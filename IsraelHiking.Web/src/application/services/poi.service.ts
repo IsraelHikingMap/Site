@@ -1,27 +1,26 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { NgProgress } from "ngx-progressbar";
-import { uniq, cloneDeep, isEqualWith } from "lodash-es";
-import { fromEvent, Subscription, firstValueFrom } from "rxjs";
-import { timeout, throttleTime, skip, filter } from "rxjs/operators";
+import { cloneDeep, isEqualWith } from "lodash-es";
+import { firstValueFrom } from "rxjs";
+import { timeout, skip } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
 import { Store } from "@ngxs/store";
-import JSZip from "jszip";
-import MiniSearch from "minisearch";
+import osmtogeojson from "osmtogeojson";
 import type { Immutable } from "immer";
+import type { MapGeoJSONFeature, SourceSpecification } from "maplibre-gl";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, PoiRouterData, RouteStrings } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
-import { DatabaseService, ImageUrlAndData } from "./database.service";
+import { DatabaseService } from "./database.service";
 import { RunningContextService } from "./running-context.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { MapService } from "./map.service";
-import { FileService } from "./file.service";
 import { ConnectionService } from "./connection.service";
-import { AddToPoiQueueAction, RemoveFromPoiQueueAction, SetOfflinePoisLastModifiedDateAction } from "../reducers/offline.reducer";
+import { OverpassTurboService } from "./overpass-turbo.service";
+import { AddToPoiQueueAction, RemoveFromPoiQueueAction } from "../reducers/offline.reducer";
 import {
     SetCategoriesGroupVisibilityAction,
     AddCategoryAction,
@@ -35,25 +34,13 @@ import type {
     ApplicationState,
     Category,
     IconColorLabel,
-    SearchResultsPointOfInterest,
     Contribution,
     NorthEast,
     EditablePublicPointData,
     OfflineState
 } from "../models/models";
 
-export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite";
-
-type ImageItem = {
-    thumbnail: string;
-    imageUrls: string[];
-};
-
-type UpdatesResponse = {
-    features: GeoJSON.Feature<GeoJSON.Geometry>[];
-    images: ImageItem[];
-    lastModified: Date;
-};
+export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite"
 
 export type PoiSocialLinks = {
     poiLink: string;
@@ -69,16 +56,56 @@ export interface ISelectableCategory extends Category {
     label: string;
 }
 
+type Geolocation = {
+    lat: number;
+    lon: number;
+}
+
+type PoiProperties = {
+    poiSource: string;
+    poiId: string;
+    identifier: string;
+    poiGeolocation: Geolocation;
+    poiLanguage: string;
+    poiIconColor: string;
+    poiIcon: string;
+    poiCategory: string;
+    "name:he"?: string;
+    "name:en"?: string;
+}
+
+type SourceLayerAndJson = {
+    sourceLayer: string;
+    source: SourceSpecification;
+}
+
 @Injectable()
 export class PoiService {
+
+    private static readonly POIS_MAP: Record<string, SourceLayerAndJson> = {
+        "points-of-interest": { sourceLayer: "public_pois", source: {
+            type: "vector",
+            maxzoom: 14,
+            minzoom: 0,
+            tiles: ["https://production.pois.israelhikingmap.workers.dev/public_pois/{z}/{x}/{y}.mvt"]
+        } },
+        "trail-points-of-interest": { sourceLayer: "trail_pois", source: {
+            type: "vector",
+            maxzoom: 14,
+            minzoom: 0,
+            tiles: ["https://production.pois.israelhikingmap.workers.dev/trail_pois/{z}/{x}/{y}.mvt"]
+        } },
+        "external-points-of-interest": { sourceLayer: "external", source: {
+            type: "vector",
+            url: "https://israelhiking.osm.org.il/vector/data/external.json"
+        } }
+    }
+
     private poisCache: GeoJSON.Feature[];
-    private poisGeojson: GeoJSON.FeatureCollection<GeoJSON.Point>;
-    private miniSearch: MiniSearch;
     private queueIsProcessing: boolean;
-    private moveEndSubsription: Subscription;
     private offlineState: Immutable<OfflineState>;
 
-    public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Point>;
+    public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Geometry, PoiProperties>;
     public poisChanged: EventEmitter<void>;
 
     constructor(private readonly resources: ResourcesService,
@@ -91,41 +118,18 @@ export class PoiService {
                 private readonly geoJsonParser: GeoJsonParser,
                 private readonly loggingService: LoggingService,
                 private readonly mapService: MapService,
-                private readonly fileService: FileService,
                 private readonly connectionService: ConnectionService,
-                private readonly ngPregress: NgProgress,
+                private readonly overpassTurboService: OverpassTurboService,
                 private readonly store: Store
     ) {
         this.poisCache = [];
         this.poisChanged = new EventEmitter();
         this.queueIsProcessing = false;
-        this.moveEndSubsription = null;
 
         this.poiGeojsonFiltered = {
             type: "FeatureCollection",
             features: []
         };
-
-        this.poisGeojson = {
-            type: "FeatureCollection",
-            features: []
-        };
-        this.miniSearch = new MiniSearch({
-            idField: "poiId",
-            extractField: (p: GeoJSON.Feature<GeoJSON.Geometry>, fieldName) => {
-                if (fieldName === "poiId") {
-                    return this.getFeatureId(p);
-                }
-                if (p.properties.poiNames[fieldName]) {
-                    return p.properties.poiNames[fieldName].join(" ");
-                }
-                return "";
-            },
-            fields: ["he", "en"],
-            searchOptions: {
-                fuzzy: 0.2
-            }
-        });
 
         this.store.select((s: ApplicationState) => s.offlineState).subscribe(offlineState => this.offlineState = offlineState);
     }
@@ -134,33 +138,14 @@ export class PoiService {
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(skip(1)).subscribe(() => {
             this.poisCache = [];
             this.loggingService.info("[POIs] Language changed, updating pois");
-            this.updatePois(this.offlineState.poisLastModifiedDate == null);
+            this.updatePois();
         });
         this.store.select((state: ApplicationState) => state.layersState.categoriesGroups).pipe(skip(1)).subscribe(() => {
             this.loggingService.info("[POIs] Categories changed, updating pois");
-            this.updatePois(this.offlineState.poisLastModifiedDate == null);
+            this.updatePois();
         });
         await this.syncCategories();
-        this.updatePois(true); // don't wait
         await this.mapService.initializationPromise;
-        let lastLocation = this.mapService.map.getCenter();
-        this.moveEndSubsription = fromEvent(this.mapService.map as any, "moveend")
-            .pipe(
-                throttleTime(500, undefined, { trailing: true }),
-                filter(() => {
-                    const lastLocationPoint = this.mapService.map.project(lastLocation);
-                    return lastLocationPoint.dist(this.mapService.map.project(this.mapService.map.getCenter())) > 200;
-                }),
-            ).subscribe(() => {
-                lastLocation = this.mapService.map.getCenter();
-                this.ngZone.run(() => {
-                    this.updatePois(true);
-                });
-            });
-
-        if (this.runningContextService.isCapacitor) {
-            await this.updateOfflinePois();
-        }
         this.store.select((state: ApplicationState) => state.offlineState.uploadPoiQueue).subscribe((items: Immutable<string[]>) => this.handleUploadQueueChanges(items));
         this.connectionService.stateChanged.subscribe(online => {
             this.loggingService.info(`[POIs] Connection status changed to: ${online}`);
@@ -168,7 +153,53 @@ export class PoiService {
                 this.handleUploadQueueChanges(this.offlineState.uploadPoiQueue);
             }
         });
+        this.initializePois();
+    }
 
+    private initializePois() {
+        for (const source of Object.keys(PoiService.POIS_MAP)) {
+            const sourceLayer = PoiService.POIS_MAP[source];
+            this.mapService.map.addSource(source, sourceLayer.source);
+            this.mapService.map.addLayer({
+                id: `${source}-layer`,
+                type: "circle",
+                source: source,
+                "source-layer": sourceLayer.sourceLayer,
+                paint: {
+                    "circle-color": "transparent",
+                }
+            }, this.resources.endOfBaseLayer);
+
+            if (this.runningContextService.isCapacitor) {// this.store.selectSnapshot((s: ApplicationState) => s.offlineState.lastModifiedDate) != null) {
+                this.mapService.map.addSource(`${source}-offline`, {
+                    type: "vector",
+                    tiles: [`custom://${sourceLayer.sourceLayer}/{z}/{x}/{y}.pbf`],
+                    minzoom: 12,
+                    maxzoom: 14
+                });
+                this.mapService.map.addLayer({
+                    id: `${source}-offline-layer`,
+                    type: "circle",
+                    source: `${source}-offline`,
+                    "source-layer": sourceLayer.sourceLayer,
+                    paint: {
+                        "circle-color": "transparent",
+                    }
+                }, this.resources.endOfBaseLayer);
+            }
+        }
+        this.mapService.map.on("sourcedata", (e) => {
+            if (Object.keys(PoiService.POIS_MAP).includes(e.sourceId)) {
+                this.ngZone.run(() => {
+                    this.updatePois();
+                });
+            }
+        });
+        this.mapService.map.on("moveend", () => {
+            this.ngZone.run(() => {
+                this.updatePois();
+            });
+        });
     }
 
     private async handleUploadQueueChanges(items: Immutable<string[]>) {
@@ -204,10 +235,7 @@ export class PoiService {
             } else {
                 this.loggingService.info("[POIs] Uploaded successfully a feature with id:" +
                 `${this.getFeatureId(poi) ?? firstItemId}, removing from upload queue`);
-                if (this.runningContextService.isCapacitor) {
-                    await this.databaseService.storePois([poi]);
-                    this.rebuildPois();
-                }
+                this.updatePois();
             }
             this.databaseService.removePoiFromUploadQueue(firstItemId);
             this.queueIsProcessing = false;
@@ -233,38 +261,303 @@ export class PoiService {
         }
     }
 
-    private async getPoisFromServer(): Promise<GeoJSON.Feature<GeoJSON.Point>[]> {
-        const visibleCategories = this.getVisibleCategories();
-        if (this.mapService.map.getZoom() <= 10) {
-            return [];
+    private setIconColorCategory(feature: GeoJSON.Feature, poi: GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>) {
+        if (poi.properties.poiIconColor && poi.properties.poiIcon && poi.properties.poiCategory) {
+            return;
         }
-        const bounds = SpatialService.getMapBounds(this.mapService.map);
-        // Adding half a screen padding:
-        bounds.northEast.lng += (bounds.northEast.lng - bounds.southWest.lng) / 2.0;
-        bounds.northEast.lat += (bounds.northEast.lat - bounds.southWest.lat) / 2.0;
-        bounds.southWest.lng -= (bounds.northEast.lng - bounds.southWest.lng) / 2.0;
-        bounds.southWest.lat -= (bounds.northEast.lat - bounds.southWest.lat) / 2.0;
+        if (feature.properties.boundary === "protected_area" || 
+            feature.properties.boundary === "national_park" ||
+            feature.properties.leisure === "nature_reserve") {
+            poi.properties.poiIconColor = "#008000";
+            poi.properties.poiIcon = "icon-nature-reserve";
+            poi.properties.poiCategory = "Other";
+            return;
+        }
+        if (feature.properties.network) {
+            switch (feature.properties.network) {
+                case "lcn":
+                case "rcn":
+                    poi.properties.poiIconColor = "black";
+                    poi.properties.poiIcon = "icon-bike";
+                    poi.properties.poiCategory = "Bicycle";
+                    return;
+                case "lwn":
+                case "rwn":
+                    poi.properties.poiIconColor = "black";
+                    poi.properties.poiIcon = "icon-hike";
+                    poi.properties.poiCategory = "Hiking";
+                    return;
+            }
+        }
+        if (feature.properties.historic) {
+            poi.properties.poiIconColor = "#666666";
+            poi.properties.poiCategory = "Historic";
+            switch (feature.properties.historic) {
+                case "ruins":
+                    poi.properties.poiIcon = "icon-ruins";
+                    return;
+                case "archaeological_site":
+                    poi.properties.poiIcon = "icon-archaeological";
+                    return;
+                case "memorial":
+                case "monument":
+                    poi.properties.poiIcon = "icon-memorial";
+                    return;
+                case "tomb":
+                    poi.properties.poiIconColor = "black";
+                    poi.properties.poiIcon = "icon-cave";
+                    poi.properties.poiCategory = "Natural";
+                    return;
+            }
+        }
+        if (feature.properties.leisure === "picnic_table" || 
+            feature.properties.tourism === "picnic_site" || 
+            feature.properties.amenity === "picnic") {
+            poi.properties.poiIconColor = "#734a08";
+            poi.properties.poiIcon = "icon-picnic";
+            poi.properties.poiCategory = "Camping";
+            return;
+        }
 
-        const language = this.resources.getCurrentLanguageCodeSimplified();
-        const params = new HttpParams()
-            .set("northEast", bounds.northEast.lat + "," + bounds.northEast.lng)
-            .set("southWest", bounds.southWest.lat + "," + bounds.southWest.lng)
-            .set("categories", visibleCategories.join(","))
-            .set("language", language);
-        try {
-            const features$ = this.httpClient.get(Urls.poi, { params }).pipe(timeout(10000));
-            this.poisGeojson.features = await firstValueFrom(features$) as GeoJSON.Feature<GeoJSON.Point>[];
-            return this.poisGeojson.features;
-        } catch {
-            return this.poisGeojson.features;
+        if (feature.properties.natural) {
+            switch (feature.properties.natural) {
+                case "cave_entrance":
+                    poi.properties.poiIconColor = "black";
+                    poi.properties.poiIcon = "icon-cave";
+                    poi.properties.poiCategory = "Natural";
+                    return;
+                case "spring":
+                    poi.properties.poiIconColor = "blue";
+                    poi.properties.poiIcon = "icon-tint";
+                    poi.properties.poiCategory = "Water";
+                    return;
+                case "tree":
+                    poi.properties.poiIconColor = "#008000";
+                    poi.properties.poiIcon = "icon-tree";
+                    poi.properties.poiCategory = "Natural";
+                    return;
+                case "flowers":
+                    poi.properties.poiIconColor = "#008000";
+                    poi.properties.poiIcon = "icon-flowers";
+                    poi.properties.poiCategory = "Natural";
+                    return;
+                case "waterhole":
+                    poi.properties.poiIconColor = "blue";
+                    poi.properties.poiIcon = "icon-waterhole";
+                    poi.properties.poiCategory = "Water";
+                    return;
+            }
+        }
+
+        if (feature.properties.water === "reservoir" || 
+            feature.properties.water === "pond") {
+            poi.properties.poiIconColor = "blue";
+            poi.properties.poiIcon = "icon-tint";
+            poi.properties.poiCategory = "Water";
+            return;
+        }
+
+        if (feature.properties.man_made) {
+            poi.properties.poiIconColor = "blue";
+            poi.properties.poiCategory = "Water";
+            switch (feature.properties.man_made) {
+                case "water_well":
+                    poi.properties.poiIcon = "icon-water-well";
+                    return;
+                case "cistern":
+                    poi.properties.poiIcon = "icon-cistern";
+                    return;
+            }
+        }
+
+        if (feature.properties.waterway === "waterfall") {
+            poi.properties.poiIconColor = "blue";
+            poi.properties.poiIcon = "icon-waterfall";
+            poi.properties.poiCategory = "Water";
+            return;
+        }
+
+        if (feature.properties.place) {
+            poi.properties.poiIconColor = "black";
+            poi.properties.poiIcon = "icon-home";
+            poi.properties.poiCategory = "Wikipedia";
+            return;
+        }
+
+        if (feature.properties.tourism) {
+            switch (feature.properties.tourism) {
+                case "viewpoint":
+                    poi.properties.poiIconColor = "#008000";
+                    poi.properties.poiIcon = "icon-viewpoint";
+                    poi.properties.poiCategory = "Viewpoint";
+                    return;
+                case "picnic_site":
+                    poi.properties.poiIconColor = "#734a08";
+                    poi.properties.poiIcon = "icon-picnic";
+                    poi.properties.poiCategory = "Camping";
+                    return;
+                case "camp_site":
+                    poi.properties.poiIconColor = "#734a08";
+                    poi.properties.poiIcon = "icon-campsite";
+                    poi.properties.poiCategory = "Camping";
+                    return;
+                case "attraction":
+                    poi.properties.poiIconColor = "#ffb800";
+                    poi.properties.poiIcon = "icon-star";
+                    poi.properties.poiCategory = "Other";
+                    return;
+            }
+            return;
+        }
+
+        if (feature.properties.wikidata || feature.properties.wikipedia) {
+            poi.properties.poiIconColor = "black";
+            poi.properties.poiIcon = "icon-wikipedia-w";
+            poi.properties.poiCategory = "Wikipedia";
+            return;
+        }
+
+        if (feature.properties.natural === "peak") {
+            poi.properties.poiIconColor = "black";
+            poi.properties.poiIcon = "icon-peak";
+            poi.properties.poiCategory = "Other";
+            return;
+        }
+
+        if (feature.properties.mtb_name || feature.properties["mtb:name"]) {
+            poi.properties.poiIconColor = "gray";
+            poi.properties.poiIcon = "icon-bike";
+            poi.properties.poiCategory = "Bicycle";
+            return;
+        }
+
+        poi.properties.poiIconColor = "black";
+        poi.properties.poiIcon = "icon-search";
+        poi.properties.poiCategory = "Other";
+
+    }
+
+    private getGeolocation(feature: GeoJSON.Feature): Geolocation {
+        switch (feature.geometry.type) {
+            case "Point":
+                return {
+                    lat: feature.geometry.coordinates[1],
+                    lon: feature.geometry.coordinates[0],
+                };
+            case "LineString":
+                return {
+                    lat: feature.geometry.coordinates[0][1],
+                    lon: feature.geometry.coordinates[0][0],
+                };
+            case "Polygon": {
+                    // HM TODO: this is a very rough approximation
+                    const bounds = SpatialService.getBoundsForFeature(feature);
+                    return {
+                        lat: (bounds.northEast.lat + bounds.southWest.lat) / 2,
+                        lon: (bounds.northEast.lng + bounds.southWest.lng) / 2,
+                    };
+                }
+            case "MultiPolygon": {
+                // HM TODO: this is a very rough approximation
+                const bounds = SpatialService.getBoundsForFeature(feature);
+                    return {
+                        lat: (bounds.northEast.lat + bounds.southWest.lat) / 2,
+                        lon: (bounds.northEast.lng + bounds.southWest.lng) / 2,
+                    };
+            }
+            case "MultiLineString":
+                return {
+                    lat: feature.geometry.coordinates[0][0][1],
+                    lon: feature.geometry.coordinates[0][0][0],
+                };
+            default:
+                throw new Error("Unsupported geometry type: " + feature.geometry.type);
         }
     }
 
-    private getPoisFromMemory(): GeoJSON.Feature<GeoJSON.Point>[] {
+    private setLanguage(feature: GeoJSON.Feature, poi: GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>) {
+        const hasHebrew = feature.properties["name:he"] || feature.properties["name_he"] || feature.properties["mtb_name"];
+        const hasEnglish = feature.properties["name:en"] || feature.properties["name_en"] || feature.properties["mtb_name:en"];
+        if (hasHebrew || hasEnglish) {
+            poi.properties.poiLanguage = hasHebrew && hasEnglish ? "all" : hasHebrew ? "he" : "en";
+        }
+    }
+
+    /**
+     * This will adjust the locaiton accorting to the location in the tile 
+     * instead of clalculating a different location based on the geometry.
+     * This is somewhat of a hack to solve a difference of calculation between 
+     * the tile generation and client side calculation.
+     * @param id - the id of the poi, for example OSM_way_1234
+     * @param poi - the point of interest to adjust
+     */
+    private adjustGeolocationBasedOnTileDate(id: string, poi: GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>) {
+        if (poi.geometry.type === "Point") {
+            return;
+        }
+        for (const source of Object.keys(PoiService.POIS_MAP)) {
+            const features = this.mapService.map.querySourceFeatures(source, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer});
+            const feature = features.find(f => this.osmTileFeatureToPoiIdentifier(f) === id);
+            if (feature == null) {
+                continue;
+            }
+            poi.properties.poiGeolocation = this.getGeolocation(feature);
+        }
+    }
+
+    private async getPoisFromTiles(): Promise<GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>[]> {
+        if (this.mapService.map.getZoom() <= 10) {
+            return [];
+        }
+        let features: MapGeoJSONFeature[] = [];
+        for (const source of Object.keys(PoiService.POIS_MAP)) {
+            features = features.concat(this.mapService.map.querySourceFeatures(source, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer}));
+        }
+        if (features.length === 0) {
+            for (const source of Object.keys(PoiService.POIS_MAP)) {
+                features = features.concat(this.mapService.map.querySourceFeatures(`${source}-offline`, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer}));
+            }
+        }
+        const pois = features.map(feature => this.convertFeatureToPoi(feature, this.osmTileFeatureToPoiIdentifier(feature)));
+        return this.filterFeatures(pois);
+    }
+
+    private osmTileFeatureToPoiIdentifier(feature: GeoJSON.Feature): string {
+        if (feature.properties.identifier) {
+            return feature.properties.identifier;
+        }
+        const osmType = feature.id.toString().endsWith("1") ? "node_" : feature.id.toString().endsWith("2") ? "way_" : "relation_";
+        return osmType + Math.floor((Number(feature.id)/ 10));
+    }
+
+    private poiIdentifierToTypeAndId(id: string): {type: string, osmId: string} {
+        const osmTypeAndId = id.split("_");
+        return {
+            type: osmTypeAndId[0],
+            osmId: osmTypeAndId[1]
+        };
+    }
+
+    private convertFeatureToPoi(feature: GeoJSON.Feature, id: string): GeoJSON.Feature<GeoJSON.Geometry, PoiProperties> {
+        const poi: GeoJSON.Feature<GeoJSON.Geometry, PoiProperties> = {
+            type: "Feature",
+            geometry: feature.geometry,
+            properties: JSON.parse(JSON.stringify(feature.properties)) || {}
+        };
+        poi.properties.identifier = poi.properties.identifier || id;
+        poi.properties.poiSource = poi.properties.poiSource || "OSM";
+        poi.properties.poiId = poi.properties.poiId || poi.properties.poiSource + "_" + poi.properties.identifier;
+        poi.properties.poiGeolocation = poi.properties.poiGeolocation || this.getGeolocation(feature);
+        this.setIconColorCategory(feature, poi);
+        this.setLanguage(feature, poi);
+        return poi;
+    }
+
+    private filterFeatures(features: GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>[]): GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>[] {
         const visibleFeatures = [];
         const visibleCategories = this.getVisibleCategories();
         const language = this.resources.getCurrentLanguageCodeSimplified();
-        for (const feature of this.poisGeojson.features) {
+        for (const feature of features) {
             if (feature.properties.poiLanguage !== "all" && feature.properties.poiLanguage !== language) {
                 continue;
             }
@@ -278,168 +571,6 @@ export class PoiService {
         return visibleFeatures;
     }
 
-    private async rebuildPois() {
-        this.poisGeojson.features = await this.databaseService.getPoisForClustering();
-        if (this.poisGeojson.features.length > 0 && this.moveEndSubsription != null) {
-            this.loggingService.info("[POIs] Unsubscribing from move end, pois are from database now");
-            this.moveEndSubsription.unsubscribe();
-        }
-        this.miniSearch.addAllAsync(this.poisGeojson.features);
-        this.loggingService.info(`[POIs] Finished getting pois from database and adding to memory: ${this.poisGeojson.features.length}`);
-        this.updatePois(false);
-    }
-
-    private async updateOfflinePois() {
-        try {
-            let lastModified = this.offlineState.poisLastModifiedDate;
-            if (lastModified != null) {
-                lastModified = new Date(lastModified); // deserialize from json
-            }
-            this.loggingService.info(`[POIs] Getting POIs for: ${lastModified ? lastModified.toUTCString() : null} from server`);
-            if (lastModified == null || Date.now() - lastModified.getTime() > 1000 * 60 * 60 * 24 * 180) {
-                await this.downlodOfflineFileAndUpdateDatabase((value) => this.ngPregress.ref().set(value));
-                lastModified = this.offlineState.poisLastModifiedDate;
-            }
-            if (lastModified == null) {
-                return;
-            }
-            await this.updateOfflinePoisByPaging(lastModified);
-        } catch (ex) {
-            this.loggingService.warning("[POIs] Unable to sync public pois and categories - using local data: " + (ex as Error).message);
-        }
-        this.loggingService.info("[POIs] Getting POIs for clustering from database");
-        await this.rebuildPois();
-    }
-
-    private async downlodOfflineFileAndUpdateDatabase(progressCallback: (value: number, text?: string) => void): Promise<void> {
-        progressCallback(1, this.resources.downloadingPoisForOfflineUsage);
-        const poiIdsToDelete = this.poisGeojson.features.map(f => this.getFeatureId(f));
-        this.loggingService.info(`[POIs] Deleting exiting pois: ${poiIdsToDelete.length}`);
-        await this.databaseService.deletePois(poiIdsToDelete);
-        this.loggingService.info("[POIs] Getting cached offline pois file");
-        let poisFile = await this.fileService.getFileFromCache(Urls.poisOfflineFile);
-        if (poisFile == null) {
-            this.loggingService.info("[POIs] No file in cache, downloading pois file");
-            await this.fileService.downloadFileToCache(Urls.poisOfflineFile, (value) => progressCallback(value * 50));
-            this.loggingService.info("[POIs] Finished downloading pois file, reading file");
-            poisFile = await this.fileService.getFileFromCache(Urls.poisOfflineFile);
-        }
-        this.loggingService.info("[POIs] Opening pois file");
-        const lastModified = await this.openPoisFile(poisFile, progressCallback);
-        this.loggingService.info(`[POIs] Updating last modified to: ${lastModified}`);
-        this.store.dispatch(new SetOfflinePoisLastModifiedDateAction(lastModified));
-        this.loggingService.info(`[POIs] Finished downloading file and updating database, last modified: ${lastModified.toUTCString()}`);
-        await this.fileService.deleteFileFromCache(Urls.poisOfflineFile);
-        this.loggingService.info("[POIs] Finished deleting offline pois cached file");
-    }
-
-    private async updateOfflinePoisByPaging(lastModified: Date) {
-        let modifiedUntil = lastModified;
-        do {
-            lastModified = modifiedUntil;
-            modifiedUntil = new Date(lastModified.getTime() + 3 * 24 * 60 * 60 * 1000); // last modified + 3 days
-            this.loggingService.info(`[POIs] Getting POIs for: ${lastModified.toUTCString()} - ${modifiedUntil.toUTCString()}`);
-            const updates$ = this.httpClient.get(`${Urls.poiUpdates}${lastModified.toISOString()}/${modifiedUntil.toISOString()}`)
-                .pipe(timeout(60000));
-            const updates = await firstValueFrom(updates$) as UpdatesResponse;
-            this.loggingService.info(`[POIs] Storing POIs for: ${lastModified.toUTCString()} - ${modifiedUntil.toUTCString()},` +
-                `got: ${ updates.features.length }`);
-            const deletedIds = updates.features.filter(f => f.properties.poiDeleted).map(f => this.getFeatureId(f));
-            do {
-                await this.databaseService.storePois(updates.features.splice(0, 500));
-            } while (updates.features.length > 0);
-            this.databaseService.deletePois(deletedIds);
-            const imageAndData = this.imageItemToUrl(updates.images);
-            this.loggingService.info(`[POIs] Storing images: ${imageAndData.length}`);
-            this.databaseService.storeImages(imageAndData);
-            const minDate = new Date(Math.min(new Date(updates.lastModified).getTime(), modifiedUntil.getTime()));
-            this.loggingService.info(`[POIs] Updating last modified to: ${minDate}`);
-            this.store.dispatch(new SetOfflinePoisLastModifiedDateAction(minDate));
-        } while (modifiedUntil < new Date());
-    }
-
-    public async openPoisFile(blob: Blob, progressCallback: (percentage: number, text?: string) => void): Promise<Date> {
-        const zip = new JSZip();
-        await zip.loadAsync(blob);
-        await this.writeImages(zip, progressCallback);
-        this.loggingService.info("[POIs] Finished saving images to database");
-        return await this.writePois(zip, progressCallback);
-    }
-
-    private async writePois(zip: JSZip, progressCallback: (percentage: number, content: string) => void): Promise<Date> {
-        let lastModified = new Date(0);
-        const poisFileNames = Object.keys(zip.files).filter(name => name.startsWith("pois/") && name.endsWith(".geojson"));
-        for (let poiFileIndex = 0; poiFileIndex < poisFileNames.length; poiFileIndex++) {
-            const poisFileName = poisFileNames[poiFileIndex];
-            const poisJson = JSON.parse((await zip.file(poisFileName).async("text")).trim()) as GeoJSON.FeatureCollection;
-            const chunkLastModified = this.getLastModifiedFromFeatures(poisJson.features);
-            if (chunkLastModified > lastModified) {
-                lastModified = chunkLastModified;
-            }
-            await this.databaseService.storePois(poisJson.features);
-            progressCallback(((poiFileIndex + 1) * 10.0 / poisFileNames.length) + 90, this.resources.downloadingPoisForOfflineUsage);
-            this.loggingService.debug(`[POIs] Stored pois ${poisFileName} ${poiFileIndex}/${poisFileNames.length}`);
-        }
-        return lastModified;
-    }
-
-    private async writeImages(zip: JSZip, progressCallback: (percentage: number, content: string) => void) {
-        const imagesFileNames = Object.keys(zip.files).filter(name => name.startsWith("images/") && name.endsWith(".json"));
-        for (let imagesFileIndex = 0; imagesFileIndex < imagesFileNames.length; imagesFileIndex++) {
-            const imagesFile = imagesFileNames[imagesFileIndex];
-            const imagesJson = JSON.parse(await zip.file(imagesFile).async("text") as string) as ImageItem[];
-            const imagesUrl = this.imageItemToUrl(imagesJson);
-            await this.databaseService.storeImages(imagesUrl);
-            progressCallback((imagesFileIndex + 1) * 40.0 / imagesFileNames.length + 50, this.resources.downloadingPoisForOfflineUsage);
-            this.loggingService.debug(`[POIs] Stored images ${imagesFile} ${imagesFileIndex}/${imagesFileNames.length}`);
-        }
-    }
-
-    private getLastModifiedFromFeatures(features: GeoJSON.Feature[]): Date {
-        let lastModified = null;
-        for (const feature of features) {
-            const dateValue = new Date(feature.properties.poiLastModified);
-            if (lastModified == null || dateValue > lastModified) {
-                lastModified = dateValue;
-            }
-        }
-        return lastModified;
-    }
-
-    private imageItemToUrl(images: ImageItem[]): ImageUrlAndData[] {
-        const imageAndData = [] as ImageUrlAndData[];
-        for (const image of images) {
-            for (const imageUrl of image.imageUrls) {
-                imageAndData.push({ imageUrl, data: image.thumbnail });
-            }
-        }
-        return imageAndData;
-    }
-
-    public async getSerchResults(searchTerm: string): Promise<SearchResultsPointOfInterest[]> {
-        const ids = this.miniSearch.search(searchTerm).map(r => r.id);
-        const results = [] as SearchResultsPointOfInterest[];
-        for (const id of uniq(ids)) {
-            const feature = await this.databaseService.getPoiById(id);
-            const title = this.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
-            const point = {
-                description: feature.properties.description,
-                title,
-                displayName: title,
-                icon: feature.properties.poiIcon,
-                iconColor: feature.properties.poiIconColor,
-                location: this.getLocation(feature),
-                source: feature.properties.poiSource,
-                id: feature.properties.identifier
-            };
-            results.push(point);
-            if (results.length === 10) {
-                return results;
-            }
-        }
-        return results;
-    }
-
     private getVisibleCategories(): string[] {
         const visibleCategories = [];
         const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
@@ -451,10 +582,9 @@ export class PoiService {
         return visibleCategories;
     }
 
-    private async updatePois(fromServer: boolean) {
+    private async updatePois() {
         await this.mapService.initializationPromise;
-        const visibleCategories = this.getVisibleCategories();
-        if (visibleCategories.length === 0) {
+        if (this.getVisibleCategories().length === 0) {
             this.poiGeojsonFiltered = {
                 type: "FeatureCollection",
                 features: []
@@ -462,7 +592,7 @@ export class PoiService {
             this.poisChanged.next();
             return;
         }
-        const visibleFeatures = fromServer ? await this.getPoisFromServer() : this.getPoisFromMemory();
+        const visibleFeatures = await this.getPoisFromTiles();
         this.poiGeojsonFiltered = {
             type: "FeatureCollection",
             features: visibleFeatures
@@ -524,6 +654,38 @@ export class PoiService {
         return selectableCategories;
     }
 
+    private async enritchFeatureFromWikimedia(feature: GeoJSON.Feature, language: string): Promise<void> {
+        const url = `https://www.wikidata.org/w/rest.php/wikibase/v0/entities/items/${feature.properties.wikidata}`;
+        const wikidata = await firstValueFrom(this.httpClient.get(url).pipe(timeout(3000))) as any;
+        const languageShort = language || this.resources.getCurrentLanguageCodeSimplified();
+        const title = wikidata.sitelinks[`${languageShort}wiki`]?.title;
+        if (wikidata.statements.P18 && wikidata.statements.P18.length > 0) {
+            this.setProperty(feature, "image", `File:${wikidata.statements.P18[0].value.content}`);
+        }
+        if (title) {
+            const indexString = this.setProperty(feature, "website", `https://${languageShort}.wikipedia.org/wiki/${title}`);
+            feature.properties["poiSourceImageUrl" + indexString] = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/128px-Wikipedia-logo-v2.svg.png";
+        }
+        const wikipediaPage = await firstValueFrom(this.httpClient.get(`http://${languageShort}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=${title}&origin=*`)) as any;
+        const pagesIds = Object.keys(wikipediaPage.query.pages);
+        if (pagesIds.length > 0) {
+            feature.properties.poiExternalDescription = wikipediaPage.query.pages[pagesIds[0]].extract;
+        }
+    }
+
+    private async enritchFeatureFromINature(feature: GeoJSON.Feature): Promise<void> {
+        const iNatureRef = feature.properties["inature:website"];
+        const address = `https://inature.info/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles=${iNatureRef}&origin=*`;
+        const iNatureJson = await firstValueFrom(this.httpClient.get(address).pipe(timeout(3000))) as any;
+        const content = iNatureJson.query.pages[Object.keys(iNatureJson.query.pages)[0]].revisions[0]["*"];
+        feature.properties.poiExternalDescription = content.match(/סקירה=(.*)/)[1];
+        const indexString = this.setProperty(feature, "website", `https://inature.info/wiki/${iNatureRef}`);
+        feature.properties["poiSourceImageUrl" + indexString] = "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png";
+        const image = content.match(/תמונה=(.*)/)[1];
+        const imageSrc = `https://inature.info/w/index.php?title=Special:Redirect/file/${image}`;
+        this.setProperty(feature, "image", imageSrc);        
+    }
+
     public async getPoint(id: string, source: string, language?: string): Promise<GeoJSON.Feature> {
         const itemInCache = this.poisCache.find(f => this.getFeatureId(f) === id && f.properties.source === source);
         if (itemInCache) {
@@ -533,18 +695,67 @@ export class PoiService {
             return this.getFeatureFromCoordinatesId(id, language);
         }
         try {
-            const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
-            const poi$ = this.httpClient.get(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000));
-            const poi = await firstValueFrom(poi$) as GeoJSON.Feature;
-            this.poisCache.splice(0, 0, poi);
-            return cloneDeep(poi);
+            if (source === "OSM") {
+                const { osmId, type } = this.poiIdentifierToTypeAndId(id);
+                const osmPoi$ = this.httpClient.get(`https://www.openstreetmap.org/api/0.6/${type}/${osmId}${type !== "node" ? "/full" : ""}`).pipe(timeout(6000));
+                const osmPoi = await firstValueFrom(osmPoi$);
+                const geojson = osmtogeojson(osmPoi);
+                const feature = geojson.features[0];
+                let wikidataPromise = Promise.resolve();
+                let inaturePromise = Promise.resolve();
+                let placePromise = Promise.resolve({features: []});
+                let wayPromise = Promise.resolve({features: []});
+                if (feature.properties.wikidata) {
+                    wikidataPromise = this.enritchFeatureFromWikimedia(feature, language);
+                }
+                if (feature.properties["inature:website"] && language === "he") {
+                    inaturePromise = this.enritchFeatureFromINature(feature);
+                }
+                if (type === "node" && feature.properties.place) {
+                    placePromise = this.overpassTurboService.getPlaceGeometry(osmId);
+                }
+                if (type === "way" && (feature.properties.highway || feature.properties.waterway)) {
+                    wayPromise = this.overpassTurboService.getLongWay(osmId, 
+                        feature.properties["mtb:name"] || feature.properties.name,
+                        feature.properties.waterway != null,
+                        feature.properties["mtb:name"] != null);
+                }
+                await Promise.all([wikidataPromise, inaturePromise, placePromise, wayPromise]);
+                const placeGeojson = await placePromise;
+                if (placeGeojson.features.length > 0) {
+                    feature.geometry = placeGeojson.features[0].geometry;
+                }
+                const longGeojson = await wayPromise;
+                if (longGeojson.features.length > 1) {
+                    // HM TODO: merge while including direction?
+                    feature.geometry = {
+                        type: "MultiLineString",
+                        coordinates: longGeojson.features.map(f => (f.geometry as GeoJSON.LineString).coordinates)
+                    }
+                }
+                const poi = this.convertFeatureToPoi(feature, id);
+                this.adjustGeolocationBasedOnTileDate(id, poi);
+                this.poisCache.splice(0, 0, poi);
+                return cloneDeep(poi);
+            } else {
+                const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
+                const poi$ = this.httpClient.get(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000));
+                const poi = await firstValueFrom(poi$) as GeoJSON.Feature;
+                this.poisCache.splice(0, 0, poi);
+                return cloneDeep(poi);
+            }
         } catch {
-            const feature = await this.databaseService.getPoiById(`${source}_${id}`);
+            let features: MapGeoJSONFeature[] = [];
+            for (const source of Object.keys(PoiService.POIS_MAP)) {
+                features = features.concat(this.mapService.map.querySourceFeatures(`${source}-offline`, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer}));
+            }
+            const feature = features.find(f => this.osmTileFeatureToPoiIdentifier(f) === id);
             if (feature == null) {
                 throw new Error("Failed to load POI from offline database.");
             }
-            this.poisCache.splice(0, 0, feature);
-            return feature;
+            const poi = this.convertFeatureToPoi(feature, id);
+            this.poisCache.splice(0, 0, poi);
+            return poi;
         }
     }
 
@@ -681,7 +892,10 @@ export class PoiService {
     }
 
     public hasExtraData(feature: GeoJSON.Feature, language: string): boolean {
-        return feature.properties["description:" + language] || Object.keys(feature.properties).find(k => k.startsWith("image")) != null;
+        return feature.properties["description:" + language] || 
+            Object.keys(feature.properties).find(k => k.startsWith("image")) != null ||
+            Object.keys(feature.properties).find(k => k.startsWith("wikipedia")) != null ||
+            Object.keys(feature.properties).find(k => k.startsWith("wikidata")) != null;
     }
 
     public async getClosestPoint(location: LatLngAlt, source?: string, language?: string): Promise<MarkerData> {
@@ -861,5 +1075,18 @@ export class PoiService {
             return feature.id.toString();
         }
         return feature.id ?? feature.properties.poiId;
+    }
+
+    private setProperty(feature: GeoJSON.Feature, key: string, value: string): string {
+        if (!feature.properties[key]) {
+            feature.properties[key] = value;
+            return "";
+        }
+        let index = 1;
+        while (feature.properties[key + index]) {
+            index++;
+        }
+        feature.properties[key + index] = value;
+        return `${index}`;
     }
 }
