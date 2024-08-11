@@ -86,14 +86,14 @@ export class PoiService {
         "points-of-interest": { sourceLayer: "public_pois", source: {
             type: "vector",
             maxzoom: 14,
-            minzoom: 0,
+            minzoom: 12,
             tiles: ["https://production.pois.israelhikingmap.workers.dev/public_pois/{z}/{x}/{y}.mvt"]
         } },
         "trail-points-of-interest": { sourceLayer: "trail_pois", source: {
             type: "vector",
             maxzoom: 14,
-            minzoom: 0,
-            tiles: ["https://production.pois.israelhikingmap.workers.dev/trail_pois/{z}/{x}/{y}.mvt"]
+            minzoom: 12,
+            tiles: ["https://israelhiking.osm.org.il/vector/data/trail_pois/{z}/{x}/{y}.mvt"]
         } },
         "external-points-of-interest": { sourceLayer: "external", source: {
             type: "vector",
@@ -424,7 +424,7 @@ export class PoiService {
             return;
         }
 
-        if (feature.properties.mtb_name || feature.properties["mtb:name"]) {
+        if (feature.properties["mtb:name"]) {
             poi.properties.poiIconColor = "gray";
             poi.properties.poiIcon = "icon-bike";
             poi.properties.poiCategory = "Bicycle";
@@ -450,7 +450,6 @@ export class PoiService {
                     lon: feature.geometry.coordinates[0][0],
                 };
             case "Polygon": {
-                    // HM TODO: this is a very rough approximation
                     const bounds = SpatialService.getBoundsForFeature(feature);
                     return {
                         lat: (bounds.northEast.lat + bounds.southWest.lat) / 2,
@@ -458,7 +457,6 @@ export class PoiService {
                     };
                 }
             case "MultiPolygon": {
-                // HM TODO: this is a very rough approximation
                 const bounds = SpatialService.getBoundsForFeature(feature);
                     return {
                         lat: (bounds.northEast.lat + bounds.southWest.lat) / 2,
@@ -476,8 +474,8 @@ export class PoiService {
     }
 
     private setLanguage(feature: GeoJSON.Feature, poi: GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>) {
-        const hasHebrew = feature.properties["name:he"] || feature.properties["name_he"] || feature.properties["mtb_name"];
-        const hasEnglish = feature.properties["name:en"] || feature.properties["name_en"] || feature.properties["mtb_name:en"];
+        const hasHebrew = feature.properties["name:he"] || feature.properties["mtb:name"];
+        const hasEnglish = feature.properties["name:en"] || feature.properties["mtb:name:en"];
         if (hasHebrew || hasEnglish) {
             poi.properties.poiLanguage = hasHebrew && hasEnglish ? "all" : hasHebrew ? "he" : "en";
         }
@@ -727,11 +725,7 @@ export class PoiService {
                 }
                 const longGeojson = await wayPromise;
                 if (longGeojson.features.length > 1) {
-                    // HM TODO: merge while including direction?
-                    feature.geometry = {
-                        type: "MultiLineString",
-                        coordinates: longGeojson.features.map(f => (f.geometry as GeoJSON.LineString).coordinates)
-                    }
+                    feature.geometry = SpatialService.mergeLines(longGeojson.features) as GeoJSON.Geometry;
                 }
                 const poi = this.convertFeatureToPoi(feature, id);
                 this.adjustGeolocationBasedOnTileDate(id, poi);
