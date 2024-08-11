@@ -672,7 +672,7 @@ export class PoiService {
     }
 
     private async enritchFeatureFromINature(feature: GeoJSON.Feature): Promise<void> {
-        const iNatureRef = feature.properties["inature:website"];
+        const iNatureRef = feature.properties["ref:IL:inature"];
         const address = `https://inature.info/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles=${iNatureRef}&origin=*`;
         const iNatureJson = await firstValueFrom(this.httpClient.get(address).pipe(timeout(3000))) as any;
         const content = iNatureJson.query.pages[Object.keys(iNatureJson.query.pages)[0]].revisions[0]["*"];
@@ -706,7 +706,7 @@ export class PoiService {
                 if (feature.properties.wikidata) {
                     wikidataPromise = this.enritchFeatureFromWikimedia(feature, language);
                 }
-                if (feature.properties["inature:website"] && language === "he") {
+                if (feature.properties["ref:IL:inature"] && language === "he") {
                     inaturePromise = this.enritchFeatureFromINature(feature);
                 }
                 if (type === "node" && feature.properties.place) {
