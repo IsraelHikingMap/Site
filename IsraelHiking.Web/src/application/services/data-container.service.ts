@@ -91,7 +91,7 @@ export class DataContainerService {
             this.store.dispatch(new SetFileUrlAndBaseLayerAction(url, baseLayer));
             data.baseLayer = this.stringToBaseLayer(baseLayer);
             this.setData(data, this.runningContextService.isCapacitor);
-        } catch (ex) {
+        } catch {
             this.toastService.warning(this.resources.unableToLoadFromUrl);
         }
     }

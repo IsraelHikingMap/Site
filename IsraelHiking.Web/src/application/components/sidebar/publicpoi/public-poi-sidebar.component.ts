@@ -159,7 +159,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                     this.close();
                 }
             }
-        } catch (ex) {
+        } catch {
             this.toastService.warning(this.resources.unableToFindPoi);
             this.close();
         } finally {
@@ -285,7 +285,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             }
             this.toastService.success(this.resources.dataUpdatedSuccessfullyItWillTakeTimeToSeeIt);
             this.clear();
-        } catch (ex) {
+        } catch {
             this.toastService.confirm({ message: this.resources.unableToSaveData, type: "Ok" });
         } finally {
             this.isLoading = false;

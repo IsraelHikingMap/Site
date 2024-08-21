@@ -87,7 +87,7 @@ export class ShareUrlsService {
             this.loggingService.warning(`[Shares] Cached share is outdated ${shareUrlId}, fetching it again...`);
             shareUrl = await this.getShareFromServerAndCacheIt(shareUrlId, 5000);
             return shareUrl;
-        } catch (ex) {
+        } catch {
             this.loggingService.error(`[Shares] Failed to get share fast ${shareUrlId}, refreshing in the background`);
             this.getShareFromServerAndCacheIt(shareUrlId); // don't wait for it...
             return shareUrl;
