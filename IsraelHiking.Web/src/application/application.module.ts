@@ -317,7 +317,9 @@ const initializeApplication = (injector: Injector) => async () => {
         SocialSharing,
         RouteEditPoiInteraction,
         RouteEditRouteInteraction,
-        provideHttpClient(withInterceptorsFromDi())
+        provideHttpClient(
+            withInterceptorsFromDi(),
+        )
     ],
     declarations: [
         MainMapComponent,
