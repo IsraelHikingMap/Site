@@ -265,6 +265,9 @@ describe("Poi Service", () => {
                     offlineState: {
                         poisLastModifiedDate: Date.now(),
                         uploadPoiQueue: []
+                    },
+                    configuration: {
+                        language: { code: "he", rtl: false }
                     }
                 });
                 (runningContextService as any).isCapacitor = true;
