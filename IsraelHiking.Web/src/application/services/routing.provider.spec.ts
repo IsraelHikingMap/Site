@@ -1,6 +1,6 @@
 import { TestBed, inject } from "@angular/core/testing";
-import { HttpClientModule } from "@angular/common/http";
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 import geojsonVt from "geojson-vt";
 import vtpbf from "vt-pbf";
@@ -36,18 +36,17 @@ describe("RoutingProvider", () => {
         const toastMockCreator = new ToastServiceMockCreator();
         TestBed.configureTestingModule({
             imports: [
-                HttpClientModule,
-                HttpClientTestingModule,
-                NgxsModule.forRoot([])
-            ],
+                NgxsModule.forRoot([])],
             providers: [
                 { provide: ResourcesService, useValue: toastMockCreator.resourcesService },
                 { provide: ToastService, useValue: toastMockCreator.toastService },
-                { provide: LoggingService, useValue: { error: () => {} } },
+                { provide: LoggingService, useValue: { error: () => { } } },
                 { provide: RunningContextService, useValue: {} },
                 { provide: PmTilesService, useValue: {} },
                 GeoJsonParser,
                 RoutingProvider,
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
             ]
         });
     });
