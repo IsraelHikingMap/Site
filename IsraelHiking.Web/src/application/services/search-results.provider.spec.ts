@@ -1,6 +1,6 @@
 import { TestBed, inject } from "@angular/core/testing";
-import { HttpClientModule } from "@angular/common/http";
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 
 import { SearchResultsProvider } from "./search-results.provider";
 import { GeoJsonParser } from "./geojson.parser";
@@ -12,16 +12,14 @@ import type { SearchResultsPointOfInterest } from "../models/models";
 describe("SearchResultsProvider", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [
-                HttpClientModule,
-                HttpClientTestingModule
-            ],
             providers: [
                 GeoJsonParser,
                 SearchResultsProvider,
                 CoordinatesService,
                 { provide: RunningContextService, useValue: { isOnline: true } },
-                { provide: PoiService, useValue: null }
+                { provide: PoiService, useValue: null },
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting()
             ]
         });
     });

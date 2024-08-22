@@ -1,6 +1,6 @@
 import { TestBed, inject, fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
-import { HttpClientModule, HttpRequest } from "@angular/common/http";
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { HttpRequest, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 import JSZip from "jszip";
 
@@ -61,8 +61,6 @@ describe("Poi Service", () => {
         };
         TestBed.configureTestingModule({
             imports: [
-                HttpClientModule,
-                HttpClientTestingModule,
                 NgxsModule.forRoot([LayersReducer, OfflineReducer, ConfigurationReducer])
             ],
             providers: [
@@ -77,7 +75,9 @@ describe("Poi Service", () => {
                 GeoJsonParser,
                 RunningContextService,
                 WhatsAppService,
-                PoiService
+                PoiService,
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting()
             ]
         });
     });
@@ -265,6 +265,9 @@ describe("Poi Service", () => {
                     offlineState: {
                         poisLastModifiedDate: Date.now(),
                         uploadPoiQueue: []
+                    },
+                    configuration: {
+                        language: { code: "he", rtl: false }
                     }
                 });
                 (runningContextService as any).isCapacitor = true;

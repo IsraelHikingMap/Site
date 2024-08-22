@@ -1,4 +1,5 @@
-import { HttpClientTestingModule } from "@angular/common/http/testing";
+import { provideHttpClientTesting } from "@angular/common/http/testing";
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { TestBed, inject } from "@angular/core/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 
@@ -33,10 +34,7 @@ describe("Recorded Route Service", () => {
             uploadLocalTracesIfNeeded: () => Promise.resolve()
         };
         TestBed.configureTestingModule({
-            imports: [
-                NgxsModule.forRoot([GpsReducer, RecordedRouteReducer]),
-                HttpClientTestingModule
-            ],
+            imports: [NgxsModule.forRoot([GpsReducer, RecordedRouteReducer])],
             providers: [
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
                 { provide: ToastService, useValue: toastMock.toastService },
@@ -46,7 +44,9 @@ describe("Recorded Route Service", () => {
                 RunningContextService,
                 ConnectionService,
                 RoutesFactory,
-                RecordedRouteService
+                RecordedRouteService,
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting()
             ]
         });
     });

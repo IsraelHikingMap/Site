@@ -61,20 +61,20 @@ describe("Spatial service", () => {
         expect(clippedLines[0].geometry.coordinates[0]).toEqual([0,0]);
     });
 
-    it("Should change a line that is crosses the entire tile boundary", () => {
+    it("Should change a line that crosses the entire tile boundary", () => {
         const lines = [lineString([[-1,-1], [5,5]])];
         const clippedLines = SpatialService.clipLinesToTileBoundary(lines, {x: 128,y: 127}, 8);
         expect(clippedLines[0].geometry.coordinates[0]).toEqual([0,0]);
         expect(clippedLines[0].geometry.coordinates[1]).not.toEqual([5,5]);
     });
 
-    it("Should split a line that is crosses the tile boundary multiple times to several lines", () => {
+    it("Should split a line that crosses the tile boundary multiple times to several lines", () => {
         const lines = [lineString([[-1,-1], [0.5,0.5], [-1, 0.5], [0.5, 0.6], [-1, 0.6], [0.7, 0.7]])];
         const clippedLines = SpatialService.clipLinesToTileBoundary(lines, {x: 128,y: 127}, 8);
         expect(clippedLines.length).toBe(3);
-        expect(clippedLines[0].geometry.coordinates[0]).toEqual([0,0]);
-        expect(clippedLines[0].geometry.coordinates[2]).toEqual([0,0.5]);
-        expect(clippedLines[1].geometry.coordinates[2]).toEqual([0,0.6]);
+        expect(clippedLines[1].geometry.coordinates[0]).toEqual([0,0]);
+        expect(clippedLines[1].geometry.coordinates[2]).toEqual([0,0.5]);
+        expect(clippedLines[0].geometry.coordinates[2]).toEqual([0,0.6]);
         expect(clippedLines[2].geometry.coordinates[1]).toEqual([0.7,0.7]);
     });
 

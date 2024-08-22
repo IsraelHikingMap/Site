@@ -75,7 +75,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
             if (response && response.name) {
                 this.layerData.key = response.name;
             }
-        } catch (ex) {
+        } catch {
             // ignore error
         }
     }
