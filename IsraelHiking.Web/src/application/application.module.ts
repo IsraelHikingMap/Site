@@ -33,7 +33,7 @@ import { NgProgressModule } from "ngx-progressbar";
 import { NgProgressHttpModule } from "ngx-progressbar/http";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgxMapLibreGLModule } from "@maplibre/ngx-maplibre-gl";
-import { NgIdleModule } from "@ng-idle/core";
+import { provideNgIdle } from "@ng-idle/core";
 import { provideLottieOptions, LottieComponent } from "ngx-lottie";
 import { NgxsModule } from "@ngxs/store";
 import { saveAs } from "file-saver-es";
@@ -249,7 +249,6 @@ const initializeApplication = (injector: Injector) => async () => {
             UIComponentsReducer
         ]),
         NgxMapLibreGLModule,
-        NgIdleModule.forRoot(),
         HammerModule,
         LottieComponent
     ],
@@ -319,7 +318,8 @@ const initializeApplication = (injector: Injector) => async () => {
         RouteEditRouteInteraction,
         provideHttpClient(
             withInterceptorsFromDi(),
-        )
+        ),
+        provideNgIdle()
     ],
     declarations: [
         MainMapComponent,
