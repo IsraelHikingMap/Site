@@ -1,6 +1,6 @@
 import { TestBed, inject } from "@angular/core/testing";
-import { HttpClientModule, HttpRequest } from "@angular/common/http";
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { HttpRequest, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 
 import { ToastServiceMockCreator } from "./toast.service.spec";
@@ -64,8 +64,6 @@ describe("Poi Service", () => {
         };
         TestBed.configureTestingModule({
             imports: [
-                HttpClientModule,
-                HttpClientTestingModule,
                 NgxsModule.forRoot([LayersReducer, OfflineReducer, ConfigurationReducer])
             ],
             providers: [
@@ -81,7 +79,9 @@ describe("Poi Service", () => {
                 GeoJsonParser,
                 RunningContextService,
                 WhatsAppService,
-                PoiService
+                PoiService,
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting()
             ]
         });
     });

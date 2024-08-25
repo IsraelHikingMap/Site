@@ -21,14 +21,12 @@
 	},
 	"packageClassList": [
 		"KeepAwakePlugin",
-		"KeepAwakePlugin",
-		"ScreenBrightnessPlugin",
 		"ScreenBrightnessPlugin",
 		"AppPlugin",
 		"CAPCameraPlugin",
 		"DevicePlugin",
 		"TextZoomPlugin",
-		"NativeAudio",
+		"AppUpdatePlugin",
 		"NativeAudio",
 		"CDVPlugin"
 	]

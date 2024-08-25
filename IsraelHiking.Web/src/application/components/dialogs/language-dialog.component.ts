@@ -4,6 +4,7 @@ import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
+import { AVAILABLE_LANGUAGES } from "../../reducers/initial-state";
 import { ApplicationState, LanguageCode } from "../../models/models";
 
 @Component({
@@ -12,6 +13,7 @@ import { ApplicationState, LanguageCode } from "../../models/models";
 })
 export class LanguageDialogComponent extends BaseMapComponent {
     public selectedLanguageCode: LanguageCode;
+    public availableLanguages = AVAILABLE_LANGUAGES;
 
     constructor(resources: ResourcesService,
                 private readonly store: Store) {

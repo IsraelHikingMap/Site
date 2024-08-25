@@ -1,6 +1,6 @@
 import { TestBed, inject } from "@angular/core/testing";
-import { HttpClientModule } from "@angular/common/http";
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 
 import { TracesService } from "./traces.service";
@@ -22,18 +22,17 @@ describe("Traces Service", () => {
         };
         TestBed.configureTestingModule({
             imports: [
-                HttpClientModule,
-                HttpClientTestingModule,
-                NgxsModule.forRoot([])
-            ],
+                NgxsModule.forRoot([])],
             providers: [
                 TracesService,
                 { provide: ResourcesService, useValue: mock.resourcesService },
                 { provide: LoggingService, useValue: loggignMock },
                 { provide: RunningContextService, useValue: {} },
                 { provide: DatabaseService, useValue: {
-                    deleteTraceById: () => {}
-                } }
+                        deleteTraceById: () => { }
+                } },
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting()
             ]
         });
     });

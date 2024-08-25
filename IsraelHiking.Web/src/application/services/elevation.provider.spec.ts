@@ -1,6 +1,6 @@
 import { TestBed, inject } from "@angular/core/testing";
-import { HttpClientModule } from "@angular/common/http";
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 
 import { ElevationProvider } from "./elevation.provider";
@@ -12,14 +12,14 @@ describe("ElevationProvider", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [
-                HttpClientModule,
-                HttpClientTestingModule,
                 NgxsModule.forRoot([])
             ],
             providers: [
                 { provide: LoggingService, useValue: { warning: () => { } } },
                 { provide: PmTilesService, useValue: {} },
-                ElevationProvider
+                ElevationProvider,
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting()
             ]
         });
     });

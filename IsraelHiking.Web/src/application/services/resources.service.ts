@@ -4,6 +4,7 @@ import { Store } from "@ngxs/store";
 
 import { GetTextCatalogService } from "./gettext-catalog.service";
 import { SetLanguageAction } from "../reducers/configuration.reducer";
+import { AVAILABLE_LANGUAGES } from "../reducers/initial-state";
 import { Urls } from "../urls";
 import type { ApplicationState, Language, LanguageCode } from "../models/models";
 
@@ -13,7 +14,6 @@ export class ResourcesService {
     public direction: Direction;
     public start: string;
     public end: string;
-    public availableLanguages: Language[];
     public endOfBaseLayer = "end-of-base-layer";
     public endOfOverlays = "end-of-overlays";
     public endOfClusters = "end-of-clusters";
@@ -309,6 +309,7 @@ export class ResourcesService {
     public editingRouteWhileTracking: string;
     public loginTokenExpiredPleaseLoginAgain: string;
     public jammedPositionReceived: string;
+    public newVersionAvailable: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -455,16 +456,6 @@ export class ResourcesService {
 
     constructor(private readonly gettextCatalog: GetTextCatalogService,
                 private readonly store: Store) {
-        this.availableLanguages = [
-            {
-                code: "he",
-                rtl: true,
-            },
-            {
-                code: "en-US",
-                rtl: false,
-            }
-        ];
     }
 
     public async initialize() {
@@ -484,7 +475,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1716145116367");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1722974337771");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -796,6 +787,7 @@ export class ResourcesService {
             "in order to avoid map centering to current location please click the cross icon on the top left corner");
         this.loginTokenExpiredPleaseLoginAgain = this.gettextCatalog.getString("Login token expired, please login again");
         this.jammedPositionReceived = this.gettextCatalog.getString("Jammed position received...");
+        this.newVersionAvailable = this.gettextCatalog.getString("New version available, do you want to update?");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog
@@ -952,7 +944,7 @@ export class ResourcesService {
     }
 
     public async setLanguage(code: LanguageCode) {
-        const language = this.availableLanguages.find((l) => l.code === code);
+        const language = AVAILABLE_LANGUAGES.find((l) => l.code === code);
         await this.setLanguageInternal(language);
     }
 

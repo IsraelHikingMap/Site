@@ -1,23 +1,26 @@
 PODS:
-  - Capacitor (6.0.0):
+  - Capacitor (6.1.2):
     - CapacitorCordova
-  - CapacitorApp (6.0.0):
+  - CapacitorApp (6.0.1):
     - Capacitor
-  - CapacitorCamera (6.0.0):
+  - CapacitorCamera (6.0.2):
     - Capacitor
-  - CapacitorCommunityKeepAwake (5.0.0):
+  - CapacitorCommunityKeepAwake (5.0.1):
     - Capacitor
   - CapacitorCommunityScreenBrightness (6.0.0):
     - Capacitor
-  - CapacitorCordova (6.0.0)
-  - CapacitorDevice (6.0.0):
+  - CapacitorCordova (6.1.2)
+  - CapacitorDevice (6.0.1):
     - Capacitor
-  - CapacitorTextZoom (6.0.0):
+  - CapacitorTextZoom (6.0.2):
     - Capacitor
-  - CapgoNativeAudio (6.4.3):
+  - CapawesomeCapacitorAppUpdate (6.0.0):
     - Capacitor
-  - CordovaPlugins (6.0.0):
+  - CapgoNativeAudio (6.4.4):
+    - Capacitor
+  - CordovaPlugins (6.1.2):
     - CapacitorCordova
+  - CordovaPluginsResources (0.0.105)
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -28,8 +31,10 @@ DEPENDENCIES:
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
   - "CapacitorTextZoom (from `../../node_modules/@capacitor/text-zoom`)"
+  - "CapawesomeCapacitorAppUpdate (from `../../node_modules/@capawesome/capacitor-app-update`)"
   - "CapgoNativeAudio (from `../../node_modules/@capgo/native-audio`)"
   - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
+  - CordovaPluginsResources (from `../capacitor-cordova-ios-plugins`)
 
 EXTERNAL SOURCES:
   Capacitor:
@@ -48,23 +53,29 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/device"
   CapacitorTextZoom:
     :path: "../../node_modules/@capacitor/text-zoom"
+  CapawesomeCapacitorAppUpdate:
+    :path: "../../node_modules/@capawesome/capacitor-app-update"
   CapgoNativeAudio:
     :path: "../../node_modules/@capgo/native-audio"
   CordovaPlugins:
     :path: "../capacitor-cordova-ios-plugins"
+  CordovaPluginsResources:
+    :path: "../capacitor-cordova-ios-plugins"
 
 SPEC CHECKSUMS:
-  Capacitor: 559d073c4ca6c27f8e7002c807eea94c3ba435a9
-  CapacitorApp: 9d53aec7101f7b030a950c5bdc4df8612576b279
-  CapacitorCamera: b61f125d92a0ef75d7becb7956fed7dd13187ee0
-  CapacitorCommunityKeepAwake: c820e5394a74ab73635107f0544378b026562243
+  Capacitor: 679f9673fdf30597493a6362a5d5bf233d46abc2
+  CapacitorApp: 0bc633b4eae40a1f32cd2834788fad3bc42da6a1
+  CapacitorCamera: ed022171dbf3853e68eec877b4d78995378af6b7
+  CapacitorCommunityKeepAwake: e2ddd50812e3407f8dc3a2c28e97d66e9b59b2f5
   CapacitorCommunityScreenBrightness: 250184917bd0738a681c026a9513e18ddb0cb49b
-  CapacitorCordova: 8c4bfdf69368512e85b1d8b724dd7546abeb30af
-  CapacitorDevice: f8fd88f9edd1261c55a109f32015b09bbbfdc4a0
-  CapacitorTextZoom: 696722e5c479b364f2429584f11ad386d609bd1a
-  CapgoNativeAudio: 569bfe2955e4bc58d9c44f14590ea985854f7f9b
-  CordovaPlugins: 1f2794134a8c57f6b5112e89cc7afd07dc0f7bef
+  CapacitorCordova: f48c89f96c319101cd2f0ce8a2b7449b5fb8b3dd
+  CapacitorDevice: 7097a1deb4224b77fd13a6e60a355d0062a5d772
+  CapacitorTextZoom: 013a8dd0887f6bd103171768c91845f2354414b6
+  CapawesomeCapacitorAppUpdate: 3c05b5c8e42f9c6a88d666093406e9336d9bfdb1
+  CapgoNativeAudio: 71b7ad4171b4439834bcfd5b7e3b63e9abb13545
+  CordovaPlugins: 665d54b7b09e50186426075e8f82ca33f7d6ebf0
+  CordovaPluginsResources: 0c211f770ed91763a179ebcd9b9346e120b70662
 
-PODFILE CHECKSUM: 0c32ad6bc2ae562b3fa0cf7a399eddd792459d18
+PODFILE CHECKSUM: e0c33abfef59d60da443219984847be84bfb0cc1
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.15.2

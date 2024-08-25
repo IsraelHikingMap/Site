@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Map, LngLatBounds, LngLatLike } from "maplibre-gl";
-import { lineString, featureCollection, point, Units, BBox } from "@turf/helpers";
+import { lineString, featureCollection, point, Units } from "@turf/helpers";
 import simplify from "@turf/simplify";
 import distance from "@turf/distance";
 import center from "@turf/center";
@@ -357,7 +357,7 @@ export class SpatialService {
         };
     }
 
-    public static insideBbox(position: GeoJSON.Position, bbox: BBox): boolean {
+    public static insideBbox(position: GeoJSON.Position, bbox: GeoJSON.BBox): boolean {
         return position[0] >= bbox[0] && position[0] <= bbox[2] &&
             position[1] >= bbox[1] && position[1] <= bbox[3];
     }

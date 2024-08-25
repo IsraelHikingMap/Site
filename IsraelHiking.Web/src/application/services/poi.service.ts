@@ -624,7 +624,7 @@ export class PoiService {
                     }
                 }
             }
-        } catch (ex) {
+        } catch {
             this.loggingService.warning("[POIs] Unable to sync categories, using local categories");
         }
 

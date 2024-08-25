@@ -150,7 +150,7 @@ export class LayersService {
             for (const toRemove of baselayerToRemove) {
                 this.store.dispatch(new RemoveBaseLayerAction(toRemove.key));
             }
-        } catch (error) {
+        } catch {
             this.loggingService.warning("[Layers] Unable to sync user layer from server - using local layers");
         }
     }

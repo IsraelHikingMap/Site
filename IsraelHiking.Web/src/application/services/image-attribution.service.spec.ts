@@ -1,5 +1,5 @@
-import { HttpClientModule } from "@angular/common/http";
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { inject, TestBed } from "@angular/core/testing";
 
 import { ImageAttributionService } from "./image-attribution.service";
@@ -9,13 +9,11 @@ describe("ImageAttributionService", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [
-                HttpClientModule,
-                HttpClientTestingModule
-            ],
             providers: [
                 { provide: ResourcesService, useValue: { getCurrentLanguageCodeSimplified: () => "en" } },
-                ImageAttributionService
+                ImageAttributionService,
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting()
             ]
         });
     });

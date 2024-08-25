@@ -10,6 +10,7 @@ import { Store } from "@ngxs/store";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { StopShowingIntroAction } from "../../reducers/configuration.reducer";
+import { AVAILABLE_LANGUAGES } from "../../reducers/initial-state";
 import { RunningContextService } from "../../services/running-context.service";
 import languageAnimationData from "../../../content/lottie/dialog-language.json";
 import mapsAnimationData from "../../../content/lottie/dialog-maps.json";
@@ -29,6 +30,7 @@ export class IntroDialogComponent extends BaseMapComponent {
     lottieMore: AnimationOptions = { animationData: moreAnimationData };
 
     public step: number;
+    public availableLanguages = AVAILABLE_LANGUAGES;
 
     constructor(resources: ResourcesService,
             private readonly dialogRef: MatDialogRef<IntroDialogComponent>,

@@ -14,7 +14,7 @@ export class OsmTokenInterceptor implements HttpInterceptor {
         let token = "";
         try {
             token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
-        } catch (ex) {
+        } catch {
             // store is not ready yet
         }
 

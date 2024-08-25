@@ -1,5 +1,5 @@
 ﻿import { Urls } from "../urls";
-import type { MutableApplicationState, RouteData, StateWithHistory } from "../models/models";
+import type { Language, MutableApplicationState, RouteData, StateWithHistory } from "../models/models";
 
 export const ISRAEL_HIKING_MAP = "Israel Hiking Map";
 export const ISRAEL_MTB_MAP = "Israel MTB Map";
@@ -12,6 +12,16 @@ export const SPECIAL_BASELAYERS = [ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE]
 export const SPECIAL_OVERLAYS =  [HIKING_TRAILS, BICYCLE_TRAILS, POPULARITY_HEATMAP];
 export const SPECIAL_LAYERS = [...SPECIAL_BASELAYERS, ...SPECIAL_OVERLAYS];
 
+export const AVAILABLE_LANGUAGES: Language[] = [{
+        code: "he",
+        rtl: true,
+    },
+    {
+        code: "en-US",
+        rtl: false,
+    }
+];
+
 export const initialState =
     {
         configuration: {
@@ -23,10 +33,7 @@ export const initialState =
             isShowKmMarker: false,
             isShowSlope: false,
             version: "9.20",
-            language: {
-                code: "he",
-                rtl: true
-            }
+            language: AVAILABLE_LANGUAGES.find(l => l.code === navigator.language) ?? AVAILABLE_LANGUAGES[0],
         },
         locationState: {
             longitude: 35.12,

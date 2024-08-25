@@ -293,7 +293,7 @@ export class SearchComponent extends BaseMapComponent {
                 this.selectResults(searchContext, searchContext.searchResults[0]);
             }
             this.selectFirstSearchResults = false;
-        } catch (ex) {
+        } catch {
             this.toastService.warning(this.resources.unableToGetSearchResults);
         }
     }
