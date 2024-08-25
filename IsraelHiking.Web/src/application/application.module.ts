@@ -31,7 +31,7 @@ import { ClipboardModule } from "@angular/cdk/clipboard";
 import { Angulartics2Module, Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import { NgProgressModule } from "ngx-progressbar";
 import { NgProgressHttpModule } from "ngx-progressbar/http";
-import { InfiniteScrollModule } from "ngx-infinite-scroll";
+import { InfiniteScrollDirective } from "ngx-infinite-scroll";
 import { NgxMapLibreGLModule } from "@maplibre/ngx-maplibre-gl";
 import { provideNgIdle } from "@ng-idle/core";
 import { provideLottieOptions, LottieComponent } from "ngx-lottie";
@@ -231,7 +231,6 @@ const initializeApplication = (injector: Injector) => async () => {
         NgProgressHttpModule,
         ScrollToModule.forRoot(),
         DragDropModule,
-        InfiniteScrollModule,
         NgxsModule.forRoot([
             ConfigurationReducer,
             LocationReducer,
@@ -250,7 +249,8 @@ const initializeApplication = (injector: Injector) => async () => {
         ]),
         NgxMapLibreGLModule,
         HammerModule,
-        LottieComponent
+        LottieComponent,
+        InfiniteScrollDirective
     ],
     providers: [
         AuthorizationService,
