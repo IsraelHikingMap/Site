@@ -144,7 +144,7 @@ export class LocationComponent extends BaseMapComponent {
 
     public getRotationAngle() {
         if (this.mapComponent.mapInstance == null) {
-            return 0;
+            return "rotate(0deg)";
         }
         return `rotate(${-this.mapComponent.mapInstance.getBearing()}deg)`;
     }
