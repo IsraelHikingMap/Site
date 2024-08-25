@@ -7,7 +7,7 @@ import {
     SourceSpecification,
     LayerSpecification
 } from "maplibre-gl";
-import { Subject, Subscription, mergeMap } from "rxjs";
+import { Subject, mergeMap } from "rxjs";
 import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
