@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from "@angular/core";
+import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, OutputRefSubscription } from "@angular/core";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import {
     StyleSpecification,
@@ -40,7 +40,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
 
     private rasterSourceId: string;
     private rasterLayerId: string;
-    private subscriptions: Subscription[];
+    private subscriptions: OutputRefSubscription[];
     private jsonSourcesIds: string[];
     private jsonLayersIds: string[];
     private hasInternetAccess: boolean;
