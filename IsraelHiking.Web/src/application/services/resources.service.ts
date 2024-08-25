@@ -4,6 +4,7 @@ import { Store } from "@ngxs/store";
 
 import { GetTextCatalogService } from "./gettext-catalog.service";
 import { SetLanguageAction } from "../reducers/configuration.reducer";
+import { AVAILABLE_LANGUAGES } from "../reducers/initial-state";
 import { Urls } from "../urls";
 import type { ApplicationState, Language, LanguageCode } from "../models/models";
 
@@ -13,7 +14,6 @@ export class ResourcesService {
     public direction: Direction;
     public start: string;
     public end: string;
-    public availableLanguages: Language[];
     public endOfBaseLayer = "end-of-base-layer";
     public endOfOverlays = "end-of-overlays";
     public endOfClusters = "end-of-clusters";
@@ -456,16 +456,6 @@ export class ResourcesService {
 
     constructor(private readonly gettextCatalog: GetTextCatalogService,
                 private readonly store: Store) {
-        this.availableLanguages = [
-            {
-                code: "he",
-                rtl: true,
-            },
-            {
-                code: "en-US",
-                rtl: false,
-            }
-        ];
     }
 
     public async initialize() {
@@ -954,7 +944,7 @@ export class ResourcesService {
     }
 
     public async setLanguage(code: LanguageCode) {
-        const language = this.availableLanguages.find((l) => l.code === code);
+        const language = AVAILABLE_LANGUAGES.find((l) => l.code === code);
         await this.setLanguageInternal(language);
     }
 
