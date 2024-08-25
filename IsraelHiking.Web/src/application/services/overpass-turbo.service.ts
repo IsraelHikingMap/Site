@@ -26,7 +26,7 @@ export class OverpassTurboService {
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(text, "text/xml");
             return osmtogeojson(xmlDoc);
-        } catch (ex) {
+        } catch {
             return {
                 type: "FeatureCollection",
                 features: []
