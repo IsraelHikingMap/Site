@@ -24,7 +24,7 @@ export class INatureService {
             }
         };
         const lngLat = this.setLocation(content, feature);
-        this.setImageAndWebsite(content, feature, pageId);
+        this.setImageAndWebsite(content, feature, title);
         feature.geometry = await this.getGeometryFromContent(content) ?? {
             type: "Point",
             coordinates: [lngLat.lng, lngLat.lat]
@@ -90,13 +90,17 @@ export class INatureService {
     }
 
     private async getGeometryFromContent(content: string): Promise<GeoJSON.Geometry> {
-        const shareRegexp = new RegExp("israelhiking\.osm\.org\.il/share/(.*?)");
+        const shareRegexp = new RegExp("israelhiking\\.osm\\.org\\.il/share/(.*?)[\"']");
         const match = content.match(shareRegexp);
         if (match == null) {
             return null;
         }
         const shareId = match[1];
-        const geojson = await firstValueFrom(this.httpClient.get(`${Urls.urls}${shareId}?format=geojson`)) as GeoJSON.FeatureCollection;
-        return geojson.features.find(f => f.geometry.type === "LineString")?.geometry;
+        // HM TODO: replace this:
+        //let url = Urls.urls + shareId + "?format=geojson";
+        const url = "https://israelhiking.osm.org.il/api/urls/" + shareId + "?format=geojson";
+        const geojson = await firstValueFrom(this.httpClient.get(url)) as GeoJSON.FeatureCollection;
+        console.log(geojson);
+        return geojson.features.find(f => f.geometry.type !== "Point")?.geometry;
     }
 }

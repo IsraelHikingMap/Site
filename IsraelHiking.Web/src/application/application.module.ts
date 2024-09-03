@@ -97,6 +97,7 @@ import { OverpassTurboService } from "./services/overpass-turbo.service";
 import { ImageAttributionService } from "./services/image-attribution.service";
 import { PmTilesService } from "./services/pmtiles.service";
 import { ApplicationUpdateService } from "./services/application-update.service";
+import { INatureService } from "./services/inature.service";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
@@ -309,6 +310,7 @@ const initializeApplication = (injector: Injector) => async () => {
         ImageAttributionService,
         PmTilesService,
         ApplicationUpdateService,
+        INatureService,
         AudioPlayerFactory,
         FileSystemWrapper,
         // eslint-disable-next-line
