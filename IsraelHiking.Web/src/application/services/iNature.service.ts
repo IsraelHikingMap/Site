@@ -89,7 +89,7 @@ export class INatureService {
     }
 
     private async getGeometryFromContent(content: string): Promise<GeoJSON.Geometry> {
-        const shareRegexp = /israelhiking\.osm\.org\.il\/share\/(.*?)["']/;
+        const shareRegexp = /israelhiking\.osm\.org\.il\/share\/(.*?)["']/i;
         const match = content.match(shareRegexp);
         if (match == null) {
             return null;
