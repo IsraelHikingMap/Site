@@ -16,6 +16,7 @@ import { SpatialService } from "../../services/spatial.service";
 import { NavigateHereService } from "../../services/navigate-here.service";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
+import { GeoJSONUtils } from "../../services/geojson-utils";
 import type { ApplicationState, LatLngAlt, LinkData, Overlay } from "../../models/models";
 
 @Component({
@@ -132,11 +133,11 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     }
 
     public getTitle(feature: GeoJSON.Feature<GeoJSON.Point>): string {
-        return this.poiService.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
+        return GeoJSONUtils.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
     public hasExtraData(feature: GeoJSON.Feature<GeoJSON.Point>): boolean {
-        return this.poiService.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
+        return GeoJSONUtils.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
     public isCoordinatesFeature(feature: Immutable<GeoJSON.Feature>) {

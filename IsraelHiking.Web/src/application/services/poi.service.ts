@@ -39,6 +39,8 @@ import type {
     EditablePublicPointData,
     OfflineState
 } from "../models/models";
+import { GeoJSONUtils } from "./geojson-utils";
+import { INatureService } from "./inature.service";
 
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite"
 
@@ -120,6 +122,7 @@ export class PoiService {
                 private readonly mapService: MapService,
                 private readonly connectionService: ConnectionService,
                 private readonly overpassTurboService: OverpassTurboService,
+                private readonly iNatureService: INatureService,
                 private readonly store: Store
     ) {
         this.poisCache = [];
@@ -231,7 +234,7 @@ export class PoiService {
             const poi = await firstValueFrom(poi$) as GeoJSON.Feature;
             if (feature.properties.poiIsSimple) {
                 this.loggingService.info("[POIs] Uploaded successfully a simple feature with generated id: " +
-                `${firstItemId} at: ${JSON.stringify(this.getLocation(feature))}, removing from upload queue`);
+                `${firstItemId} at: ${JSON.stringify(GeoJSONUtils.getLocation(feature))}, removing from upload queue`);
             } else {
                 this.loggingService.info("[POIs] Uploaded successfully a feature with id:" +
                 `${this.getFeatureId(poi) ?? firstItemId}, removing from upload queue`);
@@ -562,7 +565,7 @@ export class PoiService {
             if (visibleCategories.indexOf(feature.properties.poiCategory) === -1) {
                 continue;
             }
-            if (this.getTitle(feature, language) || this.hasExtraData(feature, language)) {
+            if (GeoJSONUtils.getTitle(feature, language) || GeoJSONUtils.hasExtraData(feature, language)) {
                 visibleFeatures.push(feature);
             }
         }
@@ -658,10 +661,10 @@ export class PoiService {
         const languageShort = language || this.resources.getCurrentLanguageCodeSimplified();
         const title = wikidata.sitelinks[`${languageShort}wiki`]?.title;
         if (wikidata.statements.P18 && wikidata.statements.P18.length > 0) {
-            this.setProperty(feature, "image", `File:${wikidata.statements.P18[0].value.content}`);
+            GeoJSONUtils.setProperty(feature, "image", `File:${wikidata.statements.P18[0].value.content}`);
         }
         if (title) {
-            const indexString = this.setProperty(feature, "website", `https://${languageShort}.wikipedia.org/wiki/${title}`);
+            const indexString = GeoJSONUtils.setProperty(feature, "website", `https://${languageShort}.wikipedia.org/wiki/${title}`);
             feature.properties["poiSourceImageUrl" + indexString] = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/128px-Wikipedia-logo-v2.svg.png";
         }
         const wikipediaPage = await firstValueFrom(this.httpClient.get(`http://${languageShort}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=${title}&origin=*`)) as any;
@@ -669,19 +672,6 @@ export class PoiService {
         if (pagesIds.length > 0) {
             feature.properties.poiExternalDescription = wikipediaPage.query.pages[pagesIds[0]].extract;
         }
-    }
-
-    private async enritchFeatureFromINature(feature: GeoJSON.Feature): Promise<void> {
-        const iNatureRef = feature.properties["ref:IL:inature"];
-        const address = `https://inature.info/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles=${iNatureRef}&origin=*`;
-        const iNatureJson = await firstValueFrom(this.httpClient.get(address).pipe(timeout(3000))) as any;
-        const content = iNatureJson.query.pages[Object.keys(iNatureJson.query.pages)[0]].revisions[0]["*"];
-        feature.properties.poiExternalDescription = content.match(/סקירה=(.*)/)[1];
-        const indexString = this.setProperty(feature, "website", `https://inature.info/wiki/${iNatureRef}`);
-        feature.properties["poiSourceImageUrl" + indexString] = "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png";
-        const image = content.match(/תמונה=(.*)/)[1];
-        const imageSrc = `https://inature.info/w/index.php?title=Special:Redirect/file/${image}`;
-        this.setProperty(feature, "image", imageSrc);        
     }
 
     public async getPoint(id: string, source: string, language?: string): Promise<GeoJSON.Feature> {
@@ -707,7 +697,7 @@ export class PoiService {
                     wikidataPromise = this.enritchFeatureFromWikimedia(feature, language);
                 }
                 if (feature.properties["ref:IL:inature"] && language === "he") {
-                    inaturePromise = this.enritchFeatureFromINature(feature);
+                    inaturePromise = this.iNatureService.enritchFeatureFromINature(feature);
                 }
                 if (type === "node" && feature.properties.place) {
                     placePromise = this.overpassTurboService.getPlaceGeometry(osmId);
@@ -731,6 +721,13 @@ export class PoiService {
                 this.adjustGeolocationBasedOnTileDate(id, poi);
                 this.poisCache.splice(0, 0, poi);
                 return cloneDeep(poi);
+            } else if (source === "iNature") {
+                const feature = await this.iNatureService.createFeatureFromPageId(id);
+                this.poisCache.splice(0, 0, feature);
+                return cloneDeep(feature);
+            // HM TODO: add support for wikidata
+            //} else if (source === "wikidata") {
+
             } else {
                 const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
                 const poi$ = this.httpClient.get(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000));
@@ -775,8 +772,8 @@ export class PoiService {
                 coordinates: SpatialService.toCoordinate(latlng)
             }
         } as GeoJSON.Feature;
-        this.setLocation(feature, latlng);
-        this.setTitle(feature, id, language);
+        GeoJSONUtils.setLocation(feature, latlng);
+        GeoJSONUtils.setTitle(feature, id, language);
         return feature;
     }
 
@@ -795,20 +792,20 @@ export class PoiService {
             language
         } as PoiRouterData);
         const escaped = encodeURIComponent(poiLink);
-        const location = this.getLocation(feature);
+        const location = GeoJSONUtils.getLocation(feature);
         return {
             poiLink,
             facebook: `${Urls.facebook}${escaped}`,
-            whatsapp: this.whatsappService.getUrl(this.getTitle(feature, language), escaped) as string,
+            whatsapp: this.whatsappService.getUrl(GeoJSONUtils.getTitle(feature, language), escaped) as string,
             waze: `${Urls.waze}${location.lat},${location.lng}`
         };
     }
 
     public mergeWithPoi(feature: GeoJSON.Feature, markerData: Immutable<MarkerData>) {
         const language = this.resources.getCurrentLanguageCodeSimplified();
-        this.setTitle(feature, feature.properties["name:" + language] || markerData.title, language);
-        this.setDescription(feature, feature.properties["description:" + language] || markerData.description, language);
-        this.setLocation(feature, markerData.latlng);
+        GeoJSONUtils.setTitle(feature, feature.properties["name:" + language] || markerData.title, language);
+        GeoJSONUtils.setDescription(feature, feature.properties["description:" + language] || markerData.description, language);
+        GeoJSONUtils.setLocation(feature, markerData.latlng);
         feature.properties.poiIcon = feature.properties.poiIcon || `icon-${markerData.type || "star"}`;
         let lastIndex = Math.max(-1, ...Object.keys(feature.properties)
             .filter(k => k.startsWith("image"))
@@ -821,53 +818,6 @@ export class PoiService {
             feature.properties[name] = url;
         });
         return feature;
-    }
-
-    public setDescription(feature: GeoJSON.Feature, value: string, language: string) {
-        feature.properties["description:" + language] = value;
-    }
-
-    public setTitle(feature: GeoJSON.Feature, value: string, language: string) {
-        feature.properties["name:" + language] = value;
-    }
-
-    public setLocation(feature: GeoJSON.Feature, value: LatLngAlt) {
-        feature.properties.poiGeolocation = {
-            lat: value.lat,
-            lon: value.lng
-        };
-    }
-
-    public getTitle(feature: Immutable<GeoJSON.Feature>, language: string): string {
-        if (feature.properties["name:" + language]) {
-            return feature.properties["name:" + language];
-        }
-        if (feature.properties.name) {
-            return feature.properties.name;
-        }
-        if (feature.properties["mtb:name:"+ language]) {
-            return feature.properties["mtb:name:"+ language];
-        }
-        if (feature.properties["mtb:name"]) {
-            return feature.properties["mtb:name"];
-        }
-        return "";
-    }
-
-    public getDescription(feature: Immutable<GeoJSON.Feature>, language: string): string {
-        return feature.properties["description:" + language] || feature.properties.description;
-    }
-
-    public getExternalDescription(feature: GeoJSON.Feature, language: string): string {
-        return feature.properties["poiExternalDescription:" + language] || feature.properties.poiExternalDescription;
-    }
-
-    public getLocation(feature: GeoJSON.Feature): LatLngAlt {
-        return {
-            lat: feature.properties.poiGeolocation.lat,
-            lng: feature.properties.poiGeolocation.lon,
-            alt: feature.properties.poiAlt
-        };
     }
 
     public getContribution(feature: GeoJSON.Feature): Contribution {
@@ -883,13 +833,6 @@ export class PoiService {
             east: feature.properties.poiItmEast,
             north: feature.properties.poiItmNorth,
         } as NorthEast;
-    }
-
-    public hasExtraData(feature: GeoJSON.Feature, language: string): boolean {
-        return feature.properties["description:" + language] || 
-            Object.keys(feature.properties).find(k => k.startsWith("image")) != null ||
-            Object.keys(feature.properties).find(k => k.startsWith("wikipedia")) != null ||
-            Object.keys(feature.properties).find(k => k.startsWith("wikidata")) != null;
     }
 
     public async getClosestPoint(location: LatLngAlt, source?: string, language?: string): Promise<MarkerData> {
@@ -926,13 +869,13 @@ export class PoiService {
                 coordinates: SpatialService.toCoordinate(latlng)
             },
         } as GeoJSON.Feature;
-        this.setLocation(feature, latlng);
+        GeoJSONUtils.setLocation(feature, latlng);
         return this.addPointToUploadQueue(feature);
     }
 
     public addComplexPoi(info: EditablePublicPointData, location: LatLngAlt): Promise<void> {
         const feature = this.getFeatureFromEditableData(info);
-        this.setLocation(feature, location);
+        GeoJSONUtils.setLocation(feature, location);
         const id = uuidv4();
         feature.id = id;
         feature.properties.poiId = id;
@@ -970,16 +913,16 @@ export class PoiService {
         }
 
         if (newLocation) {
-            this.setLocation(featureContainingOnlyChanges, newLocation);
+            GeoJSONUtils.setLocation(featureContainingOnlyChanges, newLocation);
             hasChages = true;
         }
         const language = this.resources.getCurrentLanguageCodeSimplified();
         if (info.title !== editableDataBeforeChanges.title) {
-            this.setTitle(featureContainingOnlyChanges, info.title, language);
+            GeoJSONUtils.setTitle(featureContainingOnlyChanges, info.title, language);
             hasChages = true;
         }
         if (info.description !== editableDataBeforeChanges.description) {
-            this.setDescription(featureContainingOnlyChanges, info.description, language);
+            GeoJSONUtils.setDescription(featureContainingOnlyChanges, info.description, language);
             hasChages = true;
         }
         if (info.icon !== editableDataBeforeChanges.icon || info.iconColor !== editableDataBeforeChanges.iconColor) {
@@ -1021,8 +964,8 @@ export class PoiService {
         return {
             id: this.getFeatureId(feature),
             category: feature.properties.poiCategory,
-            description: this.getDescription(feature, language),
-            title: this.getTitle(feature, language),
+            description: GeoJSONUtils.getDescription(feature, language),
+            title: GeoJSONUtils.getTitle(feature, language),
             icon: feature.properties.poiIcon,
             iconColor: feature.properties.poiIconColor,
             imagesUrls: Object.keys(feature.properties).filter(k => k.startsWith("image")).map(k => feature.properties[k]),
@@ -1059,8 +1002,8 @@ export class PoiService {
             index++;
         }
         const language = this.resources.getCurrentLanguageCodeSimplified();
-        this.setDescription(feature, info.description, language);
-        this.setTitle(feature, info.title, language);
+        GeoJSONUtils.setDescription(feature, info.description, language);
+        GeoJSONUtils.setTitle(feature, info.title, language);
         return feature;
     }
 
@@ -1069,18 +1012,5 @@ export class PoiService {
             return feature.id.toString();
         }
         return feature.id ?? feature.properties.poiId;
-    }
-
-    private setProperty(feature: GeoJSON.Feature, key: string, value: string): string {
-        if (!feature.properties[key]) {
-            feature.properties[key] = value;
-            return "";
-        }
-        let index = 1;
-        while (feature.properties[key + index]) {
-            index++;
-        }
-        feature.properties[key + index] = value;
-        return `${index}`;
     }
 }

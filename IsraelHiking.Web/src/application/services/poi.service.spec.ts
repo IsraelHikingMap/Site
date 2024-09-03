@@ -2,6 +2,7 @@ import { TestBed, inject } from "@angular/core/testing";
 import { HttpRequest, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
+import { LngLatBounds } from "maplibre-gl";
 
 import { ToastServiceMockCreator } from "./toast.service.spec";
 import { ResourcesService } from "./resources.service";
@@ -21,8 +22,9 @@ import { Urls } from "../urls";
 import { LayersReducer } from "../reducers/layers.reducer";
 import { AddToPoiQueueAction, OfflineReducer } from "../reducers/offline.reducer";
 import { ConfigurationReducer, SetLanguageAction } from "../reducers/configuration.reducer";
+import { GeoJSONUtils } from "./geojson-utils";
+import { INatureService } from "./inature.service";
 import type { Category, MarkerData } from "../models/models";
-import { LngLatBounds } from "maplibre-gl";
 
 describe("Poi Service", () => {
 
@@ -75,6 +77,7 @@ describe("Poi Service", () => {
                 { provide: MapService, useValue: mapServiceMock },
                 { provide: LoggingService, useValue: loggingService },
                 { provide: OverpassTurboService, useValue: {} },
+                { provide: INatureService, useValue: {} },
                 ConnectionService,
                 GeoJsonParser,
                 RunningContextService,
@@ -447,9 +450,9 @@ describe("Poi Service", () => {
                     expect(feature.properties.poiId).not.toBeNull();
                     expect(feature.properties.poiSource).toBe("OSM");
                     expect(feature.properties["description:he"]).toBe("description");
-                    expect(poiService.getDescription(feature, "he")).toBe("description");
+                    expect(GeoJSONUtils.getDescription(feature, "he")).toBe("description");
                     expect(feature.properties["name:he"]).toBe("title");
-                    expect(poiService.getTitle(feature, "he")).toBe("title");
+                    expect(GeoJSONUtils.getTitle(feature, "he")).toBe("title");
                     expect(feature.properties.poiAddedUrls).toEqual(["some-new-url"]);
                     expect(feature.properties.poiRemovedUrls).toEqual(["some-old-url"]);
                     expect(feature.properties.poiAddedImages).toEqual(["some-new-image-url"]);
@@ -457,8 +460,8 @@ describe("Poi Service", () => {
                     expect(feature.properties.poiIcon).toBe("icon-spring");
                     expect(feature.properties.poiGeolocation.lat).toBe(1);
                     expect(feature.properties.poiGeolocation.lon).toBe(2);
-                    expect(poiService.getLocation(feature).lat).toBe(1);
-                    expect(poiService.getLocation(feature).lng).toBe(2);
+                    expect(GeoJSONUtils.getLocation(feature).lat).toBe(1);
+                    expect(GeoJSONUtils.getLocation(feature).lng).toBe(2);
                     // expected to not change geometry
                     expect(feature.geometry.type).toBe("Point");
                     expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([0, 0]);
@@ -532,7 +535,7 @@ describe("Poi Service", () => {
                         coordinates: [0, 0]
                     }
                 } as GeoJSON.Feature;
-                poiService.setLocation(featureInQueue, { lat: 1, lng: 2 });
+                GeoJSONUtils.setLocation(featureInQueue, { lat: 1, lng: 2 });
                 dbMock.getPoiFromUploadQueue = () => Promise.resolve(featureInQueue);
                 store.reset({
                     poiState: {
@@ -573,16 +576,16 @@ describe("Poi Service", () => {
                     expect(feature.properties.poiId).not.toBeNull();
                     expect(feature.properties.poiSource).toBe("OSM");
                     expect(feature.properties["description:he"]).toBe("description");
-                    expect(poiService.getDescription(feature, "he")).toBe("description");
+                    expect(GeoJSONUtils.getDescription(feature, "he")).toBe("description");
                     expect(feature.properties["name:he"]).toBe("title");
-                    expect(poiService.getTitle(feature, "he")).toBe("title");
+                    expect(GeoJSONUtils.getTitle(feature, "he")).toBe("title");
                     expect(feature.properties.poiAddedUrls).toEqual(["some-url"]);
                     expect(feature.properties.poiAddedImages).toEqual(["some-image-url"]);
                     expect(feature.properties.poiIcon).toBeUndefined();
                     expect(feature.properties.poiGeolocation.lat).toBe(1);
                     expect(feature.properties.poiGeolocation.lon).toBe(2);
-                    expect(poiService.getLocation(feature).lat).toBe(1);
-                    expect(poiService.getLocation(feature).lng).toBe(2);
+                    expect(GeoJSONUtils.getLocation(feature).lat).toBe(1);
+                    expect(GeoJSONUtils.getLocation(feature).lng).toBe(2);
                     // expected to not change geometry
                     expect(feature.geometry.type).toBe("Point");
                     expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([0, 0]);
@@ -618,11 +621,11 @@ describe("Poi Service", () => {
                 poiService.mergeWithPoi(feature, markerData);
                 const info = poiService.getEditableDataFromFeature(feature);
                 const featureAfterConverstion = poiService.getFeatureFromEditableData(info);
-                poiService.setLocation(featureAfterConverstion, { lat: 2, lng: 1});
-                expect(poiService.getLocation(featureAfterConverstion).lat).toBe(2);
-                expect(poiService.getLocation(featureAfterConverstion).lng).toBe(1);
-                expect(poiService.getDescription(featureAfterConverstion, "he")).toBe("description");
-                expect(poiService.getTitle(featureAfterConverstion, "he")).toBe("title");
+                GeoJSONUtils.setLocation(featureAfterConverstion, { lat: 2, lng: 1});
+                expect(GeoJSONUtils.getLocation(featureAfterConverstion).lat).toBe(2);
+                expect(GeoJSONUtils.getLocation(featureAfterConverstion).lng).toBe(1);
+                expect(GeoJSONUtils.getDescription(featureAfterConverstion, "he")).toBe("description");
+                expect(GeoJSONUtils.getTitle(featureAfterConverstion, "he")).toBe("title");
                 expect(featureAfterConverstion.properties.image).toBe("image-url");
                 expect(featureAfterConverstion.properties.image0).toBeUndefined();
                 expect(featureAfterConverstion.properties.poiIcon).toBe("icon-some-type");
@@ -662,14 +665,6 @@ describe("Poi Service", () => {
         })
     ));
 
-    it("should return has extra data for feature with description", inject([PoiService], (poiService: PoiService) => {
-        expect(poiService.hasExtraData({properties: { "description:he": "desc"}} as any as GeoJSON.Feature, "he")).toBeTruthy();
-    }));
-
-    it("should return has extra data for feature with image", inject([PoiService], (poiService: PoiService) => {
-        expect(poiService.hasExtraData({properties: { image: "image-url"}} as any as GeoJSON.Feature, "he")).toBeTruthy();
-    }));
-
     it("should return the itm coordinates for feature", inject([PoiService], (poiService: PoiService) => {
         const results = poiService.getItmCoordinates({properties: { poiItmEast: 1, poiItmNorth: 2}} as any as GeoJSON.Feature);
         expect(results.east).toBe(1);
@@ -685,37 +680,7 @@ describe("Poi Service", () => {
         expect(results.userName).toBe("name");
     }));
 
-    it("should get extenal description for hebrew", inject([PoiService], (poiService: PoiService) => {
-        const results = poiService.getExternalDescription(
-            {properties: { "poiExternalDescription:he": "desc"}} as any as GeoJSON.Feature, "he");
-        expect(results).toBe("desc");
-    }));
-
-    it("should get extenal description for language independant", inject([PoiService], (poiService: PoiService) => {
-        const results = poiService.getExternalDescription(
-            {properties: { poiExternalDescription: "desc"}} as any as GeoJSON.Feature, "he");
-        expect(results).toBe("desc");
-    }));
-
-    it("should get title when there's mtb name with language", inject([PoiService], (poiService: PoiService) => {
-        const results = poiService.getTitle({properties: { "mtb:name:he": "name"}} as any as GeoJSON.Feature, "he");
-        expect(results).toBe("name");
-    }));
-
-    it("should get title when there's mtb name without language", inject([PoiService], (poiService: PoiService) => {
-        const results = poiService.getTitle({properties: { "mtb:name": "name"}} as any as GeoJSON.Feature, "he");
-        expect(results).toBe("name");
-    }));
-
-    it("should get title even when there's no title for language description", inject([PoiService], (poiService: PoiService) => {
-        const results = poiService.getTitle({properties: { name: "name"}} as any as GeoJSON.Feature, "he");
-        expect(results).toBe("name");
-    }));
-
-    it("should get title even when there's no title for language description", inject([PoiService], (poiService: PoiService) => {
-        const results = poiService.getTitle({properties: { name: "name"}} as any as GeoJSON.Feature, "he");
-        expect(results).toBe("name");
-    }));
+    
 
     it("should get social links", inject([PoiService], (poiService: PoiService) => {
         const results = poiService.getFeatureFromCoordinatesId("1_2", "he");
