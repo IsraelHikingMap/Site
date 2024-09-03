@@ -3,7 +3,6 @@ import { Injectable } from "@angular/core";
 import { firstValueFrom, timeout } from "rxjs";
 
 import { GeoJSONUtils } from "./geojson-utils";
-import { Urls } from "../urls";
 
 @Injectable()
 export class INatureService {
