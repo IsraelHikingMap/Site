@@ -34,15 +34,15 @@ export class INatureService {
         feature.properties.poiId = "iNature_" + pageId;
         feature.properties.identifier = pageId;
         feature.properties.name = title;
-        if (feature.geometry.type === "LineString") {
-            feature.properties.icon = "icon-hiking";
+        if (feature.geometry.type !== "Point") {
+            feature.properties.poiIcon = "icon-hike";
             feature.properties.poiCategory = "Hiking";
-            feature.properties.iconColor = "black";
+            feature.properties.poiIconColor = "black";
             feature.properties.name = feature.properties.name + " - טבע ונופים";
         } else {
-            feature.properties.icon = "icon-nature";
+            feature.properties.poiIcon = "icon-inature";
             feature.properties.poiCategory = "iNature";
-            feature.properties.iconColor = "#116C00";
+            feature.properties.poiIconColor = "#116C00";
         }
         return feature;
     }

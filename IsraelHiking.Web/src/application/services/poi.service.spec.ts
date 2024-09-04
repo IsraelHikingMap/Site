@@ -17,13 +17,14 @@ import { ToastService } from "./toast.service";
 import { MapService } from "./map.service";
 import { ConnectionService } from "./connection.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
+import { INatureService } from "./inature.service";
+import { WikidataService } from "./wikidata.service";
+import { GeoJSONUtils } from "./geojson-utils";
 import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
 import { LayersReducer } from "../reducers/layers.reducer";
 import { AddToPoiQueueAction, OfflineReducer } from "../reducers/offline.reducer";
 import { ConfigurationReducer, SetLanguageAction } from "../reducers/configuration.reducer";
-import { GeoJSONUtils } from "./geojson-utils";
-import { INatureService } from "./inature.service";
 import type { Category, MarkerData } from "../models/models";
 
 describe("Poi Service", () => {
@@ -78,6 +79,7 @@ describe("Poi Service", () => {
                 { provide: LoggingService, useValue: loggingService },
                 { provide: OverpassTurboService, useValue: {} },
                 { provide: INatureService, useValue: {} },
+                { provide: WikidataService, useValue: {} },
                 ConnectionService,
                 GeoJsonParser,
                 RunningContextService,

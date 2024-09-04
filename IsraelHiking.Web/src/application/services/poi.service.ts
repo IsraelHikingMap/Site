@@ -20,6 +20,9 @@ import { GeoJsonParser } from "./geojson.parser";
 import { MapService } from "./map.service";
 import { ConnectionService } from "./connection.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
+import { GeoJSONUtils } from "./geojson-utils";
+import { INatureService } from "./inature.service";
+import { WikidataService } from "./wikidata.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction } from "../reducers/offline.reducer";
 import {
     SetCategoriesGroupVisibilityAction,
@@ -39,8 +42,6 @@ import type {
     EditablePublicPointData,
     OfflineState
 } from "../models/models";
-import { GeoJSONUtils } from "./geojson-utils";
-import { INatureService } from "./inature.service";
 
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite"
 
@@ -123,6 +124,7 @@ export class PoiService {
                 private readonly connectionService: ConnectionService,
                 private readonly overpassTurboService: OverpassTurboService,
                 private readonly iNatureService: INatureService,
+                private readonly wikidataService: WikidataService,
                 private readonly store: Store
     ) {
         this.poisCache = [];
@@ -655,24 +657,7 @@ export class PoiService {
         return selectableCategories;
     }
 
-    private async enritchFeatureFromWikimedia(feature: GeoJSON.Feature, language: string): Promise<void> {
-        const url = `https://www.wikidata.org/w/rest.php/wikibase/v0/entities/items/${feature.properties.wikidata}`;
-        const wikidata = await firstValueFrom(this.httpClient.get(url).pipe(timeout(3000))) as any;
-        const languageShort = language || this.resources.getCurrentLanguageCodeSimplified();
-        const title = wikidata.sitelinks[`${languageShort}wiki`]?.title;
-        if (wikidata.statements.P18 && wikidata.statements.P18.length > 0) {
-            GeoJSONUtils.setProperty(feature, "image", `File:${wikidata.statements.P18[0].value.content}`);
-        }
-        if (title) {
-            const indexString = GeoJSONUtils.setProperty(feature, "website", `https://${languageShort}.wikipedia.org/wiki/${title}`);
-            feature.properties["poiSourceImageUrl" + indexString] = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/128px-Wikipedia-logo-v2.svg.png";
-        }
-        const wikipediaPage = await firstValueFrom(this.httpClient.get(`http://${languageShort}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=${title}&origin=*`)) as any;
-        const pagesIds = Object.keys(wikipediaPage.query.pages);
-        if (pagesIds.length > 0) {
-            feature.properties.poiExternalDescription = wikipediaPage.query.pages[pagesIds[0]].extract;
-        }
-    }
+    
 
     public async getPoint(id: string, source: string, language?: string): Promise<GeoJSON.Feature> {
         const itemInCache = this.poisCache.find(f => this.getFeatureId(f) === id && f.properties.source === source);
@@ -694,7 +679,7 @@ export class PoiService {
                 let placePromise = Promise.resolve({features: []});
                 let wayPromise = Promise.resolve({features: []});
                 if (feature.properties.wikidata) {
-                    wikidataPromise = this.enritchFeatureFromWikimedia(feature, language);
+                    wikidataPromise = this.wikidataService.enritchFeatureFromWikimedia(feature, language);
                 }
                 if (feature.properties["ref:IL:inature"] && language === "he") {
                     inaturePromise = this.iNatureService.enritchFeatureFromINature(feature);
@@ -725,9 +710,10 @@ export class PoiService {
                 const feature = await this.iNatureService.createFeatureFromPageId(id);
                 this.poisCache.splice(0, 0, feature);
                 return cloneDeep(feature);
-            // HM TODO: add support for wikidata
-            //} else if (source === "wikidata") {
-
+            } else if (source === "Wikidata") {
+                const feature = await this.wikidataService.createFeatureFromPageId(id, language);
+                this.poisCache.splice(0, 0, feature);
+                return cloneDeep(feature);
             } else {
                 const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
                 const poi$ = this.httpClient.get(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000));
