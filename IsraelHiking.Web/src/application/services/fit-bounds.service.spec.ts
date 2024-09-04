@@ -32,6 +32,7 @@ describe("FitBoundsService", () => {
             const spy = jasmine.createSpy();
             mapService.map.fitBounds = spy;
             await service.fitBounds({ northEast: { lat: 1, lng: 1}, southWest: { lat: 2, lng: 2}});
+            console.log(spy.calls.all()[0].args[1]);
             expect(spy.calls.all()[0].args[1].padding.left).toBe(400);
     }));
 
