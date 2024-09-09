@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Idle, DEFAULT_INTERRUPTSOURCES } from "@ng-idle/core";
 import { TextZoom } from "@capacitor/text-zoom";
 import { KeepAwake } from "@capacitor-community/keep-awake";
@@ -15,10 +15,10 @@ import type { ApplicationState } from "../models/models";
 export class ScreenService {
     private originalBrightness: number;
 
-    constructor(private readonly runningContextService: RunningContextService,
-                private readonly store: Store,
-                private readonly userIdleService: Idle,
-                private readonly logger: LoggingService) { }
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly store = inject(Store);
+    private readonly userIdleService = inject(Idle);
+    private readonly logger = inject(LoggingService);
 
     public async initialize() {
         if (!this.runningContextService.isCapacitor) {

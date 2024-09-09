@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
@@ -19,17 +19,15 @@ import type { ApplicationState, LatLngAlt, RoutingType } from "../models/models"
 
 @Injectable()
 export class RoutingProvider {
-    private featuresCache: Map<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>;
+    private featuresCache = new Map<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>();
 
-    constructor(private readonly httpClient: HttpClient,
-                private readonly resources: ResourcesService,
-                private readonly toastService: ToastService,
-                private readonly pmTilesService: PmTilesService,
-                private readonly loggingService: LoggingService,
-                private readonly runningContextService: RunningContextService,
-                private readonly store: Store) {
-        this.featuresCache = new Map<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>();
-    }
+    private readonly httpClient = inject(HttpClient);
+    private readonly resources = inject(ResourcesService);
+    private readonly toastService = inject(ToastService);
+    private readonly pmTilesService = inject(PmTilesService);
+    private readonly loggingService = inject(LoggingService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly store = inject(Store);
 
     public async getRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {
 

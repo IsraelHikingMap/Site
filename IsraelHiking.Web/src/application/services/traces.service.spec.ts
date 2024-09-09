@@ -5,7 +5,6 @@ import { NgxsModule, Store } from "@ngxs/store";
 
 import { TracesService } from "./traces.service";
 import { LoggingService } from "./logging.service";
-import { ToastServiceMockCreator } from "./toast.service.spec";
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { DatabaseService } from "./database.service";
@@ -15,7 +14,6 @@ import type { Trace } from "../models/models";
 
 describe("Traces Service", () => {
     beforeEach(() => {
-        const mock = new ToastServiceMockCreator();
         const loggignMock = {
             info: () => { },
             error: () => { }
@@ -25,7 +23,9 @@ describe("Traces Service", () => {
                 NgxsModule.forRoot([])],
             providers: [
                 TracesService,
-                { provide: ResourcesService, useValue: mock.resourcesService },
+                { provide: ResourcesService, useValue: {
+                    getCurrentLanguageCodeSimplified: () => "he"
+                } },
                 { provide: LoggingService, useValue: loggignMock },
                 { provide: RunningContextService, useValue: {} },
                 { provide: DatabaseService, useValue: {

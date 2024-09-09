@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
@@ -24,16 +24,13 @@ export class RecordedRouteService {
     private rejectedPosition: LatLngAltTime;
     private lastValidLocation: LatLngAltTime;
 
-    constructor(private readonly resources: ResourcesService,
-                private readonly geoLocationService: GeoLocationService,
-                private readonly routesFactory: RoutesFactory,
-                private readonly tracesService: TracesService,
-                private readonly loggingService: LoggingService,
-                private readonly toastService: ToastService,
-                private readonly store: Store) {
-        this.rejectedPosition = null;
-        this.lastValidLocation = null;
-    }
+    private readonly resources = inject(ResourcesService);
+    private readonly geoLocationService = inject(GeoLocationService);
+    private readonly routesFactory = inject(RoutesFactory);
+    private readonly tracesService = inject(TracesService);
+    private readonly loggingService = inject(LoggingService);
+    private readonly toastService = inject(ToastService);
+    private readonly store = inject(Store);
 
     public initialize() {
         if (this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording) {

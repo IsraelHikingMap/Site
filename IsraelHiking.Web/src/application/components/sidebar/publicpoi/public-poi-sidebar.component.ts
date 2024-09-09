@@ -9,7 +9,6 @@ import { Store } from "@ngxs/store";
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { PoiService, PoiSocialLinks } from "../../../services/poi.service";
-import { AuthorizationService } from "../../../services/authorization.service";
 import { IHMTitleService } from "../../../services/ihm-title.service";
 import { ToastService } from "../../../services/toast.service";
 import { HashService, RouteStrings, PoiRouterData } from "../../../services/hash.service";
@@ -33,6 +32,7 @@ import type {
     Contribution,
     LatLngAltTime
 } from "../../../models/models";
+import { OsmAddressesService } from "application/services/osm-addresses.service";
 
 export type SourceImageUrlPair = {
     imageUrl: string;
@@ -67,7 +67,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 private readonly router: Router,
                 private readonly route: ActivatedRoute,
                 private readonly poiService: PoiService,
-                private readonly authorizationService: AuthorizationService,
+                private readonly osmAddressesService: OsmAddressesService,
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly routesFactory: RoutesFactory,
                 private readonly toastService: ToastService,
@@ -217,7 +217,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public isHideEditMode(): boolean {
-        return !this.authorizationService.isLoggedIn() ||
+        const isLoggedOut = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo) == null;
+        return isLoggedOut ||
             !this.fullFeature ||
             !this.isEditable() ||
             this.editMode;
@@ -236,7 +237,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         if (!this.isEditable()) {
             return description;
         }
-        if (this.authorizationService.isLoggedIn() === false) {
+        const isLoggedOut = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo) == null;
+        if (isLoggedOut) {
             return this.resources.noDescriptionLoginRequired;
         }
         return this.resources.emptyPoiDescription;
@@ -247,7 +249,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public setEditMode() {
-        if (this.authorizationService.isLoggedIn() === false) {
+        const isLoggedOut = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo) == null;
+        if (isLoggedOut) {
             this.toastService.info(this.resources.loginRequired);
             return;
         }
@@ -376,7 +379,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         if (!this.isEditable()) {
             return null;
         }
-        return this.authorizationService.getElementOsmAddress(this.fullFeature.properties.identifier);
+        return this.osmAddressesService.getElementOsmAddress(this.fullFeature.properties.identifier);
     }
 
     public share() {

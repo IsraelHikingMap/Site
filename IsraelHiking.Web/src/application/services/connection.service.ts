@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { BehaviorSubject, firstValueFrom } from "rxjs";
 import { timeout } from "rxjs/operators";
 import { HttpClient } from "@angular/common/http";
@@ -17,14 +17,15 @@ export class ConnectionService {
      */
     private static readonly HEART_BREAK_INTERVAL = 30000;
 
-    public stateChanged: BehaviorSubject<boolean>;
-    private isOnline: boolean;
+    private readonly http = inject(HttpClient);
+    private readonly loggingService = inject(LoggingService);
+
+    public stateChanged = new BehaviorSubject(true);
+
+    private isOnline = true;
     private intervalId: ReturnType<typeof setInterval>;
 
-    constructor(private readonly http: HttpClient,
-        private readonly loggingService: LoggingService) {
-        this.stateChanged = new BehaviorSubject(true);
-        this.isOnline = true;
+    constructor() {
         window.addEventListener("online", () => this.updateInternetAccessAndEmitIfNeeded())
         window.addEventListener("offline", () => this.updateInternetAccessAndEmitIfNeeded())
         this.initializeDynamicTimer(ConnectionService.HEART_BREAK_INTERVAL);

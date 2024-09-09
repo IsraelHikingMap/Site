@@ -9,7 +9,7 @@ import type { Immutable } from "immer";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
-import { AuthorizationService } from "../../services/authorization.service";
+import { OsmAddressesService } from "../../services/osm-addresses.service";
 import { FitBoundsService } from "../../services/fit-bounds.service";
 import { ToastService } from "../../services/toast.service";
 import { LayersService } from "../../services/layers.service";
@@ -45,7 +45,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit {
                 private readonly layersService: LayersService,
                 private readonly fitBoundsService: FitBoundsService,
                 private readonly toastService: ToastService,
-                private readonly authorizationService: AuthorizationService,
+                private readonly osmAddressesService: OsmAddressesService,
                 private readonly tracesService: TracesService,
                 private readonly runningContextService: RunningContextService,
                 private readonly dataContainerService: DataContainerService,
@@ -113,7 +113,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit {
 
     public editInOsm() {
         const baseLayerAddress = this.layersService.getSelectedBaseLayerAddressForOSM();
-        window.open(this.authorizationService.getEditOsmGpxAddress(baseLayerAddress, this.selectedTraceId));
+        window.open(this.osmAddressesService.getEditOsmGpxAddress(baseLayerAddress, this.selectedTraceId));
     }
 
     public async findUnmappedRoutes(): Promise<void> {

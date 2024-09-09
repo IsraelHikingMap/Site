@@ -10,7 +10,6 @@ import { RoutingProvider } from "./routing.provider";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { GeoJsonParser } from "./geojson.parser";
-import { ToastServiceMockCreator } from "./toast.service.spec";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { SpatialService } from "./spatial.service";
@@ -33,13 +32,14 @@ const createTileFromFeatureCollection = (featureCollection: GeoJSON.FeatureColle
 
 describe("RoutingProvider", () => {
     beforeEach(() => {
-        const toastMockCreator = new ToastServiceMockCreator();
         TestBed.configureTestingModule({
             imports: [
                 NgxsModule.forRoot([])],
             providers: [
-                { provide: ResourcesService, useValue: toastMockCreator.resourcesService },
-                { provide: ToastService, useValue: toastMockCreator.toastService },
+                { provide: ResourcesService, useValue: {} },
+                { provide: ToastService, useValue: {
+                    warning: jasmine.createSpy()
+                } },
                 { provide: LoggingService, useValue: { error: () => { } } },
                 { provide: RunningContextService, useValue: {} },
                 { provide: PmTilesService, useValue: {} },

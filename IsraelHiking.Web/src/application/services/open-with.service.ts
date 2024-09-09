@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from "@angular/core";
+import { inject, Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { App } from "@capacitor/app";
@@ -13,14 +13,14 @@ import { SpatialService } from "./spatial.service";
 
 @Injectable()
 export class OpenWithService {
-    constructor(private readonly resources: ResourcesService,
-                private readonly runningContextService: RunningContextService,
-                private readonly fileService: FileService,
-                private readonly toastService: ToastService,
-                private readonly matDialog: MatDialog,
-                private readonly router: Router,
-                private readonly loggingService: LoggingService,
-                private readonly ngZone: NgZone) { }
+    private readonly resources = inject(ResourcesService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly fileService = inject(FileService);
+    private readonly toastService = inject(ToastService);
+    private readonly matDialog = inject(MatDialog);
+    private readonly router = inject(Router);
+    private readonly loggingService = inject(LoggingService);
+    private readonly ngZone = inject(NgZone);
 
     public initialize() {
         if (!this.runningContextService.isCapacitor) {

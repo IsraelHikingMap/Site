@@ -4,7 +4,6 @@ import { HttpTestingController, provideHttpClientTesting } from "@angular/common
 import { NgxsModule, Store } from "@ngxs/store";
 import JSZip from "jszip";
 
-import { ToastServiceMockCreator } from "./toast.service.spec";
 import { ResourcesService } from "./resources.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { RunningContextService } from "./running-context.service";
@@ -27,7 +26,6 @@ import { LngLatBounds } from "maplibre-gl";
 describe("Poi Service", () => {
 
     beforeEach(() => {
-        const toastMock = new ToastServiceMockCreator();
         const hashService = {
             getFullUrlFromPoiId: () => {}
         };
@@ -64,9 +62,11 @@ describe("Poi Service", () => {
                 NgxsModule.forRoot([LayersReducer, OfflineReducer, ConfigurationReducer])
             ],
             providers: [
-                { provide: ResourcesService, useValue: toastMock.resourcesService },
+                { provide: ResourcesService, useValue: {
+                    getCurrentLanguageCodeSimplified: () => "he"
+                } },
                 { provide: HashService, useValue: hashService },
-                { provide: ToastService, useValue: toastMock.toastService },
+                { provide: ToastService, useValue: {} },
                 { provide: FileService, useValue: fileServiceMock },
                 { provide: DatabaseService, useValue: databaseServiceMock },
                 { provide: MapService, useValue: mapServiceMosk },

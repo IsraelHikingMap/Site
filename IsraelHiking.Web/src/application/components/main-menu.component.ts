@@ -1,4 +1,5 @@
 import { Component } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { timer } from "rxjs";
 import { Device } from "@capacitor/device";
@@ -20,6 +21,7 @@ import { LayersService } from "../services/layers.service";
 import { SidebarService } from "../services/sidebar.service";
 import { HashService } from "../services/hash.service";
 import { PurchaseService } from "../services/purchase.service";
+import { OsmAddressesService } from "../services/osm-addresses.service";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
 import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
 import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
@@ -30,7 +32,6 @@ import { SendReportDialogComponent } from "./dialogs/send-report-dialog.componen
 import { SetUIComponentVisibilityAction } from "../reducers/ui-components.reducer";
 import { SetAgreeToTermsAction } from "../reducers/user.reducer";
 import type { UserInfo, ApplicationState } from "../models/models";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
     selector: "main-menu",
@@ -47,6 +48,7 @@ export class MainMenuComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
                 private readonly socialSharing: SocialSharing,
                 private readonly authorizationService: AuthorizationService,
+                private readonly osmAddressesService: OsmAddressesService,
                 private readonly dialog: MatDialog,
                 private readonly runningContextService: RunningContextService,
                 private readonly toastService: ToastService,
@@ -230,11 +232,11 @@ export class MainMenuComponent extends BaseMapComponent {
         if (poiState.isSidebarOpen &&
             poiState.selectedPointOfInterest != null &&
             poiState.selectedPointOfInterest.properties.poiSource.toLocaleLowerCase() === "osm") {
-            return this.authorizationService.getEditElementOsmAddress(baseLayerAddress,
+            return this.osmAddressesService.getEditElementOsmAddress(baseLayerAddress,
                 poiState.selectedPointOfInterest.properties.identifier);
         }
         const currentLocation = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
-        return this.authorizationService.getEditOsmLocationAddress(baseLayerAddress,
+        return this.osmAddressesService.getEditOsmLocationAddress(baseLayerAddress,
             currentLocation.zoom + 1,
             currentLocation.latitude,
             currentLocation.longitude);

@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Capacitor } from "@capacitor/core";
 
 import { environment } from "../../environments/environment";
@@ -6,23 +6,19 @@ import { ConnectionService } from "./connection.service";
 
 @Injectable()
 export class RunningContextService {
-    public readonly isMobile: boolean;
-    public readonly isIFrame: boolean;
-    public readonly isCapacitor: boolean;
-    public readonly isIos: boolean;
-    public readonly isProduction: boolean;
+    public readonly isMobile: boolean = false;
+    public readonly isIFrame = window.self !== window.top;
+    public readonly isCapacitor = environment.isCapacitor;
+    public readonly isIos = /^(iPhone|iPad|iPod)/.test(navigator.platform);
+    public readonly isProduction = environment.production;
     public readonly isFacebook: boolean;
-    public isOnline: boolean;
-    constructor(private readonly connectionService: ConnectionService) {
-        this.isIFrame = window.self !== window.top;
-        this.isMobile = false;
-        this.isProduction = environment.production;
-        this.isCapacitor = environment.isCapacitor;
-        this.isIos = /^(iPhone|iPad|iPod)/.test(navigator.platform);
+    public isOnline: boolean = true;
+    private readonly connectionService = inject(ConnectionService);
+    
+    constructor() {
         if (!this.isIos && this.isCapacitor) {
             this.isIos = Capacitor.getPlatform() === "ios";
         }
-        this.isOnline = true;
         const agent: string = navigator.userAgent || navigator.vendor || (window as any).opera || "";
         /* eslint-disable */
         if (

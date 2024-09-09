@@ -7,10 +7,10 @@ import { ToastService } from "../../services/toast.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { BaseMapComponent } from "../base-map.component";
 import { SelectedRouteService } from "../../services/selected-route.service";
-import { AuthorizationService } from "../../services/authorization.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
 import { RunningContextService } from "../../services/running-context.service";
-import type { DataContainer, ShareUrl } from "../../models/models";
+import { Store } from "@ngxs/store";
+import type { ApplicationState, DataContainer, ShareUrl } from "../../models/models";
 
 @Component({
     selector: "share-dialog",
@@ -39,9 +39,9 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
                 private readonly dataContainerService: DataContainerService,
                 private readonly shareUrlsService: ShareUrlsService,
                 private readonly toastService: ToastService,
-                private readonly authorizationService: AuthorizationService,
                 private readonly socialSharing: SocialSharing,
-                private readonly runningContextService: RunningContextService
+                private readonly runningContextService: RunningContextService,
+                private readonly store: Store
     ) {
         super(resources);
 
@@ -62,8 +62,9 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         if (shareUrl != null) {
             this.title = shareUrl.title;
             this.description = shareUrl.description;
-            this.canUpdate = this.authorizationService.isLoggedIn() &&
-                shareUrl.osmUserId.toString() === this.authorizationService.getUserInfo().id.toString();
+            const userInfo = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo);
+            this.canUpdate = userInfo &&
+                shareUrl.osmUserId.toString() === userInfo.id.toString();
         }
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute != null) {
@@ -134,12 +135,13 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     private createShareUrlObject(): ShareUrl {
         const selectedShare = this.shareUrlsService.getSelectedShareUrl();
         const id = selectedShare ? selectedShare.id : "";
+        const osmUserId = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo)?.id ?? "";
         const shareUrl = {
             id,
             title: this.title,
             description: this.description,
             dataContainer: this.getDataFiltered(),
-            osmUserId: this.authorizationService.isLoggedIn() ? this.authorizationService.getUserInfo().id : ""
+            osmUserId: osmUserId
         } as ShareUrl;
         return shareUrl;
     }

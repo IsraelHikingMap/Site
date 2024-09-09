@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { AppUpdate, AppUpdateAvailability } from '@capawesome/capacitor-app-update';
 
 import { RunningContextService } from "./running-context.service";
@@ -7,9 +7,10 @@ import { ResourcesService } from "./resources.service";
 
 @Injectable()
 export class ApplicationUpdateService {
-    constructor(private readonly resourcesService: ResourcesService,
-        private readonly runningContextSerive: RunningContextService,
-        private readonly toastService: ToastService) {}
+
+    private readonly resourcesService = inject(ResourcesService);
+    private readonly runningContextSerive = inject(RunningContextService);
+    private readonly toastService = inject(ToastService);
 
     public async initialize() {
         if (!this.runningContextSerive.isCapacitor) {

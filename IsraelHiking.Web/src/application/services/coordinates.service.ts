@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import Proj, { Converter } from "proj4";
+import Proj from "proj4";
 
 import { LatLngAlt, NorthEast } from "../models/models";
 
@@ -47,11 +47,10 @@ export class CoordinatesService {
     static readonly DEGREES_MINUTES = new RegExp("^\\s*(\\d{1,3})(?:[:°\\s]\\s*)(\\d{1,2}(?:\\.\\d+)?)[:" +
                     MINUTES_SYMBOLS_STRING + "]?\\s*$");
 
-    private itmConverter: Converter;
+    private itmConverter = Proj(CoordinatesService.ITM_WKT);
     private coordinatesParserMap: {matcher: RegExp; parser: (match: RegExpMatchArray) => LatLngAlt}[];
 
     constructor() {
-        this.itmConverter = Proj(CoordinatesService.ITM_WKT);
         this.coordinatesParserMap = [
             {
                 matcher: CoordinatesService.ITM_ICS_COORDINATES,

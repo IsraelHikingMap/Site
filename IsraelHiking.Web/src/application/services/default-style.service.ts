@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { StyleSpecification } from "maplibre-gl";
 
 import { FileService } from "./file.service";
@@ -7,7 +7,9 @@ import { FileService } from "./file.service";
 export class DefaultStyleService {
     public style: StyleSpecification;
 
-    constructor(private readonly fileService: FileService) {
+    private readonly fileService = inject(FileService);
+
+    constructor() {
         this.style = {
             version: 8,
             sources: {},
