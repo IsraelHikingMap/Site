@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 
 import { BaseMapComponent } from "./base-map.component";
@@ -8,11 +8,9 @@ import { ResourcesService } from "../services/resources.service";
     selector: "zoom",
     templateUrl: "./zoom.component.html"
 })
-export class ZoomComponent extends BaseMapComponent {
-    constructor(resources: ResourcesService,
-                private readonly mapComponent: MapComponent) {
-        super(resources);
-    }
+export class ZoomComponent {
+    public readonly resources = inject(ResourcesService);
+    private readonly mapComponent = inject(MapComponent);
 
     public zoomIn() {
         this.mapComponent.mapInstance.zoomTo(Math.round(this.mapComponent.mapInstance.getZoom() + 1));
