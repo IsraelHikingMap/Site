@@ -88,15 +88,11 @@ export class PoiService {
     private static readonly POIS_MAP: Record<string, SourceLayerAndJson> = {
         "points-of-interest": { sourceLayer: "public_pois", source: {
             type: "vector",
-            maxzoom: 14,
-            minzoom: 12,
-            tiles: ["https://production.pois.israelhikingmap.workers.dev/public_pois/{z}/{x}/{y}.mvt"]
+            url: "https://israelhiking.osm.org.il/vector/data/public_pois.json"
         } },
         "trail-points-of-interest": { sourceLayer: "trail_pois", source: {
             type: "vector",
-            maxzoom: 14,
-            minzoom: 12,
-            tiles: ["https://israelhiking.osm.org.il/vector/data/trail_pois/{z}/{x}/{y}.mvt"]
+            url: "https://israelhiking.osm.org.il/vector/data/trail_pois.json"
         } },
         "external-points-of-interest": { sourceLayer: "external", source: {
             type: "vector",
