@@ -290,6 +290,20 @@ export class PoiService {
                     return;
             }
         }
+        if (feature.properties.route) {
+            switch (feature.properties.route) {
+                case "hiking":
+                    poi.properties.poiIconColor = "black";
+                    poi.properties.poiIcon = "icon-hike";
+                    poi.properties.poiCategory = "Hiking";
+                    return;
+                case "bicycle":
+                    poi.properties.poiIconColor = "black";
+                    poi.properties.poiIcon = "icon-bike";
+                    poi.properties.poiCategory = "Bicycle";
+                    return;
+            }
+        }
         if (feature.properties.historic) {
             poi.properties.poiIconColor = "#666666";
             poi.properties.poiCategory = "Historic";
