@@ -4,7 +4,7 @@ $control-border: 4px;
 $container-height-small-screen: 130px;
 $container-height: 200px;
 $container-height-expanded: 300px;
-$button-height: 36px;
+$button-size: 36px;
 $buttons-margin: 5px;
 
 .chart-control-container {
@@ -13,7 +13,7 @@ $buttons-margin: 5px;
 }
 
 .chart-control-container.expanded {
-    width: calc(100vw - #{$control-border});
+    width: calc(100vw - #{$control-border} - #{$button-size} - 2 * #{$buttons-margin});
     height: $container-height-expanded;
 }
 
@@ -71,12 +71,12 @@ $buttons-margin: 5px;
 }
 
 .chart-expand-button {
-    top: calc(#{$buttons-margin} + #{$button-height});
+    top: calc(#{$buttons-margin} + #{$button-size});
     left: $buttons-margin;
 }
 
 .chart-more-button {
-    top: calc(#{$buttons-margin} + 2 * #{$button-height});
+    top: calc(#{$buttons-margin} + 2 * #{$button-size});
     left: $buttons-margin;
 }
 
@@ -86,7 +86,7 @@ $buttons-margin: 5px;
 }
 
 .chart-table-button {
-    bottom: calc(#{$buttons-margin} + #{$button-height});
+    bottom: calc(#{$buttons-margin} + #{$button-size});
     right: $buttons-margin;
 }
 
@@ -118,7 +118,7 @@ $buttons-margin: 5px;
     }
 
     .chart-more-button {
-        top: calc(#{$buttons-margin} + #{$button-height});
+        top: calc(#{$buttons-margin} + #{$button-size});
         left: $buttons-margin;
     }
 }
