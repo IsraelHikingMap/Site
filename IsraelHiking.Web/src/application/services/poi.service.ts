@@ -518,7 +518,7 @@ export class PoiService {
         }
     }
 
-    private async getPoisFromTiles(): Promise<GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>[]> {
+    private getPoisFromTiles(): GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>[] {
         if (this.mapService.map.getZoom() <= 10) {
             return [];
         }
@@ -531,7 +531,15 @@ export class PoiService {
                 features = features.concat(this.mapService.map.querySourceFeatures(`${source}-offline`, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer}));
             }
         }
-        const pois = features.map(feature => this.convertFeatureToPoi(feature, this.osmTileFeatureToPoiIdentifier(feature)));
+        const hashSet = new Set();
+        let pois = features.map(feature => this.convertFeatureToPoi(feature, this.osmTileFeatureToPoiIdentifier(feature)))
+        pois = pois.filter(p => {
+            if (hashSet.has(p.properties.poiId)) {
+                return false;
+            }
+            hashSet.add(p.properties.poiId);
+            return true;
+        });
         return this.filterFeatures(pois);
     }
 
