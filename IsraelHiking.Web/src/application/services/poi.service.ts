@@ -171,11 +171,11 @@ export class PoiService {
                 }
             }, this.resources.endOfBaseLayer);
 
-            if (this.runningContextService.isCapacitor) {// this.store.selectSnapshot((s: ApplicationState) => s.offlineState.lastModifiedDate) != null) {
+            if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState.lastModifiedDate) != null) {
                 this.mapService.map.addSource(`${source}-offline`, {
                     type: "vector",
                     tiles: [`custom://${sourceLayer.sourceLayer}/{z}/{x}/{y}.pbf`],
-                    minzoom: 12,
+                    minzoom: 10,
                     maxzoom: 14
                 });
                 this.mapService.map.addLayer({
@@ -543,7 +543,7 @@ export class PoiService {
         return this.filterFeatures(pois);
     }
 
-    private osmTileFeatureToPoiIdentifier(feature: GeoJSON.Feature): string {
+    public osmTileFeatureToPoiIdentifier(feature: GeoJSON.Feature): string {
         if (feature.properties.identifier) {
             return feature.properties.identifier;
         }

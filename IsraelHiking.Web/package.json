@@ -28,7 +28,7 @@
     "@mapbox/mapbox-gl-rtl-text": "0.2.3",
     "@mapbox/polyline": "^1.2.1",
     "@mapbox/vector-tile": "^1.3.1",
-    "@maplibre/ngx-maplibre-gl": "^18.1.1",
+    "@maplibre/ngx-maplibre-gl": "^18.1.2",
     "@ng-idle/core": "^15.0.0",
     "@ngxs/store": "^18.1.1",
     "@nicky-lenaers/ngx-scroll-to": "^14.0.0",
