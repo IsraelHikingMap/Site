@@ -1,11 +1,10 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatDialog } from "@angular/material/dialog";
 import { remove } from "lodash-es";
 import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "../base-map.component";
 import { DownloadDialogComponent } from "../dialogs/download-dialog.component";
 import { ILegendItem } from "./legend-item.component";
 import { SidebarService } from "../../services/sidebar.service";
@@ -27,24 +26,21 @@ export type LegendSection = {
     templateUrl: "./info-sidebar.component.html",
     styleUrls: ["./info-sidebar.component.scss"]
 })
-export class InfoSidebarComponent extends BaseMapComponent {
-    public legendSections: LegendSection[];
-    public selectedTabIndex: number;
-    private selectedSection: LegendSection;
+export class InfoSidebarComponent {
+    public legendSections: LegendSection[] = [];
+    public selectedTabIndex: number = 0;
+    private selectedSection: LegendSection = null;
 
-    constructor(resources: ResourcesService,
-                private readonly dialog: MatDialog,
-                private readonly angulartics: Angulartics2GoogleGlobalSiteTag,
-                private readonly sidebarService: SidebarService,
-                private readonly layersService: LayersService,
-                private readonly runningContext: RunningContextService,
-                private readonly store: Store) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
 
-        this.selectedTabIndex = 0;
-        this.selectedSection = null;
-        this.legendSections = [];
+    private readonly dialog = inject(MatDialog);
+    private readonly angulartics = inject(Angulartics2GoogleGlobalSiteTag);
+    private readonly sidebarService = inject(SidebarService);
+    private readonly layersService = inject(LayersService);
+    private readonly runningContext = inject(RunningContextService);
+    private readonly store = inject(Store);
 
+    constructor() {
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed()).subscribe(() => {
             this.initalizeLegendSections();
         });
