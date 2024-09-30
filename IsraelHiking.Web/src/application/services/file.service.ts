@@ -119,7 +119,7 @@ export class FileService {
             }
             return await firstValueFrom(this.httpClient.get(url)) as StyleSpecification;
         } catch (ex) {
-            this.loggingService.error(`[Files] Unanle to get style file, isOffline: ${isOffline}, ${(ex as Error).message}`);
+            this.loggingService.error(`[Files] Unable to get style file, isOffline: ${isOffline}, ${(ex as Error).message}`);
             return {
                 version: 8.0,
                 layers: [],
