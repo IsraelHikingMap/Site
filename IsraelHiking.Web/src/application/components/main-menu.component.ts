@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { timer } from "rxjs";
@@ -9,7 +9,6 @@ import { encode } from "base64-arraybuffer";
 import { Store } from "@ngxs/store";
 import platform from "platform";
 
-import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
 import { RunningContextService } from "../services/running-context.service";
@@ -38,31 +37,31 @@ import type { UserInfo, ApplicationState } from "../models/models";
     templateUrl: "./main-menu.component.html",
     styleUrls: ["./main-menu.component.scss"]
 })
-export class MainMenuComponent extends BaseMapComponent {
+export class MainMenuComponent {
 
-    public userInfo: UserInfo;
-    public drawingVisible: boolean;
-    public statisticsVisible: boolean;
-    public isShowMore: boolean;
+    public userInfo: UserInfo = null;
+    public drawingVisible: boolean = false;
+    public statisticsVisible: boolean = false;
+    public isShowMore: boolean = false;
 
-    constructor(resources: ResourcesService,
-                private readonly socialSharing: SocialSharing,
-                private readonly authorizationService: AuthorizationService,
-                private readonly osmAddressesService: OsmAddressesService,
-                private readonly dialog: MatDialog,
-                private readonly runningContextService: RunningContextService,
-                private readonly toastService: ToastService,
-                private readonly fileService: FileService,
-                private readonly geoLocationService: GeoLocationService,
-                private readonly layersService: LayersService,
-                private readonly sidebarService: SidebarService,
-                private readonly loggingService: LoggingService,
-                private readonly hashService: HashService,
-                private readonly purchaseService: PurchaseService,
-                private readonly store: Store) {
-        super(resources);
-        this.isShowMore = false;
-        this.userInfo = null;
+    public readonly resources = inject(ResourcesService);
+
+    private readonly socialSharing = inject(SocialSharing);
+    private readonly authorizationService = inject(AuthorizationService);
+    private readonly osmAddressesService = inject(OsmAddressesService);
+    private readonly dialog = inject(MatDialog);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly toastService = inject(ToastService);
+    private readonly fileService = inject(FileService);
+    private readonly geoLocationService = inject(GeoLocationService);
+    private readonly layersService = inject(LayersService);
+    private readonly sidebarService = inject(SidebarService);
+    private readonly loggingService = inject(LoggingService);
+    private readonly hashService = inject(HashService);
+    private readonly purchaseService = inject(PurchaseService);
+    private readonly store = inject(Store);
+    
+    constructor() {
         this.store.select((state: ApplicationState) => state.userState.userInfo).pipe(takeUntilDestroyed()).subscribe(userInfo => this.userInfo = userInfo);
         this.store.select((state: ApplicationState) => state.uiComponentsState.drawingVisible).pipe(takeUntilDestroyed()).subscribe(v => this.drawingVisible = v);
         this.store.select((state: ApplicationState) => state.uiComponentsState.statisticsVisible).pipe(takeUntilDestroyed()).subscribe(v => this.statisticsVisible = v);

@@ -1,7 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 
-import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 
 @Component({

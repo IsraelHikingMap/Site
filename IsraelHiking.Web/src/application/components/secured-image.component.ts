@@ -1,4 +1,4 @@
-import { Component, OnChanges, Input, input,  } from "@angular/core";
+import { Component, OnChanges, input } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 import { HttpClient } from "@angular/common/http";
 import { BehaviorSubject, Observable } from "rxjs";

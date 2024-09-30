@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, input, OnInit } from "@angular/core";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -12,8 +12,7 @@ import type { LatLngAlt, NorthEast } from "../models/models";
 })
 export class CoordinatesComponent extends BaseMapComponent implements OnInit {
 
-    @Input()
-    public latlng: LatLngAlt;
+    public latlng = input<LatLngAlt>();
 
     public itmCoordinates: NorthEast;
 
@@ -24,7 +23,7 @@ export class CoordinatesComponent extends BaseMapComponent implements OnInit {
     }
 
     public async ngOnInit(): Promise<void> {
-        this.itmCoordinates = this.itmCoordinatesService.toItm(this.latlng);
-        await this.elevationProvider.updateHeights([this.latlng]);
+        this.itmCoordinates = this.itmCoordinatesService.toItm(this.latlng());
+        await this.elevationProvider.updateHeights([this.latlng()]);
     }
 }

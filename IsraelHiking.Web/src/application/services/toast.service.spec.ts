@@ -98,8 +98,8 @@ describe("ToastService", () => {
     }));
 
     it("should raise custom confirm toast and dismiss it when clicked",
-        inject([ToastService, MatSnackBar, ResourcesService], 
-            (service: ToastService, snackBar: MatSnackBar, resourcesService: ResourcesService) => {
+        inject([ToastService, MatSnackBar], 
+            (service: ToastService, snackBar: MatSnackBar) => {
         const options: IConfirmOptions = {
             message: "message",
             type: "Custom",
