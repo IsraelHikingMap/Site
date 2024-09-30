@@ -46,7 +46,7 @@
             </mat-expansion-panel-header>
             <div *ngFor="let overlay of (overlays$ | async)">
                 <div class="flex flex-row">
-                    <button mat-button class="row-button flex-1 !justify-start" (click)="toggleVisibility(overlay)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle overlay visiblity {{overlay.key}}">
+                    <button mat-button class="row-button flex-1 !justify-start" (click)="toggleVisibility(overlay)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle overlay visibility {{overlay.key}}">
                         <span><i class="fa" [ngClass]="{'icon-eye': overlay.visible, 'icon-eye-slash': !overlay.visible}"></i></span>
                         <span class="break-all">{{resources.translate(overlay.key)}}</span>
                     </button>
