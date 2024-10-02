@@ -519,9 +519,6 @@ export class PoiService {
     }
 
     private getPoisFromTiles(): GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>[] {
-        if (this.mapService.map.getZoom() <= 10) {
-            return [];
-        }
         let features: MapGeoJSONFeature[] = [];
         for (const source of Object.keys(PoiService.POIS_MAP)) {
             features = features.concat(this.mapService.map.querySourceFeatures(source, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer}));
