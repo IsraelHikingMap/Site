@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
+import { Component, inject, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router, ActivatedRoute, ParamMap } from "@angular/router";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
@@ -48,45 +48,41 @@ export type SourceImageUrlPair = {
         sidebarAnimate
     ]
 })
-export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDestroy {
-    public info: EditablePublicPointData;
-    public isLoading: boolean;
-    public showLocationUpdate: boolean;
-    public updateLocation: boolean;
+export class PublicPoiSidebarComponent implements OnDestroy {
+    public info = { imagesUrls: [], urls: [] } as EditablePublicPointData;
+    public isLoading: boolean = true;
+    public showLocationUpdate: boolean = false;
+    public updateLocation: boolean = false;
     public sourceImageUrls: SourceImageUrlPair[];
     public latlng: LatLngAlt;
-    public shareLinks: PoiSocialLinks;
-    public contribution: Contribution;
+    public shareLinks = {} as PoiSocialLinks;;
+    public contribution = {} as Contribution;
     public isOpen$: Observable<boolean>;
 
     private editMode: boolean;
     private fullFeature: GeoJSON.Feature;
 
-    constructor(resources: ResourcesService,
-                private readonly titleService: IHMTitleService,
-                private readonly router: Router,
-                private readonly route: ActivatedRoute,
-                private readonly poiService: PoiService,
-                private readonly osmAddressesService: OsmAddressesService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly routesFactory: RoutesFactory,
-                private readonly toastService: ToastService,
-                private readonly hashService: HashService,
-                private readonly fitBoundsService: FitBoundsService,
-                private readonly sidebarService: SidebarService,
-                private readonly runningContextSerivce: RunningContextService,
-                private readonly navigateHereService: NavigateHereService,
-                private readonly geoJsonParser: GeoJsonParser,
-                private readonly socialSharing: SocialSharing,
-                private readonly store: Store) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
+
+    private readonly titleService = inject(IHMTitleService);
+    private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
+    private readonly poiService = inject(PoiService);
+    private readonly osmAddressesService = inject(OsmAddressesService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly routesFactory = inject(RoutesFactory);
+    private readonly toastService = inject(ToastService);
+    private readonly hashService = inject(HashService);
+    private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly sidebarService = inject(SidebarService);
+    private readonly runningContextSerivce = inject(RunningContextService);
+    private readonly navigateHereService = inject(NavigateHereService);
+    private readonly geoJsonParser = inject(GeoJsonParser);
+    private readonly socialSharing = inject(SocialSharing);
+    private readonly store = inject(Store);
+
+    constructor() {
         this.sidebarService.hideWithoutChangingAddressbar();
-        this.isLoading = true;
-        this.showLocationUpdate = false;
-        this.updateLocation = false;
-        this.shareLinks = {} as PoiSocialLinks;
-        this.contribution = {} as Contribution;
-        this.info = { imagesUrls: [], urls: [] } as EditablePublicPointData;
         this.isOpen$ = this.store.select((state: ApplicationState) => state.poiState.isSidebarOpen);
         this.route.paramMap.pipe(takeUntilDestroyed()).subscribe(async (_) => {
             if (!this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
