@@ -2,7 +2,6 @@ import { Component, inject, input, OnInit } from "@angular/core";
 import { MatSelectChange } from "@angular/material/select";
 
 import { PoiService, ISelectableCategory } from "../../../services/poi.service";
-import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
 import type { EditablePublicPointData, IconColorLabel } from "../../../models/models";
 

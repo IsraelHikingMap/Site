@@ -1,6 +1,5 @@
 import { Component, Input, Output, EventEmitter } from "@angular/core";
 
-import { ResourcesService } from "../../services/resources.service";
 import { ClosableOverlayComponent } from "./closable-overlay.component";
 
 @Component({

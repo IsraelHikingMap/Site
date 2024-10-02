@@ -6,7 +6,6 @@ import { Observable } from "rxjs";
 import { cloneDeep } from "lodash-es";
 import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { PoiService, PoiSocialLinks } from "../../../services/poi.service";
 import { IHMTitleService } from "../../../services/ihm-title.service";

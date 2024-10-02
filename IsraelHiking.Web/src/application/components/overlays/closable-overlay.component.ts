@@ -1,6 +1,5 @@
 import { Input, Output, EventEmitter, Component, inject } from "@angular/core";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import type { LatLngAlt } from "../../models/models";
 

@@ -1,4 +1,4 @@
-import { Component, inject, input, Input } from "@angular/core";
+import { Component, inject, input } from "@angular/core";
 import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../../services/resources.service";

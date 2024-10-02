@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, input } from "@angular/core";
+import { Component, Output, EventEmitter, OnChanges, SimpleChanges, input } from "@angular/core";
 import { AnimationOptions } from "ngx-lottie";
 
 import { BaseMapComponent } from "../../base-map.component";
