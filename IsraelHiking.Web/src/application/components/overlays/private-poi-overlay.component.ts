@@ -1,7 +1,6 @@
-import { Component, Input, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, inject, Input, OnInit, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 
-import { BaseMapComponent } from "../base-map.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { PrivatePoiShowDialogComponent } from "../dialogs/private-poi-show-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -14,7 +13,7 @@ import type { MarkerData, LinkData } from "../../models/models";
     styleUrls: ["./private-poi-overlay.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnInit {
+export class PrivatePoiOverlayComponent implements OnInit {
 
     @Input()
     public marker: MarkerData;
@@ -30,11 +29,10 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
 
     public imageLink: LinkData;
 
-    constructor(resources: ResourcesService,
-                private readonly matDialog: MatDialog,
-                private readonly selectedRouteService: SelectedRouteService) {
-        super(resources);
-    }
+    public readonly resources = inject(ResourcesService);
+
+    private readonly matDialog = inject(MatDialog);
+    private readonly selectedRouteService = inject(SelectedRouteService);
 
     public ngOnInit(): void {
         this.imageLink = this.marker.urls.find(u => u.mimeType.startsWith("image"));

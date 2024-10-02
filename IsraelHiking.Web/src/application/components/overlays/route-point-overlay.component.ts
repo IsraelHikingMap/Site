@@ -1,6 +1,5 @@
-import { Component, Input, HostListener, OnChanges, Output, EventEmitter } from "@angular/core";
+import { Component, Input, HostListener, OnChanges, Output, EventEmitter, inject } from "@angular/core";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import type { LatLngAlt } from "../../models/models";
@@ -9,9 +8,9 @@ import type { LatLngAlt } from "../../models/models";
     selector: "route-point-overlay",
     templateUrl: "./route-point-overlay.component.html"
 })
-export class RoutePointOverlayComponent extends BaseMapComponent implements OnChanges {
-    public canMerge: boolean;
-    public isMiddle: boolean;
+export class RoutePointOverlayComponent implements OnChanges {
+    public canMerge: boolean = false;
+    public isMiddle: boolean = false;
 
     @Input()
     public latlng: LatLngAlt;
@@ -22,15 +21,11 @@ export class RoutePointOverlayComponent extends BaseMapComponent implements OnCh
     @Output()
     public closed = new EventEmitter();
 
-    public hideCoordinates: boolean;
+    public hideCoordinates: boolean = true;
 
-    constructor(resources: ResourcesService,
-                private readonly selectedRouteService: SelectedRouteService) {
-        super(resources);
-        this.canMerge = false;
-        this.isMiddle = false;
-        this.hideCoordinates = true;
-    }
+    public readonly resources = inject(ResourcesService);
+
+    private readonly selectedRouteService = inject(SelectedRouteService);
 
     public ngOnChanges(): void {
         this.isMiddle = this.isFirst() === false && this.isLast() === false;

@@ -1,25 +1,21 @@
-import { Input, Output, EventEmitter, Component } from "@angular/core";
+import { Input, Output, EventEmitter, Component, inject } from "@angular/core";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import type { LatLngAlt } from "../../models/models";
 
 @Component({ template: "" })
-export class ClosableOverlayComponent extends BaseMapComponent {
+export class ClosableOverlayComponent {
     @Input()
     public isOpen: boolean;
 
     @Output()
-    public closed: EventEmitter<any>;
+    public closed = new EventEmitter<void>();
 
     @Input()
     public latlng: LatLngAlt;
 
-    constructor(resources: ResourcesService) {
-        super(resources);
-
-        this.closed = new EventEmitter();
-    }
+    public readonly resources = inject(ResourcesService);
 
     public close() {
         this.isOpen = false;

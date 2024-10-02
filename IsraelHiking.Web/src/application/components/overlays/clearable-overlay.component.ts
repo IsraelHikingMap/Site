@@ -14,18 +14,10 @@ export class ClearableOverlayComponent extends ClosableOverlayComponent {
     public title: string;
 
     @Output()
-    public convertToRoute: EventEmitter<any>;
+    public convertToRoute = new EventEmitter<void>();
 
     @Output()
-    public cleared: EventEmitter<any>;
+    public cleared = new EventEmitter<void>();
 
-    public hideCoordinates: boolean;
-
-    constructor(resources: ResourcesService) {
-        super(resources);
-
-        this.hideCoordinates = true;
-        this.convertToRoute = new EventEmitter();
-        this.cleared = new EventEmitter();
-    }
+    public hideCoordinates: boolean = true;
 }
