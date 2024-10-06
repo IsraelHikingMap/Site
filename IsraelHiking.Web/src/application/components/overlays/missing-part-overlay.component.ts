@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ViewEncapsulation, inject } from "@angular/core";
+import { Component, Input, ViewEncapsulation, inject, output } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 
@@ -21,8 +21,7 @@ export class MissingPartOverlayComponent extends ClosableOverlayComponent {
     @Input()
     public feature: GeoJSON.Feature<GeoJSON.LineString>;
 
-    @Output()
-    public removed = new EventEmitter<void>();
+    public removed = output();
 
     public hideCoordinates: boolean = true;
 
