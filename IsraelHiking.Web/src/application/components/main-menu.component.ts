@@ -242,7 +242,7 @@ export class MainMenuComponent {
     }
 
     public openTraces() {
-        this.dialog.open(TracesDialogComponent, { width: "480px" } as MatDialogConfig);
+        this.dialog.open(TracesDialogComponent, { width: "480px", data: [] } as MatDialogConfig);
     }
 
     public openShares() {

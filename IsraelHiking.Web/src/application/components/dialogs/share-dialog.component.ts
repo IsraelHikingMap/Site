@@ -1,11 +1,10 @@
-import { Component, AfterViewInit } from "@angular/core";
+import { Component, AfterViewInit, inject } from "@angular/core";
 import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { DataContainerService } from "../../services/data-container.service";
-import { BaseMapComponent } from "../base-map.component";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
 import { RunningContextService } from "../../services/running-context.service";
@@ -16,49 +15,36 @@ import type { ApplicationState, DataContainer, ShareUrl } from "../../models/mod
     selector: "share-dialog",
     templateUrl: "./share-dialog.component.html"
 })
-export class ShareDialogComponent extends BaseMapComponent implements AfterViewInit {
+export class ShareDialogComponent implements AfterViewInit {
 
-    public title: string;
-    public description: string;
-    public imageUrl: string;
-    public shareAddress: string;
-    public whatsappShareAddress: SafeUrl;
-    public facebookShareAddress: string;
-    public nakebCreateHikeAddress: string;
-    public isLoading: boolean;
-    public lastShareUrl: ShareUrl;
-    public canUpdate: boolean;
-    public updateCurrentShare: boolean;
-    public shareOverlays: boolean;
+    public title: string = "";
+    public description: string = "";
+    public imageUrl: string = "";
+    public shareAddress: string = "";
+    public whatsappShareAddress: SafeUrl = null;
+    public facebookShareAddress: string = "";
+    public nakebCreateHikeAddress: string = "";
+    public isLoading: boolean = false;
+    public lastShareUrl: ShareUrl = null;
+    public canUpdate: boolean = false;
+    public updateCurrentShare: boolean = false;
+    public shareOverlays: boolean = false;
     public showUnhide: boolean;
-    public unhideRoutes: boolean;
+    public unhideRoutes: boolean = false;
 
-    constructor(resources: ResourcesService,
-                private readonly sanitizer: DomSanitizer,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly dataContainerService: DataContainerService,
-                private readonly shareUrlsService: ShareUrlsService,
-                private readonly toastService: ToastService,
-                private readonly socialSharing: SocialSharing,
-                private readonly runningContextService: RunningContextService,
-                private readonly store: Store
-    ) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
 
-        this.title = "";
-        this.description = "";
-        this.imageUrl = "";
-        this.isLoading = false;
-        this.shareAddress = "";
-        this.whatsappShareAddress = null;
-        this.facebookShareAddress = "";
-        this.nakebCreateHikeAddress = "";
-        this.lastShareUrl = null;
+    private readonly sanitizer = inject(DomSanitizer);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly dataContainerService = inject(DataContainerService);
+    private readonly shareUrlsService = inject(ShareUrlsService);
+    private readonly toastService = inject(ToastService);
+    private readonly socialSharing = inject(SocialSharing);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly store = inject(Store);
+
+    constructor() {
         const shareUrl = this.shareUrlsService.getSelectedShareUrl();
-        this.updateCurrentShare = false;
-        this.shareOverlays = false;
-        this.canUpdate = false;
-        this.unhideRoutes = false;
         if (shareUrl != null) {
             this.title = shareUrl.title;
             this.description = shareUrl.description;

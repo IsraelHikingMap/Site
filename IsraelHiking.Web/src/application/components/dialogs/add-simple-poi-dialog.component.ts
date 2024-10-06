@@ -1,7 +1,6 @@
-import { Component, Inject } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialog } from "@angular/material/dialog";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { PoiService, SimplePointType} from "../../services/poi.service";
 import { ToastService } from "../../services/toast.service";
@@ -20,17 +19,14 @@ export type AddSimplePoiDialogData = {
     selector: "add-simple-poi-doalog",
     templateUrl: "./add-simple-poi-dialog.component.html"
 })
-export class AddSimplePoiDialogComponent extends BaseMapComponent {
-    private data: AddSimplePoiDialogData;
+export class AddSimplePoiDialogComponent {
 
-    constructor(resources: ResourcesService,
-                private readonly poiService: PoiService,
-                private readonly privatePoiUploaderService: PrivatePoiUploaderService,
-                private readonly toastService: ToastService,
-                @Inject(MAT_DIALOG_DATA) data: AddSimplePoiDialogData) {
-        super(resources);
-        this.data = data;
-    }
+    public readonly resources = inject(ResourcesService);
+
+    private readonly poiService: PoiService = inject(PoiService);
+    private readonly privatePoiUploaderService: PrivatePoiUploaderService = inject(PrivatePoiUploaderService);
+    private readonly toastService: ToastService = inject(ToastService);
+    private readonly data = inject<AddSimplePoiDialogData>(MAT_DIALOG_DATA);
 
     public static openDialog(matDialog: MatDialog, data: AddSimplePoiDialogData) {
         matDialog.open(AddSimplePoiDialogComponent, { data });

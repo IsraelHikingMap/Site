@@ -5,7 +5,6 @@ import { remove } from "lodash-es";
 import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import { Store } from "@ngxs/store";
 
-import { DownloadDialogComponent } from "../dialogs/download-dialog.component";
 import { ILegendItem } from "./legend-item.component";
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
@@ -71,11 +70,6 @@ export class InfoSidebarComponent {
 
     public isMobile(): boolean {
         return this.runningContext.isMobile;
-    }
-
-    public openDownloadDialog(event: Event) {
-        event.preventDefault();
-        this.dialog.open(DownloadDialogComponent);
     }
 
     private initalizeLegendSections() {

@@ -1,7 +1,6 @@
-import { Component, Inject } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { MatDialog, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 
 export type SendReportDialogData = {
@@ -12,15 +11,16 @@ export type SendReportDialogData = {
     selector: "send-report",
     templateUrl: "./send-report-dialog.component.html"
 })
-export class SendReportDialogComponent extends BaseMapComponent {
+export class SendReportDialogComponent {
     public mailToLink: string;
 
-    constructor(resources: ResourcesService,
-        @Inject(MAT_DIALOG_DATA) data: SendReportDialogData) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
+    private readonly data = inject<SendReportDialogData>(MAT_DIALOG_DATA);
+
+    constructor() {
         const body = encodeURIComponent(this.resources.reportAnIssueInstructions);
         const to = "israelhikingmap@gmail.com";
-        const subject = encodeURIComponent(data.subject);
+        const subject = encodeURIComponent(this.data.subject);
         this.mailToLink = `mailto:${to}?subject=${subject}&body=${body}`;
     }
 
