@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject } from "@angular/core";
+import { Component, Input, inject, output } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Observable } from "rxjs";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
@@ -25,8 +25,7 @@ export class GpsLocationOverlayComponent {
     @Input()
     public latlng: LatLngAlt;
 
-    @Output()
-    public closed = new EventEmitter();
+    public closed = output();
 
     public distance$: Observable<boolean>;
     public hideCoordinates: boolean = true;

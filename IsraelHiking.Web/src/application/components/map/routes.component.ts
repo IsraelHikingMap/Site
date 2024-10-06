@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ViewEncapsulation } from "@angular/core";
+import { Component, AfterViewInit, ViewEncapsulation, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { MapLayerMouseEvent } from "maplibre-gl";
@@ -6,7 +6,6 @@ import { Store } from "@ngxs/store";
 import invert from "invert-color";
 import type { Immutable } from "immer";
 
-import { BaseMapComponent } from "../base-map.component";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
 import { ResourcesService } from "../../services/resources.service";
@@ -37,35 +36,33 @@ interface RoutePointViewData {
     styleUrls: ["./routes.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
+export class RoutesComponent implements AfterViewInit {
 
     private static readonly START_COLOR = "#43a047";
     private static readonly END_COLOR = "red";
 
     public routePointPopupData: RoutePointViewData;
     public nonEditRoutePointPopupData: { latlng: LatLngAlt; wazeAddress: string; routeId: string};
-    public editingRouteGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
-    public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
-    public routes: Immutable<RouteData[]>;
+    public editingRouteGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = {
+        type: "FeatureCollection",
+        features: []
+    };
+    public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = {
+        type: "FeatureCollection",
+        features: []
+    };
+    public routes: Immutable<RouteData[]> = [];
 
-    constructor(resources: ResourcesService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly routeEditPoiInteraction: RouteEditPoiInteraction,
-                private readonly routeEditRouteInteraction: RouteEditRouteInteraction,
-                private readonly fileService: FileService,
-                private readonly mapComponent: MapComponent,
-                private readonly store: Store
-    ) {
-        super(resources);
-        this.routesGeoJson = {
-            type: "FeatureCollection",
-            features: []
-        };
-        this.editingRouteGeoJson = {
-            type: "FeatureCollection",
-            features: []
-        };
-        this.routes = [];
+    public readonly resources = inject(ResourcesService);
+
+    private readonly selectedRouteService: SelectedRouteService = inject(SelectedRouteService);
+    private readonly routeEditPoiInteraction: RouteEditPoiInteraction = inject(RouteEditPoiInteraction);
+    private readonly routeEditRouteInteraction: RouteEditRouteInteraction = inject(RouteEditRouteInteraction);
+    private readonly fileService: FileService = inject(FileService);
+    private readonly mapComponent: MapComponent = inject(MapComponent);
+    private readonly store: Store = inject(Store);
+
+    constructor() {
         this.routeEditRouteInteraction.onRoutePointClick.pipe(takeUntilDestroyed()).subscribe(this.handleRoutePointClick);
         this.store.select((state: ApplicationState) => state.routes.present).pipe(takeUntilDestroyed()).subscribe(routes => this.handleRoutesChanges(routes));
         this.store.select((state: ApplicationState) => state.routeEditingState.selectedRouteId).pipe(takeUntilDestroyed()).subscribe(() => this.handleRoutesChanges(this.routes));

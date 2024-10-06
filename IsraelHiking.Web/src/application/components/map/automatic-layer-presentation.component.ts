@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, OutputRefSubscription } from "@angular/core";
+import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, OutputRefSubscription, inject } from "@angular/core";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import {
     StyleSpecification,
@@ -10,7 +10,6 @@ import {
 import { Subject, mergeMap } from "rxjs";
 import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { ConnectionService } from "../../services/connection.service";
@@ -21,7 +20,7 @@ import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from ".
     selector: "auto-layer",
     templateUrl: "./automatic-layer-presentation.component.html"
 })
-export class AutomaticLayerPresentationComponent extends BaseMapComponent implements OnInit, OnChanges, OnDestroy {
+export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, OnDestroy {
     private static indexNumber = 0;
 
     private static readonly ATTRIBUTION = "<a href='https://github.com/IsraelHikingMap/Site/wiki/Attribution' target='_blank'>" +
@@ -40,30 +39,27 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
 
     private rasterSourceId: string;
     private rasterLayerId: string;
-    private subscriptions: OutputRefSubscription[];
-    private jsonSourcesIds: string[];
-    private jsonLayersIds: string[];
-    private hasInternetAccess: boolean;
+    private subscriptions: OutputRefSubscription[] = [];
+    private jsonSourcesIds: string[] = [];
+    private jsonLayersIds: string[] = [];
+    private hasInternetAccess: boolean = true;
     private mapLoadedPromise: Promise<void>;
     private currentLanguageCode: LanguageCode;
-    private recreateQueue: Subject<() => Promise<void>>;
+    private recreateQueue: Subject<() => Promise<void>> = new Subject();
 
-    constructor(resources: ResourcesService,
-                private readonly mapComponent: MapComponent,
-                private readonly fileService: FileService,
-                private readonly connectionSerive: ConnectionService,
-                private readonly mapService: MapService,
-                private readonly store: Store) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
+    
+    private readonly mapComponent: MapComponent = inject(MapComponent);
+    private readonly fileService: FileService = inject(FileService);
+    private readonly connectionSerive: ConnectionService = inject(ConnectionService);
+    private readonly mapService: MapService = inject(MapService);
+    private readonly store: Store = inject(Store);
+
+    constructor() {
         const layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
         this.rasterLayerId = `raster-layer-${layerIndex}`;
         this.rasterSourceId = `raster-source-${layerIndex}`;
 
-        this.recreateQueue = new Subject();
-        this.hasInternetAccess = true;
-        this.jsonSourcesIds = [];
-        this.jsonLayersIds = [];
-        this.subscriptions = [];
         this.subscriptions.push(this.recreateQueue.pipe(mergeMap((action: () => Promise<void>) => action(), 1)).subscribe());
         this.mapLoadedPromise = new Promise((resolve, _) => {
             this.subscriptions.push(this.mapComponent.mapLoad.subscribe(() => {

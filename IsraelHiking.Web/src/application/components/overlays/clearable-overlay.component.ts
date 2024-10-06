@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from "@angular/core";
+import { Component, Input, output } from "@angular/core";
 
 import { ClosableOverlayComponent } from "./closable-overlay.component";
 
@@ -12,11 +12,9 @@ export class ClearableOverlayComponent extends ClosableOverlayComponent {
     @Input()
     public title: string;
 
-    @Output()
-    public convertToRoute = new EventEmitter<void>();
+    public convertToRoute = output();
 
-    @Output()
-    public cleared = new EventEmitter<void>();
+    public cleared = output();
 
     public hideCoordinates: boolean = true;
 }

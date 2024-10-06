@@ -1,4 +1,4 @@
-import { Component, Input, HostListener, OnChanges, Output, EventEmitter, inject } from "@angular/core";
+import { Component, Input, HostListener, OnChanges, inject, output } from "@angular/core";
 
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
@@ -18,8 +18,7 @@ export class RoutePointOverlayComponent implements OnChanges {
     @Input()
     public segmentIndex: number;
 
-    @Output()
-    public closed = new EventEmitter();
+    public closed = output();
 
     public hideCoordinates: boolean = true;
 
@@ -38,22 +37,22 @@ export class RoutePointOverlayComponent implements OnChanges {
 
     public split(): void {
         this.selectedRouteService.splitRoute(this.segmentIndex);
-        this.closed.next(undefined);
+        this.closed.emit();
     }
 
     public merge() {
         this.selectedRouteService.mergeRoutes(this.isFirst());
-        this.closed.next(undefined);
+        this.closed.emit();
     }
 
     public reverse() {
         this.selectedRouteService.reverseRoute();
-        this.closed.next(undefined);
+        this.closed.emit();
     }
 
     public remove() {
         this.selectedRouteService.removeSegment(this.segmentIndex);
-        this.closed.next(undefined);
+        this.closed.emit();
     }
 
     private isFirst(): boolean {

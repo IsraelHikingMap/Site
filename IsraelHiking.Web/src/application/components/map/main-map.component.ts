@@ -1,14 +1,12 @@
-import { Component, ViewChild, ViewEncapsulation, ViewChildren, QueryList, ElementRef } from "@angular/core";
+import { Component, ViewChild, ViewEncapsulation, ViewChildren, QueryList, ElementRef, inject } from "@angular/core";
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
 import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "../base-map.component";
 import { TracesDialogComponent } from "../dialogs/traces-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { IHMTitleService } from "../../services/ihm-title.service";
-import { ImageGalleryService } from "../../services/image-gallery.service";
 import { HashService } from "../../services/hash.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
@@ -22,7 +20,7 @@ import type { ApplicationState, LocationState } from "../../models/models";
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class MainMapComponent extends BaseMapComponent {
+export class MainMapComponent {
 
     @ViewChild(MapComponent)
     public mapComponent: MapComponent;
@@ -41,22 +39,21 @@ export class MainMapComponent extends BaseMapComponent {
 
     public location: LocationState;
     public initialStyle: StyleSpecification;
-    private isTerrainOn: boolean;
+    private isTerrainOn: boolean = false;
 
-    constructor(resources: ResourcesService,
-                private readonly titleService: IHMTitleService,
-                public readonly imageGalleryService: ImageGalleryService,
-                private readonly mapService: MapService,
-                private readonly hashService: HashService,
-                private readonly runningContextService: RunningContextService,
-                private readonly defaultStyleService: DefaultStyleService,
-                private readonly dialog: MatDialog,
-                private readonly store: Store,
+    public readonly resources = inject(ResourcesService);
 
-    ) {
-        super(resources);
+    private readonly titleService = inject(IHMTitleService);
+    private readonly mapService = inject(MapService);
+    private readonly hashService = inject(HashService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly defaultStyleService = inject(DefaultStyleService);
+    private readonly dialog = inject(MatDialog);
+    private readonly store = inject(Store);
+
+    constructor() {
+        
         this.location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
-        this.isTerrainOn = false;
         this.initialStyle = { ...this.defaultStyleService.style };
         this.initialStyle.sources = {
             dummy: {

@@ -1,4 +1,4 @@
-import { Input, Output, EventEmitter, Component, inject } from "@angular/core";
+import { Input, Component, inject, output } from "@angular/core";
 
 import { ResourcesService } from "../../services/resources.service";
 import type { LatLngAlt } from "../../models/models";
@@ -8,12 +8,11 @@ export class ClosableOverlayComponent {
     @Input()
     public isOpen: boolean;
 
-    @Output()
-    public closed = new EventEmitter<void>();
-
     @Input()
     public latlng: LatLngAlt;
 
+    public closed = output();
+    
     public readonly resources = inject(ResourcesService);
 
     public close() {

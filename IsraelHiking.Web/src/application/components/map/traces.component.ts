@@ -1,9 +1,8 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Store } from "@ngxs/store";
 import type { LngLatLike } from "maplibre-gl";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SpatialService } from "../../services/spatial.service";
 import { RoutesFactory } from "../../services/routes.factory";
@@ -16,34 +15,30 @@ import type { ApplicationState } from "../../models/models";
     selector: "traces",
     templateUrl: "./traces.component.html"
 })
-export class TracesComponent extends BaseMapComponent {
+export class TracesComponent {
 
-    public visibleTraceName: string;
-    public selectedTrace: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
-    public selectedTraceStart: LngLatLike;
+    public visibleTraceName: string = "";
+    public selectedTrace: GeoJSON.FeatureCollection<GeoJSON.Geometry> = null;
+    public selectedTraceStart: LngLatLike = null;
     public selectedFeature: GeoJSON.Feature<GeoJSON.LineString>;
     public missingCoordinates: LngLatLike;
-    public missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString>;
+    public missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString> = {
+        type: "FeatureCollection",
+        features: []
+    };
     public selectedFeatureSource: GeoJSON.FeatureCollection<GeoJSON.LineString>;
-    public isConfigOpen: boolean;
+    public isConfigOpen: boolean = false;
 
-    constructor(resources: ResourcesService,
-                private readonly routesFactory: RoutesFactory,
-                private readonly tracesService: TracesService,
-                private readonly store: Store) {
-        super(resources);
-        this.isConfigOpen = false;
-        this.selectedTrace = null;
-        this.selectedTraceStart = null;
-        this.visibleTraceName = "";
+    public readonly resources = inject(ResourcesService);
+
+    private readonly routesFactory = inject(RoutesFactory);
+    private readonly tracesService = inject(TracesService);
+    private readonly store = inject(Store);
+
+    constructor() {
         this.clearSelection();
-        this.missingParts = {
-            type: "FeatureCollection",
-            features: []
-        };
         this.store.select((state: ApplicationState) => state.tracesState.visibleTraceId).pipe(takeUntilDestroyed()).subscribe(async (id) => {
-            if (id == null)
-            {
+            if (id == null) {
                 this.clearTraceSource();
                 return;
             }
