@@ -63,4 +63,7 @@ export class IntroDialogComponent extends BaseMapComponent {
         this.dialogRef.close();
     }
 
+    public getLanuguageCode(): string {
+        return this.store.selectSnapshot((s) => s.configuration.language.code);
+    }
 }
