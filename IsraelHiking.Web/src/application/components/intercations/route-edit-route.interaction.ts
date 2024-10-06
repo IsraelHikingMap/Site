@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter, NgZone } from "@angular/core";
+import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
 import { MapMouseEvent, Map, GeoJSONSource } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 import type Point from "@mapbox/point-geometry";
@@ -30,30 +30,23 @@ declare type EditMouseState = "none" | "down" | "dragging" | "canceled";
 @Injectable()
 export class RouteEditRouteInteraction {
 
-    public onRoutePointClick: EventEmitter<number>;
+    public onRoutePointClick = new EventEmitter<number>();
 
-    private state: EditMouseState;
-    private mouseDownPoint: Point;
+    private state: EditMouseState = "none";
+    private mouseDownPoint: Point = null;
 
-    private selectedRoutePoint: GeoJSON.Feature<GeoJSON.Point>;
-    private selectedRouteSegments: GeoJSON.Feature<GeoJSON.LineString>[];
-    private geoJsonData: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
+    private selectedRoutePoint: GeoJSON.Feature<GeoJSON.Point> = null;
+    private selectedRouteSegments: GeoJSON.Feature<GeoJSON.LineString>[] = [];
+    private geoJsonData: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = null;
     private map: Map;
 
-    constructor(private readonly resources: ResourcesService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly routingProvider: RoutingProvider,
-                private readonly elevationProvider: ElevationProvider,
-                private readonly snappingService: SnappingService,
-                private readonly ngZone: NgZone,
-                private readonly store: Store) {
-        this.geoJsonData = null;
-        this.selectedRouteSegments = [];
-        this.selectedRoutePoint = null;
-        this.onRoutePointClick = new EventEmitter();
-        this.state = "none";
-        this.mouseDownPoint = null;
-    }
+    private readonly resources = inject(ResourcesService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly routingProvider = inject(RoutingProvider);
+    private readonly elevationProvider = inject(ElevationProvider);
+    private readonly snappingService = inject(SnappingService);
+    private readonly ngZone = inject(NgZone);
+    private readonly store = inject(Store);
 
     public static createSegmentId(route: Immutable<RouteData>, index: number) {
         return route.id + SEGMENT + index;
