@@ -142,7 +142,6 @@ import { RoutePointOverlayComponent } from "./components/overlays/route-point-ov
 import { PrivatePoiOverlayComponent } from "./components/overlays/private-poi-overlay.component";
 import { ClusterOverlayComponent } from "./components/overlays/cluster-overlay.component";
 import { GpsLocationOverlayComponent } from "./components/overlays/gps-location-overlay.component";
-import { ClearableOverlayComponent } from "./components/overlays/clearable-overlay.component";
 import { MissingPartOverlayComponent } from "./components/overlays/missing-part-overlay.component";
 import { SearchComponent } from "./components/search.component";
 import { InfoSidebarComponent } from "./components/sidebar/info-sidebar.component";
@@ -333,7 +332,6 @@ const initializeApplication = (injector: Injector) => async () => {
         PrivatePoiOverlayComponent,
         ClusterOverlayComponent,
         GpsLocationOverlayComponent,
-        ClearableOverlayComponent,
         MissingPartOverlayComponent,
         SearchComponent,
         InfoSidebarComponent,

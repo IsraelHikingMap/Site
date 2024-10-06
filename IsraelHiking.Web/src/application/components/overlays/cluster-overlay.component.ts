@@ -1,4 +1,4 @@
-import { Component, Input, inject, output } from "@angular/core";
+import { Component, inject, input, output } from "@angular/core";
 import { Router } from "@angular/router";
 
 import { ResourcesService } from "../../services/resources.service";
@@ -12,8 +12,7 @@ import { RouteStrings } from "../../services/hash.service";
 })
 export class ClusterOverlayComponent {
 
-    @Input()
-    public features: GeoJSON.Feature[];
+    public features = input<GeoJSON.Feature[]>();
 
     public closed = output();
     public readonly resources = inject(ResourcesService);

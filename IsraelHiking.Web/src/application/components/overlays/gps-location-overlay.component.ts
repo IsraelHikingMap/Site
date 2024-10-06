@@ -1,4 +1,4 @@
-import { Component, Input, inject, output } from "@angular/core";
+import { Component, inject, input, output } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Observable } from "rxjs";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
@@ -22,8 +22,7 @@ import type { ApplicationState, LatLngAlt, LinkData } from "../../models/models"
 })
 export class GpsLocationOverlayComponent {
 
-    @Input()
-    public latlng: LatLngAlt;
+    public latlng = input<LatLngAlt>();
 
     public closed = output();
 
@@ -46,7 +45,7 @@ export class GpsLocationOverlayComponent {
 
     public addPointToRoute() {
         const markerData = {
-            latlng: { ...this.latlng },
+            latlng: { ...this.latlng() },
             title: "",
             description: "",
             type: "star",
@@ -72,7 +71,7 @@ export class GpsLocationOverlayComponent {
             return;
         }
         AddSimplePoiDialogComponent.openDialog(this.matDialog, {
-            latlng: { ...this.latlng },
+            latlng: { ...this.latlng() },
             description: "",
             imageLink: null,
             markerType: "star",
@@ -91,9 +90,9 @@ export class GpsLocationOverlayComponent {
     }
 
     public shareMyLocation() {
-        const ihmCoordinateUrl = this.hashService.getFullUrlFromLatLng(this.latlng);
+        const ihmCoordinateUrl = this.hashService.getFullUrlFromLatLng(this.latlng());
         this.socialSharing.shareWithOptions({
-            message: `geo:${this.latlng.lat},${this.latlng.lng}\n${ihmCoordinateUrl}`
+            message: `geo:${this.latlng().lat},${this.latlng().lng}\n${ihmCoordinateUrl}`
         });
         this.closed.emit();
     }

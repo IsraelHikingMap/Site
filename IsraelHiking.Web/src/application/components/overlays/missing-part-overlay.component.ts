@@ -1,10 +1,9 @@
-import { Component, Input, ViewEncapsulation, inject, output } from "@angular/core";
+import { Component, ViewEncapsulation, inject, input, output } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
-import { ClosableOverlayComponent } from "./closable-overlay.component";
 import { Urls } from "../../urls";
 import type { LatLngAlt } from "../../models/models";
 
@@ -14,12 +13,11 @@ import type { LatLngAlt } from "../../models/models";
     styleUrls: ["./missing-part-overlay.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class MissingPartOverlayComponent extends ClosableOverlayComponent {
-    @Input()
-    public latlng: LatLngAlt;
+export class MissingPartOverlayComponent {
 
-    @Input()
-    public feature: GeoJSON.Feature<GeoJSON.LineString>;
+    public latlng = input<LatLngAlt>();
+
+    public feature = input<GeoJSON.Feature<GeoJSON.LineString>>();
 
     public removed = output();
 
@@ -31,21 +29,21 @@ export class MissingPartOverlayComponent extends ClosableOverlayComponent {
     private readonly toastService = inject(ToastService);
 
     public getHighwayType(): string {
-        return this.feature.properties.highway || "track";
+        return this.feature().properties.highway || "track";
     }
 
     public setHighwayType(highwayType: string) {
-        this.feature.properties.highway = highwayType;
+        this.feature().properties.highway = highwayType;
     }
 
     public getColor(): string {
-        return this.feature.properties.colour || "none";
+        return this.feature().properties.colour || "none";
     }
 
     public setColor(color: string) {
-        this.feature.properties.colour = color;
+        this.feature().properties.colour = color;
         if (color === "none") {
-            delete this.feature.properties.colour;
+            delete this.feature().properties.colour;
         }
     }
 

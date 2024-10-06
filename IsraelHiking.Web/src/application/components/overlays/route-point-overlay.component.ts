@@ -1,4 +1,4 @@
-import { Component, Input, HostListener, OnChanges, inject, output } from "@angular/core";
+import { Component, HostListener, OnChanges, inject, output, input } from "@angular/core";
 
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
@@ -12,11 +12,9 @@ export class RoutePointOverlayComponent implements OnChanges {
     public canMerge: boolean = false;
     public isMiddle: boolean = false;
 
-    @Input()
-    public latlng: LatLngAlt;
+    public latlng = input<LatLngAlt>();
 
-    @Input()
-    public segmentIndex: number;
+    public segmentIndex = input<number>();
 
     public closed = output();
 
@@ -36,7 +34,7 @@ export class RoutePointOverlayComponent implements OnChanges {
     }
 
     public split(): void {
-        this.selectedRouteService.splitRoute(this.segmentIndex);
+        this.selectedRouteService.splitRoute(this.segmentIndex());
         this.closed.emit();
     }
 
@@ -51,16 +49,16 @@ export class RoutePointOverlayComponent implements OnChanges {
     }
 
     public remove() {
-        this.selectedRouteService.removeSegment(this.segmentIndex);
+        this.selectedRouteService.removeSegment(this.segmentIndex());
         this.closed.emit();
     }
 
     private isFirst(): boolean {
-        return this.segmentIndex === 0;
+        return this.segmentIndex() === 0;
     }
 
     private isLast(): boolean {
-        return this.selectedRouteService.getSelectedRoute().segments.length - 1 === this.segmentIndex;
+        return this.selectedRouteService.getSelectedRoute().segments.length - 1 === this.segmentIndex();
     }
 
     @HostListener("window:keydown", ["$event"])
