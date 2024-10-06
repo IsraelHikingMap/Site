@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, AfterViewInit, HostListener, inject } from "@angular/core";
+import { Component, ElementRef, AfterViewInit, HostListener, inject, viewChild } from "@angular/core";
 import {
     MatDialogRef,
     MatDialog,
@@ -51,8 +51,7 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
     public description: string;
     public iconsGroups: IIconsGroup[] = [];
 
-    @ViewChild("titleInput")
-    public titleInput: ElementRef;
+    public titleInput = viewChild<ElementRef>("titleInput");
 
     public readonly resources = inject(ResourcesService);
 
@@ -130,8 +129,8 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
     }
 
     private focusTitle() {
-        if (this.titleInput && this.titleInput.nativeElement) {
-            this.titleInput.nativeElement.focus();
+        if (this.titleInput && this.titleInput().nativeElement) {
+            this.titleInput().nativeElement.focus();
         }
     }
 

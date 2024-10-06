@@ -1,4 +1,4 @@
-import { Component, ViewChild, ViewEncapsulation, ViewChildren, QueryList, ElementRef, inject } from "@angular/core";
+import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildren } from "@angular/core";
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
 import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike } from "maplibre-gl";
@@ -22,20 +22,11 @@ import type { ApplicationState, LocationState } from "../../models/models";
 })
 export class MainMapComponent {
 
-    @ViewChild(MapComponent)
-    public mapComponent: MapComponent;
-
-    @ViewChildren("topLeftControl", { read: ElementRef })
-    public topLeftControls: QueryList<ElementRef>;
-
-    @ViewChildren("topRightControl", { read: ElementRef })
-    public topRightControls: QueryList<ElementRef>;
-
-    @ViewChildren("bottomLeftControl", { read: ElementRef })
-    public bottomLeftControls: QueryList<ElementRef>;
-
-    @ViewChildren("bottomRightControl", { read: ElementRef })
-    public bottomRightControls: QueryList<ElementRef>;
+    public mapComponent = viewChild(MapComponent);
+    public topLeftControls = viewChildren("topLeftControl", { read: ElementRef });
+    public topRightControls = viewChildren("topRightControl", { read: ElementRef });
+    public bottomLeftControls = viewChildren("bottomLeftControl", { read: ElementRef });
+    public bottomRightControls = viewChildren("bottomRightControl", { read: ElementRef });
 
     public location: LocationState;
     public initialStyle: StyleSpecification;
@@ -101,37 +92,37 @@ export class MainMapComponent {
         if (!e) {
             return;
         }
-        const centerLatLon = this.mapComponent.mapInstance.getCenter();
-        this.store.dispatch(new SetLocationAction(centerLatLon.lng, centerLatLon.lat, this.mapComponent.mapInstance.getZoom()));
+        const centerLatLon = this.mapComponent().mapInstance.getCenter();
+        this.store.dispatch(new SetLocationAction(centerLatLon.lng, centerLatLon.lat, this.mapComponent().mapInstance.getZoom()));
         this.hashService.resetAddressbar();
     }
 
     public mapLoaded() {
         setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
 
-        this.mapService.setMap(this.mapComponent.mapInstance);
+        this.mapService.setMap(this.mapComponent().mapInstance);
 
-        this.topLeftControls.forEach(c => {
-            this.mapComponent.mapInstance.addControl(new CustomControl(c.nativeElement), "top-left");
-        });
-        this.topRightControls.forEach(c => {
-            this.mapComponent.mapInstance.addControl(new CustomControl(c.nativeElement), "top-right");
-        });
-        this.mapComponent.mapInstance.addControl(new ScaleControl({ unit: "meter" as Unit}), "bottom-left");
-        this.bottomLeftControls.forEach(c => {
-            this.mapComponent.mapInstance.addControl(new CustomControl(c.nativeElement), "bottom-left");
-        });
-        this.bottomRightControls.forEach(c => {
-            this.mapComponent.mapInstance.addControl(new CustomControl(c.nativeElement), "bottom-right");
-        });
+        for (const c of this.topLeftControls()) {
+            this.mapComponent().mapInstance.addControl(new CustomControl(c.nativeElement), "top-left");
+        }
+        for (const c of this.topRightControls()) {
+            this.mapComponent().mapInstance.addControl(new CustomControl(c.nativeElement), "top-right");
+        }
+        this.mapComponent().mapInstance.addControl(new ScaleControl({ unit: "meter" as Unit}), "bottom-left");
+        for (const c of this.bottomLeftControls()) {
+            this.mapComponent().mapInstance.addControl(new CustomControl(c.nativeElement), "bottom-left");
+        }
+        for (const c of this.bottomRightControls()) {
+            this.mapComponent().mapInstance.addControl(new CustomControl(c.nativeElement), "bottom-right");
+        }
 
-        this.mapComponent.mapInstance.on("click", (e) => {
+        this.mapComponent().mapInstance.on("click", (e) => {
             // This is used for the personal heatmap, assuming there's a layer there called "record_lines".
             const bbox = [
                 [e.point.x - 5, e.point.y - 5],
                 [e.point.x + 5, e.point.y + 5]
             ] as [PointLike, PointLike];
-            const features = this.mapComponent.mapInstance.queryRenderedFeatures(bbox).filter(f => f.sourceLayer === "record_lines");
+            const features = this.mapComponent().mapInstance.queryRenderedFeatures(bbox).filter(f => f.sourceLayer === "record_lines");
             if (features.length <= 0) { return; }
             this.dialog.open(TracesDialogComponent, { width: "480px", data: features.map(f => f.properties.trace_id) } as MatDialogConfig);
         });
@@ -150,7 +141,7 @@ export class MainMapComponent {
     }
 
     public pitchChanged() {
-        const pitch = this.mapComponent.mapInstance.getPitch();
+        const pitch = this.mapComponent().mapInstance.getPitch();
         if (pitch <= 10 && !this.isTerrainOn) {
             // Terrain is off and pitch is low, nothing to do.
             return;
@@ -164,7 +155,7 @@ export class MainMapComponent {
         if (pitch <= 10 && this.isTerrainOn) {
             // Terrain is on and pitch is low, turning off.
             this.isTerrainOn = false;
-            this.mapComponent.mapInstance.setTerrain(null);
+            this.mapComponent().mapInstance.setTerrain(null);
             return;
         }
 
@@ -184,14 +175,13 @@ export class MainMapComponent {
                 minzoom:7
             };
         }
-        const currentSourceTerrain = this.mapComponent.mapInstance.getSource("terrain");
+        const currentSourceTerrain = this.mapComponent().mapInstance.getSource("terrain");
         if (!currentSourceTerrain) {
-            this.mapComponent.mapInstance.addSource("terrain", source);
+            this.mapComponent().mapInstance.addSource("terrain", source);
         } else if (currentSourceTerrain && currentSourceTerrain.serialize().url !== source.url) {
-            this.mapComponent.mapInstance.removeSource("terrain");
-            this.mapComponent.mapInstance.addSource("terrain", source);
+            this.mapComponent().mapInstance.removeSource("terrain");
+            this.mapComponent().mapInstance.addSource("terrain", source);
         }
-        this.mapComponent.mapInstance.setTerrain({source: "terrain", exaggeration: 2});
+        this.mapComponent().mapInstance.setTerrain({source: "terrain", exaggeration: 2});
     }
-
 }
