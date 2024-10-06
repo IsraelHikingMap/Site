@@ -55,12 +55,12 @@ export class RoutesComponent implements AfterViewInit {
 
     public readonly resources = inject(ResourcesService);
 
-    private readonly selectedRouteService: SelectedRouteService = inject(SelectedRouteService);
-    private readonly routeEditPoiInteraction: RouteEditPoiInteraction = inject(RouteEditPoiInteraction);
-    private readonly routeEditRouteInteraction: RouteEditRouteInteraction = inject(RouteEditRouteInteraction);
-    private readonly fileService: FileService = inject(FileService);
-    private readonly mapComponent: MapComponent = inject(MapComponent);
-    private readonly store: Store = inject(Store);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly routeEditPoiInteraction = inject(RouteEditPoiInteraction);
+    private readonly routeEditRouteInteraction = inject(RouteEditRouteInteraction);
+    private readonly fileService = inject(FileService);
+    private readonly mapComponent = inject(MapComponent);
+    private readonly store = inject(Store);
 
     constructor() {
         this.routeEditRouteInteraction.onRoutePointClick.pipe(takeUntilDestroyed()).subscribe(this.handleRoutePointClick);

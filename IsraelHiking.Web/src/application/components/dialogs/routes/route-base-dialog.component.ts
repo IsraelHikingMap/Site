@@ -19,10 +19,10 @@ export abstract class RouteBaseDialogComponent {
 
     public readonly resources = inject(ResourcesService);
 
-    protected readonly selectedRouteService: SelectedRouteService = inject(SelectedRouteService);
-    protected readonly routesFactory: RoutesFactory = inject(RoutesFactory);
-    protected readonly toastService: ToastService = inject(ToastService);
-    protected readonly store: Store = inject(Store);
+    protected readonly selectedRouteService = inject(SelectedRouteService);
+    protected readonly routesFactory = inject(RoutesFactory);
+    protected readonly toastService = inject(ToastService);
+    protected readonly store = inject(Store);
 
     constructor() {
         this.colors = this.routesFactory.colors;

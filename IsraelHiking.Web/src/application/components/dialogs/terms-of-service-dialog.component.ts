@@ -14,8 +14,8 @@ export class TermsOfServiceDialogComponent {
 
     public readonly resources = inject(ResourcesService);
 
-    private readonly authorizationService: AuthorizationService = inject(AuthorizationService);
-    private readonly toastService: ToastService = inject(ToastService);
+    private readonly authorizationService = inject(AuthorizationService);
+    private readonly toastService = inject(ToastService);
 
     constructor() {
 

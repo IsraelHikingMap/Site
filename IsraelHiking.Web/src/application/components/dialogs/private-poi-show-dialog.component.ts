@@ -39,11 +39,11 @@ export class PrivatePoiShowDialogComponent {
 
     public readonly resources = inject(ResourcesService);
 
-    private readonly matDialog: MatDialog = inject(MatDialog);
-    private readonly imageGalleryService: ImageGalleryService = inject(ImageGalleryService);
-    private readonly selectedRouteService: SelectedRouteService = inject(SelectedRouteService);
-    private readonly toastService: ToastService = inject(ToastService);
-    private readonly store: Store = inject(Store);
+    private readonly matDialog = inject(MatDialog);
+    private readonly imageGalleryService = inject(ImageGalleryService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly toastService = inject(ToastService);
+    private readonly store = inject(Store);
     private readonly dialogRef = inject(MatDialogRef);
     private readonly data = inject<IPrivatePoiShowDialogData>(MAT_DIALOG_DATA);
 

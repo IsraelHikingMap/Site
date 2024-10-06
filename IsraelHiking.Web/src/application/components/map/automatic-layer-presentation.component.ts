@@ -49,11 +49,11 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
 
     public readonly resources = inject(ResourcesService);
     
-    private readonly mapComponent: MapComponent = inject(MapComponent);
-    private readonly fileService: FileService = inject(FileService);
-    private readonly connectionSerive: ConnectionService = inject(ConnectionService);
-    private readonly mapService: MapService = inject(MapService);
-    private readonly store: Store = inject(Store);
+    private readonly mapComponent = inject(MapComponent);
+    private readonly fileService = inject(FileService);
+    private readonly connectionSerive = inject(ConnectionService);
+    private readonly mapService = inject(MapService);
+    private readonly store = inject(Store);
 
     constructor() {
         const layerIndex = AutomaticLayerPresentationComponent.indexNumber++;

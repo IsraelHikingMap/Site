@@ -23,9 +23,9 @@ export class AddSimplePoiDialogComponent {
 
     public readonly resources = inject(ResourcesService);
 
-    private readonly poiService: PoiService = inject(PoiService);
-    private readonly privatePoiUploaderService: PrivatePoiUploaderService = inject(PrivatePoiUploaderService);
-    private readonly toastService: ToastService = inject(ToastService);
+    private readonly poiService = inject(PoiService);
+    private readonly privatePoiUploaderService = inject(PrivatePoiUploaderService);
+    private readonly toastService = inject(ToastService);
     private readonly data = inject<AddSimplePoiDialogData>(MAT_DIALOG_DATA);
 
     public static openDialog(matDialog: MatDialog, data: AddSimplePoiDialogData) {

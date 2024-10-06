@@ -35,8 +35,8 @@ export class RecordedRouteComponent {
 
     public readonly resources = inject(ResourcesService);
 
-    private readonly routeEditPoiInteraction: RouteEditPoiInteraction = inject(RouteEditPoiInteraction);
-    private readonly store: Store = inject(Store);
+    private readonly routeEditPoiInteraction = inject(RouteEditPoiInteraction);
+    private readonly store = inject(Store);
 
     constructor() {
         this.recordedRoute$ = this.store.select((state: ApplicationState) => state.recordedRouteState.route);
