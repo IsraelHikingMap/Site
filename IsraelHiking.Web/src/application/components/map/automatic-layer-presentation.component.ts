@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, OutputRefSubscription, inject } from "@angular/core";
+import { Component, OnInit, OnChanges, SimpleChanges, OnDestroy, OutputRefSubscription, inject, input } from "@angular/core";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import {
     StyleSpecification,
@@ -26,16 +26,11 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     private static readonly ATTRIBUTION = "<a href='https://github.com/IsraelHikingMap/Site/wiki/Attribution' target='_blank'>" +
         "Click me to see attribution</a>";
 
-    @Input()
-    public visible: boolean;
-    @Input()
-    public before: string;
-    @Input()
-    public isBaselayer: boolean;
-    @Input()
-    public layerData: EditableLayer;
-    @Input()
-    public isMainMap: boolean;
+    public visible = input<boolean>();
+    public before = input<string>();
+    public isBaselayer = input<boolean>();
+    public layerData = input<EditableLayer>();
+    public isMainMap = input<boolean>();
 
     private rasterSourceId: string;
     private rasterLayerId: string;
@@ -69,11 +64,11 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     }
 
     public ngOnInit() {
-        this.addLayerRecreationQuqueItem(null, this.layerData);
+        this.addLayerRecreationQuqueItem(null, this.layerData());
         this.currentLanguageCode = this.store.selectSnapshot((s: ApplicationState) => s.configuration).language.code;
         this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.language).subscribe((language) => {
             if (this.currentLanguageCode !== language.code) {
-                this.addLayerRecreationQuqueItem(this.layerData, this.layerData);
+                this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
             }
             this.currentLanguageCode = language.code;
         }));
@@ -83,18 +78,18 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             }
             this.hasInternetAccess = online;
             if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate == null
-                || this.layerData.isOfflineAvailable === false) {
+                || this.layerData().isOfflineAvailable === false) {
                 return;
             }
-            if (this.layerData.isOfflineOn === true) {
+            if (this.layerData().isOfflineOn === true) {
                 return;
             }
-            this.addLayerRecreationQuqueItem(this.layerData, this.layerData);
+            this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
         }));
     }
 
     public ngOnDestroy() {
-        this.addLayerRecreationQuqueItem(this.layerData, null);
+        this.addLayerRecreationQuqueItem(this.layerData(), null);
         this.recreateQueue.complete();
         for (const subscription of this.subscriptions) {
             subscription.unsubscribe();
@@ -106,7 +101,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             return;
         }
 
-        this.addLayerRecreationQuqueItem(changes.layerData ? changes.layerData.previousValue : this.layerData, this.layerData);
+        this.addLayerRecreationQuqueItem(changes.layerData ? changes.layerData.previousValue : this.layerData(), this.layerData());
     }
 
     private isRaster(address: string) {
@@ -137,13 +132,13 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             type: "raster",
             source: this.rasterSourceId,
             layout: {
-                visibility: (this.visible ? "visible" : "none") as "visible" | "none"
+                visibility: (this.visible() ? "visible" : "none") as "visible" | "none"
             },
             paint: {
                 "raster-opacity": layerData.opacity || 1.0
             }
         } as RasterLayerSpecification;
-        this.mapComponent.mapInstance.addLayer(layer, this.before);
+        this.mapComponent.mapInstance.addLayer(layer, this.before());
     }
 
     private removeRasterLayer() {
@@ -162,9 +157,9 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     private updateSourcesAndLayers(layerData: LayerData, sources: {[_: string]: SourceSpecification}, layers: LayerSpecification[]) {
         let attributiuonUpdated = false;
         for (let sourceKey of Object.keys(sources)) {
-            if (Object.prototype.hasOwnProperty.call(sources, sourceKey) && this.visible) {
+            if (Object.prototype.hasOwnProperty.call(sources, sourceKey) && this.visible()) {
                 const source = sources[sourceKey];
-                if (!this.isBaselayer) {
+                if (!this.isBaselayer()) {
                     sourceKey = layerData.key + "_" + sourceKey;
                 }
                 if (source.type === "vector") {
@@ -177,14 +172,14 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             }
         }
         for (const layer of layers) {
-            if (!this.visible || (!this.isBaselayer && layer.metadata && !(layer.metadata as any)["IHM:overlay"])) {
+            if (!this.visible() || (!this.isBaselayer() && layer.metadata && !(layer.metadata as any)["IHM:overlay"])) {
                 continue;
             }
-            if (!this.isBaselayer) {
+            if (!this.isBaselayer()) {
                 layer.id = layerData.key + "_" + layer.id;
                 (layer as any).source = layerData.key + "_" + (layer as any).source;
             }
-            this.mapComponent.mapInstance.addLayer(layer, this.before);
+            this.mapComponent.mapInstance.addLayer(layer, this.before());
             this.jsonLayersIds.push(layer.id);
         }
     }
@@ -206,7 +201,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
         } else {
             await this.createJsonLayer(layerData);
         }
-        if (this.isBaselayer) {
+        if (this.isBaselayer()) {
             this.mapComponent.mapInstance.setMinZoom(Math.max(layerData.minZoom - 1, 0));
         }
     }
@@ -227,7 +222,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
      */
     private addLayerRecreationQuqueItem(oldLayer: LayerData, newLayer: EditableLayer) {
         this.recreateQueue.next(async () => {
-            await (this.isMainMap ? this.mapService.initializationPromise : this.mapLoadedPromise);
+            await (this.isMainMap() ? this.mapService.initializationPromise : this.mapLoadedPromise);
             if (oldLayer != null) {
                 this.removeLayer(oldLayer);
             }
