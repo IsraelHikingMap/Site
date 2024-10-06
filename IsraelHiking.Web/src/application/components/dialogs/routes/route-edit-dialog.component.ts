@@ -18,8 +18,8 @@ import type { DataContainer, RouteData, LatLngAlt } from "../../../models/models
 export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     private originalName: string;
 
-    private readonly fileService: FileService = inject(FileService);
-    private readonly fitBoundsService: FitBoundsService = inject(FitBoundsService);
+    private readonly fileService = inject(FileService);
+    private readonly fitBoundsService = inject(FitBoundsService);
     private readonly data = inject<RouteData>(MAT_DIALOG_DATA);
 
     constructor() {
