@@ -293,7 +293,7 @@ export class LayersService {
 
     public toggleOverlay(overlay: Overlay) {
         const newVisibility = !overlay.visible;
-        this.loggingService.info(`[Layers] Changing visiblity of ${overlay.key} to ${newVisibility ? "visible" : "hidden"}`);
+        this.loggingService.info(`[Layers] Changing visibility of ${overlay.key} to ${newVisibility ? "visible" : "hidden"}`);
         this.store.dispatch(new UpdateOverlayAction(overlay.key, {
                 ...overlay,
                 visible: newVisibility

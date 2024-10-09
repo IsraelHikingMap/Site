@@ -5,7 +5,7 @@
                 <p class="w-full">{{resources.translate(categoriesGroup().type)}}</p>
             </div>
             <div class="w-1/5">
-                <button class="w-full !h-full" mat-button (click)="toggleVisibility($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle visiblity of category layer {{categoriesGroup().type}}">
+                <button class="w-full !h-full" mat-button (click)="toggleVisibility($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle visibility of category layer {{categoriesGroup().type}}">
                     <i class="fa fa-lg" [ngClass]="{'icon-eye': categoriesGroup().visible, 'icon-eye-slash': !categoriesGroup().visible}"></i>
                 </button>
             </div>
