@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 
 import { ResourcesService } from "./resources.service";
 import { firstValueFrom, timeout } from "rxjs";
@@ -10,12 +10,21 @@ type WikiDataPage = {
     statements: { [key: string]: { value: { content: any } }[] };
 }
 
+type WikipediaPage = {
+    query: {
+        pages: {
+            [key: string]: {
+                extract: string
+            }
+        }
+    }
+}
+
 @Injectable()
 export class WikidataService {
 
-    constructor(private readonly httpClient: HttpClient,
-                private readonly resources: ResourcesService) {
-    }
+    private readonly resources: ResourcesService = inject(ResourcesService);
+    private readonly httpClient: HttpClient = inject(HttpClient);
 
     public async enritchFeatureFromWikimedia(feature: GeoJSON.Feature, language: string): Promise<void> {
         const languageShort = language || this.resources.getCurrentLanguageCodeSimplified();
@@ -52,7 +61,7 @@ export class WikidataService {
 
     private async getWikidataFromId(wikidataId: string): Promise<WikiDataPage> {
         const url = `https://www.wikidata.org/w/rest.php/wikibase/v0/entities/items/${wikidataId}`;
-        return await firstValueFrom(this.httpClient.get(url).pipe(timeout(3000))) as any;
+        return await firstValueFrom(this.httpClient.get(url).pipe(timeout(3000))) as unknown as WikiDataPage;
     }
 
     private async setDescriptionAndImages(wikidata: WikiDataPage, feature: GeoJSON.Feature, language: string): Promise<void> {
@@ -64,7 +73,7 @@ export class WikidataService {
             const indexString = GeoJSONUtils.setProperty(feature, "website", `https://${language}.wikipedia.org/wiki/${title}`);
             feature.properties["poiSourceImageUrl" + indexString] = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/128px-Wikipedia-logo-v2.svg.png";
         }
-        const wikipediaPage = await firstValueFrom(this.httpClient.get(`http://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=${title}&origin=*`)) as any;
+        const wikipediaPage = await firstValueFrom(this.httpClient.get(`http://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=${title}&origin=*`).pipe(timeout(3000))) as unknown as WikipediaPage;
         const pagesIds = Object.keys(wikipediaPage.query.pages);
         if (pagesIds.length > 0) {
             feature.properties.poiExternalDescription = wikipediaPage.query.pages[pagesIds[0]].extract;
