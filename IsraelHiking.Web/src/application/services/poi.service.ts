@@ -104,7 +104,7 @@ export class PoiService {
     private queueIsProcessing: boolean= false;
     private offlineState: Immutable<OfflineState>;
 
-    public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Geometry, PoiProperties>= {
+    public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Geometry, PoiProperties> = {
         type: "FeatureCollection",
         features: []
     };

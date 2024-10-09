@@ -29,7 +29,7 @@ export class SharesDialogComponent implements OnInit {
     public shareUrlInEditMode: ShareUrl = null;
     public selectedShareUrlId: string = null;
     public loadingShareUrls: boolean = false;
-    public searchTerm = new FormControl<string>("");;
+    public searchTerm = new FormControl<string>("");
     public shownShareUrl$: Observable<Immutable<ShareUrl>>;
 
     private sessionSearchTerm = "";
