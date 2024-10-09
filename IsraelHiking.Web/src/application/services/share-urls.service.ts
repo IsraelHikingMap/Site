@@ -102,11 +102,11 @@ export class ShareUrlsService {
             const sharesLastSuccessfullSync = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).shareUrlsLastModifiedDate;
             const operationStartTimeStamp = new Date();
             let sharesToGetFromServer = [] as ShareUrl[];
-            this.loggingService.info("[Shares] Starting shares sync, last modified:" +
+            this.loggingService.info("[Shares] Starting shares sync, last modified: " +
                 (sharesLastSuccessfullSync || new Date(0)).toUTCString());
             const shareUrls$ = this.httpClient.get(Urls.urls).pipe(timeout(20000));
             const shareUrls = await firstValueFrom(shareUrls$) as ShareUrl[];
-            this.loggingService.info("[Shares] Got the list of shares, statring to compare against exiting list");
+            this.loggingService.info("[Shares] Got the list of shares, starting to compare against exiting list");
             const exitingShareUrls = this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState).shareUrls;
             for (const shareUrl of shareUrls) {
                 shareUrl.lastModifiedDate = new Date(shareUrl.lastModifiedDate);
