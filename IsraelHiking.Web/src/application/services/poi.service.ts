@@ -75,7 +75,7 @@ export class PoiService {
     private poisGeojson: GeoJSON.FeatureCollection<GeoJSON.Point> = {
         type: "FeatureCollection",
         features: []
-    };;
+    };
     private miniSearch: MiniSearch;
     private queueIsProcessing = false;
     private moveEndSubsription: Subscription;

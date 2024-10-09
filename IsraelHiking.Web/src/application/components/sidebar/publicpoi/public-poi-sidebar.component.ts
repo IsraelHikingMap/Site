@@ -54,7 +54,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     public updateLocation: boolean = false;
     public sourceImageUrls: SourceImageUrlPair[];
     public latlng: LatLngAlt;
-    public shareLinks = {} as PoiSocialLinks;;
+    public shareLinks = {} as PoiSocialLinks;
     public contribution = {} as Contribution;
     public isOpen$: Observable<boolean>;
 
