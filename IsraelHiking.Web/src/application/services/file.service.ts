@@ -258,7 +258,7 @@ export class FileService {
     public async writeStyle(styleFileName: string, styleText: string) {
         await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, styleFileName, styleText,
             { append: false, replace: true, truncate: 0 });
-        this.loggingService.info(`[Files] Write style finished succefully: ${styleFileName}`);
+        this.loggingService.info(`[Files] Write style finished successfully: ${styleFileName}`);
     }
 
     public async compressTextToBase64Zip(contents: {name: string; text: string}[]): Promise<string> {
