@@ -97,6 +97,8 @@ import { OverpassTurboService } from "./services/overpass-turbo.service";
 import { ImageAttributionService } from "./services/image-attribution.service";
 import { PmTilesService } from "./services/pmtiles.service";
 import { ApplicationUpdateService } from "./services/application-update.service";
+import { INatureService } from "./services/inature.service";
+import { WikidataService } from "./services/wikidata.service";
 import { OsmAddressesService } from "./services/osm-addresses.service";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
@@ -308,6 +310,8 @@ const initializeApplication = (injector: Injector) => async () => {
         ImageAttributionService,
         PmTilesService,
         ApplicationUpdateService,
+        INatureService,
+        WikidataService,
         OsmAddressesService,
         AudioPlayerFactory,
         FileSystemWrapper,
