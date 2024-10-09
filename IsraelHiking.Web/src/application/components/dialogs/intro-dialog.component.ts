@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import {
     MatDialog,
     MatDialogConfig,
@@ -7,7 +7,6 @@ import {
 import { AnimationOptions } from "ngx-lottie";
 import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { StopShowingIntroAction } from "../../reducers/configuration.reducer";
 import { AVAILABLE_LANGUAGES } from "../../reducers/initial-state";
@@ -22,22 +21,20 @@ import moreAnimationData from "../../../content/lottie/dialog-more.json";
     templateUrl: "./intro-dialog.component.html",
     styleUrls: ["./intro-dialog.component.scss"]
 })
-export class IntroDialogComponent extends BaseMapComponent {
+export class IntroDialogComponent {
 
     lottieLanguage: AnimationOptions = { animationData: languageAnimationData };
     lottieMaps: AnimationOptions = { animationData: mapsAnimationData };
     lottiePlan: AnimationOptions = { animationData: planAnimationData };
     lottieMore: AnimationOptions = { animationData: moreAnimationData };
 
-    public step: number;
+    public step: number = 0;
     public availableLanguages = AVAILABLE_LANGUAGES;
 
-    constructor(resources: ResourcesService,
-            private readonly dialogRef: MatDialogRef<IntroDialogComponent>,
-            private readonly store: Store) {
-        super(resources);
-        this.step = 0;
-    }
+    public readonly resources = inject(ResourcesService);
+
+    private readonly dialogRef = inject(MatDialogRef);
+    private readonly store = inject(Store);
 
     public static openDialog(dialog: MatDialog, runningContextSerivce: RunningContextService) {
         const options: MatDialogConfig = {};
@@ -63,4 +60,7 @@ export class IntroDialogComponent extends BaseMapComponent {
         this.dialogRef.close();
     }
 
+    public getLanuguageCode(): string {
+        return this.store.selectSnapshot((s) => s.configuration.language.code);
+    }
 }

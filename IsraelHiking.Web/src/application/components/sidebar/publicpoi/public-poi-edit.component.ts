@@ -1,8 +1,7 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, inject, input, OnInit } from "@angular/core";
 import { MatSelectChange } from "@angular/material/select";
 
 import { PoiService, ISelectableCategory } from "../../../services/poi.service";
-import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
 import type { EditablePublicPointData, IconColorLabel } from "../../../models/models";
 
@@ -11,20 +10,16 @@ import type { EditablePublicPointData, IconColorLabel } from "../../../models/mo
     templateUrl: "./public-poi-edit.component.html",
     styleUrls: ["./public-poi-edit.component.scss"]
 })
-export class PublicPointOfInterestEditComponent extends BaseMapComponent implements OnInit {
+export class PublicPointOfInterestEditComponent implements OnInit {
 
-    @Input()
-    public info: EditablePublicPointData;
+    public info = input<EditablePublicPointData>();
 
-    public categories: ISelectableCategory[];
-    public selectedCategory: ISelectableCategory;
+    public categories: ISelectableCategory[] = [];
+    public selectedCategory: ISelectableCategory = null;
 
-    constructor(resources: ResourcesService,
-                private readonly poiService: PoiService) {
-        super(resources);
-        this.selectedCategory = null;
-        this.categories = [];
-    }
+    public readonly resources = inject(ResourcesService);
+
+    private readonly poiService: PoiService = inject(PoiService);
 
     private initializeCategories() {
         const categories = this.poiService.getSelectableCategories();
@@ -35,13 +30,13 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
 
     public ngOnInit() {
         this.initializeCategories();
-        if (this.info.urls.length === 0) {
+        if (this.info().urls.length === 0) {
             this.addEmptyUrl();
         }
         let selectedIcon = null;
         let selectedCategory = null;
         for (const category of this.categories) {
-            const icon = category.icons.find(iconToFind => iconToFind.icon === this.info.icon);
+            const icon = category.icons.find(iconToFind => iconToFind.icon === this.info().icon);
             if (icon) {
                 selectedCategory = category;
                 selectedIcon = icon;
@@ -53,10 +48,10 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
             selectedCategory = this.categories.find(categoryToFind => categoryToFind.name === "Other");
         }
 
-        if (this.info.id && selectedIcon == null) {
-            selectedIcon = { icon: this.info.icon, color: "black", label: this.resources.other } as IconColorLabel;
+        if (this.info().id && selectedIcon == null) {
+            selectedIcon = { icon: this.info().icon, color: "black", label: this.resources.other } as IconColorLabel;
             selectedCategory.icons.push(selectedIcon);
-        } else if (!this.info.id && selectedIcon == null) {
+        } else if (!this.info().id && selectedIcon == null) {
             selectedIcon = selectedCategory.icons[0];
         }
         this.selectCategory({ value: selectedCategory } as MatSelectChange);
@@ -74,15 +69,15 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
 
     public selectIcon(icon: IconColorLabel) {
         this.selectedCategory.selectedIcon = icon;
-        this.info.icon = icon.icon;
+        this.info().icon = icon.icon;
     }
 
     public addEmptyUrl() {
-        this.info.urls.push("");
+        this.info().urls.push("");
     }
 
     public removeUrl(i: number) {
-        this.info.urls.splice(i, 1);
+        this.info().urls.splice(i, 1);
     }
 
     public trackByIndex(index: number) {
@@ -90,6 +85,6 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
     }
 
     public isPoint(): boolean {
-        return this.info != null && this.info.isPoint;
+        return this.info != null && this.info().isPoint;
     }
 }

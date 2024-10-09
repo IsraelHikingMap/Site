@@ -3,7 +3,6 @@ import { NgxsModule, Store } from "@ngxs/store";
 
 import { SelectedRouteService } from "./selected-route.service";
 import { ResourcesService } from "./resources.service";
-import { ToastServiceMockCreator } from "./toast.service.spec";
 import { RoutingProvider } from "./routing.provider";
 import { RoutesFactory } from "./routes.factory";
 import { SetSelectedRouteAction, RouteEditingReducer } from "../reducers/route-editing.reducer";
@@ -22,9 +21,10 @@ describe("Selected Route Service", () => {
     };
 
     beforeEach(() => {
-        const toastMock = new ToastServiceMockCreator();
-        toastMock.resourcesService.route = "route";
-        toastMock.resourcesService.split = "split";
+        const resourceService = {
+            route: "route",
+            split: "split"
+        };
         const routingProviderMock = {
             getRoute: () => Promise.resolve([])
         };
@@ -33,7 +33,7 @@ describe("Selected Route Service", () => {
                 NgxsModule.forRoot([RoutesReducer, RouteEditingReducer])
             ],
             providers: [
-                { provide: ResourcesService, useValue: toastMock.resourcesService },
+                { provide: ResourcesService, useValue: resourceService },
                 { provide: RoutingProvider, useValue: routingProviderMock },
                 RoutesFactory,
                 SelectedRouteService,

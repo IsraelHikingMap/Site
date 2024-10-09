@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import type { Immutable } from "immer";
 
 import { SpatialService } from "./spatial.service";
@@ -14,7 +14,7 @@ export type SnappingPointResponse = {
 export class SnappingService {
     private static readonly SENSITIVITY = 30;
 
-    constructor(private readonly mapService: MapService) { }
+    private readonly mapService = inject(MapService);
 
     /**
      * This method will snap to the nearest point. markerData will be null in case there were no points near by.

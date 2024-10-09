@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { orderBy } from "lodash-es";
@@ -25,16 +25,14 @@ interface IShareUrlSocialLinks {
 
 @Injectable()
 export class ShareUrlsService {
-    private syncing: boolean;
+    private syncing = false;
 
-    constructor(private readonly httpClient: HttpClient,
-                private readonly whatsAppService: WhatsAppService,
-                private readonly hashService: HashService,
-                private readonly loggingService: LoggingService,
-                private readonly databaseService: DatabaseService,
-                private readonly store: Store) {
-            this.syncing = false;
-    }
+    private readonly httpClient = inject(HttpClient);
+    private readonly whatsAppService = inject(WhatsAppService);
+    private readonly hashService = inject(HashService);
+    private readonly loggingService = inject(LoggingService);
+    private readonly databaseService = inject(DatabaseService);
+    private readonly store = inject(Store);
 
     public async initialize() {
         if (this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo == null) {

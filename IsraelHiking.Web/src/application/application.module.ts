@@ -99,6 +99,7 @@ import { PmTilesService } from "./services/pmtiles.service";
 import { ApplicationUpdateService } from "./services/application-update.service";
 import { INatureService } from "./services/inature.service";
 import { WikidataService } from "./services/wikidata.service";
+import { OsmAddressesService } from "./services/osm-addresses.service";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
@@ -117,7 +118,6 @@ import { RouteEditDialogComponent } from "./components/dialogs/routes/route-edit
 import { TracesDialogComponent } from "./components/dialogs/traces-dialog.component";
 import { SharesDialogComponent } from "./components/dialogs/shares-dialog.component";
 import { LanguageDialogComponent } from "./components/dialogs/language-dialog.component";
-import { DownloadDialogComponent } from "./components/dialogs/download-dialog.component";
 import { ShareDialogComponent } from "./components/dialogs/share-dialog.component";
 import { TermsOfServiceDialogComponent } from "./components/dialogs/terms-of-service-dialog.component";
 import { ConfirmDialogComponent } from "./components/dialogs/confirm-dialog.component";
@@ -144,7 +144,6 @@ import { RoutePointOverlayComponent } from "./components/overlays/route-point-ov
 import { PrivatePoiOverlayComponent } from "./components/overlays/private-poi-overlay.component";
 import { ClusterOverlayComponent } from "./components/overlays/cluster-overlay.component";
 import { GpsLocationOverlayComponent } from "./components/overlays/gps-location-overlay.component";
-import { ClearableOverlayComponent } from "./components/overlays/clearable-overlay.component";
 import { MissingPartOverlayComponent } from "./components/overlays/missing-part-overlay.component";
 import { SearchComponent } from "./components/search.component";
 import { InfoSidebarComponent } from "./components/sidebar/info-sidebar.component";
@@ -313,9 +312,9 @@ const initializeApplication = (injector: Injector) => async () => {
         ApplicationUpdateService,
         INatureService,
         WikidataService,
+        OsmAddressesService,
         AudioPlayerFactory,
         FileSystemWrapper,
-        // eslint-disable-next-line
         FileTransfer,
         SocialSharing,
         RouteEditPoiInteraction,
@@ -337,7 +336,6 @@ const initializeApplication = (injector: Injector) => async () => {
         PrivatePoiOverlayComponent,
         ClusterOverlayComponent,
         GpsLocationOverlayComponent,
-        ClearableOverlayComponent,
         MissingPartOverlayComponent,
         SearchComponent,
         InfoSidebarComponent,
@@ -368,7 +366,6 @@ const initializeApplication = (injector: Injector) => async () => {
         SharesDialogComponent,
         LanguageDialogComponent,
         IntroDialogComponent,
-        DownloadDialogComponent,
         ShareDialogComponent,
         TermsOfServiceDialogComponent,
         SendReportDialogComponent,

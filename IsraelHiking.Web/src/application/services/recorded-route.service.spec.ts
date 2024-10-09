@@ -4,7 +4,6 @@ import { TestBed, inject } from "@angular/core/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 
 import { RecordedRouteService } from "./recorded-route.service";
-import { ToastServiceMockCreator } from "./toast.service.spec";
 import { GeoLocationService } from "./geo-location.service";
 import { ResourcesService } from "./resources.service";
 import { TracesService } from "./traces.service";
@@ -25,7 +24,6 @@ describe("Recorded Route Service", () => {
     };
 
     beforeEach(() => {
-        const toastMock = new ToastServiceMockCreator();
         const loggingServiceMock = {
             debug: () => { },
             info: () => { }
@@ -36,8 +34,10 @@ describe("Recorded Route Service", () => {
         TestBed.configureTestingModule({
             imports: [NgxsModule.forRoot([GpsReducer, RecordedRouteReducer])],
             providers: [
-                { provide: ResourcesService, useValue: toastMock.resourcesService },
-                { provide: ToastService, useValue: toastMock.toastService },
+                { provide: ResourcesService, useValue: {} },
+                { provide: ToastService, useValue: {
+                    warning: jasmine.createSpy()
+                } },
                 { provide: LoggingService, useValue: loggingServiceMock },
                 { provide: TracesService, useValue: tracesServiceMock },
                 GeoLocationService,

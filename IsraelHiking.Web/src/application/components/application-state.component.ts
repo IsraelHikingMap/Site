@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Store } from "@ngxs/store";
 
@@ -14,14 +14,14 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
     template: "<div></div>"
 })
 export class ApplicationStateComponent implements OnInit {
-    constructor(private readonly router: Router,
-                private readonly route: ActivatedRoute,
-                private readonly sidebarService: SidebarService,
-                private readonly dataContainerService: DataContainerService,
-                private readonly fitBoundsService: FitBoundsService,
-                private readonly store: Store,
-                private readonly destroyRef: DestroyRef) {
-    }
+    
+    private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
+    private readonly sidebarService = inject(SidebarService);
+    private readonly dataContainerService = inject(DataContainerService);
+    private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly store = inject(Store);
+    private readonly destroyRef = inject(DestroyRef);
 
     public ngOnInit() {
         this.route.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {

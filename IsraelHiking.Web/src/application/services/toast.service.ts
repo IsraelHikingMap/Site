@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { ResourcesService } from "./resources.service";
@@ -22,11 +22,10 @@ export interface IConfirmOptions {
 export class ToastService {
     private static readonly DURATION = 6000;
 
-    constructor(private readonly resources: ResourcesService,
-                private readonly matDialog: MatDialog,
-                private readonly snackbar: MatSnackBar,
-                private readonly loggingService: LoggingService) {
-    }
+    private readonly resources = inject(ResourcesService);
+    private readonly matDialog = inject(MatDialog);
+    private readonly snackbar = inject(MatSnackBar);
+    private readonly loggingService = inject(LoggingService);
 
     public error(ex: Error | unknown, message: string, title?: string) {
         this.loggingService.error(message + ": " + (ex as Error).message);

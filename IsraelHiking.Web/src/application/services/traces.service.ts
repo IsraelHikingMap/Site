@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { Store } from "@ngxs/store";
@@ -16,13 +16,12 @@ import type { Trace, ApplicationState, DataContainer, RouteData } from "../model
 @Injectable()
 export class TracesService {
 
-    constructor(private readonly resources: ResourcesService,
-                private readonly httpClient: HttpClient,
-                private readonly loggingService: LoggingService,
-                private readonly runningContextService: RunningContextService,
-                private readonly databaseService: DatabaseService,
-                private readonly store: Store) {
-    }
+    private readonly resources = inject(ResourcesService);
+    private readonly httpClient = inject(HttpClient);
+    private readonly loggingService = inject(LoggingService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly databaseService = inject(DatabaseService);
+    private readonly store = inject(Store);
 
     public getMissingParts(traceId: string): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
         this.loggingService.info(`[Traces] Getting missing parts for ${traceId}`);

@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter, NgZone } from "@angular/core";
+import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { cloneDeep, isEqualWith } from "lodash-es";
 import { firstValueFrom } from "rxjs";
@@ -100,38 +100,33 @@ export class PoiService {
         } }
     }
 
-    private poisCache: GeoJSON.Feature[];
-    private queueIsProcessing: boolean;
+    private poisCache: GeoJSON.Feature[] = [];
+    private queueIsProcessing: boolean= false;
     private offlineState: Immutable<OfflineState>;
 
-    public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Geometry, PoiProperties>;
-    public poisChanged: EventEmitter<void>;
+    public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Geometry, PoiProperties>= {
+        type: "FeatureCollection",
+        features: []
+    };
+    public poisChanged = new EventEmitter<void>;
 
-    constructor(private readonly resources: ResourcesService,
-                private readonly httpClient: HttpClient,
-                private readonly ngZone: NgZone,
-                private readonly whatsappService: WhatsAppService,
-                private readonly hashService: HashService,
-                private readonly databaseService: DatabaseService,
-                private readonly runningContextService: RunningContextService,
-                private readonly geoJsonParser: GeoJsonParser,
-                private readonly loggingService: LoggingService,
-                private readonly mapService: MapService,
-                private readonly connectionService: ConnectionService,
-                private readonly overpassTurboService: OverpassTurboService,
-                private readonly iNatureService: INatureService,
-                private readonly wikidataService: WikidataService,
-                private readonly store: Store
-    ) {
-        this.poisCache = [];
-        this.poisChanged = new EventEmitter();
-        this.queueIsProcessing = false;
+    private readonly resources = inject(ResourcesService);
+    private readonly httpClient = inject(HttpClient);
+    private readonly ngZone = inject(NgZone);
+    private readonly whatsappService = inject(WhatsAppService);
+    private readonly hashService = inject(HashService);
+    private readonly databaseService = inject(DatabaseService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly geoJsonParser = inject(GeoJsonParser);
+    private readonly loggingService = inject(LoggingService);
+    private readonly mapService = inject(MapService);
+    private readonly connectionService = inject(ConnectionService);
+    private readonly iNatureService = inject(INatureService);
+    private readonly wikidataService = inject(WikidataService);
+    private readonly overpassTurboService = inject(OverpassTurboService);
+    private readonly store = inject(Store);
 
-        this.poiGeojsonFiltered = {
-            type: "FeatureCollection",
-            features: []
-        };
-
+    constructor() {
         this.store.select((s: ApplicationState) => s.offlineState).subscribe(offlineState => this.offlineState = offlineState);
     }
 

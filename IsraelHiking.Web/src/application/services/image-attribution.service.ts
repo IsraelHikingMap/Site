@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { firstValueFrom, timeout } from "rxjs";
 
 import { ResourcesService } from "./resources.service";
@@ -11,12 +11,10 @@ export type ImageAttribution = {
 
 @Injectable()
 export class ImageAttributionService {
-    private attributionImageCache: Map<string, ImageAttribution>;
+    private attributionImageCache = new Map<string, ImageAttribution>();
 
-    constructor(private readonly resources: ResourcesService,
-        private readonly httpClient: HttpClient) {
-        this.attributionImageCache = new Map<string, ImageAttribution>();
-    }
+    private readonly resources = inject(ResourcesService);
+    private readonly httpClient = inject(HttpClient);
 
     public async getAttributionForImage(imageUrl: string): Promise<ImageAttribution> {
         if (imageUrl == null) {

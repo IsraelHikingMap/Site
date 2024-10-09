@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, inject, OnInit, ViewEncapsulation } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatDialog } from "@angular/material/dialog";
 import { FormControl } from "@angular/forms";
@@ -8,7 +8,6 @@ import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ShareDialogComponent } from "./share-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
@@ -24,34 +23,31 @@ import type { ApplicationState, ShareUrl } from "../../models/models";
     styleUrls: ["shares-dialog.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class SharesDialogComponent extends BaseMapComponent implements OnInit {
+export class SharesDialogComponent implements OnInit {
 
     public filteredShareUrls: Immutable<ShareUrl[]>;
-    public shareUrlInEditMode: ShareUrl;
-    public selectedShareUrlId: string;
-    public loadingShareUrls: boolean;
-    public searchTerm: FormControl<string>;
+    public shareUrlInEditMode: ShareUrl = null;
+    public selectedShareUrlId: string = null;
+    public loadingShareUrls: boolean = false;
+    public searchTerm = new FormControl<string>("");;
     public shownShareUrl$: Observable<Immutable<ShareUrl>>;
 
     private sessionSearchTerm = "";
-    private page: number;
+    private page: number = 1;
 
-    constructor(resources: ResourcesService,
-                private readonly dialog: MatDialog,
-                private readonly toastService: ToastService,
-                private readonly shareUrlsService: ShareUrlsService,
-                private readonly dataContainerService: DataContainerService,
-                private readonly socialSharing: SocialSharing,
-                private readonly runningContextService: RunningContextService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly store: Store
-    ) {
-        super(resources);
-        this.loadingShareUrls = false;
-        this.shareUrlInEditMode = null;
-        this.selectedShareUrlId = null;
-        this.page = 1;
-        this.searchTerm = new FormControl<string>("");
+    public readonly resources = inject(ResourcesService);
+
+
+    private readonly dialog = inject(MatDialog);
+    private readonly toastService = inject(ToastService);
+    private readonly shareUrlsService = inject(ShareUrlsService);
+    private readonly dataContainerService = inject(DataContainerService);
+    private readonly socialSharing = inject(SocialSharing);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly store = inject(Store);
+
+    constructor() {
         this.searchTerm.valueChanges.pipe(takeUntilDestroyed()).subscribe((searchTerm: string) => {
             this.updateFilteredLists(searchTerm);
         });

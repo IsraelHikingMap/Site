@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
@@ -6,7 +6,6 @@ import { Store } from "@ngxs/store";
 
 import { LayersService } from "./layers.service";
 import { SidebarService } from "./sidebar.service";
-import { DatabaseService } from "./database.service";
 import { FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
@@ -18,16 +17,15 @@ import type { ApplicationState } from "../models/models";
 
 @Injectable()
 export class OfflineFilesDownloadService {
-    constructor(private readonly resources: ResourcesService,
-                private readonly sidebarService: SidebarService,
-                private readonly layersService: LayersService,
-                private readonly databaseService: DatabaseService,
-                private readonly fileService: FileService,
-                private readonly loggingService: LoggingService,
-                private readonly httpClient: HttpClient,
-                private readonly toastService: ToastService,
-                private readonly store: Store) {
-    }
+
+    private readonly resources = inject(ResourcesService);
+    private readonly sidebarService = inject(SidebarService);
+    private readonly layersService = inject(LayersService);
+    private readonly fileService = inject(FileService);
+    private readonly loggingService = inject(LoggingService);
+    private readonly httpClient = inject(HttpClient);
+    private readonly toastService = inject(ToastService);
+    private readonly store = inject(Store);
 
     public async initialize(): Promise<void> {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);

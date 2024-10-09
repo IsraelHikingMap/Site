@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from "@angular/core";
+import { inject, Pipe, PipeTransform } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { encode } from "base64-arraybuffer";
 import { firstValueFrom } from "rxjs";
@@ -8,10 +8,10 @@ import { DatabaseService } from "../services/database.service";
 
 @Pipe({ name: "offlineImage" })
 export class OfflineImagePipe implements PipeTransform {
-    constructor(private readonly http: HttpClient,
-                private readonly runningContextService: RunningContextService,
-                private readonly databaseService: DatabaseService) {
-    }
+
+    private readonly http = inject(HttpClient);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly databaseService = inject(DatabaseService);
 
     public async transform(value: string, cache: boolean): Promise<string> {
         if (!this.runningContextService.isOnline) {

@@ -1,15 +1,15 @@
 import invert from "invert-color";
 import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { ToastService } from "../../../services/toast.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { SelectedRouteService } from "../../../services/selected-route.service";
 import { SetOpacityAndWeightAction } from "../../../reducers/route-editing.reducer";
 import type { RouteData } from "../../../models/models";
+import { inject } from "@angular/core";
 
-export abstract class RouteBaseDialogComponent extends BaseMapComponent {
+export abstract class RouteBaseDialogComponent {
     public colors: string[];
     public isNew: boolean;
     public title: string;
@@ -17,12 +17,14 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
 
     public routeData: RouteData;
 
-    constructor(resources: ResourcesService,
-                protected readonly selectedRouteService: SelectedRouteService,
-                protected readonly routesFactory: RoutesFactory,
-                protected readonly toastService: ToastService,
-                protected readonly store: Store) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
+
+    protected readonly selectedRouteService = inject(SelectedRouteService);
+    protected readonly routesFactory = inject(RoutesFactory);
+    protected readonly toastService = inject(ToastService);
+    protected readonly store = inject(Store);
+
+    constructor() {
         this.colors = this.routesFactory.colors;
     }
 

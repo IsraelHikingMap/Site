@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
@@ -7,35 +7,22 @@ import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { SetTokenAction, SetUserInfoAction } from "../reducers/user.reducer";
 import { Urls } from "../urls";
-import type { ApplicationState, OsmUserDetails, UserState, UserInfo } from "../models/models";
+import type { ApplicationState, OsmUserDetails } from "../models/models";
 
 @Injectable()
 export class AuthorizationService {
 
     private static readonly OAUTH_CODE = "code";
 
-    private readonly redirectUrl: string;
-
-    private userState: UserState;
-
-    constructor(private readonly httpClient: HttpClient,
-                private readonly runningContextService: RunningContextService,
-                private readonly loggingService: LoggingService,
-                private readonly store: Store) {
-        this.redirectUrl = this.runningContextService.isCapacitor ? "ihm://oauth_callback/" : Urls.emptyAuthHtml;
-        this.store.select((state: ApplicationState) => state.userState).subscribe(us => this.userState = us);
-    }
+    private readonly httpClient = inject(HttpClient);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly loggingService = inject(LoggingService);
+    private readonly store = inject(Store);
+    private readonly redirectUrl = this.runningContextService.isCapacitor ? Urls.ihmAuthUrl : Urls.emptyAuthHtml;
 
     public isLoggedIn(): boolean {
-        return this.userState.userInfo != null;
-    }
-
-    public getUserInfo(): UserInfo {
-        return this.userState.userInfo;
-    }
-
-    public getToken(): string {
-        return this.userState.token;
+        const userState = this.store.selectSnapshot((s: ApplicationState) => s.userState);
+        return userState.userInfo != null;
     }
 
     public logout() {
@@ -142,40 +129,5 @@ export class AuthorizationService {
             }
         } catch { } // eslint-disable-line
         setTimeout(() => this.watchPopup(popup, resolve, reject), 100);
-    }
-
-    public getEditOsmLocationAddress(baseLayerAddress: string, zoom: number, latitude: number, longitude: number): string {
-        const background = this.getBackgroundStringForOsmAddress(baseLayerAddress);
-        return `${Urls.osmBase}/edit#${background}&map=${zoom}/${latitude}/${longitude}`;
-    }
-
-    public getEditOsmGpxAddress(baseLayerAddress: string, gpxId: string) {
-        const background = this.getBackgroundStringForOsmAddress(baseLayerAddress);
-        return `${Urls.osmBase}/edit?gpx=${gpxId}#${background}`;
-    }
-
-    public getEditElementOsmAddress(baseLayerAddress: string, id: string) {
-        const elementType = id.split("_")[0];
-        const elementId = id.split("_")[1];
-        const background = this.getBackgroundStringForOsmAddress(baseLayerAddress);
-        return `${Urls.osmBase}/edit?${elementType}=${elementId}#${background}`;
-    }
-
-    public getElementOsmAddress(id: string) {
-        const elementType = id.split("_")[0];
-        const elementId = id.split("_")[1];
-        return `${Urls.osmBase}/${elementType}/${elementId}`;
-    }
-
-    private getBackgroundStringForOsmAddress(baseLayerAddress: string): string {
-        let background = "background=bing";
-        if (baseLayerAddress !== "") {
-            if (baseLayerAddress.startsWith("/")) {
-                baseLayerAddress = Urls.baseTilesAddress + baseLayerAddress;
-            }
-            const address = baseLayerAddress.replace("{s}", "s");
-            background = `background=custom:${encodeURIComponent(address)}`;
-        }
-        return background;
     }
 }
