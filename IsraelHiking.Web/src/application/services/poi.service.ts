@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter, NgZone } from "@angular/core";
+import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { NgProgress } from "ngx-progressbar";
 import { uniq, cloneDeep, isEqualWith } from "lodash-es";
@@ -71,45 +71,38 @@ export interface ISelectableCategory extends Category {
 
 @Injectable()
 export class PoiService {
-    private poisCache: GeoJSON.Feature[];
-    private poisGeojson: GeoJSON.FeatureCollection<GeoJSON.Point>;
+    private poisCache: GeoJSON.Feature[] = [];
+    private poisGeojson: GeoJSON.FeatureCollection<GeoJSON.Point> = {
+        type: "FeatureCollection",
+        features: []
+    };;
     private miniSearch: MiniSearch;
-    private queueIsProcessing: boolean;
+    private queueIsProcessing = false;
     private moveEndSubsription: Subscription;
     private offlineState: Immutable<OfflineState>;
 
-    public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Point>;
-    public poisChanged: EventEmitter<void>;
+    public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Point> = {
+        type: "FeatureCollection",
+        features: []
+    };
+    public poisChanged = new EventEmitter<void>;
 
-    constructor(private readonly resources: ResourcesService,
-                private readonly httpClient: HttpClient,
-                private readonly ngZone: NgZone,
-                private readonly whatsappService: WhatsAppService,
-                private readonly hashService: HashService,
-                private readonly databaseService: DatabaseService,
-                private readonly runningContextService: RunningContextService,
-                private readonly geoJsonParser: GeoJsonParser,
-                private readonly loggingService: LoggingService,
-                private readonly mapService: MapService,
-                private readonly fileService: FileService,
-                private readonly connectionService: ConnectionService,
-                private readonly ngPregress: NgProgress,
-                private readonly store: Store
-    ) {
-        this.poisCache = [];
-        this.poisChanged = new EventEmitter();
-        this.queueIsProcessing = false;
-        this.moveEndSubsription = null;
+    private readonly resources = inject(ResourcesService);
+    private readonly httpClient = inject(HttpClient);
+    private readonly ngZone = inject(NgZone);
+    private readonly whatsappService = inject(WhatsAppService);
+    private readonly hashService = inject(HashService);
+    private readonly databaseService = inject(DatabaseService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly geoJsonParser = inject(GeoJsonParser);
+    private readonly loggingService = inject(LoggingService);
+    private readonly mapService = inject(MapService);
+    private readonly fileService = inject(FileService);
+    private readonly connectionService = inject(ConnectionService);
+    private readonly ngPregress = inject(NgProgress);
+    private readonly store = inject(Store);
 
-        this.poiGeojsonFiltered = {
-            type: "FeatureCollection",
-            features: []
-        };
-
-        this.poisGeojson = {
-            type: "FeatureCollection",
-            features: []
-        };
+    constructor() {
         this.miniSearch = new MiniSearch({
             idField: "poiId",
             extractField: (p: GeoJSON.Feature<GeoJSON.Geometry>, fieldName) => {

@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { Store } from "@ngxs/store";
 
@@ -43,10 +43,9 @@ export class HashService {
     private static readonly HIGH_PERSICION = 6;
     private static readonly ZOOM_PERSICION = 2;
 
-    constructor(private readonly router: Router,
-                private readonly mapService: MapService,
-                private readonly store: Store) {
-    }
+    private readonly router = inject(Router);
+    private readonly mapService = inject(MapService);
+    private readonly store = inject(Store);
 
     public resetAddressbar(): void {
         if (this.store.selectSnapshot((s: ApplicationState) => s.poiState).isSidebarOpen) {

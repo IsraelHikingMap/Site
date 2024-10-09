@@ -1,11 +1,10 @@
-import { Component, ViewEncapsulation } from "@angular/core";
+import { Component, inject, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
-import { BaseMapComponent } from "../base-map.component";
 import { BaseLayerAddDialogComponent } from "../dialogs/layers/base-layer-add-dialog.component";
 import { BaseLayerEditDialogComponent } from "../dialogs/layers/base-layer-edit-dialog.component";
 import { OverlayAddDialogComponent } from "../dialogs/layers/overlay-add-dialog.component";
@@ -31,7 +30,7 @@ import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGro
     styleUrls: ["./layers-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class LayersSidebarComponent extends BaseMapComponent {
+export class LayersSidebarComponent {
 
     public baseLayers$: Observable<Immutable<EditableLayer[]>>;
     public overlays$: Observable<Immutable<Overlay[]>>;
@@ -41,17 +40,19 @@ export class LayersSidebarComponent extends BaseMapComponent {
 
     public manageSubscriptions: string;
 
-    constructor(resources: ResourcesService,
-                private readonly dialog: MatDialog,
-                private readonly purchaseService: PurchaseService,
-                private readonly layersService: LayersService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly sidebarService: SidebarService,
-                private readonly runningContextService: RunningContextService,
-                private readonly toastService: ToastService,
-                private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
-                private readonly store: Store) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
+
+    private readonly dialog = inject(MatDialog);
+    private readonly purchaseService = inject(PurchaseService);
+    private readonly layersService = inject(LayersService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly sidebarService = inject(SidebarService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly toastService = inject(ToastService);
+    private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
+    private readonly store = inject(Store);
+
+    constructor() {
         this.manageSubscriptions = this.runningContextService.isIos
             ? "https://apps.apple.com/account/subscriptions"
             : "https://play.google.com/store/account/subscriptions";

@@ -1,9 +1,8 @@
-import { Component, DestroyRef } from "@angular/core";
+import { Component, DestroyRef, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { GeoLocationService } from "../services/geo-location.service";
 import { ToastService } from "../services/toast.service";
@@ -23,34 +22,31 @@ import type { LatLngAlt, ApplicationState } from "../models/models";
     templateUrl: "./location.component.html",
     styleUrls: ["./location.component.scss"]
 })
-export class LocationComponent extends BaseMapComponent {
+export class LocationComponent {
 
-    private lastSpeed: number;
-    private lastSpeedTime: number;
-    private isPanned: boolean;
+    private lastSpeed: number = null;
+    private lastSpeedTime: number = null;
+    private isPanned: boolean = false;
 
     public locationFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     public distanceFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
-    public isKeepNorthUp: boolean;
-    public locationLatLng: LatLngAlt;
-    public showDistance: boolean;
+    public isKeepNorthUp: boolean = false;
+    public locationLatLng: LatLngAlt = null;
+    public showDistance: boolean = false;
 
-    constructor(resources: ResourcesService,
-                private readonly geoLocationService: GeoLocationService,
-                private readonly toastService: ToastService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly recordedRouteService: RecordedRouteService,
-                private readonly fitBoundsService: FitBoundsService,
-                private readonly deviceOrientationService: DeviceOrientationService,
-                private readonly store: Store,
-                private readonly destroyRef: DestroyRef,
-                private readonly mapComponent: MapComponent) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
 
-        this.isKeepNorthUp = false;
-        this.locationLatLng = null;
-        this.lastSpeed = null;
-        this.lastSpeedTime = null;
+    private readonly geoLocationService = inject(GeoLocationService);
+    private readonly toastService = inject(ToastService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly recordedRouteService = inject(RecordedRouteService);
+    private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly deviceOrientationService = inject(DeviceOrientationService);
+    private readonly store = inject(Store);
+    private readonly destroyRef = inject(DestroyRef);
+    private readonly mapComponent = inject(MapComponent);
+
+    constructor() {
         this.clearLocationFeatureCollection();
 
         this.store.select((state: ApplicationState) => state.inMemoryState.distance).pipe(takeUntilDestroyed()).subscribe(distance => {

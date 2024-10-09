@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Direction } from "@angular/cdk/bidi";
 import { Store } from "@ngxs/store";
 
@@ -10,6 +10,9 @@ import type { ApplicationState, Language, LanguageCode } from "../models/models"
 
 @Injectable()
 export class ResourcesService {
+
+    private readonly gettextCatalog = inject(GetTextCatalogService);
+    private readonly store = inject(Store);
 
     public direction: Direction;
     public start: string;
@@ -453,10 +456,6 @@ export class ResourcesService {
     public legendCemetery: string;
     public legendQuarry: string;
     public legendEmpty: string;
-
-    constructor(private readonly gettextCatalog: GetTextCatalogService,
-                private readonly store: Store) {
-    }
 
     public async initialize() {
         await this.setLanguageInternal(this.store.selectSnapshot((s: ApplicationState) => s.configuration).language);

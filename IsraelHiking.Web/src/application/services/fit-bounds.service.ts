@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
 
 import { SidebarService } from "./sidebar.service";
@@ -10,13 +10,11 @@ import type { Bounds, LatLngAlt } from "../models/models";
 @Injectable()
 export class FitBoundsService {
     public static readonly DEFAULT_MAX_ZOOM = 16;
-    public isFlying: boolean;
+    public isFlying = false;
 
-    constructor(private readonly sidebarService: SidebarService,
-                private readonly mapService: MapService,
-                private readonly store: Store) {
-        this.isFlying = false;
-    }
+    private readonly sidebarService = inject(SidebarService);
+    private readonly mapService = inject(MapService);
+    private readonly store = inject(Store);
 
     public async fitBounds(bounds: Bounds, noPadding = false) {
         await this.mapService.initializationPromise;

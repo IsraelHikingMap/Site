@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Map } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 
@@ -10,18 +10,14 @@ import type { ApplicationState } from "../models/models";
 export class MapService {
     private static readonly NOT_FOLLOWING_TIMEOUT = 20000;
 
-    public map: Map;
-    public initializationPromise: Promise<void>;
-
     private resolve: (value?: void | PromiseLike<void>) => void;
+    private missingImagesArray: string[] = [];
 
-    private missingImagesArray: string[];
+    private readonly cancelableTimeoutService = inject(CancelableTimeoutService);
+    private readonly store = inject(Store);
 
-    constructor(private readonly cancelableTimeoutService: CancelableTimeoutService,
-        private readonly store: Store) {
-        this.initializationPromise = new Promise((resolve) => { this.resolve = resolve; });
-        this.missingImagesArray = [];
-    }
+    public map: Map;
+    public initializationPromise = new Promise<void>((resolve) => { this.resolve = resolve; });
 
     public setMap(map: Map) {
         this.map = map;

@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
 import "cordova-plugin-purchase";
 
@@ -12,11 +12,11 @@ const OFFLINE_MAPS_SUBSCRIPTION = "offline_map";
 
 @Injectable()
 export class PurchaseService {
-    constructor(private readonly runningContextService: RunningContextService,
-                private readonly loggingService: LoggingService,
-                private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
-                private readonly store: Store) {
-    }
+
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly loggingService = inject(LoggingService);
+    private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
+    private readonly store = inject(Store);
 
     public async initialize() {
         if (!this.runningContextService.isCapacitor) {

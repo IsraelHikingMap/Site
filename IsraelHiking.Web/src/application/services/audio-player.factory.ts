@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { NativeAudio } from "@capgo/native-audio";
 
 import { RunningContextService } from "./running-context.service";
@@ -10,8 +10,8 @@ export interface IAudioPlayer {
 
 @Injectable()
 export class AudioPlayerFactory {
-    constructor(private readonly runningContext: RunningContextService,
-        private readonly loggingService: LoggingService) { }
+    private readonly runningContext = inject(RunningContextService);
+    private readonly loggingService = inject(LoggingService);
 
     public async create(): Promise<IAudioPlayer> {
         if (!this.runningContext.isCapacitor) {

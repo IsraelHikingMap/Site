@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { debounceTime } from "rxjs/operators";
 import { addProtocol } from "maplibre-gl";
@@ -40,14 +40,12 @@ export class DatabaseService {
     private imagesDatabase: Dexie;
     private shareUrlsDatabase: Dexie;
     private tracesDatabase: Dexie;
-    private updating: boolean;
+    private updating = false;
 
-    constructor(private readonly loggingService: LoggingService,
-                private readonly runningContext: RunningContextService,
-                private readonly pmTilesService: PmTilesService,
-                private readonly store: Store) {
-        this.updating = false;
-    }
+    private readonly loggingService = inject(LoggingService);
+    private readonly runningContext = inject(RunningContextService);
+    private readonly pmTilesService = inject(PmTilesService);
+    private readonly store = inject(Store);
 
     public async initialize() {
         this.stateDatabase = new Dexie(DatabaseService.STATE_DB_NAME);

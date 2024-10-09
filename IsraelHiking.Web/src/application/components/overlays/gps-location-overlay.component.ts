@@ -1,10 +1,9 @@
-import { Component, Input, Output, EventEmitter } from "@angular/core";
+import { Component, inject, input, output } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Observable } from "rxjs";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "../base-map.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { AddSimplePoiDialogComponent } from "../dialogs/add-simple-poi-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -21,33 +20,32 @@ import type { ApplicationState, LatLngAlt, LinkData } from "../../models/models"
     selector: "gps-location-overlay",
     templateUrl: "./gps-location-overlay.component.html"
 })
-export class GpsLocationOverlayComponent extends BaseMapComponent {
+export class GpsLocationOverlayComponent {
 
-    @Input()
-    public latlng: LatLngAlt;
+    public latlng = input<LatLngAlt>();
 
-    @Output()
-    public closed = new EventEmitter();
+    public closed = output();
 
     public distance$: Observable<boolean>;
-    public hideCoordinates: boolean;
+    public hideCoordinates: boolean = true;
 
-    constructor(resources: ResourcesService,
-                private readonly matDialog: MatDialog,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly runningContextService: RunningContextService,
-                private readonly socialSharing: SocialSharing,
-                private readonly hashService: HashService,
-                private readonly toastService: ToastService,
-                private readonly store: Store) {
-        super(resources);
-        this.hideCoordinates = true;
+    public readonly resources = inject(ResourcesService);
+
+    private readonly matDialog = inject(MatDialog);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly socialSharing = inject(SocialSharing);
+    private readonly hashService = inject(HashService);
+    private readonly toastService = inject(ToastService);
+    private readonly store = inject(Store);
+
+    constructor() {
         this.distance$ = this.store.select((state: ApplicationState) => state.inMemoryState.distance);
     }
 
     public addPointToRoute() {
         const markerData = {
-            latlng: { ...this.latlng },
+            latlng: { ...this.latlng() },
             title: "",
             description: "",
             type: "star",
@@ -73,7 +71,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
             return;
         }
         AddSimplePoiDialogComponent.openDialog(this.matDialog, {
-            latlng: { ...this.latlng },
+            latlng: { ...this.latlng() },
             description: "",
             imageLink: null,
             markerType: "star",
@@ -92,9 +90,9 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
     }
 
     public shareMyLocation() {
-        const ihmCoordinateUrl = this.hashService.getFullUrlFromLatLng(this.latlng);
+        const ihmCoordinateUrl = this.hashService.getFullUrlFromLatLng(this.latlng());
         this.socialSharing.shareWithOptions({
-            message: `geo:${this.latlng.lat},${this.latlng.lng}\n${ihmCoordinateUrl}`
+            message: `geo:${this.latlng().lat},${this.latlng().lng}\n${ihmCoordinateUrl}`
         });
         this.closed.emit();
     }

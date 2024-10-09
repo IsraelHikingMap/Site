@@ -1,7 +1,6 @@
-import { Component, ElementRef, ViewChild, AfterViewInit, InjectionToken, Inject, ViewEncapsulation, EventEmitter } from "@angular/core";
+import { Component, ElementRef, AfterViewInit, InjectionToken, ViewEncapsulation, EventEmitter, viewChild, inject } from "@angular/core";
 import PhotoSwipe from "photoswipe";
 
-import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 
 export const PHOTO_SWIPE_DATA = new InjectionToken<PhotoSwipeData>("PHOTO_SWIPE_DATA");
@@ -17,23 +16,15 @@ export type PhotoSwipeData = {
     styleUrls: ["./photoswipe.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class PhotoSwpieComponent extends BaseMapComponent implements AfterViewInit{
+export class PhotoSwpieComponent implements AfterViewInit{
 
-    @ViewChild("photoswipe")
-    public photoswipe: ElementRef;
-    public closed: EventEmitter<void>;
-
-    private data: PhotoSwipeData;
-
-    constructor(resources: ResourcesService,
-                @Inject(PHOTO_SWIPE_DATA) data: PhotoSwipeData) {
-        super(resources);
-        this.data = data;
-        this.closed = new EventEmitter();
-    }
+    public readonly resources = inject(ResourcesService);
+    public photoswipe = viewChild<ElementRef>("photoswipe");
+    public closed = new EventEmitter();
+    private data = inject(PHOTO_SWIPE_DATA);
 
     public ngAfterViewInit(): void {
-        const pswpElement = this.photoswipe.nativeElement;
+        const pswpElement = this.photoswipe().nativeElement;
 
         const dataSource = this.data.imageUrls.map(imageUrl => ({
             src: imageUrl,

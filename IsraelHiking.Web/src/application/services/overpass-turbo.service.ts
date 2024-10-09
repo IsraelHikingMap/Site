@@ -1,12 +1,13 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { firstValueFrom } from "rxjs";
 import { addProtocol } from "maplibre-gl";
 import osmtogeojson from "osmtogeojson";
 
 @Injectable()
 export class OverpassTurboService {
-    constructor(private readonly httpClient: HttpClient) {}
+
+    private readonly httpClient = inject(HttpClient);
 
     public initialize() {
         addProtocol("overpass", async (params, _abortController) => {

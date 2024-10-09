@@ -1,10 +1,9 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Observable, combineLatest, throttleTime } from "rxjs";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
-import { BaseMapComponent } from "../base-map.component";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { ResourcesService } from "../../services/resources.service";
 import { SpatialService } from "../../services/spatial.service";
@@ -14,34 +13,32 @@ import { ApplicationState, LatLngAltTime, RecordedRoute } from "../../models/mod
     selector: "recorded-route",
     templateUrl: "./recorded-route.component.html"
 })
-export class RecordedRouteComponent extends BaseMapComponent {
+export class RecordedRouteComponent {
 
     static readonly NUMBER_OF_POINTS_IN_ROUTE_SPLIT = 4000;
 
     public isAddingPoi$: Observable<boolean>;
-    public recordedRouteSegments: GeoJSON.Feature<GeoJSON.LineString>[];
+    public recordedRouteSegments: GeoJSON.Feature<GeoJSON.LineString>[] = [];
     public lastRouteSegment: GeoJSON.Feature<GeoJSON.LineString>;
-    public startPointGeoJson: GeoJSON.Feature<GeoJSON.Point>;
+    public startPointGeoJson: GeoJSON.Feature<GeoJSON.Point> = {
+        type: "Feature",
+        geometry: {
+            type: "Point",
+            coordinates: []
+        },
+        properties: {}
+    };
     public recordedRoute$: Observable<Immutable<RecordedRoute>>;
     
     private currentPosition$: Observable<Immutable<GeolocationPosition>>;
-    private lastSplit: number;
+    private lastSplit: number = 0;
 
-    constructor(resources: ResourcesService,
-        private readonly routeEditPoiInteraction: RouteEditPoiInteraction,
-        private readonly store: Store) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
 
-        this.recordedRouteSegments = [];
-        this.lastSplit = 0;
-        this.startPointGeoJson = {
-            type: "Feature",
-            geometry: {
-                type: "Point",
-                coordinates: []
-            },
-            properties: {}
-        };
+    private readonly routeEditPoiInteraction = inject(RouteEditPoiInteraction);
+    private readonly store = inject(Store);
+
+    constructor() {
         this.recordedRoute$ = this.store.select((state: ApplicationState) => state.recordedRouteState.route);
         this.currentPosition$ = this.store.select((state: ApplicationState) => state.gpsState.currentPosition);
 

@@ -1,14 +1,9 @@
-import { Component, ViewEncapsulation, Inject } from "@angular/core";
+import { Component, ViewEncapsulation, inject } from "@angular/core";
 import { MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { Store } from "@ngxs/store";
 
 import { RouteBaseDialogComponent } from "./route-base-dialog.component";
-import { ResourcesService } from "../../../services/resources.service";
 import { FileService } from "../../../services/file.service";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
-import { ToastService } from "../../../services/toast.service";
-import { RoutesFactory } from "../../../services/routes.factory";
-import { SelectedRouteService } from "../../../services/selected-route.service";
 import { SpatialService } from "../../../services/spatial.service";
 import { DeleteRouteAction, ChangeRoutePropertiesAction } from "../../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../../reducers/route-editing.reducer";
@@ -23,21 +18,17 @@ import type { DataContainer, RouteData, LatLngAlt } from "../../../models/models
 export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     private originalName: string;
 
-    constructor(resources: ResourcesService,
-                selectedRouteService: SelectedRouteService,
-                routesFactory: RoutesFactory,
-                toastService: ToastService,
-                store: Store,
-                private readonly fileService: FileService,
-                private readonly fitBoundsService: FitBoundsService,
-                @Inject(MAT_DIALOG_DATA) data: RouteData
-    ) {
-        super(resources, selectedRouteService, routesFactory, toastService, store);
+    private readonly fileService = inject(FileService);
+    private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly data = inject<RouteData>(MAT_DIALOG_DATA);
+
+    constructor() {
+        super();
 
         this.isNew = false;
         this.title = this.resources.routeProperties;
-        this.routeData = data;
-        this.originalName = data.name;
+        this.routeData = this.data;
+        this.originalName = this.data.name;
     }
 
     protected saveImplementation() {
