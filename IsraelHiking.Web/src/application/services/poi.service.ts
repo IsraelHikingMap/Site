@@ -732,13 +732,22 @@ export class PoiService {
                 return cloneDeep(poi);
             }
         } catch {
-            let features: MapGeoJSONFeature[] = [];
+            let feature: MapGeoJSONFeature = null;
             for (const source of Object.keys(PoiService.POIS_MAP)) {
-                features = features.concat(this.mapService.map.querySourceFeatures(`${source}-offline`, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer}));
+                let features = this.mapService.map.querySourceFeatures(source, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer});
+                feature = features.find(f => this.osmTileFeatureToPoiIdentifier(f) === id);
+                if (feature != null) {
+                    break;
+                }
+                features = this.mapService.map.querySourceFeatures(`${source}-offline`, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer});
+                feature = features.find(f => this.osmTileFeatureToPoiIdentifier(f) === id);
+                if (feature != null) {
+                    break;
+                }
             }
-            const feature = features.find(f => this.osmTileFeatureToPoiIdentifier(f) === id);
+            
             if (feature == null) {
-                throw new Error("Failed to load POI from offline database.");
+                throw new Error("Failed to load POI from offline or in-memory tiles.");
             }
             const poi = this.convertFeatureToPoi(feature, id);
             this.poisCache.splice(0, 0, poi);
