@@ -1,8 +1,10 @@
 ﻿﻿<router-outlet></router-outlet>
 <div class="sidebar-wrapper" *ngIf="isSidebarVisible()" [@animateSidebar]>
-    <h3 class="text-center title">{{getTitle()}}</h3>
-    <div class="close-button">
-        <button mat-button type="button" (click)="close()" tabindex="-1"><i class="fa fa-lg icon-close"></i></button>
+    <div class="sidebar-header">
+        <h3 class="text-center title">{{getTitle()}}</h3>
+        <div class="close-button">
+            <button mat-button type="button" (click)="close()" tabindex="-1"><i class="fa fa-lg icon-close"></i></button>
+        </div>
     </div>
     <div [ngSwitch]="getViewName()">
         <div *ngSwitchCase="'layers'">
