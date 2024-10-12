@@ -20,7 +20,7 @@
     <div *ngFor="let url of info().urls; let i = index; trackBy:trackByIndex" class="flex flex-row">
         <mat-form-field class="w-full">
             <mat-label>{{resources.aLinkToAWebsite}}</mat-label>
-            <input matInput class="w-full" maxlength="255" type="text" dir="ltr" [(ngModel)]="info.urls[i]"/>
+            <input matInput class="w-full" maxlength="255" type="text" dir="ltr" [(ngModel)]="info().urls[i]"/>
             <button matSuffix mat-icon-button (click)="removeUrl(i)"><i class="fa icon-trash"></i></button>
         </mat-form-field>
     </div>
