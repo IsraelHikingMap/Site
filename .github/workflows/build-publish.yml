@@ -91,7 +91,7 @@ jobs:
           npm run build:mobile -- --no-progress
           npx cap sync android
       - name: Build Android Release
-        if: ${{ secrets.STORE_PASSWORD != '' && secrets.PASSWORD != '' }}
+        if: ${{ github.secret_source == 'Actions' }}
         run: |
           cd IsraelHiking.Web/android
           ./gradlew :app:assembleRelease --no-daemon "-Pandroid.injected.signing.store.file=$WORKSPACE/IsraelHiking.Web/signing/IHM.jks" "-Pandroid.injected.signing.store.password=$STORE_PASSWORD" "-Pandroid.injected.signing.key.alias=ihmkey" "-Pandroid.injected.signing.key.password=$PASSWORD"
@@ -101,19 +101,19 @@ jobs:
           PASSWORD: ${{ secrets.PASSWORD }}
           WORKSPACE: ${{ github.workspace }}
       - name: Build Android Debug
-        if: ${{ secrets.STORE_PASSWORD == '' && secrets.PASSWORD == '' }}
+        if: ${{ github.secret_source == 'None' }}
         run: |
           cd IsraelHiking.Web/android
           ./gradlew :app:assembleDebug --no-daemon
       - name: Upload aab artifacts
-        if: ${{ secrets.STORE_PASSWORD != '' && secrets.PASSWORD != '' }}
+        if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
         with:
           name: IHM_signed_${{ needs.version.outputs.version_string }}.aab
           path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
 
       - name: Upload apk artifacts
-        if: ${{ secrets.STORE_PASSWORD != '' && secrets.PASSWORD != '' }}
+        if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
         with:
           name: IHM_signed_${{ needs.version.outputs.version_string }}.apk
@@ -177,7 +177,7 @@ jobs:
           podfile-path: IsraelHiking.Web/ios/App/Podfile.lock
 
       - name: Keychain setup
-        if: ${{ secrets.STORE_PASSWORD != '' && secrets.PASSWORD != '' }}
+        if: ${{ github.secret_source == 'Actions' }}
         run: |
           cd IsraelHiking.Web
           openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/CI.mobileprovision.enc -d -a -out ./signing/CI.mobileprovision
@@ -213,12 +213,12 @@ jobs:
           cd IsraelHiking.Web/ios
           xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive -quiet
       - name: Export iOS Archive
-        if: ${{ secrets.STORE_PASSWORD != '' && secrets.PASSWORD != '' }}
+        if: ${{ github.secret_source == 'Actions' }}
         run: |
           cd IsraelHiking.Web/ios
           xcodebuild -exportArchive -archivePath App.xcarchive -exportPath ./ -exportOptionsPlist exportOptions.plist
       - name: Upload artifacts
-        if: ${{ secrets.STORE_PASSWORD != '' && secrets.PASSWORD != '' }}
+        if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
         with:
           name: IHM_signed_${{ needs.version.outputs.version_string }}.ipa
