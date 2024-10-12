@@ -1,3 +1,10 @@
 .selected {
     font-weight: bold;
 }
+
+@media(max-height:550px){
+    .mat-mdc-dialog-content , #dialogContentForScroll {
+        max-height: calc(100vh - 170px);
+    }
+}
+    
