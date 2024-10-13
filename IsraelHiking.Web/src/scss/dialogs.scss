@@ -61,7 +61,7 @@
 }
 
 @media(max-height:550px){
-    #dialogContentForScroll {
+    .mat-mdc-dialog-content {
        max-height: calc(100vh - 170px);
    }
 }
