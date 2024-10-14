@@ -313,4 +313,73 @@ describe("Spatial service", () => {
         expect(pixel.pixelX).toBe(35);
         expect(pixel.pixelY).toBe(220);
     });
+
+    it("Should merge lines", () => {
+        const lines = [
+            lineString([[0,0], [1,1]]),
+            lineString([[1,1], [2,2]])
+        ];
+        const merged = SpatialService.mergeLines(lines);
+        expect(merged.coordinates.length).toBe(3);
+    });
+
+    it("Should merge opposite lines", () => {
+        const lines = [
+            lineString([[0,0], [1,1]]),
+            lineString([[2,2], [1,1]])
+        ];
+        const merged = SpatialService.mergeLines(lines);
+        expect(merged.coordinates.length).toBe(3);
+    });
+
+    it("Should merge reverse opposite lines", () => {
+        const lines = [
+            lineString([[1,1], [0,0]]),
+            lineString([[1,1], [2,2]])
+        ];
+        const merged = SpatialService.mergeLines(lines);
+        expect(merged.coordinates.length).toBe(3);
+        expect(merged.coordinates[0]).toEqual([2,2]);
+        expect(merged.coordinates[2]).toEqual([0,0]);
+    });
+
+    it("Should merge unordered lines", () => {
+        const lines = [
+            lineString([[1,1], [2,2]]),
+            lineString([[0,0], [1,1]])
+        ];
+        const merged = SpatialService.mergeLines(lines);
+        expect(merged.coordinates.length).toBe(3);
+    });
+
+    it("Should merge complicated unordered lines", () => {
+        const lines = [
+            lineString([[1,1], [2,2]]),
+            lineString([[0,0], [1,1]]),
+            lineString([[3,3], [2,2]])
+        ];
+        const merged = SpatialService.mergeLines(lines);
+        expect(merged.coordinates.length).toBe(4);
+    });
+
+    it("Should merge complicated unordered lines with gap", () => {
+        const lines = [
+            lineString([[0,0], [1,1]]),
+            lineString([[2,2], [3,3]]),
+            lineString([[1,1], [2,2]])
+        ];
+        const merged = SpatialService.mergeLines(lines);
+        expect(merged.coordinates.length).toBe(4);
+    });
+
+    it("Should try to merge and make the fisrt coordinate the same", () => {
+        const lines = [
+            lineString([[0,0], [1,1]]),
+            lineString([[2,2], [1,1]]),            
+            lineString([[2,2], [3,3]])
+        ];
+        const merged = SpatialService.mergeLines(lines);
+        expect(merged.coordinates.length).toBe(4);
+        expect(merged.coordinates[0]).toEqual([0,0]);
+    });
 });
