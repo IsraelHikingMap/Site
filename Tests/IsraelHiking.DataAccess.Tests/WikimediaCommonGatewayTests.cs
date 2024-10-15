@@ -63,7 +63,7 @@ namespace IsraelHiking.DataAccess.Tests
         {
             _gateway.Initialize().Wait();
 
-            var restuls = _gateway.GetNonExistingFilePageName("foo.bar", "foo.bar.jpeg");
+            var restuls = _gateway.GetNonExistingFilePageName("foo.bar", "foo.XXX.jpeg");
 
             Assert.AreEqueal(restuls, "foo.bar.jpeg");
         }
