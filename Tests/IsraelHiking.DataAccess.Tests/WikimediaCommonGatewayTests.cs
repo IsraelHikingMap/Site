@@ -59,7 +59,7 @@ namespace IsraelHiking.DataAccess.Tests
         
         [TestMethod]
         [Ignore]
-        public void UploadImage()
+        public void UploadImageWithDot()
         {
             _gateway.Initialize().Wait();
 
