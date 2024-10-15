@@ -55,6 +55,18 @@ namespace IsraelHiking.DataAccess.Tests
                 new Coordinate(0, 0)).Result;
 
             Assert.IsNotNull(restuls);
+            Assert.IsNotNull(null);
+        }
+        
+        [TestMethod]
+        [Ignore]
+        public void UploadImageWithDot()
+        {
+            _gateway.Initialize().Wait();
+
+            var restuls = _gateway.GetNonExistingFilePageName("foo.bar", "foo.XXX.jpeg");
+
+            Assert.AreEqueal(restuls, "foo.YYY.jpeg");
         }
     }
 }

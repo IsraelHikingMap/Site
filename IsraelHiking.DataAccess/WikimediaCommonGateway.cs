@@ -128,7 +128,8 @@ namespace IsraelHiking.DataAccess
         private string GetNonExistingFilePageName(string title, string fileName)
         {
             var name = string.IsNullOrWhiteSpace(title) ? fileName : title;
-            if (Path.HasExtension(name) == false)
+            if (Path.HasExtension(name) == false ||
+                Path.GetExtension(name.Replace(".jpg", ".jpeg")) != Path.GetExtension(fileName.Replace(".jpg", ".jpeg")))
             {
                 name += Path.GetExtension(fileName);
             }
