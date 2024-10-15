@@ -65,7 +65,7 @@ namespace IsraelHiking.DataAccess.Tests
 
             var restuls = _gateway.GetNonExistingFilePageName("foo.bar", "foo.XXX.jpeg");
 
-            Assert.AreEqueal(restuls, "foo.bar.jpeg");
+            Assert.AreEqueal(restuls, "foo.YYY.jpeg");
         }
     }
 }
