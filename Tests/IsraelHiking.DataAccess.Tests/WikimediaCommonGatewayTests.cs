@@ -55,6 +55,7 @@ namespace IsraelHiking.DataAccess.Tests
                 new Coordinate(0, 0)).Result;
 
             Assert.IsNotNull(restuls);
+            Assert.IsNotNull(null);
         }
         
         [TestMethod]
