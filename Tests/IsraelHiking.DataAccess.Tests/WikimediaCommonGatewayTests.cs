@@ -56,5 +56,16 @@ namespace IsraelHiking.DataAccess.Tests
 
             Assert.IsNotNull(restuls);
         }
+        
+        [TestMethod]
+        [Ignore]
+        public void UploadImage()
+        {
+            _gateway.Initialize().Wait();
+
+            var restuls = _gateway.GetNonExistingFilePageName("foo.bar", "foo.bar.jpeg");
+
+            Assert.AreEqueal(restuls, "foo.bar.jpeg");
+        }
     }
 }
