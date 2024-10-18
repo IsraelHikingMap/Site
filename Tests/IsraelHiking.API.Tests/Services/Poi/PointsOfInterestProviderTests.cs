@@ -542,7 +542,77 @@ namespace IsraelHiking.API.Tests.Services.Poi
 
             _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
-            _wikimediaCommonGateway.Received(1).UploadImage("name", "description", user.DisplayName, "name.png", Arg.Any<Stream>(), Arg.Any<Coordinate>());
+            _wikimediaCommonGateway.Received(1).UploadImage("name.png", "description", user.DisplayName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
+            _wikimediaCommonGateway.Received(1).GetImageUrl(Arg.Any<string>());
+            _imagesUrlsStorageExecutor.Received(1).StoreImage(Arg.Any<MD5>(), Arg.Any<byte[]>(), Arg.Any<string>());
+        }
+        
+        [TestMethod]
+        public void UpdateFeature_WithImageWithDot_ShouldUpdate()
+        {
+            var user = new User { DisplayName = "DisplayName" };
+            var gateway = SetupHttpFactory();
+            gateway.GetUserDetails().Returns(user);
+            const string id = "Node_42";
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.ID, id },
+                { FeatureAttributes.POI_ICON, "icon" },
+                { FeatureAttributes.POI_ADDED_IMAGES, new [] {"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
+                                                              "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
+            });
+            _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
+            var featureFromDatabase = new Feature
+            {
+                Attributes = new AttributesTable
+                {
+                    { FeatureAttributes.POI_ICON, "icon" }
+                }
+            };
+            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(featureFromDatabase);
+            gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection {
+                { "description:he", "description" },
+                { "name:he", "name.1" },
+            }, Latitude = 0, Longitude = 0, Id = 42 });
+
+            _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+            _wikimediaCommonGateway.Received(1).UploadImage("name.1.png", "description", user.DisplayName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
+            _wikimediaCommonGateway.Received(1).GetImageUrl(Arg.Any<string>());
+            _imagesUrlsStorageExecutor.Received(1).StoreImage(Arg.Any<MD5>(), Arg.Any<byte[]>(), Arg.Any<string>());
+        }
+        
+        [TestMethod]
+        public void UpdateFeature_WithEmptyDescriptionAndTitle_ShouldUpdateWithIconName()
+        {
+            var user = new User { DisplayName = "DisplayName" };
+            var gateway = SetupHttpFactory();
+            gateway.GetUserDetails().Returns(user);
+            const string id = "Node_42";
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.ID, id },
+                { FeatureAttributes.POI_ICON, "icon-tint" },
+                { FeatureAttributes.POI_ADDED_IMAGES, new [] {"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
+                                                              "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
+            });
+            _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
+            var featureFromDatabase = new Feature
+            {
+                Attributes = new AttributesTable
+                {
+                    { FeatureAttributes.POI_ICON, "icon-tint" }
+                }
+            };
+            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(featureFromDatabase);
+            gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection()
+            {
+                {"natural", "spring"}
+            }, Latitude = 0, Longitude = 0, Id = 42 });
+
+            _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+            _wikimediaCommonGateway.Received(1).UploadImage("tint.png", "tint", user.DisplayName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
             _wikimediaCommonGateway.Received(1).GetImageUrl(Arg.Any<string>());
             _imagesUrlsStorageExecutor.Received(1).StoreImage(Arg.Any<MD5>(), Arg.Any<byte[]>(), Arg.Any<string>());
         }
@@ -574,7 +644,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
 
             _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
-            _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
+            _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
             _wikimediaCommonGateway.DidNotReceive().GetImageUrl(Arg.Any<string>());
             gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o => o.Tags.Any(t => t.Key == "image")));
         }
@@ -607,7 +677,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
 
             _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
-            _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
+            _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
             _wikimediaCommonGateway.DidNotReceive().GetImageUrl(Arg.Any<string>());
             gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o => o.Tags.Any(t =>
                 t.Key == "description:he" && t.Value == "new description") &&
@@ -641,7 +711,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
 
             _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
-            _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
+            _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
             _wikimediaCommonGateway.DidNotReceive().GetImageUrl(Arg.Any<string>());
             gateway.DidNotReceive().UpdateElement(Arg.Any<long>(), Arg.Any<ICompleteOsmGeo>());
         }

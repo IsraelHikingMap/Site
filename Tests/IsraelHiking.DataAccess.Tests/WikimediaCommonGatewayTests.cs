@@ -51,10 +51,10 @@ namespace IsraelHiking.DataAccess.Tests
         {
             _gateway.Initialize().Wait();
 
-            var restuls = _gateway.UploadImage("ספריית שביל ישראל", "description", "me", "file", new MemoryStream(),
+            var results = _gateway.UploadImage("file","description", "me", new MemoryStream(),
                 new Coordinate(0, 0)).Result;
 
-            Assert.IsNotNull(restuls);
+            Assert.IsNotNull(results);
         }
     }
 }
