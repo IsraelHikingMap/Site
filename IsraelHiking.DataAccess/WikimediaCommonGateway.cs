@@ -17,7 +17,6 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace IsraelHiking.DataAccess
 {
-
     internal class LoginAgainAccountAssertionFailureHandler : IAccountAssertionFailureHandler
     {
 
@@ -69,15 +68,10 @@ namespace IsraelHiking.DataAccess
             _logger.LogInformation("Finished initializing Wikimedia common service");
         }
 
-        public async Task<string> UploadImage(string title, string description, string author, string fileName, Stream contentStream, Coordinate location)
+        public async Task<string> UploadImage(string fileName, string description, string author, Stream contentStream, Coordinate location)
         {
-            _logger.LogInformation($"Upload an image to wikimedia common. title: {title}, fileName: {fileName}, Location: {location.Y}, {location.X}");
-            var wikiFileName = GetNonExistingFilePageName(title, fileName);
-            description = !string.IsNullOrWhiteSpace(description)
-                ? description
-                : !string.IsNullOrWhiteSpace(title)
-                    ? title
-                    : fileName;
+            _logger.LogInformation($"Upload an image to wikimedia common. File name: {fileName}, Location: {location.Y}, {location.X}");
+            var wikiFileName = GetNonExistingFilePageName(fileName);
             var comment = CreateWikipediaComment(location, description, author);
             await _site.GetTokenAsync("edit", true);
             var results = await _site.UploadAsync(wikiFileName, new StreamUploadSource(contentStream), comment, true).ConfigureAwait(false);
@@ -91,7 +85,7 @@ namespace IsraelHiking.DataAccess
                 _logger.LogWarning($"Received bad file name from wikipedia. old: {wikiFileName}, correct: File:{correctWikiFileName}");
                 wikiFileName = "File:" + correctWikiFileName;
             }
-            _logger.LogInformation($"Finished uploading image successfully. title: {title}, fileName: {fileName}, wikipage: {wikiFileName}");
+            _logger.LogInformation($"Finished uploading image successfully. FileName: {fileName}, wikipage: {wikiFileName}");
             return wikiFileName;
         }
 
@@ -121,19 +115,14 @@ namespace IsraelHiking.DataAccess
 
         public static string GetWikiName(string name)
         {
-            var invalidCharacterReularExpression = new Regex(@"[\\#<>\[\]\?|:{}/~\s+]");
-            return invalidCharacterReularExpression.Replace(name, "_");
+            var invalidCharacterRegularExpression = new Regex(@"[\\#<>\[\]\?|:{}/~\s+]");
+            return invalidCharacterRegularExpression.Replace(name, "_");
         }
 
-        private string GetNonExistingFilePageName(string title, string fileName)
+        private string GetNonExistingFilePageName(string fileName)
         {
-            var name = string.IsNullOrWhiteSpace(title) ? fileName : title;
-            if (Path.HasExtension(name) == false)
-            {
-                name += Path.GetExtension(fileName);
-            }
-            name = name.Replace(".jpg", ".jpeg");
-            var wikiFileName = $"IHM_{GetWikiName(name)}";
+            fileName = fileName.Replace(".jpg", ".jpeg");
+            var wikiFileName = $"IHM_{GetWikiName(fileName)}";
             var wikiNameWithoutExtension = Path.GetFileNameWithoutExtension(wikiFileName);
             var countingFileName = wikiNameWithoutExtension.Substring(0, Math.Min(170, wikiNameWithoutExtension.Length));
             var extension = Path.GetExtension(wikiFileName);
