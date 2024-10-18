@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using WikiClientLibrary.Client;
 using WikiClientLibrary.Files;
 using WikiClientLibrary.Pages;
 using WikiClientLibrary.Sites;
@@ -16,6 +17,23 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace IsraelHiking.DataAccess
 {
+    internal class LoginAgainAccountAssertionFailureHandler : IAccountAssertionFailureHandler
+    {
+
+        private readonly NonPublicConfigurationData _options;
+
+        public LoginAgainAccountAssertionFailureHandler(NonPublicConfigurationData options)
+        {
+            _options = options;
+        }
+
+        public async Task<bool> Login(WikiSite site)
+        {
+            await site.LoginAsync(_options.WikiMediaUserName, _options.WikiMediaPassword);
+            return true;
+        }
+    }
+
     public class WikimediaCommonGateway : IWikimediaCommonGateway
     {
         private const string BASE_API_ADDRESS = "https://commons.wikimedia.org/w/api.php";
