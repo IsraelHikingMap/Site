@@ -2,8 +2,8 @@ import { Component, inject, input, output } from "@angular/core";
 import { Router } from "@angular/router";
 
 import { ResourcesService } from "../../services/resources.service";
-import { PoiService } from "../../services/poi.service";
 import { RouteStrings } from "../../services/hash.service";
+import { GeoJSONUtils } from "../../services/geojson-utils";
 
 @Component({
     selector: "cluster-overlay",
@@ -18,14 +18,13 @@ export class ClusterOverlayComponent {
     public readonly resources = inject(ResourcesService);
 
     private readonly router = inject(Router);
-    private readonly poiService = inject(PoiService);
 
     public getTitle(feature: GeoJSON.Feature) {
-        return this.poiService.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
+        return GeoJSONUtils.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
     public hasExtraData(feature: GeoJSON.Feature): boolean {
-        return this.poiService.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
+        return GeoJSONUtils.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
     public clickOnItem(feature: GeoJSON.Feature) {
