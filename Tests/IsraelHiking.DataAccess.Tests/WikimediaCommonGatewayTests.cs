@@ -51,7 +51,7 @@ namespace IsraelHiking.DataAccess.Tests
         {
             _gateway.Initialize().Wait();
 
-            var results = _gateway.UploadImage("file","description", "me", new MemoryStream(),
+            var results = _gateway.UploadImage("file", "description", "me", new MemoryStream(),
                 new Coordinate(0, 0)).Result;
 
             Assert.IsNotNull(results);
