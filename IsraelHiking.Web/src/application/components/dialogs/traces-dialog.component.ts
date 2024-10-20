@@ -74,6 +74,10 @@ export class TracesDialogComponent implements OnInit {
 
     public async addTraceToRoutes() {
         const trace = await this.tracesService.getTraceById(this.selectedTraceId);
+        if (trace.dataContainer.routes.length === 1) {
+            trace.dataContainer.routes[0].name = this.getTraceDisplayName(trace) || trace.name;
+            trace.dataContainer.routes[0].description = trace.name;
+        }
         this.dataContainerService.setData(trace.dataContainer, true);
     }
 
