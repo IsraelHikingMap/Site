@@ -58,7 +58,7 @@ export class LocationService {
             if (!this.isActive()) {
                 return;
             }
-            if (this.store.select((state: ApplicationState) => state.inMemoryState.distance)) {
+            if (this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState).distance) {
                 this.store.dispatch(new ToggleDistanceAction());
             }
             if (this.isFollowing()) {
