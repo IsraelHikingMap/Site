@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { Store } from "@ngxs/store";
@@ -32,7 +32,6 @@ export class LocationComponent {
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly recordedRouteService = inject(RecordedRouteService);
     private readonly store = inject(Store);
-    private readonly destroyRef = inject(DestroyRef);
     private readonly mapComponent = inject(MapComponent);
 
     constructor() {
@@ -63,8 +62,8 @@ export class LocationComponent {
             });
 
             this.mapComponent.mapInstance.on("resize", () => {
-                if (this.locationSerivce.isFollowing() && this.locationSerivce.getLocation() != null) {
-                    this.mapComponent.mapInstance.setCenter(this.locationSerivce.getLocation().center);
+                if (this.locationSerivce.isFollowing() && this.locationSerivce.getLocationCenter() != null) {
+                    this.mapComponent.mapInstance.setCenter(this.locationSerivce.getLocationCenter());
                 }
             });
         });
@@ -83,7 +82,7 @@ export class LocationComponent {
         if (selectedRoute != null && selectedRoute.state === "Route") {
             return;
         }
-        let center = this.locationSerivce.getLocation().center;
+        let center = this.locationSerivce.getLocationCenter();
         if (center !== null) {
             this.locationLatLng = center;
         }
@@ -230,13 +229,13 @@ export class LocationComponent {
     }
 
     private updateDistanceFeatureCollection() {
-        if (!this.isActive() || !this.showDistance) {
+        const gps = this.locationSerivce.getLocationCenter();
+        if (!this.isActive() || !this.showDistance || gps == null) {
             this.clearDistanceFeatureCollection();
             return;
         }
 
         const center = this.mapComponent.mapInstance.getCenter();
-        const gps = this.locationSerivce.getLocation().center;
         const distance = SpatialService.getDistanceInMeters(center, gps);
         this.distanceFeatures = {
             type: "FeatureCollection",

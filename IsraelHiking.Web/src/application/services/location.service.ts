@@ -25,7 +25,7 @@ export class LocationService {
     public changed = new EventEmitter<LocationWithBearing | null>();
     private lastSpeed: number = null;
     private lastSpeedTime: number = null;
-    private locationWithBearing: LocationWithBearing = null;
+    private locationWithBearing: LocationWithBearing | null = null;
     private isPanned: boolean = false;
 
     public initialize() {
@@ -91,8 +91,8 @@ export class LocationService {
         return this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "tracking";
     }
 
-    public getLocation(): LocationWithBearing {
-        return this.locationWithBearing;
+    public getLocationCenter(): LatLngAlt | null {
+        return this.locationWithBearing?.center;
     }
 
     public isFollowing(): boolean {
