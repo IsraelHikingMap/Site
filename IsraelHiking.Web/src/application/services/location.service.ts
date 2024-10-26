@@ -5,6 +5,7 @@ import { GeoLocationService } from "./geo-location.service";
 import { DeviceOrientationService } from "./device-orientation.service";
 import { FitBoundsService } from "./fit-bounds.service";
 import { MapService } from "./map.service";
+import { LoggingService } from "./logging.service";
 import { SetFollowingAction, SetPannedAction, ToggleDistanceAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, LatLngAlt } from "../models/models";
 
@@ -20,6 +21,7 @@ export class LocationService {
     private readonly deviceOrientationService = inject(DeviceOrientationService);
     private readonly fitBoundsService = inject(FitBoundsService);
     private readonly mapService = inject(MapService);
+    private readonly loggingService = inject(LoggingService);
     private readonly store = inject(Store);
 
     public changed = new EventEmitter<LocationWithBearing | null>();
@@ -121,7 +123,10 @@ export class LocationService {
             this.lastSpeedTime = new Date().getTime();
             bearing = position.coords.heading;
         }
-        
+        if (isNaN(position.coords.latitude) || isNaN(position.coords.longitude)) {
+            this.loggingService.warning("[Location] Ignoring invalid position: " + JSON.stringify(position));
+            return;
+        }
         this.locationWithBearing = {
             center: {
                 lat: position.coords.latitude,

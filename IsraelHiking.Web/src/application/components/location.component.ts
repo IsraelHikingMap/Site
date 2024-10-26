@@ -82,7 +82,7 @@ export class LocationComponent {
         if (selectedRoute != null && selectedRoute.state === "Route") {
             return;
         }
-        let center = this.locationSerivce.getLocationCenter();
+        const center = this.locationSerivce.getLocationCenter();
         if (center !== null) {
             this.locationLatLng = center;
         }

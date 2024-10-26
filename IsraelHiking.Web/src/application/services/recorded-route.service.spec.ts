@@ -19,7 +19,7 @@ import type { ApplicationState, MarkerData } from "../models/models";
 
 describe("Recorded Route Service", () => {
 
-    const positionChanged = (store: Store, newPoistion: any) => {
+    const positionChanged = (store: Store, newPoistion: GeolocationPosition) => {
         store.dispatch(new SetCurrentPositionAction(newPoistion));
     };
 
