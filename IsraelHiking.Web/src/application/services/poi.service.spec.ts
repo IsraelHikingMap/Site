@@ -80,7 +80,7 @@ describe("Poi Service", () => {
                 { provide: OverpassTurboService, useValue: {} },
                 { provide: INatureService, useValue: {} },
                 { provide: WikidataService, useValue: {} },
-                ConnectionService,
+                { provide: ConnectionService, useValue: { stateChanged: { subscribe: () => {} }} },
                 GeoJsonParser,
                 RunningContextService,
                 WhatsAppService,

@@ -48,10 +48,9 @@ describe("FileService", () => {
         TestBed.configureTestingModule({
             providers: [
                 RunningContextService,
-                // eslint-disable-next-line
                 FileTransfer,
                 GpxDataContainerConverterService,
-                ConnectionService,
+                { provide: ConnectionService, useValue: { stateChanged: { subscribe: () => {} }} },
                 { provide: SocialSharing, useValue: {} },
                 { provide: FileSystemWrapper, useValue: {} },
                 { provide: LoggingService, useValue: loggingServiceMock },
