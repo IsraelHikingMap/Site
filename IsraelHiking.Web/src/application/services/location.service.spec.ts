@@ -9,15 +9,13 @@ import { FitBoundsService } from "./fit-bounds.service";
 import { MapService } from "./map.service";
 import { LoggingService } from "./logging.service";
 import { GpsReducer, SetCurrentPositionAction } from "../reducers/gps.reducer";
-import { InMemoryReducer } from "../reducers/in-memory.reducer";
+import { InMemoryReducer, SetPannedAction } from "../reducers/in-memory.reducer";
 
 describe("LocationService", () => {
 
     beforeEach(() => {
         const geoLocationService = {
-            backToForeground: {
-                subscribe: () => { }
-            },
+            backToForeground: new EventEmitter<number>(),
             bulkPositionChanged: {
                 subscribe: () => { }
             },
@@ -45,7 +43,7 @@ describe("LocationService", () => {
                 { provide: DeviceOrientationService, useValue: deviceOrientationService },
                 { provide: FitBoundsService, useValue: fitBoundsService },
                 { provide: MapService, useValue: mapService },
-                { provide: LoggingService, useValue: {} },
+                { provide: LoggingService, useValue: { warning: () => {} } },
                 LocationService
             ]
         });
@@ -53,6 +51,7 @@ describe("LocationService", () => {
 
     it("Should initialize without any failures", inject([LocationService], (service: LocationService) => {
         expect(() => service.initialize()).not.toThrow();
+        expect(service.getLocationCenter()).toBeUndefined();
     }));
 
     it("Should call disable of services when disabled", inject([LocationService, GeoLocationService, DeviceOrientationService], 
@@ -66,7 +65,6 @@ describe("LocationService", () => {
     it("Should call enable of services when enabled", inject([LocationService, GeoLocationService, DeviceOrientationService], 
         (service: LocationService, geoLocationService: GeoLocationService, deviceOrientationService: DeviceOrientationService) => {
             service.enable();
-
             expect(geoLocationService.enable).toHaveBeenCalled();
             expect(deviceOrientationService.enable).toHaveBeenCalled();
     }));
@@ -173,7 +171,7 @@ describe("LocationService", () => {
         store.reset({ 
             gpsState: { 
                 currentPosition: null,
-                tracking: "searching"
+                tracking: "tracking"
             },
             inMemoryState: { following: true }
         });
@@ -188,7 +186,6 @@ describe("LocationService", () => {
 
     it("Should fire orientation change when in active state", inject([LocationService, DeviceOrientationService, Store], 
         (service: LocationService, deviceOrientationService: DeviceOrientationService, store: Store) => {
-        console.log("start test");
         store.reset({ 
             gpsState: { 
                 currentPosition: null,
@@ -203,5 +200,51 @@ describe("LocationService", () => {
         deviceOrientationService.orientationChanged.emit(5);
 
         expect(eventSpy).toHaveBeenCalledTimes(2);
+    }));
+
+    it("Should move to gps position after returning from background", inject([LocationService, GeoLocationService, FitBoundsService, Store], 
+        (service: LocationService, geolocationService: GeoLocationService, fitBoundsService: FitBoundsService, store: Store) => {
+        store.reset({ 
+            gpsState: { 
+                currentPosition: null,
+                tracking: "tracking"
+            },
+            inMemoryState: { following: true }
+        });
+        service.initialize();
+        store.dispatch(new SetCurrentPositionAction({coords: {latitude: 2, longitude: 3}} as any));
+        geolocationService.backToForeground.emit();
+
+        expect(fitBoundsService.moveTo).toHaveBeenCalled();
+        expect(service.getLocationCenter()).toEqual({lat: 2, lng: 3, alt: undefined});
+    }));
+
+    it("Should disable distance when centering", inject([LocationService, Store], 
+        (service: LocationService, store: Store) => {
+        store.reset({ 
+            gpsState: { 
+                currentPosition: null,
+                tracking: "tracking"
+            },
+            inMemoryState: { following: true, distance: true }
+        });
+        service.initialize();
+        
+        expect(store.selectSnapshot((s: any) => s.inMemoryState).distance).toBeFalsy();
+    }));
+
+    it("Should not be following when panned", inject([LocationService, Store], 
+        (service: LocationService, store: Store) => {
+        store.reset({ 
+            gpsState: { 
+                currentPosition: null,
+                tracking: "tracking"
+            },
+            inMemoryState: { following: true, distance: true }
+        });
+        service.initialize();
+        expect(service.isFollowing()).toBeTruthy();
+        store.dispatch(new SetPannedAction(new Date()));
+        expect(service.isFollowing()).toBeFalsy();
     }));
 });
