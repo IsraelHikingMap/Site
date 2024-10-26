@@ -1,3 +1,4 @@
+import { EventEmitter } from "@angular/core";
 import { inject, TestBed } from "@angular/core/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 
@@ -24,9 +25,7 @@ describe("LocationService", () => {
             disable: jasmine.createSpy("disable")
         };
         const deviceOrientationService = {
-            orientationChanged: {
-                subscribe: () => { }
-            },
+            orientationChanged: new EventEmitter<number>(),
             enable: jasmine.createSpy("enable"),
             disable: jasmine.createSpy("disable")
         };
@@ -139,5 +138,70 @@ describe("LocationService", () => {
 
         expect(eventSpy).not.toHaveBeenCalled();
         expect(fitBoundsService.moveTo).not.toHaveBeenCalled();
+    }));
+
+    it("Should not do anything on orientation change and no location", inject([LocationService, DeviceOrientationService], 
+        (service: LocationService, deviceOrientationService: DeviceOrientationService) => {
+        service.initialize();
+        const eventSpy = jasmine.createSpy();
+        service.changed.subscribe(eventSpy);
+        deviceOrientationService.orientationChanged.emit(1);
+
+        expect(eventSpy).not.toHaveBeenCalled();
+    }));
+
+    it("Should not do anything on orientation change and not in active state", inject([LocationService, DeviceOrientationService, Store], 
+        (service: LocationService, deviceOrientationService: DeviceOrientationService, store: Store) => {
+        store.reset({ 
+            gpsState: { 
+                currentPosition: null,
+                tracking: "searching"
+            },
+            inMemoryState: { following: true }
+        });
+        service.initialize();
+        const eventSpy = jasmine.createSpy();
+        service.changed.subscribe(eventSpy);
+        store.dispatch(new SetCurrentPositionAction({coords: {latitude: 1, longitude: 2}} as any));
+        deviceOrientationService.orientationChanged.emit(1);
+
+        expect(eventSpy).not.toHaveBeenCalledTimes(2);
+    }));
+
+    it("Should not do anything on orientation change and last update time was recent", inject([LocationService, DeviceOrientationService, Store], 
+        (service: LocationService, deviceOrientationService: DeviceOrientationService, store: Store) => {
+        store.reset({ 
+            gpsState: { 
+                currentPosition: null,
+                tracking: "searching"
+            },
+            inMemoryState: { following: true }
+        });
+        service.initialize();
+        const eventSpy = jasmine.createSpy();
+        service.changed.subscribe(eventSpy);
+        store.dispatch(new SetCurrentPositionAction({coords: {latitude: 1, longitude: 2, speed: 3, heading: 4}} as any));
+        deviceOrientationService.orientationChanged.emit(5);
+
+        expect(eventSpy).not.toHaveBeenCalledTimes(2);
+    }));
+
+    it("Should fire orientation change when in active state", inject([LocationService, DeviceOrientationService, Store], 
+        (service: LocationService, deviceOrientationService: DeviceOrientationService, store: Store) => {
+        console.log("start test");
+        store.reset({ 
+            gpsState: { 
+                currentPosition: null,
+                tracking: "tracking"
+            },
+            inMemoryState: { following: true }
+        });
+        service.initialize();
+        const eventSpy = jasmine.createSpy();
+        service.changed.subscribe(eventSpy);
+        store.dispatch(new SetCurrentPositionAction({coords: {latitude: 2, longitude: 3}} as any));
+        deviceOrientationService.orientationChanged.emit(5);
+
+        expect(eventSpy).toHaveBeenCalledTimes(2);
     }));
 });
