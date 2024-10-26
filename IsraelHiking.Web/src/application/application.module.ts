@@ -100,6 +100,7 @@ import { ApplicationUpdateService } from "./services/application-update.service"
 import { INatureService } from "./services/inature.service";
 import { WikidataService } from "./services/wikidata.service";
 import { OsmAddressesService } from "./services/osm-addresses.service";
+import { LocationService } from "./services/location.service";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
@@ -313,6 +314,7 @@ const initializeApplication = (injector: Injector) => async () => {
         INatureService,
         WikidataService,
         OsmAddressesService,
+        LocationService,
         AudioPlayerFactory,
         FileSystemWrapper,
         FileTransfer,
