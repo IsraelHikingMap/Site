@@ -99,12 +99,6 @@ export class GeoLocationService {
         }
     }
 
-    public canRecord(): boolean {
-        const gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
-        return gpsState.tracking === "tracking"
-            && gpsState.currentPosition != null && this.runningContextService.isCapacitor;
-    }
-
     private startWatching() {
         this.store.dispatch(new SetTrackingStateAction("searching"));
         if (window.navigator && window.navigator.geolocation) {
