@@ -1,6 +1,6 @@
-﻿﻿<div class="sidebar-wrapper" *ngIf="isOpen$ | async" [@animateSidebar]>
+﻿﻿<div class="sidebar-wrapper poi" *ngIf="isOpen$ | async" [@animateSidebar]>
     <div [dir]="resources.direction">
-        <div class="flex flex-row">
+        <div class="flex flex-row sticky top-0 z-10 bg-white">
             <div class="flex-1" *ngIf="!isHideEditMode()">
                 <button mat-button class="w-full min-w-unset !p-0" (click)="setEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Edit POI"><i class="fa icon-pencil"></i></button>
             </div>
@@ -15,9 +15,6 @@
             </div>
             <div class="flex-1" *ngIf="!isRoute() && !isEditMode()">
                 <button mat-button class="w-full min-w-unset !p-0" (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to point"><i class="fa icon-plus"></i></button>
-            </div>
-            <div class="flex-1" *ngIf="!isEditMode()">
-                <button mat-button class="w-full min-w-unset !p-0" (click)="clear()" matTooltip="{{resources.clear}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Clear and close"><i class="fa icon-eye-slash"></i></button>
             </div>
             <div class="flex-1" *ngIf="shareLinks.poiLink && !isEditMode()">
                 <mat-menu #appMenu="matMenu" [dir]="resources.direction">
@@ -45,14 +42,6 @@
                     <mat-checkbox color="primary" [(ngModel)]="updateLocation">{{resources.updateLocation}}</mat-checkbox>
                 </div>
             </mat-card>
-            <div class="flex flex-row">
-                <div class="w-1/2">
-                    <button mat-button class="w-full min-w-unset !p-0" (click)="save()" [disabled]="isLoading" matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
-                </div>
-                <div class="w-1/2">
-                    <button mat-button class="w-full min-w-unset !p-0" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below"><i class="fa icon-close"></i></button>
-                </div>
-            </div>
         </div>
         <div *ngIf="!isEditMode()">
             <mat-card appearance="outlined" class="mat-elevation-z0">
@@ -72,7 +61,7 @@
                             {{getDescription()}}
                         </p>
                     </div>
-                    <div class="flex flex-row" *ngIf="isShowSeeAlso()">
+                    <div class="flex flex-row max-sm:hidden" *ngIf="isShowSeeAlso()">
                         <h4>{{resources.seeAlso}}</h4>
                     </div>
                     <div class="flex flex-row">

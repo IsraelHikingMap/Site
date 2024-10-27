@@ -282,7 +282,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
                 await this.poiService.updateComplexPoi(this.info, this.updateLocation ? this.latlng : null);
             }
             this.toastService.success(this.resources.dataUpdatedSuccessfullyItWillTakeTimeToSeeIt);
-            this.clear();
+            this.close();
         } catch {
             this.toastService.confirm({ message: this.resources.unableToSaveData, type: "Ok" });
         } finally {
@@ -300,7 +300,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             this.store.dispatch(new AddRouteAction(newRoute));
             this.selectedRouteService.setSelectedRoute(newRoute.id);
         }
-        this.clear();
+        this.close();
     }
 
     public async addPointToRoute() {
@@ -320,19 +320,13 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             id,
             urls
         }));
-        this.clear();
+        this.close();
     }
 
     public navigateHere() {
         const location = this.poiService.getLocation(this.fullFeature);
         const title = this.poiService.getTitle(this.fullFeature, this.resources.getCurrentLanguageCodeSimplified());
         this.navigateHereService.addNavigationSegment(location, title);
-    }
-
-    public clear() {
-        if (this.fullFeature) {
-            this.store.dispatch(new SetSelectedPoiAction(null));
-        }
         this.close();
     }
 
@@ -362,6 +356,9 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     }
 
     public close() {
+        if (this.fullFeature) {
+            this.store.dispatch(new SetSelectedPoiAction(null));
+        }
         this.store.dispatch(new SetSidebarAction(false));
         // reset address bar only after animation ends.
         setTimeout(() => this.hashService.resetAddressbar(), 500);
