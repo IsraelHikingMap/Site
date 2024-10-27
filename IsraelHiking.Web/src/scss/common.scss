@@ -63,6 +63,10 @@ $app-background: map-get($app-theme, background);
         width: 100vw;
         box-sizing: border-box;
     }
+    .sidebar-wrapper.poi {
+        top: 40vh;
+        height: 60vh;
+    }
 }
 
 html {

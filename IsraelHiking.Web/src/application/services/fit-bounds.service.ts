@@ -20,24 +20,26 @@ export class FitBoundsService {
         await this.mapService.initializationPromise;
         const maxZoom = Math.max(this.mapService.map.getZoom(), 16);
         const mbBounds = SpatialService.boundsToMBBounds(bounds);
+        
+        this.store.dispatch(new SetPannedAction(new Date()));
+        this.mapService.map.fitBounds(mbBounds, {
+            maxZoom,
+            padding: this.getPadding(noPadding)
+        });
+    }
+
+    private getPadding(noPadding = false) {
         let padding = 50;
         if (noPadding) {
             padding = 0;
         }
-        this.store.dispatch(new SetPannedAction(new Date()));
-        if (this.sidebarService.isSidebarOpen() && window.innerWidth >= 768) {
-            this.mapService.map.fitBounds(mbBounds,
-                {
-                    maxZoom,
-                    padding: { top: 50, left: 400, bottom: 50, right: 50 }
-                });
-        } else {
-            this.mapService.map.fitBounds(mbBounds,
-                {
-                    maxZoom,
-                    padding
-                });
+        if (!this.sidebarService.isSidebarOpen()) {
+            return padding;
         }
+        if (window.innerWidth >= 550) {
+            return { top: 50, left: 400, bottom: 50, right: 50 }
+        }
+        return { top: 50, left: 50, bottom: window.innerHeight / 2, right: 50 }
     }
 
     public async flyTo(latLng: LatLngAlt, zoom: number) {

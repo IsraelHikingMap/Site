@@ -31,8 +31,19 @@ describe("FitBoundsService", () => {
             sidebarService.isSidebarOpen = () => true;
             const spy = jasmine.createSpy();
             mapService.map.fitBounds = spy;
+            (window as any).innerWidth = 1500;
             await service.fitBounds({ northEast: { lat: 1, lng: 1}, southWest: { lat: 2, lng: 2}});
             expect(spy.calls.all()[0].args[1].padding.left).toBe(400);
+    }));
+
+    it("Should fit bounds when sidebar serive is open with padding", inject([FitBoundsService, SidebarService, MapService], 
+        async (service: FitBoundsService, sidebarService: SidebarService, mapService: MapService) => {
+            sidebarService.isSidebarOpen = () => true;
+            const spy = jasmine.createSpy();
+            mapService.map.fitBounds = spy;
+            (window as any).innerWidth = 500;
+            await service.fitBounds({ northEast: { lat: 1, lng: 1}, southWest: { lat: 2, lng: 2}});
+            expect(spy.calls.all()[0].args[1].padding.bottom).toBe(window.innerHeight / 2);
     }));
 
     it("Should fit bounds when sidebar serive is closed without padding", inject([FitBoundsService, SidebarService, MapService], 
@@ -44,8 +55,8 @@ describe("FitBoundsService", () => {
             expect(spy.calls.all()[0].args[1].padding).toBe(0);
     }));
 
-    it("Should not fly to on small changes", inject([FitBoundsService, SidebarService, MapService], 
-        async (service: FitBoundsService, sidebarService: SidebarService, mapService: MapService) => {
+    it("Should not fly to on small changes", inject([FitBoundsService, MapService], 
+        async (service: FitBoundsService, mapService: MapService) => {
             mapService.map.getCenter = () => { return { lat: 1, lng: 1} as LngLat};
             const spy = jasmine.createSpy();
             mapService.map.flyTo = spy;
