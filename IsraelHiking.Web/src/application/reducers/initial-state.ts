@@ -153,6 +153,7 @@ export const initialState =
             distance: false,
             following: true,
             pannedTimestamp: null,
+            keepNorthUp: false,
             shareUrl: null,
             fileUrl: null,
             baseLayer: null

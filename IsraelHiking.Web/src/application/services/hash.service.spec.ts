@@ -1,7 +1,6 @@
-import { Router, UrlTree } from "@angular/router";
+import { provideRouter, Router, UrlTree } from "@angular/router";
 import { NgxsModule, Store } from "@ngxs/store";
 import { TestBed, inject } from "@angular/core/testing";
-import { RouterTestingModule } from "@angular/router/testing";
 import { Subject } from "rxjs";
 
 import { HashService, RouteStrings } from "./hash.service";
@@ -16,8 +15,9 @@ describe("HashService", () => {
             createUrlTree: () => { }
         };
         TestBed.configureTestingModule({
-            imports: [RouterTestingModule, NgxsModule.forRoot([])],
+            imports: [NgxsModule.forRoot([])],
             providers: [
+                provideRouter([]),
                 { provide: Router, useValue: routerMock },
                 { provide: MapService, useValue: {} },
                 HashService

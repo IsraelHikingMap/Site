@@ -98,6 +98,7 @@ import { ImageAttributionService } from "./services/image-attribution.service";
 import { PmTilesService } from "./services/pmtiles.service";
 import { ApplicationUpdateService } from "./services/application-update.service";
 import { OsmAddressesService } from "./services/osm-addresses.service";
+import { LocationService } from "./services/location.service";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
@@ -309,6 +310,7 @@ const initializeApplication = (injector: Injector) => async () => {
         PmTilesService,
         ApplicationUpdateService,
         OsmAddressesService,
+        LocationService,
         AudioPlayerFactory,
         FileSystemWrapper,
         FileTransfer,

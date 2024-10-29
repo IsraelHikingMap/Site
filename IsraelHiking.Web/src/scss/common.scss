@@ -63,6 +63,10 @@ $app-background: map-get($app-theme, background);
         width: 100vw;
         box-sizing: border-box;
     }
+    .sidebar-wrapper.poi {
+        top: 40vh;
+        height: 60vh;
+    }
 }
 
 html {
@@ -78,6 +82,7 @@ body {
     margin: 0;
     font-family: Roboto, sans-serif;
     overflow: hidden;
+    padding-top: env(safe-area-inset-top, 0);
 }
 
 .side-control {

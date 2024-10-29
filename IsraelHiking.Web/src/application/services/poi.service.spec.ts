@@ -71,7 +71,7 @@ describe("Poi Service", () => {
                 { provide: DatabaseService, useValue: databaseServiceMock },
                 { provide: MapService, useValue: mapServiceMosk },
                 { provide: LoggingService, useValue: loggingService },
-                ConnectionService,
+                { provide: ConnectionService, useValue: { stateChanged: { subscribe: () => {} }} },
                 GeoJsonParser,
                 RunningContextService,
                 WhatsAppService,

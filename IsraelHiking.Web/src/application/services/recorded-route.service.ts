@@ -9,6 +9,7 @@ import { GeoLocationService } from "./geo-location.service";
 import { RoutesFactory } from "./routes.factory";
 import { TracesService } from "./traces.service";
 import { SpatialService } from "./spatial.service";
+import { RunningContextService } from "./running-context.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { StopRecordingAction, StartRecordingAction, AddRecordingRoutePointsAction } from "../reducers/recorded-route.reducer";
 import { AddTraceAction } from "../reducers/traces.reducer";
@@ -26,6 +27,7 @@ export class RecordedRouteService {
 
     private readonly resources = inject(ResourcesService);
     private readonly geoLocationService = inject(GeoLocationService);
+    private readonly runningContextService = inject(RunningContextService);
     private readonly routesFactory = inject(RoutesFactory);
     private readonly tracesService = inject(TracesService);
     private readonly loggingService = inject(LoggingService);
@@ -58,6 +60,12 @@ export class RecordedRouteService {
         this.lastValidLocation = currentLocation;
         this.store.dispatch(new StartRecordingAction());
         this.store.dispatch(new AddRecordingRoutePointsAction([currentLocation]));
+    }
+
+    public canRecord(): boolean {
+        const gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
+        return gpsState.tracking === "tracking"
+            && gpsState.currentPosition != null && this.runningContextService.isCapacitor;
     }
 
     public isRecording() {

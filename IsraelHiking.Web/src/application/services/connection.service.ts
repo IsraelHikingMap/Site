@@ -9,11 +9,19 @@ import { Urls } from "../urls";
 @Injectable()
 export class ConnectionService {
     /**
-     * Interval used to retry Internet connectivity checks when an error is detected (when no Internet connection). Default value is "1000".
+     * Number of retries to check Internet connectivity before determining that there's no connection.
      */
-    private static readonly HEART_BREAK_RETRY_INTERVAL = 1000;
+    private static readonly NUMBER_OF_RETRIES = 3;
     /**
-     * Interval used to check Internet connectivity specified in milliseconds. Default value is "30000".
+     * Timeout used to retry internet connectivity checks before determining that there's no connection.
+     */
+    private static readonly SINGLE_RETRY_TIMEOUT = 1000;
+    /**
+     * Interval used to retry internet connectivity checks when an error is detected (when no Internet connection).
+     */
+    private static readonly HEART_BREAK_RETRY_INTERVAL = 2 * ConnectionService.SINGLE_RETRY_TIMEOUT * ConnectionService.NUMBER_OF_RETRIES;
+    /**
+     * Interval used to check Internet connectivity specified in milliseconds.
      */
     private static readonly HEART_BREAK_INTERVAL = 30000;
 
@@ -33,17 +41,23 @@ export class ConnectionService {
     }
 
     private async getInternetStatusNow(): Promise<boolean> {
-        try {
-            await firstValueFrom(this.http.get(Urls.health, {
-                responseType: "text",
-                headers: {
-                    ignoreProgressBar: ""
+        for (let retry = 0; retry < ConnectionService.NUMBER_OF_RETRIES; retry++) {
+            try {
+                await firstValueFrom(this.http.get(Urls.health, {
+                    responseType: "text",
+                    headers: {
+                        ignoreProgressBar: ""
+                    }
+                }).pipe(timeout(ConnectionService.SINGLE_RETRY_TIMEOUT)));
+                return true;
+            } catch (ex) {
+                const typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
+                if (typeAndMessage.type != "timeout") {
+                    return false;
                 }
-            }).pipe(timeout(500)));
-            return true;
-        } catch {
-            return false;
+            }
         }
+        return false;
     }
 
     private initializeDynamicTimer(interval: number) {

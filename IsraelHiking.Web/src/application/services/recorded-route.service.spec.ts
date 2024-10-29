@@ -19,7 +19,7 @@ import type { ApplicationState, MarkerData } from "../models/models";
 
 describe("Recorded Route Service", () => {
 
-    const positionChanged = (store: Store, newPoistion: any) => {
+    const positionChanged = (store: Store, newPoistion: GeolocationPosition) => {
         store.dispatch(new SetCurrentPositionAction(newPoistion));
     };
 
@@ -31,6 +31,9 @@ describe("Recorded Route Service", () => {
         const tracesServiceMock = {
             uploadLocalTracesIfNeeded: () => Promise.resolve()
         };
+        const runnningContextServiceMock = {
+            isCapacitor: true
+        };
         TestBed.configureTestingModule({
             imports: [NgxsModule.forRoot([GpsReducer, RecordedRouteReducer])],
             providers: [
@@ -40,9 +43,9 @@ describe("Recorded Route Service", () => {
                 } },
                 { provide: LoggingService, useValue: loggingServiceMock },
                 { provide: TracesService, useValue: tracesServiceMock },
+                { provide: RunningContextService, useValue: runnningContextServiceMock },
+                { provide: ConnectionService, useValue: { stateChanged: { subscribe: () => {} }} },
                 GeoLocationService,
-                RunningContextService,
-                ConnectionService,
                 RoutesFactory,
                 RecordedRouteService,
                 provideHttpClient(withInterceptorsFromDi()),
@@ -59,6 +62,34 @@ describe("Recorded Route Service", () => {
                 }
             });
             expect(service.isRecording()).toBeFalse();
+        }
+    ));
+
+    it("Should return false for canRecord when in searching state", inject([RecordedRouteService, Store],
+        (service: RecordedRouteService, store: Store) => {
+            store.reset({
+                gpsState: {
+                    tracking: "searching"
+                }
+            });
+            expect(service.canRecord()).toBeFalse();
+        }
+    ));
+
+    it("Should return true for canRecord when position is defined", inject([RecordedRouteService, Store],
+        (service: RecordedRouteService, store: Store) => {
+            store.reset({
+                gpsState: {
+                    tracking: "tracking",
+                    currentPosition: {
+                        coords: {
+                            latitude: 1,
+                            longitude: 2
+                        }
+                    }
+                }
+            });
+            expect(service.canRecord()).toBeTruthy();
         }
     ));
 

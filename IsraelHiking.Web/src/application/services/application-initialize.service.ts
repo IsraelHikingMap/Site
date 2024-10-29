@@ -25,6 +25,7 @@ import { OverpassTurboService } from "./overpass-turbo.service";
 import { AuthorizationService } from "./authorization.service";
 import { ToastService } from "./toast.service";
 import { ApplicationUpdateService } from "./application-update.service";
+import { LocationService } from "./location.service";
 import type { ApplicationState } from "../models/models";
 
 @Injectable()
@@ -50,6 +51,7 @@ export class ApplicationInitializeService {
     private readonly overpassTurboService = inject(OverpassTurboService);
     private readonly authorizationService = inject(AuthorizationService);
     private readonly applicationUpdateService = inject(ApplicationUpdateService);
+    private readonly locationService = inject(LocationService);
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
 
@@ -98,6 +100,7 @@ export class ApplicationInitializeService {
             this.tracesService.initialize(); // no need to wait for it to complete
             this.shareUrlsService.initialize(); // no need to wait for it to complete
             this.offlineFilesDownloadService.initialize(); // no need to wait for it to complete
+            this.locationService.initialize();
             await this.loggingService.info("Finished IHM Application Initialization");
         } catch (ex) {
             if (this.runningContextService.isIFrame) {
