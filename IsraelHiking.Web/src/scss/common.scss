@@ -93,19 +93,32 @@ body {
         padding: 0 !important;
         display: block;
         width: v.$app-button-size;
-        height: v.$app-button-size;
+        height: 44px;
 
         & i {
             vertical-align: middle !important;
         }
     }
+    button.active:not(button.active:first-child , .search button.active ){
+        margin-top:7px;
+    }
 }
-
+.side-control.search
+ {
+    button{
+        margin-top:2px;
+    }
+    button.active {
+        margin-top: 2px;
+    }
+ } 
 .input-wrapper-spacer {
     height: 0;
     margin-bottom: 1rem;
 }
-
+.mt-0{
+    margin-top: 0px !important;
+}
 @media (width <= 550px) {
     .route-statistics-control-container {
         margin-bottom: 0 !important;
@@ -114,7 +127,7 @@ body {
 }
 
 .active {
-    outline: 2px solid #32CD6D !important;
+    outline: 3px solid #32CD6D !important;
 }
 // photoswipe, used for placing overlay at the right z-index
 overlay.overlay-shown {
