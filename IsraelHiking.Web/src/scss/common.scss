@@ -104,7 +104,7 @@ body {
             vertical-align: middle !important;
         }
     }
-    button.active:not(button.active:first-child , .search button.active ){
+    .active:not(.active:first-child , .search .active ){
         margin-top:7px;
     }
 }
