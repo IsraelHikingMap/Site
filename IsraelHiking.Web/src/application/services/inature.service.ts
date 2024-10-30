@@ -3,6 +3,7 @@ import { inject, Injectable } from "@angular/core";
 import { firstValueFrom, timeout } from "rxjs";
 
 import { GeoJSONUtils } from "./geojson-utils";
+import { Urls } from "../urls";
 
 @Injectable()
 export class INatureService {
@@ -23,7 +24,7 @@ export class INatureService {
             }
         };
         const lngLat = this.setLocation(content, feature);
-        this.setImageAndWebsite(content, feature, title);
+        this.setImageWebsiteAndExternalDescription(content, feature, title);
         feature.geometry = await this.getGeometryFromContent(content) ?? {
             type: "Point",
             coordinates: [lngLat.lng, lngLat.lat]
@@ -51,7 +52,7 @@ export class INatureService {
         const iNatureRef = feature.properties["ref:IL:inature"];
         const address = this.getContnetRetrivalAddress(iNatureRef, false);
         const contentAndTitle = await this.getPageContentAndTitleFromAddress(address);
-        this.setImageAndWebsite(contentAndTitle.content, feature, iNatureRef);
+        this.setImageWebsiteAndExternalDescription(contentAndTitle.content, feature, iNatureRef);
     }
 
     private setLocation(content: string, feature: GeoJSON.Feature) {
@@ -62,7 +63,7 @@ export class INatureService {
         return latLng;
     }
 
-    private setImageAndWebsite(content: string, feature: GeoJSON.Feature, title: string) {
+    private setImageWebsiteAndExternalDescription(content: string, feature: GeoJSON.Feature, title: string) {
         feature.properties.poiExternalDescription = content.match(/סקירה=(.*)/)[1];
         const indexString = GeoJSONUtils.setProperty(feature, "website", `https://inature.info/wiki/${title}`);
         feature.properties["poiSourceImageUrl" + indexString] = "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png";
@@ -95,9 +96,7 @@ export class INatureService {
             return null;
         }
         const shareId = match[1];
-        // HM TODO: replace this:
-        //let url = Urls.urls + shareId + "?format=geojson";
-        const url = "https://israelhiking.osm.org.il/api/urls/" + shareId + "?format=geojson";
+        let url = Urls.urls + shareId + "?format=geojson";
         const geojson = await firstValueFrom(this.httpClient.get(url)) as GeoJSON.FeatureCollection;
         return geojson.features.find(f => f.geometry.type !== "Point")?.geometry;
     }
