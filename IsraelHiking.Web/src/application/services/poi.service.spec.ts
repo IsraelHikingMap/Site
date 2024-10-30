@@ -307,7 +307,7 @@ describe("Poi Service", () => {
             const id = "42";
             const source = "iNature";
 
-            let feature = await poiService.getPoint(id, source);
+            const feature = await poiService.getPoint(id, source);
             expect(feature).not.toBeNull();
         }
     )));
@@ -318,7 +318,7 @@ describe("Poi Service", () => {
             const id = "42";
             const source = "Wikidata";
 
-            let feature = await poiService.getPoint(id, source);
+            const feature = await poiService.getPoint(id, source);
             expect(feature).not.toBeNull();
         }
     )));
