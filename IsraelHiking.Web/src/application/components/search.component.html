@@ -14,7 +14,7 @@
         </div>
     </div>
     <ng-container *ngIf="directional.isOn">
-        <div class="pull-left-important flex flex-row">
+        <div class="pull-left-important flex flex-row my-0.5">
             <button mat-button class="pull-right" (click)="setRouting('Hike')" [ngClass]="{active : routingType === 'Hike' }" matTooltip="{{resources.hikeRouting}}" matTooltipPosition="below"><i class="fa icon-hike fa-lg"></i></button>
             <button mat-button class="pull-right" (click)="setRouting('Bike')" [ngClass]="{active : routingType === 'Bike' }" matTooltip="{{resources.bikeRouting}}" matTooltipPosition="below"><i class="fa icon-bike fa-lg"></i></button>
             <button mat-button class="pull-right" (click)="setRouting('4WD')" [ngClass]="{active : routingType === '4WD' }" matTooltip="{{resources.fourWheelDriveRouting}}" matTooltipPosition="below"><i class="fa icon-four-by-four fa-lg"></i></button>
