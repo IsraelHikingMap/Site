@@ -96,7 +96,7 @@ export class INatureService {
             return null;
         }
         const shareId = match[1];
-        let url = Urls.urls + shareId + "?format=geojson";
+        const url = Urls.urls + shareId + "?format=geojson";
         const geojson = await firstValueFrom(this.httpClient.get(url)) as GeoJSON.FeatureCollection;
         return geojson.features.find(f => f.geometry.type !== "Point")?.geometry;
     }
