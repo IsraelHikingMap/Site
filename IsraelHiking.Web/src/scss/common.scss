@@ -97,7 +97,7 @@ body {
         min-width: unset !important;
         padding: 0 !important;
         display: block;
-        width: v.$app-button-size;
+        width: v.$app-button-width;
         height: 44px;
 
         & i {
@@ -174,7 +174,7 @@ overlay.overlay-shown {
 .control-container-item {
     display: table-cell;
     vertical-align: middle;
-    height: v.$app-button-size;
+    height: v.$app-button-width;
 }
 
 .control-container-item.gutters {
