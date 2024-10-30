@@ -77,9 +77,17 @@ describe("Poi Service", () => {
                 { provide: DatabaseService, useValue: databaseServiceMock },
                 { provide: MapService, useValue: mapServiceMock },
                 { provide: LoggingService, useValue: loggingService },
-                { provide: OverpassTurboService, useValue: {} },
-                { provide: INatureService, useValue: {} },
-                { provide: WikidataService, useValue: {} },
+                { provide: OverpassTurboService, useValue: {
+                    getLongWay: () => Promise.resolve({ features: [] }),
+                } },
+                { provide: INatureService, useValue: {
+                    enritchFeatureFromINature: () => Promise.resolve(),
+                    createFeatureFromPageId: () => Promise.resolve()
+                } },
+                { provide: WikidataService, useValue: {
+                    enritchFeatureFromWikimedia: () => Promise.resolve(),
+                    createFeatureFromPageId: () => Promise.resolve()
+                } },
                 { provide: ConnectionService, useValue: { stateChanged: { subscribe: () => {} }} },
                 GeoJsonParser,
                 RunningContextService,
@@ -289,6 +297,83 @@ describe("Poi Service", () => {
 
             mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes(id) &&
                     request.url.includes(source)).flush({});
+            return promise;
+        }
+    )));
+
+    it("Should get a point by id and source from iNature", (inject([PoiService],
+        async (poiService: PoiService) => {
+
+            const id = "42";
+            const source = "iNature";
+
+            let feature = await poiService.getPoint(id, source);
+            expect(feature).not.toBeNull();
+        }
+    )));
+
+    it("Should get a point by id and source from Wikidata", (inject([PoiService],
+        async (poiService: PoiService) => {
+
+            const id = "42";
+            const source = "Wikidata";
+
+            let feature = await poiService.getPoint(id, source);
+            expect(feature).not.toBeNull();
+        }
+    )));
+
+    it("Should get a point by id and source from OSM with iNature and Wikidata", (inject([PoiService, HttpTestingController],
+        async (poiService: PoiService, mockBackend: HttpTestingController) => {
+
+            const id = "way_42";
+            const source = "OSM";
+
+            const promise = poiService.getPoint(id, source, "he").then((res) => {
+                expect(res.properties.poiIcon).toBe("icon-bike");
+            });
+
+            mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes("42") &&
+                    request.url.includes("way")).flush({
+                        "version": "0.6",
+                        "generator": "openstreetmap-cgimap 2.0.1 (3329567 spike-07.openstreetmap.org)",
+                        "copyright": "OpenStreetMap and contributors",
+                        "attribution": "http://www.openstreetmap.org/copyright",
+                        "license": "http://opendatacommons.org/licenses/odbl/1-0/",
+                        "elements": [
+                            {
+                                "type": "node",
+                                "id": 1,
+                                "lat": 32.4801317,
+                                "lon": 35.0415805,
+                                "uid": 1
+                            },
+                            {
+                                "type": "node",
+                                "id": 2,
+                                "lat": 32.4801635,
+                                "lon": 35.0417149,
+                                "uid": 2
+                            },
+                            {
+                                "type": "way",
+                                "id": 3,
+                                "uid": 3,
+                                "nodes": [
+                                    1,
+                                    2
+                                ],
+                                "tags": {
+                                    "bicycle": "designated",
+                                    "foot": "yes",
+                                    "highway": "path",
+                                    "mtb:name": "mtb:name",
+                                    "wikidata": "Q42",
+                                    "ref:IL:inature": "42"
+                                }
+                            }
+                        ]
+                    });
             return promise;
         }
     )));

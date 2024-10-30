@@ -1,4 +1,3 @@
-import { Injectable } from "@angular/core";
 import { Map, LngLatBounds, LngLatLike } from "maplibre-gl";
 import { lineString, featureCollection, point, Units } from "@turf/helpers";
 import simplify from "@turf/simplify";
@@ -16,7 +15,6 @@ import type { Immutable } from "immer";
 
 import type { LatLngAlt, Bounds, LatLngAltTime } from "../models/models";
 
-@Injectable()
 export class SpatialService {
 
     public static getLengthInMetersForGeometry(geometry: Immutable<GeoJSON.Geometry>) {

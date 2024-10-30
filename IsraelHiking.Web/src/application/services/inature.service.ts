@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { firstValueFrom, timeout } from "rxjs";
 
 import { GeoJSONUtils } from "./geojson-utils";
@@ -9,7 +9,7 @@ export class INatureService {
     private readonly API_URL = "https://inature.info/w/api.php";
     private readonly TIMEOUT = 3000;
     
-    constructor(private readonly httpClient: HttpClient) {}
+    private readonly httpClient: HttpClient = inject(HttpClient);
 
     public async createFeatureFromPageId(pageId: string): Promise<GeoJSON.Feature> {
         const address = this.getContnetRetrivalAddress(pageId, true);
@@ -99,7 +99,6 @@ export class INatureService {
         //let url = Urls.urls + shareId + "?format=geojson";
         const url = "https://israelhiking.osm.org.il/api/urls/" + shareId + "?format=geojson";
         const geojson = await firstValueFrom(this.httpClient.get(url)) as GeoJSON.FeatureCollection;
-        console.log(geojson);
         return geojson.features.find(f => f.geometry.type !== "Point")?.geometry;
     }
 }
