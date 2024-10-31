@@ -75,10 +75,6 @@ $buttons-margin: 5px;
 }
 
 @media (width <= 550px) {
-    .hidden-xs {
-        display: none !important
-    }
-    
     .chart-control-container {
         width: calc(100vw - 2 * #{$control-border});
         height: $container-height-small-screen;
