@@ -4,10 +4,6 @@
     right: 85px
 }
 
-.pull-left-important {
-    float: left !important;
-}
-
 .search-input-container {
     width: calc(100vw - 178px);
     @include mat.all-component-densities(-3);

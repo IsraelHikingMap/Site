@@ -1,15 +1,15 @@
 ﻿﻿<div class="side-control maplibregl-ctrl">
     <div class="control-container">
-        <button mat-button class="pull-right high-button" [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Toggle main menu"><i class="fa fa-lg icon-bars"></i></button>
-        <div class="pull-right relative">
+        <div class="flex flex-row relative">
             <button mat-button class="high-button" *ngIf="isLoggedIn()" [matMenuTriggerFor]="userMenu" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Toggle user menu">
-                <img *ngIf="userInfo?.imageUrl" class="pull-right space-after profile-image" [src]="userInfo.imageUrl | offlineImage:true | async" alt=""/>
+                <img *ngIf="userInfo?.imageUrl" class="space-after profile-image" [src]="userInfo.imageUrl | offlineImage:true | async" alt=""/>
                 <i *ngIf="!userInfo.imageUrl" class="fa icon-user fa-lg"></i>
             </button>
             <button mat-button class="high-button" *ngIf="!isLoggedIn() && !isIFrame()" (click)="login()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Login">
                 <i class="fa icon-frown-o fa-lg"></i>
             </button>
             <span class="circle" [ngClass]="{'offline': isOffline(), 'online': !isOffline()}">{{getQueueText()}}</span>
+            <button mat-button class="high-button" [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Toggle main menu"><i class="fa fa-lg icon-bars"></i></button>
         </div>
         <mat-menu #appMenu="matMenu" xPosition="before">
             <ng-template matMenuContent>
