@@ -23,6 +23,7 @@ import { GeoJsonParser } from "../../../services/geojson.parser";
 import { sidebarAnimate } from "../sidebar.component";
 import { AddRouteAction, AddPrivatePoiAction } from "../../../reducers/routes.reducer";
 import { SetSelectedPoiAction, SetUploadMarkerDataAction, SetSidebarAction } from "../../../reducers/poi.reducer";
+import { GeoJSONUtils } from "../../../services/geojson-utils";
 import type {
     LinkData,
     LatLngAlt,
@@ -176,13 +177,13 @@ export class PublicPoiSidebarComponent implements OnDestroy {
 
     private initFromFeature(feature: GeoJSON.Feature) {
         this.fullFeature = feature;
-        this.latlng = this.poiService.getLocation(feature);
+        this.latlng = GeoJSONUtils.getLocation(feature);
         this.sourceImageUrls = this.getSourceImageUrls(feature);
         this.shareLinks = this.poiService.getPoiSocialLinks(feature);
         this.contribution = this.poiService.getContribution(feature);
         this.info = this.poiService.getEditableDataFromFeature(feature);
         const language = this.resources.getCurrentLanguageCodeSimplified();
-        this.titleService.set(this.poiService.getTitle(feature, language));
+        this.titleService.set(GeoJSONUtils.getTitle(feature, language));
     }
 
     private getSourceImageUrls(feature: GeoJSON.Feature): SourceImageUrlPair[] {
@@ -224,8 +225,8 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             return "";
         }
         const language = this.resources.getCurrentLanguageCodeSimplified();
-        const description = this.poiService.getDescription(this.fullFeature, language) ||
-            this.poiService.getExternalDescription(this.fullFeature, language);
+        const description = GeoJSONUtils.getDescription(this.fullFeature, language) ||
+            GeoJSONUtils.getExternalDescription(this.fullFeature, language);
         if (description) {
             return description;
         }
@@ -324,8 +325,8 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     }
 
     public navigateHere() {
-        const location = this.poiService.getLocation(this.fullFeature);
-        const title = this.poiService.getTitle(this.fullFeature, this.resources.getCurrentLanguageCodeSimplified());
+        const location = GeoJSONUtils.getLocation(this.fullFeature);
+        const title = GeoJSONUtils.getTitle(this.fullFeature, this.resources.getCurrentLanguageCodeSimplified());
         this.navigateHereService.addNavigationSegment(location, title);
         this.close();
     }

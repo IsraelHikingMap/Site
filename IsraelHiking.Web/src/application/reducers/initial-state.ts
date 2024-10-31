@@ -165,7 +165,6 @@ export const initialState =
         offlineState: {
             isOfflineAvailable: false,
             lastModifiedDate: null,
-            poisLastModifiedDate: null,
             shareUrlsLastModifiedDate: null,
             uploadPoiQueue: [],
             isPmtilesDownloaded: false
