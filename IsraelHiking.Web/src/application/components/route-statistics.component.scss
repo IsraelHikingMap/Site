@@ -65,31 +65,6 @@ $buttons-margin: 5px;
     min-width: unset !important;
 }
 
-.chart-close-button {
-    top: $buttons-margin;
-    left: $buttons-margin;
-}
-
-.chart-expand-button {
-    top: calc(#{$buttons-margin} + #{$button-size});
-    left: $buttons-margin;
-}
-
-.chart-more-button {
-    top: calc(#{$buttons-margin} + 2 * #{$button-size});
-    left: $buttons-margin;
-}
-
-.chart-graph-button {
-    bottom: $buttons-margin;
-    right: $buttons-margin;
-}
-
-.chart-table-button {
-    bottom: calc(#{$buttons-margin} + #{$button-size});
-    right: $buttons-margin;
-}
-
 .chart-container-tooltip {
     top: 20px;
     position: absolute
@@ -115,10 +90,5 @@ $buttons-margin: 5px;
 
     .chart-buttons .mat-mdc-button {
         padding: 0 !important;
-    }
-
-    .chart-more-button {
-        top: calc(#{$buttons-margin} + #{$button-size});
-        left: $buttons-margin;
     }
 }
