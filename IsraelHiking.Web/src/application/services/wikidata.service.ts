@@ -73,7 +73,7 @@ export class WikidataService {
             const indexString = GeoJSONUtils.setProperty(feature, "website", `https://${language}.wikipedia.org/wiki/${title}`);
             feature.properties["poiSourceImageUrl" + indexString] = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/128px-Wikipedia-logo-v2.svg.png";
         }
-        const wikipediaPage = await firstValueFrom(this.httpClient.get(`http://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=${title}&origin=*`).pipe(timeout(3000))) as unknown as WikipediaPage;
+        const wikipediaPage = await firstValueFrom(this.httpClient.get(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=${title}&origin=*`).pipe(timeout(3000))) as unknown as WikipediaPage;
         const pagesIds = Object.keys(wikipediaPage.query.pages);
         if (pagesIds.length > 0) {
             feature.properties.poiExternalDescription = wikipediaPage.query.pages[pagesIds[0]].extract;
