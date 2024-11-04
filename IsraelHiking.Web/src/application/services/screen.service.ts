@@ -38,6 +38,9 @@ export class ScreenService {
             } else {
                 this.logger.info(`[Screen] App is inactive, stop watching idle setting brightness to original: ${this.originalBrightness}`);
                 this.userIdleService.stop();
+                if (this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isAddingPoi) {
+                    this.store.dispatch(new ToggleAddRecordingPoiAction());
+                }
             }
         });
         this.userIdleService.setInterrupts(DEFAULT_INTERRUPTSOURCES);
