@@ -6,6 +6,9 @@ import { DeviceOrientationService } from "./device-orientation.service";
 import { FitBoundsService } from "./fit-bounds.service";
 import { MapService } from "./map.service";
 import { LoggingService } from "./logging.service";
+import { ResourcesService } from "./resources.service";
+import { ToastService } from "./toast.service";
+import { SelectedRouteService } from "./selected-route.service";
 import { SetFollowingAction, SetPannedAction, ToggleDistanceAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, LatLngAlt } from "../models/models";
 
@@ -17,10 +20,13 @@ export type LocationWithBearing = {
 
 @Injectable()
 export class LocationService {
+    private readonly resources: ResourcesService = inject(ResourcesService);
+    private readonly toastService = inject(ToastService);
     private readonly geoLocationService = inject(GeoLocationService);
     private readonly deviceOrientationService = inject(DeviceOrientationService);
     private readonly fitBoundsService = inject(FitBoundsService);
     private readonly mapService = inject(MapService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly loggingService = inject(LoggingService);
     private readonly store = inject(Store);
 
@@ -53,6 +59,7 @@ export class LocationService {
         });
 
         this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
+            const wasPanned = this.isPanned;
             this.isPanned = pannedTimestamp != null;
             if (this.isPanned) {
                 return;
@@ -65,6 +72,10 @@ export class LocationService {
             }
             if (this.isFollowing()) {
                 this.moveMapToGpsPosition();
+                const selectedRoute = this.selectedRouteService.getSelectedRoute();
+                if (wasPanned && selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
+                    this.toastService.warning(this.resources.editingRouteWhileTracking);
+                }
             }
         });
 

@@ -8,6 +8,9 @@ import { DeviceOrientationService } from "./device-orientation.service";
 import { FitBoundsService } from "./fit-bounds.service";
 import { MapService } from "./map.service";
 import { LoggingService } from "./logging.service";
+import { ToastService } from "./toast.service";
+import { ResourcesService } from "./resources.service";
+import { SelectedRouteService } from "./selected-route.service";
 import { GpsReducer, SetCurrentPositionAction } from "../reducers/gps.reducer";
 import { InMemoryReducer, SetPannedAction } from "../reducers/in-memory.reducer";
 
@@ -36,6 +39,9 @@ describe("LocationService", () => {
                 getZoom: () => 0
             }
         };
+        const toastService = {
+            warning: jasmine.createSpy()
+        }
         TestBed.configureTestingModule({
             imports: [NgxsModule.forRoot([InMemoryReducer, GpsReducer])],
             providers: [
@@ -44,6 +50,9 @@ describe("LocationService", () => {
                 { provide: FitBoundsService, useValue: fitBoundsService },
                 { provide: MapService, useValue: mapService },
                 { provide: LoggingService, useValue: { warning: () => {} } },
+                { provide: ToastService, useValue: toastService },
+                { provide: ResourcesService, useValue: {} },
+                { provide: SelectedRouteService, useValue: { getSelectedRoute: jasmine.createSpy().and.returnValue({ state: "Poi" }) } },
                 LocationService
             ]
         });
@@ -246,5 +255,21 @@ describe("LocationService", () => {
         expect(service.isFollowing()).toBeTruthy();
         store.dispatch(new SetPannedAction(new Date()));
         expect(service.isFollowing()).toBeFalsy();
+    }));
+
+    it("Should raise a toast when editing and panned changed from true to false", inject([LocationService, Store, ToastService], 
+        (service: LocationService, store: Store, toastService: ToastService) => {
+        store.reset({ 
+            gpsState: { 
+                currentPosition: null,
+                tracking: "tracking"
+            },
+            inMemoryState: { following: true, pannedTimestamp: new Date() }
+        });
+        service.initialize();
+
+        store.dispatch(new SetPannedAction(null));
+        
+        expect(toastService.warning).toHaveBeenCalled();
     }));
 });
