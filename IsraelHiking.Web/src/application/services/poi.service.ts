@@ -276,14 +276,6 @@ export class PoiService {
         }
     }
 
-    private setLanguage(feature: GeoJSON.Feature, poi: GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>) {
-        const hasHebrew = feature.properties["name:he"] || feature.properties["mtb:name"];
-        const hasEnglish = feature.properties["name:en"] || feature.properties["mtb:name:en"];
-        if (hasHebrew || hasEnglish) {
-            poi.properties.poiLanguage = hasHebrew && hasEnglish ? "all" : hasHebrew ? "he" : "en";
-        }
-    }
-
     /**
      * This will adjust the locaiton accorting to the location in the tile 
      * instead of clalculating a different location based on the geometry.
@@ -354,8 +346,8 @@ export class PoiService {
         poi.properties.poiSource = poi.properties.poiSource || "OSM";
         poi.properties.poiId = poi.properties.poiId || poi.properties.poiSource + "_" + poi.properties.identifier;
         poi.properties.poiGeolocation = poi.properties.poiGeolocation || this.getGeolocation(feature);
+        poi.properties.poiLanguage = poi.properties.poiLanguage || "all";
         OsmTagsService.setIconColorCategory(feature, poi);
-        this.setLanguage(feature, poi);
         return poi;
     }
 
