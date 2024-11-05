@@ -505,7 +505,7 @@ describe("Poi Service", () => {
                                 poiSource: "OSM",
                                 poiId: "poiId",
                                 identifier: "id",
-                                imageUrl: "some-old-image-url",
+                                imageUrl: "wikimedia.org/some-old-image-url",
                                 website: "some-old-url"
                             } as any,
                             geometry: {
@@ -543,7 +543,7 @@ describe("Poi Service", () => {
                     expect(feature.properties.poiAddedUrls).toEqual(["some-new-url"]);
                     expect(feature.properties.poiRemovedUrls).toEqual(["some-old-url"]);
                     expect(feature.properties.poiAddedImages).toEqual(["some-new-image-url"]);
-                    expect(feature.properties.poiRemovedImages).toEqual(["some-old-image-url"]);
+                    expect(feature.properties.poiRemovedImages).toEqual(["wikimedia.org/some-old-image-url"]);
                     expect(feature.properties.poiIcon).toBe("icon-spring");
                     expect(feature.properties.poiGeolocation.lat).toBe(1);
                     expect(feature.properties.poiGeolocation.lon).toBe(2);
@@ -569,7 +569,7 @@ describe("Poi Service", () => {
                                 poiSource: "OSM",
                                 poiId: "poiId",
                                 identifier: "id",
-                                imageUrl: "some-image-url",
+                                imageUrl: "wikimedia.org/some-image-url",
                                 website: "some-url",
                                 description: "description",
                                 poiCategory: "natural",
@@ -595,7 +595,7 @@ describe("Poi Service", () => {
                     icon: "icon-spring",
                     iconColor: "blue",
                     description: "description",
-                    imagesUrls: ["some-image-url"],
+                    imagesUrls: ["wikimedia.org/some-image-url"],
                     title: "title",
                     urls: ["some-url"],
                     canEditTitle: true
@@ -701,7 +701,7 @@ describe("Poi Service", () => {
                     description: "description",
                     title: "title",
                     type: "some-type",
-                    urls: [{mimeType: "image", url: "image-url", text: "text"}],
+                    urls: [{mimeType: "image", url: "wikimedia.org/image-url", text: "text"}],
                     latlng: { lng: 1, lat: 2}
                 };
 
@@ -713,9 +713,30 @@ describe("Poi Service", () => {
                 expect(GeoJSONUtils.getLocation(featureAfterConverstion).lng).toBe(1);
                 expect(GeoJSONUtils.getDescription(featureAfterConverstion, "he")).toBe("description");
                 expect(GeoJSONUtils.getTitle(featureAfterConverstion, "he")).toBe("title");
-                expect(featureAfterConverstion.properties.image).toBe("image-url");
+                expect(featureAfterConverstion.properties.image).toBe("wikimedia.org/image-url");
                 expect(featureAfterConverstion.properties.image0).toBeUndefined();
                 expect(featureAfterConverstion.properties.poiIcon).toBe("icon-some-type");
+            }
+        )
+    );
+
+    it("Should filter out incompatible images",
+        inject([PoiService], (poiService: PoiService) => {
+                const feature = {
+                    properties: {
+                        poiSource: "OSM",
+                        poiId: "poiId",
+                        identifier: "id",
+                        image: "invalid-image-url",
+                    } as any,
+                    geometry: {
+                        type: "Point",
+                        coordinates: [1, 2]
+                    }
+                } as GeoJSON.Feature;
+
+                const info = poiService.getEditableDataFromFeature(feature);
+                expect(info.imagesUrls.length).toBe(0);
             }
         )
     );

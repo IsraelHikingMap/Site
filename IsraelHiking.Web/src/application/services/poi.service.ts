@@ -766,7 +766,10 @@ export class PoiService {
             title: GeoJSONUtils.getTitle(feature, language),
             icon: feature.properties.poiIcon,
             iconColor: feature.properties.poiIconColor,
-            imagesUrls: Object.keys(feature.properties).filter(k => k.startsWith("image")).map(k => feature.properties[k]),
+            imagesUrls: Object.keys(feature.properties)
+                .filter(k => k.startsWith("image"))
+                .map(k => feature.properties[k])
+                .filter(u => u.includes("wikimedia.org") || u.includes("inature.info") || u.includes("nakeb.co.il") || u.includes("jeepolog.com")),
             urls: Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => feature.properties[k]),
             isPoint: feature.geometry.type === "Point" || feature.geometry.type === "MultiPoint",
             canEditTitle: !feature.properties.poiMerged && !feature.properties["mtb:name"],
@@ -787,17 +790,11 @@ export class PoiService {
                 poiIconColor: info.iconColor,
             } as any
         } as GeoJSON.Feature;
-        let index = 0;
         for (const imageUrl of info.imagesUrls) {
-            const key = index === 0 ? "image" : `image${index}`;
-            feature.properties[key] = imageUrl;
-            index++;
+            GeoJSONUtils.setProperty(feature, "image", imageUrl);
         }
-        index = 0;
         for (const url of info.urls) {
-            const key = index === 0 ? "website" : `website${index}`;
-            feature.properties[key] = url;
-            index++;
+            GeoJSONUtils.setProperty(feature, "website", url);
         }
         const language = this.resources.getCurrentLanguageCodeSimplified();
         GeoJSONUtils.setDescription(feature, info.description, language);
