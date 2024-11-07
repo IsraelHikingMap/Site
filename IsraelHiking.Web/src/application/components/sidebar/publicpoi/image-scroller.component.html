@@ -14,6 +14,9 @@
              (click)="showImage()"/>
     </div>
 </div>
+<div class="flex flex-row" *ngIf="canEdit()">
+    <div class="text-sm ml-2 mr-2 text-center">{{resources.imageUploadWaiver}}</div>
+</div>
 <div class="flex flex-row" *ngIf="hasNext() || hasPrevious() || canEdit()">
     <div class="flex-1">
         <button mat-button class="w-full" (click)="previous()" [disabled]="!hasPrevious()"><i class="fa icon-chevron-{{resources.start}}"></i></button>
