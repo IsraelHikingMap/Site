@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, OnInit, ViewChild, ElementRef, ChangeDetectorRef, DestroyRef } from "@angular/core";
+import { Component, ViewEncapsulation, OnInit, ElementRef, ChangeDetectorRef, DestroyRef, inject, viewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { trigger, style, transition, animate } from "@angular/animations";
 import { Observable, interval } from "rxjs";
@@ -9,7 +9,6 @@ import * as d3 from "d3";
 import type { Selection, ScaleContinuousNumeric } from "d3";
 import type { Immutable } from "immer";
 
-import { BaseMapComponent } from "./base-map.component";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStatisticsService, RouteStatistics, RouteStatisticsPoint } from "../services/route-statistics.service";
@@ -36,19 +35,19 @@ interface IChartSubRouteRange {
 }
 
 interface IChartElements {
-    svg: Selection<any, any, null, undefined>;
-    chartArea: Selection<SVGGElement, any, null, undefined>;
-    path: Selection<SVGPathElement, any, null, undefined>;
-    hoverGroup: Selection<SVGGElement, any, null, undefined>;
-    dragRect: Selection<SVGRectElement, any, null, undefined>;
-    locationGroup: Selection<SVGGElement, any, null, undefined>;
-    xScale: ScaleContinuousNumeric<number, number>;
-    yScale: ScaleContinuousNumeric<number, number>;
-    yScaleSlope: ScaleContinuousNumeric<number, number>;
+    svg?: Selection<any, any, null, undefined>;
+    chartArea?: Selection<SVGGElement, any, null, undefined>;
+    path?: Selection<SVGPathElement, any, null, undefined>;
+    hoverGroup?: Selection<SVGGElement, any, null, undefined>;
+    dragRect?: Selection<SVGRectElement, any, null, undefined>;
+    locationGroup?: Selection<SVGGElement, any, null, undefined>;
+    xScale?: ScaleContinuousNumeric<number, number>;
+    yScale?: ScaleContinuousNumeric<number, number>;
+    yScaleSlope?: ScaleContinuousNumeric<number, number>;
     margin: IMargin;
-    width: number;
-    height: number;
-    dragState: DragState;
+    width?: number;
+    height?: number;
+    dragState?: DragState;
 }
 
 @Component({
@@ -73,79 +72,65 @@ interface IChartElements {
         )
     ],
 })
-export class RouteStatisticsComponent extends BaseMapComponent implements OnInit {
+export class RouteStatisticsComponent implements OnInit {
     private static readonly HOVER_BOX_WIDTH = 160;
     private static readonly MAX_SLOPE = 20;
 
-    public length: number;
-    public gain: number;
-    public loss: number;
-    public duration: string;
-    public durationUnits: string;
-    public averageSpeed: number;
-    public currentSpeed: number;
-    public remainingDistance: number;
-    public traveledDistance: number;
-    public ETA: string;
-    public isKmMarkersOn: boolean;
-    public isSlopeOn: boolean;
-    public isExpanded: boolean;
-    public isTable: boolean;
-    public isOpen: boolean;
-    public isFollowing: boolean;
-    public kmMarkersSource: GeoJSON.FeatureCollection<GeoJSON.Point>;
-    public chartHoverSource: GeoJSON.FeatureCollection<GeoJSON.Point>;
-    public slopeRouteSource: GeoJSON.FeatureCollection<GeoJSON.LineString>;
+    public length: number = 0;
+    public gain: number = 0;
+    public loss: number = 0;
+    public duration: string = "--:--";
+    public durationUnits: string = "";
+    public averageSpeed: number | null = null;
+    public currentSpeed: number | null = null;
+    public remainingDistance: number = 0;
+    public traveledDistance: number = 0;
+    public ETA: string = "--:--";
+    public isKmMarkersOn: boolean = false;
+    public isSlopeOn: boolean = false;
+    public isExpanded: boolean = false;
+    public isTable: boolean = false;
+    public isOpen: boolean = false;
+    public isFollowing: boolean = false;
+    public kmMarkersSource: GeoJSON.FeatureCollection<GeoJSON.Point> = {
+        type: "FeatureCollection",
+        features: []
+    };
+    public chartHoverSource: GeoJSON.FeatureCollection<GeoJSON.Point> = {
+        type: "FeatureCollection",
+        features: []
+    };
+    public slopeRouteSource: GeoJSON.FeatureCollection<GeoJSON.LineString> = {
+        type: "FeatureCollection",
+        features: []
+    };
     public subRouteRange: IChartSubRouteRange;
-    public slopeRoutePaint: LineLayerSpecification["paint"];
+    public slopeRoutePaint: LineLayerSpecification["paint"] = {};
     public statisticsVisible$: Observable<boolean>;
 
-    @ViewChild("lineChartContainer")
-    public lineChartContainer: ElementRef;
+    public lineChartContainer = viewChild<ElementRef>("lineChartContainer");
 
     private statistics: RouteStatistics;
-    private chartElements: IChartElements;
-    private zoom: number;
+    private chartElements: IChartElements = {
+        margin: { top: 10, right: 10, bottom: 40, left: 40 },
+    };
+    private zoom: number = 7;
     private routeColor: string;
     private audioPlayer: IAudioPlayer;
-    private heading: number;
+    private heading: number | null = null;
 
-    constructor(resources: ResourcesService,
-                private readonly changeDetectorRef: ChangeDetectorRef,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly routeStatisticsService: RouteStatisticsService,
-                private readonly cancelableTimeoutService: CancelableTimeoutService,
-                private readonly sidebarService: SidebarService,
-                private readonly audioPlayerFactory: AudioPlayerFactory,
-                private readonly store: Store,
-                private readonly destroyRef: DestroyRef,
+    public readonly resources = inject(ResourcesService);
+    private readonly changeDetectorRef = inject(ChangeDetectorRef);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly routeStatisticsService = inject(RouteStatisticsService);
+    private readonly cancelableTimeoutService = inject(CancelableTimeoutService);
+    private readonly sidebarService = inject(SidebarService);
+    private readonly audioPlayerFactory = inject(AudioPlayerFactory);
+    private readonly store = inject(Store);
+    private readonly destroyRef = inject(DestroyRef);
+
+    constructor(
     ) {
-        super(resources);
-        this.isExpanded = false;
-        this.isOpen = false;
-        this.isTable = false;
-        this.isFollowing = false;
-        this.statistics = null;
-        this.subRouteRange = null;
-        this.heading = null;
-        this.setViewStatisticsValues(null);
-        this.kmMarkersSource = {
-            type: "FeatureCollection",
-            features: []
-        };
-        this.chartHoverSource = {
-            type: "FeatureCollection",
-            features: []
-        };
-        this.slopeRouteSource = {
-            type: "FeatureCollection",
-            features: []
-        };
-        this.slopeRoutePaint = {};
-        this.chartElements = {
-            margin: { top: 10, right: 10, bottom: 40, left: 40 },
-        } as IChartElements;
-        this.zoom = 7;
         this.store.select((state: ApplicationState) => state.locationState.zoom).pipe(takeUntilDestroyed()).subscribe((zoom) => {
             this.zoom = zoom;
             this.updateKmMarkers();
@@ -323,7 +308,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (!this.isOpen) {
             return;
         }
-        if (!this.lineChartContainer || !this.lineChartContainer.nativeElement) {
+        if (!(this.lineChartContainer()?.nativeElement)) {
             return;
         }
 
@@ -433,9 +418,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     private initChart() {
         this.chartElements.margin.right = this.isSlopeOn ? 30 : 10;
-        this.chartElements.svg = d3.select(this.lineChartContainer.nativeElement).select("svg");
+        this.chartElements.svg = d3.select(this.lineChartContainer().nativeElement).select("svg");
         this.chartElements.svg.html("");
-        const windowStyle = window.getComputedStyle(this.lineChartContainer.nativeElement);
+        const windowStyle = window.getComputedStyle(this.lineChartContainer().nativeElement);
         const width = +windowStyle.width.replace("px", "");
         const height = +windowStyle.height.replace("px", "");
         this.chartElements.svg.attr("height", height);

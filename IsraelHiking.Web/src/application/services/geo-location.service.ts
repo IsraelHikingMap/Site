@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter, NgZone } from "@angular/core";
+import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
 import { BackgroundGeolocationPlugin, Location } from "cordova-background-geolocation-plugin";
 import { App } from "@capacitor/app";
 import { Store } from "@ngxs/store";
@@ -18,27 +18,20 @@ export class GeoLocationService {
     private static readonly TIME_OUT = 30000;
     private static readonly SHORT_TIME_OUT = 10000; // Only for first position for good UX
 
-    private watchNumber: number;
-    private isBackground: boolean;
-    private wasInitialized: boolean;
-    private gettingLocations: boolean;
+    private watchNumber = -1;
+    private isBackground = false;
+    private wasInitialized = false;
+    private gettingLocations = false;
 
-    public bulkPositionChanged: EventEmitter<GeolocationPosition[]>;
-    public backToForeground: EventEmitter<void>;
+    public bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
+    public backToForeground = new EventEmitter<void>();
 
-    constructor(private readonly resources: ResourcesService,
-                private readonly runningContextService: RunningContextService,
-                private readonly loggingService: LoggingService,
-                private readonly toastService: ToastService,
-                private readonly ngZone: NgZone,
-                private readonly store: Store) {
-        this.watchNumber = -1;
-        this.backToForeground = new EventEmitter();
-        this.bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
-        this.isBackground = false;
-        this.wasInitialized = false;
-        this.gettingLocations = false;
-    }
+    private readonly resources = inject(ResourcesService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly loggingService = inject(LoggingService);
+    private readonly toastService = inject(ToastService);
+    private readonly ngZone = inject(NgZone);
+    private readonly store = inject(Store);
 
     public static positionToLatLngTime(position: GeolocationPosition): LatLngAltTime {
         if (position == null) {
@@ -104,12 +97,6 @@ export class GeoLocationService {
                 await this.stopWatching();
                 return;
         }
-    }
-
-    public canRecord(): boolean {
-        const gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
-        return gpsState.tracking === "tracking"
-            && gpsState.currentPosition != null && this.runningContextService.isCapacitor;
     }
 
     private startWatching() {

@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from "@angular/core";
+import { inject, Injectable, NgZone } from "@angular/core";
 import { MapMouseEvent, Map } from "maplibre-gl";
 import { MatDialog } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
@@ -16,14 +16,13 @@ import type { ApplicationState, MarkerData, LatLngAlt } from "../../models/model
 @Injectable()
 export class RouteEditPoiInteraction {
 
-    constructor(private readonly matDialog: MatDialog,
-                private readonly ngZone: NgZone,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly snappingService: SnappingService,
-                private readonly poiService: PoiService,
-                private readonly resources: ResourcesService,
-                private readonly store: Store) {
-    }
+    private readonly matDialog = inject(MatDialog);
+    private readonly ngZone = inject(NgZone);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly snappingService = inject(SnappingService);
+    private readonly poiService = inject(PoiService);
+    private readonly resources = inject(ResourcesService);
+    private readonly store = inject(Store);
 
     public setActive(active: boolean, map: Map) {
         if (active) {

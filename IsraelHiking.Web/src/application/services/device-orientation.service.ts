@@ -1,6 +1,6 @@
 /// <reference types="cordova-plugin-device-orientation" />
 
-import { Injectable, EventEmitter, NgZone } from "@angular/core";
+import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
 import { App } from "@capacitor/app";
 import { Store } from "@ngxs/store";
 
@@ -12,17 +12,14 @@ import type { ApplicationState } from "../models/models";
 export class DeviceOrientationService {
     private static readonly THROTTLE_TIME = 500; // in milliseconds
 
-    public orientationChanged: EventEmitter<number>;
+    public orientationChanged = new EventEmitter<number>();
 
-    private watchId: number;
+    private watchId = -1;
 
-    constructor(private readonly ngZone: NgZone,
-                private readonly loggingService: LoggingService,
-                private readonly runningContextService: RunningContextService,
-                private readonly store: Store) {
-        this.orientationChanged = new EventEmitter();
-        this.watchId = -1;
-    }
+    private readonly ngZone = inject(NgZone);
+    private readonly loggingService = inject(LoggingService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly store = inject(Store);
 
     public initialize() {
         if (!this.runningContextService.isCapacitor) {

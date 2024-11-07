@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from "@angular/core";
+import { inject, Injectable, NgZone } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
 import { App } from "@capacitor/app";
@@ -15,27 +15,23 @@ import { ImageGalleryService } from "./image-gallery.service";
 import { SetSidebarAction } from "../reducers/poi.reducer";
 import type { ApplicationState } from "../models/models";
 
-declare type ExitState = "None" | "FirstClick" | "SecondClick";
+type ExitState = "None" | "FirstClick" | "SecondClick";
 
 @Injectable()
 export class ApplicationExitService {
-    private state: ExitState;
-
-    constructor(private readonly resources: ResourcesService,
-                private readonly matDialog: MatDialog,
-                private readonly sidebarService: SidebarService,
-                private readonly ngZone: NgZone,
-                private readonly databaseService: DatabaseService,
-                private readonly runningContext: RunningContextService,
-                private readonly recordingRouteService: RecordedRouteService,
-                private readonly geoLocationService: GeoLocationService,
-                private readonly imageGalleryService: ImageGalleryService,
-                private readonly store: Store,
-                private readonly loggingService: LoggingService,
-                private readonly toastService: ToastService) {
-
-        this.state = "None";
-    }
+    private state: ExitState = "None";
+    private readonly resources = inject(ResourcesService);
+    private readonly matDialog = inject(MatDialog);
+    private readonly sidebarService = inject(SidebarService);
+    private readonly ngZone = inject(NgZone);
+    private readonly databaseService = inject(DatabaseService);
+    private readonly runningContext = inject(RunningContextService);
+    private readonly recordingRouteService = inject(RecordedRouteService);
+    private readonly geoLocationService = inject(GeoLocationService);
+    private readonly imageGalleryService = inject(ImageGalleryService);
+    private readonly store = inject(Store);
+    private readonly loggingService = inject(LoggingService);
+    private readonly toastService = inject(ToastService);
 
     public initialize() {
         if (!this.runningContext.isCapacitor) {

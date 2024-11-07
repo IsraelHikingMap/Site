@@ -2,28 +2,30 @@ import { HttpClient } from "@angular/common/http";
 import { Observable, firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
 import { LayersService } from "../../../services/layers.service";
 import type { LayerData, ApplicationState, EditableLayer, LocationState } from "../../../models/models";
 import type { Immutable } from "immer";
+import { inject } from "@angular/core";
 
-export abstract class LayerBaseDialogComponent extends BaseMapComponent {
+export abstract class LayerBaseDialogComponent {
     public title: string;
     public isNew: boolean;
     public isOverlay: boolean;
     public layerData: EditableLayer;
     public location$: Observable<Immutable<LocationState>>;
 
-    protected constructor(resources: ResourcesService,
-                          protected readonly mapService: MapService,
-                          protected readonly layersService: LayersService,
-                          protected readonly toastService: ToastService,
-                          private readonly http: HttpClient,
-                          private readonly store: Store) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
+
+    protected readonly mapService = inject(MapService);
+    protected readonly layersService = inject(LayersService);
+    protected readonly toastService = inject(ToastService);
+    private readonly http = inject(HttpClient);
+    private readonly store = inject(Store);
+
+    protected constructor() {
         this.layerData = {
             minZoom: LayersService.MIN_ZOOM,
             maxZoom: LayersService.MAX_NATIVE_ZOOM,
@@ -75,7 +77,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
             if (response && response.name) {
                 this.layerData.key = response.name;
             }
-        } catch (ex) {
+        } catch {
             // ignore error
         }
     }

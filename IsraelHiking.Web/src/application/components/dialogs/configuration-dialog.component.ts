@@ -1,9 +1,8 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { MatDialogRef } from "@angular/material/dialog";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
@@ -20,19 +19,21 @@ import type { ApplicationState, BatteryOptimizationType } from "../../models/mod
     selector: "configuration-dialog",
     templateUrl: "./configuration-dialog.component.html"
 })
-export class ConfigurationDialogComponent extends BaseMapComponent {
+export class ConfigurationDialogComponent {
 
     public batteryOptimizationType$: Observable<BatteryOptimizationType>;
     public isAutomaticRecordingUpload$: Observable<boolean>;
     public isGotLostWarnings$: Observable<boolean>;
 
-    constructor(resources: ResourcesService,
-        private readonly dialogRef: MatDialogRef<ConfigurationDialogComponent>,
-        private readonly runningContextService: RunningContextService,
-        private readonly toastService: ToastService,
-        private readonly logginService: LoggingService,
-        private readonly store: Store) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
+
+    private readonly dialogRef = inject(MatDialogRef);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly toastService = inject(ToastService);
+    private readonly logginService = inject(LoggingService);
+    private readonly store = inject(Store);
+
+    constructor() {
         this.batteryOptimizationType$ = this.store.select((state: ApplicationState) => state.configuration.batteryOptimizationType);
         this.isAutomaticRecordingUpload$ = this.store.select((state: ApplicationState) => state.configuration.isAutomaticRecordingUpload);
         this.isGotLostWarnings$ = this.store.select((state: ApplicationState) => state.configuration.isGotLostWarnings);

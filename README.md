@@ -37,7 +37,7 @@ The technology stack of this site is based on the following frameworks:
 * [MiniSearch](https://lucaong.github.io/minisearch/) - for in memory search
 * [GeoJSON Path Finder](https://www.liedman.net/geojson-path-finder/) - for in memory small area routing
 
-# Architecture and folder stucture of the client side
+# Architecture and folder structure of the client side
 The architecture is based heavily on Angular:
 * application - where all the application code is, topmost folder.
   * components - this layer handles the UI calls and bindings along with the relevant css and html files.

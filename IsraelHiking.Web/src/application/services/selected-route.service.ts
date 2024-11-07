@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter } from "@angular/core";
+import { Injectable, EventEmitter, inject } from "@angular/core";
 import { some } from "lodash-es";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
@@ -34,17 +34,17 @@ import type {
 export class SelectedRouteService {
     private static MERGE_THRESHOLD = 50; // meter.
 
-    private routes: Immutable<RouteData[]>;
+    private routes: Immutable<RouteData[]> = [];
     private selectedRouteId: string;
 
-    public selectedRouteHover: EventEmitter<LatLngAlt>;
+    public selectedRouteHover = new EventEmitter<LatLngAlt>;
 
-    constructor(private readonly resources: ResourcesService,
-                private readonly routesFactory: RoutesFactory,
-                private readonly routingProvider: RoutingProvider,
-                private readonly store: Store) {
-        this.routes = [];
-        this.selectedRouteHover = new EventEmitter();
+    private readonly resources = inject(ResourcesService);
+    private readonly routesFactory = inject(RoutesFactory);
+    private readonly routingProvider = inject(RoutingProvider);
+    private readonly store = inject(Store);
+    
+    constructor() {
         this.store.select((state: ApplicationState) => state.routes.present).subscribe((r) => {
             this.routes = r;
         });

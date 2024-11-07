@@ -1,37 +1,30 @@
-import { Component, Input, Output, EventEmitter } from "@angular/core";
+import { Component, inject, input, output } from "@angular/core";
 import { Router } from "@angular/router";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { PoiService } from "../../services/poi.service";
 import { RouteStrings } from "../../services/hash.service";
+import { GeoJSONUtils } from "../../services/geojson-utils";
 
 @Component({
     selector: "cluster-overlay",
     templateUrl: "./cluster-overlay.component.html",
     styleUrls: ["./cluster-overlay.component.scss"]
 })
-export class ClusterOverlayComponent extends BaseMapComponent {
+export class ClusterOverlayComponent {
 
-    @Input()
-    public features: GeoJSON.Feature[];
+    public features = input<GeoJSON.Feature[]>();
 
-    @Output()
-    public closed: EventEmitter<void>;
+    public closed = output();
+    public readonly resources = inject(ResourcesService);
 
-    constructor(resources: ResourcesService,
-                private readonly router: Router,
-                private readonly poiService: PoiService) {
-        super(resources);
-        this.closed = new EventEmitter();
-    }
+    private readonly router = inject(Router);
 
     public getTitle(feature: GeoJSON.Feature) {
-        return this.poiService.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
+        return GeoJSONUtils.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
     public hasExtraData(feature: GeoJSON.Feature): boolean {
-        return this.poiService.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
+        return GeoJSONUtils.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
     public clickOnItem(feature: GeoJSON.Feature) {

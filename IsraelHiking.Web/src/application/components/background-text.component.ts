@@ -1,8 +1,7 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import type { ApplicationState } from "../models/models";
 
@@ -11,15 +10,15 @@ import type { ApplicationState } from "../models/models";
     templateUrl: "./background-text.component.html",
     styleUrls: ["./background-text.component.scss"]
 })
-export class BackgroundTextComponent extends BaseMapComponent {
+export class BackgroundTextComponent {
 
-    public text: string;
+    public text: string = "";
 
-    constructor(resources: ResourcesService,
-        private readonly store: Store) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
 
-        this.text = "";
+    private readonly store = inject(Store);
+
+    constructor() {
         this.store.select((state: ApplicationState) => state.offlineState.isOfflineAvailable).pipe(takeUntilDestroyed()).subscribe(() => this.updateText());
         this.store.select((state: ApplicationState) => state.offlineState.lastModifiedDate).pipe(takeUntilDestroyed()).subscribe(() => this.updateText());
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed()).subscribe(() => this.updateText());

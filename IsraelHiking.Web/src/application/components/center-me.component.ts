@@ -1,7 +1,6 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState } from "../models/models";
@@ -11,12 +10,12 @@ import type { ApplicationState } from "../models/models";
     templateUrl: "./center-me.component.html",
     styleUrls: ["./center-me.component.scss"]
 })
-export class CenterMeComponent extends BaseMapComponent {
+export class CenterMeComponent {
 
-    constructor(resources: ResourcesService,
-                private readonly store: Store) {
-        super(resources);
-    }
+    public readonly resources = inject(ResourcesService);
+
+    private readonly store = inject(Store);
+    
 
     public showButton() {
         const inMemeoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);

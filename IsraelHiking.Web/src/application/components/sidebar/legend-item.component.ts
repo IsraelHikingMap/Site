@@ -1,7 +1,6 @@
-import { Component, Input } from "@angular/core";
+import { Component, inject, input } from "@angular/core";
 
 import { LayersService } from "../../services/layers.service";
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FitBoundsService } from "../../services/fit-bounds.service";
 import type { LatLngAlt } from "../../models/models";
@@ -23,35 +22,34 @@ export interface ILegendItem {
     templateUrl: "./legend-item.component.html",
     styleUrls: ["./legend-item.component.scss"]
 })
-export class LegendItemComponent extends BaseMapComponent {
+export class LegendItemComponent {
 
     public static readonly OSM_TAG_LINK = "osm-tag-link";
     public static readonly OSM_KEY_LINK = "osm-key-link";
 
-    @Input()
-    public item: ILegendItem;
-    constructor(resources: ResourcesService,
-                private readonly fitBoundsService: FitBoundsService,
-                private readonly layersService: LayersService) {
-        super(resources);
+    public item = input<ILegendItem>();
+
+    public readonly resources = inject(ResourcesService);
+
+    private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly layersService = inject(LayersService);
+
+    public moveToLocation() {
+        this.fitBoundsService.flyTo(this.item().latlng, this.item().zoom);
     }
 
-    public moveToLocation(item: ILegendItem) {
-        this.fitBoundsService.flyTo(item.latlng, item.zoom);
-    }
-
-    public getLink(item: ILegendItem) {
-        if (item.link === LegendItemComponent.OSM_KEY_LINK) {
-            return `https://wiki.openstreetmap.org/wiki/Key:${item.osmTags[0].split("=")[0]}`;
+    public getLink() {
+        if (this.item().link === LegendItemComponent.OSM_KEY_LINK) {
+            return `https://wiki.openstreetmap.org/wiki/Key:${this.item().osmTags[0].split("=")[0]}`;
         }
-        if (item.link === LegendItemComponent.OSM_TAG_LINK) {
-            return `https://wiki.openstreetmap.org/wiki/Tag:${item.osmTags[0].split(" ")[0]}`;
+        if (this.item().link === LegendItemComponent.OSM_TAG_LINK) {
+            return `https://wiki.openstreetmap.org/wiki/Tag:${this.item().osmTags[0].split(" ")[0]}`;
         }
-        return item.link;
+        return this.item().link;
     }
 
-    public getImageAddress(item: ILegendItem) {
+    public getImageAddress() {
         const styleKey = this.layersService.getSelectedBaseLayer().address.replace(".json", "").split("/").splice(-1)[0];
-        return `content/legend/${styleKey}_${item.key}.png`;
+        return `content/legend/${styleKey}_${this.item().key}.png`;
     }
 }

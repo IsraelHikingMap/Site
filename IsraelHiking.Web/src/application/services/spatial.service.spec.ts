@@ -61,20 +61,20 @@ describe("Spatial service", () => {
         expect(clippedLines[0].geometry.coordinates[0]).toEqual([0,0]);
     });
 
-    it("Should change a line that is crosses the entire tile boundary", () => {
+    it("Should change a line that crosses the entire tile boundary", () => {
         const lines = [lineString([[-1,-1], [5,5]])];
         const clippedLines = SpatialService.clipLinesToTileBoundary(lines, {x: 128,y: 127}, 8);
         expect(clippedLines[0].geometry.coordinates[0]).toEqual([0,0]);
         expect(clippedLines[0].geometry.coordinates[1]).not.toEqual([5,5]);
     });
 
-    it("Should split a line that is crosses the tile boundary multiple times to several lines", () => {
+    it("Should split a line that crosses the tile boundary multiple times to several lines", () => {
         const lines = [lineString([[-1,-1], [0.5,0.5], [-1, 0.5], [0.5, 0.6], [-1, 0.6], [0.7, 0.7]])];
         const clippedLines = SpatialService.clipLinesToTileBoundary(lines, {x: 128,y: 127}, 8);
         expect(clippedLines.length).toBe(3);
-        expect(clippedLines[0].geometry.coordinates[0]).toEqual([0,0]);
-        expect(clippedLines[0].geometry.coordinates[2]).toEqual([0,0.5]);
-        expect(clippedLines[1].geometry.coordinates[2]).toEqual([0,0.6]);
+        expect(clippedLines[1].geometry.coordinates[0]).toEqual([0,0]);
+        expect(clippedLines[1].geometry.coordinates[2]).toEqual([0,0.5]);
+        expect(clippedLines[0].geometry.coordinates[2]).toEqual([0,0.6]);
         expect(clippedLines[2].geometry.coordinates[1]).toEqual([0.7,0.7]);
     });
 
@@ -312,5 +312,74 @@ describe("Spatial service", () => {
         const pixel = SpatialService.toRelativePixel(latlng, 12, 256);
         expect(pixel.pixelX).toBe(35);
         expect(pixel.pixelY).toBe(220);
+    });
+
+    it("Should merge lines", () => {
+        const lines = [
+            lineString([[0,0], [1,1]]),
+            lineString([[1,1], [2,2]])
+        ];
+        const merged = SpatialService.mergeLines(lines);
+        expect(merged.coordinates.length).toBe(3);
+    });
+
+    it("Should merge opposite lines", () => {
+        const lines = [
+            lineString([[0,0], [1,1]]),
+            lineString([[2,2], [1,1]])
+        ];
+        const merged = SpatialService.mergeLines(lines);
+        expect(merged.coordinates.length).toBe(3);
+    });
+
+    it("Should merge reverse opposite lines", () => {
+        const lines = [
+            lineString([[1,1], [0,0]]),
+            lineString([[1,1], [2,2]])
+        ];
+        const merged = SpatialService.mergeLines(lines);
+        expect(merged.coordinates.length).toBe(3);
+        expect(merged.coordinates[0]).toEqual([2,2]);
+        expect(merged.coordinates[2]).toEqual([0,0]);
+    });
+
+    it("Should merge unordered lines", () => {
+        const lines = [
+            lineString([[1,1], [2,2]]),
+            lineString([[0,0], [1,1]])
+        ];
+        const merged = SpatialService.mergeLines(lines);
+        expect(merged.coordinates.length).toBe(3);
+    });
+
+    it("Should merge complicated unordered lines", () => {
+        const lines = [
+            lineString([[1,1], [2,2]]),
+            lineString([[0,0], [1,1]]),
+            lineString([[3,3], [2,2]])
+        ];
+        const merged = SpatialService.mergeLines(lines);
+        expect(merged.coordinates.length).toBe(4);
+    });
+
+    it("Should merge complicated unordered lines with gap", () => {
+        const lines = [
+            lineString([[0,0], [1,1]]),
+            lineString([[2,2], [3,3]]),
+            lineString([[1,1], [2,2]])
+        ];
+        const merged = SpatialService.mergeLines(lines);
+        expect(merged.coordinates.length).toBe(4);
+    });
+
+    it("Should try to merge and make the fisrt coordinate the same", () => {
+        const lines = [
+            lineString([[0,0], [1,1]]),
+            lineString([[2,2], [1,1]]),            
+            lineString([[2,2], [3,3]])
+        ];
+        const merged = SpatialService.mergeLines(lines);
+        expect(merged.coordinates.length).toBe(4);
+        expect(merged.coordinates[0]).toEqual([0,0]);
     });
 });

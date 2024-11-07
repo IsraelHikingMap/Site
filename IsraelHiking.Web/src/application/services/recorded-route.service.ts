@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
@@ -9,6 +9,7 @@ import { GeoLocationService } from "./geo-location.service";
 import { RoutesFactory } from "./routes.factory";
 import { TracesService } from "./traces.service";
 import { SpatialService } from "./spatial.service";
+import { RunningContextService } from "./running-context.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { StopRecordingAction, StartRecordingAction, AddRecordingRoutePointsAction } from "../reducers/recorded-route.reducer";
 import { AddTraceAction } from "../reducers/traces.reducer";
@@ -24,16 +25,14 @@ export class RecordedRouteService {
     private rejectedPosition: LatLngAltTime;
     private lastValidLocation: LatLngAltTime;
 
-    constructor(private readonly resources: ResourcesService,
-                private readonly geoLocationService: GeoLocationService,
-                private readonly routesFactory: RoutesFactory,
-                private readonly tracesService: TracesService,
-                private readonly loggingService: LoggingService,
-                private readonly toastService: ToastService,
-                private readonly store: Store) {
-        this.rejectedPosition = null;
-        this.lastValidLocation = null;
-    }
+    private readonly resources = inject(ResourcesService);
+    private readonly geoLocationService = inject(GeoLocationService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly routesFactory = inject(RoutesFactory);
+    private readonly tracesService = inject(TracesService);
+    private readonly loggingService = inject(LoggingService);
+    private readonly toastService = inject(ToastService);
+    private readonly store = inject(Store);
 
     public initialize() {
         if (this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording) {
@@ -61,6 +60,12 @@ export class RecordedRouteService {
         this.lastValidLocation = currentLocation;
         this.store.dispatch(new StartRecordingAction());
         this.store.dispatch(new AddRecordingRoutePointsAction([currentLocation]));
+    }
+
+    public canRecord(): boolean {
+        const gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
+        return gpsState.tracking === "tracking"
+            && gpsState.currentPosition != null && this.runningContextService.isCapacitor;
     }
 
     public isRecording() {

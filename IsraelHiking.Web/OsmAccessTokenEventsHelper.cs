@@ -62,7 +62,7 @@ namespace IsraelHiking.Web
                 
                 var userIdFromCache = await _appCache.GetOrAddAsync(token, async () =>
                 {
-                    var osmGateway = _clientsFactory.CreateOAuth2Client(context.Token);
+                    var osmGateway = _clientsFactory.CreateOAuth2Client(token);
                     var user = await osmGateway.GetUserDetails();
                     var userId = user.Id.ToString();
                     _logger.LogInformation($"User {userId} had just logged in");

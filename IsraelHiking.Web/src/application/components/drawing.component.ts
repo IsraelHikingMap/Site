@@ -1,8 +1,7 @@
-import { Component, HostListener } from "@angular/core";
+import { Component, HostListener, inject } from "@angular/core";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { ToastService } from "../services/toast.service";
@@ -23,15 +22,17 @@ import type { RoutingType, ApplicationState } from "../models/models";
     selector: "drawing",
     templateUrl: "./drawing.component.html"
 })
-export class DrawingComponent extends BaseMapComponent {
+export class DrawingComponent {
 
     public undoQueueLength$: Observable<number>;
 
-    constructor(resources: ResourcesService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly toastService: ToastService,
-                private readonly store: Store) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
+
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly toastService = inject(ToastService);
+    private readonly store = inject(Store);
+
+    constructor() {
         this.undoQueueLength$ = this.store.select((state: ApplicationState) => state.routes.past.length);
     }
 

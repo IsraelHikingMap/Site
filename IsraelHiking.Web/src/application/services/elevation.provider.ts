@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { timeout } from "rxjs/operators";
@@ -16,14 +16,12 @@ export class ElevationProvider {
     private readonly transparentPngUrl =
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=";
 
-    private elevationCache: Map<string, Uint8ClampedArray>;
+    private elevationCache = new Map<string, Uint8ClampedArray>();
 
-    constructor(private readonly httpClient: HttpClient,
-                private readonly loggingService: LoggingService,
-                private readonly pmTilesService: PmTilesService,
-                private readonly store: Store) {
-        this.elevationCache = new Map<string, Uint8ClampedArray>();
-    }
+    private readonly httpClient = inject(HttpClient);
+    private readonly loggingService = inject(LoggingService);
+    private readonly pmTilesService = inject(PmTilesService);
+    private readonly store = inject(Store);
 
     public async updateHeights(latlngs: LatLngAlt[]): Promise<void> {
         const relevantIndexes = [] as number[];

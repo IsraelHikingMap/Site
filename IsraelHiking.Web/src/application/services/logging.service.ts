@@ -29,10 +29,6 @@ export class LoggingService {
     private loggingDatabase: Dexie;
     private logToConsole: boolean;
 
-    constructor() {
-        this.loggingDatabase = null;
-    }
-
     public async initialize(logToConsole = true) {
         this.loggingDatabase = new Dexie(LoggingService.LOGGING_DB_NAME);
         this.loggingDatabase.version(1).stores({
