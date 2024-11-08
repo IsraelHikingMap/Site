@@ -4,6 +4,7 @@
             <mat-card appearance="outlined">
                 <mat-card-content>
                     <p><span [innerHtml]="resources.infoSubheader"></span></p>
+                    <p *ngIf="isApp()">{{resources.subscriptionDetails}}</p>
                     <div *ngIf="!isApp()" class="flex flex-row justify-center items-center">
                         <a href="https://play.google.com/store/apps/details?id=il.org.osm.israelhiking&hl=en" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Download from google play store">
                             <img src="content/google-play-badge.png" width="200" />

@@ -43,12 +43,6 @@ export class LocationComponent {
                 return;
             }
             this.updateLocationFeatureCollection(location.center, location.accuracy, location.bearing);
-            if (this.locationSerivce.isFollowing()) {
-                const selectedRoute = this.selectedRouteService.getSelectedRoute();
-                if (selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
-                    this.toastService.warning(this.resources.editingRouteWhileTracking);
-                }
-            }
         });
 
         this.store.select((state: ApplicationState) => state.inMemoryState.distance).pipe(takeUntilDestroyed()).subscribe(distance => {

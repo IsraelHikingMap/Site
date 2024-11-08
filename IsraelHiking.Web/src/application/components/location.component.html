@@ -1,8 +1,8 @@
 ﻿﻿<div class="side-control maplibregl-ctrl">
-    <button mat-button class="mt-1" (click)="toggleTracking()" [class.active]="isActive()" matTooltip="{{resources.showMeWhereIAm}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Location" angularticsAction="Toggle GPS location">
+    <button mat-button (click)="toggleTracking()" [class.active]="isActive()" matTooltip="{{resources.showMeWhereIAm}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Location" angularticsAction="Toggle GPS location">
         <i *ngIf="isDisabled() || isActive()" class="fa fa-lg icon-crosshairs" [class.following]="isActive() && isFollowingLocation()"></i>
         <div *ngIf="isLoading()" class="spinner-container">
-            <mat-spinner diameter="24"></mat-spinner>
+            <mat-spinner diameter="30"></mat-spinner>
         </div>
     </button>
     <button mat-button class="mt-1" (click)="toggleKeepNorthUp()" [class.active]="isKeepNorthUp()"><div [style.transform]="getRotationAngle()" matTooltip="{{resources.northUp}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Location" angularticsAction="North Up"><i class="icon-north"></i></div></button>
