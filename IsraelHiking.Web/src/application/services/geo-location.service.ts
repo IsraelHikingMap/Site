@@ -7,9 +7,9 @@ import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
+import { SpatialService } from "./spatial.service";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models/models";
-import { SpatialService } from "./spatial.service";
 
 declare let BackgroundGeolocation: BackgroundGeolocationPlugin;
 
@@ -62,10 +62,16 @@ export class GeoLocationService {
             this.isBackground = !state.isActive;
             this.loggingService.debug(`[GeoLocation] Now in ${this.isBackground ? "back" : "fore"}ground`);
             if (state.isActive) {
+                if (!this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording) {
+                    this.getRoughPosition();
+                    this.startBackgroundGeolocation();
+                }
                 this.ngZone.run(async () => {
                     await this.onLocationUpdate();
                     this.backToForeground.next();
                 });
+            } else if (!this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording) {
+                BackgroundGeolocation.stop();
             }
         });
     }
@@ -99,14 +105,18 @@ export class GeoLocationService {
         }
     }
 
-    private startWatching() {
-        this.store.dispatch(new SetTrackingStateAction("searching"));
+    private getRoughPosition() {
         if (window.navigator && window.navigator.geolocation) {
             // Upon starting location watching get the current position as fast as we can, even if not accurate.
             window.navigator.geolocation.getCurrentPosition((position: GeolocationPosition) => {
                 this.handlePositionChange(position);
             }, () => {}, { timeout: GeoLocationService.SHORT_TIME_OUT });
         }
+    }
+
+    private startWatching() {
+        this.store.dispatch(new SetTrackingStateAction("searching"));
+        this.getRoughPosition();
         if (this.runningContextService.isCapacitor) {
             this.startBackgroundGeolocation();
         } else {
@@ -139,10 +149,11 @@ export class GeoLocationService {
 
     private startBackgroundGeolocation() {
         if (this.wasInitialized) {
+            this.loggingService.info("[GeoLocation] Starting background tracking");
             BackgroundGeolocation.start();
             return;
         }
-        this.loggingService.info("[GeoLocation] Starting background tracking");
+        this.loggingService.info("[GeoLocation] Initializing background tracking");
         this.wasInitialized = true;
         BackgroundGeolocation.configure({
             locationProvider: BackgroundGeolocation.RAW_PROVIDER,
