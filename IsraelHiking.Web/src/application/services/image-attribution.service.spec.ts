@@ -116,7 +116,10 @@ describe("ImageAttributionService", () => {
         const response = await promise;
 
         expect(response).not.toBeNull();
-        expect(response.author).toBe("Sources for historical series of maps as follows:\n");
+        expect(response.author).toBe("Sources for historical series of maps as follows:\n" +
+                                     "PEF Survey of Palestine\n" +
+                                     "Survey of PalestineOverlay from Palestine Open Maps\n" +
+                                     "OpenStreetMap");
         expect(response.url).toBe("https://en.wikipedia.org/wiki/File:IHM_Image.jpeg");
     }));
 
