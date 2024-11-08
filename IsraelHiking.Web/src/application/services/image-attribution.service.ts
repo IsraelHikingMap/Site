@@ -16,7 +16,7 @@ export class ImageAttributionService {
     private readonly resources = inject(ResourcesService);
     private readonly httpClient = inject(HttpClient);
 
-    private function extractPlainText(html: string): string {
+    private extractPlainText(html: string): string {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
         return doc.documentElement.textContent.replace(/( *\n *)+/g, '\n').replace(/ +/g, ' ').trim();
