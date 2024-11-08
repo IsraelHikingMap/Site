@@ -251,6 +251,7 @@ export class ResourcesService {
     public imageBy: string;
     public notYet: string;
     public imageUploadWaiver: string;
+    public subscriptionDetails: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -475,7 +476,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1730928830631");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1731049787026");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -708,6 +709,7 @@ export class ResourcesService {
         this.imageBy = this.gettextCatalog.getString("Image by");
         this.notYet = this.gettextCatalog.getString("Not yet...");
         this.imageUploadWaiver = this.gettextCatalog.getString("The pictures I will upload are my own work, and they can be used without any restrictions.");
+        this.subscriptionDetails = this.gettextCatalog.getString("No reception? Try out our offline maps subscription! Only 99₪ per year, paid once a year. Use the main menu to purchase the subscription.");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
