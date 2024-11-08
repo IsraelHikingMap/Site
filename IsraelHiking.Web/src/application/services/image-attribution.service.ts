@@ -50,7 +50,7 @@ export class ImageAttributionService {
             const response: any = await firstValueFrom(this.httpClient.get(address).pipe(timeout(3000)));
             const extmetadata = response.query.pages[-1].imageinfo[0].extmetadata;
             if (extmetadata?.Artist.value) {
-                let author = this.extractPlainText(extmetadata.Artist.value as string);
+                const author = this.extractPlainText(extmetadata.Artist.value as string);
                 const imageAttribution = {
                     author,
                     url: `https://${language}.wikipedia.org/wiki/File:${imageName}`
