@@ -23,6 +23,7 @@ import { OverpassTurboService } from "./overpass-turbo.service";
 import { GeoJSONUtils } from "./geojson-utils";
 import { INatureService } from "./inature.service";
 import { WikidataService } from "./wikidata.service";
+import { ImageAttributionService } from "./image-attribution.service";
 import { LatLon, OsmTagsService, PoiProperties } from "./osm-tags.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction } from "../reducers/offline.reducer";
 import {
@@ -107,6 +108,7 @@ export class PoiService {
     private readonly iNatureService = inject(INatureService);
     private readonly wikidataService = inject(WikidataService);
     private readonly overpassTurboService = inject(OverpassTurboService);
+    private readonly imageAttributinoService = inject(ImageAttributionService);
     private readonly store = inject(Store);
 
     constructor() {
@@ -679,7 +681,7 @@ export class PoiService {
 
     public async updateComplexPoi(info: EditablePublicPointData, newLocation?: LatLngAlt) {
         const originalFeature = this.store.selectSnapshot((s: ApplicationState) => s.poiState).selectedPointOfInterest;
-        const editableDataBeforeChanges = this.getEditableDataFromFeature(originalFeature);
+        const editableDataBeforeChanges = await this.getEditableDataFromFeature(originalFeature);
         let hasChages = false;
         const originalId = this.getFeatureId(originalFeature);
         let featureContainingOnlyChanges = {
@@ -749,8 +751,14 @@ export class PoiService {
         await this.addPointToUploadQueue(featureContainingOnlyChanges);
     }
 
-    public getEditableDataFromFeature(feature: Immutable<GeoJSON.Feature>): EditablePublicPointData {
+    public async getEditableDataFromFeature(feature: Immutable<GeoJSON.Feature>): Promise<EditablePublicPointData> {
         const language = this.resources.getCurrentLanguageCodeSimplified();
+        let imagesUrls = Object.keys(feature.properties)
+            .filter(k => k.startsWith("image"))
+            .map(k => feature.properties[k])
+            .filter(u => u.includes("wikimedia.org") || u.includes("inature.info") || u.includes("nakeb.co.il") || u.includes("jeepolog.com"));
+        const imageAttributions = await Promise.all(imagesUrls.map(u => this.imageAttributinoService.getAttributionForImage(u)));
+        imagesUrls = imagesUrls.filter((_, i) => imageAttributions[i] != null);
         return {
             id: this.getFeatureId(feature),
             category: feature.properties.poiCategory,
@@ -758,10 +766,7 @@ export class PoiService {
             title: GeoJSONUtils.getTitle(feature, language),
             icon: feature.properties.poiIcon,
             iconColor: feature.properties.poiIconColor,
-            imagesUrls: Object.keys(feature.properties)
-                .filter(k => k.startsWith("image"))
-                .map(k => feature.properties[k])
-                .filter(u => u.includes("wikimedia.org") || u.includes("inature.info") || u.includes("nakeb.co.il") || u.includes("jeepolog.com")),
+            imagesUrls,
             urls: Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => feature.properties[k]),
             isPoint: feature.geometry.type === "Point" || feature.geometry.type === "MultiPoint",
             canEditTitle: !feature.properties.poiMerged && !feature.properties["mtb:name"],

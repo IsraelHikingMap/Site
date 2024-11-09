@@ -172,16 +172,16 @@ export class PublicPoiSidebarComponent implements OnDestroy {
                 this.showLocationUpdate = true;
             }
         }
-        this.initFromFeature(feature);
+        await this.initFromFeature(feature);
     }
 
-    private initFromFeature(feature: GeoJSON.Feature) {
+    private async initFromFeature(feature: GeoJSON.Feature) {
         this.fullFeature = feature;
         this.latlng = GeoJSONUtils.getLocation(feature);
         this.sourceImageUrls = this.getSourceImageUrls(feature);
         this.shareLinks = this.poiService.getPoiSocialLinks(feature);
         this.contribution = this.poiService.getContribution(feature);
-        this.info = this.poiService.getEditableDataFromFeature(feature);
+        this.info = await this.poiService.getEditableDataFromFeature(feature);
         const language = this.resources.getCurrentLanguageCodeSimplified();
         this.titleService.set(GeoJSONUtils.getTitle(feature, language));
     }

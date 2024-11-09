@@ -18,6 +18,7 @@ import { ConnectionService } from "./connection.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
 import { INatureService } from "./inature.service";
 import { WikidataService } from "./wikidata.service";
+import { ImageAttributionService } from "./image-attribution.service";
 import { GeoJSONUtils } from "./geojson-utils";
 import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
@@ -89,6 +90,7 @@ describe("Poi Service", () => {
                     createFeatureFromPageId: () => Promise.resolve()
                 } },
                 { provide: ConnectionService, useValue: { stateChanged: { subscribe: () => {} }} },
+                { provide: ImageAttributionService, useValue: { getAttributionForImage: () => "aaa" } },
                 GeoJsonParser,
                 RunningContextService,
                 WhatsAppService,
@@ -684,7 +686,7 @@ describe("Poi Service", () => {
     );
 
     it("Should allow adding a point from private marker",
-        inject([PoiService], (poiService: PoiService) => {
+        inject([PoiService], async (poiService: PoiService) => {
                 const feature = {
                     properties: {
                         poiSource: "OSM",
@@ -706,7 +708,7 @@ describe("Poi Service", () => {
                 };
 
                 poiService.mergeWithPoi(feature, markerData);
-                const info = poiService.getEditableDataFromFeature(feature);
+                const info = await poiService.getEditableDataFromFeature(feature);
                 const featureAfterConverstion = poiService.getFeatureFromEditableData(info);
                 GeoJSONUtils.setLocation(featureAfterConverstion, { lat: 2, lng: 1});
                 expect(GeoJSONUtils.getLocation(featureAfterConverstion).lat).toBe(2);
@@ -721,7 +723,7 @@ describe("Poi Service", () => {
     );
 
     it("Should filter out incompatible images",
-        inject([PoiService], (poiService: PoiService) => {
+        inject([PoiService], async (poiService: PoiService) => {
                 const feature = {
                     properties: {
                         poiSource: "OSM",
@@ -735,8 +737,33 @@ describe("Poi Service", () => {
                     }
                 } as GeoJSON.Feature;
 
-                const info = poiService.getEditableDataFromFeature(feature);
+                const info = await poiService.getEditableDataFromFeature(feature);
                 expect(info.imagesUrls.length).toBe(0);
+            }
+        )
+    );
+
+    it("Should filter out images with no attribution",
+        inject([PoiService, ImageAttributionService], async (poiService: PoiService, attributionService: ImageAttributionService) => {
+                const feature = {
+                    properties: {
+                        poiSource: "OSM",
+                        poiId: "poiId",
+                        identifier: "id",
+                        image: "wikimedia.org/image-url",
+                        image1: "wikimedia.org/image-url1",
+                        image2: "wikimedia.org/image-url2",
+                    } as any,
+                    geometry: {
+                        type: "Point",
+                        coordinates: [1, 2]
+                    }
+                } as GeoJSON.Feature;
+                spyOn(attributionService, "getAttributionForImage").and.returnValues(Promise.resolve(null), Promise.resolve("aaa") as any, Promise.resolve(null));
+
+                const info = await poiService.getEditableDataFromFeature(feature);
+                expect(info.imagesUrls.length).toBe(1);
+                expect(info.imagesUrls[0]).toBe("wikimedia.org/image-url1");
             }
         )
     );

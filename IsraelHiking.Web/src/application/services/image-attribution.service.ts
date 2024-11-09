@@ -2,8 +2,6 @@ import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { firstValueFrom, timeout } from "rxjs";
 
-import { ResourcesService } from "./resources.service";
-
 export type ImageAttribution = {
     author: string;
     url: string;
@@ -13,8 +11,13 @@ export type ImageAttribution = {
 export class ImageAttributionService {
     private attributionImageCache = new Map<string, ImageAttribution>();
 
-    private readonly resources = inject(ResourcesService);
     private readonly httpClient = inject(HttpClient);
+
+    private extractPlainText(html: string): string {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        return doc.documentElement.textContent.replace(/([ \t]*\n[ \t]*)+/g, '\n').replace(/[ \t]+/g, ' ').trim();
+    }
 
     public async getAttributionForImage(imageUrl: string): Promise<ImageAttribution> {
         if (imageUrl == null) {
@@ -37,21 +40,16 @@ export class ImageAttributionService {
         }
 
         const imageName = imageUrl.split("/").pop();
-        const language = this.resources.getCurrentLanguageCodeSimplified();
-        const address = `https://${language}.wikipedia.org/w/api.php?action=query&prop=imageinfo&iiprop=extmetadata&format=json&origin=*` +
+        const address = `https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=extmetadata&format=json&origin=*` +
             `&titles=File:${imageName}`;
         try {
             const response: any = await firstValueFrom(this.httpClient.get(address).pipe(timeout(3000)));
-            const extmetadata = response.query.pages[-1].imageinfo[0].extmetadata;
+            const extmetadata = response.query.pages[Object.keys(response.query.pages)[0]].imageinfo[0].extmetadata;
             if (extmetadata?.Artist.value) {
-                const match = extmetadata.Artist.value.match(/<[^>]*>([^<]*)<\/[^>]*>/);
-                let author = extmetadata.Artist.value as string;
-                if (match) {
-                    author = match[1]; // Extract the content between the opening and closing tags
-                }
+                const author = this.extractPlainText(extmetadata.Artist.value as string);
                 const imageAttribution = {
                     author,
-                    url: `https://${language}.wikipedia.org/wiki/File:${imageName}`
+                    url: `https://commons.wikimedia.org/wiki/File:${imageName}`
                 };
                 this.attributionImageCache.set(imageUrl, imageAttribution);
                 return imageAttribution;
