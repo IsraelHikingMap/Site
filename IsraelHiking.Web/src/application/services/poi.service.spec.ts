@@ -743,6 +743,28 @@ describe("Poi Service", () => {
         )
     );
 
+    it("Should filter out images with no attribution",
+        inject([PoiService, ImageAttributionService], async (poiService: PoiService, attributionService: ImageAttributionService) => {
+                const feature = {
+                    properties: {
+                        poiSource: "OSM",
+                        poiId: "poiId",
+                        identifier: "id",
+                        image: "wikimedia.org/image-url",
+                    } as any,
+                    geometry: {
+                        type: "Point",
+                        coordinates: [1, 2]
+                    }
+                } as GeoJSON.Feature;
+                spyOn(attributionService, "getAttributionForImage").and.returnValue(Promise.resolve(null));
+
+                const info = await poiService.getEditableDataFromFeature(feature);
+                expect(info.imagesUrls.length).toBe(0);
+            }
+        )
+    );
+
     it("should get closest point from server", (inject([PoiService, HttpTestingController],
         async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
