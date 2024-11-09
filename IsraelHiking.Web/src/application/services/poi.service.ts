@@ -757,7 +757,7 @@ export class PoiService {
             .filter(k => k.startsWith("image"))
             .map(k => feature.properties[k])
             .filter(u => u.includes("wikimedia.org") || u.includes("inature.info") || u.includes("nakeb.co.il") || u.includes("jeepolog.com"));
-        let imageAttributions = await Promise.all(imagesUrls.map(u => this.imageAttributinoService.getAttributionForImage(u)));
+        const imageAttributions = await Promise.all(imagesUrls.map(u => this.imageAttributinoService.getAttributionForImage(u)));
         imagesUrls = imagesUrls.filter((_, i) => imageAttributions[i] != null);
         return {
             id: this.getFeatureId(feature),
