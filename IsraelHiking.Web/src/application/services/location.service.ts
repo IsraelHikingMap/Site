@@ -36,7 +36,8 @@ export class LocationService {
     private locationWithBearing: LocationWithBearing | null = null;
     private isPanned: boolean = false;
 
-    public initialize() {
+    public async initialize() {
+        await this.mapService.initializationPromise;
         this.deviceOrientationService.orientationChanged.subscribe((bearing: number) => {
             if (!this.isActive() || this.locationWithBearing == null) {
                 return;
