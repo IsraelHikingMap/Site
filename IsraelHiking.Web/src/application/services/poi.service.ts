@@ -757,12 +757,8 @@ export class PoiService {
             .filter(k => k.startsWith("image"))
             .map(k => feature.properties[k])
             .filter(u => u.includes("wikimedia.org") || u.includes("inature.info") || u.includes("nakeb.co.il") || u.includes("jeepolog.com"));
-        for (let imageIndex = imagesUrls.length - 1; imageIndex >= 0; imageIndex--) {
-            const attribution = await this.imageAttributinoService.getAttributionForImage(imagesUrls[imageIndex]);
-            if (attribution == null) {
-                imagesUrls.splice(imageIndex, 1);
-            }
-        }
+        let imageAttributions = await Promise.all(imagesUrls.map(u => this.imageAttributinoService.getAttributionForImage(u)));
+        imagesUrls = imagesUrls.filter((_, i) => imageAttributions[i] != null);
         return {
             id: this.getFeatureId(feature),
             category: feature.properties.poiCategory,

@@ -751,16 +751,19 @@ describe("Poi Service", () => {
                         poiId: "poiId",
                         identifier: "id",
                         image: "wikimedia.org/image-url",
+                        image1: "wikimedia.org/image-url1",
+                        image2: "wikimedia.org/image-url2",
                     } as any,
                     geometry: {
                         type: "Point",
                         coordinates: [1, 2]
                     }
                 } as GeoJSON.Feature;
-                spyOn(attributionService, "getAttributionForImage").and.returnValue(Promise.resolve(null));
+                spyOn(attributionService, "getAttributionForImage").and.returnValues(Promise.resolve(null), Promise.resolve("aaa") as any, Promise.resolve(null));
 
                 const info = await poiService.getEditableDataFromFeature(feature);
-                expect(info.imagesUrls.length).toBe(0);
+                expect(info.imagesUrls.length).toBe(1);
+                expect(info.imagesUrls[0]).toBe("wikimedia.org/image-url1");
             }
         )
     );
