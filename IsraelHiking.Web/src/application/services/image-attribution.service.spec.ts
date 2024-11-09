@@ -102,7 +102,7 @@ describe("ImageAttributionService", () => {
                                         "<a href=\"https://en.wikipedia.org/wiki/PEF_Survey_of_Palestine\"" +
                                         " class=\"extiw\" title=\"w:PEF Survey of Palestine\">PEF Survey of Palestine" +
                                         "</a></li>\n<li><a href=\"https://en.wikipedia.org/wiki/Survey_of_Palestine\" " +
-                                        "class=\"extiw\" title=\"w:Survey of Palestine\">Survey of Palestine</a></li></ul>" +
+                                        "class=\"extiw\" title=\"w:Survey of Palestine\">\tSurvey of Palestine</a></li></ul>" +
                                         "<p>Overlay from <a rel=\"nofollow\" class=\"external text\" href=\"https://palopenmaps.org\">" +
                                         "Palestine Open Maps</a>\n</p>\n<ul><li><a href=\"https://en.wikipedia.org/wiki/OpenStreetMap\" " +
                                         "class=\"extiw\" title=\"w:OpenStreetMap\">OpenStreetMap</a></li></ul>"
