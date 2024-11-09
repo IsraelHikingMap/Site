@@ -184,7 +184,14 @@ export class OsmTagsService {
         if (feature.properties.natural === "peak") {
             poi.properties.poiIconColor = "black";
             poi.properties.poiIcon = "icon-peak";
-            poi.properties.poiCategory = "Other";
+            poi.properties.poiCategory = "Natural";
+            return;
+        }
+
+        if (feature.properties["ref:IL:inature"]) {
+            poi.properties.poiIconColor = "#116C00";
+            poi.properties.poiIcon = "icon-inature";
+            poi.properties.poiCategory = "iNature";
             return;
         }
 
