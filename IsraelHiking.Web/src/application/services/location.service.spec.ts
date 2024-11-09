@@ -37,7 +37,8 @@ describe("LocationService", () => {
             map: {
                 isMoving: () => false,
                 getZoom: () => 0
-            }
+            },
+            initializationPromise: Promise.resolve()
         };
         const toastService = {
             warning: jasmine.createSpy()
@@ -58,8 +59,8 @@ describe("LocationService", () => {
         });
     });
 
-    it("Should initialize without any failures", inject([LocationService], (service: LocationService) => {
-        expect(() => service.initialize()).not.toThrow();
+    it("Should initialize without any failures", inject([LocationService], async (service: LocationService) => {
+        await expectAsync(service.initialize()).toBeResolved();
         expect(service.getLocationCenter()).toBeUndefined();
     }));
 
@@ -85,12 +86,12 @@ describe("LocationService", () => {
     }));
 
     it("Should move to gps position if a new valid position is received", inject([LocationService, FitBoundsService, Store], 
-        (service: LocationService, fitBoundsService: FitBoundsService, store: Store) => {
+        async (service: LocationService, fitBoundsService: FitBoundsService, store: Store) => {
         store.reset({ 
             gpsState: { currentPosition: null },
             inMemoryState: { following: false }
         });
-        service.initialize();
+        await service.initialize();
         const eventSpy = jasmine.createSpy();
         service.changed.subscribe(eventSpy);
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: 1, longitude: 2}} as any));
@@ -101,12 +102,12 @@ describe("LocationService", () => {
     }));
 
     it("Should move to gps position with heading from gps", inject([LocationService, FitBoundsService, Store], 
-        (service: LocationService, fitBoundsService: FitBoundsService, store: Store) => {
+        async (service: LocationService, fitBoundsService: FitBoundsService, store: Store) => {
         store.reset({ 
             gpsState: { currentPosition: null },
             inMemoryState: { following: false }
         });
-        service.initialize();
+        await service.initialize();
         const eventSpy = jasmine.createSpy();
         service.changed.subscribe(eventSpy);
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: 1, longitude: 2}} as any));
@@ -117,12 +118,12 @@ describe("LocationService", () => {
     }));
 
     it("Should move to gps position with heading 0 when keep north up", inject([LocationService, FitBoundsService, Store], 
-        (service: LocationService, fitBoundsService: FitBoundsService, store: Store) => {
+        async (service: LocationService, fitBoundsService: FitBoundsService, store: Store) => {
         store.reset({ 
             gpsState: { currentPosition: null },
             inMemoryState: { following: false, keepNorthUp: true }
         });
-        service.initialize();
+        await service.initialize();
         const eventSpy = jasmine.createSpy();
         service.changed.subscribe(eventSpy);
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: 1, longitude: 2}} as any));
@@ -133,12 +134,12 @@ describe("LocationService", () => {
     }));
 
     it("Should not move to gps position when given invalid location", inject([LocationService, FitBoundsService, Store], 
-        (service: LocationService, fitBoundsService: FitBoundsService, store: Store) => {
+        async (service: LocationService, fitBoundsService: FitBoundsService, store: Store) => {
         store.reset({ 
             gpsState: { currentPosition: null },
             inMemoryState: { following: false }
         });
-        service.initialize();
+        await service.initialize();
         const eventSpy = jasmine.createSpy();
         service.changed.subscribe(eventSpy);
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: NaN, longitude: NaN}} as any));
@@ -148,8 +149,8 @@ describe("LocationService", () => {
     }));
 
     it("Should not do anything on orientation change and no location", inject([LocationService, DeviceOrientationService], 
-        (service: LocationService, deviceOrientationService: DeviceOrientationService) => {
-        service.initialize();
+        async (service: LocationService, deviceOrientationService: DeviceOrientationService) => {
+        await service.initialize();
         const eventSpy = jasmine.createSpy();
         service.changed.subscribe(eventSpy);
         deviceOrientationService.orientationChanged.emit(1);
@@ -158,7 +159,7 @@ describe("LocationService", () => {
     }));
 
     it("Should not do anything on orientation change and not in active state", inject([LocationService, DeviceOrientationService, Store], 
-        (service: LocationService, deviceOrientationService: DeviceOrientationService, store: Store) => {
+        async (service: LocationService, deviceOrientationService: DeviceOrientationService, store: Store) => {
         store.reset({ 
             gpsState: { 
                 currentPosition: null,
@@ -166,7 +167,7 @@ describe("LocationService", () => {
             },
             inMemoryState: { following: true }
         });
-        service.initialize();
+        await service.initialize();
         const eventSpy = jasmine.createSpy();
         service.changed.subscribe(eventSpy);
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: 1, longitude: 2}} as any));
@@ -176,7 +177,7 @@ describe("LocationService", () => {
     }));
 
     it("Should not do anything on orientation change and last update time was recent", inject([LocationService, DeviceOrientationService, Store], 
-        (service: LocationService, deviceOrientationService: DeviceOrientationService, store: Store) => {
+        async (service: LocationService, deviceOrientationService: DeviceOrientationService, store: Store) => {
         store.reset({ 
             gpsState: { 
                 currentPosition: null,
@@ -184,7 +185,7 @@ describe("LocationService", () => {
             },
             inMemoryState: { following: true }
         });
-        service.initialize();
+        await service.initialize();
         const eventSpy = jasmine.createSpy();
         service.changed.subscribe(eventSpy);
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: 1, longitude: 2, speed: 3, heading: 4}} as any));
@@ -194,7 +195,7 @@ describe("LocationService", () => {
     }));
 
     it("Should fire orientation change when in active state", inject([LocationService, DeviceOrientationService, Store], 
-        (service: LocationService, deviceOrientationService: DeviceOrientationService, store: Store) => {
+        async (service: LocationService, deviceOrientationService: DeviceOrientationService, store: Store) => {
         store.reset({ 
             gpsState: { 
                 currentPosition: null,
@@ -202,7 +203,7 @@ describe("LocationService", () => {
             },
             inMemoryState: { following: true }
         });
-        service.initialize();
+        await service.initialize();
         const eventSpy = jasmine.createSpy();
         service.changed.subscribe(eventSpy);
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: 2, longitude: 3}} as any));
@@ -212,7 +213,7 @@ describe("LocationService", () => {
     }));
 
     it("Should move to gps position after returning from background", inject([LocationService, GeoLocationService, FitBoundsService, Store], 
-        (service: LocationService, geolocationService: GeoLocationService, fitBoundsService: FitBoundsService, store: Store) => {
+        async (service: LocationService, geolocationService: GeoLocationService, fitBoundsService: FitBoundsService, store: Store) => {
         store.reset({ 
             gpsState: { 
                 currentPosition: null,
@@ -220,7 +221,7 @@ describe("LocationService", () => {
             },
             inMemoryState: { following: true }
         });
-        service.initialize();
+        await service.initialize();
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: 2, longitude: 3}} as any));
         geolocationService.backToForeground.emit();
 
@@ -229,7 +230,7 @@ describe("LocationService", () => {
     }));
 
     it("Should disable distance when centering", inject([LocationService, Store], 
-        (service: LocationService, store: Store) => {
+        async (service: LocationService, store: Store) => {
         store.reset({ 
             gpsState: { 
                 currentPosition: null,
@@ -237,13 +238,13 @@ describe("LocationService", () => {
             },
             inMemoryState: { following: true, distance: true }
         });
-        service.initialize();
+        await service.initialize();
         
         expect(store.selectSnapshot((s: any) => s.inMemoryState).distance).toBeFalsy();
     }));
 
     it("Should not be following when panned", inject([LocationService, Store], 
-        (service: LocationService, store: Store) => {
+        async (service: LocationService, store: Store) => {
         store.reset({ 
             gpsState: { 
                 currentPosition: null,
@@ -251,14 +252,14 @@ describe("LocationService", () => {
             },
             inMemoryState: { following: true, distance: true }
         });
-        service.initialize();
+        await service.initialize();
         expect(service.isFollowing()).toBeTruthy();
         store.dispatch(new SetPannedAction(new Date()));
         expect(service.isFollowing()).toBeFalsy();
     }));
 
     it("Should raise a toast when editing and panned changed from true to false", inject([LocationService, Store, ToastService], 
-        (service: LocationService, store: Store, toastService: ToastService) => {
+        async (service: LocationService, store: Store, toastService: ToastService) => {
         store.reset({ 
             gpsState: { 
                 currentPosition: null,
@@ -266,7 +267,7 @@ describe("LocationService", () => {
             },
             inMemoryState: { following: true, pannedTimestamp: new Date() }
         });
-        service.initialize();
+        await service.initialize();
 
         store.dispatch(new SetPannedAction(null));
         
