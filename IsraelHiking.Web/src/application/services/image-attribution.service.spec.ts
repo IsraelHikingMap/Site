@@ -87,6 +87,7 @@ describe("ImageAttributionService", () => {
         expect(response.url).toBe("https://en.wikipedia.org/wiki/File:IHM_Image.jpeg");
     }));
 
+    // Based on https://upload.wikimedia.org/wikipedia/commons/b/b5/Historical_map_series_for_the_area_of_Al-Manara%2C_Palestine_%281870s%29.jpg
     it("should remove html tags and get the value inside for multiple html tags", inject([ImageAttributionService, HttpTestingController],
         async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
         const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
@@ -116,7 +117,10 @@ describe("ImageAttributionService", () => {
         const response = await promise;
 
         expect(response).not.toBeNull();
-        expect(response.author).toBe("Sources for historical series of maps as follows:\n");
+        expect(response.author).toBe("Sources for historical series of maps as follows:\n" +
+                                     "PEF Survey of Palestine\n" +
+                                     "Survey of PalestineOverlay from Palestine Open Maps\n" +
+                                     "OpenStreetMap");
         expect(response.url).toBe("https://en.wikipedia.org/wiki/File:IHM_Image.jpeg");
     }));
 

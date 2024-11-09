@@ -16,6 +16,12 @@ export class ImageAttributionService {
     private readonly resources = inject(ResourcesService);
     private readonly httpClient = inject(HttpClient);
 
+    private extractPlainText(html: string): string {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        return doc.documentElement.textContent.replace(/( *\n *)+/g, '\n').replace(/ +/g, ' ').trim();
+    }
+
     public async getAttributionForImage(imageUrl: string): Promise<ImageAttribution> {
         if (imageUrl == null) {
             return null;
@@ -44,11 +50,7 @@ export class ImageAttributionService {
             const response: any = await firstValueFrom(this.httpClient.get(address).pipe(timeout(3000)));
             const extmetadata = response.query.pages[-1].imageinfo[0].extmetadata;
             if (extmetadata?.Artist.value) {
-                const match = extmetadata.Artist.value.match(/<[^>]*>([^<]*)<\/[^>]*>/);
-                let author = extmetadata.Artist.value as string;
-                if (match) {
-                    author = match[1]; // Extract the content between the opening and closing tags
-                }
+                const author = this.extractPlainText(extmetadata.Artist.value as string);
                 const imageAttribution = {
                     author,
                     url: `https://${language}.wikipedia.org/wiki/File:${imageName}`
