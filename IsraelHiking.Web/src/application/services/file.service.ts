@@ -1,4 +1,4 @@
-import { Inject, Injectable, InjectionToken } from "@angular/core";
+import { inject, Injectable, InjectionToken } from "@angular/core";
 import { HttpClient, HttpEventType } from "@angular/common/http";
 import { StyleSpecification } from "maplibre-gl";
 import { File as FileSystemWrapper, FileEntry } from "@awesome-cordova-plugins/file/ngx";
@@ -20,9 +20,7 @@ import { GpxDataContainerConverterService } from "./gpx-data-container-converter
 import { Urls } from "../urls";
 import type { DataContainer } from "../models/models";
 
-
 export const SaveAsFactory = new InjectionToken<typeof saveAsForType>(null);
-
 
 export type FormatViewModel = {
     label: string;
@@ -32,58 +30,56 @@ export type FormatViewModel = {
 
 @Injectable()
 export class FileService {
-    public formats: FormatViewModel[];
 
-    constructor(private readonly httpClient: HttpClient,
-                private readonly fileSystemWrapper: FileSystemWrapper,
-                // eslint-disable-next-line
-                private readonly fileTransfer: FileTransfer,
-                private readonly runningContextService: RunningContextService,
-                private readonly imageResizeService: ImageResizeService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly fitBoundsService: FitBoundsService,
-                private readonly gpxDataContainerConverterService: GpxDataContainerConverterService,
-                private readonly socialSharing: SocialSharing,
-                private readonly loggingService: LoggingService,
-                @Inject(SaveAsFactory) private readonly saveAs: typeof saveAsForType) {
-        this.formats = [
-            {
-                label: "GPX version 1.1 (.gpx)",
-                extension: "gpx",
-                outputFormat: "gpx"
-            },
-            {
-                label: "Single track GPX (.gpx)",
-                extension: "gpx",
-                outputFormat: "gpx_single_track"
-            },
-            {
-                label: "Single route GPX (.gpx)",
-                extension: "gpx",
-                outputFormat: "gpx_route"
-            },
-            {
-                label: "Keyhole markup language (.kml)",
-                extension: "kml",
-                outputFormat: "kml"
-            },
-            {
-                label: "Comma-separated values (.csv)",
-                extension: "csv",
-                outputFormat: "csv"
-            },
-            {
-                label: "Naviguide binary route file (.twl)",
-                extension: "twl",
-                outputFormat: "twl",
-            },
-            {
-                label: "All routes to a single Track GPX (.gpx)",
-                extension: "gpx",
-                outputFormat: "all_gpx_single_track"
-            }
-        ];
-    }
+    private readonly httpClient = inject(HttpClient);
+    private readonly fileSystemWrapper = inject(FileSystemWrapper);
+    private readonly fileTransfer = inject(FileTransfer);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly imageResizeService = inject(ImageResizeService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly gpxDataContainerConverterService = inject(GpxDataContainerConverterService);
+    private readonly socialSharing = inject(SocialSharing);
+    private readonly loggingService = inject(LoggingService);
+    private readonly saveAs = inject(SaveAsFactory);
+
+    public formats: FormatViewModel[] = [
+        {
+            label: "GPX version 1.1 (.gpx)",
+            extension: "gpx",
+            outputFormat: "gpx"
+        },
+        {
+            label: "Single track GPX (.gpx)",
+            extension: "gpx",
+            outputFormat: "gpx_single_track"
+        },
+        {
+            label: "Single route GPX (.gpx)",
+            extension: "gpx",
+            outputFormat: "gpx_route"
+        },
+        {
+            label: "Keyhole markup language (.kml)",
+            extension: "kml",
+            outputFormat: "kml"
+        },
+        {
+            label: "Comma-separated values (.csv)",
+            extension: "csv",
+            outputFormat: "csv"
+        },
+        {
+            label: "Naviguide binary route file (.twl)",
+            extension: "twl",
+            outputFormat: "twl",
+        },
+        {
+            label: "All routes to a single Track GPX (.gpx)",
+            extension: "gpx",
+            outputFormat: "all_gpx_single_track"
+        }
+    ];
 
     public getFileFromEvent(e: any): File {
         const file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
@@ -123,7 +119,7 @@ export class FileService {
             }
             return await firstValueFrom(this.httpClient.get(url)) as StyleSpecification;
         } catch (ex) {
-            this.loggingService.error(`[Files] Unanle to get style file, isOffline: ${isOffline}, ${(ex as Error).message}`);
+            this.loggingService.error(`[Files] Unable to get style file, isOffline: ${isOffline}, ${(ex as Error).message}`);
             return {
                 version: 8.0,
                 layers: [],
@@ -262,7 +258,7 @@ export class FileService {
     public async writeStyle(styleFileName: string, styleText: string) {
         await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, styleFileName, styleText,
             { append: false, replace: true, truncate: 0 });
-        this.loggingService.info(`[Files] Write style finished succefully: ${styleFileName}`);
+        this.loggingService.info(`[Files] Write style finished successfully: ${styleFileName}`);
     }
 
     public async compressTextToBase64Zip(contents: {name: string; text: string}[]): Promise<string> {

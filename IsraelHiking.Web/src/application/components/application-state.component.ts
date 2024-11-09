@@ -1,7 +1,5 @@
-import { Component, OnInit, OnDestroy } from "@angular/core";
-
+import { Component, DestroyRef, inject, OnInit } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
-import { Subscription } from "rxjs";
 import { Store } from "@ngxs/store";
 
 import { RouteStrings } from "../services/hash.service";
@@ -9,26 +7,24 @@ import { SidebarService } from "../services/sidebar.service";
 import { DataContainerService } from "../services/data-container.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
 import { SetFileUrlAndBaseLayerAction, SetShareUrlAction } from "../reducers/in-memory.reducer";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
     selector: "application-state",
     template: "<div></div>"
 })
-export class ApplicationStateComponent implements OnInit, OnDestroy {
-
-    private subscription: Subscription;
-
-    constructor(private readonly router: Router,
-                private readonly route: ActivatedRoute,
-                private readonly sidebarService: SidebarService,
-                private readonly dataContainerService: DataContainerService,
-                private readonly fitBoundsService: FitBoundsService,
-                private readonly store: Store) {
-        this.subscription = null;
-    }
+export class ApplicationStateComponent implements OnInit {
+    
+    private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
+    private readonly sidebarService = inject(SidebarService);
+    private readonly dataContainerService = inject(DataContainerService);
+    private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly store = inject(Store);
+    private readonly destroyRef = inject(DestroyRef);
 
     public ngOnInit() {
-        this.subscription = this.route.params.subscribe(params => {
+        this.route.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
             if (this.router.url.startsWith(RouteStrings.ROUTE_MAP)) {
                 this.fitBoundsService.flyTo({
                     lng: +params[RouteStrings.LON],
@@ -45,11 +41,5 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
                 this.sidebarService.hideWithoutChangingAddressbar();
             }
         });
-    }
-
-    public ngOnDestroy() {
-        if (this.subscription) {
-            this.subscription.unsubscribe();
-        }
     }
 }

@@ -1,7 +1,6 @@
-import { Injectable, EventEmitter } from "@angular/core";
-import { Observable } from "rxjs";
+import { Injectable, EventEmitter, inject } from "@angular/core";
 import { some } from "lodash-es";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { RoutesFactory } from "./routes.factory";
@@ -35,27 +34,21 @@ import type {
 export class SelectedRouteService {
     private static MERGE_THRESHOLD = 50; // meter.
 
-    private routes: Immutable<RouteData[]>;
+    private routes: Immutable<RouteData[]> = [];
     private selectedRouteId: string;
 
-    @Select((state: ApplicationState) => state.routes.present)
-    private routes$: Observable<Immutable<RouteData[]>>;
+    public selectedRouteHover = new EventEmitter<LatLngAlt>;
 
-    @Select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
-    private selectedRouteId$: Observable<string>;
-
-    public selectedRouteHover: EventEmitter<LatLngAlt>;
-
-    constructor(private readonly resources: ResourcesService,
-                private readonly routesFactory: RoutesFactory,
-                private readonly routingProvider: RoutingProvider,
-                private readonly store: Store) {
-        this.routes = [];
-        this.selectedRouteHover = new EventEmitter();
-        this.routes$.subscribe((r) => {
+    private readonly resources = inject(ResourcesService);
+    private readonly routesFactory = inject(RoutesFactory);
+    private readonly routingProvider = inject(RoutingProvider);
+    private readonly store = inject(Store);
+    
+    constructor() {
+        this.store.select((state: ApplicationState) => state.routes.present).subscribe((r) => {
             this.routes = r;
         });
-        this.selectedRouteId$.subscribe((id) => {
+        this.store.select((state: ApplicationState) => state.routeEditingState.selectedRouteId).subscribe((id) => {
             this.selectedRouteId = id;
         });
     }

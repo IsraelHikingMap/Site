@@ -59,3 +59,10 @@
         height: 48px;
     }
 }
+
+
+@media(height <= 550px){
+    .mat-mdc-dialog-content {
+       max-height: calc(100vh - 170px) !important;
+   }
+}

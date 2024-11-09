@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { File as FileSystemWrapper, IFile } from "@awesome-cordova-plugins/file/ngx";
 import * as pmtiles from "pmtiles";
 
@@ -27,11 +27,9 @@ class CapacitorSource implements pmtiles.Source {
 @Injectable()
 export class PmTilesService {
 
-    private sourcesCache: Map<string, CapacitorSource>;
+    private sourcesCache = new Map<string, CapacitorSource>;
 
-    constructor(private readonly fileStsyemWrapper: FileSystemWrapper) { 
-        this.sourcesCache = new Map();
-    }
+    private readonly fileStsyemWrapper = inject(FileSystemWrapper);
 
     private async getSource(filePath: string): Promise<pmtiles.Source> {
         if (this.sourcesCache.has(filePath)) {
@@ -50,7 +48,7 @@ export class PmTilesService {
 
     /**
      * Get's a tile from the stored pmtiles file
-     * @param url - should be something like pmtiles://filename.pmtiles/{z}/{x}/{y}.png
+     * @param url - should be something like custom://filename-without-pmtiles-extention/{z}/{x}/{y}.png
      * @returns 
      */
     public async getTile(url: string): Promise<ArrayBuffer> {

@@ -1,19 +1,22 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Direction } from "@angular/cdk/bidi";
 import { Store } from "@ngxs/store";
 
 import { GetTextCatalogService } from "./gettext-catalog.service";
 import { SetLanguageAction } from "../reducers/configuration.reducer";
+import { AVAILABLE_LANGUAGES } from "../reducers/initial-state";
 import { Urls } from "../urls";
 import type { ApplicationState, Language, LanguageCode } from "../models/models";
 
 @Injectable()
 export class ResourcesService {
 
+    private readonly gettextCatalog = inject(GetTextCatalogService);
+    private readonly store = inject(Store);
+
     public direction: Direction;
     public start: string;
     public end: string;
-    public availableLanguages: Language[];
     public endOfBaseLayer = "end-of-base-layer";
     public endOfOverlays = "end-of-overlays";
     public endOfClusters = "end-of-clusters";
@@ -247,6 +250,8 @@ export class ResourcesService {
     public manageSubscriptions: string;
     public imageBy: string;
     public notYet: string;
+    public imageUploadWaiver: string;
+    public subscriptionDetails: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -309,6 +314,7 @@ export class ResourcesService {
     public editingRouteWhileTracking: string;
     public loginTokenExpiredPleaseLoginAgain: string;
     public jammedPositionReceived: string;
+    public newVersionAvailable: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -453,20 +459,6 @@ export class ResourcesService {
     public legendQuarry: string;
     public legendEmpty: string;
 
-    constructor(private readonly gettextCatalog: GetTextCatalogService,
-                private readonly store: Store) {
-        this.availableLanguages = [
-            {
-                code: "he",
-                rtl: true,
-            },
-            {
-                code: "en-US",
-                rtl: false,
-            }
-        ];
-    }
-
     public async initialize() {
         await this.setLanguageInternal(this.store.selectSnapshot((s: ApplicationState) => s.configuration).language);
     }
@@ -484,7 +476,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1716145116367");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1731049787026");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -716,6 +708,8 @@ export class ResourcesService {
         this.manageSubscriptions = this.gettextCatalog.getString("Manage subscriptions");
         this.imageBy = this.gettextCatalog.getString("Image by");
         this.notYet = this.gettextCatalog.getString("Not yet...");
+        this.imageUploadWaiver = this.gettextCatalog.getString("The pictures I will upload are my own work, and they can be used without any restrictions.");
+        this.subscriptionDetails = this.gettextCatalog.getString("No reception? Try out our offline maps subscription! Only 99₪ per year, paid once a year. Use the main menu to purchase the subscription.");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -796,6 +790,7 @@ export class ResourcesService {
             "in order to avoid map centering to current location please click the cross icon on the top left corner");
         this.loginTokenExpiredPleaseLoginAgain = this.gettextCatalog.getString("Login token expired, please login again");
         this.jammedPositionReceived = this.gettextCatalog.getString("Jammed position received...");
+        this.newVersionAvailable = this.gettextCatalog.getString("New version available, do you want to update?");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog
@@ -952,7 +947,7 @@ export class ResourcesService {
     }
 
     public async setLanguage(code: LanguageCode) {
-        const language = this.availableLanguages.find((l) => l.code === code);
+        const language = AVAILABLE_LANGUAGES.find((l) => l.code === code);
         await this.setLanguageInternal(language);
     }
 

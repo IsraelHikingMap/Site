@@ -5,6 +5,8 @@ name: CI
 
 on:
   push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
 
@@ -32,8 +34,8 @@ jobs:
         run: |
           cd IsraelHiking.Web
           npm ci
-          npx ng lint
           npm run test-ci
+          npx ng lint
       - name: Codecov upload
         if: always()
         uses: codecov/codecov-action@v4

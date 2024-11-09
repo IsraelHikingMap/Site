@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { debounceTime } from "rxjs/operators";
 import { addProtocol } from "maplibre-gl";
@@ -23,11 +23,9 @@ export class DatabaseService {
     private static readonly STATE_DB_NAME = "State";
     private static readonly STATE_TABLE_NAME = "state";
     private static readonly STATE_DOC_ID = "state";
-    private static readonly POIS_DB_NAME = "PointsOfInterest";
-    private static readonly POIS_TABLE_NAME = "pois";
+    private static readonly POIS_UPLOAD_QUEUE_DB_NAME = "UploadQueue";
     private static readonly POIS_UPLOAD_QUEUE_TABLE_NAME = "uploadQueue";
     private static readonly POIS_ID_COLUMN = "properties.poiId";
-    private static readonly POIS_LOCATION_COLUMN = "[properties.poiGeolocation.lat+properties.poiGeolocation.lon]";
     private static readonly IMAGES_DB_NAME = "Images";
     private static readonly IMAGES_TABLE_NAME = "images";
     private static readonly SHARE_URLS_DB_NAME = "ShareUrls";
@@ -36,29 +34,24 @@ export class DatabaseService {
     private static readonly TRACES_TABLE_NAME = "traces";
 
     private stateDatabase: Dexie;
-    private poisDatabase: Dexie;
+    private uploadQueueDatabase: Dexie;
     private imagesDatabase: Dexie;
     private shareUrlsDatabase: Dexie;
     private tracesDatabase: Dexie;
-    private updating: boolean;
+    private updating = false;
 
-    constructor(private readonly loggingService: LoggingService,
-                private readonly runningContext: RunningContextService,
-                private readonly pmTilesService: PmTilesService,
-                private readonly store: Store) {
-        this.updating = false;
-    }
+    private readonly loggingService = inject(LoggingService);
+    private readonly runningContext = inject(RunningContextService);
+    private readonly pmTilesService = inject(PmTilesService);
+    private readonly store = inject(Store);
 
     public async initialize() {
         this.stateDatabase = new Dexie(DatabaseService.STATE_DB_NAME);
         this.stateDatabase.version(1).stores({
             state: "id"
         });
-        this.poisDatabase = new Dexie(DatabaseService.POIS_DB_NAME);
-        this.poisDatabase.version(1).stores({
-            pois: DatabaseService.POIS_ID_COLUMN + "," + DatabaseService.POIS_LOCATION_COLUMN,
-        });
-        this.poisDatabase.version(2).stores({
+        this.uploadQueueDatabase = new Dexie(DatabaseService.POIS_UPLOAD_QUEUE_DB_NAME);
+        this.uploadQueueDatabase.version(1).stores({
             uploadQueue: DatabaseService.POIS_ID_COLUMN
         });
         this.imagesDatabase = new Dexie(DatabaseService.IMAGES_DB_NAME);
@@ -129,55 +122,16 @@ export class DatabaseService {
         }
     }
 
-    public storePois(pois: GeoJSON.Feature[]): Promise<any> {
-        return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).bulkPut(pois);
-    }
-
-    public deletePois(poiIds: string[]): Promise<void> {
-        return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).bulkDelete(poiIds);
-    }
-
-    public async getPoisForClustering(): Promise<GeoJSON.Feature<GeoJSON.Point>[]> {
-        this.loggingService.debug("[Database] Startting getting pois for clustering in chunks");
-        let features = [] as GeoJSON.Feature<GeoJSON.Point>[];
-        let index = 0;
-        const size = 2000;
-        let currentFeatures = [];
-        do {
-            currentFeatures = await this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).offset(index * size).limit(size).toArray();
-            features = features.concat(currentFeatures);
-            index++;
-        } while (currentFeatures.length !== 0);
-        this.loggingService.debug("[Database] Finished getting pois for clustering in chunks: " + features.length);
-        const pointFeatures = features.map((feature: GeoJSON.Feature) => {
-            const geoLocation = feature.properties.poiGeolocation;
-            const pointFeature = {
-                type: "Feature",
-                geometry: {
-                    type: "Point",
-                    coordinates: [parseFloat(geoLocation.lon), parseFloat(geoLocation.lat)]
-                },
-                properties: feature.properties
-            } as GeoJSON.Feature<GeoJSON.Point>;
-            return pointFeature;
-        });
-        return pointFeatures;
-    }
-
-    public getPoiById(id: string): Promise<GeoJSON.Feature> {
-        return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).get(id);
-    }
-
     public addPoiToUploadQueue(feature: GeoJSON.Feature): Promise<any> {
-        return this.poisDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).put(feature);
+        return this.uploadQueueDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).put(feature);
     }
 
     public getPoiFromUploadQueue(featureId: string): Promise<GeoJSON.Feature> {
-        return this.poisDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).get(featureId);
+        return this.uploadQueueDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).get(featureId);
     }
 
     public removePoiFromUploadQueue(featureId: string): Promise<void> {
-        return this.poisDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).delete(featureId);
+        return this.uploadQueueDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).delete(featureId);
     }
 
     public storeImages(images: ImageUrlAndData[]): Promise<any> {

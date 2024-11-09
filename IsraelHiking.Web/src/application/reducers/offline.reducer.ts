@@ -15,11 +15,6 @@ export class SetOfflineMapsLastModifiedDateAction {
     constructor(public lastModifiedDate: Date) {}
 }
 
-export class SetOfflinePoisLastModifiedDateAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public lastModifiedDate: Date) {}
-}
-
 export class SetShareUrlsLastModifiedDateAction {
     public static type = this.prototype.constructor.name;
     constructor(public lastModifiedDate: Date) {}
@@ -55,14 +50,6 @@ export class OfflineReducer {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.lastModifiedDate = action.lastModifiedDate;
             lastState.isPmtilesDownloaded = true;
-            return lastState;
-        }));
-    }
-
-    @Action(SetOfflinePoisLastModifiedDateAction)
-    public setOfflinePoisLastModifiedDate(ctx: StateContext<OfflineState>, action: SetOfflinePoisLastModifiedDateAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.poisLastModifiedDate = action.lastModifiedDate;
             return lastState;
         }));
     }

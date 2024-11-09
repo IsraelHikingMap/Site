@@ -1,4 +1,4 @@
-import { Directive, Output, ElementRef, Renderer2, OnDestroy, EventEmitter, NgZone } from "@angular/core";
+import { Directive, output, ElementRef, Renderer2, OnDestroy, NgZone, inject } from "@angular/core";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 
 import { environment } from "../../environments/environment";
@@ -16,20 +16,19 @@ interface HTMLElementInputChangeEvent {
 })
 export class ImageCaptureDirective implements OnDestroy {
 
-    @Output()
-    public changed: EventEmitter<HTMLElementInputChangeEvent>;
+    public changed = output<HTMLElementInputChangeEvent>();
 
-    private listenFunction: () => void;
+    private readonly renderer = inject(Renderer2);
+    private readonly ngZone = inject(NgZone);
+    private readonly resources = inject(ResourcesService);
+    private readonly toastService = inject(ToastService);
+    private readonly fileService = inject(FileService);
 
-    constructor(elementRef: ElementRef,
-                private readonly renderer: Renderer2,
-                private readonly ngZone: NgZone,
-                private readonly resources: ResourcesService,
-                private readonly toastService: ToastService,
-                private readonly fileService: FileService) {
+    private unsbscribeFn: () => void;
 
-        this.changed = new EventEmitter();
-        this.listenFunction = this.renderer.listen(elementRef.nativeElement, "click", (event) => {
+    constructor(elementRef: ElementRef) {
+
+        this.unsbscribeFn = this.renderer.listen(elementRef.nativeElement, "click", (event) => {
             if (!environment.isCapacitor) {
                 return;
             }
@@ -74,10 +73,10 @@ export class ImageCaptureDirective implements OnDestroy {
             dataTransfer: { files },
             target: {}
         };
-        this.ngZone.run(() => this.changed.next(changeEvent));
+        this.ngZone.run(() => this.changed.emit(changeEvent));
     }
 
     ngOnDestroy(): void {
-        this.listenFunction();
+        this.unsbscribeFn();
     }
 }

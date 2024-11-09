@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { flatten } from "lodash-es";
 import { Store } from "@ngxs/store";
@@ -12,12 +12,12 @@ import type { LinkData, LatLngAlt, MarkerData } from "../models/models";
 
 @Injectable()
 export class PrivatePoiUploaderService {
-    constructor(private readonly router: Router,
-                private readonly resources: ResourcesService,
-                private readonly poiService: PoiService,
-                private readonly toastService: ToastService,
-                private readonly store: Store) {
-    }
+
+    private readonly router = inject(Router);
+    private readonly resources = inject(ResourcesService);
+    private readonly poiService = inject(PoiService);
+    private readonly toastService = inject(ToastService);
+    private readonly store = inject(Store);
 
     public async uploadPoint(
         latLng: LatLngAlt,

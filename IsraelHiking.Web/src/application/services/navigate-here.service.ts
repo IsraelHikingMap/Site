@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "./resources.service";
@@ -13,12 +13,13 @@ import type { ApplicationState, LatLngAlt, LatLngAltTime } from "../models/model
 
 @Injectable()
 export class NavigateHereService {
-    constructor(private readonly resources: ResourcesService,
-                private readonly toastService: ToastService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly routingProvider: RoutingProvider,
-                private readonly routesFactory: RoutesFactory,
-                private readonly store: Store) { }
+    
+    private readonly resources = inject(ResourcesService);
+    private readonly toastService = inject(ToastService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly routingProvider = inject(RoutingProvider);
+    private readonly routesFactory = inject(RoutesFactory);
+    private readonly store = inject(Store);
 
     public async addNavigationSegment(latlng: LatLngAlt, title?: string) {
         const currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;

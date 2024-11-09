@@ -1,12 +1,11 @@
-import { Component, AfterViewInit, ViewEncapsulation } from "@angular/core";
-import { Observable } from "rxjs";
+import { Component, AfterViewInit, ViewEncapsulation, inject } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { MapLayerMouseEvent } from "maplibre-gl";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import invert from "invert-color";
 import type { Immutable } from "immer";
 
-import { BaseMapComponent } from "../base-map.component";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
 import { ResourcesService } from "../../services/resources.service";
@@ -37,57 +36,44 @@ interface RoutePointViewData {
     styleUrls: ["./routes.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
+export class RoutesComponent implements AfterViewInit {
 
     private static readonly START_COLOR = "#43a047";
     private static readonly END_COLOR = "red";
 
-    @Select((state: ApplicationState) => state.routes.present)
-    public routes$: Observable<Immutable<RouteData[]>>;
-
-    @Select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
-    public selectedRouteId$: Observable<Immutable<RouteData[]>>;
-
-    @Select((state: ApplicationState) => state.recordedRouteState.isAddingPoi)
-    public isAddingPoi$: Observable<boolean>;
-
     public routePointPopupData: RoutePointViewData;
     public nonEditRoutePointPopupData: { latlng: LatLngAlt; wazeAddress: string; routeId: string};
+    public editingRouteGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = {
+        type: "FeatureCollection",
+        features: []
+    };
+    public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = {
+        type: "FeatureCollection",
+        features: []
+    };
+    public routes: Immutable<RouteData[]> = [];
 
-    public editingRouteGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
-    public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
+    public readonly resources = inject(ResourcesService);
 
-    private routes: Immutable<RouteData[]>;
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly routeEditPoiInteraction = inject(RouteEditPoiInteraction);
+    private readonly routeEditRouteInteraction = inject(RouteEditRouteInteraction);
+    private readonly fileService = inject(FileService);
+    private readonly mapComponent = inject(MapComponent);
+    private readonly store = inject(Store);
 
-    constructor(resources: ResourcesService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly routeEditPoiInteraction: RouteEditPoiInteraction,
-                private readonly routeEditRouteInteraction: RouteEditRouteInteraction,
-                private readonly fileService: FileService,
-                private readonly mapComponent: MapComponent,
-                private readonly store: Store
-    ) {
-        super(resources);
-        this.routesGeoJson = {
-            type: "FeatureCollection",
-            features: []
-        };
-        this.editingRouteGeoJson = {
-            type: "FeatureCollection",
-            features: []
-        };
-        this.routes = [];
-        this.routeEditRouteInteraction.onRoutePointClick.subscribe(this.handleRoutePointClick);
-        this.routes$.subscribe(this.handleRoutesChanges);
-        this.selectedRouteId$.subscribe(() => this.handleRoutesChanges(this.routes));
-        this.isAddingPoi$.subscribe(() => this.setInteractionAccordingToState());
+    constructor() {
+        this.routeEditRouteInteraction.onRoutePointClick.pipe(takeUntilDestroyed()).subscribe(this.handleRoutePointClick);
+        this.store.select((state: ApplicationState) => state.routes.present).pipe(takeUntilDestroyed()).subscribe(routes => this.handleRoutesChanges(routes));
+        this.store.select((state: ApplicationState) => state.routeEditingState.selectedRouteId).pipe(takeUntilDestroyed()).subscribe(() => this.handleRoutesChanges(this.routes));
+        this.store.select((state: ApplicationState) => state.recordedRouteState.isAddingPoi).pipe(takeUntilDestroyed()).subscribe(() => this.setInteractionAccordingToState());
     }
 
-    private handleRoutesChanges = (routes: Immutable<RouteData[]>) => {
+    private handleRoutesChanges(routes: Immutable<RouteData[]>) {
         this.routes = routes;
         this.setInteractionAccordingToState();
         this.buildFeatureCollections();
-    };
+    }
 
     private buildFeatureCollections() {
         let features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];

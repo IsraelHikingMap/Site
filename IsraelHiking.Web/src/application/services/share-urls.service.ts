@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { orderBy } from "lodash-es";
@@ -25,16 +25,14 @@ interface IShareUrlSocialLinks {
 
 @Injectable()
 export class ShareUrlsService {
-    private syncing: boolean;
+    private syncing = false;
 
-    constructor(private readonly httpClient: HttpClient,
-                private readonly whatsAppService: WhatsAppService,
-                private readonly hashService: HashService,
-                private readonly loggingService: LoggingService,
-                private readonly databaseService: DatabaseService,
-                private readonly store: Store) {
-            this.syncing = false;
-    }
+    private readonly httpClient = inject(HttpClient);
+    private readonly whatsAppService = inject(WhatsAppService);
+    private readonly hashService = inject(HashService);
+    private readonly loggingService = inject(LoggingService);
+    private readonly databaseService = inject(DatabaseService);
+    private readonly store = inject(Store);
 
     public async initialize() {
         if (this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo == null) {
@@ -87,7 +85,7 @@ export class ShareUrlsService {
             this.loggingService.warning(`[Shares] Cached share is outdated ${shareUrlId}, fetching it again...`);
             shareUrl = await this.getShareFromServerAndCacheIt(shareUrlId, 5000);
             return shareUrl;
-        } catch (ex) {
+        } catch {
             this.loggingService.error(`[Shares] Failed to get share fast ${shareUrlId}, refreshing in the background`);
             this.getShareFromServerAndCacheIt(shareUrlId); // don't wait for it...
             return shareUrl;
@@ -104,11 +102,11 @@ export class ShareUrlsService {
             const sharesLastSuccessfullSync = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).shareUrlsLastModifiedDate;
             const operationStartTimeStamp = new Date();
             let sharesToGetFromServer = [] as ShareUrl[];
-            this.loggingService.info("[Shares] Starting shares sync, last modified:" +
+            this.loggingService.info("[Shares] Starting shares sync, last modified: " +
                 (sharesLastSuccessfullSync || new Date(0)).toUTCString());
             const shareUrls$ = this.httpClient.get(Urls.urls).pipe(timeout(20000));
             const shareUrls = await firstValueFrom(shareUrls$) as ShareUrl[];
-            this.loggingService.info("[Shares] Got the list of shares, statring to compare against exiting list");
+            this.loggingService.info("[Shares] Got the list of shares, starting to compare against exiting list");
             const exitingShareUrls = this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState).shareUrls;
             for (const shareUrl of shareUrls) {
                 shareUrl.lastModifiedDate = new Date(shareUrl.lastModifiedDate);

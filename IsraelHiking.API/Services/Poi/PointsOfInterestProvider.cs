@@ -494,14 +494,26 @@ namespace IsraelHiking.API.Services.Poi
             return updatedImageUrls.ToArray();
         }
 
+        private string GetNonEmptyTitle(string title, string icon)
+        {
+            return string.IsNullOrWhiteSpace(title)
+                ? icon.Replace("icon-", "")
+                : title;
+        }
+        
+        private string GetNonEmptyDescription(string description, string nonEmptyTitle)
+        {
+            return string.IsNullOrWhiteSpace(description)
+                ? nonEmptyTitle
+                : description;
+        }
+        
         private async Task<string> UploadImageIfNeeded(string imageUrl,
             IFeature feature, string language, string userDisplayName)
         {
             var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
-            var fileName = string.IsNullOrWhiteSpace(feature.GetTitle(language))
-                    ? icon.Replace("icon-", "")
-                    : feature.GetTitle(language);
-            var file = _base64ImageConverter.ConvertToFile(imageUrl, fileName);
+            var nonEmptyTitle = GetNonEmptyTitle(feature.GetTitle(language), icon);
+            var file = _base64ImageConverter.ConvertToFile(imageUrl, nonEmptyTitle);
             if (file == null)
             {
                 return imageUrl;
@@ -514,8 +526,8 @@ namespace IsraelHiking.API.Services.Poi
             }
 
             await using var memoryStream = new MemoryStream(file.Content);
-            var imageName = await _wikimediaCommonGateway.UploadImage(feature.GetTitle(language),
-                    feature.GetDescription(language), userDisplayName, file.FileName, memoryStream, feature.GetLocation());
+            var nonEmptyDescription = GetNonEmptyDescription(feature.GetDescription(language), nonEmptyTitle);
+            var imageName = await _wikimediaCommonGateway.UploadImage(file.FileName, nonEmptyDescription, userDisplayName, memoryStream, feature.GetLocation());
             imageUrl = await _wikimediaCommonGateway.GetImageUrl(imageName);
             await _imageUrlStoreExecutor.StoreImage(md5, file.Content, imageUrl);
             return imageUrl;

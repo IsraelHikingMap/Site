@@ -1,26 +1,26 @@
 ﻿﻿<div [dir]="resources.direction">
-    <mat-card-header *ngIf="!info.canEditTitle">
-        <mat-card-title [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">
-            <span class="text-xl" [dir]="resources.getDirection(info.title)">{{info.title}}</span>
+    <mat-card-header *ngIf="!info().canEditTitle">
+        <mat-card-title [ngClass]="resources.getTextAlignment(info().title)" [dir]="resources.getDirection(info().title)">
+            <span class="text-xl" [dir]="resources.getDirection(info().title)">{{info().title}}</span>
         </mat-card-title>
     </mat-card-header>
     <div class="flex flex-row">
-        <mat-form-field class="w-full" *ngIf="info.canEditTitle">
+        <mat-form-field class="w-full" *ngIf="info().canEditTitle">
             <mat-label>{{resources.nameInLanguage}}</mat-label>
-            <input matInput type="text" class="w-full" [dir]="resources.getDirection(info.title)" [(ngModel)]="info.title" />
+            <input matInput type="text" class="w-full" [dir]="resources.getDirection(info().title)" [(ngModel)]="info().title" />
         </mat-form-field>
     </div>
-    <image-scroller [images]="info.imagesUrls" [canEdit]="true"></image-scroller>
+    <image-scroller [images]="info().imagesUrls" [canEdit]="true"></image-scroller>
     <div class="flex flex-row">
         <mat-form-field class="w-full">
             <mat-label>{{resources.descriptionInLanguage}}</mat-label>
-            <textarea rows="4" maxlength="255" matInput class="w-full" [dir]="resources.getDirection(info.description)" [(ngModel)]="info.description"></textarea>
+            <textarea rows="4" maxlength="255" matInput class="w-full" [dir]="resources.getDirection(info().description)" [(ngModel)]="info().description"></textarea>
         </mat-form-field>
     </div>
-    <div *ngFor="let url of info.urls; let i = index; trackBy:trackByIndex" class="flex flex-row">
+    <div *ngFor="let url of info().urls; let i = index; trackBy:trackByIndex" class="flex flex-row">
         <mat-form-field class="w-full">
             <mat-label>{{resources.aLinkToAWebsite}}</mat-label>
-            <input matInput class="w-full" maxlength="255" type="text" dir="ltr" [(ngModel)]="info.urls[i]"/>
+            <input matInput class="w-full" maxlength="255" type="text" dir="ltr" [(ngModel)]="info().urls[i]"/>
             <button matSuffix mat-icon-button (click)="removeUrl(i)"><i class="fa icon-trash"></i></button>
         </mat-form-field>
     </div>

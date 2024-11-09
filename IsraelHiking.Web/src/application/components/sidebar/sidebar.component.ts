@@ -1,9 +1,8 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { transition, trigger, style, animate } from "@angular/animations";
 
 import { SidebarService, SidebarView } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
-import { BaseMapComponent } from "../base-map.component";
 
 export const sidebarAnimate = trigger(
     "animateSidebar",
@@ -33,11 +32,11 @@ export const sidebarAnimate = trigger(
         sidebarAnimate
     ]
 })
-export class SidebarComponent extends BaseMapComponent {
-    constructor(resources: ResourcesService,
-                private sidebarService: SidebarService) {
-        super(resources);
-    }
+export class SidebarComponent {
+
+    public readonly resources = inject(ResourcesService);
+    
+    private readonly sidebarService = inject(SidebarService);
 
     public isSidebarVisible(): boolean {
         return this.sidebarService.isVisible;

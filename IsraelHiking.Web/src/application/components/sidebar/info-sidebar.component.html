@@ -4,6 +4,7 @@
             <mat-card appearance="outlined">
                 <mat-card-content>
                     <p><span [innerHtml]="resources.infoSubheader"></span></p>
+                    <p *ngIf="isApp()">{{resources.subscriptionDetails}}</p>
                     <div *ngIf="!isApp()" class="flex flex-row justify-center items-center">
                         <a href="https://play.google.com/store/apps/details?id=il.org.osm.israelhiking&hl=en" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Download from google play store">
                             <img src="content/google-play-badge.png" width="200" />
@@ -19,6 +20,13 @@
                         <div class="flex-1">{{resources.longPressHint}}</div>
                     </div>
                     <h4>{{resources.infoHelpfulLinks}}</h4>
+                    <div class="flex flex-row">
+                        <div class="w-1/6 text-center"><i class="fa icon-question-circle-o w-full"></i></div>
+                        <div class="flex-1">
+                            <a class="w-full link" href="https://github.com/IsraelHikingMap/Site/wiki/Israel-Hiking-Maps-FAQ" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="FAQ">{{resources.infoFAQLink}}</a>
+                        </div>
+                    </div>
+                    <mat-divider></mat-divider>
                     <div class="flex flex-row">
                         <div class="w-1/6 text-center"><i class="fa icon-facebook w-full"></i></div>
                         <div class="flex-1">
@@ -40,24 +48,10 @@
                         </div>
                     </div>
                     <mat-divider></mat-divider>
-                    <div class="flex flex-row" *ngIf="!isApp()">
-                        <div class="w-1/6 text-center"><i class="fa icon-download w-full"></i></div>
-                        <div class="flex-1">
-                            <a class="w-full link" href="" (click)="openDownloadDialog($event)" angulartics2On="click" angularticsCategory="Info" angularticsAction="Download open">{{resources.infoDownloadOldMapsForOfflineUse}}</a>
-                        </div>
-                    </div>
-                    <mat-divider></mat-divider>
                     <div class="flex flex-row">
                         <div class="w-1/6 text-center"><i class="fa icon-edit w-full"></i></div>
                         <div class="flex-1">
                             <a class="w-full link" href="https://github.com/IsraelHikingMap/Site/wiki/Privacy-Policy-and-Terms-of-Service" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Terms of service">{{resources.infoPrivacyPolicyTermsOfService}}</a>
-                        </div>
-                    </div>
-                    <mat-divider></mat-divider>
-                    <div class="flex flex-row">
-                        <div class="w-1/6 text-center"><i class="fa icon-question-circle-o w-full"></i></div>
-                        <div class="flex-1">
-                            <a class="w-full link" href="https://github.com/IsraelHikingMap/Site/wiki/Israel-Hiking-Maps-FAQ" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="FAQ">{{resources.infoFAQLink}}</a>
                         </div>
                     </div>
                     <mat-divider></mat-divider>

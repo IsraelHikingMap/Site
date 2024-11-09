@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, AfterViewInit, HostListener, Inject } from "@angular/core";
+import { Component, ElementRef, AfterViewInit, HostListener, inject, viewChild } from "@angular/core";
 import {
     MatDialogRef,
     MatDialog,
@@ -7,7 +7,6 @@ import {
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "../base-map.component";
 import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
@@ -35,7 +34,7 @@ interface PrivatePoiEditDialogData {
     selector: "private-poi-edit-dialog",
     templateUrl: "private-poi-edit-dialog.component.html"
 })
-export class PrivatePoiEditDialogComponent extends BaseMapComponent implements AfterViewInit {
+export class PrivatePoiEditDialogComponent implements AfterViewInit {
     private static readonly NUMBER_OF_ICONS_PER_ROW = 4;
 
     private routeId?: string;
@@ -44,32 +43,32 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     public marker: MarkerData;
     public url: LinkData;
     public imageLink: LinkData;
-    public showIcons: boolean;
-    public showCoordinates: boolean;
+    public showIcons: boolean = false;
+    public showCoordinates: boolean = false;
     public showUrl: boolean;
     public title: string;
     public markerType: string;
     public description: string;
-    public iconsGroups: IIconsGroup[];
+    public iconsGroups: IIconsGroup[] = [];
 
-    @ViewChild("titleInput")
-    public titleInput: ElementRef;
+    public titleInput = viewChild<ElementRef>("titleInput");
 
-    constructor(resources: ResourcesService,
-                private readonly fileService: FileService,
-                private readonly imageResizeService: ImageResizeService,
-                private readonly matDialog: MatDialog,
-                private readonly dialogRef: MatDialogRef<PrivatePoiEditDialogComponent>,
-                private readonly navigateHereService: NavigateHereService,
-                private readonly runningContextService: RunningContextService,
-                private readonly socialSharing: SocialSharing,
-                private readonly hashService: HashService,
-                private readonly toastService: ToastService,
-                private readonly store: Store,
-                @Inject(MAT_DIALOG_DATA) data: PrivatePoiEditDialogData) {
-        super(resources);
-        this.showIcons = false;
-        this.showCoordinates = false;
+    public readonly resources = inject(ResourcesService);
+
+    private readonly fileService = inject(FileService);
+    private readonly imageResizeService = inject(ImageResizeService);
+    private readonly matDialog = inject(MatDialog);
+    private readonly dialogRef = inject(MatDialogRef);
+    private readonly navigateHereService = inject(NavigateHereService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly socialSharing = inject(SocialSharing);
+    private readonly hashService = inject(HashService);
+    private readonly toastService = inject(ToastService);
+    private readonly store = inject(Store);
+    private readonly data = inject<PrivatePoiEditDialogData>(MAT_DIALOG_DATA);
+
+
+    constructor() {
         this.iconsGroups = [];
         const icons = [
             "star", "arrow-left", "arrow-right", "tint",
@@ -85,9 +84,9 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
                 icons: icons.splice(0, PrivatePoiEditDialogComponent.NUMBER_OF_ICONS_PER_ROW)
             });
         }
-        this.routeId = data.routeId;
-        this.markerIndex = data.index;
-        this.marker = structuredClone(data.marker);
+        this.routeId = this.data.routeId;
+        this.markerIndex = this.data.index;
+        this.marker = structuredClone(this.data.marker);
         this.markerType = this.marker.type;
         this.title = this.marker.title;
         this.description = this.marker.description;
@@ -130,8 +129,8 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     private focusTitle() {
-        if (this.titleInput && this.titleInput.nativeElement) {
-            this.titleInput.nativeElement.focus();
+        if (this.titleInput && this.titleInput().nativeElement) {
+            this.titleInput().nativeElement.focus();
         }
     }
 

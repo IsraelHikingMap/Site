@@ -1,6 +1,5 @@
-import { Component, Input, HostListener, OnChanges, Output, EventEmitter } from "@angular/core";
+import { Component, HostListener, OnChanges, inject, output, input } from "@angular/core";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import type { LatLngAlt } from "../../models/models";
@@ -9,28 +8,21 @@ import type { LatLngAlt } from "../../models/models";
     selector: "route-point-overlay",
     templateUrl: "./route-point-overlay.component.html"
 })
-export class RoutePointOverlayComponent extends BaseMapComponent implements OnChanges {
-    public canMerge: boolean;
-    public isMiddle: boolean;
+export class RoutePointOverlayComponent implements OnChanges {
+    public canMerge: boolean = false;
+    public isMiddle: boolean = false;
 
-    @Input()
-    public latlng: LatLngAlt;
+    public latlng = input<LatLngAlt>();
 
-    @Input()
-    public segmentIndex: number;
+    public segmentIndex = input<number>();
 
-    @Output()
-    public closed = new EventEmitter();
+    public closed = output();
 
-    public hideCoordinates: boolean;
+    public hideCoordinates: boolean = true;
 
-    constructor(resources: ResourcesService,
-                private readonly selectedRouteService: SelectedRouteService) {
-        super(resources);
-        this.canMerge = false;
-        this.isMiddle = false;
-        this.hideCoordinates = true;
-    }
+    public readonly resources = inject(ResourcesService);
+
+    private readonly selectedRouteService = inject(SelectedRouteService);
 
     public ngOnChanges(): void {
         this.isMiddle = this.isFirst() === false && this.isLast() === false;
@@ -42,31 +34,31 @@ export class RoutePointOverlayComponent extends BaseMapComponent implements OnCh
     }
 
     public split(): void {
-        this.selectedRouteService.splitRoute(this.segmentIndex);
-        this.closed.next(undefined);
+        this.selectedRouteService.splitRoute(this.segmentIndex());
+        this.closed.emit();
     }
 
     public merge() {
         this.selectedRouteService.mergeRoutes(this.isFirst());
-        this.closed.next(undefined);
+        this.closed.emit();
     }
 
     public reverse() {
         this.selectedRouteService.reverseRoute();
-        this.closed.next(undefined);
+        this.closed.emit();
     }
 
     public remove() {
-        this.selectedRouteService.removeSegment(this.segmentIndex);
-        this.closed.next(undefined);
+        this.selectedRouteService.removeSegment(this.segmentIndex());
+        this.closed.emit();
     }
 
     private isFirst(): boolean {
-        return this.segmentIndex === 0;
+        return this.segmentIndex() === 0;
     }
 
     private isLast(): boolean {
-        return this.selectedRouteService.getSelectedRoute().segments.length - 1 === this.segmentIndex;
+        return this.selectedRouteService.getSelectedRoute().segments.length - 1 === this.segmentIndex();
     }
 
     @HostListener("window:keydown", ["$event"])

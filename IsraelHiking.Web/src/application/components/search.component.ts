@@ -2,10 +2,10 @@ import {
     Component,
     HostListener,
     ViewEncapsulation,
-    ViewChild,
-    ViewChildren,
     ElementRef,
-    QueryList
+    inject,
+    viewChild,
+    viewChildren
 } from "@angular/core";
 import { Router } from "@angular/router";
 import { MatAutocompleteTrigger } from "@angular/material/autocomplete";
@@ -14,7 +14,6 @@ import { debounceTime, filter, tap, map } from "rxjs/operators";
 import { remove } from "lodash-es";
 import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStrings } from "../services/hash.service";
 import { RoutingProvider } from "../services/routing.provider";
@@ -59,59 +58,48 @@ type DirectionalContext = {
     styleUrls: ["./search.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class SearchComponent extends BaseMapComponent {
+export class SearchComponent {
 
-    public fromContext: SearchContext;
-    public toContext: SearchContext;
-    public routingType: RoutingType;
-    public searchFrom: FormControl<string | SearchResultsPointOfInterest>;
-    public searchTo: FormControl<string | SearchResultsPointOfInterest>;
+    public fromContext: SearchContext = {
+        searchTerm: "",
+        searchResults: [],
+        selectedSearchResults: null
+    };
+    public toContext: SearchContext = {
+        searchTerm: "",
+        searchResults: [],
+        selectedSearchResults: null
+    };
+    public routingType: RoutingType = "Hike";
+    public searchFrom = new FormControl<string | SearchResultsPointOfInterest>("");
+    public searchTo = new FormControl<string | SearchResultsPointOfInterest>("");
     public hasFocus: boolean;
     public showCoordinates: boolean;
-    public directional: DirectionalContext;
+    public directional: DirectionalContext = {
+        isOn: false,
+        overlayLocation: null,
+        routeCoordinates: [],
+        latlngs: [],
+        routeTitle: "",
+        showResults: false,
+    };
 
-    private requestsQueue: SearchRequestQueueItem[];
-    private selectFirstSearchResults: boolean;
+    private requestsQueue: SearchRequestQueueItem[] = [];
+    private selectFirstSearchResults: boolean = false;
 
-    @ViewChild("searchFromInput")
-    public searchFromInput: ElementRef;
+    public searchFromInput = viewChild<ElementRef>("searchFromInput");
+    public matAutocompleteTriggers = viewChildren(MatAutocompleteTrigger);
 
-    @ViewChildren(MatAutocompleteTrigger)
-    public matAutocompleteTriggers: QueryList<MatAutocompleteTrigger>;
+    public readonly resources = inject(ResourcesService);
+    private readonly searchResultsProvider = inject(SearchResultsProvider);
+    private readonly routingProvider = inject(RoutingProvider);
+    private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly toastService = inject(ToastService);
+    private readonly routesFactory = inject(RoutesFactory);
+    private readonly router = inject(Router);
+    private readonly store = inject(Store);
 
-    constructor(resources: ResourcesService,
-                private readonly searchResultsProvider: SearchResultsProvider,
-                private readonly routingProvider: RoutingProvider,
-                private readonly fitBoundsService: FitBoundsService,
-                private readonly toastService: ToastService,
-                private readonly routesFactory: RoutesFactory,
-                private readonly router: Router,
-                private readonly store: Store
-    ) {
-        super(resources);
-        this.requestsQueue = [];
-        this.directional = {
-            isOn: false,
-            overlayLocation: null,
-            routeCoordinates: [],
-            latlngs: [],
-            routeTitle: "",
-            showResults: false,
-        };
-        this.routingType = "Hike";
-        this.selectFirstSearchResults = false;
-        this.fromContext = {
-            searchTerm: "",
-            searchResults: [],
-            selectedSearchResults: null
-        } as SearchContext;
-        this.toContext = {
-            searchTerm: "",
-            searchResults: [],
-            selectedSearchResults: null
-        } as SearchContext;
-        this.searchFrom = new FormControl<string | SearchResultsPointOfInterest>("");
-        this.searchTo = new FormControl<string | SearchResultsPointOfInterest>("");
+    constructor() {
         this.configureInputFormControl(this.searchFrom, this.fromContext);
         this.configureInputFormControl(this.searchTo, this.toContext);
     }
@@ -148,8 +136,8 @@ export class SearchComponent extends BaseMapComponent {
         // ChangeDetectionRef doesn't work well for some reason...
         setTimeout(() => {            
             this.hasFocus = true;
-            this.searchFromInput.nativeElement.focus();
-            this.searchFromInput.nativeElement.select();
+            this.searchFromInput().nativeElement.focus();
+            this.searchFromInput().nativeElement.select();
         }, 100);
 
     }
@@ -256,10 +244,10 @@ export class SearchComponent extends BaseMapComponent {
         if (!this.hasFocus) {
             return true;
         }
-        if (this.matAutocompleteTriggers.first == null) {
+        if (this.matAutocompleteTriggers()[0] == null) {
             return true;
         }
-        if (this.matAutocompleteTriggers.first.activeOption != null) {
+        if (this.matAutocompleteTriggers()[0].activeOption != null) {
             return true;
         }
         if (this.fromContext.selectedSearchResults == null && this.fromContext.searchResults.length > 0) {
@@ -293,7 +281,7 @@ export class SearchComponent extends BaseMapComponent {
                 this.selectResults(searchContext, searchContext.searchResults[0]);
             }
             this.selectFirstSearchResults = false;
-        } catch (ex) {
+        } catch {
             this.toastService.warning(this.resources.unableToGetSearchResults);
         }
     }

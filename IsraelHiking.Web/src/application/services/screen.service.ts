@@ -1,29 +1,24 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Idle, DEFAULT_INTERRUPTSOURCES } from "@ng-idle/core";
 import { TextZoom } from "@capacitor/text-zoom";
 import { KeepAwake } from "@capacitor-community/keep-awake";
 import { ScreenBrightness } from "@capacitor-community/screen-brightness";
 import { App } from "@capacitor/app";
-import { Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
-import type { ApplicationState, BatteryOptimizationType } from "../models/models";
+import type { ApplicationState } from "../models/models";
 
 @Injectable()
 export class ScreenService {
-
-    @Select((state: ApplicationState) => state.configuration.batteryOptimizationType)
-    public batteryOptimizationType$: Observable<BatteryOptimizationType>;
-
     private originalBrightness: number;
 
-    constructor(private readonly runningContextService: RunningContextService,
-                private readonly store: Store,
-                private readonly userIdleService: Idle,
-                private readonly logger: LoggingService) { }
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly store = inject(Store);
+    private readonly userIdleService = inject(Idle);
+    private readonly logger = inject(LoggingService);
 
     public async initialize() {
         if (!this.runningContextService.isCapacitor) {
@@ -43,6 +38,9 @@ export class ScreenService {
             } else {
                 this.logger.info(`[Screen] App is inactive, stop watching idle setting brightness to original: ${this.originalBrightness}`);
                 this.userIdleService.stop();
+                if (this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isAddingPoi) {
+                    this.store.dispatch(new ToggleAddRecordingPoiAction());
+                }
             }
         });
         this.userIdleService.setInterrupts(DEFAULT_INTERRUPTSOURCES);
@@ -65,7 +63,7 @@ export class ScreenService {
         });
         this.userIdleService.watch();
 
-        this.batteryOptimizationType$.subscribe(() => this.setKeepScreenOn());
+        this.store.select((state: ApplicationState) => state.configuration.batteryOptimizationType).subscribe(() => this.setKeepScreenOn());
     }
 
     private setKeepScreenOn() {

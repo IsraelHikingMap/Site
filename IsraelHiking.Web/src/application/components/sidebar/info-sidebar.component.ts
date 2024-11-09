@@ -1,20 +1,17 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatDialog } from "@angular/material/dialog";
 import { remove } from "lodash-es";
 import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
-import { Observable } from "rxjs";
-import { Select } from "@ngxs/store";
-import type { Immutable } from "immer";
+import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "../base-map.component";
-import { DownloadDialogComponent } from "../dialogs/download-dialog.component";
 import { ILegendItem } from "./legend-item.component";
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ISRAEL_MTB_MAP, ISRAEL_HIKING_MAP } from "../../reducers/initial-state";
-import type { ApplicationState, Language } from "../../models/models";
+import type { ApplicationState } from "../../models/models";
 import legendSectionsJson from "../../../content/legend/legend.json";
 
 export type LegendSection = {
@@ -28,27 +25,22 @@ export type LegendSection = {
     templateUrl: "./info-sidebar.component.html",
     styleUrls: ["./info-sidebar.component.scss"]
 })
-export class InfoSidebarComponent extends BaseMapComponent {
-    public legendSections: LegendSection[];
-    public selectedTabIndex: number;
-    private selectedSection: LegendSection;
+export class InfoSidebarComponent {
+    public legendSections: LegendSection[] = [];
+    public selectedTabIndex: number = 0;
+    private selectedSection: LegendSection = null;
 
-    @Select((state: ApplicationState) => state.configuration.language)
-    private language$: Observable<Immutable<Language>>;
+    public readonly resources = inject(ResourcesService);
 
-    constructor(resources: ResourcesService,
-                private readonly dialog: MatDialog,
-                private readonly angulartics: Angulartics2GoogleGlobalSiteTag,
-                private readonly sidebarService: SidebarService,
-                private readonly layersService: LayersService,
-                private readonly runningContext: RunningContextService) {
-        super(resources);
+    private readonly dialog = inject(MatDialog);
+    private readonly angulartics = inject(Angulartics2GoogleGlobalSiteTag);
+    private readonly sidebarService = inject(SidebarService);
+    private readonly layersService = inject(LayersService);
+    private readonly runningContext = inject(RunningContextService);
+    private readonly store = inject(Store);
 
-        this.selectedTabIndex = 0;
-        this.selectedSection = null;
-        this.legendSections = [];
-
-        this.language$.subscribe(() => {
+    constructor() {
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed()).subscribe(() => {
             this.initalizeLegendSections();
         });
     }
@@ -78,11 +70,6 @@ export class InfoSidebarComponent extends BaseMapComponent {
 
     public isMobile(): boolean {
         return this.runningContext.isMobile;
-    }
-
-    public openDownloadDialog(event: Event) {
-        event.preventDefault();
-        this.dialog.open(DownloadDialogComponent);
     }
 
     private initalizeLegendSections() {

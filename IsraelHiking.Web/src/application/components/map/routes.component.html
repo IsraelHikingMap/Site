@@ -116,7 +116,7 @@
 </mgl-popup>
 
 
-<div *ngFor="let route of (routes$ | async)">
+<div *ngFor="let route of routes">
     <div *ngIf="route.state !== 'Hidden'">
         <div *ngFor="let marker of route.markers; let idx = index">
             <mgl-marker anchor="bottom"

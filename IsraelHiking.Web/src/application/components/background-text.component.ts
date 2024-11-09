@@ -1,38 +1,27 @@
-import { Component } from "@angular/core";
-import { Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
-import type { Immutable } from "immer";
+import { Component, inject } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
-import type { ApplicationState, Language } from "../models/models";
+import type { ApplicationState } from "../models/models";
 
 @Component({
     selector: "background-text",
     templateUrl: "./background-text.component.html",
     styleUrls: ["./background-text.component.scss"]
 })
-export class BackgroundTextComponent extends BaseMapComponent {
+export class BackgroundTextComponent {
 
-    @Select((state: ApplicationState) => state.offlineState.isOfflineAvailable)
-    public isOfflineAvailable$: Observable<boolean>;
+    public text: string = "";
 
-    @Select((state: ApplicationState) => state.offlineState.lastModifiedDate)
-    public lastModifiedDate$: Observable<boolean>;
+    public readonly resources = inject(ResourcesService);
 
-    @Select((state: ApplicationState) => state.configuration.language)
-    public language$: Observable<Immutable<Language>>;
+    private readonly store = inject(Store);
 
-    public text: string;
-
-    constructor(resources: ResourcesService,
-        private readonly store: Store) {
-        super(resources);
-
-        this.text = "";
-        this.isOfflineAvailable$.subscribe(() => this.updateText());
-        this.lastModifiedDate$.subscribe(() => this.updateText());
-        this.language$.subscribe(() => this.updateText());
+    constructor() {
+        this.store.select((state: ApplicationState) => state.offlineState.isOfflineAvailable).pipe(takeUntilDestroyed()).subscribe(() => this.updateText());
+        this.store.select((state: ApplicationState) => state.offlineState.lastModifiedDate).pipe(takeUntilDestroyed()).subscribe(() => this.updateText());
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed()).subscribe(() => this.updateText());
     }
 
     private updateText() {

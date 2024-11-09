@@ -1,11 +1,11 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
 import { GeoJSONSourceComponent } from "@maplibre/ngx-maplibre-gl";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
-import { BaseMapComponent } from "../base-map.component";
 import { PoiService } from "../../services/poi.service";
 import { LayersService } from "../../services/layers.service";
 import { RouteStrings } from "../../services/hash.service";
@@ -15,6 +15,7 @@ import { SpatialService } from "../../services/spatial.service";
 import { NavigateHereService } from "../../services/navigate-here.service";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
+import { GeoJSONUtils } from "../../services/geojson-utils";
 import type { ApplicationState, LatLngAlt, LinkData, Overlay } from "../../models/models";
 
 @Component({
@@ -22,40 +23,33 @@ import type { ApplicationState, LatLngAlt, LinkData, Overlay } from "../../model
     templateUrl: "layers-view.component.html",
     styleUrls: ["layers-view.component.scss"]
 })
-export class LayersViewComponent extends BaseMapComponent implements OnInit {
+export class LayersViewComponent implements OnInit {
     private static readonly MAX_MENU_POINTS_IN_CLUSTER = 7;
 
-    public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point>;
-    public selectedPoiFeature: GeoJSON.Feature<GeoJSON.Point>;
-    public selectedPoiGeoJson: Immutable<GeoJSON.FeatureCollection>;
-    public selectedCluster: GeoJSON.Feature<GeoJSON.Point>;
+    public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
+    public selectedPoiFeature: GeoJSON.Feature<GeoJSON.Point> = null;
+    public selectedPoiGeoJson: Immutable<GeoJSON.FeatureCollection> = {
+        type: "FeatureCollection",
+        features: []
+    };
+    public selectedCluster: GeoJSON.Feature<GeoJSON.Point> = null;
     public clusterFeatures: GeoJSON.Feature<GeoJSON.Point>[];
-    public hoverFeature: GeoJSON.Feature<GeoJSON.Point>;
-    public isShowCoordinatesPopup: boolean;
+    public hoverFeature: GeoJSON.Feature<GeoJSON.Point> = null;
+    public isShowCoordinatesPopup: boolean = false;
+    public overlays$: Observable<Immutable<Overlay[]>>;	
 
-    @Select((state: ApplicationState) => state.layersState.overlays)
-    public overlays: Observable<Immutable<Overlay[]>>;
+    public readonly resources = inject(ResourcesService);
 
-    @Select((state: ApplicationState) => state.poiState.selectedPointOfInterest)
-    public selectedPoi$: Observable<Immutable<GeoJSON.Feature>>;
+    private readonly router = inject(Router);
+    private readonly layersService = inject(LayersService);
+    private readonly poiService = inject(PoiService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly navigateHereService = inject(NavigateHereService);
+    private readonly store = inject(Store);
+    private readonly destroyRef = inject(DestroyRef);
 
-    constructor(resources: ResourcesService,
-                private readonly router: Router,
-                private readonly layersService: LayersService,
-                private readonly poiService: PoiService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly navigateHereService: NavigateHereService,
-                private readonly store: Store
-    ) {
-        super(resources);
-        this.selectedCluster = null;
-        this.hoverFeature = null;
-        this.isShowCoordinatesPopup = false;
-        this.selectedPoiFeature = null;
-        this.selectedPoiGeoJson = {
-            type: "FeatureCollection",
-            features: []
-        };
+    constructor() {
+        this.overlays$ = this.store.select((state: ApplicationState) => state.layersState.overlays);
     }
 
     public getBaseLayer() {
@@ -64,10 +58,10 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
 
     public ngOnInit() {
         this.poiGeoJsonData = this.poiService.poiGeojsonFiltered;
-        this.poiService.poisChanged.subscribe(() => {
+        this.poiService.poisChanged.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.poiGeoJsonData = this.poiService.poiGeojsonFiltered;
         });
-        this.selectedPoi$.subscribe((poi) => this.onSelectedPoiChanged(poi));
+        this.store.select((state: ApplicationState) => state.poiState.selectedPointOfInterest).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(poi => this.onSelectedPoiChanged(poi));
     }
 
     private onSelectedPoiChanged(poi: Immutable<GeoJSON.Feature>) {
@@ -134,11 +128,11 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     }
 
     public getTitle(feature: GeoJSON.Feature<GeoJSON.Point>): string {
-        return this.poiService.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
+        return GeoJSONUtils.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
     public hasExtraData(feature: GeoJSON.Feature<GeoJSON.Point>): boolean {
-        return this.poiService.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
+        return GeoJSONUtils.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
     public isCoordinatesFeature(feature: Immutable<GeoJSON.Feature>) {

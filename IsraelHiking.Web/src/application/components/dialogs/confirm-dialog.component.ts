@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 
 import { ResourcesService } from "../../services/resources.service";
 
@@ -18,7 +18,9 @@ export class ConfirmDialogComponent {
     public declineIcon: string;
     public declineButtonText: string;
 
-    public constructor(public resources: ResourcesService) {
+    public readonly resources = inject(ResourcesService);
+
+    public constructor() {
         this.confirmAction = () => { throw new Error("Confirm action method must be provided!"); };
         this.declineAction = () => { throw new Error("Decline action method must be provided!"); };
     }

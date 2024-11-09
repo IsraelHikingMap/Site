@@ -4,7 +4,6 @@ import fs from "fs";
 
 const resourcesFilePath = "./src/application/services/resources.service.ts";
 const sourceFile = "./src/application/services/resources.service.ts";
-import targetJson from "./src/translations/en-US.json" assert { type: "json" };
 
 const fileContent = fs.readFileSync(sourceFile, "utf-8");
 const jsonKeys = fileContent.replace(/\"\s*\+\s*\"/g, "")
@@ -15,18 +14,27 @@ const jsonKeys = fileContent.replace(/\"\s*\+\s*\"/g, "")
     .split("\n")
     .sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}));
 
-const output = {};
-for (let key of jsonKeys) {
-    if (!Object.keys(targetJson).includes(key)) {
-        output[key] = key;
-    } else {
-        output[key] = targetJson[key];
+
+const translationFiles = fs.readdirSync("./src/translations");
+for (let translationFile of translationFiles) {
+    const output = {};
+    for (let key of jsonKeys) {
+        const targetJson = JSON.parse(fs.readFileSync(`./src/translations/${translationFile}`, "utf-8"));
+        if (!Object.keys(targetJson).includes(key)) {
+            if (translationFile === "en-US.json") {
+                output[key] = key;
+            } else {
+                output[key] = "__MISSING__";
+            }
+        } else {
+            output[key] = targetJson[key];
+        }
     }
+    console.log("Updating translation file " + translationFile);
+    fs.writeFileSync(`./src/translations/${translationFile}`, JSON.stringify(output, null, 4));
 }
 
 
-console.log("Updating translation file");
-fs.writeFileSync("./src/translations/en-US.json", JSON.stringify(output, null, 4));
 
 console.log("Updating translation signature");
 const data = fs.readFileSync(resourcesFilePath, "utf8");

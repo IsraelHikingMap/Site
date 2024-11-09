@@ -1,15 +1,14 @@
-import { Component, OnInit, OnDestroy, ViewEncapsulation, Inject } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, inject } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormControl } from "@angular/forms";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { Subscription, Observable } from "rxjs";
 import { orderBy, take } from "lodash-es";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
-import { AuthorizationService } from "../../services/authorization.service";
+import { OsmAddressesService } from "../../services/osm-addresses.service";
 import { FitBoundsService } from "../../services/fit-bounds.service";
 import { ToastService } from "../../services/toast.service";
 import { LayersService } from "../../services/layers.service";
@@ -26,53 +25,40 @@ import type { ApplicationState, Trace, TraceVisibility } from "../../models/mode
     styleUrls: ["./traces-dialog.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class TracesDialogComponent extends BaseMapComponent implements OnInit, OnDestroy {
+export class TracesDialogComponent implements OnInit {
 
     public filteredTraces: Immutable<Trace[]>;
-    public selectedTraceId: string;
-    public traceInEditMode: Trace;
+    public selectedTraceId: string = null;
+    public traceInEditMode: Trace = null;
     public file: File;
-    public loadingTraces: boolean;
-    public searchTerm: FormControl<string>;
-
-    @Select((state: ApplicationState) => state.tracesState.traces)
-    public traces$: Observable<Immutable<Trace[]>>;
+    public loadingTraces: boolean = false;
+    public searchTerm = new FormControl<string>("");
 
     private sessionSearchTerm = "";
-    private page: number;
-    private tracesChangedSubscription: Subscription;
-    private specificIds: string[];
+    private page: number = 1;
+    private specificIds: string[] = [];
 
-    constructor(resources: ResourcesService,
-                private readonly matDialogRef: MatDialogRef<TracesDialogComponent>,
-                private readonly fileService: FileService,
-                private readonly layersService: LayersService,
-                private readonly fitBoundsService: FitBoundsService,
-                private readonly toastService: ToastService,
-                private readonly authorizationService: AuthorizationService,
-                private readonly tracesService: TracesService,
-                private readonly runningContextService: RunningContextService,
-                private readonly dataContainerService: DataContainerService,
-                private readonly store: Store,
-                @Inject(MAT_DIALOG_DATA) data: string[]
-    ) {
-        super(resources);
-        this.loadingTraces = false;
-        this.selectedTraceId = null;
-        this.traceInEditMode = null;
-        this.page = 1;
-        this.searchTerm = new FormControl<string>("");
-        if (data) {
-            this.specificIds = data;
-        } else {
-            this.specificIds = [];
-        }
+    public readonly resources = inject(ResourcesService);
 
-        this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
+    private readonly matDialogRef = inject(MatDialogRef);
+    private readonly fileService = inject(FileService);
+    private readonly layersService = inject(LayersService);
+    private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly toastService = inject(ToastService);
+    private readonly osmAddressesService = inject(OsmAddressesService);
+    private readonly tracesService = inject(TracesService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly dataContainerService = inject(DataContainerService);
+    private readonly store = inject(Store);
+    private readonly data = inject<string[]>(MAT_DIALOG_DATA);
+
+    constructor() {
+        this.specificIds = this.data;
+        this.searchTerm.valueChanges.pipe(takeUntilDestroyed()).subscribe((searchTerm: string) => {
             this.updateFilteredLists(searchTerm);
         });
         this.searchTerm.setValue(this.sessionSearchTerm);
-        this.tracesChangedSubscription = this.traces$.subscribe(() => {
+        this.store.select((state: ApplicationState) => state.tracesState.traces).pipe(takeUntilDestroyed()).subscribe(() => {
             if (!this.loadingTraces) {
                 this.updateFilteredLists(this.searchTerm.value);
             }
@@ -86,12 +72,12 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         this.updateFilteredLists(this.searchTerm.value);
     }
 
-    public ngOnDestroy() {
-        this.tracesChangedSubscription.unsubscribe();
-    }
-
     public async addTraceToRoutes() {
         const trace = await this.tracesService.getTraceById(this.selectedTraceId);
+        if (trace.dataContainer.routes.length === 1) {
+            trace.dataContainer.routes[0].name = this.getTraceDisplayName(trace) || trace.name;
+            trace.dataContainer.routes[0].description = trace.name;
+        }
         this.dataContainerService.setData(trace.dataContainer, true);
     }
 
@@ -121,7 +107,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
 
     public editInOsm() {
         const baseLayerAddress = this.layersService.getSelectedBaseLayerAddressForOSM();
-        window.open(this.authorizationService.getEditOsmGpxAddress(baseLayerAddress, this.selectedTraceId));
+        window.open(this.osmAddressesService.getEditOsmGpxAddress(baseLayerAddress, this.selectedTraceId));
     }
 
     public async findUnmappedRoutes(): Promise<void> {

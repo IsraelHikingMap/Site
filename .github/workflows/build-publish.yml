@@ -14,8 +14,12 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
-      publish:
-        description: 'Publish to Appstore and Google play'
+      publishandroid:
+        description: 'Publish to Google play'
+        required: false
+        default: 'false'
+      publishios:
+        description: 'Publish to App Store'
         required: false
         default: 'false'
       tag:
@@ -86,24 +90,37 @@ jobs:
           npm ci
           npm run build:mobile -- --no-progress
           npx cap sync android
-      - name: Build Android
+      - name: Build Android Release
+        if: ${{ github.secret_source == 'Actions' }}
         run: |
           cd IsraelHiking.Web/android
-          ./gradlew :app:bundleRelease "-Pandroid.injected.signing.store.file=$WORKSPACE/IsraelHiking.Web/signing/IHM.jks" "-Pandroid.injected.signing.store.password=$STORE_PASSWORD" "-Pandroid.injected.signing.key.alias=ihmkey" "-Pandroid.injected.signing.key.password=$PASSWORD"
-          #./gradlew --no-daemon bundleRelease    
+          ./gradlew :app:assembleRelease --no-daemon "-Pandroid.injected.signing.store.file=$WORKSPACE/IsraelHiking.Web/signing/IHM.jks" "-Pandroid.injected.signing.store.password=$STORE_PASSWORD" "-Pandroid.injected.signing.key.alias=ihmkey" "-Pandroid.injected.signing.key.password=$PASSWORD"
+          ./gradlew :app:bundleRelease --no-daemon "-Pandroid.injected.signing.store.file=$WORKSPACE/IsraelHiking.Web/signing/IHM.jks" "-Pandroid.injected.signing.store.password=$STORE_PASSWORD" "-Pandroid.injected.signing.key.alias=ihmkey" "-Pandroid.injected.signing.key.password=$PASSWORD"
         env:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           PASSWORD: ${{ secrets.PASSWORD }}
           WORKSPACE: ${{ github.workspace }}
-          
-      - name: Upload artifacts
+      - name: Build Android Debug
+        if: ${{ github.secret_source == 'None' }}
+        run: |
+          cd IsraelHiking.Web/android
+          ./gradlew :app:assembleDebug --no-daemon
+      - name: Upload aab artifacts
+        if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
         with:
           name: IHM_signed_${{ needs.version.outputs.version_string }}.aab
           path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
+
+      - name: Upload apk artifacts
+        if: ${{ github.secret_source == 'Actions' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: IHM_signed_${{ needs.version.outputs.version_string }}.apk
+          path: IsraelHiking.Web/android/app/build/outputs/apk/release/app-release.apk
       
       - name: Publish to Google Play
-        if: ${{ github.event.inputs.publish == 'true' }}
+        if: ${{ github.event.inputs.publishandroid == 'true' }}
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
@@ -120,15 +137,21 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Login to GitHub Container Registry
+        if: ${{ github.secret_source == 'Actions' }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build Docker image
         run: |
           docker build . -t ghcr.io/israelhikingmap/website:$VERSION --build-arg VERSION=$VERSION
+        env:
+          VERSION: ${{ needs.version.outputs.version_string }}
+      - name: Push Docker image
+        if: ${{ github.secret_source == 'Actions' }}
+        run: |
           docker push ghcr.io/israelhikingmap/website:$VERSION
         env:
           VERSION: ${{ needs.version.outputs.version_string }}
@@ -156,21 +179,22 @@ jobs:
           podfile-path: IsraelHiking.Web/ios/App/Podfile.lock
 
       - name: Keychain setup
+        if: ${{ github.secret_source == 'Actions' }}
         run: |
           cd IsraelHiking.Web
-          openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/appveyor.mobileprovision.enc -d -a -out ./signing/appveyor.mobileprovision
+          openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/CI.mobileprovision.enc -d -a -out ./signing/CI.mobileprovision
           openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/ihm-dist.cer.enc -d -a -out ./signing/ihm-dist.cer
           openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/ihm-dist.p12.enc -d -a -out ./signing/ihm-dist.p12
-          security create-keychain -p appveyor ios-build.keychain
+          security create-keychain -p CI ios-build.keychain
           security default-keychain -s ios-build.keychain
-          security unlock-keychain -p appveyor ios-build.keychain
+          security unlock-keychain -p CI ios-build.keychain
           security set-keychain-settings -t 3600 -l ~/Library/Keychains/ios-build.keychain
           security import ./signing/apple.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
           security import ./signing/ihm-dist.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
           security import ./signing/ihm-dist.p12 -k ~/Library/Keychains/ios-build.keychain -P $STORE_PASSWORD -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k appveyor ~/Library/Keychains/ios-build.keychain > /dev/null
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k CI ~/Library/Keychains/ios-build.keychain > /dev/null
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp ./signing/appveyor.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+          cp ./signing/CI.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
         env:
           PASSWORD: ${{ secrets.PASSWORD }}
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
@@ -186,20 +210,30 @@ jobs:
           info-plist-path: "./IsraelHiking.Web/ios/App/App/Info.plist"
           bundle-short-version-string: ${{ needs.version.outputs.version_string }}
           bundle-version: ${{ needs.version.outputs.version_string }}
-      - name: Build iOS
+      - name: Build iOS with signing
+        if: ${{ github.secret_source == 'Actions' }}
         run: |
           cd IsraelHiking.Web/ios
           xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive -quiet
-          echo "Exporting archive"
+      - name: Build iOS no signing
+        if: ${{ github.secret_source == 'None' }}
+        run: |
+          cd IsraelHiking.Web/ios
+          xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive -quiet CODE_SIGN_IDENTITY=""
+      - name: Export iOS Archive
+        if: ${{ github.secret_source == 'Actions' }}
+        run: |
+          cd IsraelHiking.Web/ios
           xcodebuild -exportArchive -archivePath App.xcarchive -exportPath ./ -exportOptionsPlist exportOptions.plist
       - name: Upload artifacts
+        if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
         with:
           name: IHM_signed_${{ needs.version.outputs.version_string }}.ipa
           path: IsraelHiking.Web/ios/App.ipa
 
       - name: Publish to App Store
-        if: ${{ github.event.inputs.publish == 'true' }}
+        if: ${{ github.event.inputs.publishios == 'true' }}
         run: |
           cd IsraelHiking.Web/ios
           xcrun altool --upload-app --type ios --file ./App.ipa --username $APPLE_APPSTORE_USER --password $APPLE_APPSTORE_PASSWORD

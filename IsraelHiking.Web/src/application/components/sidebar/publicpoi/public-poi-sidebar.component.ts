@@ -1,14 +1,13 @@
-import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
+import { Component, inject, OnDestroy, ViewEncapsulation } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router, ActivatedRoute, ParamMap } from "@angular/router";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
-import { Subscription, Observable } from "rxjs";
+import { Observable } from "rxjs";
 import { cloneDeep } from "lodash-es";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { PoiService, PoiSocialLinks } from "../../../services/poi.service";
-import { AuthorizationService } from "../../../services/authorization.service";
 import { IHMTitleService } from "../../../services/ihm-title.service";
 import { ToastService } from "../../../services/toast.service";
 import { HashService, RouteStrings, PoiRouterData } from "../../../services/hash.service";
@@ -24,6 +23,7 @@ import { GeoJsonParser } from "../../../services/geojson.parser";
 import { sidebarAnimate } from "../sidebar.component";
 import { AddRouteAction, AddPrivatePoiAction } from "../../../reducers/routes.reducer";
 import { SetSelectedPoiAction, SetUploadMarkerDataAction, SetSidebarAction } from "../../../reducers/poi.reducer";
+import { GeoJSONUtils } from "../../../services/geojson-utils";
 import type {
     LinkData,
     LatLngAlt,
@@ -32,6 +32,7 @@ import type {
     Contribution,
     LatLngAltTime
 } from "../../../models/models";
+import { OsmAddressesService } from "application/services/osm-addresses.service";
 
 export type SourceImageUrlPair = {
     imageUrl: string;
@@ -47,50 +48,43 @@ export type SourceImageUrlPair = {
         sidebarAnimate
     ]
 })
-export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDestroy {
-    public info: EditablePublicPointData;
-    public isLoading: boolean;
-    public showLocationUpdate: boolean;
-    public updateLocation: boolean;
+export class PublicPoiSidebarComponent implements OnDestroy {
+    public info = { imagesUrls: [], urls: [] } as EditablePublicPointData;
+    public isLoading: boolean = true;
+    public showLocationUpdate: boolean = false;
+    public updateLocation: boolean = false;
     public sourceImageUrls: SourceImageUrlPair[];
     public latlng: LatLngAlt;
-    public shareLinks: PoiSocialLinks;
-    public contribution: Contribution;
-
-    @Select((state: ApplicationState) => state.poiState.isSidebarOpen)
-    public isOpen: Observable<boolean>;
+    public shareLinks = {} as PoiSocialLinks;
+    public contribution = {} as Contribution;
+    public isOpen$: Observable<boolean>;
 
     private editMode: boolean;
     private fullFeature: GeoJSON.Feature;
-    private subscriptions: Subscription[];
 
-    constructor(resources: ResourcesService,
-                private readonly titleService: IHMTitleService,
-                private readonly router: Router,
-                private readonly route: ActivatedRoute,
-                private readonly poiService: PoiService,
-                private readonly authorizationService: AuthorizationService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly routesFactory: RoutesFactory,
-                private readonly toastService: ToastService,
-                private readonly hashService: HashService,
-                private readonly fitBoundsService: FitBoundsService,
-                private readonly sidebarService: SidebarService,
-                private readonly runningContextSerivce: RunningContextService,
-                private readonly navigateHereService: NavigateHereService,
-                private readonly geoJsonParser: GeoJsonParser,
-                private readonly socialSharing: SocialSharing,
-                private readonly store: Store) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
+
+    private readonly titleService = inject(IHMTitleService);
+    private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
+    private readonly poiService = inject(PoiService);
+    private readonly osmAddressesService = inject(OsmAddressesService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly routesFactory = inject(RoutesFactory);
+    private readonly toastService = inject(ToastService);
+    private readonly hashService = inject(HashService);
+    private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly sidebarService = inject(SidebarService);
+    private readonly runningContextSerivce = inject(RunningContextService);
+    private readonly navigateHereService = inject(NavigateHereService);
+    private readonly geoJsonParser = inject(GeoJsonParser);
+    private readonly socialSharing = inject(SocialSharing);
+    private readonly store = inject(Store);
+
+    constructor() {
         this.sidebarService.hideWithoutChangingAddressbar();
-        this.isLoading = true;
-        this.showLocationUpdate = false;
-        this.updateLocation = false;
-        this.shareLinks = {} as PoiSocialLinks;
-        this.contribution = {} as Contribution;
-        this.info = { imagesUrls: [], urls: [] } as EditablePublicPointData;
-        this.subscriptions = [];
-        this.subscriptions.push(this.route.paramMap.subscribe(async (_) => {
+        this.isOpen$ = this.store.select((state: ApplicationState) => state.poiState.isSidebarOpen);
+        this.route.paramMap.pipe(takeUntilDestroyed()).subscribe(async (_) => {
             if (!this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
                 return;
             }
@@ -99,8 +93,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             if (snapshot.queryParamMap.get(RouteStrings.EDIT) !== "true" || poiSourceAndId.source === "new") {
                 await this.fillUiWithData(poiSourceAndId);
             }
-        }));
-        this.subscriptions.push(this.route.queryParams.subscribe(async (params) => {
+        });
+        this.route.queryParams.pipe(takeUntilDestroyed()).subscribe(async (params) => {
             if (!this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
                 return;
             }
@@ -113,7 +107,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             // change this only after we get the full data
             // so that the edit dialog will have all the necessary data to decide
             this.editMode = editMode;
-        }));
+        });
     }
 
     private getDataFromRoute(params: ParamMap, queryParams: ParamMap) {
@@ -126,10 +120,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
 
     public ngOnDestroy() {
         this.titleService.clear();
-
-        for (const subscription of this.subscriptions) {
-            subscription.unsubscribe();
-        }
     }
 
     public isApp(): boolean {
@@ -165,7 +155,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                     this.close();
                 }
             }
-        } catch (ex) {
+        } catch {
             this.toastService.warning(this.resources.unableToFindPoi);
             this.close();
         } finally {
@@ -182,18 +172,18 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 this.showLocationUpdate = true;
             }
         }
-        this.initFromFeature(feature);
+        await this.initFromFeature(feature);
     }
 
-    private initFromFeature(feature: GeoJSON.Feature) {
+    private async initFromFeature(feature: GeoJSON.Feature) {
         this.fullFeature = feature;
-        this.latlng = this.poiService.getLocation(feature);
+        this.latlng = GeoJSONUtils.getLocation(feature);
         this.sourceImageUrls = this.getSourceImageUrls(feature);
         this.shareLinks = this.poiService.getPoiSocialLinks(feature);
         this.contribution = this.poiService.getContribution(feature);
-        this.info = this.poiService.getEditableDataFromFeature(feature);
+        this.info = await this.poiService.getEditableDataFromFeature(feature);
         const language = this.resources.getCurrentLanguageCodeSimplified();
-        this.titleService.set(this.poiService.getTitle(feature, language));
+        this.titleService.set(GeoJSONUtils.getTitle(feature, language));
     }
 
     private getSourceImageUrls(feature: GeoJSON.Feature): SourceImageUrlPair[] {
@@ -223,7 +213,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public isHideEditMode(): boolean {
-        return !this.authorizationService.isLoggedIn() ||
+        const isLoggedOut = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo) == null;
+        return isLoggedOut ||
             !this.fullFeature ||
             !this.isEditable() ||
             this.editMode;
@@ -234,15 +225,16 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             return "";
         }
         const language = this.resources.getCurrentLanguageCodeSimplified();
-        const description = this.poiService.getDescription(this.fullFeature, language) ||
-            this.poiService.getExternalDescription(this.fullFeature, language);
+        const description = GeoJSONUtils.getDescription(this.fullFeature, language) ||
+            GeoJSONUtils.getExternalDescription(this.fullFeature, language);
         if (description) {
             return description;
         }
         if (!this.isEditable()) {
             return description;
         }
-        if (this.authorizationService.isLoggedIn() === false) {
+        const isLoggedOut = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo) == null;
+        if (isLoggedOut) {
             return this.resources.noDescriptionLoginRequired;
         }
         return this.resources.emptyPoiDescription;
@@ -253,7 +245,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public setEditMode() {
-        if (this.authorizationService.isLoggedIn() === false) {
+        const isLoggedOut = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo) == null;
+        if (isLoggedOut) {
             this.toastService.info(this.resources.loginRequired);
             return;
         }
@@ -290,8 +283,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 await this.poiService.updateComplexPoi(this.info, this.updateLocation ? this.latlng : null);
             }
             this.toastService.success(this.resources.dataUpdatedSuccessfullyItWillTakeTimeToSeeIt);
-            this.clear();
-        } catch (ex) {
+            this.close();
+        } catch {
             this.toastService.confirm({ message: this.resources.unableToSaveData, type: "Ok" });
         } finally {
             this.isLoading = false;
@@ -308,7 +301,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             this.store.dispatch(new AddRouteAction(newRoute));
             this.selectedRouteService.setSelectedRoute(newRoute.id);
         }
-        this.clear();
+        this.close();
     }
 
     public async addPointToRoute() {
@@ -328,19 +321,13 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             id,
             urls
         }));
-        this.clear();
+        this.close();
     }
 
     public navigateHere() {
-        const location = this.poiService.getLocation(this.fullFeature);
-        const title = this.poiService.getTitle(this.fullFeature, this.resources.getCurrentLanguageCodeSimplified());
+        const location = GeoJSONUtils.getLocation(this.fullFeature);
+        const title = GeoJSONUtils.getTitle(this.fullFeature, this.resources.getCurrentLanguageCodeSimplified());
         this.navigateHereService.addNavigationSegment(location, title);
-    }
-
-    public clear() {
-        if (this.fullFeature) {
-            this.store.dispatch(new SetSelectedPoiAction(null));
-        }
         this.close();
     }
 
@@ -370,6 +357,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public close() {
+        if (this.fullFeature) {
+            this.store.dispatch(new SetSelectedPoiAction(null));
+        }
         this.store.dispatch(new SetSidebarAction(false));
         // reset address bar only after animation ends.
         setTimeout(() => this.hashService.resetAddressbar(), 500);
@@ -382,7 +372,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         if (!this.isEditable()) {
             return null;
         }
-        return this.authorizationService.getElementOsmAddress(this.fullFeature.properties.identifier);
+        return this.osmAddressesService.getElementOsmAddress(this.fullFeature.properties.identifier);
     }
 
     public share() {

@@ -1,18 +1,15 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 
 import { FileService } from "./file.service";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
-import { LoggingService } from "./logging.service";
 
 @Injectable()
 export class DragAndDropService {
 
-    constructor(private readonly resources: ResourcesService,
-                private readonly fileService: FileService,
-                private readonly toastService: ToastService,
-                private readonly loggingService: LoggingService
-        ) { }
+    private readonly resources = inject(ResourcesService);
+    private readonly fileService = inject(FileService);
+    private readonly toastService = inject(ToastService);
 
     public initialize() {
         document.addEventListener("dragover", (event) => {

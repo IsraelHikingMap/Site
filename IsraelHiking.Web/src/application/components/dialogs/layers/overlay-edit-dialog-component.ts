@@ -1,11 +1,6 @@
 import { Component } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
 import type { Immutable } from "immer";
 
-import { ResourcesService } from "../../../services/resources.service";
-import { MapService } from "../../../services/map.service";
-import { ToastService } from "../../../services/toast.service";
-import { LayersService } from "../../../services/layers.service";
 import { LayerBaseDialogComponent } from "./layer-base-dialog.component";
 import type { LayerData, Overlay } from "../../../models/models";
 
@@ -17,12 +12,8 @@ import type { LayerData, Overlay } from "../../../models/models";
 export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
     private backupOverlay: Immutable<Overlay>;
 
-    constructor(resources: ResourcesService,
-                mapService: MapService,
-                layersService: LayersService,
-                toastService: ToastService,
-                http: HttpClient) {
-        super(resources, mapService, layersService, toastService, http);
+    constructor() {
+        super();
         this.title = this.resources.overlayProperties;
         this.isNew = false;
         this.isOverlay = true;
