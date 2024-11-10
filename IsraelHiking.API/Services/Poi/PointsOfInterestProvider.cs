@@ -2,7 +2,6 @@
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
-using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
@@ -274,22 +273,6 @@ namespace IsraelHiking.API.Services.Poi
             return results.Where(r => r.Geometry is Point && ((source != null && r.Attributes[FeatureAttributes.POI_SOURCE].Equals(source)) || source == null))
                 .OrderBy(f => f.Geometry.Coordinate.Distance(location))
                 .FirstOrDefault();
-        }
-
-        /// <inheritdoc/>
-        public async Task<UpdatesResponse> GetUpdates(DateTime lastModifiedDate, DateTime modifiedUntil)
-        {
-            var results = (lastModifiedDate.Year < 2010)
-                ? throw new ArgumentException("Last modified date must be higher than 2010", nameof(lastModifiedDate))
-                : await _pointsOfInterestRepository.GetPointsOfInterestUpdates(lastModifiedDate, modifiedUntil);
-            var lastModified = await _pointsOfInterestRepository.GetLastSuccessfulRebuildTime();
-            _elevationSetterExecutor.GeometryTo3D(results);
-            return new UpdatesResponse
-            {
-                Features = results.ToArray(),
-                LastModified = lastModified
-            };
-            
         }
 
         /// <inheritdoc/>

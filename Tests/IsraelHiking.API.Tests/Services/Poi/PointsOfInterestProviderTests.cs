@@ -495,24 +495,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
-        public void GetUpdates_TooOld_ShouldThrow()
-        {
-            Assert.ThrowsException<AggregateException>(() => _adapter.GetUpdates(DateTime.MinValue, DateTime.Now).Result);
-        }
-        
-        [TestMethod]
-        public void GetUpdates_ShouldReturnThem()
-        {
-            _pointsOfInterestRepository.GetPointsOfInterestUpdates(Arg.Any<DateTime>(), Arg.Any<DateTime>())
-                .Returns(new List<IFeature>());
-            _pointsOfInterestRepository.GetLastSuccessfulRebuildTime().Returns(DateTime.Now);
-            
-            var results = _adapter.GetUpdates(DateTime.Now, DateTime.Now).Result;
-            
-            Assert.AreEqual(0, results.Features.Length);
-        }
-        
-        [TestMethod]
         public void UpdateFeature_WithImageIdExists_ShouldUpdate()
         {
             var user = new User { DisplayName = "DisplayName" };
