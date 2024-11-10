@@ -257,6 +257,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                                       "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==");
             feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, _tagsHelper.GetCategoriesByGroup(Categories.POINTS_OF_INTEREST).First().Icon);
             feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "he.wikipedia.org/wiki/%D7%AA%D7%9C_%D7%A9%D7%9C%D7%9D");
+            feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + "1", "www.wikidata.org/wiki/Q19401334");
             _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
             _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
             
@@ -265,6 +266,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             Assert.IsNotNull(results);
             _pointsOfInterestRepository.Received(1).UpdatePointsOfInterestData(Arg.Any<List<IFeature>>());
             gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIPEDIA + ":" + language].Contains("תל שלם")));
+            gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIDATA].Equals("Q19401334")));
             gateway.Received().CreateChangeset(Arg.Any<TagsCollectionBase>());
             gateway.Received().CloseChangeset(Arg.Any<long>());
         }
