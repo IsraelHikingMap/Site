@@ -50,6 +50,7 @@
         public const string WEBSITE = "website";
         public const string WIKIPEDIA = "wikipedia";
         public const string WIKIDATA = "wikidata";
+        public const string INATURE_REF = "ref:IL:inature";
         public const string POI_PREFIX = "poi";
         public const string POI_ID = POI_PREFIX + "Id";
         public const string POI_SOURCE = POI_PREFIX + "Source";

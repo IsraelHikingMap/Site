@@ -78,6 +78,7 @@ namespace IsraelHiking.API.Executors
             externalFeatures = MergeWikipediaAndWikidataIntoWikidata(externalFeatures);
             externalFeatures = MergeWikipediaToOsmByWikipediaTags(osmFeatures, externalFeatures);
             externalFeatures = MergeWikidataToOsmByWikidataTags(osmFeatures, externalFeatures);
+            externalFeatures = MergeINatureToOsmByINatureTags(osmFeatures, externalFeatures);
             _logger.LogInformation($"Starting to sort features by importance: {osmFeatures.Count}");
             osmFeatures = osmFeatures.OrderBy(f => f, new FeatureComparer()).ToList();
             _logger.LogInformation($"Finished sorting features by importance: {osmFeatures.Count}");
@@ -595,6 +596,30 @@ namespace IsraelHiking.API.Executors
                 MergeFeatures(osmWikiFeature, wikiFeatureToRemove);
             }
             WriteToBothLoggers($"Finished joining Wikidata markers. Merged features: {featureIdsToRemove.Count}");
+            return externalFeatures.Where(f => featureIdsToRemove.Contains(f.GetId()) == false).ToList();
+        }
+        
+        private List<IFeature> MergeINatureToOsmByINatureTags(List<IFeature> osmFeatures, List<IFeature> externalFeatures)
+        {
+            WriteToBothLoggers("Starting joining iNature markers.");
+            var featureIdsToRemove = new HashSet<string>();
+            var iNatureFeatures = externalFeatures.Where(f => f.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.INATURE)).ToList();
+            var osmINatureFeatures = osmFeatures.Where(f =>
+                    f.Attributes.GetNames().Any(n => n == FeatureAttributes.INATURE_REF) &&
+                    f.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM))
+                .ToList();
+            foreach (var osmINatureFeature in osmINatureFeatures)
+            {
+                var iNaturePage = osmINatureFeature.Attributes[FeatureAttributes.INATURE_REF].ToString();
+                var iNatureFeatureToRemove = iNatureFeatures.FirstOrDefault(f => f.Attributes[FeatureAttributes.NAME].ToString() == iNaturePage);
+                if (iNatureFeatureToRemove == null)
+                {
+                    continue;
+                }
+                featureIdsToRemove.Add(iNatureFeatureToRemove.GetId());
+                MergeFeatures(osmINatureFeature, iNatureFeatureToRemove);
+            }
+            WriteToBothLoggers($"Finished joining iNature markers. Merged features: {featureIdsToRemove.Count}");
             return externalFeatures.Where(f => featureIdsToRemove.Contains(f.GetId()) == false).ToList();
         }
 

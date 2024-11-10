@@ -299,6 +299,25 @@ namespace IsraelHiking.API.Tests.Executors
 
             Assert.AreEqual(1, results.Count);
         }
+        
+        [TestMethod]
+        public void MergeFeatures_OsmWithINatureTags_ShouldMerge()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.INATURE_REF, "page");
+            feature1.SetTitles();
+            feature1.SetLocation(feature1.Geometry.Coordinate);
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "page");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.INATURE);
+            feature2.SetTitles();
+            feature2.SetLocation(feature2.Geometry.Coordinate);
+
+            var results = _executor.Merge(new List<IFeature> { feature1 },  new List<IFeature> { feature2 });
+
+            Assert.AreEqual(1, results.Count);
+        }
 
         [TestMethod]
         public void MergeFeatures_TwoPolygonsAndPoint_ShouldMerge()
