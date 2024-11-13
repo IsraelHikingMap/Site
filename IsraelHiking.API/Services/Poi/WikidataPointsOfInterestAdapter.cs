@@ -37,7 +37,6 @@ public class WikidataPointsOfInterestAdapter : IPointsOfInterestAdapter
     /// <inheritdoc />
     public async Task<List<IFeature>> GetAll()
     {
-        // HM TODO: linked OSM entities that do not have a location??
         _logger.LogInformation("Starting getting Wikidata items for indexing.");
         var startCoordinate = new Coordinate(34, 29);
         var endCoordinate = new Coordinate(36, 34);
@@ -49,12 +48,7 @@ public class WikidataPointsOfInterestAdapter : IPointsOfInterestAdapter
     /// <inheritdoc />
     public async Task<List<IFeature>> GetUpdates(DateTime lastModifiedDate)
     {
-        // HM TODO: update date??
         var features = await GetAll();
-        // The features with the invalid location might be added by editing an OSM element,
-        // in that case we need to return them as well. Since we simply bring all of them here,
-        // there's no easy way to know when the OSM element linking to them has been updated.
-        // So the "hack" here is to return those without a location always.
-        return features.Where(f => f.GetLastModified() > lastModifiedDate || f.GetLocation().X.Equals(FeatureAttributes.INVALID_LOCATION)).ToList();
+        return features.Where(f => f.GetLastModified() > lastModifiedDate).ToList();
     }
 }
