@@ -156,15 +156,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 
         [TestMethod]
         [Ignore]
-        public void GetPointsOfInterestUpdates_ShouldGetSome()
-        {
-            var results = _gateway.GetPointsOfInterestUpdates(DateTime.Now.AddDays(-50), DateTime.Now.AddDays(-45)).Result;
-
-            Assert.IsNotNull(results);
-        }
-
-        [TestMethod]
-        [Ignore]
         public void GetAllPointsOfInterest_ShouldGetThem()
         {
             var results = _gateway.GetAllPointsOfInterest(false).Result;

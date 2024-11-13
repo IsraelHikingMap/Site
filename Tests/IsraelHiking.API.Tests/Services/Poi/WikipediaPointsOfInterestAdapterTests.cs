@@ -19,7 +19,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         private IOverpassTurboGateway _overpassTurboGateway;
 
         [TestInitialize]
-        public void TestInialize()
+        public void TestInitialize()
         {
             InitializeSubstitutes();
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
@@ -40,8 +40,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var points = _adapter.GetAll().Result;
             
             _wikipediaGateway.Received(952).GetByBoundingBox(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string>());
-            Assert.AreEqual(Languages.Array.Length, points.Count); // distinct by number of lanugages
+            Assert.AreEqual(Languages.Array.Length, points.Count); // distinct by number of languages
         }
-
     }
 }

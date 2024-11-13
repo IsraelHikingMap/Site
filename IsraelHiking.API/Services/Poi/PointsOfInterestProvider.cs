@@ -2,7 +2,6 @@
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
-using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
@@ -222,28 +221,36 @@ namespace IsraelHiking.API.Services.Poi
             }
         }
 
-        private void SetWebsiteAndWikipediaTags(TagsCollectionBase tags, List<string> urls)
+        private void SetWebsiteAndWikiTags(TagsCollectionBase tags, List<string> urls)
         {
-            var regexp = new Regex(@"((https?://)|^)([a-z]+)(\.m)?\.wikipedia.org/wiki/(.*)");
+            var wikipediaRegexp = new Regex(@"((https?://)|^)([a-z]+)(\.m)?\.wikipedia.org/wiki/(.*)");
+            var wikidataRegexp = new Regex(@"((https?://)|^)([a-z]+)(\.m)?\.wikidata.org/wiki/(.*)");
+
             var nonWikipediaUrls = new List<string>();
             foreach (var url in urls)
             {
-                var match = regexp.Match(url ?? string.Empty);
-                if (!match.Success)
+                var matchWikipedia = wikipediaRegexp.Match(url ?? string.Empty);
+                if (matchWikipedia.Success)
                 {
-                    nonWikipediaUrls.Add(url);
+                    var language = matchWikipedia.Groups[3].Value;
+                    var pageTitle = Uri.UnescapeDataString(matchWikipedia.Groups[5].Value.Replace("_", " "));
+                    var key = FeatureAttributes.WIKIPEDIA + ":" + language;
+                    tags.AddOrReplace(key, pageTitle);
+                    key = FeatureAttributes.WIKIPEDIA;
+                    pageTitle = language + ":" + pageTitle;
+                    if (tags.ContainsKey(key) == false)
+                    {
+                        tags.Add(key, pageTitle);
+                    }
                     continue;
                 }
-                var language = match.Groups[3].Value;
-                var pageTitle = Uri.UnescapeDataString(match.Groups[5].Value.Replace("_", " "));
-                var key = FeatureAttributes.WIKIPEDIA + ":" + language;
-                tags.AddOrReplace(key, pageTitle);
-                key = FeatureAttributes.WIKIPEDIA;
-                pageTitle = language + ":" + pageTitle;
-                if (tags.ContainsKey(key) == false)
+                var matchWikidata = wikidataRegexp.Match(url ?? string.Empty);
+                if (matchWikidata.Success)
                 {
-                    tags.Add(key, pageTitle);
+                    tags.AddOrReplace(FeatureAttributes.WIKIDATA, matchWikidata.Groups[5].Value);
+                    continue;
                 }
+                nonWikipediaUrls.Add(url);
             }
             SetMultipleValuesForTag(tags, FeatureAttributes.WEBSITE, nonWikipediaUrls.ToArray());
         }
@@ -274,22 +281,6 @@ namespace IsraelHiking.API.Services.Poi
             return results.Where(r => r.Geometry is Point && ((source != null && r.Attributes[FeatureAttributes.POI_SOURCE].Equals(source)) || source == null))
                 .OrderBy(f => f.Geometry.Coordinate.Distance(location))
                 .FirstOrDefault();
-        }
-
-        /// <inheritdoc/>
-        public async Task<UpdatesResponse> GetUpdates(DateTime lastModifiedDate, DateTime modifiedUntil)
-        {
-            var results = (lastModifiedDate.Year < 2010)
-                ? throw new ArgumentException("Last modified date must be higher than 2010", nameof(lastModifiedDate))
-                : await _pointsOfInterestRepository.GetPointsOfInterestUpdates(lastModifiedDate, modifiedUntil);
-            var lastModified = await _pointsOfInterestRepository.GetLastSuccessfulRebuildTime();
-            _elevationSetterExecutor.GeometryTo3D(results);
-            return new UpdatesResponse
-            {
-                Features = results.ToArray(),
-                LastModified = lastModified
-            };
-            
         }
 
         /// <inheritdoc/>
@@ -337,7 +328,7 @@ namespace IsraelHiking.API.Services.Poi
                 Longitude = location.X,
                 Tags = new TagsCollection()
             };
-            SetWebsiteAndWikipediaTags(node.Tags, feature.Attributes.GetNames()
+            SetWebsiteAndWikiTags(node.Tags, feature.Attributes.GetNames()
                     .Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
                     .Select(p => feature.Attributes[p].ToString())
                     .ToList());
@@ -390,7 +381,7 @@ namespace IsraelHiking.API.Services.Poi
                 locationWasUpdated = UpdateLocationIfNeeded(completeOsmGeo, location);
             }
 
-            await UpdateLists(partialFeature, completeOsmGeo, osmGateway, language);
+            await UpdateWebsitesAndImages(partialFeature, completeOsmGeo, osmGateway, language);
 
             RemoveEmptyTagsAndWhiteSpaces(completeOsmGeo.Tags);
             if (oldTags.SequenceEqual(completeOsmGeo.Tags.ToArray()) &&
@@ -420,7 +411,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="osmGateway">The gateway to get the user details from</param>
         /// <param name="language">The language to use for the tags</param>
         /// <returns></returns>
-        private async Task UpdateLists(IFeature partialFeature, ICompleteOsmGeo completeOsmGeo, IAuthClient osmGateway, string language)
+        private async Task UpdateWebsitesAndImages(IFeature partialFeature, ICompleteOsmGeo completeOsmGeo, IAuthClient osmGateway, string language)
         {
             var featureAfterTagsUpdates = ConvertOsmToFeature(completeOsmGeo);
             var existingUrls = featureAfterTagsUpdates.Attributes.GetNames()
@@ -440,7 +431,7 @@ namespace IsraelHiking.API.Services.Poi
                     .Select(u => u.ToString())
                     .ToList();
                 var wikipediaTagsToRemove = new TagsCollection();
-                SetWebsiteAndWikipediaTags(wikipediaTagsToRemove, urlsToRemove);
+                SetWebsiteAndWikiTags(wikipediaTagsToRemove, urlsToRemove);
                 foreach(var urlToRemove in urlsToRemove)
                 {
                     existingUrls.Remove(urlToRemove);
@@ -454,7 +445,7 @@ namespace IsraelHiking.API.Services.Poi
                     }
                 }
             }
-            SetWebsiteAndWikipediaTags(completeOsmGeo.Tags, existingUrls.Distinct().ToList());
+            SetWebsiteAndWikiTags(completeOsmGeo.Tags, existingUrls.Distinct().ToList());
 
             var existingImages = featureAfterTagsUpdates.Attributes.GetNames()
                     .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
