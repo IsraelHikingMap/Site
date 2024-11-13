@@ -299,6 +299,45 @@ namespace IsraelHiking.API.Tests.Executors
 
             Assert.AreEqual(1, results.Count);
         }
+
+        [TestMethod]
+        public void MergeFeatures_OsmWithWikidataTags_ShouldMerge()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.WIKIDATA, "Q1234");
+            feature1.SetTitles();
+            feature1.SetLocation(feature1.Geometry.Coordinate);
+            var feature2 = CreateFeature("Q1234", 0, 0);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "2");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.WIKIDATA);
+            feature2.SetTitles();
+            feature2.SetLocation(feature1.Geometry.Coordinate);
+            var results = _executor.Merge(new List<IFeature> { feature1 },  new List<IFeature> { feature2 });
+
+            Assert.AreEqual(1, results.Count);
+        }
+
+        [TestMethod]
+        public void MergeFeatures_WikidataAndWikipediaTags_ShouldMerge()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.WIKIPEDIA, "page");
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.WIKIDATA);
+            feature1.SetTitles();
+            feature1.SetLocation(feature1.Geometry.Coordinate);
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.WIKIDATA, "page");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.WIKIPEDIA);
+            feature2.SetTitles();
+            feature2.SetLocation(feature1.Geometry.Coordinate);
+
+            var results = _executor.Merge(new List<IFeature>(),  new List<IFeature> { feature1, feature2 });
+
+            Assert.AreEqual(1, results.Count);
+        }
         
         [TestMethod]
         public void MergeFeatures_OsmWithINatureTags_ShouldMerge()
