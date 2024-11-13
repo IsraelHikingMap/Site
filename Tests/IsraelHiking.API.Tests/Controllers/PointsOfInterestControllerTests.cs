@@ -291,20 +291,10 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetPointOfInterestUpdates_ShouldGetThem()
         {
-            _pointsOfInterestProvider.GetUpdates(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new UpdatesResponse
-            {
-                Features = new[] {new Feature(null, new AttributesTable
-                {
-                    {FeatureAttributes.IMAGE_URL, "imageUrl"}
-                })},
-                Images = Array.Empty<ImageItem>(),
-                LastModified = DateTime.Now
-            });
-            
-            var results = _controller.GetPointOfInterestUpdates(DateTime.MinValue, DateTime.Now).Result;
+            var results = _controller.GetPointOfInterestUpdates(DateTime.MinValue, DateTime.Now);
 
-            _imagesUrlsStorageExecutor.Received(1).GetAllImagesForUrls(Arg.Any<string[]>());
-            Assert.AreEqual(1, results.Features.Length);
+            Assert.AreEqual(0, results.Features.Length);
+            Assert.AreEqual(0, results.Images.Length);
         }
         
         [TestMethod]

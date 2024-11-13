@@ -649,18 +649,6 @@ namespace IsraelHiking.DataAccess
             ).Field($"{PROPERTIES}.{FeatureAttributes.POI_GEOLOCATION}");
         }
 
-        public async Task<List<IFeature>> GetPointsOfInterestUpdates(DateTime lastModifiedDate, DateTime modifiedUntil)
-        {
-            var categories = Categories.Points.Concat(Categories.Routes).Select(c => c.ToLower()).ToArray();
-            var response = await _elasticClient.SearchAsync<IFeature>(s => s.Index(OSM_POIS_ALIAS)
-                    .Size(10000)
-                    .Scroll("10s")
-                    .Query(q => q.DateRange(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_LAST_MODIFIED}").GreaterThan(lastModifiedDate).LessThanOrEquals(modifiedUntil))
-                        && q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CATEGORY}").Terms(categories))
-                    ));
-            return GetAllItemsByScrolling(response);
-        }
-
         public async Task<IFeature> GetPointOfInterestById(string id, string source)
         {
             var fullId = GeoJsonExtensions.GetId(source, id);

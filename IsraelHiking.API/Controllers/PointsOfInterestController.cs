@@ -240,19 +240,14 @@ namespace IsraelHiking.API.Controllers
         [Route("updates/{lastModified}/")]
         [Route("updates/{lastModified}/{modifiedUntil}")]
         [HttpGet]
-        public async Task<UpdatesResponse> GetPointOfInterestUpdates(DateTime lastModified, DateTime? modifiedUntil)
+        [Obsolete("Remove by 5.2025")]
+        public UpdatesResponse GetPointOfInterestUpdates(DateTime lastModified, DateTime? modifiedUntil)
         {
-            var response = await _pointsOfInterestProvider.GetUpdates(lastModified, modifiedUntil ?? DateTime.Now);
-            var imageUrls = new List<string>();
-            foreach (var feature in response.Features)
+            return new UpdatesResponse
             {
-                var currentImageUrls = feature.Attributes.GetNames()
-                    .Where(a => a.StartsWith(FeatureAttributes.IMAGE_URL))
-                    .Select(k => feature.Attributes[k].ToString());
-                imageUrls.AddRange(currentImageUrls.ToList());
-            }
-            response.Images = await _imageUrlStoreExecutor.GetAllImagesForUrls(imageUrls.ToArray());
-            return response;
+                Features = Array.Empty<IFeature>(),
+                Images = Array.Empty<ImageItem>()
+            };
         }
 
         /// <summary>

@@ -145,27 +145,8 @@ namespace IsraelHiking.API.Services.Osm
             var externalFeatures = sources.Select(s => _externalSourcesRepository.GetExternalPoisBySource(s)).SelectMany(t => t.Result).ToList();
             var features = _featuresMergeExecutor.Merge(osmFeaturesTask.Result, externalFeatures);
             _unauthorizedImageUrlsRemover.RemoveImages(features);
-            var exitingFeatures = await _pointsOfInterestRepository.GetAllPointsOfInterest(true);
-            _logger.LogInformation($"Adding deleted features to new ones, total merged features: {features.Count} total existing features including deleted: {exitingFeatures.Count} of them: {exitingFeatures.Count(f => f.Attributes.Exists(FeatureAttributes.POI_DELETED))}");
-            var newFeaturesDictionary = features.ToDictionary(f => f.GetId(), f => f);
-            var deletedFeatures = exitingFeatures.Where(f => f.GetLastModified() <= rebuildContext.StartTime && !newFeaturesDictionary.ContainsKey(f.GetId())).ToArray();
-            foreach (var deletedFeatureToMark in deletedFeatures)
-            {
-                if (!deletedFeatureToMark.Attributes.Exists(FeatureAttributes.POI_DELETED))
-                {
-                    deletedFeatureToMark.Attributes.Add(FeatureAttributes.POI_DELETED, true);
-                    deletedFeatureToMark.SetLastModified(DateTime.Now);
-                    _logger.LogInformation("Removed feature id: " + deletedFeatureToMark.GetId());
-                }
-            }
-            var featuresToStore = features.Concat(deletedFeatures).ToList();
-            _logger.LogInformation($"Added deleted features to new ones: {deletedFeatures.Length} total features to store: {featuresToStore.Count}");
-            await _pointsOfInterestRepository.StorePointsOfInterestDataToSecondaryIndex(featuresToStore);
-            _logger.LogInformation("Getting all features added since rebuild started: " + rebuildContext.StartTime.ToLongTimeString());
-            var addedFeaturesAfterRebuildStart = await _pointsOfInterestRepository.GetPointsOfInterestUpdates(rebuildContext.StartTime, DateTime.Now);
-            _logger.LogInformation("Got all features added since rebuild started: " + addedFeaturesAfterRebuildStart.Count);
-            await _pointsOfInterestRepository.StorePointsOfInterestDataToSecondaryIndex(addedFeaturesAfterRebuildStart);
-            _logger.LogInformation("Finished storing all features");
+            await _pointsOfInterestRepository.StorePointsOfInterestDataToSecondaryIndex(features);
+            _logger.LogInformation("Finished storing all features " + features.Count);
             await _pointsOfInterestRepository.SwitchPointsOfInterestIndices();
             _logger.LogInformation("Finished rebuilding POIs database.");
         }
