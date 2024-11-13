@@ -34,14 +34,15 @@ export class OverpassTurboService {
         }
     }
 
-    public async getLongWay(id: string, title: string, isWaterway: boolean, isMtbRoute: boolean): Promise<GeoJSON.FeatureCollection> {
+    public async getLongWay(id: string, name: string, isWaterway: boolean, isMtbRoute: boolean): Promise<GeoJSON.FeatureCollection> {
+        const quotedName = name.replace(/"/g, '\\"')
         const query = `
         way(${id});
         complete
         {
           way(around:30)
             [${isWaterway ? 'waterway' : 'highway'}]
-            ["${isMtbRoute ? 'mtb:name' : 'name'}"="${title}"];
+            ["${isMtbRoute ? 'mtb:name' : 'name'}"="${quotedName}"];
         }
         out geom;`;
         return await this.getGeoJsonFromQuery(query);
