@@ -167,7 +167,7 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         [Ignore]
         public void GetAllPointsOfInterest_ShouldGetThem()
         {
-            var results = _gateway.GetAllPointsOfInterest(false).Result;
+            var results = _gateway.GetAllPointsOfInterest().Result;
 
             Assert.IsNotNull(results);
         }

@@ -128,7 +128,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 {FeatureAttributes.IMAGE_URL, "imageUrl2"}
             });
             feature.SetLastModified(new DateTime(0));
-            _pointsOfInterestRepository.GetAllPointsOfInterest(false).Returns(new List<IFeature> {feature});
+            _pointsOfInterestRepository.GetAllPointsOfInterest().Returns(new List<IFeature> {feature});
             _osmRepository.GetImagesUrls(Arg.Any<Stream>()).Returns(new List<string> {imageUrl});
             
             _service.Rebuild(new UpdateRequest {Images = true}).Wait();
@@ -151,7 +151,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         {
             var feature = new Feature(new Point(0, 0), new AttributesTable());
             feature.SetLastModified(new DateTime(0));
-            _pointsOfInterestRepository.GetAllPointsOfInterest(false).Returns(new List<IFeature> {feature});
+            _pointsOfInterestRepository.GetAllPointsOfInterest().Returns(new List<IFeature> {feature});
             _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(new[] {1.0});
             
             _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();

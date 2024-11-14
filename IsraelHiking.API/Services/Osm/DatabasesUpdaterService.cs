@@ -166,7 +166,7 @@ namespace IsraelHiking.API.Services.Osm
         {
             _logger.LogInformation("Starting rebuilding images database.");
             await using var stream = await _osmLatestFileGateway.Get();
-            var features = await _pointsOfInterestRepository.GetAllPointsOfInterest(false);
+            var features = await _pointsOfInterestRepository.GetAllPointsOfInterest();
             var featuresUrls = features.SelectMany(f =>
                 f.Attributes.GetNames()
                 .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
@@ -180,7 +180,7 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildSiteMap()
         {
             _logger.LogInformation("Starting rebuilding sitemap.");
-            var features = await _pointsOfInterestRepository.GetAllPointsOfInterest(false);
+            var features = await _pointsOfInterestRepository.GetAllPointsOfInterest();
             _pointsOfInterestFilesCreatorExecutor.CreateSiteMapXmlFile(features);
             _logger.LogInformation("Finished rebuilding sitemap.");
         }
@@ -188,7 +188,7 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildOfflinePoisFile(RebuildContext context)
         {
             _logger.LogInformation($"Starting rebuilding offline pois file for date: {context.StartTime.ToInvariantString()}");
-            var features = await _pointsOfInterestRepository.GetAllPointsOfInterest(false);
+            var features = await _pointsOfInterestRepository.GetAllPointsOfInterest();
             features = features.Where(f => f.GetLastModified() <= context.StartTime).ToList();
             _elevationSetterExecutor.GeometryTo3D(features);
             _pointsOfInterestFilesCreatorExecutor.CreateOfflinePoisFile(features);
