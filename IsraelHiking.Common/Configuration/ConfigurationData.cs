@@ -159,7 +159,7 @@ namespace IsraelHiking.Common.Configuration
             MaxNumberOfPointsPerLine = 1000;
             MaxLengthPerLine = 3000;
             RadialSimplificationAngle = 90;
-            SearchFactor = 0.5;
+            SearchFactor = 1;
             MergePointsOfInterestThreshold = 0.001; // around 100m
             MergeExternalPointsOfInterestThreshold = 1 / 60.0; // 1 minute
             ClosestPointsOfInterestThreshold = 0.001; // around 100m

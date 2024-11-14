@@ -31,7 +31,7 @@ namespace IsraelHiking.API.Tests.Services
                 {"place", "place"}
             });
 
-            Assert.AreEqual(1, factor);
+            Assert.AreEqual(2, factor);
             Assert.AreEqual("icon-home", iconColorCategory.Icon);
             Assert.AreEqual(Categories.NONE, iconColorCategory.Category);
         }
@@ -45,7 +45,7 @@ namespace IsraelHiking.API.Tests.Services
                 {"wikipedia", "wiki title" }
             });
 
-            Assert.AreEqual(1, factor);
+            Assert.AreEqual(2, factor);
             Assert.AreEqual("icon-home", iconColorCategory.Icon);
             Assert.AreEqual(Categories.WIKIPEDIA, iconColorCategory.Category);
         }
@@ -59,7 +59,7 @@ namespace IsraelHiking.API.Tests.Services
                 {"wikipedia", "wiki title" }
             });
 
-            Assert.AreEqual(1, factor);
+            Assert.AreEqual(2, factor);
             Assert.AreEqual("icon-tint", iconColorCategory.Icon);
             Assert.AreEqual(Categories.WATER, iconColorCategory.Category);
         }
@@ -72,7 +72,7 @@ namespace IsraelHiking.API.Tests.Services
                 {"wikipedia", "wiki title" }
             });
 
-            Assert.AreEqual(1, factor);
+            Assert.AreEqual(2, factor);
             Assert.AreEqual("icon-wikipedia-w", iconColorCategory.Icon);
             Assert.AreEqual(Categories.WIKIPEDIA, iconColorCategory.Category);
         }
@@ -121,7 +121,7 @@ namespace IsraelHiking.API.Tests.Services
                 {FeatureAttributes.MTB_NAME, "some-name"}
             });
 
-            Assert.AreEqual(1, factor);
+            Assert.AreEqual(2, factor);
             Assert.AreEqual("icon-bike", iconColorCategory.Icon);
             Assert.AreEqual(Categories.ROUTE_BIKE, iconColorCategory.Category);
         }
@@ -134,7 +134,7 @@ namespace IsraelHiking.API.Tests.Services
                 {"waterway", "river"}
             });
 
-            Assert.AreEqual(1, factor);
+            Assert.AreEqual(2, factor);
             Assert.AreEqual(Categories.NONE, iconColorCategory.Category);
         }
         
@@ -146,7 +146,7 @@ namespace IsraelHiking.API.Tests.Services
                 {"waterway", "stream"}
             });
 
-            Assert.AreEqual(1, factor);
+            Assert.AreEqual(2, factor);
             Assert.AreEqual(Categories.NONE, iconColorCategory.Category);
         }
         
@@ -158,7 +158,7 @@ namespace IsraelHiking.API.Tests.Services
                 {"waterway", "wadi"}
             });
 
-            Assert.AreEqual(1, factor);
+            Assert.AreEqual(2, factor);
             Assert.AreEqual(Categories.NONE, iconColorCategory.Category);
         }
         
@@ -170,7 +170,7 @@ namespace IsraelHiking.API.Tests.Services
                 {"landuse", "farmyard"}
             });
 
-            Assert.AreEqual(1, factor);
+            Assert.AreEqual(2, factor);
             Assert.AreEqual(Categories.NONE, iconColorCategory.Category);
         }
         
@@ -182,7 +182,7 @@ namespace IsraelHiking.API.Tests.Services
                 {"natural", "peak"},
             });
 
-            Assert.AreEqual(1, factor);
+            Assert.AreEqual(2, factor);
             Assert.AreEqual(Categories.NONE, iconColorCategory.Category);
         }
         
@@ -195,7 +195,7 @@ namespace IsraelHiking.API.Tests.Services
                 {FeatureAttributes.DESCRIPTION, "desc"}
             });
 
-            Assert.AreEqual(1, factor);
+            Assert.AreEqual(2, factor);
             Assert.AreEqual(Categories.NATURAL, iconColorCategory.Category);
         }
         
@@ -208,7 +208,7 @@ namespace IsraelHiking.API.Tests.Services
                 {FeatureAttributes.IMAGE_URL, "image_url"}
             });
 
-            Assert.AreEqual(1, factor);
+            Assert.AreEqual(2, factor);
             Assert.AreEqual(Categories.NATURAL, iconColorCategory.Category);
         }
     }
