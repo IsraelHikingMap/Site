@@ -28,7 +28,6 @@ export class Urls {
     public static readonly poiClosest = Urls.poi + "closest/";
     public static readonly poiUpdates = Urls.poi + "updates/";
     public static readonly poiSimple = Urls.poi + "simple/";
-    public static readonly poisOfflineFile = Urls.baseAddress + "/PointsOfInterest/pois.zip";
     */
     // HM TODO: change this on the mobile definitions?
     public static readonly mobileAuthUrl = "ihm://oauth_callback/";
