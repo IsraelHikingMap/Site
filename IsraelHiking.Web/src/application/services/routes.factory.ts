@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
@@ -25,7 +25,7 @@ export class RoutesFactory {
 
     private nextColorIndex = 0;
 
-    constructor(private readonly store: Store) { }
+    private readonly store = inject(Store);
 
     public createRouteData(name: string, color?: string): RouteData {
         const routeEditingState = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState);

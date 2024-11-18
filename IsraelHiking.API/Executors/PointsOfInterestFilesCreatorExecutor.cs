@@ -139,6 +139,12 @@ namespace IsraelHiking.API.Executors
             outputMemStream.Position = 0;
             var fullFolderPath = Path.GetFullPath(_options.OfflineFilesFolder);
             _fileSystemHelper.WriteAllBytes(Path.Combine(fullFolderPath, "pois.zip"), outputMemStream.ToArray());
+
+            var externalFeatures = new FeatureCollection();
+            foreach (var feature in features.Where(f => f.Attributes[FeatureAttributes.POI_SOURCE].ToString() != Sources.OSM).ToList()) {
+                externalFeatures.Add(feature);
+            }
+            _fileSystemHelper.WriteAllBytes(Path.Combine(fullFolderPath, "external.geojson"), externalFeatures.ToBytes());
         }
     }
 }

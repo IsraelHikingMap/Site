@@ -1,7 +1,6 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Map } from "maplibre-gl";
-import { Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
@@ -11,26 +10,19 @@ import type { ApplicationState } from "../models/models";
 export class MapService {
     private static readonly NOT_FOLLOWING_TIMEOUT = 20000;
 
-    public map: Map;
-    public initializationPromise: Promise<void>;
-
     private resolve: (value?: void | PromiseLike<void>) => void;
+    private missingImagesArray: string[] = [];
 
-    private missingImagesArray: string[];
+    private readonly cancelableTimeoutService = inject(CancelableTimeoutService);
+    private readonly store = inject(Store);
 
-    @Select((state: ApplicationState) => state.inMemoryState.pannedTimestamp)
-    public pannedTimestamp$: Observable<Date>;
-
-    constructor(private readonly cancelableTimeoutService: CancelableTimeoutService,
-        private readonly store: Store) {
-        this.initializationPromise = new Promise((resolve) => { this.resolve = resolve; });
-        this.missingImagesArray = [];
-    }
+    public map: Map;
+    public initializationPromise = new Promise<void>((resolve) => { this.resolve = resolve; });
 
     public setMap(map: Map) {
         this.map = map;
         this.resolve();
-        this.pannedTimestamp$.subscribe(pannedTimestamp => {
+        this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
             this.cancelableTimeoutService.clearTimeoutByGroup("panned");
             if (pannedTimestamp) {
                 this.cancelableTimeoutService.setTimeoutByGroup(() => {
@@ -43,7 +35,7 @@ export class MapService {
             this.store.dispatch(new SetPannedAction(new Date()));
         });
 
-        this.map.on("styleimagemissing", (e: {id: string}) => {
+        this.map.on("styleimagemissing", async (e: {id: string}) => {
             if (!/^http/.test(e.id)) {
                 return;
             }
@@ -51,9 +43,8 @@ export class MapService {
                 return;
             }
             this.missingImagesArray.push(e.id);
-            this.map.loadImage(e.id, (_: Error, image: HTMLImageElement | ImageBitmap) => {
-                this.map.addImage(e.id, image);
-            });
+            const image = await this.map.loadImage(e.id);
+            this.map.addImage(e.id, image.data);
         });
     }
 }

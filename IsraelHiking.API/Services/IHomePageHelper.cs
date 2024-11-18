@@ -1,5 +1,3 @@
-using Microsoft.Extensions.FileProviders;
-
 namespace IsraelHiking.API.Services
 {
     /// <summary>

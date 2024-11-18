@@ -26,6 +26,7 @@ namespace IsraelHiking.DataAccess
             services.AddTransient<IOsmRepository, OsmRepository>();
             services.AddTransient<INakebGateway, NakebGateway>();
             services.AddSingleton<IWikipediaGateway, WikipediaGateway>();
+            services.AddSingleton<IWikidataGateway, WikidataGateway>();
             services.AddSingleton<IWikimediaCommonGateway, WikimediaCommonGateway>();
             services.AddTransient<IImgurGateway, ImgurGateway>();
             services.AddSingleton<IINatureGateway, INatureGateway>();

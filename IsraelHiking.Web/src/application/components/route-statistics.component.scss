@@ -4,7 +4,7 @@ $control-border: 4px;
 $container-height-small-screen: 130px;
 $container-height: 200px;
 $container-height-expanded: 300px;
-$button-height: 36px;
+$button-size: 36px;
 $buttons-margin: 5px;
 
 .chart-control-container {
@@ -13,7 +13,7 @@ $buttons-margin: 5px;
 }
 
 .chart-control-container.expanded {
-    width: calc(100vw - #{$control-border});
+    width: calc(100vw - #{$control-border} - #{$button-size} - 2 * #{$buttons-margin});
     height: $container-height-expanded;
 }
 
@@ -65,31 +65,6 @@ $buttons-margin: 5px;
     min-width: unset !important;
 }
 
-.chart-close-button {
-    top: $buttons-margin;
-    left: $buttons-margin;
-}
-
-.chart-expand-button {
-    top: calc(#{$buttons-margin} + #{$button-height});
-    left: $buttons-margin;
-}
-
-.chart-more-button {
-    top: calc(#{$buttons-margin} + 2 * #{$button-height});
-    left: $buttons-margin;
-}
-
-.chart-graph-button {
-    bottom: $buttons-margin;
-    right: $buttons-margin;
-}
-
-.chart-table-button {
-    bottom: calc(#{$buttons-margin} + #{$button-height});
-    right: $buttons-margin;
-}
-
 .chart-container-tooltip {
     top: 20px;
     position: absolute
@@ -100,10 +75,6 @@ $buttons-margin: 5px;
 }
 
 @media (width <= 550px) {
-    .hidden-xs {
-        display: none !important
-    }
-    
     .chart-control-container {
         width: calc(100vw - 2 * #{$control-border});
         height: $container-height-small-screen;
@@ -115,10 +86,5 @@ $buttons-margin: 5px;
 
     .chart-buttons .mat-mdc-button {
         padding: 0 !important;
-    }
-
-    .chart-more-button {
-        top: calc(#{$buttons-margin} + #{$button-height});
-        left: $buttons-margin;
     }
 }

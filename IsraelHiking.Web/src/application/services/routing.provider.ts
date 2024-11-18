@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
@@ -11,7 +11,7 @@ import polyline from "@mapbox/polyline";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { SpatialService } from "./spatial.service";
-import { DatabaseService } from "./database.service";
+import { PmTilesService } from "./pmtiles.service";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { Urls } from "../urls";
@@ -19,17 +19,15 @@ import type { ApplicationState, LatLngAlt, RoutingType } from "../models/models"
 
 @Injectable()
 export class RoutingProvider {
-    private featuresCache: Map<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>;
+    private featuresCache = new Map<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>();
 
-    constructor(private readonly httpClient: HttpClient,
-                private readonly resources: ResourcesService,
-                private readonly toastService: ToastService,
-                private readonly databaseService: DatabaseService,
-                private readonly loggingService: LoggingService,
-                private readonly runningContextService: RunningContextService,
-                private readonly store: Store) {
-        this.featuresCache = new Map<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>();
-    }
+    private readonly httpClient = inject(HttpClient);
+    private readonly resources = inject(ResourcesService);
+    private readonly toastService = inject(ToastService);
+    private readonly pmTilesService = inject(PmTilesService);
+    private readonly loggingService = inject(LoggingService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly store = inject(Store);
 
     public async getRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {
         try {
@@ -231,7 +229,7 @@ export class RoutingProvider {
                     type: "FeatureCollection",
                     features: []
                 } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
-                const arrayBuffer = await this.databaseService.getTile(`custom://IHM/${zoom}/${tileX}/${tileY}.pbf`);
+                const arrayBuffer = await this.pmTilesService.getTile(`custom://IHM/${zoom}/${tileX}/${tileY}.pbf`);
                 const tile = new VectorTile(new Protobuf(arrayBuffer));
                 for (const layerKey of Object.keys(tile.layers)) {
                     const layer = tile.layers[layerKey];

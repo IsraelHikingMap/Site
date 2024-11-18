@@ -51,7 +51,7 @@ namespace IsraelHiking.API.Services
                 {
                     continue;
                 }
-                if (content.Name.EndsWith(".mbtiles") || content.Name.StartsWith("style"))
+                if (content.Name.EndsWith(".pmtiles") || content.Name.StartsWith("style"))
                 {
                     filesDictionary[content.Name] = content.LastModified.DateTime;
                 }

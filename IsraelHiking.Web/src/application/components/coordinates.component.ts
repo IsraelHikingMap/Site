@@ -1,6 +1,5 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, inject, input, OnInit } from "@angular/core";
 
-import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { ElevationProvider } from "../services/elevation.provider";
 import { CoordinatesService } from "../services/coordinates.service";
@@ -10,21 +9,19 @@ import type { LatLngAlt, NorthEast } from "../models/models";
     selector: "coordinates",
     templateUrl: "./coordinates.component.html"
 })
-export class CoordinatesComponent extends BaseMapComponent implements OnInit {
+export class CoordinatesComponent implements OnInit {
 
-    @Input()
-    public latlng: LatLngAlt;
+    public latlng = input<LatLngAlt>();
 
     public itmCoordinates: NorthEast;
 
-    constructor(resources: ResourcesService,
-                private readonly itmCoordinatesService: CoordinatesService,
-                private readonly elevationProvider: ElevationProvider) {
-        super(resources);
-    }
+    public readonly resources = inject(ResourcesService);
+
+    private readonly itmCoordinatesService = inject(CoordinatesService);
+    private readonly elevationProvider = inject(ElevationProvider);
 
     public async ngOnInit(): Promise<void> {
-        this.itmCoordinates = this.itmCoordinatesService.toItm(this.latlng);
-        await this.elevationProvider.updateHeights([this.latlng]);
+        this.itmCoordinates = this.itmCoordinatesService.toItm(this.latlng());
+        await this.elevationProvider.updateHeights([this.latlng()]);
     }
 }

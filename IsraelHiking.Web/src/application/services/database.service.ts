@@ -1,14 +1,13 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { debounceTime } from "rxjs/operators";
-import { CapacitorSQLite, SQLiteDBConnection, SQLiteConnection} from "@capacitor-community/sqlite";
-import { gunzipSync } from "fflate";
+import { addProtocol } from "maplibre-gl";
 import Dexie from "dexie";
 import deepmerge from "deepmerge";
-import maplibregl from "maplibre-gl";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
+import { PmTilesService } from "./pmtiles.service";
 import { POPULARITY_HEATMAP, initialState } from "../reducers/initial-state";
 import { ClearHistoryAction } from "../reducers/routes.reducer";
 import { SetSelectedPoiAction, SetSidebarAction } from "../reducers/poi.reducer";
@@ -24,11 +23,9 @@ export class DatabaseService {
     private static readonly STATE_DB_NAME = "State";
     private static readonly STATE_TABLE_NAME = "state";
     private static readonly STATE_DOC_ID = "state";
-    private static readonly POIS_DB_NAME = "PointsOfInterest";
-    private static readonly POIS_TABLE_NAME = "pois";
+    private static readonly POIS_UPLOAD_QUEUE_DB_NAME = "UploadQueue";
     private static readonly POIS_UPLOAD_QUEUE_TABLE_NAME = "uploadQueue";
     private static readonly POIS_ID_COLUMN = "properties.poiId";
-    private static readonly POIS_LOCATION_COLUMN = "[properties.poiGeolocation.lat+properties.poiGeolocation.lon]";
     private static readonly IMAGES_DB_NAME = "Images";
     private static readonly IMAGES_TABLE_NAME = "images";
     private static readonly SHARE_URLS_DB_NAME = "ShareUrls";
@@ -37,34 +34,24 @@ export class DatabaseService {
     private static readonly TRACES_TABLE_NAME = "traces";
 
     private stateDatabase: Dexie;
-    private poisDatabase: Dexie;
+    private uploadQueueDatabase: Dexie;
     private imagesDatabase: Dexie;
     private shareUrlsDatabase: Dexie;
     private tracesDatabase: Dexie;
-    private sourceDatabases: Map<string, Promise<SQLiteDBConnection>>;
-    private updating: boolean;
-    private sqlite: SQLiteConnection;
+    private updating = false;
 
-    constructor(private readonly loggingService: LoggingService,
-                private readonly runningContext: RunningContextService,
-                private readonly store: Store) {
-        this.updating = false;
-        this.sourceDatabases = new Map<string, Promise<SQLiteDBConnection>>();
-    }
+    private readonly loggingService = inject(LoggingService);
+    private readonly runningContext = inject(RunningContextService);
+    private readonly pmTilesService = inject(PmTilesService);
+    private readonly store = inject(Store);
 
     public async initialize() {
         this.stateDatabase = new Dexie(DatabaseService.STATE_DB_NAME);
         this.stateDatabase.version(1).stores({
             state: "id"
         });
-        if (this.runningContext.isCapacitor) {
-            this.sqlite = new SQLiteConnection(CapacitorSQLite);
-        }
-        this.poisDatabase = new Dexie(DatabaseService.POIS_DB_NAME);
-        this.poisDatabase.version(1).stores({
-            pois: DatabaseService.POIS_ID_COLUMN + "," + DatabaseService.POIS_LOCATION_COLUMN,
-        });
-        this.poisDatabase.version(2).stores({
+        this.uploadQueueDatabase = new Dexie(DatabaseService.POIS_UPLOAD_QUEUE_DB_NAME);
+        this.uploadQueueDatabase.version(1).stores({
             uploadQueue: DatabaseService.POIS_ID_COLUMN
         });
         this.imagesDatabase = new Dexie(DatabaseService.IMAGES_DB_NAME);
@@ -79,11 +66,11 @@ export class DatabaseService {
         this.tracesDatabase.version(1).stores({
             traces: "id",
         });
-        this.initCustomTileLoadFunction();
         if (this.runningContext.isIFrame) {
             this.store.reset(initialState);
             return;
         }
+        this.initCustomTileLoadFunction();
         let storedState = initialState;
         const dbState = await this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).get(DatabaseService.STATE_DOC_ID);
         if (dbState != null) {
@@ -103,16 +90,9 @@ export class DatabaseService {
     }
 
     private initCustomTileLoadFunction() {
-        maplibregl.addProtocol("custom", (params, callback) => {
-            this.getTile(params.url).then((tileBuffer) => {
-                if (tileBuffer) {
-                    callback(null, tileBuffer, null, null);
-                } else {
-                    const message = `Tile is not in DB: ${params.url}`;
-                    callback(new Error(message));
-                }
-            });
-            return { cancel: () => { } };
+        addProtocol("custom", async (params, _abortController) => {
+            const data = await this.pmTilesService.getTile(params.url);
+            return {data};
         });
     }
 
@@ -123,27 +103,6 @@ export class DatabaseService {
         this.store.dispatch(new SetSidebarAction(false));
         const finalState = this.store.snapshot() as ApplicationState;
         await this.updateState(finalState);
-        for (const dbKey of this.sourceDatabases.keys()) {
-            await this.closeDatabase(dbKey);
-        }
-    }
-
-    public async closeDatabase(dbKey: string) {
-        this.loggingService.info("[Database] Closing " + dbKey);
-        if (!this.sourceDatabases.has(dbKey)) {
-            this.loggingService.info(`[Database] ${dbKey} was never opened`);
-            return;
-        }
-        try {
-            const db = await this.sourceDatabases.get(dbKey);
-            await db.close();
-            this.loggingService.info("[Database] Closed succefully: " + dbKey);
-            await this.sqlite.closeConnection(dbKey + ".db", true);
-            this.loggingService.info("[Database] Connection closed succefully: " + dbKey);
-            this.sourceDatabases.delete(dbKey);
-        } catch (ex) {
-            this.loggingService.error(`[Database] Unable to close ${dbKey}, ${(ex as Error).message}`);
-        }
     }
 
     private async updateState(state: ApplicationState) {
@@ -163,123 +122,16 @@ export class DatabaseService {
         }
     }
 
-    private getSourceNameFromUrl(url: string) {
-        return url.replace("custom://", "").split("/")[0];
-    }
-
-    public async getTile(url: string): Promise<ArrayBuffer> {
-        const splitUrl = url.split("/");
-        const dbName = this.getSourceNameFromUrl(url);
-        const z = +splitUrl[splitUrl.length - 3];
-        const x = +splitUrl[splitUrl.length - 2];
-        const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
-
-        return this.getTileFromDatabase(dbName, z, x, y);
-    }
-
-    private async getTileFromDatabase(dbName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {
-        const db = await this.getDatabase(dbName);
-
-        const params = [z, x, Math.pow(2, z) - y - 1];
-        const queryresults = await db.query("SELECT HEX(tile_data) as tile_data_hex FROM tiles " +
-                "WHERE zoom_level = ? AND tile_column = ? AND tile_row = ? limit 1",
-                params);
-        if (queryresults.values.length !== 1) {
-            throw new Error("Unable to get tile from database");
-        }
-        const hexData = queryresults.values[0].tile_data_hex;
-        let binData = new Uint8Array(hexData.match(/.{1,2}/g).map((byte: string) => parseInt(byte, 16)));
-        const isGzipped = binData[0] === 0x1f && binData[1] === 0x8b;
-        if (isGzipped) {
-            binData = gunzipSync(binData);
-        }
-        return binData.buffer;
-    }
-
-    private async getDatabase(dbName: string): Promise<SQLiteDBConnection> {
-        if (this.sourceDatabases.has(dbName)) {
-            try {
-                const db = await this.sourceDatabases.get(dbName);
-                return db;
-            } catch (ex) {
-                this.loggingService.error(`[Database] There's a problem with the connection to ${dbName}, ${(ex as Error).message}`);
-            }
-        }
-        this.loggingService.info(`[Database] Creating connection to ${dbName}`);
-        this.sourceDatabases.set(dbName, this.createConnection(dbName));
-        return this.sourceDatabases.get(dbName);
-    }
-
-    private async createConnection(dbName: string) {
-        try {
-            const dbPromise = this.sqlite.createConnection(dbName + ".db", false, "no-encryption", 1, true);
-            const db = await dbPromise;
-            this.loggingService.info(`[Database] Connection created succefully to ${dbName}`);
-            await db.open();
-            this.loggingService.info(`[Database] Connection opened succefully: ${dbName}`);
-            return db;
-        } catch (ex) {
-            this.loggingService.error(`[Database] Failed opening ${dbName}, ${(ex as Error).message}`);
-            throw ex;
-        }
-    }
-
-    public async moveDownloadedDatabaseFile(dbFileName: string) {
-        await this.closeDatabase(dbFileName.replace(".db", ""));
-        this.loggingService.info(`[Database] Starting moving file ${dbFileName}`);
-        await this.sqlite.moveDatabasesAndAddSuffix("cache", [dbFileName]);
-        this.loggingService.info(`[Database] Finished moving file ${dbFileName}`);
-    }
-
-    public storePois(pois: GeoJSON.Feature[]): Promise<any> {
-        return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).bulkPut(pois);
-    }
-
-    public deletePois(poiIds: string[]): Promise<void> {
-        return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).bulkDelete(poiIds);
-    }
-
-    public async getPoisForClustering(): Promise<GeoJSON.Feature<GeoJSON.Point>[]> {
-        this.loggingService.debug("[Database] Startting getting pois for clustering in chunks");
-        let features = [] as GeoJSON.Feature<GeoJSON.Point>[];
-        let index = 0;
-        const size = 2000;
-        let currentFeatures = [];
-        do {
-            currentFeatures = await this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).offset(index * size).limit(size).toArray();
-            features = features.concat(currentFeatures);
-            index++;
-        } while (currentFeatures.length !== 0);
-        this.loggingService.debug("[Database] Finished getting pois for clustering in chunks: " + features.length);
-        const pointFeatures = features.map((feature: GeoJSON.Feature) => {
-            const geoLocation = feature.properties.poiGeolocation;
-            const pointFeature = {
-                type: "Feature",
-                geometry: {
-                    type: "Point",
-                    coordinates: [parseFloat(geoLocation.lon), parseFloat(geoLocation.lat)]
-                },
-                properties: feature.properties
-            } as GeoJSON.Feature<GeoJSON.Point>;
-            return pointFeature;
-        });
-        return pointFeatures;
-    }
-
-    public getPoiById(id: string): Promise<GeoJSON.Feature> {
-        return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).get(id);
-    }
-
     public addPoiToUploadQueue(feature: GeoJSON.Feature): Promise<any> {
-        return this.poisDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).put(feature);
+        return this.uploadQueueDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).put(feature);
     }
 
     public getPoiFromUploadQueue(featureId: string): Promise<GeoJSON.Feature> {
-        return this.poisDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).get(featureId);
+        return this.uploadQueueDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).get(featureId);
     }
 
     public removePoiFromUploadQueue(featureId: string): Promise<void> {
-        return this.poisDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).delete(featureId);
+        return this.uploadQueueDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).delete(featureId);
     }
 
     public storeImages(images: ImageUrlAndData[]): Promise<any> {
@@ -332,12 +184,5 @@ export class DatabaseService {
             storedState.gpsState = initialState.gpsState;
         }
         return storedState;
-    }
-
-    public async migrateDatabasesIfNeeded(): Promise<void> {
-        this.loggingService.info("[Database] Starting migrating old databases using sqlite plugin");
-        await this.sqlite.moveDatabasesAndAddSuffix("default", ["Contour.db", "IHM.db", "TerrainRGB.db"]);
-        const databases = await this.sqlite.getDatabaseList();
-        this.loggingService.info("[Database] Finished migrating old databases using sqlite plugin, " + JSON.stringify(databases.values));
     }
 }

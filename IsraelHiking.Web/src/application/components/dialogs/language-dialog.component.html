@@ -5,7 +5,7 @@
     </div>
     <div mat-dialog-content>
         <mat-radio-group [(ngModel)]="selectedLanguageCode">
-            <div *ngFor="let language of resources.availableLanguages">
+            <div *ngFor="let language of availableLanguages">
                 <mat-radio-button [value]="language.code" color="primary" angulartics2On="click" angularticsCategory="Language" angularticsAction="Select language {{language.code}}">{{resources.getLabelForCode(language.code)}}</mat-radio-button>
             </div>
         </mat-radio-group>

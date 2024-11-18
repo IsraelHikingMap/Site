@@ -1,13 +1,10 @@
-import { Injectable } from "@angular/core";
-import { ResourcesService } from "./resources.service";
+import { inject, Injectable } from "@angular/core";
 import { Title } from "@angular/platform-browser";
 
 @Injectable()
 export class IHMTitleService {
-    constructor(private readonly resources: ResourcesService,
-        private titleService: Title,
-    ) {
-    }
+    
+    private readonly titleService = inject(Title);
 
     public clear() {
         this.set();

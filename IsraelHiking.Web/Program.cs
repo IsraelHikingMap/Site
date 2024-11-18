@@ -88,7 +88,7 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     services.AddSingleton<IClientsFactory>(serviceProvider =>
         new ClientsFactory(serviceProvider.GetRequiredService<ILogger>(),
         serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(),
-        serviceProvider.GetRequiredService<IOptions<ConfigurationData>>().Value.OsmConfiguration.BaseAddress + "/api/"));
+        serviceProvider.GetRequiredService<IOptions<ConfigurationData>>().Value.OsmBaseAddress + "/api/"));
     var geometryFactory = new GeometryFactory(new PrecisionModel(100000000));
     services.AddSingleton<GeometryFactory, GeometryFactory>(_ => geometryFactory);
     services.AddSingleton<IHomePageHelper, HomePageHelper>();

@@ -49,6 +49,8 @@
         public const string IMAGE_URL = "image";
         public const string WEBSITE = "website";
         public const string WIKIPEDIA = "wikipedia";
+        public const string WIKIDATA = "wikidata";
+        public const string INATURE_REF = "ref:IL:inature";
         public const string POI_PREFIX = "poi";
         public const string POI_ID = POI_PREFIX + "Id";
         public const string POI_SOURCE = POI_PREFIX + "Source";
@@ -67,7 +69,6 @@
         public const string POI_ICON_COLOR = POI_PREFIX + "IconColor";
         public const string POI_OSM_NODES = POI_PREFIX + "OsmNodes";
         public const string POI_ALT = POI_PREFIX + "Alt";
-        public const string POI_DELETED = POI_PREFIX + "Deleted";
         public const string POI_EXTERNAL_DESCRIPTION = POI_PREFIX + "ExternalDescription";
         public const string POI_VERSION = POI_PREFIX + "Version";
         public const string POI_IS_SIMPLE = POI_PREFIX + "IsSimple";
@@ -94,8 +95,8 @@
         public const string OSM = "OSM";
         public const string NAKEB = "Nakeb";
         public const string WIKIPEDIA = "Wikipedia";
+        public const string WIKIDATA = "Wikidata";
         public const string INATURE = "iNature";
-        public const string COORDINATES = "Coordinates";
     }
 
     public static class Languages

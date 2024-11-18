@@ -1,11 +1,10 @@
-import { Component, Inject } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import {
     MatDialogRef,
     MatDialog,
     MAT_DIALOG_DATA
 } from "@angular/material/dialog";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { LoggingService } from "../../services/logging.service";
 
@@ -21,25 +20,25 @@ export interface IProgressDialogConfig {
     selector: "progress-dialog",
     templateUrl: "progress-dialog.component.html"
 })
-export class ProgressDialogComponent extends BaseMapComponent {
-    public progressPersentage: number;
-    public text: string;
+export class ProgressDialogComponent {
+    public progressPersentage: number = 0;
+    public text: string = "";
     public isError: boolean;
     public isContinue: boolean;
 
     public continueAction: () => void;
 
-    constructor(resources: ResourcesService,
-                private readonly matDialogRef: MatDialogRef<ProgressDialogComponent>,
-                private readonly loggingService: LoggingService,
-                @Inject(MAT_DIALOG_DATA) data: IProgressDialogConfig
-    ) {
-        super(resources);
-        this.progressPersentage = 0;
-        this.text = "";
-        this.isContinue = data.showContinueButton;
+    public readonly resources = inject(ResourcesService);
+
+    private readonly matDialogRef = inject(MatDialogRef);
+    private readonly loggingService: LoggingService = inject(LoggingService);
+    private readonly data = inject<IProgressDialogConfig>(MAT_DIALOG_DATA);
+
+
+    constructor() {
+        this.isContinue = this.data.showContinueButton;
         const wrappedAction = () => {
-            data.action((value, text) => {
+            this.data.action((value, text) => {
                 this.progressPersentage = value;
                 this.text = text;
             }).then(
@@ -51,8 +50,8 @@ export class ProgressDialogComponent extends BaseMapComponent {
                 });
         };
 
-        if (data.showContinueButton) {
-            this.text = data.continueText;
+        if (this.data.showContinueButton) {
+            this.text = this.data.continueText;
             this.continueAction = () => {
                 this.isContinue = false;
                 wrappedAction();

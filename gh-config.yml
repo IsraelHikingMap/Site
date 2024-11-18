@@ -44,7 +44,7 @@ graphhopper:
           - if: "track_type != GRADE4 && track_type != GRADE5 && car_access == false"
             multiply_by: "0"
           - if: "road_class == TRACK"
-            multiply_by: "20"
+            multiply_by: "2"
     - name: hike
       vehicle: roads
       weighting: custom
@@ -75,7 +75,7 @@ graphhopper:
             multiply_by: "1.05"
     - name: mtb
       vehicle: mtb
-      weighting: short_fastest
+      custom_model_files: []
 
   # Speed mode:
   # Its possible to speed up routing by doing a special graph preparation (Contraction Hierarchies, CH). This requires

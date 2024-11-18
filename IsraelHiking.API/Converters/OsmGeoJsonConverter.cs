@@ -15,6 +15,7 @@ namespace IsraelHiking.API.Converters
     public class OsmGeoJsonConverter : IOsmGeoJsonConverter
     {
         private const string OUTER = "outer";
+        private const string INNER = "inner";
         private const string SUBAREA = "subarea";
         private const string BOUNDARY = "boundary";
         private const string TYPE = "type";
@@ -183,7 +184,7 @@ namespace IsraelHiking.API.Converters
             var allWaysInRelationByRole = GetAllWaysGroupedByRole(relation);
             var outerWays = allWaysInRelationByRole.Where(kvp => kvp.Key == OUTER).SelectMany(kvp => kvp.Value).ToList();
             var outerPolygons = GetGeometriesFromWays(outerWays, true).OfType<Polygon>().ToList();
-            var innerWays = allWaysInRelationByRole.Where(kvp => kvp.Key != OUTER).SelectMany(kvp => kvp.Value).ToList();
+            var innerWays = allWaysInRelationByRole.Where(kvp => kvp.Key == INNER).SelectMany(kvp => kvp.Value).ToList();
             var innerPolygons = GetGeometriesFromWays(innerWays, true).OfType<Polygon>().ToList();
             var multiPolygon = MergeInnerIntoOuterPolygon(outerPolygons, innerPolygons);
             return new Feature(multiPolygon, ConvertTags(relation));

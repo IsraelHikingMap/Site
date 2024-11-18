@@ -1,15 +1,14 @@
-import { Component, OnDestroy } from "@angular/core";
+import { Component, inject } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
-import { Subscription, Observable, timer } from "rxjs";
+import { timer } from "rxjs";
 import { Device } from "@capacitor/device";
 import { App } from "@capacitor/app";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { encode } from "base64-arraybuffer";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import platform from "platform";
-import type { Immutable } from "immer";
 
-import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
 import { RunningContextService } from "../services/running-context.service";
@@ -21,6 +20,7 @@ import { LayersService } from "../services/layers.service";
 import { SidebarService } from "../services/sidebar.service";
 import { HashService } from "../services/hash.service";
 import { PurchaseService } from "../services/purchase.service";
+import { OsmAddressesService } from "../services/osm-addresses.service";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
 import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
 import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
@@ -37,55 +37,38 @@ import type { UserInfo, ApplicationState } from "../models/models";
     templateUrl: "./main-menu.component.html",
     styleUrls: ["./main-menu.component.scss"]
 })
-export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
+export class MainMenuComponent {
 
-    private subscriptions: Subscription[];
+    public userInfo: UserInfo = null;
+    public drawingVisible: boolean = false;
+    public statisticsVisible: boolean = false;
+    public isShowMore: boolean = false;
 
-    public userInfo: UserInfo;
-    public drawingVisible: boolean;
-    public statisticsVisible: boolean;
-    public isShowMore: boolean;
+    public readonly resources = inject(ResourcesService);
 
-    @Select((state: ApplicationState) => state.userState.userInfo)
-    public userInfo$: Observable<Immutable<UserInfo>>;
-
-    @Select((state: ApplicationState) => state.uiComponentsState.drawingVisible)
-    public drawingVisible$: Observable<boolean>;
-
-    @Select((state: ApplicationState) => state.uiComponentsState.statisticsVisible)
-    public statisticsVisible$: Observable<boolean>;
-
-    constructor(resources: ResourcesService,
-                private readonly socialSharing: SocialSharing,
-                private readonly authorizationService: AuthorizationService,
-                private readonly dialog: MatDialog,
-                private readonly runningContextService: RunningContextService,
-                private readonly toastService: ToastService,
-                private readonly fileService: FileService,
-                private readonly geoLocationService: GeoLocationService,
-                private readonly layersService: LayersService,
-                private readonly sidebarService: SidebarService,
-                private readonly loggingService: LoggingService,
-                private readonly hashService: HashService,
-                private readonly purchaseService: PurchaseService,
-                private readonly store: Store) {
-        super(resources);
-        this.isShowMore = false;
-        this.userInfo = null;
-        this.subscriptions = [];
-        this.subscriptions.push(this.userInfo$.subscribe(userInfo => this.userInfo = userInfo));
-        this.subscriptions.push(this.drawingVisible$.subscribe(v => this.drawingVisible = v));
-        this.subscriptions.push(this.statisticsVisible$.subscribe(v => this.statisticsVisible = v));
+    private readonly socialSharing = inject(SocialSharing);
+    private readonly authorizationService = inject(AuthorizationService);
+    private readonly osmAddressesService = inject(OsmAddressesService);
+    private readonly dialog = inject(MatDialog);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly toastService = inject(ToastService);
+    private readonly fileService = inject(FileService);
+    private readonly geoLocationService = inject(GeoLocationService);
+    private readonly layersService = inject(LayersService);
+    private readonly sidebarService = inject(SidebarService);
+    private readonly loggingService = inject(LoggingService);
+    private readonly hashService = inject(HashService);
+    private readonly purchaseService = inject(PurchaseService);
+    private readonly store = inject(Store);
+    
+    constructor() {
+        this.store.select((state: ApplicationState) => state.userState.userInfo).pipe(takeUntilDestroyed()).subscribe(userInfo => this.userInfo = userInfo);
+        this.store.select((state: ApplicationState) => state.uiComponentsState.drawingVisible).pipe(takeUntilDestroyed()).subscribe(v => this.drawingVisible = v);
+        this.store.select((state: ApplicationState) => state.uiComponentsState.statisticsVisible).pipe(takeUntilDestroyed()).subscribe(v => this.statisticsVisible = v);
         if (this.runningContextService.isCapacitor) {
             App.getInfo().then((info) => {
                 this.loggingService.info(`App version: ${info.version}`);
             });
-        }
-    }
-
-    public ngOnDestroy(): void {
-        for (const subscription of this.subscriptions) {
-            subscription.unsubscribe();
         }
     }
 
@@ -141,14 +124,14 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     public selectDrawing() {
         this.store.dispatch(new SetUIComponentVisibilityAction(
             "drawing",
-            !this.store.selectSnapshot((s: ApplicationState) => s.uiComponentsState).drawingVisible
+            !this.drawingVisible
         ));
     }
 
     public selectStatistics() {
         this.store.dispatch(new SetUIComponentVisibilityAction(
             "statistics",
-            !this.store.selectSnapshot((s: ApplicationState) => s.uiComponentsState).statisticsVisible
+            !this.statisticsVisible
         ));
     }
 
@@ -248,18 +231,18 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         if (poiState.isSidebarOpen &&
             poiState.selectedPointOfInterest != null &&
             poiState.selectedPointOfInterest.properties.poiSource.toLocaleLowerCase() === "osm") {
-            return this.authorizationService.getEditElementOsmAddress(baseLayerAddress,
+            return this.osmAddressesService.getEditElementOsmAddress(baseLayerAddress,
                 poiState.selectedPointOfInterest.properties.identifier);
         }
         const currentLocation = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
-        return this.authorizationService.getEditOsmLocationAddress(baseLayerAddress,
+        return this.osmAddressesService.getEditOsmLocationAddress(baseLayerAddress,
             currentLocation.zoom + 1,
             currentLocation.latitude,
             currentLocation.longitude);
     }
 
     public openTraces() {
-        this.dialog.open(TracesDialogComponent, { width: "480px" } as MatDialogConfig);
+        this.dialog.open(TracesDialogComponent, { width: "480px", data: [] } as MatDialogConfig);
     }
 
     public openShares() {

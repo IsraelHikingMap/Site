@@ -145,26 +145,8 @@ namespace IsraelHiking.API.Services.Osm
             var externalFeatures = sources.Select(s => _externalSourcesRepository.GetExternalPoisBySource(s)).SelectMany(t => t.Result).ToList();
             var features = _featuresMergeExecutor.Merge(osmFeaturesTask.Result, externalFeatures);
             _unauthorizedImageUrlsRemover.RemoveImages(features);
-            _logger.LogInformation("Adding deleted features to new ones");
-            var exitingFeatures = await _pointsOfInterestRepository.GetAllPointsOfInterest(true);
-            var newFeaturesDictionary = features.ToDictionary(f => f.GetId(), f => f);
-            var deletedFeatures = exitingFeatures.Where(f => f.GetLastModified() <= rebuildContext.StartTime && !newFeaturesDictionary.ContainsKey(f.GetId())).ToArray();
-            foreach (var deletedFeatureToMark in deletedFeatures)
-            {
-                if (!deletedFeatureToMark.Attributes.Exists(FeatureAttributes.POI_DELETED))
-                {
-                    deletedFeatureToMark.Attributes.Add(FeatureAttributes.POI_DELETED, true);
-                    deletedFeatureToMark.SetLastModified(DateTime.Now);
-                    _logger.LogDebug("Removed feature id: " + deletedFeatureToMark.GetId());
-                }
-            }
-            _logger.LogInformation("Added deleted features to new ones: " + deletedFeatures.Length);
-            await _pointsOfInterestRepository.StorePointsOfInterestDataToSecondaryIndex(features.Concat(deletedFeatures).ToList());
-            _logger.LogInformation("Getting all features added since rebuild started: " + rebuildContext.StartTime.ToLongTimeString());
-            var addedFeaturesAfterRebuildStart = await _pointsOfInterestRepository.GetPointsOfInterestUpdates(rebuildContext.StartTime, DateTime.Now);
-            _logger.LogInformation("Got all features added since rebuild started: " + addedFeaturesAfterRebuildStart.Count);
-            await _pointsOfInterestRepository.StorePointsOfInterestDataToSecondaryIndex(addedFeaturesAfterRebuildStart);
-            _logger.LogInformation("Finished storing all features");
+            await _pointsOfInterestRepository.StorePointsOfInterestDataToSecondaryIndex(features);
+            _logger.LogInformation("Finished storing all features " + features.Count);
             await _pointsOfInterestRepository.SwitchPointsOfInterestIndices();
             _logger.LogInformation("Finished rebuilding POIs database.");
         }
@@ -184,7 +166,7 @@ namespace IsraelHiking.API.Services.Osm
         {
             _logger.LogInformation("Starting rebuilding images database.");
             await using var stream = await _osmLatestFileGateway.Get();
-            var features = await _pointsOfInterestRepository.GetAllPointsOfInterest(false);
+            var features = await _pointsOfInterestRepository.GetAllPointsOfInterest();
             var featuresUrls = features.SelectMany(f =>
                 f.Attributes.GetNames()
                 .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
@@ -198,7 +180,7 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildSiteMap()
         {
             _logger.LogInformation("Starting rebuilding sitemap.");
-            var features = await _pointsOfInterestRepository.GetAllPointsOfInterest(false);
+            var features = await _pointsOfInterestRepository.GetAllPointsOfInterest();
             _pointsOfInterestFilesCreatorExecutor.CreateSiteMapXmlFile(features);
             _logger.LogInformation("Finished rebuilding sitemap.");
         }
@@ -206,7 +188,7 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildOfflinePoisFile(RebuildContext context)
         {
             _logger.LogInformation($"Starting rebuilding offline pois file for date: {context.StartTime.ToInvariantString()}");
-            var features = await _pointsOfInterestRepository.GetAllPointsOfInterest(false);
+            var features = await _pointsOfInterestRepository.GetAllPointsOfInterest();
             features = features.Where(f => f.GetLastModified() <= context.StartTime).ToList();
             _elevationSetterExecutor.GeometryTo3D(features);
             _pointsOfInterestFilesCreatorExecutor.CreateOfflinePoisFile(features);

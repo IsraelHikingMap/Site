@@ -47,6 +47,7 @@ namespace IsraelHiking.API
             services.AddTransient<IPointsOfInterestAdapter, NakebPointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, INaturePointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, WikipediaPointsOfInterestAdapter>();
+            services.AddTransient<IPointsOfInterestAdapter, WikidataPointsOfInterestAdapter>();
             services.AddTransient<CsvPointsOfInterestAdapter>();
             services.AddSingleton<IPointsOfInterestAdapterFactory, PointsOfInterestAdapterFactory>();
             // last one is the least important

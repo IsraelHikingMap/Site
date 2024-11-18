@@ -1,6 +1,5 @@
-import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
+import { inject, Injectable } from "@angular/core";
+import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { LoggingService } from "./logging.service";
@@ -10,6 +9,7 @@ import { GeoLocationService } from "./geo-location.service";
 import { RoutesFactory } from "./routes.factory";
 import { TracesService } from "./traces.service";
 import { SpatialService } from "./spatial.service";
+import { RunningContextService } from "./running-context.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { StopRecordingAction, StartRecordingAction, AddRecordingRoutePointsAction } from "../reducers/recorded-route.reducer";
 import { AddTraceAction } from "../reducers/traces.reducer";
@@ -19,26 +19,20 @@ import type { TraceVisibility, DataContainer, ApplicationState, RouteData, LatLn
 
 @Injectable()
 export class RecordedRouteService {
-    private static readonly MAX_TIME_DIFFERENCE = 120; // seconds
     private static readonly MAX_SPPED = 55; // meters / seconds =~ 200 Km/hs
     private static readonly MIN_ACCURACY = 100; // meters
 
     private rejectedPosition: LatLngAltTime;
     private lastValidLocation: LatLngAltTime;
 
-    @Select((state: ApplicationState) => state.gpsState.currentPosition)
-    private currentPosition$: Observable<Immutable<GeolocationPosition>>;
-
-    constructor(private readonly resources: ResourcesService,
-                private readonly geoLocationService: GeoLocationService,
-                private readonly routesFactory: RoutesFactory,
-                private readonly tracesService: TracesService,
-                private readonly loggingService: LoggingService,
-                private readonly toastService: ToastService,
-                private readonly store: Store) {
-        this.rejectedPosition = null;
-        this.lastValidLocation = null;
-    }
+    private readonly resources = inject(ResourcesService);
+    private readonly geoLocationService = inject(GeoLocationService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly routesFactory = inject(RoutesFactory);
+    private readonly tracesService = inject(TracesService);
+    private readonly loggingService = inject(LoggingService);
+    private readonly toastService = inject(ToastService);
+    private readonly store = inject(Store);
 
     public initialize() {
         if (this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording) {
@@ -47,12 +41,11 @@ export class RecordedRouteService {
             this.toastService.warning(this.resources.lastRecordingDidNotEndWell);
         }
 
-        this.currentPosition$.subscribe(
-            (position: GeolocationPosition) => {
-                if (position != null) {
-                    this.updateRecordingRoute([position]);
-                }
-            });
+        this.store.select((state: ApplicationState) => state.gpsState.currentPosition).subscribe(position => {
+            if (position != null) {
+                this.updateRecordingRoute([position]);
+            }
+        });
         this.geoLocationService.bulkPositionChanged.subscribe(
             (positions: GeolocationPosition[]) => {
                 this.updateRecordingRoute(positions);
@@ -67,6 +60,12 @@ export class RecordedRouteService {
         this.lastValidLocation = currentLocation;
         this.store.dispatch(new StartRecordingAction());
         this.store.dispatch(new AddRecordingRoutePointsAction([currentLocation]));
+    }
+
+    public canRecord(): boolean {
+        const gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
+        return gpsState.tracking === "tracking"
+            && gpsState.currentPosition != null && this.runningContextService.isCapacitor;
     }
 
     public isRecording() {
@@ -181,19 +180,17 @@ export class RecordedRouteService {
     }
 
     private isValid(test: LatLngAltTime, position: GeolocationPosition): string {
-        const distance = SpatialService.getDistanceInMeters(test, GeoLocationService.positionToLatLngTime(position));
-        const timeDifference = Math.abs(position.timestamp - new Date(test.timestamp).getTime()) / 1000;
-        if (timeDifference === 0) {
-            return "Time difference is 0";
+        const positionLatLng = GeoLocationService.positionToLatLngTime(position);
+        const distance = SpatialService.getDistanceInMeters(test, positionLatLng);
+        const timeDifference = (position.timestamp - new Date(test.timestamp).getTime()) / 1000;
+        if (timeDifference <= 0) {
+            return `Time difference below or zero: ${timeDifference}`;
         }
         if (distance / timeDifference > RecordedRouteService.MAX_SPPED) {
-            return "Speed too high: " + distance / timeDifference;
-        }
-        if (timeDifference > RecordedRouteService.MAX_TIME_DIFFERENCE) {
-            return "Time difference too high: " + timeDifference;
+            return `Speed too high: ${distance / timeDifference}`;
         }
         if (position.coords.accuracy > RecordedRouteService.MIN_ACCURACY) {
-            return "Accuracy too low: " + position.coords.accuracy;
+            return `Accuracy too low: ${position.coords.accuracy}`;
         }
         return "";
     }

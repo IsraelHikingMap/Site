@@ -1,25 +1,25 @@
 import { TestBed, inject } from "@angular/core/testing";
-import { HttpClientModule } from "@angular/common/http";
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 
 import { ElevationProvider } from "./elevation.provider";
 import { LoggingService } from "./logging.service";
-import { DatabaseService } from "./database.service";
+import { PmTilesService } from "./pmtiles.service";
 
 describe("ElevationProvider", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [
-                HttpClientModule,
-                HttpClientTestingModule,
                 NgxsModule.forRoot([])
             ],
             providers: [
                 { provide: LoggingService, useValue: { warning: () => { } } },
-                { provide: DatabaseService, useValue: {} },
-                ElevationProvider
+                { provide: PmTilesService, useValue: {} },
+                ElevationProvider,
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting()
             ]
         });
     });
@@ -80,8 +80,8 @@ describe("ElevationProvider", () => {
     ));
 
     it("Should update elevation when getting an error from server and offline is available",
-        inject([ElevationProvider, HttpTestingController, DatabaseService, Store],
-        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
+        inject([ElevationProvider, HttpTestingController, PmTilesService, Store],
+        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
             store.reset({

@@ -78,7 +78,7 @@ namespace IsraelHiking.API.Tests.Services
             var lastModified = DateTime.Now.Subtract(TimeSpan.FromDays(10));
             var fileInfo = Substitute.For<IFileInfo>();
             fileInfo.LastModified.Returns(DateTime.Now);
-            fileInfo.Name.Returns("some.mbtiles");
+            fileInfo.Name.Returns("some.pmtiles");
             var directory = Substitute.For<IDirectoryContents>();
             var files = new List<IFileInfo> {fileInfo} as IEnumerable<IFileInfo>;
             directory.GetEnumerator().Returns(_ => files.GetEnumerator());

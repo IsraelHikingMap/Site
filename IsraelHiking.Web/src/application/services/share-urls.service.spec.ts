@@ -1,6 +1,6 @@
 import { TestBed, inject } from "@angular/core/testing";
-import { HttpClientModule } from "@angular/common/http";
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 
 import { ShareUrlsService } from "./share-urls.service";
@@ -32,18 +32,16 @@ describe("Share Urls Service", () => {
         };
         TestBed.configureTestingModule({
             imports: [
-                HttpClientModule,
-                HttpClientTestingModule,
-                NgxsModule.forRoot([ShareUrlsReducer])
-            ],
+                NgxsModule.forRoot([ShareUrlsReducer])],
             providers: [
                 { provide: HashService, useValue: hashService },
                 { provide: LoggingService, useValue: loggingService },
                 { provide: DatabaseService, useValue: databaseService },
-                ConnectionService,
-                RunningContextService,
+                { provide: ConnectionService, useValue: { stateChanged: { subscribe: () => {} }} },                RunningContextService,
                 WhatsAppService,
-                ShareUrlsService
+                ShareUrlsService,
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting()
             ]
         });
     });

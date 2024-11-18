@@ -44,15 +44,14 @@ namespace IsraelHiking.API.Tests.Controllers
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(new ConfigurationData());
             var factory = Substitute.For<IClientsFactory>();
-            factory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(_osmGateway);
+            factory.CreateOAuth2Client(Arg.Any<string>()).Returns(_osmGateway);
             _controller = new PointsOfInterestController(factory, 
                 _tagHelper, 
                 _pointsOfInterestProvider, 
                 _imagesUrlsStorageExecutor,
                 _simplePointAdderExecutor,
                 _persistentCache,
-                Substitute.For<ILogger>(),
-                optionsProvider);
+                Substitute.For<ILogger>());
         }
 
         [TestMethod]
@@ -292,20 +291,10 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetPointOfInterestUpdates_ShouldGetThem()
         {
-            _pointsOfInterestProvider.GetUpdates(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new UpdatesResponse
-            {
-                Features = new[] {new Feature(null, new AttributesTable
-                {
-                    {FeatureAttributes.IMAGE_URL, "imageUrl"}
-                })},
-                Images = Array.Empty<ImageItem>(),
-                LastModified = DateTime.Now
-            });
-            
-            var results = _controller.GetPointOfInterestUpdates(DateTime.MinValue, DateTime.Now).Result;
+            var results = _controller.GetPointOfInterestUpdates(DateTime.MinValue, DateTime.Now);
 
-            _imagesUrlsStorageExecutor.Received(1).GetAllImagesForUrls(Arg.Any<string[]>());
-            Assert.AreEqual(1, results.Features.Length);
+            Assert.AreEqual(0, results.Features.Length);
+            Assert.AreEqual(0, results.Images.Length);
         }
         
         [TestMethod]

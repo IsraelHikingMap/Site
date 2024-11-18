@@ -1,6 +1,6 @@
 import { TestBed, inject } from "@angular/core/testing";
-import { HttpClientModule } from "@angular/common/http";
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 import geojsonVt from "geojson-vt";
 import vtpbf from "vt-pbf";
@@ -10,11 +10,10 @@ import { RoutingProvider } from "./routing.provider";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { GeoJsonParser } from "./geojson.parser";
-import { ToastServiceMockCreator } from "./toast.service.spec";
-import { DatabaseService } from "./database.service";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { SpatialService } from "./spatial.service";
+import { PmTilesService } from "./pmtiles.service";
 
 const createTileFromFeatureCollection = (featureCollection: GeoJSON.FeatureCollection): ArrayBuffer => {
     const tileindex = geojsonVt(featureCollection);
@@ -33,21 +32,21 @@ const createTileFromFeatureCollection = (featureCollection: GeoJSON.FeatureColle
 
 describe("RoutingProvider", () => {
     beforeEach(() => {
-        const toastMockCreator = new ToastServiceMockCreator();
         TestBed.configureTestingModule({
             imports: [
-                HttpClientModule,
-                HttpClientTestingModule,
-                NgxsModule.forRoot([])
-            ],
+                NgxsModule.forRoot([])],
             providers: [
-                { provide: ResourcesService, useValue: toastMockCreator.resourcesService },
-                { provide: ToastService, useValue: toastMockCreator.toastService },
-                { provide: DatabaseService, usevalue: {} },
-                { provide: LoggingService, useValue: { error: () => {} } },
+                { provide: ResourcesService, useValue: {} },
+                { provide: ToastService, useValue: {
+                    warning: jasmine.createSpy()
+                } },
+                { provide: LoggingService, useValue: { error: () => { } } },
                 { provide: RunningContextService, useValue: {} },
+                { provide: PmTilesService, useValue: {} },
                 GeoJsonParser,
-                RoutingProvider
+                RoutingProvider,
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
             ]
         });
     });
@@ -171,8 +170,8 @@ describe("RoutingProvider", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available",
-        inject([RoutingProvider, HttpTestingController, DatabaseService, Store],
-        async (router: RoutingProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, PmTilesService, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -207,8 +206,8 @@ describe("RoutingProvider", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available for a multiline string",
-        inject([RoutingProvider, HttpTestingController, DatabaseService, Store],
-        async (router: RoutingProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, PmTilesService, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -246,8 +245,8 @@ describe("RoutingProvider", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available only through one line",
-        inject([RoutingProvider, HttpTestingController, DatabaseService, Store],
-        async (router: RoutingProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, PmTilesService, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -291,8 +290,8 @@ describe("RoutingProvider", () => {
     ));
 
     it("Should return srart and end point when all lines are filtered out",
-        inject([RoutingProvider, HttpTestingController, DatabaseService, Store],
-        async (router: RoutingProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, PmTilesService, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -327,8 +326,8 @@ describe("RoutingProvider", () => {
     ));
 
     it("Should return a route between two lines when points are not exactly the same",
-        inject([RoutingProvider, HttpTestingController, DatabaseService, Store],
-        async (router: RoutingProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, PmTilesService, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
             const featureCollection = {
                 type: "FeatureCollection",
                 features: [{

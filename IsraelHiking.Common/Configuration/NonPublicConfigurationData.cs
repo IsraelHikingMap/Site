@@ -11,14 +11,6 @@
         /// </summary>
         public string WikiMediaPassword { get; set; }
         /// <summary>
-        /// Zanata user name for uploading and downloading translations
-        /// </summary>
-        public string ZanataUserName { get; set; }
-        /// <summary>
-        /// Zanata api key for uploading and downloading translations
-        /// </summary>
-        public string ZanataApiKey { get; set; }
-        /// <summary>
         /// Imgur client ID for private images upload, mainly for private routes
         /// </summary>
         public string ImgurClientId { get; set; }

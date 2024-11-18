@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from "@angular/core";
+import { Component, OnInit, OnChanges, SimpleChanges, OnDestroy, OutputRefSubscription, inject, input } from "@angular/core";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import {
     StyleSpecification,
@@ -7,67 +7,54 @@ import {
     SourceSpecification,
     LayerSpecification
 } from "maplibre-gl";
-import { Observable, Subject, Subscription, mergeMap } from "rxjs";
-import { Store, Select } from "@ngxs/store";
-import type { Immutable } from "immer";
+import { Subject, mergeMap } from "rxjs";
+import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { ConnectionService } from "../../services/connection.service";
 import { MapService } from "../../services/map.service";
-import type { ApplicationState, EditableLayer, Language, LanguageCode, LayerData } from "../../models/models";
+import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models/models";
 
 @Component({
     selector: "auto-layer",
     templateUrl: "./automatic-layer-presentation.component.html"
 })
-export class AutomaticLayerPresentationComponent extends BaseMapComponent implements OnInit, OnChanges, OnDestroy {
+export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, OnDestroy {
     private static indexNumber = 0;
 
     private static readonly ATTRIBUTION = "<a href='https://github.com/IsraelHikingMap/Site/wiki/Attribution' target='_blank'>" +
         "Click me to see attribution</a>";
 
-    @Input()
-    public visible: boolean;
-    @Input()
-    public before: string;
-    @Input()
-    public isBaselayer: boolean;
-    @Input()
-    public layerData: EditableLayer;
-    @Input()
-    public isMainMap: boolean;
+    public visible = input<boolean>();
+    public before = input<string>();
+    public isBaselayer = input<boolean>();
+    public layerData = input<EditableLayer>();
+    public isMainMap = input<boolean>();
 
     private rasterSourceId: string;
     private rasterLayerId: string;
-    private subscriptions: Subscription[];
-    private jsonSourcesIds: string[];
-    private jsonLayersIds: string[];
-    private hasInternetAccess: boolean;
+    private subscriptions: OutputRefSubscription[] = [];
+    private jsonSourcesIds: string[] = [];
+    private jsonLayersIds: string[] = [];
+    private hasInternetAccess: boolean = true;
     private mapLoadedPromise: Promise<void>;
     private currentLanguageCode: LanguageCode;
-    private recreateQueue: Subject<() => Promise<void>>;
+    private recreateQueue: Subject<() => Promise<void>> = new Subject();
 
-    @Select((state: ApplicationState) => state.configuration.language)
-    private language$: Observable<Immutable<Language>>;
+    public readonly resources = inject(ResourcesService);
+    
+    private readonly mapComponent = inject(MapComponent);
+    private readonly fileService = inject(FileService);
+    private readonly connectionSerive = inject(ConnectionService);
+    private readonly mapService = inject(MapService);
+    private readonly store = inject(Store);
 
-    constructor(resources: ResourcesService,
-                private readonly mapComponent: MapComponent,
-                private readonly fileService: FileService,
-                private readonly connectionSerive: ConnectionService,
-                private readonly mapService: MapService,
-                private readonly store: Store) {
-        super(resources);
+    constructor() {
         const layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
         this.rasterLayerId = `raster-layer-${layerIndex}`;
         this.rasterSourceId = `raster-source-${layerIndex}`;
 
-        this.recreateQueue = new Subject();
-        this.hasInternetAccess = true;
-        this.jsonSourcesIds = [];
-        this.jsonLayersIds = [];
-        this.subscriptions = [];
         this.subscriptions.push(this.recreateQueue.pipe(mergeMap((action: () => Promise<void>) => action(), 1)).subscribe());
         this.mapLoadedPromise = new Promise((resolve, _) => {
             this.subscriptions.push(this.mapComponent.mapLoad.subscribe(() => {
@@ -77,11 +64,11 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     }
 
     public ngOnInit() {
-        this.addLayerRecreationQuqueItem(null, this.layerData);
+        this.addLayerRecreationQuqueItem(null, this.layerData());
         this.currentLanguageCode = this.store.selectSnapshot((s: ApplicationState) => s.configuration).language.code;
-        this.subscriptions.push(this.language$.subscribe((language) => {
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.language).subscribe((language) => {
             if (this.currentLanguageCode !== language.code) {
-                this.addLayerRecreationQuqueItem(this.layerData, this.layerData);
+                this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
             }
             this.currentLanguageCode = language.code;
         }));
@@ -91,18 +78,18 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             }
             this.hasInternetAccess = online;
             if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate == null
-                || this.layerData.isOfflineAvailable === false) {
+                || this.layerData().isOfflineAvailable === false) {
                 return;
             }
-            if (this.layerData.isOfflineOn === true) {
+            if (this.layerData().isOfflineOn === true) {
                 return;
             }
-            this.addLayerRecreationQuqueItem(this.layerData, this.layerData);
+            this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
         }));
     }
 
     public ngOnDestroy() {
-        this.addLayerRecreationQuqueItem(this.layerData, null);
+        this.addLayerRecreationQuqueItem(this.layerData(), null);
         this.recreateQueue.complete();
         for (const subscription of this.subscriptions) {
             subscription.unsubscribe();
@@ -114,7 +101,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             return;
         }
 
-        this.addLayerRecreationQuqueItem(changes.layerData ? changes.layerData.previousValue : this.layerData, this.layerData);
+        this.addLayerRecreationQuqueItem(changes.layerData ? changes.layerData.previousValue : this.layerData(), this.layerData());
     }
 
     private isRaster(address: string) {
@@ -145,13 +132,13 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             type: "raster",
             source: this.rasterSourceId,
             layout: {
-                visibility: (this.visible ? "visible" : "none") as "visible" | "none"
+                visibility: (this.visible() ? "visible" : "none") as "visible" | "none"
             },
             paint: {
                 "raster-opacity": layerData.opacity || 1.0
             }
         } as RasterLayerSpecification;
-        this.mapComponent.mapInstance.addLayer(layer, this.before);
+        this.mapComponent.mapInstance.addLayer(layer, this.before());
     }
 
     private removeRasterLayer() {
@@ -170,9 +157,9 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     private updateSourcesAndLayers(layerData: LayerData, sources: {[_: string]: SourceSpecification}, layers: LayerSpecification[]) {
         let attributiuonUpdated = false;
         for (let sourceKey of Object.keys(sources)) {
-            if (Object.prototype.hasOwnProperty.call(sources, sourceKey) && this.visible) {
+            if (Object.prototype.hasOwnProperty.call(sources, sourceKey) && this.visible()) {
                 const source = sources[sourceKey];
-                if (!this.isBaselayer) {
+                if (!this.isBaselayer()) {
                     sourceKey = layerData.key + "_" + sourceKey;
                 }
                 if (source.type === "vector") {
@@ -185,14 +172,14 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             }
         }
         for (const layer of layers) {
-            if (!this.visible || (!this.isBaselayer && layer.metadata && !(layer.metadata as any)["IHM:overlay"])) {
+            if (!this.visible() || (!this.isBaselayer() && layer.metadata && !(layer.metadata as any)["IHM:overlay"])) {
                 continue;
             }
-            if (!this.isBaselayer) {
+            if (!this.isBaselayer()) {
                 layer.id = layerData.key + "_" + layer.id;
                 (layer as any).source = layerData.key + "_" + (layer as any).source;
             }
-            this.mapComponent.mapInstance.addLayer(layer, this.before);
+            this.mapComponent.mapInstance.addLayer(layer, this.before());
             this.jsonLayersIds.push(layer.id);
         }
     }
@@ -214,7 +201,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         } else {
             await this.createJsonLayer(layerData);
         }
-        if (this.isBaselayer) {
+        if (this.isBaselayer()) {
             this.mapComponent.mapInstance.setMinZoom(Math.max(layerData.minZoom - 1, 0));
         }
     }
@@ -235,7 +222,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
      */
     private addLayerRecreationQuqueItem(oldLayer: LayerData, newLayer: EditableLayer) {
         this.recreateQueue.next(async () => {
-            await (this.isMainMap ? this.mapService.initializationPromise : this.mapLoadedPromise);
+            await (this.isMainMap() ? this.mapService.initializationPromise : this.mapLoadedPromise);
             if (oldLayer != null) {
                 this.removeLayer(oldLayer);
             }

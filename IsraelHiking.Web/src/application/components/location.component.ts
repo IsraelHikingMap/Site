@@ -1,19 +1,15 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
-import { Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
-import type { Immutable } from "immer";
+import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
-import { GeoLocationService } from "../services/geo-location.service";
 import { ToastService } from "../services/toast.service";
-import { FitBoundsService } from "../services/fit-bounds.service";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { SpatialService } from "../services/spatial.service";
-import { DeviceOrientationService } from "../services/device-orientation.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
-import { ToggleDistanceAction, SetPannedAction, SetFollowingAction } from "../reducers/in-memory.reducer";
+import { LocationService } from "../services/location.service";
+import { ToggleDistanceAction, SetPannedAction, SetFollowingAction, ToggleKeepNorthUpAction } from "../reducers/in-memory.reducer";
 import { StopShowingBatteryConfirmationAction } from "../reducers/configuration.reducer";
 import { ChangeRouteStateAction } from "../reducers/routes.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
@@ -24,67 +20,34 @@ import type { LatLngAlt, ApplicationState } from "../models/models";
     templateUrl: "./location.component.html",
     styleUrls: ["./location.component.scss"]
 })
-export class LocationComponent extends BaseMapComponent {
-
-    @Select((state: ApplicationState) => state.inMemoryState.distance)
-    public distance$: Observable<boolean>;
-
-    @Select((state: ApplicationState) => state.inMemoryState.pannedTimestamp)
-    public pannedTimestamp$: Observable<Date>;
-
-    @Select((state: ApplicationState) => state.gpsState.currentPosition)
-    private currentPosition$: Observable<Immutable<GeolocationPosition>>;
-
-    private lastSpeed: number;
-    private lastSpeedTime: number;
-    private isPanned: boolean;
-
+export class LocationComponent {
     public locationFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     public distanceFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
-    public isKeepNorthUp: boolean;
-    public locationLatLng: LatLngAlt;
-    public showDistance: boolean;
+    public locationLatLng: LatLngAlt = null;
+    public showDistance: boolean = false;
 
-    constructor(resources: ResourcesService,
-                private readonly geoLocationService: GeoLocationService,
-                private readonly toastService: ToastService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly recordedRouteService: RecordedRouteService,
-                private readonly fitBoundsService: FitBoundsService,
-                private readonly deviceOrientationService: DeviceOrientationService,
-                private readonly store: Store,
-                private readonly mapComponent: MapComponent) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
+    private readonly toastService = inject(ToastService);
+    private readonly locationSerivce = inject(LocationService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly recordedRouteService = inject(RecordedRouteService);
+    private readonly store = inject(Store);
+    private readonly mapComponent = inject(MapComponent);
 
-        this.isKeepNorthUp = false;
-        this.locationLatLng = null;
-        this.lastSpeed = null;
-        this.lastSpeedTime = null;
+    constructor() {
         this.clearLocationFeatureCollection();
 
-        this.distance$.subscribe(distance => {
-            this.showDistance = distance;
-            this.updateDistanceFeatureCollection();
+        this.locationSerivce.changed.pipe(takeUntilDestroyed()).subscribe(location => {
+            if (location == null) {
+                this.clearLocationFeatureCollection();
+                return;
+            }
+            this.updateLocationFeatureCollection(location.center, location.accuracy, location.bearing);
         });
 
-        this.pannedTimestamp$.subscribe(pannedTimestamp => {
-            this.isPanned = pannedTimestamp != null;
-            if (this.isPanned) {
-                return;
-            }
-            if (!this.isActive()) {
-                return;
-            }
-            if (this.showDistance) {
-                this.store.dispatch(new ToggleDistanceAction());
-            }
-            if (this.isFollowingLocation()) {
-                this.moveMapToGpsPosition();
-                const selectedRoute = this.selectedRouteService.getSelectedRoute();
-                if (selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
-                    this.toastService.warning(this.resources.editingRouteWhileTracking);
-                }
-            }
+        this.store.select((state: ApplicationState) => state.inMemoryState.distance).pipe(takeUntilDestroyed()).subscribe(distance => {
+            this.showDistance = distance;
+            this.updateDistanceFeatureCollection();
         });
 
         this.mapComponent.mapLoad.subscribe(() => {
@@ -93,43 +56,15 @@ export class LocationComponent extends BaseMapComponent {
             });
 
             this.mapComponent.mapInstance.on("resize", () => {
-                if (this.locationFeatures.features.length > 0 && this.isFollowingLocation()) {
-                    this.mapComponent.mapInstance.setCenter(this.getCenterFromLocationFeatureCollection());
-                }
-            });
-
-            this.currentPosition$.subscribe((position: GeolocationPosition) => {
-                if (position != null) {
-                    this.handlePositionChange(position);
-                }
-            });
-
-            this.deviceOrientationService.orientationChanged.subscribe((bearing: number) => {
-                if (!this.isActive() || this.locationFeatures.features.length === 0) {
-                    return;
-                }
-                if (this.lastSpeed != null && new Date().getTime() - this.lastSpeedTime < 5000) {
-                    return;
-                }
-                this.lastSpeed = null;
-                const center = this.getCenterFromLocationFeatureCollection();
-                const radius = this.getRadiusFromLocationFeatureCollection();
-                this.updateLocationFeatureCollection(center, radius, bearing);
-                if (!this.mapComponent.mapInstance.isMoving() && this.isFollowingLocation()) {
-                    this.moveMapToGpsPosition();
-                }
-            });
-
-            this.geoLocationService.backToForeground.subscribe(() => {
-                if (this.isFollowingLocation()) {
-                    this.moveMapToGpsPosition();
+                if (this.locationSerivce.isFollowing() && this.locationSerivce.getLocationCenter() != null) {
+                    this.mapComponent.mapInstance.setCenter(this.locationSerivce.getLocationCenter());
                 }
             });
         });
     }
 
     public isFollowingLocation(): boolean {
-        return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).following && !this.isPanned;
+        return this.locationSerivce.isFollowing();
     }
 
     public openLocationPopup() {
@@ -141,30 +76,37 @@ export class LocationComponent extends BaseMapComponent {
         if (selectedRoute != null && selectedRoute.state === "Route") {
             return;
         }
-        this.locationLatLng = this.getCenterFromLocationFeatureCollection();
+        const center = this.locationSerivce.getLocationCenter();
+        if (center !== null) {
+            this.locationLatLng = center;
+        }
+    }
+
+    public isKeepNorthUp() {
+        return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).keepNorthUp;
     }
 
     public toggleKeepNorthUp() {
-        this.isKeepNorthUp = !this.isKeepNorthUp;
-        if (this.isKeepNorthUp) {
+        this.store.dispatch(new ToggleKeepNorthUpAction());
+        if (this.isKeepNorthUp()) {
            this.mapComponent.mapInstance.rotateTo(0);
         }
     }
 
     public getRotationAngle() {
         if (this.mapComponent.mapInstance == null) {
-            return 0;
+            return "rotate(0deg)";
         }
         return `rotate(${-this.mapComponent.mapInstance.getBearing()}deg)`;
     }
 
     public toggleTracking() {
         if (this.isLoading()) {
-            this.disableLocation();
+            this.locationSerivce.disable();
             return;
         }
         if (this.isDisabled()) {
-            this.enableLocation();
+            this.locationSerivce.enable();
             return;
         }
         // is active must be true
@@ -174,7 +116,7 @@ export class LocationComponent extends BaseMapComponent {
             if (this.showDistance) {
                 this.store.dispatch(new ToggleDistanceAction());
             }
-            this.moveMapToGpsPosition();
+            this.locationSerivce.moveMapToGpsPosition();
             return;
         }
         // following and not panned
@@ -183,13 +125,13 @@ export class LocationComponent extends BaseMapComponent {
             return;
         }
         if (!this.isRecording()) {
-            this.disableLocation();
+            this.locationSerivce.disable();
             return;
         }
     }
 
     public canRecord() {
-        return this.geoLocationService.canRecord();
+        return this.recordedRouteService.canRecord();
     }
 
     public isRecording() {
@@ -246,71 +188,6 @@ export class LocationComponent extends BaseMapComponent {
         this.store.dispatch(new ToggleAddRecordingPoiAction());
     }
 
-    private handlePositionChange(position: GeolocationPosition) {
-        if (this.locationFeatures.features.length === 0) {
-            this.store.dispatch(new SetFollowingAction(true));
-        }
-        const validHeading = !isNaN(position.coords.heading) && position.coords.speed !== 0;
-        if (validHeading) {
-            this.lastSpeed = position.coords.speed;
-            this.lastSpeedTime = new Date().getTime();
-        }
-        const heading = validHeading ? position.coords.heading : this.getBrearingFromLocationFeatureCollection();
-        this.updateLocationFeatureCollection({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            alt: position.coords.altitude
-        }, position.coords.accuracy, heading);
-        if (!this.mapComponent.mapInstance.isMoving() && this.isFollowingLocation()) {
-            this.moveMapToGpsPosition();
-        }
-    }
-
-    private disableLocation() {
-        this.geoLocationService.disable();
-        this.deviceOrientationService.disable();
-        this.clearLocationFeatureCollection();
-    }
-
-    private enableLocation() {
-        this.geoLocationService.enable();
-        this.deviceOrientationService.enable();
-        this.store.dispatch(new SetFollowingAction(true));
-        this.store.dispatch(new SetPannedAction(null));
-    }
-
-    private moveMapToGpsPosition() {
-        if (this.locationFeatures.features.length === 0) {
-            return;
-        }
-        const center = this.getCenterFromLocationFeatureCollection();
-        const bearing = this.isKeepNorthUp
-            ? 0
-            : this.getBrearingFromLocationFeatureCollection();
-        this.fitBoundsService.moveTo(center, this.mapComponent.mapInstance.getZoom(), bearing);
-    }
-
-    private getCenterFromLocationFeatureCollection(): LatLngAlt {
-        const pointGeometry = this.locationFeatures.features.map(f => f.geometry).find(g => g.type === "Point") as GeoJSON.Point;
-        const coordinates = pointGeometry.coordinates as [number, number];
-        return SpatialService.toLatLng(coordinates);
-    }
-
-    private getBrearingFromLocationFeatureCollection(): number {
-        const pointFeature = this.locationFeatures.features.find(f => f.geometry.type === "Point");
-        return pointFeature == null
-            ? this.mapComponent.mapInstance.getBearing()
-            : pointFeature.properties.heading;
-    }
-
-    private getRadiusFromLocationFeatureCollection(): number {
-        const radiusFeature = this.locationFeatures.features.find(f => f.geometry.type === "Polygon");
-        if (radiusFeature == null) {
-            return null;
-        }
-        return radiusFeature.properties.radius;
-    }
-
     private clearLocationFeatureCollection() {
         this.locationFeatures = {
             type: "FeatureCollection",
@@ -346,13 +223,13 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     private updateDistanceFeatureCollection() {
-        if (!this.isActive() || !this.showDistance) {
+        const gps = this.locationSerivce.getLocationCenter();
+        if (!this.isActive() || !this.showDistance || gps == null) {
             this.clearDistanceFeatureCollection();
             return;
         }
 
         const center = this.mapComponent.mapInstance.getCenter();
-        const gps = this.getCenterFromLocationFeatureCollection();
         const distance = SpatialService.getDistanceInMeters(center, gps);
         this.distanceFeatures = {
             type: "FeatureCollection",

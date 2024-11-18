@@ -59,14 +59,6 @@ namespace IsraelHiking.API.Services.Poi
         public Task<IFeature> GetClosestPoint(Coordinate location, string source, string language = "");
 
         /// <summary>
-        /// Get the all the points that were undated since the given date, and up until a given data
-        /// </summary>
-        /// <param name="lastModifiedDate">The last modidifaction date that the client has</param>
-        /// <param name="modifiedUntil">The end time of the updates to reduce response size</param>
-        /// <returns></returns>
-        public Task<UpdatesResponse> GetUpdates(DateTime lastModifiedDate, DateTime modifiedUntil);
-
-        /// <summary>
         /// Get all points from the OSM repository
         /// </summary>
         /// <returns></returns>

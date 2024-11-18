@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
 
 import { RunningContextService } from "./running-context.service";
@@ -6,8 +6,8 @@ import { RunningContextService } from "./running-context.service";
 @Injectable()
 export class WhatsAppService {
 
-    constructor(private readonly sanitizer: DomSanitizer,
-                private readonly runningContextService: RunningContextService) { }
+    private readonly sanitizer = inject(DomSanitizer);
+    private readonly runningContextService = inject(RunningContextService);
 
     public getUrl(title: string, escaped: string): SafeUrl {
         const titleAndLink = `${title}: ${escaped}`;

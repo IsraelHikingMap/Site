@@ -292,19 +292,20 @@ namespace IsraelHiking.API.Services
         ///<inheritdoc/>
         public (double SearchFactor, IconColorCategory IconColorCategory) GetInfo(IAttributesTable attributesTable)
         {
+            var highSearchFactor = _options.SearchFactor * 2;
             if (attributesTable.GetNames().Any(k => k.Equals("place", StringComparison.OrdinalIgnoreCase)))
             {
                 var category = attributesTable.GetNames().Any(k => k.StartsWith(FeatureAttributes.WIKIPEDIA))
                     ? Categories.WIKIPEDIA
                     : Categories.NONE;
-                return (1, new IconColorCategory("icon-home", category));
+                return (highSearchFactor, new IconColorCategory("icon-home", category));
             }
             var iconTags = _categories.SelectMany(c => c.Items)
                 .FirstOrDefault(i => i.Tags
                     .Any(t => attributesTable.Has(t.Key, t.Value)));
             if (iconTags != null)
             {
-                return (1, iconTags.IconColorCategory);
+                return (highSearchFactor, iconTags.IconColorCategory);
             }
 
             if (attributesTable.Has("landuse", "farmyard") ||
@@ -312,7 +313,7 @@ namespace IsraelHiking.API.Services
                 attributesTable.Has("waterway", "river") ||
                 attributesTable.Has("waterway", "wadi"))
             {
-                return (1, new IconColorCategory());
+                return (highSearchFactor, new IconColorCategory());
             }
             
             if (attributesTable.Has("natural", "peak"))
@@ -321,17 +322,17 @@ namespace IsraelHiking.API.Services
                     n.StartsWith(FeatureAttributes.DESCRIPTION) || n.StartsWith(FeatureAttributes.IMAGE_URL))
                     ? Categories.NATURAL
                     : Categories.NONE;
-                return (1, new IconColorCategory("icon-peak", category));
+                return (highSearchFactor, new IconColorCategory("icon-peak", category));
                 
             }
 
             if (attributesTable.GetNames().Any(k => k.StartsWith(FeatureAttributes.WIKIPEDIA)))
             {
-                return (1, new IconColorCategory("icon-wikipedia-w", Categories.WIKIPEDIA));
+                return (highSearchFactor, new IconColorCategory("icon-wikipedia-w", Categories.WIKIPEDIA));
             }
             if (attributesTable.GetNames().Any(k => k.Contains(FeatureAttributes.MTB_NAME)))
             {
-                return (1, new IconColorCategory("icon-bike", Categories.ROUTE_BIKE, "gray", string.Empty));
+                return (highSearchFactor, new IconColorCategory("icon-bike", Categories.ROUTE_BIKE, "gray", string.Empty));
             }
             if (attributesTable.GetNames().Any(k => k == "highway"))
             {
@@ -339,7 +340,7 @@ namespace IsraelHiking.API.Services
                     ? new IconColorCategory("icon-bus-stop")
                     : new IconColorCategory("icon-map-signs");
                 var importantHighway = attributesTable["highway"].ToString() == "path" || attributesTable["highway"].ToString() == "track";
-                return (importantHighway ? 1 : _options.SearchFactor, icon);
+                return (importantHighway ? highSearchFactor : _options.SearchFactor, icon);
             }
             return (_options.SearchFactor, new IconColorCategory());
         }

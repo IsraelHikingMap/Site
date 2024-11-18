@@ -4,23 +4,17 @@ import { NgxsModule, Store } from "@ngxs/store";
 import { ResourcesService } from "./resources.service";
 import { GetTextCatalogService } from "./gettext-catalog.service";
 
-export class GetTextCatalogMockCreator {
-    public getTextCatalogService: GetTextCatalogService;
-
-    public constructor() {
-        this.getTextCatalogService = new GetTextCatalogService(null);
-        spyOn(this.getTextCatalogService, "loadRemote").and.returnValue(new Promise((resolve) => { resolve(); }));
-    }
-}
-
 describe("ResourcesService", () => {
 
     beforeEach(() => {
-        const mockCreator = new GetTextCatalogMockCreator();
         TestBed.configureTestingModule({
             imports: [NgxsModule.forRoot([])],
             providers: [
-                { provide: GetTextCatalogService, useValue: mockCreator.getTextCatalogService },
+                {provide: GetTextCatalogService, useValue: {
+                    getString: () => "",
+                    loadRemote: () => Promise.resolve(),
+                    setCurrentLanguage: () => {}
+                }},
                 ResourcesService
             ]
         });

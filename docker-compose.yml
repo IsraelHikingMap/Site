@@ -1,5 +1,3 @@
-version: '3.4'
-
 services:
 #  website:
 #    image: israel-hiking
@@ -24,7 +22,7 @@ services:
       - 9300:9300
     restart: always
   graphhopper:
-    image: israelhikingmap/graphhopper:7.0
+    image: israelhikingmap/graphhopper:8.0
     container_name: graphhopper
     volumes:
       - ghdata:/data:rw

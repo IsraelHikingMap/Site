@@ -1,35 +1,29 @@
-import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
+import { inject, Injectable } from "@angular/core";
+import { Store } from "@ngxs/store";
 import "cordova-plugin-purchase";
-import type { Immutable } from "immer";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import { SetOfflineAvailableAction } from "../reducers/offline.reducer";
-import type { ApplicationState, UserInfo } from "../models/models";
+import type { ApplicationState } from "../models/models";
 
 const OFFLINE_MAPS_SUBSCRIPTION = "offline_map";
 
 @Injectable()
 export class PurchaseService {
 
-    @Select((state: ApplicationState) => state.userState.userInfo)
-    private userInfo$: Observable<Immutable<UserInfo>>;
-
-    constructor(private readonly runningContextService: RunningContextService,
-                private readonly loggingService: LoggingService,
-                private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
-                private readonly store: Store) {
-    }
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly loggingService = inject(LoggingService);
+    private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
+    private readonly store = inject(Store);
 
     public async initialize() {
         if (!this.runningContextService.isCapacitor) {
             return;
         }
 
-        this.userInfo$.subscribe(userInfo => {
+        this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe(userInfo => {
             if (userInfo == null) {
                 return;
             }

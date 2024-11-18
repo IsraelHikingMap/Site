@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
 
@@ -22,31 +22,38 @@ import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { GeoLocationService } from "./geo-location.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
+import { AuthorizationService } from "./authorization.service";
+import { ToastService } from "./toast.service";
+import { ApplicationUpdateService } from "./application-update.service";
+import { LocationService } from "./location.service";
 import type { ApplicationState } from "../models/models";
 
 @Injectable()
 export class ApplicationInitializeService {
-    constructor(private readonly dialog: MatDialog,
-                private readonly resources: ResourcesService,
-                private readonly loggingService: LoggingService,
-                private readonly screenService: ScreenService,
-                private readonly databaseService: DatabaseService,
-                private readonly applicationExitService: ApplicationExitService,
-                private readonly openWithService: OpenWithService,
-                private readonly purchaseService: PurchaseService,
-                private readonly runningContextService: RunningContextService,
-                private readonly dragAndDropService: DragAndDropService,
-                private readonly poiService: PoiService,
-                private readonly deviceOrientationService: DeviceOrientationService,
-                private readonly recordedRouteService: RecordedRouteService,
-                private readonly tracesService: TracesService,
-                private readonly shareUrlsService: ShareUrlsService,
-                private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
-                private readonly geoLocationService: GeoLocationService,
-                private readonly overpassTurboService: OverpassTurboService,
-                private readonly store: Store
-    ) {
-    }
+
+    private readonly dialog = inject(MatDialog);
+    private readonly resources = inject(ResourcesService);
+    private readonly loggingService = inject(LoggingService);
+    private readonly screenService = inject(ScreenService);
+    private readonly databaseService = inject(DatabaseService);
+    private readonly applicationExitService = inject(ApplicationExitService);
+    private readonly openWithService = inject(OpenWithService);
+    private readonly purchaseService = inject(PurchaseService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly dragAndDropService = inject(DragAndDropService);
+    private readonly poiService = inject(PoiService);
+    private readonly deviceOrientationService = inject(DeviceOrientationService);
+    private readonly recordedRouteService = inject(RecordedRouteService);
+    private readonly tracesService = inject(TracesService);
+    private readonly shareUrlsService = inject(ShareUrlsService);
+    private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
+    private readonly geoLocationService = inject(GeoLocationService);
+    private readonly overpassTurboService = inject(OverpassTurboService);
+    private readonly authorizationService = inject(AuthorizationService);
+    private readonly applicationUpdateService = inject(ApplicationUpdateService);
+    private readonly locationService = inject(LocationService);
+    private readonly toastService = inject(ToastService);
+    private readonly store = inject(Store);
 
     public async initialize() {
         try {
@@ -58,6 +65,7 @@ export class ApplicationInitializeService {
             this.screenService.initialize();
             await this.resources.initialize();
             this.applicationExitService.initialize();
+            await this.applicationUpdateService.initialize();
             this.openWithService.initialize();
             await this.purchaseService.initialize();
             this.geoLocationService.initialize();
@@ -74,12 +82,25 @@ export class ApplicationInitializeService {
                 && this.store.selectSnapshot((s: ApplicationState) => s.configuration).isShowIntro) {
                     IntroDialogComponent.openDialog(this.dialog, this.runningContextService);
             }
+            // HM TODO: remove this at 01.2025
+            if (this.store.selectSnapshot((s: ApplicationState) => s.userState).token?.includes(";")) {
+                this.toastService.confirm({
+                    type: "OkCancel",
+                    message: this.resources.loginTokenExpiredPleaseLoginAgain,
+                    confirmAction: () => {
+                        this.authorizationService.logout();
+                        this.authorizationService.login();
+                    },
+                    declineAction: () => { }
+                });
+            }
             this.poiService.initialize(); // do not wait for it to complete
             this.recordedRouteService.initialize();
             this.deviceOrientationService.initialize();
             this.tracesService.initialize(); // no need to wait for it to complete
             this.shareUrlsService.initialize(); // no need to wait for it to complete
             this.offlineFilesDownloadService.initialize(); // no need to wait for it to complete
+            this.locationService.initialize();
             await this.loggingService.info("Finished IHM Application Initialization");
         } catch (ex) {
             if (this.runningContextService.isIFrame) {

@@ -8,10 +8,6 @@
 		"classpath": "com.elylucas.capscreenbrightness.ScreenBrightnessPlugin"
 	},
 	{
-		"pkg": "@capacitor-community/sqlite",
-		"classpath": "com.getcapacitor.community.database.sqlite.CapacitorSQLitePlugin"
-	},
-	{
 		"pkg": "@capacitor/app",
 		"classpath": "com.capacitorjs.plugins.app.AppPlugin"
 	},
@@ -26,6 +22,10 @@
 	{
 		"pkg": "@capacitor/text-zoom",
 		"classpath": "com.capacitorjs.plugins.textzoom.TextZoomPlugin"
+	},
+	{
+		"pkg": "@capawesome/capacitor-app-update",
+		"classpath": "io.capawesome.capacitorjs.plugins.appupdate.AppUpdatePlugin"
 	},
 	{
 		"pkg": "@capgo/native-audio",

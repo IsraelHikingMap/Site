@@ -216,6 +216,7 @@ export class LayersReducer{
             const group = lastState.categoriesGroups.find(g => g.type === action.groupType);
             const category = group.categories.find(c => c.name === action.name);
             category.visible = action.visible;
+            group.visible = group.categories.some(c => c.visible);
             return lastState;
         }));
     }

@@ -1,12 +1,10 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { every } from "lodash-es";
 import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ShareDialogComponent } from "./share-dialog.component";
 import { DataContainerService } from "../../services/data-container.service";
-import { DatabaseService } from "../../services/database.service";
 import { FileService, FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
@@ -17,22 +15,22 @@ import type { ApplicationState, DataContainer } from "../../models/models";
     selector: "files-share-dialog",
     templateUrl: "./files-shares-dialog.component.html"
 })
-export class FilesSharesDialogComponent extends BaseMapComponent {
+export class FilesSharesDialogComponent {
 
-    public isSaveAsOpen: boolean;
+    public isSaveAsOpen: boolean = false;
     public showHiddenWarning: boolean;
     public formats: FormatViewModel[];
 
-    constructor(resources: ResourcesService,
-                private readonly dialog: MatDialog,
-                private readonly matDialogRef: MatDialogRef<FilesSharesDialogComponent>,
-                private readonly dataContainerService: DataContainerService,
-                private readonly fileService: FileService,
-                private readonly toastService: ToastService,
-                private readonly databaseService: DatabaseService,
-                private readonly store: Store) {
-        super(resources);
-        this.isSaveAsOpen = false;
+    public readonly resources = inject(ResourcesService);
+
+    private readonly dialog = inject(MatDialog);
+    private readonly matDialogRef = inject(MatDialogRef);
+    private readonly dataContainerService = inject(DataContainerService);
+    private readonly fileService = inject(FileService);
+    private readonly toastService = inject(ToastService);
+    private readonly store = inject(Store);
+
+    constructor() {
         this.formats = this.fileService.formats;
         this.showHiddenWarning = this.dataContainerService.hasHiddenRoutes();
     }
@@ -57,13 +55,18 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
             }
             return;
         }
-        if (file.name.endsWith(".mbtiles") && offlineState.isOfflineAvailable) {
+        if (file.name.endsWith(".pmtiles")) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
-            const dbFileName = file.name.replace(".mbtiles", ".db");
-            await this.fileService.storeFileToCache(dbFileName, file);
-            await this.databaseService.moveDownloadedDatabaseFile(dbFileName);
+            await this.fileService.storeFileToCache(file.name, file);
+            await this.fileService.moveFileFromCacheToDataDirectory(file.name);
             this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(new Date(file.lastModified)));
+            return;
+        }
+        if (file.name.endsWith(".json")) {
+            this.toastService.info(this.resources.openingAFilePleaseWait);
+            await this.fileService.writeStyle(file.name, await this.fileService.getFileContent(file));
+            this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             return;
         }
         try {

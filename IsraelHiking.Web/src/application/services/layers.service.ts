@@ -1,12 +1,11 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { firstValueFrom, Observable } from "rxjs";
+import { firstValueFrom } from "rxjs";
 import { timeout } from "rxjs/operators";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { ResourcesService } from "./resources.service";
-import { AuthorizationService } from "./authorization.service";
 import { ToastService } from "./toast.service";
 import {
     ISRAEL_HIKING_MAP,
@@ -32,7 +31,7 @@ import type {
     EditableLayer,
     Overlay,
     ApplicationState,
-    UserInfo
+    UserInfo,
 } from "../models/models";
 import { Urls } from "../urls";
 import { LoggingService } from "./logging.service";
@@ -50,37 +49,25 @@ export class LayersService {
 
     private static CUSTOM_LAYER = "Custom Layer";
 
-    private baseLayers: Immutable<EditableLayer[]>;
-    private overlays: Immutable<Overlay[]>;
-    private selectedBaseLayerKey: string;
+    private baseLayers: Immutable<EditableLayer[]> = [];
+    private overlays: Immutable<Overlay[]> = [];
+    private userInfo: Immutable<UserInfo>;
+    private selectedBaseLayerKey: Immutable<string>;
 
-    @Select((state: ApplicationState) => state.layersState.baseLayers)
-    public baseLayers$: Observable<Immutable<EditableLayer[]>>;
+    private readonly resources = inject(ResourcesService);
+    private readonly httpClient = inject(HttpClient);
+    private readonly toastService = inject(ToastService);
+    private readonly loggingService = inject(LoggingService);
+    private readonly store = inject(Store);
 
-    @Select((state: ApplicationState) => state.layersState.overlays)
-    public overlays$: Observable<Immutable<Overlay[]>>;
-
-    @Select((state: ApplicationState) => state.layersState.selectedBaseLayerKey)
-    public selectedBaseLayerKey$: Observable<string>;
-
-    @Select((state: ApplicationState) => state.userState.userInfo)
-    public userInfo$: Observable<Immutable<UserInfo>>;
-
-    constructor(private readonly resources: ResourcesService,
-                private readonly authorizationService: AuthorizationService,
-                private readonly httpClient: HttpClient,
-                private readonly toastService: ToastService,
-                private readonly loggingService: LoggingService,
-                private readonly store: Store
-    ) {
-        this.baseLayers = [];
-        this.overlays = [];
-
-        this.baseLayers$.subscribe(b => this.baseLayers = b);
-        this.overlays$.subscribe(o => this.overlays = o);
-        this.selectedBaseLayerKey$.subscribe(k => this.selectedBaseLayerKey = k);
-
-        this.userInfo$.subscribe(() => this.syncUserLayers());
+    constructor() {
+        this.store.select((state: ApplicationState) => state.layersState.baseLayers).subscribe(b => this.baseLayers = b);
+        this.store.select((state: ApplicationState) => state.layersState.overlays).subscribe(o => this.overlays = o);
+        this.store.select((state: ApplicationState) => state.layersState.selectedBaseLayerKey).subscribe(k => this.selectedBaseLayerKey = k);
+        this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe((userInfo) => {
+            this.userInfo = userInfo;
+            this.syncUserLayers();
+        });
     }
 
     public isBaseLayerSelected(layer: EditableLayer): boolean {
@@ -116,7 +103,7 @@ export class LayersService {
     }
 
     private async syncUserLayers(): Promise<void> {
-        if (!this.authorizationService.isLoggedIn()) {
+        if (!this.userInfo) {
             return;
         }
         return;
@@ -169,7 +156,7 @@ export class LayersService {
             for (const toRemove of baselayerToRemove) {
                 this.store.dispatch(new RemoveBaseLayerAction(toRemove.key));
             }
-        } catch (error) {
+        } catch {
             this.loggingService.warning("[Layers] Unable to sync user layer from server - using local layers");
         }
         */
@@ -200,14 +187,14 @@ export class LayersService {
         if (SPECIAL_BASELAYERS.includes(layer.key)) {
             return;
         }
-        if (!this.authorizationService.isLoggedIn()) {
+        if (!this.userInfo) {
             return;
         }
         return;
         /*
         const layerToStore = { ...layer } as UserLayer;
         layerToStore.isOverlay = false;
-        layerToStore.osmUserId = this.authorizationService.getUserInfo().id;
+        layerToStore.osmUserId = this.userInfo.id;
         const response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as UserLayer;
         this.store.dispatch(new UpdateBaseLayerAction(layer.key, {
             ...layer,
@@ -217,14 +204,14 @@ export class LayersService {
     }
 
     private async updateUserLayerInDatabase(isOverlay: boolean, layer: Immutable<EditableLayer>) {
-        if (!this.authorizationService.isLoggedIn()) {
+        if (!this.userInfo) {
             return;
         }
         return;
         /*
         const layerToStore = { ...layer } as UserLayer;
         layerToStore.isOverlay = isOverlay;
-        layerToStore.osmUserId = this.authorizationService.getUserInfo().id;
+        layerToStore.osmUserId = this.userInfo.id;
         layerToStore.id = layer.id;
         await firstValueFrom(this.httpClient.put(Urls.userLayers + layerToStore.id, layerToStore));
         */
@@ -232,8 +219,8 @@ export class LayersService {
 
     private async deleteUserLayerFromDatabase(id: string) {
         throw new Error("Not implemented");
-        /*
-        if (this.authorizationService.isLoggedIn()) {
+        /* HM TODO: bring this back?
+        if (this.userInfo) {
             await firstValueFrom(this.httpClient.delete(Urls.userLayers + id));
         }
         */
@@ -265,14 +252,14 @@ export class LayersService {
         if (SPECIAL_OVERLAYS.includes(layer.key)) {
             return;
         }
-        if (!this.authorizationService.isLoggedIn()) {
+        if (!this.userInfo) {
             return;
         }
         return;
         /*
         const layerToStore = { ...layer } as UserLayer;
         layerToStore.isOverlay = true;
-        layerToStore.osmUserId = this.authorizationService.getUserInfo().id;
+        layerToStore.osmUserId = this.userInfo.id;
         const response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as UserLayer;
         this.store.dispatch(new UpdateOverlayAction(layer.key, {
             ...layer,
@@ -324,7 +311,7 @@ export class LayersService {
 
     public toggleOverlay(overlay: Overlay) {
         const newVisibility = !overlay.visible;
-        this.loggingService.info(`[Layers] Changing visiblity of ${overlay.key} to ${newVisibility ? "visible" : "hidden"}`);
+        this.loggingService.info(`[Layers] Changing visibility of ${overlay.key} to ${newVisibility ? "visible" : "hidden"}`);
         this.store.dispatch(new UpdateOverlayAction(overlay.key, {
                 ...overlay,
                 visible: newVisibility

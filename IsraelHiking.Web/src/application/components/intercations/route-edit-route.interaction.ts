@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter, NgZone } from "@angular/core";
+import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
 import { MapMouseEvent, Map, GeoJSONSource } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 import type Point from "@mapbox/point-geometry";
@@ -30,30 +30,23 @@ declare type EditMouseState = "none" | "down" | "dragging" | "canceled";
 @Injectable()
 export class RouteEditRouteInteraction {
 
-    public onRoutePointClick: EventEmitter<number>;
+    public onRoutePointClick = new EventEmitter<number>();
 
-    private state: EditMouseState;
-    private mouseDownPoint: Point;
+    private state: EditMouseState = "none";
+    private mouseDownPoint: Point = null;
 
-    private selectedRoutePoint: GeoJSON.Feature<GeoJSON.Point>;
-    private selectedRouteSegments: GeoJSON.Feature<GeoJSON.LineString>[];
-    private geoJsonData: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
+    private selectedRoutePoint: GeoJSON.Feature<GeoJSON.Point> = null;
+    private selectedRouteSegments: GeoJSON.Feature<GeoJSON.LineString>[] = [];
+    private geoJsonData: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = null;
     private map: Map;
 
-    constructor(private readonly resources: ResourcesService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly routingProvider: RoutingProvider,
-                private readonly elevationProvider: ElevationProvider,
-                private readonly snappingService: SnappingService,
-                private readonly ngZone: NgZone,
-                private readonly store: Store) {
-        this.geoJsonData = null;
-        this.selectedRouteSegments = [];
-        this.selectedRoutePoint = null;
-        this.onRoutePointClick = new EventEmitter();
-        this.state = "none";
-        this.mouseDownPoint = null;
-    }
+    private readonly resources = inject(ResourcesService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly routingProvider = inject(RoutingProvider);
+    private readonly elevationProvider = inject(ElevationProvider);
+    private readonly snappingService = inject(SnappingService);
+    private readonly ngZone = inject(NgZone);
+    private readonly store = inject(Store);
 
     public static createSegmentId(route: Immutable<RouteData>, index: number) {
         return route.id + SEGMENT + index;
@@ -114,15 +107,16 @@ export class RouteEditRouteInteraction {
             map.on("touchmove", this.handleMove);
             map.on("mouseup", this.handleUp);
             map.on("touchend", this.handleUp);
+            map.on("click", this.handleClick);
             map.getCanvas().addEventListener("keydown", this.cancelInteraction);
         } else {
             map.off("mousedown", this.handleDown);
             map.off("touchstart", this.handleDown);
             map.off("mousemove", this.handleMove);
             map.off("touchmove", this.handleMove);
-            map.off("drag", this.handleMove);
             map.off("mouseup", this.handleUp);
             map.off("touchend", this.handleUp);
+            map.off("click", this.handleClick);
             map.getCanvas().removeEventListener("keydown", this.cancelInteraction);
         }
     }
@@ -173,10 +167,8 @@ export class RouteEditRouteInteraction {
             this.raiseRoutePointClick(null);
         }
         if (this.isUpdating()) {
+            // Avoid map panning when dragging
             event.preventDefault();
-        } else {
-            this.map.off("mousemove", this.handleMove);
-            this.map.on("drag", this.handleMove);
         }
     };
 
@@ -191,13 +183,14 @@ export class RouteEditRouteInteraction {
         if (this.state === "down") {
             this.state = "dragging";
         }
-        if (this.state === "dragging") {
-            this.raiseRoutePointClick(null);
-            if (this.selectedRoutePoint != null) {
-                this.handleRoutePointDrag(event);
-            } else if (this.selectedRouteSegments.length > 0) {
-                this.handleRouteMiddleSegmentDrag(event);
-            }
+        if (this.state !== "dragging") {
+            return;
+        }
+        this.raiseRoutePointClick(null);
+        if (this.selectedRoutePoint != null) {
+            this.handleRoutePointDrag(event);
+        } else if (this.selectedRouteSegments.length > 0) {
+            this.handleRouteMiddleSegmentDrag(event);
         }
     };
 
@@ -240,8 +233,6 @@ export class RouteEditRouteInteraction {
 
     private handleUp = (event: MapMouseEvent) => {
         this.mouseDownPoint = null;
-        // this is used here to support touch screen and prevent additional mouse events
-        event.originalEvent.preventDefault();
         if (this.isTouchesBiggerThan(event.originalEvent, 0)) {
             // more than zero touches - no need to do any thing.
             return;
@@ -251,41 +242,35 @@ export class RouteEditRouteInteraction {
             return;
         }
         const isUpdating = this.isUpdating();
-        if (!isUpdating) {
-            this.map.on("mousemove", this.handleMove);
-            this.map.off("drag", this.handleMove);
-        }
         const isDragging = this.state === "dragging";
         this.state = "none";
 
-        if (!isUpdating && isDragging) {
-            // regular map pan
-            return;
-        }
         const latlng = event.lngLat;
-        if (!isUpdating && !isDragging) {
+        if (isDragging && isUpdating) {
+            if (this.selectedRoutePoint != null) {
+                // drag exiting route point
+                this.updateRoutePoint(latlng);
+            } else {
+                // drag middle of segment
+                this.updateRouteSegment(latlng);
+            }
+        }
+    };
+
+    private handleClick = (event: MapMouseEvent) => {
+        const latlng = event.lngLat;
+        if (!this.isUpdating()) {
             // new point
             this.addPointToEndOfRoute(latlng);
             return;
         }
-        if (!isDragging) {
-            if (this.selectedRoutePoint != null) {
-                // click on exiting point
-                this.raiseRoutePointClick(this.getPointIndex());
-            } else {
-                // click on the middle of a segment
-                this.splitRouteSegment(latlng);
-            }
-            return;
-        }
-        // drag exiting route point
         if (this.selectedRoutePoint != null) {
-            this.updateRoutePoint(latlng);
+            // click on exiting point
+            this.raiseRoutePointClick(this.getPointIndex());
         } else {
-            this.updateRouteSegment(latlng);
+            // click on the middle of a segment
+            this.splitRouteSegment(latlng);
         }
-
-        return;
     };
 
     private addPointToEndOfRoute = async (latlng: LatLngAlt) => {

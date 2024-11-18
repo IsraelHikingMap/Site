@@ -3,13 +3,11 @@ using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
-using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using OsmSharp.IO.API;
 using System;
@@ -33,7 +31,6 @@ namespace IsraelHiking.API.Controllers
         private readonly ISimplePointAdderExecutor _simplePointAdderExecutor;
         private readonly IDistributedCache _persistentCache;
         private readonly ILogger _logger;
-        private readonly ConfigurationData _options;
 
         /// <summary>
         /// Controller's constructor
@@ -45,15 +42,13 @@ namespace IsraelHiking.API.Controllers
         /// <param name="simplePointAdderExecutor"></param>
         /// <param name="persistentCache"></param>
         /// <param name="logger"></param>
-        /// <param name="options"></param>
         public PointsOfInterestController(IClientsFactory clientsFactory,
             ITagsHelper tagsHelper,
             IPointsOfInterestProvider pointsOfInterestProvider,
             IImagesUrlsStorageExecutor imageUrlStoreExecutor,
             ISimplePointAdderExecutor simplePointAdderExecutor,
             IDistributedCache persistentCache,
-            ILogger logger,
-            IOptions<ConfigurationData> options)
+            ILogger logger)
         {
             _clientsFactory = clientsFactory;
             _tagsHelper = tagsHelper;
@@ -62,7 +57,6 @@ namespace IsraelHiking.API.Controllers
             _simplePointAdderExecutor = simplePointAdderExecutor;
             _persistentCache = persistentCache;
             _logger = logger;
-            _options = options.Value;
         }
 
         /// <summary>
@@ -159,7 +153,7 @@ namespace IsraelHiking.API.Controllers
             }
             _persistentCache.SetString(feature.GetId(), "In process", new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
             
-            var osmGateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
+            var osmGateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
             var newFeature = await _pointsOfInterestProvider.AddFeature(feature, osmGateway, language);
             _persistentCache.SetString(feature.GetId(), newFeature.Attributes[FeatureAttributes.ID].ToString(), new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
             return Ok(newFeature);
@@ -189,7 +183,7 @@ namespace IsraelHiking.API.Controllers
                 return BadRequest("Feature ID and supplied id do not match...");
             }
             
-            var osmGateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
+            var osmGateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
             return Ok(await _pointsOfInterestProvider.UpdateFeature(feature, osmGateway, language));
         }
 
@@ -246,19 +240,14 @@ namespace IsraelHiking.API.Controllers
         [Route("updates/{lastModified}/")]
         [Route("updates/{lastModified}/{modifiedUntil}")]
         [HttpGet]
-        public async Task<UpdatesResponse> GetPointOfInterestUpdates(DateTime lastModified, DateTime? modifiedUntil)
+        [Obsolete("Remove by 5.2025")]
+        public UpdatesResponse GetPointOfInterestUpdates(DateTime lastModified, DateTime? modifiedUntil)
         {
-            var response = await _pointsOfInterestProvider.GetUpdates(lastModified, modifiedUntil ?? DateTime.Now);
-            var imageUrls = new List<string>();
-            foreach (var feature in response.Features)
+            return new UpdatesResponse
             {
-                var currentImageUrls = feature.Attributes.GetNames()
-                    .Where(a => a.StartsWith(FeatureAttributes.IMAGE_URL))
-                    .Select(k => feature.Attributes[k].ToString());
-                imageUrls.AddRange(currentImageUrls.ToList());
-            }
-            response.Images = await _imageUrlStoreExecutor.GetAllImagesForUrls(imageUrls.ToArray());
-            return response;
+                Features = Array.Empty<IFeature>(),
+                Images = Array.Empty<ImageItem>()
+            };
         }
 
         /// <summary>
@@ -273,7 +262,7 @@ namespace IsraelHiking.API.Controllers
             }
             _persistentCache.SetString(request.Guid, "In process", new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
             _logger.LogInformation($"Adding a simple POI of type {request.PointType} at {request.LatLng.Lat}, {request.LatLng.Lng}");
-            var osmGateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
+            var osmGateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
             await _simplePointAdderExecutor.Add(osmGateway, request);
         }
     }

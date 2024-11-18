@@ -19,6 +19,10 @@ export class SetPannedAction {
     constructor(public pannedTimestamp: Date) {}
 }
 
+export class ToggleKeepNorthUpAction {
+    public static type = this.prototype.constructor.name;
+}
+
 export class SetShareUrlAction {
     public static type = this.prototype.constructor.name;
     constructor(public shareUrl: ShareUrl) {}
@@ -56,6 +60,14 @@ export class InMemoryReducer {
     public setPanned(ctx: StateContext<InMemoryState>, action: SetPannedAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.pannedTimestamp = action.pannedTimestamp;
+            return lastState;
+        }));
+    }
+
+    @Action(ToggleKeepNorthUpAction)
+    public toggleKeepNorthUp(ctx: StateContext<InMemoryState>) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.keepNorthUp = !lastState.keepNorthUp;
             return lastState;
         }));
     }

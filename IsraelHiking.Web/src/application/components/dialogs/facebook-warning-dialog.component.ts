@@ -1,18 +1,15 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 
 @Component({
     selector: "facebook-warning-dialog",
     templateUrl: "./facebook-warning-dialog.component.html"
 })
-export class FacebookWarningDialogComponent extends BaseMapComponent {
+export class FacebookWarningDialogComponent {
 
-    constructor(resources: ResourcesService) {
-        super(resources);
-    }
+    public readonly resources = inject(ResourcesService);
 
     public static openDialog(dialog: MatDialog) {
         dialog.open(FacebookWarningDialogComponent, {

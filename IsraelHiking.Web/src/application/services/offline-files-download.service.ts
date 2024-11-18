@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
@@ -6,7 +6,6 @@ import { Store } from "@ngxs/store";
 
 import { LayersService } from "./layers.service";
 import { SidebarService } from "./sidebar.service";
-import { DatabaseService } from "./database.service";
 import { FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
@@ -18,40 +17,26 @@ import type { ApplicationState } from "../models/models";
 
 @Injectable()
 export class OfflineFilesDownloadService {
-    constructor(private readonly resources: ResourcesService,
-                private readonly sidebarService: SidebarService,
-                private readonly layersService: LayersService,
-                private readonly databaseService: DatabaseService,
-                private readonly fileService: FileService,
-                private readonly loggingService: LoggingService,
-                private readonly httpClient: HttpClient,
-                private readonly toastService: ToastService,
-                private readonly store: Store) {
-    }
+
+    private readonly resources = inject(ResourcesService);
+    private readonly sidebarService = inject(SidebarService);
+    private readonly layersService = inject(LayersService);
+    private readonly fileService = inject(FileService);
+    private readonly loggingService = inject(LoggingService);
+    private readonly httpClient = inject(HttpClient);
+    private readonly toastService = inject(ToastService);
+    private readonly store = inject(Store);
 
     public async initialize(): Promise<void> {
         return;
-        /*
+        /* HM TODO: support offline maps
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         const userState = this.store.selectSnapshot((s: ApplicationState) => s.userState);
         if (offlineState.isOfflineAvailable === true &&
-            offlineState.lastModifiedDate == null &&
+            (offlineState.lastModifiedDate == null || offlineState.isPmtilesDownloaded === false) &&
             userState.userInfo != null) {
             // In case the user has purchased the map and never downloaded them, and now starts the app
             return await this.downloadOfflineMaps(false);
-        }
-        if (offlineState.isOfflineAvailable === true &&
-            offlineState.lastModifiedDate != null &&
-            userState.userInfo != null) {
-            // Check and migrate old databases if needed
-            try {
-                const needToMigrate = await this.fileService.renameOldDatabases();
-                if (needToMigrate) {
-                    await this.databaseService.migrateDatabasesIfNeeded();
-                }
-            } catch (ex) {
-                this.loggingService.error("[Offline Download] Failed to migrate: " + (ex as Error).message);
-            }
         }
         */
     }
@@ -110,11 +95,10 @@ export class OfflineFilesDownloadService {
                 const fileDate = new Date(fileNames[fileName]);
                 newestFileDate = fileDate > newestFileDate ? fileDate : newestFileDate;
                 const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
-                if (fileName.endsWith(".mbtiles")) {
-                    const dbFileName = fileName.replace(".mbtiles", ".db");
-                    await this.fileService.downloadFileToCacheAuthenticated(`${Urls.offlineFiles}/${fileName}`, dbFileName, token,
+                if (fileName.endsWith(".pmtiles")) {
+                    await this.fileService.downloadFileToCacheAuthenticated(`${Urls.offlineFiles}/${fileName}`, fileName, token,
                         (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
-                    await this.databaseService.moveDownloadedDatabaseFile(dbFileName);
+                    await this.fileService.moveFileFromCacheToDataDirectory(fileName);
                 } else {
                     const fileContent = await this.fileService.getFileContentWithProgress(`${Urls.offlineFiles}/${fileName}`,
                         (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
@@ -138,10 +122,17 @@ export class OfflineFilesDownloadService {
     private async getFilesToDownloadDictionary(): Promise<Record<string, string>> {
         throw new Error("Not implemented");
         /*
-        const lastModified = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate;
-        const lastModifiedString = lastModified ? lastModified.toISOString() : null;
+        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+        let lastModifiedString = offlineState.lastModifiedDate ? offlineState.lastModifiedDate.toISOString() : null;
+        if (!offlineState.isPmtilesDownloaded) {
+            this.loggingService.info(`[Offline Download] This is the first time downloading pmtiles, downloading all files`);
+            lastModifiedString = null;
+        }
         const fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
-            params: { lastModified: lastModifiedString }
+            params: { 
+                lastModified: lastModifiedString,
+                pmtiles: true
+            }
         }).pipe(timeout(5000)));
         this.loggingService.info(
             `[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);

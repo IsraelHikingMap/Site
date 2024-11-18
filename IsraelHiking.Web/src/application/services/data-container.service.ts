@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
@@ -21,18 +21,17 @@ import type { DataContainer, ApplicationState, LayerData, RouteData } from "../m
 @Injectable()
 export class DataContainerService {
 
-    constructor(private readonly shareUrlsService: ShareUrlsService,
-                private readonly layersService: LayersService,
-                private readonly fileService: FileService,
-                private readonly resources: ResourcesService,
-                private readonly toastService: ToastService,
-                private readonly fitBoundsService: FitBoundsService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly routesFactory: RoutesFactory,
-                private readonly mapService: MapService,
-                private readonly runningContextService: RunningContextService,
-                private readonly store: Store) {
-    }
+    private readonly shareUrlsService = inject(ShareUrlsService);
+    private readonly layersService = inject(LayersService);
+    private readonly fileService = inject(FileService);
+    private readonly resources = inject(ResourcesService);
+    private readonly toastService = inject(ToastService);
+    private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly routesFactory = inject(RoutesFactory);
+    private readonly mapService = inject(MapService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly store = inject(Store);
 
     public setData(dataContainer: Immutable<DataContainer>, keepCurrentRoutes: boolean) {
         let routesData: RouteData[] = [];
@@ -40,14 +39,15 @@ export class DataContainerService {
             const routeToAdd = this.routesFactory.createRouteDataAddMissingFields(route, this.selectedRouteService.getLeastUsedColor());
             routesData.push(routeToAdd);
         }
+        const selectedRouteId = routesData.length > 0 ? routesData[0].id : null; // the default is the first newly added route
         if (keepCurrentRoutes) {
             const currentRoutes = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.routes).present) as RouteData[];
             routesData = [...currentRoutes, ...routesData];
         }
         this.routesFactory.regenerateDuplicateIds(routesData);
         this.store.dispatch(new BulkReplaceRoutesAction(routesData));
-        if (routesData.length > 0 && this.selectedRouteService.getSelectedRoute() == null) {
-            this.store.dispatch(new SetSelectedRouteAction(routesData[0].id));
+        if (selectedRouteId) {
+            this.store.dispatch(new SetSelectedRouteAction(selectedRouteId));
         }
         this.layersService.addExternalOverlays(dataContainer.overlays);
         this.layersService.addExternalBaseLayer(dataContainer.baseLayer);
@@ -90,7 +90,7 @@ export class DataContainerService {
             this.store.dispatch(new SetFileUrlAndBaseLayerAction(url, baseLayer));
             data.baseLayer = this.stringToBaseLayer(baseLayer);
             this.setData(data, this.runningContextService.isCapacitor);
-        } catch (ex) {
+        } catch {
             this.toastService.warning(this.resources.unableToLoadFromUrl);
         }
     }
@@ -108,7 +108,7 @@ export class DataContainerService {
             }
         } catch (ex) {
             this.shareUrlsService.setShareUrl(null);
-            this.toastService.warning(this.resources.unableToLoadFromUrl);
+            this.toastService.error(ex, this.resources.unableToLoadFromUrl);
         }
     }
 

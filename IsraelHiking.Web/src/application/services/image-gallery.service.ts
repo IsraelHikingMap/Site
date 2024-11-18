@@ -1,4 +1,4 @@
-import { Injectable, Injector } from "@angular/core";
+import { inject, Injectable, Injector } from "@angular/core";
 import { Overlay, OverlayRef } from "@angular/cdk/overlay";
 import { ComponentPortal } from "@angular/cdk/portal";
 
@@ -7,13 +7,10 @@ import { ResourcesService } from "./resources.service";
 
 @Injectable()
 export class ImageGalleryService {
-    private overlayRef: OverlayRef;
+    private overlayRef: OverlayRef = null;
 
-    constructor(private readonly overlay: Overlay,
-                private readonly resourcesService: ResourcesService) {
-            this.overlayRef = null;
-
-    }
+    private readonly overlay = inject(Overlay);
+    private readonly resourcesService = inject(ResourcesService);
 
     public open(urls: string[], index: number) {
         if (this.resourcesService.getCurrentLanguageCodeSimplified() === "he") {

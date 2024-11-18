@@ -1,7 +1,6 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from "@angular/core";
+import { Component, OnChanges, SimpleChanges, input, inject, output } from "@angular/core";
 import { AnimationOptions } from "ngx-lottie";
 
-import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { FileService } from "../../../services/file.service";
 import { ImageGalleryService } from "../../../services/image-gallery.service";
@@ -14,35 +13,28 @@ import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.j
     selector: "image-scroller",
     templateUrl: "./image-scroller.component.html"
 })
-export class ImageScrollerComponent extends BaseMapComponent implements OnChanges {
+export class ImageScrollerComponent implements OnChanges {
     lottiePOI: AnimationOptions = {
         animationData: sceneryPlaceholder,
     };
 
-    private currentIndex: number;
+    private currentIndex: number = 0;
 
-    public currentImageAttribution: ImageAttribution;
+    public currentImageAttribution: ImageAttribution = null;
 
-    @Input()
-    public images: string[];
+    public images = input<string[]>();
 
-    @Input()
-    public canEdit: boolean;
+    public canEdit = input<boolean>();
 
-    @Output()
-    public currentImageChanged: EventEmitter<string>;
+    public currentImageChanged = output<string>();
 
-    constructor(resources: ResourcesService,
-                private readonly fileService: FileService,
-                private readonly runningContextService: RunningContextService,
-                private readonly imageGalleryService: ImageGalleryService,
-                private readonly imageResizeService: ImageResizeService,
-                private readonly imageAttributionService: ImageAttributionService) {
-        super(resources);
-        this.currentIndex = 0;
-        this.currentImageChanged = new EventEmitter();
-        this.currentImageAttribution = null;
-    }
+    public readonly resources = inject(ResourcesService);
+
+    private readonly fileService = inject(FileService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly imageGalleryService = inject(ImageGalleryService);
+    private readonly imageResizeService = inject(ImageResizeService);
+    private readonly imageAttributionService = inject(ImageAttributionService);
 
     public ngOnChanges(changes: SimpleChanges): void {
         if (changes.images) {
@@ -53,10 +45,10 @@ export class ImageScrollerComponent extends BaseMapComponent implements OnChange
 
     public next() {
         this.currentIndex++;
-        if (this.currentIndex >= this.images.length) {
-            this.currentIndex = this.images.length - 1;
+        if (this.currentIndex >= this.images().length) {
+            this.currentIndex = this.images().length - 1;
         }
-        this.currentImageChanged.next(this.getCurrentValue());
+        this.currentImageChanged.emit(this.getCurrentValue());
         this.updateCurrentImageAttribution();
     }
 
@@ -65,12 +57,12 @@ export class ImageScrollerComponent extends BaseMapComponent implements OnChange
         if (this.currentIndex < 0) {
             this.currentIndex = 0;
         }
-        this.currentImageChanged.next(this.getCurrentValue());
+        this.currentImageChanged.emit(this.getCurrentValue());
         this.updateCurrentImageAttribution();
     }
 
     public hasNext(): boolean {
-        return this.currentIndex < this.images.length - 1;
+        return this.currentIndex < this.images().length - 1;
     }
 
     public hasPrevious(): boolean {
@@ -78,28 +70,28 @@ export class ImageScrollerComponent extends BaseMapComponent implements OnChange
     }
 
     public remove(): void {
-        this.images.splice(this.currentIndex, 1);
+        this.images().splice(this.currentIndex, 1);
         this.previous();
     }
 
     public async add(e: any) {
-        if (this.canEdit === false) {
+        if (this.canEdit() === false) {
             return;
         }
         const files = this.fileService.getFilesFromEvent(e);
         for (const file of files) {
             const data = await this.imageResizeService.resizeImage(file);
-            this.images.push(data);
-            this.currentIndex = this.images.length - 1;
-            this.currentImageChanged.next(this.getCurrentValue());
+            this.images().push(data);
+            this.currentIndex = this.images().length - 1;
+            this.currentImageChanged.emit(this.getCurrentValue());
         }
     }
 
     public getCurrentValue(): string {
-        if (this.images.length === 0) {
+        if (this.images().length === 0) {
             return null;
         }
-        return this.images[this.currentIndex];
+        return this.images()[this.currentIndex];
     }
 
     public getCurrentImage() {
@@ -126,7 +118,7 @@ export class ImageScrollerComponent extends BaseMapComponent implements OnChange
             return;
         }
         const imagesUrls = [];
-        for (const imageUrl of this.images) {
+        for (const imageUrl of this.images()) {
             const imageUrlToPush = this.resources.getResizedImageUrl(imageUrl, 1600);
             imagesUrls.push(imageUrlToPush);
         }
@@ -134,6 +126,6 @@ export class ImageScrollerComponent extends BaseMapComponent implements OnChange
     }
 
     public getIndexString() {
-        return `${this.currentIndex + 1} / ${this.images.length}`;
+        return `${this.currentIndex + 1} / ${this.images().length}`;
     }
 }

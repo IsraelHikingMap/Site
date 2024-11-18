@@ -1,6 +1,5 @@
-import { Injectable, EventEmitter } from "@angular/core";
-import { Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
+import { Injectable, EventEmitter, inject } from "@angular/core";
+import { Store } from "@ngxs/store";
 
 import { HashService } from "./hash.service";
 import { SetSidebarAction } from "../reducers/poi.reducer";
@@ -13,19 +12,16 @@ export class SidebarService {
 
     public viewName: SidebarView;
     public isVisible: boolean;
-    public sideBarStateChanged: EventEmitter<void>;
+    public sideBarStateChanged= new EventEmitter<void>();
 
-    @Select((state: ApplicationState) => state.poiState.isSidebarOpen)
-    private isPoiSidebarOpen$: Observable<boolean>;
+    private isPoiSidebarOpen = false;
 
-    private isPoiSidebarOpen: boolean;
+    private readonly hashService = inject(HashService);
+    private readonly store = inject(Store);
 
-    constructor(private readonly hashService: HashService,
-                private readonly store: Store) {
-        this.sideBarStateChanged = new EventEmitter();
-        this.isPoiSidebarOpen = false;
+    constructor() {
         this.hideWithoutChangingAddressbar();
-        this.isPoiSidebarOpen$.subscribe((isOpen) => {
+        this.store.select((state: ApplicationState) => state.poiState.isSidebarOpen).subscribe((isOpen) => {
             this.isPoiSidebarOpen = isOpen;
             this.sideBarStateChanged.next();
         });

@@ -1,4 +1,3 @@
-import { Injectable } from "@angular/core";
 import { Map, LngLatBounds, LngLatLike } from "maplibre-gl";
 import { lineString, featureCollection, point, Units } from "@turf/helpers";
 import simplify from "@turf/simplify";
@@ -16,7 +15,6 @@ import type { Immutable } from "immer";
 
 import type { LatLngAlt, Bounds, LatLngAltTime } from "../models/models";
 
-@Injectable()
 export class SpatialService {
 
     public static getLengthInMetersForGeometry(geometry: Immutable<GeoJSON.Geometry>) {
@@ -139,16 +137,14 @@ export class SpatialService {
                 if (!lineToCheck.bbox) {
                     lineToCheck.bbox = bbox(lineToCheck);
                 }
-                if (start[0] >= lineToCheck.bbox[0] && start[0] <= lineToCheck.bbox[2] &&
-                    start[1] >= lineToCheck.bbox[1] && start[1] <= lineToCheck.bbox[3]) {
+                if (SpatialService.insideBbox(start, lineToCheck.bbox)) {
                     const nearestPoint = nearestPointOnLine(lineToCheck, start);
                     if (nearestPoint.properties.dist < 1e-5) {
                         lineToCheck.geometry.coordinates.splice(nearestPoint.properties.index + 1, 0, nearestPoint.geometry.coordinates);
                         continue;
                     }
                 }
-                if (end[0] >= lineToCheck.bbox[0] && end[0] <= lineToCheck.bbox[2] &&
-                    end[1] >= lineToCheck.bbox[1] && end[1] <= lineToCheck.bbox[3]) {
+                if (SpatialService.insideBbox(end, lineToCheck.bbox)) {
                     const nearestPoint = nearestPointOnLine(lineToCheck, end);
                     if (nearestPoint.properties.dist < 1e-5) {
                         lineToCheck.geometry.coordinates.splice(nearestPoint.properties.index + 1, 0, nearestPoint.geometry.coordinates);
@@ -305,9 +301,13 @@ export class SpatialService {
         };
     }
 
-    private static getLineString(latlngs: LatLngAlt[]): GeoJSON.Feature<GeoJSON.LineString> {
+    public static getLineString(latlngs: LatLngAlt[]): GeoJSON.Feature<GeoJSON.LineString> {
         const coordinates = latlngs.map(l => SpatialService.toCoordinate(l));
         return lineString(coordinates);
+    }
+
+    public static getPointFeature(latlng: LatLngAlt): GeoJSON.Feature<GeoJSON.Point> {
+        return point(SpatialService.toCoordinate(latlng));
     }
 
     public static getMapBounds(map: Map): Bounds {
@@ -355,8 +355,104 @@ export class SpatialService {
         };
     }
 
+    public static insideBbox(position: GeoJSON.Position, bbox: GeoJSON.BBox): boolean {
+        return position[0] >= bbox[0] && position[0] <= bbox[2] &&
+            position[1] >= bbox[1] && position[1] <= bbox[3];
+    }
+
     public static isInIsrael(latlng: LatLngAlt): boolean {
-        return latlng.lat > 29.37711 && latlng.lat < 33.35091 &&
-                latlng.lng > 34.07929 && latlng.lng < 35.91531;
+        const position = SpatialService.toCoordinate(latlng);
+        return SpatialService.insideBbox(position, [34.07929, 29.37711, 35.91531, 33.35091]);
+    }
+
+    public static isJammingTarget(latlng: LatLngAlt): boolean {
+        const position = SpatialService.toCoordinate(latlng);
+        return SpatialService.insideBbox(position, [35.48, 33.811, 35.50, 33.823]) ||
+            SpatialService.insideBbox(position, [31.350, 30.0817, 31.355, 30.0860]) ||
+            SpatialService.insideBbox(position, [35.98, 31.70, 36.02, 31.73]);
+    }
+
+    private static canBeMreged(line1: GeoJSON.Position[], line2: GeoJSON.Position[]): "start-start" | "start-end" | "end-start" | "end-end" | null {
+        const start1 = line1[0];
+        const end1 = line1[line1.length - 1];
+        const start2 = line2[0];
+        const end2 = line2[line2.length - 1];
+        if (SpatialService.getDistanceForCoordinates(start1 as [number, number], start2 as [number, number]) < 1e-5) {
+            return "start-start";
+        }
+        if (SpatialService.getDistanceForCoordinates(start1 as [number, number], end2 as [number, number]) < 1e-5) {
+            return "start-end";
+        }
+        if (SpatialService.getDistanceForCoordinates(end1 as [number, number], start2 as [number, number]) < 1e-5) {
+            return "end-start";
+        }
+        if (SpatialService.getDistanceForCoordinates(end1 as [number, number], end2 as [number, number]) < 1e-5) {
+            return "end-end";
+        }
+        return null;
+    }
+
+    public static mergeLines(lines: GeoJSON.Feature<GeoJSON.LineString>[]): GeoJSON.MultiLineString | GeoJSON.LineString {
+        const coordinatesGroups: GeoJSON.Position[][] = [];
+        const linesToMerge = lines.filter(l => l.geometry.coordinates.length > 0);
+        while (linesToMerge.length > 0) {
+            let lineIndex = 0;
+            let coordinatesGroupIndex = 0;
+            let foundType = null;
+            for (let i = 0; i < linesToMerge.length; i++) {
+                for (let j = 0; j < coordinatesGroups.length; j++) {
+                    foundType = SpatialService.canBeMreged(coordinatesGroups[j], linesToMerge[i].geometry.coordinates);
+                    if (foundType) {
+                        lineIndex = i;
+                        coordinatesGroupIndex = j;
+                        break;
+                    }
+                }
+                if (foundType) {
+                    break;
+                }
+            }
+            if (!foundType) {
+                coordinatesGroups.push(linesToMerge[0].geometry.coordinates);
+                linesToMerge.shift();
+                continue;
+            }
+
+            const line = linesToMerge[lineIndex];
+            linesToMerge.splice(lineIndex, 1);
+            const coordinateGroup = coordinatesGroups[coordinatesGroupIndex];
+            switch (foundType) {
+                case "start-start":
+                    line.geometry.coordinates.reverse();
+                    line.geometry.coordinates.pop();
+                    coordinatesGroups[coordinatesGroupIndex] = line.geometry.coordinates.concat(coordinateGroup);
+                    break;
+                case "start-end":
+                    line.geometry.coordinates.pop();
+                    coordinatesGroups[coordinatesGroupIndex] = line.geometry.coordinates.concat(coordinateGroup);
+                    break;
+                case "end-start":
+                    line.geometry.coordinates.shift();
+                    coordinatesGroups[coordinatesGroupIndex] = coordinateGroup.concat(line.geometry.coordinates);
+                    break;
+                case "end-end":
+                    line.geometry.coordinates.reverse();
+                    line.geometry.coordinates.shift();
+                    coordinatesGroups[coordinatesGroupIndex] = coordinateGroup.concat(line.geometry.coordinates);
+                    break;
+            }
+        }
+
+        if (coordinatesGroups.length === 1) {
+            return {
+                type: "LineString",
+                coordinates: coordinatesGroups[0]
+            }
+        }
+
+        return {
+            type: "MultiLineString",
+            coordinates: coordinatesGroups
+        };
     }
 }

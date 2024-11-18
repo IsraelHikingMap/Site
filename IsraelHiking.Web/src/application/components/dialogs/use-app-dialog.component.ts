@@ -1,7 +1,6 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
 
@@ -9,12 +8,14 @@ import { RunningContextService } from "../../services/running-context.service";
     selector: "use-app-dialog",
     templateUrl: "./use-app-dialog.component.html"
 })
-export class UseAppDialogComponent extends BaseMapComponent {
+export class UseAppDialogComponent {
     public appAddress: string;
 
-    constructor(resources: ResourcesService,
-                private readonly runningContextServive: RunningContextService) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
+
+    private readonly runningContextServive = inject(RunningContextService);
+
+    constructor() {
         this.appAddress = this.runningContextServive.isIos
             ? "https://apps.apple.com/us/app/israel-hiking-map/id1451300509"
             : "https://play.google.com/store/apps/details?id=il.org.osm.israelhiking&hl=en";

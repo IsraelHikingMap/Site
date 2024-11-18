@@ -11,7 +11,6 @@ using System.Text.Json;
 using System.Xml;
 using System.Xml.Linq;
 using IsraelHiking.Common.Extensions;
-using NetTopologySuite.IO.Converters;
 
 namespace IsraelHiking.API.Gpx
 {

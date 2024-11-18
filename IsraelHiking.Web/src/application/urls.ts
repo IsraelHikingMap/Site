@@ -1,11 +1,13 @@
 ﻿import { environment } from "../environments/environment";
 
 export class Urls {
-    /*
+    // HM TODO: change this when website is in a different domain
     public static readonly baseAddress = environment.baseAddress;
+    /*
     public static readonly baseTilesAddress = environment.baseTilesAddress;
     public static readonly apiBase = environment.baseApiAddress;
     public static readonly emptyAuthHtml = Urls.baseAddress + "/empty-for-oauth.html";
+    public static readonly ihmAuthUrl = "ihm://oauth_callback/";
     public static readonly translations = "translations/";
     public static readonly urls = Urls.apiBase + "urls/";
     public static readonly health = Urls.apiBase + "health/";
@@ -28,7 +30,8 @@ export class Urls {
     public static readonly poiSimple = Urls.poi + "simple/";
     public static readonly poisOfflineFile = Urls.baseAddress + "/PointsOfInterest/pois.zip";
     */
-
+    // HM TODO: change this on the mobile definitions?
+    public static readonly mobileAuthUrl = "ihm://oauth_callback/";
     public static readonly OSM_API = "https://api.openstreetmap.org/api/0.6/";
     public static readonly user = Urls.OSM_API + "user/details.json";
     public static readonly traces = Urls.OSM_API + "user/gpx_files.json";

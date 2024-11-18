@@ -19,7 +19,7 @@
                 <input type="file" (change)="uploadToOsm($event)" [style.display]="'none'" />
             </label>
         </div>
-        <div *ngFor="let trace of filteredTraces" class="item">
+        <div *ngFor="let trace of filteredTraces; trackBy:trackById" class="item">
             <div [ngClass]="{'active': selectedTraceId === trace.id}" (click)="toggleSelectedTrace(trace)">
                 <div class="flex flex-row" *ngIf="!isTraceInEditMode(trace.id)">
                     <div class="item-image">

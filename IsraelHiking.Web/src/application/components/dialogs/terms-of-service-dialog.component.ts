@@ -1,7 +1,5 @@
-import { Component } from "@angular/core";
-import { MatDialogRef } from "@angular/material/dialog";
+import { Component, inject } from "@angular/core";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { AuthorizationService } from "../../services/authorization.service";
 import { ToastService } from "../../services/toast.service";
@@ -10,17 +8,17 @@ import { ToastService } from "../../services/toast.service";
     selector: "terms-of-service-dialog",
     templateUrl: "./terms-of-service-dialog.component.html"
 })
-export class TermsOfServiceDialogComponent extends BaseMapComponent {
+export class TermsOfServiceDialogComponent {
     public wikimediaTermsOfServiceUrl: string;
-    public iAgree: boolean;
+    public iAgree: boolean = false;
 
-    constructor(resources: ResourcesService,
-                public dialogRef: MatDialogRef<TermsOfServiceDialogComponent>,
-                private authorizationService: AuthorizationService,
-                private toastService: ToastService) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
 
-        this.iAgree = false;
+    private readonly authorizationService = inject(AuthorizationService);
+    private readonly toastService = inject(ToastService);
+
+    constructor() {
+
         this.wikimediaTermsOfServiceUrl =
             `https://wikimediafoundation.org/wiki/Terms_of_Use/${this.resources.getCurrentLanguageCodeSimplified()}`;
     }

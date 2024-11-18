@@ -50,6 +50,15 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 
         [TestMethod]
         [Ignore]
+        public void SearchWithinPlace_WithLowFactor_ShouldReturnResults()
+        {
+            var results = _gateway.SearchByLocation(
+                new Coordinate(35.023903300000001, 32.248676099999997), new Coordinate(34.836766599999997, 32.003519799999999), "הסיבים", Languages.HEBREW).Result;
+            Assert.IsTrue(results.Any(f => f.Attributes.GetNames().Contains(FeatureAttributes.NAME) && f.Attributes[FeatureAttributes.NAME].ToString() == "הסיבים"));
+        }
+
+        [TestMethod]
+        [Ignore]
         public void GetHighways_ShouldReturnResults()
         {
             var northEast = new Coordinate(35.0516, 31.7553);
@@ -156,18 +165,9 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 
         [TestMethod]
         [Ignore]
-        public void GetPointsOfInterestUpdates_ShouldGetSome()
-        {
-            var results = _gateway.GetPointsOfInterestUpdates(DateTime.Now.AddDays(-50), DateTime.Now.AddDays(-45)).Result;
-
-            Assert.IsNotNull(results);
-        }
-
-        [TestMethod]
-        [Ignore]
         public void GetAllPointsOfInterest_ShouldGetThem()
         {
-            var results = _gateway.GetAllPointsOfInterest(false).Result;
+            var results = _gateway.GetAllPointsOfInterest().Result;
 
             Assert.IsNotNull(results);
         }

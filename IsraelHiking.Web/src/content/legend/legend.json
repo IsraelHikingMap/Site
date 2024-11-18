@@ -16,10 +16,10 @@
       {
         "key": "legendBlueMarkedTrail",
         "latlng": {
-          "lat": 32.56633,
-          "lng": 35.11137
+          "lat": 29.647,
+          "lng": 34.891
         },
-        "zoom": 17,
+        "zoom": 15,
         "type": "Way",
         "osmTags": [ "colour=blue" ],
         "link": "osm-key-link"
@@ -96,17 +96,6 @@
         "link": "osm-tag-link"
       },
       {
-        "key": "legendJerusalemTrail",
-        "latlng": {
-          "lat": 31.7681051,
-          "lng": 35.229898
-        },
-        "zoom": 16,
-        "type": "Way",
-        "osmTags": [ "Relation \"שביל ירושלים\"" ],
-        "link": "https://www.openstreetmap.org/relation/1314299"
-      },
-      {
         "key": "legendGolanTrail",
         "latlng": {
           "lat": 32.9979383,
@@ -120,10 +109,10 @@
       {
         "key": "legendKinneretTrail",
         "latlng": {
-          "lat": 32.8935159,
-          "lng": 35.629950
+          "lat": 32.8869,
+          "lng": 35.633
         },
-        "zoom": 16,
+        "zoom": 17,
         "type": "Way",
         "osmTags": [ "Relation \"שביל סובב כינרת\"" ],
         "link": "https://www.openstreetmap.org/relation/5145441"
@@ -180,8 +169,8 @@
       {
         "key": "legendAdvanced",
         "latlng": {
-          "lat": 32.5967000,
-          "lng": 35.135100
+          "lat": 32.6425,
+          "lng": 35.1115
         },
         "zoom": 16,
         "type": "Way",
@@ -191,10 +180,10 @@
       {
         "key": "legendChallengingWithDirection",
         "latlng": {
-          "lat": 33.198423,
-          "lng": 35.5491829
+          "lat": 31.7503,
+          "lng": 35.10555
         },
-        "zoom": 16,
+        "zoom": 18,
         "type": "Way",
         "osmTags": [ "mtb:scale=4 or mtb:scale=5" ],
         "link": "osm-key-link"
@@ -229,8 +218,8 @@
       {
         "key": "legendStrong4WDVehicles",
         "latlng": {
-          "lat": 30.590,
-          "lng": 34.824
+          "lat": 30.5892,
+          "lng": 34.819
         },
         "zoom": 15,
         "type": "Way",
@@ -262,8 +251,8 @@
       {
         "key": "legendFootPath",
         "latlng": {
-          "lat": 30.5360,
-          "lng": 34.781
+          "lat": 29.6482,
+          "lng": 34.9561
         },
         "zoom": 16,
         "type": "Way",
@@ -311,8 +300,8 @@
       {
         "key": "legendWadi",
         "latlng": {
-          "lat": 30.463327,
-          "lng": 34.8630524
+          "lat": 30.4617,
+          "lng": 34.847
         },
         "zoom": 16,
         "type": "Way",
@@ -333,10 +322,10 @@
       {
         "key": "legendLakeReservoir",
         "latlng": {
-          "lat": 33.142870,
-          "lng": 35.7321739
+          "lat": 33.1435,
+          "lng": 35.7896
         },
-        "zoom": 13,
+        "zoom": 13.20,
         "type": "POI",
         "osmTags": [ "landuse=reservoir" ],
         "link": "osm-tag-link"
@@ -344,8 +333,8 @@
       {
         "key": "legendSeasonalLake",
         "latlng": {
-          "lat": 32.248,
-          "lng": 34.852
+          "lat": 32.2545,
+          "lng": 34.8516
         },
         "zoom": 15,
         "type": "POI",
@@ -426,8 +415,8 @@
       {
         "key": "legendPavedRoad",
         "latlng": {
-          "lat": 32.4088604,
-          "lng": 34.946265
+          "lat": 32.407,
+          "lng": 34.967
         },
         "zoom": 13,
         "type": "Way",
@@ -493,7 +482,7 @@
         "key": "legendUnclassified",
         "latlng": {
           "lat": 31.731,
-          "lng": 34.610
+          "lng": 34.611
         },
         "zoom": 16,
         "type": "Way",
@@ -612,8 +601,8 @@
       {
         "key": "legendPeak",
         "latlng": {
-          "lat": 29.773536,
-          "lng": 34.976896
+          "lat": 29.7736,
+          "lng": 34.9768
         },
         "zoom": 16,
         "type": "POI",
@@ -667,8 +656,8 @@
       {
         "key": "legendTree",
         "latlng": {
-          "lat": 30.909059,
-          "lng": 34.7503607
+          "lat": 30.90925,
+          "lng": 34.75039
         },
         "zoom": 16,
         "type": "POI",
@@ -777,8 +766,8 @@
       {
         "key": "legendPowerLine",
         "latlng": {
-          "lat": 31.0381288,
-          "lng": 35.2023074
+          "lat": 31.0382,
+          "lng": 35.2038
         },
         "zoom": 16,
         "type": "Way",
@@ -840,7 +829,7 @@
           "lat": 31.744669,
           "lng": 35.0464806
         },
-        "zoom": 16,
+        "zoom": 17,
         "type": "Way",
         "osmTags": [ "barrier=fence" ],
         "link": "osm-tag-link"
@@ -848,10 +837,10 @@
       {
         "key": "legendWall",
         "latlng": {
-          "lat": 31.745796,
-          "lng": 35.1680724
+          "lat": 31.7479,
+          "lng": 35.1638
         },
-        "zoom": 16,
+        "zoom": 18,
         "type": "Way",
         "osmTags": [ "barrier=wall" ],
         "link": "osm-tag-link"
@@ -897,10 +886,10 @@
       {
         "key": "legendMilitaryArea",
         "latlng": {
-          "lat": 32.1405,
-          "lng": 35.4790
+          "lat": 29.5582,
+          "lng": 34.9153
         },
-        "zoom": 15,
+        "zoom": 16,
         "type": "Way",
         "osmTags": [ "landuse=military" ],
         "link": "osm-tag-link"
@@ -1023,8 +1012,8 @@
       {
         "key": "legendCampsite",
         "latlng": {
-          "lat": 29.9771,
-          "lng": 34.9874
+          "lat": 30.0526671,
+          "lng": 34.8084
         },
         "zoom": 16,
         "type": "POI",
@@ -1034,10 +1023,10 @@
       {
         "key": "legendDrinkingWater",
         "latlng": {
-          "lat": 31.2572354,
-          "lng": 35.1596253
+          "lat": 29.83256,
+          "lng": 34.9234
         },
-        "zoom": 16,
+        "zoom": 19,
         "type": "POI",
         "osmTags": [ "amenity=drinking_water" ],
         "link": "osm-tag-link"
@@ -1089,8 +1078,8 @@
       {
         "key": "legendConvenienceStore",
         "latlng": {
-          "lat": 32.43412,
-          "lng": 34.922373
+          "lat": 32.43417,
+          "lng": 34.92233
         },
         "zoom": 17,
         "type": "POI",
@@ -1160,8 +1149,8 @@
       {
         "key": "legendCitySettlement",
         "latlng": {
-          "lat": 32.0485,
-          "lng": 34.7704
+          "lat": 32.0442,
+          "lng": 34.7654
         },
         "zoom": 16,
         "type": "POI",
@@ -1226,10 +1215,10 @@
       {
         "key": "legendScrub",
         "latlng": {
-          "lat": 32.46835,
-          "lng": 34.92850
+          "lat": 32.4539,
+          "lng": 34.8930
         },
-        "zoom": 16,
+        "zoom": 16.2,
         "type": "POI",
         "osmTags": [ "natural=scrub" ],
         "link": "osm-tag-link"

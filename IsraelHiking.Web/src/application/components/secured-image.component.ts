@@ -1,4 +1,4 @@
-import { Component, OnChanges, Input,  } from "@angular/core";
+import { Component, OnChanges, input } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 import { HttpClient } from "@angular/common/http";
 import { BehaviorSubject, Observable } from "rxjs";
@@ -15,10 +15,9 @@ export class SecuredImageComponent implements OnChanges {
     // this makes sure that we can handle source changes
     // or even when the component gets destroyed
     // So basically turn src into src$
-    @Input()
-    public src = "";
+    public src = input<string>("");
 
-    private src$ = new BehaviorSubject(this.src);
+    private src$ = new BehaviorSubject(this.src());
 
     // this stream will contain the actual url that our img tag will load
     // everytime the src changes, the previous call would be canceled and the
@@ -28,7 +27,7 @@ export class SecuredImageComponent implements OnChanges {
     constructor(private httpClient: HttpClient, private domSanitizer: DomSanitizer) { }
 
     public ngOnChanges(): void {
-        this.src$.next(this.src);
+        this.src$.next(this.src());
     }
 
     private loadImage(url: string): Observable<any> {

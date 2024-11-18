@@ -1,4 +1,4 @@
-import { Component, Inject } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import {
     MatDialog,
     MatDialogRef,
@@ -6,7 +6,6 @@ import {
 } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
 
-import { BaseMapComponent } from "../base-map.component";
 import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
 import { PrivatePoiEditDialogComponent } from "./private-poi-edit-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -26,7 +25,7 @@ interface IPrivatePoiShowDialogData {
     selector: "private-poi-show-dialog",
     templateUrl: "private-poi-show-dialog.component.html"
 })
-export class PrivatePoiShowDialogComponent extends BaseMapComponent {
+export class PrivatePoiShowDialogComponent {
 
     private routeId: string;
     private index: number;
@@ -36,21 +35,24 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
     public url: LinkData;
     public title: string;
     public description: string;
-    public showCoordinates: boolean;
+    public showCoordinates: boolean = false;
 
-    constructor(resources: ResourcesService,
-                private readonly matDialog: MatDialog,
-                private readonly imageGalleryService: ImageGalleryService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly toastService: ToastService,
-                private readonly store: Store,
-                private readonly dialogRef: MatDialogRef<PrivatePoiShowDialogComponent>,
-                @Inject(MAT_DIALOG_DATA) data: IPrivatePoiShowDialogData) {
-        super(resources);
+    public readonly resources = inject(ResourcesService);
 
-        this.marker = data.marker;
-        this.routeId = data.routeId;
-        this.index = data.index;
+    private readonly matDialog = inject(MatDialog);
+    private readonly imageGalleryService = inject(ImageGalleryService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly toastService = inject(ToastService);
+    private readonly store = inject(Store);
+    private readonly dialogRef = inject(MatDialogRef);
+    private readonly data = inject<IPrivatePoiShowDialogData>(MAT_DIALOG_DATA);
+
+
+    constructor() {
+
+        this.marker = this.data.marker;
+        this.routeId = this.data.routeId;
+        this.index = this.data.index;
         this.title = this.marker.title;
         this.description = this.marker.description;
         this.imageLink = this.marker.urls.find(u => u.mimeType.startsWith("image"));
