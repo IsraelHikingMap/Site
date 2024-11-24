@@ -152,6 +152,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
                 this.fitBoundsService.fitBounds(bounds);
                 this.store.dispatch(new SetSelectedPoiAction(originalFeature));
                 if (data.source === RouteStrings.COORDINATES) {
+                    this.fullFeature = null;
                     this.close();
                 }
             }
