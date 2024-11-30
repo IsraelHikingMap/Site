@@ -88,7 +88,7 @@ export class PoiService {
     private queueIsProcessing: boolean = false;
     private offlineState: Immutable<OfflineState>;
 
-    public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Geometry, PoiProperties> = {
+    public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> = {
         type: "FeatureCollection",
         features: []
     };
@@ -286,7 +286,7 @@ export class PoiService {
      * @param id - the id of the poi, for example OSM_way_1234
      * @param poi - the point of interest to adjust
      */
-    private adjustGeolocationBasedOnTileDate(id: string, poi: GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>) {
+    private adjustGeolocationBasedOnTileData(id: string, poi: GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>) {
         if (poi.geometry.type === "Point") {
             return;
         }
@@ -300,7 +300,7 @@ export class PoiService {
         }
     }
 
-    private getPoisFromTiles(): GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>[] {
+    private getPoisFromTiles(): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
         let features: MapGeoJSONFeature[] = [];
         for (const source of Object.keys(PoiService.POIS_MAP)) {
             features = features.concat(this.mapService.map.querySourceFeatures(source, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer}));
@@ -311,7 +311,19 @@ export class PoiService {
             }
         }
         const hashSet = new Set();
-        let pois = features.map(feature => this.convertFeatureToPoi(feature, this.osmTileFeatureToPoiIdentifier(feature)))
+        let pois = features.map(feature => {
+            const poi = this.convertFeatureToPoi(feature, this.osmTileFeatureToPoiIdentifier(feature));
+            // convert to point for clustering
+            const pointFeature: GeoJSON.Feature<GeoJSON.Point, PoiProperties> = {
+                type: "Feature",
+                properties: {...poi.properties},
+                geometry: {
+                    type: "Point",
+                    coordinates: [poi.properties.poiGeolocation.lon, poi.properties.poiGeolocation.lat]
+                }
+            };
+            return pointFeature;
+        });
         pois = pois.filter(p => {
             if (hashSet.has(p.properties.poiId)) {
                 return false;
@@ -347,13 +359,16 @@ export class PoiService {
         poi.properties.identifier = poi.properties.identifier || id;
         poi.properties.poiSource = poi.properties.poiSource || "OSM";
         poi.properties.poiId = poi.properties.poiId || poi.properties.poiSource + "_" + poi.properties.identifier;
+        if (typeof poi.properties.poiGeolocation === "string") {
+            poi.properties.poiGeolocation = JSON.parse(poi.properties.poiGeolocation);
+        }
         poi.properties.poiGeolocation = poi.properties.poiGeolocation || this.getGeolocation(feature);
         poi.properties.poiLanguage = poi.properties.poiLanguage || "all";
         OsmTagsService.setIconColorCategory(feature, poi);
         return poi;
     }
 
-    private filterFeatures(features: GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>[]): GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>[] {
+    private filterFeatures(features: GeoJSON.Feature<GeoJSON.Point, PoiProperties>[]): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
         const visibleFeatures = [];
         const visibleCategories = this.getVisibleCategories();
         const language = this.resources.getCurrentLanguageCodeSimplified();
@@ -500,7 +515,7 @@ export class PoiService {
                     feature.geometry = SpatialService.mergeLines(longGeojson.features) as GeoJSON.Geometry;
                 }
                 const poi = this.convertFeatureToPoi(feature, id);
-                this.adjustGeolocationBasedOnTileDate(id, poi);
+                this.adjustGeolocationBasedOnTileData(id, poi);
                 this.poisCache.splice(0, 0, poi);
                 return cloneDeep(poi);
             } else if (source === "iNature") {

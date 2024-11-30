@@ -125,7 +125,7 @@ describe("Poi Service", () => {
         }
     )));
 
-    it("Should initialize and show pois tiles", (inject([PoiService, HttpTestingController, Store, RunningContextService, MapService],
+    it("Should initialize and show poi tiles, and update when changing language", (inject([PoiService, HttpTestingController, Store, RunningContextService, MapService],
         async (poiService: PoiService, mockBackend: HttpTestingController, store: Store, runningContextService: RunningContextService, mapServiceMock: MapService) => {
 
             store.reset({
@@ -194,12 +194,13 @@ describe("Poi Service", () => {
                 {
                     id: "21",
                     geometry: {
-                        type: "Point",
-                        coordinates: [0, 0]
+                        type: "MultiLineString",
+                        coordinates: [[[1, 1], [2, 2]]]
                     },
                     properties: {
                         natural: "spring",
-                        "name:he": "name"
+                        "name:he": "name",
+                        poiGeolocation: "{\"lat\": 1.1, \"lon\": 1.1 }"
                     }
                 }
             ] as any;
@@ -209,6 +210,8 @@ describe("Poi Service", () => {
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
             expect(poiService.poiGeojsonFiltered.features.length).toBe(2);
+            expect(poiService.poiGeojsonFiltered.features.every(f => f.geometry.type === "Point")).toBeTruthy();
+            expect(poiService.poiGeojsonFiltered.features[1].geometry.coordinates).toEqual([1.1, 1.1]);
 
             return promise;
         }

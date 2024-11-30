@@ -26,7 +26,7 @@ import type { ApplicationState, LatLngAlt, LinkData, Overlay } from "../../model
 export class LayersViewComponent implements OnInit {
     private static readonly MAX_MENU_POINTS_IN_CLUSTER = 7;
 
-    public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
+    public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public selectedPoiFeature: GeoJSON.Feature<GeoJSON.Point> = null;
     public selectedPoiGeoJson: Immutable<GeoJSON.FeatureCollection> = {
         type: "FeatureCollection",

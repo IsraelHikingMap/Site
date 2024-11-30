@@ -36,8 +36,8 @@
 <mgl-popup *ngIf="selectedCluster" [lngLat]="selectedCluster.geometry.coordinates" (popupClose)="clearSelectedClusterPopup()" [closeOnClick]="true">
     <cluster-overlay [features]="clusterFeatures" (closed)="clearSelectedClusterPopup()"></cluster-overlay>
 </mgl-popup>
-<mgl-popup *ngIf="hoverFeature && !isCoordinatesFeature(hoverFeature)" [lngLat]="hoverFeature.geometry.coordinates" [closeButton]="false" [offset]="[0, -30]">
-    <span [dir]="resources.getDirection(getTitle(hoverFeature))">{{getTitle(hoverFeature)}}</span>
+<mgl-popup *ngIf="hoverFeature && !isCoordinatesFeature(hoverFeature)" [lngLat]="hoverFeature.geometry.coordinates" [closeButton]="false" [offset]="[0, -30]" class="text-right">
+    <div [dir]="resources.getDirection(getTitle(hoverFeature))">{{getTitle(hoverFeature)}}</div>
 </mgl-popup>
 <mgl-popup *ngIf="isShowCoordinatesPopup && selectedPoiFeature && isCoordinatesFeature(selectedPoiFeature)" [lngLat]="selectedPoiFeature.geometry.coordinates" [offset]="[0, -30]" (popupClose)="isShowCoordinatesPopup = false">
     <div class="flex flex-row">
