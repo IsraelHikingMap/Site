@@ -18,14 +18,17 @@ on:
         description: 'Publish to Google play'
         required: false
         default: 'false'
+        type: boolean
       publishios:
         description: 'Publish to App Store'
         required: false
         default: 'false'
+        type: boolean
       tag:
-        description: 'Tags and create a Github release'
+        description: 'Tag and create a Github release'
         required: false
         default: 'false'
+        type: boolean
 jobs:
   version:
     runs-on: ubuntu-latest
