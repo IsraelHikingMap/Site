@@ -1,5 +1,5 @@
 import { inject, Injectable } from "@angular/core";
-import { HttpClient, HttpParams } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
