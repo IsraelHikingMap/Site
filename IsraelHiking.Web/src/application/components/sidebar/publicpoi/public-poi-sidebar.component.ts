@@ -19,6 +19,8 @@ import { RunningContextService } from "../../../services/running-context.service
 import { SidebarService } from "../../../services/sidebar.service";
 import { NavigateHereService } from "../../../services/navigate-here.service";
 import { GpxDataContainerConverterService } from "../../../services/gpx-data-container-converter.service";
+import { OsmAddressesService } from "../../../services/osm-addresses.service";
+import { ElevationProvider } from "../../../services/elevation.provider";
 import { GeoJsonParser } from "../../../services/geojson.parser";
 import { sidebarAnimate } from "../sidebar.component";
 import { AddRouteAction, AddPrivatePoiAction } from "../../../reducers/routes.reducer";
@@ -32,7 +34,6 @@ import type {
     Contribution,
     LatLngAltTime
 } from "../../../models/models";
-import { OsmAddressesService } from "application/services/osm-addresses.service";
 
 export type SourceImageUrlPair = {
     imageUrl: string;
@@ -79,6 +80,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     private readonly navigateHereService = inject(NavigateHereService);
     private readonly geoJsonParser = inject(GeoJsonParser);
     private readonly socialSharing = inject(SocialSharing);
+    private readonly elevasionProvider = inject(ElevationProvider);
     private readonly store = inject(Store);
 
     constructor() {
@@ -292,11 +294,12 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         }
     }
 
-    public convertToRoute() {
+    public async convertToRoute() {
         const routes = this.geoJsonParser.toRoutes(this.fullFeature as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString>);
         for (const route of routes) {
             const name = this.selectedRouteService.createRouteName(route.name);
             const newRoute = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
+            await this.elevasionProvider.updateHeights(route.latlngs);
             newRoute.description = this.info.description;
             newRoute.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs as LatLngAltTime[], "Hike");
             this.store.dispatch(new AddRouteAction(newRoute));
