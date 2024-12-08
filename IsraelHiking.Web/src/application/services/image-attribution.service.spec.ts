@@ -33,7 +33,7 @@ describe("ImageAttributionService", () => {
         expect(response.url).toBe("https://www.example.com");
     }));
 
-    it("should fetch data from wikipedia when getting wikimedia image", inject([ImageAttributionService, HttpTestingController],
+    it("should fetch data from wikimedia when getting wikimedia image", inject([ImageAttributionService, HttpTestingController],
         async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
         const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
         mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
@@ -57,6 +57,32 @@ describe("ImageAttributionService", () => {
         expect(response).not.toBeNull();
         expect(response.author).toBe("hello");
         expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:IHM_Image.jpeg");
+    }));
+
+    it("should fetch data from wikimedia when getting wikimedia file", inject([ImageAttributionService, HttpTestingController],
+        async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
+        const promise = service.getAttributionForImage("File:123.jpeg");
+        mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
+            query: {
+                pages: {
+                    "-1": {
+                        imageinfo: [{
+                            extmetadata: {
+                                Artist: {
+                                    value: "hello"
+                                }
+                            }
+                        }]
+                    }
+                }
+            }
+        });
+
+        const response = await promise;
+
+        expect(response).not.toBeNull();
+        expect(response.author).toBe("hello");
+        expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:123.jpeg");
     }));
 
     it("should remove html tags and get the value inside", inject([ImageAttributionService, HttpTestingController],
