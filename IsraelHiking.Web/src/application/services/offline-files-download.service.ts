@@ -38,6 +38,36 @@ export class OfflineFilesDownloadService {
         }
     }
 
+    public async downloadSlicedOfflineMaps() {
+        const fileNames = [
+            "global+7-67-45.pmtiles", 
+            "global+7-67-46.pmtiles",
+            "global+7-68-45.pmtiles",
+            "global+7-68-46.pmtiles",
+            "global+7-69-45.pmtiles",
+            "global+7-69-46.pmtiles",
+            "global+7-76-51.pmtiles",
+            "global+7-76-52.pmtiles",
+            "global+7-76-53.pmtiles",
+            "global-6.pmtiles"
+        ];
+        this.toastService.progress({
+            action: async (progress) => {
+                const length = Object.keys(fileNames).length;
+                for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
+                    const fileName = fileNames[fileNameIndex];
+                    await this.fileService.downloadFileToCacheAuthenticated(`https://israelhiking.osm.org.il/extracts/${fileName}`, fileName, "",
+                        (value) => progress((value + fileNameIndex) * 100.0 / length));
+                    await this.fileService.moveFileFromCacheToDataDirectory(fileName);
+                }
+            },
+            showContinueButton: false,
+            continueText: ""
+        });
+        
+        
+    }
+
     public async downloadOfflineMaps(showMessage = true): Promise<void> {
         this.loggingService.info("[Offline Download] Starting downloading offline files");
         try {

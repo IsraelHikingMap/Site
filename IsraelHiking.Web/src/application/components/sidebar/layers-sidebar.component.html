@@ -8,6 +8,9 @@
     <div class="flex flex-row justify-center" *ngIf="isOfflineDownloadAvailable()">
         <button mat-raised-button color="primary" (click)="downloadOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Download offline maps"><i class="fa icon-download"></i> {{resources.infoDownloadMapForOfflineUse}}</button>
     </div>
+    <div class="flex flex-row justify-center" *ngIf="isOfflineDownloadAvailable()">
+        <button mat-raised-button color="primary" (click)="downloadSlicedOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Download offline maps"><i class="fa icon-download"></i> Sliced Offline</button>
+    </div>
     <mat-accordion multi="true">
         <mat-expansion-panel [expanded]="getExpandState('Base Layers')" (opened)="expand('Base Layers')" (closed)="collapse('Base Layers')">
             <mat-expansion-panel-header>

@@ -179,6 +179,10 @@ export class LayersSidebarComponent {
         this.offlineFilesDownloadService.downloadOfflineMaps();
     }
 
+    public downloadSlicedOfflineMaps() {
+        this.offlineFilesDownloadService.downloadSlicedOfflineMaps();
+    }
+
     public toggleOffline(event: Event, layer: EditableLayer, isOverlay: boolean) {
         event.stopPropagation();
         if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate == null && !layer.isOfflineOn) {

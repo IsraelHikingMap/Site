@@ -94,6 +94,45 @@ export class DatabaseService {
             const data = await this.pmTilesService.getTile(params.url);
             return {data};
         });
+        addProtocol("slice", async (params, _abortController) => {
+            // slice://israelhiking.osm.org.il/vector/data/planet/{z}/{x}/{y}.mvt
+            try {
+                this.loggingService.debug(`[Database] Fetching ${params.url}`);
+                const response = await fetch(params.url.replace("slice://", "https://"), {
+                    method: "GET",
+                    signal: AbortSignal.any([_abortController.signal, AbortSignal.timeout(2000)])
+                });
+                const data = await response.arrayBuffer();
+                return {data, cacheControl: response.headers.get("Cache-Control"), expires: response.headers.get("Expires")};
+            } catch (ex) {
+                this.loggingService.debug(`[Database] Failed fetching with error: ${(ex as any).message}: ${params.url}`);
+                // Timeout or other error
+                if (!this.store.snapshot().offlineState.isOfflineAvailable) {
+                    throw ex;
+                }
+                const splitUrl = params.url.split("/");
+                const type = splitUrl[splitUrl.length - 4];
+                const z = +splitUrl[splitUrl.length - 3];
+                const x = +splitUrl[splitUrl.length - 2];
+                const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
+                // find the tile x, y, for zoom 7:
+                if (z >= 7) {
+                    const targetZoom = 7;
+                    const scale = Math.pow(2, z - targetZoom);
+                    const tileXZoom7 = Math.floor(x / scale);
+                    const tileYZoom7 = Math.floor(y / scale);
+                    const fileName = `${type}+7-${tileXZoom7}-${tileYZoom7}.pmtiles`;
+                    const data = await this.pmTilesService.getTileFromFile(fileName, z, x, y);
+                    this.loggingService.debug(`[Database] got tile for ${z}/${x}/${y} from ${fileName}`);
+                    return { data };
+                } else {
+                    const fileName = `${type}-6.pmtiles`;
+                    const data = await this.pmTilesService.getTileFromFile(fileName, z, x, y);
+                    this.loggingService.debug(`[Database] got tile for ${z}/${x}/${y} from ${fileName}`);
+                    return { data };
+                }
+            }
+        });
     }
 
     public async uninitialize() {
