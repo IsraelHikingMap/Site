@@ -10,14 +10,27 @@ type WikiDataPage = {
     statements: { [key: string]: { value: { content: any } }[] };
 }
 
-type WikipediaPage = {
+export type WikiPage = {
     query: {
         pages: {
             [key: string]: {
                 extract: string,
                 original?: {
                     source: string
-                }
+                };
+                imageinfo: {
+                    extmetadata: {
+                        Artist?: {
+                            value: string;
+                        };
+                        Attribution?: {
+                            value: string;
+                        };
+                        LicenseShortName?: {
+                            value: string;
+                        }
+                    };
+                }[];
             }
         },
     }
@@ -76,14 +89,15 @@ export class WikidataService {
             const indexString = GeoJSONUtils.setProperty(feature, "website", `https://${language}.wikipedia.org/wiki/${title}`);
             feature.properties["poiSourceImageUrl" + indexString] = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/128px-Wikipedia-logo-v2.svg.png";
         }
-        const wikipediaPage = await firstValueFrom(this.httpClient.get(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&explaintext=&titles=${title}&origin=*`).pipe(timeout(3000))) as unknown as WikipediaPage;
+        const wikipediaPage = await firstValueFrom(this.httpClient.get(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&explaintext=&titles=${title}&origin=*`).pipe(timeout(3000))) as unknown as WikiPage;
         const pagesIds = Object.keys(wikipediaPage.query.pages);
-        if (pagesIds.length > 0) {
-            const page = wikipediaPage.query.pages[pagesIds[0]];
-            feature.properties.poiExternalDescription = page.extract;
-            if (page.original?.source) {
-                GeoJSONUtils.setProperty(feature, "image", page.original.source);
-            }
+        if (pagesIds.length === 0) {
+            return;
+        }
+        const page = wikipediaPage.query.pages[pagesIds[0]];
+        feature.properties.poiExternalDescription = page.extract;
+        if (page.original?.source) {
+            GeoJSONUtils.setProperty(feature, "image", page.original.source);
         }
     }
 
