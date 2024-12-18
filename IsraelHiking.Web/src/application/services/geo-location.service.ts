@@ -63,7 +63,7 @@ export class GeoLocationService {
             this.loggingService.debug(`[GeoLocation] Now in ${this.isBackground ? "back" : "fore"}ground`);
             if (state.isActive) {
                 if (!this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording) {
-                    this.startBackgroundGeolocation();
+                    this.startWatching();
                 }
                 this.ngZone.run(async () => {
                     await this.onLocationUpdate();
