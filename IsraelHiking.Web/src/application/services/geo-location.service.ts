@@ -63,7 +63,6 @@ export class GeoLocationService {
             this.loggingService.debug(`[GeoLocation] Now in ${this.isBackground ? "back" : "fore"}ground`);
             if (state.isActive) {
                 if (!this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording) {
-                    this.getRoughPosition();
                     this.startBackgroundGeolocation();
                 }
                 this.ngZone.run(async () => {
@@ -105,18 +104,8 @@ export class GeoLocationService {
         }
     }
 
-    private getRoughPosition() {
-        if (window.navigator && window.navigator.geolocation) {
-            // Upon starting location watching get the current position as fast as we can, even if not accurate.
-            window.navigator.geolocation.getCurrentPosition((position: GeolocationPosition) => {
-                this.handlePositionChange(position);
-            }, () => {}, { timeout: GeoLocationService.SHORT_TIME_OUT });
-        }
-    }
-
     private startWatching() {
         this.store.dispatch(new SetTrackingStateAction("searching"));
-        this.getRoughPosition();
         if (this.runningContextService.isCapacitor) {
             this.startBackgroundGeolocation();
         } else {
@@ -147,10 +136,9 @@ export class GeoLocationService {
             });
     }
 
-    private startBackgroundGeolocation() {
+    private async startBackgroundGeolocation() {
         if (this.wasInitialized) {
-            this.loggingService.info("[GeoLocation] Starting background tracking");
-            BackgroundGeolocation.start();
+            this.startBackgroundGeolocationWithRoughPosition();
             return;
         }
         this.loggingService.info("[GeoLocation] Initializing background tracking");
@@ -198,7 +186,27 @@ export class GeoLocationService {
                 this.toastService.warning(this.resources.unableToFindYourLocation);
                 this.disable();
             });
+        
+        this.startBackgroundGeolocationWithRoughPosition();
+    }
+
+    private async startBackgroundGeolocationWithRoughPosition() {
+        this.loggingService.info("[GeoLocation] Starting background tracking");
         BackgroundGeolocation.start();
+
+        if (window.navigator?.geolocation == null) {
+            return;
+        }
+        const status = await BackgroundGeolocation.checkStatus();
+        if (status.authorization === BackgroundGeolocation.NOT_AUTHORIZED) {
+            return;
+        }
+        window.navigator.geolocation.getCurrentPosition((position: GeolocationPosition) => {
+            // Upon starting location watching get the current position as fast as we can, even if not accurate, only update if we didn't reveice a location already.
+            if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "searching") {
+                this.handlePositionChange(position);
+            }
+        }, () => {}, { timeout: GeoLocationService.SHORT_TIME_OUT });
     }
 
     private async onLocationUpdate() {
