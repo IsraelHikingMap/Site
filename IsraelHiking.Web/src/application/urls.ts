@@ -31,6 +31,7 @@ export class Urls {
     public static readonly waze = "https://www.waze.com/ul?navigate=yes&zoom=17&ll=";
     public static readonly osmBase = "https://www.openstreetmap.org";
     public static readonly osmAuth = Urls.osmBase + "/oauth2";
+    public static readonly nominatim = "https://nominatim.openstreetmap.org/search?format=json&limit=10&q=";
 
     public static readonly DEFAULT_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/IHM.json";
     public static readonly MTB_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/ilMTB.json";

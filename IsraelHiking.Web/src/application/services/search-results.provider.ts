@@ -3,17 +3,25 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 
-import { PoiService } from "./poi.service";
 import { CoordinatesService } from "./coordinates.service";
 import { RouteStrings, getIdFromLatLng } from "./hash.service";
 import { Urls } from "../urls";
 import type { SearchResultsPointOfInterest } from "../models/models";
 
+type NominatimResponse = {
+    display_name: string;
+    lat: string;
+    lon: string;
+    type: string;
+    name: string;
+    osm_id: string;
+    osm_type: string;
+};
+
 @Injectable()
 export class SearchResultsProvider {
 
     private readonly httpClient = inject(HttpClient);
-    private readonly poiService = inject(PoiService);
     private readonly coordinatesService = inject(CoordinatesService);
 
     public async getResults(searchTerm: string, isHebrew: boolean): Promise<SearchResultsPointOfInterest[]> {
@@ -33,11 +41,23 @@ export class SearchResultsProvider {
             }];
         }
         const language = isHebrew ? "he" : "en";
-        const params = new HttpParams().set("language", language);
-        const response = await firstValueFrom(this.httpClient.get(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
-            params
-        }).pipe(timeout(3000)));
-        return response as SearchResultsPointOfInterest[];
-        // HM TODO: think if there's a way to have offline search results
+        const response = await firstValueFrom(this.httpClient.get(Urls.nominatim + encodeURIComponent(searchWithoutBadCharacters), {
+            headers: {
+                "Accept-Language": language
+            }
+        }).pipe(timeout(3000))) as any as NominatimResponse[];
+        return response.map((r: NominatimResponse) => {
+            const latlng = { lat: +r.lat, lng: +r.lon };
+            return {
+                id: r.osm_type + "_" + r.osm_id,
+                displayName: r.display_name,
+                title: r.name,
+                source: "OSM",
+                icon: "icon-marker",
+                iconColor: "black",
+                location: latlng,
+                description: "",
+            };
+        });
     }
 }
