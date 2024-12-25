@@ -47,7 +47,8 @@
               "photoswipe-ui-default",
               "invert-color",
               "lottie-web",
-              "detect-node"
+              "detect-node",
+              "rbush"
             ],
             "vendorChunk": true,
             "extractLicenses": false,

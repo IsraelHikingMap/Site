@@ -9,7 +9,8 @@
                 [visible]="overlay.visible"
                 [before]="resources.endOfOverlays"
                 [isBaselayer]="false"
-                [isMainMap]="true">
+                [isMainMap]="true"
+                [isSameBaselayerOn]="isSameBaselayerOn(overlay)">
     </auto-layer>
 </div>
 <mgl-geojson-source #clusterSource
