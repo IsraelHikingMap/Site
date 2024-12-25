@@ -31,6 +31,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     public isBaselayer = input<boolean>();
     public layerData = input<EditableLayer>();
     public isMainMap = input<boolean>();
+    public isSameBaselayerOn = input<boolean>(false);
 
     private rasterSourceId: string;
     private rasterLayerId: string;
@@ -155,24 +156,25 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     }
 
     private updateSourcesAndLayers(layerData: LayerData, sources: {[_: string]: SourceSpecification}, layers: LayerSpecification[]) {
+        if (!this.visible()) {
+            return;
+        }
         let attributiuonUpdated = false;
         for (let sourceKey of Object.keys(sources)) {
-            if (Object.prototype.hasOwnProperty.call(sources, sourceKey) && this.visible()) {
-                const source = sources[sourceKey];
-                if (!this.isBaselayer()) {
-                    sourceKey = layerData.key + "_" + sourceKey;
-                }
-                if (source.type === "vector") {
-                    source.attribution = attributiuonUpdated === false ? AutomaticLayerPresentationComponent.ATTRIBUTION : "";
-                    attributiuonUpdated = true;
-                }
-
-                this.mapComponent.mapInstance.addSource(sourceKey, source);
-                this.jsonSourcesIds.push(sourceKey);
+            const source = sources[sourceKey];
+            if (!this.isBaselayer()) {
+                sourceKey = layerData.key + "_" + sourceKey;
             }
+            if (source.type === "vector") {
+                source.attribution = attributiuonUpdated === false ? AutomaticLayerPresentationComponent.ATTRIBUTION : "";
+                attributiuonUpdated = true;
+            }
+
+            this.mapComponent.mapInstance.addSource(sourceKey, source);
+            this.jsonSourcesIds.push(sourceKey);
         }
         for (const layer of layers) {
-            if (!this.visible() || (!this.isBaselayer() && layer.metadata && !(layer.metadata as any)["IHM:overlay"])) {
+            if (!this.isBaselayer() && layer.metadata && !(layer.metadata as any)["IHM:overlay"]) {
                 continue;
             }
             if (!this.isBaselayer()) {
@@ -226,7 +228,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             if (oldLayer != null) {
                 this.removeLayer(oldLayer);
             }
-            if (newLayer != null) {
+            if (newLayer != null && !this.isSameBaselayerOn()) {
                 await this.createLayer(newLayer);
             }
         });

@@ -172,4 +172,8 @@ export class LayersViewComponent implements OnInit {
         this.navigateHereService.addNavigationSegment(this.getSelectedFeatureLatlng());
         this.clearSelected();
     }
+
+    public isSameBaselayerOn(overlay: Overlay) {
+        return overlay.address === this.getBaseLayer()?.address;
+    }
 }
