@@ -19,6 +19,12 @@ describe("GeoJsonUtils", () => {
         expect(feature.properties.name2).toBe("name2");
     });
 
+    it("should not set a value when unique is requested", () => {
+        const feature = {properties: {name: "name1"}} as any as GeoJSON.Feature;
+        GeoJSONUtils.setPropertyUnique(feature, "name", "name1");
+        expect(feature.properties.name1).toBeUndefined()
+    });
+
     it("should get extenal description for hebrew", () => {
         const results = GeoJSONUtils.getExternalDescription(
             {properties: { "poiExternalDescription:he": "desc"}} as any as GeoJSON.Feature, "he");
