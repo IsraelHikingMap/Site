@@ -3,7 +3,7 @@ import { LatLngAlt } from "../models/models";
 
 export class GeoJSONUtils {
     public static setPropertyUnique(feature: GeoJSON.Feature, key: string, value: string) {
-        let hasValue = Object.keys(feature.properties).filter(k => k.includes(key)).some(k => feature.properties[k] === value);
+        const hasValue = Object.keys(feature.properties).filter(k => k.includes(key)).some(k => feature.properties[k] === value);
         if (!hasValue) {
             GeoJSONUtils.setProperty(feature, key, value);
         }
