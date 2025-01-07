@@ -9,13 +9,17 @@
       "projectType": "application",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "wwwroot",
+            "outputPath": {
+              "base": "wwwroot",
+              "browser": ""
+            },
             "index": "src/index.html",
-            "main": "src/main.ts",
             "tsConfig": "./tsconfig.app.json",
-            "polyfills": "src/polyfills.ts",
+            "polyfills": [
+              "src/polyfills.ts"
+            ],
             "assets": [
               "src/content",
               "src/translations",
@@ -48,14 +52,25 @@
               "invert-color",
               "lottie-web",
               "detect-node",
-              "rbush"
+              "rbush",
+              "maplibre-gl",
+              "@mapbox/vector-tile",
+              "pbf",
+              "@mapbox/polyline",
+              "linear-interpolator",
+              "osmtogeojson",
+              "piexifjs",
+              "deepmerge",
+              "cordova-plugin-purchase",
+              "xml-beautify",
+              "d3-regression",
+              "platform"
             ],
-            "vendorChunk": true,
             "extractLicenses": false,
-            "buildOptimizer": false,
             "sourceMap": true,
             "optimization": false,
-            "namedChunks": true
+            "namedChunks": true,
+            "browser": "src/main.ts"
           },
           "configurations": {
             "production": {
@@ -70,8 +85,6 @@
               "sourceMap": false,
               "namedChunks": false,
               "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -91,9 +104,10 @@
               "sourceMap": false,
               "namedChunks": false,
               "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
-              "outputPath": "www",
+              "outputPath": {
+                "base": "www",
+                "browser": ""
+              },
               "baseHref": "./",
               "fileReplacements": [
                 {
@@ -112,8 +126,10 @@
               "namedChunks": false,
               "aot": false,
               "extractLicenses": true,
-              "vendorChunk": false,
-              "outputPath": "www",
+              "outputPath": {
+                "base": "www",
+                "browser": ""
+              },
               "baseHref": "./",
               "fileReplacements": [
                 {
