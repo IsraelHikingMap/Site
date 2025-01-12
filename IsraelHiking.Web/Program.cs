@@ -83,7 +83,9 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     {
         Directory.CreateDirectory("./Cache");    
     }
-    services.AddSqliteCache("./Cache/cache.sqlite");
+    services.AddSqliteCache(options => {
+        options.CachePath = "./Cache/cache.sqlite";
+    });
     services.AddSingleton<OsmAccessTokenEventsHelper>();
     services.AddSingleton<IClientsFactory>(serviceProvider =>
         new ClientsFactory(serviceProvider.GetRequiredService<ILogger>(),
