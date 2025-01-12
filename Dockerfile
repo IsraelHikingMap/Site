@@ -21,7 +21,7 @@ RUN apt-get update -y --allow-unauthenticated --allow-insecure-repositories && a
 
 WORKDIR /israelhiking
 
-COPY --from=build-net /net/IsraelHiking.Web/bin/Debug/net9.0/publish ./
+COPY --from=build-net /net/IsraelHiking.Web/bin/Release/net9.0/publish ./
 COPY --from=build-node /angular/wwwroot ./wwwroot
 
 HEALTHCHECK --interval=5s --timeout=3s --start-period=40s CMD curl --fail http://localhost:80/api/health || exit 1
