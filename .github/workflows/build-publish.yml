@@ -267,6 +267,7 @@ jobs:
         run: |
           mv ${{ github.workspace }}/artifacts/*.ipa ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.ipa
           mv ${{ github.workspace }}/artifacts/*.aab ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.aab
+          mv ${{ github.workspace }}/artifacts/*.apk ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.apk
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
@@ -277,3 +278,4 @@ jobs:
           files: |
             IHM_signed_${{ needs.version.outputs.version_string }}.ipa
             IHM_signed_${{ needs.version.outputs.version_string }}.aab
+            IHM_signed_${{ needs.version.outputs.version_string }}.apk
