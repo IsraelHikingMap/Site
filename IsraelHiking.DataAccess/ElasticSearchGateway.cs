@@ -290,6 +290,8 @@ public class PointDocument
     public string PoiIcon { get; set; }
     [JsonPropertyName("poiIconColor")]
     public string PoiIconColor { get; set; }
+    [JsonPropertyName("poiSource")]
+    public string poiSource { get; set; }
     [JsonPropertyName("location")]
     public double[] Location { get; set; }
 }
@@ -494,14 +496,14 @@ namespace IsraelHiking.DataAccess
                 IFeature feature = new Feature(new Point(d.Source.Location[0], d.Source.Location[1]), new AttributesTable
                 {
                     { FeatureAttributes.NAME, d.Source.Name.TryGetValue(language, out var value) ? value : d.Source.Name[Languages.ENGLISH]},
-                    { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                    { FeatureAttributes.POI_SOURCE, d.Source.poiSource },
                     { FeatureAttributes.POI_ICON, d.Source.PoiIcon },
                     { FeatureAttributes.POI_CATEGORY, d.Source.PoiCategory },
                     { FeatureAttributes.POI_ICON_COLOR, d.Source.PoiIconColor },
                     { FeatureAttributes.DESCRIPTION, d.Source.Description },
                     { FeatureAttributes.POI_ID, d.Id },
                     { FeatureAttributes.POI_LANGUAGE, Languages.ALL },
-                    { FeatureAttributes.ID, d.Id.Replace("OSM_", "") }
+                    { FeatureAttributes.ID, d.Id.Replace(d.Source.poiSource + "_", "") }
                 });
                 feature.SetTitles();
                 feature.SetLocation(new Coordinate(d.Source.Location[0], d.Source.Location[1]));
