@@ -35,6 +35,22 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
             var results = _gateway.Search("מנות", "name").Result;
             Assert.AreEqual(10, results.Count);
         }
+        
+        [TestMethod]
+        [Ignore]
+        public void SearchPoints_ShouldReturnResults()
+        {
+            var results = _gateway.SearchPoints("מנןת", "he").Result;
+            Assert.AreEqual(9, results.Count);
+        }
+        
+        [TestMethod]
+        [Ignore]
+        public void GetContainerName_ShouldReturnResults()
+        {
+            var results = _gateway.GetContainerName(new Coordinate(35.225306, 32.703806), "he").Result;
+            Assert.AreEqual("a", results);
+        }
 
         [TestMethod]
         [Ignore]
@@ -42,9 +58,9 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         {
             var placesFeatures = _gateway.SearchPlaces("תמרת", Languages.HEBREW).Result;
             Assert.AreEqual(5, placesFeatures.Count);
-            var envolope = placesFeatures.First().Geometry.EnvelopeInternal;
+            var envelope = placesFeatures.First().Geometry.EnvelopeInternal;
             var results = _gateway.SearchByLocation(
-                new Coordinate(envolope.MaxX, envolope.MaxY), new Coordinate(envolope.MinX, envolope.MinY), "מורן", Languages.HEBREW).Result;
+                new Coordinate(envelope.MaxX, envelope.MaxY), new Coordinate(envelope.MinX, envelope.MinY), "מורן", Languages.HEBREW).Result;
             Assert.AreEqual(1, results.Count);
         }
 

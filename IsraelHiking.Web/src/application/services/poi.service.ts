@@ -70,14 +70,14 @@ type SourceLayerAndJson = {
 export class PoiService {
 
     private static readonly POIS_MAP: Record<string, SourceLayerAndJson> = {
-        "points-of-interest": { sourceLayer: "public_pois", source: {
+        "points-of-interest": { sourceLayer: "global_points", source: {
             type: "vector",
-            url: "https://israelhiking.osm.org.il/vector/data/public_pois.json"
+            url: "http://localhost:7777/global_points.json"
         } },
-        "trail-points-of-interest": { sourceLayer: "trail_pois", source: {
-            type: "vector",
-            url: "https://israelhiking.osm.org.il/vector/data/trail_pois.json"
-        } },
+        //"trail-points-of-interest": { sourceLayer: "trail_pois", source: {
+        //    type: "vector",
+        //    url: "https://israelhiking.osm.org.il/vector/data/trail_pois.json"
+        //} },
         "external-points-of-interest": { sourceLayer: "external", source: {
             type: "vector",
             url: "https://israelhiking.osm.org.il/vector/data/external.json"

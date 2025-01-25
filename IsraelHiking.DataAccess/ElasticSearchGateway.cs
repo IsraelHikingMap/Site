@@ -278,6 +278,30 @@ public class SystemTextJsonSerializer : IElasticsearchSerializer
     }
 }
 
+public class PointDocument
+{
+    [JsonPropertyName("name")]
+    public Dictionary<string, string> Name { get; set; }
+    [JsonPropertyName("description")]
+    public Dictionary<string, string> Description { get; set; }
+    [JsonPropertyName("poiCategory")]
+    public string PoiCategory { get; set; }
+    [JsonPropertyName("poiIcon")]
+    public string PoiIcon { get; set; }
+    [JsonPropertyName("poiIconColor")]
+    public string PoiIconColor { get; set; }
+    [JsonPropertyName("location")]
+    public double[] Location { get; set; }
+}
+
+public class BBoxDocument
+{
+    [JsonPropertyName("name")]
+    public Dictionary<string, string> Name { get; set; }
+    [JsonPropertyName("area")]
+    public double Area { get; set; }
+}
+
 namespace IsraelHiking.DataAccess
 {
     public class ElasticSearchGateway :
@@ -439,6 +463,52 @@ namespace IsraelHiking.DataAccess
             return response.Documents.ToList();
         }
 
+        public async Task<List<IFeature>> SearchPoints(string searchTerm, string language)
+        {
+            var response = await _elasticClient.SearchAsync<PointDocument>(
+                s => s.Index("points")
+                    .Size(30)
+                    .TrackScores()
+                    .Sort(f => f.Descending("_score"))
+                    .Query(q =>
+                        q.DisMax(dm =>
+                            dm.Queries(sh =>
+                                sh.MatchPhrase(m =>
+                                    m.Query(searchTerm)
+                                        .Field("name." + language + ".keyword")
+                                        .Boost(5)
+                                ),
+                                sh => sh.Match(m =>
+                                    m.Query(searchTerm)
+                                        .Field("name." + language)
+                                        .Fuzziness(Fuzziness.Auto)
+                                )
+                            )
+                        )
+                    )
+            );
+            var docs = response.Hits.ToList();
+            _logger.LogInformation($"Got {docs.Count} points for search term: {searchTerm}");
+            return docs.Select(d =>
+            {
+                IFeature feature = new Feature(new Point(d.Source.Location[0], d.Source.Location[1]), new AttributesTable
+                {
+                    { FeatureAttributes.NAME, d.Source.Name.TryGetValue(language, out var value) ? value : d.Source.Name[Languages.ENGLISH]},
+                    { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                    { FeatureAttributes.POI_ICON, d.Source.PoiIcon },
+                    { FeatureAttributes.POI_CATEGORY, d.Source.PoiCategory },
+                    { FeatureAttributes.POI_ICON_COLOR, d.Source.PoiIconColor },
+                    { FeatureAttributes.DESCRIPTION, d.Source.Description },
+                    { FeatureAttributes.POI_ID, d.Id },
+                    { FeatureAttributes.POI_LANGUAGE, Languages.ALL },
+                    { FeatureAttributes.ID, d.Id.Replace("OSM_", "") }
+                });
+                feature.SetTitles();
+                feature.SetLocation(new Coordinate(d.Source.Location[0], d.Source.Location[1]));
+                return feature;
+            }).ToList();
+        }
+
         public async Task<List<IFeature>> SearchExact(string searchTerm, string language)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
@@ -512,6 +582,22 @@ namespace IsraelHiking.DataAccess
                         && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CONTAINER}").Value(true)))
             );
             return response.Documents.ToList();
+        }
+
+        public async Task<string> GetContainerName(Coordinate coordinate, string language)
+        {
+            var response = await _elasticClient.SearchAsync<BBoxDocument>(
+                s => s.Index("bbox")
+                    .Size(1)
+                    .Sort(f => f.Ascending(a => a.Area))
+                    .Query(q =>
+                        q.GeoShape(g =>
+                            g.Shape(sh => sh.Point(ConvertCoordinate(coordinate)))
+                                .Field("bbox")
+                                .Relation(GeoShapeRelation.Contains))
+                    )
+            );
+            return response.Documents.FirstOrDefault()?.Name.GetValueOrDefault(language, null);
         }
 
         private (string currentIndex, string newIndex) GetIndicesStatus(string index1, string index2, string alias)
