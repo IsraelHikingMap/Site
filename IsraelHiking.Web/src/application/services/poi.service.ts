@@ -505,14 +505,18 @@ export class PoiService {
                         feature.properties.waterway != null,
                         feature.properties["mtb:name"] != null);
                 }
-                await Promise.all([wikidataPromise, inaturePromise, placePromise, wayPromise]);
-                const placeGeojson = await placePromise;
-                if (placeGeojson.features.length > 0) {
-                    feature.geometry = placeGeojson.features[0].geometry;
-                }
-                const longGeojson = await wayPromise;
-                if (longGeojson.features.length > 1) {
-                    feature.geometry = SpatialService.mergeLines(longGeojson.features) as GeoJSON.Geometry;
+                try {
+                    await Promise.all([wikidataPromise, inaturePromise, placePromise, wayPromise]);
+                    const placeGeojson = await placePromise;
+                    if (placeGeojson.features.length > 0) {
+                        feature.geometry = placeGeojson.features[0].geometry;
+                    }
+                    const longGeojson = await wayPromise;
+                    if (longGeojson.features.length > 1) {
+                        feature.geometry = SpatialService.mergeLines(longGeojson.features) as GeoJSON.Geometry;
+                    }
+                } catch (ex) {
+                    this.loggingService.warning(`[POIs] Failed to enrich feature with id: ${id}, error: ${(ex as Error).message}`);
                 }
                 const poi = this.convertFeatureToPoi(feature, id);
                 this.adjustGeolocationBasedOnTileData(id, poi);
