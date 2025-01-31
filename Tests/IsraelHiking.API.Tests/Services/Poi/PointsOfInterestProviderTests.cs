@@ -34,6 +34,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         private IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private IOsmRepository _osmRepository;
         private IPointsOfInterestRepository _pointsOfInterestRepository;
+        private IExternalSourcesRepository _externalSourcesRepository;
         private IWikimediaCommonGateway _wikimediaCommonGateway;
         private IOsmLatestFileGateway _latestFileGateway;
         private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
@@ -51,9 +52,11 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _osmRepository = Substitute.For<IOsmRepository>();
             _latestFileGateway = Substitute.For<IOsmLatestFileGateway>();
             _pointsOfInterestRepository = Substitute.For<IPointsOfInterestRepository>();
+            _externalSourcesRepository = Substitute.For<IExternalSourcesRepository>();
             _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
             _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
             _adapter = new PointsOfInterestProvider(_pointsOfInterestRepository,
+                _externalSourcesRepository,
                 new ElevationSetterExecutor(_elevationGateway),
                 _osmGeoJsonPreprocessorExecutor,
                 _osmRepository,
@@ -71,66 +74,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var gateway = Substitute.For<IAuthClient>();
             _clientsFactory.CreateOAuth2Client(Arg.Any<string>()).Returns(gateway);
             return gateway;
-        }
-
-        [TestMethod]
-        public void GetFeature_FilterRelevant_ShouldReturnEmptyList()
-        {
-            var feature = new Feature
-            {
-                Geometry = new Point(null),
-                Attributes = new AttributesTable { { FeatureAttributes.POI_ID, "42" } }
-            };
-            feature.SetLocation(new Coordinate(0, 0));
-            _pointsOfInterestRepository.GetPointsOfInterest(null, null, null, null).Returns(new List<IFeature> { feature });
-
-            var results = _adapter.GetFeatures(null, null, null, null).Result;
-
-            Assert.AreEqual(0, results.Length);
-        }
-
-        [TestMethod]
-        public void GetFeature_EnglishTitleOnly_ShouldReturnIt()
-        {
-            var name = "English name";
-            var feature = GetValidFeature("some-id", Sources.OSM);
-            feature.Attributes.DeleteAttribute(FeatureAttributes.NAME);
-            feature.Attributes.Add("name:en", name);
-            _pointsOfInterestRepository.GetPointsOfInterest(null, null, null, "en").Returns(new List<IFeature> { feature });
-
-            var result = _adapter.GetFeatures(null, null, null, "en").Result;
-
-            Assert.AreEqual(1, result.Length);
-            result.First().SetTitles();
-            Assert.AreEqual(name, result.First().GetTitle("en"));
-        }
-
-        [TestMethod]
-        public void GetFeature_ImageAndDescriptionOnly_ShouldReturnIt()
-        {
-            var feature = GetValidFeature("some-id", Sources.OSM);
-            feature.Attributes.DeleteAttribute(FeatureAttributes.NAME);
-            feature.Attributes.Add(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL);
-            feature.Attributes.Add(FeatureAttributes.WIKIPEDIA, FeatureAttributes.DESCRIPTION);
-            _pointsOfInterestRepository.GetPointsOfInterest(null, null, null, "he").Returns(new List<IFeature> { feature });
-
-            var result = _adapter.GetFeatures(null, null, null, "he").Result;
-
-            Assert.AreEqual(1, result.Length);
-            Assert.AreEqual(string.Empty, result.First().GetTitle("he"));
-        }
-
-        [TestMethod]
-        public void GetFeature_NoIcon_ShouldReturnItWithSearchIcon()
-        {
-            var feature = GetValidFeature("some-id", Sources.OSM);
-            feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, string.Empty);
-            _pointsOfInterestRepository.GetPointsOfInterest(null, null, null, "he").Returns(new List<IFeature> { feature });
-
-            var result = _adapter.GetFeatures(null, null, null, "he").Result;
-
-            Assert.AreEqual(1, result.Length);
-            Assert.AreEqual(PointsOfInterestProvider.SEARCH_ICON, result.First().Attributes[FeatureAttributes.POI_ICON]);
         }
 
         [TestMethod]
@@ -259,12 +202,10 @@ namespace IsraelHiking.API.Tests.Services.Poi
             feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "he.wikipedia.org/wiki/%D7%AA%D7%9C_%D7%A9%D7%9C%D7%9D");
             feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + "1", "www.wikidata.org/wiki/Q19401334");
             _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
-            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
             
             var results = _adapter.AddFeature(feature, gateway, language).Result;
 
             Assert.IsNotNull(results);
-            _pointsOfInterestRepository.Received(1).UpdatePointsOfInterestData(Arg.Any<List<IFeature>>());
             gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIPEDIA + ":" + language].Contains("תל שלם")));
             gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIDATA].Equals("Q19401334")));
             gateway.Received().CreateChangeset(Arg.Any<TagsCollectionBase>());
@@ -284,12 +225,10 @@ namespace IsraelHiking.API.Tests.Services.Poi
             feature.Attributes.AddOrUpdate(FeatureAttributes.NAME, " a   b  c ");
             feature.Attributes.AddOrUpdate(FeatureAttributes.DESCRIPTION, "  ");
             _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
-            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
             
             var results = _adapter.AddFeature(feature, gateway, language).Result;
 
             Assert.IsNotNull(results);
-            _pointsOfInterestRepository.Received(1).UpdatePointsOfInterestData(Arg.Any<List<IFeature>>());
             gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => 
                 x.Tags[FeatureAttributes.NAME + ":" + language].Equals("a b c") && 
                 x.Tags.All(t => t.Key != FeatureAttributes.DESCRIPTION)));
@@ -306,13 +245,10 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var feature = GetValidFeature("42", Sources.OSM);
             feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, _tagsHelper.GetCategoriesByGroup(Categories.POINTS_OF_INTEREST).First().Icon);
             feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "https://he.m.wikipedia.org/wiki/%D7%96%D7%95%D7%94%D7%A8_(%D7%9E%D7%95%D7%A9%D7%91)");            
-            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
-
             
             var results = _adapter.AddFeature(feature, gateway, language).Result;
 
             Assert.IsNotNull(results);
-            _pointsOfInterestRepository.Received(1).UpdatePointsOfInterestData(Arg.Any<List<IFeature>>());
             gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIPEDIA + ":" + language].Contains("זוהר")));
         }
 

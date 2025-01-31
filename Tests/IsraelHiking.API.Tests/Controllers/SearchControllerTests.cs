@@ -114,7 +114,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _searchRepository
                 .SearchByLocation(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), "searchTerm", Languages.ENGLISH)
                 .Returns(featuresInsidePlace);
-            _searchRepository.GetContainers(featureLocation).Returns(new List<IFeature> { placeFeature });
+            _searchRepository.GetContainerName(featureLocation, Languages.ENGLISH).Returns(placeFeature.GetTitle(Languages.ENGLISH));
 
             var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result.ToList();
 
@@ -161,7 +161,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _searchRepository
                 .SearchByLocation(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), "searchTerm", Languages.ENGLISH)
                 .Returns(featuresInsidePlace);
-            _searchRepository.GetContainers(featureLocation).Returns(new List<IFeature> { placeFeature });
+            _searchRepository.GetContainerName(Arg.Any<Coordinate>(), Arg.Any<string>()).Returns(placeFeature.GetTitle(Languages.ENGLISH));
 
             var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result.ToList();
 
@@ -223,18 +223,6 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var place = "place";
             var searchTerm = "searchTerm";
-            var placeFeature = new Feature(new Polygon(new LinearRing(new[]
-            {
-                new Coordinate(0, 0),
-                new Coordinate(0, 1),
-                new Coordinate(2, 0),
-                new Coordinate(0, 0)
-            })), new AttributesTable
-            {
-                {FeatureAttributes.NAME, place},
-                {FeatureAttributes.ID, "place_id" }
-            });
-            placeFeature.SetTitles();
             var featureLocation = new Coordinate(0.5, 0.5);
             var featureInPlace = new Feature(new Point(featureLocation), new AttributesTable
             {
@@ -248,7 +236,7 @@ namespace IsraelHiking.API.Tests.Controllers
             featureInPlace.SetTitles();
             featureInPlace.SetLocation(featureLocation);
             _searchRepository.Search(searchTerm, Languages.ENGLISH).Returns(new List<IFeature> { featureInPlace });
-            _searchRepository.GetContainers(featureLocation).Returns(new List<IFeature> { placeFeature });
+            _searchRepository.GetContainerName(Arg.Any<Coordinate>(), Arg.Any<string>()).Returns(place);
 
             var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result;
 

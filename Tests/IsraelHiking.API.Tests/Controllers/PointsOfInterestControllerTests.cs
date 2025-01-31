@@ -67,21 +67,9 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetPointsOfInterest_NoCategory_ShouldReturnEmptyList()
         {
-            var result = _controller.GetPointsOfInterest(string.Empty, string.Empty, string.Empty).Result;
+            var result = _controller.GetPointsOfInterest(string.Empty, string.Empty, string.Empty);
 
             Assert.AreEqual(0, result.Length);
-            _pointsOfInterestProvider.DidNotReceive().GetFeatures(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>(), Arg.Any<string>());
-        }
-
-        [TestMethod]
-        public void GetPointsOfInterest_OneAdapter_ShouldReturnPoi()
-        {
-            _pointsOfInterestProvider.GetFeatures(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>(),
-                Arg.Any<string>()).Returns(new[] { new Feature() });
-
-            var result = _controller.GetPointsOfInterest(string.Empty, string.Empty, "category", "language").Result;
-
-            Assert.AreEqual(1, result.Length);
         }
 
         [TestMethod]
@@ -129,28 +117,9 @@ namespace IsraelHiking.API.Tests.Controllers
 
             Assert.IsNotNull(result);
         }
-        
-        [TestMethod]
-        public void CreatePointOfInterest_ExistsInCacheAndInTheDatabase_ShouldAdd()
-        {
-            _controller.SetupIdentity();
-            var poi = new Feature(new Point(0, 0), new AttributesTable {
-                { FeatureAttributes.POI_SOURCE, Sources.OSM },
-                { FeatureAttributes.POI_ICON, "icon" },
-                { FeatureAttributes.POI_ID, Guid.NewGuid().ToString() },
-            });
-            poi.SetLocation(new Coordinate());
-            _persistentCache.Get(Arg.Any<string>()).Returns(Encoding.UTF8.GetBytes("the id in the cache"));
-            _pointsOfInterestProvider.GetFeatureById(Sources.OSM, "the id in the cache").Returns(poi);
-
-            var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as OkObjectResult;
-
-            Assert.IsNotNull(result);
-            _pointsOfInterestProvider.DidNotReceive().AddFeature(Arg.Any<Feature>(), _osmGateway, Arg.Any<string>());
-        }
 
         [TestMethod]
-        public void CreatePointOfInterest_ExistsInCacheButNotInTheDatabase_ShouldAdd()
+        public void CreatePointOfInterest_ExistsInCache_ShouldNotAdd()
         {
             _controller.SetupIdentity();
             var poi = new Feature(new Point(0, 0), new AttributesTable {

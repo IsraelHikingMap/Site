@@ -81,17 +81,11 @@ namespace IsraelHiking.API.Controllers
         /// <returns>A list of GeoJSON features</returns>
         [Route("")]
         [HttpGet]
-        public async Task<IFeature[]> GetPointsOfInterest(string northEast, string southWest, string categories,
+        [Obsolete("Should be removed by 6.2025")]
+        public IFeature[] GetPointsOfInterest(string northEast, string southWest, string categories,
             string language = "")
         {
-            if (string.IsNullOrWhiteSpace(categories))
-            {
-                return Array.Empty<IFeature>();
-            }
-            var categoriesArray = categories.Split(',').Select(f => f.Trim()).ToArray();
-            var northEastCoordinate = northEast.ToCoordinate();
-            var southWestCoordinate = southWest.ToCoordinate();
-            return await _pointsOfInterestProvider.GetFeatures(northEastCoordinate, southWestCoordinate, categoriesArray, language);
+            return Array.Empty<IFeature>();
         }
 
         /// <summary>
@@ -141,21 +135,14 @@ namespace IsraelHiking.API.Controllers
                 });
                 return Ok();
             }
-            var mappedId = _persistentCache.GetString(feature.GetId());
-            if (!string.IsNullOrEmpty(mappedId))
+            if (!string.IsNullOrEmpty(_persistentCache.GetString(feature.GetId())))
             {
-                var featureFromDatabase = await _pointsOfInterestProvider.GetFeatureById(feature.Attributes[FeatureAttributes.POI_SOURCE].ToString(), mappedId);
-                if (featureFromDatabase == null)
-                {
-                    return BadRequest("Feature is still in process please try again later...");
-                }
-                return Ok(featureFromDatabase);
+                return BadRequest("Feature creation was already requested, ignoring request.");
             }
             _persistentCache.SetString(feature.GetId(), "In process", new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
             
             var osmGateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
             var newFeature = await _pointsOfInterestProvider.AddFeature(feature, osmGateway, language);
-            _persistentCache.SetString(feature.GetId(), newFeature.Attributes[FeatureAttributes.ID].ToString(), new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
             return Ok(newFeature);
         }
 

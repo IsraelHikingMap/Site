@@ -34,11 +34,12 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="term">A string to search for</param>
         /// <param name="language">The language to search in</param>
+        /// <param name="newAPI">A flag to use the new API</param>
         /// <returns></returns>
         // GET api/search/abc&language=en
         [HttpGet]
         [Route("{term}")]
-        public async Task<IEnumerable<SearchResultsPointOfInterest>> GetSearchResults(string term, string language)
+        public async Task<IEnumerable<SearchResultsPointOfInterest>> GetSearchResults(string term, string language, bool newAPI = false)
         {
             if ((term.StartsWith("\"") || term.StartsWith("״")) && 
                 (term.EndsWith("\"") || term.StartsWith("״")))
@@ -61,7 +62,12 @@ namespace IsraelHiking.API.Controllers
                     return await Task.WhenAll(featuresWithinPlaces.ToList().Select(f => ConvertFromFeature(f,language)));
                 }
             }
-            var features = await _searchRepository.SearchPoints(term, language);
+
+            // HM TODO: remove this extra parameter before merging to main
+            var features = newAPI 
+                ? await _searchRepository.SearchPoints(term, language)
+                : await _searchRepository.Search(term, language);
+            
             return await Task.WhenAll(features.ToList().Select(f => ConvertFromFeature(f, language)));
         }
 

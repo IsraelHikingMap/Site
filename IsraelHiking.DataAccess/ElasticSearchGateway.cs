@@ -734,6 +734,7 @@ namespace IsraelHiking.DataAccess
 
         public async Task<IFeature> GetPointOfInterestById(string id, string source)
         {
+            // HM TODO: replace this with a call to OSM instead
             var fullId = GeoJsonExtensions.GetId(source, id);
             var response = await _elasticClient.GetAsync<IFeature>(fullId, r => r.Index(OSM_POIS_ALIAS));
             return response.Source;

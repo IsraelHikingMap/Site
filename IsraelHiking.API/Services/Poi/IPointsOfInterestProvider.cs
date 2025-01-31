@@ -22,16 +22,6 @@ namespace IsraelHiking.API.Services.Poi
         Task<IFeature> GetFeatureById(string source, string id);
 
         /// <summary>
-        /// Gets all the POIs within the bounding box that matches the given categories in the given language
-        /// </summary>
-        /// <param name="northEast">North east corner</param>
-        /// <param name="southWest">South west corner</param>
-        /// <param name="categories">The categories</param>
-        /// <param name="language">The language</param>
-        /// <returns>An array of POIs</returns>
-        Task<IFeature[]> GetFeatures(Coordinate northEast, Coordinate southWest, string[] categories, string language);
-
-        /// <summary>
         /// Adds a POI
         /// </summary>
         /// <param name="feature">The POI's data to add</param>
