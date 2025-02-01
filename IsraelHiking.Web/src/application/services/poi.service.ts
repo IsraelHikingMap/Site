@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Store } from "@ngxs/store";
 import osmtogeojson from "osmtogeojson";
 import type { Immutable } from "immer";
-import type { MapGeoJSONFeature, SourceSpecification } from "maplibre-gl";
+import type { MapGeoJSONFeature } from "maplibre-gl";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, PoiRouterData, RouteStrings } from "./hash.service";
