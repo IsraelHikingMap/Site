@@ -77,7 +77,7 @@ export class WikidataService {
     }
 
     private async getWikidataFromId(wikidataId: string): Promise<WikiDataPage> {
-        const url = `https://www.wikidata.org/w/rest.php/wikibase/v0/entities/items/${wikidataId}`;
+        const url = `https://www.wikidata.org/w/rest.php/wikibase/v1/entities/items/${wikidataId}`;
         return await firstValueFrom(this.httpClient.get(url).pipe(timeout(3000))) as unknown as WikiDataPage;
     }
 
