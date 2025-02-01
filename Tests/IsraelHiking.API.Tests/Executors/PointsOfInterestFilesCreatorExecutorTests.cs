@@ -8,7 +8,6 @@ using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
@@ -34,9 +33,7 @@ namespace IsraelHiking.API.Tests.Executors
             _executor = new PointsOfInterestFilesCreatorExecutor(
                 _fileSystemHelper,
                 Substitute.For<IWebHostEnvironment>(),
-                _imagesRepository,
-                options,
-                Substitute.For<ILogger>());
+                options);
         }
 
         [TestMethod]
@@ -56,9 +53,9 @@ namespace IsraelHiking.API.Tests.Executors
             
             Assert.IsTrue(stream.ToArray().Length > 0);
         }
-        
+
         [TestMethod]
-        public void CreateOfflinePoisFile_SomeImagesExistsAndSomeDoNot_ShouldCreatIt()
+        public void CreateOfflinePoisFile_ShouldCreatIt()
         {
             var feature = new Feature(new Point(0, 0), new AttributesTable
             {
@@ -69,15 +66,12 @@ namespace IsraelHiking.API.Tests.Executors
                 {FeatureAttributes.IMAGE_URL, "image"},
                 {FeatureAttributes.IMAGE_URL + "1", "image1"},
                 {FeatureAttributes.IMAGE_URL + "2", "image2"}
-                
             });
             feature.SetLastModified(DateTime.Now);
-            _imagesRepository.GetAllUrls().Returns(new List<string> {"image", "image2"});
-            _imagesRepository.GetImageByUrl("image2").Returns(new ImageItem());
-            
-            _executor.CreateOfflinePoisFile(new List<IFeature> {feature});
-            
-            _fileSystemHelper.Received(2).WriteAllBytes(Arg.Any<string>(), Arg.Any<byte[]>());
+
+            _executor.CreateOfflinePoisFile([feature]);
+
+            _fileSystemHelper.Received(1).WriteAllBytes(Arg.Any<string>(), Arg.Any<byte[]>());
         }
     }
 }

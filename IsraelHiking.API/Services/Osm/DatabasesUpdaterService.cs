@@ -189,7 +189,6 @@ namespace IsraelHiking.API.Services.Osm
         {
             _logger.LogInformation($"Starting rebuilding offline pois file for date: {context.StartTime.ToInvariantString()}");
             var features = await _pointsOfInterestRepository.GetAllPointsOfInterest();
-            features = features.Where(f => f.GetLastModified() <= context.StartTime).ToList();
             _elevationSetterExecutor.GeometryTo3D(features);
             _pointsOfInterestFilesCreatorExecutor.CreateOfflinePoisFile(features);
             _logger.LogInformation("Finished rebuilding offline pois file.");
