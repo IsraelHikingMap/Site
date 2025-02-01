@@ -207,15 +207,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 
         [TestMethod]
         [Ignore]
-        public void GetLastSuccessfulRebuildTime_ShouldSGetIt()
-        {
-            var results = _gateway.GetLastSuccessfulRebuildTime().Result;
-
-            Assert.IsTrue(results > DateTime.MinValue);
-        }
-
-        [TestMethod]
-        [Ignore]
         public void GetUrlTimestampById_ShouldSGetIt()
         {
             var results = _gateway.GetUrlTimestampById("mXgPc5nohX").Result;

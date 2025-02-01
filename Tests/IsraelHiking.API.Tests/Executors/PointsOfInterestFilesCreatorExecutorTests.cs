@@ -1,14 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
-using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
@@ -22,21 +19,17 @@ namespace IsraelHiking.API.Tests.Executors
     {
         private PointsOfInterestFilesCreatorExecutor _executor;
         private IFileSystemHelper _fileSystemHelper;
-        private IImagesRepository _imagesRepository;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _fileSystemHelper = Substitute.For<IFileSystemHelper>();
-            _imagesRepository = Substitute.For<IImagesRepository>();
             var options = Substitute.For<IOptions<ConfigurationData>>();
             options.Value.Returns(new ConfigurationData());
             _executor = new PointsOfInterestFilesCreatorExecutor(
                 _fileSystemHelper,
                 Substitute.For<IWebHostEnvironment>(),
-                _imagesRepository,
-                options,
-                Substitute.For<ILogger>());
+                options);
         }
 
         [TestMethod]
@@ -52,13 +45,13 @@ namespace IsraelHiking.API.Tests.Executors
             var stream = new MemoryStream();
             _fileSystemHelper.CreateWriteStream(Arg.Any<string>()).Returns(stream);
 
-            _executor.CreateSiteMapXmlFile(new List<IFeature> {feature});
+            _executor.CreateSiteMapXmlFile([feature]);
             
             Assert.IsTrue(stream.ToArray().Length > 0);
         }
         
         [TestMethod]
-        public void CreateOfflinePoisFile_SomeImagesExistsAndSomeDoNot_ShouldCreatIt()
+        public void CreateOfflinePoisFile_ShouldCreatIt()
         {
             var feature = new Feature(new Point(0, 0), new AttributesTable
             {
@@ -72,12 +65,10 @@ namespace IsraelHiking.API.Tests.Executors
                 
             });
             feature.SetLastModified(DateTime.Now);
-            _imagesRepository.GetAllUrls().Returns(new List<string> {"image", "image2"});
-            _imagesRepository.GetImageByUrl("image2").Returns(new ImageItem());
             
-            _executor.CreateOfflinePoisFile(new List<IFeature> {feature});
+            _executor.CreateOfflinePoisFile([feature]);
             
-            _fileSystemHelper.Received(2).WriteAllBytes(Arg.Any<string>(), Arg.Any<byte[]>());
+            _fileSystemHelper.Received(1).WriteAllBytes(Arg.Any<string>(), Arg.Any<byte[]>());
         }
     }
 }

@@ -17,6 +17,5 @@ namespace IsraelHiking.DataAccessInterfaces.Repositories
         Task<IFeature> GetPointOfInterestById(string id, string source);
         Task DeletePointOfInterestById(string id, string source);
         Task StoreRebuildContext(RebuildContext context);
-        Task<DateTime> GetLastSuccessfulRebuildTime();
     }
 }

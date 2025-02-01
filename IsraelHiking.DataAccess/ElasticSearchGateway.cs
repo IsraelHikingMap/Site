@@ -999,18 +999,5 @@ namespace IsraelHiking.DataAccess
         {
             return _elasticClient.IndexAsync(context, r => r.Index(REBUILD_LOG).Id(context.StartTime.ToString("o")));
         }
-
-        public async Task<DateTime> GetLastSuccessfulRebuildTime()
-        {
-            const string maxDate = "max_date";
-            var response = await _elasticClient.SearchAsync<RebuildContext>(s => s.Index(REBUILD_LOG)
-                    .Size(1)
-                    .Query(q => q.Term(t => t.Field(r => r.Succeeded).Value(true)))
-                    .Aggregations(a => a.Max(maxDate, m => m.Field(r => r.StartTime)))
-                    );
-            return DateTime.TryParse(response.Aggregations.Max(maxDate).ValueAsString, out var date) 
-                ? date 
-                : DateTime.MinValue;
-        }
     }
 }
