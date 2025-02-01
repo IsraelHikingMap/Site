@@ -49,7 +49,7 @@ namespace IsraelHiking.API.Tests.Executors
             
             Assert.IsTrue(stream.ToArray().Length > 0);
         }
-        
+
         [TestMethod]
         public void CreateOfflinePoisFile_ShouldCreatIt()
         {
@@ -62,12 +62,11 @@ namespace IsraelHiking.API.Tests.Executors
                 {FeatureAttributes.IMAGE_URL, "image"},
                 {FeatureAttributes.IMAGE_URL + "1", "image1"},
                 {FeatureAttributes.IMAGE_URL + "2", "image2"}
-                
             });
             feature.SetLastModified(DateTime.Now);
-            
+
             _executor.CreateOfflinePoisFile([feature]);
-            
+
             _fileSystemHelper.Received(1).WriteAllBytes(Arg.Any<string>(), Arg.Any<byte[]>());
         }
     }
