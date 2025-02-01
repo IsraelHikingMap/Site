@@ -61,11 +61,6 @@ export interface ISelectableCategory extends Category {
     label: string;
 }
 
-type SourceLayerAndJson = {
-    sourceLayer: string;
-    source: SourceSpecification;
-}
-
 @Injectable()
 export class PoiService {
 
@@ -303,7 +298,7 @@ export class PoiService {
     }
 
     private getPoisFromTiles(): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
-        let features = this.getFeaturesFromTiles();
+        const features = this.getFeaturesFromTiles();
         const hashSet = new Set();
         let pois = features.map(feature => {
             const poi = this.convertFeatureToPoi(feature, this.osmTileFeatureToPoiIdentifier(feature));
@@ -528,7 +523,7 @@ export class PoiService {
                 return cloneDeep(poi);
             }
         } catch {
-            let feature = this.getFeaturesFromTiles().find(f => this.osmTileFeatureToPoiIdentifier(f) === id);
+            const feature = this.getFeaturesFromTiles().find(f => this.osmTileFeatureToPoiIdentifier(f) === id);
             
             if (feature == null) {
                 throw new Error("Failed to load POI from offline or in-memory tiles.");
