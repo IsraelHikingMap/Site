@@ -97,20 +97,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 
         [TestMethod]
         [Ignore]
-        public void DeleteThenGet_ShouldReturnEmpty()
-        {
-            var id = "he_22216";
-            var feature = _gateway.GetPointOfInterestById(id, Sources.WIKIPEDIA).Result;
-            Assert.IsNotNull(feature);
-
-            _gateway.DeletePointOfInterestById(id, Sources.WIKIPEDIA).Wait();
-
-            feature = _gateway.GetPointOfInterestById(id, Sources.WIKIPEDIA).Result;
-            Assert.IsNull(feature);
-        }
-
-        [TestMethod]
-        [Ignore]
         public void GetContainers_ShouldGetSome()
         {
             var features = _gateway.GetContainers(new Coordinate(35.225306, 32.703806)).Result;
@@ -165,7 +151,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         public void UpdatePointOfInterest_ShouldBeAbleToGetRightAfterAdding()
         {
             var id = "42";
-            _gateway.DeletePointOfInterestById(id, Sources.OSM).Wait();
             var feature = new Feature(new Point(0, 0), new AttributesTable
             {
                 { FeatureAttributes.NAME, "name" },
@@ -175,8 +160,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
             feature.SetId();
             feature.SetTitles();
             _gateway.UpdatePointsOfInterestData(new List<IFeature> { feature }).Wait();
-            var results = _gateway.GetPointOfInterestById(id, Sources.OSM).Result;
-            Assert.IsNotNull(results);
         }
 
         [TestMethod]

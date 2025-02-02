@@ -22,6 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using IsraelHiking.API.Gpx;
 
 namespace IsraelHiking.API.Tests.Services.Poi
@@ -64,30 +65,41 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 _wikimediaCommonGateway,
                 new Base64ImageStringToFileConverter(),
                 _imagesUrlsStorageExecutor,
-                _tagsHelper,
+                _tagsHelper, _clientsFactory,
                 _options,
                 Substitute.For<ILogger>());
         }
 
-        private IAuthClient SetupHttpFactory()
+        private IAuthClient SetupOsmAuthClient()
         {
             var gateway = Substitute.For<IAuthClient>();
             _clientsFactory.CreateOAuth2Client(Arg.Any<string>()).Returns(gateway);
+            return gateway;
+        }
+        
+        private INonAuthClient SetupOsmNonAuthClient()
+        {
+            var gateway = Substitute.For<INonAuthClient>();
+            _clientsFactory.CreateNonAuthClient().Returns(gateway);
             return gateway;
         }
 
         [TestMethod]
         public void GetFeatureById_RouteWithMultipleAttributes_ShouldReturnIt()
         {
-            var someId = "some-id";
-            var feature = GetValidFeature(someId, Sources.OSM);
-            feature.Attributes.DeleteAttribute(FeatureAttributes.NAME);
-            feature.Attributes.Add(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL);
-            feature.Attributes.Add(FeatureAttributes.IMAGE_URL + "1", FeatureAttributes.IMAGE_URL + "1");
-            feature.Attributes.Add(FeatureAttributes.DESCRIPTION, FeatureAttributes.DESCRIPTION);
-            feature.Attributes.Add(FeatureAttributes.WIKIPEDIA + ":en", "page with space");
-            _pointsOfInterestRepository.GetPointOfInterestById(someId, Sources.OSM).Returns(feature);
-
+            var someId = "node_123";
+            var gateway = SetupOsmNonAuthClient();
+            var node = new Node
+            {
+                Id = 123,
+                Tags = new TagsCollection()
+            };
+            node.Tags.Add(new Tag(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL));
+            node.Tags.Add(new Tag(FeatureAttributes.IMAGE_URL+ "1", FeatureAttributes.IMAGE_URL+ "1"));
+            node.Tags.Add(new Tag(FeatureAttributes.DESCRIPTION, FeatureAttributes.DESCRIPTION));
+            node.Tags.Add(new Tag(FeatureAttributes.WIKIPEDIA + ":en", "page with space"));
+            gateway.GetNode(node.Id.Value).Returns(node);
+            
             var result = _adapter.GetFeatureById(Sources.OSM, someId).Result;
 
             Assert.IsNotNull(result);
@@ -95,44 +107,26 @@ namespace IsraelHiking.API.Tests.Services.Poi
             Assert.AreEqual(FeatureAttributes.DESCRIPTION, result.GetDescription("en"));
             var imagesUrls = result.Attributes.GetNames()
                     .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
-                    .Select(p => feature.Attributes[p].ToString())
+                    .Select(p => node.Tags.GetValue(p).ToString())
                     .ToArray();
             Assert.AreEqual(2, imagesUrls.Length);
             Assert.AreEqual(FeatureAttributes.IMAGE_URL, imagesUrls.First());
             Assert.IsTrue(result.Attributes[FeatureAttributes.WIKIPEDIA + ":en"].ToString()?.Contains("page with space"));
         }
-
-        [TestMethod]
-        public void GetFeatureById_NonValidWikiTag_ShouldReturnIt()
-        {
-            var someId = "some-id";
-            var feature = GetValidFeature(someId, Sources.OSM);
-            feature.Attributes.Add(FeatureAttributes.WIKIPEDIA, "en:en:page");
-            feature.Attributes.Add(FeatureAttributes.WEBSITE, "website");
-            _pointsOfInterestRepository.GetPointOfInterestById(someId, Sources.OSM).Returns(feature);
-
-            var result = _adapter.GetFeatureById(Sources.OSM, someId).Result;
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual("website", result.Attributes[FeatureAttributes.WEBSITE]);
-        }
         
         [TestMethod]
-        public void GetFeatureById_NoIcon_ShouldReturnItWithSearchIcon()
+        public void GetFeatureById_FeatureDoesNotExist_ShouldReturnNull()
         {
-            var someId = "some-id";
-            var feature = GetValidFeature(someId, Sources.OSM);
-            feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, string.Empty);
-            _pointsOfInterestRepository.GetPointOfInterestById(someId, Sources.OSM).Returns(feature);
+            _externalSourcesRepository.GetExternalPoiById("42", Sources.INATURE).Returns(Task.FromResult<IFeature>(null));
 
-            var result = _adapter.GetFeatureById(Sources.OSM, someId).Result;
+            var result = _adapter.GetFeatureById(Sources.INATURE, "42").Result;
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(PointsOfInterestProvider.SEARCH_ICON, result.Attributes[FeatureAttributes.POI_ICON]);
+            Assert.IsNull(result);
         }
         
+        
         [TestMethod]
-        public void GetFeatureById_NoElevation_ShouldAddIt()
+        public void GetFeatureById_NonOsmWithNoElevation_ShouldAddElevation()
         {
             var someId = "some-id";
             var featureStr =
@@ -150,48 +144,24 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 "}";
             var col = Encoding.UTF8.GetBytes(featureStr).ToFeatureCollection();
             col.First().Attributes[FeatureAttributes.ID] = "42";
-            col.First().Attributes[FeatureAttributes.POI_SOURCE] = Sources.OSM;
+            col.First().Attributes[FeatureAttributes.POI_SOURCE] = Sources.INATURE;
             col.First().Attributes[FeatureAttributes.POI_ICON] = null;
 
             var feature = col.First();
             
-            _pointsOfInterestRepository.GetPointOfInterestById(someId, Sources.OSM).Returns(feature);
+            _externalSourcesRepository.GetExternalPoiById(someId, Sources.INATURE).Returns(feature);
 
-            var result = _adapter.GetFeatureById(Sources.OSM, someId).Result;
+            var result = _adapter.GetFeatureById(Sources.INATURE, someId).Result;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Geometry.Coordinates.First().Z);
         }
 
         [TestMethod]
-        public void GetFeatureById_WithMultipleWebsiteAndSourceImages_ShouldNotFail()
-        {
-            var someId = "some-id";
-            var feature = GetValidFeature(someId, Sources.OSM);
-            feature.Attributes.Add(FeatureAttributes.WEBSITE, "website");
-            feature.Attributes.Add(FeatureAttributes.POI_SOURCE_IMAGE_URL, "sourceImage");
-            feature.Attributes.Add(FeatureAttributes.WEBSITE + "1", "website1");
-            feature.Attributes.Add(FeatureAttributes.POI_SOURCE_IMAGE_URL + "1", "sourceImage1");
-            feature.Attributes.Add(FeatureAttributes.WEBSITE + "2", "website2");
-            _pointsOfInterestRepository.GetPointOfInterestById(someId, Sources.OSM).Returns(feature);
-
-            var result = _adapter.GetFeatureById(Sources.OSM, someId).Result;
-
-            Assert.IsNotNull(result);
-            var references = result.Attributes.GetNames()
-                    .Where(n => n.StartsWith(FeatureAttributes.POI_SOURCE_IMAGE_URL))
-                    .Select(n => result.Attributes[n])
-                    .ToArray();
-            Assert.AreEqual(2, references.Length);
-            Assert.AreEqual("sourceImage", references.First());
-            Assert.AreEqual("sourceImage1", references.Last());
-        }
-
-        [TestMethod]
         public void AddFeature_ShouldUpdateOsmAndElasticSearch()
         {
             var user = new User { DisplayName = "DisplayName" };
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             gateway.GetUserDetails().Returns(user);
             var language = "he";
             gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
@@ -216,7 +186,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void AddFeature_WithExtraSpaces_ShouldRemoveExtraSpaces()
         {
             var user = new User { DisplayName = "DisplayName" };
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             gateway.GetUserDetails().Returns(user);
             var language = "he";
             gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
@@ -239,7 +209,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void AddFeature_WikipediaMobileLink_ShouldUpdateOsmAndElasticSearch()
         {
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             var language = "he";
             gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
             var feature = GetValidFeature("42", Sources.OSM);
@@ -255,11 +225,10 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void UpdateFeature_CreateWikipediaTag()
         {
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             var feature = GetValidFeature("Node_1", Sources.OSM);
             feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "oldIcon");
             feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ADDED_URLS, new[] { "https://en.wikipedia.org/wiki/Literary_Hall" });
-            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(GetValidFeature("Node_1", Sources.OSM));
             gateway.GetNode(1).Returns(new Node
             {
                 Id = 1,
@@ -281,11 +250,10 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void UpdateFeature_HasLanguageSpecificDescription_ShouldUpdateBoth()
         {
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             var feature = GetValidFeature("Node_1", Sources.OSM);
             feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "oldIcon");
             feature.Attributes.AddOrUpdate(FeatureAttributes.DESCRIPTION, "new description");
-            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(GetValidFeature("Node_1", Sources.OSM));
             gateway.GetNode(1).Returns(new Node
             {
                 Id = 1,
@@ -309,10 +277,9 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void UpdateFeature_UpdateLocationToALocationTooClose_ShouldNotUpdate()
         {
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             var feature = GetValidFeature("Node_1", Sources.OSM);
             feature.SetLocation(new Coordinate(1.00000000001,1));
-            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(GetValidFeature("Node_1", Sources.OSM));
             gateway.GetNode(1).Returns(new Node
             {
                 Id = 1,
@@ -333,7 +300,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void UpdateFeature_OnlyChangeExtraSpaces_ShouldNotUpdate()
         {
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             var featureBeforeUpdate = GetValidFeature("Node_1", Sources.OSM);
             var featureUpdate = new Feature(featureBeforeUpdate.Geometry, new AttributesTable
             {
@@ -341,7 +308,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 { FeatureAttributes.ID, featureBeforeUpdate.Attributes[FeatureAttributes.ID]},
                 { FeatureAttributes.NAME, "name " }
             });
-            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(GetValidFeature("Node_1", Sources.OSM));
             gateway.GetNode(1).Returns(new Node
             {
                 Id = 1,
@@ -362,10 +328,9 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void UpdateFeature_UpdateLocationOfWay_ShouldNotUpdate()
         {
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             var feature = GetValidFeature("Way_1", Sources.OSM);
             feature.SetLocation(new Coordinate(1,1));
-            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(GetValidFeature("Node_1", Sources.OSM));
             gateway.GetCompleteWay(1).Returns(new CompleteWay
             {
                 Id = 1,
@@ -436,7 +401,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void UpdateFeature_WithImageIdExists_ShouldUpdate()
         {
             var user = new User { DisplayName = "DisplayName" };
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             gateway.GetUserDetails().Returns(user);
             const string id = "Node_42";
             var poi = new Feature(new Point(0, 0), new AttributesTable {
@@ -454,7 +419,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     { FeatureAttributes.POI_ICON, "icon" }
                 }
             };
-            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(featureFromDatabase);
             gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection {
                 { "description:he", "description" },
                 { "name:he", "name" },
@@ -471,7 +435,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void UpdateFeature_WithImageWithDot_ShouldUpdate()
         {
             var user = new User { DisplayName = "DisplayName" };
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             gateway.GetUserDetails().Returns(user);
             const string id = "Node_42";
             var poi = new Feature(new Point(0, 0), new AttributesTable {
@@ -489,7 +453,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     { FeatureAttributes.POI_ICON, "icon" }
                 }
             };
-            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(featureFromDatabase);
             gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection {
                 { "description:he", "description" },
                 { "name:he", "name.1" },
@@ -506,7 +469,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void UpdateFeature_WithEmptyDescriptionAndTitle_ShouldUpdateWithIconName()
         {
             var user = new User { DisplayName = "DisplayName" };
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             gateway.GetUserDetails().Returns(user);
             const string id = "Node_42";
             var poi = new Feature(new Point(0, 0), new AttributesTable {
@@ -524,7 +487,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     { FeatureAttributes.POI_ICON, "icon-tint" }
                 }
             };
-            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(featureFromDatabase);
             gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection()
             {
                 {"natural", "spring"}
@@ -541,7 +503,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void UpdateFeature_WithImageInRepository_ShouldNotUploadImage()
         {
             var user = new User { DisplayName = "DisplayName" };
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             gateway.GetUserDetails().Returns(user);
             var id = "Node_42";
             var poi = new Feature(new Point(0, 0), new AttributesTable {
@@ -552,14 +514,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
                                       "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
             });
             _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns("some-url");
-            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
-            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(new Feature
-            {
-                Attributes = new AttributesTable
-                {
-                    { FeatureAttributes.POI_ICON, "icon" }
-                }
-            });
             gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection { { "osmish", "something" } }, Latitude = 0, Longitude = 0, Id = 42 });
 
             _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
@@ -573,7 +527,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void UpdateFeature_NewTitleDescriptionUrlsLocation_ShouldUpdateInOSM()
         {
             var user = new User { DisplayName = "DisplayName" };
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             gateway.GetUserDetails().Returns(user);
             const string id = "Node_42";
             var poi = new Feature(new Point(0, 0), new AttributesTable {
@@ -585,14 +539,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
             poi.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + Languages.HEBREW, "new name");
             poi.Attributes.AddOrUpdate(FeatureAttributes.DESCRIPTION + ":" + Languages.HEBREW, "new description");
             poi.SetLocation(new Coordinate(6, 5));
-            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
-            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(new Feature
-            {
-                Attributes = new AttributesTable
-                {
-                    { FeatureAttributes.POI_ICON, "icon" }
-                }
-            });
             gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection { { "osmish", "something" } }, Latitude = 0, Longitude = 0, Id = 42 });
 
             _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
@@ -611,7 +557,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void UpdateFeature_UpdateSameUrlsSecondTime_ShouldNotUpdate()
         {
             var user = new User { DisplayName = "DisplayName" };
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             gateway.GetUserDetails().Returns(user);
             const string id = "Node_42";
             var poi = new Feature(new Point(0, 0), new AttributesTable {
@@ -619,13 +565,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 { FeatureAttributes.ID, id },
                 { FeatureAttributes.POI_ICON, "icon" },
                 { FeatureAttributes.POI_ADDED_URLS, new [] { "some-url" } }
-            });
-            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(new Feature
-            {
-                Attributes = new AttributesTable
-                {
-                    { FeatureAttributes.POI_ICON, "icon" }
-                }
             });
             gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection { { "website", "some-url" } }, Latitude = 0, Longitude = 0, Id = 42 });
 
@@ -640,21 +579,13 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void UpdateFeature_IconChange_ShouldUpdateInOSM()
         {
             var user = new User { DisplayName = "DisplayName" };
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             gateway.GetUserDetails().Returns(user);
             const string id = "Node_42";
             var poi = new Feature(new Point(0, 0), new AttributesTable {
                 { FeatureAttributes.POI_SOURCE, Sources.OSM },
                 { FeatureAttributes.ID, id },
                 { FeatureAttributes.POI_ICON, "icon-ruins" },
-            });
-            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
-            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(new Feature
-            {
-                Attributes = new AttributesTable
-                {
-                    { FeatureAttributes.POI_ICON, "icon-tint" }
-                }
             });
             gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection { { "natural", "spring" } }, Latitude = 0, Longitude = 0, Id = 42 });
 
@@ -670,7 +601,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void UpdateFeature_RemoveUrl_ShouldUpdateInOSM()
         {
             var user = new User { DisplayName = "DisplayName" };
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             gateway.GetUserDetails().Returns(user);
             var id = "Node_42";
             var poi = new Feature(new Point(0, 0), new AttributesTable {
@@ -678,14 +609,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 { FeatureAttributes.ID, id },
                 { FeatureAttributes.POI_ICON, "icon-ruins" },
                 { FeatureAttributes.POI_REMOVED_URLS, new [] { "url-to-remove" } }
-            });
-            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
-            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(new Feature
-            {
-                Attributes = new AttributesTable
-                {
-                    { FeatureAttributes.POI_ICON, "icon-ruins" }
-                }
             });
             gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection {
                 { "website", "url-to-remove" },
@@ -703,7 +626,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void UpdateFeature_RemoveWikiUrl_ShouldUpdateInOSM()
         {
             var user = new User { DisplayName = "DisplayName" };
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             gateway.GetUserDetails().Returns(user);
             var id = "Node_42";
             var poi = new Feature(new Point(0, 0), new AttributesTable {
@@ -711,14 +634,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 { FeatureAttributes.ID, id },
                 { FeatureAttributes.POI_ICON, "icon-ruins" },
                 { FeatureAttributes.POI_REMOVED_URLS, new [] { "https://he.wikipedia.org/wiki/123" } }
-            });
-            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
-            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(new Feature
-            {
-                Attributes = new AttributesTable
-                {
-                    { FeatureAttributes.POI_ICON, "icon-ruins" }
-                }
             });
             gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection {
                 { "wikipedia", "he:123" },
@@ -737,7 +652,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void UpdateFeature_RemoveWikiUrl_ShouldUpdateInOSMButNotRemoveEnglishWikipedia()
         {
             var user = new User { DisplayName = "DisplayName" };
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             gateway.GetUserDetails().Returns(user);
             var id = "Node_42";
             var poi = new Feature(new Point(0, 0), new AttributesTable {
@@ -745,14 +660,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 { FeatureAttributes.ID, id },
                 { FeatureAttributes.POI_ICON, "icon-ruins" },
                 { FeatureAttributes.POI_REMOVED_URLS, new [] { "https://he.wikipedia.org/wiki/123" } }
-            });
-            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
-            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(new Feature
-            {
-                Attributes = new AttributesTable
-                {
-                    { FeatureAttributes.POI_ICON, "icon-ruins" }
-                }
             });
             gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection {
                 { "wikipedia", "en:456" },
@@ -773,7 +680,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void UpdateFeature_RemoveImage_ShouldUpdateInOSM()
         {
             var user = new User { DisplayName = "DisplayName" };
-            var gateway = SetupHttpFactory();
+            var gateway = SetupOsmAuthClient();
             gateway.GetUserDetails().Returns(user);
             var id = "Node_42";
             var poi = new Feature(new Point(0, 0), new AttributesTable {
@@ -781,14 +688,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 { FeatureAttributes.ID, id },
                 { FeatureAttributes.POI_ICON, "icon-ruins" },
                 { FeatureAttributes.POI_REMOVED_IMAGES, new [] { "image-to-remove" } }
-            });
-            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
-            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(new Feature
-            {
-                Attributes = new AttributesTable
-                {
-                    { FeatureAttributes.POI_ICON, "icon-ruins" }
-                }
             });
             gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection {
                 { "image", "image-to-remove" },

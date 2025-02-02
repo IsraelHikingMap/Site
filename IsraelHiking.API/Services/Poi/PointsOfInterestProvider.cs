@@ -37,6 +37,7 @@ namespace IsraelHiking.API.Services.Poi
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private readonly IOsmRepository _osmRepository;
         private readonly ITagsHelper _tagsHelper;
+        private readonly IClientsFactory _clientsFactory;
         private readonly IOsmLatestFileGateway _latestFileGateway;
         private readonly IElevationSetterExecutor _elevationSetterExecutor;
         private readonly IPointsOfInterestRepository _pointsOfInterestRepository;
@@ -56,10 +57,11 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
         /// <param name="osmRepository"></param>
         /// <param name="latestFileGateway"></param>
-        /// <param name="base64ImageConverter"></param>
         /// <param name="wikimediaCommonGateway"></param>
+        /// <param name="base64ImageConverter"></param>
         /// <param name="imageUrlStoreExecutor"></param>
         /// <param name="tagsHelper"></param>
+        /// <param name="clientsFactory"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
         public PointsOfInterestProvider(IPointsOfInterestRepository pointsOfInterestRepository,
@@ -72,12 +74,14 @@ namespace IsraelHiking.API.Services.Poi
             IBase64ImageStringToFileConverter base64ImageConverter,
             IImagesUrlsStorageExecutor imageUrlStoreExecutor,
             ITagsHelper tagsHelper,
+            IClientsFactory clientsFactory,
             IOptions<ConfigurationData> options,
             ILogger logger)
         {
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
             _osmRepository = osmRepository;
             _tagsHelper = tagsHelper;
+            _clientsFactory = clientsFactory;
             _latestFileGateway = latestFileGateway;
             _elevationSetterExecutor = elevationSetterExecutor;
             _options = options.Value;
@@ -250,6 +254,7 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<IFeature> GetClosestPoint(Coordinate location, string source, string language = "")
         {
             var distance = _options.ClosestPointsOfInterestThreshold;
+            // HM TODO: get it from overpass turbo
             var results = await _pointsOfInterestRepository.GetPointsOfInterest(
                 new Coordinate(location.X + distance, location.Y + distance),
                 new Coordinate(location.X - distance, location.Y - distance),
@@ -263,15 +268,26 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc/>
         public async Task<IFeature> GetFeatureById(string source, string id)
         {
-            var feature = source == Sources.OSM
-                ? await _pointsOfInterestRepository.GetPointOfInterestById(id, source)
-                : await _externalSourcesRepository.GetExternalPoiById(id, source);    
-            if (feature != null) {
-                feature.Geometry = _elevationSetterExecutor.GeometryTo3D(feature.Geometry);
-                if (string.IsNullOrWhiteSpace(feature.Attributes[FeatureAttributes.POI_ICON]?.ToString()))
-                {
-                    feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, SEARCH_ICON);
-                }
+            IFeature feature;
+            if (source == Sources.OSM)
+            {
+                var client = _clientsFactory.CreateNonAuthClient();
+                var osmElement = await client.GetCompleteElement(GeoJsonExtensions.GetOsmId(id), GeoJsonExtensions.GetOsmType(id));
+                feature = ConvertOsmToFeature(osmElement);    
+            }
+            else
+            {
+                feature = await _externalSourcesRepository.GetExternalPoiById(id, source);
+            }
+
+            if (feature == null)
+            {
+                return null;
+            }
+            feature.Geometry = _elevationSetterExecutor.GeometryTo3D(feature.Geometry);
+            if (string.IsNullOrWhiteSpace(feature.Attributes[FeatureAttributes.POI_ICON]?.ToString()))
+            {
+                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, SEARCH_ICON);
             }
             return feature;
         }

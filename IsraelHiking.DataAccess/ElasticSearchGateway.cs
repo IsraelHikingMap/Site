@@ -732,20 +732,6 @@ namespace IsraelHiking.DataAccess
             ).Field($"{PROPERTIES}.{FeatureAttributes.POI_GEOLOCATION}");
         }
 
-        public async Task<IFeature> GetPointOfInterestById(string id, string source)
-        {
-            // HM TODO: replace this with a call to OSM instead
-            var fullId = GeoJsonExtensions.GetId(source, id);
-            var response = await _elasticClient.GetAsync<IFeature>(fullId, r => r.Index(OSM_POIS_ALIAS));
-            return response.Source;
-        }
-
-        public Task DeletePointOfInterestById(string id, string source)
-        {
-            var fullId = GeoJsonExtensions.GetId(source, id);
-            return _elasticClient.DeleteAsync<IFeature>(fullId, d => d.Index(OSM_POIS_ALIAS));
-        }
-
         public async Task<List<IFeature>> GetExternalPoisBySource(string source)
         {
             var response = await _elasticClient.SearchAsync<IFeature>(
