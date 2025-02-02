@@ -46,30 +46,6 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiCategory).toBe("Other");
     });
 
-    it("Should set icon color category for network lcn", () => {
-        // Arrange
-        const feature = createFeature({network: "lcn" });
-        const poi = createPoi();
-        // Act
-        OsmTagsService.setIconColorCategory(feature, poi);
-        // Assert
-        expect(poi.properties.poiIconColor).toBe("black");
-        expect(poi.properties.poiIcon).toBe("icon-bike");
-        expect(poi.properties.poiCategory).toBe("Bicycle");
-    });
-
-    it("Should set icon color category for network lwn", () => {
-        // Arrange
-        const feature = createFeature({network: "lwn" });
-        const poi = createPoi();
-        // Act
-        OsmTagsService.setIconColorCategory(feature, poi);
-        // Assert
-        expect(poi.properties.poiIconColor).toBe("black");
-        expect(poi.properties.poiIcon).toBe("icon-hike");
-        expect(poi.properties.poiCategory).toBe("Hiking");
-    });
-
     it("Should set icon color category for route hiking", () => {
         // Arrange
         const feature = createFeature({route: "hiking" });
@@ -252,6 +228,30 @@ describe("OsmTagsService", () => {
     it("Should set icon color category for waterfall", () => {
         // Arrange
         const feature = createFeature({ waterway: "waterfall" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("blue");
+        expect(poi.properties.poiIcon).toBe("icon-waterfall");
+        expect(poi.properties.poiCategory).toBe("Water");
+    });
+
+    it("Should set icon color category for waterfall", () => {
+        // Arrange
+        const feature = createFeature({ waterway: "waterfall" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("blue");
+        expect(poi.properties.poiIcon).toBe("icon-waterfall");
+        expect(poi.properties.poiCategory).toBe("Water");
+    });
+
+    it("Should set icon color category for waterway", () => {
+        // Arrange
+        const feature = createFeature({ type: "waterway" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);

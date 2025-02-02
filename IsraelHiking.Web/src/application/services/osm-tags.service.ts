@@ -29,22 +29,6 @@ export class OsmTagsService {
             poi.properties.poiCategory = "Other";
             return;
         }
-        if (feature.properties.network) {
-            switch (feature.properties.network) {
-                case "lcn":
-                case "rcn":
-                    poi.properties.poiIconColor = "black";
-                    poi.properties.poiIcon = "icon-bike";
-                    poi.properties.poiCategory = "Bicycle";
-                    return;
-                case "lwn":
-                case "rwn":
-                    poi.properties.poiIconColor = "black";
-                    poi.properties.poiIcon = "icon-hike";
-                    poi.properties.poiCategory = "Hiking";
-                    return;
-            }
-        }
         if (feature.properties.route) {
             switch (feature.properties.route) {
                 case "hiking":
@@ -140,7 +124,7 @@ export class OsmTagsService {
             }
         }
 
-        if (feature.properties.waterway === "waterfall") {
+        if (feature.properties.waterway === "waterfall" || feature.properties.type === "waterway") {
             poi.properties.poiIconColor = "blue";
             poi.properties.poiIcon = "icon-waterfall";
             poi.properties.poiCategory = "Water";
