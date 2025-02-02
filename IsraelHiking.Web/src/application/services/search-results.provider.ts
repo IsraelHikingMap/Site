@@ -33,7 +33,7 @@ export class SearchResultsProvider {
             }];
         }
         const language = isHebrew ? "he" : "en";
-        const params = new HttpParams().set("language", language);//.set("newAPI", true);
+        const params = new HttpParams().set("language", language).set("newAPI", true);
         const response = await firstValueFrom(this.httpClient.get(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
             params
         }).pipe(timeout(3000)));
