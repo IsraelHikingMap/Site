@@ -333,6 +333,42 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiIconColor).toBe("black");
     });
 
+    it("Should set icon color category for cycleway", () => {
+        // Arrange
+        const feature = createFeature({highway: "cycleway" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("Bicycle");
+        expect(poi.properties.poiIcon).toBe("icon-bike");
+        expect(poi.properties.poiIconColor).toBe("black");
+    });
+
+    it("Should set icon color category for footway", () => {
+        // Arrange
+        const feature = createFeature({highway: "footway" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("Hiking");
+        expect(poi.properties.poiIcon).toBe("icon-hike");
+        expect(poi.properties.poiIconColor).toBe("black");
+    });
+
+    it("Should set icon color category for track", () => {
+        // Arrange
+        const feature = createFeature({highway: "track" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("4x4");
+        expect(poi.properties.poiIcon).toBe("icon-four-by-four");
+        expect(poi.properties.poiIconColor).toBe("black");
+    });
+
     it("Should set icon color category for wikipedia", () => {
         // Arrange
         const feature = createFeature({ wikipedia: "page" });

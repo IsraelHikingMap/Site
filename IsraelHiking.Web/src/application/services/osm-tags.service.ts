@@ -179,6 +179,31 @@ export class OsmTagsService {
             return;
         }
 
+        if (feature.properties.highway != null) {
+            switch (feature.properties.highway) {
+              case "cycleway":
+                poi.properties.poiIconColor = "black";
+                poi.properties.poiCategory = "Bicycle";
+                poi.properties.poiIcon = "icon-bike";
+                return;
+              case "footway":
+                poi.properties.poiIconColor = "black";
+                poi.properties.poiCategory = "Hiking";
+                poi.properties.poiIcon = "icon-hike";
+                return;
+              case "path":
+                poi.properties.poiIconColor = "black";
+                poi.properties.poiCategory = "Hiking";
+                poi.properties.poiIcon = "icon-hike";
+                return;
+              case "track":
+                poi.properties.poiIconColor = "black";
+                poi.properties.poiCategory = "4x4";
+                poi.properties.poiIcon = "icon-four-by-four";
+                return;
+            }
+          }
+
         if (feature.properties.wikidata || feature.properties.wikipedia) {
             poi.properties.poiIconColor = "black";
             poi.properties.poiIcon = "icon-wikipedia-w";
