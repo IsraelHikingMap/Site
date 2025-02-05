@@ -34,15 +34,14 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="term">A string to search for</param>
         /// <param name="language">The language to search in</param>
-        /// <param name="newAPI">A flag to use the new API</param>
         /// <returns></returns>
         // GET api/search/abc&language=en
         [HttpGet]
         [Route("{term}")]
-        public async Task<IEnumerable<SearchResultsPointOfInterest>> GetSearchResults(string term, string language, bool newAPI = false)
+        public async Task<IEnumerable<SearchResultsPointOfInterest>> GetSearchResults(string term, string language)
         {
             if ((term.StartsWith("\"") || term.StartsWith("״")) && 
-                (term.EndsWith("\"") || term.StartsWith("״")))
+                (term.EndsWith("\"") || term.EndsWith("״")))
             {
                 var exactFeatures = await _searchRepository.SearchExact(term.Substring(1, term.Length - 2), language);
                 return await Task.WhenAll(exactFeatures.ToList().Select(f => ConvertFromFeature(f, language)));
@@ -50,24 +49,15 @@ namespace IsraelHiking.API.Controllers
             
             if (term.Count(c => c == ',') == 1)
             {
-                var split = term.Split(',');
-                var place = split.Last().Trim();
-                term = split.First().Trim();
-                var placesFeatures = await _searchRepository.SearchPlaces(place, language);
-                if (placesFeatures.Any())
+                var featuresWithinPlaces = await _searchRepository.SearchPlaces(term, language);
+                if (featuresWithinPlaces.Count != 0)
                 {
-                    var envelope = placesFeatures.First().Geometry.EnvelopeInternal;
-                    var featuresWithinPlaces = await _searchRepository.SearchByLocation(
-                        new Coordinate(envelope.MaxX, envelope.MaxY), new Coordinate(envelope.MinX, envelope.MinY), term, language);
-                    return await Task.WhenAll(featuresWithinPlaces.ToList().Select(f => ConvertFromFeature(f,language)));
+                    return await Task.WhenAll(featuresWithinPlaces.ToList().Select(f => ConvertFromFeature(f, language)));
                 }
+                term = term.Split(",").First().Trim();
             }
 
-            // HM TODO: remove this extra parameter before merging to main
-            var features = newAPI 
-                ? await _searchRepository.SearchPoints(term, language)
-                : await _searchRepository.Search(term, language);
-            
+            var features = await _searchRepository.Search(term, language);
             return await Task.WhenAll(features.ToList().Select(f => ConvertFromFeature(f, language)));
         }
 

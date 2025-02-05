@@ -1,4 +1,5 @@
-﻿using IsraelHiking.DataAccessInterfaces;
+﻿using IsraelHiking.DataAccess.ElasticSearch;
+using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 

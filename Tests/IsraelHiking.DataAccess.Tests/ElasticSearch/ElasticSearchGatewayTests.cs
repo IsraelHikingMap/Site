@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using IsraelHiking.DataAccess.ElasticSearch;
 
 namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 {
@@ -38,14 +39,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         
         [TestMethod]
         [Ignore]
-        public void SearchPoints_ShouldReturnResults()
-        {
-            var results = _gateway.SearchPoints("מנןת", "he").Result;
-            Assert.AreEqual(9, results.Count);
-        }
-        
-        [TestMethod]
-        [Ignore]
         public void GetContainerName_ShouldReturnResults()
         {
             var results = _gateway.GetContainerName(new Coordinate(35.225306, 32.703806), "he").Result;
@@ -56,21 +49,8 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         [Ignore]
         public void SearchWithinPlace_ShouldReturnResults()
         {
-            var placesFeatures = _gateway.SearchPlaces("תמרת", Languages.HEBREW).Result;
-            Assert.AreEqual(5, placesFeatures.Count);
-            var envelope = placesFeatures.First().Geometry.EnvelopeInternal;
-            var results = _gateway.SearchByLocation(
-                new Coordinate(envelope.MaxX, envelope.MaxY), new Coordinate(envelope.MinX, envelope.MinY), "מורן", Languages.HEBREW).Result;
+            var results = _gateway.SearchPlaces("פינת הזיכרון, רמות מנשה", Languages.HEBREW).Result;
             Assert.AreEqual(1, results.Count);
-        }
-
-        [TestMethod]
-        [Ignore]
-        public void SearchWithinPlace_WithLowFactor_ShouldReturnResults()
-        {
-            var results = _gateway.SearchByLocation(
-                new Coordinate(35.023903300000001, 32.248676099999997), new Coordinate(34.836766599999997, 32.003519799999999), "הסיבים", Languages.HEBREW).Result;
-            Assert.IsTrue(results.Any(f => f.Attributes.GetNames().Contains(FeatureAttributes.NAME) && f.Attributes[FeatureAttributes.NAME].ToString() == "הסיבים"));
         }
 
         [TestMethod]
