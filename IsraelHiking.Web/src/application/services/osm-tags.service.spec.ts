@@ -189,9 +189,33 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiCategory).toBe("Water");
     });
 
+    it("Should set icon color category for pond", () => {
+        // Arrange
+        const feature = createFeature({water: "pond" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("blue");
+        expect(poi.properties.poiIcon).toBe("icon-tint");
+        expect(poi.properties.poiCategory).toBe("Water");
+    });
+
     it("Should set icon color category for reservoir", () => {
         // Arrange
         const feature = createFeature({water: "reservoir" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("blue");
+        expect(poi.properties.poiIcon).toBe("icon-tint");
+        expect(poi.properties.poiCategory).toBe("Water");
+    });
+
+    it("Should set icon color category for lake", () => {
+        // Arrange
+        const feature = createFeature({water: "lake" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);

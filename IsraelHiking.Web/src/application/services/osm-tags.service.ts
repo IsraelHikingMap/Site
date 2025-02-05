@@ -104,7 +104,8 @@ export class OsmTagsService {
         }
 
         if (feature.properties.water === "reservoir" || 
-            feature.properties.water === "pond") {
+            feature.properties.water === "pond" ||
+            feature.properties.water === "lake") {
             poi.properties.poiIconColor = "blue";
             poi.properties.poiIcon = "icon-tint";
             poi.properties.poiCategory = "Water";
