@@ -1,7 +1,6 @@
 ﻿using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
-using IsraelHiking.Common.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
@@ -41,7 +40,7 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         [Ignore]
         public void GetContainerName_ShouldReturnResults()
         {
-            var results = _gateway.GetContainerName(new Coordinate(35.225306, 32.703806), "he").Result;
+            var results = _gateway.GetContainerName([new Coordinate(35.225306, 32.703806)], "he").Result;
             Assert.AreEqual("a", results);
         }
 
@@ -97,11 +96,11 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 
         [TestMethod]
         [Ignore]
-        public void GetContainers_ShouldGetSome()
+        public void GetContainerName_MultipleCoordinates_ShouldGetOne()
         {
-            var features = _gateway.GetContainers(new Coordinate(35.225306, 32.703806)).Result;
+            var name = _gateway.GetContainerName([new Coordinate(35.052338, 32.598071), new Coordinate(35.061919, 32.595458)], Languages.HEBREW).Result;
 
-            Assert.IsTrue(features.Count > 0);
+            Assert.AreEqual("רמות מנשה", name);
         }
 
         [TestMethod]

@@ -112,16 +112,16 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         }
     }
         
-    private List<T> GetAllItemsByScrolling<T>(ISearchResponse<T> response) where T: class
+    private List<IHit<T>> GetAllItemsByScrolling<T>(ISearchResponse<T> response) where T: class
     {
-        var list = new List<T>();
-        list.AddRange(response.Documents.ToList());
+        var list = new List<IHit<T>>();
+        list.AddRange(response.Hits.ToList());
         var results = _elasticClient.Scroll<T>("10s", response.ScrollId);
-        list.AddRange(results.Documents.ToList());
+        list.AddRange(results.Hits.ToList());
         while (results.Documents.Any())
         {
             results = _elasticClient.Scroll<T>("10s", results.ScrollId);
-            list.AddRange(results.Documents.ToList());
+            list.AddRange(results.Hits.ToList());
         }
         _elasticClient.ClearScroll(new ClearScrollRequest(response.ScrollId));
         return list;
@@ -236,22 +236,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         return response.Hits.Select(d => HitToFeature(d, language)).ToList();
     }
 
-    public async Task<List<IFeature>> GetContainers(Coordinate coordinate)
-    {
-        var response = await _elasticClient.SearchAsync<IFeature>(
-            s => s.Index(OSM_POIS_ALIAS)
-                .Size(100)
-                .Query(q =>
-                    q.GeoShape(g =>
-                        g.Shape(sh => sh.Point(ConvertCoordinate(coordinate)))
-                            .Field(f => f.Geometry)
-                            .Relation(GeoShapeRelation.Contains))
-                    && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CONTAINER}").Value(true)))
-        );
-        return response.Documents.ToList();
-    }
-
-    public async Task<string> GetContainerName(Coordinate coordinate, string language)
+    public async Task<string> GetContainerName(Coordinate[] coordinates, string language)
     {
         var response = await _elasticClient.SearchAsync<BBoxDocument>(
             s => s.Index(BBOX)
@@ -259,7 +244,19 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                 .Sort(f => f.Ascending(a => a.Area))
                 .Query(q =>
                     q.GeoShape(g =>
-                        g.Shape(sh => sh.Point(ConvertCoordinate(coordinate)))
+                        g.Shape(sh =>
+                            {
+                                if (coordinates.Length == 1)
+                                {
+                                    return sh.Point(ConvertCoordinate(coordinates[0]));    
+                                }
+
+                                return sh.Envelope([
+                                    new GeoCoordinate(coordinates.Max(c => c.Y), coordinates.Min(c => c.X)),
+                                    new GeoCoordinate(coordinates.Min(c => c.Y), coordinates.Max(c => c.X))
+                                ]);
+
+                            })
                             .Field("bbox")
                             .Relation(GeoShapeRelation.Contains))
                 )
@@ -373,24 +370,20 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
 
     public async Task<List<IFeature>> GetAllPointsOfInterest()
     {
-        await _elasticClient.Indices.RefreshAsync(OSM_POIS_ALIAS);
-        var categories = Categories.Points.Concat(Categories.Routes).Select(c => c.ToLower()).ToArray();
-        var response = await _elasticClient.SearchAsync<IFeature>(s => s.Index(OSM_POIS_ALIAS)
-            .Size(10000)
+        await _elasticClient.Indices.RefreshAsync(POINTS);
+        var response = await _elasticClient.SearchAsync<PointDocument>(s => s.Index(POINTS)
+            .Size(PAGE_SIZE)
             .Scroll("10s")
-            .Query(q => q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CATEGORY}").Terms(categories))
-            ));
+            .Query(q =>
+                q.Bool(b => 
+                    b.MustNot(mn => 
+                        mn.Term(t => t.Field(p => p.PoiIcon).Value("icon-search"))
+                    )
+                )
+            )
+        );
         var list = GetAllItemsByScrolling(response);
-        return list;
-    }
-
-    private GeoBoundingBoxQueryDescriptor<IFeature> ConvertToGeoBoundingBox(GeoBoundingBoxQueryDescriptor<IFeature> b,
-        Coordinate northEast, Coordinate southWest)
-    {
-        return b.BoundingBox(
-            bb => bb.TopLeft(new GeoCoordinate(northEast.Y, southWest.X))
-                .BottomRight(new GeoCoordinate(southWest.Y, northEast.X))
-        ).Field($"{PROPERTIES}.{FeatureAttributes.POI_GEOLOCATION}");
+        return list.Select(h => HitToFeature(h, Languages.ENGLISH)).ToList();
     }
 
     public async Task<List<IFeature>> GetExternalPoisBySource(string source)
@@ -405,7 +398,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         );
         var features = GetAllItemsByScrolling(response);
         logger.LogInformation($"Got {features.Count} features for source {source}");
-        return features;
+        return features.Select(f => f.Source).ToList();
     }
 
     public async Task<IFeature> GetExternalPoiById(string id, string source)
@@ -625,7 +618,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                 ).Query(q => q.MatchAll())
         );
         var list = GetAllItemsByScrolling(response);
-        return list.SelectMany(i => i.ImageUrls ?? new List<String>()).ToList();
+        return list.SelectMany(i => i.Source.ImageUrls ?? []).ToList();
     }
 
     public Task StoreImage(ImageItem imageItem)

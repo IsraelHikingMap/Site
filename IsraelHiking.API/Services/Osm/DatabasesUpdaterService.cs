@@ -187,6 +187,7 @@ namespace IsraelHiking.API.Services.Osm
 
         private async Task RebuildOfflinePoisFile(RebuildContext context)
         {
+            // HM TODO: migrate the process to use the external index and a pbf file.
             _logger.LogInformation($"Starting rebuilding offline pois file for date: {context.StartTime.ToInvariantString()}");
             var features = await _pointsOfInterestRepository.GetAllPointsOfInterest();
             _elevationSetterExecutor.GeometryTo3D(features);

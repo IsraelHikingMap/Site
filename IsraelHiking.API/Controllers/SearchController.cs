@@ -87,7 +87,7 @@ namespace IsraelHiking.API.Controllers
         private async Task<string> GetDisplayName(IFeature feature, string language, string title)
         {
             var displayName = title;
-            var containerTitle = await _searchRepository.GetContainerName(feature.Geometry.Coordinate, language);
+            var containerTitle = await _searchRepository.GetContainerName([feature.Geometry.Coordinate], language);
             if (!string.IsNullOrWhiteSpace(containerTitle))
             {
                 displayName += ", " + containerTitle;
