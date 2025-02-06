@@ -32,9 +32,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     private const int NUMBER_OF_RESULTS = 20;
     
     private const string PROPERTIES = "properties";
-    private const string OSM_POIS_INDEX1 = "osm_names1";
-    private const string OSM_POIS_INDEX2 = "osm_names2";
-    private const string OSM_POIS_ALIAS = "osm_names";
     private const string OSM_HIGHWAYS_INDEX1 = "osm_highways1";
     private const string OSM_HIGHWAYS_INDEX2 = "osm_highways2";
     private const string OSM_HIGHWAYS_ALIAS = "osm_highways";
@@ -58,7 +55,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                 (_, _) => new SystemTextJsonSerializer(GeoJsonExtensions.GeoJsonWritableFactory))
             .PrettyJson();
         _elasticClient = new ElasticClient(connectionString);
-        await InitializeIndexWithAlias(OSM_POIS_INDEX1, OSM_POIS_INDEX2, OSM_POIS_ALIAS, CreatePointsOfInterestIndex);
         await InitializeIndexWithAlias(OSM_HIGHWAYS_INDEX1, OSM_HIGHWAYS_INDEX2, OSM_HIGHWAYS_ALIAS, CreateHighwaysIndex);
 
         if ((await _elasticClient.Indices.ExistsAsync(SHARES)).Exists == false)
@@ -295,19 +291,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         await SwitchIndices(currentIndex, newIndex, OSM_HIGHWAYS_ALIAS);
     }
 
-    public async Task StorePointsOfInterestDataToSecondaryIndex(List<IFeature> pointsOfInterest)
-    {
-        var (_, newIndex) = GetIndicesStatus(OSM_POIS_INDEX1, OSM_POIS_INDEX2, OSM_POIS_ALIAS);
-        await CreatePointsOfInterestIndex(newIndex);
-        await UpdateUsingPaging(pointsOfInterest, newIndex);
-    }
-
-    public async Task SwitchPointsOfInterestIndices()
-    {
-        var (currentIndex, newIndex) = GetIndicesStatus(OSM_POIS_INDEX1, OSM_POIS_INDEX2, OSM_POIS_ALIAS);
-        await SwitchIndices(currentIndex, newIndex, OSM_POIS_ALIAS);
-    }
-
     public Task UpdateHighwaysData(List<IFeature> features)
     {
         return UpdateData(features, OSM_HIGHWAYS_ALIAS);
@@ -437,24 +420,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                         )
                     )
             )
-        );
-    }
-
-    private Task CreatePointsOfInterestIndex(string poisIndexName)
-    {
-        return _elasticClient.Indices.CreateAsync(poisIndexName,
-            c => c.Map<IFeature>(m =>
-                m.Properties(ps =>
-                    ps.Object<IAttributesTable>(o => o
-                        .Name(PROPERTIES)
-                        .Properties(p => p.GeoPoint(s => s.Name(FeatureAttributes.POI_GEOLOCATION)))
-                        .Properties(p => p.Keyword(s => s.Name(FeatureAttributes.ID)))
-                        .Properties(p => p.Date(s => s.Name(FeatureAttributes.POI_LAST_MODIFIED)))
-                    ).GeoShape(g =>
-                        g.Name(f => f.Geometry)
-                    )
-                )
-            ).Settings(s => s.Setting("index.mapping.total_fields.limit", 10000))
         );
     }
 

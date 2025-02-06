@@ -69,14 +69,10 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 _geoJsonPreprocessorExecutor,
                 _osmRepository,
                 _pointsOfInterestAdapterFactory,
-                _featuresMergeExecutor,
                 _osmLatestFileGateway,
                 _pointsOfInterestFilesCreatorExecutor,
                 _imagesUrlsStorageExecutor,
-                _pointsOfInterestProvider,
-                _externalSourceUpdaterExecutor,
-                _elevationGateway,
-                Substitute.For<IUnauthorizedImageUrlsRemover>(), Substitute.For<IElevationSetterExecutor>(),
+                _externalSourceUpdaterExecutor, Substitute.For<IElevationSetterExecutor>(),
                 Substitute.For<ILogger>());
         }
 
@@ -97,25 +93,6 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _service.Rebuild(new UpdateRequest {Highways = true}).Wait();
 
             _highwaysRepository.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<IFeature>>());
-            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
-        }
-
-        [TestMethod] public void TestRebuild_Points_ShouldRebuildPoints()
-        {
-            var adapter = Substitute.For<IPointsOfInterestAdapter>();
-            adapter.GetAll().Returns(new List<IFeature>());
-            _pointsOfInterestAdapterFactory.GetAll().Returns(new[] {adapter});
-            _externalSourcesRepository.GetExternalPoisBySource(Arg.Any<string>()).Returns(new List<IFeature>());
-            _featuresMergeExecutor.Merge(Arg.Any<List<IFeature>>(), Arg.Any<List<IFeature>>()).Returns(new List<IFeature>
-            {
-                new Feature(new Point(0,0), new AttributesTable { {FeatureAttributes.POI_ID, "1"}})
-            });
-            _pointsOfInterestProvider.GetAll().Returns(new List<IFeature>());
-            
-            _service.Rebuild(new UpdateRequest {PointsOfInterest = true}).Wait();
-            
-            _pointsOfInterestRepository.Received(1).StorePointsOfInterestDataToSecondaryIndex(Arg.Any<List<IFeature>>());
-            _pointsOfInterestRepository.Received(1).SwitchPointsOfInterestIndices();
             _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
         }
         

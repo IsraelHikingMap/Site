@@ -1,8 +1,6 @@
-﻿using IsraelHiking.Common.Api;
-using NetTopologySuite.Features;
+﻿using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp.IO.API;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -14,7 +12,7 @@ namespace IsraelHiking.API.Services.Poi
     public interface IPointsOfInterestProvider
     {
         /// <summary>
-        /// This get a specific point of interest by the Id and source
+        /// This get a specific point of interest its ID and source
         /// </summary>
         /// <param name="id"></param>
         /// <param name="source"></param>
@@ -46,11 +44,5 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="language"></param>
         /// <returns></returns>
         public Task<IFeature> GetClosestPoint(Coordinate location, string language = "");
-
-        /// <summary>
-        /// Get all points from the OSM repository
-        /// </summary>
-        /// <returns></returns>
-        public Task<List<IFeature>> GetAll();
     }
 }

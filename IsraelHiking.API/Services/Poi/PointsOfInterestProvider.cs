@@ -115,18 +115,6 @@ namespace IsraelHiking.API.Services.Poi
             return true;
         }
 
-        /// <inheritdoc />
-        public async Task<List<IFeature>> GetAll()
-        {
-            _logger.LogInformation("Starting getting OSM points of interest");
-            await using var stream = await _latestFileGateway.Get();
-            var relevantTagsDictionary = _tagsHelper.GetAllTags();
-            var osmEntities = await _osmRepository.GetPoints(stream, relevantTagsDictionary);
-            var features = _osmGeoJsonPreprocessorExecutor.Preprocess(osmEntities);
-            _logger.LogInformation("Finished getting OSM points of interest: " + features.Count);
-            return features;
-        }
-
         private IFeature ConvertOsmToFeature(ICompleteOsmGeo osm)
         {
             var features = _osmGeoJsonPreprocessorExecutor.Preprocess(new List<ICompleteOsmGeo> {osm});

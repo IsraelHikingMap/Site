@@ -8,7 +8,7 @@ namespace IsraelHiking.DataAccessInterfaces.Repositories
     public interface IOsmRepository
     {
         Task<List<CompleteWay>> GetAllHighways(Stream osmFileStream);
-        Task<List<ICompleteOsmGeo>> GetPoints(Stream osmFileStream, List<KeyValuePair<string, string>> tags);
+        Task<Dictionary<string, List<string>>> GetExternalReferences(Stream osmFileStream);
         Task<List<string>> GetImagesUrls(Stream osmFileStream);
     }
 }

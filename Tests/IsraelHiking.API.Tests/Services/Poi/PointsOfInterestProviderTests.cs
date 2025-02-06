@@ -324,22 +324,22 @@ namespace IsraelHiking.API.Tests.Services.Poi
 
             gateway.DidNotReceive().UpdateElement(Arg.Any<long>(), Arg.Any<ICompleteOsmGeo>());
         }
-        
+
         [TestMethod]
         public void UpdateFeature_UpdateLocationOfWay_ShouldNotUpdate()
         {
             var gateway = SetupOsmAuthClient();
             var feature = GetValidFeature("Way_1", Sources.OSM);
-            feature.SetLocation(new Coordinate(1,1));
+            feature.SetLocation(new Coordinate(1, 1));
             gateway.GetCompleteWay(1).Returns(new CompleteWay
             {
                 Id = 1,
                 Tags = new TagsCollection
                 {
-                    {FeatureAttributes.NAME, "name"},
-                    {FeatureAttributes.NAME + ":en", "name"}
+                    { FeatureAttributes.NAME, "name" },
+                    { FeatureAttributes.NAME + ":en", "name" }
                 },
-                Nodes = new []
+                Nodes = new[]
                 {
                     new Node
                     {
@@ -353,23 +353,12 @@ namespace IsraelHiking.API.Tests.Services.Poi
                         Latitude = 2,
                         Longitude = 2
                     },
-                } 
+                }
             });
-            
+
             _adapter.UpdateFeature(feature, gateway, "en").Wait();
 
             gateway.DidNotReceive().UpdateElement(Arg.Any<long>(), Arg.Any<ICompleteOsmGeo>());
-        }
-        
-        [TestMethod]
-        public void GetPointsForIndexing_ShouldGetThem()
-        {
-            _latestFileGateway.Get().Returns(new MemoryStream());
-            _osmRepository.GetPoints(Arg.Any<Stream>(), Arg.Any<List<KeyValuePair<string, string>>>()).Returns(new List<ICompleteOsmGeo>());
-
-            var results = _adapter.GetAll().Result;
-
-            Assert.AreEqual(0, results.Count);
         }
 
         [TestMethod]
