@@ -370,23 +370,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         return response.Hits.Select(d => HitToFeature(d, Languages.ENGLISH)).FirstOrDefault();
 
     }
-    
-    public async Task<List<IFeature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
-    {
-        var languages = language == Languages.ALL ? Languages.Array : [language];
-        languages = languages.Concat([Languages.ALL]).ToArray();
-        var response = await _elasticClient.SearchAsync<IFeature>(
-            s => s.Index(OSM_POIS_ALIAS)
-                .Size(10000).Query(
-                    q => q.GeoBoundingBox(
-                             b => ConvertToGeoBoundingBox(b, northEast, southWest)
-                         ) &&
-                         q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CATEGORY}").Terms(categories.Select(c => c.ToLower()).ToArray())) &&
-                         q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_LANGUAGE}").Terms(languages))
-                )
-        );
-        return response.Documents.ToList();
-    }
 
     public async Task<List<IFeature>> GetAllPointsOfInterest()
     {
