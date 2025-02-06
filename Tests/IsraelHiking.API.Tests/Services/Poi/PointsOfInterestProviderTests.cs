@@ -375,26 +375,15 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void GetClosestPoint_ShouldGetTheClosesOsmPoint()
         {
-            var list = new List<IFeature>
+            var feature = new Feature(new LineString([]), new AttributesTable
             {
-                new Feature(new LineString(Array.Empty<Coordinate>()), new AttributesTable
-                {
-                    {FeatureAttributes.POI_SOURCE, Sources.OSM}
-                }),
-                new Feature(new Point(new Coordinate(0, 0)), new AttributesTable
-                {
-                    {FeatureAttributes.POI_SOURCE, Sources.WIKIPEDIA}
-                }),
-                new Feature(new Point(new Coordinate(0.01, 0.01)), new AttributesTable
-                {
-                    {FeatureAttributes.POI_SOURCE, Sources.OSM}
-                })
-            };
-            _pointsOfInterestRepository.GetPointsOfInterest(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>(), Arg.Any<string>()).Returns(list);
+                { FeatureAttributes.POI_SOURCE, Sources.OSM }
+            });
+            _pointsOfInterestRepository.GetClosestPoint(Arg.Any<Coordinate>()).Returns(feature);
 
             var results = _adapter.GetClosestPoint(new Coordinate(0,0), Sources.OSM).Result;
 
-            Assert.AreEqual(list.Last(), results);
+            Assert.AreEqual(feature, results);
         }
 
         [TestMethod]

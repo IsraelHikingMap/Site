@@ -67,6 +67,26 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 
         [TestMethod]
         [Ignore]
+        public void GetClosestPoint_ShouldReturnResults()
+        {
+            var coordinate = new Coordinate(35.303488, 33.027086);
+            var results = _gateway.GetClosestPoint(coordinate).Result;
+            Assert.IsNotNull(results);
+        }
+        
+        [TestMethod]
+        [Ignore]
+        public void GetClosestPoint_ShouldNotReturnResults()
+        {
+            var coordinate = new Coordinate(35.23087, 32.93687);
+            var results = _gateway.GetClosestPoint(coordinate).Result;
+            Assert.IsNull(results);
+        }
+
+        
+        
+        [TestMethod]
+        [Ignore]
         public void SetIndex_ShouldReturnResults()
         {
             _gateway.AddUrl(new ShareUrl {Id = "123", OsmUserId = "789"});
@@ -124,22 +144,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
             var imageItem = _gateway.GetAllUrls().Result;
 
             Assert.IsNotNull(imageItem);
-        }
-
-        [TestMethod]
-        [Ignore]
-        public void UpdatePointOfInterest_ShouldBeAbleToGetRightAfterAdding()
-        {
-            var id = "42";
-            var feature = new Feature(new Point(0, 0), new AttributesTable
-            {
-                { FeatureAttributes.NAME, "name" },
-                { FeatureAttributes.POI_SOURCE, Sources.OSM },
-                { FeatureAttributes.ID, id },
-            });
-            feature.SetId();
-            feature.SetTitles();
-            _gateway.UpdatePointsOfInterestData(new List<IFeature> { feature }).Wait();
         }
 
         [TestMethod]

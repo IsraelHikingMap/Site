@@ -14,7 +14,7 @@ public class PointDocument
     [JsonPropertyName("poiIconColor")]
     public string PoiIconColor { get; set; }
     [JsonPropertyName("poiSource")]
-    public string poiSource { get; set; }
+    public string PoiSource { get; set; }
     [JsonPropertyName("location")]
     public double[] Location { get; set; }
 }

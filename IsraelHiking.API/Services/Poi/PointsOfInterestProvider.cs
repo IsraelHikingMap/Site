@@ -251,18 +251,9 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc/>
-        public async Task<IFeature> GetClosestPoint(Coordinate location, string source, string language = "")
+        public async Task<IFeature> GetClosestPoint(Coordinate location, string language = "")
         {
-            var distance = _options.ClosestPointsOfInterestThreshold;
-            // HM TODO: get it from overpass turbo
-            var results = await _pointsOfInterestRepository.GetPointsOfInterest(
-                new Coordinate(location.X + distance, location.Y + distance),
-                new Coordinate(location.X - distance, location.Y - distance),
-                Categories.Points, 
-                string.IsNullOrEmpty(language) ? Languages.ALL : language);
-            return results.Where(r => r.Geometry is Point && ((source != null && r.Attributes[FeatureAttributes.POI_SOURCE].Equals(source)) || source == null))
-                .OrderBy(f => f.Geometry.Coordinate.Distance(location))
-                .FirstOrDefault();
+            return await _pointsOfInterestRepository.GetClosestPoint(location);
         }
 
         /// <inheritdoc/>

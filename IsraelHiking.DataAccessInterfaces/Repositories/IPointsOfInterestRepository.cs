@@ -11,8 +11,7 @@ namespace IsraelHiking.DataAccessInterfaces.Repositories
     {
         Task StorePointsOfInterestDataToSecondaryIndex(List<IFeature> pointsOfInterest);
         Task SwitchPointsOfInterestIndices();
-        Task UpdatePointsOfInterestData(List<IFeature> features);
-        Task<List<IFeature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language);
+        Task<IFeature> GetClosestPoint(Coordinate location);
         Task<List<IFeature>> GetAllPointsOfInterest();
         Task StoreRebuildContext(RebuildContext context);
     }

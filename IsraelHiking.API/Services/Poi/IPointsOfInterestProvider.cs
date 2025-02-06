@@ -43,10 +43,9 @@ namespace IsraelHiking.API.Services.Poi
         /// Get the closest point to the given location, only for the given source
         /// </summary>
         /// <param name="location"></param>
-        /// <param name="source">Source is optional</param>
         /// <param name="language"></param>
         /// <returns></returns>
-        public Task<IFeature> GetClosestPoint(Coordinate location, string source, string language = "");
+        public Task<IFeature> GetClosestPoint(Coordinate location, string language = "");
 
         /// <summary>
         /// Get all points from the OSM repository

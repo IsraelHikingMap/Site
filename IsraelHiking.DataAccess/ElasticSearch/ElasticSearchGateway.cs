@@ -132,14 +132,14 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         IFeature feature = new Feature(new Point(d.Source.Location[0], d.Source.Location[1]), new AttributesTable
         {
             { FeatureAttributes.NAME, d.Source.Name.GetValueOrDefault(language, d.Source.Name.GetValueOrDefault(Languages.ENGLISH, string.Empty)) },
-            { FeatureAttributes.POI_SOURCE, d.Source.poiSource },
+            { FeatureAttributes.POI_SOURCE, d.Source.PoiSource },
             { FeatureAttributes.POI_ICON, d.Source.PoiIcon },
             { FeatureAttributes.POI_CATEGORY, d.Source.PoiCategory },
             { FeatureAttributes.POI_ICON_COLOR, d.Source.PoiIconColor },
             { FeatureAttributes.DESCRIPTION, d.Source.Description },
             { FeatureAttributes.POI_ID, d.Id },
             { FeatureAttributes.POI_LANGUAGE, Languages.ALL },
-            { FeatureAttributes.ID, d.Id.Replace(d.Source.poiSource + "_", "") }
+            { FeatureAttributes.ID, d.Id.Replace(d.Source.PoiSource + "_", "") }
         });
         feature.SetTitles();
         feature.SetLocation(new Coordinate(d.Source.Location[0], d.Source.Location[1]));
@@ -316,11 +316,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         return UpdateData(features, OSM_HIGHWAYS_ALIAS);
     }
 
-    public Task UpdatePointsOfInterestData(List<IFeature> features)
-    {
-        return UpdateData(features, OSM_POIS_ALIAS);
-    }
-
     private async Task UpdateData(List<IFeature> features, string alias)
     {
         var result = await _elasticClient.BulkAsync(bulk =>
@@ -358,6 +353,24 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         return new GeoCoordinate(coordinate.Y, coordinate.X);
     }
 
+    public async Task<IFeature> GetClosestPoint(Coordinate coordinate)
+    {
+        var distance = _options.ClosestPointsOfInterestThreshold;
+        var response = await _elasticClient.SearchAsync<PointDocument>(s =>
+            s.Index(POINTS)
+                .Size(1)
+                .Query(q =>
+                    q.GeoBoundingBox(b => b.BoundingBox(
+                        bb => bb.TopLeft(new GeoCoordinate(coordinate.Y + distance, coordinate.X - distance))
+                            .BottomRight(new GeoCoordinate(coordinate.Y - distance, coordinate.X + distance))
+                    ).Field(p => p.Location)) 
+                    && q.Term(t => t.Field(p => p.PoiSource).Value(Sources.OSM.ToLower()))
+                    && q.Bool(b => b.MustNot(mn => mn.Term(t => t.Field(p => p.PoiIcon).Value("icon-search"))))
+                ));
+        return response.Hits.Select(d => HitToFeature(d, Languages.ENGLISH)).FirstOrDefault();
+
+    }
+    
     public async Task<List<IFeature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
     {
         var languages = language == Languages.ALL ? Languages.Array : [language];

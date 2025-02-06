@@ -208,14 +208,13 @@ namespace IsraelHiking.API.Controllers
         /// Gets the closest point to a given location.
         /// </summary>
         /// <param name="location">The location string "lat,lon" to search around</param>
-        /// <param name="source">Optional, if given this is the only source this methosd will use</param>
         /// <param name="language">Optional, if given this is the only language this method will use</param>
         /// <returns></returns>
         [HttpGet]
         [Route("closest")]
-        public Task<IFeature> GetClosestPoint(string location, string source, string language)
+        public Task<IFeature> GetClosestPoint(string location, string language)
         {
-            return _pointsOfInterestProvider.GetClosestPoint(location.ToCoordinate(), source, language);
+            return _pointsOfInterestProvider.GetClosestPoint(location.ToCoordinate(), language);
         }
 
         /// <summary>
