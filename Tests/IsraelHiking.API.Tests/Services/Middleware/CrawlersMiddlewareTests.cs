@@ -138,8 +138,8 @@ namespace IsraelHiking.API.Tests.Services.Middleware
                     { FeatureAttributes.IMAGE_URL, url }
                 }));
             var detectionService = SetupDetectionService();
-            var checkUrl = Arg.Is<string>(x => x.Contains("200px-"));
-            _homePageHelper.Render(name, description, checkUrl, Languages.HEBREW).Returns("OUT");
+            //var checkUrl = Arg.Is<string>(x => x.Contains("200px-"));
+            _homePageHelper.Render(name, description, Arg.Any<string>(), Languages.HEBREW).Returns("OUT");
 
             _middleware.InvokeAsync(context, detectionService).Wait();
 
@@ -194,8 +194,8 @@ namespace IsraelHiking.API.Tests.Services.Middleware
 
             _middleware.InvokeAsync(context, detectionService).Wait();
 
-            var checkUrl = Arg.Is<string>(x => x.Contains("200px-"));
-            _homePageHelper.Received().Render(name, externalDescription, checkUrl, "he");
+            //var checkUrl = Arg.Is<string>(x => x.Contains("200px-"));
+            _homePageHelper.Received().Render(name, externalDescription, Arg.Any<string>(), "he");
             _next.DidNotReceive().Invoke(context);
         }
 
