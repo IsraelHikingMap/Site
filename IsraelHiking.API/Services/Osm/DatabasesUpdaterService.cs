@@ -101,7 +101,7 @@ namespace IsraelHiking.API.Services.Osm
                 }
                 if (request.OfflinePoisFile)
                 {
-                    await RebuildOfflineFiles(rebuildContext);
+                    await RebuildOfflineFiles();
                 }
             }
             catch (Exception ex)
@@ -151,7 +151,7 @@ namespace IsraelHiking.API.Services.Osm
             _logger.LogInformation("Finished rebuilding sitemap.");
         }
 
-        private async Task RebuildOfflineFiles(RebuildContext context)
+        private async Task RebuildOfflineFiles()
         {
             _logger.LogInformation($"Starting rebuilding offline files.");
             await using var stream = await _osmLatestFileGateway.Get();
@@ -161,20 +161,26 @@ namespace IsraelHiking.API.Services.Osm
             foreach (var source in sources)
             {
                 var features = await _externalSourcesRepository.GetExternalPoisBySource(source);
-                if (!references.ContainsKey(source))
+                if (!references.TryGetValue(source, out var reference))
                 {
                     externalFeatures.AddRange(features);
                     continue;
                 }
-                var referencesNames = references[source].ToHashSet();
+                var referencesNames = reference.ToHashSet();
                 _logger.LogInformation($"Got {referencesNames.Count} references from OSM file for {source}.");
                 foreach (var feature in features)
                 {
-                    if (!referencesNames.Contains(feature.Attributes[FeatureAttributes.ID]) &&
-                        !referencesNames.Contains(feature.Attributes[FeatureAttributes.NAME]))
+                    if (feature.Attributes.GetNames().Any(n => n == FeatureAttributes.NAME) &&
+                        referencesNames.Contains(feature.Attributes[FeatureAttributes.NAME]))
                     {
-                        externalFeatures.Add(feature);
+                        continue;
                     }
+                    if (feature.Attributes.GetNames().Any(n => n == FeatureAttributes.ID) &&
+                        referencesNames.Contains(feature.Attributes[FeatureAttributes.ID]))
+                    {
+                        continue;
+                    }
+                    externalFeatures.Add(feature);
                 }
             }
             _logger.LogInformation($"Starting rebuilding offline files with {externalFeatures.Count} features.");
