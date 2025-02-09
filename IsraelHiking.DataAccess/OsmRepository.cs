@@ -39,29 +39,35 @@ namespace IsraelHiking.DataAccess
             });
         }
 
-        public Task<List<ICompleteOsmGeo>> GetPoints(Stream osmFileStream, List<KeyValuePair<string, string>> tags)
+        public Task<Dictionary<string,List<string>>> GetExternalReferences(Stream osmFileStream)
         {
             return Task.Run(() =>
             {
-                _logger.LogInformation("Extracting points from OSM stream.");
+                var dictionary = new Dictionary<string, List<string>>
+                {
+                    { Sources.WIKIDATA, [] },
+                    { Sources.INATURE, [] }
+                };
+                _logger.LogInformation("Starting extracting external references from OSM stream.");
                 osmFileStream.Seek(0, SeekOrigin.Begin);
                 var source = new PBFOsmStreamSource(osmFileStream);
                 var completeSource = new OsmSimpleCompleteStreamSource(source);
-                var completeOsmGeos = completeSource
-                    .Where(o => !o.Tags.Contains("highway", "construction"))
-                    .Where(o => !o.Tags.Contains("boundary", "disputed"))
-                    .Where(o => !string.IsNullOrWhiteSpace(o.Tags.GetName()))
+                var references = completeSource
+                    .Where(o => o.Tags.ContainsKey("wikidata") || o.Tags.ContainsKey("ref:IL:inature"))
                     .ToList();
-                
-                var nodes = completeSource.OfType<Node>()
-                    .Where(node =>
-                        node.Tags.GetName() == string.Empty &&
-                        node.Tags.HasAny(tags)
-                    ).ToList();
-                completeOsmGeos.AddRange(nodes);
-                
-                _logger.LogInformation("Finished extracting points. " + completeOsmGeos.Count);
-                return completeOsmGeos;
+                foreach (var reference in references)
+                {
+                    if (reference.Tags.ContainsKey("ref:IL:inature"))
+                    {
+                        dictionary[Sources.INATURE].Add(reference.Tags["ref:IL:inature"]);
+                    }
+                    else
+                    {
+                        dictionary[Sources.WIKIDATA].Add(reference.Tags["wikidata"]);
+                    }
+                }
+                _logger.LogInformation("Finished extracting external references from OSM stream: " + references.Count);
+                return dictionary;
             });
         }
 

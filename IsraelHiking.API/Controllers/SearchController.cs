@@ -13,7 +13,7 @@ using IsraelHiking.API.Services.Poi;
 namespace IsraelHiking.API.Controllers
 {
     /// <summary>
-    /// This contoller allows search of geo-locations
+    /// This controller allows search of geo-locations
     /// </summary>
     [Route("api/[controller]")]
     public class SearchController : ControllerBase
@@ -41,25 +41,22 @@ namespace IsraelHiking.API.Controllers
         public async Task<IEnumerable<SearchResultsPointOfInterest>> GetSearchResults(string term, string language)
         {
             if ((term.StartsWith("\"") || term.StartsWith("״")) && 
-                (term.EndsWith("\"") || term.StartsWith("״")))
+                (term.EndsWith("\"") || term.EndsWith("״")))
             {
                 var exactFeatures = await _searchRepository.SearchExact(term.Substring(1, term.Length - 2), language);
                 return await Task.WhenAll(exactFeatures.ToList().Select(f => ConvertFromFeature(f, language)));
             }
+            
             if (term.Count(c => c == ',') == 1)
             {
-                var split = term.Split(',');
-                var place = split.Last().Trim();
-                term = split.First().Trim();
-                var placesFeatures = await _searchRepository.SearchPlaces(place, language);
-                if (placesFeatures.Any())
+                var featuresWithinPlaces = await _searchRepository.SearchPlaces(term, language);
+                if (featuresWithinPlaces.Count != 0)
                 {
-                    var envelope = placesFeatures.First().Geometry.EnvelopeInternal;
-                    var featuresWithinPlaces = await _searchRepository.SearchByLocation(
-                        new Coordinate(envelope.MaxX, envelope.MaxY), new Coordinate(envelope.MinX, envelope.MinY), term, language);
-                    return await Task.WhenAll(featuresWithinPlaces.ToList().Select(f => ConvertFromFeature(f,language)));
+                    return await Task.WhenAll(featuresWithinPlaces.ToList().Select(f => ConvertFromFeature(f, language)));
                 }
+                term = term.Split(",").First().Trim();
             }
+
             var features = await _searchRepository.Search(term, language);
             return await Task.WhenAll(features.ToList().Select(f => ConvertFromFeature(f, language)));
         }
@@ -90,20 +87,11 @@ namespace IsraelHiking.API.Controllers
         private async Task<string> GetDisplayName(IFeature feature, string language, string title)
         {
             var displayName = title;
-            var containers = await _searchRepository.GetContainers(feature.Geometry.Coordinate);
-            var geometries = Enumerable.Range(0, feature.Geometry.NumGeometries).Select(i => feature.Geometry.GetGeometryN(i)).ToArray();
-            var container = containers.Where(c =>
-                    c.Attributes[FeatureAttributes.ID] != feature.Attributes[FeatureAttributes.ID] &&
-                    geometries.All(g => c.Geometry.Covers(g)) &&
-                    c.Geometry.EqualsTopologically(feature.Geometry) == false)
-                .OrderBy(c => c.Geometry.Area)
-                .FirstOrDefault();
-            var containerTitle = container?.GetTitle(language);
+            var containerTitle = await _searchRepository.GetContainerName([feature.Geometry.Coordinate], language);
             if (!string.IsNullOrWhiteSpace(containerTitle))
             {
                 displayName += ", " + containerTitle;
             }
-
             return displayName;
         }
     }

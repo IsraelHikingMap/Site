@@ -29,22 +29,6 @@ export class OsmTagsService {
             poi.properties.poiCategory = "Other";
             return;
         }
-        if (feature.properties.network) {
-            switch (feature.properties.network) {
-                case "lcn":
-                case "rcn":
-                    poi.properties.poiIconColor = "black";
-                    poi.properties.poiIcon = "icon-bike";
-                    poi.properties.poiCategory = "Bicycle";
-                    return;
-                case "lwn":
-                case "rwn":
-                    poi.properties.poiIconColor = "black";
-                    poi.properties.poiIcon = "icon-hike";
-                    poi.properties.poiCategory = "Hiking";
-                    return;
-            }
-        }
         if (feature.properties.route) {
             switch (feature.properties.route) {
                 case "hiking":
@@ -120,7 +104,9 @@ export class OsmTagsService {
         }
 
         if (feature.properties.water === "reservoir" || 
-            feature.properties.water === "pond") {
+            feature.properties.water === "pond" ||
+            feature.properties.water === "lake" ||
+            feature.properties.water === "stream_pool") {
             poi.properties.poiIconColor = "blue";
             poi.properties.poiIcon = "icon-tint";
             poi.properties.poiCategory = "Water";
@@ -140,7 +126,7 @@ export class OsmTagsService {
             }
         }
 
-        if (feature.properties.waterway === "waterfall") {
+        if (feature.properties.waterway === "waterfall" || feature.properties.type === "waterway") {
             poi.properties.poiIconColor = "blue";
             poi.properties.poiIcon = "icon-waterfall";
             poi.properties.poiCategory = "Water";
@@ -194,6 +180,31 @@ export class OsmTagsService {
             poi.properties.poiCategory = "iNature";
             return;
         }
+
+        if (feature.properties.highway != null) {
+            switch (feature.properties.highway) {
+              case "cycleway":
+                poi.properties.poiIconColor = "black";
+                poi.properties.poiCategory = "Bicycle";
+                poi.properties.poiIcon = "icon-bike";
+                return;
+              case "footway":
+                poi.properties.poiIconColor = "black";
+                poi.properties.poiCategory = "Hiking";
+                poi.properties.poiIcon = "icon-hike";
+                return;
+              case "path":
+                poi.properties.poiIconColor = "black";
+                poi.properties.poiCategory = "Hiking";
+                poi.properties.poiIcon = "icon-hike";
+                return;
+              case "track":
+                poi.properties.poiIconColor = "black";
+                poi.properties.poiCategory = "4x4";
+                poi.properties.poiIcon = "icon-four-by-four";
+                return;
+            }
+          }
 
         if (feature.properties.wikidata || feature.properties.wikipedia) {
             poi.properties.poiIconColor = "black";

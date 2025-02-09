@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
-using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,13 +19,11 @@ namespace IsraelHiking.API.Tests.Executors
     {
         private PointsOfInterestFilesCreatorExecutor _executor;
         private IFileSystemHelper _fileSystemHelper;
-        private IImagesRepository _imagesRepository;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _fileSystemHelper = Substitute.For<IFileSystemHelper>();
-            _imagesRepository = Substitute.For<IImagesRepository>();
             var options = Substitute.For<IOptions<ConfigurationData>>();
             options.Value.Returns(new ConfigurationData());
             _executor = new PointsOfInterestFilesCreatorExecutor(
@@ -49,7 +45,7 @@ namespace IsraelHiking.API.Tests.Executors
             var stream = new MemoryStream();
             _fileSystemHelper.CreateWriteStream(Arg.Any<string>()).Returns(stream);
 
-            _executor.CreateSiteMapXmlFile(new List<IFeature> {feature});
+            _executor.CreateSiteMapXmlFile([feature]);
             
             Assert.IsTrue(stream.ToArray().Length > 0);
         }

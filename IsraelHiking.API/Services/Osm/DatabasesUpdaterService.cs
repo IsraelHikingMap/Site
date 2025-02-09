@@ -2,14 +2,14 @@
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
-using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
-using OsmSharp;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using NetTopologySuite.Features;
 
 namespace IsraelHiking.API.Services.Osm
 {
@@ -22,14 +22,10 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private readonly IOsmRepository _osmRepository;
         private readonly IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
-        private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
-        private readonly IFeaturesMergeExecutor _featuresMergeExecutor;
         private readonly IOsmLatestFileGateway _osmLatestFileGateway;
         private readonly IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
         private readonly IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
         private readonly IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
-        private readonly IElevationGateway _elevationGateway;
-        private readonly IUnauthorizedImageUrlsRemover _unauthorizedImageUrlsRemover;
         private readonly IElevationSetterExecutor _elevationSetterExecutor;
         private readonly ILogger _logger;
 
@@ -42,14 +38,10 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
         /// <param name="osmRepository"></param>
         /// <param name="pointsOfInterestAdapterFactory"></param>
-        /// <param name="featuresMergeExecutor"></param>
         /// <param name="latestFileGateway"></param>
         /// <param name="pointsOfInterestFilesCreatorExecutor"></param>
         /// <param name="imagesUrlsStorageExecutor"></param>
-        /// <param name="pointsOfInterestProvider"></param>
         /// <param name="externalSourceUpdaterExecutor"></param>
-        /// <param name="elevationGateway"></param>
-        /// <param name="unauthorizedImageUrlsRemover"></param>
         /// <param name="elevationSetterExecutor"></param>
         /// <param name="logger"></param>
         public DatabasesUpdaterService(IExternalSourcesRepository externalSourcesRepository,
@@ -58,14 +50,10 @@ namespace IsraelHiking.API.Services.Osm
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor, 
             IOsmRepository osmRepository,
             IPointsOfInterestAdapterFactory pointsOfInterestAdapterFactory,
-            IFeaturesMergeExecutor featuresMergeExecutor,
             IOsmLatestFileGateway latestFileGateway,
             IPointsOfInterestFilesCreatorExecutor pointsOfInterestFilesCreatorExecutor,
             IImagesUrlsStorageExecutor imagesUrlsStorageExecutor,
-            IPointsOfInterestProvider pointsOfInterestProvider,
             IExternalSourceUpdaterExecutor externalSourceUpdaterExecutor,
-            IElevationGateway elevationGateway,
-            IUnauthorizedImageUrlsRemover unauthorizedImageUrlsRemover,
             IElevationSetterExecutor elevationSetterExecutor,
             ILogger logger)
         {
@@ -76,13 +64,9 @@ namespace IsraelHiking.API.Services.Osm
             _osmRepository = osmRepository;
             _pointsOfInterestAdapterFactory = pointsOfInterestAdapterFactory;
             _pointsOfInterestFilesCreatorExecutor = pointsOfInterestFilesCreatorExecutor;
-            _featuresMergeExecutor = featuresMergeExecutor;
             _osmLatestFileGateway = latestFileGateway;
-            _pointsOfInterestProvider = pointsOfInterestProvider;
             _imagesUrlsStorageExecutor = imagesUrlsStorageExecutor;
             _externalSourceUpdaterExecutor = externalSourceUpdaterExecutor;
-            _elevationGateway = elevationGateway;
-            _unauthorizedImageUrlsRemover = unauthorizedImageUrlsRemover;
             _elevationSetterExecutor = elevationSetterExecutor;
             _logger = logger;
         }
@@ -107,10 +91,6 @@ namespace IsraelHiking.API.Services.Osm
                 {
                     await RebuildHighways();
                 }
-                if (request.PointsOfInterest)
-                {
-                    await RebuildPointsOfInterest(rebuildContext);
-                }
                 if (request.Images)
                 {
                     await RebuildImages();
@@ -121,7 +101,7 @@ namespace IsraelHiking.API.Services.Osm
                 }
                 if (request.OfflinePoisFile)
                 {
-                    await RebuildOfflinePoisFile(rebuildContext);
+                    await RebuildOfflineFiles();
                 }
             }
             catch (Exception ex)
@@ -135,20 +115,6 @@ namespace IsraelHiking.API.Services.Osm
                 await _pointsOfInterestRepository.StoreRebuildContext(rebuildContext);
             }
             
-        }
-
-        private async Task RebuildPointsOfInterest(RebuildContext rebuildContext)
-        {
-            _logger.LogInformation("Starting rebuilding POIs database.");
-            var osmFeaturesTask = _pointsOfInterestProvider.GetAll();
-            var sources = _pointsOfInterestAdapterFactory.GetAll().Select(s => s.Source);
-            var externalFeatures = sources.Select(s => _externalSourcesRepository.GetExternalPoisBySource(s)).SelectMany(t => t.Result).ToList();
-            var features = _featuresMergeExecutor.Merge(osmFeaturesTask.Result, externalFeatures);
-            _unauthorizedImageUrlsRemover.RemoveImages(features);
-            await _pointsOfInterestRepository.StorePointsOfInterestDataToSecondaryIndex(features);
-            _logger.LogInformation("Finished storing all features " + features.Count);
-            await _pointsOfInterestRepository.SwitchPointsOfInterestIndices();
-            _logger.LogInformation("Finished rebuilding POIs database.");
         }
 
         private async Task RebuildHighways()
@@ -185,12 +151,41 @@ namespace IsraelHiking.API.Services.Osm
             _logger.LogInformation("Finished rebuilding sitemap.");
         }
 
-        private async Task RebuildOfflinePoisFile(RebuildContext context)
+        private async Task RebuildOfflineFiles()
         {
-            _logger.LogInformation($"Starting rebuilding offline pois file for date: {context.StartTime.ToInvariantString()}");
-            var features = await _pointsOfInterestRepository.GetAllPointsOfInterest();
-            _elevationSetterExecutor.GeometryTo3D(features);
-            _pointsOfInterestFilesCreatorExecutor.CreateOfflinePoisFile(features);
+            _logger.LogInformation($"Starting rebuilding offline files.");
+            await using var stream = await _osmLatestFileGateway.Get();
+            var references = await _osmRepository.GetExternalReferences(stream);
+            var sources = _pointsOfInterestAdapterFactory.GetAll().Select(s => s.Source);
+            var externalFeatures = new List<IFeature>();
+            foreach (var source in sources)
+            {
+                var features = await _externalSourcesRepository.GetExternalPoisBySource(source);
+                if (!references.TryGetValue(source, out var reference))
+                {
+                    externalFeatures.AddRange(features);
+                    continue;
+                }
+                var referencesNames = reference.ToHashSet();
+                _logger.LogInformation($"Got {referencesNames.Count} references from OSM file for {source}.");
+                foreach (var feature in features)
+                {
+                    if (feature.Attributes.GetNames().Any(n => n == FeatureAttributes.NAME) &&
+                        referencesNames.Contains(feature.Attributes[FeatureAttributes.NAME]))
+                    {
+                        continue;
+                    }
+                    if (feature.Attributes.GetNames().Any(n => n == FeatureAttributes.ID) &&
+                        referencesNames.Contains(feature.Attributes[FeatureAttributes.ID]))
+                    {
+                        continue;
+                    }
+                    externalFeatures.Add(feature);
+                }
+            }
+            _logger.LogInformation($"Starting rebuilding offline files with {externalFeatures.Count} features.");
+            _elevationSetterExecutor.GeometryTo3D(externalFeatures);
+            _pointsOfInterestFilesCreatorExecutor.CreateOfflinePoisFile(externalFeatures);
             _logger.LogInformation("Finished rebuilding offline pois file.");
         }
 
