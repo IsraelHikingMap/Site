@@ -26,7 +26,7 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '7.0'
+          dotnet-version: '9.0'
 
       - name: Run backend tests
         run: dotnet test Tests/IsraelHiking.API.Tests  --logger "junit;LogFilePath=test-result.xml" /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:Exclude="[IsraelHiking.Common]*"

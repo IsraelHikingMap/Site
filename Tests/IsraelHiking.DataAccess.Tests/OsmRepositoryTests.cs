@@ -11,11 +11,11 @@ namespace IsraelHiking.DataAccess.Tests
     {
         [TestMethod]
         [Ignore]
-        public void TestGetPoints()
+        public void TestGetExternalReferences()
         {
             var osmRepository = new OsmRepository(Substitute.For<ILogger>());
             var stream = new FileStream("/Users/harel/Downloads/israel-and-palestine-latest.osm.pbf", FileMode.Open);
-            var result = osmRepository.GetPoints(stream, new List<KeyValuePair<string, string>>()).Result;
+            var result = osmRepository.GetExternalReferences(stream).Result;
             Assert.IsTrue(result.Count > 0);
         }
         

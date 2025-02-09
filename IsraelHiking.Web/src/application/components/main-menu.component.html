@@ -9,6 +9,7 @@
                 <i class="fa icon-frown-o fa-lg"></i>
             </button>
             <span class="circle" [ngClass]="{'offline': isOffline(), 'online': !isOffline()}">{{getQueueText()}}</span>
+            <span *ngIf="isOffline()" class="circle-line"></span>
             <button mat-button class="high-button" [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Toggle main menu"><i class="fa fa-lg icon-bars"></i></button>
         </div>
         <mat-menu #appMenu="matMenu" xPosition="before">

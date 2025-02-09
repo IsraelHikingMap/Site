@@ -166,28 +166,15 @@ namespace IsraelHiking.API.Controllers
 
         private async Task<string> GetDescriptionByArea(string language, List<Coordinate> allPoints, string defaultDescription)
         {
-            var containersStart = await _searchRepository.GetContainers(allPoints.First());
-            var containersEnd = await _searchRepository.GetContainers(allPoints.Last());
-            var containers = containersStart.Concat(containersEnd)
-                .GroupBy(f => f.GetId())
-                .Select(g => g.First())
-                .OrderBy(c => c.Geometry.Area)
-                .ToList();
-            foreach (var container in containers)
+            var containerName = await _searchRepository.GetContainerName(allPoints.ToArray(), language);
+            if (string.IsNullOrEmpty(containerName))
             {
-                var pointsInside = allPoints.Count(c => container.Geometry.Contains(new Point(c)));
-                if (pointsInside * 100.0 / allPoints.Count <= 20.0)
-                {
-                    continue;
-                }
-                container.SetTitles();
-                var replacementTarget = language == "he"
-                    ? "מסלול ב" + container.GetTitle(language)
-                    : "A route in " + container.GetTitle(language);
-                return defaultDescription.Replace("מסלול", replacementTarget).Replace("Route", replacementTarget).Replace("Recorded using IHM at", replacementTarget);
+                return defaultDescription;
             }
-
-            return defaultDescription;
+            var replacementTarget = language == "he"
+                ? "מסלול ב" + containerName
+                : "A route in " + containerName;
+            return defaultDescription.Replace("מסלול", replacementTarget).Replace("Route", replacementTarget).Replace("Recorded using IHM at", replacementTarget);
         }
 
         /// <summary>

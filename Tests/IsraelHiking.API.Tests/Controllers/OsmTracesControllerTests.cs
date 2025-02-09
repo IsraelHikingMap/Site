@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using IsraelHiking.API.Controllers;
+﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces.Repositories;
@@ -13,10 +11,8 @@ using OsmSharp.IO.API;
 using System.IO;
 using System.Text;
 using IsraelHiking.Common.DataContainer;
-using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Caching.Distributed;
-using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -49,13 +45,15 @@ namespace IsraelHiking.API.Tests.Controllers
             _controller.SetupIdentity();
             var osmGateWay = SetupOAuthClient();
             _controller.Url = Substitute.For<IUrlHelper>();
-            osmGateWay.GetTraces().Returns(new[] {new GpxFile
+            osmGateWay.GetTraces().Returns([
+                new GpxFile
             {
                 Id = 42,
                 Description = "description",
                 Name = "name",
-                Tags = Array.Empty<string>()
-            }});
+                Tags = []
+            }
+            ]);
 
         _controller.GetTraces().Wait();
 
@@ -85,7 +83,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>())
                 .Returns(new DataContainerPoco());
             _imageCreationGateway.Create(Arg.Any<DataContainerPoco>(), Arg.Any<int>(), Arg.Any<int>())
-                .Returns(new byte[] {1});
+                .Returns([1]);
             
             var results = _controller.GetTraceByIdImage(42).Result as FileContentResult;
             
@@ -105,7 +103,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var file = Substitute.For<IFormFile>();
             file.FileName.Returns("SomeFile.gpx");
-            var osmGateWay = SetupOAuthClient();
+            SetupOAuthClient();
             _distributedCache.Get(Arg.Any<string>()).Returns(Encoding.UTF8.GetBytes("something"));
             _controller.SetupIdentity();
         
@@ -146,34 +144,20 @@ namespace IsraelHiking.API.Tests.Controllers
                 Id = "42",
                 Name = "Route",
                 Description = "Route",
-                Segments = new List<RouteSegmentData>
-                {
-                    new()
+                Segments =
+                [
+                    new RouteSegmentData
                     {
-                        Latlngs = new List<LatLngTime>
-                        {
-                            new(0, 0),
-                            new(1, 1),
-                            new(2, 2)
-                        }
+                        Latlngs =
+                        [
+                            new LatLngTime(0, 0),
+                            new LatLngTime(1, 1),
+                            new LatLngTime(2, 2)
+                        ]
                     }
-                }
+                ]
             };
-            var containingFeature = new Feature(new Polygon(new LinearRing(new[]
-            {
-                new Coordinate(-1, -1),
-                new Coordinate(-1, 3),
-                new Coordinate(3, 3),
-                new Coordinate(3, -1),
-                new Coordinate(-1, -1)
-            })), new AttributesTable
-            {
-                {FeatureAttributes.NAME, "name"},
-                {FeatureAttributes.ID, "42"},
-                {FeatureAttributes.POI_ID, "42"}
-            });
-            containingFeature.SetTitles();
-            _searchRepository.GetContainers(Arg.Any<Coordinate>()).Returns(new List<IFeature> {containingFeature});
+            _searchRepository.GetContainerName(Arg.Any<Coordinate[]>(), Languages.ENGLISH).Returns("name");
             _distributedCache.Get(Arg.Any<string>()).Returns((byte[])null);
             
             _controller.PostUploadRouteData(routeData, Languages.ENGLISH).Wait();
@@ -190,34 +174,21 @@ namespace IsraelHiking.API.Tests.Controllers
             {
                 Id = "42",
                 Name = "Recorded using IHM at 2000-01-01",
-                Segments = new List<RouteSegmentData>
-                {
-                    new()
+                Segments =
+                [
+                    new RouteSegmentData
                     {
-                        Latlngs = new List<LatLngTime>
-                        {
-                            new(0, 0),
-                            new(1, 1),
-                            new(2, 2)
-                        }
+                        Latlngs =
+                        [
+                            new LatLngTime(0, 0),
+                            new LatLngTime(1, 1),
+                            new LatLngTime(2, 2)
+                        ]
                     }
-                }
+                ]
             };
-            var containingFeature = new Feature(new Polygon(new LinearRing(new[]
-            {
-                new Coordinate(-1, -1),
-                new Coordinate(-1, 3),
-                new Coordinate(3, 3),
-                new Coordinate(3, -1),
-                new Coordinate(-1, -1)
-            })), new AttributesTable
-            {
-                {FeatureAttributes.NAME, "area"},
-                {FeatureAttributes.ID, "42"},
-                {FeatureAttributes.POI_ID, "42"}
-            });
-            containingFeature.SetTitles();
-            _searchRepository.GetContainers(Arg.Any<Coordinate>()).Returns(new List<IFeature> {containingFeature});
+            
+            _searchRepository.GetContainerName(Arg.Any<Coordinate[]>(), Languages.ENGLISH).Returns("area");
             _distributedCache.Get(Arg.Any<string>()).Returns((byte[])null);
             
             _controller.PostUploadRouteData(routeData, Languages.ENGLISH).Wait();

@@ -1,7 +1,6 @@
 ﻿using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
-using IsraelHiking.Common.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
@@ -11,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using IsraelHiking.DataAccess.ElasticSearch;
 
 namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 {
@@ -35,26 +35,21 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
             var results = _gateway.Search("מנות", "name").Result;
             Assert.AreEqual(10, results.Count);
         }
+        
+        [TestMethod]
+        [Ignore]
+        public void GetContainerName_ShouldReturnResults()
+        {
+            var results = _gateway.GetContainerName([new Coordinate(35.225306, 32.703806)], "he").Result;
+            Assert.AreEqual("a", results);
+        }
 
         [TestMethod]
         [Ignore]
         public void SearchWithinPlace_ShouldReturnResults()
         {
-            var placesFeatures = _gateway.SearchPlaces("תמרת", Languages.HEBREW).Result;
-            Assert.AreEqual(5, placesFeatures.Count);
-            var envolope = placesFeatures.First().Geometry.EnvelopeInternal;
-            var results = _gateway.SearchByLocation(
-                new Coordinate(envolope.MaxX, envolope.MaxY), new Coordinate(envolope.MinX, envolope.MinY), "מורן", Languages.HEBREW).Result;
+            var results = _gateway.SearchPlaces("פינת הזיכרון, רמות מנשה", Languages.HEBREW).Result;
             Assert.AreEqual(1, results.Count);
-        }
-
-        [TestMethod]
-        [Ignore]
-        public void SearchWithinPlace_WithLowFactor_ShouldReturnResults()
-        {
-            var results = _gateway.SearchByLocation(
-                new Coordinate(35.023903300000001, 32.248676099999997), new Coordinate(34.836766599999997, 32.003519799999999), "הסיבים", Languages.HEBREW).Result;
-            Assert.IsTrue(results.Any(f => f.Attributes.GetNames().Contains(FeatureAttributes.NAME) && f.Attributes[FeatureAttributes.NAME].ToString() == "הסיבים"));
         }
 
         [TestMethod]
@@ -71,6 +66,26 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 
         [TestMethod]
         [Ignore]
+        public void GetClosestPoint_ShouldReturnResults()
+        {
+            var coordinate = new Coordinate(35.303488, 33.027086);
+            var results = _gateway.GetClosestPoint(coordinate).Result;
+            Assert.IsNotNull(results);
+        }
+        
+        [TestMethod]
+        [Ignore]
+        public void GetClosestPoint_ShouldNotReturnResults()
+        {
+            var coordinate = new Coordinate(35.23087, 32.93687);
+            var results = _gateway.GetClosestPoint(coordinate).Result;
+            Assert.IsNull(results);
+        }
+
+        
+        
+        [TestMethod]
+        [Ignore]
         public void SetIndex_ShouldReturnResults()
         {
             _gateway.AddUrl(new ShareUrl {Id = "123", OsmUserId = "789"});
@@ -81,25 +96,11 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 
         [TestMethod]
         [Ignore]
-        public void DeleteThenGet_ShouldReturnEmpty()
+        public void GetContainerName_MultipleCoordinates_ShouldGetOne()
         {
-            var id = "he_22216";
-            var feature = _gateway.GetPointOfInterestById(id, Sources.WIKIPEDIA).Result;
-            Assert.IsNotNull(feature);
+            var name = _gateway.GetContainerName([new Coordinate(35.052338, 32.598071), new Coordinate(35.061919, 32.595458)], Languages.HEBREW).Result;
 
-            _gateway.DeletePointOfInterestById(id, Sources.WIKIPEDIA).Wait();
-
-            feature = _gateway.GetPointOfInterestById(id, Sources.WIKIPEDIA).Result;
-            Assert.IsNull(feature);
-        }
-
-        [TestMethod]
-        [Ignore]
-        public void GetContainers_ShouldGetSome()
-        {
-            var features = _gateway.GetContainers(new Coordinate(35.225306, 32.703806)).Result;
-
-            Assert.IsTrue(features.Count > 0);
+            Assert.AreEqual("רמות מנשה", name);
         }
 
         [TestMethod]
@@ -146,25 +147,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 
         [TestMethod]
         [Ignore]
-        public void UpdatePointOfInterest_ShouldBeAbleToGetRightAfterAdding()
-        {
-            var id = "42";
-            _gateway.DeletePointOfInterestById(id, Sources.OSM).Wait();
-            var feature = new Feature(new Point(0, 0), new AttributesTable
-            {
-                { FeatureAttributes.NAME, "name" },
-                { FeatureAttributes.POI_SOURCE, Sources.OSM },
-                { FeatureAttributes.ID, id },
-            });
-            feature.SetId();
-            feature.SetTitles();
-            _gateway.UpdatePointsOfInterestData(new List<IFeature> { feature }).Wait();
-            var results = _gateway.GetPointOfInterestById(id, Sources.OSM).Result;
-            Assert.IsNotNull(results);
-        }
-
-        [TestMethod]
-        [Ignore]
         public void GetAllPointsOfInterest_ShouldGetThem()
         {
             var results = _gateway.GetAllPointsOfInterest().Result;
@@ -187,15 +169,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
                     AllExternalSources = true,
                 }
             }).Wait();
-        }
-
-        [TestMethod]
-        [Ignore]
-        public void GetLastSuccessfulRebuildTime_ShouldSGetIt()
-        {
-            var results = _gateway.GetLastSuccessfulRebuildTime().Result;
-
-            Assert.IsTrue(results > DateTime.MinValue);
         }
 
         [TestMethod]

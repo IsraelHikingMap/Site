@@ -65,7 +65,7 @@ The architecture is based on layers:
 # Setting Up the Project for site Development (To setup iOS and Android follow the capacitor guides)
 In order to be able to build this site you'll need some tools:
 * Install [Docker](https://www.docker.com/products/docker-desktop)
-* Install [.Net core SDK 7.0 ](https://www.microsoft.com/net/download/core)
+* Install [.Net core SDK 9.0 ](https://www.microsoft.com/net/download/core)
 * Install [node.js](https://nodejs.org/en/) (20+).
 * Run from command line `dotnet restore` and after that `dotnet build`
 * Go to `IsraelHiking.Web` and run from command line: 

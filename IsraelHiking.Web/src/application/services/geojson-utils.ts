@@ -2,6 +2,13 @@ import { Immutable } from "immer";
 import { LatLngAlt } from "../models/models";
 
 export class GeoJSONUtils {
+    public static setPropertyUnique(feature: GeoJSON.Feature, key: string, value: string) {
+        const hasValue = Object.keys(feature.properties).filter(k => k.includes(key)).some(k => feature.properties[k] === value);
+        if (!hasValue) {
+            GeoJSONUtils.setProperty(feature, key, value);
+        }
+    }
+
     public static setProperty(feature: GeoJSON.Feature, key: string, value: string): string {
         if (!feature.properties[key]) {
             feature.properties[key] = value;

@@ -127,7 +127,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns>A link to the image stored on the web</returns>
         [HttpPost]
         [Route("anonymous")]
-        public async Task<string> PostUploadImage([FromForm]IFormFile file)
+        public async Task<string> PostUploadImage(IFormFile file)
         {
             using var stream = file.OpenReadStream();
             var link = await _imgurGateway.UploadImage(stream);

@@ -46,30 +46,6 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiCategory).toBe("Other");
     });
 
-    it("Should set icon color category for network lcn", () => {
-        // Arrange
-        const feature = createFeature({network: "lcn" });
-        const poi = createPoi();
-        // Act
-        OsmTagsService.setIconColorCategory(feature, poi);
-        // Assert
-        expect(poi.properties.poiIconColor).toBe("black");
-        expect(poi.properties.poiIcon).toBe("icon-bike");
-        expect(poi.properties.poiCategory).toBe("Bicycle");
-    });
-
-    it("Should set icon color category for network lwn", () => {
-        // Arrange
-        const feature = createFeature({network: "lwn" });
-        const poi = createPoi();
-        // Act
-        OsmTagsService.setIconColorCategory(feature, poi);
-        // Assert
-        expect(poi.properties.poiIconColor).toBe("black");
-        expect(poi.properties.poiIcon).toBe("icon-hike");
-        expect(poi.properties.poiCategory).toBe("Hiking");
-    });
-
     it("Should set icon color category for route hiking", () => {
         // Arrange
         const feature = createFeature({route: "hiking" });
@@ -213,9 +189,45 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiCategory).toBe("Water");
     });
 
+    it("Should set icon color category for pond", () => {
+        // Arrange
+        const feature = createFeature({water: "pond" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("blue");
+        expect(poi.properties.poiIcon).toBe("icon-tint");
+        expect(poi.properties.poiCategory).toBe("Water");
+    });
+
+    it("Should set icon color category for stream_pool", () => {
+        // Arrange
+        const feature = createFeature({water: "stream_pool" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("blue");
+        expect(poi.properties.poiIcon).toBe("icon-tint");
+        expect(poi.properties.poiCategory).toBe("Water");
+    });
+
     it("Should set icon color category for reservoir", () => {
         // Arrange
         const feature = createFeature({water: "reservoir" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("blue");
+        expect(poi.properties.poiIcon).toBe("icon-tint");
+        expect(poi.properties.poiCategory).toBe("Water");
+    });
+
+    it("Should set icon color category for lake", () => {
+        // Arrange
+        const feature = createFeature({water: "lake" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -252,6 +264,30 @@ describe("OsmTagsService", () => {
     it("Should set icon color category for waterfall", () => {
         // Arrange
         const feature = createFeature({ waterway: "waterfall" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("blue");
+        expect(poi.properties.poiIcon).toBe("icon-waterfall");
+        expect(poi.properties.poiCategory).toBe("Water");
+    });
+
+    it("Should set icon color category for waterfall", () => {
+        // Arrange
+        const feature = createFeature({ waterway: "waterfall" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("blue");
+        expect(poi.properties.poiIcon).toBe("icon-waterfall");
+        expect(poi.properties.poiCategory).toBe("Water");
+    });
+
+    it("Should set icon color category for waterway", () => {
+        // Arrange
+        const feature = createFeature({ type: "waterway" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -330,6 +366,54 @@ describe("OsmTagsService", () => {
         // Assert
         expect(poi.properties.poiCategory).toBe("Natural");
         expect(poi.properties.poiIcon).toBe("icon-peak");
+        expect(poi.properties.poiIconColor).toBe("black");
+    });
+
+    it("Should set icon color category for cycleway", () => {
+        // Arrange
+        const feature = createFeature({highway: "cycleway" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("Bicycle");
+        expect(poi.properties.poiIcon).toBe("icon-bike");
+        expect(poi.properties.poiIconColor).toBe("black");
+    });
+
+    it("Should set icon color category for path", () => {
+        // Arrange
+        const feature = createFeature({highway: "path" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("Hiking");
+        expect(poi.properties.poiIcon).toBe("icon-hike");
+        expect(poi.properties.poiIconColor).toBe("black");
+    });
+
+    it("Should set icon color category for footway", () => {
+        // Arrange
+        const feature = createFeature({highway: "footway" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("Hiking");
+        expect(poi.properties.poiIcon).toBe("icon-hike");
+        expect(poi.properties.poiIconColor).toBe("black");
+    });
+
+    it("Should set icon color category for track", () => {
+        // Arrange
+        const feature = createFeature({highway: "track" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("4x4");
+        expect(poi.properties.poiIcon).toBe("icon-four-by-four");
         expect(poi.properties.poiIconColor).toBe("black");
     });
 

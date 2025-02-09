@@ -18,14 +18,17 @@ on:
         description: 'Publish to Google play'
         required: false
         default: 'false'
+        type: boolean
       publishios:
         description: 'Publish to App Store'
         required: false
         default: 'false'
+        type: boolean
       tag:
-        description: 'Tags and create a Github release'
+        description: 'Tag and create a Github release'
         required: false
         default: 'false'
+        type: boolean
 jobs:
   version:
     runs-on: ubuntu-latest
@@ -264,6 +267,7 @@ jobs:
         run: |
           mv ${{ github.workspace }}/artifacts/*.ipa ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.ipa
           mv ${{ github.workspace }}/artifacts/*.aab ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.aab
+          mv ${{ github.workspace }}/artifacts/*.apk ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.apk
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
@@ -274,3 +278,4 @@ jobs:
           files: |
             IHM_signed_${{ needs.version.outputs.version_string }}.ipa
             IHM_signed_${{ needs.version.outputs.version_string }}.aab
+            IHM_signed_${{ needs.version.outputs.version_string }}.apk

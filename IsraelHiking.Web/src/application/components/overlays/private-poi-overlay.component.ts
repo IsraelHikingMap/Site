@@ -34,7 +34,7 @@ export class PrivatePoiOverlayComponent implements OnInit {
     public overlayClick(event: Event) {
         event.stopPropagation();
 
-        if (!this.routeId) {
+        if (!this.routeId()) {
             PrivatePoiEditDialogComponent.openDialog(this.matDialog, this.marker(), this.index());
             return;
         }
