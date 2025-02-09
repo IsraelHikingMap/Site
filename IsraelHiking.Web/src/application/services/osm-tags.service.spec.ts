@@ -381,6 +381,18 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiIconColor).toBe("black");
     });
 
+    it("Should set icon color category for path", () => {
+        // Arrange
+        const feature = createFeature({highway: "path" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("Hiking");
+        expect(poi.properties.poiIcon).toBe("icon-hike");
+        expect(poi.properties.poiIconColor).toBe("black");
+    });
+
     it("Should set icon color category for footway", () => {
         // Arrange
         const feature = createFeature({highway: "footway" });
