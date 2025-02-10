@@ -774,7 +774,7 @@ describe("Poi Service", () => {
     it("should get closest point from server", (inject([PoiService, HttpTestingController],
         async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
-            const promise = poiService.getClosestPoint({lat: 0, lng: 0}).then((data: MarkerData) => {
+            const promise = poiService.getClosestPoint({lat: 0, lng: 0}, "", "").then((data: MarkerData) => {
                 expect(data.latlng.lat).toBe(1);
                 expect(data.latlng.lng).toBe(1);
             });
@@ -792,7 +792,7 @@ describe("Poi Service", () => {
     it("should not get closest point from server when there's a server error", (inject([PoiService, HttpTestingController],
         async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
-            const promise = poiService.getClosestPoint({lat: 0, lng: 0}).then((data: MarkerData) => {
+            const promise = poiService.getClosestPoint({lat: 0, lng: 0}, "", "").then((data: MarkerData) => {
                 expect(data).toBeNull();
             });
 
