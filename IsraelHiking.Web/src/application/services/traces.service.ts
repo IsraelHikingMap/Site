@@ -3,12 +3,14 @@ import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { Store } from "@ngxs/store";
 import { firstValueFrom } from "rxjs";
+import { parseString } from "isomorphic-xml2js";
 import type { Immutable } from "immer";
 
 import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { DatabaseService } from "./database.service";
+import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { AddTraceAction, RemoveTraceAction, UpdateTraceAction } from "../reducers/traces.reducer";
 import { Urls } from "../urls";
 import type { Trace, ApplicationState, DataContainer, RouteData } from "../models/models";
@@ -21,11 +23,12 @@ export class TracesService {
     private readonly loggingService = inject(LoggingService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly databaseService = inject(DatabaseService);
+    private readonly gpxDataContainerConverterService = inject(GpxDataContainerConverterService);
     private readonly store = inject(Store);
 
     public getMissingParts(traceId: string): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
         this.loggingService.info(`[Traces] Getting missing parts for ${traceId}`);
-        const missingParts$ = this.httpClient.post(Urls.osm + "?traceId=" + traceId, null);
+        const missingParts$ = this.httpClient.post(Urls.missingParts + "?traceId=" + traceId, null);
         return firstValueFrom(missingParts$) as Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
     }
 
@@ -57,11 +60,32 @@ export class TracesService {
         await this.syncTraces();
     }
 
+    private parseStringAsync(xml: string): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            parseString(xml, (err, res: any) => {
+                if (err) reject(err);
+                else resolve(res);
+            });
+        });
+    }
+
     public async syncTraces(): Promise<void> {
         try {
             this.loggingService.info("[Traces] Starting syncing traces");
-            const response = await firstValueFrom(this.httpClient.get(Urls.osmTrace).pipe(timeout(20000)));
-            const traces = ([] as Trace[]).concat(response as Trace[] || []);
+            const responseXml = await firstValueFrom(this.httpClient.get(Urls.traces, {responseType: 'text'}).pipe(timeout(20000)));
+            const response = await this.parseStringAsync(responseXml);
+            const traces: Trace[] = response.osm.gpx_file.map((gpxFile: any) => {
+                return {
+                    id: gpxFile.$.id,
+                    name: gpxFile.$.name,
+                    description: gpxFile.description,
+                    timeStamp: new Date(gpxFile.$.timestamp),
+                    visibility: gpxFile.$.visibility,
+                    tagString: (gpxFile.tag || []).join(","),
+                    url: `https://www.openstreetmap.org/user/${gpxFile.$.user}/traces/${gpxFile.$.id}`,
+                    imageUrl: `content/logo.png`,
+                };
+            });
             const existingTraces = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces;
             for (const traceJson of traces) {
                 traceJson.timeStamp = new Date(traceJson.timeStamp);
@@ -106,7 +130,10 @@ export class TracesService {
                 dataContainer: storedTrace.dataContainer
             };
         }
-        const dataContainer = await firstValueFrom(this.httpClient.get(Urls.osmTrace + traceId)) as DataContainer;
+        const gpxXml = await firstValueFrom(this.httpClient.get(Urls.traceGPX + traceId + "/data", {responseType: "text"}));
+        console.log(gpxXml);
+        //const gpxXml = await this.fetchTrace(traceId);
+        const dataContainer = await this.gpxDataContainerConverterService.toDataContainer(gpxXml);
         this.loggingService.info(`[Traces] Got trace from server: ${traceId}`);
         const traceToStore = {
             ...trace,
@@ -116,24 +143,63 @@ export class TracesService {
         return traceToStore;
     }
 
+    private async fetchTrace(traceId: string): Promise<string> {
+  
+        const initialUrl = Urls.traceGPX + traceId + "/data/";
+        const headers = new Headers({ Authorization: `Bearer ${this.store.selectSnapshot((s: ApplicationState) => s.userState.token)}` });
+
+        // Step 1: Make the initial request (will return 302 redirect)
+        const response = await fetch(initialUrl, {
+            method: 'GET',
+            headers: headers,
+            redirect: 'manual', // Prevent automatic redirect
+        });
+
+        if (response.status === 302) {
+            console.log("302: " + await response.text())
+            /*
+            // Step 2: Extract new location from the response headers
+            const redirectUrl = response.headers.get('Location');
+            if (!redirectUrl) {
+                throw new Error('Redirect location not found');
+            }
+
+            // Step 3: Follow the redirect
+            const finalResponse = await fetch(redirectUrl, {
+                method: 'GET',
+                headers: headers
+            });
+            if (!finalResponse.ok) {
+                throw new Error(`Failed to fetch trace: ${finalResponse.statusText}`);
+            }
+
+            return finalResponse.text(); // Return GPX data
+            */
+        }
+        //return response.text();
+        throw new Error(`Unexpected response: ${response.status}`);
+        return "";
+    }
+
     public uploadTrace(file: File): Promise<any> {
         const formData = new FormData();
         formData.append("file", file, file.name);
         this.loggingService.info(`[Traces] Uploading a trace with file name ${file.name}`);
-        return firstValueFrom(this.httpClient.post(Urls.osmTrace, formData).pipe(timeout(3 * 60 * 1000)));
+        return firstValueFrom(this.httpClient.post(Urls.traces, formData).pipe(timeout(3 * 60 * 1000)));
     }
 
     public async uploadRouteAsTrace(route: Immutable<RouteData>): Promise<any> {
         this.loggingService.info(`[Traces] Uploading a route as trace with name ${route.name}`);
-        return firstValueFrom(this.httpClient.post(Urls.osmTraceRoute, route, {
-            params: { language: this.resources.getCurrentLanguageCodeSimplified() }
-        }).pipe(timeout(3 * 60 * 1000)));
+        // HM TODO: solve this?
+        //return firstValueFrom(this.httpClient.post(Urls.osmTraceRoute, route, {
+        //    params: { language: this.resources.getCurrentLanguageCodeSimplified() }
+        //}).pipe(timeout(3 * 60 * 1000)));
     }
 
     public async updateTrace(trace: Trace): Promise<void> {
         this.loggingService.info(`[Traces] Updating a trace with id ${trace.id}, visibility: ${trace.visibility}`);
         if (trace.visibility !== "local") {
-            await firstValueFrom(this.httpClient.put(Urls.osmTrace + trace.id, trace));
+            await firstValueFrom(this.httpClient.put(Urls.traces + trace.id, trace));
         }
         this.store.dispatch(new UpdateTraceAction(trace));
     }
@@ -141,7 +207,7 @@ export class TracesService {
     public async deleteTrace(trace: Immutable<Trace>): Promise<void> {
         this.loggingService.info(`[Traces] Deleting a trace with name ${trace.name} and id ${trace.id}, visibility: ${trace.visibility}`);
         if (trace.visibility !== "local") {
-            await firstValueFrom(this.httpClient.delete(Urls.osmTrace + trace.id));
+            await firstValueFrom(this.httpClient.delete(Urls.traces + trace.id));
         }
         this.store.dispatch(new RemoveTraceAction(trace.id));
         await this.databaseService.deleteTraceById(trace.id);

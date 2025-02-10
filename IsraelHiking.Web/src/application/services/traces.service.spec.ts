@@ -46,7 +46,7 @@ describe("Traces Service", () => {
                 expect(res).not.toBeNull();
             });
 
-            mockBackend.expectOne(Urls.osm + "?traceId=" + trace.id).flush({});
+            mockBackend.expectOne(Urls.missingParts + "?traceId=" + trace.id).flush({});
             return promise;
     }));
 
