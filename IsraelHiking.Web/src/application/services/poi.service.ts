@@ -623,7 +623,7 @@ export class PoiService {
         } as NorthEast;
     }
 
-    public async getClosestPoint(location: LatLngAlt, source?: string, language?: string): Promise<MarkerData> {
+    public async getClosestPoint(location: LatLngAlt, source: string, language: string): Promise<MarkerData> {
         let feature = null;
         try {
             const feature$ = this.httpClient.get(Urls.poiClosest, { params: {

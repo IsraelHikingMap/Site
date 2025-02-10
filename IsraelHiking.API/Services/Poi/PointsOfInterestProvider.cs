@@ -239,9 +239,9 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc/>
-        public async Task<IFeature> GetClosestPoint(Coordinate location, string language = "")
+        public async Task<IFeature> GetClosestPoint(Coordinate location, string source, string language)
         {
-            return await _pointsOfInterestRepository.GetClosestPoint(location);
+            return await _pointsOfInterestRepository.GetClosestPoint(location, source, language);
         }
 
         /// <inheritdoc/>

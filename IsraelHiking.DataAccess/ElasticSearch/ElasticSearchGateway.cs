@@ -132,10 +132,11 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             { FeatureAttributes.POI_ICON, d.Source.PoiIcon },
             { FeatureAttributes.POI_CATEGORY, d.Source.PoiCategory },
             { FeatureAttributes.POI_ICON_COLOR, d.Source.PoiIconColor },
-            { FeatureAttributes.DESCRIPTION, d.Source.Description },
+            { FeatureAttributes.DESCRIPTION, d.Source.Description.GetValueOrDefault(language, d.Source.Description.GetValueOrDefault(Languages.ENGLISH, string.Empty)) },
+            { FeatureAttributes.IMAGE_URL, d.Source.Image},
             { FeatureAttributes.POI_ID, d.Id },
             { FeatureAttributes.POI_LANGUAGE, Languages.ALL },
-            { FeatureAttributes.ID, d.Id.Replace(d.Source.PoiSource + "_", "") }
+            { FeatureAttributes.ID, string.Join("_", d.Id.Split("_").Skip(1)) }
         });
         feature.SetTitles();
         feature.SetLocation(new Coordinate(d.Source.Location[0], d.Source.Location[1]));
@@ -333,21 +334,27 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         return new GeoCoordinate(coordinate.Y, coordinate.X);
     }
 
-    public async Task<IFeature> GetClosestPoint(Coordinate coordinate)
+    public async Task<IFeature> GetClosestPoint(Coordinate coordinate, string source, string language)
     {
         var distance = _options.ClosestPointsOfInterestThreshold;
         var response = await _elasticClient.SearchAsync<PointDocument>(s =>
             s.Index(POINTS)
-                .Size(1)
-                .Query(q =>
-                    q.GeoBoundingBox(b => b.BoundingBox(
+            .Size(1)
+            .Query(q =>
+            {
+                var query = q.GeoBoundingBox(b => b.BoundingBox(
                         bb => bb.TopLeft(new GeoCoordinate(coordinate.Y + distance, coordinate.X - distance))
                             .BottomRight(new GeoCoordinate(coordinate.Y - distance, coordinate.X + distance))
-                    ).Field(p => p.Location)) 
-                    && q.Term(t => t.Field(p => p.PoiSource).Value(Sources.OSM.ToLower()))
-                    && q.Bool(b => b.MustNot(mn => mn.Term(t => t.Field(p => p.PoiIcon).Value("icon-search"))))
-                ));
-        return response.Hits.Select(d => HitToFeature(d, Languages.ENGLISH)).FirstOrDefault();
+                    ).Field(p => p.Location))
+                    && q.Bool(b => b.MustNot(mn => mn.Term(t => t.Field(p => p.PoiIcon).Value("icon-search"))));
+                if (!string.IsNullOrWhiteSpace(source))
+                {
+                    query = query && q.Term(t => t.Field(p => p.PoiSource).Value(source.ToLower()));
+                }
+                return query;
+            })
+        );
+        return response.Hits.Select(d => HitToFeature(d, language ?? Languages.ENGLISH)).FirstOrDefault();
 
     }
 

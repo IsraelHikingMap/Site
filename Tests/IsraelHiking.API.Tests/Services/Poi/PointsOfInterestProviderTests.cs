@@ -368,9 +368,9 @@ namespace IsraelHiking.API.Tests.Services.Poi
             {
                 { FeatureAttributes.POI_SOURCE, Sources.OSM }
             });
-            _pointsOfInterestRepository.GetClosestPoint(Arg.Any<Coordinate>()).Returns(feature);
+            _pointsOfInterestRepository.GetClosestPoint(Arg.Any<Coordinate>(), Arg.Any<string>(), Arg.Any<string>()).Returns(feature);
 
-            var results = _adapter.GetClosestPoint(new Coordinate(0,0), Sources.OSM).Result;
+            var results = _adapter.GetClosestPoint(new Coordinate(0,0), Sources.OSM, null).Result;
 
             Assert.AreEqual(feature, results);
         }

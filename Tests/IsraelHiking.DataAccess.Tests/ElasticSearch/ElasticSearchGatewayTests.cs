@@ -69,16 +69,25 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         public void GetClosestPoint_ShouldReturnResults()
         {
             var coordinate = new Coordinate(35.303488, 33.027086);
-            var results = _gateway.GetClosestPoint(coordinate).Result;
+            var results = _gateway.GetClosestPoint(coordinate, Sources.OSM, null).Result;
             Assert.IsNotNull(results);
         }
         
         [TestMethod]
         [Ignore]
-        public void GetClosestPoint_ShouldNotReturnResults()
+        public void GetClosestPoint_NoSourceIsSpecified_ShouldReturnResults()
         {
             var coordinate = new Coordinate(35.23087, 32.93687);
-            var results = _gateway.GetClosestPoint(coordinate).Result;
+            var results = _gateway.GetClosestPoint(coordinate, null, "he").Result;
+            Assert.IsNotNull(results);
+        }
+        
+        [TestMethod]
+        [Ignore]
+        public void GetClosestPoint_OSMSourceSpecified_ShouldNotReturnResults()
+        {
+            var coordinate = new Coordinate(35.23087, 32.93687);
+            var results = _gateway.GetClosestPoint(coordinate, Sources.OSM, "he").Result;
             Assert.IsNull(results);
         }
 
