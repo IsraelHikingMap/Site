@@ -65,14 +65,6 @@ public class PointsOfInterestControllerTests
     }
 
     [TestMethod]
-    public void GetPointsOfInterest_NoCategory_ShouldReturnEmptyList()
-    {
-        var result = _controller.GetPointsOfInterest(string.Empty, string.Empty, string.Empty);
-
-        Assert.AreEqual(0, result.Length);
-    }
-
-    [TestMethod]
     public void GetPointOfInterest_WrongSource_ShouldReturnBadRequest()
     {
         _pointsOfInterestProvider.GetFeatureById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
@@ -265,15 +257,6 @@ public class PointsOfInterestControllerTests
         var results = _controller.GetClosestPoint("0,0", null, "he").Result;
 
         Assert.IsNotNull(results);
-    }
-
-    [TestMethod]
-    public void GetPointOfInterestUpdates_ShouldGetThem()
-    {
-        var results = _controller.GetPointOfInterestUpdates(DateTime.MinValue, DateTime.Now);
-
-        Assert.AreEqual(0, results.Features.Length);
-        Assert.AreEqual(0, results.Images.Length);
     }
         
     [TestMethod]

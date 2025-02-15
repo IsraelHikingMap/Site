@@ -1,7 +1,6 @@
 ﻿using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp.IO.API;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services.Poi;

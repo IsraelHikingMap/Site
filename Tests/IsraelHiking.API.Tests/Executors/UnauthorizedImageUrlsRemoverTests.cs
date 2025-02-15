@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using IsraelHiking.API.Executors;
 using IsraelHiking.Common;

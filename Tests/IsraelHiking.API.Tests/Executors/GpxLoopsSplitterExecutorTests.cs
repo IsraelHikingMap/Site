@@ -21,7 +21,7 @@ public class GpxLoopsSplitterExecutorTests
     {
         var gpxLine = new LineString([]);
 
-        var results = _executor.GetMissingLines(gpxLine, new LineString[0], 200, 30);
+        var results = _executor.GetMissingLines(gpxLine, [], 200, 30);
 
         Assert.AreEqual(0, results.Count);
     }
@@ -31,7 +31,7 @@ public class GpxLoopsSplitterExecutorTests
     {
         var gpxLine = new LineString([new Coordinate(1, 1), new Coordinate(2, 2)]);
 
-        var results = _executor.GetMissingLines(gpxLine, new LineString[0], 200, 30);
+        var results = _executor.GetMissingLines(gpxLine, [], 200, 30);
 
         Assert.AreEqual(0, results.Count);
     }
@@ -41,7 +41,7 @@ public class GpxLoopsSplitterExecutorTests
     {
         var gpxLines = new LineString([new Coordinate(1, 1), new Coordinate(2, 2), new Coordinate(3, 3)]);
 
-        var results = _executor.GetMissingLines(gpxLines, new LineString[0], 200, 30);
+        var results = _executor.GetMissingLines(gpxLines, [], 200, 30);
 
         Assert.AreEqual(0, results.Count);
     }
@@ -51,7 +51,7 @@ public class GpxLoopsSplitterExecutorTests
     {
         var gpxLine = new LineString([new Coordinate(1, 1), new Coordinate(20, 20), new Coordinate(300, 300)]);
 
-        var results = _executor.GetMissingLines(gpxLine, new LineString[0], 200, 30);
+        var results = _executor.GetMissingLines(gpxLine, [], 200, 30);
 
         Assert.AreEqual(1, results.Count);
     }

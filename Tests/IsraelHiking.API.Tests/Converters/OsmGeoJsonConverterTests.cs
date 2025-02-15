@@ -16,7 +16,7 @@ public class OsmGeoJsonConverterTests
     private const string NAME = "name";
     private OsmGeoJsonConverter _converter;
 
-    private Node CreateNode(int number)
+    private static Node CreateNode(int number)
     {
         return new Node
         {

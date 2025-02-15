@@ -1,7 +1,5 @@
-﻿using IsraelHiking.Common;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
-using System.Linq;
 using System.Net.Http;
 using NSubstitute;
 

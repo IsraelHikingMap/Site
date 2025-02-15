@@ -10,7 +10,6 @@ using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp;
 using OsmSharp.Changesets;
-using OsmSharp.Complete;
 using OsmSharp.IO.API;
 using OsmSharp.Tags;
 using System;

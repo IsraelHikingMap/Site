@@ -48,34 +48,38 @@ public class RoutingControllerTests
     public void GetRouting_None_ShouldReturnLineStringWithTwoPoints()
     {
         var results = _controller.GetRouting("0.00001,0.00001", "0.00002,0.00002", RoutingType.NONE).Result as OkObjectResult;
+        
+        Assert.IsNotNull(results);
         var content = results.Value as FeatureCollection;
-
+        Assert.IsNotNull(content);
         Assert.AreEqual(1, content.Count);
         var lineString = content.First().Geometry as LineString;
         Assert.IsNotNull(lineString);
-        var points = lineString.Coordinates.OfType<Coordinate>();
+        var points = lineString.Coordinates;
         Assert.AreEqual(0.00001, points.First().X);
         Assert.AreEqual(0.00001, points.First().Y);
         Assert.AreEqual(0.00002, points.Last().X);
         Assert.AreEqual(0.00002, points.Last().Y);
-        Assert.AreEqual(2, points.Count());
+        Assert.AreEqual(2, points.Length);
     }
 
     [TestMethod]
     public void GetRouting_None_ShouldReturnLineStringWithManyPoints()
     {
         var results = _controller.GetRouting("1,1", "2,2", RoutingType.NONE).Result as OkObjectResult;
+        
+        Assert.IsNotNull(results);
         var content = results.Value as FeatureCollection;
-
+        Assert.IsNotNull(content);
         Assert.AreEqual(1, content.Count);
         var lineString = content.First().Geometry as LineString;
         Assert.IsNotNull(lineString);
-        var points = lineString.Coordinates.OfType<Coordinate>();
+        var points = lineString.Coordinates;
         Assert.AreEqual(1, points.First().X);
         Assert.AreEqual(1, points.First().Y);
         Assert.AreEqual(2, points.Last().X);
         Assert.AreEqual(2, points.Last().Y);
-        Assert.AreEqual(31, points.Count());
+        Assert.AreEqual(31, points.Length);
     }
 
     [TestMethod]
@@ -89,13 +93,15 @@ public class RoutingControllerTests
             ]), new AttributesTable()));
 
         var results = _controller.GetRouting("1,1", "2,2", RoutingType.FOUR_WHEEL_DRIVE).Result as OkObjectResult;
+        
+        Assert.IsNotNull(results);
         var content = results.Value as FeatureCollection;
-
+        Assert.IsNotNull(content);
         Assert.AreEqual(1, content.Count);
         var lineString = content.First().Geometry as LineString;
         Assert.IsNotNull(lineString);
-        var points = lineString.Coordinates.OfType<Coordinate>();
-        Assert.AreEqual(3, points.Count());
+        var points = lineString.Coordinates;
+        Assert.AreEqual(3, points.Length);
         Assert.AreEqual(1, points.First().X);
         Assert.AreEqual(1, points.First().Y);
         Assert.AreEqual(2, points.Last().X);

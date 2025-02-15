@@ -1,5 +1,4 @@
-﻿using System;
-using IsraelHiking.API.Converters;
+﻿using IsraelHiking.API.Converters;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
@@ -17,7 +16,6 @@ using OsmSharp.API;
 using OsmSharp.Complete;
 using OsmSharp.IO.API;
 using OsmSharp.Tags;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;

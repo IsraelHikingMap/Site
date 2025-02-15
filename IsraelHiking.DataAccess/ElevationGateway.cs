@@ -1,5 +1,4 @@
-﻿using System;
-using IsraelHiking.DataAccessInterfaces;
+﻿using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Geometries;
 using System.Linq;
 using System.Net.Http;

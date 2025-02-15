@@ -4,8 +4,6 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.DataContainer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.IO;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace IsraelHiking.API.Tests.Gpx;

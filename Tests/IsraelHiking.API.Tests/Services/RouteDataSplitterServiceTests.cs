@@ -8,7 +8,6 @@ using IsraelHiking.Common.DataContainer;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 

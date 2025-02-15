@@ -120,6 +120,7 @@ public class FilesControllerTests
 
         var result = _controller.PostConvertFile("gpx", dataContainer).Result as OkObjectResult;
 
+        Assert.IsNotNull(result);
         CollectionAssert.AreEqual(expectedGpx.ToBytes(), result.Value as byte[]);
     }
 

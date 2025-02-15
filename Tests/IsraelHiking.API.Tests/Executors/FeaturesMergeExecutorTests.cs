@@ -9,7 +9,6 @@ using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using IsraelHiking.API.Gpx;
@@ -722,9 +721,9 @@ public class FeaturesMergeExecutorTests
 
         Assert.AreEqual(1, results.Count);
         Assert.AreEqual(importantDescription, results.First().Attributes[hebrewDescriptionKey].ToString());
-        Assert.AreEqual(3, results.First().Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE)).Count());
-        Assert.AreEqual(2, results.First().Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.POI_SOURCE_IMAGE_URL)).Count());
-        Assert.AreEqual(2, results.First().Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL)).Count());
+        Assert.AreEqual(3, results.First().Attributes.GetNames().Count(n => n.StartsWith(FeatureAttributes.WEBSITE)));
+        Assert.AreEqual(2, results.First().Attributes.GetNames().Count(n => n.StartsWith(FeatureAttributes.POI_SOURCE_IMAGE_URL)));
+        Assert.AreEqual(2, results.First().Attributes.GetNames().Count(n => n.StartsWith(FeatureAttributes.IMAGE_URL)));
         Assert.IsFalse(results.First().Attributes.GetNames().Any(n => n == FeatureAttributes.POI_SOURCE_IMAGE_URL));
     }
 

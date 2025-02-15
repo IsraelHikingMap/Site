@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using NetTopologySuite.Geometries;
 
 public class BBoxContainer
 {

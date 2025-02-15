@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Controllers;
