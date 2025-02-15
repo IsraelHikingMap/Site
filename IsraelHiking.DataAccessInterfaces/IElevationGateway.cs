@@ -1,12 +1,11 @@
 ﻿using NetTopologySuite.Geometries;
 using System.Threading.Tasks;
 
-namespace IsraelHiking.DataAccessInterfaces
+namespace IsraelHiking.DataAccessInterfaces;
+
+public interface IElevationGateway
 {
-    public interface IElevationGateway
-    {
-        Task<double> GetElevation(Coordinate latLng);
+    Task<double> GetElevation(Coordinate latLng);
         
-        Task<double[]> GetElevation(Coordinate[] latLngs);
-    }
+    Task<double[]> GetElevation(Coordinate[] latLngs);
 }

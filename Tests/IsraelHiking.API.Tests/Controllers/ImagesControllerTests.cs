@@ -11,81 +11,80 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using System.IO;
 
-namespace IsraelHiking.API.Tests.Controllers
+namespace IsraelHiking.API.Tests.Controllers;
+
+[TestClass]
+public class ImagesControllerTests
 {
-    [TestClass]
-    public class ImagesControllerTests
+    private ImagesController _controller;
+    private IShareUrlsRepository _repository;
+    private IImageCreationGateway _imageCreationGateway;
+    private IImgurGateway _imgurGateway;
+
+    [TestInitialize]
+    public void TestInitialize()
     {
-        private ImagesController _controller;
-        private IShareUrlsRepository _repository;
-        private IImageCreationGateway _imageCreationGateway;
-        private IImgurGateway _imgurGateway;
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            _repository = Substitute.For<IShareUrlsRepository>();
-            _imageCreationGateway = Substitute.For<IImageCreationGateway>();
-            _imgurGateway = Substitute.For<IImgurGateway>();
-            var options = Substitute.For<IOptions<ConfigurationData>>();
-            options.Value.Returns(new ConfigurationData());
+        _repository = Substitute.For<IShareUrlsRepository>();
+        _imageCreationGateway = Substitute.For<IImageCreationGateway>();
+        _imgurGateway = Substitute.For<IImgurGateway>();
+        var options = Substitute.For<IOptions<ConfigurationData>>();
+        options.Value.Returns(new ConfigurationData());
             
-            _controller = new ImagesController(_repository, _imageCreationGateway, _imgurGateway, options);
-        }
+        _controller = new ImagesController(_repository, _imageCreationGateway, _imgurGateway, options);
+    }
 
-        [TestMethod]
-        public void GetImage_ShouldCreateOne()
+    [TestMethod]
+    public void GetImage_ShouldCreateOne()
+    {
+        var results = _controller.GetImage(32, 35, 100, 100).Result as FileContentResult;
+
+        Assert.IsNotNull(results);
+    }
+
+    [TestMethod]
+    public void GetImageForShare_NoUrl_ShouldNotFound()
+    {
+        var results = _controller.GetImageForShare("42").Result as NotFoundResult;
+
+        Assert.IsNotNull(results);
+    }
+
+    [TestMethod]
+    public void GetImageForShare_UrlInDatabase_ShouldCreateIt()
+    {
+        var siteUrl = new ShareUrl
         {
-            var results = _controller.GetImage(32, 35, 100, 100).Result as FileContentResult;
+            Id = "1",
+            DataContainer = new DataContainerPoco()
+        };
+        _repository.GetUrlById(siteUrl.Id).Returns(siteUrl);
 
-            Assert.IsNotNull(results);
-        }
+        var results = _controller.GetImageForShare(siteUrl.Id).Result as FileContentResult;
 
-        [TestMethod]
-        public void GetImageForShare_NoUrl_ShouldNotFound()
-        {
-            var results = _controller.GetImageForShare("42").Result as NotFoundResult;
+        Assert.IsNotNull(results);
+    }
 
-            Assert.IsNotNull(results);
-        }
+    [TestMethod]
+    public void PostDataContainer_ShouldCreateImage()
+    {
+        var dataContainer = new DataContainerPoco();
 
-        [TestMethod]
-        public void GetImageForShare_UrlInDatabase_ShouldCreateIt()
-        {
-            var siteUrl = new ShareUrl
-            {
-                Id = "1",
-                DataContainer = new DataContainerPoco()
-            };
-            _repository.GetUrlById(siteUrl.Id).Returns(siteUrl);
+        _controller.PostDataContainer(dataContainer).Wait();
 
-            var results = _controller.GetImageForShare(siteUrl.Id).Result as FileContentResult;
+        _imageCreationGateway.Received(1).Create(dataContainer, Arg.Any<int>(), Arg.Any<int>());
+    }
 
-            Assert.IsNotNull(results);
-        }
+    [TestMethod]
+    public void PostUploadImage_ShouldUpload()
+    {
+        var expectedLink = "link";
+        var file = Substitute.For<IFormFile>();
+        var fileStreamMock = new MemoryStream();
+        file.OpenReadStream().Returns(fileStreamMock);
+        _imgurGateway.UploadImage(fileStreamMock).Returns(expectedLink);
 
-        [TestMethod]
-        public void PostDataContainer_ShouldCreateImage()
-        {
-            var dataContainer = new DataContainerPoco();
+        var results = _controller.PostUploadImage(file).Result;
 
-            _controller.PostDataContainer(dataContainer).Wait();
-
-            _imageCreationGateway.Received(1).Create(dataContainer, Arg.Any<int>(), Arg.Any<int>());
-        }
-
-        [TestMethod]
-        public void PostUploadImage_ShouldUpload()
-        {
-            var expectedLink = "link";
-            var file = Substitute.For<IFormFile>();
-            var fileStreamMock = new MemoryStream();
-            file.OpenReadStream().Returns(fileStreamMock);
-            _imgurGateway.UploadImage(fileStreamMock).Returns(expectedLink);
-
-            var results = _controller.PostUploadImage(file).Result;
-
-            Assert.AreEqual(expectedLink, results);
-        }
+        Assert.AreEqual(expectedLink, results);
     }
 }

@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace IsraelHiking.DataAccessInterfaces
+namespace IsraelHiking.DataAccessInterfaces;
+
+public interface IOverpassTurboGateway
 {
-    public interface IOverpassTurboGateway
-    {
-        Task<List<string>> GetWikipediaLinkedTitles();
-    }
+    Task<List<string>> GetWikipediaLinkedTitles();
 }

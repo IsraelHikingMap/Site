@@ -165,7 +165,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
         {
-            return new List<IFeature>();
+            return [];
         }
 
         var response = await _elasticClient.SearchAsync<PointDocument>(s => s.Index(POINTS)

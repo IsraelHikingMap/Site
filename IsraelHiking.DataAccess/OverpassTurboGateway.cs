@@ -7,58 +7,57 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace IsraelHiking.DataAccess
+namespace IsraelHiking.DataAccess;
+
+public class OverpassTurboGateway : IOverpassTurboGateway
 {
-    public class OverpassTurboGateway : IOverpassTurboGateway
+    private const string INTERPRETER_ADDRESS = "https://z.overpass-api.de/api/interpreter";
+    private const string INTERPRETER_ADDRESS_2 = "https://lz4.overpass-api.de/api/interpreter";
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ILogger _logger;
+
+    public OverpassTurboGateway(IHttpClientFactory httpClientFactory,
+        ILogger logger)
     {
-        private const string INTERPRETER_ADDRESS = "https://z.overpass-api.de/api/interpreter";
-        private const string INTERPRETER_ADDRESS_2 = "https://lz4.overpass-api.de/api/interpreter";
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger _logger;
+        _httpClientFactory = httpClientFactory;
+        _logger = logger;
+    }
 
-        public OverpassTurboGateway(IHttpClientFactory httpClientFactory,
-                ILogger logger)
+    public async Task<List<string>> GetWikipediaLinkedTitles()
+    {
+        var list = await GetWikipediaLinkedTitlesByLanguage(string.Empty);
+        foreach (var language in Languages.Array)
         {
-            _httpClientFactory = httpClientFactory;
-            _logger = logger;
+            var perLanguage = await GetWikipediaLinkedTitlesByLanguage(":" + language);
+            list.AddRange(perLanguage.Select(w => language + ":" + w).ToList());
         }
+        return list.Distinct().ToList();
+    }
 
-        public async Task<List<string>> GetWikipediaLinkedTitles()
+    private async Task<List<string>> GetWikipediaLinkedTitlesByLanguage(string languagePostfix)
+    {
+        try
         {
-            var list = await GetWikipediaLinkedTitlesByLanguage(string.Empty);
-            foreach (var language in Languages.Array)
+            var client = _httpClientFactory.CreateClient();
+            var queryString = "[out:csv('wikipedia';false)];\nnwr  ['wikipedia'] (area:3606195356);\nout; ";
+            var postBody = new StringContent(queryString.Replace("'wikipedia'", $"'wikipedia{languagePostfix}'"));
+            var response = await client.PostAsync(INTERPRETER_ADDRESS, postBody);
+            if (!response.IsSuccessStatusCode)
             {
-                var perLanguage = await GetWikipediaLinkedTitlesByLanguage(":" + language);
-                list.AddRange(perLanguage.Select(w => language + ":" + w).ToList());
+                response = await client.PostAsync(INTERPRETER_ADDRESS_2, postBody);
             }
-            return list.Distinct().ToList();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception(await response.Content.ReadAsStringAsync());
+            }
+            var responseString = await response.Content.ReadAsStringAsync();
+            return responseString.Split("\n", StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim().TrimStart('"').TrimEnd('"').Replace("\"\"", "\"")).ToList(); // CSV " cleaning
         }
-
-        private async Task<List<string>> GetWikipediaLinkedTitlesByLanguage(string languagePostfix)
+        catch (Exception ex)
         {
-            try
-            {
-                var client = _httpClientFactory.CreateClient();
-                var queryString = "[out:csv('wikipedia';false)];\nnwr  ['wikipedia'] (area:3606195356);\nout; ";
-                var postBody = new StringContent(queryString.Replace("'wikipedia'", $"'wikipedia{languagePostfix}'"));
-                var response = await client.PostAsync(INTERPRETER_ADDRESS, postBody);
-                if (!response.IsSuccessStatusCode)
-                {
-                    response = await client.PostAsync(INTERPRETER_ADDRESS_2, postBody);
-                }
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception(await response.Content.ReadAsStringAsync());
-                }
-                var responseString = await response.Content.ReadAsStringAsync();
-                return responseString.Split("\n", StringSplitOptions.RemoveEmptyEntries)
-                    .Select(s => s.Trim().TrimStart('"').TrimEnd('"').Replace("\"\"", "\"")).ToList(); // CSV " cleaning
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Unable to get overpass data for language: " + languagePostfix);
-            }
-            return new List<string>();
+            _logger.LogError(ex, "Unable to get overpass data for language: " + languagePostfix);
         }
+        return [];
     }
 }

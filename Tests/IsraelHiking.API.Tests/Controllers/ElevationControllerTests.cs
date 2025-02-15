@@ -5,26 +5,25 @@ using NSubstitute;
 using System.Linq;
 using NetTopologySuite.Geometries;
 
-namespace IsraelHiking.API.Tests.Controllers
+namespace IsraelHiking.API.Tests.Controllers;
+
+[TestClass]
+public class ElevationControllerTests
 {
-    [TestClass]
-    public class ElevationControllerTests
+    private ElevationController _elevationController;
+
+    [TestMethod]
+    public void GetElevation_TwoPoints_ShouldReturnThem()
     {
-        private ElevationController _elevationController;
+        var elevationGateway = Substitute.For<IElevationGateway>();
+        var point1 = "31.8239,35.0375";
+        var point2 = "31.8213,35.0965";
+        elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns([1, 2]);
+        _elevationController = new ElevationController(elevationGateway);
 
-        [TestMethod]
-        public void GetElevation_TwoPoints_ShouldReturnThem()
-        {
-            var elevationGateway = Substitute.For<IElevationGateway>();
-            var point1 = "31.8239,35.0375";
-            var point2 = "31.8213,35.0965";
-            elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(new double[]{ 1, 2});
-            _elevationController = new ElevationController(elevationGateway);
+        var response = _elevationController.GetElevation($"{point1}|{point2}").Result.ToArray();
 
-            var response = _elevationController.GetElevation($"{point1}|{point2}").Result.ToArray();
-
-            Assert.AreEqual(1, response[0]);
-            Assert.AreEqual(2, response[1]);
-        }
+        Assert.AreEqual(1, response[0]);
+        Assert.AreEqual(2, response[1]);
     }
 }

@@ -12,137 +12,136 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
-namespace IsraelHiking.API.Tests.Executors
+namespace IsraelHiking.API.Tests.Executors;
+
+[TestClass]
+public class ImagesUrlsStorageExecutorTests
 {
-    [TestClass]
-    public class ImagesUrlsStorageExecutorTests
+    private ImagesUrlsStorageExecutor _executor;
+    private IImagesRepository _imagesRepository;
+    private IRemoteFileSizeFetcherGateway _remoteFileSizeFetcherGateway;
+    private const string SINGLE_PIXEL_PNG =
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
+        
+    [TestInitialize]
+    public void TestInitialize()
     {
-        private ImagesUrlsStorageExecutor _executor;
-        private IImagesRepository _imagesRepository;
-        private IRemoteFileSizeFetcherGateway _remoteFileSizeFetcherGateway;
-        private const string SINGLE_PIXEL_PNG =
-            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
+        _imagesRepository = Substitute.For<IImagesRepository>();
+        _remoteFileSizeFetcherGateway = Substitute.For<IRemoteFileSizeFetcherGateway>();
+        _executor = new ImagesUrlsStorageExecutor(_imagesRepository, _remoteFileSizeFetcherGateway, Substitute.For<ILogger>());
+            
+    }
+
+    [TestMethod]
+    public void DownloadAndStoreUrls_ImagesInDatabaseAreNotRelevant_ShouldDeleteThem()
+    {
+        var olderImageUrl = "olderImageUrl";
+        _imagesRepository.GetAllUrls().Returns([olderImageUrl]);
+        _executor.DownloadAndStoreUrls([]).Wait();
+
+        _imagesRepository.DidNotReceive().StoreImage(Arg.Any<ImageItem>());
+        _imagesRepository.Received(1).DeleteImageByUrl(olderImageUrl);
+    }
         
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            _imagesRepository = Substitute.For<IImagesRepository>();
-            _remoteFileSizeFetcherGateway = Substitute.For<IRemoteFileSizeFetcherGateway>();
-            _executor = new ImagesUrlsStorageExecutor(_imagesRepository, _remoteFileSizeFetcherGateway, Substitute.For<ILogger>());
+    [TestMethod]
+    public void DownloadAndStoreUrls_ImagesInDatabaseAreUpToDate_ShouldNotDoAnything()
+    {
+        var existingImageUrl = "existingImageUrl";
+        _imagesRepository.GetAllUrls().Returns([existingImageUrl]);
+        _remoteFileSizeFetcherGateway.GetFileSize(existingImageUrl).Returns(42);
             
-        }
+        _executor.DownloadAndStoreUrls([existingImageUrl]).Wait();
 
-        [TestMethod]
-        public void DownloadAndStoreUrls_ImagesInDatabaseAreNotRelevant_ShouldDeleteThem()
-        {
-            var olderImageUrl = "olderImageUrl";
-            _imagesRepository.GetAllUrls().Returns(new List<string> {olderImageUrl});
-            _executor.DownloadAndStoreUrls(new List<string>()).Wait();
-
-            _imagesRepository.DidNotReceive().StoreImage(Arg.Any<ImageItem>());
-            _imagesRepository.Received(1).DeleteImageByUrl(olderImageUrl);
-        }
+        _imagesRepository.DidNotReceive().StoreImage(Arg.Any<ImageItem>());
+    }
         
-        [TestMethod]
-        public void DownloadAndStoreUrls_ImagesInDatabaseAreUpToDate_ShouldNotDoAnything()
+    [TestMethod]
+    public void DownloadAndStoreUrls_SingleImageNoImagesInDatabase_ShouldSucceed()
+    {
+        var imageUrl = "imageUrl";
+        _imagesRepository.GetAllUrls().Returns([]);
+        _remoteFileSizeFetcherGateway.GetFileContent(imageUrl).Returns(new RemoteFileFetcherGatewayResponse
         {
-            var existingImageUrl = "existingImageUrl";
-            _imagesRepository.GetAllUrls().Returns(new List<string> {existingImageUrl});
-            _remoteFileSizeFetcherGateway.GetFileSize(existingImageUrl).Returns(42);
+            Content = Convert.FromBase64String(SINGLE_PIXEL_PNG),
+            FileName = imageUrl
+        });
             
-            _executor.DownloadAndStoreUrls(new List<string> {existingImageUrl}).Wait();
+        _executor.DownloadAndStoreUrls([imageUrl]).Wait();
 
-            _imagesRepository.DidNotReceive().StoreImage(Arg.Any<ImageItem>());
-        }
+        _imagesRepository.Received(1).StoreImage(Arg.Is<ImageItem>(i => i.ImageUrls.Contains(imageUrl)));
+    }
         
-        [TestMethod]
-        public void DownloadAndStoreUrls_SingleImageNoImagesInDatabase_ShouldSucceed()
-        {
-            var imageUrl = "imageUrl";
-            _imagesRepository.GetAllUrls().Returns(new List<string>());
-            _remoteFileSizeFetcherGateway.GetFileContent(imageUrl).Returns(new RemoteFileFetcherGatewayResponse
-            {
-                Content = Convert.FromBase64String(SINGLE_PIXEL_PNG),
-                FileName = imageUrl
-            });
+    [TestMethod]
+    public void DownloadAndStoreUrls_SingleImageNoImagesInDatabase_ShouldFailAllRetries()
+    {
+        var imageUrl = "imageUrl";
+        _imagesRepository.GetAllUrls().Returns([]);
+        _remoteFileSizeFetcherGateway.GetFileContent(imageUrl).Throws(new Exception("Error..."));
             
-            _executor.DownloadAndStoreUrls(new List<string> {imageUrl}).Wait();
+        _executor.DownloadAndStoreUrls([imageUrl]).Wait();
 
-            _imagesRepository.Received(1).StoreImage(Arg.Is<ImageItem>(i => i.ImageUrls.Contains(imageUrl)));
-        }
+        _imagesRepository.DidNotReceive().StoreImage(Arg.Any<ImageItem>());
+    }
         
-        [TestMethod]
-        public void DownloadAndStoreUrls_SingleImageNoImagesInDatabase_ShouldFailAllRetries()
+    [TestMethod]
+    public void DownloadAndStoreUrls_WikipediaImageNoImagesInDatabase_ShouldSucceed()
+    {
+        var imageUrl = "File:imageUrl";
+        _imagesRepository.GetAllUrls().Returns([]);
+        _remoteFileSizeFetcherGateway.GetFileContent(Arg.Any<string>()).Returns(new RemoteFileFetcherGatewayResponse
         {
-            var imageUrl = "imageUrl";
-            _imagesRepository.GetAllUrls().Returns(new List<string>());
-            _remoteFileSizeFetcherGateway.GetFileContent(imageUrl).Throws(new Exception("Error..."));
+            Content = Convert.FromBase64String(SINGLE_PIXEL_PNG),
+            FileName = imageUrl
+        });
             
-            _executor.DownloadAndStoreUrls(new List<string> {imageUrl}).Wait();
+        _executor.DownloadAndStoreUrls([imageUrl]).Wait();
 
-            _imagesRepository.DidNotReceive().StoreImage(Arg.Any<ImageItem>());
-        }
+        _imagesRepository.Received(1)
+            .StoreImage(Arg.Is<ImageItem>(i => i.ImageUrls.Any(u => u.Contains("imageUrl"))));
+    }
         
-        [TestMethod]
-        public void DownloadAndStoreUrls_WikipediaImageNoImagesInDatabase_ShouldSucceed()
+    [TestMethod]
+    public void DownloadAndStoreUrls_ImageInDatabaseWithDifferentUrl_ShouldUpdateEntry()
+    {
+        var imageUrl = "imageUrl";
+        var olderImageUrl = "olderImageUrl";
+        _imagesRepository.GetAllUrls().Returns([]);
+        _imagesRepository.GetImageByHash(Arg.Any<string>()).Returns(new ImageItem
         {
-            var imageUrl = "File:imageUrl";
-            _imagesRepository.GetAllUrls().Returns(new List<string>());
-            _remoteFileSizeFetcherGateway.GetFileContent(Arg.Any<string>()).Returns(new RemoteFileFetcherGatewayResponse
-            {
-                Content = Convert.FromBase64String(SINGLE_PIXEL_PNG),
-                FileName = imageUrl
-            });
-            
-            _executor.DownloadAndStoreUrls(new List<string> {imageUrl}).Wait();
-
-            _imagesRepository.Received(1)
-                .StoreImage(Arg.Is<ImageItem>(i => i.ImageUrls.Any(u => u.Contains("imageUrl"))));
-        }
-        
-        [TestMethod]
-        public void DownloadAndStoreUrls_ImageInDatabaseWithDifferentUrl_ShouldUpdateEntry()
+            ImageUrls = [olderImageUrl]
+        });
+        _remoteFileSizeFetcherGateway.GetFileContent(imageUrl).Returns(new RemoteFileFetcherGatewayResponse
         {
-            var imageUrl = "imageUrl";
-            var olderImageUrl = "olderImageUrl";
-            _imagesRepository.GetAllUrls().Returns(new List<string>());
-            _imagesRepository.GetImageByHash(Arg.Any<string>()).Returns(new ImageItem
-            {
-                ImageUrls = new List<string> {olderImageUrl}
-            });
-            _remoteFileSizeFetcherGateway.GetFileContent(imageUrl).Returns(new RemoteFileFetcherGatewayResponse
-            {
-                Content = Convert.FromBase64String(SINGLE_PIXEL_PNG),
-                FileName = imageUrl
-            });
+            Content = Convert.FromBase64String(SINGLE_PIXEL_PNG),
+            FileName = imageUrl
+        });
             
-            _executor.DownloadAndStoreUrls(new List<string> {imageUrl}).Wait();
+        _executor.DownloadAndStoreUrls([imageUrl]).Wait();
 
-            _imagesRepository.Received(1).StoreImage(Arg.Is<ImageItem>(i => 
-                i.ImageUrls.Contains(imageUrl) &&
-                i.ImageUrls.Contains(olderImageUrl)));
-        }
+        _imagesRepository.Received(1).StoreImage(Arg.Is<ImageItem>(i => 
+            i.ImageUrls.Contains(imageUrl) &&
+            i.ImageUrls.Contains(olderImageUrl)));
+    }
 
-        [TestMethod]
-        public void GetImageUrlIfExists_UrlExists_ShouldGetIt()
-        {
-            _imagesRepository.GetImageByHash(Arg.Any<string>())
-                .Returns(new ImageItem {ImageUrls = new List<string> {"imageUrl"}});
+    [TestMethod]
+    public void GetImageUrlIfExists_UrlExists_ShouldGetIt()
+    {
+        _imagesRepository.GetImageByHash(Arg.Any<string>())
+            .Returns(new ImageItem {ImageUrls = ["imageUrl"] });
             
-            var results = _executor.GetImageUrlIfExists(MD5.Create(), Convert.FromBase64String(SINGLE_PIXEL_PNG)).Result;
+        var results = _executor.GetImageUrlIfExists(MD5.Create(), Convert.FromBase64String(SINGLE_PIXEL_PNG)).Result;
 
-            Assert.IsNotNull(results);
-        }
+        Assert.IsNotNull(results);
+    }
 
-        [TestMethod]
-        public void GetAllImagesForUrls_ShouldGetThem()
-        {
-            var imageUrl = "imageUrl";
-            _imagesRepository.GetImageByUrl(imageUrl).Returns(new ImageItem());
+    [TestMethod]
+    public void GetAllImagesForUrls_ShouldGetThem()
+    {
+        var imageUrl = "imageUrl";
+        _imagesRepository.GetImageByUrl(imageUrl).Returns(new ImageItem());
             
-            var results = _executor.GetAllImagesForUrls(new[] {imageUrl}).Result;
+        var results = _executor.GetAllImagesForUrls([imageUrl]).Result;
             
-            Assert.AreEqual(1, results.Length);
-        }
+        Assert.AreEqual(1, results.Length);
     }
 }

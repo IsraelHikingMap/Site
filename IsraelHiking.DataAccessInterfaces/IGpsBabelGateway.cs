@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace IsraelHiking.DataAccessInterfaces
+namespace IsraelHiking.DataAccessInterfaces;
+
+public interface IGpsBabelGateway
 {
-    public interface IGpsBabelGateway
-    {
-        Task<byte[]> ConvertFileFromat(byte[] content, string inputFormat, string outputFormat);
-    }
+    Task<byte[]> ConvertFileFromat(byte[] content, string inputFormat, string outputFormat);
 }

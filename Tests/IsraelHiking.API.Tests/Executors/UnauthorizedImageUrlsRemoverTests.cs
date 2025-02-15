@@ -37,7 +37,7 @@ public class UnauthorizedImageUrlsRemoverTests
             { FeatureAttributes.POI_SOURCE_IMAGE_URL + "1", "wikimedia.org" },
         });
         
-        _remover.RemoveImages(new List<IFeature> { feature });
+        _remover.RemoveImages([feature]);
 
         Assert.AreEqual(1, feature.Attributes.GetNames().Count(n => n.StartsWith(FeatureAttributes.IMAGE_URL)));
         Assert.AreEqual(1, feature.Attributes.GetNames().Count(n => n.StartsWith(FeatureAttributes.POI_SOURCE_IMAGE_URL)));

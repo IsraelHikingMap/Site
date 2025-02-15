@@ -7,88 +7,87 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace IsraelHiking.API.Controllers
+namespace IsraelHiking.API.Controllers;
+
+/// <summary>
+/// This controller handles updates in elastic search and graphhopper
+/// </summary>
+[Route("api/[controller]")]
+public class UpdateController : ControllerBase
 {
+    private static readonly Semaphore RebuildSemaphore = new(1, 1);
+
+    private readonly ILogger _logger;
+    private readonly IDatabasesUpdaterService _databasesUpdaterService;
+
     /// <summary>
-    /// This controller handles updates in elastic search and graphhopper
+    /// Controller's constructor
     /// </summary>
-    [Route("api/[controller]")]
-    public class UpdateController : ControllerBase
+    /// <param name="databasesUpdaterService"></param>
+    /// <param name="logger"></param>
+    public UpdateController(
+        IDatabasesUpdaterService databasesUpdaterService,
+        ILogger logger)
     {
-        private static readonly Semaphore RebuildSemaphore = new(1, 1);
+        _databasesUpdaterService = databasesUpdaterService;
+        _logger = logger;
+    }
 
-        private readonly ILogger _logger;
-        private readonly IDatabasesUpdaterService _databasesUpdaterService;
-
-        /// <summary>
-        /// Controller's constructor
-        /// </summary>
-        /// <param name="databasesUpdaterService"></param>
-        /// <param name="logger"></param>
-        public UpdateController(
-            IDatabasesUpdaterService databasesUpdaterService,
-            ILogger logger)
+    /// <summary>
+    /// This operation updates elastic search and graph hopper with data stored in osm pbf file.
+    /// If OsmFile is set to false it will download and use the daily file without updating it to latest version.
+    /// This operation should have minimal down time.
+    /// This operation can only be ran from the hosting server.
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost]
+    [Route("")]
+    public async Task<IActionResult> PostUpdateData(UpdateRequest request)
+    {
+        if (!RebuildSemaphore.WaitOne(0))
         {
-            _databasesUpdaterService = databasesUpdaterService;
-            _logger = logger;
+            return BadRequest("Can't run two full updates in parallel");
         }
-
-        /// <summary>
-        /// This operation updates elastic search and graph hopper with data stored in osm pbf file.
-        /// If OsmFile is set to false it will download and use the daily file without updating it to latest version.
-        /// This operation should have minimal down time.
-        /// This operation can only be ran from the hosting server.
-        /// </summary>
-        /// <returns></returns>
-        [HttpPost]
-        [Route("")]
-        public async Task<IActionResult> PostUpdateData(UpdateRequest request)
+        try
         {
-            if (!RebuildSemaphore.WaitOne(0))
+            if (!IsRequestLocal())
             {
-                return BadRequest("Can't run two full updates in parallel");
+                return BadRequest("This operation can't be done from a remote client, please run this from the server");
             }
-            try
+            if (request == null || 
+                request.Highways == false &&
+                request.AllExternalSources == false &&
+                request.PointsOfInterest == false &&
+                request.Images == false &&
+                request.SiteMap == false &&
+                request.OfflinePoisFile == false)
             {
-                if (!IsRequestLocal())
+                request = new UpdateRequest
                 {
-                    return BadRequest("This operation can't be done from a remote client, please run this from the server");
-                }
-                if (request == null || 
-                    request.Highways == false &&
-                    request.AllExternalSources == false &&
-                    request.PointsOfInterest == false &&
-                    request.Images == false &&
-                    request.SiteMap == false &&
-                    request.OfflinePoisFile == false)
-                {
-                    request = new UpdateRequest
-                    {
-                        Highways = true,
-                        AllExternalSources = true,
-                        PointsOfInterest = true,
-                        SiteMap = true,
-                        Images = true,
-                        OfflinePoisFile = true
-                    };
-                    _logger.LogInformation("No specific filters were applied, updating all databases.");
-                }
-                _logger.LogInformation("Starting updating site's databases according to request: " + JsonSerializer.Serialize(request));
-                await _databasesUpdaterService.Rebuild(request);
-                _logger.LogInformation("Finished updating site's databases according to request");
-                return Ok();
+                    Highways = true,
+                    AllExternalSources = true,
+                    PointsOfInterest = true,
+                    SiteMap = true,
+                    Images = true,
+                    OfflinePoisFile = true
+                };
+                _logger.LogInformation("No specific filters were applied, updating all databases.");
             }
-            finally
-            {
-                RebuildSemaphore.Release();
-            }
+            _logger.LogInformation("Starting updating site's databases according to request: " + JsonSerializer.Serialize(request));
+            await _databasesUpdaterService.Rebuild(request);
+            _logger.LogInformation("Finished updating site's databases according to request");
+            return Ok();
         }
-
-        private bool IsRequestLocal()
+        finally
         {
-            return HttpContext.Connection.LocalIpAddress.Equals(HttpContext.Connection.RemoteIpAddress) ||
-                   IPAddress.IsLoopback(HttpContext.Connection.RemoteIpAddress) ||
-                   HttpContext.Connection.RemoteIpAddress.Equals(IPAddress.Parse("10.10.10.10"));
+            RebuildSemaphore.Release();
         }
+    }
+
+    private bool IsRequestLocal()
+    {
+        return HttpContext.Connection.LocalIpAddress.Equals(HttpContext.Connection.RemoteIpAddress) ||
+               IPAddress.IsLoopback(HttpContext.Connection.RemoteIpAddress) ||
+               HttpContext.Connection.RemoteIpAddress.Equals(IPAddress.Parse("10.10.10.10"));
     }
 }

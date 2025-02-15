@@ -12,14 +12,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace IsraelHiking.API.Tests.Services
-{
-    [TestClass]
-    public class RouteDataSplitterServiceTests
-    {
-        #region GPX string data
+namespace IsraelHiking.API.Tests.Services;
 
-        private string gpxString = @"<?xml version='1.0'?>
+[TestClass]
+public class RouteDataSplitterServiceTests
+{
+  #region GPX string data
+
+  private string gpxString = @"<?xml version='1.0'?>
             <gpx xmlns:xsd='http://www.w3.org/2001/XMLSchema' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' version='1.1' creator='IsraelHikingMap' xmlns='http://www.topografix.com/GPX/1/1'>
               <trk>
                 <name>Original TWL route</name>
@@ -291,83 +291,82 @@ namespace IsraelHiking.API.Tests.Services
               </trk>
             </gpx>";
 
-        #endregion
+  #endregion
 
-        private RouteDataSplitterService _service;
+  private RouteDataSplitterService _service;
 
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            var options = new ConfigurationData
-            {
-                InitialSplitSimplificationDistanceTolerance = 50,
-                MaxSegmentsNumber = 40,
-                MinimalSegmentLength = 500
-            };
-            var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
-            optionsProvider.Value.Returns(options);
+  [TestInitialize]
+  public void TestInitialize()
+  {
+    var options = new ConfigurationData
+    {
+      InitialSplitSimplificationDistanceTolerance = 50,
+      MaxSegmentsNumber = 40,
+      MinimalSegmentLength = 500
+    };
+    var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
+    optionsProvider.Value.Returns(options);
             
-            _service = new RouteDataSplitterService(new ItmWgs84MathTransformFactory(), optionsProvider);
-        }
+    _service = new RouteDataSplitterService(new ItmWgs84MathTransformFactory(), optionsProvider);
+  }
 
-        [TestMethod]
-        public void TestSimplifyRouteData()
+  [TestMethod]
+  public void TestSimplifyRouteData()
+  {
+    var converter = new GpxDataContainerConverter();
+    var container = converter.ToDataContainer(Encoding.ASCII.GetBytes(gpxString).ToGpx());
+
+    var route = _service.Split(container.Routes.First());
+
+    Assert.IsTrue(route.Segments.Count <= 40);
+  }
+
+  [TestMethod]
+  public void SimplifyRoundRoute()
+  {
+    var routeToSimplify = new RouteData
+    {
+      Segments =
+      [
+        new RouteSegmentData
         {
-            var converter = new GpxDataContainerConverter();
-            var container = converter.ToDataContainer(Encoding.ASCII.GetBytes(gpxString).ToGpx());
-
-            var route = _service.Split(container.Routes.First());
-
-            Assert.IsTrue(route.Segments.Count <= 40);
+          Latlngs =
+          [
+            new LatLngTime { Lat = 1, Lng = 1 },
+            new LatLngTime { Lat = 2, Lng = 2 },
+            new LatLngTime { Lat = 3, Lng = 3 },
+            new LatLngTime { Lat = 4, Lng = 4 },
+            new LatLngTime { Lat = 1, Lng = 1 }
+          ]
         }
+      ]
+    };
 
-        [TestMethod]
-        public void SimplifyRoundRoute()
+    var route = _service.Split(routeToSimplify);
+
+    Assert.IsTrue(route.Segments.Count <= 5);
+  }
+
+  [TestMethod]
+  public void SimplifyRouteWithTwoPoints_ShouldNotBeSimplified()
+  {
+    var routeToSimplify = new RouteData
+    {
+      Segments =
+      [
+        new RouteSegmentData
         {
-            var routeToSimplify = new RouteData
-            {
-                Segments = new List<RouteSegmentData>
-                {
-                    new RouteSegmentData
-                    {
-                        Latlngs = new List<LatLngTime>
-                        {
-                            new LatLngTime {Lat = 1, Lng = 1},
-                            new LatLngTime {Lat = 2, Lng = 2},
-                            new LatLngTime {Lat = 3, Lng = 3},
-                            new LatLngTime {Lat = 4, Lng = 4},
-                            new LatLngTime {Lat = 1, Lng = 1},
-                        }
-                    }
-                }
-            };
-
-            var route = _service.Split(routeToSimplify);
-
-            Assert.IsTrue(route.Segments.Count <= 5);
+          Latlngs =
+          [
+            new LatLngTime { Lat = 1, Lng = 1 },
+            new LatLngTime { Lat = 2, Lng = 2 }
+          ]
         }
+      ]
+    };
 
-        [TestMethod]
-        public void SimplifyRouteWithTwoPoints_ShouldNotBeSimplified()
-        {
-            var routeToSimplify = new RouteData
-            {
-                Segments = new List<RouteSegmentData>
-                {
-                    new RouteSegmentData
-                    {
-                        Latlngs = new List<LatLngTime>
-                        {
-                            new LatLngTime {Lat = 1, Lng = 1},
-                            new LatLngTime {Lat = 2, Lng = 2}
-                        }
-                    }
-                }
-            };
+    var route = _service.Split(routeToSimplify);
 
-            var route = _service.Split(routeToSimplify);
-
-            Assert.AreEqual(2, route.Segments.Count);
-        }
-    }
+    Assert.AreEqual(2, route.Segments.Count);
+  }
 }
