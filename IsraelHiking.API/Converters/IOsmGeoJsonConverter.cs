@@ -4,7 +4,7 @@ using OsmSharp.Complete;
 namespace IsraelHiking.API.Converters;
 
 /// <summary>
-/// Converts from OSM data objects to geojson and back
+/// Converts from OSM data objects to geoJson and back
 /// </summary>
 public interface IOsmGeoJsonConverter
 {

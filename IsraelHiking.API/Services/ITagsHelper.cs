@@ -5,7 +5,7 @@ using NetTopologySuite.Features;
 namespace IsraelHiking.API.Services;
 
 /// <summary>
-/// This class facilatates for search factor and icon for geojson features used for search
+/// This class facilitates for search factor and icon for geojson features used for search
 /// </summary>
 public interface ITagsHelper
 {

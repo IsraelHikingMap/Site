@@ -27,7 +27,6 @@ public class PointsOfInterestController : ControllerBase
     private readonly IClientsFactory _clientsFactory;
     private readonly ITagsHelper _tagsHelper;
     private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
-    private readonly IImagesUrlsStorageExecutor _imageUrlStoreExecutor;
     private readonly ISimplePointAdderExecutor _simplePointAdderExecutor;
     private readonly IDistributedCache _persistentCache;
     private readonly ILogger _logger;
@@ -38,21 +37,18 @@ public class PointsOfInterestController : ControllerBase
     /// <param name="clientsFactory"></param>
     /// <param name="tagsHelper"></param>
     /// <param name="pointsOfInterestProvider"></param>
-    /// <param name="imageUrlStoreExecutor"></param>
     /// <param name="simplePointAdderExecutor"></param>
     /// <param name="persistentCache"></param>
     /// <param name="logger"></param>
     public PointsOfInterestController(IClientsFactory clientsFactory,
         ITagsHelper tagsHelper,
         IPointsOfInterestProvider pointsOfInterestProvider,
-        IImagesUrlsStorageExecutor imageUrlStoreExecutor,
         ISimplePointAdderExecutor simplePointAdderExecutor,
         IDistributedCache persistentCache,
         ILogger logger)
     {
         _clientsFactory = clientsFactory;
         _tagsHelper = tagsHelper;
-        _imageUrlStoreExecutor = imageUrlStoreExecutor;
         _pointsOfInterestProvider = pointsOfInterestProvider;
         _simplePointAdderExecutor = simplePointAdderExecutor;
         _persistentCache = persistentCache;

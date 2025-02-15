@@ -121,7 +121,7 @@ public class DataContainerConverterService : IDataContainerConverterService
     }
 
     /// <summary>
-    /// This method created a list containig the converters needed in order to get from input to output.
+    /// This method created a list containing the converters needed in order to get from input to output.
     /// It uses recursive calls to find them.
     /// </summary>
     /// <param name="inputFormat"></param>

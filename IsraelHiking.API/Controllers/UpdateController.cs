@@ -36,8 +36,8 @@ public class UpdateController : ControllerBase
     /// <summary>
     /// This operation updates elastic search and graph hopper with data stored in osm pbf file.
     /// If OsmFile is set to false it will download and use the daily file without updating it to latest version.
-    /// This operation should have minimal down time.
-    /// This operation can only be ran from the hosting server.
+    /// This operation should have minimal downtime.
+    /// This operation can only be run from the hosting server.
     /// </summary>
     /// <returns></returns>
     [HttpPost]

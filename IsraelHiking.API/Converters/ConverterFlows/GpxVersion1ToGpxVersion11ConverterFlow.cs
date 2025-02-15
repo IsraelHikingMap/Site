@@ -44,8 +44,8 @@ public class GpxVersion1ToGpxVersion11ConverterFlow : IConverterFlowItem
         {
             return false;
         }
-        using var mempryStream = new MemoryStream(content);
-        var document = XDocument.Load(mempryStream);
+        using var memoryStream = new MemoryStream(content);
+        var document = XDocument.Load(memoryStream);
         return document.Elements().Where(x => x.Name.LocalName == "gpx").Attributes().Any(a => a.Name.LocalName == "version" && a.Value == "1.0");
     }
 }

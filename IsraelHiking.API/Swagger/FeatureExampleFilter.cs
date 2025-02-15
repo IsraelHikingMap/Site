@@ -16,7 +16,7 @@ namespace IsraelHiking.API.Swagger;
 public class FeatureExampleFilter : ISchemaFilter
 {
     /// <summary>
-    /// Applys the example of a <see cref="Feature"/> to the schema
+    /// Apples the example of a <see cref="Feature"/> to the schema
     /// </summary>
     /// <param name="context"></param>
     /// <param name="schema"></param>

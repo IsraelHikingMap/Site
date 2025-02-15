@@ -59,8 +59,8 @@ public class GpxLoopsSplitterExecutor : IGpxLoopsSplitterExecutor
                 continue;
             }
             AddLineString(lines, reversedGpxLine.Coordinates.Take(indexOfClosingLine).ToArray());
-            var reminingPoints = reversedGpxLine.Coordinates.Skip(indexOfClosingLine).ToArray();
-            reversedGpxLine = reminingPoints.Length > 1 ? _geometryFactory.CreateLineString(reminingPoints) : _geometryFactory.CreateLineString([]);
+            var remainingPoints = reversedGpxLine.Coordinates.Skip(indexOfClosingLine).ToArray();
+            reversedGpxLine = remainingPoints.Length > 1 ? _geometryFactory.CreateLineString(remainingPoints) : _geometryFactory.CreateLineString([]);
             coordinateIndex = 0;
         }
         AddLineString(lines, reversedGpxLine.Coordinates);

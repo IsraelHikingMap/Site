@@ -249,7 +249,7 @@ public class FeaturesMergeExecutor : IFeaturesMergeExecutor
     {
         try
         {
-            var containsOrClose = false;
+            bool containsOrClose;
             if (feature.Geometry is Point)
             {
                 containsOrClose = container.Geometry.Contains(feature.Geometry) ||

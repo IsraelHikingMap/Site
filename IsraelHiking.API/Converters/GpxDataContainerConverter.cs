@@ -8,9 +8,9 @@ using System.Linq;
 namespace IsraelHiking.API.Converters;
 
 internal class ColorOpacityWeight {
-    public string Color { get; set; }
-    public double? Opacity { get; set; }
-    public int? Weight { get; set; }
+    public string Color { get; init; }
+    public double? Opacity { get; init; }
+    public int? Weight { get; init; }
 }
 
 ///<inheritdoc />
@@ -97,7 +97,7 @@ public class GpxDataContainerConverter : IGpxDataContainerConverter
             Color = (t.Extensions as ColorOpacityWeight)?.Color,
             Opacity = (t.Extensions as ColorOpacityWeight)?.Opacity,
             Weight = (t.Extensions as ColorOpacityWeight)?.Weight,
-            Segments = t.Segments.Where(seg => seg?.Waypoints != null && seg.Waypoints.Count > 1).Select(seg => new RouteSegmentData
+            Segments = t.Segments.Where(seg => seg?.Waypoints is { Count: > 1 }).Select(seg => new RouteSegmentData
             {
                 Latlngs = seg.Waypoints.Select(ToLatLngTime).ToList(),
                 RoutePoint = ToLatLng(seg.Waypoints.Last()),

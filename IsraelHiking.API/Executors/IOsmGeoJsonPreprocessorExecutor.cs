@@ -10,7 +10,7 @@ namespace IsraelHiking.API.Executors;
 public interface IOsmGeoJsonPreprocessorExecutor
 {
     /// <summary>
-    /// Preprocess OSM geometry into geojson features
+    /// Preprocess OSM geometry into geoJson features
     /// </summary>
     /// <param name="osmEntities"></param>
     /// <returns>a list of preprocessed features</returns>

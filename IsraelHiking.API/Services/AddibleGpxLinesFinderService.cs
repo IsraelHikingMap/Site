@@ -345,15 +345,15 @@ public class AddibleGpxLinesFinderService : IAddibleGpxLinesFinderService
     {
         var adjustedLines = new List<LineString>();
 
-        for (int currnetLineIndex = gpxItmLines.Count - 1; currnetLineIndex >= 0; currnetLineIndex--)
+        for (int currentLineIndex = gpxItmLines.Count - 1; currentLineIndex >= 0; currentLineIndex--)
         {
-            var currentLine = gpxItmLines[currnetLineIndex];
+            var currentLine = gpxItmLines[currentLineIndex];
             foreach (var otherLine in gpxItmLines.Except([currentLine]))
             {
                 currentLine = GetLineWithExtraPoints(currentLine, otherLine.Coordinates.First());
                 currentLine = GetLineWithExtraPoints(currentLine, otherLine.Coordinates.Last());
             }
-            gpxItmLines[currnetLineIndex] = currentLine;
+            gpxItmLines[currentLineIndex] = currentLine;
         }
         foreach (var currentLine in gpxItmLines)
         {

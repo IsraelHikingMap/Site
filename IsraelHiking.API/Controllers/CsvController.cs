@@ -42,7 +42,7 @@ public class CsvController : ControllerBase
     /// This method is used to preprocess csv files
     /// </summary>
     /// <param name="file">The file to preprocess</param>
-    /// <param name="idRegExPattern">The regular expersion for the id field to fill - for example &amp;id=(\d+)</param>
+    /// <param name="idRegExPattern">The regular expression for the id field to fill - for example &amp;id=(\d+)</param>
     /// /// <param name="sourceImageUrl">A url to a small image representing this source</param>
     /// <param name="icon">icon to add - for example icon-tint or icon-waterfall</param>
     /// <param name="iconColor">The color for the icon - with # or just a name</param>

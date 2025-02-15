@@ -13,11 +13,11 @@ internal class LineAndCoordinate {
 
 internal class SegmentWithLines
 {
-    public Coordinate[] OriginalCoordinates { get; set; }
-    public LineAndCoordinate Start { get; set; }
-    public Coordinate StartProjected { get; set; }
-    public LineAndCoordinate End { get; set; }
-    public Coordinate EndProjected { get; set; }
+    public Coordinate[] OriginalCoordinates { get; init; }
+    public LineAndCoordinate Start { get; init; }
+    public Coordinate StartProjected { get; init; }
+    public LineAndCoordinate End { get; init; }
+    public Coordinate EndProjected { get; init; }
 }
 
 /// <summary>
@@ -33,24 +33,24 @@ public class GpxProlongerExecutorInput
     /// <summary>
     /// The original coordinates that start from the line's end
     /// </summary>
-    public Coordinate[] OriginalCoordinates { get; set; }
+    public Coordinate[] OriginalCoordinates { get; init; }
     /// <summary>
     /// Existing lines in the area in ITM coordinates
     /// </summary>
-    public IReadOnlyList<LineString> ExistingItmHighways { get; set; }
+    public IReadOnlyList<LineString> ExistingItmHighways { get; init; }
     /// <summary>
     /// The minimal distance to another line in order to stop prolonging
     /// </summary>
-    public double MinimalDistance { get; set; }
+    public double MinimalDistance { get; init; }
     /// <summary>
     /// The minimal area that is considered to be a valid area to allow prolonging a line
     /// </summary>
-    public double MinimalAreaSize { get; set; }
+    public double MinimalAreaSize { get; init; }
 
     /// <summary>
     /// The minimal line length in meters that is considered a valid line
     /// </summary>
-    public double MinimalLength { get; set; }
+    public double MinimalLength { get; init; }
 }
 
 /// <inheritdoc/>

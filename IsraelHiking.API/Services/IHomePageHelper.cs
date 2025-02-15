@@ -1,7 +1,7 @@
 namespace IsraelHiking.API.Services;
 
 /// <summary>
-/// Helps returning or rendering with custom content the home page.
+/// Helps with returning or rendering custom content of the home page.
 /// </summary>
 public interface IHomePageHelper
 {

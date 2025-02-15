@@ -120,7 +120,7 @@ public class SimplePointAdderExecutor : ISimplePointAdderExecutor
 
         if (!closestHighways.Any())
         {
-            return (null, Array.Empty<Feature>());
+            return (null, []);
         }
 
         // check for version matching and get updates if needed.
@@ -134,9 +134,9 @@ public class SimplePointAdderExecutor : ISimplePointAdderExecutor
         var completeWay = await osmGateway.GetCompleteWay(closestHighway.GetOsmId());
         var firstHighway = _osmGeoJsonPreprocessorExecutor.Preprocess([completeWay]).FirstOrDefault();
         if (firstHighway == null) {
-            // This is a rate case where the next version of the highway doesn't contain any tags 
+            // This is a rate case where the next version of the highway doesn't contain any tags, 
             // and it was a highway when the highways database wes built
-            return (null, Array.Empty<Feature>());
+            return (null, []);
         }
         // The following assumes that after the highway version upgrade this is still the closest highway 
         // Ignoring this assumption will require to redo the entire process to another highway 

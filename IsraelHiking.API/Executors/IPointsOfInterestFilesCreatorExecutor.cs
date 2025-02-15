@@ -15,7 +15,7 @@ public interface IPointsOfInterestFilesCreatorExecutor
     void CreateSiteMapXmlFile(List<IFeature> features);
 
     /// <summary>
-    /// This function creates the pois-slim.geojson file inside the wwwroot folder
+    /// This function creates the external points file inside the wwwroot folder
     /// </summary>
     /// <param name="features"></param>
     void CreateOfflinePoisFile(List<IFeature> features);

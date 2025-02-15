@@ -11,14 +11,14 @@ namespace IsraelHiking.API.Executors;
 public interface IImagesUrlsStorageExecutor
 {
     /// <summary>
-    /// Dowonloads the content from the urls, calculates hash and stores to database
+    /// Downloads the content from the urls, calculates hash and stores to database
     /// </summary>
     /// <param name="imagesUrls"></param>
     /// <returns></returns>
     Task DownloadAndStoreUrls(List<string> imagesUrls);
 
     /// <summary>
-    /// Get an image url if it exsits in the repository
+    /// Get an image url if it exists in the repository
     /// </summary>
     /// <param name="md5"></param>
     /// <param name="content"></param>
@@ -32,7 +32,7 @@ public interface IImagesUrlsStorageExecutor
     /// <returns></returns>
     Task<ImageItem[]> GetAllImagesForUrls(string[] imageUrls);
     /// <summary>
-    /// This method stores images in the repostory after computing hash and resizing them
+    /// This method stores images in the repository after computing hash and resizing them
     /// </summary>
     /// <param name="md5"></param>
     /// <param name="content"></param>

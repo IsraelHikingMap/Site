@@ -31,11 +31,9 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
     private PointsOfInterestProvider _adapter;
     private IClientsFactory _clientsFactory;
     private IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
-    private IOsmRepository _osmRepository;
     private IPointsOfInterestRepository _pointsOfInterestRepository;
     private IExternalSourcesRepository _externalSourcesRepository;
     private IWikimediaCommonGateway _wikimediaCommonGateway;
-    private IOsmLatestFileGateway _latestFileGateway;
     private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
     private ITagsHelper _tagsHelper;
 
@@ -48,8 +46,8 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         _osmGeoJsonPreprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(),
             _elevationGateway,
             new OsmGeoJsonConverter(new GeometryFactory()), _tagsHelper);
-        _osmRepository = Substitute.For<IOsmRepository>();
-        _latestFileGateway = Substitute.For<IOsmLatestFileGateway>();
+        Substitute.For<IOsmRepository>();
+        Substitute.For<IOsmLatestFileGateway>();
         _pointsOfInterestRepository = Substitute.For<IPointsOfInterestRepository>();
         _externalSourcesRepository = Substitute.For<IExternalSourcesRepository>();
         _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
@@ -58,13 +56,10 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
             _externalSourcesRepository,
             new ElevationSetterExecutor(_elevationGateway),
             _osmGeoJsonPreprocessorExecutor,
-            _osmRepository,
-            _latestFileGateway,
             _wikimediaCommonGateway,
             new Base64ImageStringToFileConverter(),
             _imagesUrlsStorageExecutor,
             _tagsHelper, _clientsFactory,
-            _options,
             Substitute.For<ILogger>());
     }
 
@@ -388,13 +383,6 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
                                                           "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
         });
         _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
-        var featureFromDatabase = new Feature
-        {
-            Attributes = new AttributesTable
-            {
-                { FeatureAttributes.POI_ICON, "icon" }
-            }
-        };
         gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection {
             { "description:he", "description" },
             { "name:he", "name" },
@@ -422,13 +410,6 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
                                                           "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
         });
         _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
-        var featureFromDatabase = new Feature
-        {
-            Attributes = new AttributesTable
-            {
-                { FeatureAttributes.POI_ICON, "icon" }
-            }
-        };
         gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection {
             { "description:he", "description" },
             { "name:he", "name.1" },
@@ -456,13 +437,6 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
                                                           "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
         });
         _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
-        var featureFromDatabase = new Feature
-        {
-            Attributes = new AttributesTable
-            {
-                { FeatureAttributes.POI_ICON, "icon-tint" }
-            }
-        };
         gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection()
         {
             {"natural", "spring"}

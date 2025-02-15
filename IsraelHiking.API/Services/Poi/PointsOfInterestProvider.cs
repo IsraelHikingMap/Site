@@ -2,12 +2,10 @@
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
-using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp;
@@ -35,10 +33,8 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
     public const string SEARCH_ICON = "icon-search";
 
     private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
-    private readonly IOsmRepository _osmRepository;
     private readonly ITagsHelper _tagsHelper;
     private readonly IClientsFactory _clientsFactory;
-    private readonly IOsmLatestFileGateway _latestFileGateway;
     private readonly IElevationSetterExecutor _elevationSetterExecutor;
     private readonly IPointsOfInterestRepository _pointsOfInterestRepository;
     private readonly IExternalSourcesRepository _externalSourcesRepository;
@@ -46,7 +42,6 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
     private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
     private readonly IImagesUrlsStorageExecutor _imageUrlStoreExecutor;
     private readonly ILogger _logger;
-    private readonly ConfigurationData _options;
 
     /// <summary>
     /// Class constructor
@@ -55,36 +50,27 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
     /// <param name="externalSourcesRepository"></param>
     /// <param name="elevationSetterExecutor"></param>
     /// <param name="osmGeoJsonPreprocessorExecutor"></param>
-    /// <param name="osmRepository"></param>
-    /// <param name="latestFileGateway"></param>
     /// <param name="wikimediaCommonGateway"></param>
     /// <param name="base64ImageConverter"></param>
     /// <param name="imageUrlStoreExecutor"></param>
     /// <param name="tagsHelper"></param>
     /// <param name="clientsFactory"></param>
-    /// <param name="options"></param>
     /// <param name="logger"></param>
     public PointsOfInterestProvider(IPointsOfInterestRepository pointsOfInterestRepository,
         IExternalSourcesRepository externalSourcesRepository,
         IElevationSetterExecutor elevationSetterExecutor,
         IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
-        IOsmRepository osmRepository,
-        IOsmLatestFileGateway latestFileGateway,
         IWikimediaCommonGateway wikimediaCommonGateway,
         IBase64ImageStringToFileConverter base64ImageConverter,
         IImagesUrlsStorageExecutor imageUrlStoreExecutor,
         ITagsHelper tagsHelper,
         IClientsFactory clientsFactory,
-        IOptions<ConfigurationData> options,
         ILogger logger)
     {
         _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
-        _osmRepository = osmRepository;
         _tagsHelper = tagsHelper;
         _clientsFactory = clientsFactory;
-        _latestFileGateway = latestFileGateway;
         _elevationSetterExecutor = elevationSetterExecutor;
-        _options = options.Value;
         _pointsOfInterestRepository = pointsOfInterestRepository;
         _externalSourcesRepository = externalSourcesRepository;
         _wikimediaCommonGateway = wikimediaCommonGateway;

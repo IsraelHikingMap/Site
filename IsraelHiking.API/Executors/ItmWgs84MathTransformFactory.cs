@@ -24,7 +24,7 @@ public class ItmWgs84MathTransformFactory : IItmWgs84MathTransformFactory
             new ProjectionParameter("scale_factor", 1.0000067)
         };
 
-        var itmDatum = coordinateSystemFactory.CreateHorizontalDatum("Isreal 1993", DatumType.HD_Geocentric,
+        var itmDatum = coordinateSystemFactory.CreateHorizontalDatum("Israel 1993", DatumType.HD_Geocentric,
             Ellipsoid.GRS80, new Wgs84ConversionInfo(-24.0024, -17.1032, -17.8444, -0.33077, -1.85269, 1.66969, 5.4248));
 
         var itmGeo = coordinateSystemFactory.CreateGeographicCoordinateSystem("ITM", AngularUnit.Degrees, itmDatum,
@@ -32,20 +32,20 @@ public class ItmWgs84MathTransformFactory : IItmWgs84MathTransformFactory
 
         var itmProjection = coordinateSystemFactory.CreateProjection("Transverse_Mercator", "Transverse_Mercator", itmParameters);
         _itm = coordinateSystemFactory.CreateProjectedCoordinateSystem("ITM", itmGeo, itmProjection, LinearUnit.Metre,
-            new AxisInfo("East", AxisOrientationEnum.East), new AxisInfo("North", AxisOrientationEnum.North)) as ProjectedCoordinateSystem;
+            new AxisInfo("East", AxisOrientationEnum.East), new AxisInfo("North", AxisOrientationEnum.North));
     }
 
     /// <inheritdoc />
     public MathTransform Create()
     {
         var coordinateTransformFactory = new CoordinateTransformationFactory();
-        return coordinateTransformFactory.CreateFromCoordinateSystems(_itm, GeographicCoordinateSystem.WGS84).MathTransform as MathTransform;
+        return coordinateTransformFactory.CreateFromCoordinateSystems(_itm, GeographicCoordinateSystem.WGS84).MathTransform;
     }
 
     /// <inheritdoc />
     public MathTransform CreateInverse()
     {
         var coordinateTransformFactory = new CoordinateTransformationFactory();
-        return coordinateTransformFactory.CreateFromCoordinateSystems(GeographicCoordinateSystem.WGS84, _itm).MathTransform as MathTransform;
+        return coordinateTransformFactory.CreateFromCoordinateSystems(GeographicCoordinateSystem.WGS84, _itm).MathTransform;
     }
 }

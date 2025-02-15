@@ -1,12 +1,10 @@
 ﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.Common;
-using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.DataContainer;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using System.IO;
@@ -27,10 +25,8 @@ public class ImagesControllerTests
         _repository = Substitute.For<IShareUrlsRepository>();
         _imageCreationGateway = Substitute.For<IImageCreationGateway>();
         _imgurGateway = Substitute.For<IImgurGateway>();
-        var options = Substitute.For<IOptions<ConfigurationData>>();
-        options.Value.Returns(new ConfigurationData());
             
-        _controller = new ImagesController(_repository, _imageCreationGateway, _imgurGateway, options);
+        _controller = new ImagesController(_repository, _imageCreationGateway, _imgurGateway);
     }
 
     [TestMethod]

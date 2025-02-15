@@ -28,7 +28,6 @@ public class PointsOfInterestControllerTests
     private IAuthClient _osmGateway;
     private ITagsHelper _tagHelper;
     private IPointsOfInterestProvider _pointsOfInterestProvider;
-    private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
     private IDistributedCache _persistentCache;
     private ISimplePointAdderExecutor _simplePointAdderExecutor;
 
@@ -38,7 +37,7 @@ public class PointsOfInterestControllerTests
         _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
         _tagHelper = Substitute.For<ITagsHelper>();
         _osmGateway = Substitute.For<IAuthClient>();
-        _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
+        Substitute.For<IImagesUrlsStorageExecutor>();
         _persistentCache = Substitute.For<IDistributedCache>();
         _simplePointAdderExecutor = Substitute.For<ISimplePointAdderExecutor>();
         var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
@@ -47,8 +46,7 @@ public class PointsOfInterestControllerTests
         factory.CreateOAuth2Client(Arg.Any<string>()).Returns(_osmGateway);
         _controller = new PointsOfInterestController(factory, 
             _tagHelper, 
-            _pointsOfInterestProvider, 
-            _imagesUrlsStorageExecutor,
+            _pointsOfInterestProvider,
             _simplePointAdderExecutor,
             _persistentCache,
             Substitute.For<ILogger>());

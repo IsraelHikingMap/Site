@@ -176,8 +176,7 @@ public class CsvPointsOfInterestAdapter : IPointsOfInterestAdapter
         var csv = new CsvReader(reader, configuration);
         return csv.GetRecords<CsvPointOfInterestRow>();
     }
-
-    /// <inheritdoc />
+    
     private async Task UpdateGeometry(IFeature feature)
     {
         if (feature.Attributes.Exists(FeatureAttributes.POI_SHARE_REFERENCE) &&

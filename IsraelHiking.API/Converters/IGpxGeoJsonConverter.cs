@@ -9,7 +9,7 @@ namespace IsraelHiking.API.Converters;
 public interface IGpxGeoJsonConverter
 {
     /// <summary>
-    /// Convetrs <see cref="GpxFile"/> to <see cref="FeatureCollection"/>
+    /// Converts <see cref="GpxFile"/> to <see cref="FeatureCollection"/>
     /// </summary>
     /// <param name="gpx">The GPX data to convert</param>
     /// <returns>The GeoJson data</returns>

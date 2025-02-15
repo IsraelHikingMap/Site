@@ -12,7 +12,7 @@ using IsraelHiking.API.Services.Poi;
 namespace IsraelHiking.API.Controllers;
 
 /// <summary>
-/// This controller allows search of geo-locations
+/// This controller allows search of geolocations
 /// </summary>
 [Route("api/[controller]")]
 public class SearchController : ControllerBase
@@ -29,7 +29,7 @@ public class SearchController : ControllerBase
     }
 
     /// <summary>
-    /// Gets a geo location by search term
+    /// Gets a geolocation by search term
     /// </summary>
     /// <param name="term">A string to search for</param>
     /// <param name="language">The language to search in</param>

@@ -287,8 +287,8 @@ public class OsmGeoJsonConverter : IOsmGeoJsonConverter
     {
         var coordinates = nodes.Select(ConvertNode).ToArray();
         return nodes.First().Id == nodes.Last().Id && nodes.Length >= 4 && closePolygons
-            ? _geometryFactory.CreatePolygon(_geometryFactory.CreateLinearRing(coordinates)) as Geometry
-            : _geometryFactory.CreateLineString(coordinates) as Geometry;
+            ? _geometryFactory.CreatePolygon(_geometryFactory.CreateLinearRing(coordinates))
+            : _geometryFactory.CreateLineString(coordinates);
     }
 
     /// <summary>

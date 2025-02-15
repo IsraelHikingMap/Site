@@ -147,7 +147,7 @@ public class OsmLineAdderService : IOsmLineAdderService
     {
         if (newWayNodes.Any() && newWayNodes.Last().Id == newNodeId)
         {
-            // last node that was added had the same Id
+            // last node that was added had the same ID
             return false;
         }
         var existingNode = newWayNodes.FirstOrDefault(n => n.Id == newNodeId);
@@ -196,7 +196,7 @@ public class OsmLineAdderService : IOsmLineAdderService
     /// <summary>
     /// This will add the new node to an exiting way
     /// It will also update the new node to be on the existing way instead of just altering the existing way by
-    /// pleacing the node in the projection location
+    /// placing the node in the projection location
     /// </summary>
     /// <param name="newNode"></param>
     /// <param name="closestHighwayItm"></param>
@@ -244,7 +244,7 @@ public class OsmLineAdderService : IOsmLineAdderService
     {
         var northEast = _wgs84ItmMathTransform.Transform(line.Coordinates.Max(c => c.X), line.Coordinates.Max(c => c.Y));
         var southWest = _wgs84ItmMathTransform.Transform(line.Coordinates.Min(c => c.X), line.Coordinates.Min(c => c.Y));
-        // adding tolerance perimiter to find ways.
+        // adding tolerance perimeter to find ways.
         northEast.y += _options.MinimalDistanceToClosestPoint;
         northEast.x += _options.MinimalDistanceToClosestPoint;
         southWest.y -= _options.MinimalDistanceToClosestPoint;
@@ -307,8 +307,8 @@ public class OsmLineAdderService : IOsmLineAdderService
     private async Task AddWaysToElasticSearch(List<long?> wayIds)
     {
         var tasksList = wayIds.Select(wayId => _osmGateway.GetCompleteWay(wayId.Value)).ToList();
-        var newlyaddedWays = await Task.WhenAll(tasksList);
-        var newlyHighwaysFeatures = _geoJsonPreprocessorExecutor.Preprocess(newlyaddedWays.ToList());
+        var newlyAddedWays = await Task.WhenAll(tasksList);
+        var newlyHighwaysFeatures = _geoJsonPreprocessorExecutor.Preprocess(newlyAddedWays.ToList());
         await _highwaysRepository.UpdateHighwaysData(newlyHighwaysFeatures);
     }
 
@@ -330,7 +330,7 @@ public class OsmLineAdderService : IOsmLineAdderService
     /// <summary>
     /// This method tries to find two coordinates that their segment is the closest to the first coordinate of the line
     /// In this case the first coordinate should be added to the way to create a close loop
-    /// Assuming of course it is inside the merge points threashold
+    /// Assuming of course it is inside the merge points threshold
     /// </summary>
     private void CloseLoopWithStartPointIfNeeded(List<Node> newWayNodes)
     {

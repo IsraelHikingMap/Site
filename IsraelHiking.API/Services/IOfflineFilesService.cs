@@ -5,7 +5,7 @@ using System.IO;
 namespace IsraelHiking.API.Services;
 
 /// <summary>
-/// A serivce responsible for offline files location and get who was updated
+/// A service responsible for offline files location and get who was updated
 /// </summary>
 public interface IOfflineFilesService
 {

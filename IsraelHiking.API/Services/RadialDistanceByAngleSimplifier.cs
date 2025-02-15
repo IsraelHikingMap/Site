@@ -27,14 +27,14 @@ public class RadialDistanceByAngleSimplifier
     /// </summary>
     /// <param name="geometry">The geometry to simplify</param>
     /// <param name="distanceTolerance">The radial distance tolerance</param>
-    /// <param name="angleTolerace">The angle tolerance in degrees</param>
-    /// <returns>A simlified <see cref="LineString"/></returns>
-    public static LineString Simplify(Geometry geometry, double distanceTolerance, double angleTolerace)
+    /// <param name="angleTolerance">The angle tolerance in degrees</param>
+    /// <returns>A simplified <see cref="LineString"/></returns>
+    public static LineString Simplify(Geometry geometry, double distanceTolerance, double angleTolerance)
     {
         var simplifier = new RadialDistanceByAngleSimplifier(geometry)
         {
             DistanceTolerance = distanceTolerance,
-            AngleTolerance = angleTolerace
+            AngleTolerance = angleTolerance
         };
         return simplifier.GetResultGeometry();
     }
@@ -49,7 +49,7 @@ public class RadialDistanceByAngleSimplifier
     }
 
     /// <summary>
-    /// Simplifies the geometry, allways keeps the first and last points
+    /// Simplifies the geometry, always keeps the first and last points
     /// </summary>
     /// <returns>A simplified <see cref="LineString"/></returns>
     public LineString GetResultGeometry()
@@ -83,9 +83,9 @@ public class RadialDistanceByAngleSimplifier
 
     /// <summary>
     /// Will add another point to the simplified list if the angle is within tolerance.
-    /// In case it's not within tolrance it will check if the next point's angle is also not within tolerance 
+    /// In case it's not within tolerance it will check if the next point's angle is also not within tolerance 
     /// and in this case it will remove the previous point from the simplified list.
-    /// This will ensure that angles within the simplified list will not violate the angle tolrance.
+    /// This will ensure that angles within the simplified list will not violate the angle tolerance.
     /// In case the distance between two points is large enough the angle tolerance violation is allowed.
     /// </summary>
     /// <param name="coordinateIndex">Current coordinate index</param>

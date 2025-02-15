@@ -1,11 +1,9 @@
 ﻿using IsraelHiking.Common;
-using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.DataContainer;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using System.Threading.Tasks;
 
@@ -21,7 +19,6 @@ public class ImagesController : ControllerBase
     private readonly IImageCreationGateway _imageCreationGateway;
     private readonly IImgurGateway _imgurGateway;
     private readonly IShareUrlsRepository _repository;
-    private readonly ConfigurationData _options;
 
     /// <summary>
     /// Controller's constructor
@@ -29,16 +26,13 @@ public class ImagesController : ControllerBase
     /// <param name="repository"></param>
     /// <param name="imageCreationGateway"></param>
     /// <param name="imgurGateway"></param>
-    /// <param name="options"></param>
     public ImagesController(IShareUrlsRepository repository,
         IImageCreationGateway imageCreationGateway,
-        IImgurGateway imgurGateway,
-        IOptions<ConfigurationData> options)
+        IImgurGateway imgurGateway)
     {
         _repository = repository;
         _imageCreationGateway = imageCreationGateway;
         _imgurGateway = imgurGateway;
-        _options = options.Value;
     }
 
     /// <summary>

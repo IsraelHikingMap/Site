@@ -6,7 +6,7 @@ using OsmSharp.IO.API;
 namespace IsraelHiking.API.Services.Osm;
 
 /// <summary>
-/// This class is responsible of adding a given line to OSM
+/// This class is responsible for adding a given line to OSM
 /// </summary>
 public interface IOsmLineAdderService
 {

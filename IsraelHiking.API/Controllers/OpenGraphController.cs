@@ -9,7 +9,7 @@ namespace IsraelHiking.API.Controllers;
 
 /// <inheritdoc />
 /// <summary>
-/// This contoller is used to return an HTML page for facebook crawler
+/// This controller is used to return an HTML page for facebook crawler
 /// </summary>
 [Route("api/[controller]")]
 public class OpenGraphController : ControllerBase

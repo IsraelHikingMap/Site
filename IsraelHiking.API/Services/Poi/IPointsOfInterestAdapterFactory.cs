@@ -3,7 +3,7 @@
 namespace IsraelHiking.API.Services.Poi;
 
 /// <summary>
-/// This class is responsible for maintining a list of point of interest adapters
+/// This class is responsible for maintaining a list of point of interest adapters
 /// </summary>
 public interface IPointsOfInterestAdapterFactory
 {
@@ -15,7 +15,7 @@ public interface IPointsOfInterestAdapterFactory
     IPointsOfInterestAdapter GetBySource(string source);
 
     /// <summary>
-    /// This method is used to get all the adapeters
+    /// This method is used to get all the adapters
     /// </summary>
     /// <returns></returns>
     IEnumerable<IPointsOfInterestAdapter> GetAll();

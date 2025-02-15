@@ -12,7 +12,7 @@ namespace IsraelHiking.API.Converters;
 public class GpxGeoJsonConverter : IGpxGeoJsonConverter
 {
     private const string NAME = "name";
-    private const string DESCRIPTIOM = "description";
+    private const string DESCRIPTION = "description";
     private const string CREATOR = "Creator";
 
     private readonly GeometryFactory _geometryFactory;
@@ -134,7 +134,7 @@ public class GpxGeoJsonConverter : IGpxGeoJsonConverter
         return coordinatesGroups.Count > 1
             ? _geometryFactory.CreateMultiLineString(
                 coordinatesGroups.Select(g => CreateLineStringFromCoordinates(g.ToList())).Where(l => l != null).ToArray())
-            : CreateLineStringFromCoordinates(coordinatesGroups.First().ToList()) as Geometry;
+            : CreateLineStringFromCoordinates(coordinatesGroups.First().ToList());
     }
 
     private GpxWaypoint CreateWaypoint(IFeature pointFeature)
@@ -156,7 +156,7 @@ public class GpxGeoJsonConverter : IGpxGeoJsonConverter
         return new GpxWaypoint(
             longitude: new GpxLongitude(position.X),
             latitude: new GpxLatitude(position.Y), 
-            elevationInMeters: double.IsNaN(position.Z) ? (double?)null : position.Z,
+            elevationInMeters: double.IsNaN(position.Z) ? null : position.Z,
             name: name,
             description: description,
             links: ImmutableArray<GpxWebLink>.Empty, 
@@ -277,7 +277,7 @@ public class GpxGeoJsonConverter : IGpxGeoJsonConverter
 
     private IAttributesTable CreateProperties(string name, string description)
     {
-        var table = new AttributesTable {{NAME, name}, {DESCRIPTIOM, description}};
+        var table = new AttributesTable {{NAME, name}, {DESCRIPTION, description}};
         return table;
     }
 
@@ -295,6 +295,6 @@ public class GpxGeoJsonConverter : IGpxGeoJsonConverter
 
     private string GetFeatureDescription(IFeature feature)
     {
-        return feature.Attributes.Exists(DESCRIPTIOM) ? feature.Attributes[DESCRIPTIOM]?.ToString() : string.Empty;
+        return feature.Attributes.Exists(DESCRIPTION) ? feature.Attributes[DESCRIPTION]?.ToString() : string.Empty;
     }
 }

@@ -180,7 +180,7 @@ public class OsmTracesController : ControllerBase
     /// <summary>
     /// Allows update OSM trace meta data
     /// </summary>
-    /// <param name="id">The Id of the trace</param>
+    /// <param name="id">The ID of the trace</param>
     /// <param name="trace">The trace data</param>
     /// <returns></returns>
     [Route("{id}")]
@@ -199,7 +199,7 @@ public class OsmTracesController : ControllerBase
     /// <summary>
     /// Allows the deletion of OSM trace
     /// </summary>
-    /// <param name="id">The Id of the trace</param>
+    /// <param name="id">The ID of the trace</param>
     /// <returns></returns>
     [Route("{id}")]
     [HttpDelete]

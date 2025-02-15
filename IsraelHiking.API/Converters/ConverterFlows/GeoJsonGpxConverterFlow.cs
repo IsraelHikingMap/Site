@@ -3,7 +3,7 @@
 namespace IsraelHiking.API.Converters.ConverterFlows;
 
 /// <summary>
-/// This class is responsible to convert from geojson to gpx
+/// This class is responsible to convert from geoJson to gpx
 /// </summary>
 public class GeoJsonGpxConverterFlow : IConverterFlowItem
 {
