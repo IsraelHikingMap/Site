@@ -95,6 +95,14 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
+        public void PostShareUrl_NullShare_ShouldReturnBadRequest()
+        {
+            var results = _controller.PostShareUrl(null).Result as BadRequestObjectResult;
+
+            Assert.IsNotNull(results);
+        }
+        
+        [TestMethod]
         public void PostShareUrl_IncorrectUser_ShouldReturnBadRequest()
         {
             var url = new ShareUrl { OsmUserId = "1" };

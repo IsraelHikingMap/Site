@@ -119,7 +119,7 @@ namespace IsraelHiking.API.Controllers
         [ProducesResponseType(typeof(IEnumerable<ShareUrl>), 200)]
         public async Task<IActionResult> GetShareUrlForUser()
         {
-            var shareUrls = await _repository.GetUrlsByUser(User.Identity.Name);
+            var shareUrls = await _repository.GetUrlsByUser(User.Identity!.Name);
             foreach (var shareUrl in shareUrls)
             {
                 shareUrl.FixModifiedDate();
@@ -138,9 +138,13 @@ namespace IsraelHiking.API.Controllers
         [ProducesResponseType(typeof(ShareUrl), 200)]
         public async Task<IActionResult> PostShareUrl([FromBody]ShareUrl shareUrl)
         {
-            if (string.IsNullOrWhiteSpace(shareUrl.OsmUserId) == false && shareUrl.OsmUserId != User.Identity.Name)
+            if (shareUrl == null)
             {
-                return BadRequest("You can't create a share as someone else!");
+                return BadRequest("Share object in body is required");
+            }
+            if (string.IsNullOrWhiteSpace(shareUrl.OsmUserId) == false && shareUrl.OsmUserId != User.Identity?.Name)
+            {
+                return BadRequest($"You can't create a share as someone else! {shareUrl.OsmUserId} != {User.Identity?.Name}");
             }
             var random = new Random(Guid.NewGuid().GetHashCode());
             var now = DateTime.Now;
