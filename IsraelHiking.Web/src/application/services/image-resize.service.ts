@@ -74,7 +74,7 @@ export class ImageResizeService {
         canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
 
         let dataUrl = canvas.toDataURL(ImageResizeService.JPEG, 0.92);
-        if (exifData != null) {
+        if (exifData != null && exifData["0th"] != null) {
             exifData["0th"][TagValues.ImageIFD.Orientation] = 1;
             const exifbytes = dump(exifData);
             dataUrl = insert(exifbytes, dataUrl);
