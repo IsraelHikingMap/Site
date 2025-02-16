@@ -126,7 +126,7 @@ export class OsmTagsService {
             }
         }
 
-        if (feature.properties.waterway === "waterfall" || feature.properties.type === "waterway") {
+        if (feature.properties.waterway || feature.properties.type === "waterway") {
             poi.properties.poiIconColor = "blue";
             poi.properties.poiIcon = "icon-waterfall";
             poi.properties.poiCategory = "Water";
