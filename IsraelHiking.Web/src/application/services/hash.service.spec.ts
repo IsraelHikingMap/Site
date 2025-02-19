@@ -39,6 +39,7 @@ describe("HashService", () => {
         (service: HashService, routerMock: Router, store: Store) => {
             const spy = jasmine.createSpy();
             routerMock.navigate = spy;
+            service.initialize();
             store.reset({
                 poiState: {
                     selectedPointOfInterest: {}
