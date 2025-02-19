@@ -38,25 +38,13 @@ export class SidebarComponent {
     
     private readonly sidebarService = inject(SidebarService);
 
-    public isSidebarVisible(): boolean {
-        return this.sidebarService.isVisible;
-    }
+    public visible: boolean = false;
+    public viewName: SidebarView = "";
 
-    public getViewName(): SidebarView {
-        return this.sidebarService.viewName;
-    }
-
-    public getTitle(): string {
-        switch (this.sidebarService.viewName) {
-            case "layers":
-                return this.resources.layers;
-            case "info":
-                return this.resources.about + " - " + this.resources.legend;
-        }
-        return "";
-    }
-
-    public close() {
-        this.sidebarService.hide();
+    constructor() {
+        this.sidebarService.sideBarStateChanged.subscribe(() => {
+            this.viewName = this.sidebarService.viewName;
+            this.visible = this.sidebarService.isSidebarOpen();
+        });
     }
 }

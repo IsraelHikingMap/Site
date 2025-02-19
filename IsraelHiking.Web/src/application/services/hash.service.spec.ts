@@ -3,9 +3,14 @@ import { NgxsModule, Store } from "@ngxs/store";
 import { TestBed, inject } from "@angular/core/testing";
 import { Subject } from "rxjs";
 
-import { HashService, RouteStrings } from "./hash.service";
 import { Urls } from "../urls";
 import { MapService } from "./map.service";
+import { HashService, RouteStrings } from "./hash.service";
+import { SidebarService } from "./sidebar.service";
+import { DataContainerService } from "./data-container.service";
+import { FitBoundsService } from "./fit-bounds.service";
+import { ShareUrlsService } from "./share-urls.service";
+import { InMemoryReducer } from "../reducers/in-memory.reducer";
 
 describe("HashService", () => {
     beforeEach(() => {
@@ -15,11 +20,15 @@ describe("HashService", () => {
             createUrlTree: () => { }
         };
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([])],
+            imports: [NgxsModule.forRoot([InMemoryReducer])],
             providers: [
                 provideRouter([]),
                 { provide: Router, useValue: routerMock },
                 { provide: MapService, useValue: {} },
+                { provide: DataContainerService, useValue: {} },
+                { provide: FitBoundsService, useValue: {} },
+                { provide: ShareUrlsService, useValue: {} },
+                SidebarService,
                 HashService
             ]
         });
@@ -31,11 +40,9 @@ describe("HashService", () => {
             routerMock.navigate = spy;
             store.reset({
                 poiState: {
-                    isSidebarOpen: true
+                    selectedPointOfInterest: {}
                 }
             });
-
-            service.resetAddressbar();
 
             expect(spy).not.toHaveBeenCalled();
     }));
@@ -44,16 +51,13 @@ describe("HashService", () => {
         (service: HashService, routerMock: Router, store: Store) => {
             const spy = jasmine.createSpy();
             routerMock.navigate = spy;
+            service.initialize();
             store.reset({
-                poiState: {
-                    isSidebarOpen: false
-                },
+                poiState: {},
                 inMemoryState: {
                     shareUrl: {}
                 }
             });
-
-            service.resetAddressbar();
 
             expect(spy).toHaveBeenCalled();
             expect(spy.calls.all()[0].args[0][0]).toBe(RouteStrings.ROUTE_SHARE);
@@ -63,18 +67,14 @@ describe("HashService", () => {
         (service: HashService, routerMock: Router, store: Store) => {
             const spy = jasmine.createSpy();
             routerMock.navigate = spy;
+            service.initialize();
             store.reset({
-                poiState: {
-                    isSidebarOpen: false
-                },
+                poiState: {},
                 inMemoryState: {
                     fileUrl: {},
                     baseLayer: "baseLayer"
                 }
             });
-
-            service.resetAddressbar();
-
             expect(spy).toHaveBeenCalled();
             expect(spy.calls.all()[0].args[0][0]).toBe(RouteStrings.ROUTE_URL);
     }));
@@ -83,15 +83,14 @@ describe("HashService", () => {
         (service: HashService, routerMock: Router, store: Store, mapService: MapService) => {
             const spy = jasmine.createSpy();
             routerMock.navigate = spy;
-            store.reset({
-                poiState: {
-                    isSidebarOpen: false
-                },
-                inMemoryState: {}
-            });
             mapService.map = { isMoving: () => true } as any;
-
-            service.resetAddressbar();
+            store.reset({
+                locationState: {
+                    zoom: 1,
+                    latitude: 2,
+                    longitude: 3
+                },
+            });
 
             expect(spy).not.toHaveBeenCalled();
     }));
@@ -100,10 +99,10 @@ describe("HashService", () => {
         (service: HashService, routerMock: Router, store: Store, mapService: MapService) => {
             const spy = jasmine.createSpy();
             routerMock.navigate = spy;
+            mapService.map = { isMoving: () => false } as any;
+            service.initialize();
             store.reset({
-                poiState: {
-                    isSidebarOpen: false
-                },
+                poiState: {},
                 inMemoryState: {},
                 locationState: { 
                     zoom: 1,
@@ -111,9 +110,6 @@ describe("HashService", () => {
                     longitude: 3
                 }
             });
-            mapService.map = { isMoving: () => false } as any;
-
-            service.resetAddressbar();
 
             expect(spy).toHaveBeenCalled();
             expect(spy.calls.all()[0].args[0][0]).toBe(RouteStrings.ROUTE_MAP);
@@ -137,9 +133,9 @@ describe("HashService", () => {
         }));
 
     it("Should return share url",
-        inject([HashService, Router, Store], (service: HashService, routerMock: Router, store: Store) => {
+        inject([HashService, Router, Store, ShareUrlsService], (service: HashService, routerMock: Router, store: Store, shareUrlService: ShareUrlsService) => {
 
-            routerMock.createUrlTree = () => "share-address" as any as UrlTree;
+            shareUrlService.getFullUrlFromShareId = () => "share-address";
             store.reset({
                 inMemoryState: {
                     shareUrl: { id: "1" }
@@ -148,7 +144,7 @@ describe("HashService", () => {
 
             const href = service.getHref();
 
-            expect(href).toBe(Urls.baseAddress + "share-address");
+            expect(href).toBe("share-address");
         }));
 
     it("Should return external url",

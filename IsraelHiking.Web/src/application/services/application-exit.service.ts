@@ -12,8 +12,6 @@ import { SidebarService } from "./sidebar.service";
 import { GeoLocationService } from "./geo-location.service";
 import { RecordedRouteService } from "./recorded-route.service";
 import { ImageGalleryService } from "./image-gallery.service";
-import { SetSidebarAction } from "../reducers/poi.reducer";
-import type { ApplicationState } from "../models/models";
 
 type ExitState = "None" | "FirstClick" | "SecondClick";
 
@@ -47,12 +45,8 @@ export class ApplicationExitService {
                     this.matDialog.closeAll();
                     return;
                 }
-                if (this.sidebarService.isVisible) {
+                if (this.sidebarService.isSidebarOpen()) {
                     this.sidebarService.hide();
-                    return;
-                }
-                if (this.store.selectSnapshot((s: ApplicationState) => s.poiState).isSidebarOpen) {
-                    this.store.dispatch(new SetSidebarAction(false));
                     return;
                 }
                 if (this.recordingRouteService.isRecording()) {

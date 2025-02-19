@@ -153,7 +153,6 @@ import { LegendItemComponent } from "./components/sidebar/legend-item.component"
 import { PublicPoiSidebarComponent } from "./components/sidebar/publicpoi/public-poi-sidebar.component";
 import { PublicPointOfInterestEditComponent } from "./components/sidebar/publicpoi/public-poi-edit.component";
 import { ImageScrollerComponent } from "./components/sidebar/publicpoi/image-scroller.component";
-import { ApplicationStateComponent } from "./components/application-state.component";
 import { LayersViewComponent } from "./components/map/layers-view.component";
 import { RoutesComponent } from "./components/map/routes.component";
 import { TracesComponent } from "./components/map/traces.component";
@@ -181,7 +180,6 @@ import { RouteEditingReducer } from "./reducers/route-editing.reducer";
 import { RoutesReducer } from "./reducers/routes.reducer";
 import { LocationReducer } from "./reducers/location.reducer";
 // variables and functions
-import { routes } from "./routes";
 
 // See https://github.com/ionic-team/capacitor/issues/1564
 export class FileReaderFixForCapacitor extends FileReader {
@@ -227,7 +225,7 @@ const initializeApplication = (injector: Injector) => async () => {
         FormsModule,
         ReactiveFormsModule,
         ClipboardModule,
-        RouterModule.forRoot(routes),
+        RouterModule.forRoot([{ path: "**", component: MainMapComponent }]),
         Angulartics2Module.forRoot(),
         NgProgressModule,
         NgProgressHttpModule,
@@ -346,7 +344,6 @@ const initializeApplication = (injector: Injector) => async () => {
         PublicPoiSidebarComponent,
         PublicPointOfInterestEditComponent,
         ImageScrollerComponent,
-        ApplicationStateComponent,
         LayersViewComponent,
         RoutesComponent,
         TracesComponent,

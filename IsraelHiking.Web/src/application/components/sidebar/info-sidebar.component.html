@@ -1,4 +1,8 @@
-﻿﻿<div [dir]="resources.direction">
+﻿﻿<div class="sidebar-header flex flex-row justify-center items-center sticky top-0 z-10 bg-white" [dir]="resources.direction">
+    <div class="flex-1 text-center text-xl title">{{resources.about}} - {{resources.legend}}</div>
+    <button mat-button class="w-1/6" type="button" (click)="close()" tabindex="-1"><i class="fa fa-lg icon-close"></i></button>
+</div>
+<div [dir]="resources.direction">
     <mat-tab-group [selectedIndex]="selectedTabIndex" (selectedIndexChange)="selectedTabChanged($event)" [dynamicHeight]="'true'">
         <mat-tab label="{{resources.about}}">
             <mat-card appearance="outlined">

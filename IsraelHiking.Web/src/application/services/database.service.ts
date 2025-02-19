@@ -10,7 +10,7 @@ import { RunningContextService } from "./running-context.service";
 import { PmTilesService } from "./pmtiles.service";
 import { POPULARITY_HEATMAP, initialState } from "../reducers/initial-state";
 import { ClearHistoryAction } from "../reducers/routes.reducer";
-import { SetSelectedPoiAction, SetSidebarAction } from "../reducers/poi.reducer";
+import { SetSelectedPoiAction } from "../reducers/poi.reducer";
 import type { ApplicationState, MutableApplicationState, ShareUrl, Trace } from "../models/models";
 
 export type ImageUrlAndData = {
@@ -100,7 +100,6 @@ export class DatabaseService {
         // reduce database size and memory footprint
         this.store.dispatch(new ClearHistoryAction());
         this.store.dispatch(new SetSelectedPoiAction(null));
-        this.store.dispatch(new SetSidebarAction(false));
         const finalState = this.store.snapshot() as ApplicationState;
         await this.updateState(finalState);
     }
