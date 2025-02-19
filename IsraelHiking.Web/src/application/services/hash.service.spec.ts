@@ -1,4 +1,4 @@
-import { provideRouter, Router, UrlTree } from "@angular/router";
+import { NavigationEnd, provideRouter, Router, UrlTree } from "@angular/router";
 import { NgxsModule, Store } from "@ngxs/store";
 import { TestBed, inject } from "@angular/core/testing";
 import { Subject } from "rxjs";
@@ -17,7 +17,8 @@ describe("HashService", () => {
         const routerMock = {
             navigate: jasmine.createSpy("navigate"),
             events: new Subject<any>(),
-            createUrlTree: () => { }
+            createUrlTree: () => { },
+            parseUrl: (url: string) => ({ root: { children: { primary: {segments: url.split("/")}, }}, queryParams: {} })
         };
         TestBed.configureTestingModule({
             imports: [NgxsModule.forRoot([InMemoryReducer])],
@@ -161,5 +162,52 @@ describe("HashService", () => {
             const href = service.getHref();
 
             expect(href).toBe(Urls.baseAddress + "file-address?base-layer");
+        }));
+
+        it("Should flyTo in case of map url", inject([HashService, Router, FitBoundsService], 
+            (service: HashService, routerMock: Router, fitBoundService: FitBoundsService) => {
+                fitBoundService.flyTo = jasmine.createSpy();
+                (routerMock as any).url = RouteStrings.ROUTE_MAP + "/2.00/2.000000/3.000000";
+                (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
+
+                expect(fitBoundService.flyTo).toHaveBeenCalled();
+
+        }));
+
+        it("Should set share in case of share url", inject([HashService, Router, DataContainerService], 
+            (service: HashService, routerMock: Router, dataContainerService: DataContainerService) => {
+                dataContainerService.setShareUrlAfterNavigation = jasmine.createSpy();
+                (routerMock as any).url = RouteStrings.ROUTE_SHARE + "/1234";
+                (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
+
+                expect(dataContainerService.setShareUrlAfterNavigation).toHaveBeenCalled();
+
+        }));
+
+        it("Should set file in case of file url", inject([HashService, Router, DataContainerService], 
+            (service: HashService, routerMock: Router, dataContainerService: DataContainerService) => {
+                dataContainerService.setFileUrlAfterNavigation = jasmine.createSpy();
+                (routerMock as any).url = RouteStrings.ROUTE_URL + "/1234";
+                (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
+
+                expect(dataContainerService.setFileUrlAfterNavigation).toHaveBeenCalled();
+        }));
+
+        it("Should open poi pane in case of poi url", inject([HashService, Router, SidebarService], 
+            (service: HashService, routerMock: Router, sidebarService: SidebarService) => {
+                sidebarService.show = jasmine.createSpy();
+                (routerMock as any).url = RouteStrings.ROUTE_POI + "/1234";
+                (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
+
+                expect(sidebarService.show).toHaveBeenCalled();
+        }));
+
+        it("Should hide sidebar in case of root url", inject([HashService, Router, SidebarService], 
+            (service: HashService, routerMock: Router, sidebarService: SidebarService) => {
+                sidebarService.hide = jasmine.createSpy();
+                (routerMock as any).url = RouteStrings.ROUTE_ROOT;
+                (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
+
+                expect(sidebarService.hide).toHaveBeenCalled();
         }));
 });
