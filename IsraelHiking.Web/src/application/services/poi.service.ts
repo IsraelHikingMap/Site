@@ -285,6 +285,10 @@ export class PoiService {
     }
 
     private getFeaturesFromTiles(): MapGeoJSONFeature[] {
+        if (this.mapService.map == null) {
+            // Map is not ready yet
+            return [];
+        }
         let features: MapGeoJSONFeature[] = [];
         for (const sourceLayer of PoiService.POIS_SOURCE_LAYER_NAMES) {
             features = features.concat(this.mapService.map.querySourceFeatures(PoiService.POIS_SOURCE_ID, {sourceLayer}));

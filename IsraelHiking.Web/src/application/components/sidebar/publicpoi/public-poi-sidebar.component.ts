@@ -22,7 +22,6 @@ import { GpxDataContainerConverterService } from "../../../services/gpx-data-con
 import { OsmAddressesService } from "../../../services/osm-addresses.service";
 import { ElevationProvider } from "../../../services/elevation.provider";
 import { GeoJsonParser } from "../../../services/geojson.parser";
-import { sidebarAnimate } from "../sidebar.component";
 import { AddRouteAction, AddPrivatePoiAction } from "../../../reducers/routes.reducer";
 import { SetSelectedPoiAction, SetUploadMarkerDataAction } from "../../../reducers/poi.reducer";
 import { GeoJSONUtils } from "../../../services/geojson-utils";
@@ -44,10 +43,7 @@ export type SourceImageUrlPair = {
     selector: "public-poi-sidebar",
     templateUrl: "./public-poi-sidebar.component.html",
     styleUrls: ["./public-poi-sidebar.component.scss"],
-    encapsulation: ViewEncapsulation.None,
-    animations: [
-        sidebarAnimate
-    ]
+    encapsulation: ViewEncapsulation.None
 })
 export class PublicPoiSidebarComponent implements OnDestroy {
     public info = { imagesUrls: [], urls: [] } as EditablePublicPointData;
@@ -85,6 +81,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             takeUntilDestroyed(),
             filter(event => event instanceof NavigationEnd && event.url.startsWith(RouteStrings.ROUTE_POI))
           ).subscribe(async () => {
+            this.isLoading = true;
             await this.initOrUpdate();
         });
 
