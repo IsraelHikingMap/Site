@@ -346,9 +346,6 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     }
 
     public close() {
-        if (this.fullFeature) {
-            this.store.dispatch(new SetSelectedPoiAction(null));
-        }
         this.sidebarService.hide();
     }
 
