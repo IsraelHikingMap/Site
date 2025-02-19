@@ -59,7 +59,7 @@ public class OsmRepository : IOsmRepository
                 {
                     dictionary[Sources.INATURE].Add(reference.Tags["ref:IL:inature"]);
                 }
-                else
+                if (reference.Tags.ContainsKey("wikidata"))
                 {
                     dictionary[Sources.WIKIDATA].Add(reference.Tags["wikidata"]);
                 }
