@@ -17,7 +17,7 @@ describe("HashService", () => {
         const routerMock = {
             navigate: jasmine.createSpy("navigate"),
             events: new Subject<any>(),
-            createUrlTree: () => { },
+            createUrlTree: (array: []) => array.join("/"),
             parseUrl: (url: string) => ({ root: { children: { primary: {segments: url.split("/")}, }}, queryParams: {} })
         };
         TestBed.configureTestingModule({
@@ -214,5 +214,14 @@ describe("HashService", () => {
                 (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
 
                 expect(sidebarService.hide).toHaveBeenCalled();
+        }));
+
+        it("Should return full URL from LatLng", inject([HashService], 
+            (service: HashService) => {
+            const latlng = { lat: 1, lng: 2, alt: 0 };
+            const fullUrl = service.getFullUrlFromLatLng(latlng);
+
+            expect(fullUrl).toContain(RouteStrings.POI);
+            expect(fullUrl).toContain(RouteStrings.COORDINATES);
         }));
 });
