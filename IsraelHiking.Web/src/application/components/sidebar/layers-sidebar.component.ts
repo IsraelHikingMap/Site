@@ -63,7 +63,7 @@ export class LayersSidebarComponent {
         this.routes$ = this.store.select((state: ApplicationState) => state.routes.present);
     }
 
-    public closeSidebar() {
+    public close() {
         this.sidebarService.hide();
     }
 

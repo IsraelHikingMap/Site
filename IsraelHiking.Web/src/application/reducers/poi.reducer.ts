@@ -16,10 +16,6 @@ export class SetUploadMarkerDataAction {
     constructor(public markerData: MarkerData) {}
 }
 
-export class SetSidebarAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public isOpen: boolean) {}
-}
 @State<PointsOfInterestState>({
     name: "poiState",
     defaults: initialState.poiState
@@ -39,14 +35,6 @@ export class PointsOfInterestReducer {
     public setUploadMarkerData(ctx: StateContext<PointsOfInterestState>, action: SetUploadMarkerDataAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.uploadMarkerData = action.markerData;
-            return lastState;
-        }));
-    }
-
-    @Action(SetSidebarAction)
-    public setSidebar(ctx: StateContext<PointsOfInterestState>, action: SetSidebarAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.isSidebarOpen =  action.isOpen;
             return lastState;
         }));
     }

@@ -146,8 +146,7 @@ export const initialState =
         },
         poiState: {
             selectedPointOfInterest: null,
-            uploadMarkerData: null,
-            isSidebarOpen: false
+            uploadMarkerData: null
         },
         inMemoryState: {
             distance: false,

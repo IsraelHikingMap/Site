@@ -296,13 +296,13 @@ describe("Poi Service", () => {
             const id = "42";
             const source = "source";
 
-            const promise = poiService.getPoint(id, source).then((res) => {
-                expect(res).not.toBeNull();
-            });
+            const promise = poiService.getPoint(id, source);
 
             mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes(id) &&
                     request.url.includes(source)).flush({});
-            return promise;
+
+            const res = await promise;
+            expect(res).not.toBeNull();
         }
     )));
 
@@ -334,9 +334,7 @@ describe("Poi Service", () => {
             const id = "way_42";
             const source = "OSM";
 
-            const promise = poiService.getPoint(id, source, "he").then((res) => {
-                expect(res.properties.poiIcon).toBe("icon-bike");
-            });
+            const promise = poiService.getPoint(id, source, "he");
 
             mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes("42") &&
                     request.url.includes("way")).flush({
@@ -379,7 +377,9 @@ describe("Poi Service", () => {
                             }
                         ]
                     });
-            return promise;
+            
+            const res = await promise;
+            expect(res.properties.poiIcon).toBe("icon-bike");
         }
     )));
 
@@ -391,14 +391,32 @@ describe("Poi Service", () => {
                 const source = "source";
                 const spy = spyOn(mapServiceMock.map, "querySourceFeatures").and.returnValue([{ id: "421", properties: {}, geometry: { type: "Point", coordinates: [0,0]}} as any]);
 
-                const promise = poiService.getPoint(id, source).then((res) => {
-                    expect(res).not.toBeNull();
-                    expect(spy).toHaveBeenCalled();
-                });
+                const promise = poiService.getPoint(id, source);
 
                 mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes(id) &&
                         request.url.includes(source)).flush("Some error", { status: 500, statusText: "Time out"});
-                return promise;
+
+                const res = await promise;
+                expect(res).not.toBeNull();
+                expect(spy).toHaveBeenCalled();
+            }
+        )
+    ));
+
+    it("Should not fail on map not initialized when trying to get a point by id and source from the tiles in case the server is not available",
+        (inject([PoiService, HttpTestingController, MapService],
+            async (poiService: PoiService, mockBackend: HttpTestingController, mapServiceMock: MapService) => {
+
+                const id = "node_42";
+                const source = "source";
+                mapServiceMock.map = null;
+
+                const promise = poiService.getPoint(id, source);
+
+                mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes(id) &&
+                        request.url.includes(source)).flush("Some error", { status: 500, statusText: "Time out"});
+
+                await expectAsync(promise).toBeRejectedWithError("Failed to load POI from offline or in-memory tiles.")
             }
         )
     ));

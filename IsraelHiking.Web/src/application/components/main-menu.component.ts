@@ -228,8 +228,7 @@ export class MainMenuComponent {
     public getOsmAddress() {
         const poiState = this.store.selectSnapshot((s: ApplicationState) => s.poiState);
         const baseLayerAddress = this.layersService.getSelectedBaseLayerAddressForOSM();
-        if (poiState.isSidebarOpen &&
-            poiState.selectedPointOfInterest != null &&
+        if (poiState.selectedPointOfInterest != null &&
             poiState.selectedPointOfInterest.properties.poiSource.toLocaleLowerCase() === "osm") {
             return this.osmAddressesService.getEditElementOsmAddress(baseLayerAddress,
                 poiState.selectedPointOfInterest.properties.identifier);

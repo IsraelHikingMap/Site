@@ -1,4 +1,8 @@
-﻿﻿<div [dir]="resources.direction">
+﻿﻿<div class="sidebar-header flex flex-row justify-center items-center sticky top-0 z-10 bg-white" [dir]="resources.direction">
+    <div class="flex-1 text-center text-xl title">{{resources.layers}}</div>
+    <button mat-button class="w-1/6" type="button" (click)="close()" tabindex="-1"><i class="fa fa-lg icon-close"></i></button>
+</div>
+<div [dir]="resources.direction">
     <div class="flex flex-row justify-center" *ngIf="isPurchaseAvailable()">
         <button mat-raised-button color="primary" (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Purchase offline maps"><i class="fa icon-dollar"></i> {{resources.purchaseOfflineMaps}}</button>
     </div>
