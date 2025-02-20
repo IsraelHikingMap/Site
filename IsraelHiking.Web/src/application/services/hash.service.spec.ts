@@ -91,6 +91,8 @@ describe("HashService", () => {
             service.initialize();
             mapService.map = { isMoving: () => true } as any;
             store.reset({
+                poiState: {},
+                inMemoryState: {},
                 locationState: {
                     zoom: 1,
                     latitude: 2,
