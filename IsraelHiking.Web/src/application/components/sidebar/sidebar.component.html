@@ -1,15 +1,13 @@
-﻿﻿<router-outlet></router-outlet>
-<div class="sidebar-wrapper" *ngIf="isSidebarVisible()" [@animateSidebar]>
-    <div class="sidebar-header flex flex-row justify-center items-center sticky top-0 z-10 bg-white" [dir]="resources.direction">
-        <div class="flex-1 text-center text-xl title">{{getTitle()}}</div>
-        <button mat-button class="w-1/6" type="button" (click)="close()" tabindex="-1"><i class="fa fa-lg icon-close"></i></button>
-    </div>
-    <div [ngSwitch]="getViewName()">
+﻿﻿<div class="sidebar-wrapper" [class.poi]="viewName === 'public-poi'" *ngIf="visible" [@animateSidebar]>
+    <div [ngSwitch]="viewName">
         <div *ngSwitchCase="'layers'">
             <layers-sidebar></layers-sidebar>
         </div>
         <div *ngSwitchCase="'info'">
             <info-sidebar></info-sidebar>
+        </div>
+        <div *ngSwitchCase="'public-poi'">
+            <public-poi-sidebar></public-poi-sidebar>
         </div>
     </div>
 </div>

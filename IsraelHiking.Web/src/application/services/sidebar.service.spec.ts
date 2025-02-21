@@ -21,13 +21,13 @@ describe("SidebarService", () => {
     });
 
     it("Should initialize hidden", inject([SidebarService], (service: SidebarService) => {
-        expect(service.isVisible).toBeFalsy();
+        expect(service.isSidebarOpen()).toBeFalsy();
     }));
 
     it("Should show when toggled", inject([SidebarService], (service: SidebarService) => {
         service.toggle("info");
 
-        expect(service.isVisible).toBeTruthy();
+        expect(service.isSidebarOpen()).toBeTruthy();
         expect(service.viewName).toBe("info");
     }));
 
@@ -35,7 +35,7 @@ describe("SidebarService", () => {
         service.toggle("info");
         service.toggle("info");
 
-        expect(service.isVisible).toBeFalsy();
+        expect(service.isSidebarOpen()).toBeFalsy();
         expect(service.viewName).toBe("");
     }));
 
@@ -43,7 +43,7 @@ describe("SidebarService", () => {
         service.toggle("info");
         service.hide();
 
-        expect(service.isVisible).toBeFalsy();
+        expect(service.isSidebarOpen()).toBeFalsy();
         expect(service.viewName).toBe("");
     }));
 
@@ -51,7 +51,7 @@ describe("SidebarService", () => {
         service.toggle("info");
         service.toggle("layers");
 
-        expect(service.isVisible).toBeTruthy();
+        expect(service.isSidebarOpen()).toBeTruthy();
         expect(service.viewName).toBe("layers");
     }));
 
@@ -60,13 +60,13 @@ describe("SidebarService", () => {
         service.toggle("layers");
         service.toggle("layers");
 
-        expect(service.isVisible).toBeFalsy();
+        expect(service.isSidebarOpen()).toBeFalsy();
         expect(service.viewName).toBe("");
     }));
 
     it("Should stay hidden when hide", inject([SidebarService], (service: SidebarService) => {
         service.hide();
 
-        expect(service.isVisible).toBeFalsy();
+        expect(service.isSidebarOpen()).toBeFalsy();
     }));
 });

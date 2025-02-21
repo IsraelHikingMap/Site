@@ -3,14 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace IsraelHiking.DataAccessInterfaces
+namespace IsraelHiking.DataAccessInterfaces;
+
+public interface IINatureGateway : IInitializable
 {
-    public interface IINatureGateway : IInitializable
-    {
-        Task<List<IFeature>> GetAll();
+    Task<List<IFeature>> GetAll();
 
-        Task<List<IFeature>> GetUpdates(DateTime lastUpdated);
+    Task<List<IFeature>> GetUpdates(DateTime lastUpdated);
 
 
-    }
 }

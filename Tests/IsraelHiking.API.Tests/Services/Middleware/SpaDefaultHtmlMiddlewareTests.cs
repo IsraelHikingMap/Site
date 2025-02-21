@@ -58,7 +58,7 @@ public class SpaDefaultHtmlMiddlewareTests
             }
         };
         var fileInfo = Substitute.For<IFileInfo>();
-        fileInfo.CreateReadStream().Returns(new MemoryStream(new byte[] {1}));
+        fileInfo.CreateReadStream().Returns(new MemoryStream([1]));
         _environment.WebRootFileProvider.GetFileInfo(Arg.Any<string>()).Returns(fileInfo);
         
         _middleware.InvokeAsync(context).Wait();

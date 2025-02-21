@@ -19,180 +19,179 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using NetTopologySuite.Geometries;
 
-namespace IsraelHiking.API.Tests.Services.Osm
+namespace IsraelHiking.API.Tests.Services.Osm;
+
+[TestClass]
+public class DatabasesUpdaterServiceTests
 {
-    [TestClass]
-    public class DatabasesUpdaterServiceTests
+    private IDatabasesUpdaterService _service;
+    private IClientsFactory _clientsFactory;
+    private INonAuthClient _osmGateway;
+    private IOsmRepository _osmRepository;
+    private IExternalSourcesRepository _externalSourcesRepository;
+    private IPointsOfInterestRepository _pointsOfInterestRepository;
+    private IHighwaysRepository _highwaysRepository;
+    private IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
+    private IOsmLatestFileGateway _osmLatestFileGateway;
+    private IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
+    private IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
+    private IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
+    private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
+    private IElevationGateway _elevationGateway;
+        
+    [TestInitialize]
+    public void TestInitialize()
     {
-        private IDatabasesUpdaterService _service;
-        private IClientsFactory _clientsFactory;
-        private INonAuthClient _osmGateway;
-        private IOsmRepository _osmRepository;
-        private IExternalSourcesRepository _externalSourcesRepository;
-        private IPointsOfInterestRepository _pointsOfInterestRepository;
-        private IHighwaysRepository _highwaysRepository;
-        private IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
-        private IOsmLatestFileGateway _osmLatestFileGateway;
-        private IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
-        private IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
-        private IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
-        private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
-        private IElevationGateway _elevationGateway;
-        
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            _clientsFactory = Substitute.For<IClientsFactory>();
-            _osmGateway = Substitute.For<INonAuthClient>();
-            _clientsFactory.CreateNonAuthClient().Returns(_osmGateway);
-            var options = new ConfigurationData();
-            var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
-            optionsProvider.Value.Returns(options);
-            _externalSourcesRepository = Substitute.For<IExternalSourcesRepository>();
-            _pointsOfInterestRepository = Substitute.For<IPointsOfInterestRepository>();
-            _highwaysRepository = Substitute.For<IHighwaysRepository>();
-            _osmRepository = Substitute.For<IOsmRepository>();
-            _geoJsonPreprocessorExecutor = Substitute.For<IOsmGeoJsonPreprocessorExecutor>();
-            _osmLatestFileGateway = Substitute.For<IOsmLatestFileGateway>();
-            _pointsOfInterestFilesCreatorExecutor = Substitute.For<IPointsOfInterestFilesCreatorExecutor>();
-            _pointsOfInterestAdapterFactory = Substitute.For<IPointsOfInterestAdapterFactory>();
-            _externalSourceUpdaterExecutor = Substitute.For<IExternalSourceUpdaterExecutor>();
-            _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
-            _elevationGateway = Substitute.For<IElevationGateway>();
-            _service = new DatabasesUpdaterService(_externalSourcesRepository,
-                _pointsOfInterestRepository,
-                _highwaysRepository,
-                _geoJsonPreprocessorExecutor,
-                _osmRepository,
-                _pointsOfInterestAdapterFactory,
-                _osmLatestFileGateway,
-                _pointsOfInterestFilesCreatorExecutor,
-                _imagesUrlsStorageExecutor,
-                _externalSourceUpdaterExecutor, Substitute.For<IElevationSetterExecutor>(),
-                Substitute.For<ILogger>());
-        }
+        _clientsFactory = Substitute.For<IClientsFactory>();
+        _osmGateway = Substitute.For<INonAuthClient>();
+        _clientsFactory.CreateNonAuthClient().Returns(_osmGateway);
+        var options = new ConfigurationData();
+        var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
+        optionsProvider.Value.Returns(options);
+        _externalSourcesRepository = Substitute.For<IExternalSourcesRepository>();
+        _pointsOfInterestRepository = Substitute.For<IPointsOfInterestRepository>();
+        _highwaysRepository = Substitute.For<IHighwaysRepository>();
+        _osmRepository = Substitute.For<IOsmRepository>();
+        _geoJsonPreprocessorExecutor = Substitute.For<IOsmGeoJsonPreprocessorExecutor>();
+        _osmLatestFileGateway = Substitute.For<IOsmLatestFileGateway>();
+        _pointsOfInterestFilesCreatorExecutor = Substitute.For<IPointsOfInterestFilesCreatorExecutor>();
+        _pointsOfInterestAdapterFactory = Substitute.For<IPointsOfInterestAdapterFactory>();
+        _externalSourceUpdaterExecutor = Substitute.For<IExternalSourceUpdaterExecutor>();
+        _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
+        _elevationGateway = Substitute.For<IElevationGateway>();
+        _service = new DatabasesUpdaterService(_externalSourcesRepository,
+            _pointsOfInterestRepository,
+            _highwaysRepository,
+            _geoJsonPreprocessorExecutor,
+            _osmRepository,
+            _pointsOfInterestAdapterFactory,
+            _osmLatestFileGateway,
+            _pointsOfInterestFilesCreatorExecutor,
+            _imagesUrlsStorageExecutor,
+            _externalSourceUpdaterExecutor, Substitute.For<IElevationSetterExecutor>(),
+            Substitute.For<ILogger>());
+    }
 
-        [TestMethod]
-        public void TestRebuild_ExternalSources_ShouldRebuildExternalSources()
-        {
-            _pointsOfInterestAdapterFactory.GetAll().Returns([Substitute.For<IPointsOfInterestAdapter>()]);
+    [TestMethod]
+    public void TestRebuild_ExternalSources_ShouldRebuildExternalSources()
+    {
+        _pointsOfInterestAdapterFactory.GetAll().Returns([Substitute.For<IPointsOfInterestAdapter>()]);
             
-            _service.Rebuild(new UpdateRequest {AllExternalSources = true}).Wait();
+        _service.Rebuild(new UpdateRequest {AllExternalSources = true}).Wait();
 
-            _externalSourceUpdaterExecutor.Received(1).UpdateSource(Arg.Any<string>());
-            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
-        }
+        _externalSourceUpdaterExecutor.Received(1).UpdateSource(Arg.Any<string>());
+        _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
+    }
         
-        [TestMethod]
-        public void TestRebuild_Highways_ShouldRebuildHighwaysAndPoints()
-        { 
-            _service.Rebuild(new UpdateRequest {Highways = true}).Wait();
+    [TestMethod]
+    public void TestRebuild_Highways_ShouldRebuildHighwaysAndPoints()
+    { 
+        _service.Rebuild(new UpdateRequest {Highways = true}).Wait();
 
-            _highwaysRepository.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<IFeature>>());
-            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
-        }
+        _highwaysRepository.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<IFeature>>());
+        _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
+    }
         
-        [TestMethod]
-        public void TestRebuild_Images_ShouldRebuildImages()
+    [TestMethod]
+    public void TestRebuild_Images_ShouldRebuildImages()
+    {
+        const string imageUrl = "imageUrl";
+        var feature = new Feature(new Point(0, 0), new AttributesTable
         {
-            const string imageUrl = "imageUrl";
-            var feature = new Feature(new Point(0, 0), new AttributesTable
-            {
-                {FeatureAttributes.IMAGE_URL, "imageUrl2"}
-            });
-            feature.SetLastModified(new DateTime(0));
-            _pointsOfInterestRepository.GetAllPointsOfInterest().Returns([feature]);
-            _osmRepository.GetImagesUrls(Arg.Any<Stream>()).Returns([imageUrl]);
+            {FeatureAttributes.IMAGE_URL, "imageUrl2"}
+        });
+        feature.SetLastModified(new DateTime(0));
+        _pointsOfInterestRepository.GetAllPointsOfInterest().Returns([feature]);
+        _osmRepository.GetImagesUrls(Arg.Any<Stream>()).Returns([imageUrl]);
             
-            _service.Rebuild(new UpdateRequest {Images = true}).Wait();
+        _service.Rebuild(new UpdateRequest {Images = true}).Wait();
 
-            _imagesUrlsStorageExecutor.Received(1).DownloadAndStoreUrls(Arg.Is<List<string>>(l => l.All(i => i.StartsWith(imageUrl))));
-            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
-        }
+        _imagesUrlsStorageExecutor.Received(1).DownloadAndStoreUrls(Arg.Is<List<string>>(l => l.All(i => i.StartsWith(imageUrl))));
+        _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
+    }
         
-        [TestMethod]
-        public void TestRebuild_SiteMap_ShouldRebuildSiteMap()
-        {
-            _service.Rebuild(new UpdateRequest {SiteMap = true}).Wait();
+    [TestMethod]
+    public void TestRebuild_SiteMap_ShouldRebuildSiteMap()
+    {
+        _service.Rebuild(new UpdateRequest {SiteMap = true}).Wait();
 
-            _pointsOfInterestFilesCreatorExecutor.Received(1).CreateSiteMapXmlFile(Arg.Any<List<IFeature>>());
-            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
-        }
+        _pointsOfInterestFilesCreatorExecutor.Received(1).CreateSiteMapXmlFile(Arg.Any<List<IFeature>>());
+        _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
+    }
         
-        [TestMethod]
-        public void TestRebuild_OfflinePointsFile_NoExternalFeatures()
-        {
-            var feature = new Feature(new Point(0, 0), new AttributesTable());
-            _pointsOfInterestRepository.GetAllPointsOfInterest().Returns([feature]);
-            _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns([1.0]);
-            _pointsOfInterestAdapterFactory.GetAll().Returns([]);
+    [TestMethod]
+    public void TestRebuild_OfflinePointsFile_NoExternalFeatures()
+    {
+        var feature = new Feature(new Point(0, 0), new AttributesTable());
+        _pointsOfInterestRepository.GetAllPointsOfInterest().Returns([feature]);
+        _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns([1.0]);
+        _pointsOfInterestAdapterFactory.GetAll().Returns([]);
             
-            _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
+        _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
 
-            _pointsOfInterestFilesCreatorExecutor.Received(1).CreateOfflinePoisFile(Arg.Any<List<IFeature>>());
-            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
-        }
+        _pointsOfInterestFilesCreatorExecutor.Received(1).CreateOfflinePoisFile(Arg.Any<List<IFeature>>());
+        _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
+    }
         
-        [TestMethod]
-        public void TestRebuild_OfflinePointsFileNoRelevantSource_ShouldRebuildIt()
-        {
-            var feature = new Feature(new Point(0, 0), new AttributesTable());
-            _pointsOfInterestRepository.GetAllPointsOfInterest().Returns([feature]);
-            _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns([1.0]);
-            var adapter = Substitute.For<IPointsOfInterestAdapter>();
-            adapter.Source.Returns(Sources.NAKEB);
-            _pointsOfInterestAdapterFactory.GetAll().Returns([adapter]);
-            _externalSourcesRepository.GetExternalPoisBySource(Arg.Any<string>()).Returns([feature]);
-            _osmRepository.GetExternalReferences(Arg.Any<Stream>()).Returns(new Dictionary<string, List<string>> { { Sources.WIKIDATA,
-                ["Q123"]
-            }});
+    [TestMethod]
+    public void TestRebuild_OfflinePointsFileNoRelevantSource_ShouldRebuildIt()
+    {
+        var feature = new Feature(new Point(0, 0), new AttributesTable());
+        _pointsOfInterestRepository.GetAllPointsOfInterest().Returns([feature]);
+        _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns([1.0]);
+        var adapter = Substitute.For<IPointsOfInterestAdapter>();
+        adapter.Source.Returns(Sources.NAKEB);
+        _pointsOfInterestAdapterFactory.GetAll().Returns([adapter]);
+        _externalSourcesRepository.GetExternalPoisBySource(Arg.Any<string>()).Returns([feature]);
+        _osmRepository.GetExternalReferences(Arg.Any<Stream>()).Returns(new Dictionary<string, List<string>> { { Sources.WIKIDATA,
+            ["Q123"]
+        }});
             
-            _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
+        _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
 
-            _pointsOfInterestFilesCreatorExecutor.Received(1).CreateOfflinePoisFile(Arg.Any<List<IFeature>>());
-            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
-        }
+        _pointsOfInterestFilesCreatorExecutor.Received(1).CreateOfflinePoisFile(Arg.Any<List<IFeature>>());
+        _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
+    }
         
-        [TestMethod]
-        public void TestRebuild_OfflinePointsFile_ShouldRebuildItWithoutReferncedFeatures()
+    [TestMethod]
+    public void TestRebuild_OfflinePointsFile_ShouldRebuildItWithoutReferncedFeatures()
+    {
+        var feature1 = new Feature(new Point(0, 0), new AttributesTable
         {
-            var feature1 = new Feature(new Point(0, 0), new AttributesTable
-            {
-                { FeatureAttributes.ID, "Q111" },
-                { FeatureAttributes.WIKIDATA, "Q111"}
-            });
-            var feature2 = new Feature(new Point(0, 0), new AttributesTable
-            {
-                { FeatureAttributes.NAME, "Q222" },
-                { FeatureAttributes.WIKIDATA, "Q222"}
-            });
-            var feature3 = new Feature(new Point(0, 0), new AttributesTable
-            {
-                { FeatureAttributes.ID, "Q333" },
-                { FeatureAttributes.WIKIDATA, "Q333"}
-            });
-            _pointsOfInterestRepository.GetAllPointsOfInterest().Returns([feature1]);
-            _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns([1.0]);
-            var adapter = Substitute.For<IPointsOfInterestAdapter>();
-            adapter.Source.Returns(Sources.WIKIDATA);
-            _pointsOfInterestAdapterFactory.GetAll().Returns([adapter]);
-            _externalSourcesRepository.GetExternalPoisBySource(Arg.Any<string>()).Returns([feature1, feature2, feature3]);
-            _osmRepository.GetExternalReferences(Arg.Any<Stream>()).Returns(new Dictionary<string, List<string>> { { Sources.WIKIDATA,
-                ["Q111", "Q222"]
-            }});
+            { FeatureAttributes.ID, "Q111" },
+            { FeatureAttributes.WIKIDATA, "Q111"}
+        });
+        var feature2 = new Feature(new Point(0, 0), new AttributesTable
+        {
+            { FeatureAttributes.NAME, "Q222" },
+            { FeatureAttributes.WIKIDATA, "Q222"}
+        });
+        var feature3 = new Feature(new Point(0, 0), new AttributesTable
+        {
+            { FeatureAttributes.ID, "Q333" },
+            { FeatureAttributes.WIKIDATA, "Q333"}
+        });
+        _pointsOfInterestRepository.GetAllPointsOfInterest().Returns([feature1]);
+        _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns([1.0]);
+        var adapter = Substitute.For<IPointsOfInterestAdapter>();
+        adapter.Source.Returns(Sources.WIKIDATA);
+        _pointsOfInterestAdapterFactory.GetAll().Returns([adapter]);
+        _externalSourcesRepository.GetExternalPoisBySource(Arg.Any<string>()).Returns([feature1, feature2, feature3]);
+        _osmRepository.GetExternalReferences(Arg.Any<Stream>()).Returns(new Dictionary<string, List<string>> { { Sources.WIKIDATA,
+            ["Q111", "Q222"]
+        }});
             
-            _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
+        _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
 
-            _pointsOfInterestFilesCreatorExecutor.Received(1).CreateOfflinePoisFile(Arg.Is<List<IFeature>>(a => a.Count == 1));
-            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
-        }
+        _pointsOfInterestFilesCreatorExecutor.Received(1).CreateOfflinePoisFile(Arg.Is<List<IFeature>>(a => a.Count == 1));
+        _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
+    }
         
-        [TestMethod]
-        public void TestRebuild_GotException_ShouldStoreException()
-        {
-            _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
+    [TestMethod]
+    public void TestRebuild_GotException_ShouldStoreException()
+    {
+        _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
 
-            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == false));
-        }
+        _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == false));
     }
 }

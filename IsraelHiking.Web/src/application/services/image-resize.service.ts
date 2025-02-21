@@ -42,20 +42,18 @@ export class ImageResizeService {
     }
 
     private getGeoLocation(exifData: IExif): LatLngAlt {
-        if (exifData == null || exifData.GPS == null ||
-            Object.keys(exifData.GPS).length === 0 ||
-            !Object.prototype.hasOwnProperty.call(exifData.GPS, TagValues.GPSIFD.GPSLatitude) ||
-            !Object.prototype.hasOwnProperty.call(exifData.GPS, TagValues.GPSIFD.GPSLongitude)) {
+        try {
+            const lat = GPSHelper.dmsRationalToDeg(exifData.GPS[TagValues.GPSIFD.GPSLatitude],
+                exifData.GPS[TagValues.GPSIFD.GPSLatitudeRef]);
+            const lng = GPSHelper.dmsRationalToDeg(exifData.GPS[TagValues.GPSIFD.GPSLongitude],
+                exifData.GPS[TagValues.GPSIFD.GPSLongitudeRef]);
+            if (isNaN(lat) || isNaN(lng)) {
+                return null;
+            }
+            return { lat, lng };
+        } catch {
             return null;
         }
-        const lat = GPSHelper.dmsRationalToDeg(exifData.GPS[TagValues.GPSIFD.GPSLatitude],
-            exifData.GPS[TagValues.GPSIFD.GPSLatitudeRef]);
-        const lng = GPSHelper.dmsRationalToDeg(exifData.GPS[TagValues.GPSIFD.GPSLongitude],
-            exifData.GPS[TagValues.GPSIFD.GPSLongitudeRef]);
-        if (isNaN(lat) || isNaN(lng)) {
-            return null;
-        }
-        return { lat, lng };
     }
 
     private resizeImageWithExif(image: HTMLImageElement, exifData: IExif): string {
@@ -74,7 +72,7 @@ export class ImageResizeService {
         canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
 
         let dataUrl = canvas.toDataURL(ImageResizeService.JPEG, 0.92);
-        if (exifData != null) {
+        if (exifData != null && exifData["0th"] != null) {
             exifData["0th"][TagValues.ImageIFD.Orientation] = 1;
             const exifbytes = dump(exifData);
             dataUrl = insert(exifbytes, dataUrl);

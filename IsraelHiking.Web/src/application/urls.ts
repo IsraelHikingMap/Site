@@ -25,7 +25,7 @@ export class Urls {
     public static readonly poiSimple = Urls.poi + "simple/";
 
     public static readonly osmApi = "https://api.openstreetmap.org/api/0.6/";
-    public static readonly user = Urls.osmApi + "user/details.json";
+    public static readonly osmUser = Urls.osmApi + "user/details.json";
     public static readonly traces = Urls.osmApi + "user/gpx_files";
     public static readonly traceGPX = Urls.osmApi + 'gpx/';
 

@@ -1,10 +1,9 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 
-namespace IsraelHiking.DataAccessInterfaces
+namespace IsraelHiking.DataAccessInterfaces;
+
+public interface IImgurGateway
 {
-    public interface IImgurGateway
-    {
-        Task<string> UploadImage(Stream stream);
-    }
+    Task<string> UploadImage(Stream stream);
 }

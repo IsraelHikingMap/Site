@@ -19,7 +19,7 @@ export class OsmTokenInterceptor implements HttpInterceptor {
             // store is not ready yet
         }
 
-        if (token && (request.url.includes(Urls.apiBase) || request.url.includes("api.openstreetmap.org"))) {
+        if (token && (request.url.includes(Urls.apiBase) || request.url.includes(Urls.osmApi))) {
             request = request.clone({
                 setHeaders: {
                     Authorization: `Bearer ${token}`

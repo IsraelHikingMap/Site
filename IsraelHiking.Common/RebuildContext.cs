@@ -3,18 +3,17 @@ using System;
 using System.Text.Json.Serialization;
 using IsraelHiking.Common.Extensions;
 
-namespace IsraelHiking.Common
+namespace IsraelHiking.Common;
+
+public class RebuildContext
 {
-    public class RebuildContext
-    {
-        [JsonPropertyName("request")]
-        public UpdateRequest Request { get; set; }
-        [JsonConverter(typeof(DateTimeConverter))]
-        [JsonPropertyName("startTime")]
-        public DateTime StartTime { get; set; }
-        [JsonPropertyName("succeeded")]
-        public bool Succeeded { get; set; }
-        [JsonPropertyName("errorMessage")]
-        public string ErrorMessage { get; set; }
-    }
+    [JsonPropertyName("request")]
+    public UpdateRequest Request { get; set; }
+    [JsonConverter(typeof(DateTimeConverter))]
+    [JsonPropertyName("startTime")]
+    public DateTime StartTime { get; set; }
+    [JsonPropertyName("succeeded")]
+    public bool Succeeded { get; set; }
+    [JsonPropertyName("errorMessage")]
+    public string ErrorMessage { get; set; }
 }

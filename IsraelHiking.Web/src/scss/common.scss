@@ -1,11 +1,11 @@
 ﻿@use "@angular/material" as mat;
 @use "variables" as v;
 @use "dialogs";
-@import "../fonts/icons.css";
-@import "font-awesome/css/font-awesome.css";
-@import "maplibre-gl/dist/maplibre-gl.css";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@use "../fonts/icons.css";
+@use "font-awesome/css/font-awesome.css";
+@use "maplibre-gl/dist/maplibre-gl.css";
+@use "tailwindcss/components";
+@use "tailwindcss/utilities";
 
 $app-primary: mat.m2-define-palette(mat.$m2-green-palette, 600);
 $app-accent: mat.m2-define-palette(mat.$m2-yellow-palette);
@@ -41,33 +41,6 @@ $app-background: map-get($app-theme, background);
   }
 
 
-/* added direction to fix issue with scroll bar and legend maps */
-.sidebar-wrapper {
-    position: fixed;
-    top: env(safe-area-inset-top, 0);
-    bottom: 0;
-    left: 0;
-    width: v.$app-sidebar-width;
-    line-height: 24px;
-    overflow-x: hidden;
-    overflow-y: auto;
-    color: black;
-    direction: ltr;
-    background: mat.m2-get-color-from-palette($app-background, card);
-    z-index: v.$app-left-z-index + 5;
-}
-
-
-@media (width <= 550px) {
-    .sidebar-wrapper {
-        width: 100vw;
-        box-sizing: border-box;
-    }
-    .sidebar-wrapper.poi {
-        top: 40vh;
-        height: 60vh;
-    }
-}
 
 html {
     height: 100%;

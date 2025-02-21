@@ -26,7 +26,7 @@ export class PrivatePoiUploaderService {
         description: string,
         markerType: string
     ) {
-        const results = await this.poiService.getClosestPoint(latLng, "OSM");
+        const results = await this.poiService.getClosestPoint(latLng, "OSM", this.resources.getCurrentLanguageCodeSimplified());
         let urls = [] as LinkData[];
         if (imageLink) {
             urls = [imageLink];

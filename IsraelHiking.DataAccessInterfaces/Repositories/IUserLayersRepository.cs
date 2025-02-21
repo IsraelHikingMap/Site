@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace IsraelHiking.DataAccessInterfaces.Repositories
+namespace IsraelHiking.DataAccessInterfaces.Repositories;
+
+public interface IUserLayersRepository
 {
-    public interface IUserLayersRepository
-    {
-        Task<List<MapLayerData>> GetUserLayers(string osmUserId);
-        Task<MapLayerData> GetUserLayerById(string id);
-        Task<MapLayerData> AddUserLayer(MapLayerData layerData);
-        Task UpdateUserLayer(MapLayerData layerData);
-        Task DeleteUserLayer(MapLayerData layerData);
-    }
+    Task<List<MapLayerData>> GetUserLayers(string osmUserId);
+    Task<MapLayerData> GetUserLayerById(string id);
+    Task<MapLayerData> AddUserLayer(MapLayerData layerData);
+    Task UpdateUserLayer(MapLayerData layerData);
+    Task DeleteUserLayer(MapLayerData layerData);
 }

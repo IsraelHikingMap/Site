@@ -7,29 +7,28 @@ using NetTopologySuite.Geometries;
 using NSubstitute;
 using System.Net.Http;
 
-namespace IsraelHiking.DataAccess.Tests
+namespace IsraelHiking.DataAccess.Tests;
+
+[TestClass]
+public class GraphHopperGatewayTests
 {
-    [TestClass]
-    public class GraphHopperGatewayTests
+    [TestMethod]
+    [Ignore]
+    public void GetRouting_ShouldGetRoutingWithDetails()
     {
-        [TestMethod]
-        [Ignore]
-        public void GetRouting_ShouldGetRoutingWithDetails()
+        var factory = Substitute.For<IHttpClientFactory>();
+        factory.CreateClient().Returns(new HttpClient());
+        var options = Substitute.For<IOptions<ConfigurationData>>();
+        options.Value.Returns(new ConfigurationData());
+        var gateway = new GraphHopperGateway(factory, options, Substitute.For<ILogger>());
+        var results = gateway.GetRouting(new RoutingGatewayRequest
         {
-            var factory = Substitute.For<IHttpClientFactory>();
-            factory.CreateClient().Returns(new HttpClient());
-            var options = Substitute.For<IOptions<ConfigurationData>>();
-            options.Value.Returns(new ConfigurationData());
-            var gateway = new GraphHopperGateway(factory, options, Substitute.For<ILogger>());
-            var results = gateway.GetRouting(new RoutingGatewayRequest
-            {
-                From = new Coordinate(35.24470233230383, 31.971396577420734),
-                To = new Coordinate(35.00963707334776, 31.926065209376176),
-                Profile = ProfileType.Foot
-            }).Result;
-            Assert.IsNotNull(results);
-            var details = results.Attributes["details"];
-            Assert.IsNotNull(details);
-        }
+            From = new Coordinate(35.24470233230383, 31.971396577420734),
+            To = new Coordinate(35.00963707334776, 31.926065209376176),
+            Profile = ProfileType.Foot
+        }).Result;
+        Assert.IsNotNull(results);
+        var details = results.Attributes["details"];
+        Assert.IsNotNull(details);
     }
 }

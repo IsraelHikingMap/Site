@@ -2,10 +2,9 @@
 using NetTopologySuite.Features;
 using IsraelHiking.Common.Api;
 
-namespace IsraelHiking.DataAccessInterfaces
+namespace IsraelHiking.DataAccessInterfaces;
+
+public interface IGraphHopperGateway
 {
-    public interface IGraphHopperGateway
-    {
-        Task<Feature> GetRouting(RoutingGatewayRequest request);
-    }
+    Task<Feature> GetRouting(RoutingGatewayRequest request);
 }

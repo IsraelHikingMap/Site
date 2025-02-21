@@ -5,69 +5,68 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace IsraelHiking.API.Controllers
+namespace IsraelHiking.API.Controllers;
+
+/// <summary>
+/// This contoller is responsible for external sourcing mirroning
+/// </summary>
+[Route("api/[controller]")]
+public class ExternalSourcesController : ControllerBase
 {
+    private readonly IPointsOfInterestAdapterFactory _adaptersFactory;
+    private readonly IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
+
     /// <summary>
-    /// This contoller is responsible for external sourcing mirroning
+    /// Class constructor
     /// </summary>
-    [Route("api/[controller]")]
-    public class ExternalSourcesController : ControllerBase
+    /// <param name="adaptersFactory"></param>
+    /// <param name="externalSourceUpdaterExecutor"></param>
+    public ExternalSourcesController(IPointsOfInterestAdapterFactory adaptersFactory,
+        IExternalSourceUpdaterExecutor externalSourceUpdaterExecutor)
     {
-        private readonly IPointsOfInterestAdapterFactory _adaptersFactory;
-        private readonly IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
+        _adaptersFactory = adaptersFactory;
+        _externalSourceUpdaterExecutor = externalSourceUpdaterExecutor;
+    }
 
-        /// <summary>
-        /// Class constructor
-        /// </summary>
-        /// <param name="adaptersFactory"></param>
-        /// <param name="externalSourceUpdaterExecutor"></param>
-        public ExternalSourcesController(IPointsOfInterestAdapterFactory adaptersFactory,
-            IExternalSourceUpdaterExecutor externalSourceUpdaterExecutor)
-        {
-            _adaptersFactory = adaptersFactory;
-            _externalSourceUpdaterExecutor = externalSourceUpdaterExecutor;
-        }
+    /// <summary>
+    /// Get all the available external sources
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet]
+    public IEnumerable<string> GetSources()
+    {
+        return _adaptersFactory.GetAll().Select(a => a.Source);
+    }
 
-        /// <summary>
-        /// Get all the available external sources
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        public IEnumerable<string> GetSources()
+    /// <summary>
+    /// Extracts an extarnal source.
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    [HttpPost]
+    public async Task<IActionResult> PostRebuildSource(string source)
+    {
+        if (!GetSources().Contains(source))
         {
-            return _adaptersFactory.GetAll().Select(a => a.Source);
+            return NotFound($"Source {source} does not exist");
         }
+        await _externalSourceUpdaterExecutor.RebuildSource(source);
+        return Ok();
+    }
 
-        /// <summary>
-        /// Extracts an extarnal source.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        [HttpPost]
-        public async Task<IActionResult> PostRebuildSource(string source)
+    /// <summary>
+    /// Updates an external source from the last time it was updated.
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    [HttpPut]
+    public async Task<IActionResult> PutUpdateSource(string source)
+    {
+        if (!GetSources().Contains(source))
         {
-            if (!GetSources().Contains(source))
-            {
-                return NotFound($"Source {source} does not exist");
-            }
-            await _externalSourceUpdaterExecutor.RebuildSource(source);
-            return Ok();
+            return NotFound($"Source {source} does not exist");
         }
-
-        /// <summary>
-        /// Updates an external source from the last time it was updated.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        [HttpPut]
-        public async Task<IActionResult> PutUpdateSource(string source)
-        {
-            if (!GetSources().Contains(source))
-            {
-                return NotFound($"Source {source} does not exist");
-            }
-            await _externalSourceUpdaterExecutor.UpdateSource(source);
-            return Ok();
-        }
+        await _externalSourceUpdaterExecutor.UpdateSource(source);
+        return Ok();
     }
 }

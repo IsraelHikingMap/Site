@@ -27,24 +27,21 @@ public class ElevationSetterExecutorTests
     public void AddElevationToGeometryCollection()
     {
         var polygon = new Polygon(
-            new LinearRing(new[]
-                { new Coordinate(0, 0), new Coordinate(2, 2), new Coordinate(3, 3), new Coordinate(0, 0) }
-            ), new []
-            {
-                new LinearRing(new[]
-                    { new Coordinate(1, 1), new Coordinate(1.1, 1.1), new Coordinate(1.2, 1.2), new Coordinate(1, 1) }
-                )   
-            }); 
+            new LinearRing([new Coordinate(0, 0), new Coordinate(2, 2), new Coordinate(3, 3), new Coordinate(0, 0)]
+            ), [
+                new LinearRing([new Coordinate(1, 1), new Coordinate(1.1, 1.1), new Coordinate(1.2, 1.2), new Coordinate(1, 1)
+                    ]
+                )
+            ]); 
         var collection = new FeatureCollection {
-            new Feature(new GeometryCollection(new Geometry[]
-            {
+            new Feature(new GeometryCollection([
                 new Point(0,0),
-                new LineString(new [] { new Coordinate(0,0), new Coordinate(2,2)}),
+                new LineString([new Coordinate(0,0), new Coordinate(2,2)]),
                 polygon,
-                new MultiPoint(new [] { new Point(3, 3), new Point(4,4)}),
-                new MultiLineString(new [] { new LineString(new []{ new Coordinate(5,5), new Coordinate(6,6)})}),
-                new MultiPolygon(new []{ polygon })
-            }), new AttributesTable())
+                new MultiPoint([new Point(3, 3), new Point(4,4)]),
+                new MultiLineString([new LineString([new Coordinate(5,5), new Coordinate(6,6)])]),
+                new MultiPolygon([polygon])
+            ]), new AttributesTable())
         };
         
         

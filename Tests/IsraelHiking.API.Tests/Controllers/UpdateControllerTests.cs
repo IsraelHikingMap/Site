@@ -8,66 +8,65 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using System.Net;
 
-namespace IsraelHiking.API.Tests.Controllers
+namespace IsraelHiking.API.Tests.Controllers;
+
+[TestClass]
+public class UpdateControllerTests
 {
-    [TestClass]
-    public class UpdateControllerTests
+    private UpdateController _controller;
+    private IDatabasesUpdaterService _databasesUpdaterService;
+
+    [TestInitialize]
+    public void TestInitialize()
     {
-        private UpdateController _controller;
-        private IDatabasesUpdaterService _databasesUpdaterService;
+        var logger = Substitute.For<ILogger>();
+        _databasesUpdaterService = Substitute.For<IDatabasesUpdaterService>();
+        _controller = new UpdateController(_databasesUpdaterService, logger);
+    }
 
-        [TestInitialize]
-        public void TestInitialize()
+    private void SetupContext(IPAddress localIp, IPAddress remoteIp)
+    {
+        _controller.ControllerContext = new ControllerContext
         {
-            var logger = Substitute.For<ILogger>();
-            _databasesUpdaterService = Substitute.For<IDatabasesUpdaterService>();
-            _controller = new UpdateController(_databasesUpdaterService, logger);
-        }
-
-        private void SetupContext(IPAddress localIp, IPAddress remoteIp)
-        {
-            _controller.ControllerContext = new ControllerContext
+            HttpContext = new DefaultHttpContext
             {
-                HttpContext = new DefaultHttpContext
+                Connection =
                 {
-                    Connection =
-                    {
-                        LocalIpAddress = localIp,
-                        RemoteIpAddress = remoteIp
-                    }
+                    LocalIpAddress = localIp,
+                    RemoteIpAddress = remoteIp
                 }
-            };
-        }
+            }
+        };
+    }
         
-        [TestMethod]
-        public void PostUpdateData_LocalAndRemoteDoNotMatch_ShouldReturnBadRequest()
-        {
-            SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Parse("5.6.7.8"));
+    [TestMethod]
+    public void PostUpdateData_LocalAndRemoteDoNotMatch_ShouldReturnBadRequest()
+    {
+        SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Parse("5.6.7.8"));
             
-            var results = _controller.PostUpdateData(null).Result;
+        var results = _controller.PostUpdateData(null).Result;
             
-            Assert.IsNotNull(results as BadRequestObjectResult);
-        }
+        Assert.IsNotNull(results as BadRequestObjectResult);
+    }
 
-        [TestMethod]
-        public void PostUpdateData_RequestIsNull_ShouldUpdateAllGateways()
-        {
-            SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Loopback);
+    [TestMethod]
+    public void PostUpdateData_RequestIsNull_ShouldUpdateAllGateways()
+    {
+        SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Loopback);
 
-            _controller.PostUpdateData(null).Wait();
+        _controller.PostUpdateData(null).Wait();
 
-            _databasesUpdaterService.Received(1).Rebuild(Arg.Any<UpdateRequest>());
+        _databasesUpdaterService.Received(1).Rebuild(Arg.Any<UpdateRequest>());
             
-        }
+    }
 
-        [TestMethod]
-        public void PostUpdateData_RemoteIs10101010DefaultRequest_ShouldUpdateAllGateways()
-        {
-            SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Parse("10.10.10.10"));
+    [TestMethod]
+    public void PostUpdateData_RemoteIs10101010DefaultRequest_ShouldUpdateAllGateways()
+    {
+        SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Parse("10.10.10.10"));
             
-            _controller.PostUpdateData(new UpdateRequest()).Wait();
+        _controller.PostUpdateData(new UpdateRequest()).Wait();
 
-            _databasesUpdaterService.Received(1).Rebuild(Arg.Any<UpdateRequest>());
-        }
+        _databasesUpdaterService.Received(1).Rebuild(Arg.Any<UpdateRequest>());
     }
 }

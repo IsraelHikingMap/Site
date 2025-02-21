@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace IsraelHiking.DataAccessInterfaces
-{
-    public interface INakebGateway
-    {
-        Task<List<Feature>> GetAll();
+namespace IsraelHiking.DataAccessInterfaces;
 
-        Task<Feature> GetById(string id);
-    }
+public interface INakebGateway
+{
+    Task<List<Feature>> GetAll();
+
+    Task<Feature> GetById(string id);
 }

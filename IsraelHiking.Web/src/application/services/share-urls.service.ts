@@ -1,12 +1,13 @@
 import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { Router } from "@angular/router";
 import { timeout } from "rxjs/operators";
 import { orderBy } from "lodash-es";
 import { Store } from "@ngxs/store";
 import { firstValueFrom } from "rxjs";
 import type { Immutable } from "immer";
 
-import { HashService } from "./hash.service";
+import { RouteStrings } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
@@ -28,8 +29,8 @@ export class ShareUrlsService {
     private syncing = false;
 
     private readonly httpClient = inject(HttpClient);
+    private readonly router = inject(Router);
     private readonly whatsAppService = inject(WhatsAppService);
-    private readonly hashService = inject(HashService);
     private readonly loggingService = inject(LoggingService);
     private readonly databaseService = inject(DatabaseService);
     private readonly store = inject(Store);
@@ -54,7 +55,7 @@ export class ShareUrlsService {
                 nakeb: ""
             };
         }
-        const ihm = this.hashService.getFullUrlFromShareId(shareUrl.id);
+        const ihm = this.getFullUrlFromShareId(shareUrl.id);
         const escaped = encodeURIComponent(ihm);
         return {
             ihm,
@@ -187,5 +188,10 @@ export class ShareUrlsService {
 
     public getSelectedShareUrl(): Immutable<ShareUrl> {
         return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).shareUrl;
+    }
+
+    public getFullUrlFromShareId(id: string) {
+        const urlTree = this.router.createUrlTree([RouteStrings.SHARE, id]);
+        return Urls.baseAddress + urlTree.toString();
     }
 }

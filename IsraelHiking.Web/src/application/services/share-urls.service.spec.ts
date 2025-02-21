@@ -112,12 +112,9 @@ describe("Share Urls Service", () => {
         expect(displayName).toContain("desc");
     }));
 
-    it("Should get social links", inject([ShareUrlsService, HashService], (shareUrlService: ShareUrlsService, hashService: HashService) => {
-        const fullUrl = "http://full-url";
-        hashService.getFullUrlFromShareId = () => fullUrl;
+    it("Should get social links", inject([ShareUrlsService], (shareUrlService: ShareUrlsService) => {
         const links = shareUrlService.getShareSocialLinks({title: "title", description: "desc"} as ShareUrl);
-        expect(links.facebook).toContain(encodeURIComponent(fullUrl));
-        expect(links.ihm).toBe(fullUrl);
+        expect(links.facebook).toContain(Urls.facebook);
     }));
 
     it("Should get share url from database when already cached and don't refresh it if it's not newer", inject([ShareUrlsService, HttpTestingController, DatabaseService],

@@ -5,44 +5,43 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace IsraelHiking.DataAccess
+namespace IsraelHiking.DataAccess;
+
+public class GpsBabelGateway : IGpsBabelGateway
 {
-    public class GpsBabelGateway : IGpsBabelGateway
+    private readonly ILogger _logger;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ConfigurationData _options;
+
+    public GpsBabelGateway(ILogger logger,
+        IHttpClientFactory httpClientFactory,
+        IOptions<ConfigurationData> options)
     {
-        private readonly ILogger _logger;
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ConfigurationData _options;
+        _logger = logger;
+        _httpClientFactory = httpClientFactory;
+        _options = options.Value;
+    }
 
-        public GpsBabelGateway(ILogger logger,
-            IHttpClientFactory httpClientFactory,
-            IOptions<ConfigurationData> options)
+    public async Task<byte[]> ConvertFileFromat(byte[] content, string inputFormat, string outputFormat)
+    {
+        if (inputFormat == outputFormat)
         {
-            _logger = logger;
-            _httpClientFactory = httpClientFactory;
-            _options = options.Value;
+            return content;
         }
-
-        public async Task<byte[]> ConvertFileFromat(byte[] content, string inputFormat, string outputFormat)
+        var client = _httpClientFactory.CreateClient();
+        var formData = new MultipartFormDataContent();
+        formData.Add(new ByteArrayContent(content), name: "file", fileName: "file");
+        formData.Add(new StringContent(inputFormat), "inputFormat");
+        formData.Add(new StringContent(outputFormat), "outputFormat");
+        var response = await client.PostAsync(_options.GpsBabelServerAddress, formData);
+        if (response.IsSuccessStatusCode)
         {
-            if (inputFormat == outputFormat)
-            {
-                return content;
-            }
-            var client = _httpClientFactory.CreateClient();
-            var formData = new MultipartFormDataContent();
-            formData.Add(new ByteArrayContent(content), name: "file", fileName: "file");
-            formData.Add(new StringContent(inputFormat), "inputFormat");
-            formData.Add(new StringContent(outputFormat), "outputFormat");
-            var response = await client.PostAsync(_options.GpsBabelServerAddress, formData);
-            if (response.IsSuccessStatusCode)
-            {
-                _logger.LogInformation("Finished converting data from: " + inputFormat + " to: " + outputFormat);
-            }
-            else
-            {
-                _logger.LogError("Failed converting data from: " + inputFormat + " to: " + outputFormat);
-            }
-            return await response.Content.ReadAsByteArrayAsync();
+            _logger.LogInformation("Finished converting data from: " + inputFormat + " to: " + outputFormat);
         }
+        else
+        {
+            _logger.LogError("Failed converting data from: " + inputFormat + " to: " + outputFormat);
+        }
+        return await response.Content.ReadAsByteArrayAsync();
     }
 }

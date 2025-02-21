@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace IsraelHiking.DataAccessInterfaces
+namespace IsraelHiking.DataAccessInterfaces;
+
+public interface IInitializable
 {
-    public interface IInitializable
-    {
-        Task Initialize();
-    }
+    Task Initialize();
 }

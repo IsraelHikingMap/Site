@@ -1,18 +1,17 @@
-namespace IsraelHiking.API.Services
+namespace IsraelHiking.API.Services;
+
+/// <summary>
+/// Helps with returning or rendering custom content of the home page.
+/// </summary>
+public interface IHomePageHelper
 {
     /// <summary>
-    /// Helps returning or rendering with custom content the home page.
+    /// Renders the home page with specified data
     /// </summary>
-    public interface IHomePageHelper
-    {
-        /// <summary>
-        /// Renders the home page with specified data
-        /// </summary>
-        /// <param name="title"></param>
-        /// <param name="description"></param>
-        /// <param name="thumbnailUrl"></param>
-        /// <param name="language"></param>
-        /// <returns></returns>
-        string Render(string title, string description, string thumbnailUrl, string language = "");
-    }
+    /// <param name="title"></param>
+    /// <param name="description"></param>
+    /// <param name="thumbnailUrl"></param>
+    /// <param name="language"></param>
+    /// <returns></returns>
+    string Render(string title, string description, string thumbnailUrl, string language = "");
 }

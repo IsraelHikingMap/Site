@@ -7,7 +7,6 @@ import { Store } from "@ngxs/store";
 import { TracesDialogComponent } from "../dialogs/traces-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { IHMTitleService } from "../../services/ihm-title.service";
-import { HashService } from "../../services/hash.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
@@ -36,7 +35,6 @@ export class MainMapComponent {
 
     private readonly titleService = inject(IHMTitleService);
     private readonly mapService = inject(MapService);
-    private readonly hashService = inject(HashService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly defaultStyleService = inject(DefaultStyleService);
     private readonly dialog = inject(MatDialog);
@@ -94,7 +92,6 @@ export class MainMapComponent {
         }
         const centerLatLon = this.mapComponent().mapInstance.getCenter();
         this.store.dispatch(new SetLocationAction(centerLatLon.lng, centerLatLon.lat, this.mapComponent().mapInstance.getZoom()));
-        this.hashService.resetAddressbar();
     }
 
     public mapLoaded() {

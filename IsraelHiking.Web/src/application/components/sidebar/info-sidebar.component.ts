@@ -45,6 +45,10 @@ export class InfoSidebarComponent {
         });
     }
 
+    public close() {
+        this.sidebarService.hide();
+    }
+
     public isActive(): boolean {
         return this.sidebarService.viewName === "info";
     }
