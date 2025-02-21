@@ -1,6 +1,12 @@
 ﻿export type OsmUserDetails = {
-    displayName: string;
-    image: string;
-    changeSetCount: number;
-    id: string;
+    user: {
+        id: number;
+        display_name: string;
+        img: {
+            href: string;
+        };
+        changesets: {
+            count: number;
+        };
+    };
 };

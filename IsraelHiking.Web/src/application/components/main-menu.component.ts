@@ -111,8 +111,9 @@ export class MainMenuComponent {
                 }
             });
         } else {
-            this.authorizationService.login().then(() => { }, () => {
+            this.authorizationService.login().then(() => { }, (ex) => {
                 this.toastService.warning(this.resources.unableToLogin);
+                this.loggingService.error(`[Main Menu] Unable to login: ${ex.message}`);
             });
         }
     }
