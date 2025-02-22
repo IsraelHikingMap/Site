@@ -5,7 +5,7 @@ import { firstValueFrom } from "rxjs";
 import { timeout, skip } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
 import { Store } from "@ngxs/store";
-import osmtogeojson from "osmtogeojson";
+import osmtogeojson from "osm2geojson-lite";
 import type { Immutable } from "immer";
 import type { MapGeoJSONFeature } from "maplibre-gl";
 
@@ -477,7 +477,7 @@ export class PoiService {
                 const { osmId, type } = this.poiIdentifierToTypeAndId(id);
                 const osmPoi$ = this.httpClient.get(`https://www.openstreetmap.org/api/0.6/${type}/${osmId}${type !== "node" ? "/full" : ""}`).pipe(timeout(6000));
                 const osmPoi = await firstValueFrom(osmPoi$);
-                const geojson = osmtogeojson(osmPoi);
+                const geojson = osmtogeojson(osmPoi, {completeFeature: true}) as GeoJSON.FeatureCollection;
                 const feature = geojson.features[0];
                 let wikidataPromise = Promise.resolve();
                 let inaturePromise = Promise.resolve();
