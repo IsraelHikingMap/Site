@@ -1,8 +1,25 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-public class BBoxContainer
+namespace IsraelHiking.DataAccess.ElasticSearch;
+
+public class BaseBBoxShape
 {
+    [JsonPropertyName("type")]
+    public string Type { get; set; }
+}
+
+public class MultiPolygonBBoxShape : BaseBBoxShape {
+    [JsonPropertyName("coordinates")]
+    public double[][][][] Coordinates { get; set; }
+}
+
+public class PolygonBBoxShape : BaseBBoxShape {
+    [JsonPropertyName("coordinates")]
+    public double[][][] Coordinates { get; set; }
+}
+
+public class EnvelopeBBoxShape : BaseBBoxShape {
     [JsonPropertyName("coordinates")]
     public double[][] Coordinates { get; set; }
 }
@@ -13,6 +30,7 @@ public class BBoxDocument
     public Dictionary<string, string> Name { get; set; }
     [JsonPropertyName("area")]
     public double Area { get; set; }
+    [JsonConverter(typeof(BBoxShapeGeoJsonConverter))]
     [JsonPropertyName("bbox")]
-    public BBoxContainer BBox { get; set; }
+    public BaseBBoxShape BBox { get; set; }
 }
