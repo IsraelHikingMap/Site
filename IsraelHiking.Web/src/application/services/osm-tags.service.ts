@@ -32,11 +32,13 @@ export class OsmTagsService {
         if (feature.properties.route) {
             switch (feature.properties.route) {
                 case "hiking":
+                case "foot":
                     poi.properties.poiIconColor = "black";
                     poi.properties.poiIcon = "icon-hike";
                     poi.properties.poiCategory = "Hiking";
                     return;
                 case "bicycle":
+                case "mtb":
                     poi.properties.poiIconColor = "black";
                     poi.properties.poiIcon = "icon-bike";
                     poi.properties.poiCategory = "Bicycle";
