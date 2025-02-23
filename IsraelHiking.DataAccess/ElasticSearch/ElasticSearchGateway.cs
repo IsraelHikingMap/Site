@@ -216,19 +216,29 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         {
             return [];
         }
-
-        var envelope = placesResponse.Documents.First().BBox.Coordinates;
         var response = await _elasticClient.SearchAsync<PointDocument>(s => s.Index(POINTS)
             .Size(NUMBER_OF_RESULTS)
             .TrackScores()
             .Sort(f => f.Descending("_score"))
             .Query(q => DocumentNameSearchQuery(q, searchTerm, language) &&
-                        q.GeoBoundingBox(b => b.BoundingBox(
-                            bb => bb.TopLeft(new GeoCoordinate(envelope[0][1], envelope[0][0]))
-                                .BottomRight(new GeoCoordinate(envelope[1][1], envelope[1][0]))
-                        ).Field(p => p.Location))
+                q.GeoShape(b =>
+                {
+                    b.Field(p => p.Location);
+                    b.Relation(GeoShapeRelation.Within);
+                    return placesResponse.Documents.First().BBox switch
+                    {
+                        EnvelopeBBoxShape envelope => b.Shape(sh =>
+                                sh.Envelope(envelope.Coordinates.Select(c => new GeoCoordinate(c[1], c[0])))),
+                        PolygonBBoxShape poly => b.Shape(sh =>
+                            sh.Polygon(poly.Coordinates.Select(
+                                p => p.Select(c => new GeoCoordinate(c[1], c[0]))))),
+                        MultiPolygonBBoxShape multi => b.Shape(sh =>
+                            sh.MultiPolygon(multi.Coordinates.Select(mp =>
+                                mp.Select(p => p.Select(c => new GeoCoordinate(c[1], c[0])))))),
+                        _ => throw new Exception("Unsupported shape type")
+                    };
+                })
             )
-            
         );
         return response.Hits.Select(d => HitToFeature(d, language)).ToList();
     }
@@ -254,6 +264,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                                 ]);
 
                             })
+                            // For some reason the field is not recognized as a field
                             .Field("bbox")
                             .Relation(GeoShapeRelation.Contains))
                 )

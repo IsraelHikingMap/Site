@@ -40,8 +40,8 @@ public class ElasticSearchGatewayTests
     [Ignore]
     public void GetContainerName_ShouldReturnResults()
     {
-        var results = _gateway.GetContainerName([new Coordinate(35.225306, 32.703806)], "he").Result;
-        Assert.AreEqual("a", results);
+        var results = _gateway.GetContainerName([new Coordinate(35.05746, 32.596838)], "he").Result;
+        Assert.AreEqual("רמות מנשה", results);
     }
 
     [TestMethod]
@@ -107,7 +107,7 @@ public class ElasticSearchGatewayTests
     [Ignore]
     public void GetContainerName_MultipleCoordinates_ShouldGetOne()
     {
-        var name = _gateway.GetContainerName([new Coordinate(35.052338, 32.598071), new Coordinate(35.061919, 32.595458)], Languages.HEBREW).Result;
+        var name = _gateway.GetContainerName([new Coordinate(35.052338, 32.598071), new Coordinate(35.059919, 32.597458)], Languages.HEBREW).Result;
 
         Assert.AreEqual("רמות מנשה", name);
     }
