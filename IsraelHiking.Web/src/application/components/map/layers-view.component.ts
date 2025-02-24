@@ -1,4 +1,5 @@
 import { Component, DestroyRef, inject, OnInit } from "@angular/core";
+import { MatDialog } from "@angular/material/dialog";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
@@ -6,6 +7,7 @@ import { GeoJSONSourceComponent } from "@maplibre/ngx-maplibre-gl";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
+import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { PoiService } from "../../services/poi.service";
 import { LayersService } from "../../services/layers.service";
 import { RouteStrings } from "../../services/hash.service";
@@ -41,6 +43,7 @@ export class LayersViewComponent implements OnInit {
     public readonly resources = inject(ResourcesService);
 
     private readonly router = inject(Router);
+    private readonly matDialog = inject(MatDialog);
     private readonly layersService = inject(LayersService);
     private readonly poiService = inject(PoiService);
     private readonly selectedRouteService = inject(SelectedRouteService);
@@ -147,7 +150,7 @@ export class LayersViewComponent implements OnInit {
     }
 
     public addPointToRoute() {
-        const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
+        let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         const markerData = {
             latlng: this.getSelectedFeatureLatlng(),
             title: "",
@@ -157,6 +160,9 @@ export class LayersViewComponent implements OnInit {
         };
         this.store.dispatch(new AddPrivatePoiAction(selectedRoute.id, markerData));
         this.clearSelected();
+        selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const index = selectedRoute.markers.length - 1;
+        PrivatePoiEditDialogComponent.openDialog(this.matDialog, markerData, index, selectedRoute.id);
     }
 
     public clearSelected() {
