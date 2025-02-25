@@ -764,6 +764,27 @@ describe("Poi Service", () => {
         )
     );
 
+    it("Should filter out empty wikipedia images",
+        inject([PoiService], async (poiService: PoiService) => {
+                const feature = {
+                    properties: {
+                        poiSource: "OSM",
+                        poiId: "poiId",
+                        identifier: "id",
+                        image: "https://upload.wikimedia.org/wikipedia/commons/b/b6/Building_no_free_image_yet-he.svg",
+                    } as any,
+                    geometry: {
+                        type: "Point",
+                        coordinates: [1, 2]
+                    }
+                } as GeoJSON.Feature;
+
+                const info = await poiService.getEditableDataFromFeature(feature);
+                expect(info.imagesUrls.length).toBe(0);
+            }
+        )
+    );
+
     it("Should filter out images with no attribution",
         inject([PoiService, ImageAttributionService], async (poiService: PoiService, attributionService: ImageAttributionService) => {
                 const feature = {

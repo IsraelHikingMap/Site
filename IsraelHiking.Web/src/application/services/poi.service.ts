@@ -756,7 +756,7 @@ export class PoiService {
         let imagesUrls = Object.keys(feature.properties)
             .filter(k => k.startsWith("image"))
             .map(k => feature.properties[k])
-            .filter((u: string) => u.startsWith("File:") || u.includes("wikimedia.org") || u.includes("inature.info") || u.includes("nakeb.co.il") || u.includes("jeepolog.com"));
+            .filter(u => this.isValidUrl(u));
         const imageAttributions = await Promise.all(imagesUrls.map(u => this.imageAttributinoService.getAttributionForImage(u)));
         imagesUrls = imagesUrls.filter((_, i) => imageAttributions[i] != null);
         return {
@@ -774,6 +774,27 @@ export class PoiService {
                 ? SpatialService.getLengthInMetersForGeometry(feature.geometry) / 1000.0
                 : null
         };
+    }
+
+    private isValidUrl(url: string): boolean {
+        if (url.startsWith("File:")) {
+            return true;
+        }
+        if (url.includes("wikimedia.org") && !url.includes("Building_no_free_image_yet"))
+        {
+            return true;
+        }
+        if (url.includes("inature.info"))
+        {
+            return true;
+        }
+        if (url.includes("nakeb.co.il")) {
+            return true;
+        }
+        if (url.includes("jeepolog.com")) {
+            return true;
+        }
+        return false;
     }
 
     public getFeatureFromEditableData(info: EditablePublicPointData): GeoJSON.Feature {
