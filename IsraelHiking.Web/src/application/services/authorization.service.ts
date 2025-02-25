@@ -70,7 +70,7 @@ export class AuthorizationService {
             displayName: detailJson.user.display_name,
             id: detailJson.user.id.toString(),
             changeSets: detailJson.user.changesets.count,
-            imageUrl: detailJson.user.img.href
+            imageUrl: detailJson.user.img?.href
         };
         this.store.dispatch(new SetUserInfoAction(userInfo));
         this.loggingService.info(`[Authorization] User ${userInfo.displayName} logged-in successfully`);

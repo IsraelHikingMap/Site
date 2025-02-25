@@ -2,7 +2,7 @@
     user: {
         id: number;
         display_name: string;
-        img: {
+        img?: {
             href: string;
         };
         changesets: {
