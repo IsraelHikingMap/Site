@@ -5,7 +5,6 @@ import { firstValueFrom } from "rxjs";
 import { timeout, skip } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
 import { Store } from "@ngxs/store";
-import osmtogeojson from "osmtogeojson";
 import type { Immutable } from "immer";
 import type { MapGeoJSONFeature } from "maplibre-gl";
 
@@ -475,14 +474,11 @@ export class PoiService {
         try {
             if (source === "OSM") {
                 const { osmId, type } = this.poiIdentifierToTypeAndId(id);
-                const osmPoi$ = this.httpClient.get(`https://www.openstreetmap.org/api/0.6/${type}/${osmId}${type !== "node" ? "/full" : ""}`).pipe(timeout(6000));
-                const osmPoi = await firstValueFrom(osmPoi$);
-                const geojson = osmtogeojson(osmPoi);
-                const feature = geojson.features[0];
+                const feature = await this.overpassTurboService.getFeature(type, osmId);
                 let wikidataPromise = Promise.resolve();
                 let inaturePromise = Promise.resolve();
-                let placePromise = Promise.resolve({features: []});
-                let wayPromise = Promise.resolve({features: []});
+                let placePromise = Promise.resolve(null as GeoJSON.Feature);
+                let wayPromise = Promise.resolve(null as GeoJSON.Feature);
                 if (feature.properties.wikidata) {
                     wikidataPromise = this.wikidataService.enritchFeatureFromWikimedia(feature, language);
                 }
@@ -500,13 +496,13 @@ export class PoiService {
                 }
                 try {
                     await Promise.all([wikidataPromise, inaturePromise, placePromise, wayPromise]);
-                    const placeGeojson = await placePromise;
-                    if (placeGeojson.features.length > 0) {
-                        feature.geometry = placeGeojson.features[0].geometry;
+                    const placeFeature = await placePromise;
+                    if (placeFeature != null) {
+                        feature.geometry = placeFeature.geometry;
                     }
-                    const longGeojson = await wayPromise;
-                    if (longGeojson.features.length > 1) {
-                        feature.geometry = SpatialService.mergeLines(longGeojson.features) as GeoJSON.Geometry;
+                    const longWayFeature = await wayPromise;
+                    if (longWayFeature != null) {
+                        feature.geometry = longWayFeature.geometry;
                     }
                 } catch (ex) {
                     this.loggingService.warning(`[POIs] Failed to enrich feature with id: ${id}, error: ${(ex as Error).message}`);

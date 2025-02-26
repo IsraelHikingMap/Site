@@ -58,7 +58,6 @@
               "pbf",
               "@mapbox/polyline",
               "linear-interpolator",
-              "osmtogeojson",
               "piexifjs",
               "deepmerge",
               "cordova-plugin-purchase",
