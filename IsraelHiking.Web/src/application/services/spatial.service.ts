@@ -392,16 +392,16 @@ export class SpatialService {
         return null;
     }
 
-    public static mergeLines(lines: GeoJSON.Feature<GeoJSON.LineString>[]): GeoJSON.MultiLineString | GeoJSON.LineString {
+    public static mergeLines(lines: GeoJSON.LineString[]): GeoJSON.MultiLineString | GeoJSON.LineString {
         const coordinatesGroups: GeoJSON.Position[][] = [];
-        const linesToMerge = lines.filter(l => l.geometry.coordinates.length > 0);
+        const linesToMerge = lines.filter(l => l.coordinates.length > 0);
         while (linesToMerge.length > 0) {
             let lineIndex = 0;
             let coordinatesGroupIndex = 0;
             let foundType = null;
             for (let i = 0; i < linesToMerge.length; i++) {
                 for (let j = 0; j < coordinatesGroups.length; j++) {
-                    foundType = SpatialService.canBeMreged(coordinatesGroups[j], linesToMerge[i].geometry.coordinates);
+                    foundType = SpatialService.canBeMreged(coordinatesGroups[j], linesToMerge[i].coordinates);
                     if (foundType) {
                         lineIndex = i;
                         coordinatesGroupIndex = j;
@@ -413,7 +413,7 @@ export class SpatialService {
                 }
             }
             if (!foundType) {
-                coordinatesGroups.push(linesToMerge[0].geometry.coordinates);
+                coordinatesGroups.push(linesToMerge[0].coordinates);
                 linesToMerge.shift();
                 continue;
             }
@@ -423,22 +423,22 @@ export class SpatialService {
             const coordinateGroup = coordinatesGroups[coordinatesGroupIndex];
             switch (foundType) {
                 case "start-start":
-                    line.geometry.coordinates.reverse();
-                    line.geometry.coordinates.pop();
-                    coordinatesGroups[coordinatesGroupIndex] = line.geometry.coordinates.concat(coordinateGroup);
+                    line.coordinates.reverse();
+                    line.coordinates.pop();
+                    coordinatesGroups[coordinatesGroupIndex] = line.coordinates.concat(coordinateGroup);
                     break;
                 case "start-end":
-                    line.geometry.coordinates.pop();
-                    coordinatesGroups[coordinatesGroupIndex] = line.geometry.coordinates.concat(coordinateGroup);
+                    line.coordinates.pop();
+                    coordinatesGroups[coordinatesGroupIndex] = line.coordinates.concat(coordinateGroup);
                     break;
                 case "end-start":
-                    line.geometry.coordinates.shift();
-                    coordinatesGroups[coordinatesGroupIndex] = coordinateGroup.concat(line.geometry.coordinates);
+                    line.coordinates.shift();
+                    coordinatesGroups[coordinatesGroupIndex] = coordinateGroup.concat(line.coordinates);
                     break;
                 case "end-end":
-                    line.geometry.coordinates.reverse();
-                    line.geometry.coordinates.shift();
-                    coordinatesGroups[coordinatesGroupIndex] = coordinateGroup.concat(line.geometry.coordinates);
+                    line.coordinates.reverse();
+                    line.coordinates.shift();
+                    coordinatesGroups[coordinatesGroupIndex] = coordinateGroup.concat(line.coordinates);
                     break;
             }
         }

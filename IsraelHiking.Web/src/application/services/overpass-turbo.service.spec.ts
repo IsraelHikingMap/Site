@@ -24,7 +24,7 @@ describe("OverpassTurboService", () => {
         mockBackend.expectOne("https://overpass-api.de/api/interpreter").flush(response);
         // Assert
         const results = await promise;
-        expect(results.features.length).toBe(0);
+        expect(results).toBeNull();
     }));
 
     it("Should get a long mtb way by name", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
@@ -36,7 +36,7 @@ describe("OverpassTurboService", () => {
         mockBackend.expectOne(u => u.body.includes("mtb:name")).flush(response);
         // Assert
         const results = await promise;
-        expect(results.features.length).toBe(0);
+        expect(results).toBeNull();
     }));
 
     it("Should get a long waterway way by name", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
@@ -48,7 +48,7 @@ describe("OverpassTurboService", () => {
         mockBackend.expectOne(u => u.body.includes("waterway")).flush(response);
         // Assert
         const results = await promise;
-        expect(results.features.length).toBe(0);
+        expect(results).toBeNull();
     }));
 
     it("Should get a long way by name with '\"'", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
@@ -60,7 +60,7 @@ describe("OverpassTurboService", () => {
         mockBackend.expectOne(u => u.body.includes("lalala\\\"")).flush(response);
         // Assert
         const results = await promise;
-        expect(results.features.length).toBe(0);
+        expect(results).toBeNull();
     }));
 
     it("Should get a place by id", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
@@ -72,6 +72,6 @@ describe("OverpassTurboService", () => {
         mockBackend.expectOne("https://overpass-api.de/api/interpreter").flush(response);
         // Assert
         const results = await promise;
-        expect(results.features.length).toBe(0);
+        expect(results).toBeNull();
     }));
 });

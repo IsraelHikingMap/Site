@@ -79,7 +79,7 @@ describe("Poi Service", () => {
                 { provide: MapService, useValue: mapServiceMock },
                 { provide: LoggingService, useValue: loggingService },
                 { provide: OverpassTurboService, useValue: {
-                    getLongWay: () => Promise.resolve({ features: [] }),
+                    getLongWay: () => Promise.resolve(null),
                 } },
                 { provide: INatureService, useValue: {
                     enritchFeatureFromINature: () => Promise.resolve(),
@@ -328,57 +328,28 @@ describe("Poi Service", () => {
         }
     )));
 
-    it("Should get a point by id and source from OSM with iNature and Wikidata", (inject([PoiService, HttpTestingController],
-        async (poiService: PoiService, mockBackend: HttpTestingController) => {
+    it("Should get a point by id and source from OSM with iNature and Wikidata", (inject([PoiService, OverpassTurboService],
+        async (poiService: PoiService, overpassTurboService: OverpassTurboService) => {
 
             const id = "way_42";
             const source = "OSM";
 
-            const promise = poiService.getPoint(id, source, "he");
+            overpassTurboService.getFeature = () => Promise.resolve({ 
+                geometry: {
+                    type: "LineString",
+                    coordinates: [[35.0415805, 32.4801317], [35.0417149, 32.4801635]]
+                },
+                properties: { 
+                    wikidata: "Q42",
+                    "mtb:name": "mtb:name",
+                    highway: "path",
+                    "ref:IL:inature": "42",
+                    "bicycle": "designated",
+                }
+            } as any);
 
-            mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes("42") &&
-                    request.url.includes("way")).flush({
-                        "version": "0.6",
-                        "generator": "openstreetmap-cgimap 2.0.1 (3329567 spike-07.openstreetmap.org)",
-                        "copyright": "OpenStreetMap and contributors",
-                        "attribution": "http://www.openstreetmap.org/copyright",
-                        "license": "http://opendatacommons.org/licenses/odbl/1-0/",
-                        "elements": [
-                            {
-                                "type": "node",
-                                "id": 1,
-                                "lat": 32.4801317,
-                                "lon": 35.0415805,
-                                "uid": 1
-                            },
-                            {
-                                "type": "node",
-                                "id": 2,
-                                "lat": 32.4801635,
-                                "lon": 35.0417149,
-                                "uid": 2
-                            },
-                            {
-                                "type": "way",
-                                "id": 3,
-                                "uid": 3,
-                                "nodes": [
-                                    1,
-                                    2
-                                ],
-                                "tags": {
-                                    "bicycle": "designated",
-                                    "foot": "yes",
-                                    "highway": "path",
-                                    "mtb:name": "mtb:name",
-                                    "wikidata": "Q42",
-                                    "ref:IL:inature": "42"
-                                }
-                            }
-                        ]
-                    });
-            
-            const res = await promise;
+            const res = await poiService.getPoint(id, source, "he");
+
             expect(res.properties.poiIcon).toBe("icon-bike");
         }
     )));

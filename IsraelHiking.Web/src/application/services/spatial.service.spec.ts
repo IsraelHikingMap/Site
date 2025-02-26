@@ -319,7 +319,7 @@ describe("Spatial service", () => {
             lineString([[0,0], [1,1]]),
             lineString([[1,1], [2,2]])
         ];
-        const merged = SpatialService.mergeLines(lines);
+        const merged = SpatialService.mergeLines(lines.map(l => l.geometry));
         expect(merged.coordinates.length).toBe(3);
     });
 
@@ -328,7 +328,7 @@ describe("Spatial service", () => {
             lineString([[0,0], [1,1]]),
             lineString([[2,2], [1,1]])
         ];
-        const merged = SpatialService.mergeLines(lines);
+        const merged = SpatialService.mergeLines(lines.map(l => l.geometry));
         expect(merged.coordinates.length).toBe(3);
     });
 
@@ -337,7 +337,7 @@ describe("Spatial service", () => {
             lineString([[1,1], [0,0]]),
             lineString([[1,1], [2,2]])
         ];
-        const merged = SpatialService.mergeLines(lines);
+        const merged = SpatialService.mergeLines(lines.map(l => l.geometry));
         expect(merged.coordinates.length).toBe(3);
         expect(merged.coordinates[0]).toEqual([2,2]);
         expect(merged.coordinates[2]).toEqual([0,0]);
@@ -348,7 +348,7 @@ describe("Spatial service", () => {
             lineString([[1,1], [2,2]]),
             lineString([[0,0], [1,1]])
         ];
-        const merged = SpatialService.mergeLines(lines);
+        const merged = SpatialService.mergeLines(lines.map(l => l.geometry));
         expect(merged.coordinates.length).toBe(3);
     });
 
@@ -358,7 +358,7 @@ describe("Spatial service", () => {
             lineString([[0,0], [1,1]]),
             lineString([[3,3], [2,2]])
         ];
-        const merged = SpatialService.mergeLines(lines);
+        const merged = SpatialService.mergeLines(lines.map(l => l.geometry));
         expect(merged.coordinates.length).toBe(4);
     });
 
@@ -368,7 +368,7 @@ describe("Spatial service", () => {
             lineString([[2,2], [3,3]]),
             lineString([[1,1], [2,2]])
         ];
-        const merged = SpatialService.mergeLines(lines);
+        const merged = SpatialService.mergeLines(lines.map(l => l.geometry));
         expect(merged.coordinates.length).toBe(4);
     });
 
@@ -378,7 +378,7 @@ describe("Spatial service", () => {
             lineString([[2,2], [1,1]]),            
             lineString([[2,2], [3,3]])
         ];
-        const merged = SpatialService.mergeLines(lines);
+        const merged = SpatialService.mergeLines(lines.map(l => l.geometry));
         expect(merged.coordinates.length).toBe(4);
         expect(merged.coordinates[0]).toEqual([0,0]);
     });
