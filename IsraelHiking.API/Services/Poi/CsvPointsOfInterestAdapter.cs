@@ -147,6 +147,7 @@ public class CsvPointsOfInterestAdapter : IPointsOfInterestAdapter
             {FeatureAttributes.POI_ICON_COLOR, pointOfInterest.IconColor},
             {FeatureAttributes.POI_SOURCE, Source},
             {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
+            {FeatureAttributes.POI_LANGUAGES, new [] {Languages.HEBREW}},
             {FeatureAttributes.POI_CATEGORY, pointOfInterest.Category},
             {FeatureAttributes.POI_SHARE_REFERENCE, pointOfInterest.FileUrl },
             {FeatureAttributes.POI_SOURCE_IMAGE_URL, pointOfInterest.SourceImageUrl},

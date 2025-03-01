@@ -3,7 +3,6 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 
-import { PoiService } from "./poi.service";
 import { CoordinatesService } from "./coordinates.service";
 import { RouteStrings, getIdFromLatLng } from "./hash.service";
 import { Urls } from "../urls";
@@ -13,7 +12,6 @@ import type { SearchResultsPointOfInterest } from "../models/models";
 export class SearchResultsProvider {
 
     private readonly httpClient = inject(HttpClient);
-    private readonly poiService = inject(PoiService);
     private readonly coordinatesService = inject(CoordinatesService);
 
     public async getResults(searchTerm: string, isHebrew: boolean): Promise<SearchResultsPointOfInterest[]> {
