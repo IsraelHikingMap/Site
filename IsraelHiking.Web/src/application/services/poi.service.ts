@@ -25,6 +25,7 @@ import { WikidataService } from "./wikidata.service";
 import { ImageAttributionService } from "./image-attribution.service";
 import { LatLon, OsmTagsService, PoiProperties } from "./osm-tags.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction } from "../reducers/offline.reducer";
+import { AVAILABLE_LANGUAGES } from "../reducers/initial-state";
 import {
     SetCategoriesGroupVisibilityAction,
     AddCategoryAction,
@@ -43,6 +44,7 @@ import type {
     EditablePublicPointData,
     OfflineState
 } from "../models/models";
+
 
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite"
 
@@ -354,8 +356,12 @@ export class PoiService {
         if (typeof poi.properties.poiGeolocation === "string") {
             poi.properties.poiGeolocation = JSON.parse(poi.properties.poiGeolocation);
         }
+        if (typeof poi.properties.poiLanguages === "string") {
+            poi.properties.poiLanguages = (poi.properties.poiLanguages as string).split(",");
+        }
         poi.properties.poiGeolocation = poi.properties.poiGeolocation || this.getGeolocation(feature);
         poi.properties.poiLanguage = poi.properties.poiLanguage || "all";
+        poi.properties.poiLanguages = poi.properties.poiLanguages || AVAILABLE_LANGUAGES.map(l => l.code);
         OsmTagsService.setIconColorCategory(feature, poi);
         return poi;
     }
@@ -365,7 +371,7 @@ export class PoiService {
         const visibleCategories = this.getVisibleCategories();
         const language = this.resources.getCurrentLanguageCodeSimplified();
         for (const feature of features) {
-            if (feature.properties.poiLanguage !== "all" && feature.properties.poiLanguage !== language) {
+            if (!feature.properties.poiLanguages.includes(language)) {
                 continue;
             }
             if (visibleCategories.indexOf(feature.properties.poiCategory) === -1) {

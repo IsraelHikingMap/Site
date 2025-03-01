@@ -247,7 +247,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     }
 
     public isShowSeeAlso() {
-        return this.fullFeature && this.fullFeature.properties.poiSource !== RouteStrings.COORDINATES;
+        return this.fullFeature && this.fullFeature.properties.poiSource !== RouteStrings.COORDINATES && (this.sourceImageUrls.length > 0 || this.getElementOsmAddress() != null);
     }
 
     public isRoute() {

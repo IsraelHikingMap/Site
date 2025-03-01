@@ -51,11 +51,12 @@ public static class FeatureAttributes
     public const string WIKIPEDIA = "wikipedia";
     public const string WIKIDATA = "wikidata";
     public const string INATURE_REF = "ref:IL:inature";
-    public const string POI_PREFIX = "poi";
+    private const string POI_PREFIX = "poi";
     public const string POI_ID = POI_PREFIX + "Id";
     public const string POI_SOURCE = POI_PREFIX + "Source";
     public const string POI_CATEGORY = POI_PREFIX + "Category";
     public const string POI_LANGUAGE = POI_PREFIX + "Language";
+    public const string POI_LANGUAGES = POI_PREFIX + "Languages";
     public const string POI_NAMES = POI_PREFIX + "Names";
     public const string POI_CONTAINER = POI_PREFIX + "Container";
     public const string POI_SHARE_REFERENCE = POI_PREFIX + "ShareReference";
