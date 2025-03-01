@@ -361,7 +361,7 @@ export class PoiService {
         }
         poi.properties.poiGeolocation = poi.properties.poiGeolocation || this.getGeolocation(feature);
         poi.properties.poiLanguage = poi.properties.poiLanguage || "all";
-        poi.properties.poiLanguages = poi.properties.poiLanguages || AVAILABLE_LANGUAGES.map(l => l.code);
+        poi.properties.poiLanguages = poi.properties.poiLanguages || AVAILABLE_LANGUAGES.map(l => l.code.split("-")[0]);
         OsmTagsService.setIconColorCategory(feature, poi);
         return poi;
     }
