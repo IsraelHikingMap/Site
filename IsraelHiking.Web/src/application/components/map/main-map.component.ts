@@ -3,7 +3,8 @@ import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { NgStyle, NgIf } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
 import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike } from "maplibre-gl";
-import { NgProgressComponent } from "ngx-progressbar";
+import { NgProgressbar } from "ngx-progressbar";
+import { NgProgressHttp } from 'ngx-progressbar/http';
 import { Store } from "@ngxs/store";
 
 import { TracesDialogComponent } from "../dialogs/traces-dialog.component";
@@ -34,7 +35,7 @@ import { IhmLinkComponent } from "../ihm-link.component";
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgProgressComponent, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersViewComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, NgIf, LocationComponent, MainMenuComponent, SearchComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, IhmLinkComponent]
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersViewComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, NgIf, LocationComponent, MainMenuComponent, SearchComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, IhmLinkComponent]
 })
 export class MainMapComponent {
 

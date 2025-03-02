@@ -1,7 +1,8 @@
 import { enableProdMode, APP_INITIALIZER, Injector, ErrorHandler, importProvidersFrom } from "@angular/core";
 import { environment } from "./environments/environment";
 import { AuthorizationService } from "./application/services/authorization.service";
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptors, withInterceptorsFromDi } from "@angular/common/http";
+import { progressInterceptor } from 'ngx-progressbar/http';
 import { OsmTokenInterceptor } from "./application/services/osm-token.interceptor";
 import { ApplicationInitializeService } from "./application/services/application-initialize.service";
 import { GlobalErrorHandler } from "./application/services/global-error.handler";
@@ -94,8 +95,6 @@ import { ClipboardModule } from "@angular/cdk/clipboard";
 import { provideRouter } from "@angular/router";
 import { MainMapComponent } from "./application/components/map/main-map.component";
 import { Angulartics2Module } from "angulartics2";
-import { NgProgressModule } from "ngx-progressbar";
-import { NgProgressHttpModule } from "ngx-progressbar/http";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import { DragDropModule } from "@angular/cdk/drag-drop";
 import { NgxsModule } from "@ngxs/store";
@@ -129,7 +128,7 @@ if (environment.production) {
 
 bootstrapApplication(MainMapComponent, {
     providers: [
-        importProvidersFrom(CommonModule, BrowserModule, MatDialogModule, MatButtonModule, MatInputModule, MatSnackBarModule, MatSliderModule, MatAutocompleteModule, MatSlideToggleModule, MatTooltipModule, MatSelectModule, MatProgressBarModule, MatProgressSpinnerModule, MatTabsModule, MatRadioModule, MatCheckboxModule, MatToolbarModule, MatMenuModule, MatExpansionModule, MatDividerModule, MatCardModule, MatGridListModule, FormsModule, ReactiveFormsModule, ClipboardModule, Angulartics2Module.forRoot(), NgProgressModule, NgProgressHttpModule, ScrollToModule.forRoot(), DragDropModule, NgxsModule.forRoot([
+        importProvidersFrom(CommonModule, BrowserModule, MatDialogModule, MatButtonModule, MatInputModule, MatSnackBarModule, MatSliderModule, MatAutocompleteModule, MatSlideToggleModule, MatTooltipModule, MatSelectModule, MatProgressBarModule, MatProgressSpinnerModule, MatTabsModule, MatRadioModule, MatCheckboxModule, MatToolbarModule, MatMenuModule, MatExpansionModule, MatDividerModule, MatCardModule, MatGridListModule, FormsModule, ReactiveFormsModule, ClipboardModule, Angulartics2Module.forRoot(), ScrollToModule.forRoot(), DragDropModule, NgxsModule.forRoot([
             ConfigurationReducer,
             LocationReducer,
             RoutesReducer,
@@ -214,7 +213,10 @@ bootstrapApplication(MainMapComponent, {
         SocialSharing,
         RouteEditPoiInteraction,
         RouteEditRouteInteraction,
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(
+            withInterceptorsFromDi(),
+            withInterceptors([progressInterceptor])
+        ),
         provideNgIdle(),
         provideAnimations(),
         provideRouter([{ path: "**", component: MainMapComponent }])

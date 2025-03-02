@@ -76,7 +76,7 @@
     "minisearch": "^7.1.0",
     "ngx-infinite-scroll": "^19.0.0",
     "ngx-lottie": "^13.0.1",
-    "ngx-progressbar": "^11.1.0",
+    "ngx-progressbar": "^14.0.0",
     "osm2geojson-lite": "^0.9.4",
     "pbf": "^3.2.1",
     "photoswipe": "^5.4.4",
