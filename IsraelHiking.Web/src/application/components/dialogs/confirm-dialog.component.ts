@@ -6,7 +6,8 @@ export type ConfirmType = "YesNo" | "OkCancel" | "Ok" | "Custom";
 
 @Component({
     selector: "confirm-dialog",
-    templateUrl: "confirm-dialog.component.html"
+    templateUrl: "confirm-dialog.component.html",
+    standalone: false
 })
 export class ConfirmDialogComponent {
     public confirmAction: () => void;

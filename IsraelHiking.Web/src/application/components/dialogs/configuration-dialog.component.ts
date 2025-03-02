@@ -17,7 +17,8 @@ import type { ApplicationState, BatteryOptimizationType } from "../../models/mod
 
 @Component({
     selector: "configuration-dialog",
-    templateUrl: "./configuration-dialog.component.html"
+    templateUrl: "./configuration-dialog.component.html",
+    standalone: false
 })
 export class ConfigurationDialogComponent {
 

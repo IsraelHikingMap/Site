@@ -21,7 +21,8 @@ import type { ApplicationState, ShareUrl } from "../../models/models";
     selector: "shares-dialog",
     templateUrl: "shares-dialog.component.html",
     styleUrls: ["shares-dialog.component.scss"],
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class SharesDialogComponent implements OnInit {
 

@@ -34,7 +34,8 @@ interface RoutePointViewData {
     selector: "routes",
     templateUrl: "./routes.component.html",
     styleUrls: ["./routes.component.scss"],
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class RoutesComponent implements AfterViewInit {
 

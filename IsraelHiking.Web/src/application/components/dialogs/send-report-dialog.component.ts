@@ -9,7 +9,8 @@ export type SendReportDialogData = {
 
 @Component({
     selector: "send-report",
-    templateUrl: "./send-report-dialog.component.html"
+    templateUrl: "./send-report-dialog.component.html",
+    standalone: false
 })
 export class SendReportDialogComponent {
     public mailToLink: string;

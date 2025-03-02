@@ -11,7 +11,8 @@ import type { LatLngAlt } from "../../models/models";
     selector: "missing-part-overlay",
     templateUrl: "./missing-part-overlay.component.html",
     styleUrls: ["./missing-part-overlay.component.scss"],
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class MissingPartOverlayComponent {
 

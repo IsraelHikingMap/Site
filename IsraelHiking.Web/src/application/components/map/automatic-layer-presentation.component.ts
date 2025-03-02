@@ -18,7 +18,8 @@ import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from ".
 
 @Component({
     selector: "auto-layer",
-    templateUrl: "./automatic-layer-presentation.component.html"
+    templateUrl: "./automatic-layer-presentation.component.html",
+    standalone: false
 })
 export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, OnDestroy {
     private static indexNumber = 0;

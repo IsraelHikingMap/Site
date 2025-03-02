@@ -8,6 +8,7 @@ import { AddRouteAction } from "../../../reducers/routes.reducer";
     templateUrl: "./route-properties-dialog.component.html",
     styleUrls: ["./route-properties-dialog.component.scss"],
     encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class RouteAddDialogComponent extends RouteBaseDialogComponent {
     constructor() {

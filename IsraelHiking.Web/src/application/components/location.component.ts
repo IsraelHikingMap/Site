@@ -18,7 +18,8 @@ import type { LatLngAlt, ApplicationState } from "../models/models";
 @Component({
     selector: "location",
     templateUrl: "./location.component.html",
-    styleUrls: ["./location.component.scss"]
+    styleUrls: ["./location.component.scss"],
+    standalone: false
 })
 export class LocationComponent {
     public locationFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;

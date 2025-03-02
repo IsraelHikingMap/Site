@@ -23,7 +23,8 @@ import type { ApplicationState, LatLngAlt, LinkData, Overlay } from "../../model
 @Component({
     selector: "layers-view",
     templateUrl: "layers-view.component.html",
-    styleUrls: ["layers-view.component.scss"]
+    styleUrls: ["layers-view.component.scss"],
+    standalone: false
 })
 export class LayersViewComponent implements OnInit {
     private static readonly MAX_MENU_POINTS_IN_CLUSTER = 7;

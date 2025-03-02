@@ -12,7 +12,8 @@ import type { ApplicationState, LatLngAlt } from "../../models/models";
 
 @Component({
     selector: "traces",
-    templateUrl: "./traces.component.html"
+    templateUrl: "./traces.component.html",
+    standalone: false
 })
 export class TracesComponent {
 

@@ -14,7 +14,8 @@ export type PhotoSwipeData = {
     selector: "photoswipe",
     templateUrl: "./photoswipe.component.html",
     styleUrls: ["./photoswipe.component.scss"],
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class PhotoSwpieComponent implements AfterViewInit{
 

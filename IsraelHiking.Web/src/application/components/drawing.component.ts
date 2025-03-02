@@ -20,7 +20,8 @@ import type { RoutingType, ApplicationState } from "../models/models";
 
 @Component({
     selector: "drawing",
-    templateUrl: "./drawing.component.html"
+    templateUrl: "./drawing.component.html",
+    standalone: false
 })
 export class DrawingComponent {
 

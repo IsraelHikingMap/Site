@@ -18,7 +18,8 @@ export interface IProgressDialogConfig {
 
 @Component({
     selector: "progress-dialog",
-    templateUrl: "progress-dialog.component.html"
+    templateUrl: "progress-dialog.component.html",
+    standalone: false
 })
 export class ProgressDialogComponent {
     public progressPersentage: number = 0;

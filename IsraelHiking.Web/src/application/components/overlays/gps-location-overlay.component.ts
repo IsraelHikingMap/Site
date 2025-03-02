@@ -18,7 +18,8 @@ import type { ApplicationState, LatLngAlt, LinkData } from "../../models/models"
 
 @Component({
     selector: "gps-location-overlay",
-    templateUrl: "./gps-location-overlay.component.html"
+    templateUrl: "./gps-location-overlay.component.html",
+    standalone: false
 })
 export class GpsLocationOverlayComponent {
 

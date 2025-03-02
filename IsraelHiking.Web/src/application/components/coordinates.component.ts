@@ -7,7 +7,8 @@ import type { LatLngAlt, NorthEast } from "../models/models";
 
 @Component({
     selector: "coordinates",
-    templateUrl: "./coordinates.component.html"
+    templateUrl: "./coordinates.component.html",
+    standalone: false
 })
 export class CoordinatesComponent implements OnInit {
 

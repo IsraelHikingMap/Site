@@ -14,6 +14,7 @@ import type { DataContainer, RouteData, LatLngAlt } from "../../../models/models
     templateUrl: "./route-properties-dialog.component.html",
     styleUrls: ["./route-properties-dialog.component.scss"],
     encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     private originalName: string;

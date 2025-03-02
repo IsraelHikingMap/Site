@@ -32,7 +32,8 @@ interface PrivatePoiEditDialogData {
 
 @Component({
     selector: "private-poi-edit-dialog",
-    templateUrl: "private-poi-edit-dialog.component.html"
+    templateUrl: "private-poi-edit-dialog.component.html",
+    standalone: false
 })
 export class PrivatePoiEditDialogComponent implements AfterViewInit {
     private static readonly NUMBER_OF_ICONS_PER_ROW = 4;

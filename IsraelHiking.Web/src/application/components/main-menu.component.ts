@@ -35,7 +35,8 @@ import type { UserInfo, ApplicationState } from "../models/models";
 @Component({
     selector: "main-menu",
     templateUrl: "./main-menu.component.html",
-    styleUrls: ["./main-menu.component.scss"]
+    styleUrls: ["./main-menu.component.scss"],
+    standalone: false
 })
 export class MainMenuComponent {
 

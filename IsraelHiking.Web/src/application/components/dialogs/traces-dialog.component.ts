@@ -23,7 +23,8 @@ import type { ApplicationState, Trace, TraceVisibility } from "../../models/mode
     selector: "traces-dialog",
     templateUrl: "./traces-dialog.component.html",
     styleUrls: ["./traces-dialog.component.scss"],
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class TracesDialogComponent implements OnInit {
 

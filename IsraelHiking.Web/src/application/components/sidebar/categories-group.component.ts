@@ -12,7 +12,8 @@ import type { ApplicationState, CategoriesGroup, Category } from "../../models/m
 
 @Component({
     selector: "categories-group",
-    templateUrl: "./categories-group.component.html"
+    templateUrl: "./categories-group.component.html",
+    standalone: false
 })
 export class CategoriesGroupComponent {
 

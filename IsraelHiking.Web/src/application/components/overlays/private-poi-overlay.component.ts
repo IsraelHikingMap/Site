@@ -11,7 +11,8 @@ import type { MarkerData, LinkData } from "../../models/models";
     selector: "private-poi-overlay",
     templateUrl: "./private-poi-overlay.component.html",
     styleUrls: ["./private-poi-overlay.component.scss"],
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class PrivatePoiOverlayComponent implements OnInit {
 

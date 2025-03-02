@@ -28,7 +28,8 @@ import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGro
     selector: "layers-sidebar",
     templateUrl: "./layers-sidebar.component.html",
     styleUrls: ["./layers-sidebar.component.scss"],
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class LayersSidebarComponent {
 

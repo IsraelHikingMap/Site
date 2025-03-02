@@ -13,7 +13,8 @@ import type { ApplicationState, DataContainer, ShareUrl } from "../../models/mod
 
 @Component({
     selector: "share-dialog",
-    templateUrl: "./share-dialog.component.html"
+    templateUrl: "./share-dialog.component.html",
+    standalone: false
 })
 export class ShareDialogComponent implements AfterViewInit {
 

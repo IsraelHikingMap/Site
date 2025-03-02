@@ -8,7 +8,8 @@ import { switchMap, map } from "rxjs/operators";
     selector: "secured-image",
     template: `
     <img [src]="dataUrl$|async" class="w-full"/>
-  `
+  `,
+    standalone: false
 })
 export class SecuredImageComponent implements OnChanges {
     // This code block just creates an rxjs stream from the src

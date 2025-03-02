@@ -5,7 +5,8 @@ import { ResourcesService } from "../services/resources.service";
 
 @Component({
     selector: "zoom",
-    templateUrl: "./zoom.component.html"
+    templateUrl: "./zoom.component.html",
+    standalone: false
 })
 export class ZoomComponent {
     public readonly resources = inject(ResourcesService);

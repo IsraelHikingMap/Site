@@ -11,7 +11,8 @@ import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.j
 
 @Component({
     selector: "image-scroller",
-    templateUrl: "./image-scroller.component.html"
+    templateUrl: "./image-scroller.component.html",
+    standalone: false
 })
 export class ImageScrollerComponent implements OnChanges {
     lottiePOI: AnimationOptions = {

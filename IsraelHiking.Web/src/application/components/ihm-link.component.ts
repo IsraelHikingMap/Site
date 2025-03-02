@@ -7,7 +7,8 @@ import { Urls } from "../urls";
 @Component({
     selector: "ihm-link",
     templateUrl: "./ihm-link.component.html",
-    styleUrls: ["./ihm-link.component.scss"]
+    styleUrls: ["./ihm-link.component.scss"],
+    standalone: false
 })
 export class IhmLinkComponent {
 

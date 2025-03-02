@@ -6,7 +6,8 @@ import { RunningContextService } from "../../services/running-context.service";
 
 @Component({
     selector: "use-app-dialog",
-    templateUrl: "./use-app-dialog.component.html"
+    templateUrl: "./use-app-dialog.component.html",
+    standalone: false
 })
 export class UseAppDialogComponent {
     public appAddress: string;

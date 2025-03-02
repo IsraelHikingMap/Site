@@ -11,7 +11,8 @@ import { ApplicationState, LatLngAltTime, RecordedRoute } from "../../models/mod
 
 @Component({
     selector: "recorded-route",
-    templateUrl: "./recorded-route.component.html"
+    templateUrl: "./recorded-route.component.html",
+    standalone: false
 })
 export class RecordedRouteComponent {
 

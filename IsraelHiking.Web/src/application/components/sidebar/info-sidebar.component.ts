@@ -23,7 +23,8 @@ export type LegendSection = {
 @Component({
     selector: "info-sidebar",
     templateUrl: "./info-sidebar.component.html",
-    styleUrls: ["./info-sidebar.component.scss"]
+    styleUrls: ["./info-sidebar.component.scss"],
+    standalone: false
 })
 export class InfoSidebarComponent {
     public legendSections: LegendSection[] = [];

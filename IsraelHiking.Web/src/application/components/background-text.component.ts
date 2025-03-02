@@ -8,7 +8,8 @@ import type { ApplicationState } from "../models/models";
 @Component({
     selector: "background-text",
     templateUrl: "./background-text.component.html",
-    styleUrls: ["./background-text.component.scss"]
+    styleUrls: ["./background-text.component.scss"],
+    standalone: false
 })
 export class BackgroundTextComponent {
 

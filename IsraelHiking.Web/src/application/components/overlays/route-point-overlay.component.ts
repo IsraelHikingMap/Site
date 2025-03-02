@@ -6,7 +6,8 @@ import type { LatLngAlt } from "../../models/models";
 
 @Component({
     selector: "route-point-overlay",
-    templateUrl: "./route-point-overlay.component.html"
+    templateUrl: "./route-point-overlay.component.html",
+    standalone: false
 })
 export class RoutePointOverlayComponent implements OnChanges {
     public canMerge: boolean = false;

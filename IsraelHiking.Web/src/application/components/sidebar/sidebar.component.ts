@@ -10,22 +10,17 @@ import { ResourcesService } from "../../services/resources.service";
     styleUrls: ["./sidebar.component.scss"],
     animations: [
         trigger("animateSidebar", [
-            transition(
-                ":enter",
-                [
-                    style({ transform: "translateX(-100%)" }),
-                    animate("500ms", style({ transform: "translateX(0)" }))
-                ]
-            ),
-            transition(
-                ":leave",
-                [
-                    style({ transform: "translateX(0)" }),
-                    animate("500ms", style({ transform: "translateX(-100%)" }))
-                ]
-            )
+            transition(":enter", [
+                style({ transform: "translateX(-100%)" }),
+                animate("500ms", style({ transform: "translateX(0)" }))
+            ]),
+            transition(":leave", [
+                style({ transform: "translateX(0)" }),
+                animate("500ms", style({ transform: "translateX(-100%)" }))
+            ])
         ])
-    ]
+    ],
+    standalone: false
 })
 export class SidebarComponent {
 

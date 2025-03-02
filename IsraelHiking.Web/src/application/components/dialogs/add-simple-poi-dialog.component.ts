@@ -17,7 +17,8 @@ export type AddSimplePoiDialogData = {
 
 @Component({
     selector: "add-simple-poi-doalog",
-    templateUrl: "./add-simple-poi-dialog.component.html"
+    templateUrl: "./add-simple-poi-dialog.component.html",
+    standalone: false
 })
 export class AddSimplePoiDialogComponent {
 

@@ -6,7 +6,8 @@ import { ToastService } from "../../services/toast.service";
 
 @Component({
     selector: "terms-of-service-dialog",
-    templateUrl: "./terms-of-service-dialog.component.html"
+    templateUrl: "./terms-of-service-dialog.component.html",
+    standalone: false
 })
 export class TermsOfServiceDialogComponent {
     public wikimediaTermsOfServiceUrl: string;

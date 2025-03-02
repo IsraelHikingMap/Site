@@ -5,7 +5,8 @@ import { LayersService } from "../services/layers.service";
 
 @Directive({
     selector: "[nameInUse]",
-    providers: [{ provide: NG_VALIDATORS, useExisting: NameInUseValidatorDirective, multi: true }]
+    providers: [{ provide: NG_VALIDATORS, useExisting: NameInUseValidatorDirective, multi: true }],
+    standalone: false
 })
 export class NameInUseValidatorDirective implements Validator, AfterViewInit {
 

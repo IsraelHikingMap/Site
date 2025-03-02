@@ -13,7 +13,8 @@ import type { ApplicationState, DataContainer } from "../../models/models";
 
 @Component({
     selector: "files-share-dialog",
-    templateUrl: "./files-shares-dialog.component.html"
+    templateUrl: "./files-shares-dialog.component.html",
+    standalone: false
 })
 export class FilesSharesDialogComponent {
 

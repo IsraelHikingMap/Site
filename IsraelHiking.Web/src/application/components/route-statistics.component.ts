@@ -57,20 +57,17 @@ interface IChartElements {
     encapsulation: ViewEncapsulation.None,
     animations: [
         trigger("animateChart", [
-            transition(
-                ":enter", [
+            transition(":enter", [
                 style({ transform: "scale(0.2)", "transform-origin": "bottom right" }),
                 animate("200ms", style({ transform: "scale(1)", "transform-origin": "bottom right" }))
-            ]
-            ),
-            transition(
-                ":leave", [
+            ]),
+            transition(":leave", [
                 style({ transform: "scale(1)", "transform-origin": "bottom right" }),
                 animate("200ms", style({ transform: "scale(0.2)", "transform-origin": "bottom right" }))
-            ]
-            )]
-        )
+            ])
+        ])
     ],
+    standalone: false
 })
 export class RouteStatisticsComponent implements OnInit {
     private static readonly HOVER_BOX_WIDTH = 160;

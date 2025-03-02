@@ -19,7 +19,8 @@ import moreAnimationData from "../../../content/lottie/dialog-more.json";
 @Component({
     selector: "intro-dialog",
     templateUrl: "./intro-dialog.component.html",
-    styleUrls: ["./intro-dialog.component.scss"]
+    styleUrls: ["./intro-dialog.component.scss"],
+    standalone: false
 })
 export class IntroDialogComponent {
 

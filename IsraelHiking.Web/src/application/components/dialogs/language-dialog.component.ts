@@ -8,7 +8,8 @@ import { ApplicationState, LanguageCode } from "../../models/models";
 
 @Component({
     selector: "language-dialog",
-    templateUrl: "./language-dialog.component.html"
+    templateUrl: "./language-dialog.component.html",
+    standalone: false
 })
 export class LanguageDialogComponent {
     public selectedLanguageCode: LanguageCode;

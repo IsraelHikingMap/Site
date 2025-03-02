@@ -8,7 +8,8 @@ import type { EditablePublicPointData, IconColorLabel } from "../../../models/mo
 @Component({
     selector: "public-poi-edit",
     templateUrl: "./public-poi-edit.component.html",
-    styleUrls: ["./public-poi-edit.component.scss"]
+    styleUrls: ["./public-poi-edit.component.scss"],
+    standalone: false
 })
 export class PublicPointOfInterestEditComponent implements OnInit {
 

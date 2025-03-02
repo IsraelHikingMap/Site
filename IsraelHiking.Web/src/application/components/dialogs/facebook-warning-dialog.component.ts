@@ -5,7 +5,8 @@ import { ResourcesService } from "../../services/resources.service";
 
 @Component({
     selector: "facebook-warning-dialog",
-    templateUrl: "./facebook-warning-dialog.component.html"
+    templateUrl: "./facebook-warning-dialog.component.html",
+    standalone: false
 })
 export class FacebookWarningDialogComponent {
 

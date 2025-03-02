@@ -8,7 +8,8 @@ import type { ApplicationState } from "../models/models";
 @Component({
     selector: "center-me",
     templateUrl: "./center-me.component.html",
-    styleUrls: ["./center-me.component.scss"]
+    styleUrls: ["./center-me.component.scss"],
+    standalone: false
 })
 export class CenterMeComponent {
 

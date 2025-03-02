@@ -23,7 +23,8 @@ interface IPrivatePoiShowDialogData {
 
 @Component({
     selector: "private-poi-show-dialog",
-    templateUrl: "private-poi-show-dialog.component.html"
+    templateUrl: "private-poi-show-dialog.component.html",
+    standalone: false
 })
 export class PrivatePoiShowDialogComponent {
 

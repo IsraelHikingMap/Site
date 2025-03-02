@@ -17,7 +17,8 @@ import type { ApplicationState, LocationState } from "../../models/models";
     selector: "main-map",
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class MainMapComponent {
 

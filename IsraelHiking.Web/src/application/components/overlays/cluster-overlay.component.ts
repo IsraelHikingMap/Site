@@ -8,7 +8,8 @@ import { GeoJSONUtils } from "../../services/geojson-utils";
 @Component({
     selector: "cluster-overlay",
     templateUrl: "./cluster-overlay.component.html",
-    styleUrls: ["./cluster-overlay.component.scss"]
+    styleUrls: ["./cluster-overlay.component.scss"],
+    standalone: false
 })
 export class ClusterOverlayComponent {
 

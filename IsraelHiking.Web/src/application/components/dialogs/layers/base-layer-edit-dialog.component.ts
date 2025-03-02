@@ -5,7 +5,8 @@ import type { LayerData, EditableLayer } from "../../../models/models";
 
 @Component({
     selector: "baselayer-edit-dialog",
-    templateUrl: "./layer-properties-dialog.component.html"
+    templateUrl: "./layer-properties-dialog.component.html",
+    standalone: false
 })
 export class BaseLayerEditDialogComponent extends LayerBaseDialogComponent {
     private backupBaseLayer: EditableLayer;

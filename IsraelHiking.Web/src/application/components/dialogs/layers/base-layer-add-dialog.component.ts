@@ -5,7 +5,8 @@ import type { LayerData } from "../../../models/models";
 
 @Component({
     selector: "baselayer-add-dialog",
-    templateUrl: "./layer-properties-dialog.component.html"
+    templateUrl: "./layer-properties-dialog.component.html",
+    standalone: false
 })
 export class BaseLayerAddDialogComponent extends LayerBaseDialogComponent {
     constructor() {
