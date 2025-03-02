@@ -41,7 +41,6 @@ export class InfoSidebarComponent {
 
     public readonly resources = inject(ResourcesService);
 
-    private readonly dialog = inject(MatDialog);
     private readonly angulartics = inject(Angulartics2GoogleGlobalSiteTag);
     private readonly sidebarService = inject(SidebarService);
     private readonly layersService = inject(LayersService);
