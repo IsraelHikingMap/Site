@@ -1,4 +1,4 @@
-import { enableProdMode, APP_INITIALIZER, Injector, ErrorHandler, importProvidersFrom } from "@angular/core";
+import { enableProdMode, provideAppInitializer, ErrorHandler, importProvidersFrom, inject } from "@angular/core";
 import { environment } from "./environments/environment";
 import { AuthorizationService } from "./application/services/authorization.service";
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptors, withInterceptorsFromDi } from "@angular/common/http";
@@ -116,10 +116,17 @@ import { NgxMapLibreGLModule } from "@maplibre/ngx-maplibre-gl";
 import { InfiniteScrollDirective } from "ngx-infinite-scroll";
 import player from "lottie-web";
 
-const initializeApplication = (injector: Injector) => async () => {
-    await injector.get<ApplicationInitializeService>(ApplicationInitializeService).initialize();
-};
 
+// See https://github.com/ionic-team/capacitor/issues/1564
+export class FileReaderFixForCapacitor extends FileReader {
+	constructor() {
+		super();
+        // eslint-disable-next-line
+		const zoneOriginalInstance = (this as any).__zone_symbol__originalInstance;
+		return zoneOriginalInstance || this;
+	}
+}
+window.FileReader = FileReaderFixForCapacitor;
 
 
 if (environment.production) {
@@ -128,6 +135,9 @@ if (environment.production) {
 
 bootstrapApplication(MainMapComponent, {
     providers: [
+        provideAppInitializer(async () => {
+            await inject(ApplicationInitializeService).initialize();
+        }),
         importProvidersFrom(CommonModule, BrowserModule, MatDialogModule, MatButtonModule, MatInputModule, MatSnackBarModule, MatSliderModule, MatAutocompleteModule, MatSlideToggleModule, MatTooltipModule, MatSelectModule, MatProgressBarModule, MatProgressSpinnerModule, MatTabsModule, MatRadioModule, MatCheckboxModule, MatToolbarModule, MatMenuModule, MatExpansionModule, MatDividerModule, MatCardModule, MatGridListModule, FormsModule, ReactiveFormsModule, ClipboardModule, Angulartics2Module.forRoot(), ScrollToModule.forRoot(), DragDropModule, NgxsModule.forRoot([
             ConfigurationReducer,
             LocationReducer,
@@ -149,7 +159,6 @@ bootstrapApplication(MainMapComponent, {
         InfiniteScrollDirective),
         AuthorizationService,
         { provide: HTTP_INTERCEPTORS, useClass: OsmTokenInterceptor, multi: true },
-        { provide: APP_INITIALIZER, useFactory: initializeApplication, deps: [Injector], multi: true },
         { provide: ErrorHandler, useClass: GlobalErrorHandler },
         { provide: SaveAsFactory, useFactory: () => saveAs },
         provideLottieOptions({ player: () => player }),
