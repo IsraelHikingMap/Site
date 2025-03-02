@@ -1,9 +1,9 @@
 import { enableProdMode, provideAppInitializer, ErrorHandler, importProvidersFrom, inject } from "@angular/core";
 import { environment } from "./environments/environment";
 import { AuthorizationService } from "./application/services/authorization.service";
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptors, withInterceptorsFromDi } from "@angular/common/http";
+import { provideHttpClient, withInterceptors } from "@angular/common/http";
 import { progressInterceptor } from 'ngx-progressbar/http';
-import { OsmTokenInterceptor } from "./application/services/osm-token.interceptor";
+import { osmTokenInterceptor } from "./application/services/osm-token.interceptor";
 import { ApplicationInitializeService } from "./application/services/application-initialize.service";
 import { GlobalErrorHandler } from "./application/services/global-error.handler";
 import { SaveAsFactory, FileService } from "./application/services/file.service";
@@ -22,7 +22,7 @@ import { SnappingService } from "./application/services/snapping.service";
 import { FitBoundsService } from "./application/services/fit-bounds.service";
 import { RouteStatisticsService } from "./application/services/route-statistics.service";
 import { ShareUrlsService } from "./application/services/share-urls.service";
-import { Title, BrowserModule, HammerModule, bootstrapApplication } from "@angular/platform-browser";
+import { Title, BrowserModule, bootstrapApplication } from "@angular/platform-browser";
 import { IHMTitleService } from "./application/services/ihm-title.service";
 import { ToastService } from "./application/services/toast.service";
 import { ElevationProvider } from "./application/services/elevation.provider";
@@ -138,30 +138,55 @@ bootstrapApplication(MainMapComponent, {
         provideAppInitializer(async () => {
             await inject(ApplicationInitializeService).initialize();
         }),
-        importProvidersFrom(CommonModule, BrowserModule, MatDialogModule, MatButtonModule, MatInputModule, MatSnackBarModule, MatSliderModule, MatAutocompleteModule, MatSlideToggleModule, MatTooltipModule, MatSelectModule, MatProgressBarModule, MatProgressSpinnerModule, MatTabsModule, MatRadioModule, MatCheckboxModule, MatToolbarModule, MatMenuModule, MatExpansionModule, MatDividerModule, MatCardModule, MatGridListModule, FormsModule, ReactiveFormsModule, ClipboardModule, Angulartics2Module.forRoot(), ScrollToModule.forRoot(), DragDropModule, NgxsModule.forRoot([
-            ConfigurationReducer,
-            LocationReducer,
-            RoutesReducer,
-            RouteEditingReducer,
-            RecordedRouteReducer,
-            TracesReducer,
-            LayersReducer,
-            ShareUrlsReducer,
-            UserInfoReducer,
-            PointsOfInterestReducer,
-            InMemoryReducer,
-            GpsReducer,
-            OfflineReducer,
-            UIComponentsReducer
-        ]), 
-        NgxMapLibreGLModule, 
-        HammerModule, 
-        InfiniteScrollDirective),
+        importProvidersFrom(
+            CommonModule,
+            BrowserModule,
+            MatDialogModule,
+            MatButtonModule,
+            MatInputModule,
+            MatSnackBarModule,
+            MatSliderModule,
+            MatAutocompleteModule,
+            MatSlideToggleModule,
+            MatTooltipModule,
+            MatSelectModule,
+            MatProgressBarModule,
+            MatProgressSpinnerModule,
+            MatTabsModule,
+            MatRadioModule,
+            MatCheckboxModule,
+            MatToolbarModule,
+            MatMenuModule,
+            MatExpansionModule,
+            MatDividerModule,
+            MatCardModule,
+            MatGridListModule,
+            FormsModule,
+            ReactiveFormsModule,
+            ClipboardModule,
+            NgxMapLibreGLModule,
+            InfiniteScrollDirective,
+            Angulartics2Module.forRoot(), 
+            ScrollToModule.forRoot(), 
+            DragDropModule,
+            NgxsModule.forRoot([
+                ConfigurationReducer,
+                LocationReducer,
+                RoutesReducer,
+                RouteEditingReducer,
+                RecordedRouteReducer,
+                TracesReducer,
+                LayersReducer,
+                ShareUrlsReducer,
+                UserInfoReducer,
+                PointsOfInterestReducer,
+                InMemoryReducer,
+                GpsReducer,
+                OfflineReducer,
+                UIComponentsReducer
+            ])
+        ),
         AuthorizationService,
-        { provide: HTTP_INTERCEPTORS, useClass: OsmTokenInterceptor, multi: true },
-        { provide: ErrorHandler, useClass: GlobalErrorHandler },
-        { provide: SaveAsFactory, useFactory: () => saveAs },
-        provideLottieOptions({ player: () => player }),
         GetTextCatalogService,
         MapService,
         ResourcesService,
@@ -222,12 +247,14 @@ bootstrapApplication(MainMapComponent, {
         SocialSharing,
         RouteEditPoiInteraction,
         RouteEditRouteInteraction,
+        { provide: ErrorHandler, useClass: GlobalErrorHandler },
+        { provide: SaveAsFactory, useFactory: () => saveAs },
         provideHttpClient(
-            withInterceptorsFromDi(),
-            withInterceptors([progressInterceptor])
+            withInterceptors([osmTokenInterceptor, progressInterceptor])
         ),
         provideNgIdle(),
         provideAnimations(),
-        provideRouter([{ path: "**", component: MainMapComponent }])
+        provideRouter([{ path: "**", component: MainMapComponent }]),
+        provideLottieOptions({ player: () => player })
     ]
 });
