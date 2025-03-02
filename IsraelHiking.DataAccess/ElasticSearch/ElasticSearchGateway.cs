@@ -139,7 +139,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         });
         if (!string.IsNullOrWhiteSpace(d.Source.Image))
         {
-            feature.Attributes[FeatureAttributes.IMAGE_URL] = d.Source.Image;
+            feature.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, d.Source.Image);
         }
         feature.SetTitles();
         feature.SetLocation(new Coordinate(d.Source.Location[0], d.Source.Location[1]));
