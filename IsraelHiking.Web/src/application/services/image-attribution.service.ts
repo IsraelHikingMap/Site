@@ -16,8 +16,8 @@ export class ImageAttributionService {
 
     private extractPlainText(html: string): string {
         const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        return doc.documentElement.textContent.replace(/([ \t]*\n[ \t]*)+/g, '\n').replace(/[ \t]+/g, ' ').trim();
+        const doc = parser.parseFromString(html, "text/html");
+        return doc.documentElement.textContent.replace(/([ \t]*\n[ \t]*)+/g, "\n").replace(/[ \t]+/g, " ").trim();
     }
 
     public async getAttributionForImage(imageUrl: string): Promise<ImageAttribution> {

@@ -4,7 +4,7 @@ import { NgStyle, NgIf } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
 import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike } from "maplibre-gl";
 import { NgProgressbar } from "ngx-progressbar";
-import { NgProgressHttp } from 'ngx-progressbar/http';
+import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";
 
 import { TracesDialogComponent } from "../dialogs/traces-dialog.component";

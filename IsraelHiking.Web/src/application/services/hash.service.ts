@@ -62,7 +62,7 @@ export class HashService {
             filter(event => event instanceof NavigationEnd)
           ).subscribe((event: NavigationEnd) => {
             const tree = this.router.parseUrl(event.url);
-            const segments = tree.root.children['primary']?.segments ?? [];
+            const segments = tree.root.children["primary"]?.segments ?? [];
             const queryParams = tree.queryParams;
             if (this.router.url.startsWith(RouteStrings.ROUTE_MAP)) {
                 this.fitBoundsService.flyTo({
