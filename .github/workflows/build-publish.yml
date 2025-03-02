@@ -79,7 +79,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Bump versions in gradle
         uses: chkfung/android-version-actions@v1.2.2
