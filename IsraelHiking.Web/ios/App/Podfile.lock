@@ -14,9 +14,9 @@ PODS:
     - Capacitor
   - CapacitorTextZoom (7.0.0):
     - Capacitor
-  - CapawesomeCapacitorAppUpdate (6.1.0):
+  - CapawesomeCapacitorAppUpdate (7.0.1):
     - Capacitor
-  - CapgoNativeAudio (6.4.23):
+  - CapgoNativeAudio (7.3.0):
     - Capacitor
   - CordovaPlugins (7.0.1):
     - CapacitorCordova
@@ -71,8 +71,8 @@ SPEC CHECKSUMS:
   CapacitorCordova: 63d476958d5022d76f197031e8b7ea3519988c64
   CapacitorDevice: 069faf433b3a99c3d5f0e500fbe634f60a8c6a84
   CapacitorTextZoom: 254c75dffb54d34d582a4f14cc7ba432fcfb5cad
-  CapawesomeCapacitorAppUpdate: 385ad62a9f529cdedaca5df3599b9b7f6d03e880
-  CapgoNativeAudio: af16819c730f0bad24361a2aa40e6e2327113bed
+  CapawesomeCapacitorAppUpdate: d1f04c1c870388248889908cf2ca960c7fdbf0ef
+  CapgoNativeAudio: 31deec018455d3bacf76e10028794603d8d56cba
   CordovaPlugins: 6613bdd70e5ae8c9c12561297ced5c7f6e323e97
   CordovaPluginsResources: 0c211f770ed91763a179ebcd9b9346e120b70662
 
