@@ -11,10 +11,7 @@ interface HTMLElementInputChangeEvent {
     target: any;
 }
 
-@Directive({
-    selector: "[imageCapture]",
-    standalone: false
-})
+@Directive({ selector: "[imageCapture]" })
 export class ImageCaptureDirective implements OnDestroy {
 
     public changed = output<HTMLElementInputChangeEvent>();

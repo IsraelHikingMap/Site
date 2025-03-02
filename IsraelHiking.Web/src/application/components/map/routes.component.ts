@@ -1,11 +1,17 @@
 import { Component, AfterViewInit, ViewEncapsulation, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { MapComponent } from "@maplibre/ngx-maplibre-gl";
+import { NgIf, NgFor } from "@angular/common";
+import { Dir } from "@angular/cdk/bidi";
+import { MatAnchor, MatButton } from "@angular/material/button";
+import { MatTooltip } from "@angular/material/tooltip";
+import { MapComponent, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, MarkerComponent } from "@maplibre/ngx-maplibre-gl";
 import { MapLayerMouseEvent } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 import invert from "invert-color";
 import type { Immutable } from "immer";
 
+import { RoutePointOverlayComponent } from "../overlays/route-point-overlay.component";
+import { PrivatePoiOverlayComponent } from "../overlays/private-poi-overlay.component";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
 import { ResourcesService } from "../../services/resources.service";
@@ -35,7 +41,7 @@ interface RoutePointViewData {
     templateUrl: "./routes.component.html",
     styleUrls: ["./routes.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+    imports: [SourceDirective, GeoJSONSourceComponent, LayerComponent, NgIf, PopupComponent, RoutePointOverlayComponent, Dir, MatAnchor, MatTooltip, MatButton, NgFor, MarkerComponent, PrivatePoiOverlayComponent]
 })
 export class RoutesComponent implements AfterViewInit {
 

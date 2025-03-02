@@ -1,6 +1,15 @@
 import { Component, inject, input, OnInit } from "@angular/core";
-import { MatSelectChange } from "@angular/material/select";
+import { MatSelectChange, MatSelect } from "@angular/material/select";
+import { Dir } from "@angular/cdk/bidi";
+import { NgIf, NgClass, NgFor } from "@angular/common";
+import { MatCardHeader, MatCardTitle } from "@angular/material/card";
+import { MatFormField, MatLabel, MatSuffix } from "@angular/material/form-field";
+import { MatInput } from "@angular/material/input";
+import { FormsModule } from "@angular/forms";
+import { MatIconButton, MatButton } from "@angular/material/button";
+import { MatOption } from "@angular/material/core";
 
+import { ImageScrollerComponent } from "./image-scroller.component";
 import { PoiService, ISelectableCategory } from "../../../services/poi.service";
 import { ResourcesService } from "../../../services/resources.service";
 import type { EditablePublicPointData, IconColorLabel } from "../../../models/models";
@@ -9,7 +18,7 @@ import type { EditablePublicPointData, IconColorLabel } from "../../../models/mo
     selector: "public-poi-edit",
     templateUrl: "./public-poi-edit.component.html",
     styleUrls: ["./public-poi-edit.component.scss"],
-    standalone: false
+    imports: [Dir, NgIf, MatCardHeader, MatCardTitle, NgClass, MatFormField, MatLabel, MatInput, FormsModule, ImageScrollerComponent, NgFor, MatIconButton, MatSuffix, MatButton, MatSelect, MatOption]
 })
 export class PublicPointOfInterestEditComponent implements OnInit {
 

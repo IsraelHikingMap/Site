@@ -1,4 +1,8 @@
 import { Component, inject } from "@angular/core";
+import { MatTooltip } from "@angular/material/tooltip";
+import { NgIf } from "@angular/common";
+import { Angulartics2OnModule } from "angulartics2";
+
 import { HashService } from "../services/hash.service";
 import { ResourcesService } from "../services/resources.service";
 import { RunningContextService } from "../services/running-context.service";
@@ -8,7 +12,7 @@ import { Urls } from "../urls";
     selector: "ihm-link",
     templateUrl: "./ihm-link.component.html",
     styleUrls: ["./ihm-link.component.scss"],
-    standalone: false
+    imports: [Angulartics2OnModule, MatTooltip, NgIf]
 })
 export class IhmLinkComponent {
 

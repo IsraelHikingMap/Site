@@ -1,7 +1,19 @@
 import { Component, inject, OnInit, ViewEncapsulation } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { MatDialog } from "@angular/material/dialog";
-import { FormControl } from "@angular/forms";
+import { Dir } from "@angular/cdk/bidi";
+import { MatFormField, MatLabel } from "@angular/material/form-field";
+import { MatInput } from "@angular/material/input";
+import { MatButton, MatAnchor } from "@angular/material/button";
+import { CdkScrollable } from "@angular/cdk/scrolling";
+import { NgFor, NgClass, NgIf, AsyncPipe, DatePipe } from "@angular/common";
+import { MatProgressSpinner } from "@angular/material/progress-spinner";
+import { MatTooltip } from "@angular/material/tooltip";
+import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
+import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
+import { MatDialog, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
+import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { Angulartics2OnModule } from "angulartics2";
+import { InfiniteScrollDirective } from "ngx-infinite-scroll";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { take, orderBy } from "lodash-es";
 import { Observable } from "rxjs";
@@ -22,7 +34,7 @@ import type { ApplicationState, ShareUrl } from "../../models/models";
     templateUrl: "shares-dialog.component.html",
     styleUrls: ["shares-dialog.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+    imports: [InfiniteScrollDirective, Dir, MatDialogTitle, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, Angulartics2OnModule, NgFor, NgClass, NgIf, MatProgressSpinner, MatDialogActions, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, AsyncPipe, DatePipe]
 })
 export class SharesDialogComponent implements OnInit {
 

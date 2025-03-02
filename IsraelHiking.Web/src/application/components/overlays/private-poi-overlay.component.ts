@@ -1,5 +1,7 @@
 import { Component, inject, input, OnInit, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
+import { Dir } from "@angular/cdk/bidi";
+import { NgIf, NgClass } from "@angular/common";
 
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { PrivatePoiShowDialogComponent } from "../dialogs/private-poi-show-dialog.component";
@@ -12,7 +14,7 @@ import type { MarkerData, LinkData } from "../../models/models";
     templateUrl: "./private-poi-overlay.component.html",
     styleUrls: ["./private-poi-overlay.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+    imports: [Dir, NgIf, NgClass]
 })
 export class PrivatePoiOverlayComponent implements OnInit {
 

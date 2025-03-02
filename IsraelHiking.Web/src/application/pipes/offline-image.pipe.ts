@@ -6,10 +6,7 @@ import { firstValueFrom } from "rxjs";
 import { RunningContextService } from "../services/running-context.service";
 import { DatabaseService } from "../services/database.service";
 
-@Pipe({
-    name: "offlineImage",
-    standalone: false
-})
+@Pipe({ name: "offlineImage" })
 export class OfflineImagePipe implements PipeTransform {
 
     private readonly http = inject(HttpClient);

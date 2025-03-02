@@ -1,12 +1,20 @@
 import { Component, ElementRef, AfterViewInit, HostListener, inject, viewChild } from "@angular/core";
-import {
-    MatDialogRef,
-    MatDialog,
-    MAT_DIALOG_DATA
-} from "@angular/material/dialog";
+import { Dir } from "@angular/cdk/bidi";
+import { NgIf, NgFor, NgStyle, NgClass } from "@angular/common";
+import { MatButton, MatAnchor, MatIconButton } from "@angular/material/button";
+import { CdkScrollable } from "@angular/cdk/scrolling";
+import { MatFormField, MatLabel, MatSuffix } from "@angular/material/form-field";
+import { MatInput } from "@angular/material/input";
+import { FormsModule } from "@angular/forms";
+import { MatTooltip } from "@angular/material/tooltip";
+import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
+import { MatDialogRef, MatDialog, MAT_DIALOG_DATA, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
+import { Angulartics2OnModule } from "angulartics2";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { Store } from "@ngxs/store";
 
+import { CoordinatesComponent } from "../coordinates.component";
+import { ImageCaptureDirective } from "../../directives/image-capture.directive";
 import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
@@ -33,7 +41,7 @@ interface PrivatePoiEditDialogData {
 @Component({
     selector: "private-poi-edit-dialog",
     templateUrl: "private-poi-edit-dialog.component.html",
-    standalone: false
+    imports: [Dir, MatDialogTitle, NgIf, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatAnchor, ImageCaptureDirective, Angulartics2OnModule, MatTooltip, NgFor, NgStyle, NgClass, MatIconButton, MatSuffix, CoordinatesComponent, MatDialogActions, MatMenu, MatMenuItem, MatMenuTrigger]
 })
 export class PrivatePoiEditDialogComponent implements AfterViewInit {
     private static readonly NUMBER_OF_ICONS_PER_ROW = 4;

@@ -1,11 +1,24 @@
 import { Component, OnInit, ViewEncapsulation, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { FormControl } from "@angular/forms";
-import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { Dir } from "@angular/cdk/bidi";
+import { MatFormField, MatLabel } from "@angular/material/form-field";
+import { MatInput } from "@angular/material/input";
+import { MatButton, MatAnchor } from "@angular/material/button";
+import { CdkScrollable } from "@angular/cdk/scrolling";
+import { NgFor, NgClass, NgIf, DatePipe } from "@angular/common";
+import { MatSelect } from "@angular/material/select";
+import { MatOption } from "@angular/material/core";
+import { MatProgressSpinner } from "@angular/material/progress-spinner";
+import { MatTooltip } from "@angular/material/tooltip";
+import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
+import { Angulartics2OnModule } from "angulartics2";
+import { InfiniteScrollDirective } from "ngx-infinite-scroll";
 import { orderBy, take } from "lodash-es";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
+import { SecuredImageComponent } from "../secured-image.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { OsmAddressesService } from "../../services/osm-addresses.service";
@@ -24,7 +37,7 @@ import type { ApplicationState, Trace, TraceVisibility } from "../../models/mode
     templateUrl: "./traces-dialog.component.html",
     styleUrls: ["./traces-dialog.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+    imports: [InfiniteScrollDirective, Dir, MatDialogTitle, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatAnchor, Angulartics2OnModule, NgFor, NgClass, NgIf, SecuredImageComponent, MatSelect, MatOption, MatProgressSpinner, MatDialogActions, MatTooltip, DatePipe]
 })
 export class TracesDialogComponent implements OnInit {
 

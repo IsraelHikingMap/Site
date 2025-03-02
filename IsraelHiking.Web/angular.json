@@ -31,7 +31,7 @@
               "src/fonts/glyphs.json",
               {
                 "glob": "**/mapbox-gl-rtl-text.js",
-                "input": "./node_modules/@mapbox/mapbox-gl-rtl-text",
+                "input": "./node_modules/@mapbox/mapbox-gl-rtl-text/dist",
                 "output": "./"
               }
             ],

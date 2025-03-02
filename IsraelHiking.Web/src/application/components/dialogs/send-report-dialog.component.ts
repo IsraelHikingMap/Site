@@ -1,5 +1,9 @@
 import { Component, inject } from "@angular/core";
-import { MatDialog, MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { Dir } from "@angular/cdk/bidi";
+import { MatButton, MatAnchor } from "@angular/material/button";
+import { CdkScrollable } from "@angular/cdk/scrolling";
+import { MatDialog, MAT_DIALOG_DATA, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
+import { Angulartics2OnModule } from "angulartics2";
 
 import { ResourcesService } from "../../services/resources.service";
 
@@ -10,7 +14,7 @@ export type SendReportDialogData = {
 @Component({
     selector: "send-report",
     templateUrl: "./send-report-dialog.component.html",
-    standalone: false
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatDialogActions, MatAnchor, Angulartics2OnModule]
 })
 export class SendReportDialogComponent {
     public mailToLink: string;

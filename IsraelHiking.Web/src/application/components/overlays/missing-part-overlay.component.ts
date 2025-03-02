@@ -1,7 +1,13 @@
 import { Component, ViewEncapsulation, inject, input, output } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { Dir } from "@angular/cdk/bidi";
+import { MatButton } from "@angular/material/button";
+import { NgClass, NgIf } from "@angular/common";
+import { MatTooltip } from "@angular/material/tooltip";
+import { Angulartics2OnModule } from "angulartics2";
 import { firstValueFrom } from "rxjs";
 
+import { CoordinatesComponent } from "../coordinates.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { Urls } from "../../urls";
@@ -12,7 +18,7 @@ import type { LatLngAlt } from "../../models/models";
     templateUrl: "./missing-part-overlay.component.html",
     styleUrls: ["./missing-part-overlay.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+    imports: [Dir, MatButton, NgClass, MatTooltip, Angulartics2OnModule, NgIf, CoordinatesComponent]
 })
 export class MissingPartOverlayComponent {
 

@@ -1,5 +1,12 @@
 import { Component, inject } from "@angular/core";
-import { MatDialogRef } from "@angular/material/dialog";
+import { Dir } from "@angular/cdk/bidi";
+import { MatButton, MatAnchor } from "@angular/material/button";
+import { CdkScrollable } from "@angular/cdk/scrolling";
+import { NgIf, AsyncPipe } from "@angular/common";
+import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
+import { MatCheckbox } from "@angular/material/checkbox";
+import { MatDialogRef, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
+import { Angulartics2OnModule } from "angulartics2";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
@@ -18,7 +25,7 @@ import type { ApplicationState, BatteryOptimizationType } from "../../models/mod
 @Component({
     selector: "configuration-dialog",
     templateUrl: "./configuration-dialog.component.html",
-    standalone: false
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, NgIf, MatRadioGroup, MatRadioButton, Angulartics2OnModule, MatCheckbox, MatDialogActions, MatAnchor, AsyncPipe]
 })
 export class ConfigurationDialogComponent {
 

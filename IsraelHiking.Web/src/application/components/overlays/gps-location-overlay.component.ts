@@ -1,9 +1,15 @@
 import { Component, inject, input, output } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
+import { Dir } from "@angular/cdk/bidi";
+import { MatButton } from "@angular/material/button";
+import { MatTooltip } from "@angular/material/tooltip";
+import { NgIf, AsyncPipe } from "@angular/common";
+import { Angulartics2OnModule } from "angulartics2";
 import { Observable } from "rxjs";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { Store } from "@ngxs/store";
 
+import { CoordinatesComponent } from "../coordinates.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { AddSimplePoiDialogComponent } from "../dialogs/add-simple-poi-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -19,7 +25,7 @@ import type { ApplicationState, LatLngAlt, LinkData } from "../../models/models"
 @Component({
     selector: "gps-location-overlay",
     templateUrl: "./gps-location-overlay.component.html",
-    standalone: false
+    imports: [Dir, MatButton, Angulartics2OnModule, MatTooltip, NgIf, CoordinatesComponent, AsyncPipe]
 })
 export class GpsLocationOverlayComponent {
 

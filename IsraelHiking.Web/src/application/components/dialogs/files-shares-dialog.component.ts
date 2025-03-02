@@ -1,5 +1,11 @@
 import { Component, inject } from "@angular/core";
-import { MatDialog, MatDialogRef } from "@angular/material/dialog";
+import { Dir } from "@angular/cdk/bidi";
+import { MatButton, MatAnchor } from "@angular/material/button";
+import { CdkScrollable } from "@angular/cdk/scrolling";
+import { NgIf, NgFor } from "@angular/common";
+import { MatHint } from "@angular/material/form-field";
+import { MatDialog, MatDialogRef, MatDialogTitle, MatDialogClose, MatDialogContent } from "@angular/material/dialog";
+import { Angulartics2OnModule } from "angulartics2";
 import { every } from "lodash-es";
 import { Store } from "@ngxs/store";
 
@@ -14,7 +20,7 @@ import type { ApplicationState, DataContainer } from "../../models/models";
 @Component({
     selector: "files-share-dialog",
     templateUrl: "./files-shares-dialog.component.html",
-    standalone: false
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, Angulartics2OnModule, MatAnchor, NgIf, MatHint, NgFor]
 })
 export class FilesSharesDialogComponent {
 

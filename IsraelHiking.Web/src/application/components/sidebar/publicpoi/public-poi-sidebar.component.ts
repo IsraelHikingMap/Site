@@ -1,11 +1,24 @@
 import { Component, inject, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { Dir } from "@angular/cdk/bidi";
+import { NgIf, NgClass, NgFor, DecimalPipe } from "@angular/common";
+import { MatButton, MatAnchor } from "@angular/material/button";
+import { MatTooltip } from "@angular/material/tooltip";
+import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
+import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
+import { MatProgressSpinner } from "@angular/material/progress-spinner";
+import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from "@angular/material/card";
+import { MatCheckbox } from "@angular/material/checkbox";
+import { FormsModule } from "@angular/forms";
 import { Router, NavigationEnd } from "@angular/router";
+import { Angulartics2OnModule } from "angulartics2";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { filter } from "rxjs";
 import { cloneDeep } from "lodash-es";
 import { Store } from "@ngxs/store";
 
+import { PublicPointOfInterestEditComponent } from "./public-poi-edit.component";
+import { ImageScrollerComponent } from "./image-scroller.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { PoiService, PoiSocialLinks } from "../../../services/poi.service";
 import { IHMTitleService } from "../../../services/ihm-title.service";
@@ -44,7 +57,7 @@ export type SourceImageUrlPair = {
     templateUrl: "./public-poi-sidebar.component.html",
     styleUrls: ["./public-poi-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+    imports: [Dir, NgIf, MatButton, Angulartics2OnModule, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, MatCard, PublicPointOfInterestEditComponent, MatCheckbox, FormsModule, MatCardHeader, MatCardTitle, NgClass, MatCardContent, ImageScrollerComponent, NgFor, DecimalPipe]
 })
 export class PublicPoiSidebarComponent implements OnDestroy {
     public info = { imagesUrls: [], urls: [] } as EditablePublicPointData;

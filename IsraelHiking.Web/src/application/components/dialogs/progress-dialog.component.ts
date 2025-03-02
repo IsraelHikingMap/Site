@@ -1,9 +1,11 @@
 import { Component, inject } from "@angular/core";
-import {
-    MatDialogRef,
-    MatDialog,
-    MAT_DIALOG_DATA
-} from "@angular/material/dialog";
+import { Dir } from "@angular/cdk/bidi";
+import { CdkScrollable } from "@angular/cdk/scrolling";
+import { MatProgressBar } from "@angular/material/progress-bar";
+import { NgIf, DecimalPipe } from "@angular/common";
+import { MatButton } from "@angular/material/button";
+import { MatDialogRef, MatDialog, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions, MatDialogClose } from "@angular/material/dialog";
+import { Angulartics2OnModule } from "angulartics2";
 
 import { ResourcesService } from "../../services/resources.service";
 import { LoggingService } from "../../services/logging.service";
@@ -19,7 +21,7 @@ export interface IProgressDialogConfig {
 @Component({
     selector: "progress-dialog",
     templateUrl: "progress-dialog.component.html",
-    standalone: false
+    imports: [Dir, CdkScrollable, MatDialogContent, MatProgressBar, NgIf, MatDialogActions, MatButton, MatDialogClose, Angulartics2OnModule, DecimalPipe]
 })
 export class ProgressDialogComponent {
     public progressPersentage: number = 0;

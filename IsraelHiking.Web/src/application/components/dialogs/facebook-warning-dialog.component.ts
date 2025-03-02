@@ -1,12 +1,15 @@
 import { Component, inject } from "@angular/core";
-import { MatDialog } from "@angular/material/dialog";
+import { Dir } from "@angular/cdk/bidi";
+import { MatButton, MatAnchor } from "@angular/material/button";
+import { MatDialog, MatDialogTitle, MatDialogClose, MatDialogActions } from "@angular/material/dialog";
+import { Angulartics2OnModule } from "angulartics2";
 
 import { ResourcesService } from "../../services/resources.service";
 
 @Component({
     selector: "facebook-warning-dialog",
     templateUrl: "./facebook-warning-dialog.component.html",
-    standalone: false
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, MatDialogActions, MatAnchor, Angulartics2OnModule]
 })
 export class FacebookWarningDialogComponent {
 

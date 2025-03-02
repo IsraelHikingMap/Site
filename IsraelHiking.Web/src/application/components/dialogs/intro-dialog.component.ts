@@ -1,10 +1,12 @@
 import { Component, inject } from "@angular/core";
-import {
-    MatDialog,
-    MatDialogConfig,
-    MatDialogRef
-} from "@angular/material/dialog";
-import { AnimationOptions } from "ngx-lottie";
+import { Dir } from "@angular/cdk/bidi";
+import { CdkScrollable } from "@angular/cdk/scrolling";
+import { NgIf, NgFor } from "@angular/common";
+import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
+import { MatButton } from "@angular/material/button";
+import { MatDialog, MatDialogConfig, MatDialogRef, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
+import { AnimationOptions, LottieComponent } from "ngx-lottie";
+import { Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../../services/resources.service";
@@ -20,7 +22,7 @@ import moreAnimationData from "../../../content/lottie/dialog-more.json";
     selector: "intro-dialog",
     templateUrl: "./intro-dialog.component.html",
     styleUrls: ["./intro-dialog.component.scss"],
-    standalone: false
+    imports: [Dir, CdkScrollable, MatDialogContent, NgIf, MatRadioGroup, NgFor, MatRadioButton, Angulartics2OnModule, LottieComponent, MatDialogActions, MatButton]
 })
 export class IntroDialogComponent {
 
