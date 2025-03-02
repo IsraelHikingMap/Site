@@ -292,11 +292,11 @@ export class PoiService {
         }
         let features: MapGeoJSONFeature[] = [];
         for (const sourceLayer of PoiService.POIS_SOURCE_LAYER_NAMES) {
-            features = features.concat(this.mapService.map.querySourceFeatures(PoiService.POIS_SOURCE_ID, {sourceLayer}));
+            features = features.concat(this.mapService.map.querySourceFeatures(PoiService.POIS_SOURCE_ID, {sourceLayer}) as MapGeoJSONFeature[]);
         }
         if (features.length === 0) {
             for (const sourceLayer of PoiService.POIS_SOURCE_LAYER_NAMES) {
-                features = features.concat(this.mapService.map.querySourceFeatures(`${PoiService.POIS_SOURCE_ID}-offline`, {sourceLayer}));
+                features = features.concat(this.mapService.map.querySourceFeatures(`${PoiService.POIS_SOURCE_ID}-offline`, {sourceLayer}) as MapGeoJSONFeature[]);
             }
         }
         return features;
