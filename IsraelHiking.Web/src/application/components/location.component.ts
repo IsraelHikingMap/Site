@@ -15,6 +15,7 @@ import { SelectedRouteService } from "../services/selected-route.service";
 import { SpatialService } from "../services/spatial.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
 import { LocationService } from "../services/location.service";
+import { FileService } from "../services/file.service";
 import { ToggleDistanceAction, SetPannedAction, SetFollowingAction, ToggleKeepNorthUpAction } from "../reducers/in-memory.reducer";
 import { StopShowingBatteryConfirmationAction } from "../reducers/configuration.reducer";
 import { ChangeRouteStateAction } from "../reducers/routes.reducer";
@@ -38,6 +39,7 @@ export class LocationComponent {
     private readonly locationSerivce = inject(LocationService);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly recordedRouteService = inject(RecordedRouteService);
+    private readonly fileService = inject(FileService);
     private readonly store = inject(Store);
     private readonly mapComponent = inject(MapComponent);
 
@@ -57,7 +59,10 @@ export class LocationComponent {
             this.updateDistanceFeatureCollection();
         });
 
-        this.mapComponent.mapLoad.subscribe(() => {
+        this.mapComponent.mapLoad.subscribe(async () => {
+            const fullUrl = this.fileService.getFullUrl("content/gps-arrow.png");
+            const image = await this.mapComponent.mapInstance.loadImage(fullUrl);
+            this.mapComponent.mapInstance.addImage("gps-arrow", image.data);
             this.mapComponent.mapInstance.on("move", () => {
                 this.updateDistanceFeatureCollection();
             });
