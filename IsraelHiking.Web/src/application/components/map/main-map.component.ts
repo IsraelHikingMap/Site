@@ -156,6 +156,9 @@ export class MainMapComponent {
     }
 
     public pitchChanged() {
+        if (this.runningContextService.isMobile) {
+            return;
+        }
         const pitch = this.mapComponent().mapInstance.getPitch();
         if (pitch <= 10 && !this.isTerrainOn) {
             // Terrain is off and pitch is low, nothing to do.
