@@ -117,7 +117,7 @@ export class OfflineFilesDownloadService {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         let lastModifiedString = offlineState.lastModifiedDate ? offlineState.lastModifiedDate.toISOString() : null;
         if (!offlineState.isPmtilesDownloaded) {
-            this.loggingService.info(`[Offline Download] This is the first time downloading pmtiles, downloading all files`);
+            this.loggingService.info("[Offline Download] This is the first time downloading pmtiles, downloading all files");
             lastModifiedString = null;
         }
         const fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {

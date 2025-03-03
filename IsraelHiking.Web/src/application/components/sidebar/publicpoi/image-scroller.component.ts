@@ -1,6 +1,12 @@
 import { Component, OnChanges, SimpleChanges, input, inject, output } from "@angular/core";
-import { AnimationOptions } from "ngx-lottie";
+import { NgIf, AsyncPipe } from "@angular/common";
+import { MatAnchor, MatButton } from "@angular/material/button";
+import { Dir } from "@angular/cdk/bidi";
+import { Angulartics2OnModule } from "angulartics2";
+import { AnimationOptions, LottieComponent } from "ngx-lottie";
 
+import { ImageCaptureDirective } from "../../../directives/image-capture.directive";
+import { OfflineImagePipe } from "../../../pipes/offline-image.pipe";
 import { ResourcesService } from "../../../services/resources.service";
 import { FileService } from "../../../services/file.service";
 import { ImageGalleryService } from "../../../services/image-gallery.service";
@@ -11,7 +17,8 @@ import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.j
 
 @Component({
     selector: "image-scroller",
-    templateUrl: "./image-scroller.component.html"
+    templateUrl: "./image-scroller.component.html",
+    imports: [NgIf, LottieComponent, MatAnchor, ImageCaptureDirective, Angulartics2OnModule, MatButton, Dir, AsyncPipe, OfflineImagePipe]
 })
 export class ImageScrollerComponent implements OnChanges {
     lottiePOI: AnimationOptions = {

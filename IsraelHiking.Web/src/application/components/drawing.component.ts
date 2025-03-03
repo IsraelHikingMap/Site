@@ -1,4 +1,10 @@
 import { Component, HostListener, inject } from "@angular/core";
+import { NgIf, NgClass, NgStyle, AsyncPipe } from "@angular/common";
+import { Dir } from "@angular/cdk/bidi";
+import { MatButton } from "@angular/material/button";
+import { MatTooltip } from "@angular/material/tooltip";
+import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
+import { Angulartics2OnModule } from "angulartics2";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
@@ -20,7 +26,8 @@ import type { RoutingType, ApplicationState } from "../models/models";
 
 @Component({
     selector: "drawing",
-    templateUrl: "./drawing.component.html"
+    templateUrl: "./drawing.component.html",
+    imports: [NgIf, Dir, MatButton, Angulartics2OnModule, NgClass, NgStyle, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger, AsyncPipe]
 })
 export class DrawingComponent {
 

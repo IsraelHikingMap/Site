@@ -6,7 +6,7 @@ import { timeout, skip } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
-import type { MapGeoJSONFeature } from "maplibre-gl";
+import type { GeoJSONFeature } from "maplibre-gl";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, PoiRouterData, RouteStrings } from "./hash.service";
@@ -285,12 +285,12 @@ export class PoiService {
         }
     }
 
-    private getFeaturesFromTiles(): MapGeoJSONFeature[] {
+    private getFeaturesFromTiles(): GeoJSONFeature[] {
         if (this.mapService.map == null) {
             // Map is not ready yet
             return [];
         }
-        let features: MapGeoJSONFeature[] = [];
+        let features: GeoJSONFeature[] = [];
         for (const sourceLayer of PoiService.POIS_SOURCE_LAYER_NAMES) {
             features = features.concat(this.mapService.map.querySourceFeatures(PoiService.POIS_SOURCE_ID, {sourceLayer}));
         }

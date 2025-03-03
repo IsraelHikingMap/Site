@@ -1,12 +1,20 @@
 import { Component, DestroyRef, inject, OnInit } from "@angular/core";
+import { NgFor, NgIf, AsyncPipe } from "@angular/common";
+import { Dir } from "@angular/cdk/bidi";
+import { MatButton } from "@angular/material/button";
+import { MatTooltip } from "@angular/material/tooltip";
+import { Angulartics2OnModule } from "angulartics2";
 import { MatDialog } from "@angular/material/dialog";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
-import { GeoJSONSourceComponent } from "@maplibre/ngx-maplibre-gl";
+import { GeoJSONSourceComponent, SourceDirective, MarkersForClustersComponent, PointDirective, ClusterPointDirective, PopupComponent, MarkerComponent, LayerComponent } from "@maplibre/ngx-maplibre-gl";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
+import { CoordinatesComponent } from "../coordinates.component";
+import { ClusterOverlayComponent } from "../overlays/cluster-overlay.component";
+import { AutomaticLayerPresentationComponent } from "./automatic-layer-presentation.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { PoiService } from "../../services/poi.service";
 import { LayersService } from "../../services/layers.service";
@@ -23,7 +31,8 @@ import type { ApplicationState, LatLngAlt, LinkData, Overlay } from "../../model
 @Component({
     selector: "layers-view",
     templateUrl: "layers-view.component.html",
-    styleUrls: ["layers-view.component.scss"]
+    styleUrls: ["layers-view.component.scss"],
+    imports: [AutomaticLayerPresentationComponent, NgFor, SourceDirective, GeoJSONSourceComponent, MarkersForClustersComponent, PointDirective, Angulartics2OnModule, NgIf, ClusterPointDirective, PopupComponent, ClusterOverlayComponent, Dir, MatButton, MatTooltip, CoordinatesComponent, MarkerComponent, LayerComponent, AsyncPipe]
 })
 export class LayersViewComponent implements OnInit {
     private static readonly MAX_MENU_POINTS_IN_CLUSTER = 7;

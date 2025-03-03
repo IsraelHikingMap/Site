@@ -1,5 +1,9 @@
 import { Component, inject } from "@angular/core";
-import { MAT_DIALOG_DATA, MatDialog } from "@angular/material/dialog";
+import { Dir } from "@angular/cdk/bidi";
+import { MatButton } from "@angular/material/button";
+import { CdkScrollable } from "@angular/cdk/scrolling";
+import { MAT_DIALOG_DATA, MatDialog, MatDialogTitle, MatDialogClose, MatDialogContent } from "@angular/material/dialog";
+import { Angulartics2OnModule } from "angulartics2";
 
 import { ResourcesService } from "../../services/resources.service";
 import { PoiService, SimplePointType} from "../../services/poi.service";
@@ -17,7 +21,8 @@ export type AddSimplePoiDialogData = {
 
 @Component({
     selector: "add-simple-poi-doalog",
-    templateUrl: "./add-simple-poi-dialog.component.html"
+    templateUrl: "./add-simple-poi-dialog.component.html",
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, Angulartics2OnModule]
 })
 export class AddSimplePoiDialogComponent {
 

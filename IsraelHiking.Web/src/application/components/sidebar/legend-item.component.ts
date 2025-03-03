@@ -1,4 +1,8 @@
 import { Component, inject, input } from "@angular/core";
+import { NgClass, NgIf } from "@angular/common";
+import { Dir } from "@angular/cdk/bidi";
+import { MatTooltip } from "@angular/material/tooltip";
+import { Angulartics2OnModule } from "angulartics2";
 
 import { LayersService } from "../../services/layers.service";
 import { ResourcesService } from "../../services/resources.service";
@@ -20,7 +24,8 @@ export interface ILegendItem {
 @Component({
     selector: "legend-item",
     templateUrl: "./legend-item.component.html",
-    styleUrls: ["./legend-item.component.scss"]
+    styleUrls: ["./legend-item.component.scss"],
+    imports: [NgClass, Dir, Angulartics2OnModule, MatTooltip, NgIf]
 })
 export class LegendItemComponent {
 
