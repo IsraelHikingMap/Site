@@ -1,8 +1,14 @@
 import { Component, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { MapComponent } from "@maplibre/ngx-maplibre-gl";
+import { MatButton } from "@angular/material/button";
+import { MatTooltip } from "@angular/material/tooltip";
+import { NgIf } from "@angular/common";
+import { MatProgressSpinner } from "@angular/material/progress-spinner";
+import { MapComponent, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent } from "@maplibre/ngx-maplibre-gl";
+import { Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
 
+import { GpsLocationOverlayComponent } from "./overlays/gps-location-overlay.component";
 import { ResourcesService } from "../services/resources.service";
 import { ToastService } from "../services/toast.service";
 import { SelectedRouteService } from "../services/selected-route.service";
@@ -19,7 +25,8 @@ import type { LatLngAlt, ApplicationState } from "../models/models";
 @Component({
     selector: "location",
     templateUrl: "./location.component.html",
-    styleUrls: ["./location.component.scss"]
+    styleUrls: ["./location.component.scss"],
+    imports: [MatButton, Angulartics2OnModule, MatTooltip, NgIf, MatProgressSpinner, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, GpsLocationOverlayComponent]
 })
 export class LocationComponent {
     public locationFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;

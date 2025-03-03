@@ -6,7 +6,7 @@ import { timeout, skip } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
-import type { MapGeoJSONFeature } from "maplibre-gl";
+import type { GeoJSONFeature } from "maplibre-gl";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, PoiRouterData, RouteStrings } from "./hash.service";
@@ -25,6 +25,7 @@ import { WikidataService } from "./wikidata.service";
 import { ImageAttributionService } from "./image-attribution.service";
 import { LatLon, OsmTagsService, PoiProperties } from "./osm-tags.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction } from "../reducers/offline.reducer";
+import { AVAILABLE_LANGUAGES } from "../reducers/initial-state";
 import {
     SetCategoriesGroupVisibilityAction,
     AddCategoryAction,
@@ -43,6 +44,7 @@ import type {
     EditablePublicPointData,
     OfflineState
 } from "../models/models";
+
 
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite"
 
@@ -283,12 +285,12 @@ export class PoiService {
         }
     }
 
-    private getFeaturesFromTiles(): MapGeoJSONFeature[] {
+    private getFeaturesFromTiles(): GeoJSONFeature[] {
         if (this.mapService.map == null) {
             // Map is not ready yet
             return [];
         }
-        let features: MapGeoJSONFeature[] = [];
+        let features: GeoJSONFeature[] = [];
         for (const sourceLayer of PoiService.POIS_SOURCE_LAYER_NAMES) {
             features = features.concat(this.mapService.map.querySourceFeatures(PoiService.POIS_SOURCE_ID, {sourceLayer}));
         }
@@ -354,8 +356,12 @@ export class PoiService {
         if (typeof poi.properties.poiGeolocation === "string") {
             poi.properties.poiGeolocation = JSON.parse(poi.properties.poiGeolocation);
         }
+        if (typeof poi.properties.poiLanguages === "string") {
+            poi.properties.poiLanguages = (poi.properties.poiLanguages as string).split(",");
+        }
         poi.properties.poiGeolocation = poi.properties.poiGeolocation || this.getGeolocation(feature);
         poi.properties.poiLanguage = poi.properties.poiLanguage || "all";
+        poi.properties.poiLanguages = poi.properties.poiLanguages || AVAILABLE_LANGUAGES.map(l => l.code.split("-")[0]);
         OsmTagsService.setIconColorCategory(feature, poi);
         return poi;
     }
@@ -365,7 +371,7 @@ export class PoiService {
         const visibleCategories = this.getVisibleCategories();
         const language = this.resources.getCurrentLanguageCodeSimplified();
         for (const feature of features) {
-            if (feature.properties.poiLanguage !== "all" && feature.properties.poiLanguage !== language) {
+            if (!feature.properties.poiLanguages.includes(language)) {
                 continue;
             }
             if (visibleCategories.indexOf(feature.properties.poiCategory) === -1) {
@@ -752,7 +758,7 @@ export class PoiService {
         let imagesUrls = Object.keys(feature.properties)
             .filter(k => k.startsWith("image"))
             .map(k => feature.properties[k])
-            .filter(u => this.isValidUrl(u));
+            .filter(u => this.isValidImageUrl(u));
         const imageAttributions = await Promise.all(imagesUrls.map(u => this.imageAttributinoService.getAttributionForImage(u)));
         imagesUrls = imagesUrls.filter((_, i) => imageAttributions[i] != null);
         return {
@@ -772,12 +778,14 @@ export class PoiService {
         };
     }
 
-    private isValidUrl(url: string): boolean {
+    private isValidImageUrl(url: string): boolean {
         if (url.startsWith("File:")) {
             return true;
         }
-        if (url.includes("wikimedia.org") && !url.includes("Building_no_free_image_yet"))
-        {
+        if (url.includes("wikimedia.org") && 
+            !url.includes("Building_no_free_image_yet") && 
+            !url.endsWith("svg.png") &&
+            !url.endsWith("svg")) {
             return true;
         }
         if (url.includes("inature.info"))

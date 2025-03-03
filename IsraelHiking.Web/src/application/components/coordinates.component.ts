@@ -1,4 +1,6 @@
 import { Component, inject, input, OnInit } from "@angular/core";
+import { NgIf, DecimalPipe } from "@angular/common";
+import { Dir } from "@angular/cdk/bidi";
 
 import { ResourcesService } from "../services/resources.service";
 import { ElevationProvider } from "../services/elevation.provider";
@@ -7,7 +9,8 @@ import type { LatLngAlt, NorthEast } from "../models/models";
 
 @Component({
     selector: "coordinates",
-    templateUrl: "./coordinates.component.html"
+    templateUrl: "./coordinates.component.html",
+    imports: [NgIf, Dir, DecimalPipe]
 })
 export class CoordinatesComponent implements OnInit {
 

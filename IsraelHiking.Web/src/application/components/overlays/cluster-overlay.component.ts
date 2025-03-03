@@ -1,5 +1,9 @@
 import { Component, inject, input, output } from "@angular/core";
 import { Router } from "@angular/router";
+import { Dir } from "@angular/cdk/bidi";
+import { NgFor, NgIf, NgClass } from "@angular/common";
+import { MatButton } from "@angular/material/button";
+import { Angulartics2OnModule } from "angulartics2";
 
 import { ResourcesService } from "../../services/resources.service";
 import { RouteStrings } from "../../services/hash.service";
@@ -8,7 +12,8 @@ import { GeoJSONUtils } from "../../services/geojson-utils";
 @Component({
     selector: "cluster-overlay",
     templateUrl: "./cluster-overlay.component.html",
-    styleUrls: ["./cluster-overlay.component.scss"]
+    styleUrls: ["./cluster-overlay.component.scss"],
+    imports: [Dir, NgFor, NgIf, MatButton, Angulartics2OnModule, NgClass]
 })
 export class ClusterOverlayComponent {
 

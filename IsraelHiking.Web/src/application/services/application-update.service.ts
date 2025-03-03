@@ -1,5 +1,5 @@
 import { inject, Injectable } from "@angular/core";
-import { AppUpdate, AppUpdateAvailability } from '@capawesome/capacitor-app-update';
+import { AppUpdate, AppUpdateAvailability } from "@capawesome/capacitor-app-update";
 
 import { RunningContextService } from "./running-context.service";
 import { ToastService } from "./toast.service";

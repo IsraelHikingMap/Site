@@ -27,7 +27,7 @@ export class OverpassTurboService {
     private async getFeatureFromQuery(query: string, timeoutInMilliseconds = 2000): Promise<GeoJSON.Feature> {
         try {
             
-            const json = await firstValueFrom(this.httpClient.post(OverpassTurboService.OVERPASS_API_URL, `${query}out geom;`, {responseType: "text"}).pipe(timeout(timeoutInMilliseconds))) as unknown;
+            const json = await firstValueFrom(this.httpClient.post(OverpassTurboService.OVERPASS_API_URL, `[out: json];${query}out geom;`).pipe(timeout(timeoutInMilliseconds))) as unknown;
             const geojson = osmtogeojson(json, {completeFeature: true, excludeWay: false}) as GeoJSON.FeatureCollection;
             if (geojson.features.length === 1 && geojson.features[0].geometry.type !== "MultiLineString") {
                 return geojson.features[0];
@@ -48,14 +48,14 @@ export class OverpassTurboService {
     }
 
     public async getLongWay(id: string, name: string, isWaterway: boolean, isMtbRoute: boolean): Promise<GeoJSON.Feature> {
-        const quotedName = name.replace(/"/g, '\\"')
+        const quotedName = name.replace(/"/g, "\\\"")
         const query = `
         way(${id});
         complete
         {
           way(around:30)
-            [${isWaterway ? 'waterway' : 'highway'}]
-            ["${isMtbRoute ? 'mtb:name' : 'name'}"="${quotedName}"];
+            [${isWaterway ? "waterway" : "highway"}]
+            ["${isMtbRoute ? "mtb:name" : "name"}"="${quotedName}"];
         }`;
         return await this.getFeatureFromQuery(query);
     }

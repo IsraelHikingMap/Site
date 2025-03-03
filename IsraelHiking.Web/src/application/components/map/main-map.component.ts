@@ -1,7 +1,10 @@
 import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildren } from "@angular/core";
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
+import { NgStyle, NgIf } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
 import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike } from "maplibre-gl";
+import { NgProgressbar } from "ngx-progressbar";
+import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";
 
 import { TracesDialogComponent } from "../dialogs/traces-dialog.component";
@@ -12,12 +15,27 @@ import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { SetLocationAction } from "../../reducers/location.reducer";
 import type { ApplicationState, LocationState } from "../../models/models";
+import { SidebarComponent } from "../sidebar/sidebar.component";
+import { BackgroundTextComponent } from "../background-text.component";
+import { LayersViewComponent } from "./layers-view.component";
+import { RoutesComponent } from "./routes.component";
+import { RecordedRouteComponent } from "./recorded-route.component";
+import { TracesComponent } from "./traces.component";
+import { ZoomComponent } from "../zoom.component";
+import { LocationComponent } from "../location.component";
+import { MainMenuComponent } from "../main-menu.component";
+import { SearchComponent } from "../search.component";
+import { DrawingComponent } from "../drawing.component";
+import { RouteStatisticsComponent } from "../route-statistics.component";
+import { CenterMeComponent } from "../center-me.component";
+import { IhmLinkComponent } from "../ihm-link.component";
 
 @Component({
     selector: "main-map",
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersViewComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, NgIf, LocationComponent, MainMenuComponent, SearchComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, IhmLinkComponent]
 })
 export class MainMapComponent {
 
@@ -138,6 +156,9 @@ export class MainMapComponent {
     }
 
     public pitchChanged() {
+        if (this.runningContextService.isMobile) {
+            return;
+        }
         const pitch = this.mapComponent().mapInstance.getPitch();
         if (pitch <= 10 && !this.isTerrainOn) {
             // Terrain is off and pitch is low, nothing to do.

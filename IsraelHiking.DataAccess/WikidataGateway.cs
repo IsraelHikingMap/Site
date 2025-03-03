@@ -31,6 +31,8 @@ internal class WikidataBinding
     public WikidataLiteral Location { get; set; }
     [JsonPropertyName("links")]
     public WikidataLiteral WikipediaLinks { get; set; }
+    [JsonPropertyName("image")]
+    public WikidataLiteral Image { get; set; }
 }
 
 internal class WikidataResult
@@ -63,11 +65,14 @@ public class WikidataGateway : IWikidataGateway
     public async Task<List<IFeature>> GetByBoundingBox(Coordinate southWest, Coordinate northEast)
     {
         _logger.LogInformation($"Starting getting Wikidata items for coordinates: ({southWest.X}, {southWest.Y}), ({northEast.X}, {northEast.Y})");
-        var query = "SELECT ?place ?location ?links WHERE {\n" +
+        var query = "SELECT ?place ?location ?links ?image WHERE {\n" +
                     "  SERVICE wikibase:box {\n" +
                     "    ?place wdt:P625 ?location.\n" +
                     $"    bd:serviceParam wikibase:cornerWest \"Point({southWest.X} {southWest.Y})\"^^geo:wktLiteral.\n" +
                     $"    bd:serviceParam wikibase:cornerEast \"Point({northEast.X} {northEast.Y})\"^^geo:wktLiteral.\n" +
+                    "  }\n" +
+                    "  OPTIONAL {\n" +
+                    "    ?place wdt:P18 ?image.\n" +
                     "  }\n";
         foreach (var language in Languages.Array)
         {
@@ -112,11 +117,17 @@ public class WikidataGateway : IWikidataGateway
                 {FeatureAttributes.POI_SOURCE, Sources.WIKIDATA},
                 {FeatureAttributes.POI_CATEGORY, Categories.WIKIPEDIA},
                 {FeatureAttributes.POI_LANGUAGE, languagesTitlesAndLinks.First().Language},
+                {FeatureAttributes.POI_LANGUAGES, languagesTitlesAndLinks.Select(l => l.Language).ToArray()},
                 {FeatureAttributes.POI_ICON, "icon-wikipedia-w"},
                 {FeatureAttributes.POI_ICON_COLOR, "black"},
                 {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
                 {FeatureAttributes.POI_SOURCE_IMAGE_URL, WIKIDATA_LOGO}
             }) as IFeature;
+            if (!string.IsNullOrWhiteSpace(b.Image?.Value))
+            {
+                feature.Attributes.Add(FeatureAttributes.IMAGE_URL, b.Image.Value);
+                feature.Attributes[FeatureAttributes.POI_LANGUAGES] = Languages.Array;
+            }
             for (var index = 0; index < languagesTitlesAndLinks.Length; index++)
             {
                 feature.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + languagesTitlesAndLinks[index].Language,

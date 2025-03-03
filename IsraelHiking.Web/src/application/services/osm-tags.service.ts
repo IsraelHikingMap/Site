@@ -9,6 +9,7 @@ export type PoiProperties = {
     identifier: string;
     poiGeolocation: LatLon;
     poiLanguage: string;
+    poiLanguages: string[];
     poiIconColor: string;
     poiIcon: string;
     poiCategory: string;

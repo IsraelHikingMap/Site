@@ -1,5 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { Dir } from "@angular/cdk/bidi";
 import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../services/resources.service";
@@ -8,7 +9,8 @@ import type { ApplicationState } from "../models/models";
 @Component({
     selector: "background-text",
     templateUrl: "./background-text.component.html",
-    styleUrls: ["./background-text.component.scss"]
+    styleUrls: ["./background-text.component.scss"],
+    imports: [Dir]
 })
 export class BackgroundTextComponent {
 

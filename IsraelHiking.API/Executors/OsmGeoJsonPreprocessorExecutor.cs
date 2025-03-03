@@ -113,6 +113,7 @@ public class OsmGeoJsonPreprocessorExecutor : IOsmGeoJsonPreprocessorExecutor
         feature.Attributes.Add(FeatureAttributes.POI_CATEGORY, iconColorCategory.Category);
         feature.Attributes.Add(FeatureAttributes.POI_SOURCE, Sources.OSM);
         feature.Attributes.Add(FeatureAttributes.POI_LANGUAGE, Languages.ALL);
+        feature.Attributes.Add(FeatureAttributes.POI_LANGUAGES, Languages.Array);
         feature.Attributes.Add(FeatureAttributes.POI_CONTAINER, feature.IsValidContainer());
         feature.SetTitles();
         feature.SetId();

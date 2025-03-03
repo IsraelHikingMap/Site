@@ -1,11 +1,18 @@
 import { Component, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { MatDialog } from "@angular/material/dialog";
+import { Dir } from "@angular/cdk/bidi";
+import { MatButton } from "@angular/material/button";
+import { MatTabGroup, MatTab } from "@angular/material/tabs";
+import { MatCard, MatCardContent } from "@angular/material/card";
+import { NgIf, NgFor } from "@angular/common";
+import { MatDivider } from "@angular/material/divider";
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from "@angular/material/expansion";
+import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import { remove } from "lodash-es";
-import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
+import { Angulartics2GoogleGlobalSiteTag, Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
 
-import { ILegendItem } from "./legend-item.component";
+import { ILegendItem, LegendItemComponent } from "./legend-item.component";
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers.service";
@@ -23,7 +30,8 @@ export type LegendSection = {
 @Component({
     selector: "info-sidebar",
     templateUrl: "./info-sidebar.component.html",
-    styleUrls: ["./info-sidebar.component.scss"]
+    styleUrls: ["./info-sidebar.component.scss"],
+    imports: [Dir, MatButton, MatTabGroup, MatTab, MatCard, MatCardContent, NgIf, Angulartics2OnModule, MatDivider, MatAccordion, NgFor, MatExpansionPanel, MatExpansionPanelHeader, ScrollToModule, LegendItemComponent]
 })
 export class InfoSidebarComponent {
     public legendSections: LegendSection[] = [];
@@ -32,7 +40,6 @@ export class InfoSidebarComponent {
 
     public readonly resources = inject(ResourcesService);
 
-    private readonly dialog = inject(MatDialog);
     private readonly angulartics = inject(Angulartics2GoogleGlobalSiteTag);
     private readonly sidebarService = inject(SidebarService);
     private readonly layersService = inject(LayersService);

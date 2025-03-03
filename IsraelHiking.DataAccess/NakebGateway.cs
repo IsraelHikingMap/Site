@@ -106,6 +106,7 @@ public class NakebGateway : INakebGateway
             {FeatureAttributes.POI_SOURCE, Sources.NAKEB},
             {FeatureAttributes.POI_CATEGORY, Categories.ROUTE_HIKE},
             {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
+            {FeatureAttributes.POI_LANGUAGES, new [] {Languages.HEBREW}},
             {FeatureAttributes.POI_ICON, "icon-hike"},
             {FeatureAttributes.POI_ICON_COLOR, "black"},
             {FeatureAttributes.POI_SEARCH_FACTOR, 1.0}

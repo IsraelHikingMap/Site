@@ -735,14 +735,16 @@ describe("Poi Service", () => {
         )
     );
 
-    it("Should filter out empty wikipedia images",
+    it("Should filter out invalid wikipedia images",
         inject([PoiService], async (poiService: PoiService) => {
                 const feature = {
                     properties: {
                         poiSource: "OSM",
                         poiId: "poiId",
                         identifier: "id",
-                        image: "https://upload.wikimedia.org/wikipedia/commons/b/b6/Building_no_free_image_yet-he.svg",
+                        image: "https://upload.wikimedia.org/wikipedia/commons/b/b6/Building_no_free_image_yet-he.png",
+                        image1: "https://upload.wikimedia.org/wikipedia/commons/b/b6/1.svg",
+                        image2: "https://upload.wikimedia.org/wikipedia/commons/b/b6/2.svg.png",
                     } as any,
                     geometry: {
                         type: "Point",
