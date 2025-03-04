@@ -210,6 +210,72 @@ describe("LayersService", () => {
         expect(service.isAllOverlaysHidden()).toBeTrue();
     }));
 
+    it("should ignore null or empty layer data", inject([LayersService, Store], (service: LayersService, store: Store) => {
+        const addBaseLayerSpy = spyOn(service, 'addBaseLayer').and.callThrough();
+        
+        service.addExternalBaseLayer(null);
+        service.addExternalBaseLayer({ address: "", key: "" } as LayerData);
+        
+        expect(addBaseLayerSpy).not.toHaveBeenCalled();
+    }));
+
+    it("should add external base layer with valid data", inject([LayersService, Store], (service: LayersService, store: Store) => {
+        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const layerData = { key: "newLayer", address: "https://tiles.server/{z}/{x}/{y}.png" } as LayerData;
+        
+        service.addExternalBaseLayer(layerData);
+        
+        expect(spy.calls.first().args[0]).toBeInstanceOf(AddBaseLayerAction);
+    }));
+    
+    it("should select existing base layer when address matches case insensitively", inject([LayersService, Store], (service: LayersService, store: Store) => {
+        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const baseLayer: EditableLayer = { 
+            key: "existingLayer", 
+            address: "https://existing.address/tiles" 
+        } as EditableLayer;
+        store.reset({ 
+            layersState: { 
+                baseLayers: [baseLayer]
+            } 
+        });
+        
+        service.addExternalBaseLayer({ 
+            address: "https://EXISTING.address/tiles", 
+            key: "newLayer" 
+        } as LayerData);
+        
+        expect(spy.calls.first().args[0]).toBeInstanceOf(SelectBaseLayerAction);
+    }));
+    
+    it("should generate custom layer name when key is empty", inject([LayersService, Store], (service: LayersService, store: Store) => {
+        const spy = spyOn(store, 'dispatch').and.callThrough();
+        
+        service.addExternalBaseLayer({ 
+            address: "https://new.address/tiles", 
+            key: "" 
+        } as LayerData);
+        
+        expect(spy.calls.first().args[0]).toBeInstanceOf(AddBaseLayerAction);
+    }));
+    
+    it("should increment custom layer index when custom layers exist", inject([LayersService, Store], (service: LayersService, store: Store) => {
+        const spy = spyOn(store, 'dispatch').and.callThrough();
+        
+        service.addExternalBaseLayer({ 
+            address: "https://new.address/tiles", 
+            key: "" 
+        } as LayerData);
+        service.addExternalBaseLayer({ 
+            address: "https://new.address/tiles2", 
+            key: "" 
+        } as LayerData);
+        
+        expect(spy.calls.first().args[0]).toBeInstanceOf(AddBaseLayerAction);
+        expect(spy.calls.all()[1].args[0]).toBeInstanceOf(SelectBaseLayerAction);
+        expect((spy.calls.all()[2].args[0] as AddBaseLayerAction).layerData.key).toContain("2");
+    }));
+
     it("should get data container with selected layers", inject([LayersService, Store], (service: LayersService, store: Store) => {
         const baseLayer: EditableLayer = { key: "base" } as EditableLayer;
         const overlay1: Overlay = { key: "overlay1", visible: true } as Overlay;
@@ -303,8 +369,13 @@ describe("LayersService", () => {
     }));
 
     it("should toggle offline", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
         const overlay = { key: "overlay1", id: "1", isOfflineOn: false } as Overlay;
+        store.reset({ 
+            layersState: { 
+                overlays: [overlay]
+            } 
+        });
+        const spy = spyOn(store, 'dispatch').and.callThrough();
         
         service.toggleOffline(overlay, true);
         
