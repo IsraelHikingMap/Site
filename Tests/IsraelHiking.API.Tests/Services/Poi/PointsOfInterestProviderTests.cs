@@ -156,7 +156,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         var user = new User { DisplayName = "DisplayName" };
         var gateway = SetupOsmAuthClient();
         gateway.GetUserDetails().Returns(user);
-        var language = "he";
+        var language = Languages.HEBREW;
         gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
         var feature = GetValidFeature("42", Sources.OSM);
         feature.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
@@ -181,7 +181,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         var user = new User { DisplayName = "DisplayName" };
         var gateway = SetupOsmAuthClient();
         gateway.GetUserDetails().Returns(user);
-        var language = "he";
+        var language = Languages.HEBREW;
         gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
         var feature = GetValidFeature("42", Sources.OSM);
         feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, _tagsHelper.GetCategoriesByGroup(Categories.POINTS_OF_INTEREST).First().Icon);
@@ -203,7 +203,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
     public void AddFeature_WikipediaMobileLink_ShouldUpdateOsmAndElasticSearch()
     {
         var gateway = SetupOsmAuthClient();
-        var language = "he";
+        var language = Languages.HEBREW;
         gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
         var feature = GetValidFeature("42", Sources.OSM);
         feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, _tagsHelper.GetCategoriesByGroup(Categories.POINTS_OF_INTEREST).First().Icon);

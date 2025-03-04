@@ -32,15 +32,24 @@ public class ElasticSearchGatewayTests
     [Ignore]
     public void Search_ShouldReturnResults()
     {
-        var results = _gateway.Search("מנות", "name").Result;
-        Assert.AreEqual(10, results.Count);
+        var results = _gateway.Search("מנות", Languages.HEBREW).Result;
+        Assert.AreEqual(20, results.Count);
+    }
+    
+    [TestMethod]
+    [Ignore]
+    public void SearchRussian_ShouldReturnResults()
+    {
+        // Caesarea
+        var results = _gateway.Search("Кейсария", Languages.HEBREW).Result;
+        Assert.AreEqual(20, results.Count);
     }
         
     [TestMethod]
     [Ignore]
     public void GetContainerName_ShouldReturnResults()
     {
-        var results = _gateway.GetContainerName([new Coordinate(35.05746, 32.596838)], "he").Result;
+        var results = _gateway.GetContainerName([new Coordinate(35.05746, 32.596838)], Languages.HEBREW).Result;
         Assert.AreEqual("רמות מנשה", results);
     }
 
@@ -78,7 +87,7 @@ public class ElasticSearchGatewayTests
     public void GetClosestPoint_NoSourceIsSpecified_ShouldReturnResults()
     {
         var coordinate = new Coordinate(35.23087, 32.93687);
-        var results = _gateway.GetClosestPoint(coordinate, null, "he").Result;
+        var results = _gateway.GetClosestPoint(coordinate, null, Languages.HEBREW).Result;
         Assert.IsNotNull(results);
     }
         
@@ -87,7 +96,7 @@ public class ElasticSearchGatewayTests
     public void GetClosestPoint_OSMSourceSpecified_ShouldNotReturnResults()
     {
         var coordinate = new Coordinate(35.23087, 32.93687);
-        var results = _gateway.GetClosestPoint(coordinate, Sources.OSM, "he").Result;
+        var results = _gateway.GetClosestPoint(coordinate, Sources.OSM, Languages.HEBREW).Result;
         Assert.IsNull(results);
     }
 

@@ -146,19 +146,22 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         return feature;
     }
     
-    private QueryContainer DocumentNameSearchQuery<T>(QueryContainerDescriptor<T> q, string searchTerm, string language) where T: class
+    private QueryContainer DocumentNameSearchQuery<T>(QueryContainerDescriptor<T> q, string searchTerm) where T: class
     {
         return q.DisMax(dm =>
             dm.Queries(sh =>
-                    sh.MatchPhrase(m =>
-                        m.Query(searchTerm)
-                            .Field("name." + language + ".keyword")
-                            .Boost(5)
+                    sh.MultiMatch(m =>
+                        m.Type(TextQueryType.Phrase)
+                        .Query(searchTerm)
+                        .Boost(5)
+                        .Fields(f => f.Fields(Languages.Array.Select(l => new Field("name." + l + ".keyword"))))
                     ),
-                sh => sh.Match(m =>
-                    m.Query(searchTerm)
-                        .Field("name." + language)
+                sh => 
+                    sh.MultiMatch(m =>
+                    m.Type(TextQueryType.BestFields)
+                        .Query(searchTerm)
                         .Fuzziness(Fuzziness.Auto)
+                        .Fields(f => f.Fields(Languages.Array.Select(l => new Field("name." + l))))
                 )
             )
         );
@@ -175,7 +178,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             .Size(NUMBER_OF_RESULTS)
             .TrackScores()
             .Sort(f => f.Descending("_score"))
-            .Query(q => DocumentNameSearchQuery(q, searchTerm, language))
+            .Query(q => DocumentNameSearchQuery(q, searchTerm))
         );
         return response.Hits.Select(d=> HitToFeature(d, language)).ToList();
     }
@@ -213,7 +216,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             .Size(1)
             .TrackScores()
             .Sort(f => f.Descending("_score"))
-            .Query(q => DocumentNameSearchQuery(q, place, language))
+            .Query(q => DocumentNameSearchQuery(q, place))
         );
         if (placesResponse.Documents.Count == 0)
         {
@@ -223,7 +226,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             .Size(NUMBER_OF_RESULTS)
             .TrackScores()
             .Sort(f => f.Descending("_score"))
-            .Query(q => DocumentNameSearchQuery(q, searchTerm, language) &&
+            .Query(q => DocumentNameSearchQuery(q, searchTerm) &&
                 q.GeoShape(b =>
                 {
                     b.Field(p => p.Location);

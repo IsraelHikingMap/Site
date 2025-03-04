@@ -13,7 +13,7 @@ export class ImageGalleryService {
     private readonly resourcesService = inject(ResourcesService);
 
     public open(urls: string[], index: number) {
-        if (this.resourcesService.getCurrentLanguageCodeSimplified() === "he") {
+        if (this.resourcesService.direction === "rtl") {
             urls = [...urls].reverse();
             index = urls.length - 1 - index;
         }

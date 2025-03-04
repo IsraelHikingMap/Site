@@ -4,7 +4,7 @@
             <h2>{{resources.language}}</h2>
             <mat-radio-group (change)=resources.setLanguage($event.value) [value]="getLanuguageCode()">
                 <div *ngFor="let language of availableLanguages">
-                    <mat-radio-button [value]="language.code" color="primary" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Select language {{language.code}}">{{resources.getLabelForCode(language.code)}}</mat-radio-button>
+                    <mat-radio-button [value]="language.code" color="primary" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Select language {{language.code}}">{{language.label}}</mat-radio-button>
                 </div>
             </mat-radio-group>
             <br />

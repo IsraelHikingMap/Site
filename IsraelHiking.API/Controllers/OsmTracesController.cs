@@ -171,10 +171,7 @@ public class OsmTracesController : ControllerBase
         {
             return defaultDescription;
         }
-        var replacementTarget = language == "he"
-            ? "מסלול ב" + containerName
-            : "A route in " + containerName;
-        return defaultDescription.Replace("מסלול", replacementTarget).Replace("Route", replacementTarget).Replace("Recorded using IHM at", replacementTarget);
+        return defaultDescription.Replace("Recorded using IHM at", containerName);
     }
 
     /// <summary>
