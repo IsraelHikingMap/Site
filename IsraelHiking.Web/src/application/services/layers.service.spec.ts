@@ -19,26 +19,26 @@ describe("LayersService", () => {
                 LayersService,
                 provideHttpClient(withInterceptorsFromDi()),                
                 provideHttpClientTesting(),
-                { provide: LoggingService, useValue: jasmine.createSpyObj('LoggingService', ['info', 'warning']) },
-                { provide: ResourcesService, useValue: jasmine.createSpyObj('ResourcesService', ['getCurrentLanguageCodeSimplified']) }
+                { provide: LoggingService, useValue: jasmine.createSpyObj("LoggingService", ["info", "warning"]) },
+                { provide: ResourcesService, useValue: jasmine.createSpyObj("ResourcesService", ["getCurrentLanguageCodeSimplified"]) }
             ]
         });
     });
 
     it("should sync user layers when user logs off", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        spyOn(store, "dispatch").and.callThrough();
 
         store.reset({
             userState: {
                 userInfo: null
             }
         })
-        backend.expectNone(u => true);
+        backend.expectNone(_ => true);
         expect(true).toBeTrue();
     }));
 
     it("should sync user layers when user logs in with no data", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        spyOn(store, "dispatch").and.callThrough();
 
         store.reset({
             userState: {
@@ -52,7 +52,7 @@ describe("LayersService", () => {
     }));
 
     it("should sync user layers when user logs in with data that needs addintion, update and removal", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
 
         store.reset({
             userState: {
@@ -230,7 +230,7 @@ describe("LayersService", () => {
     }));
 
     it("should select base layer", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         
         service.selectBaseLayer("newLayer");
         
@@ -238,7 +238,7 @@ describe("LayersService", () => {
     }));
 
     it("should toggle overlay", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         const overlay: Overlay = { key: "overlay1", visible: false } as Overlay;
         
         service.toggleOverlay(overlay);
@@ -261,7 +261,7 @@ describe("LayersService", () => {
     }));
 
     it("should hide all overlays", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        spyOn(store, 'dispatch').and.callThrough();
+        spyOn(store, "dispatch").and.callThrough();
         const overlay1: Overlay = { key: "overlay1", visible: true } as Overlay;
         const overlay2: Overlay = { key: "overlay2", visible: true } as Overlay;
         store.reset({ 
@@ -276,7 +276,7 @@ describe("LayersService", () => {
     }));
 
     it("should ignore null or empty layer data", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         
         service.addExternalBaseLayer(null);
         service.addExternalBaseLayer({ address: "", key: "" } as LayerData);
@@ -285,7 +285,7 @@ describe("LayersService", () => {
     }));
 
     it("should add external base layer with valid data", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         const layerData = { key: "newLayer", address: "https://tiles.server/{z}/{x}/{y}.png" } as LayerData;
         
         service.addExternalBaseLayer(layerData);
@@ -294,7 +294,7 @@ describe("LayersService", () => {
     }));
     
     it("should select existing base layer when address matches case insensitively", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         const baseLayer: EditableLayer = { 
             key: "existingLayer", 
             address: "https://existing.address/tiles" 
@@ -314,7 +314,7 @@ describe("LayersService", () => {
     }));
     
     it("should generate custom layer name when key is empty", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         
         service.addExternalBaseLayer({ 
             address: "https://new.address/tiles", 
@@ -325,7 +325,7 @@ describe("LayersService", () => {
     }));
     
     it("should increment custom layer index when custom layers exist", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         
         service.addExternalBaseLayer({ 
             address: "https://new.address/tiles", 
@@ -342,7 +342,7 @@ describe("LayersService", () => {
     }));
 
     it("should do nothing if overlays array is null or empty", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
 
         service.addExternalOverlays(null);
         service.addExternalOverlays([]);
@@ -351,7 +351,7 @@ describe("LayersService", () => {
     }));
 
     it("should add external overlays and toggle visibility of hidden ones", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         const overlayData1 = { key: "overlay1", address: "https://test.com/1", visible: false } as Overlay;
         const overlayData2 = { key: "overlay2", address: "https://test.com/2" } as LayerData;
         const overlays = [overlayData1, overlayData2];
@@ -369,7 +369,7 @@ describe("LayersService", () => {
     }));
 
     it("should hide overlays that are not part of the share", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         const existingOverlay = { key: "existingOverlay", address: "https://existing.com", visible: true } as Overlay;
         const overlayData = { key: "newOverlay", address: "https://new.com" } as LayerData;
         const overlays = [overlayData] as LayerData[];
@@ -406,7 +406,7 @@ describe("LayersService", () => {
     }));
 
     it("should add base layer for non logged-in user", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         const layerData = { key: "newLayer", address: "https://test.com" } as LayerData;
         
         service.addBaseLayer(layerData);
@@ -424,7 +424,7 @@ describe("LayersService", () => {
             }
         });
         backend.expectOne(u => u.method == "GET" && u.url.startsWith(Urls.userLayers)).flush(null);
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         const layerData = { key: "newLayer", address: "https://test.com" } as LayerData;
 
         service.addBaseLayer(layerData);
@@ -439,7 +439,7 @@ describe("LayersService", () => {
     }));
 
     it("should not add base layer if it already exists", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        spyOn(store, 'dispatch').and.callThrough();
+        spyOn(store, "dispatch").and.callThrough();
         const existingLayer = { key: "existingLayer" } as EditableLayer;
         store.reset({ 
             layersState: { 
@@ -453,7 +453,7 @@ describe("LayersService", () => {
     }));
 
     it("should add overlay for non logged-in user", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         const overlayData = { key: "newOverlay", address: "https://test.com" } as LayerData;
         
         service.addOverlay(overlayData);
@@ -471,7 +471,7 @@ describe("LayersService", () => {
             }
         });
         backend.expectOne(u => u.method == "GET" && u.url.startsWith(Urls.userLayers)).flush(null);
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         const overlayData = { key: "newOverlay", address: "https://test.com" } as LayerData;
         
         service.addOverlay(overlayData);
@@ -485,7 +485,7 @@ describe("LayersService", () => {
     }));
 
     it("should not add overlay if it already exists", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        spyOn(store, 'dispatch').and.callThrough();
+        spyOn(store, "dispatch").and.callThrough();
         const existingOverlay = { key: "existingOverlay" } as Overlay;
         store.reset({ 
             layersState: { 
@@ -500,7 +500,7 @@ describe("LayersService", () => {
     }));
 
     it("should update base layer and select it", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         const layer = { key: "layer1", id: "1" } as EditableLayer;
         store.reset({ 
             layersState: { 
@@ -523,7 +523,7 @@ describe("LayersService", () => {
                 overlays: []
             }
         })
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         const layer = { key: "layer1", id: "1" } as Overlay;
 
         service.updateOverlay(layer, layer);
@@ -533,7 +533,7 @@ describe("LayersService", () => {
     }));
 
     it("should remove base layer and select first layer", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         const layer1 = { key: "layer1", id: "1" } as EditableLayer;
         const layer2 = { key: "layer2", id: "2" } as EditableLayer;
         store.reset({ 
@@ -550,7 +550,7 @@ describe("LayersService", () => {
     }));
 
     it("should remove overlay for non registered user", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         const overlay = { key: "overlay1", id: "1" } as Overlay;
         
         service.removeOverlay(overlay);
@@ -565,7 +565,7 @@ describe("LayersService", () => {
                 overlays: [overlay]
             } 
         });
-        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const spy = spyOn(store, "dispatch").and.callThrough();
         
         service.toggleOffline(overlay, true);
         
