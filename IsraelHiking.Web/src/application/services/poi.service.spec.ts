@@ -205,7 +205,7 @@ describe("Poi Service", () => {
                 }
             ] as any;
 
-            store.dispatch(new SetLanguageAction({ code: "he", rtl: false }));
+            store.dispatch(new SetLanguageAction({ code: "he", rtl: false, label: "עברית" }));
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 

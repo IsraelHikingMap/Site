@@ -7,6 +7,7 @@ import { GeoJsonParser } from "./geojson.parser";
 import { RunningContextService } from "./running-context.service";
 import { PoiService } from "./poi.service";
 import { CoordinatesService } from "./coordinates.service";
+import { ResourcesService } from "./resources.service";
 import type { SearchResultsPointOfInterest } from "../models/models";
 
 describe("SearchResultsProvider", () => {
@@ -18,6 +19,9 @@ describe("SearchResultsProvider", () => {
                 CoordinatesService,
                 { provide: RunningContextService, useValue: { isOnline: true } },
                 { provide: PoiService, useValue: null },
+                { provide: ResourcesService, useValue: {
+                    getCurrentLanguageCodeSimplified: () => "en"
+                } },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting()
             ]
