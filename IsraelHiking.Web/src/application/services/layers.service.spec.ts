@@ -1,19 +1,20 @@
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { inject, TestBed } from "@angular/core/testing";
-import { provideHttpClientTesting } from "@angular/common/http/testing";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 
+import { Urls } from "application/urls";
 import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { LayersService } from "./layers.service";
+import { SetUserInfoAction, UserInfoReducer } from "../reducers/user.reducer";
 import { AddBaseLayerAction, AddOverlayAction, LayersReducer, RemoveBaseLayerAction, RemoveOverlayAction, SelectBaseLayerAction, ToggleOfflineAction, UpdateBaseLayerAction, UpdateOverlayAction } from "../reducers/layers.reducer";
 import type { EditableLayer, LayerData, Overlay } from "../models/models";
-import { Urls } from "application/urls";
 
 describe("LayersService", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([LayersReducer])],
+            imports: [NgxsModule.forRoot([LayersReducer, UserInfoReducer])],
             providers: [
                 LayersService,
                 provideHttpClient(withInterceptorsFromDi()),                
@@ -23,6 +24,70 @@ describe("LayersService", () => {
             ]
         });
     });
+
+    it("should sync user layers when user logs off", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
+        const spy = spyOn(store, 'dispatch').and.callThrough();
+
+        store.reset({
+            userState: {
+                userInfo: null
+            }
+        })
+        backend.expectNone(u => true);
+        expect(true).toBeTrue();
+    }));
+
+    it("should sync user layers when user logs in with no data", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
+        const spy = spyOn(store, 'dispatch').and.callThrough();
+
+        store.reset({
+            userState: {
+                userInfo: {}
+            }
+        })
+        
+        backend.expectOne(u => u.url.startsWith(Urls.userLayers)).flush(null);
+
+        expect(true).toBeTrue();
+    }));
+
+    it("should sync user layers when user logs in with data that needs addintion, update and removal", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
+        const spy = spyOn(store, 'dispatch').and.callThrough();
+
+        store.reset({
+            userState: {
+                userInfo: null
+            },
+            layersState: {
+                baseLayers: [
+                    { key: "layer1", isEditable: true } as EditableLayer,
+                    { key: "layer2", address: "https://layer2" } as EditableLayer
+                ],
+                overlays: [
+                    { key: "overlay1", isEditable: true } as Overlay,
+                    { key: "overlay2", address: "https://overlay2" } as Overlay
+                ]
+            }
+        })
+        
+        store.dispatch(new SetUserInfoAction({ id: "1", displayName: "test", imageUrl: "https://test.com", changeSets: 0 }));
+
+        backend.expectOne(u => u.url.startsWith(Urls.userLayers)).flush([
+            {key: "layer2", address: "https://layer2-new", isOverlay: false},
+            {key: "layer3", address: "https://layer3", isOverlay: false},
+            {key: "overlay2", address: "https://overlay2-new", isOverlay: true},
+            {key: "overlay3", address: "https://overlay3", isOverlay: true}
+        ]);
+
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(spy.calls.all()[0].args[0]).toBeInstanceOf(SetUserInfoAction);
+        expect(spy.calls.all()[1].args[0]).toBeInstanceOf(UpdateBaseLayerAction);
+        expect(spy.calls.all()[2].args[0]).toBeInstanceOf(AddBaseLayerAction);
+        expect(spy.calls.all()[3].args[0]).toBeInstanceOf(UpdateOverlayAction);
+        expect(spy.calls.all()[4].args[0]).toBeInstanceOf(AddOverlayAction);
+        expect(spy.calls.all()[5].args[0]).toBeInstanceOf(RemoveOverlayAction);
+        expect(spy.calls.all()[6].args[0]).toBeInstanceOf(RemoveBaseLayerAction);
+    }));
 
     it("should check if base layer is selected", inject([LayersService, Store], (service: LayersService, store: Store) => {
         const layer: EditableLayer = { key: "layer1" } as EditableLayer;
@@ -211,12 +276,12 @@ describe("LayersService", () => {
     }));
 
     it("should ignore null or empty layer data", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const addBaseLayerSpy = spyOn(service, 'addBaseLayer').and.callThrough();
+        const spy = spyOn(store, 'dispatch').and.callThrough();
         
         service.addExternalBaseLayer(null);
         service.addExternalBaseLayer({ address: "", key: "" } as LayerData);
         
-        expect(addBaseLayerSpy).not.toHaveBeenCalled();
+        expect(spy).not.toHaveBeenCalled();
     }));
 
     it("should add external base layer with valid data", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -349,6 +414,30 @@ describe("LayersService", () => {
         expect(spy.calls.first().args[0]).toBeInstanceOf(AddBaseLayerAction);
     }))
 
+    it("should add base layer for logged-in user", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
+        store.reset({
+            userState: {
+                userInfo: {}
+            },
+            layersState: {
+                baseLayers: []
+            }
+        });
+        backend.expectOne(u => u.method == "GET" && u.url.startsWith(Urls.userLayers)).flush(null);
+        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const layerData = { key: "newLayer", address: "https://test.com" } as LayerData;
+
+        service.addBaseLayer(layerData);
+
+        backend.expectOne(u => u.method == "POST" && u.url.startsWith(Urls.userLayers)).flush({ id: "1"});
+
+        await new Promise(resolve => setTimeout(resolve, 10));
+
+        expect(spy.calls.first().args[0]).toBeInstanceOf(AddBaseLayerAction);
+        expect(spy.calls.all()[1].args[0]).toBeInstanceOf(SelectBaseLayerAction);
+        expect(spy.calls.all()[2].args[0]).toBeInstanceOf(UpdateBaseLayerAction);
+    }));
+
     it("should not add base layer if it already exists", inject([LayersService, Store], (service: LayersService, store: Store) => {
         spyOn(store, 'dispatch').and.callThrough();
         const existingLayer = { key: "existingLayer" } as EditableLayer;
@@ -370,6 +459,29 @@ describe("LayersService", () => {
         service.addOverlay(overlayData);
         
         expect(spy.calls.first().args[0]).toBeInstanceOf(AddOverlayAction);
+    }));
+
+    it("should add overlay for non logged-in user", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
+        store.reset({
+            userState: {
+                userInfo: {}
+            },
+            layersState: {
+                overlays: []
+            }
+        });
+        backend.expectOne(u => u.method == "GET" && u.url.startsWith(Urls.userLayers)).flush(null);
+        const spy = spyOn(store, 'dispatch').and.callThrough();
+        const overlayData = { key: "newOverlay", address: "https://test.com" } as LayerData;
+        
+        service.addOverlay(overlayData);
+
+        backend.expectOne(u => u.method == "POST" && u.url.startsWith(Urls.userLayers)).flush({ id: "1"});
+
+        await new Promise(resolve => setTimeout(resolve, 10));
+
+        expect(spy.calls.first().args[0]).toBeInstanceOf(AddOverlayAction);
+        expect(spy.calls.all()[1].args[0]).toBeInstanceOf(UpdateOverlayAction);
     }));
 
     it("should not add overlay if it already exists", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -402,12 +514,21 @@ describe("LayersService", () => {
         expect(spy.calls.all()[1].args[0]).toBeInstanceOf(SelectBaseLayerAction);
     }));
 
-    it("should update overlay", inject([LayersService, Store], (service: LayersService, store: Store) => {
+    it("should update overlay when user is logged in", inject([LayersService, Store, HttpTestingController], (service: LayersService, store: Store, backend: HttpTestingController) => {
+        store.reset({
+            userState: {
+                userInfo: {}
+            },
+            layersState: {
+                overlays: []
+            }
+        })
         const spy = spyOn(store, 'dispatch').and.callThrough();
         const layer = { key: "layer1", id: "1" } as Overlay;
 
         service.updateOverlay(layer, layer);
 
+        backend.expectOne(u => u.method == "PUT" && u.url.startsWith(Urls.userLayers)).flush(null);
         expect(spy.calls.first().args[0]).toBeInstanceOf(UpdateOverlayAction);
     }));
 
