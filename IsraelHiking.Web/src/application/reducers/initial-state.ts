@@ -19,6 +19,10 @@ export const AVAILABLE_LANGUAGES: Language[] = [{
     {
         code: "en-US",
         rtl: false,
+    },
+    {
+        code: "ru",
+        rtl: false,
     }
 ];
 

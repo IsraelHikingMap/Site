@@ -649,8 +649,8 @@ public class FeaturesMergeExecutor : IFeaturesMergeExecutor
                 do
                 {
                     index++;
-                } while (natureReserveFeature.Attributes.Exists(FeatureAttributes.NAME + ":he" + index));
-                natureReserveFeature.Attributes.Add(FeatureAttributes.NAME + ":he" + index, alternativeTitle);
+                } while (natureReserveFeature.Attributes.Exists(FeatureAttributes.NAME + ":" + Languages.HEBREW + index));
+                natureReserveFeature.Attributes.Add(FeatureAttributes.NAME + ":" + Languages.HEBREW + index, alternativeTitle);
             }
             natureReserveFeature.SetTitles();
         }

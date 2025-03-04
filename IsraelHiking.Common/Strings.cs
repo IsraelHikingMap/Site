@@ -105,10 +105,12 @@ public static class Languages
     public const string ALL = "all";
     public const string HEBREW = "he";
     public const string ENGLISH = "en";
+    public const string RUSSIAN = "ru";
     public static readonly string[] Array =
     [
         HEBREW,
-        ENGLISH
+        ENGLISH,
+        RUSSIAN
     ];
 }
 
