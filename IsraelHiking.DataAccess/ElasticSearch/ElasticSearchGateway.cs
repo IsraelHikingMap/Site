@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Elasticsearch.Net;
 using IsraelHiking.Common;
@@ -123,16 +124,63 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         return list;
     }
 
+    /// <summary>
+    /// This method is used to extract the field with the highest contribution to the score
+    /// It uses the explanation object to recursively find the field
+    /// </summary>
+    /// <param name="exp"></param>
+    /// <returns></returns>
+    private string FindBestField(ExplanationDetail exp)
+    {
+        // Extract the field from the explanation
+        var match = Regex.Match(exp.Description, @"weight\((.*)\)");
+        if (match.Success)
+        {
+            return match.Groups[1].Value;
+        }
+
+        // Recursively check child explanations
+        foreach (var child in exp.Details)
+        {
+            var childResult = FindBestField(child);
+            if (!string.IsNullOrEmpty(childResult))
+                return childResult;
+        }
+
+        return null;
+    }
+    
+    /// <summary>
+    /// This method is used to find the language with the highest contribution to the score
+    /// </summary>
+    /// <param name="explanation">The explanination object from the query results</param>
+    /// <param name="fallbackLanguage">The language to use in case no matching language was found</param>
+    /// <returns></returns>
+    private string GetBestMatchLanguage(Explanation explanation, string fallbackLanguage)
+    {
+        // Recursive method to find the field with the highest contribution to the score
+        foreach (var details in explanation.Details)
+        {
+            var results = FindBestField(details);
+            if (!string.IsNullOrEmpty(results) && Languages.ArrayWithDefault.Any(l => results.Contains("." + l)))
+            {
+                return Languages.ArrayWithDefault.First(l => results.Contains("." + l));
+            }
+        }
+        return fallbackLanguage;
+    }
+    
     private IFeature HitToFeature(IHit<PointDocument> d, string language)
     {
+        var searchTermLanguage = GetBestMatchLanguage(d.Explanation, language);
         IFeature feature = new Feature(new Point(d.Source.Location[0], d.Source.Location[1]), new AttributesTable
         {
-            { FeatureAttributes.NAME, d.Source.Name.GetValueOrDefault(language, d.Source.Name.GetValueOrDefault(Languages.ENGLISH, string.Empty)) },
+            { FeatureAttributes.NAME, d.Source.Name.GetValueOrDefault(searchTermLanguage, d.Source.Name.GetValueOrDefault(Languages.ENGLISH, string.Empty)) },
             { FeatureAttributes.POI_SOURCE, d.Source.PoiSource },
             { FeatureAttributes.POI_ICON, d.Source.PoiIcon },
             { FeatureAttributes.POI_CATEGORY, d.Source.PoiCategory },
             { FeatureAttributes.POI_ICON_COLOR, d.Source.PoiIconColor },
-            { FeatureAttributes.DESCRIPTION, d.Source.Description.GetValueOrDefault(language, d.Source.Description.GetValueOrDefault(Languages.ENGLISH, string.Empty)) },
+            { FeatureAttributes.DESCRIPTION, d.Source.Description.GetValueOrDefault(searchTermLanguage, d.Source.Description.GetValueOrDefault(Languages.ENGLISH, string.Empty)) },
             { FeatureAttributes.POI_ID, d.Id },
             { FeatureAttributes.POI_LANGUAGE, Languages.ALL },
             { FeatureAttributes.ID, string.Join("_", d.Id.Split("_").Skip(1)) }
@@ -154,14 +202,14 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                         m.Type(TextQueryType.Phrase)
                         .Query(searchTerm)
                         .Boost(5)
-                        .Fields(f => f.Fields(Languages.Array.Select(l => new Field("name." + l + ".keyword"))))
+                        .Fields(f => f.Fields(Languages.ArrayWithDefault.Select(l => new Field("name." + l + ".keyword"))))
                     ),
                 sh => 
                     sh.MultiMatch(m =>
                     m.Type(TextQueryType.BestFields)
                         .Query(searchTerm)
                         .Fuzziness(Fuzziness.Auto)
-                        .Fields(f => f.Fields(Languages.Array.Select(l => new Field("name." + l))))
+                        .Fields(f => f.Fields(Languages.ArrayWithDefault.Select(l => new Field("name." + l))))
                 )
             )
         );
@@ -179,6 +227,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             .TrackScores()
             .Sort(f => f.Descending("_score"))
             .Query(q => DocumentNameSearchQuery(q, searchTerm))
+            .Explain()
         );
         return response.Hits.Select(d=> HitToFeature(d, language)).ToList();
     }
@@ -195,10 +244,12 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             .TrackScores()
             .Sort(f => f.Descending("_score"))
             .Query(q => 
-                q.MatchPhrase(m =>
-                    m.Query(searchTerm)
-                        .Field("name." + language + ".keyword"))
+                q.MultiMatch(m =>
+                    m.Type(TextQueryType.Phrase)
+                        .Query(searchTerm)
+                        .Fields(f => f.Fields(Languages.ArrayWithDefault.Select(l => new Field("name." + l + ".keyword"))))
                 )
+            ).Explain()
         );
         return response.Hits.Select(d=> HitToFeature(d, language)).ToList();
     }
