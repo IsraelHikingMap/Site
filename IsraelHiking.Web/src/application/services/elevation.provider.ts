@@ -1,5 +1,5 @@
 import { inject, Injectable } from "@angular/core";
-import { HttpClient, HttpParams } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
@@ -55,9 +55,8 @@ export class ElevationProvider {
         }
 
         try {
-            const points = missingElevation.map(latlng => `${latlng.lat.toFixed(6)},${latlng.lng.toFixed(6)}`);
-            const params = new HttpParams().set("points", points.join("|"));
-            const response = await firstValueFrom(this.httpClient.get(Urls.elevation, { params }).pipe(timeout(1000)));
+            const points = missingElevation.map(latlng => [latlng.lng, latlng.lat]);
+            const response = await firstValueFrom(this.httpClient.post(Urls.elevation, points).pipe(timeout(1000)));
             for (let index = 0; index < relevantIndexes.length; index++) {
                 latlngs[relevantIndexes[index]].alt = (response as number[])[index];
             }

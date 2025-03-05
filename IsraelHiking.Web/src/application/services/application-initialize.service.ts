@@ -26,6 +26,8 @@ import { AuthorizationService } from "./authorization.service";
 import { ToastService } from "./toast.service";
 import { ApplicationUpdateService } from "./application-update.service";
 import { LocationService } from "./location.service";
+import { HashService } from "./hash.service";
+import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import type { ApplicationState } from "../models/models";
 
 @Injectable()
@@ -52,11 +54,14 @@ export class ApplicationInitializeService {
     private readonly authorizationService = inject(AuthorizationService);
     private readonly applicationUpdateService = inject(ApplicationUpdateService);
     private readonly locationService = inject(LocationService);
+    private readonly hashService = inject(HashService);
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
+    private readonly angulartics = inject(Angulartics2GoogleGlobalSiteTag);
 
     public async initialize() {
         try {
+            this.angulartics.startTracking();
             await this.loggingService.initialize();
             await this.loggingService.info("---------------------------------------");
             await this.loggingService.info("Starting IHM Application Initialization");
@@ -69,6 +74,7 @@ export class ApplicationInitializeService {
             this.openWithService.initialize();
             await this.purchaseService.initialize();
             this.geoLocationService.initialize();
+            this.hashService.initialize();
             this.dragAndDropService.initialize();
             if (this.runningContextService.isMobile
                 && !this.runningContextService.isCapacitor

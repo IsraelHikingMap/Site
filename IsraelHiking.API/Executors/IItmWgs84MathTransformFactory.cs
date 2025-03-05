@@ -1,22 +1,21 @@
 ﻿using ProjNet.CoordinateSystems.Transformations;
 
-namespace IsraelHiking.API.Executors
+namespace IsraelHiking.API.Executors;
+
+/// <summary>
+/// This is a factory for MathTransform for ITM to WGS84 transform.
+/// </summary>
+public interface IItmWgs84MathTransformFactory
 {
     /// <summary>
-    /// This is a factory for IMathtransform for ITM to WGS84 transform.
+    /// Creates a coordinates transformation from ITM to WGS84.
     /// </summary>
-    public interface IItmWgs84MathTransformFactory
-    {
-        /// <summary>
-        /// Creates a coordinats transfomation from ITM to WGS84.
-        /// </summary>
-        /// <returns></returns>
-        MathTransform Create();
+    /// <returns></returns>
+    MathTransform Create();
 
-        /// <summary>
-        /// Creates a coordinats transfomation from WGS84 to ITM.
-        /// </summary>
-        /// <returns></returns>
-        MathTransform CreateInverse();
-    }
+    /// <summary>
+    /// Creates a coordinates transformation from WGS84 to ITM.
+    /// </summary>
+    /// <returns></returns>
+    MathTransform CreateInverse();
 }

@@ -1,5 +1,17 @@
 import { Component, AfterViewInit, inject } from "@angular/core";
+import { Dir } from "@angular/cdk/bidi";
+import { MatDialogTitle, MatDialogClose, MatDialogContent } from "@angular/material/dialog";
+import { MatButton, MatAnchor } from "@angular/material/button";
+import { CdkScrollable } from "@angular/cdk/scrolling";
+import { NgIf, NgClass } from "@angular/common";
+import { MatFormField, MatLabel, MatHint } from "@angular/material/form-field";
+import { MatInput } from "@angular/material/input";
+import { FormsModule } from "@angular/forms";
+import { MatCheckbox } from "@angular/material/checkbox";
+import { MatTooltip } from "@angular/material/tooltip";
+import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
+import { Angulartics2OnModule } from "angulartics2";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 
 import { ResourcesService } from "../../services/resources.service";
@@ -13,7 +25,8 @@ import type { ApplicationState, DataContainer, ShareUrl } from "../../models/mod
 
 @Component({
     selector: "share-dialog",
-    templateUrl: "./share-dialog.component.html"
+    templateUrl: "./share-dialog.component.html",
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, NgIf, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, Angulartics2OnModule, NgClass, MatAnchor, MatTooltip, CdkCopyToClipboard]
 })
 export class ShareDialogComponent implements AfterViewInit {
 

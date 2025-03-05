@@ -6,7 +6,7 @@ import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { last } from "lodash-es";
 import { firstValueFrom } from "rxjs";
-import { zipSync, strToU8, unzipSync, strFromU8, Zippable } from 'fflate';
+import { zipSync, strToU8, unzipSync, strFromU8, Zippable } from "fflate";
 import { encode } from "base64-arraybuffer";
 import type { saveAs as saveAsForType } from "file-saver";
 
@@ -151,7 +151,7 @@ export class FileService {
     }
 
     public async saveLogToZipFile(fileName: string, content: string) {
-        const result = zipSync({ 'log.txt': strToU8(content) });
+        const result = zipSync({ "log.txt": strToU8(content) });
         const resultBlob = new Blob([result]);
         this.saveAs(resultBlob, fileName, { autoBom: false });
     }

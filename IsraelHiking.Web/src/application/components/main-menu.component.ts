@@ -1,6 +1,11 @@
 import { Component, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { NgIf, NgClass, AsyncPipe } from "@angular/common";
+import { MatButton } from "@angular/material/button";
+import { MatMenuTrigger, MatMenu, MatMenuContent, MatMenuItem } from "@angular/material/menu";
+import { Dir } from "@angular/cdk/bidi";
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
+import { Angulartics2OnModule } from "angulartics2";
 import { timer } from "rxjs";
 import { Device } from "@capacitor/device";
 import { App } from "@capacitor/app";
@@ -9,6 +14,7 @@ import { encode } from "base64-arraybuffer";
 import { Store } from "@ngxs/store";
 import platform from "platform";
 
+import { OfflineImagePipe } from "../pipes/offline-image.pipe";
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
 import { RunningContextService } from "../services/running-context.service";
@@ -35,7 +41,8 @@ import type { UserInfo, ApplicationState } from "../models/models";
 @Component({
     selector: "main-menu",
     templateUrl: "./main-menu.component.html",
-    styleUrls: ["./main-menu.component.scss"]
+    styleUrls: ["./main-menu.component.scss"],
+    imports: [NgIf, MatButton, Angulartics2OnModule, MatMenuTrigger, NgClass, MatMenu, MatMenuContent, Dir, MatMenuItem, AsyncPipe, OfflineImagePipe]
 })
 export class MainMenuComponent {
 
@@ -111,8 +118,9 @@ export class MainMenuComponent {
                 }
             });
         } else {
-            this.authorizationService.login().then(() => { }, () => {
+            this.authorizationService.login().then(() => { }, (ex) => {
                 this.toastService.warning(this.resources.unableToLogin);
+                this.loggingService.error(`[Main Menu] Unable to login: ${ex.message}`);
             });
         }
     }
@@ -228,8 +236,7 @@ export class MainMenuComponent {
     public getOsmAddress() {
         const poiState = this.store.selectSnapshot((s: ApplicationState) => s.poiState);
         const baseLayerAddress = this.layersService.getSelectedBaseLayerAddressForOSM();
-        if (poiState.isSidebarOpen &&
-            poiState.selectedPointOfInterest != null &&
+        if (poiState.selectedPointOfInterest != null &&
             poiState.selectedPointOfInterest.properties.poiSource.toLocaleLowerCase() === "osm") {
             return this.osmAddressesService.getEditElementOsmAddress(baseLayerAddress,
                 poiState.selectedPointOfInterest.properties.identifier);

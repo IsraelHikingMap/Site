@@ -1,9 +1,15 @@
 import { inject, Injectable } from "@angular/core";
-import { Router } from "@angular/router";
+import { NavigationEnd, Router } from "@angular/router";
 import { Store } from "@ngxs/store";
+import { filter, skip } from "rxjs";
 
-import { MapService } from "./map.service";
 import { Urls } from "../urls";
+import { MapService } from "./map.service";
+import { SidebarService } from "./sidebar.service";
+import { DataContainerService } from "./data-container.service";
+import { FitBoundsService } from "./fit-bounds.service";
+import { ShareUrlsService } from "./share-urls.service";
+import { SetFileUrlAndBaseLayerAction, SetShareUrlAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, LatLngAlt } from "../models/models";
 
 export type PoiRouterData = {
@@ -45,10 +51,56 @@ export class HashService {
 
     private readonly router = inject(Router);
     private readonly mapService = inject(MapService);
+    private readonly sidebarService = inject(SidebarService);
+    private readonly dataContainerService = inject(DataContainerService);
+    private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly store = inject(Store);
 
-    public resetAddressbar(): void {
-        if (this.store.selectSnapshot((s: ApplicationState) => s.poiState).isSidebarOpen) {
+    constructor() {
+        this.router.events.pipe(
+            filter(event => event instanceof NavigationEnd)
+          ).subscribe((event: NavigationEnd) => {
+            const tree = this.router.parseUrl(event.url);
+            const segments = tree.root.children.primary?.segments ?? [];
+            const queryParams = tree.queryParams;
+            if (this.router.url.startsWith(RouteStrings.ROUTE_MAP)) {
+                this.fitBoundsService.flyTo({
+                    lng: +segments[3].path,
+                    lat: +segments[2].path
+                }, +segments[1].path - 1);
+            } else if (this.router.url.startsWith(RouteStrings.ROUTE_SHARE)) {
+                this.dataContainerService.setShareUrlAfterNavigation(segments[1].path);
+            } else if (this.router.url.startsWith(RouteStrings.ROUTE_URL)) {
+                this.dataContainerService.setFileUrlAfterNavigation(segments[1].path,
+                    queryParams[RouteStrings.BASE_LAYER]);
+            } else if (this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
+                this.sidebarService.show("public-poi");
+            } else if (this.router.url === RouteStrings.ROUTE_ROOT) {
+                this.store.dispatch(new SetFileUrlAndBaseLayerAction(null, null));
+                this.store.dispatch(new SetShareUrlAction(null));
+                this.sidebarService.hide();
+            }
+        });
+    }
+
+    public initialize(): void {
+        this.store.select((state: ApplicationState) => state.inMemoryState.fileUrl).pipe(skip(1)).subscribe(() => {
+            this.resetAddressbar();
+        });
+        this.store.select((state: ApplicationState) => state.inMemoryState.shareUrl).pipe(skip(1)).subscribe(() => {
+            this.resetAddressbar();
+        });
+        this.store.select((state: ApplicationState) => state.poiState.selectedPointOfInterest).pipe(skip(1)).subscribe(() => {
+            this.resetAddressbar();
+        });
+        this.store.select((state: ApplicationState) => state.locationState).pipe(skip(1)).subscribe(() => {
+            this.resetAddressbar();
+        });
+    }
+
+    private resetAddressbar(): void {
+        if (this.store.selectSnapshot((s: ApplicationState) => s.poiState).selectedPointOfInterest) {
             return;
         }
         const inMemoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
@@ -88,7 +140,7 @@ export class HashService {
             return Urls.baseAddress + urlTree.toString();
         }
         if (inMemoryState.shareUrl != null) {
-            return this.getFullUrlFromShareId(inMemoryState.shareUrl.id);
+            return this.shareUrlsService.getFullUrlFromShareId(inMemoryState.shareUrl.id);
         }
         return this.getMapAddress();
     }
@@ -113,11 +165,6 @@ export class HashService {
     public getFullUrlFromPoiId(poiSourceAndId: PoiRouterData) {
         const urlTree = this.router.createUrlTree([RouteStrings.POI, poiSourceAndId.source, poiSourceAndId.id],
             { queryParams: { language: poiSourceAndId.language } });
-        return Urls.baseAddress + urlTree.toString();
-    }
-
-    public getFullUrlFromShareId(id: string) {
-        const urlTree = this.router.createUrlTree([RouteStrings.SHARE, id]);
         return Urls.baseAddress + urlTree.toString();
     }
 }

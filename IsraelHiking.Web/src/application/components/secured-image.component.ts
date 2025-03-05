@@ -3,12 +3,14 @@ import { DomSanitizer } from "@angular/platform-browser";
 import { HttpClient } from "@angular/common/http";
 import { BehaviorSubject, Observable } from "rxjs";
 import { switchMap, map } from "rxjs/operators";
+import { AsyncPipe } from "@angular/common";
 
 @Component({
     selector: "secured-image",
     template: `
     <img [src]="dataUrl$|async" class="w-full"/>
-  `
+  `,
+    imports: [AsyncPipe]
 })
 export class SecuredImageComponent implements OnChanges {
     // This code block just creates an rxjs stream from the src

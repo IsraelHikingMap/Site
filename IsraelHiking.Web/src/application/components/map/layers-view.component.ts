@@ -1,11 +1,21 @@
 import { Component, DestroyRef, inject, OnInit } from "@angular/core";
+import { NgFor, NgIf, AsyncPipe } from "@angular/common";
+import { Dir } from "@angular/cdk/bidi";
+import { MatButton } from "@angular/material/button";
+import { MatTooltip } from "@angular/material/tooltip";
+import { Angulartics2OnModule } from "angulartics2";
+import { MatDialog } from "@angular/material/dialog";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
-import { GeoJSONSourceComponent } from "@maplibre/ngx-maplibre-gl";
+import { GeoJSONSourceComponent, SourceDirective, MarkersForClustersComponent, PointDirective, ClusterPointDirective, PopupComponent, MarkerComponent, LayerComponent } from "@maplibre/ngx-maplibre-gl";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
+import { CoordinatesComponent } from "../coordinates.component";
+import { ClusterOverlayComponent } from "../overlays/cluster-overlay.component";
+import { AutomaticLayerPresentationComponent } from "./automatic-layer-presentation.component";
+import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { PoiService } from "../../services/poi.service";
 import { LayersService } from "../../services/layers.service";
 import { RouteStrings } from "../../services/hash.service";
@@ -21,12 +31,13 @@ import type { ApplicationState, LatLngAlt, LinkData, Overlay } from "../../model
 @Component({
     selector: "layers-view",
     templateUrl: "layers-view.component.html",
-    styleUrls: ["layers-view.component.scss"]
+    styleUrls: ["layers-view.component.scss"],
+    imports: [AutomaticLayerPresentationComponent, NgFor, SourceDirective, GeoJSONSourceComponent, MarkersForClustersComponent, PointDirective, Angulartics2OnModule, NgIf, ClusterPointDirective, PopupComponent, ClusterOverlayComponent, Dir, MatButton, MatTooltip, CoordinatesComponent, MarkerComponent, LayerComponent, AsyncPipe]
 })
 export class LayersViewComponent implements OnInit {
     private static readonly MAX_MENU_POINTS_IN_CLUSTER = 7;
 
-    public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
+    public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public selectedPoiFeature: GeoJSON.Feature<GeoJSON.Point> = null;
     public selectedPoiGeoJson: Immutable<GeoJSON.FeatureCollection> = {
         type: "FeatureCollection",
@@ -41,6 +52,7 @@ export class LayersViewComponent implements OnInit {
     public readonly resources = inject(ResourcesService);
 
     private readonly router = inject(Router);
+    private readonly matDialog = inject(MatDialog);
     private readonly layersService = inject(LayersService);
     private readonly poiService = inject(PoiService);
     private readonly selectedRouteService = inject(SelectedRouteService);
@@ -147,7 +159,7 @@ export class LayersViewComponent implements OnInit {
     }
 
     public addPointToRoute() {
-        const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
+        let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         const markerData = {
             latlng: this.getSelectedFeatureLatlng(),
             title: "",
@@ -157,6 +169,9 @@ export class LayersViewComponent implements OnInit {
         };
         this.store.dispatch(new AddPrivatePoiAction(selectedRoute.id, markerData));
         this.clearSelected();
+        selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const index = selectedRoute.markers.length - 1;
+        PrivatePoiEditDialogComponent.openDialog(this.matDialog, markerData, index, selectedRoute.id);
     }
 
     public clearSelected() {
@@ -171,5 +186,9 @@ export class LayersViewComponent implements OnInit {
     public navigateHere() {
         this.navigateHereService.addNavigationSegment(this.getSelectedFeatureLatlng());
         this.clearSelected();
+    }
+
+    public isSameBaselayerOn(overlay: Overlay) {
+        return overlay.address === this.getBaseLayer()?.address;
     }
 }

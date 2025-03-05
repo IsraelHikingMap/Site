@@ -1,16 +1,29 @@
 import { Component, inject, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Router, ActivatedRoute, ParamMap } from "@angular/router";
+import { Dir } from "@angular/cdk/bidi";
+import { NgIf, NgClass, NgFor, DecimalPipe } from "@angular/common";
+import { MatButton, MatAnchor } from "@angular/material/button";
+import { MatTooltip } from "@angular/material/tooltip";
+import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
+import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
+import { MatProgressSpinner } from "@angular/material/progress-spinner";
+import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from "@angular/material/card";
+import { MatCheckbox } from "@angular/material/checkbox";
+import { FormsModule } from "@angular/forms";
+import { Router, NavigationEnd } from "@angular/router";
+import { Angulartics2OnModule } from "angulartics2";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
-import { Observable } from "rxjs";
+import { filter } from "rxjs";
 import { cloneDeep } from "lodash-es";
 import { Store } from "@ngxs/store";
 
+import { PublicPointOfInterestEditComponent } from "./public-poi-edit.component";
+import { ImageScrollerComponent } from "./image-scroller.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { PoiService, PoiSocialLinks } from "../../../services/poi.service";
 import { IHMTitleService } from "../../../services/ihm-title.service";
 import { ToastService } from "../../../services/toast.service";
-import { HashService, RouteStrings, PoiRouterData } from "../../../services/hash.service";
+import { RouteStrings, PoiRouterData } from "../../../services/hash.service";
 import { SelectedRouteService } from "../../../services/selected-route.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
@@ -19,10 +32,11 @@ import { RunningContextService } from "../../../services/running-context.service
 import { SidebarService } from "../../../services/sidebar.service";
 import { NavigateHereService } from "../../../services/navigate-here.service";
 import { GpxDataContainerConverterService } from "../../../services/gpx-data-container-converter.service";
+import { OsmAddressesService } from "../../../services/osm-addresses.service";
+import { ElevationProvider } from "../../../services/elevation.provider";
 import { GeoJsonParser } from "../../../services/geojson.parser";
-import { sidebarAnimate } from "../sidebar.component";
 import { AddRouteAction, AddPrivatePoiAction } from "../../../reducers/routes.reducer";
-import { SetSelectedPoiAction, SetUploadMarkerDataAction, SetSidebarAction } from "../../../reducers/poi.reducer";
+import { SetSelectedPoiAction, SetUploadMarkerDataAction } from "../../../reducers/poi.reducer";
 import { GeoJSONUtils } from "../../../services/geojson-utils";
 import type {
     LinkData,
@@ -32,7 +46,6 @@ import type {
     Contribution,
     LatLngAltTime
 } from "../../../models/models";
-import { OsmAddressesService } from "application/services/osm-addresses.service";
 
 export type SourceImageUrlPair = {
     imageUrl: string;
@@ -44,9 +57,7 @@ export type SourceImageUrlPair = {
     templateUrl: "./public-poi-sidebar.component.html",
     styleUrls: ["./public-poi-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    animations: [
-        sidebarAnimate
-    ]
+    imports: [Dir, NgIf, MatButton, Angulartics2OnModule, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, MatCard, PublicPointOfInterestEditComponent, MatCheckbox, FormsModule, MatCardHeader, MatCardTitle, NgClass, MatCardContent, ImageScrollerComponent, NgFor, DecimalPipe]
 })
 export class PublicPoiSidebarComponent implements OnDestroy {
     public info = { imagesUrls: [], urls: [] } as EditablePublicPointData;
@@ -57,7 +68,6 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     public latlng: LatLngAlt;
     public shareLinks = {} as PoiSocialLinks;
     public contribution = {} as Contribution;
-    public isOpen$: Observable<boolean>;
 
     private editMode: boolean;
     private fullFeature: GeoJSON.Feature;
@@ -66,60 +76,52 @@ export class PublicPoiSidebarComponent implements OnDestroy {
 
     private readonly titleService = inject(IHMTitleService);
     private readonly router = inject(Router);
-    private readonly route = inject(ActivatedRoute);
     private readonly poiService = inject(PoiService);
     private readonly osmAddressesService = inject(OsmAddressesService);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly routesFactory = inject(RoutesFactory);
     private readonly toastService = inject(ToastService);
-    private readonly hashService = inject(HashService);
     private readonly fitBoundsService = inject(FitBoundsService);
     private readonly sidebarService = inject(SidebarService);
     private readonly runningContextSerivce = inject(RunningContextService);
     private readonly navigateHereService = inject(NavigateHereService);
     private readonly geoJsonParser = inject(GeoJsonParser);
     private readonly socialSharing = inject(SocialSharing);
+    private readonly elevasionProvider = inject(ElevationProvider);
     private readonly store = inject(Store);
 
     constructor() {
-        this.sidebarService.hideWithoutChangingAddressbar();
-        this.isOpen$ = this.store.select((state: ApplicationState) => state.poiState.isSidebarOpen);
-        this.route.paramMap.pipe(takeUntilDestroyed()).subscribe(async (_) => {
-            if (!this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
-                return;
-            }
-            const snapshot = this.route.snapshot;
-            const poiSourceAndId = this.getDataFromRoute(snapshot.paramMap, snapshot.queryParamMap);
-            if (snapshot.queryParamMap.get(RouteStrings.EDIT) !== "true" || poiSourceAndId.source === "new") {
-                await this.fillUiWithData(poiSourceAndId);
-            }
+        this.router.events.pipe(
+            takeUntilDestroyed(),
+            filter(event => event instanceof NavigationEnd && event.url.startsWith(RouteStrings.ROUTE_POI))
+          ).subscribe(async () => {
+            this.isLoading = true;
+            await this.initOrUpdate();
         });
-        this.route.queryParams.pipe(takeUntilDestroyed()).subscribe(async (params) => {
-            if (!this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
-                return;
-            }
-            const editMode = params[RouteStrings.EDIT] === "true";
-            const snapshot = this.route.snapshot;
-            const poiSourceAndId = this.getDataFromRoute(snapshot.paramMap, snapshot.queryParamMap);
-            if (editMode && poiSourceAndId.source !== "new") {
-                await this.fillUiWithData(poiSourceAndId);
-            }
-            // change this only after we get the full data
-            // so that the edit dialog will have all the necessary data to decide
-            this.editMode = editMode;
-        });
+
+        this.initOrUpdate();
     }
 
-    private getDataFromRoute(params: ParamMap, queryParams: ParamMap) {
-        return {
-            id: params.get(RouteStrings.ID),
-            source: params.get(RouteStrings.SOURCE),
-            language: queryParams.get(RouteStrings.LANGUAGE)
-        } as PoiRouterData;
+    private async initOrUpdate() {
+        const parsed = this.router.parseUrl(this.router.url);
+        const editMode = parsed.queryParams[RouteStrings.EDIT] === "true";
+        
+        const poiSourceAndId = {
+            source: parsed.root.children.primary.segments[1].path,
+            id: parsed.root.children.primary.segments[2]?.path,
+            language: parsed.queryParams[RouteStrings.LANGUAGE]
+        }
+        await this.fillUiWithData(poiSourceAndId);
+        // change this only after we get the full data
+        // so that the edit dialog will have all the necessary data to decide
+        this.editMode = editMode;
     }
 
     public ngOnDestroy() {
         this.titleService.clear();
+        if (this.fullFeature) {
+            this.store.dispatch(new SetSelectedPoiAction(null));
+        }
     }
 
     public isApp(): boolean {
@@ -128,7 +130,6 @@ export class PublicPoiSidebarComponent implements OnDestroy {
 
     private async fillUiWithData(data: PoiRouterData) {
         try {
-            this.store.dispatch(new SetSidebarAction(true));
             if (data.source === "new") {
                 const newFeature = {
                     id: "",
@@ -152,6 +153,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
                 this.fitBoundsService.fitBounds(bounds);
                 this.store.dispatch(new SetSelectedPoiAction(originalFeature));
                 if (data.source === RouteStrings.COORDINATES) {
+                    this.fullFeature = null;
                     this.close();
                 }
             }
@@ -172,16 +174,16 @@ export class PublicPoiSidebarComponent implements OnDestroy {
                 this.showLocationUpdate = true;
             }
         }
-        this.initFromFeature(feature);
+        await this.initFromFeature(feature);
     }
 
-    private initFromFeature(feature: GeoJSON.Feature) {
+    private async initFromFeature(feature: GeoJSON.Feature) {
         this.fullFeature = feature;
         this.latlng = GeoJSONUtils.getLocation(feature);
         this.sourceImageUrls = this.getSourceImageUrls(feature);
         this.shareLinks = this.poiService.getPoiSocialLinks(feature);
         this.contribution = this.poiService.getContribution(feature);
-        this.info = this.poiService.getEditableDataFromFeature(feature);
+        this.info = await this.poiService.getEditableDataFromFeature(feature);
         const language = this.resources.getCurrentLanguageCodeSimplified();
         this.titleService.set(GeoJSONUtils.getTitle(feature, language));
     }
@@ -259,7 +261,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     }
 
     public isShowSeeAlso() {
-        return this.fullFeature && this.fullFeature.properties.poiSource !== RouteStrings.COORDINATES;
+        return this.fullFeature && this.fullFeature.properties.poiSource !== RouteStrings.COORDINATES && (this.sourceImageUrls.length > 0 || this.getElementOsmAddress() != null);
     }
 
     public isRoute() {
@@ -291,11 +293,12 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         }
     }
 
-    public convertToRoute() {
+    public async convertToRoute() {
         const routes = this.geoJsonParser.toRoutes(this.fullFeature as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString>);
         for (const route of routes) {
             const name = this.selectedRouteService.createRouteName(route.name);
             const newRoute = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
+            await this.elevasionProvider.updateHeights(route.latlngs);
             newRoute.description = this.info.description;
             newRoute.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs as LatLngAltTime[], "Hike");
             this.store.dispatch(new AddRouteAction(newRoute));
@@ -357,12 +360,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     }
 
     public close() {
-        if (this.fullFeature) {
-            this.store.dispatch(new SetSelectedPoiAction(null));
-        }
-        this.store.dispatch(new SetSidebarAction(false));
-        // reset address bar only after animation ends.
-        setTimeout(() => this.hashService.resetAddressbar(), 500);
+        this.sidebarService.hide();
     }
 
     public getElementOsmAddress(): string {

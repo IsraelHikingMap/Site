@@ -139,7 +139,7 @@ describe("Recorded Route Service", () => {
             });
             service.initialize();
 
-            positionChanged(store, { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(1).getTime() });
+            positionChanged(store, { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(1).getTime() } as GeolocationPosition);
 
             expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(0);
         }
@@ -185,7 +185,7 @@ describe("Recorded Route Service", () => {
                 }
             });
 
-            positionChanged(store, { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(1).getTime()});
+            positionChanged(store, { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(1).getTime()} as GeolocationPosition);
 
             expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(1);
         }
@@ -234,22 +234,22 @@ describe("Recorded Route Service", () => {
                 {
                     coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(1).getTime()
-                },
+                } as GeolocationPosition,
                 {
                     coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(60000).getTime()
-                },
+                } as GeolocationPosition,
                 {
                     coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(120000).getTime()
-                },
+                } as GeolocationPosition,
                 {
                     coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(180000).getTime()
-                }
+                } as GeolocationPosition
             ]);
             positionChanged(store,
-                { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(240000).getTime()}
+                { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(240000).getTime()} as GeolocationPosition
             );
             expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(5);
         }
@@ -299,31 +299,31 @@ describe("Recorded Route Service", () => {
                 {
                     coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(150000).getTime()
-                },
+                } as GeolocationPosition,
                 {
                     coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(1000).getTime()
-                },
+                } as GeolocationPosition,
                 {
                     coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(2000).getTime()
-                },
+                } as GeolocationPosition,
                 {
                     coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(3000).getTime()
-                },
+                } as GeolocationPosition,
                 {
                     coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(3000).getTime()
-                },
+                } as GeolocationPosition,
                 {
                     coords: { longitude: 1, latitude: 2, accuracy: 1000 } as GeolocationCoordinates,
                     timestamp: new Date(4000).getTime()
-                },
+                } as GeolocationPosition,
                 {
                     coords: { longitude: 1.1, latitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(5000).getTime()
-                }
+                } as GeolocationPosition
             ]);
             expect(spy.calls.all()[0].args[0].startsWith("[Record] Valid position")).toBeTruthy();
             expect(spy.calls.all()[1].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy();

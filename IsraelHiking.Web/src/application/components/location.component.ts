@@ -1,14 +1,21 @@
 import { Component, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { MapComponent } from "@maplibre/ngx-maplibre-gl";
+import { MatButton } from "@angular/material/button";
+import { MatTooltip } from "@angular/material/tooltip";
+import { NgIf } from "@angular/common";
+import { MatProgressSpinner } from "@angular/material/progress-spinner";
+import { MapComponent, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent } from "@maplibre/ngx-maplibre-gl";
+import { Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
 
+import { GpsLocationOverlayComponent } from "./overlays/gps-location-overlay.component";
 import { ResourcesService } from "../services/resources.service";
 import { ToastService } from "../services/toast.service";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { SpatialService } from "../services/spatial.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
 import { LocationService } from "../services/location.service";
+import { FileService } from "../services/file.service";
 import { ToggleDistanceAction, SetPannedAction, SetFollowingAction, ToggleKeepNorthUpAction } from "../reducers/in-memory.reducer";
 import { StopShowingBatteryConfirmationAction } from "../reducers/configuration.reducer";
 import { ChangeRouteStateAction } from "../reducers/routes.reducer";
@@ -18,7 +25,8 @@ import type { LatLngAlt, ApplicationState } from "../models/models";
 @Component({
     selector: "location",
     templateUrl: "./location.component.html",
-    styleUrls: ["./location.component.scss"]
+    styleUrls: ["./location.component.scss"],
+    imports: [MatButton, Angulartics2OnModule, MatTooltip, NgIf, MatProgressSpinner, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, GpsLocationOverlayComponent]
 })
 export class LocationComponent {
     public locationFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
@@ -31,6 +39,7 @@ export class LocationComponent {
     private readonly locationSerivce = inject(LocationService);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly recordedRouteService = inject(RecordedRouteService);
+    private readonly fileService = inject(FileService);
     private readonly store = inject(Store);
     private readonly mapComponent = inject(MapComponent);
 
@@ -50,7 +59,10 @@ export class LocationComponent {
             this.updateDistanceFeatureCollection();
         });
 
-        this.mapComponent.mapLoad.subscribe(() => {
+        this.mapComponent.mapLoad.subscribe(async () => {
+            const fullUrl = this.fileService.getFullUrl("content/gps-arrow.png");
+            const image = await this.mapComponent.mapInstance.loadImage(fullUrl);
+            this.mapComponent.mapInstance.addImage("gps-arrow", image.data);
             this.mapComponent.mapInstance.on("move", () => {
                 this.updateDistanceFeatureCollection();
             });

@@ -55,6 +55,21 @@
     background: #f00;
 }
 
+.circle-line {
+    position: absolute;
+    top: 6px;
+    left: 1px;
+    border: solid white 1px;
+    font-size: 8px;
+    color: #fff;
+    line-height: normal;
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    width: 10px;
+    transform: rotate(-45deg);
+}
+
 ::ng-deep .mdc-list-item__primary-text {
     width: 100%;
 }

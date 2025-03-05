@@ -3,14 +3,12 @@ using NetTopologySuite.Geometries;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace IsraelHiking.DataAccessInterfaces.Repositories
+namespace IsraelHiking.DataAccessInterfaces.Repositories;
+
+public interface ISearchRepository
 {
-    public interface ISearchRepository
-    {
-        Task<List<IFeature>> Search(string searchTerm, string language);
-        Task<List<IFeature>> SearchPlaces(string place, string language);
-        Task<List<IFeature>> SearchByLocation(Coordinate northEast, Coordinate southWest, string searchTerm, string language);
-        Task<List<IFeature>> SearchExact(string searchTerm, string language);
-        Task<List<IFeature>> GetContainers(Coordinate coordinate);
-    }
+    Task<List<IFeature>> Search(string searchTerm, string language);
+    Task<List<IFeature>> SearchPlaces(string searchTerm, string language);
+    Task<List<IFeature>> SearchExact(string searchTerm, string language);
+    Task<string> GetContainerName(Coordinate[] coordinates, string language);
 }

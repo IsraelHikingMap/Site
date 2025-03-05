@@ -19,14 +19,15 @@ export class Urls {
     public static readonly osm = Urls.apiBase + "osm/";
     public static readonly osmTrace = Urls.osm + "trace/";
     public static readonly osmTraceRoute = Urls.osmTrace + "route";
-    public static readonly osmUser = Urls.osm + "details/";
     public static readonly userLayers = Urls.apiBase + "userLayers/";
     public static readonly poi = Urls.apiBase + "points/";
     public static readonly poiCategories = Urls.poi + "categories/";
     public static readonly poiClosest = Urls.poi + "closest/";
     public static readonly poiUpdates = Urls.poi + "updates/";
     public static readonly poiSimple = Urls.poi + "simple/";
-    public static readonly poisOfflineFile = Urls.baseAddress + "/PointsOfInterest/pois.zip";
+
+    public static readonly osmApi = "https://api.openstreetmap.org/api/0.6/";
+    public static readonly osmUser = Urls.osmApi + "user/details.json";
 
     public static readonly facebook = "https://www.facebook.com/sharer/sharer.php?u=";
     public static readonly waze = "https://www.waze.com/ul?navigate=yes&zoom=17&ll=";

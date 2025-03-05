@@ -15,10 +15,22 @@ export const SPECIAL_LAYERS = [...SPECIAL_BASELAYERS, ...SPECIAL_OVERLAYS];
 export const AVAILABLE_LANGUAGES: Language[] = [{
         code: "he",
         rtl: true,
+        label: "עברית"
     },
     {
         code: "en-US",
         rtl: false,
+        label: "English"
+    },
+    {
+        code: "ru",
+        rtl: false,
+        label: "Русский"
+    },
+    {
+        code: "ar",
+        rtl: true,
+        label: "العربية"
     }
 ];
 
@@ -146,8 +158,7 @@ export const initialState =
         },
         poiState: {
             selectedPointOfInterest: null,
-            uploadMarkerData: null,
-            isSidebarOpen: false
+            uploadMarkerData: null
         },
         inMemoryState: {
             distance: false,

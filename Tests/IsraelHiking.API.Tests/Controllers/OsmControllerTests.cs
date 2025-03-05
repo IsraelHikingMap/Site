@@ -17,144 +17,141 @@ using System.Linq;
 using System.Net;
 using NSubstitute.ExceptionExtensions;
 
-namespace IsraelHiking.API.Tests.Controllers
+namespace IsraelHiking.API.Tests.Controllers;
+
+[TestClass]
+public class OsmControllerTests
 {
-    [TestClass]
-    public class OsmControllerTests
+    private OsmController _controller;
+    private IOsmLineAdderService _osmLineAdderService;
+    private IClientsFactory _clientsFactory;
+    private IDataContainerConverterService _dataContainerConverterService;
+    private IAddibleGpxLinesFinderService _addibleGpxLinesFinderService;
+
+    private int SetupGpxUrl(GpxFile gpx, List<LineString> addibleLines = null)
     {
-        private OsmController _controller;
-        private IOsmLineAdderService _osmLineAdderService;
-        private IClientsFactory _clientsFactory;
-        private IDataContainerConverterService _dataContainerConverterService;
-        private IAddibleGpxLinesFinderService _addibleGpxLinesFinderService;
-
-        private int SetupGpxUrl(GpxFile gpx, List<LineString> addibleLines = null)
+        int traceId = 1;
+        var fetcher = Substitute.For<IAuthClient>();
+        var fileResponse = new TypedStream
         {
-            int traceId = 1;
-            var fetcher = Substitute.For<IAuthClient>();
-            var fileResponse = new TypedStream
+            FileName = "file.gpx",
+            Stream = new MemoryStream([])
+        };
+        fetcher.GetTraceData(traceId).Returns(fileResponse);
+        _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>())
+            .Returns(gpx.ToBytes());
+        _clientsFactory.CreateOAuth2Client(Arg.Any<string>()).Returns(fetcher);
+        _addibleGpxLinesFinderService.GetLines(Arg.Any<List<LineString>>()).Returns(
+            addibleLines ?? new List <LineString>
             {
-                FileName = "file.gpx",
-                Stream = new MemoryStream(Array.Empty<byte>())
-            };
-            fetcher.GetTraceData(traceId).Returns(fileResponse);
-            _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>())
-                .Returns(gpx.ToBytes());
-            _clientsFactory.CreateOAuth2Client(Arg.Any<string>()).Returns(fetcher);
-            _addibleGpxLinesFinderService.GetLines(Arg.Any<List<LineString>>()).Returns(
-                addibleLines ?? new List <LineString>
-                {
-                    new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)})
-                }.AsEnumerable()
-            );
-            return traceId;
-        }
+                new LineString([new Coordinate(0, 0), new Coordinate(1, 1)])
+            }.AsEnumerable()
+        );
+        return traceId;
+    }
 
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            _clientsFactory = Substitute.For<IClientsFactory>();
-            _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
-            _addibleGpxLinesFinderService = Substitute.For<IAddibleGpxLinesFinderService>();
-            _osmLineAdderService = Substitute.For<IOsmLineAdderService>();
-            _controller = new OsmController(_clientsFactory, _dataContainerConverterService, new ItmWgs84MathTransformFactory(), 
-                _addibleGpxLinesFinderService, _osmLineAdderService, new GeometryFactory());
-        }
+    [TestInitialize]
+    public void TestInitialize()
+    {
+        _clientsFactory = Substitute.For<IClientsFactory>();
+        _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
+        _addibleGpxLinesFinderService = Substitute.For<IAddibleGpxLinesFinderService>();
+        _osmLineAdderService = Substitute.For<IOsmLineAdderService>();
+        _controller = new OsmController(_clientsFactory, _dataContainerConverterService, new ItmWgs84MathTransformFactory(), 
+            _addibleGpxLinesFinderService, _osmLineAdderService, new GeometryFactory());
+    }
 
-        [TestMethod]
-        public void PutAddUnmappedPartIntoOsm_ShouldDoIt()
-        {
-            var feature = new Feature(new LineString(Array.Empty<Coordinate>()), new AttributesTable());
-            _controller.SetupIdentity();
+    [TestMethod]
+    public void PutAddUnmappedPartIntoOsm_ShouldDoIt()
+    {
+        var feature = new Feature(new LineString([]), new AttributesTable());
+        _controller.SetupIdentity();
 
-            _controller.PutAddUnmappedPartIntoOsm(feature).Wait();
+        _controller.PutAddUnmappedPartIntoOsm(feature).Wait();
 
-            _osmLineAdderService.Received(1).Add(Arg.Any<LineString>(), Arg.Any<Dictionary<string, string>>(), Arg.Any<IAuthClient>());
-        }
+        _osmLineAdderService.Received(1).Add(Arg.Any<LineString>(), Arg.Any<Dictionary<string, string>>(), Arg.Any<IAuthClient>());
+    }
 
-        [TestMethod]
-        public void PostGpsTrace_NoFileOrUrlProvided_ShouldReturnBadRequestResult()
-        {
-            _controller.SetupIdentity();
-            var fetcher = Substitute.For<IAuthClient>();
-            fetcher.GetTraceData(Arg.Any<long>()).Throws(new OsmApiException(null, "something", HttpStatusCode.NotFound));
-            _clientsFactory.CreateOAuth2Client(Arg.Any<string>()).Returns(fetcher);
+    [TestMethod]
+    public void PostGpsTrace_NoFileOrUrlProvided_ShouldReturnBadRequestResult()
+    {
+        _controller.SetupIdentity();
+        var fetcher = Substitute.For<IAuthClient>();
+        fetcher.GetTraceData(Arg.Any<long>()).Throws(new OsmApiException(null, "something", HttpStatusCode.NotFound));
+        _clientsFactory.CreateOAuth2Client(Arg.Any<string>()).Returns(fetcher);
 
-            var results = _controller.PostFindUnmappedPartsFromGpsTrace(-1).Result as BadRequestObjectResult;
+        var results = _controller.PostFindUnmappedPartsFromGpsTrace(-1).Result as BadRequestObjectResult;
 
-            Assert.IsNotNull(results);
-        }
+        Assert.IsNotNull(results);
+    }
 
-        [TestMethod]
-        public void PostGpsTrace_UrlProvidedForEmptyGpxFile_ShouldReturnEmptyFeatureCollection()
-        {
-            var url = SetupGpxUrl(new GpxFile(), new List<LineString>());
-            _controller.SetupIdentity();
+    [TestMethod]
+    public void PostGpsTrace_UrlProvidedForEmptyGpxFile_ShouldReturnEmptyFeatureCollection()
+    {
+        var url = SetupGpxUrl(new GpxFile(), []);
+        _controller.SetupIdentity();
 
-            var results = _controller.PostFindUnmappedPartsFromGpsTrace(url).Result as BadRequestObjectResult;
+        var results = _controller.PostFindUnmappedPartsFromGpsTrace(url).Result as BadRequestObjectResult;
 
-            Assert.IsNotNull(results);
-        }
+        Assert.IsNotNull(results);
+    }
 
-        [TestMethod]
-        public void PostGpsTrace_UrlProvidedForSemiEmptyGpxFile_ShouldReturnEmptyFeatureCollection()
-        {
-            var gpx = new GpxFile();
-            gpx.Tracks.Add(new GpxTrack());
-            var url = SetupGpxUrl(gpx, new List<LineString>());
-            _controller.SetupIdentity();
+    [TestMethod]
+    public void PostGpsTrace_UrlProvidedForSemiEmptyGpxFile_ShouldReturnEmptyFeatureCollection()
+    {
+        var gpx = new GpxFile();
+        gpx.Tracks.Add(new GpxTrack());
+        var url = SetupGpxUrl(gpx, []);
+        _controller.SetupIdentity();
 
-            var results = _controller.PostFindUnmappedPartsFromGpsTrace(url).Result as BadRequestObjectResult;
+        var results = _controller.PostFindUnmappedPartsFromGpsTrace(url).Result as BadRequestObjectResult;
 
-            Assert.IsNotNull(results);
-        }
+        Assert.IsNotNull(results);
+    }
 
-        [TestMethod]
-        public void PostGpsTrace_UrlProvidedForCyclewayGpxFile_ShouldReturnFeatureCollection()
-        {
-            var gpx = new GpxFile();
-            gpx.Routes.Add(
-                new GpxRoute().WithWaypoints(new[]
-                {
-                    new GpxWaypoint((GpxLongitude) 0, (GpxLatitude) 0).WithTimestampUtc(DateTime.Now.ToUniversalTime()),
-                    new GpxWaypoint((GpxLongitude) 0.001, (GpxLatitude) 0.001).WithTimestampUtc(DateTime.Now
-                        .AddMinutes(1).ToUniversalTime())
-                }));
-            var url = SetupGpxUrl(gpx);
-            _controller.SetupIdentity();
+    [TestMethod]
+    public void PostGpsTrace_UrlProvidedForCyclewayGpxFile_ShouldReturnFeatureCollection()
+    {
+        var gpx = new GpxFile();
+        gpx.Routes.Add(
+            new GpxRoute().WithWaypoints([
+                new GpxWaypoint((GpxLongitude) 0, (GpxLatitude) 0).WithTimestampUtc(DateTime.Now.ToUniversalTime()),
+                new GpxWaypoint((GpxLongitude) 0.001, (GpxLatitude) 0.001).WithTimestampUtc(DateTime.Now
+                    .AddMinutes(1).ToUniversalTime())
+            ]));
+        var url = SetupGpxUrl(gpx);
+        _controller.SetupIdentity();
 
-            var results = _controller.PostFindUnmappedPartsFromGpsTrace(url).Result as OkObjectResult;
+        var results = _controller.PostFindUnmappedPartsFromGpsTrace(url).Result as OkObjectResult;
 
-            Assert.IsNotNull(results);
-            var featureCollection = results.Value as FeatureCollection;
-            Assert.IsNotNull(featureCollection);
-            Assert.AreEqual(1, featureCollection.Count);
-            Assert.IsTrue(featureCollection.First().Attributes.GetValues().Contains("cycleway"));
-        }
+        Assert.IsNotNull(results);
+        var featureCollection = results.Value as FeatureCollection;
+        Assert.IsNotNull(featureCollection);
+        Assert.AreEqual(1, featureCollection.Count);
+        Assert.IsTrue(featureCollection.First().Attributes.GetValues().Contains("cycleway"));
+    }
 
-        [TestMethod]
-        public void PostGpsTrace_UrlProvidedForTrackGpxFile_ShouldReturnFeatureCollection()
-        {
-            var gpx = new GpxFile();
-            gpx.Routes.Add(
-                new GpxRoute().WithWaypoints(new[]
-                {
-                    new GpxWaypoint(new GpxLongitude(0), new GpxLatitude(0)).WithTimestampUtc(
-                        DateTime.Now.ToUniversalTime()),
-                    new GpxWaypoint(new GpxLongitude(0.01), new GpxLatitude(0.01)).WithTimestampUtc(DateTime.Now
-                        .AddMinutes(1).ToUniversalTime())
-                })
-            );
-            var url = SetupGpxUrl(gpx);
-            _controller.SetupIdentity();
+    [TestMethod]
+    public void PostGpsTrace_UrlProvidedForTrackGpxFile_ShouldReturnFeatureCollection()
+    {
+        var gpx = new GpxFile();
+        gpx.Routes.Add(
+            new GpxRoute().WithWaypoints([
+                new GpxWaypoint(new GpxLongitude(0), new GpxLatitude(0)).WithTimestampUtc(
+                    DateTime.Now.ToUniversalTime()),
+                new GpxWaypoint(new GpxLongitude(0.01), new GpxLatitude(0.01)).WithTimestampUtc(DateTime.Now
+                    .AddMinutes(1).ToUniversalTime())
+            ])
+        );
+        var url = SetupGpxUrl(gpx);
+        _controller.SetupIdentity();
 
-            var results = _controller.PostFindUnmappedPartsFromGpsTrace(url).Result as OkObjectResult;
+        var results = _controller.PostFindUnmappedPartsFromGpsTrace(url).Result as OkObjectResult;
 
-            Assert.IsNotNull(results);
-            var featureCollection = results.Value as FeatureCollection;
-            Assert.IsNotNull(featureCollection);
-            Assert.AreEqual(1, featureCollection.Count);
-            Assert.IsTrue(featureCollection.First().Attributes.GetValues().Contains("track"));
-        }
+        Assert.IsNotNull(results);
+        var featureCollection = results.Value as FeatureCollection;
+        Assert.IsNotNull(featureCollection);
+        Assert.AreEqual(1, featureCollection.Count);
+        Assert.IsTrue(featureCollection.First().Attributes.GetValues().Contains("track"));
     }
 }

@@ -1,7 +1,13 @@
 import { Component, ViewEncapsulation, inject, input, output } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { Dir } from "@angular/cdk/bidi";
+import { MatButton } from "@angular/material/button";
+import { NgClass, NgIf } from "@angular/common";
+import { MatTooltip } from "@angular/material/tooltip";
+import { Angulartics2OnModule } from "angulartics2";
 import { firstValueFrom } from "rxjs";
 
+import { CoordinatesComponent } from "../coordinates.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { Urls } from "../../urls";
@@ -11,7 +17,8 @@ import type { LatLngAlt } from "../../models/models";
     selector: "missing-part-overlay",
     templateUrl: "./missing-part-overlay.component.html",
     styleUrls: ["./missing-part-overlay.component.scss"],
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    imports: [Dir, MatButton, NgClass, MatTooltip, Angulartics2OnModule, NgIf, CoordinatesComponent]
 })
 export class MissingPartOverlayComponent {
 
@@ -49,7 +56,7 @@ export class MissingPartOverlayComponent {
 
     public async addMissingPartToOsm() {
         try {
-            await firstValueFrom(this.httpClient.put(Urls.osm, this.feature));
+            await firstValueFrom(this.httpClient.put(Urls.osm, this.feature()));
             this.toastService.success(this.resources.routeAddedSuccessfullyItWillTakeTime);
             this.remove();
         } catch (ex) {

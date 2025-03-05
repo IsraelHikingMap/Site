@@ -3,9 +3,9 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 
-import { PoiService } from "./poi.service";
 import { CoordinatesService } from "./coordinates.service";
 import { RouteStrings, getIdFromLatLng } from "./hash.service";
+import { ResourcesService } from "./resources.service";
 import { Urls } from "../urls";
 import type { SearchResultsPointOfInterest } from "../models/models";
 
@@ -13,10 +13,10 @@ import type { SearchResultsPointOfInterest } from "../models/models";
 export class SearchResultsProvider {
 
     private readonly httpClient = inject(HttpClient);
-    private readonly poiService = inject(PoiService);
     private readonly coordinatesService = inject(CoordinatesService);
+    private readonly resources = inject(ResourcesService)
 
-    public async getResults(searchTerm: string, isHebrew: boolean): Promise<SearchResultsPointOfInterest[]> {
+    public async getResults(searchTerm: string): Promise<SearchResultsPointOfInterest[]> {
         const searchWithoutBadCharacters = searchTerm.replace("/", " ").replace("\t", " ");
         const latlng = this.coordinatesService.parseCoordinates(searchWithoutBadCharacters);
         if (latlng) {
@@ -32,8 +32,7 @@ export class SearchResultsProvider {
                 description: "",
             }];
         }
-        const language = isHebrew ? "he" : "en";
-        const params = new HttpParams().set("language", language);
+        const params = new HttpParams().set("language", this.resources.getCurrentLanguageCodeSimplified());
         const response = await firstValueFrom(this.httpClient.get(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
             params
         }).pipe(timeout(3000)));

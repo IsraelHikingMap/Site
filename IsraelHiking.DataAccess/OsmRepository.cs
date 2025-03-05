@@ -6,80 +6,83 @@ using OsmSharp.Streams;
 using OsmSharp.Streams.Complete;
 using Microsoft.Extensions.Logging;
 using System.IO;
-using IsraelHiking.Common.Extensions;
-using OsmSharp;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 
-namespace IsraelHiking.DataAccess
+namespace IsraelHiking.DataAccess;
+
+public class OsmRepository : IOsmRepository
 {
-    public class OsmRepository : IOsmRepository
+    private readonly ILogger _logger;
+
+    public OsmRepository(ILogger logger)
     {
-        private readonly ILogger _logger;
+        _logger = logger;
+    }
 
-        public OsmRepository(ILogger logger)
+    public Task<List<CompleteWay>> GetAllHighways(Stream osmFileStream)
+    {
+        return Task.Run(() =>
         {
-            _logger = logger;
-        }
+            _logger.LogInformation("Extracting highways from OSM stream.");
+            osmFileStream.Seek(0, SeekOrigin.Begin);
+            var source = new PBFOsmStreamSource(osmFileStream);
+            var completeSource = new OsmSimpleCompleteStreamSource(source);
+            var highways = completeSource
+                .OfType<CompleteWay>()
+                .Where(o => o.Tags.ContainsKey("highway") && !o.Tags.Contains("highway", "construction"))
+                .ToList();
+            _logger.LogInformation("Finished getting highways. " + highways.Count);
+            return highways;
+        });
+    }
 
-        public Task<List<CompleteWay>> GetAllHighways(Stream osmFileStream)
+    public Task<Dictionary<string,List<string>>> GetExternalReferences(Stream osmFileStream)
+    {
+        return Task.Run(() =>
         {
-            return Task.Run(() =>
+            var dictionary = new Dictionary<string, List<string>>
             {
-                _logger.LogInformation("Extracting highways from OSM stream.");
-                osmFileStream.Seek(0, SeekOrigin.Begin);
-                var source = new PBFOsmStreamSource(osmFileStream);
-                var completeSource = new OsmSimpleCompleteStreamSource(source);
-                var highways = completeSource
-                    .OfType<CompleteWay>()
-                    .Where(o => o.Tags.ContainsKey("highway") && !o.Tags.Contains("highway", "construction"))
-                    .ToList();
-                _logger.LogInformation("Finished getting highways. " + highways.Count);
-                return highways;
-            });
-        }
-
-        public Task<List<ICompleteOsmGeo>> GetPoints(Stream osmFileStream, List<KeyValuePair<string, string>> tags)
-        {
-            return Task.Run(() =>
+                { Sources.WIKIDATA, [] },
+                { Sources.INATURE, [] }
+            };
+            _logger.LogInformation("Starting extracting external references from OSM stream.");
+            osmFileStream.Seek(0, SeekOrigin.Begin);
+            var source = new PBFOsmStreamSource(osmFileStream);
+            var completeSource = new OsmSimpleCompleteStreamSource(source);
+            var references = completeSource
+                .Where(o => o.Tags.ContainsKey("wikidata") || o.Tags.ContainsKey("ref:IL:inature"))
+                .ToList();
+            foreach (var reference in references)
             {
-                _logger.LogInformation("Extracting points from OSM stream.");
-                osmFileStream.Seek(0, SeekOrigin.Begin);
-                var source = new PBFOsmStreamSource(osmFileStream);
-                var completeSource = new OsmSimpleCompleteStreamSource(source);
-                var completeOsmGeos = completeSource
-                    .Where(o => !o.Tags.Contains("highway", "construction"))
-                    .Where(o => !o.Tags.Contains("boundary", "disputed"))
-                    .Where(o => !string.IsNullOrWhiteSpace(o.Tags.GetName()))
-                    .ToList();
-                
-                var nodes = completeSource.OfType<Node>()
-                    .Where(node =>
-                        node.Tags.GetName() == string.Empty &&
-                        node.Tags.HasAny(tags)
-                    ).ToList();
-                completeOsmGeos.AddRange(nodes);
-                
-                _logger.LogInformation("Finished extracting points. " + completeOsmGeos.Count);
-                return completeOsmGeos;
-            });
-        }
+                if (reference.Tags.ContainsKey("ref:IL:inature"))
+                {
+                    dictionary[Sources.INATURE].Add(reference.Tags["ref:IL:inature"]);
+                }
+                if (reference.Tags.ContainsKey("wikidata"))
+                {
+                    dictionary[Sources.WIKIDATA].Add(reference.Tags["wikidata"]);
+                }
+            }
+            _logger.LogInformation("Finished extracting external references from OSM stream: " + references.Count);
+            return dictionary;
+        });
+    }
 
-        public Task<List<string>> GetImagesUrls(Stream osmFileStream)
+    public Task<List<string>> GetImagesUrls(Stream osmFileStream)
+    {
+        return Task.Run(() =>
         {
-            return Task.Run(() =>
-            {
-                _logger.LogInformation("Starting extracting urls from OSM stream.");
-                osmFileStream.Seek(0, SeekOrigin.Begin);
-                var source = new PBFOsmStreamSource(osmFileStream);
-                var completeSource = new OsmSimpleCompleteStreamSource(source);
-                var urls = completeSource.Where(element => element.Tags.Any(t => t.Key.StartsWith(FeatureAttributes.IMAGE_URL)))
-                    .SelectMany(element => element.Tags.Where(t => t.Key.StartsWith(FeatureAttributes.IMAGE_URL)))
-                    .Select(tag => tag.Value)
-                    .ToList();
-                _logger.LogInformation("Finished extracting urls from OSM stream. " + urls.Count);
-                return urls;
-            });
-        }
+            _logger.LogInformation("Starting extracting urls from OSM stream.");
+            osmFileStream.Seek(0, SeekOrigin.Begin);
+            var source = new PBFOsmStreamSource(osmFileStream);
+            var completeSource = new OsmSimpleCompleteStreamSource(source);
+            var urls = completeSource.Where(element => element.Tags.Any(t => t.Key.StartsWith(FeatureAttributes.IMAGE_URL)))
+                .SelectMany(element => element.Tags.Where(t => t.Key.StartsWith(FeatureAttributes.IMAGE_URL)))
+                .Select(tag => tag.Value)
+                .ToList();
+            _logger.LogInformation("Finished extracting urls from OSM stream. " + urls.Count);
+            return urls;
+        });
     }
 }

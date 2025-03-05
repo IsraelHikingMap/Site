@@ -9,6 +9,7 @@
                 <i class="fa icon-frown-o fa-lg"></i>
             </button>
             <span class="circle" [ngClass]="{'offline': isOffline(), 'online': !isOffline()}">{{getQueueText()}}</span>
+            <span *ngIf="isOffline()" class="circle-line"></span>
             <button mat-button class="high-button" [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Toggle main menu"><i class="fa fa-lg icon-bars"></i></button>
         </div>
         <mat-menu #appMenu="matMenu" xPosition="before">
@@ -74,7 +75,7 @@
                         <button mat-menu-item (click)="openLanguage()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Open language selection">
                             <span class="flex flex-row justify-center items-center">
                                 <span class="w-1/12 text-center"><i class="fa fa-lg icon-language mat-icon"></i></span>
-                                <span class="flex-1 margin-sides">{{resources.language}}</span>
+                                <span class="flex-1 margin-sides">Language</span>
                             </span>
                         </button>
                         <a mat-menu-item *ngIf="isShowEditOsmButton()" [href]="getOsmAddress()" [target]="'_blank'" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Edit in OSM">

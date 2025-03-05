@@ -5,9 +5,8 @@ import { firstValueFrom } from "rxjs";
 import { timeout, skip } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
 import { Store } from "@ngxs/store";
-import osmtogeojson from "osmtogeojson";
 import type { Immutable } from "immer";
-import type { MapGeoJSONFeature, SourceSpecification } from "maplibre-gl";
+import type { GeoJSONFeature } from "maplibre-gl";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, PoiRouterData, RouteStrings } from "./hash.service";
@@ -23,8 +22,10 @@ import { OverpassTurboService } from "./overpass-turbo.service";
 import { GeoJSONUtils } from "./geojson-utils";
 import { INatureService } from "./inature.service";
 import { WikidataService } from "./wikidata.service";
+import { ImageAttributionService } from "./image-attribution.service";
 import { LatLon, OsmTagsService, PoiProperties } from "./osm-tags.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction } from "../reducers/offline.reducer";
+import { AVAILABLE_LANGUAGES } from "../reducers/initial-state";
 import {
     SetCategoriesGroupVisibilityAction,
     AddCategoryAction,
@@ -44,6 +45,7 @@ import type {
     OfflineState
 } from "../models/models";
 
+
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite"
 
 export type PoiSocialLinks = {
@@ -60,34 +62,18 @@ export interface ISelectableCategory extends Category {
     label: string;
 }
 
-type SourceLayerAndJson = {
-    sourceLayer: string;
-    source: SourceSpecification;
-}
-
 @Injectable()
 export class PoiService {
 
-    private static readonly POIS_MAP: Record<string, SourceLayerAndJson> = {
-        "points-of-interest": { sourceLayer: "public_pois", source: {
-            type: "vector",
-            url: "https://israelhiking.osm.org.il/vector/data/public_pois.json"
-        } },
-        "trail-points-of-interest": { sourceLayer: "trail_pois", source: {
-            type: "vector",
-            url: "https://israelhiking.osm.org.il/vector/data/trail_pois.json"
-        } },
-        "external-points-of-interest": { sourceLayer: "external", source: {
-            type: "vector",
-            url: "https://israelhiking.osm.org.il/vector/data/external.json"
-        } }
-    }
+    private static readonly POIS_SOURCE_LAYER_NAMES = ["global_points", "external"];
+    private static readonly POIS_SOURCE_ID = "points-of-interest";
+    private static readonly POIS_SOURCE_ADDRESS = "https://israelhiking.osm.org.il/vector/data/global_points.json";
 
     private poisCache: GeoJSON.Feature[] = [];
     private queueIsProcessing: boolean = false;
     private offlineState: Immutable<OfflineState>;
 
-    public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Geometry, PoiProperties> = {
+    public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> = {
         type: "FeatureCollection",
         features: []
     };
@@ -107,6 +93,7 @@ export class PoiService {
     private readonly iNatureService = inject(INatureService);
     private readonly wikidataService = inject(WikidataService);
     private readonly overpassTurboService = inject(OverpassTurboService);
+    private readonly imageAttributinoService = inject(ImageAttributionService);
     private readonly store = inject(Store);
 
     constructor() {
@@ -136,31 +123,35 @@ export class PoiService {
     }
 
     private initializePois() {
-        for (const source of Object.keys(PoiService.POIS_MAP)) {
-            const sourceLayer = PoiService.POIS_MAP[source];
-            this.mapService.map.addSource(source, sourceLayer.source);
+        this.mapService.map.addSource(PoiService.POIS_SOURCE_ID, {
+            type: "vector",
+            url: PoiService.POIS_SOURCE_ADDRESS
+        });
+        for (const sourceLayerName of PoiService.POIS_SOURCE_LAYER_NAMES) {
             this.mapService.map.addLayer({
-                id: `${source}-layer`,
+                id: sourceLayerName + "-layer",
                 type: "circle",
-                source: source,
-                "source-layer": sourceLayer.sourceLayer,
+                source: PoiService.POIS_SOURCE_ID,
+                "source-layer": sourceLayerName,
                 paint: {
                     "circle-color": "transparent",
                 }
             }, this.resources.endOfBaseLayer);
+        }
 
-            if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState.lastModifiedDate) != null) {
-                this.mapService.map.addSource(`${source}-offline`, {
-                    type: "vector",
-                    tiles: [`custom://${sourceLayer.sourceLayer}/{z}/{x}/{y}.pbf`],
-                    minzoom: 10,
-                    maxzoom: 14
-                });
+        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState.lastModifiedDate) != null) {
+            this.mapService.map.addSource(`${PoiService.POIS_SOURCE_ID}-offline`, {
+                type: "vector",
+                tiles: [`custom://${PoiService.POIS_SOURCE_ADDRESS.split("/").pop().replace(".json", "")}/{z}/{x}/{y}.pbf`],
+                minzoom: 10,
+                maxzoom: 14
+            });
+            for (const sourceLayerName of PoiService.POIS_SOURCE_LAYER_NAMES) {
                 this.mapService.map.addLayer({
-                    id: `${source}-offline-layer`,
+                    id: `${sourceLayerName}-offline-layer`,
                     type: "circle",
-                    source: `${source}-offline`,
-                    "source-layer": sourceLayer.sourceLayer,
+                    source: `${PoiService.POIS_SOURCE_ID}-offline`,
+                    "source-layer": sourceLayerName,
                     paint: {
                         "circle-color": "transparent",
                     }
@@ -168,7 +159,7 @@ export class PoiService {
             }
         }
         this.mapService.map.on("sourcedata", (e) => {
-            if (Object.keys(PoiService.POIS_MAP).includes(e.sourceId)) {
+            if (PoiService.POIS_SOURCE_ID === e.sourceId) {
                 this.ngZone.run(() => {
                     this.updatePois();
                 });
@@ -284,32 +275,49 @@ export class PoiService {
      * @param id - the id of the poi, for example OSM_way_1234
      * @param poi - the point of interest to adjust
      */
-    private adjustGeolocationBasedOnTileDate(id: string, poi: GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>) {
+    private adjustGeolocationBasedOnTileData(id: string, poi: GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>) {
         if (poi.geometry.type === "Point") {
             return;
         }
-        for (const source of Object.keys(PoiService.POIS_MAP)) {
-            const features = this.mapService.map.querySourceFeatures(source, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer});
-            const feature = features.find(f => this.osmTileFeatureToPoiIdentifier(f) === id);
-            if (feature == null) {
-                continue;
-            }
-            poi.properties.poiGeolocation = this.getGeolocation(feature);
+        const feature = this.getFeaturesFromTiles().find(f => this.osmTileFeatureToPoiIdentifier(f) === id);
+        if (feature != null) {
+            poi.properties.poiGeolocation = this.getGeolocation(feature);    
         }
     }
 
-    private getPoisFromTiles(): GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>[] {
-        let features: MapGeoJSONFeature[] = [];
-        for (const source of Object.keys(PoiService.POIS_MAP)) {
-            features = features.concat(this.mapService.map.querySourceFeatures(source, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer}));
+    private getFeaturesFromTiles(): GeoJSONFeature[] {
+        if (this.mapService.map == null) {
+            // Map is not ready yet
+            return [];
+        }
+        let features: GeoJSONFeature[] = [];
+        for (const sourceLayer of PoiService.POIS_SOURCE_LAYER_NAMES) {
+            features = features.concat(this.mapService.map.querySourceFeatures(PoiService.POIS_SOURCE_ID, {sourceLayer}));
         }
         if (features.length === 0) {
-            for (const source of Object.keys(PoiService.POIS_MAP)) {
-                features = features.concat(this.mapService.map.querySourceFeatures(`${source}-offline`, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer}));
+            for (const sourceLayer of PoiService.POIS_SOURCE_LAYER_NAMES) {
+                features = features.concat(this.mapService.map.querySourceFeatures(`${PoiService.POIS_SOURCE_ID}-offline`, {sourceLayer}));
             }
         }
+        return features;
+    }
+
+    private getPoisFromTiles(): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
+        const features = this.getFeaturesFromTiles();
         const hashSet = new Set();
-        let pois = features.map(feature => this.convertFeatureToPoi(feature, this.osmTileFeatureToPoiIdentifier(feature)))
+        let pois = features.map(feature => {
+            const poi = this.convertFeatureToPoi(feature, this.osmTileFeatureToPoiIdentifier(feature));
+            // convert to point for clustering
+            const pointFeature: GeoJSON.Feature<GeoJSON.Point, PoiProperties> = {
+                type: "Feature",
+                properties: {...poi.properties},
+                geometry: {
+                    type: "Point",
+                    coordinates: [poi.properties.poiGeolocation.lon, poi.properties.poiGeolocation.lat]
+                }
+            };
+            return pointFeature;
+        });
         pois = pois.filter(p => {
             if (hashSet.has(p.properties.poiId)) {
                 return false;
@@ -345,18 +353,25 @@ export class PoiService {
         poi.properties.identifier = poi.properties.identifier || id;
         poi.properties.poiSource = poi.properties.poiSource || "OSM";
         poi.properties.poiId = poi.properties.poiId || poi.properties.poiSource + "_" + poi.properties.identifier;
+        if (typeof poi.properties.poiGeolocation === "string") {
+            poi.properties.poiGeolocation = JSON.parse(poi.properties.poiGeolocation);
+        }
+        if (typeof poi.properties.poiLanguages === "string") {
+            poi.properties.poiLanguages = (poi.properties.poiLanguages as string).split(",");
+        }
         poi.properties.poiGeolocation = poi.properties.poiGeolocation || this.getGeolocation(feature);
         poi.properties.poiLanguage = poi.properties.poiLanguage || "all";
+        poi.properties.poiLanguages = poi.properties.poiLanguages || AVAILABLE_LANGUAGES.map(l => l.code.split("-")[0]);
         OsmTagsService.setIconColorCategory(feature, poi);
         return poi;
     }
 
-    private filterFeatures(features: GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>[]): GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>[] {
+    private filterFeatures(features: GeoJSON.Feature<GeoJSON.Point, PoiProperties>[]): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
         const visibleFeatures = [];
         const visibleCategories = this.getVisibleCategories();
         const language = this.resources.getCurrentLanguageCodeSimplified();
         for (const feature of features) {
-            if (feature.properties.poiLanguage !== "all" && feature.properties.poiLanguage !== language) {
+            if (!feature.properties.poiLanguages.includes(language)) {
                 continue;
             }
             if (visibleCategories.indexOf(feature.properties.poiCategory) === -1) {
@@ -465,14 +480,11 @@ export class PoiService {
         try {
             if (source === "OSM") {
                 const { osmId, type } = this.poiIdentifierToTypeAndId(id);
-                const osmPoi$ = this.httpClient.get(`https://www.openstreetmap.org/api/0.6/${type}/${osmId}${type !== "node" ? "/full" : ""}`).pipe(timeout(6000));
-                const osmPoi = await firstValueFrom(osmPoi$);
-                const geojson = osmtogeojson(osmPoi);
-                const feature = geojson.features[0];
+                const feature = await this.overpassTurboService.getFeature(type, osmId);
                 let wikidataPromise = Promise.resolve();
                 let inaturePromise = Promise.resolve();
-                let placePromise = Promise.resolve({features: []});
-                let wayPromise = Promise.resolve({features: []});
+                let placePromise = Promise.resolve(null as GeoJSON.Feature);
+                let wayPromise = Promise.resolve(null as GeoJSON.Feature);
                 if (feature.properties.wikidata) {
                     wikidataPromise = this.wikidataService.enritchFeatureFromWikimedia(feature, language);
                 }
@@ -488,17 +500,21 @@ export class PoiService {
                         feature.properties.waterway != null,
                         feature.properties["mtb:name"] != null);
                 }
-                await Promise.all([wikidataPromise, inaturePromise, placePromise, wayPromise]);
-                const placeGeojson = await placePromise;
-                if (placeGeojson.features.length > 0) {
-                    feature.geometry = placeGeojson.features[0].geometry;
-                }
-                const longGeojson = await wayPromise;
-                if (longGeojson.features.length > 1) {
-                    feature.geometry = SpatialService.mergeLines(longGeojson.features) as GeoJSON.Geometry;
+                try {
+                    await Promise.all([wikidataPromise, inaturePromise, placePromise, wayPromise]);
+                    const placeFeature = await placePromise;
+                    if (placeFeature != null) {
+                        feature.geometry = placeFeature.geometry;
+                    }
+                    const longWayFeature = await wayPromise;
+                    if (longWayFeature != null) {
+                        feature.geometry = longWayFeature.geometry;
+                    }
+                } catch (ex) {
+                    this.loggingService.warning(`[POIs] Failed to enrich feature with id: ${id}, error: ${(ex as Error).message}`);
                 }
                 const poi = this.convertFeatureToPoi(feature, id);
-                this.adjustGeolocationBasedOnTileDate(id, poi);
+                this.adjustGeolocationBasedOnTileData(id, poi);
                 this.poisCache.splice(0, 0, poi);
                 return cloneDeep(poi);
             } else if (source === "iNature") {
@@ -517,19 +533,7 @@ export class PoiService {
                 return cloneDeep(poi);
             }
         } catch {
-            let feature: MapGeoJSONFeature = null;
-            for (const source of Object.keys(PoiService.POIS_MAP)) {
-                let features = this.mapService.map.querySourceFeatures(source, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer});
-                feature = features.find(f => this.osmTileFeatureToPoiIdentifier(f) === id);
-                if (feature != null) {
-                    break;
-                }
-                features = this.mapService.map.querySourceFeatures(`${source}-offline`, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer});
-                feature = features.find(f => this.osmTileFeatureToPoiIdentifier(f) === id);
-                if (feature != null) {
-                    break;
-                }
-            }
+            const feature = this.getFeaturesFromTiles().find(f => this.osmTileFeatureToPoiIdentifier(f) === id);
             
             if (feature == null) {
                 throw new Error("Failed to load POI from offline or in-memory tiles.");
@@ -625,7 +629,7 @@ export class PoiService {
         } as NorthEast;
     }
 
-    public async getClosestPoint(location: LatLngAlt, source?: string, language?: string): Promise<MarkerData> {
+    public async getClosestPoint(location: LatLngAlt, source: string, language: string): Promise<MarkerData> {
         let feature = null;
         try {
             const feature$ = this.httpClient.get(Urls.poiClosest, { params: {
@@ -679,7 +683,7 @@ export class PoiService {
 
     public async updateComplexPoi(info: EditablePublicPointData, newLocation?: LatLngAlt) {
         const originalFeature = this.store.selectSnapshot((s: ApplicationState) => s.poiState).selectedPointOfInterest;
-        const editableDataBeforeChanges = this.getEditableDataFromFeature(originalFeature);
+        const editableDataBeforeChanges = await this.getEditableDataFromFeature(originalFeature);
         let hasChages = false;
         const originalId = this.getFeatureId(originalFeature);
         let featureContainingOnlyChanges = {
@@ -749,8 +753,14 @@ export class PoiService {
         await this.addPointToUploadQueue(featureContainingOnlyChanges);
     }
 
-    public getEditableDataFromFeature(feature: Immutable<GeoJSON.Feature>): EditablePublicPointData {
+    public async getEditableDataFromFeature(feature: Immutable<GeoJSON.Feature>): Promise<EditablePublicPointData> {
         const language = this.resources.getCurrentLanguageCodeSimplified();
+        let imagesUrls = Object.keys(feature.properties)
+            .filter(k => k.startsWith("image"))
+            .map(k => feature.properties[k])
+            .filter(u => this.isValidImageUrl(u));
+        const imageAttributions = await Promise.all(imagesUrls.map(u => this.imageAttributinoService.getAttributionForImage(u)));
+        imagesUrls = imagesUrls.filter((_, i) => imageAttributions[i] != null);
         return {
             id: this.getFeatureId(feature),
             category: feature.properties.poiCategory,
@@ -758,10 +768,7 @@ export class PoiService {
             title: GeoJSONUtils.getTitle(feature, language),
             icon: feature.properties.poiIcon,
             iconColor: feature.properties.poiIconColor,
-            imagesUrls: Object.keys(feature.properties)
-                .filter(k => k.startsWith("image"))
-                .map(k => feature.properties[k])
-                .filter(u => u.includes("wikimedia.org") || u.includes("inature.info") || u.includes("nakeb.co.il") || u.includes("jeepolog.com")),
+            imagesUrls,
             urls: Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => feature.properties[k]),
             isPoint: feature.geometry.type === "Point" || feature.geometry.type === "MultiPoint",
             canEditTitle: !feature.properties.poiMerged && !feature.properties["mtb:name"],
@@ -769,6 +776,29 @@ export class PoiService {
                 ? SpatialService.getLengthInMetersForGeometry(feature.geometry) / 1000.0
                 : null
         };
+    }
+
+    private isValidImageUrl(url: string): boolean {
+        if (url.startsWith("File:")) {
+            return true;
+        }
+        if (url.includes("wikimedia.org") && 
+            !url.includes("Building_no_free_image_yet") && 
+            !url.endsWith("svg.png") &&
+            !url.endsWith("svg")) {
+            return true;
+        }
+        if (url.includes("inature.info"))
+        {
+            return true;
+        }
+        if (url.includes("nakeb.co.il")) {
+            return true;
+        }
+        if (url.includes("jeepolog.com")) {
+            return true;
+        }
+        return false;
     }
 
     public getFeatureFromEditableData(info: EditablePublicPointData): GeoJSON.Feature {

@@ -6,12 +6,7 @@ import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { ResourcesService } from "./resources.service";
-import { ToastService } from "./toast.service";
 import {
-    ISRAEL_HIKING_MAP,
-    ISRAEL_MTB_MAP,
-    HIKING_TRAILS,
-    BICYCLE_TRAILS,
     SPECIAL_BASELAYERS,
     SPECIAL_OVERLAYS
 } from "../reducers/initial-state";
@@ -56,7 +51,6 @@ export class LayersService {
 
     private readonly resources = inject(ResourcesService);
     private readonly httpClient = inject(HttpClient);
-    private readonly toastService = inject(ToastService);
     private readonly loggingService = inject(LoggingService);
     private readonly store = inject(Store);
 
@@ -288,7 +282,6 @@ export class LayersService {
     public selectBaseLayer(key: string) {
         this.loggingService.info(`[Layers] Selecting base layer ${key}`);
         this.store.dispatch(new SelectBaseLayerAction(key));
-        this.warnBaselayerOverlayOverlappingIfNeeded();
     }
 
     public toggleOverlay(overlay: Overlay) {
@@ -299,14 +292,6 @@ export class LayersService {
                 visible: newVisibility
             }
         ));
-        this.warnBaselayerOverlayOverlappingIfNeeded();
-    }
-
-    private warnBaselayerOverlayOverlappingIfNeeded() {
-        if ((this.overlays.find(o => o.key === HIKING_TRAILS).visible && this.selectedBaseLayerKey === ISRAEL_HIKING_MAP ||
-            this.overlays.find(o => o.key === BICYCLE_TRAILS).visible && this.selectedBaseLayerKey === ISRAEL_MTB_MAP)) {
-            this.toastService.warning(this.resources.baseLayerAndOverlayAreOverlapping);
-        }
     }
 
     public isAllOverlaysHidden() {

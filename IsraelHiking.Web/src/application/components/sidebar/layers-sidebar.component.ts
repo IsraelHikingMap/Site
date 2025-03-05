@@ -1,10 +1,17 @@
 import { Component, inject, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
-import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
+import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag } from "@angular/cdk/drag-drop";
+import { Dir } from "@angular/cdk/bidi";
+import { MatButton } from "@angular/material/button";
+import { NgIf, NgFor, NgClass, AsyncPipe, DatePipe } from "@angular/common";
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from "@angular/material/expansion";
+import { MatTooltip } from "@angular/material/tooltip";
+import { Angulartics2OnModule } from "angulartics2";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
+import { CategoriesGroupComponent } from "./categories-group.component";
 import { BaseLayerAddDialogComponent } from "../dialogs/layers/base-layer-add-dialog.component";
 import { BaseLayerEditDialogComponent } from "../dialogs/layers/base-layer-edit-dialog.component";
 import { OverlayAddDialogComponent } from "../dialogs/layers/overlay-add-dialog.component";
@@ -28,7 +35,8 @@ import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGro
     selector: "layers-sidebar",
     templateUrl: "./layers-sidebar.component.html",
     styleUrls: ["./layers-sidebar.component.scss"],
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    imports: [Dir, MatButton, NgIf, Angulartics2OnModule, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgFor, NgClass, MatTooltip, CategoriesGroupComponent, CdkDropList, CdkDrag, AsyncPipe, DatePipe]
 })
 export class LayersSidebarComponent {
 
@@ -63,7 +71,7 @@ export class LayersSidebarComponent {
         this.routes$ = this.store.select((state: ApplicationState) => state.routes.present);
     }
 
-    public closeSidebar() {
+    public close() {
         this.sidebarService.hide();
     }
 

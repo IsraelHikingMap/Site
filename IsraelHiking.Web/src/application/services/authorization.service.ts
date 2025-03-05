@@ -67,10 +67,10 @@ export class AuthorizationService {
     private updateUserDetails = async () => {
         const detailJson = await firstValueFrom(this.httpClient.get(Urls.osmUser)) as OsmUserDetails;
         const userInfo = {
-            displayName: detailJson.displayName,
-            id: detailJson.id,
-            changeSets: detailJson.changeSetCount,
-            imageUrl: detailJson.image
+            displayName: detailJson.user.display_name,
+            id: detailJson.user.id.toString(),
+            changeSets: detailJson.user.changesets.count,
+            imageUrl: detailJson.user.img?.href
         };
         this.store.dispatch(new SetUserInfoAction(userInfo));
         this.loggingService.info(`[Authorization] User ${userInfo.displayName} logged-in successfully`);

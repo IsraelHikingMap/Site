@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace IsraelHiking.DataAccessInterfaces
+namespace IsraelHiking.DataAccessInterfaces;
+
+public interface IReceiptValidationGateway
 {
-    public interface IReceiptValidationGateway
-    {
-        Task<bool> IsEntitled(string userId);
-    }
+    Task<bool> IsEntitled(string userId);
 }

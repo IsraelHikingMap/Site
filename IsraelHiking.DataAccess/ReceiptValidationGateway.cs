@@ -7,41 +7,40 @@ using Microsoft.Extensions.Options;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace IsraelHiking.DataAccess
+namespace IsraelHiking.DataAccess;
+
+public class ReceiptValidationGateway : IReceiptValidationGateway
 {
-    public class ReceiptValidationGateway : IReceiptValidationGateway
+    private const string VALIDATOR_URL = "https://validator.iaptic.com/v3/customers/";
+
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ILogger _logger;
+    private readonly NonPublicConfigurationData _options;
+
+    public ReceiptValidationGateway(IHttpClientFactory httpClientFactory,
+        IOptions<NonPublicConfigurationData> options,
+        ILogger logger)
     {
-        private const string VALIDATOR_URL = "https://validator.iaptic.com/v3/customers/";
+        _httpClientFactory = httpClientFactory;
+        _logger = logger;
+        _options = options.Value;
+    }
 
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger _logger;
-        private readonly NonPublicConfigurationData _options;
-
-        public ReceiptValidationGateway(IHttpClientFactory httpClientFactory,
-            IOptions<NonPublicConfigurationData> options,
-            ILogger logger)
+    public async Task<bool> IsEntitled(string userId)
+    {
+        var client = _httpClientFactory.CreateClient();
+        // Docs: https://www.iaptic.com/documentation/api/v3/#api-Customers-GetCustomerPurchases
+        var response = await client.GetAsync(VALIDATOR_URL + userId + "/purchases?appName=il.org.osm.israelhiking&apiKey=" + _options.FoveaApiKey);
+        var responseStr = await response.Content.ReadAsStringAsync();
+        if (response.StatusCode != HttpStatusCode.OK)
         {
-            _httpClientFactory = httpClientFactory;
-            _logger = logger;
-            _options = options.Value;
+            throw new Exception("There was a problem communicating with the receipt validation server, code: " 
+                                + response.StatusCode + ", " + responseStr);
         }
-
-        public async Task<bool> IsEntitled(string userId)
-        {
-            var client = _httpClientFactory.CreateClient();
-            // Docs: https://www.iaptic.com/documentation/api/v3/#api-Customers-GetCustomerPurchases
-            var response = await client.GetAsync(VALIDATOR_URL + userId + "/purchases?appName=il.org.osm.israelhiking&apiKey=" + _options.FoveaApiKey);
-            var responseStr = await response.Content.ReadAsStringAsync();
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                throw new Exception("There was a problem communicating with the receipt validation server, code: " 
-                                    + response.StatusCode + ", " + responseStr);
-            }
-            var returnValue = responseStr.Contains("\"isExpired\":false");
-            _logger.LogInformation("Is entitled for user: " + userId + " is: " + returnValue);
-            return returnValue;
+        var returnValue = responseStr.Contains("\"isExpired\":false");
+        _logger.LogInformation("Is entitled for user: " + userId + " is: " + returnValue);
+        return returnValue;
 
 
-        }
     }
 }

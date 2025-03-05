@@ -1,31 +1,26 @@
-import { inject, Injectable } from "@angular/core";
-import { HttpInterceptor, HttpHandler, HttpRequest, HttpEvent } from "@angular/common/http";
+import { inject } from "@angular/core";
+import { HttpHandlerFn, HttpRequest, HttpEvent } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
 import { Urls } from "../urls";
 import type { ApplicationState } from "../models/models";
 
-@Injectable()
-export class OsmTokenInterceptor implements HttpInterceptor {
-    
-    private readonly store = inject(Store);
+export function osmTokenInterceptor(request: HttpRequest<any>, next: HttpHandlerFn): Observable<HttpEvent<any>> {
+    const store = inject(Store);
+    let token = "";
+    try {
+        token = store.selectSnapshot((s: ApplicationState) => s.userState).token;
+    } catch {
+        // store is not ready yet
+    }
 
-    public intercept = (request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> => {
-        let token = "";
-        try {
-            token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
-        } catch {
-            // store is not ready yet
-        }
-
-        if (token && request.url.indexOf(Urls.apiBase) !== -1) {
-            request = request.clone({
-                setHeaders: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-        }
-        return next.handle(request);
-    };
+    if (token && (request.url.includes(Urls.apiBase) || request.url.includes(Urls.osmApi))) {
+        request = request.clone({
+            setHeaders: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+    }
+    return next(request);
 }

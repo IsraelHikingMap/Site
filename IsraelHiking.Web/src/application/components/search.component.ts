@@ -8,12 +8,22 @@ import {
     viewChildren
 } from "@angular/core";
 import { Router } from "@angular/router";
-import { MatAutocompleteTrigger } from "@angular/material/autocomplete";
-import { FormControl } from "@angular/forms";
+import { MatButton } from "@angular/material/button";
+import { Angulartics2OnModule } from "angulartics2";
+import { MatTooltip } from "@angular/material/tooltip";
+import { NgClass, NgFor, NgIf } from "@angular/common";
+import { Dir } from "@angular/cdk/bidi";
+import { MatFormField } from "@angular/material/form-field";
+import { MatInput } from "@angular/material/input";
+import { MatOption } from "@angular/material/core";
+import { MatAutocompleteTrigger, MatAutocomplete } from "@angular/material/autocomplete";
+import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { debounceTime, filter, tap, map } from "rxjs/operators";
 import { remove } from "lodash-es";
+import { SourceDirective, GeoJSONSourceComponent, FeatureComponent, LayerComponent, PopupComponent } from "@maplibre/ngx-maplibre-gl";
 import { Store } from "@ngxs/store";
 
+import { CoordinatesComponent } from "./coordinates.component";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStrings } from "../services/hash.service";
 import { RoutingProvider } from "../services/routing.provider";
@@ -56,7 +66,8 @@ type DirectionalContext = {
     selector: "search",
     templateUrl: "./search.component.html",
     styleUrls: ["./search.component.scss"],
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    imports: [MatButton, Angulartics2OnModule, MatTooltip, NgClass, Dir, MatFormField, MatInput, FormsModule, MatAutocompleteTrigger, ReactiveFormsModule, MatAutocomplete, NgFor, MatOption, NgIf, SourceDirective, GeoJSONSourceComponent, FeatureComponent, LayerComponent, PopupComponent, CoordinatesComponent]
 })
 export class SearchComponent {
 
@@ -264,7 +275,7 @@ export class SearchComponent {
             searchTerm
         } as SearchRequestQueueItem);
         try {
-            const results = await this.searchResultsProvider.getResults(searchTerm, this.resources.hasRtlCharacters(searchTerm));
+            const results = await this.searchResultsProvider.getResults(searchTerm);
             const queueItem = this.requestsQueue.find(itemToFind => itemToFind.searchTerm === searchTerm);
             if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
                 this.requestsQueue.splice(0, this.requestsQueue.length - 1);
