@@ -1,4 +1,4 @@
-export type LanguageCode = "en-US" | "he" | "ru";
+export type LanguageCode = "en-US" | "he" | "ru" | "ar";
 
 export type Language = {
     code: LanguageCode;
