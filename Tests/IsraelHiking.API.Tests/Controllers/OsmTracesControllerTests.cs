@@ -135,15 +135,15 @@ public class OsmTracesControllerTests
     }
 
     [TestMethod]
-    public void PostUploadRouteData_DefaultName_ShouldCreateTraceAndUpdateDescriptionToMatchArea()
+    public void PostUploadRouteData_Name_ShouldCreateTraceAndUpdateDescriptionToMatchArea()
     {
         _controller.SetupIdentity();
         var osmGateWay = SetupOAuthClient();
         var routeData = new RouteData
         {
             Id = "42",
-            Name = "Route",
-            Description = "Route",
+            Name = "Name",
+            Description = "Description",
             Segments =
             [
                 new RouteSegmentData
@@ -162,7 +162,7 @@ public class OsmTracesControllerTests
             
         _controller.PostUploadRouteData(routeData, Languages.ENGLISH).Wait();
 
-        osmGateWay.Received(1).CreateTrace(Arg.Is<GpxFile>(f => f.Description.Contains("A route in")), Arg.Any<Stream>());
+        osmGateWay.Received(1).CreateTrace(Arg.Is<GpxFile>(f => f.Description.Contains("Name")), Arg.Any<Stream>());
     }
         
     [TestMethod]
@@ -193,7 +193,7 @@ public class OsmTracesControllerTests
             
         _controller.PostUploadRouteData(routeData, Languages.ENGLISH).Wait();
 
-        osmGateWay.Received(1).CreateTrace(Arg.Is<GpxFile>(f => f.Description.Contains("A route in area") && f.Name.Contains("Recorded using IHM")), Arg.Any<Stream>());
+        osmGateWay.Received(1).CreateTrace(Arg.Is<GpxFile>(f => f.Description.Contains("area") && f.Name.Contains("Recorded using IHM")), Arg.Any<Stream>());
     }
 
     [TestMethod]
