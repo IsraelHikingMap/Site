@@ -1,4 +1,6 @@
-﻿namespace IsraelHiking.Common;
+﻿using System.Linq;
+
+namespace IsraelHiking.Common;
 
 public static class Categories
 {
@@ -105,11 +107,15 @@ public static class Languages
     public const string ALL = "all";
     public const string HEBREW = "he";
     public const string ENGLISH = "en";
+    public const string RUSSIAN = "ru";
+    public const string DEFAULT = "default";
     public static readonly string[] Array =
     [
         HEBREW,
-        ENGLISH
+        ENGLISH,
+        RUSSIAN
     ];
+    public static readonly string[] ArrayWithDefault = new [] { DEFAULT }.Concat(Array).ToArray();
 }
 
 public static class Branding

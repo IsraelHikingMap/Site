@@ -275,7 +275,7 @@ export class SearchComponent {
             searchTerm
         } as SearchRequestQueueItem);
         try {
-            const results = await this.searchResultsProvider.getResults(searchTerm, this.resources.hasRtlCharacters(searchTerm));
+            const results = await this.searchResultsProvider.getResults(searchTerm);
             const queueItem = this.requestsQueue.find(itemToFind => itemToFind.searchTerm === searchTerm);
             if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
                 this.requestsQueue.splice(0, this.requestsQueue.length - 1);

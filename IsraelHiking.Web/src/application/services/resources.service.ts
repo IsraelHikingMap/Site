@@ -951,10 +951,6 @@ export class ResourcesService {
         await this.setLanguageInternal(language);
     }
 
-    public getLabelForCode(code: LanguageCode): string {
-        return code === "he" ? "עברית" : "English";
-    }
-
     public translate(word: string): string {
         return this.gettextCatalog.getString(word) || word;
     }

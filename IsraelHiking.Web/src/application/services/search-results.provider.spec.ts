@@ -7,6 +7,7 @@ import { GeoJsonParser } from "./geojson.parser";
 import { RunningContextService } from "./running-context.service";
 import { PoiService } from "./poi.service";
 import { CoordinatesService } from "./coordinates.service";
+import { ResourcesService } from "./resources.service";
 import type { SearchResultsPointOfInterest } from "../models/models";
 
 describe("SearchResultsProvider", () => {
@@ -18,6 +19,9 @@ describe("SearchResultsProvider", () => {
                 CoordinatesService,
                 { provide: RunningContextService, useValue: { isOnline: true } },
                 { provide: PoiService, useValue: null },
+                { provide: ResourcesService, useValue: {
+                    getCurrentLanguageCodeSimplified: () => "en"
+                } },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting()
             ]
@@ -26,7 +30,7 @@ describe("SearchResultsProvider", () => {
 
     it("Should get all kind of features in results", (inject([SearchResultsProvider, HttpTestingController],
         async (provider: SearchResultsProvider, mockBackend: HttpTestingController) => {
-            const promise = provider.getResults("searchTerm", true).then((results: SearchResultsPointOfInterest[]) => {
+            const promise = provider.getResults("searchTerm").then((results: SearchResultsPointOfInterest[]) => {
                 expect(results.length).toBe(1);
             }, fail);
 

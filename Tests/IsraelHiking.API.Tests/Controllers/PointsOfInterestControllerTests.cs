@@ -242,7 +242,7 @@ public class PointsOfInterestControllerTests
     {
         _pointsOfInterestProvider.GetClosestPoint(Arg.Any<Coordinate>(), Arg.Any<string>(), Arg.Any<string>()).Returns(new Feature(new Point(0,0), new AttributesTable()));
 
-        var results = _controller.GetClosestPoint("0,0", Sources.OSM, "he").Result;
+        var results = _controller.GetClosestPoint("0,0", Sources.OSM, Languages.HEBREW).Result;
 
         Assert.IsNotNull(results);
     }
@@ -252,7 +252,7 @@ public class PointsOfInterestControllerTests
     {
         _pointsOfInterestProvider.GetClosestPoint(Arg.Any<Coordinate>(), Arg.Any<string>(), Arg.Any<string>()).Returns(new Feature(new Point(0,0), new AttributesTable()));
 
-        var results = _controller.GetClosestPoint("0,0", null, "he").Result;
+        var results = _controller.GetClosestPoint("0,0", null, Languages.HEBREW).Result;
 
         Assert.IsNotNull(results);
     }

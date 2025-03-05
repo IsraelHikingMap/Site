@@ -52,13 +52,13 @@ public class FeaturesMergeExecutorTests
     {
         var feature1 = CreateFeature("1", 0, 0);
         feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
-        feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":he", "11");
+        feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + Languages.HEBREW, "11");
         feature1.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "website");
         feature1.SetTitles();
         var feature2 = CreateFeature("2", 0, 0);
         feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
-        feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":en", "11");
-        feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":en", "11");
+        feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + Languages.ENGLISH, "11");
+        feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + Languages.ENGLISH, "11");
         feature2.SetTitles();
 
         var results = _executor.Merge([feature1, feature2], []);
@@ -125,7 +125,7 @@ public class FeaturesMergeExecutorTests
     {
         var feature1 = CreateFeature("1", 0, 0);
         feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
-        feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":he", "11");
+        feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + Languages.HEBREW, "11");
         feature1.Attributes.AddOrUpdate(FeatureAttributes.POI_CATEGORY, Categories.NONE);
         feature1.Attributes.AddOrUpdate(FeatureAttributes.POI_SEARCH_FACTOR, 0.5);
         feature1.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, string.Empty);
@@ -156,11 +156,11 @@ public class FeaturesMergeExecutorTests
     {
         var feature1 = CreateFeature("1", 0, 0);
         feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
-        feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":he", "11");
+        feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + Languages.HEBREW, "11");
         feature1.SetTitles();
         var feature2 = CreateFeature("2", 0, 0.5);
         feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
-        feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":en", "11");
+        feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + Languages.ENGLISH, "11");
         feature2.SetTitles();
 
         var results = _executor.Merge([feature1, feature2], []);

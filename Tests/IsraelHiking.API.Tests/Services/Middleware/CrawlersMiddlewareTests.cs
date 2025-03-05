@@ -193,7 +193,7 @@ public class CrawlersMiddlewareTests
 
         _middleware.InvokeAsync(context, detectionService).Wait();
 
-        _homePageHelper.Received().Render(name, externalDescription, Arg.Any<string>(), "he");
+        _homePageHelper.Received().Render(name, externalDescription, Arg.Any<string>(), Languages.HEBREW);
         _next.DidNotReceive().Invoke(context);
     }
 

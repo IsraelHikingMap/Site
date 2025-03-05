@@ -53,6 +53,7 @@ describe("ResourcesService", () => {
         expect(service.hasRtlCharacters("1. نص عربي")).toBeTruthy();
         expect(service.hasRtlCharacters("hello")).toBeFalsy();
         expect(service.hasRtlCharacters("1. hello")).toBeFalsy();
+        expect(service.hasRtlCharacters("1. Кейсария")).toBeFalsy();
     }));
 
     it("Should be able get the layout direction for titles", inject([ResourcesService], (service: ResourcesService) => {

@@ -90,21 +90,21 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         node.Tags.Add(new Tag(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL));
         node.Tags.Add(new Tag(FeatureAttributes.IMAGE_URL+ "1", FeatureAttributes.IMAGE_URL+ "1"));
         node.Tags.Add(new Tag(FeatureAttributes.DESCRIPTION, FeatureAttributes.DESCRIPTION));
-        node.Tags.Add(new Tag(FeatureAttributes.WIKIPEDIA + ":en", "page with space"));
+        node.Tags.Add(new Tag(FeatureAttributes.WIKIPEDIA + ":" + Languages.ENGLISH, "page with space"));
         gateway.GetNode(node.Id.Value).Returns(node);
             
         var result = _adapter.GetFeatureById(Sources.OSM, someId).Result;
 
         Assert.IsNotNull(result);
-        Assert.AreEqual(string.Empty, result.GetTitle("en"));
-        Assert.AreEqual(FeatureAttributes.DESCRIPTION, result.GetDescription("en"));
+        Assert.AreEqual(string.Empty, result.GetTitle(Languages.ENGLISH));
+        Assert.AreEqual(FeatureAttributes.DESCRIPTION, result.GetDescription(Languages.ENGLISH));
         var imagesUrls = result.Attributes.GetNames()
             .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
             .Select(p => node.Tags.GetValue(p).ToString())
             .ToArray();
         Assert.AreEqual(2, imagesUrls.Length);
         Assert.AreEqual(FeatureAttributes.IMAGE_URL, imagesUrls.First());
-        Assert.IsTrue(result.Attributes[FeatureAttributes.WIKIPEDIA + ":en"].ToString()?.Contains("page with space"));
+        Assert.IsTrue(result.Attributes[FeatureAttributes.WIKIPEDIA + ":" + Languages.ENGLISH].ToString()?.Contains("page with space"));
     }
         
     [TestMethod]
@@ -156,7 +156,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         var user = new User { DisplayName = "DisplayName" };
         var gateway = SetupOsmAuthClient();
         gateway.GetUserDetails().Returns(user);
-        var language = "he";
+        var language = Languages.HEBREW;
         gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
         var feature = GetValidFeature("42", Sources.OSM);
         feature.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
@@ -181,7 +181,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         var user = new User { DisplayName = "DisplayName" };
         var gateway = SetupOsmAuthClient();
         gateway.GetUserDetails().Returns(user);
-        var language = "he";
+        var language = Languages.HEBREW;
         gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
         var feature = GetValidFeature("42", Sources.OSM);
         feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, _tagsHelper.GetCategoriesByGroup(Categories.POINTS_OF_INTEREST).First().Icon);
@@ -203,7 +203,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
     public void AddFeature_WikipediaMobileLink_ShouldUpdateOsmAndElasticSearch()
     {
         var gateway = SetupOsmAuthClient();
-        var language = "he";
+        var language = Languages.HEBREW;
         gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
         var feature = GetValidFeature("42", Sources.OSM);
         feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, _tagsHelper.GetCategoriesByGroup(Categories.POINTS_OF_INTEREST).First().Icon);
@@ -233,9 +233,9 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
             Longitude = 0
         });
             
-        _adapter.UpdateFeature(feature, gateway, "en").Wait();
+        _adapter.UpdateFeature(feature, gateway, Languages.ENGLISH).Wait();
 
-        gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(x => x.Tags.ContainsKey(FeatureAttributes.WIKIPEDIA + ":en") && x.Tags.Contains(FeatureAttributes.WIKIPEDIA, "en:Literary Hall")));
+        gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(x => x.Tags.ContainsKey(FeatureAttributes.WIKIPEDIA + ":" + Languages.ENGLISH) && x.Tags.Contains(FeatureAttributes.WIKIPEDIA, "en:Literary Hall")));
         gateway.Received().CreateChangeset(Arg.Any<TagsCollectionBase>());
         gateway.Received().CloseChangeset(Arg.Any<long>());
     }
@@ -252,18 +252,18 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
             Id = 1,
             Tags = new TagsCollection
             {
-                { FeatureAttributes.DESCRIPTION + ":en", "description" },
+                { FeatureAttributes.DESCRIPTION + ":" + Languages.ENGLISH, "description" },
                 { FeatureAttributes.DESCRIPTION, "description" }
             },
             Latitude = 0,
             Longitude = 0
         });
             
-        _adapter.UpdateFeature(feature, gateway, "en").Wait();
+        _adapter.UpdateFeature(feature, gateway, Languages.ENGLISH).Wait();
 
         gateway.Received().UpdateElement(Arg.Any<long>(),
             Arg.Is<ICompleteOsmGeo>(x =>
-                x.Tags.GetValue(FeatureAttributes.DESCRIPTION + ":en") == "new description" &&
+                x.Tags.GetValue(FeatureAttributes.DESCRIPTION + ":" + Languages.ENGLISH) == "new description" &&
                 x.Tags.GetValue(FeatureAttributes.DESCRIPTION) == "new description"));
     }
         
@@ -279,13 +279,13 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
             Tags = new TagsCollection
             {
                 {FeatureAttributes.NAME, "name"},
-                {FeatureAttributes.NAME + ":en", "name"}
+                {FeatureAttributes.NAME + ":" + Languages.ENGLISH, "name"}
             },
             Latitude = 1,
             Longitude = 1
         });
             
-        _adapter.UpdateFeature(feature, gateway, "en").Wait();
+        _adapter.UpdateFeature(feature, gateway, Languages.ENGLISH).Wait();
 
         gateway.DidNotReceive().UpdateElement(Arg.Any<long>(), Arg.Any<ICompleteOsmGeo>());
     }
@@ -307,13 +307,13 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
             Tags = new TagsCollection
             {
                 {FeatureAttributes.NAME, "name"},
-                {FeatureAttributes.NAME + ":en", "name"}
+                {FeatureAttributes.NAME + ":" + Languages.ENGLISH, "name"}
             },
             Latitude = 1,
             Longitude = 1
         });
             
-        _adapter.UpdateFeature(featureUpdate, gateway, "en").Wait();
+        _adapter.UpdateFeature(featureUpdate, gateway, Languages.ENGLISH).Wait();
 
         gateway.DidNotReceive().UpdateElement(Arg.Any<long>(), Arg.Any<ICompleteOsmGeo>());
     }
@@ -330,7 +330,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
             Tags = new TagsCollection
             {
                 { FeatureAttributes.NAME, "name" },
-                { FeatureAttributes.NAME + ":en", "name" }
+                { FeatureAttributes.NAME + ":" + Languages.ENGLISH, "name" }
             },
             Nodes =
             [
@@ -349,7 +349,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
             ]
         });
 
-        _adapter.UpdateFeature(feature, gateway, "en").Wait();
+        _adapter.UpdateFeature(feature, gateway, Languages.ENGLISH).Wait();
 
         gateway.DidNotReceive().UpdateElement(Arg.Any<long>(), Arg.Any<ICompleteOsmGeo>());
     }
