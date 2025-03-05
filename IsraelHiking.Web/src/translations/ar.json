@@ -1,0 +1,427 @@
+{
+    "4x4 Routing": "توجيه 4x4",
+    "A few words about what you are sharing.": "بضعة كلمات حول ما تقوم بمشاركته.",
+    "A link to a website": "رابط لموقع إلكتروني",
+    "A name to be displayed in the layers controller": "اسم لعرضه في قائمة الخرائط أو الطبقات",
+    "About": "حول",
+    "Add Base Layer": "إضافة طبقة أساسية",
+    "Add link": "إضافة رابط",
+    "Add Overlay": "إضافة طبقة إضافية",
+    "Add point to active route": "إضافة نقطة إلى المسار النشط",
+    "Add Point to Route": "إضافة نقطة إلى المسار",
+    "Add Route": "إضافة مسار",
+    "Add This Route to OSM": "إضافة هذا المسار إلى OSM",
+    "Add to routes": "إضافة إلى المسارات",
+    "Address": "عنوان",
+    "Advanced": "متقدم",
+    "Advanced Settings": "إعدادات متقدمة",
+    "Aerialway": "تلفريك",
+    "All files are up-to-date :-)": "جميع الملفات محدثة 😊",
+    "All Vehicles": "جميع المركبات",
+    "Allow turning off the screen": "السماح بإيقاف تشغيل الشاشة",
+    "Allows you to automatically upload a recorded route when you finish recording": "يساعدك على تحميل مسار تم تسجيله تلقائيًا عند الانتهاء من التسجيل",
+    "Amenities": "مرافق",
+    "And So Much More!": "والكثير المزيد!",
+    "Antenna": "هوائي",
+    "Application": "تطبيق",
+    "Archaeological Site": "موقع أثري",
+    "Are you sure you want to delete all routes?": "هل أنت متأكد أنك تريد حذف جميع المسارات؟",
+    "Are you sure you want to stop the current recording?": "هل أنت متأكد أنك تريد إيقاف التسجيل الحالي؟",
+    "Are you sure?": "هل أنت متأكد؟",
+    "Area A": "المنطقة A",
+    "Area B": "المنطقة B",
+    "Areas": "مناطق",
+    "Asks you to classify missing routes on the map after you upload a recording": "يطلب منك تصنيف المسارات المفقودة بعد تسجيل جديد.",
+    "Attraction": "معلم سياحي",
+    "Attribution": "نسبة ملكية",
+    "Automatic upload of recording": "التحميل التلقائي للتسجيل",
+    "Average speed": "السرعة المتوسطة",
+    "Back": "عودة",
+    "Background text: You need to download offline maps": "يجب تنزيل الخرائط غير المتصلة.",
+    "Background text: You need to purchase offline maps": "من المستحسن شراء الخرائط للاستخدام غير المتصل.",
+    "Background text: You need to toggle offline maps": "لمشاهدة الخرائط غير المتصلة، اختر الخريطة المناسبة.",
+    "Barriers": "حواجز",
+    "Base layer and overlay are overlapping.": "طبقة الأساس والطبقة الإضافية تتداخل.",
+    "Base Layer Properties": "خصائص طبقة الأساس",
+    "Base Layers": "خرائط أساسية",
+    "Battery optimization": "تحسين البطارية",
+    "Beach": "شاطئ",
+    "Bicycle": "دراجة",
+    "Bicycle Path": "مسار دراجات",
+    "Bicycle Trails": "مسارات الدراجات",
+    "Bike Park": "منتزه الدراجات",
+    "Bike Routing": "توجيه الدراجات",
+    "Bike Shop": "محل دراجات",
+    "Black Marked Trail": "مسار مُعنون بالأسود",
+    "Block": "حاجز",
+    "Blue Marked Trail": "مسار مُعنون بالأزرق",
+    "Borders": "حدود ومناطق خاصة",
+    "Bridge": "جسر",
+    "Café": "مقهى",
+    "Camera": "كاميرا",
+    "Camping": "تخييم",
+    "Campsite": "موقع المخيم",
+    "Cancel": "إلغاء",
+    "Categories": "فئات",
+    "Cattle Grid": "شبك للمواشي",
+    "Cave": "كهف",
+    "Cemetery": "مقبرة",
+    "Center Me": "ركزني",
+    "Challenging with Direction": "صعب",
+    "Church": "كنيسة",
+    "Cistern": "خزان",
+    "City, Settlement": "مدينة، تجمع سكني",
+    "Clear": "مسح",
+    "Clear Both": "مسح كلاهما",
+    "Clear Points": "مسح النقاط",
+    "Clear Route": "مسح المسار",
+    "Click back again to close the app": "اضغط على زر العودة مرة أخرى للخروج",
+    "Cliff": "هاوية",
+    "Close": "إغلاق",
+    "Closed Gate": "بوابة مغلقة",
+    "Construction Site": "موقع بناء",
+    "Continue": "استمرار",
+    "Convenience Store": "متجر خدمات",
+    "Convert to Route": "تحويل إلى مسار",
+    "Copy Link": "نسخ الرابط",
+    "Create new hike in Nakeb": "إنشاء مسار جديد في نكِب",
+    "Create Share": "حفظ في السحابة",
+    "Crop": "قص",
+    "Current speed": "السرعة الحالية",
+    "Darken the screen": "تعتيم الشاشة",
+    "Delete": "حذف",
+    "Delete Account": "حذف الحساب",
+    "Delete All Routes": "حذف جميع المسارات",
+    "Delete Layer": "حذف الطبقة",
+    "Delete POI": "حذف نقطة الاهتمام",
+    "Delete Route": "حذف المسار",
+    "Deletion of": "حذف",
+    "Description": "وصف",
+    "Description in {{translation language}}": "وصف باللغة العربية",
+    "Details Level": "مستوى التفاصيل",
+    "Difficult 4WD": "مسار صعب للمركبات 4WD",
+    "Dims display when there's no user interaction": "يعتيم العرض عند عدم وجود تفاعل المستخدم",
+    "Directional Search": "بحث موجه",
+    "Dirt Road": "طريق ترابي",
+    "Distance": "المسافة",
+    "Distance (Km)": "المسافة (كم)",
+    "Don't show this message again": "لا تعرض هذه الرسالة مرة أخرى",
+    "Download finished successfully!": "تم الانتهاء من تحميله بنجاح!",
+    "Download Map for Offline Use": "تحميل خريطة للاستخدام غير المتصل",
+    "Download old raster maps for offline use in OruxMaps and Locus": "تحميل الخرائط النقطية القديمة للاستخدام غير المتصل في OruxMaps و Locus",
+    "Downloading points of interest for offline usage...": "جارٍ تحميل نقاط الاهتمام للاستخدام غير المتصل...",
+    "Drinking Water": "مياه شرب",
+    "Duration": "مدة",
+    "Easy with Direction": "سهل",
+    "Edit": "تحرير",
+    "Edit POI": "تحرير نقطة الاهتمام",
+    "Edit Route": "تحرير المسار",
+    "Edit Route Details": "تحرير تفاصيل المسار",
+    "Edit This Map Using OSM": "تحرير هذه الخريطة باستخدام OSM",
+    "Elaborated terms of service of this site, OSM and wikimedia": "شروط خدمة الموقع، OSM وويكيميديا.",
+    "Elevation": "ارتفاع",
+    "Explanation on how to open Facebook link outside facebook": "يرجى ملاحظة! أنت تشاهد الموقع حاليًا داخل تطبيق فيسبوك.",
+    "Export": "تصدير",
+    "Export As...": "تصدير كـ...",
+    "F.A.Q": "الأسئلة المتكررة",
+    "Fence": "سياج",
+    "File uploaded successfully, It will take some time to add it to OSM database.": "تم رفع الملف بنجاح، سوف يستغرق الأمر بعض الوقت لإضافته إلى قاعدة بيانات OSM.",
+    "Files": "ملفات",
+    "Find missing routes after upload": "البحث عن المسارات المفقودة بعد التحميل",
+    "Find Unmapped Routes": "البحث عن المسارات غير المرسومة",
+    "Finished opening file! :-)": "تم الانتهاء من فتح الملف! 😊",
+    "First Aid": "الإسعافات الأولية",
+    "Flowers": "زهور",
+    "Foot Path": "مسار للمشاة",
+    "Fuel Station": "محطة وقود",
+    "Gain": "نقص",
+    "Gallery": "صالة عرض",
+    "Gate": "البوابة",
+    "Generate A URL To Share With Your Friends!": "إنشاء رابط للمشاركة مع أصدقائك!",
+    "Generate markers for all route points": "توليد علامات لجميع نقاط المسار",
+    "Golan Trail": "مسار الجولان",
+    "Got lost warnings": "تحذيرات الضياع",
+    "GPS tracking is enabled while editing, in order to avoid map centering to current location please click the cross icon on the top left corner": "تم تفعيل تتبع GPS أثناء التحرير.",
+    "Grass": "عشب",
+    "Green Marked Trail": "مسار مُعنون بالأخضر",
+    "Guidepost": "علامة إرشادية",
+    "Haifa Wadis Trail": "مسار وادي حيفا",
+    "Harel, Zeev and Guy": "هاريل، زيف و جاي",
+    "Height": "ارتفاع",
+    "Height (m)": "ارتفاع (م)",
+    "Helpful links:": "روابط مفيدة:",
+    "Hidden routes will not be saved...": "لن يتم حفظ المسارات المخفية...",
+    "Hike Routing": "توجيه المشاة",
+    "Hiking": "المشي",
+    "Hiking Trails": "مسارات المشي",
+    "Historic": "تاريخي",
+    "Holy Place": "مكان مقدس",
+    "hr": "س'",
+    "I have read and agree to the terms": "لقد قرأت وأوافق على الشروط",
+    "Image by": "صورة بواسطة",
+    "Imgur terms of service": "شروط خدمة Imgur",
+    "Information Center": "مركز المعلومات",
+    "Installation Instructions": "تعليمات التثبيت",
+    "Installation instructions for Locus on desktop - surround each new line with <li></li>": "تعليمات تثبيت Locus على سطح المكتب.",
+    "Installation instructions for OruxMaps on desktop - surround each new line with <li></li>": "تعليمات تثبيت OruxMaps على سطح المكتب.",
+    "Interact with other users in our Facebook group": "تفاعل مع مستخدمين آخرين في مجموعة الفيسبوك لدينا",
+    "International Border": "حدود دولية",
+    "Intro dialog description for 'so much more'": "ابحث عن أدلتنا، صفحة الأسئلة الشائعة، الخريطة والميزات الرائعة الأخرى!",
+    "Intro dialog description for maps": "خرائط للمشي، خرائط للدراجات الجبلية وصور الأقمار الصناعية.",
+    "Intro dialog description for routes and points": "خطط وشارك المسارات، وشاهد ونقي نقاط الاهتمام.",
+    "Israel Hiking Map": "خريطة السياحة في إسرائيل",
+    "Israel MTB Map": "خريطة الدراجات الجبلية في إسرائيل",
+    "Israel Trail": "مسار إسرائيل",
+    "Jammed position received...": "تم استلام موقع مشوش...",
+    "Jerusalem Trail": "مسار القدس",
+    "Keep screen on": "ابق الشاشة مفتوحة",
+    "Kinneret Bicycle Trail": "مسار دراجات بحيرة كنيرت",
+    "Kinneret Trail": "مسار بحيرة كنيرت",
+    "Km": "كم",
+    "km per hour": "كم/س",
+    "Km POIs": "نقاط الاهتمام لكل كيلومتر",
+    "Lake, Reservoir": "بحيرة، خزان",
+    "Language": "اللغة",
+    "Last recording did not end well. Feel free to start a new one.": "لم تنتهي آخر تسجيل بشكل جيد. يمكنك بدء تسجيل جديد.",
+    "Last updated on": "آخر تحديث",
+    "Layers": "الطبقات",
+    "Learn Israel-specific mapping rules at the Israel OSM Wiki Project": "تعلم قواعد رسم الخرائط الخاصة بإسرائيل في مشروع OSM wiki الإسرائيلي.",
+    "Legend": "خريطة",
+    "Length": "طول",
+    "Less...": "أقل...",
+    "Lets you know when the your planned route is more than 50 meters from your current position": "يخبرك عندما يكون مسارك المخطط أكثر من 50 مترًا من موقعك الحالي",
+    "Light 4WD Vehicles": "مركبات دفع رباعي خفيفة",
+    "Local": "محلي",
+    "Local Trail": "مسار محلي",
+    "Lodging": "إقامة",
+    "Login": "تسجيل الدخول",
+    "Login token expired, please login again": "انتهت صلاحية رمز الدخول، يرجى تسجيل الدخول مرة أخرى",
+    "Logout": "تسجيل الخروج",
+    "Long press on any button will shows its usage": "سيظهر الضغط المطول على أي زر استخدامه",
+    "Loss": "فقدان",
+    "Low-Speed Street": "شارع منخفض السرعة",
+    "m": "م",
+    "Manage subscriptions": "إدارة الاشتراكات",
+    "Map": "خريطة",
+    "Maps": "خرائط",
+    "Marked Trails": "مسارات محددة",
+    "Max Zoom": "أقصى زوم",
+    "Measure distance from current location": "قياس المسافة من الموقع الحالي",
+    "Memorial": "نصب تذكاري",
+    "Merge": "دمج",
+    "Military Area": "منطقة عسكرية",
+    "Military Training": "تدريب عسكري",
+    "min": "دقيقة",
+    "Min Zoom": "أدنى زوم",
+    "Minefield": "حقل ألغام",
+    "Moderate": "معتدل",
+    "More Info...": "معلومات إضافية...",
+    "More map addresses can be found here, look for TMS": "يمكن العثور على عناوين خرائط إضافية هنا، ابحث عن TMS",
+    "More...": "المزيد...",
+    "Mosque": "مسجد",
+    "Motorway": "الطريق السريع",
+    "Move to Route": "انتقل إلى المسار",
+    "My Shares": "مشاركتي في السحابة",
+    "My Traces": "آثاري",
+    "Name": "اسم",
+    "Name in {{translation language}}": "الاسم باللغة العربية",
+    "National Trail": "المسار الوطني",
+    "Natural": "طبيعي",
+    "Nature Reserve, National Park": "محمية طبيعية، منتزه وطني",
+    "Navigate Here": "تنقل هنا",
+    "Navigate with Waze": "استخدم Waze للتوجيه",
+    "New version available, do you want to update?": "تحديث جديد متاح، هل تريد التحديث؟",
+    "Next": "التالي",
+    "No": "لا",
+    "No legend for this map...": "لا توجد أسطورة لهذه الخريطة...",
+    "No offline files available, please press the download button below.": "لا توجد ملفات غير متصلة متاحة، يرجى الضغط على زر التنزيل أدناه.",
+    "No shares, now is the time to start sharing your work!": "لا توجد مشاركات، الآن هو الوقت لبدء مشاركة عملك!",
+    "No Tags": "لا توجد علامات",
+    "No traces, you should really upload some to OSM.": "لا توجد آثار، يجب عليك فعلاً تحميل بعض إلى OSM.",
+    "No unmapped routes! :-)": "لا توجد مسارات غير مرسومة! 😊",
+    "Non-Marked Trail": "مسار غير محدد",
+    "North-Up": "الشمال للأعلى",
+    "Not yet...": "ليس بعد...",
+    "Observation Tower": "برج المراقبة",
+    "OK": "حسناً",
+    "Oops, something went wrong. Please try again later": "عذرًا، حدث خطأ. يرجى المحاولة مرة أخرى لاحقًا",
+    "Opacity": "شفافية",
+    "Open a File": "فتح ملف",
+    "Open in a new window": "فتح في نافذة جديدة",
+    "Open in App": "فتح في التطبيق",
+    "Opening file, this might take a while, please don't close the app...": "فتح الملف، قد يستغرق بعض الوقت، يرجى عدم إغلاق التطبيق...",
+    "Orange Regional Trail": "مسار إقليمي برتقالي",
+    "Orchard": "بستان",
+    "OSM terms of service": "شروط خدمة OSM",
+    "Other": "آخر",
+    "Overlay Properties": "خصائص الطبقة الإضافية",
+    "Overlays": "نفقات إضافية",
+    "Parking": "موقف سيارات",
+    "Path": "مسار",
+    "Paved Road": "طريق معبد",
+    "Peak": "قمة",
+    "Picnic Area": "منطقة نزهة",
+    "Playground": "ملعب ألعاب",
+    "Please add points to route...": "يرجى إضافة نقاط إلى المسار...",
+    "Please fill in the details of the issue in the e-mail message that will be shown soon and send it": "يرجى ملء تفاصيل القضية في رسالة البريد الإلكتروني التي ستظهر قريبًا وإرسالها",
+    "Please make sure the battery optimization is turned off for this application. Go to application setting to do so.": "يرجى التحقق من إيقاف تحسين البطارية لهذا التطبيق. انتقل إلى إعدادات التطبيق للقيام بذلك.",
+    "Please select from...": "يرجى الاختيار من...",
+    "Please select to...": "يرجى الاختيار إلى...",
+    "Points of Interest": "نقاط الاهتمام",
+    "Popularity Heatmap": "خريطة الحرارة الشعبية",
+    "Power Line": "خطوط الطاقة",
+    "Preparing data for issue report": "تحضير البيانات لتقرير المشكلة",
+    "Present share": "عرض الحفظ",
+    "Primary": "أساسي",
+    "Privacy Policy and Terms of Service": "سياسة الخصوصية وشروط الخدمة",
+    "Private": "خاص",
+    "Private Routes": "مسارات خاصة",
+    "Public": "عام",
+    "Purchase Maps": "شراء الخرائط",
+    "Purchase maps for offline use": "شراء الخرائط للاستخدام غير المتصل",
+    "Purple Regional Trail": "مسار إقليمي بنفسجي",
+    "Quarry": "محجر",
+    "Railway": "سكك حديدية",
+    "Railway Station": "محطة السكك الحديدية",
+    "Railway Tunnel": "نفق السكك الحديدية",
+    "Red Marked Trail": "مسار مُعنون بالأحمر",
+    "Regional Trail": "مسار إقليمي",
+    "Regional Trails": "مسارات إقليمية",
+    "Remaining distance": "المسافة المتبقية",
+    "Renew offline maps subscription": "تجديد اشتراك الخرائط غير المتصلة",
+    "Report an issue": "الإبلاغ عن مشكلة",
+    "Report an issue instructions": "يرجى وصف المشكلة بأفضل ما يمكن وإرفاق لقطات الشاشة التي توضحها.",
+    "Report an issue site instructions": "تم تحميل ملف التقرير للتو. نحن بحاجة إلى هذا الملف لفهم المشكلة بشكل أفضل.",
+    "Request features and report bugs on our Github project page": "طلب ميزات والإبلاغ عن الأخطاء في صفحة مشروعنا على Github",
+    "Reset Data": "إعادة تعيين البيانات",
+    "Residential": "سكني",
+    "Restaurant": "مطعم",
+    "Reverse Route": "عكس المسار",
+    "River": "نهر",
+    "Roads": "طرق",
+    "Route": "مسار",
+    "Route added successfully, It will take some time for the map to update.": "تم إضافة المسار بنجاح، ستستغرق الخريطة بعض الوقت لتحديثها.",
+    "Route is hidden...": "المسار مخفي...",
+    "Route Planning": "تخطيط المسار",
+    "Route Properties": "خصائص المسار",
+    "Route Statistics": "إحصائيات المسار",
+    "Routes": "مسارات",
+    "Routes and Points": "مسارات ونقاط",
+    "Routing failed, consider buying a subscription.": "فشل التوجيه، يرجى التفكير في شراء اشتراك.",
+    "Routing failed, please try a shorter route...": "فشل التوجيه، يرجى تجربة مسار أقصر...",
+    "Ruins": "أنقاض",
+    "Running in the background": "يعمل في الخلفية",
+    "Runway and Taxiway": "مدرج وممر",
+    "Sand": "رمل",
+    "Satellite Imagery": "صور الأقمار الصناعية",
+    "Save": "حفظ",
+    "Save Route to File": "تصدير المسار",
+    "Scrub": "حشائش",
+    "Search": "بحث",
+    "Seasonal Lake, Reservoir, or Riverbed": "بحيرة موسمية أو خزان أو مجرى نهر جاف",
+    "Secondary": "ثانوي",
+    "See Also": "انظر أيضًا",
+    "Select Icon": "اختر رمز",
+    "Share": "مشاركة",
+    "Share Location": "مشاركة الموقع",
+    "Share maps overlays": "دمج الطبقات الخرائطية",
+    "Share With Facebook": "مشاركة عبر فيسبوك",
+    "Share With WhatsApp": "مشاركة عبر واتساب",
+    "Show Coordinates": "عرض الإحداثيات",
+    "Show Me Where I am": "أرني أين أنا",
+    "Show Slopes": "عرض المنحدرات",
+    "Singles": "أحادي",
+    "Slope": "منحدر",
+    "Split": "انقسام",
+    "Spring": "نبع",
+    "Spring, Pond": "نبع، بركة",
+    "Start Download": "ابدأ التنزيل",
+    "Statistics and Height Chart": "إحصائيات ومخطط الارتفاعات",
+    "Steps": "خطوات",
+    "Straight Lines": "خطوط مستقيمة",
+    "Stream": "مجرى مائي",
+    "Strong 4WD Vehicles": "مركبات دفع رباعي قوية",
+    "Submit": "إرسال",
+    "Synagogue": "كنيس",
+    "Tags": "تسميات",
+    "Terms of Service": "شروط الخدمة",
+    "Tertiary": "ثانوي",
+    "Thank you for your support!": "شكرًا لدعمك!",
+    "Thanks for purchasing! download instructions here...": "شكرًا على الشراء! التعليمات لتنزيل هنا...",
+    "The data was updated successfully!": "تم تحديث البيانات بنجاح!",
+    "The data was updated successfully! It will take time to see it on the map...": "تم تحديث البيانات بنجاح! قد يستغرق الأمر بعض الوقت لرؤيتها على الخريطة...",
+    "The download may take several minutes, and afterwards you can enjoy the map with no need for a network connection.": "قد يستغرق تنزيل عدة دقائق، وبعدها يمكنك الاستمتاع بالخريطة دون الحاجة إلى اتصال بالشبكة.",
+    "The Green Line": "الخط الأخضر",
+    "The offline database has been upgraded...": "تم ترقية قاعدة البيانات غير المتصلة...",
+    "The Purple Line": "الخط الأرجواني",
+    "The route's name was altered since it is in use...": "تغير اسم المسار لكونه قيد الاستخدام...",
+    "The title for your share.": "عنوان لمشاركتك.",
+    "There's no description :-(. To add one you'll need to login to OSM first, please use the button in the upper right corner to login.": "لا يوجد وصف 😞. لإضافة وصف، يجب عليك أولاً تسجيل الدخول إلى OSM.",
+    "There's no permission to use your location. Would you like to open the app settings?": "لا يوجد إذن لاستخدام موقعك. هل ترغب في فتح إعدادات التطبيق؟",
+    "There's so much more you can do with our app": "يمكنك القيام بالكثير مع تطبيقنا",
+    "This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.": "تم إنشاء هذه الخريطة من بيانات {{link}}Open Street Map (OSM){{linkend}}، المتاحة للجميع للاستخدام والتحرير.",
+    "This name is already in use": "هذا الاسم قيد الاستخدام بالفعل",
+    "This will delete all current routes. Are you sure?": "سيؤدي ذلك إلى حذف جميع المسارات الحالية. هل أنت متأكد؟",
+    "Title": "عنوان",
+    "Toilettes": "مرافق صحية",
+    "Traces are only saved locally. You can change that in the configuration settings": "تُحفظ الأثر فقط محليًا، يمكنك تغيير ذلك في إعدادات التكوين.",
+    "Trails": "مسارات",
+    "Transportation": "المواصلات",
+    "Traveled distance": "المسافة المقطوعة",
+    "Tree": "شجرة",
+    "Trunk": "جذع",
+    "Tunnel": "نفق",
+    "Type to search...": "اكتب للبحث...",
+    "Unable to delete the share...": "لا يمكن حذف المشاركة...",
+    "Unable to extract geographic information from the file...": "لا يمكن استخراج المعلومات الجغرافية من الملف...",
+    "Unable to find the required point of interest...": "لا يمكن العثور على نقطة الاهتمام المطلوبة...",
+    "Unable to find your location...": "لا يمكن العثور على موقعك...",
+    "Unable to generate URL, please try again later...": "لا يمكن توليد رابط، يرجى المحاولة مرة أخرى لاحقًا...",
+    "Unable to get search results...": "لا يمكن الحصول على نتائج البحث...",
+    "Unable to load from URL...": "لا يمكن التحميل من الرابط...",
+    "Unable to login...": "تعذر تسجيل الدخول...",
+    "Unable to save an empty route, Please try and select a different one from the layers control on your left.": "تعذر حفظ مسار فارغ، يرجى اختيار مسار آخر من التحكم في الطبقات على يسارك.",
+    "Unable to save data, please try again later...": "تعذر حفظ البيانات، يرجى المحاولة مرة أخرى لاحقًا...",
+    "Unable to save to file...": "لا يمكن الحفظ في الملف...",
+    "Unable to send route...": "لا يمكن إرسال المسار...",
+    "Unable to upload the file...": "لا يمكن رفع الملف...",
+    "Unarked Trail": "مسار غير محدد",
+    "Unclassified": "غير مصنف",
+    "Undo": "تراجع",
+    "Unhide hidden routes": "إظهار المسارات المخفية",
+    "Unknown Scale": "مقياس غير معروف",
+    "Up to zoom": "حتى الزوم",
+    "Update": "تحديث",
+    "Update current share": "تحديث المشاركة الحالية",
+    "Update the point's location": "تحديث موقع النقطة",
+    "Upload a trace": "تحميل أثر",
+    "Upload Point": "رفع نقطة إلى OpenStreetMap",
+    "Upload to Cloud and Share": "رفع إلى السحابة ومشاركة",
+    "Use the cloud icon to go offline": "استخدم أيقونة السحابة للانتقال إلى وضع عدم الاتصال",
+    "View": "عرض",
+    "Viewpoint": "نقطة مشاهدة",
+    "Vineyard": "كرم",
+    "Wadi": "وادي",
+    "Wall": "جدار",
+    "Water": "ماء",
+    "Water Tower or Water Tank": "برج ماء أو خزان",
+    "Water Well": "بئر",
+    "Waterfall": "شلال",
+    "Waterhole": "ماء",
+    "Website": "موقع ويب",
+    "Width": "عرض",
+    "Wikimedia terms of service": "شروط استخدام ويكيميديا",
+    "Wikipedia": "ويكيبيديا",
+    "Woods": "غابة",
+    "Would you like to update the point without the title?": "هل ترغب في تحديث النقطة بدون عنوان؟",
+    "Would you like to update:": "هل ترغب في تحديث:",
+    "Wrapping things up, please wait a few seconds...": "نقوم بإكمال الأمور، يرجى الانتظار بضع ثوان...",
+    "Yes": "نعم",
+    "You are about to download large files, you can change to wifi before clicking continue...": "أنت على وشك تحميل ملفات كبيرة، يمكنك التبديل إلى الواي فاي قبل النقر على متابعة...",
+    "You can't edit while offline...": "لا يمكنك التحرير أثناء عدم الاتصال...",
+    "You need to login in order to see your traces, click the frowning face at the top": "تحتاج لتسجيل الدخول لرؤية آثارك. انقر على الوجه الحزين بالأعلى",
+    "You need to login to OSM first, please use the button in the upper right corner to login.": "تحتاج لتسجيل الدخول إلى OSM أولًا، يُرجى استخدام الزر في الزاوية العلوية اليمنى لتسجيل الدخول.",
+    "You should add your description here! Click the edit button above.": "ينبغي عليك إضافة وصفك هنا! اضغط على زر التحرير بالأعلى.",
+    "Zoom In": "تكبير",
+    "Zoom Out": "تصغير"
+}
