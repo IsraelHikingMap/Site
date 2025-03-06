@@ -12,10 +12,11 @@ import { ShareUrlsService } from "./share-urls.service";
 import { SetFileUrlAndBaseLayerAction, SetShareUrlAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, LatLngAlt } from "../models/models";
 
-export type PoiRouterData = {
+export type PoiRouteUrlInfo = {
     source: string;
     id: string;
     language: string;
+    editMode: boolean;
 };
 
 export const getIdFromLatLng = (latLng: LatLngAlt): string => latLng.lat.toFixed(6) + "_" + latLng.lng.toFixed(6);
@@ -158,11 +159,12 @@ export class HashService {
         return this.getFullUrlFromPoiId({
             id: getIdFromLatLng(latlng),
             source: RouteStrings.COORDINATES,
-            language: null
+            language: null,
+            editMode: false
         });
     }
 
-    public getFullUrlFromPoiId(poiSourceAndId: PoiRouterData) {
+    public getFullUrlFromPoiId(poiSourceAndId: PoiRouteUrlInfo) {
         const urlTree = this.router.createUrlTree([RouteStrings.POI, poiSourceAndId.source, poiSourceAndId.id],
             { queryParams: { language: poiSourceAndId.language } });
         return Urls.baseAddress + urlTree.toString();
