@@ -23,7 +23,7 @@ import { ResourcesService } from "../../../services/resources.service";
 import { PoiService, PoiSocialLinks } from "../../../services/poi.service";
 import { IHMTitleService } from "../../../services/ihm-title.service";
 import { ToastService } from "../../../services/toast.service";
-import { RouteStrings, PoiRouterData } from "../../../services/hash.service";
+import { RouteStrings, PoiRouteUrlInfo } from "../../../services/hash.service";
 import { SelectedRouteService } from "../../../services/selected-route.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
@@ -98,23 +98,31 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             this.isLoading = true;
             await this.initOrUpdate();
         });
-
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed()).subscribe(() => {
+            const sourceIdAndLanguage = this.getRouteUrlInfo();
+            this.router.navigate([RouteStrings.ROUTE_POI, sourceIdAndLanguage.source, sourceIdAndLanguage.id],
+                { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+        });
         this.initOrUpdate();
     }
 
-    private async initOrUpdate() {
+    private getRouteUrlInfo(): PoiRouteUrlInfo {
         const parsed = this.router.parseUrl(this.router.url);
-        const editMode = parsed.queryParams[RouteStrings.EDIT] === "true";
-        
-        const poiSourceAndId = {
+        return {
             source: parsed.root.children.primary.segments[1].path,
             id: parsed.root.children.primary.segments[2]?.path,
-            language: parsed.queryParams[RouteStrings.LANGUAGE]
+            language: parsed.queryParams[RouteStrings.LANGUAGE],
+            editMode: parsed.queryParams[RouteStrings.EDIT] === "true"
         }
-        await this.fillUiWithData(poiSourceAndId);
+    }
+
+    private async initOrUpdate() {
+        
+        const routeUrlInfo = this.getRouteUrlInfo();
+        await this.fillUiWithData(routeUrlInfo);
         // change this only after we get the full data
         // so that the edit dialog will have all the necessary data to decide
-        this.editMode = editMode;
+        this.editMode = routeUrlInfo.editMode;
     }
 
     public ngOnDestroy() {
@@ -128,7 +136,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         return this.runningContextSerivce.isCapacitor;
     }
 
-    private async fillUiWithData(data: PoiRouterData) {
+    private async fillUiWithData(data: PoiRouteUrlInfo) {
         try {
             if (data.source === "new") {
                 const newFeature = {

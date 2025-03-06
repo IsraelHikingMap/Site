@@ -9,7 +9,7 @@ import type { Immutable } from "immer";
 import type { GeoJSONFeature } from "maplibre-gl";
 
 import { ResourcesService } from "./resources.service";
-import { HashService, PoiRouterData, RouteStrings } from "./hash.service";
+import { HashService, PoiRouteUrlInfo, RouteStrings } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { DatabaseService } from "./database.service";
 import { RunningContextService } from "./running-context.service";
@@ -584,7 +584,7 @@ export class PoiService {
             source: feature.properties.poiSource,
             id: feature.properties.identifier,
             language
-        } as PoiRouterData);
+        } as PoiRouteUrlInfo);
         const escaped = encodeURIComponent(poiLink);
         const location = GeoJSONUtils.getLocation(feature);
         return {

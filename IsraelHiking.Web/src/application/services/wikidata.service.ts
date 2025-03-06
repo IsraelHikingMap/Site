@@ -61,7 +61,7 @@ export class WikidataService {
                 poiIcon: "icon-wikipedia-w",
                 poiCategory: "Wikipedia",
                 poiIconColor: "black",
-                poiSourceImageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Wikidata-logo.svg/128px-Wikidata-logo.svg.png",
+                poiSourceImageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Wikidata-logo.svg/128px-Wikidata-logo.svg.png",
                 poiLanguage: language
             },
             geometry: {
@@ -73,6 +73,12 @@ export class WikidataService {
         const lngLat = this.setLocation(wikidata, feature);
         feature.geometry.coordinates = [lngLat.lng, lngLat.lat];
         feature.properties.name = this.getTitle(wikidata, language);
+        if (!feature.properties.description && !feature.properties.poiExternalDescription && !feature.properties["description:" + language]) {
+            GeoJSONUtils.setDescription(feature, this.resources.noDescriptionAvailableInYourLanguage, language);
+        }
+        if (!feature.properties.website) {
+            GeoJSONUtils.setProperty(feature, "website", `https://www.wikidata.org/wiki/${wikidataId}`);
+        }
         return feature;
     }
 
