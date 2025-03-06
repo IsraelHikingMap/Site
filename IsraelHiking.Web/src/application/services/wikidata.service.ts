@@ -61,7 +61,7 @@ export class WikidataService {
                 poiIcon: "icon-wikipedia-w",
                 poiCategory: "Wikipedia",
                 poiIconColor: "black",
-                poiSourceImageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Wikidata-logo.svg/128px-Wikidata-logo.svg.png",
+                poiSourceImageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Wikidata-logo.svg/128px-Wikidata-logo.svg.png",
                 poiLanguage: language
             },
             geometry: {
