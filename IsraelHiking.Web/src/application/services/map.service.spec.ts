@@ -27,7 +27,7 @@ describe("MapService", () => {
     it("Should set panned state on drag start", inject([MapService, CancelableTimeoutService], 
         async (service: MapService, cancelableTimeoutService: CancelableTimeoutService) => {
             const spy = jasmine.createSpy();
-            cancelableTimeoutService.setTimeoutByGroup = spy;
+            cancelableTimeoutService.setTimeoutByName = spy;
             service.setMap({ on: (event: string, callback: () => void) => {
                 if (event == "dragstart") callback();
             } } as any as Map);

@@ -23,9 +23,9 @@ export class MapService {
         this.map = map;
         this.resolve();
         this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
-            this.cancelableTimeoutService.clearTimeoutByGroup("panned");
+            this.cancelableTimeoutService.clearTimeoutByName("panned");
             if (pannedTimestamp) {
-                this.cancelableTimeoutService.setTimeoutByGroup(() => {
+                this.cancelableTimeoutService.setTimeoutByName(() => {
                     this.store.dispatch(new SetPannedAction(null));
                 }, MapService.NOT_FOLLOWING_TIMEOUT, "panned");
             }
