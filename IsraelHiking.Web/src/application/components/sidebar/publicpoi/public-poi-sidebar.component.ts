@@ -98,22 +98,32 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             this.isLoading = true;
             await this.initOrUpdate();
         });
-
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed()).subscribe(() => {
+            const sourceIdAndLanguage = this.getSourceIdAndLanguage();
+            this.router.navigate([RouteStrings.ROUTE_POI, sourceIdAndLanguage.source, sourceIdAndLanguage.id],
+                { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+        });
         this.initOrUpdate();
     }
 
-    private async initOrUpdate() {
+    private getSourceIdAndLanguage(): PoiRouterData {
         const parsed = this.router.parseUrl(this.router.url);
         const editMode = parsed.queryParams[RouteStrings.EDIT] === "true";
         
-        const poiSourceAndId = {
+        return {
             source: parsed.root.children.primary.segments[1].path,
             id: parsed.root.children.primary.segments[2]?.path,
             language: parsed.queryParams[RouteStrings.LANGUAGE]
         }
-        await this.fillUiWithData(poiSourceAndId);
+    }
+
+    private async initOrUpdate() {
+        
+        await this.fillUiWithData(this.getSourceIdAndLanguage());
         // change this only after we get the full data
         // so that the edit dialog will have all the necessary data to decide
+        const parsed = this.router.parseUrl(this.router.url);
+        const editMode = parsed.queryParams[RouteStrings.EDIT] === "true";
         this.editMode = editMode;
     }
 

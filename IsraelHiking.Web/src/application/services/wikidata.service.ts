@@ -73,6 +73,12 @@ export class WikidataService {
         const lngLat = this.setLocation(wikidata, feature);
         feature.geometry.coordinates = [lngLat.lng, lngLat.lat];
         feature.properties.name = this.getTitle(wikidata, language);
+        if (!feature.properties.description && !feature.properties.poiExternalDescription && !feature.properties["description:" + language]) {
+            GeoJSONUtils.setDescription(feature, this.resources.noDescriptionAvailableInYourLanguage, language);
+        }
+        if (!feature.properties.website) {
+            GeoJSONUtils.setProperty(feature, "website", `https://www.wikidata.org/wiki/${wikidataId}`);
+        }
         return feature;
     }
 

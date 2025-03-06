@@ -252,6 +252,7 @@ export class ResourcesService {
     public notYet: string;
     public imageUploadWaiver: string;
     public subscriptionDetails: string;
+    public noDescriptionAvailableInYourLanguage: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -476,7 +477,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1731049787026");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1741252787177");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -683,7 +684,7 @@ export class ResourcesService {
         this.measureDistanceFromCurrentLocation = this.gettextCatalog.getString("Measure distance from current location");
         this.files = this.gettextCatalog.getString("Files");
         this.shareLocation = this.gettextCatalog.getString("Share Location");
-        this.facebookWarning = this.gettextCatalog.getString("Explanation on how to open Facebook link out side facebook");
+        this.facebookWarning = this.gettextCatalog.getString("Explanation on how to open Facebook link outside facebook");
         this.moreInfo = this.gettextCatalog.getString("More Info...");
         this.showSlopes = this.gettextCatalog.getString("Show Slopes");
         this.next = this.gettextCatalog.getString("Next");
@@ -710,6 +711,7 @@ export class ResourcesService {
         this.notYet = this.gettextCatalog.getString("Not yet...");
         this.imageUploadWaiver = this.gettextCatalog.getString("The pictures I will upload are my own work, and they can be used without any restrictions.");
         this.subscriptionDetails = this.gettextCatalog.getString("No reception? Try out our offline maps subscription! Only 99₪ per year, paid once a year. Use the main menu to purchase the subscription.");
+        this.noDescriptionAvailableInYourLanguage = this.gettextCatalog.getString("No description available in your language");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
