@@ -11,7 +11,13 @@ body:
   - type: textarea
     attributes:
       label: What happened?
-      description: A clear and concise description of what happend. Please
+      description: A clear and concise description of what happend. Please.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What I expect to happen
+      description: If possible please provide annotated screenshots of what you expect differently.
     validations:
       required: true
   - type: textarea
@@ -25,12 +31,6 @@ body:
         2. Do that step...
         3. ...
         4. See error ...
-    validations:
-      required: true
-  - type: textarea
-    attributes:
-      label: What I expect to happen
-      description: If possible please provide annotated screenshots of what you expect differently.
     validations:
       required: true
   - type: checkboxes

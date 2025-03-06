@@ -9,15 +9,17 @@ body:
         Please fill in as much of the following form as you're able.
   - type: textarea
     attributes:
-      label: What is the problem this feature will solve?
+      label: Problem Statement
+      description: |
+        What is the problem you are facing? Please describe it in detail.
       placeholder: |
-        Please add annotated screenshots, if applicable.
+        If you have a screenshots, please attach them.
     validations:
       required: true
   - type: textarea
     attributes:
-      label: What is the feature you are proposing to solve the problem?
-      description: Describe the request. If you already have something in mind... PRs are welcome!
+      label: Proposed Solution
+      description: Describe the way to solve the problem. If you already have something in mind... PRs are welcome!
     validations:
       required: true
   - type: textarea
@@ -27,7 +29,7 @@ body:
         Describe the other ways you have considered or tried to solve the problem, if any.
         Please let us know how each of them failed to solve it.
     validations:
-      required: true
+      required: false
   - type: textarea
     attributes:
       label: Additional information
