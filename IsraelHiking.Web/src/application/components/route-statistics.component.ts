@@ -412,13 +412,9 @@ export class RouteStatisticsComponent implements OnInit {
         // click
         this.chartElements.dragState = "none";
         this.clearSubRouteSelection();
-        const timeoutGroupName = "clickOnChart";
-        this.cancelableTimeoutService.clearTimeoutByGroup(timeoutGroupName);
-        this.cancelableTimeoutService.setTimeoutByGroup(() => {
+        this.cancelableTimeoutService.setTimeoutByName(() => {
             this.hideChartHover();
-        },
-            5000,
-            timeoutGroupName);
+        }, 5000, "clickOnChart");
     }
 
     private initChart() {
@@ -823,13 +819,11 @@ export class RouteStatisticsComponent implements OnInit {
     private onGeolocationChanged(position: GeolocationPosition) {
         this.currentSpeed = (position == null) ? null : position.coords.speed * 3.6;
         this.heading = (position == null) || position.coords.speed === 0 ? null : position.coords.heading;
-        const currentSpeedTimeout = "currentSpeedTimeout";
-        this.cancelableTimeoutService.clearTimeoutByGroup(currentSpeedTimeout);
-        this.cancelableTimeoutService.setTimeoutByGroup(() => {
+        this.cancelableTimeoutService.setTimeoutByName(() => {
             // if there are no location updates reset speed.
             this.currentSpeed = null;
             this.heading = null;
-        }, 5000, currentSpeedTimeout);
+        }, 5000, "currentSpeedTimeout");
         this.onRouteDataChanged();
     }
 

@@ -26,7 +26,6 @@ export class OverpassTurboService {
 
     private async getFeatureFromQuery(query: string, timeoutInMilliseconds = 2000): Promise<GeoJSON.Feature> {
         try {
-            
             const json = await firstValueFrom(this.httpClient.post(OverpassTurboService.OVERPASS_API_URL, `[out: json];${query}out geom;`).pipe(timeout(timeoutInMilliseconds))) as unknown;
             const geojson = osmtogeojson(json, {completeFeature: true, excludeWay: false}) as GeoJSON.FeatureCollection;
             if (geojson.features.length === 1 && geojson.features[0].geometry.type !== "MultiLineString") {
