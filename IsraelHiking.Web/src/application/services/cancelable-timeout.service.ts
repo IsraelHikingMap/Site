@@ -13,6 +13,7 @@ export class CancelableTimeoutService {
     public clearTimeoutByName(name: string) {
         if (this.idForName.has(name)) {
             clearTimeout(this.idForName.get(name));
+            this.idForName.delete(name);
         }
     }
 }
