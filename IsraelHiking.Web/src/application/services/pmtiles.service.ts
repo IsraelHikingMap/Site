@@ -1,12 +1,12 @@
 import { inject, Injectable } from "@angular/core";
 import { File as FileSystemWrapper, IFile } from "@awesome-cordova-plugins/file/ngx";
-import * as pmtiles from "pmtiles";
+import { Source, RangeResponse, PMTiles } from "pmtiles";
 
-class CapacitorSource implements pmtiles.Source {
+class CapacitorSource implements Source {
 
     constructor(private file: IFile) {}
 
-    getBytes(offset: number, length: number): Promise<pmtiles.RangeResponse> {
+    getBytes(offset: number, length: number): Promise<RangeResponse> {
         const slice = this.file.slice(offset, offset + length);
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -31,7 +31,7 @@ export class PmTilesService {
 
     private readonly fileStsyemWrapper = inject(FileSystemWrapper);
 
-    private async getSource(filePath: string): Promise<pmtiles.Source> {
+    private async getSource(filePath: string): Promise<Source> {
         if (this.sourcesCache.has(filePath)) {
             return this.sourcesCache.get(filePath);
         }
@@ -58,7 +58,7 @@ export class PmTilesService {
         const x = +splitUrl[splitUrl.length - 2];
         const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
         const source = await this.getSource(fileName);
-        const pmTilesProvider = new pmtiles.PMTiles(source);
+        const pmTilesProvider = new PMTiles(source);
         const response = await pmTilesProvider.getZxy(z, x, y);
         return response.data;
     }
