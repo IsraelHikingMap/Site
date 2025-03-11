@@ -1,7 +1,12 @@
 @use '@angular/material' as mat;
 
 .align-next-to-menu {
-    right: 85px
+    left: 85px
+}
+
+.align-next-to-menu[dir=rtl] {
+    right: 85px !important;
+    left: unset !important;
 }
 
 .search-input-container {

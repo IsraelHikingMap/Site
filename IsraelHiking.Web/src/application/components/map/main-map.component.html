@@ -15,11 +15,11 @@
             <routes></routes>
             <recorded-route></recorded-route>
             <traces></traces>
-            <zoom #topLeftControl></zoom>
-            <location #topLeftControl *ngIf="isMobile() || !isIFrame()"></location>
-            <main-menu #topRightControl></main-menu>
-            <search #topRightControl *ngIf="!isIFrame()"></search>
-            <drawing #topRightControl *ngIf="!isIFrame()"></drawing>
+            <zoom #topEndControl></zoom>
+            <location #topEndControl *ngIf="isMobile() || !isIFrame()"></location>
+            <main-menu #topStartControl></main-menu>
+            <search #topStartControl *ngIf="!isIFrame()"></search>
+            <drawing #topStartControl *ngIf="!isIFrame()"></drawing>
             <route-statistics #bottomRightControl></route-statistics>
             <center-me #bottomRightControl></center-me>
             <ihm-link *ngIf="!isApp()" #bottomLeftControl></ihm-link>

@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildr
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { NgStyle, NgIf } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
-import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike } from "maplibre-gl";
+import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike, IControl } from "maplibre-gl";
 import { NgProgressbar } from "ngx-progressbar";
 import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";
@@ -40,8 +40,8 @@ import { IhmLinkComponent } from "../ihm-link.component";
 export class MainMapComponent {
 
     public mapComponent = viewChild(MapComponent);
-    public topLeftControls = viewChildren("topLeftControl", { read: ElementRef });
-    public topRightControls = viewChildren("topRightControl", { read: ElementRef });
+    public topStartControls = viewChildren("topStartControl", { read: ElementRef });
+    public topEndControls = viewChildren("topEndControl", { read: ElementRef });
     public bottomLeftControls = viewChildren("bottomLeftControl", { read: ElementRef });
     public bottomRightControls = viewChildren("bottomRightControl", { read: ElementRef });
 
@@ -57,6 +57,8 @@ export class MainMapComponent {
     private readonly defaultStyleService = inject(DefaultStyleService);
     private readonly dialog = inject(MatDialog);
     private readonly store = inject(Store);
+
+    private addedControls: IControl[] = [];
 
     constructor() {
         
@@ -117,12 +119,23 @@ export class MainMapComponent {
 
         this.mapService.setMap(this.mapComponent().mapInstance);
 
-        for (const c of this.topLeftControls()) {
-            this.mapComponent().mapInstance.addControl(new CustomControl(c.nativeElement), "top-left");
-        }
-        for (const c of this.topRightControls()) {
-            this.mapComponent().mapInstance.addControl(new CustomControl(c.nativeElement), "top-right");
-        }
+        this.store.select((state: ApplicationState) => state.configuration.language.rtl).subscribe((rtl) => {
+            for (let control of this.addedControls) {
+                this.mapComponent().mapInstance.removeControl(control);
+            }
+            this.addedControls = [];
+            for (const c of this.topStartControls()) {
+                let control = new CustomControl(c.nativeElement);
+                this.mapComponent().mapInstance.addControl(control, rtl ? "top-right" : "top-left");
+                this.addedControls.push(control);
+            }
+            for (const c of this.topEndControls()) {
+                let control = new CustomControl(c.nativeElement);
+                this.mapComponent().mapInstance.addControl(new CustomControl(c.nativeElement), rtl ? "top-left" : "top-right");
+                this.addedControls.push(control);
+            }
+        });
+        
         this.mapComponent().mapInstance.addControl(new ScaleControl({ unit: "meter" as Unit}), "bottom-left");
         for (const c of this.bottomLeftControls()) {
             this.mapComponent().mapInstance.addControl(new CustomControl(c.nativeElement), "bottom-left");
