@@ -15,13 +15,14 @@ import { ResourcesService } from "../../services/resources.service";
     animations: [
         trigger("animateSidebar", [
             transition(":enter", [
-                style({ transform: "translateX(-100%)" }),
+                style({ transform: "{{startTransform}}" }),
                 animate("500ms", style({ transform: "translateX(0)" }))
-            ]),
+            ], { params: { startTransform: "translateX(-100%)" } }), // Default ltr
+    
             transition(":leave", [
                 style({ transform: "translateX(0)" }),
-                animate("500ms", style({ transform: "translateX(-100%)" }))
-            ])
+                animate("500ms", style({ transform: "{{startTransform}}" }))
+            ], { params: { startTransform: "translateX(-100%)" } }) // Default ltr
         ])
     ],
     imports: [NgIf, NgSwitch, NgSwitchCase, LayersSidebarComponent, InfoSidebarComponent, PublicPoiSidebarComponent]
