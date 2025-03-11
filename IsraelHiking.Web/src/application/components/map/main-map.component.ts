@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildr
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { NgStyle, NgIf } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
-import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike, IControl } from "maplibre-gl";
+import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike, IControl, ControlPosition } from "maplibre-gl";
 import { NgProgressbar } from "ngx-progressbar";
 import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";
@@ -42,8 +42,8 @@ export class MainMapComponent {
     public mapComponent = viewChild(MapComponent);
     public topStartControls = viewChildren("topStartControl", { read: ElementRef });
     public topEndControls = viewChildren("topEndControl", { read: ElementRef });
-    public bottomLeftControls = viewChildren("bottomLeftControl", { read: ElementRef });
-    public bottomRightControls = viewChildren("bottomRightControl", { read: ElementRef });
+    public bottomEndControls = viewChildren("bottomEndControl", { read: ElementRef });
+    public bottomStartControls = viewChildren("bottomStartControl", { read: ElementRef });
 
     public location: LocationState;
     public initialStyle: StyleSpecification;
@@ -120,29 +120,37 @@ export class MainMapComponent {
         this.mapService.setMap(this.mapComponent().mapInstance);
 
         this.store.select((state: ApplicationState) => state.configuration.language.rtl).subscribe((rtl) => {
-            for (let control of this.addedControls) {
+            const start = rtl ? "right" : "left";
+            const end = rtl ? "left" : "right";
+            for (const control of this.addedControls) {
                 this.mapComponent().mapInstance.removeControl(control);
             }
             this.addedControls = [];
             for (const c of this.topStartControls()) {
-                let control = new CustomControl(c.nativeElement);
-                this.mapComponent().mapInstance.addControl(control, rtl ? "top-right" : "top-left");
+                const control = new CustomControl(c.nativeElement);
+                this.mapComponent().mapInstance.addControl(control,  "top-" + start as ControlPosition);
                 this.addedControls.push(control);
             }
             for (const c of this.topEndControls()) {
-                let control = new CustomControl(c.nativeElement);
-                this.mapComponent().mapInstance.addControl(new CustomControl(c.nativeElement), rtl ? "top-left" : "top-right");
+                const control = new CustomControl(c.nativeElement);
+                this.mapComponent().mapInstance.addControl(new CustomControl(c.nativeElement), "top-" + end as ControlPosition);
+                this.addedControls.push(control);
+            }
+            const control = new ScaleControl({ unit: "meter" as Unit});
+            this.mapComponent().mapInstance.addControl(control, "bottom-" + end as ControlPosition);
+            this.addedControls.push(control);
+
+            for (const c of this.bottomEndControls()) {
+                const control = new CustomControl(c.nativeElement);
+                this.mapComponent().mapInstance.addControl(control, "bottom-" + end as ControlPosition);
+                this.addedControls.push(control);
+            }
+            for (const c of this.bottomStartControls()) {
+                const control = new CustomControl(c.nativeElement);
+                this.mapComponent().mapInstance.addControl(control, "bottom-" + start as ControlPosition);
                 this.addedControls.push(control);
             }
         });
-        
-        this.mapComponent().mapInstance.addControl(new ScaleControl({ unit: "meter" as Unit}), "bottom-left");
-        for (const c of this.bottomLeftControls()) {
-            this.mapComponent().mapInstance.addControl(new CustomControl(c.nativeElement), "bottom-left");
-        }
-        for (const c of this.bottomRightControls()) {
-            this.mapComponent().mapInstance.addControl(new CustomControl(c.nativeElement), "bottom-right");
-        }
 
         this.mapComponent().mapInstance.on("click", (e) => {
             // This is used for the personal heatmap, assuming there's a layer there called "record_lines".
