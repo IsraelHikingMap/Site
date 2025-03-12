@@ -10,7 +10,7 @@ import type { ApplicationState } from "../models/models";
     selector: "background-text",
     templateUrl: "./background-text.component.html",
     styleUrls: ["./background-text.component.scss"],
-    imports: [Dir]
+    imports: []
 })
 export class BackgroundTextComponent {
 

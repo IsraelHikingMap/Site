@@ -1,7 +1,7 @@
 ﻿﻿<ng-progress ngProgressHttp [ngStyle]="{'z-index':1500}"></ng-progress>
 <sidebar></sidebar>
-<background-text></background-text>
-<div class="flex flex-row" style="height: 100%">
+<background-text [dir]="resources.direction"></background-text>
+<div class="flex flex-row" style="height: 100%" [dir]="resources.direction">
     <div class="w-full">
         <mgl-map [zoom]="[location.zoom]"
                  [center]="[location.longitude, location.latitude]"
