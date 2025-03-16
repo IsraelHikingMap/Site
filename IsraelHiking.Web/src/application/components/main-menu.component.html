@@ -53,6 +53,12 @@
                             <span class="flex-1 margin-sides">{{resources.purchaseOfflineMapsShort}}</span>
                         </span>
                     </button>
+                    <button mat-menu-item (click)="openLanguage()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Open language selection">
+                        <span class="flex flex-row justify-center items-center">
+                            <span class="w-1/12 text-center"><i class="fa fa-lg icon-language mat-icon"></i></span>
+                            <span class="flex-1 margin-sides">Language</span>
+                        </span>
+                    </button>
                     <button mat-menu-item *ngIf="!isShowMore" (click)="toggleShowMore($event)" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show more">
                         <span class="flex flex-row justify-center items-center">
                             <span class="w-1/12 text-center"><i class="fa fa-lg icon-chevron-down mat-icon"></i></span>
@@ -70,12 +76,6 @@
                             <span class="flex flex-row justify-center items-center">
                                 <span class="w-1/12 text-center"><i class="fa fa-lg icon-envelope mat-icon"></i></span>
                                 <span class="flex-1 margin-sides">{{resources.reportAnIssue}}</span>
-                            </span>
-                        </button>
-                        <button mat-menu-item (click)="openLanguage()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Open language selection">
-                            <span class="flex flex-row justify-center items-center">
-                                <span class="w-1/12 text-center"><i class="fa fa-lg icon-language mat-icon"></i></span>
-                                <span class="flex-1 margin-sides">Language</span>
                             </span>
                         </button>
                         <a mat-menu-item *ngIf="isShowEditOsmButton()" [href]="getOsmAddress()" [target]="'_blank'" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Edit in OSM">
