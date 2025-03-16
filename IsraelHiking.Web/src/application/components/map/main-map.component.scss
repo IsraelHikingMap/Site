@@ -9,10 +9,18 @@
 }
 
 .maplibregl-ctrl-bottom-right {
-    z-index: v.$app-left-z-index - 20 !important;
+    z-index: v.$app-left-z-index - 30 !important;
 }
 
 .maplibregl-ctrl-bottom-left {
+    z-index: v.$app-left-z-index - 20 !important;
+}
+
+[dir=rtl] .maplibregl-ctrl-bottom-right {
+    z-index: v.$app-left-z-index - 20 !important;
+}
+
+[dir=rtl] .maplibregl-ctrl-bottom-left {
     z-index: v.$app-left-z-index - 30 !important;
 }
 

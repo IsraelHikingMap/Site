@@ -66,13 +66,13 @@ interface IChartElements {
     animations: [
         trigger("animateChart", [
             transition(":enter", [
-                style({ transform: "scale(0.2)", "transform-origin": "bottom right" }),
-                animate("200ms", style({ transform: "scale(1)", "transform-origin": "bottom right" }))
-            ]),
+                style({ transform: "scale(0.2)", "transform-origin": "bottom {{start}}" }),
+                animate("200ms", style({ transform: "scale(1)", "transform-origin": "bottom {{start}}" }))
+            ], { params: { start: "right" }}),
             transition(":leave", [
-                style({ transform: "scale(1)", "transform-origin": "bottom right" }),
-                animate("200ms", style({ transform: "scale(0.2)", "transform-origin": "bottom right" }))
-            ])
+                style({ transform: "scale(1)", "transform-origin": "bottom {{start}}" }),
+                animate("200ms", style({ transform: "scale(0.2)", "transform-origin": "bottom {{start}}" }))
+            ], { params: { start: "right" }})
         ])
     ],
     imports: [NgIf, Dir, NgClass, MatGridList, MatGridTile, MatTooltip, MatButton, Angulartics2OnModule, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, AsyncPipe, DecimalPipe]
@@ -468,7 +468,7 @@ export class RouteStatisticsComponent implements OnInit {
                 .call(d3.axisRight(this.chartElements.yScaleSlope).ticks(5))
                 .append("text")
                 .attr("fill", "#000")
-                .attr("transform", `translate(10, ${this.chartElements.height / 2}) rotate(-90)`)
+                .attr("transform", `translate(25, ${this.chartElements.height / 2}) rotate(-90)`)
                 .attr("text-anchor", "middle")
                 .attr("dir", this.resources.direction)
                 .text(this.resources.slope);

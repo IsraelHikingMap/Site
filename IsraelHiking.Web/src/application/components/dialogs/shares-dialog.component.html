@@ -56,7 +56,7 @@
                 <button mat-button class="w-full min-w-unset !p-0" [disabled]="!hasSelected()" (click)="updateShareUrl()" matTooltip="{{resources.update}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Update share"><i class="fa icon-check"></i></button>
             </div>
             <div class="flex-1" *ngIf="!isApp()">
-                <mat-menu #appMenu="matMenu" [dir]="resources.direction" yPosition="above" overlapTrigger="false">
+                <mat-menu #appMenu="matMenu" yPosition="above" overlapTrigger="false">
                     <div mat-menu-item disableRipple="true">
                         <div class="flex flex-row">
                             <div class="flex-1"><a class="w-full" [href]="getShareSocialLinks().facebook" [target]="'_blank'" mat-button matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook share"><i class="fa icon-facebook"></i></a></div>

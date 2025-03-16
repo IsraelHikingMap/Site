@@ -7,7 +7,7 @@
     position: fixed;
     top: env(safe-area-inset-top, 0);
     bottom: 0;
-    left: 0;
+    right: 0;
     width: v.$app-sidebar-width;
     line-height: 24px;
     overflow-x: hidden;
@@ -16,6 +16,11 @@
     direction: ltr;
     background: mat.m2-get-color-from-palette(common.$app-background, card);
     z-index: v.$app-left-z-index + 5;
+}
+
+.sidebar-wrapper[dir=rtl] {
+    right: unset;
+    left: 0;
 }
 
 
