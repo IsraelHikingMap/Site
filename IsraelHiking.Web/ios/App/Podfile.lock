@@ -1,5 +1,5 @@
 PODS:
-  - Capacitor (7.0.1):
+  - Capacitor (7.1.0):
     - CapacitorCordova
   - CapacitorApp (7.0.0):
     - Capacitor
@@ -9,16 +9,16 @@ PODS:
     - Capacitor
   - CapacitorCommunityScreenBrightness (7.0.0):
     - Capacitor
-  - CapacitorCordova (7.0.1)
+  - CapacitorCordova (7.1.0)
   - CapacitorDevice (7.0.0):
     - Capacitor
   - CapacitorTextZoom (7.0.0):
     - Capacitor
   - CapawesomeCapacitorAppUpdate (7.0.1):
     - Capacitor
-  - CapgoNativeAudio (7.3.0):
+  - CapgoNativeAudio (7.3.11):
     - Capacitor
-  - CordovaPlugins (7.0.1):
+  - CordovaPlugins (7.1.0):
     - CapacitorCordova
   - CordovaPluginsResources (0.0.105)
 
@@ -63,17 +63,17 @@ EXTERNAL SOURCES:
     :path: "../capacitor-cordova-ios-plugins"
 
 SPEC CHECKSUMS:
-  Capacitor: de199cba6c8b20995428ad0b7cb0bc6ca625ffd4
+  Capacitor: bceb785fb78f5e81e4a9e37843bc1c24bd9c7194
   CapacitorApp: 9cb31064a6c6bb2b1438583733a7bf45557fc1da
   CapacitorCamera: 20a37684b81c69c0c33fb5a7216919f135371a6f
   CapacitorCommunityKeepAwake: ae762ce29b53147d28cfcaae5273cd1db0c38fc4
   CapacitorCommunityScreenBrightness: 508f3d0f79024cd8da7d063f456870a4a1932723
-  CapacitorCordova: 63d476958d5022d76f197031e8b7ea3519988c64
+  CapacitorCordova: 866217f32c1d25b326c568a10ea3ed0c36b13e29
   CapacitorDevice: 069faf433b3a99c3d5f0e500fbe634f60a8c6a84
   CapacitorTextZoom: 254c75dffb54d34d582a4f14cc7ba432fcfb5cad
   CapawesomeCapacitorAppUpdate: d1f04c1c870388248889908cf2ca960c7fdbf0ef
-  CapgoNativeAudio: 31deec018455d3bacf76e10028794603d8d56cba
-  CordovaPlugins: 6613bdd70e5ae8c9c12561297ced5c7f6e323e97
+  CapgoNativeAudio: 67c6a693b1186b827a0fac989c67007b7230abad
+  CordovaPlugins: 3b5a5e3012b4ff29686e4db7455bc511ea918291
   CordovaPluginsResources: 0c211f770ed91763a179ebcd9b9346e120b70662
 
 PODFILE CHECKSUM: cab2d7ffaf484328d08699051c98cbfebe1eaacb
