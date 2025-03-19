@@ -13,7 +13,7 @@ import { FormsModule } from "@angular/forms";
 import { Router, NavigationEnd } from "@angular/router";
 import { Angulartics2OnModule } from "angulartics2";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
-import { filter } from "rxjs";
+import { filter, skip } from "rxjs";
 import { cloneDeep } from "lodash-es";
 import { Store } from "@ngxs/store";
 
@@ -98,10 +98,15 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             this.isLoading = true;
             await this.initOrUpdate();
         });
-        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed()).subscribe(() => {
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(), skip(1)).subscribe(() => {
             const sourceIdAndLanguage = this.getRouteUrlInfo();
-            this.router.navigate([RouteStrings.ROUTE_POI, sourceIdAndLanguage.source, sourceIdAndLanguage.id],
-                { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+            const queryParams: Record<string, string | boolean> = {
+                language: this.resources.getCurrentLanguageCodeSimplified()
+            };
+            if (sourceIdAndLanguage.editMode) {
+                queryParams.edit = true;
+            }
+            this.router.navigate([RouteStrings.ROUTE_POI, sourceIdAndLanguage.source, sourceIdAndLanguage.id], { queryParams });
         });
         this.initOrUpdate();
     }
@@ -152,11 +157,11 @@ export class PublicPoiSidebarComponent implements OnDestroy {
                         coordinates: [0, 0]
                     }
                 } as GeoJSON.Feature;
-                this.mergeDataIfNeededData(newFeature);
+                await this.mergeDataIfNeededData(newFeature);
             } else {
                 const feature = await this.poiService.getPoint(data.id, data.source, data.language);
                 const originalFeature = cloneDeep(feature);
-                this.mergeDataIfNeededData(feature);
+                await this.mergeDataIfNeededData(feature);
                 const bounds = SpatialService.getBoundsForFeature(feature);
                 this.fitBoundsService.fitBounds(bounds);
                 this.store.dispatch(new SetSelectedPoiAction(originalFeature));
