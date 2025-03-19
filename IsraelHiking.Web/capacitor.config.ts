@@ -20,6 +20,9 @@ const config: CapacitorConfig = {
   },
   ios: {
     preferredContentMode: "mobile"
+  },
+  android: {
+    adjustMarginsForEdgeToEdge: 'auto'
   }
 };
 

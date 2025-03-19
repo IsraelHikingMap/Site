@@ -129,6 +129,7 @@
     "karma-jasmine": "^5.1.0",
     "karma-jasmine-html-reporter": "^2.1.0",
     "karma-junit-reporter": "^2.0.1",
+    "patch-package": "^8.0.0",
     "puppeteer": "^24.4.0",
     "typescript": "^5.5.4",
     "vt-pbf": "^3.1.3"
@@ -150,7 +151,8 @@
     "test-ci": "ng test --code-coverage --watch=false",
     "lint": "ng lint --fix",
     "extract": "node extract-strings.js",
-    "generate-legend": "node generate-legend.js"
+    "generate-legend": "node generate-legend.js",
+    "prepare": "patch-package"
   },
   "type": "module",
   "version": "9.20.0"
