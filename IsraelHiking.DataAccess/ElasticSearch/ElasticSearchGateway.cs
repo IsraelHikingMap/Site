@@ -159,7 +159,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     private string GetBestMatchLanguage(Explanation explanation, string fallbackLanguage)
     {
         // Recursive method to find the field with the highest contribution to the score
-        foreach (var details in explanation.Details)
+        foreach (var details in explanation?.Details ?? [])
         {
             var results = FindBestField(details);
             if (!string.IsNullOrEmpty(results) && Languages.ArrayWithDefault.Any(l => results.Contains("." + l)))
@@ -175,12 +175,12 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         var searchTermLanguage = GetBestMatchLanguage(d.Explanation, language);
         IFeature feature = new Feature(new Point(d.Source.Location[0], d.Source.Location[1]), new AttributesTable
         {
-            { FeatureAttributes.NAME, d.Source.Name.GetValueOrDefault(searchTermLanguage, d.Source.Name.GetValueOrDefault(Languages.ENGLISH, string.Empty)) },
+            { FeatureAttributes.NAME, d.Source.Name.GetValueOrDefault(searchTermLanguage, d.Source.Name.GetValueOrDefault(Languages.DEFAULT, string.Empty)) },
             { FeatureAttributes.POI_SOURCE, d.Source.PoiSource },
             { FeatureAttributes.POI_ICON, d.Source.PoiIcon },
             { FeatureAttributes.POI_CATEGORY, d.Source.PoiCategory },
             { FeatureAttributes.POI_ICON_COLOR, d.Source.PoiIconColor },
-            { FeatureAttributes.DESCRIPTION, d.Source.Description.GetValueOrDefault(searchTermLanguage, d.Source.Description.GetValueOrDefault(Languages.ENGLISH, string.Empty)) },
+            { FeatureAttributes.DESCRIPTION, d.Source.Description.GetValueOrDefault(searchTermLanguage, d.Source.Description.GetValueOrDefault(Languages.DEFAULT, string.Empty)) },
             { FeatureAttributes.POI_ID, d.Id },
             { FeatureAttributes.POI_LANGUAGE, Languages.ALL },
             { FeatureAttributes.ID, string.Join("_", d.Id.Split("_").Skip(1)) }
@@ -421,8 +421,15 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                 }
                 return query;
             })
+            .Sort(ss => ss
+                .GeoDistance(g => g
+                    .Field(p => p.Location)
+                    .Points(new GeoCoordinate(coordinate.Y, coordinate.X))
+                    .Order(SortOrder.Ascending)
+                )
+            )
         );
-        return response.Hits.Select(d => HitToFeature(d, language ?? Languages.ENGLISH)).FirstOrDefault();
+        return response.Hits.Select(d => HitToFeature(d, language ?? Languages.DEFAULT)).FirstOrDefault();
 
     }
 
@@ -441,7 +448,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             )
         );
         var list = GetAllItemsByScrolling(response);
-        return list.Select(h => HitToFeature(h, Languages.ENGLISH)).ToList();
+        return list.Select(h => HitToFeature(h, Languages.DEFAULT)).ToList();
     }
 
     public async Task<List<IFeature>> GetExternalPoisBySource(string source)
