@@ -29,8 +29,12 @@
         width: 100vw;
         box-sizing: border-box;
     }
-    .sidebar-wrapper.poi {
-        top: 50vh;
-        height: 50vh;
+    .sidebar-wrapper:has(public-poi-sidebar) {
+        top: 40vh;
+        height: 60vh;
+    }
+    .sidebar-wrapper:has(public-poi-sidebar .minimized) {
+        top: 85vh;
+        height: 15vh;
     }
 }

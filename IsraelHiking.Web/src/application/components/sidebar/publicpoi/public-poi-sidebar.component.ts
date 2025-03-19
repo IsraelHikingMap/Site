@@ -62,6 +62,7 @@ export type SourceImageUrlPair = {
 export class PublicPoiSidebarComponent implements OnDestroy {
     public info = { imagesUrls: [], urls: [] } as EditablePublicPointData;
     public isLoading: boolean = true;
+    public isMinimized: boolean = false;
     public showLocationUpdate: boolean = false;
     public updateLocation: boolean = false;
     public sourceImageUrls: SourceImageUrlPair[];
