@@ -4,6 +4,7 @@ import { firstValueFrom, timeout } from "rxjs";
 import { addProtocol } from "maplibre-gl";
 import osmtogeojson from "osm2geojson-lite";
 import { SpatialService } from "./spatial.service";
+import { Urls } from "application/urls";
 
 @Injectable()
 export class OverpassTurboService {
@@ -20,14 +21,22 @@ export class OverpassTurboService {
     }
 
     public async getFeature(type: string, id: string): Promise<GeoJSON.Feature> {
-        const query = `${type}(${id});`;
-        return await this.getFeatureFromQuery(query, 6000);
+        const address = Urls.osmApi + type + "/" + id + (type !== "node" ? "/full" : "") + ".json";
+        const content = await firstValueFrom(this.httpClient.get(address).pipe(timeout(6000))) as unknown;
+        return this.processFeature(content);
     }
 
     private async getFeatureFromQuery(query: string, timeoutInMilliseconds = 2000): Promise<GeoJSON.Feature> {
         try {
             const json = await firstValueFrom(this.httpClient.post(OverpassTurboService.OVERPASS_API_URL, `[out: json];${query}out geom;`).pipe(timeout(timeoutInMilliseconds))) as unknown;
-            const geojson = osmtogeojson(json, {completeFeature: true, excludeWay: false}) as GeoJSON.FeatureCollection;
+            return this.processFeature(json);
+        } catch {
+            return null;
+        }
+    }
+
+    private processFeature(content: Parameters<typeof osmtogeojson>[0]): GeoJSON.Feature {
+        const geojson = osmtogeojson(content, {completeFeature: true, excludeWay: false}) as GeoJSON.FeatureCollection;
             if (geojson.features.length === 1 && geojson.features[0].geometry.type !== "MultiLineString") {
                 return geojson.features[0];
             }
@@ -41,9 +50,6 @@ export class OverpassTurboService {
                 return geojson.features[0];
             }
             return geojson.features[0];
-        } catch {
-            return null;
-        }
     }
 
     public async getLongWay(id: string, name: string, isWaterway: boolean, isMtbRoute: boolean): Promise<GeoJSON.Feature> {

@@ -87,7 +87,7 @@ describe("ImageAttributionService", () => {
 
     it("should fetch attribution from wikimedia when getting wikimedia image with permissive license and no author or attribution", inject([ImageAttributionService, HttpTestingController],
         async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-        const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
+        const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Some_Image.jpeg");
         mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
             query: {
                 pages: {
@@ -108,7 +108,7 @@ describe("ImageAttributionService", () => {
 
         expect(response).not.toBeNull();
         expect(response.author).toBe("Unknown");
-        expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:IHM_Image.jpeg");
+        expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:Some_Image.jpeg");
     }));
 
     it("should fetch data from wikimedia when getting wikimedia file", inject([ImageAttributionService, HttpTestingController],
@@ -226,7 +226,29 @@ describe("ImageAttributionService", () => {
         expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:IHM_Image.jpeg");
     }));
 
-    it("should return null when getting wikimedia image without artist", inject([ImageAttributionService, HttpTestingController],
+    it("should return null when getting wikimedia image without artist and license", inject([ImageAttributionService, HttpTestingController],
+        async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
+        const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/something_else.jpeg");
+        mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
+            query: {
+                pages: {
+                    "-1": {
+                        imageinfo: [{
+                            extmetadata: {
+                                somthing: {},
+                            }
+                        }]
+                    }
+                }
+            }
+        });
+
+        const response = await promise;
+
+        expect(response).toBeNull();
+    }));
+
+    it("should return unknown when getting wikimedia image without artist and license with IHM_ prefix", inject([ImageAttributionService, HttpTestingController],
         async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
         const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
         mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
@@ -245,6 +267,7 @@ describe("ImageAttributionService", () => {
 
         const response = await promise;
 
-        expect(response).toBeNull();
+        expect(response).toBeDefined();
+        expect(response.author).toBe("Unknown");
     }));
 });

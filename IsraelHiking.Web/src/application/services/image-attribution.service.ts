@@ -66,7 +66,7 @@ export class ImageAttributionService {
                 return imageAttribution;
             }
             const licenseLower = extmetadata?.LicenseShortName?.value.toLowerCase() || "";
-            if ((licenseLower.includes("cc") && !licenseLower.includes("nc")) || licenseLower.includes("public domain")) {
+            if ((licenseLower.includes("cc") && !licenseLower.includes("nc")) || licenseLower.includes("public domain") || imageName.startsWith("IHM_")) {
                 return {
                     author: "Unknown",
                     url: `${wikiPrefix}wiki/File:${imageName}`
