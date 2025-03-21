@@ -2,6 +2,7 @@ import { inject, TestBed } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { OverpassTurboService } from "./overpass-turbo.service";
+import { Urls } from "application/urls";
 
 describe("OverpassTurboService", () => {
     beforeEach(() => {
@@ -34,7 +35,7 @@ describe("OverpassTurboService", () => {
             }]
         };
         const promise = service.getFeature("way", "42");
-        mockBackend.expectOne("https://overpass-api.de/api/interpreter").flush(response);
+        mockBackend.expectOne(r => r.url.startsWith(Urls.osmApi)).flush(response);
         const results = await promise;
         expect(results.geometry.type).toBe("LineString");
     }));
@@ -76,7 +77,7 @@ describe("OverpassTurboService", () => {
             }]
         };
         const promise = service.getFeature("way", "42");
-        mockBackend.expectOne("https://overpass-api.de/api/interpreter").flush(response);
+        mockBackend.expectOne(r => r.url.startsWith(Urls.osmApi)).flush(response);
         const results = await promise;
         expect(results.geometry.type).toBe("LineString");
     }));
