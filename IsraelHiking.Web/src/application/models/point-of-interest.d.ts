@@ -1,9 +1,4 @@
 ﻿import type { LatLngAlt } from "./models";
-export type Contribution = {
-    userName: string;
-    userAddress: string;
-    lastModifiedDate: Date;
-};
 
 export type SearchResultsPointOfInterest = {
     icon: string;

@@ -14,7 +14,6 @@ import { Router, NavigationEnd } from "@angular/router";
 import { Angulartics2OnModule } from "angulartics2";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { filter, skip } from "rxjs";
-import { cloneDeep } from "lodash-es";
 import { Store } from "@ngxs/store";
 
 import { PublicPointOfInterestEditComponent } from "./public-poi-edit.component";
@@ -36,14 +35,13 @@ import { OsmAddressesService } from "../../../services/osm-addresses.service";
 import { ElevationProvider } from "../../../services/elevation.provider";
 import { GeoJsonParser } from "../../../services/geojson.parser";
 import { AddRouteAction, AddPrivatePoiAction } from "../../../reducers/routes.reducer";
-import { SetSelectedPoiAction, SetUploadMarkerDataAction } from "../../../reducers/poi.reducer";
+import { SetSelectedPoiAction } from "../../../reducers/poi.reducer";
 import { GeoJSONUtils } from "../../../services/geojson-utils";
 import type {
     LinkData,
     LatLngAlt,
     ApplicationState,
     EditablePublicPointData,
-    Contribution,
     LatLngAltTime
 } from "../../../models/models";
 
@@ -68,7 +66,6 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     public sourceImageUrls: SourceImageUrlPair[];
     public latlng: LatLngAlt;
     public shareLinks = {} as PoiSocialLinks;
-    public contribution = {} as Contribution;
 
     private editMode: boolean;
     private fullFeature: GeoJSON.Feature;
@@ -144,32 +141,27 @@ export class PublicPoiSidebarComponent implements OnDestroy {
 
     private async fillUiWithData(data: PoiRouteUrlInfo) {
         try {
-            if (data.source === "new") {
-                const newFeature = {
-                    id: "",
-                    type: "Feature",
-                    properties: {
-                        poiSource: "OSM",
-                        poiId: "",
-                        identifier: ""
-                    },
-                    geometry: {
-                        type: "Point",
-                        coordinates: [0, 0]
-                    }
-                } as GeoJSON.Feature;
-                await this.mergeDataIfNeededData(newFeature);
-            } else {
-                const feature = await this.poiService.getPoint(data.id, data.source, data.language);
-                const originalFeature = cloneDeep(feature);
-                await this.mergeDataIfNeededData(feature);
-                const bounds = SpatialService.getBoundsForFeature(feature);
-                this.fitBoundsService.fitBounds(bounds);
-                this.store.dispatch(new SetSelectedPoiAction(originalFeature));
-                if (data.source === RouteStrings.COORDINATES) {
-                    this.fullFeature = null;
-                    this.close();
+            const feature = await this.poiService.getBasicInfo(data.id, data.source, data.language);
+            if (this.getRouteUrlInfo().id !== data.id) {
+                return;
+            }
+            await this.initFromFeature(feature);
+            if (data.source === "OSM") {
+                const uploadMarkerData = this.store.selectSnapshot((s: ApplicationState) => s.poiState).uploadMarkerData;
+                if (feature.geometry.type === "Point" && uploadMarkerData != null) {
+                    this.showLocationUpdate = true;
                 }
+                await this.poiService.updateExtendedInfo(feature);
+                if (this.getRouteUrlInfo().id !== data.id) {
+                    return;
+                }
+                await this.initFromFeature(feature);
+            }
+            const bounds = SpatialService.getBoundsForFeature(feature);
+            this.fitBoundsService.fitBounds(bounds);
+            if (data.source === RouteStrings.COORDINATES) {
+                this.fullFeature = null;
+                this.close();
             }
         } catch {
             this.toastService.warning(this.resources.unableToFindPoi);
@@ -179,24 +171,11 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         }
     }
 
-    private async mergeDataIfNeededData(feature: GeoJSON.Feature) {
-        const uploadMarkerData = this.store.selectSnapshot((s: ApplicationState) => s.poiState).uploadMarkerData;
-        if (uploadMarkerData != null) {
-            this.poiService.mergeWithPoi(feature, uploadMarkerData);
-            this.store.dispatch(new SetUploadMarkerDataAction(null));
-            if (this.poiService.getFeatureId(feature) && feature.geometry.type === "Point") {
-                this.showLocationUpdate = true;
-            }
-        }
-        await this.initFromFeature(feature);
-    }
-
     private async initFromFeature(feature: GeoJSON.Feature) {
         this.fullFeature = feature;
         this.latlng = GeoJSONUtils.getLocation(feature);
         this.sourceImageUrls = this.getSourceImageUrls(feature);
         this.shareLinks = this.poiService.getPoiSocialLinks(feature);
-        this.contribution = this.poiService.getContribution(feature);
         this.info = await this.poiService.getEditableDataFromFeature(feature);
         const language = this.resources.getCurrentLanguageCodeSimplified();
         this.titleService.set(GeoJSONUtils.getTitle(feature, language));
