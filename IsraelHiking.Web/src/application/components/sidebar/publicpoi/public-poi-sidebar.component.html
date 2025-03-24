@@ -36,10 +36,12 @@
             <button mat-button class="w-full min-w-unset !p-0" (click)="isMinimized = !isMinimized" matTooltip="{{resources.restore}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Restore POI window"><i class="fa icon-chevron-up"></i></button>
         </div>
         <div class="flex-1">
-            <button mat-button class="w-full min-w-unset !p-0" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below"><i class="fa icon-close"></i></button>
+            <button mat-button class="w-full min-w-unset !p-0" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below">
+                <i class="fa icon-close" *ngIf="!isLoading"></i>
+                <mat-spinner diameter="24" *ngIf="isLoading"></mat-spinner>    
+            </button>
         </div>
     </div>
-    <mat-spinner *ngIf="isLoading"></mat-spinner>
     <div *ngIf="isEditMode()">
         <mat-card appearance="outlined" class="mat-elevation-z0">
             <public-poi-edit [info]="info"></public-poi-edit>
