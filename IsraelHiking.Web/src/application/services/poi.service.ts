@@ -472,9 +472,6 @@ export class PoiService {
         if (itemInCache) {
             return cloneDeep(itemInCache);
         }
-        if (source === RouteStrings.COORDINATES) {
-            return this.getFeatureFromCoordinatesId(id, language);
-        }
         try {
             switch (source) {
                 case "new": {
@@ -505,12 +502,22 @@ export class PoiService {
                 case "iNature": {
                     const poi = await this.iNatureService.createFeatureFromPageId(id);
                     this.poisCache.splice(0, 0, poi);
-                    return cloneDeep(poi);
+                    const clone = cloneDeep(poi);
+                    this.store.dispatch(new SetSelectedPoiAction(clone));
+                    return clone;
                 }
                 case "Wikidata": {
                     const poi = await this.wikidataService.createFeatureFromPageId(id, language);
                     this.poisCache.splice(0, 0, poi);
-                    return cloneDeep(poi);
+                    const clone = cloneDeep(poi);
+                    this.store.dispatch(new SetSelectedPoiAction(clone));
+                    return clone;
+                }
+                case RouteStrings.COORDINATES: {
+                    const poi = this.getFeatureFromCoordinatesId(id, language);
+                    const clone = cloneDeep(poi);
+                    this.store.dispatch(new SetSelectedPoiAction(clone));
+                    return clone;
                 }
                 default: { 
                     const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());

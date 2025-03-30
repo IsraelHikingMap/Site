@@ -334,25 +334,27 @@ describe("Poi Service", () => {
         }
     )));
 
-    it("Should get a point by id and source from iNature", (inject([PoiService],
-        async (poiService: PoiService) => {
-
+    it("Should get a point by id and source from iNature", (inject([PoiService, Store],
+        async (poiService: PoiService, store: Store) => {
+            store.dispatch = jasmine.createSpy();
             const id = "42";
             const source = "iNature";
 
             const feature = await poiService.getBasicInfo(id, source);
             expect(feature).not.toBeNull();
+            expect(store.dispatch).toHaveBeenCalled();
         }
     )));
 
-    it("Should get a point by id and source from Wikidata", (inject([PoiService],
-        async (poiService: PoiService) => {
-
+    it("Should get a point by id and source from Wikidata", (inject([PoiService, Store],
+        async (poiService: PoiService, store: Store) => {
+            store.dispatch = jasmine.createSpy();
             const id = "42";
             const source = "Wikidata";
 
             const feature = await poiService.getBasicInfo(id, source);
             expect(feature).not.toBeNull();
+            expect(store.dispatch).toHaveBeenCalled();
         }
     )));
 
@@ -514,10 +516,14 @@ describe("Poi Service", () => {
         }
     )));
 
-    it("Should get coordinates basic info", inject([PoiService], async (service: PoiService) => {
+    it("Should get coordinates basic info", inject([PoiService, Store], async (service: PoiService, store: Store) => {
+        store.dispatch = jasmine.createSpy();
+
         const coordinatesFeature = await service.getBasicInfo("1_2", RouteStrings.COORDINATES, "he");
+        
         expect(coordinatesFeature.geometry.type).toBe("Point");
         expect((coordinatesFeature.geometry as GeoJSON.Point).coordinates).toEqual([2, 1]);
+        expect(store.dispatch).toHaveBeenCalled();
     }));
 
     it("Should create simple point",
