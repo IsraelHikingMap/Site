@@ -121,6 +121,8 @@ import { GpsReducer } from "./application/reducers/gps.reducer";
 import { OfflineReducer } from "./application/reducers/offline.reducer";
 import { UIComponentsReducer } from "./application/reducers/ui-components.reducer";
 
+alert("Starting the app! before bootstrapApplication.");
+
 // See https://github.com/ionic-team/capacitor/issues/1564
 export class FileReaderFixForCapacitor extends FileReader {
 	constructor() {
