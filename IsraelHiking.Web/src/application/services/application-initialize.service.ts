@@ -61,20 +61,33 @@ export class ApplicationInitializeService {
 
     public async initialize() {
         try {
+            alert("1");
             this.angulartics.startTracking();
+            alert("2");
             await this.loggingService.initialize();
+            alert("3");
             await this.loggingService.info("---------------------------------------");
             await this.loggingService.info("Starting IHM Application Initialization");
             await this.databaseService.initialize();
+            alert("4");
             this.overpassTurboService.initialize();
+            alert("5");
             this.screenService.initialize();
+            alert("6");
             await this.resources.initialize();
+            alert("7");
             this.applicationExitService.initialize();
+            alert("8");
             await this.applicationUpdateService.initialize();
+            alert("9");
             this.openWithService.initialize();
+            alert("10");
             await this.purchaseService.initialize();
+            alert("11");
             this.geoLocationService.initialize();
+            alert("12");
             this.hashService.initialize();
+            alert("13");
             this.dragAndDropService.initialize();
             if (this.runningContextService.isMobile
                 && !this.runningContextService.isCapacitor
