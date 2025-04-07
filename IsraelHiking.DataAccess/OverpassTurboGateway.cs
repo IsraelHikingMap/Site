@@ -11,9 +11,10 @@ using System.Threading.Tasks;
 using IsraelHiking.Common.Configuration;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Geometries;
+using OsmSharp;
 using OsmSharp.Complete;
+using OsmSharp.Db.Impl;
 using OsmSharp.Streams;
-using OsmSharp.Streams.Complete;
 
 namespace IsraelHiking.DataAccess;
 
@@ -69,13 +70,16 @@ public class OverpassTurboGateway(
 
     public async Task<List<CompleteWay>> GetHighways(Coordinate northEast, Coordinate southWest)
     {
-        var response = await GetQueryResponse($"[out:xml];\nway[\"highway\"][!\"construction\"]({southWest.Y},{southWest.X},{northEast.Y},{northEast.X});\n(._;>;);\nout;");
+        var query = $"[out:xml];\nway[\"highway\"][!\"construction\"]({southWest.Y},{southWest.X},{northEast.Y},{northEast.X});\nout meta;\n(._;>;);\nout;";
+        var response = await GetQueryResponse(query);
 
         using MemoryStream memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(response));
         var source = new XmlOsmStreamSource(memoryStream);
-        var completeSource = new OsmSimpleCompleteStreamSource(source);
-
-        return completeSource.OfType<CompleteWay>().ToList();
+        
+        var db = new MemorySnapshotDb().CreateSnapshotDb();
+        var list = source.ToList();
+        db.AddOrUpdate(list);
+        return list.OfType<Way>().Select(w => w.CreateComplete(db)).ToList();
     }
 
     public async Task<List<string>> GetImagesUrls()

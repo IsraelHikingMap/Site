@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Linq;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using System.Net.Http;
@@ -30,6 +31,7 @@ public class OverpassTurboGatewayTests
     {
         var list = _gateway.GetHighways(new Coordinate(35.11, 32.11), new Coordinate(35.1,32.1)).Result;
         Assert.IsTrue(list.Count > 0);
+        Assert.IsNotNull(list.First().Version);
     }
     
     [TestMethod]
