@@ -17,7 +17,7 @@ public static class RegisterDataAccess
         services.AddTransient<IImageCreationGateway, ImageCreationGateway>();
         services.AddSingleton<ElasticSearchGateway, ElasticSearchGateway>();
         services.AddSingleton<IPointsOfInterestRepository>(x => x.GetService<ElasticSearchGateway>());
-        services.AddSingleton<IHighwaysRepository>(x => x.GetService<ElasticSearchGateway>());
+        services.AddSingleton<IHighwaysRepository>(x => x.GetService<OverpassTurboGateway>());
         services.AddSingleton<IShareUrlsRepository>(x => x.GetService<ElasticSearchGateway>());
         services.AddSingleton<ISearchRepository>(x => x.GetService<ElasticSearchGateway>());
         services.AddSingleton<IUserLayersRepository>(x => x.GetService<ElasticSearchGateway>());

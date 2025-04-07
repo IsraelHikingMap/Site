@@ -18,8 +18,6 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
 {
     private readonly IExternalSourcesRepository _externalSourcesRepository;
     private readonly IPointsOfInterestRepository _pointsOfInterestRepository;
-    private readonly IHighwaysRepository _highwaysRepository;
-    private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
     private readonly IOsmRepository _osmRepository;
     private readonly IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
     private readonly IOsmLatestFileGateway _osmLatestFileGateway;
@@ -27,6 +25,7 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
     private readonly IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
     private readonly IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
     private readonly IElevationSetterExecutor _elevationSetterExecutor;
+    private readonly IOverpassTurboGateway _overpassTurboGateway;
     private readonly ILogger _logger;
 
     /// <summary>
@@ -34,8 +33,6 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
     /// </summary>
     /// <param name="externalSourcesRepository"></param>
     /// <param name="pointsOfInterestRepository"></param>
-    /// <param name="highwaysRepository"></param>
-    /// <param name="osmGeoJsonPreprocessorExecutor"></param>
     /// <param name="osmRepository"></param>
     /// <param name="pointsOfInterestAdapterFactory"></param>
     /// <param name="latestFileGateway"></param>
@@ -43,11 +40,10 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
     /// <param name="imagesUrlsStorageExecutor"></param>
     /// <param name="externalSourceUpdaterExecutor"></param>
     /// <param name="elevationSetterExecutor"></param>
+    /// <param name="overpassTurboGateway"></param>
     /// <param name="logger"></param>
     public DatabasesUpdaterService(IExternalSourcesRepository externalSourcesRepository,
-        IPointsOfInterestRepository pointsOfInterestRepository,
-        IHighwaysRepository highwaysRepository,
-        IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor, 
+        IPointsOfInterestRepository pointsOfInterestRepository, 
         IOsmRepository osmRepository,
         IPointsOfInterestAdapterFactory pointsOfInterestAdapterFactory,
         IOsmLatestFileGateway latestFileGateway,
@@ -55,12 +51,11 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
         IImagesUrlsStorageExecutor imagesUrlsStorageExecutor,
         IExternalSourceUpdaterExecutor externalSourceUpdaterExecutor,
         IElevationSetterExecutor elevationSetterExecutor,
+        IOverpassTurboGateway overpassTurboGateway,
         ILogger logger)
     {
         _externalSourcesRepository = externalSourcesRepository;
         _pointsOfInterestRepository = pointsOfInterestRepository;
-        _highwaysRepository = highwaysRepository;
-        _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
         _osmRepository = osmRepository;
         _pointsOfInterestAdapterFactory = pointsOfInterestAdapterFactory;
         _pointsOfInterestFilesCreatorExecutor = pointsOfInterestFilesCreatorExecutor;
@@ -68,6 +63,7 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
         _imagesUrlsStorageExecutor = imagesUrlsStorageExecutor;
         _externalSourceUpdaterExecutor = externalSourceUpdaterExecutor;
         _elevationSetterExecutor = elevationSetterExecutor;
+        _overpassTurboGateway = overpassTurboGateway;
         _logger = logger;
     }
 
@@ -86,10 +82,6 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
             if (request.AllExternalSources)
             {
                 await UpdateExternalSources();
-            }
-            if (request.Highways)
-            {
-                await RebuildHighways();
             }
             if (request.Images)
             {
@@ -115,17 +107,6 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
             await _pointsOfInterestRepository.StoreRebuildContext(rebuildContext);
         }
             
-    }
-
-    private async Task RebuildHighways()
-    {
-        _logger.LogInformation("Starting rebuilding highways database.");
-        await using var stream = await _osmLatestFileGateway.Get();
-        var osmHighways = await _osmRepository.GetAllHighways(stream);
-        var geoJsonHighways = _osmGeoJsonPreprocessorExecutor.Preprocess(osmHighways);
-        await _highwaysRepository.UpdateHighwaysZeroDownTime(geoJsonHighways);
-
-        _logger.LogInformation("Finished rebuilding highways database.");
     }
 
     private async Task RebuildImages()
@@ -155,7 +136,7 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
     {
         _logger.LogInformation($"Starting rebuilding offline files.");
         await using var stream = await _osmLatestFileGateway.Get();
-        var references = await _osmRepository.GetExternalReferences(stream);
+        var references = await _overpassTurboGateway.GetExternalReferences();
         var sources = _pointsOfInterestAdapterFactory.GetAll().Select(s => s.Source);
         var externalFeatures = new List<IFeature>();
         foreach (var source in sources)

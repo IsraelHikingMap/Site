@@ -15,6 +15,10 @@ using OsmSharp.IO.API;
 using OsmSharp.Tags;
 using System.Collections.Generic;
 using System.Linq;
+using IsraelHiking.API.Converters;
+using IsraelHiking.API.Services;
+using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.API.Tests.Services.Osm;
 
@@ -29,7 +33,6 @@ public class OsmLineAdderServiceTests
     public void TestInitialize()
     {
         _highwaysRepository = Substitute.For<IHighwaysRepository>();
-        var geoJsonPreProcessor = Substitute.For<IOsmGeoJsonPreprocessorExecutor>();
         _clientsFactory = Substitute.For<IClientsFactory>();
         var options = new ConfigurationData
         {
@@ -38,7 +41,7 @@ public class OsmLineAdderServiceTests
         };
         var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
         optionsProvider.Value.Returns(options);
-            
+        var geoJsonPreProcessor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), Substitute.For<IElevationGateway>(), new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper(optionsProvider));
         _service = new OsmLineAdderService(_highwaysRepository, new ItmWgs84MathTransformFactory(), optionsProvider, geoJsonPreProcessor, new GeometryFactory());
     }
 
@@ -52,19 +55,12 @@ public class OsmLineAdderServiceTests
 
     private void SetupHighway(int wayId, Coordinate[] coordinates, IAuthClient osmGateway)
     {
-        var osmCompleteWay = new CompleteWay { Id = wayId };
+        var osmCompleteWay = new CompleteWay { Id = wayId, Tags = new TagsCollection{{"highway", "something"}}};
         var id = 1;
         osmCompleteWay.Nodes = coordinates.Select(coordinate => new Node { Id = id++, Latitude = coordinate.Y, Longitude = coordinate.X }).ToArray();
         osmGateway.GetCompleteWay(wayId).Returns(osmCompleteWay);
         osmGateway.GetWay(wayId).Returns(osmCompleteWay.ToSimple() as Way);
-        var table = new AttributesTable
-        {
-            {FeatureAttributes.ID, wayId.ToString()},
-            {FeatureAttributes.POI_OSM_NODES, osmCompleteWay.Nodes.Select(n => n.Id.Value).Cast<object>().ToList()}
-        };
-        _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([
-            new Feature(new LineString(coordinates), table)
-        ]);
+        _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([osmCompleteWay]);
     }
 
     [TestMethod]

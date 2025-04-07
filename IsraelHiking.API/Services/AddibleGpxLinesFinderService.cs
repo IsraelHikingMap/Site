@@ -1,6 +1,5 @@
 ﻿using IsraelHiking.API.Executors;
 using IsraelHiking.Common.Configuration;
-using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -12,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using IsraelHiking.Common.Extensions;
 
 namespace IsraelHiking.API.Services;
 
@@ -20,6 +20,7 @@ public class AddibleGpxLinesFinderService : IAddibleGpxLinesFinderService
 {
     private readonly IGpxLoopsSplitterExecutor _gpxLoopsSplitterExecutor;
     private readonly IGpxProlongerExecutor _gpxProlongerExecutor;
+    private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
     private readonly MathTransform _itmWgs84MathTransform;
     private readonly MathTransform _wgs84ItmMathTransform;
     private readonly IHighwaysRepository _highwaysRepository;
@@ -36,6 +37,7 @@ public class AddibleGpxLinesFinderService : IAddibleGpxLinesFinderService
     /// <param name="highwaysRepository"></param>
     /// <param name="options"></param>
     /// <param name="geometryFactory"></param>
+    /// <param name="osmGeoJsonPreprocessorExecutor"></param>
     /// <param name="logger"></param>
     public AddibleGpxLinesFinderService(IGpxLoopsSplitterExecutor gpxLoopsSplitterExecutor,
         IGpxProlongerExecutor gpxProlongerExecutor,
@@ -43,6 +45,7 @@ public class AddibleGpxLinesFinderService : IAddibleGpxLinesFinderService
         IHighwaysRepository highwaysRepository,
         IOptions<ConfigurationData> options,
         GeometryFactory geometryFactory,
+        IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
         ILogger logger)
     {
         _gpxLoopsSplitterExecutor = gpxLoopsSplitterExecutor;
@@ -52,6 +55,7 @@ public class AddibleGpxLinesFinderService : IAddibleGpxLinesFinderService
         _highwaysRepository = highwaysRepository;
         _geometryFactory = geometryFactory;
         _logger = logger;
+        _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
         _options = options.Value;
     }
 
@@ -289,7 +293,8 @@ public class AddibleGpxLinesFinderService : IAddibleGpxLinesFinderService
     {
         var northEast = _itmWgs84MathTransform.Transform(gpxItmLine.Coordinates.Max(c => c.X) + tolerance, gpxItmLine.Coordinates.Max(c => c.Y) + tolerance);
         var southWest = _itmWgs84MathTransform.Transform(gpxItmLine.Coordinates.Min(c => c.X) - tolerance, gpxItmLine.Coordinates.Min(c => c.Y) - tolerance);
-        var highways = await _highwaysRepository.GetHighways(new Coordinate(northEast.x, northEast.y), new Coordinate(southWest.x, southWest.y));
+        var ways = await _highwaysRepository.GetHighways(new Coordinate(northEast.x, northEast.y), new Coordinate(southWest.x, southWest.y));
+        var highways = _osmGeoJsonPreprocessorExecutor.Preprocess(ways);
         return highways.Select(highway => ToItmLineString(highway.Geometry.Coordinates, highway.GetOsmId())).ToList();
     }
 
