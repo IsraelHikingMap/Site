@@ -2,7 +2,6 @@
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
-using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -14,13 +13,14 @@ using ProjNet.CoordinateSystems.Transformations;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.API.Services.Osm;
 
 /// <inheritdoc/>
 public class OsmLineAdderService : IOsmLineAdderService
 {
-    private readonly IHighwaysRepository _highwaysRepository;
+    private readonly IOverpassTurboGateway _overpassTurboGateway;
     private readonly MathTransform _itmWgs84MathTransform;
     private readonly MathTransform _wgs84ItmMathTransform;
     private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
@@ -32,18 +32,18 @@ public class OsmLineAdderService : IOsmLineAdderService
     /// <summary>
     /// Constructor
     /// </summary>
-    /// <param name="highwaysRepository"></param>
+    /// <param name="overpassTurboGateway"></param>
     /// <param name="itmWgs84MathTransformFactory"></param>
     /// <param name="options"></param>
     /// <param name="osmGeoJsonPreprocessorExecutor"></param>
     /// <param name="geometryFactory"></param>
-    public OsmLineAdderService(IHighwaysRepository highwaysRepository,
+    public OsmLineAdderService(IOverpassTurboGateway overpassTurboGateway,
         IItmWgs84MathTransformFactory itmWgs84MathTransformFactory,
         IOptions<ConfigurationData> options,
         IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
         GeometryFactory geometryFactory)
     {
-        _highwaysRepository = highwaysRepository;
+        _overpassTurboGateway = overpassTurboGateway;
         _itmWgs84MathTransform = itmWgs84MathTransformFactory.Create();
         _wgs84ItmMathTransform = itmWgs84MathTransformFactory.CreateInverse();
         _options = options.Value;
@@ -246,7 +246,7 @@ public class OsmLineAdderService : IOsmLineAdderService
         var northEastLatLon = _itmWgs84MathTransform.Transform(northEast.x, northEast.y);
         var southWestLatLon = _itmWgs84MathTransform.Transform(southWest.x, southWest.y);
 
-        var ways = await _highwaysRepository.GetHighways(new Coordinate(northEastLatLon.x, northEastLatLon.y), 
+        var ways = await _overpassTurboGateway.GetHighways(new Coordinate(northEastLatLon.x, northEastLatLon.y), 
             new Coordinate(southWestLatLon.x, southWestLatLon.y));
         var highways = _osmGeoJsonPreprocessorExecutor.Preprocess(ways);
         return highways.ToList();

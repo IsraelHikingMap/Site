@@ -1,7 +1,6 @@
 ﻿using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common.Configuration;
-using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,7 +20,7 @@ namespace IsraelHiking.API.Tests.Services;
 public class AddibleGpxLinesFinderServiceTests
 {
     private IAddibleGpxLinesFinderService _service;
-    private IHighwaysRepository _highwaysRepository;
+    private IOverpassTurboGateway _overpassTurboGateway;
     private ConfigurationData _options;
 
     private void SetupHighways(List<Coordinate[]> lines = null)
@@ -43,13 +42,13 @@ public class AddibleGpxLinesFinderServiceTests
             };
             return way;
         }).ToList();
-        _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(ways);
+        _overpassTurboGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(ways);
     }
 
     [TestInitialize]
     public void TestInitialize()
     {
-        _highwaysRepository = Substitute.For<IHighwaysRepository>();
+        _overpassTurboGateway = Substitute.For<IOverpassTurboGateway>();
         _options = new ConfigurationData
         {
             MinimalProlongLineLength = 0
@@ -61,7 +60,7 @@ public class AddibleGpxLinesFinderServiceTests
             new GpxLoopsSplitterExecutor(geometryFactory), 
             new GpxProlongerExecutor(geometryFactory), 
             new ItmWgs84MathTransformFactory(), 
-            _highwaysRepository, 
+            _overpassTurboGateway, 
             optionsProvider, 
             geometryFactory,
             new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), Substitute.For<IElevationGateway>(), new OsmGeoJsonConverter(geometryFactory), new TagsHelper(optionsProvider)),

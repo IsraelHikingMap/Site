@@ -2,7 +2,6 @@
 using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
-using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -27,7 +26,7 @@ public class SimplePointAdderExecutorTests
 {
     ISimplePointAdderExecutor _executor;
     IAuthClient _authClient;
-    IHighwaysRepository _highwaysRepository;
+    IOverpassTurboGateway _overpassTurboGateway;
 
     private void SetupHighways(List<Coordinate[]> lines)
     {
@@ -51,7 +50,7 @@ public class SimplePointAdderExecutorTests
             return osmCompleteWay;
         }).ToList();
         
-        _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(ways);
+        _overpassTurboGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(ways);
     }
     
     [TestInitialize]
@@ -61,10 +60,10 @@ public class SimplePointAdderExecutorTests
         var configurationDate = new ConfigurationData();
         var options = Substitute.For<IOptions<ConfigurationData>>();
         options.Value.Returns(configurationDate);
-        _highwaysRepository = Substitute.For<IHighwaysRepository>();
+        _overpassTurboGateway = Substitute.For<IOverpassTurboGateway>();
         
         _executor = new SimplePointAdderExecutor(options, 
-            _highwaysRepository, new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), Substitute.For<IElevationGateway>(), new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper(options)), 
+            _overpassTurboGateway, new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), Substitute.For<IElevationGateway>(), new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper(options)), 
             Substitute.For<ILogger>());
     }
 
@@ -117,7 +116,7 @@ public class SimplePointAdderExecutorTests
     [TestMethod]
     public void AddGate_NearNoWhere_ShouldSucceed()
     {
-        _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([]);
+        _overpassTurboGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([]);
             
         _executor.Add(_authClient, new AddSimplePointOfInterestRequest
         {
@@ -152,7 +151,7 @@ public class SimplePointAdderExecutorTests
             _authClient.GetNode(node.Id!.Value).Returns(node);
         }
         
-        _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([osmCompleteWay]);
+        _overpassTurboGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([osmCompleteWay]);
         
         _executor.Add(_authClient, new AddSimplePointOfInterestRequest
         {
@@ -275,7 +274,7 @@ public class SimplePointAdderExecutorTests
         };
         _authClient.GetCompleteWay(osmCompleteWay2.Id).Returns(osmCompleteWay2);
         _authClient.GetWay(osmCompleteWay2.Id).Returns(osmCompleteWay2.ToSimple() as Way);
-        _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([osmCompleteWay1, osmCompleteWay2]);
+        _overpassTurboGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([osmCompleteWay1, osmCompleteWay2]);
 
         _executor.Add(_authClient, new AddSimplePointOfInterestRequest
         {
@@ -359,7 +358,7 @@ public class SimplePointAdderExecutorTests
         };
         _authClient.GetCompleteWay(osmCompleteWay2.Id).Returns(osmCompleteWay2);
         _authClient.GetWay(osmCompleteWay2.Id).Returns(osmCompleteWay2.ToSimple() as Way);
-        _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([osmCompleteWay1, osmCompleteWay2]);
+        _overpassTurboGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([osmCompleteWay1, osmCompleteWay2]);
 
         _executor.Add(_authClient, new AddSimplePointOfInterestRequest
         {
@@ -397,7 +396,7 @@ public class SimplePointAdderExecutorTests
             Version = 1,
             Nodes = [nodes[0], nodes[2], nodes[3]]
         };
-        _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([osmCompleteWay]);
+        _overpassTurboGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([osmCompleteWay]);
         var osmUpdatedWay = new CompleteWay
         {
             Id = osmCompleteWay.Id, 

@@ -1,11 +1,8 @@
 ﻿using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Osm;
-using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
-using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
 using OsmSharp;
@@ -26,13 +23,13 @@ namespace IsraelHiking.API.Tests.Services.Osm;
 public class OsmLineAdderServiceTests
 {
     private IOsmLineAdderService _service;
-    private IHighwaysRepository _highwaysRepository;
+    private IOverpassTurboGateway _overpassTurboGateway;
     private IClientsFactory _clientsFactory;
 
     [TestInitialize]
     public void TestInitialize()
     {
-        _highwaysRepository = Substitute.For<IHighwaysRepository>();
+        _overpassTurboGateway = Substitute.For<IOverpassTurboGateway>();
         _clientsFactory = Substitute.For<IClientsFactory>();
         var options = new ConfigurationData
         {
@@ -42,7 +39,7 @@ public class OsmLineAdderServiceTests
         var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
         optionsProvider.Value.Returns(options);
         var geoJsonPreProcessor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), Substitute.For<IElevationGateway>(), new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper(optionsProvider));
-        _service = new OsmLineAdderService(_highwaysRepository, new ItmWgs84MathTransformFactory(), optionsProvider, geoJsonPreProcessor, new GeometryFactory());
+        _service = new OsmLineAdderService(_overpassTurboGateway, new ItmWgs84MathTransformFactory(), optionsProvider, geoJsonPreProcessor, new GeometryFactory());
     }
 
     private IAuthClient SetupOsmGateway(long changesetId)
@@ -60,7 +57,7 @@ public class OsmLineAdderServiceTests
         osmCompleteWay.Nodes = coordinates.Select(coordinate => new Node { Id = id++, Latitude = coordinate.Y, Longitude = coordinate.X }).ToArray();
         osmGateway.GetCompleteWay(wayId).Returns(osmCompleteWay);
         osmGateway.GetWay(wayId).Returns(osmCompleteWay.ToSimple() as Way);
-        _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([osmCompleteWay]);
+        _overpassTurboGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([osmCompleteWay]);
     }
 
     [TestMethod]
@@ -68,7 +65,7 @@ public class OsmLineAdderServiceTests
     {
         long changesetId = 1;
         var osmGateway = SetupOsmGateway(changesetId);
-        _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([]);
+        _overpassTurboGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([]);
         osmGateway.UploadChangeset(changesetId, Arg.Any<OsmChange>()).Returns(new DiffResult { Results = []});
         var tags = new Dictionary<string, string>
         {

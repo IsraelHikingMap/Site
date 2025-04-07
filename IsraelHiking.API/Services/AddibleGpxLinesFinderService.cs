@@ -1,6 +1,5 @@
 ﻿using IsraelHiking.API.Executors;
 using IsraelHiking.Common.Configuration;
-using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Geometries;
@@ -12,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using IsraelHiking.Common.Extensions;
+using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.API.Services;
 
@@ -23,7 +23,7 @@ public class AddibleGpxLinesFinderService : IAddibleGpxLinesFinderService
     private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
     private readonly MathTransform _itmWgs84MathTransform;
     private readonly MathTransform _wgs84ItmMathTransform;
-    private readonly IHighwaysRepository _highwaysRepository;
+    private readonly IOverpassTurboGateway _overpassGateway;
     private readonly GeometryFactory _geometryFactory;
     private readonly ILogger _logger;
     private readonly ConfigurationData _options;
@@ -34,7 +34,7 @@ public class AddibleGpxLinesFinderService : IAddibleGpxLinesFinderService
     /// <param name="gpxLoopsSplitterExecutor"></param>
     /// <param name="gpxProlongerExecutor"></param>
     /// <param name="itmWgs84MathTransformFactory"></param>
-    /// <param name="highwaysRepository"></param>
+    /// <param name="overpassGateway"></param>
     /// <param name="options"></param>
     /// <param name="geometryFactory"></param>
     /// <param name="osmGeoJsonPreprocessorExecutor"></param>
@@ -42,7 +42,7 @@ public class AddibleGpxLinesFinderService : IAddibleGpxLinesFinderService
     public AddibleGpxLinesFinderService(IGpxLoopsSplitterExecutor gpxLoopsSplitterExecutor,
         IGpxProlongerExecutor gpxProlongerExecutor,
         IItmWgs84MathTransformFactory itmWgs84MathTransformFactory,
-        IHighwaysRepository highwaysRepository,
+        IOverpassTurboGateway overpassGateway,
         IOptions<ConfigurationData> options,
         GeometryFactory geometryFactory,
         IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
@@ -52,7 +52,7 @@ public class AddibleGpxLinesFinderService : IAddibleGpxLinesFinderService
         _gpxProlongerExecutor = gpxProlongerExecutor;
         _itmWgs84MathTransform = itmWgs84MathTransformFactory.Create();
         _wgs84ItmMathTransform = itmWgs84MathTransformFactory.CreateInverse();
-        _highwaysRepository = highwaysRepository;
+        _overpassGateway = overpassGateway;
         _geometryFactory = geometryFactory;
         _logger = logger;
         _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
@@ -293,7 +293,7 @@ public class AddibleGpxLinesFinderService : IAddibleGpxLinesFinderService
     {
         var northEast = _itmWgs84MathTransform.Transform(gpxItmLine.Coordinates.Max(c => c.X) + tolerance, gpxItmLine.Coordinates.Max(c => c.Y) + tolerance);
         var southWest = _itmWgs84MathTransform.Transform(gpxItmLine.Coordinates.Min(c => c.X) - tolerance, gpxItmLine.Coordinates.Min(c => c.Y) - tolerance);
-        var ways = await _highwaysRepository.GetHighways(new Coordinate(northEast.x, northEast.y), new Coordinate(southWest.x, southWest.y));
+        var ways = await _overpassGateway.GetHighways(new Coordinate(northEast.x, northEast.y), new Coordinate(southWest.x, southWest.y));
         var highways = _osmGeoJsonPreprocessorExecutor.Preprocess(ways);
         return highways.Select(highway => ToItmLineString(highway.Geometry.Coordinates, highway.GetOsmId())).ToList();
     }

@@ -3,7 +3,6 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
-using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
@@ -13,16 +12,16 @@ using OsmSharp.Changesets;
 using OsmSharp.IO.API;
 using OsmSharp.Tags;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.API.Executors;
 
 /// <inheritdoc/>
 public class SimplePointAdderExecutor : ISimplePointAdderExecutor
 {
-    private readonly IHighwaysRepository _highwaysRepository;
+    private readonly IOverpassTurboGateway _overpassTurboGateway;
     private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
     private readonly ConfigurationData _options;
     private readonly ILogger _logger;
@@ -31,15 +30,15 @@ public class SimplePointAdderExecutor : ISimplePointAdderExecutor
     /// Constructor
     /// </summary>
     /// <param name="options"></param>
-    /// <param name="highwaysRepository"></param>
+    /// <param name="overpassTurboGateway"></param>
     /// <param name="osmGeoJsonPreprocessorExecutor"></param>
     /// <param name="logger"></param>
     public SimplePointAdderExecutor(IOptions<ConfigurationData> options,
-        IHighwaysRepository highwaysRepository,
+        IOverpassTurboGateway overpassTurboGateway,
         IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor, 
         ILogger logger)
     {
-        _highwaysRepository = highwaysRepository;
+        _overpassTurboGateway = overpassTurboGateway;
         _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
         _logger = logger;
         _options = options.Value;
@@ -104,7 +103,7 @@ public class SimplePointAdderExecutor : ISimplePointAdderExecutor
     private async Task<(Way, IFeature[])> GetClosestHighways(IAuthClient osmGateway, LatLng latLng)
     {
         var diff = 0.003; // get highways around 300 m radius not to miss highways (elastic bug?)
-        var ways = await _highwaysRepository.GetHighways(new Coordinate(latLng.Lng + diff, latLng.Lat + diff),
+        var ways = await _overpassTurboGateway.GetHighways(new Coordinate(latLng.Lng + diff, latLng.Lat + diff),
             new Coordinate(latLng.Lng - diff, latLng.Lat - diff));
         var highways = _osmGeoJsonPreprocessorExecutor.Preprocess(ways);
         var point = new Point(latLng.Lng, latLng.Lat);

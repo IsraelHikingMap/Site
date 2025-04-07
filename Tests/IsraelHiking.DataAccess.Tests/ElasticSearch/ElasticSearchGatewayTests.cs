@@ -180,7 +180,6 @@ public class ElasticSearchGatewayTests
             ErrorMessage = string.Empty,
             Request = new UpdateRequest
             {
-                PointsOfInterest = true,
                 AllExternalSources = true,
             }
         }).Wait();

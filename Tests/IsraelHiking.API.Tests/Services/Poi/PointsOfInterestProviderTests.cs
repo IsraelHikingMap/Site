@@ -46,8 +46,6 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         _osmGeoJsonPreprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(),
             _elevationGateway,
             new OsmGeoJsonConverter(new GeometryFactory()), _tagsHelper);
-        Substitute.For<IOsmRepository>();
-        Substitute.For<IOsmLatestFileGateway>();
         _pointsOfInterestRepository = Substitute.For<IPointsOfInterestRepository>();
         _externalSourcesRepository = Substitute.For<IExternalSourcesRepository>();
         _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();

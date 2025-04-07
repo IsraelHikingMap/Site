@@ -13,7 +13,6 @@ using NSubstitute;
 using OsmSharp.IO.API;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
@@ -27,10 +26,8 @@ public class DatabasesUpdaterServiceTests
     private IDatabasesUpdaterService _service;
     private IClientsFactory _clientsFactory;
     private INonAuthClient _osmGateway;
-    private IOsmRepository _osmRepository;
     private IExternalSourcesRepository _externalSourcesRepository;
     private IPointsOfInterestRepository _pointsOfInterestRepository;
-    private IOsmLatestFileGateway _osmLatestFileGateway;
     private IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
     private IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
     private IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
@@ -49,8 +46,6 @@ public class DatabasesUpdaterServiceTests
         optionsProvider.Value.Returns(options);
         _externalSourcesRepository = Substitute.For<IExternalSourcesRepository>();
         _pointsOfInterestRepository = Substitute.For<IPointsOfInterestRepository>();
-        _osmRepository = Substitute.For<IOsmRepository>();
-        _osmLatestFileGateway = Substitute.For<IOsmLatestFileGateway>();
         _pointsOfInterestFilesCreatorExecutor = Substitute.For<IPointsOfInterestFilesCreatorExecutor>();
         _pointsOfInterestAdapterFactory = Substitute.For<IPointsOfInterestAdapterFactory>();
         _externalSourceUpdaterExecutor = Substitute.For<IExternalSourceUpdaterExecutor>();
@@ -59,9 +54,7 @@ public class DatabasesUpdaterServiceTests
         _overpassTurboGateway = Substitute.For<IOverpassTurboGateway>();
         _service = new DatabasesUpdaterService(_externalSourcesRepository,
             _pointsOfInterestRepository,
-            _osmRepository,
             _pointsOfInterestAdapterFactory,
-            _osmLatestFileGateway,
             _pointsOfInterestFilesCreatorExecutor,
             _imagesUrlsStorageExecutor,
             _externalSourceUpdaterExecutor, Substitute.For<IElevationSetterExecutor>(),
@@ -90,7 +83,7 @@ public class DatabasesUpdaterServiceTests
         });
         feature.SetLastModified(new DateTime(0));
         _pointsOfInterestRepository.GetAllPointsOfInterest().Returns([feature]);
-        _osmRepository.GetImagesUrls(Arg.Any<Stream>()).Returns([imageUrl]);
+        _overpassTurboGateway.GetImagesUrls().Returns([imageUrl]);
             
         _service.Rebuild(new UpdateRequest {Images = true}).Wait();
 

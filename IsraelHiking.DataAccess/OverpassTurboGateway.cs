@@ -8,7 +8,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using IsraelHiking.DataAccessInterfaces.Repositories;
+using IsraelHiking.Common.Configuration;
+using Microsoft.Extensions.Options;
 using NetTopologySuite.Geometries;
 using OsmSharp.Complete;
 using OsmSharp.Streams;
@@ -18,63 +19,27 @@ namespace IsraelHiking.DataAccess;
 
 public class OverpassTurboGateway(
     IHttpClientFactory httpClientFactory,
-    ILogger logger) : IOverpassTurboGateway, IHighwaysRepository
+    IOptions<ConfigurationData> configurationData,
+    ILogger logger) : IOverpassTurboGateway
 {
-    private const string INTERPRETER_ADDRESS = "https://z.overpass-api.de/api/interpreter";
-    private const string INTERPRETER_ADDRESS_2 = "https://lz4.overpass-api.de/api/interpreter";
-
     private async Task<string> GetQueryResponse(String queryString)
     {
         var client = httpClientFactory.CreateClient();
         var content = new StringContent(queryString);
-        var response = await client.PostAsync(INTERPRETER_ADDRESS, content);
-        if (!response.IsSuccessStatusCode)
+        HttpResponseMessage response = null;
+        foreach (var address in configurationData.Value.OverpassAddresses)
         {
-            response = await client.PostAsync(INTERPRETER_ADDRESS_2, content);
+            response = await client.PostAsync(address, content);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsStringAsync();
+            }
         }
-        if (!response.IsSuccessStatusCode)
+        if (response is { IsSuccessStatusCode: false })
         {
             throw new Exception(await response.Content.ReadAsStringAsync());
         }
-        return await response.Content.ReadAsStringAsync();
-    }
-    
-    public async Task<List<string>> GetWikipediaLinkedTitles()
-    {
-        var list = await GetWikipediaLinkedTitlesByLanguage(string.Empty);
-        foreach (var language in Languages.Array)
-        {
-            var perLanguage = await GetWikipediaLinkedTitlesByLanguage(":" + language);
-            list.AddRange(perLanguage.Select(w => language + ":" + w).ToList());
-        }
-        return list.Distinct().ToList();
-    }
-
-    private async Task<List<string>> GetWikipediaLinkedTitlesByLanguage(string languagePostfix)
-    {
-        try
-        {
-            var client = httpClientFactory.CreateClient();
-            var queryString = "[out:csv('wikipedia';false)];\nnwr  ['wikipedia'] (area:3606195356);\nout; ";
-            var postBody = new StringContent(queryString.Replace("'wikipedia'", $"'wikipedia{languagePostfix}'"));
-            var response = await client.PostAsync(INTERPRETER_ADDRESS, postBody);
-            if (!response.IsSuccessStatusCode)
-            {
-                response = await client.PostAsync(INTERPRETER_ADDRESS_2, postBody);
-            }
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception(await response.Content.ReadAsStringAsync());
-            }
-            var responseString = await response.Content.ReadAsStringAsync();
-            return responseString.Split("\n", StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => s.Trim().TrimStart('"').TrimEnd('"').Replace("\"\"", "\"")).ToList(); // CSV " cleaning
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Unable to get overpass data for language: " + languagePostfix);
-        }
-        return [];
+        throw new Exception("No overpass addresses provided");
     }
     
     public async Task<Dictionary<string,List<string>>> GetExternalReferences()
@@ -112,4 +77,13 @@ public class OverpassTurboGateway(
 
         return completeSource.OfType<CompleteWay>().ToList();
     }
+
+    public async Task<List<string>> GetImagesUrls()
+    {
+        var responseString = await GetQueryResponse("[out:csv('image';false)];\nnwr[~\"^image\"~\".\"](area:3606195356);\nout;");
+        var images = responseString.Split("\n", StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => s.Trim().TrimStart('"').TrimEnd('"').Replace("\"\"", "\"")).ToList(); // CSV " cleaning
+        return images;
+    }
+        
 }

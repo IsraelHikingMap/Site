@@ -18,9 +18,7 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
 {
     private readonly IExternalSourcesRepository _externalSourcesRepository;
     private readonly IPointsOfInterestRepository _pointsOfInterestRepository;
-    private readonly IOsmRepository _osmRepository;
     private readonly IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
-    private readonly IOsmLatestFileGateway _osmLatestFileGateway;
     private readonly IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
     private readonly IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
     private readonly IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
@@ -33,9 +31,7 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
     /// </summary>
     /// <param name="externalSourcesRepository"></param>
     /// <param name="pointsOfInterestRepository"></param>
-    /// <param name="osmRepository"></param>
     /// <param name="pointsOfInterestAdapterFactory"></param>
-    /// <param name="latestFileGateway"></param>
     /// <param name="pointsOfInterestFilesCreatorExecutor"></param>
     /// <param name="imagesUrlsStorageExecutor"></param>
     /// <param name="externalSourceUpdaterExecutor"></param>
@@ -43,10 +39,8 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
     /// <param name="overpassTurboGateway"></param>
     /// <param name="logger"></param>
     public DatabasesUpdaterService(IExternalSourcesRepository externalSourcesRepository,
-        IPointsOfInterestRepository pointsOfInterestRepository, 
-        IOsmRepository osmRepository,
+        IPointsOfInterestRepository pointsOfInterestRepository,
         IPointsOfInterestAdapterFactory pointsOfInterestAdapterFactory,
-        IOsmLatestFileGateway latestFileGateway,
         IPointsOfInterestFilesCreatorExecutor pointsOfInterestFilesCreatorExecutor,
         IImagesUrlsStorageExecutor imagesUrlsStorageExecutor,
         IExternalSourceUpdaterExecutor externalSourceUpdaterExecutor,
@@ -56,10 +50,8 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
     {
         _externalSourcesRepository = externalSourcesRepository;
         _pointsOfInterestRepository = pointsOfInterestRepository;
-        _osmRepository = osmRepository;
         _pointsOfInterestAdapterFactory = pointsOfInterestAdapterFactory;
         _pointsOfInterestFilesCreatorExecutor = pointsOfInterestFilesCreatorExecutor;
-        _osmLatestFileGateway = latestFileGateway;
         _imagesUrlsStorageExecutor = imagesUrlsStorageExecutor;
         _externalSourceUpdaterExecutor = externalSourceUpdaterExecutor;
         _elevationSetterExecutor = elevationSetterExecutor;
@@ -112,14 +104,13 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
     private async Task RebuildImages()
     {
         _logger.LogInformation("Starting rebuilding images database.");
-        await using var stream = await _osmLatestFileGateway.Get();
         var features = await _pointsOfInterestRepository.GetAllPointsOfInterest();
         var featuresUrls = features.SelectMany(f =>
             f.Attributes.GetNames()
                 .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
                 .Select(k => f.Attributes[k].ToString())
         );
-        var urls = await _osmRepository.GetImagesUrls(stream);
+        var urls = await _overpassTurboGateway.GetImagesUrls();
         await _imagesUrlsStorageExecutor.DownloadAndStoreUrls(urls.Union(featuresUrls).ToList());
         _logger.LogInformation("Finished rebuilding images database.");
     }
@@ -135,7 +126,6 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
     private async Task RebuildOfflineFiles()
     {
         _logger.LogInformation($"Starting rebuilding offline files.");
-        await using var stream = await _osmLatestFileGateway.Get();
         var references = await _overpassTurboGateway.GetExternalReferences();
         var sources = _pointsOfInterestAdapterFactory.GetAll().Select(s => s.Source);
         var externalFeatures = new List<IFeature>();
