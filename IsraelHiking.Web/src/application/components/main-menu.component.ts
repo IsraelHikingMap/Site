@@ -49,7 +49,6 @@ export class MainMenuComponent {
     public userInfo: UserInfo = null;
     public drawingVisible: boolean = false;
     public statisticsVisible: boolean = false;
-    public isShowMore: boolean = false;
 
     public readonly resources = inject(ResourcesService);
 
@@ -93,11 +92,6 @@ export class MainMenuComponent {
 
     public isIFrame() {
         return this.runningContextService.isIFrame;
-    }
-
-    public toggleShowMore($event: Event) {
-        this.isShowMore = !this.isShowMore;
-        $event.stopPropagation();
     }
 
     public getQueueText(): string {
