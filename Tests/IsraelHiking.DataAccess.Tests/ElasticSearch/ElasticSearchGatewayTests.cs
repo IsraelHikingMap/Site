@@ -81,6 +81,15 @@ public class ElasticSearchGatewayTests
         var results = _gateway.GetClosestPoint(coordinate, Sources.OSM, null).Result;
         Assert.IsNotNull(results);
     }
+    
+    [TestMethod]
+    [Ignore]
+    public void GetClosestPointWithmultiplePointsInBoundingBox_ShouldReturnResults()
+    {
+        var coordinate = new Coordinate(34.78588, 31.245418);
+        var results = _gateway.GetClosestPoint(coordinate, Sources.OSM, null).Result;
+        Assert.IsNotNull(results);
+    }
         
     [TestMethod]
     [Ignore]

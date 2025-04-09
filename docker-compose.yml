@@ -22,7 +22,7 @@ services:
       - 9300:9300
     restart: always
   graphhopper:
-    image: israelhikingmap/graphhopper:8.0
+    image: israelhikingmap/graphhopper:10.2
     container_name: graphhopper
     volumes:
       - ghdata:/data:rw

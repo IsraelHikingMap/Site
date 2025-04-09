@@ -1,4 +1,4 @@
-﻿﻿<div [dir]="resources.direction">
+﻿﻿<div [dir]="resources.direction" [class.minimized]="isMinimized && !isEditMode()">
     <div class="flex flex-row sticky top-0 z-10 bg-white">
         <div class="flex-1" *ngIf="!isHideEditMode()">
             <button mat-button class="w-full min-w-unset !p-0" (click)="setEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Edit POI"><i class="fa icon-pencil"></i></button>
@@ -16,7 +16,7 @@
             <button mat-button class="w-full min-w-unset !p-0" (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to point"><i class="fa icon-plus"></i></button>
         </div>
         <div class="flex-1" *ngIf="shareLinks.poiLink && !isEditMode()">
-            <mat-menu #appMenu="matMenu" [dir]="resources.direction">
+            <mat-menu #appMenu="matMenu">
                 <div mat-menu-item disableRipple="true">
                     <div class="flex flex-row">
                         <div *ngIf="!isApp()" class="flex-1"><a mat-button class="w-full" [href]="shareLinks.facebook" [target]="'_blank'" matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook poi"><i class="fa icon-facebook"></i></a></div>
@@ -29,11 +29,19 @@
             </mat-menu>
             <button mat-button class="w-full min-w-unset !p-0" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="below"><i class="fa icon-share-alt"></i></button>
         </div>
+        <div class="flex-1" *ngIf="!isEditMode() && !isMinimized && isApp()">
+            <button mat-button class="w-full min-w-unset !p-0" (click)="isMinimized = !isMinimized" matTooltip="{{resources.minimize}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Minimize POI window"><i class="fa icon-chevron-down"></i></button>
+        </div>
+        <div class="flex-1" *ngIf="!isEditMode() && isMinimized && isApp()">
+            <button mat-button class="w-full min-w-unset !p-0" (click)="isMinimized = !isMinimized" matTooltip="{{resources.restore}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Restore POI window"><i class="fa icon-chevron-up"></i></button>
+        </div>
         <div class="flex-1">
-            <button mat-button class="w-full min-w-unset !p-0" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below"><i class="fa icon-close"></i></button>
+            <button mat-button class="w-full min-w-unset !p-0" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below">
+                <i class="fa icon-close" *ngIf="!isLoading"></i>
+                <mat-spinner diameter="24" *ngIf="isLoading"></mat-spinner>    
+            </button>
         </div>
     </div>
-    <mat-spinner *ngIf="isLoading"></mat-spinner>
     <div *ngIf="isEditMode()">
         <mat-card appearance="outlined" class="mat-elevation-z0">
             <public-poi-edit [info]="info"></public-poi-edit>

@@ -109,8 +109,6 @@ export class ResourcesService {
     public upToZoom: string;
     public installationInstructions: string;
     public offlineMapBenefits: string;
-    public installationInstructionsDesktopOruxMaps: string;
-    public installationInstructionsDesktopLocus: string;
     public view: string;
     public edit: string;
     public update: string;
@@ -477,7 +475,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1741252787177");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1744231187383");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -563,10 +561,6 @@ export class ResourcesService {
         this.offlineMapBenefits = this.gettextCatalog
             .getString("The download may take several minutes, " +
                 "and afterwards you can enjoy the map with no need for a network connection.");
-        this.installationInstructionsDesktopOruxMaps = this.gettextCatalog
-            .getString("Installation instructions for OruxMaps on desktop - surround each new line with <li></li>");
-        this.installationInstructionsDesktopLocus = this.gettextCatalog
-            .getString("Installation instructions for Locus on desktop - surround each new line with <li></li>");
         // end
         this.view = this.gettextCatalog.getString("View");
         this.edit = this.gettextCatalog.getString("Edit");
@@ -710,7 +704,8 @@ export class ResourcesService {
         this.imageBy = this.gettextCatalog.getString("Image by");
         this.notYet = this.gettextCatalog.getString("Not yet...");
         this.imageUploadWaiver = this.gettextCatalog.getString("The pictures I will upload are my own work, and they can be used without any restrictions.");
-        this.subscriptionDetails = this.gettextCatalog.getString("No reception? Try out our offline maps subscription! Only 99₪ per year, paid once a year. Use the main menu to purchase the subscription.");
+        this.subscriptionDetails = this.gettextCatalog.getString("Offline Maps Subscription: - Allows using maps when there's no reception. - Only 99₪ per year. - Paid once a year.")
+            .replace(/ - /g, "\n - ");
         this.noDescriptionAvailableInYourLanguage = this.gettextCatalog.getString("No description available in your language");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
@@ -806,8 +801,6 @@ export class ResourcesService {
             .getString("Learn Israel-specific mapping rules at the Israel OSM Wiki Project");
         this.infoFAQLink = this.gettextCatalog.getString("F.A.Q");
         this.infoDownloadMapForOfflineUse = this.gettextCatalog.getString("Download Map for Offline Use");
-        this.infoDownloadOldMapsForOfflineUse = this.gettextCatalog
-            .getString("Download old raster maps for offline use in OruxMaps and Locus");
         this.infoFooterThanks = this.gettextCatalog.getString("Thank you for your support!");
         this.infoFooterAuthors = this.gettextCatalog.getString("Harel, Zeev and Guy");
         this.infoPrivacyPolicyTermsOfService = this.gettextCatalog.getString("Privacy Policy and Terms of Service");

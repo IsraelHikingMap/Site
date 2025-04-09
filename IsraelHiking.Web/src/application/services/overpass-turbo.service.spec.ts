@@ -2,6 +2,7 @@ import { inject, TestBed } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { OverpassTurboService } from "./overpass-turbo.service";
+import { Urls } from "application/urls";
 
 describe("OverpassTurboService", () => {
     beforeEach(() => {
@@ -14,6 +15,142 @@ describe("OverpassTurboService", () => {
             ]
         });
     });
+
+    it("Should get a feature by id and convert it to a line", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
+        const response = {
+            elements: [{
+                id: 1,
+                type: "node",
+                lat: 1,
+                lon: 2,
+            }, {
+                id: 2,
+                type: "node",
+                lat: 3,
+                lon: 4,
+            }, {
+                id: 3,
+                type: "way",
+                nodes: [1,2]
+            }]
+        };
+        const promise = service.getFeature("way", "42");
+        mockBackend.expectOne(r => r.url.startsWith(Urls.osmApi)).flush(response);
+        const results = await promise;
+        expect(results.geometry.type).toBe("LineString");
+    }));
+
+    it("Should get a relation feature by id and convert it to a line", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
+        const response = {
+            elements: [{
+                type: "relation",
+                id: 1,
+                members: [{
+                    type: "way",
+                    ref: 2,
+                    geometry: [{lat: 1, lon: 2}, {lat: 3, lon: 4}]
+                }, {
+                    type: "way",
+                    ref: 3,
+                    geometry: [
+                        {lat: 1, lon: 2}, {lat: 31.5954429, lon: 34.5619778},{lat: 31.5954049, lon: 34.5618109}, {lat: 1, lon: 2}
+                    ]
+                }, {
+                    type: "way",
+                    ref: 4,
+                    geometry: [{lat: 5, lon: 6}, {lat: 1, lon: 2}]
+                }, {
+                    type: "way",
+                    ref: 5,
+                    geometry: [{lat: 3, lon: 4}, {lat: 7, lon: 8}]
+                }, {
+                    type: "way",
+                    ref: 6,
+                    geometry: [
+                        {lat: 7, lon: 8}, {lat: 31.5979193, lon: 34.5545826}, {lat: 31.5978981, lon: 34.5542436}, {lat: 7, lon: 8}
+                    ]
+                }, {
+                    type: "way",
+                    ref: 7,
+                    geometry: [{lat: 31.6001179, lon: 34.5571696}, {lat: 5, lon: 6}]
+                }]
+            }]
+        };
+        const promise = service.getFeature("way", "42");
+        mockBackend.expectOne(r => r.url.startsWith(Urls.osmApi)).flush(response);
+        const results = await promise;
+        expect(results.geometry.type).toBe("LineString");
+    }));
+
+    it("Should get a long way with multiple ways and merge them", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
+        const response = {
+            elements: [{
+                id: 1,
+                type: "node",
+                lat: 1,
+                lon: 2,
+            }, {
+                id: 2,
+                type: "node",
+                lat: 3,
+                lon: 4,
+            }, {
+                id: 3,
+                type: "node",
+                lat: 4,
+                lon: 5,
+            }, {
+                id: 4,
+                type: "way",
+                nodes: [1, 2]
+            }, {
+                id: 5,
+                type: "way",
+                nodes: [2, 3]
+            }]
+        };
+
+        const promise = service.getLongWay("id", "name", false, false);
+        mockBackend.expectOne("https://overpass-api.de/api/interpreter").flush(response);
+
+        const results = await promise;
+        expect(results.geometry.type).toBe("LineString");
+    }));
+
+    it("Should get a long way with multiple geometries and return the first feature", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
+        const response = {
+            elements: [{
+                id: 1,
+                type: "node",
+                lat: 1,
+                lon: 2,
+            }, {
+                id: 2,
+                type: "node",
+                lat: 3,
+                lon: 4,
+            }, {
+                id: 3,
+                type: "node",
+                lat: 4,
+                lon: 5,
+            }, {
+                id: 4,
+                type: "way",
+                tags: { waterway: "dock"},
+                nodes: [1, 2, 3, 1]
+            }, {
+                id: 5,
+                type: "way",
+                nodes: [1, 2]
+            }, ]
+        };
+        const promise = service.getLongWay("id", "name", false, false);
+        mockBackend.expectOne("https://overpass-api.de/api/interpreter").flush(response);
+
+        const results = await promise;
+        expect(results.geometry.type).toBe("Polygon");
+    }));
 
     it("Should get a long way by name", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
         // Arrange
@@ -62,6 +199,7 @@ describe("OverpassTurboService", () => {
         const results = await promise;
         expect(results).toBeNull();
     }));
+
 
     it("Should get a place by id", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
         // Arrange

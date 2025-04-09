@@ -66,13 +66,13 @@ interface IChartElements {
     animations: [
         trigger("animateChart", [
             transition(":enter", [
-                style({ transform: "scale(0.2)", "transform-origin": "bottom right" }),
-                animate("200ms", style({ transform: "scale(1)", "transform-origin": "bottom right" }))
-            ]),
+                style({ transform: "scale(0.2)", "transform-origin": "bottom {{start}}" }),
+                animate("200ms", style({ transform: "scale(1)", "transform-origin": "bottom {{start}}" }))
+            ], { params: { start: "right" }}),
             transition(":leave", [
-                style({ transform: "scale(1)", "transform-origin": "bottom right" }),
-                animate("200ms", style({ transform: "scale(0.2)", "transform-origin": "bottom right" }))
-            ])
+                style({ transform: "scale(1)", "transform-origin": "bottom {{start}}" }),
+                animate("200ms", style({ transform: "scale(0.2)", "transform-origin": "bottom {{start}}" }))
+            ], { params: { start: "right" }})
         ])
     ],
     imports: [NgIf, Dir, NgClass, MatGridList, MatGridTile, MatTooltip, MatButton, Angulartics2OnModule, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, AsyncPipe, DecimalPipe]
@@ -412,13 +412,9 @@ export class RouteStatisticsComponent implements OnInit {
         // click
         this.chartElements.dragState = "none";
         this.clearSubRouteSelection();
-        const timeoutGroupName = "clickOnChart";
-        this.cancelableTimeoutService.clearTimeoutByGroup(timeoutGroupName);
-        this.cancelableTimeoutService.setTimeoutByGroup(() => {
+        this.cancelableTimeoutService.setTimeoutByName(() => {
             this.hideChartHover();
-        },
-            5000,
-            timeoutGroupName);
+        }, 5000, "clickOnChart");
     }
 
     private initChart() {
@@ -472,7 +468,7 @@ export class RouteStatisticsComponent implements OnInit {
                 .call(d3.axisRight(this.chartElements.yScaleSlope).ticks(5))
                 .append("text")
                 .attr("fill", "#000")
-                .attr("transform", `translate(10, ${this.chartElements.height / 2}) rotate(-90)`)
+                .attr("transform", `translate(25, ${this.chartElements.height / 2}) rotate(-90)`)
                 .attr("text-anchor", "middle")
                 .attr("dir", this.resources.direction)
                 .text(this.resources.slope);
@@ -823,13 +819,11 @@ export class RouteStatisticsComponent implements OnInit {
     private onGeolocationChanged(position: GeolocationPosition) {
         this.currentSpeed = (position == null) ? null : position.coords.speed * 3.6;
         this.heading = (position == null) || position.coords.speed === 0 ? null : position.coords.heading;
-        const currentSpeedTimeout = "currentSpeedTimeout";
-        this.cancelableTimeoutService.clearTimeoutByGroup(currentSpeedTimeout);
-        this.cancelableTimeoutService.setTimeoutByGroup(() => {
+        this.cancelableTimeoutService.setTimeoutByName(() => {
             // if there are no location updates reset speed.
             this.currentSpeed = null;
             this.heading = null;
-        }, 5000, currentSpeedTimeout);
+        }, 5000, "currentSpeedTimeout");
         this.onRouteDataChanged();
     }
 

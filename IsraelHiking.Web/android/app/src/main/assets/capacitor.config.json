@@ -18,5 +18,8 @@
 	},
 	"ios": {
 		"preferredContentMode": "mobile"
+	},
+	"android": {
+		"adjustMarginsForEdgeToEdge": "auto"
 	}
 }

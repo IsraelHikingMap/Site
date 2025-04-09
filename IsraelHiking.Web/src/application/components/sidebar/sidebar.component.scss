@@ -7,7 +7,7 @@
     position: fixed;
     top: env(safe-area-inset-top, 0);
     bottom: 0;
-    left: 0;
+    right: 0;
     width: v.$app-sidebar-width;
     line-height: 24px;
     overflow-x: hidden;
@@ -18,14 +18,23 @@
     z-index: v.$app-left-z-index + 5;
 }
 
+.sidebar-wrapper[dir=rtl] {
+    right: unset;
+    left: 0;
+}
+
 
 @media (width <= 550px) {
     .sidebar-wrapper {
         width: 100vw;
         box-sizing: border-box;
     }
-    .sidebar-wrapper.poi {
-        top: 50vh;
-        height: 50vh;
+    .sidebar-wrapper:has(public-poi-sidebar) {
+        top: 40vh;
+        height: 60vh;
+    }
+    .sidebar-wrapper:has(public-poi-sidebar .minimized) {
+        top: 85vh;
+        height: 15vh;
     }
 }

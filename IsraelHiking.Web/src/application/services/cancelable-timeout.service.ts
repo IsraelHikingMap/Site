@@ -2,19 +2,18 @@ import { Injectable } from "@angular/core";
 
 @Injectable()
 export class CancelableTimeoutService {
-    private idsByGroup = new Map<string, ReturnType<typeof setTimeout>[]>;
+    private idForName = new Map<string, ReturnType<typeof setTimeout>>;
 
-    public setTimeoutByGroup(action: () => void, timeout: number, type: string) {
-        if (!this.idsByGroup.has(type)) {
-            this.idsByGroup.set(type, []);
-        }
-        const id = setTimeout(action, timeout);
-        this.idsByGroup.get(type).push(id);
+    public setTimeoutByName(callback: Parameters<typeof setTimeout>[0], timeout: Parameters<typeof setTimeout>[1], name: string) {
+        this.clearTimeoutByName(name);
+        const id = setTimeout(callback, timeout);
+        this.idForName.set(name, id);
     }
 
-    public clearTimeoutByGroup(type: string) {
-        for (const id of this.idsByGroup.get(type) || []) {
-            clearTimeout(id);
+    public clearTimeoutByName(name: string) {
+        if (this.idForName.has(name)) {
+            clearTimeout(this.idForName.get(name));
+            this.idForName.delete(name);
         }
     }
 }

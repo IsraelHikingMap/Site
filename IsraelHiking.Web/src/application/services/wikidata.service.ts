@@ -69,7 +69,7 @@ export class WikidataService {
                 coordinates: []
             }
         };
-        await this.enritchFeatureFromWikimedia(feature, language);
+        await this.setDescriptionAndImages(wikidata, feature, language || this.resources.getCurrentLanguageCodeSimplified());
         const lngLat = this.setLocation(wikidata, feature);
         feature.geometry.coordinates = [lngLat.lng, lngLat.lat];
         feature.properties.name = this.getTitle(wikidata, language);

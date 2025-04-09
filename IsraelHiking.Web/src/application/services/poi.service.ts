@@ -25,6 +25,7 @@ import { WikidataService } from "./wikidata.service";
 import { ImageAttributionService } from "./image-attribution.service";
 import { LatLon, OsmTagsService, PoiProperties } from "./osm-tags.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction } from "../reducers/offline.reducer";
+import { SetSelectedPoiAction, SetUploadMarkerDataAction } from "../reducers/poi.reducer";
 import { AVAILABLE_LANGUAGES } from "../reducers/initial-state";
 import {
     SetCategoriesGroupVisibilityAction,
@@ -39,7 +40,6 @@ import type {
     ApplicationState,
     Category,
     IconColorLabel,
-    Contribution,
     NorthEast,
     EditablePublicPointData,
     OfflineState
@@ -467,81 +467,113 @@ export class PoiService {
         return selectableCategories;
     }
 
-    
-
-    public async getPoint(id: string, source: string, language?: string): Promise<GeoJSON.Feature> {
+    public async getBasicInfo(id: string, source: string, language?: string): Promise<GeoJSON.Feature> {
         const itemInCache = this.poisCache.find(f => this.getFeatureId(f) === id && f.properties.source === source);
         if (itemInCache) {
             return cloneDeep(itemInCache);
         }
-        if (source === RouteStrings.COORDINATES) {
-            return this.getFeatureFromCoordinatesId(id, language);
-        }
         try {
-            if (source === "OSM") {
-                const { osmId, type } = this.poiIdentifierToTypeAndId(id);
-                const feature = await this.overpassTurboService.getFeature(type, osmId);
-                let wikidataPromise = Promise.resolve();
-                let inaturePromise = Promise.resolve();
-                let placePromise = Promise.resolve(null as GeoJSON.Feature);
-                let wayPromise = Promise.resolve(null as GeoJSON.Feature);
-                if (feature.properties.wikidata) {
-                    wikidataPromise = this.wikidataService.enritchFeatureFromWikimedia(feature, language);
+            switch (source) {
+                case "new": {
+                    const uploadMarkerData = this.store.selectSnapshot((s: ApplicationState) => s.poiState).uploadMarkerData;
+                    const newFeature: GeoJSON.Feature = {
+                        id: "",
+                        type: "Feature",
+                        properties: {
+                            poiSource: "OSM",
+                            poiId: "",
+                            identifier: ""
+                        },
+                        geometry: {
+                            type: "Point",
+                            coordinates: SpatialService.toCoordinate(uploadMarkerData.latlng)
+                        }
+                    };
+                    this.mergeFeatureWithUploadMarker(newFeature);
+                    return newFeature;
                 }
-                if (feature.properties["ref:IL:inature"] && language === "he") {
-                    inaturePromise = this.iNatureService.enritchFeatureFromINature(feature);
+                case "OSM": {
+                    const { osmId, type } = this.poiIdentifierToTypeAndId(id);
+                    const feature = await this.overpassTurboService.getFeature(type, osmId);
+                    const poi = this.convertFeatureToPoi(feature, id);
+                    this.adjustGeolocationBasedOnTileData(id, poi);
+                    return poi;
                 }
-                if (type === "node" && feature.properties.place) {
-                    placePromise = this.overpassTurboService.getPlaceGeometry(osmId);
+                case "iNature": {
+                    const poi = await this.iNatureService.createFeatureFromPageId(id);
+                    this.poisCache.splice(0, 0, poi);
+                    const clone = cloneDeep(poi);
+                    this.store.dispatch(new SetSelectedPoiAction(clone));
+                    return clone;
                 }
-                if (type === "way" && (feature.properties.highway || feature.properties.waterway)) {
-                    wayPromise = this.overpassTurboService.getLongWay(osmId, 
-                        feature.properties["mtb:name"] || feature.properties.name,
-                        feature.properties.waterway != null,
-                        feature.properties["mtb:name"] != null);
+                case "Wikidata": {
+                    const poi = await this.wikidataService.createFeatureFromPageId(id, language);
+                    this.poisCache.splice(0, 0, poi);
+                    const clone = cloneDeep(poi);
+                    this.store.dispatch(new SetSelectedPoiAction(clone));
+                    return clone;
                 }
-                try {
-                    await Promise.all([wikidataPromise, inaturePromise, placePromise, wayPromise]);
-                    const placeFeature = await placePromise;
-                    if (placeFeature != null) {
-                        feature.geometry = placeFeature.geometry;
-                    }
-                    const longWayFeature = await wayPromise;
-                    if (longWayFeature != null) {
-                        feature.geometry = longWayFeature.geometry;
-                    }
-                } catch (ex) {
-                    this.loggingService.warning(`[POIs] Failed to enrich feature with id: ${id}, error: ${(ex as Error).message}`);
+                case RouteStrings.COORDINATES: {
+                    const poi = this.getFeatureFromCoordinatesId(id, language);
+                    const clone = cloneDeep(poi);
+                    this.store.dispatch(new SetSelectedPoiAction(clone));
+                    return clone;
                 }
-                const poi = this.convertFeatureToPoi(feature, id);
-                this.adjustGeolocationBasedOnTileData(id, poi);
-                this.poisCache.splice(0, 0, poi);
-                return cloneDeep(poi);
-            } else if (source === "iNature") {
-                const feature = await this.iNatureService.createFeatureFromPageId(id);
-                this.poisCache.splice(0, 0, feature);
-                return cloneDeep(feature);
-            } else if (source === "Wikidata") {
-                const feature = await this.wikidataService.createFeatureFromPageId(id, language);
-                this.poisCache.splice(0, 0, feature);
-                return cloneDeep(feature);
-            } else {
-                const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
-                const poi$ = this.httpClient.get(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000));
-                const poi = await firstValueFrom(poi$) as GeoJSON.Feature;
-                this.poisCache.splice(0, 0, poi);
-                return cloneDeep(poi);
+                default: { 
+                    const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
+                    const poi$ = this.httpClient.get(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000));
+                    const poi = await firstValueFrom(poi$) as GeoJSON.Feature;
+                    this.poisCache.splice(0, 0, poi);
+                    return cloneDeep(poi);
+                }
             }
         } catch {
             const feature = this.getFeaturesFromTiles().find(f => this.osmTileFeatureToPoiIdentifier(f) === id);
-            
             if (feature == null) {
                 throw new Error("Failed to load POI from offline or in-memory tiles.");
             }
-            const poi = this.convertFeatureToPoi(feature, id);
-            this.poisCache.splice(0, 0, poi);
-            return poi;
+            return this.convertFeatureToPoi(feature, id);
         }
+    }
+
+    public async updateExtendedInfo(feature: GeoJSON.Feature, language?: string): Promise<GeoJSON.Feature> {
+        const { osmId, type } = this.poiIdentifierToTypeAndId(feature.properties.identifier);
+        let wikidataPromise = Promise.resolve();
+        let inaturePromise = Promise.resolve();
+        let placePromise = Promise.resolve(null as GeoJSON.Feature);
+        let wayPromise = Promise.resolve(null as GeoJSON.Feature);
+        if (feature.properties.wikidata) {
+            wikidataPromise = this.wikidataService.enritchFeatureFromWikimedia(feature, language);
+        }
+        if (feature.properties["ref:IL:inature"] && language === "he") {
+            inaturePromise = this.iNatureService.enritchFeatureFromINature(feature);
+        }
+        if (type === "node" && feature.properties.place) {
+            placePromise = this.overpassTurboService.getPlaceGeometry(osmId);
+        }
+        if (type === "way" && (feature.properties.highway || feature.properties.waterway)) {
+            wayPromise = this.overpassTurboService.getLongWay(osmId, 
+                feature.properties["mtb:name"] || feature.properties.name,
+                feature.properties.waterway != null,
+                feature.properties["mtb:name"] != null);
+        }
+        try {
+            await Promise.all([wikidataPromise, inaturePromise, placePromise, wayPromise]);
+            const placeFeature = await placePromise;
+            if (placeFeature != null) {
+                feature.geometry = placeFeature.geometry;
+            }
+            const longWayFeature = await wayPromise;
+            if (longWayFeature != null) {
+                feature.geometry = longWayFeature.geometry;
+            }
+            this.poisCache.splice(0, 0, feature);
+        } catch (ex) {
+            this.loggingService.warning(`[POIs] Failed to enrich feature with id: ${feature.properties.poiId}, error: ${(ex as Error).message}`);
+        }
+        this.store.dispatch(new SetSelectedPoiAction(cloneDeep(feature)));
+        this.mergeFeatureWithUploadMarker(feature);
+        return feature;
     }
 
     public getLatLngFromId(id: string): LatLngAlt {
@@ -595,7 +627,11 @@ export class PoiService {
         };
     }
 
-    public mergeWithPoi(feature: GeoJSON.Feature, markerData: Immutable<MarkerData>) {
+    private mergeFeatureWithUploadMarker(feature: GeoJSON.Feature) {
+        const markerData = this.store.selectSnapshot((s: ApplicationState) => s.poiState).uploadMarkerData;
+        if (markerData == null) {
+            return;
+        }
         const language = this.resources.getCurrentLanguageCodeSimplified();
         GeoJSONUtils.setTitle(feature, feature.properties["name:" + language] || markerData.title, language);
         GeoJSONUtils.setDescription(feature, feature.properties["description:" + language] || markerData.description, language);
@@ -611,15 +647,7 @@ export class PoiService {
             }
             feature.properties[name] = url;
         });
-        return feature;
-    }
-
-    public getContribution(feature: GeoJSON.Feature): Contribution {
-        return {
-            lastModifiedDate: new Date(feature.properties.poiLastModified),
-            userAddress: feature.properties.poiUserAddress,
-            userName: feature.properties.poiUserName
-        } as Contribution;
+        this.store.dispatch(new SetUploadMarkerDataAction(null));
     }
 
     public getItmCoordinates(feature: GeoJSON.Feature): NorthEast {

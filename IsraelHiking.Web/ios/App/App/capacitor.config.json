@@ -19,6 +19,9 @@
 	"ios": {
 		"preferredContentMode": "mobile"
 	},
+	"android": {
+		"adjustMarginsForEdgeToEdge": "auto"
+	},
 	"packageClassList": [
 		"KeepAwakePlugin",
 		"ScreenBrightnessPlugin",
