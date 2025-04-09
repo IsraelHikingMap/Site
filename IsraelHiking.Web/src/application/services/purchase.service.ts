@@ -5,6 +5,8 @@ import "cordova-plugin-purchase";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { OfflineFilesDownloadService } from "./offline-files-download.service";
+import { ToastService } from "./toast.service";
+import { ResourcesService } from "./resources.service";
 import { SetOfflineAvailableAction } from "../reducers/offline.reducer";
 import type { ApplicationState } from "../models/models";
 
@@ -16,6 +18,8 @@ export class PurchaseService {
     private readonly runningContextService = inject(RunningContextService);
     private readonly loggingService = inject(LoggingService);
     private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
+    private readonly toastService = inject(ToastService);
+    private readonly resources = inject(ResourcesService);
     private readonly store = inject(Store);
 
     public async initialize() {
@@ -79,6 +83,23 @@ export class PurchaseService {
     }
 
     public order() {
+        if (this.runningContextService.isIos) {
+            this.toastService.confirm({
+                message: this.resources.subscriptionDetails,
+                type: "Custom",
+                customConfirmText: this.resources.continue,
+                customDeclineText: this.resources.cancel,
+                confirmAction: () => {
+                    this.orderInternal()
+                },
+            });
+        } else {
+            this.orderInternal();
+        }
+        
+    }
+
+    private orderInternal() {
         this.loggingService.info("[Store] Ordering product");
         const offer = CdvPurchase.store.get(OFFLINE_MAPS_SUBSCRIPTION).getOffer();
         offer.order();
