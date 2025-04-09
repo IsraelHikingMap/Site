@@ -20,7 +20,6 @@ namespace IsraelHiking.DataAccess.ElasticSearch;
 public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger logger) :
     IInitializable,
     IPointsOfInterestRepository,
-    IHighwaysRepository,
     ISearchRepository,
     IUserLayersRepository,
     IImagesRepository,
@@ -33,9 +32,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     private const int NUMBER_OF_RESULTS = 20;
     
     private const string PROPERTIES = "properties";
-    private const string OSM_HIGHWAYS_INDEX1 = "osm_highways1";
-    private const string OSM_HIGHWAYS_INDEX2 = "osm_highways2";
-    private const string OSM_HIGHWAYS_ALIAS = "osm_highways";
     private const string SHARES = "shares";
     private const string CUSTOM_USER_LAYERS = "custom_user_layers";
     private const string EXTERNAL_POIS = "external_pois";
@@ -56,8 +52,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                 (_, _) => new SystemTextJsonSerializer(GeoJsonExtensions.GeoJsonWritableFactory))
             .PrettyJson();
         _elasticClient = new ElasticClient(connectionString);
-        await InitializeIndexWithAlias(OSM_HIGHWAYS_INDEX1, OSM_HIGHWAYS_INDEX2, OSM_HIGHWAYS_ALIAS, CreateHighwaysIndex);
-
         if ((await _elasticClient.Indices.ExistsAsync(SHARES)).Exists == false)
         {
             await CreateSharesIndex();
@@ -71,42 +65,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             await CreateImagesIndex();
         }
         logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
-    }
-
-    private async Task InitializeIndexWithAlias(string index1, string index2, string alias, Func<string, Task> creatIndexAction)
-    {
-        if ((await _elasticClient.Indices.ExistsAsync(index1)).Exists == false &&
-            (await _elasticClient.Indices.ExistsAsync(index2)).Exists == false)
-        {
-            await creatIndexAction(index1);
-            await _elasticClient.Indices.BulkAliasAsync(a => a.Add(add => add.Alias(alias).Index(index1)));
-            logger.LogInformation($"Initialing elasticsearch alias: {alias}, no indices existed");
-            return;
-        }
-
-        if ((await _elasticClient.Indices.ExistsAsync(index1)).Exists &&
-            (await _elasticClient.GetIndicesPointingToAliasAsync(alias)).Contains(index1))
-        {
-            return;
-        }
-        if ((await _elasticClient.Indices.ExistsAsync(index2)).Exists &&
-            (await _elasticClient.GetIndicesPointingToAliasAsync(alias)).Contains(index2))
-        {
-            return;
-        }
-
-        if ((await _elasticClient.Indices.ExistsAsync(index1)).Exists)
-        {
-            await _elasticClient.Indices.BulkAliasAsync(a => a.Add(add => add.Alias(alias).Index(index1)));
-            logger.LogWarning($"Initialing elasticsearch alias: {alias}, for index {index1}, index existed without alias");
-            return;
-        }
-            
-        if ((await _elasticClient.Indices.ExistsAsync(index2)).Exists)
-        {
-            await _elasticClient.Indices.BulkAliasAsync(a => a.Add(add => add.Alias(alias).Index(index2)));
-            logger.LogWarning($"Initialing elasticsearch alias: {alias}, for index {index2}, index existed without alias");
-        }
     }
         
     private List<IHit<T>> GetAllItemsByScrolling<T>(ISearchResponse<T> response) where T: class
@@ -329,42 +287,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         return response.Documents.FirstOrDefault()?.Name.GetValueOrDefault(language, null);
     }
 
-    private (string currentIndex, string newIndex) GetIndicesStatus(string index1, string index2, string alias)
-    {
-        var currentIndex = index1;
-        var newIndex = index2;
-        if (_elasticClient.GetIndicesPointingToAlias(alias).Contains(index2))
-        {
-            currentIndex = index2;
-            newIndex = index1;
-        }
-        return (currentIndex, newIndex);
-    }
-
-    private async Task SwitchIndices(string currentIndex, string newIndex, string alias)
-    {
-        await _elasticClient.Indices.BulkAliasAsync(a => a
-            .Remove(i => i.Alias(alias).Index(currentIndex))
-            .Add(i => i.Alias(alias).Index(newIndex))
-        );
-        await _elasticClient.Indices.DeleteAsync(currentIndex);
-    }
-
-    public async Task UpdateHighwaysZeroDownTime(List<IFeature> highways)
-    {
-        var (currentIndex, newIndex) = GetIndicesStatus(OSM_HIGHWAYS_INDEX1, OSM_HIGHWAYS_INDEX2, OSM_HIGHWAYS_ALIAS);
-
-        await CreateHighwaysIndex(newIndex);
-        await UpdateUsingPaging(highways, newIndex);
-
-        await SwitchIndices(currentIndex, newIndex, OSM_HIGHWAYS_ALIAS);
-    }
-
-    public Task UpdateHighwaysData(List<IFeature> features)
-    {
-        return UpdateData(features, OSM_HIGHWAYS_ALIAS);
-    }
-
     private async Task UpdateData(List<IFeature> features, string alias)
     {
         var result = await _elasticClient.BulkAsync(bulk =>
@@ -379,22 +301,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         {
             result.ItemsWithErrors.ToList().ForEach(i => logger.LogError($"Inserting {i.Id} failed with error: {i.Error?.Reason ?? string.Empty} caused by: {i.Error?.CausedBy?.Reason ?? string.Empty}"));
         }
-    }
-
-    public async Task<List<IFeature>> GetHighways(Coordinate northEast, Coordinate southWest)
-    {
-        var response = await _elasticClient.SearchAsync<IFeature>(
-            s => s.Index(OSM_HIGHWAYS_ALIAS)
-                .Size(5000)
-                .Query(
-                    q => q.GeoShape(g => 
-                        g.Shape(sh => sh.Envelope(ConvertCoordinate(new Coordinate(southWest.X, northEast.Y)), ConvertCoordinate(new Coordinate(northEast.X, southWest.Y))))
-                            .Field(f => f.Geometry)
-                            .Relation(GeoShapeRelation.Intersects)
-                    )
-                )
-        );
-        return response.Documents.ToList();
     }
 
     private GeoCoordinate ConvertCoordinate(Coordinate coordinate)
@@ -491,20 +397,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         );
     }
 
-    private Task CreateHighwaysIndex(string highwaysIndexName)
-    {
-        return _elasticClient.Indices.CreateAsync(highwaysIndexName,
-            c => c.Map<IFeature>(m =>
-                m.Dynamic(false)
-                    .Properties(ps =>
-                        ps.GeoShape(g =>
-                            g.Name(f => f.Geometry)
-                        )
-                    )
-            )
-        );
-    }
-
     private Task CreateExternalPoisIndex()
     {
         return _elasticClient.Indices.CreateAsync(EXTERNAL_POIS,
@@ -537,26 +429,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         return _elasticClient.Indices.CreateAsync(SHARES,
             c => c.Map<ShareUrl>(m => m.AutoMap<ShareUrl>())
         );
-    }
-    private async Task UpdateUsingPaging(List<IFeature> features, string alias)
-    {
-        logger.LogInformation($"Starting indexing {features.Count} records");
-        var smallCacheList = new List<IFeature>(PAGE_SIZE);
-        int total = 0;
-        foreach (var feature in features)
-        {
-            smallCacheList.Add(feature);
-            if (smallCacheList.Count < PAGE_SIZE)
-            {
-                continue;
-            }
-            total += smallCacheList.Count;
-            await UpdateData(smallCacheList, alias);
-            logger.LogDebug($"Indexed {total} records of {features.Count}");
-            smallCacheList.Clear();
-        }
-        await UpdateData(smallCacheList, alias);
-        logger.LogInformation($"Finished indexing {features.Count} records");
     }
 
     public Task AddUrl(ShareUrl shareUrl)

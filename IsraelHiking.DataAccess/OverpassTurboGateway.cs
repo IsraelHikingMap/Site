@@ -3,61 +3,91 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
+using IsraelHiking.Common.Configuration;
+using Microsoft.Extensions.Options;
+using NetTopologySuite.Geometries;
+using OsmSharp;
+using OsmSharp.Complete;
+using OsmSharp.Db.Impl;
+using OsmSharp.Streams;
 
 namespace IsraelHiking.DataAccess;
 
-public class OverpassTurboGateway : IOverpassTurboGateway
+public class OverpassTurboGateway(
+    IHttpClientFactory httpClientFactory,
+    IOptions<ConfigurationData> configurationData,
+    ILogger logger) : IOverpassTurboGateway
 {
-    private const string INTERPRETER_ADDRESS = "https://z.overpass-api.de/api/interpreter";
-    private const string INTERPRETER_ADDRESS_2 = "https://lz4.overpass-api.de/api/interpreter";
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger _logger;
-
-    public OverpassTurboGateway(IHttpClientFactory httpClientFactory,
-        ILogger logger)
+    private async Task<string> GetQueryResponse(String queryString)
     {
-        _httpClientFactory = httpClientFactory;
-        _logger = logger;
-    }
-
-    public async Task<List<string>> GetWikipediaLinkedTitles()
-    {
-        var list = await GetWikipediaLinkedTitlesByLanguage(string.Empty);
-        foreach (var language in Languages.Array)
+        var client = httpClientFactory.CreateClient();
+        var content = new StringContent(queryString);
+        HttpResponseMessage response = null;
+        foreach (var address in configurationData.Value.OverpassAddresses)
         {
-            var perLanguage = await GetWikipediaLinkedTitlesByLanguage(":" + language);
-            list.AddRange(perLanguage.Select(w => language + ":" + w).ToList());
+            response = await client.PostAsync(address, content);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsStringAsync();
+            }
         }
-        return list.Distinct().ToList();
+        if (response is { IsSuccessStatusCode: false })
+        {
+            throw new Exception(await response.Content.ReadAsStringAsync());
+        }
+        throw new Exception("No overpass addresses provided");
     }
-
-    private async Task<List<string>> GetWikipediaLinkedTitlesByLanguage(string languagePostfix)
+    
+    public async Task<Dictionary<string,List<string>>> GetExternalReferences()
     {
+        var dictionary = new Dictionary<string, List<string>>
+        {
+            { Sources.WIKIDATA, [] },
+            { Sources.INATURE, [] }
+        };
         try
         {
-            var client = _httpClientFactory.CreateClient();
-            var queryString = "[out:csv('wikipedia';false)];\nnwr  ['wikipedia'] (area:3606195356);\nout; ";
-            var postBody = new StringContent(queryString.Replace("'wikipedia'", $"'wikipedia{languagePostfix}'"));
-            var response = await client.PostAsync(INTERPRETER_ADDRESS, postBody);
-            if (!response.IsSuccessStatusCode)
-            {
-                response = await client.PostAsync(INTERPRETER_ADDRESS_2, postBody);
-            }
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception(await response.Content.ReadAsStringAsync());
-            }
-            var responseString = await response.Content.ReadAsStringAsync();
-            return responseString.Split("\n", StringSplitOptions.RemoveEmptyEntries)
+            var responseString = await GetQueryResponse("[out:csv('wikidata';false)];\nnwr['wikidata'](area:3606195356);\nout;");
+            var wikidataLines = responseString.Split("\n", StringSplitOptions.RemoveEmptyEntries)
                 .Select(s => s.Trim().TrimStart('"').TrimEnd('"').Replace("\"\"", "\"")).ToList(); // CSV " cleaning
+            dictionary[Sources.WIKIDATA] = wikidataLines;
+            responseString = await GetQueryResponse("[out:csv('ref:IL:inature';false)];\nnwr['ref:IL:inature'](area:3606195356);\nout;");
+            var iNatureLines = responseString.Split("\n", StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim().TrimStart('"').TrimEnd('"').Replace("\"\"", "\"")).ToList(); // CSV " cleaning
+            dictionary[Sources.INATURE] = iNatureLines;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unable to get overpass data for language: " + languagePostfix);
+            logger.LogError(ex, "Unable to get overpass data for external references");
         }
-        return [];
+        return dictionary;
     }
+
+    public async Task<List<CompleteWay>> GetHighways(Coordinate northEast, Coordinate southWest)
+    {
+        var query = $"[out:xml];\nway[\"highway\"][!\"construction\"]({southWest.Y},{southWest.X},{northEast.Y},{northEast.X});\nout meta;\n(._;>;);\nout;";
+        var response = await GetQueryResponse(query);
+
+        using MemoryStream memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(response));
+        var source = new XmlOsmStreamSource(memoryStream);
+        
+        var db = new MemorySnapshotDb().CreateSnapshotDb();
+        var list = source.ToList();
+        db.AddOrUpdate(list);
+        return list.OfType<Way>().Select(w => w.CreateComplete(db)).ToList();
+    }
+
+    public async Task<List<string>> GetImagesUrls()
+    {
+        var responseString = await GetQueryResponse("[out:csv('image';false)];\nnwr[~\"^image\"~\".\"](area:3606195356);\nout;");
+        var images = responseString.Split("\n", StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => s.Trim().TrimStart('"').TrimEnd('"').Replace("\"\"", "\"")).ToList(); // CSV " cleaning
+        return images;
+    }
+        
 }
