@@ -159,15 +159,13 @@ export class DrawingComponent {
     }
 
     public deleteAllRoutes() {
-        this.toastService.confirm({
-            message: this.resources.areYouSureYouWantToDeleteAllRoutes,
-            type: "YesNo",
-            confirmAction: () => {
-                this.store.dispatch(new SetShareUrlAction(null));
-                this.store.dispatch(new SetSelectedRouteAction(null));
-                this.store.dispatch(new DeleteAllRoutesAction());
-                this.store.dispatch(new ClearHistoryAction());
-            }
+        this.store.dispatch(new SetSelectedRouteAction(null));
+        this.store.dispatch(new DeleteAllRoutesAction());
+        this.toastService.undo(this.resources.deleteAllRoutes, () => {
+            this.undo();    
+        }, () => {
+            this.store.dispatch(new SetShareUrlAction(null));
+            this.store.dispatch(new ClearHistoryAction());
         });
     }
 
