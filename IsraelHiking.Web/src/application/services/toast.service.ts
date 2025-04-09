@@ -60,21 +60,13 @@ export class ToastService {
         });
     }
 
-    public undo(message: string, undoAction: () => void, cleanupAction: () => void) {
-        let undoWasPerformed = false;
+    public undo(message: string, undoAction: () => void) {
         const snackbarRef = this.snackbar.open(message, this.resources.cancel, {
             direction: this.resources.direction,
             duration: ToastService.DURATION
         });
         snackbarRef.onAction().subscribe(() => {
             undoAction();
-            undoWasPerformed = true;
-            this.snackbar.dismiss();
-        });
-        snackbarRef.afterDismissed().subscribe(() => {
-            if (!undoWasPerformed) {
-                cleanupAction();
-            }
         });
     }
 

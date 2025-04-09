@@ -122,30 +122,11 @@ describe("ToastService", () => {
         inject([ToastService, MatSnackBar],
             (service: ToastService, snackBar: MatSnackBar) => {
         const undoAction = jasmine.createSpy();
-        const cleanup = jasmine.createSpy();
         const snackbarRef = {
             onAction: () => ({ subscribe: (callback: () => void) => callback() }),
-            afterDismissed: () => ({ subscribe: (callback: () => void) => callback() })
         } as any;
         spyOn(snackBar, "open").and.returnValue(snackbarRef);
-        service.undo("message", undoAction, cleanup);
+        service.undo("message", undoAction);
         expect(undoAction).toHaveBeenCalled();
-        expect(cleanup).not.toHaveBeenCalled();
-    }));
-
-    it("should raise undo toast and call final action when dismissed without undo",
-        inject([ToastService, MatSnackBar],
-            (service: ToastService, snackBar: MatSnackBar) => {
-        const undoAction = jasmine.createSpy();
-        const cleanup = jasmine.createSpy();
-        const message = "message";
-        const snackbarRef = {
-            onAction: () => ({ subscribe: () => {} }),
-            afterDismissed: () => ({ subscribe: (callback: () => void) => callback() })
-        } as any;
-        spyOn(snackBar, "open").and.returnValue(snackbarRef);
-        service.undo(message, undoAction, cleanup);
-        expect(undoAction).not.toHaveBeenCalled();
-        expect(cleanup).toHaveBeenCalled();
     }));
 });

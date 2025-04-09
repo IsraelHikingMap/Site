@@ -18,7 +18,8 @@ import {
     DeleteAllRoutesAction,
     ClearHistoryAction,
     RedoAction,
-    UndoAction
+    UndoAction,
+    RestoreHistoryAction
 } from "../reducers/routes.reducer";
 import { SetRoutingTypeAction, SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
@@ -159,13 +160,14 @@ export class DrawingComponent {
     }
 
     public deleteAllRoutes() {
+        const history = this.store.selectSnapshot((s: ApplicationState) => s.routes.past);
         this.store.dispatch(new SetSelectedRouteAction(null));
         this.store.dispatch(new DeleteAllRoutesAction());
+        this.store.dispatch(new SetShareUrlAction(null));
+        this.store.dispatch(new ClearHistoryAction());
         this.toastService.undo(this.resources.deleteAllRoutes, () => {
+            this.store.dispatch(new RestoreHistoryAction(history as any));
             this.undo();    
-        }, () => {
-            this.store.dispatch(new SetShareUrlAction(null));
-            this.store.dispatch(new ClearHistoryAction());
         });
     }
 
