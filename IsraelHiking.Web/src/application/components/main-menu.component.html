@@ -59,38 +59,24 @@
                             <span class="flex-1 margin-sides">Language</span>
                         </span>
                     </button>
-                    <button mat-menu-item *ngIf="!isShowMore" (click)="toggleShowMore($event)" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show more">
+                    <button mat-menu-item (click)="selectLegendAndAbout()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show legend and info">
                         <span class="flex flex-row justify-center items-center">
-                            <span class="w-1/12 text-center"><i class="fa fa-lg icon-chevron-down mat-icon"></i></span>
-                            <span class="flex-1 margin-sides">{{resources.more}}</span>
+                            <span class="w-1/12 text-center"><i class="fa fa-lg icon-info mat-icon"></i></span>
+                            <span class="flex-1 margin-sides">{{resources.about}} - {{resources.legend}}</span>
                         </span>
                     </button>
-                    <div *ngIf="isShowMore">
-                        <button mat-menu-item (click)="selectLegendAndAbout()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show legend and info">
-                            <span class="flex flex-row justify-center items-center">
-                                <span class="w-1/12 text-center"><i class="fa fa-lg icon-info mat-icon"></i></span>
-                                <span class="flex-1 margin-sides">{{resources.about}} - {{resources.legend}}</span>
-                            </span>
-                        </button>
-                        <button mat-menu-item *ngIf="!isIFrame()" (click)="reportAnIssue()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Report an issue">
-                            <span class="flex flex-row justify-center items-center">
-                                <span class="w-1/12 text-center"><i class="fa fa-lg icon-envelope mat-icon"></i></span>
-                                <span class="flex-1 margin-sides">{{resources.reportAnIssue}}</span>
-                            </span>
-                        </button>
-                        <a mat-menu-item *ngIf="isShowEditOsmButton()" [href]="getOsmAddress()" [target]="'_blank'" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Edit in OSM">
-                            <span class="flex flex-row justify-center items-center">
-                                <span class="w-1/12 text-center"><i class="fa icon-map-editing fa-lg mat-icon"></i></span>
-                                <span class="flex-1 margin-sides">{{resources.editThisMapUsingOsm}}</span>
-                            </span>
-                        </a>
-                        <button mat-menu-item (click)="toggleShowMore($event)" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show less">
-                            <span class="flex flex-row justify-center items-center">
-                                <span class="w-1/12 text-center"><i class="fa fa-lg icon-chevron-up mat-icon"></i></span>
-                                <span class="flex-1 margin-sides">{{resources.less}}</span>
-                            </span>
-                        </button>
-                    </div>
+                    <button mat-menu-item *ngIf="!isIFrame()" (click)="reportAnIssue()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Report an issue">
+                        <span class="flex flex-row justify-center items-center">
+                            <span class="w-1/12 text-center"><i class="fa fa-lg icon-envelope mat-icon"></i></span>
+                            <span class="flex-1 margin-sides">{{resources.reportAnIssue}}</span>
+                        </span>
+                    </button>
+                    <a mat-menu-item *ngIf="isShowEditOsmButton()" [href]="getOsmAddress()" [target]="'_blank'" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Edit in OSM">
+                        <span class="flex flex-row justify-center items-center">
+                            <span class="w-1/12 text-center"><i class="fa icon-map-editing fa-lg mat-icon"></i></span>
+                            <span class="flex-1 margin-sides">{{resources.editThisMapUsingOsm}}</span>
+                        </span>
+                    </a>
                 </div>
             </ng-template>
         </mat-menu>
