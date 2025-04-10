@@ -117,4 +117,16 @@ describe("ToastService", () => {
         expect(confirmDialog.confirmButtonText).toBe(options.customConfirmText);
         expect(confirmDialog.declineButtonText).toBe(options.customDeclineText);
     }));
+
+    it("should raise undo toast and call final action when dismissed",
+        inject([ToastService, MatSnackBar],
+            (service: ToastService, snackBar: MatSnackBar) => {
+        const undoAction = jasmine.createSpy();
+        const snackbarRef = {
+            onAction: () => ({ subscribe: (callback: () => void) => callback() }),
+        } as any;
+        spyOn(snackBar, "open").and.returnValue(snackbarRef);
+        service.undo("message", undoAction);
+        expect(undoAction).toHaveBeenCalled();
+    }));
 });

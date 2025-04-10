@@ -17,6 +17,11 @@ export class ClearHistoryAction {
     public static type = this.prototype.constructor.name;
 }
 
+export class RestoreHistoryAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public history: RouteData[][]) {}
+}
+
 export class AddRouteAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeData: RouteData) {}
@@ -155,6 +160,13 @@ export class RoutesReducer {
         ctx.setState(produce((lastState: StateWithHistory<RouteData[]>) => {
             lastState.past = [];
             lastState.future = [];
+        }));
+    }
+
+    @Action(RestoreHistoryAction)
+    public restoreHistory(ctx: StateContext<StateWithHistory<RouteData[]>>, action: RestoreHistoryAction) {
+        ctx.setState(produce((lastState: StateWithHistory<RouteData[]>) => {
+            lastState.past = action.history;
         }));
     }
 
