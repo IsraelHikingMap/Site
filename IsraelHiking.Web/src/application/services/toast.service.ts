@@ -60,6 +60,16 @@ export class ToastService {
         });
     }
 
+    public undo(message: string, undoAction: () => void) {
+        const snackbarRef = this.snackbar.open(message, this.resources.cancel, {
+            direction: this.resources.direction,
+            duration: ToastService.DURATION
+        });
+        snackbarRef.onAction().subscribe(() => {
+            undoAction();
+        });
+    }
+
     public confirm(options: IConfirmOptions) {
         const componentRef = this.snackbar.openFromComponent(ConfirmDialogComponent, { panelClass: ["confirm-snackbar"]});
         componentRef.instance.confirmMessage = options.message;
