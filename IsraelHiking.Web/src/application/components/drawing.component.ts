@@ -165,7 +165,7 @@ export class DrawingComponent {
         this.store.dispatch(new DeleteAllRoutesAction());
         this.store.dispatch(new SetShareUrlAction(null));
         this.store.dispatch(new ClearHistoryAction());
-        this.toastService.undo(this.resources.deleteAllRoutes, () => {
+        this.toastService.undo(this.resources.routesDeleted, () => {
             this.store.dispatch(new RestoreHistoryAction(history as any));
             this.undo();    
         });
