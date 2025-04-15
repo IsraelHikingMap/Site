@@ -201,7 +201,7 @@ export class MainMenuComponent {
             this.socialSharing.shareViaEmail(
                 this.resources.reportAnIssueInstructions,
                 subject,
-                ["israelhikingmap@gmail.com"],
+                ["israelhiking@osm.org.il"],
                 null,
                 null,
                 [
@@ -210,7 +210,7 @@ export class MainMenuComponent {
                 ]
             );
         } catch (ex) {
-            alert("Ooopppss... Any chance you can take a screenshot and send it to israelhikingmap@gmail.com?" +
+            alert("Ooopppss... Any chance you can take a screenshot and send it to israelhiking@osm.org.il?" +
                 `\nSend issue failed: ${ex.toString()}`);
         } finally {
             subscription.unsubscribe();

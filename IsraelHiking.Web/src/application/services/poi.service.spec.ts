@@ -318,9 +318,9 @@ describe("Poi Service", () => {
 )
 );
 
-    it("Should get a point by id and source from the server", (inject([PoiService, HttpTestingController],
-        async (poiService: PoiService, mockBackend: HttpTestingController) => {
-
+    it("Should get a point by id and source from the server", (inject([PoiService, HttpTestingController, Store],
+        async (poiService: PoiService, mockBackend: HttpTestingController, store: Store) => {
+            store.dispatch = jasmine.createSpy();
             const id = "42";
             const source = "source";
 
@@ -331,6 +331,7 @@ describe("Poi Service", () => {
 
             const res = await promise;
             expect(res).not.toBeNull();
+            expect(store.dispatch).toHaveBeenCalled();
         }
     )));
 

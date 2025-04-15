@@ -521,10 +521,11 @@ export class PoiService {
                 }
                 default: { 
                     const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
-                    const poi$ = this.httpClient.get(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000));
-                    const poi = await firstValueFrom(poi$) as GeoJSON.Feature;
+                    const poi = await firstValueFrom(this.httpClient.get(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000))) as any as GeoJSON.Feature;
                     this.poisCache.splice(0, 0, poi);
-                    return cloneDeep(poi);
+                    const clone = cloneDeep(poi);
+                    this.store.dispatch(new SetSelectedPoiAction(clone));
+                    return clone;
                 }
             }
         } catch {
