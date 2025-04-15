@@ -12,6 +12,7 @@ import { MatDialogRef, MatDialog, MAT_DIALOG_DATA, MatDialogTitle, MatDialogClos
 import { Angulartics2OnModule } from "angulartics2";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { Store } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { CoordinatesComponent } from "../coordinates.component";
 import { ImageCaptureDirective } from "../../directives/image-capture.directive";
@@ -33,7 +34,7 @@ interface IIconsGroup {
 }
 
 interface PrivatePoiEditDialogData {
-    marker: MarkerData;
+    marker: Immutable<MarkerData>;
     routeId?: string;
     index: number;
 }
@@ -95,7 +96,7 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
         }
         this.routeId = this.data.routeId;
         this.markerIndex = this.data.index;
-        this.marker = structuredClone(this.data.marker);
+        this.marker = structuredClone(this.data.marker) as MarkerData;
         this.markerType = this.marker.type;
         this.title = this.marker.title;
         this.description = this.marker.description;
@@ -112,7 +113,7 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
      * @param index the index of the marker in the markers' array
      * @param routeId [optinal] - in case of null this dialog will edit recorded route markers, otherwise the id of the planned route
      */
-    public static openDialog(matDialog: MatDialog, marker: MarkerData, index: number, routeId?: string) {
+    public static openDialog(matDialog: MatDialog, marker: Immutable<MarkerData>, index: number, routeId?: string) {
         setTimeout(() => {
             // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
             matDialog.open(PrivatePoiEditDialogComponent, {

@@ -38,7 +38,6 @@ export class ShareDialogComponent implements AfterViewInit {
     public facebookShareAddress: string = "";
     public nakebCreateHikeAddress: string = "";
     public isLoading: boolean = false;
-    public lastShareUrl: ShareUrl = null;
     public canUpdate: boolean = false;
     public updateCurrentShare: boolean = false;
     public shareOverlays: boolean = false;
@@ -100,7 +99,6 @@ export class ShareDialogComponent implements AfterViewInit {
                 ? await this.shareUrlsService.updateShareUrl(shareUrlToSend)
                 : await this.shareUrlsService.createShareUrl(shareUrlToSend);
 
-            this.lastShareUrl = shareUrl;
             this.shareUrlsService.setShareUrl(shareUrl);
             this.imageUrl = this.shareUrlsService.getImageFromShareId(shareUrl);
             const links = this.shareUrlsService.getShareSocialLinks(shareUrl);

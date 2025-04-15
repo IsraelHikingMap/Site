@@ -140,7 +140,7 @@ export class ShareUrlsService {
         }
     }
 
-    public async createShareUrl(shareUrl: ShareUrl): Promise<ShareUrl> {
+    public async createShareUrl(shareUrl: ShareUrl): Promise<Immutable<ShareUrl>> {
         this.loggingService.info(`[Shares] Creating share with title: ${shareUrl.title}`);
         const createdShareUrl = await firstValueFrom(this.httpClient.post(Urls.urls, shareUrl)) as ShareUrl;
         createdShareUrl.lastModifiedDate = new Date(createdShareUrl.lastModifiedDate);
@@ -148,7 +148,7 @@ export class ShareUrlsService {
         return createdShareUrl;
     }
 
-    public async updateShareUrl(shareUrl: ShareUrl): Promise<ShareUrl> {
+    public async updateShareUrl(shareUrl: ShareUrl): Promise<Immutable<ShareUrl>> {
         this.loggingService.info(`[Shares] Updating share with id: ${shareUrl.id}`);
         const updatedShareUrl = await firstValueFrom(this.httpClient.put(Urls.urls + shareUrl.id, shareUrl)) as ShareUrl;
         updatedShareUrl.lastModifiedDate = new Date(updatedShareUrl.lastModifiedDate);
@@ -163,7 +163,7 @@ export class ShareUrlsService {
         await this.databaseService.deleteShareUrlById(shareUrl.id);
     }
 
-    public getImageFromShareId(shareUrl: ShareUrl, width?: number, height?: number) {
+    public getImageFromShareId(shareUrl: Immutable<ShareUrl>, width?: number, height?: number) {
         let address = Urls.images + shareUrl.id;
         if (width && height) {
             address += `?width=${width}&height=${height}`;
@@ -176,8 +176,8 @@ export class ShareUrlsService {
         return window.URL.createObjectURL(image);
     }
 
-    public setShareUrl(shareUrl: ShareUrl) {
-        this.store.dispatch(new SetShareUrlAction(shareUrl));
+    public setShareUrl(shareUrl: Immutable<ShareUrl>) {
+        this.store.dispatch(new SetShareUrlAction(shareUrl as ShareUrl));
     }
 
     public async setShareUrlById(shareId: string): Promise<ShareUrl> {

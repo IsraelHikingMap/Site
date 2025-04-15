@@ -23,7 +23,7 @@ import {
 } from "../reducers/routes.reducer";
 import { SetRoutingTypeAction, SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
-import type { RoutingType, ApplicationState } from "../models/models";
+import type { RoutingType, ApplicationState, RouteData } from "../models/models";
 
 @Component({
     selector: "drawing",
@@ -166,7 +166,7 @@ export class DrawingComponent {
         this.store.dispatch(new SetShareUrlAction(null));
         this.store.dispatch(new ClearHistoryAction());
         this.toastService.undo(this.resources.routesDeleted, () => {
-            this.store.dispatch(new RestoreHistoryAction(history as any));
+            this.store.dispatch(new RestoreHistoryAction(history as RouteData[][]));
             this.undo();    
         });
     }
