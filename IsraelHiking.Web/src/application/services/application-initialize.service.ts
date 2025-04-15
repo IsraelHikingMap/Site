@@ -116,7 +116,7 @@ export class ApplicationInitializeService {
                 alert("Sorry, this site does not support running FireFox in private mode...");
             } else {
                 alert("Ooopppss... We have encountered an unexpected failure. Please try again.\n" +
-                      "If that does not help, please take a screenshot and send it to israelhikingmap@gmail.com\n" +
+                      "If that does not help, please take a screenshot and send it to israelhiking@osm.org.il\n" +
                       `Init failed: ${(ex as Error).message}`);
             }
             this.loggingService.error(`Failed IHM Application Initialization: ${(ex as Error).message}`);
