@@ -67,9 +67,9 @@ export class TracesService {
                 traceJson.timeStamp = new Date(traceJson.timeStamp);
                 const existingTrace = existingTraces.find(t => t.id === traceJson.id);
                 if (existingTrace != null) {
-                    this.store.dispatch(new UpdateTraceAction(traceJson));
+                    this.store.dispatch(new UpdateTraceAction(structuredClone(traceJson)));
                 } else {
-                    this.store.dispatch(new AddTraceAction(traceJson));
+                    this.store.dispatch(new AddTraceAction(structuredClone(traceJson)));
                 }
                 if (traceJson.visibility === "private") {
                     traceJson.visibility = "trackable";
