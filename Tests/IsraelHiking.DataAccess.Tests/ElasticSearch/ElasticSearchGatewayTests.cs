@@ -63,18 +63,6 @@ public class ElasticSearchGatewayTests
 
     [TestMethod]
     [Ignore]
-    public void GetHighways_ShouldReturnResults()
-    {
-        var northEast = new Coordinate(35.0516, 31.7553);
-        var southWest = new Coordinate(35.0251, 31.7467);
-        var results = _gateway.GetHighways(northEast, southWest).Result;
-        Assert.IsNotNull(results[0].Attributes[FeatureAttributes.POI_OSM_NODES] as IEnumerable<object>);
-        Assert.AreEqual(38, results.Count);
-            
-    }
-
-    [TestMethod]
-    [Ignore]
     public void GetClosestPoint_ShouldReturnResults()
     {
         var coordinate = new Coordinate(35.303488, 33.027086);
@@ -192,7 +180,6 @@ public class ElasticSearchGatewayTests
             ErrorMessage = string.Empty,
             Request = new UpdateRequest
             {
-                PointsOfInterest = true,
                 AllExternalSources = true,
             }
         }).Wait();

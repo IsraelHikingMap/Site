@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;

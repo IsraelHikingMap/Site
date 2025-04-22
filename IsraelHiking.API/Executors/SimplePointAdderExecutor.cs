@@ -3,7 +3,6 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
-using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
@@ -13,37 +12,19 @@ using OsmSharp.Changesets;
 using OsmSharp.IO.API;
 using OsmSharp.Tags;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.API.Executors;
 
 /// <inheritdoc/>
-public class SimplePointAdderExecutor : ISimplePointAdderExecutor
+public class SimplePointAdderExecutor(
+    IOptions<ConfigurationData> options,
+    IOverpassTurboGateway overpassTurboGateway,
+    IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
+    ILogger logger) : ISimplePointAdderExecutor
 {
-    private readonly IHighwaysRepository _highwaysRepository;
-    private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
-    private readonly ConfigurationData _options;
-    private readonly ILogger _logger;
-
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="options"></param>
-    /// <param name="highwaysRepository"></param>
-    /// <param name="osmGeoJsonPreprocessorExecutor"></param>
-    /// <param name="logger"></param>
-    public SimplePointAdderExecutor(IOptions<ConfigurationData> options,
-        IHighwaysRepository highwaysRepository,
-        IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor, 
-        ILogger logger)
-    {
-        _highwaysRepository = highwaysRepository;
-        _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
-        _logger = logger;
-        _options = options.Value;
-    }
 
     /// <inheritdoc/>
     public async Task Add(IAuthClient osmGateway, AddSimplePointOfInterestRequest request)
@@ -52,15 +33,7 @@ public class SimplePointAdderExecutor : ISimplePointAdderExecutor
         await osmGateway.UploadToOsmWithRetries(
             $"Uploading simple POI, type: {request.PointType} using IsraelHiking.osm.org.il",
             async changeSetId => await osmGateway.UploadChangeset(changeSetId, change),
-            _logger);
-
-        var modifiedWay = change.Modify?.OfType<Way>().FirstOrDefault();
-        if (modifiedWay != null)
-        {
-            var completeWay = await osmGateway.GetCompleteWay(modifiedWay.Id.Value);
-            var updatedHighways = _osmGeoJsonPreprocessorExecutor.Preprocess([completeWay]);
-            await _highwaysRepository.UpdateHighwaysData(updatedHighways);
-        }
+            logger);
     }
 
     private TagsCollection ConvertPointTypeToTags(SimplePointType pointType)
@@ -112,10 +85,11 @@ public class SimplePointAdderExecutor : ISimplePointAdderExecutor
     private async Task<(Way, IFeature[])> GetClosestHighways(IAuthClient osmGateway, LatLng latLng)
     {
         var diff = 0.003; // get highways around 300 m radius not to miss highways (elastic bug?)
-        var highways = await _highwaysRepository.GetHighways(new Coordinate(latLng.Lng + diff, latLng.Lat + diff),
+        var ways = await overpassTurboGateway.GetHighways(new Coordinate(latLng.Lng + diff, latLng.Lat + diff),
             new Coordinate(latLng.Lng - diff, latLng.Lat - diff));
+        var highways = osmGeoJsonPreprocessorExecutor.Preprocess(ways);
         var point = new Point(latLng.Lng, latLng.Lat);
-        var closestHighways = highways.Where(h => DistanceWithPolygonFix(h.Geometry, point) < _options.ClosestHighwayForGates)
+        var closestHighways = highways.Where(h => DistanceWithPolygonFix(h.Geometry, point) < options.Value.ClosestHighwayForGates)
             .OrderBy(h => DistanceWithPolygonFix(h.Geometry, point)).ToArray();
 
         if (!closestHighways.Any())
@@ -132,7 +106,7 @@ public class SimplePointAdderExecutor : ISimplePointAdderExecutor
         }
         // The highway in the database is not up-to-date, need to fetch it from OSM.
         var completeWay = await osmGateway.GetCompleteWay(closestHighway.GetOsmId());
-        var firstHighway = _osmGeoJsonPreprocessorExecutor.Preprocess([completeWay]).FirstOrDefault();
+        var firstHighway = osmGeoJsonPreprocessorExecutor.Preprocess([completeWay]).FirstOrDefault();
         if (firstHighway == null) {
             // This is a rate case where the next version of the highway doesn't contain any tags, 
             // and it was a highway when the highways database wes built
@@ -150,7 +124,6 @@ public class SimplePointAdderExecutor : ISimplePointAdderExecutor
         return geometry switch
         {
             Polygon polygon => DistanceToPolygon(polygon, point),
-            MultiPolygon multiPolygon => multiPolygon.OfType<Polygon>().Min(p => DistanceToPolygon(p, point)),
             _ => geometry.Distance(point)
         };
     }
@@ -174,8 +147,8 @@ public class SimplePointAdderExecutor : ISimplePointAdderExecutor
         var closestHighway = closestHighways.First();
         var closestNodeCoordinate = closestHighway.Geometry.Coordinates.OrderBy(n => n.Distance(coordinate)).FirstOrDefault();
         var closetNodeIndex = Array.FindIndex(closestHighway.Geometry.Coordinates.ToArray(), n => n.Equals(closestNodeCoordinate));
-        var nodeId = long.Parse(((IEnumerable<object>)closestHighway.Attributes[FeatureAttributes.POI_OSM_NODES]).ElementAt(closetNodeIndex).ToString() ?? string.Empty);
-        var isJunction = closestHighways.Skip(1).Any(f => ((IEnumerable<object>)f.Attributes[FeatureAttributes.POI_OSM_NODES]).Any(nId => nId.ToString() == nodeId.ToString()));
+        var nodeId = ((long?[])closestHighway.Attributes[FeatureAttributes.POI_OSM_NODES]).ElementAt(closetNodeIndex).Value;
+        var isJunction = closestHighways.Skip(1).Any(f => ((long?[])f.Attributes[FeatureAttributes.POI_OSM_NODES]).Any(nId => nId == nodeId));
         return (closestNodeCoordinate, closetNodeIndex, nodeId, isJunction);
     }
 
@@ -206,7 +179,7 @@ public class SimplePointAdderExecutor : ISimplePointAdderExecutor
         }
         var (closestNodeCoordinate, closetNodeIndex, nodeId, isJunction) = GetClosestNodeAndCheckIsJunction(request.LatLng, closestHighways);
         var newNodeCoordinate = request.LatLng.ToCoordinate();
-        if (isJunction || closestNodeCoordinate.Distance(newNodeCoordinate) >= _options.ClosestNodeForGates)
+        if (isJunction || closestNodeCoordinate.Distance(newNodeCoordinate) >= options.Value.ClosestNodeForGates)
         {
             // Need to add a node to the closest way
             var indexToInsert = GetIndexToInsert(closetNodeIndex, closestNodeCoordinate, closestHighways, newNodeCoordinate);

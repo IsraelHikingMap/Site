@@ -1,16 +1,18 @@
 ﻿using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
-using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
-using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
 using System.Collections.Generic;
 using System.Linq;
+using IsraelHiking.API.Converters;
+using IsraelHiking.DataAccessInterfaces;
+using OsmSharp;
+using OsmSharp.Complete;
+using OsmSharp.Tags;
 
 namespace IsraelHiking.API.Tests.Services;
 
@@ -18,32 +20,35 @@ namespace IsraelHiking.API.Tests.Services;
 public class AddibleGpxLinesFinderServiceTests
 {
     private IAddibleGpxLinesFinderService _service;
-    private IHighwaysRepository _highwaysRepository;
+    private IOverpassTurboGateway _overpassTurboGateway;
     private ConfigurationData _options;
 
-    private void SetupHighways(List<LineString> lineStrings = null)
+    private void SetupHighways(List<Coordinate[]> lines = null)
     {
-        lineStrings ??= [];
+        lines ??= [];
+        var id = 1;
         var converter = new ItmWgs84MathTransformFactory().Create();
-        var highways = lineStrings.Select(l => new Feature(new LineString(l.Coordinates.Select(c => converter.Transform(c.X, c.Y))
-                    .Select(c => new Coordinate(c.x, c.y))
-                    .ToArray()),
-                new AttributesTable()))
-            .Cast<IFeature>()
-            .ToList();
-        int id = 1;
-        foreach (var highway in highways)
+        var ways = lines.Select(coordinates =>
         {
-            highway.Attributes.Add(FeatureAttributes.ID, id.ToString());
-            id++;
-        }
-        _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(highways);
+            var way = new CompleteWay
+            {
+                Id = id++,
+                Nodes = coordinates.Select((coordinate) => 
+                {
+                    var itmCoordinate = converter.Transform([coordinate.X, coordinate.Y]);
+                    return new Node { Id = id++, Latitude = itmCoordinate[1], Longitude = itmCoordinate[0] };
+                }).ToArray(),
+                Tags = new TagsCollection {{"highway", "something"}}
+            };
+            return way;
+        }).ToList();
+        _overpassTurboGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(ways);
     }
 
     [TestInitialize]
     public void TestInitialize()
     {
-        _highwaysRepository = Substitute.For<IHighwaysRepository>();
+        _overpassTurboGateway = Substitute.For<IOverpassTurboGateway>();
         _options = new ConfigurationData
         {
             MinimalProlongLineLength = 0
@@ -51,7 +56,15 @@ public class AddibleGpxLinesFinderServiceTests
         var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
         optionsProvider.Value.Returns(_options);
         var geometryFactory = new GeometryFactory();
-        _service = new AddibleGpxLinesFinderService(new GpxLoopsSplitterExecutor(geometryFactory), new GpxProlongerExecutor(geometryFactory), new ItmWgs84MathTransformFactory(), _highwaysRepository, optionsProvider, geometryFactory, Substitute.For<ILogger>());
+        _service = new AddibleGpxLinesFinderService(
+            new GpxLoopsSplitterExecutor(geometryFactory), 
+            new GpxProlongerExecutor(geometryFactory), 
+            new ItmWgs84MathTransformFactory(), 
+            _overpassTurboGateway, 
+            optionsProvider, 
+            geometryFactory,
+            new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), Substitute.For<IElevationGateway>(), new OsmGeoJsonConverter(geometryFactory), new TagsHelper(optionsProvider)),
+            Substitute.For<ILogger>());
     }
 
     [TestMethod]
@@ -164,8 +177,8 @@ public class AddibleGpxLinesFinderServiceTests
         _options.MinimalMissingSelfLoopPartLength = 0;
         _options.SimplificationDistanceTolerance = 0;
         SetupHighways([
-            new LineString([new Coordinate(0, 0), new Coordinate(0, 10)]),
-            new LineString([new Coordinate(0, 40), new Coordinate(0, 50)])
+            [new Coordinate(0, 0), new Coordinate(0, 10)],
+            [new Coordinate(0, 40), new Coordinate(0, 50)]
         ]);
 
         var results = _service.GetLines([gpxItmLine]).Result.ToArray();
@@ -234,8 +247,8 @@ public class AddibleGpxLinesFinderServiceTests
         _options.SimplificationDistanceTolerance = 0;
 
         SetupHighways([
-            new LineString([new Coordinate(0, 0), new Coordinate(0, 10)]),
-            new LineString([new Coordinate(0, 40), new Coordinate(0, 50)])
+            [new Coordinate(0, 0), new Coordinate(0, 10)],
+            [new Coordinate(0, 40), new Coordinate(0, 50)]
         ]);
 
         var results = _service.GetLines([gpxItmLine]).Result.ToArray();

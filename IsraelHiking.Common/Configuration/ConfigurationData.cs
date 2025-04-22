@@ -117,10 +117,6 @@ public class ConfigurationData
     /// Image creator server address
     /// </summary>
     public string ImageCreatorServerAddress { get; set; }
-    /// <summary>
-    /// The address of the OSM file to download for daily rebuild
-    /// </summary>
-    public string OsmFileAddress { get; set; }
 
     /// <summary>
     /// A location where offline files are saved in order to allow them to be downloaded
@@ -130,6 +126,10 @@ public class ConfigurationData
     /// OSM server base address
     /// </summary>
     public string OsmBaseAddress { get; set; }
+    /// <summary>
+    /// OSM server base address
+    /// </summary>
+    public List<string> OverpassAddresses { get; set; }
     /// <summary>
     /// A list of allowed image sites
     /// </summary>
@@ -170,7 +170,6 @@ public class ConfigurationData
         GpsBabelServerAddress = "http://localhost:11987/";
         ElevationServerAddress = "http://localhost:11211/";
         ImageCreatorServerAddress = "http://localhost:11311/";
-        OsmFileAddress = "https://download.geofabrik.de/asia/israel-and-palestine-latest.osm.pbf";
         OfflineFilesFolder = "./";
         OsmBaseAddress = "https://www.openstreetmap.org";
         ImageUrlsAllowList =
@@ -180,6 +179,7 @@ public class ConfigurationData
             "nakeb.co.il",
             "jeepolog.com"
         ];
+        OverpassAddresses = ["https://z.overpass-api.de/api/interpreter", "https://lz4.overpass-api.de/api/interpreter"];
         CsvsDictionary = new Dictionary<string, string>();
     }
 }
