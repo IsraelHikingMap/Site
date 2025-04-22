@@ -156,6 +156,7 @@ export class OsmTagsService {
                     poi.properties.poiCategory = "Camping";
                     return;
                 case "attraction":
+                case "artwork":
                     poi.properties.poiIconColor = "#ffb800";
                     poi.properties.poiIcon = "icon-star";
                     poi.properties.poiCategory = "Other";
