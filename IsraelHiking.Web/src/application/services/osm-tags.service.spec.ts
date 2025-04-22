@@ -345,6 +345,18 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiCategory).toBe("Other");
     });
 
+    it("Should set icon color category for attraction", () => {
+        // Arrange
+        const feature = createFeature({tourism: "artwork" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("#ffb800");
+        expect(poi.properties.poiIcon).toBe("icon-star");
+        expect(poi.properties.poiCategory).toBe("Other");
+    });
+
     it("Should set icon color category for mtb route", () => {
         // Arrange
         const feature = createFeature({ "mtb:name": "route" });
