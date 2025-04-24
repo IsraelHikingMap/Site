@@ -13,6 +13,24 @@ import { AddTraceAction, RemoveTraceAction, UpdateTraceAction } from "../reducer
 import { Urls } from "../urls";
 import type { Trace, ApplicationState, DataContainer, RouteData } from "../models/models";
 
+type OsmTrace = { 
+    description: string;
+    id: number;
+    lat: number;
+    lon: number;
+    name: string;
+    pending: boolean;
+    tags: string[];
+    timestamp: string;
+    uid: number;
+    user: string;
+    visibility: "identifiable" | "private" | "public" | "trackable";
+}
+
+type OsmTraces = {
+    traces: OsmTrace[];
+}
+
 @Injectable()
 export class TracesService {
 
@@ -25,7 +43,7 @@ export class TracesService {
 
     public getMissingParts(traceId: string): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
         this.loggingService.info(`[Traces] Getting missing parts for ${traceId}`);
-        const missingParts$ = this.httpClient.post(Urls.osm + "?traceId=" + traceId, null);
+        const missingParts$ = this.httpClient.post(Urls.missingParts + "?traceId=" + traceId, null);
         return firstValueFrom(missingParts$) as Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
     }
 
@@ -60,30 +78,38 @@ export class TracesService {
     public async syncTraces(): Promise<void> {
         try {
             this.loggingService.info("[Traces] Starting syncing traces");
-            const response = await firstValueFrom(this.httpClient.get(Urls.osmTrace).pipe(timeout(20000)));
-            const traces = ([] as Trace[]).concat(response as Trace[] || []);
+            const response = await firstValueFrom(this.httpClient.get(Urls.osmGpxFiles).pipe(timeout(20000))) as unknown as OsmTraces;
             const existingTraces = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces;
-            for (const traceJson of traces) {
-                traceJson.timeStamp = new Date(traceJson.timeStamp);
-                const existingTrace = existingTraces.find(t => t.id === traceJson.id);
+            for (const traceJson of response.traces) {
+                const trace: Trace = {
+                    name: traceJson.name || "",
+                    description: traceJson.description || "",
+                    id: traceJson.id.toString(),
+                    tagsString: (traceJson.tags || []).join(","),
+                    timeStamp: traceJson.timestamp ? new Date(traceJson.timestamp) : new Date(),
+                    visibility: traceJson.visibility,
+                    url: Urls.osmBase + `/user/${traceJson.user}/traces/${traceJson.id}`,
+                    imageUrl: Urls.tracePicture + traceJson.id + "/picture"
+                }
+                const existingTrace = existingTraces.find(t => t.id === trace.id);
                 if (existingTrace != null) {
-                    this.store.dispatch(new UpdateTraceAction(structuredClone(traceJson)));
+                    this.store.dispatch(new UpdateTraceAction(structuredClone(trace)));
                 } else {
-                    this.store.dispatch(new AddTraceAction(structuredClone(traceJson)));
+                    this.store.dispatch(new AddTraceAction(structuredClone(trace)));
                 }
-                if (traceJson.visibility === "private") {
-                    traceJson.visibility = "trackable";
-                    this.updateTrace(traceJson);
+                if (trace.visibility === "private") {
+                    trace.visibility = "trackable";
+                    this.updateTrace(trace);
                 }
-                if (traceJson.visibility === "public") {
-                    traceJson.visibility = "identifiable";
-                    this.updateTrace(traceJson);
+                if (trace.visibility === "public") {
+                    trace.visibility = "identifiable";
+                    this.updateTrace(trace);
                 }
             }
-            for (const trace of existingTraces.filter(t => t.visibility !== "local")) {
-                if (traces.find(t => t.id === trace.id) == null) {
-                    this.store.dispatch(new RemoveTraceAction(trace.id));
-                    await this.databaseService.deleteTraceById(trace.id);
+            for (const existingTrace of existingTraces.filter(t => t.visibility !== "local")) {
+                if (response.traces.find(t => t.id.toString() === existingTrace.id) == null) {
+                    this.store.dispatch(new RemoveTraceAction(existingTrace.id));
+                    await this.databaseService.deleteTraceById(existingTrace.id);
                 }
             }
             this.loggingService.info("[Traces] Finished syncing traces");
@@ -106,7 +132,7 @@ export class TracesService {
                 dataContainer: storedTrace.dataContainer
             };
         }
-        const dataContainer = await firstValueFrom(this.httpClient.get(Urls.osmTrace + traceId)) as DataContainer;
+        const dataContainer = await firstValueFrom(this.httpClient.get(Urls.traceRoute + traceId)) as DataContainer;
         this.loggingService.info(`[Traces] Got trace from server: ${traceId}`);
         const traceToStore = {
             ...trace,
@@ -119,13 +145,17 @@ export class TracesService {
     public uploadTrace(file: File): Promise<any> {
         const formData = new FormData();
         formData.append("file", file, file.name);
+        const filenameWithoutExtension = file.name.split(".");
+        filenameWithoutExtension.pop();
+        formData.append("description", filenameWithoutExtension.join("."));
+        formData.append("visibility", "trackable");
         this.loggingService.info(`[Traces] Uploading a trace with file name ${file.name}`);
-        return firstValueFrom(this.httpClient.post(Urls.osmTrace, formData).pipe(timeout(3 * 60 * 1000)));
+        return firstValueFrom(this.httpClient.post(Urls.osmGpx, formData).pipe(timeout(3 * 60 * 1000)));
     }
 
     public async uploadRouteAsTrace(route: Immutable<RouteData>): Promise<any> {
         this.loggingService.info(`[Traces] Uploading a route as trace with name ${route.name}`);
-        return firstValueFrom(this.httpClient.post(Urls.osmTraceRoute, route, {
+        return firstValueFrom(this.httpClient.post(Urls.traceRoute, route, {
             params: { language: this.resources.getCurrentLanguageCodeSimplified() }
         }).pipe(timeout(3 * 60 * 1000)));
     }
@@ -133,7 +163,14 @@ export class TracesService {
     public async updateTrace(trace: Trace): Promise<void> {
         this.loggingService.info(`[Traces] Updating a trace with id ${trace.id}, visibility: ${trace.visibility}`);
         if (trace.visibility !== "local") {
-            await firstValueFrom(this.httpClient.put(Urls.osmTrace + trace.id, trace));
+            const xmlTreace = `<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="OpenStreetMap server">
+	<gpx_file id="${trace.id}" name="${trace.name}" visibility="${trace.visibility}" timestamp="${trace.timeStamp.toISOString()}">
+		<description>${trace.description}</description>
+        ${trace.tagsString.split(",").map(tag => `<tag>${tag}</tag>`).join("\n")}
+	</gpx_file>
+</osm>`
+            await firstValueFrom(this.httpClient.put(Urls.osmGpx + "/" + trace.id, xmlTreace));
         }
         this.store.dispatch(new UpdateTraceAction(trace));
     }
@@ -141,7 +178,7 @@ export class TracesService {
     public async deleteTrace(trace: Immutable<Trace>): Promise<void> {
         this.loggingService.info(`[Traces] Deleting a trace with name ${trace.name} and id ${trace.id}, visibility: ${trace.visibility}`);
         if (trace.visibility !== "local") {
-            await firstValueFrom(this.httpClient.delete(Urls.osmTrace + trace.id));
+            await firstValueFrom(this.httpClient.delete(Urls.osmGpx + "/" + trace.id));
         }
         this.store.dispatch(new RemoveTraceAction(trace.id));
         await this.databaseService.deleteTraceById(trace.id);

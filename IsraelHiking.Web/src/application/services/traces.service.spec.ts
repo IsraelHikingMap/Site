@@ -46,7 +46,7 @@ describe("Traces Service", () => {
                 expect(res).not.toBeNull();
             });
 
-            mockBackend.expectOne(Urls.osm + "?traceId=" + trace.id).flush({});
+            mockBackend.expectOne(Urls.missingParts + "?traceId=" + trace.id).flush({});
             return promise;
     }));
 
@@ -60,7 +60,7 @@ describe("Traces Service", () => {
 
             await tracesService.initialize();
 
-            expect(() => mockBackend.expectNone(Urls.osmTraceRoute)).not.toThrow();
+            expect(() => mockBackend.expectNone(Urls.traceRoute)).not.toThrow();
     }));
 
     it("Should not upload local traces if offline", inject([TracesService, HttpTestingController, Store, RunningContextService],
@@ -73,7 +73,7 @@ describe("Traces Service", () => {
             runningContextService.isOnline = false;
             await tracesService.initialize();
 
-            expect(() => mockBackend.expectNone(Urls.osmTraceRoute)).not.toThrow();
+            expect(() => mockBackend.expectNone(Urls.traceRoute)).not.toThrow();
     }));
 
     it("Should not upload local traces if user is logged out", inject([TracesService, HttpTestingController, Store, RunningContextService],
@@ -89,7 +89,7 @@ describe("Traces Service", () => {
             runningContextService.isOnline = true;
             await tracesService.initialize();
 
-            expect(() => mockBackend.expectNone(Urls.osmTraceRoute)).not.toThrow();
+            expect(() => mockBackend.expectNone(Urls.traceRoute)).not.toThrow();
     }));
 
     it("Should not upload local traces if there are no local traces", inject([TracesService, HttpTestingController, Store, RunningContextService],
@@ -108,7 +108,7 @@ describe("Traces Service", () => {
             runningContextService.isOnline = true;
             await tracesService.initialize();
 
-            expect(() => mockBackend.expectNone(Urls.osmTraceRoute)).not.toThrow();
+            expect(() => mockBackend.expectNone(Urls.traceRoute)).not.toThrow();
     }));
 
     it("Should upload local traces and run sync with no traces", inject([TracesService, HttpTestingController, Store, RunningContextService],
@@ -135,11 +135,11 @@ describe("Traces Service", () => {
             runningContextService.isOnline = true;
             const promise = tracesService.initialize();
 
-            mockBackend.expectOne(u => u.url.startsWith(Urls.osmTraceRoute)).flush({});
+            mockBackend.expectOne(u => u.url.startsWith(Urls.traceRoute)).flush({});
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            mockBackend.expectOne(u => u.url.startsWith(Urls.osmTrace)).flush([]);
+            mockBackend.expectOne(u => u.url.startsWith(Urls.osmGpxFiles)).flush({traces: []});
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(RemoveTraceAction);
@@ -173,17 +173,17 @@ describe("Traces Service", () => {
             runningContextService.isOnline = true;
             const promise = tracesService.initialize();
 
-            mockBackend.expectOne(u => u.url.startsWith(Urls.osmTraceRoute)).flush({});
+            mockBackend.expectOne(u => u.url.startsWith(Urls.traceRoute)).flush({});
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            mockBackend.expectOne(u => u.url.startsWith(Urls.osmTrace)).flush([{
-                id: "1",
+            mockBackend.expectOne(u => u.url.startsWith(Urls.osmGpxFiles)).flush({ traces: [{
+                id: 1,
                 visibility: "public"
             }, {
-                id: "2",
+                id: 2,
                 visibility: "private"
-            }]);
+            }]});
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
@@ -191,7 +191,7 @@ describe("Traces Service", () => {
             expect(spy.calls.all()[1].args[0]).toBeInstanceOf(UpdateTraceAction);
             expect(spy.calls.all()[2].args[0]).toBeInstanceOf(AddTraceAction);
 
-            const req = mockBackend.match(u => u.url.startsWith(Urls.osmTrace));
+            const req = mockBackend.match(u => u.url.startsWith(Urls.osmGpx));
             expect(req.length).toBe(2);
             req[0].flush({});
             req[1].flush({});
@@ -247,7 +247,7 @@ describe("Traces Service", () => {
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            mockBackend.expectOne(Urls.osmTrace + "1").flush({id: "1"});
+            mockBackend.expectOne(Urls.traceRoute + "1").flush({id: "1"});
 
             const trace = await promise;
             expect(trace.id).toBe("1");
@@ -260,7 +260,7 @@ describe("Traces Service", () => {
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            mockBackend.expectOne(Urls.osmTrace).flush({ id: "1"});
+            mockBackend.expectOne(Urls.osmGpx).flush({ id: "1"});
 
             const trace = await promise;
             expect(trace.id).toBe("1");
