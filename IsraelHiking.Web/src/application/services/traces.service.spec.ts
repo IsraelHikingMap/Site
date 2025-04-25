@@ -60,7 +60,7 @@ describe("Traces Service", () => {
 
             await tracesService.initialize();
 
-            expect(() => mockBackend.expectNone(Urls.traceRoute)).not.toThrow();
+            expect(() => mockBackend.expectNone(Urls.uploadDataContainer)).not.toThrow();
     }));
 
     it("Should not upload local traces if offline", inject([TracesService, HttpTestingController, Store, RunningContextService],
@@ -73,7 +73,7 @@ describe("Traces Service", () => {
             runningContextService.isOnline = false;
             await tracesService.initialize();
 
-            expect(() => mockBackend.expectNone(Urls.traceRoute)).not.toThrow();
+            expect(() => mockBackend.expectNone(Urls.uploadDataContainer)).not.toThrow();
     }));
 
     it("Should not upload local traces if user is logged out", inject([TracesService, HttpTestingController, Store, RunningContextService],
@@ -89,7 +89,7 @@ describe("Traces Service", () => {
             runningContextService.isOnline = true;
             await tracesService.initialize();
 
-            expect(() => mockBackend.expectNone(Urls.traceRoute)).not.toThrow();
+            expect(() => mockBackend.expectNone(Urls.uploadDataContainer)).not.toThrow();
     }));
 
     it("Should not upload local traces if there are no local traces", inject([TracesService, HttpTestingController, Store, RunningContextService],
@@ -108,7 +108,7 @@ describe("Traces Service", () => {
             runningContextService.isOnline = true;
             await tracesService.initialize();
 
-            expect(() => mockBackend.expectNone(Urls.traceRoute)).not.toThrow();
+            expect(() => mockBackend.expectNone(Urls.uploadDataContainer)).not.toThrow();
     }));
 
     it("Should upload local traces and run sync with no traces", inject([TracesService, HttpTestingController, Store, RunningContextService],
@@ -135,7 +135,7 @@ describe("Traces Service", () => {
             runningContextService.isOnline = true;
             const promise = tracesService.initialize();
 
-            mockBackend.expectOne(u => u.url.startsWith(Urls.traceRoute)).flush({});
+            mockBackend.expectOne(u => u.url.startsWith(Urls.uploadDataContainer)).flush({});
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
@@ -173,7 +173,7 @@ describe("Traces Service", () => {
             runningContextService.isOnline = true;
             const promise = tracesService.initialize();
 
-            mockBackend.expectOne(u => u.url.startsWith(Urls.traceRoute)).flush({});
+            mockBackend.expectOne(u => u.url.startsWith(Urls.uploadDataContainer)).flush({});
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
@@ -247,14 +247,14 @@ describe("Traces Service", () => {
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            mockBackend.expectOne(Urls.traceRoute + "1").flush({id: "1"});
+            mockBackend.expectOne(Urls.traceAsDataContainer + "1").flush({id: "1"});
 
             const trace = await promise;
             expect(trace.id).toBe("1");
     }));
 
-    it("Should upload a trace", inject([TracesService, DatabaseService, HttpTestingController],
-        async (tracesService: TracesService, databaseService: DatabaseService, mockBackend: HttpTestingController) => {
+    it("Should upload a trace", inject([TracesService, HttpTestingController],
+        async (tracesService: TracesService, mockBackend: HttpTestingController) => {
             const file = new File([""], "file.txt");
             const promise = tracesService.uploadTrace(file);
 

@@ -66,6 +66,7 @@ public class OsmTracesController : ControllerBase
     /// </summary>
     /// <returns>A list of traces</returns>
     [HttpGet]
+    [Obsolete("This endpoint is deprecated and should be removed by 9.2025, this is now going to OSM directly")]
     public async Task<Trace[]> GetTraces()
     {
         var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
@@ -79,6 +80,7 @@ public class OsmTracesController : ControllerBase
     /// <param name="id">The trace id</param>
     /// <returns>A trace converted to data container</returns>
     [HttpGet("{id}")]
+    // This is still needed until the following is solved: https://github.com/openstreetmap/openstreetmap-website/issues/5639
     public async Task<DataContainerPoco> GetTraceById(int id)
     {
         var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
@@ -110,6 +112,7 @@ public class OsmTracesController : ControllerBase
     /// </summary>
     /// <returns></returns>
     [HttpPost]
+    [Obsolete("This endpoint is deprecated and should be removed by 9.2025, this is now going to OSM directly")]
     public async Task<IActionResult> PostUploadGpsTrace(IFormFile file)
     {
         if (file == null)
@@ -182,6 +185,7 @@ public class OsmTracesController : ControllerBase
     /// <returns></returns>
     [Route("{id}")]
     [HttpPut]
+    [Obsolete("This endpoint is deprecated and should be removed by 9.2025, this is now going to OSM directly")]
     public async Task<IActionResult> PutGpsTrace(string id, [FromBody]Trace trace)
     {
         if (id != trace.Id)
@@ -200,6 +204,7 @@ public class OsmTracesController : ControllerBase
     /// <returns></returns>
     [Route("{id}")]
     [HttpDelete]
+    [Obsolete("This endpoint is deprecated and should be removed by 9.2025, this is now going to OSM directly")]
     public async Task<IActionResult> DeleteGpsTrace(long id)
     {
         var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);

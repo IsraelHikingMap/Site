@@ -132,7 +132,7 @@ export class TracesService {
                 dataContainer: storedTrace.dataContainer
             };
         }
-        const dataContainer = await firstValueFrom(this.httpClient.get(Urls.traceRoute + traceId)) as DataContainer;
+        const dataContainer = await firstValueFrom(this.httpClient.get(Urls.traceAsDataContainer + traceId)) as DataContainer;
         this.loggingService.info(`[Traces] Got trace from server: ${traceId}`);
         const traceToStore = {
             ...trace,
@@ -155,7 +155,7 @@ export class TracesService {
 
     public async uploadRouteAsTrace(route: Immutable<RouteData>): Promise<any> {
         this.loggingService.info(`[Traces] Uploading a route as trace with name ${route.name}`);
-        return firstValueFrom(this.httpClient.post(Urls.traceRoute, route, {
+        return firstValueFrom(this.httpClient.post(Urls.uploadDataContainer, route, {
             params: { language: this.resources.getCurrentLanguageCodeSimplified() }
         }).pipe(timeout(3 * 60 * 1000)));
     }

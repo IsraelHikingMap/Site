@@ -17,7 +17,8 @@ export class Urls {
     public static readonly search = Urls.apiBase + "search/";
     public static readonly images = Urls.apiBase + "images/";
     public static readonly missingParts = Urls.apiBase + "osm/";
-    public static readonly traceRoute = Urls.apiBase + "osm/trace/route/";
+    public static readonly uploadDataContainer = Urls.apiBase + "osm/trace/route/";
+    public static readonly traceAsDataContainer = Urls.apiBase + "osm/trace/";
     public static readonly tracePicture = Urls.apiBase + "osm/trace/";
     public static readonly userLayers = Urls.apiBase + "userLayers/";
     public static readonly poi = Urls.apiBase + "points/";
