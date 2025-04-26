@@ -9,7 +9,7 @@ import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { DatabaseService } from "./database.service";
-import { AddTraceAction, RemoveTraceAction, UpdateTraceAction } from "../reducers/traces.reducer";
+import { BulkReplaceTracesAction, RemoveTraceAction, UpdateTraceAction } from "../reducers/traces.reducer";
 import { Urls } from "../urls";
 import type { Trace, ApplicationState, DataContainer, RouteData } from "../models/models";
 
@@ -79,42 +79,39 @@ export class TracesService {
         try {
             this.loggingService.info("[Traces] Starting syncing traces");
             const response = await firstValueFrom(this.httpClient.get(Urls.osmGpxFiles).pipe(timeout(20000))) as unknown as OsmTraces;
+            this.loggingService.info("[Traces] Got traces from server, updating local store");
             const existingTraces = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces;
-            for (const traceJson of response.traces) {
-                const trace: Trace = {
-                    name: traceJson.name || "",
-                    description: traceJson.description || "",
-                    id: traceJson.id.toString(),
-                    tagsString: (traceJson.tags || []).join(","),
-                    timeStamp: traceJson.timestamp ? new Date(traceJson.timestamp) : new Date(),
-                    visibility: traceJson.visibility,
-                    url: Urls.osmBase + `/user/${traceJson.user}/traces/${traceJson.id}`,
-                    imageUrl: Urls.tracePicture + traceJson.id + "/picture"
-                }
-                const existingTrace = existingTraces.find(t => t.id === trace.id);
-                if (existingTrace != null) {
-                    this.store.dispatch(new UpdateTraceAction(structuredClone(trace)));
-                } else {
-                    this.store.dispatch(new AddTraceAction(structuredClone(trace)));
-                }
-                if (trace.visibility === "private") {
-                    trace.visibility = "trackable";
-                    this.updateTrace(trace);
-                }
-                if (trace.visibility === "public") {
-                    trace.visibility = "identifiable";
-                    this.updateTrace(trace);
-                }
+            const serverTraces = response.traces.map(traceJson => ({
+                name: traceJson.name || "",
+                description: traceJson.description || "",
+                id: traceJson.id.toString(),
+                tagsString: (traceJson.tags || []).join(","),
+                timeStamp: traceJson.timestamp ? new Date(traceJson.timestamp) : new Date(),
+                visibility: traceJson.visibility,
+                url: Urls.osmBase + `/user/${traceJson.user}/traces/${traceJson.id}`,
+                imageUrl: Urls.tracePicture + traceJson.id + "/picture"
+            } as Trace));
+            const allTraces = serverTraces.concat(existingTraces.filter(t => t.visibility === "local") as any as Trace[]);
+            const serverTracesMap = serverTraces.reduce((acc, trace) => {
+                acc[trace.id] = trace;
+                return acc;
+            }, {} as { [key: string]: Trace });
+            this.store.dispatch(new BulkReplaceTracesAction(allTraces));
+            for (const existingTrace of existingTraces.filter(t => t.visibility !== "local" && serverTracesMap[t.id] != null)) {
+                this.databaseService.deleteTraceById(existingTrace.id); // no need to wait.
             }
-            for (const existingTrace of existingTraces.filter(t => t.visibility !== "local")) {
-                if (response.traces.find(t => t.id.toString() === existingTrace.id) == null) {
-                    this.store.dispatch(new RemoveTraceAction(existingTrace.id));
-                    await this.databaseService.deleteTraceById(existingTrace.id);
-                }
-            }
+            this.adjustTracesVisibility(serverTraces);
             this.loggingService.info("[Traces] Finished syncing traces");
         } catch (ex) {
             this.loggingService.error("[Traces] Unable to get user's traces. " + (ex as Error).message);
+        }
+    }
+
+    private adjustTracesVisibility(traces: Trace[]): void {
+        for (const trace of traces.filter(t => t.visibility === "private" || t.visibility === "public")) {
+            const clonedTrace = structuredClone(trace);
+            clonedTrace.visibility = trace.visibility === "private" ? "trackable" : "identifiable";
+            this.updateTrace(clonedTrace); // no need to wait.
         }
     }
 

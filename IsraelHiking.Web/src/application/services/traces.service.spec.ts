@@ -9,7 +9,7 @@ import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { DatabaseService } from "./database.service";
 import { Urls } from "../urls";
-import { AddTraceAction, RemoveTraceAction, UpdateTraceAction } from "../reducers/traces.reducer";
+import { BulkReplaceTracesAction, RemoveTraceAction, UpdateTraceAction } from "../reducers/traces.reducer";
 import type { Trace } from "../models/models";
 
 describe("Traces Service", () => {
@@ -188,8 +188,7 @@ describe("Traces Service", () => {
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(RemoveTraceAction);
-            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(UpdateTraceAction);
-            expect(spy.calls.all()[2].args[0]).toBeInstanceOf(AddTraceAction);
+            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(BulkReplaceTracesAction);
 
             const req = mockBackend.match(u => u.url.startsWith(Urls.osmGpx));
             expect(req.length).toBe(2);
@@ -197,8 +196,8 @@ describe("Traces Service", () => {
             req[1].flush({});
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
+            expect(spy.calls.all()[2].args[0]).toBeInstanceOf(UpdateTraceAction);
             expect(spy.calls.all()[3].args[0]).toBeInstanceOf(UpdateTraceAction);
-            expect(spy.calls.all()[4].args[0]).toBeInstanceOf(UpdateTraceAction);
 
             return promise;
     }));
