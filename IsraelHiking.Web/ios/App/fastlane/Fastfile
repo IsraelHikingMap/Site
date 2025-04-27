@@ -18,6 +18,7 @@ default_platform(:ios)
 platform :ios do
   desc "Push a new beta build to TestFlight"
   lane :beta do
+    setup_ci
     sync_code_signing(type: "appstore")
     build_app(workspace: "App.xcworkspace", scheme: "App")
     upload_to_testflight

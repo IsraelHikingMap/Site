@@ -181,26 +181,6 @@ jobs:
         with:
           podfile-path: IsraelHiking.Web/ios/App/Podfile.lock
 
-      - name: Keychain setup
-        if: ${{ github.secret_source == 'Actions' }}
-        run: |
-          cd IsraelHiking.Web
-          openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/CI.mobileprovision.enc -d -a -out ./signing/CI.mobileprovision
-          openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/ihm-dist.cer.enc -d -a -out ./signing/ihm-dist.cer
-          openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/ihm-dist.p12.enc -d -a -out ./signing/ihm-dist.p12
-          security create-keychain -p CI ios-build.keychain
-          security default-keychain -s ios-build.keychain
-          security unlock-keychain -p CI ios-build.keychain
-          security set-keychain-settings -t 3600 -l ~/Library/Keychains/ios-build.keychain
-          security import ./signing/apple.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
-          security import ./signing/ihm-dist.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
-          security import ./signing/ihm-dist.p12 -k ~/Library/Keychains/ios-build.keychain -P $STORE_PASSWORD -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k CI ~/Library/Keychains/ios-build.keychain > /dev/null
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp ./signing/CI.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
-        env:
-          PASSWORD: ${{ secrets.PASSWORD }}
-          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
       - name: Build UI
         run: |
           cd IsraelHiking.Web
@@ -216,33 +196,22 @@ jobs:
       - name: Build iOS with signing
         if: ${{ github.secret_source == 'Actions' }}
         run: |
-          cd IsraelHiking.Web/ios
-          xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive -quiet
-      - name: Build iOS no signing
-        if: ${{ github.secret_source == 'None' }}
-        run: |
-          cd IsraelHiking.Web/ios
-          xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive -quiet CODE_SIGN_IDENTITY=""
-      - name: Export iOS Archive
-        if: ${{ github.secret_source == 'Actions' }}
-        run: |
-          cd IsraelHiking.Web/ios
-          xcodebuild -exportArchive -archivePath App.xcarchive -exportPath ./ -exportOptionsPlist exportOptions.plist
+          cd IsraelHiking.Web/ios/App
+          fastlane beta
+        env:
+          MATCH_PASSWORD: ${{ secrets.PASSWORD }}
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APPSTORE_PASSWORD }}
+      #- name: Build iOS no signing
+      #  if: ${{ github.secret_source == 'None' }}
+      #  run: |
+      #    cd IsraelHiking.Web/ios
+      #    xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive -quiet CODE_SIGN_IDENTITY=""
       - name: Upload artifacts
         if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
         with:
           name: IHM_signed_${{ needs.version.outputs.version_string }}.ipa
           path: IsraelHiking.Web/ios/App.ipa
-
-      - name: Publish to App Store
-        if: ${{ github.event.inputs.publishios == 'true' }}
-        run: |
-          cd IsraelHiking.Web/ios
-          xcrun altool --upload-app --type ios --file ./App.ipa --username $APPLE_APPSTORE_USER --password $APPLE_APPSTORE_PASSWORD
-        env:
-          APPLE_APPSTORE_USER: ${{ secrets.APPLE_APPSTORE_USER }}
-          APPLE_APPSTORE_PASSWORD: ${{ secrets.APPLE_APPSTORE_PASSWORD }}
 
   github-release:
     if: ${{ github.event.inputs.tag == 'true' }}
