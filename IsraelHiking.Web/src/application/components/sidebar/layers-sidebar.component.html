@@ -23,7 +23,7 @@
             </mat-expansion-panel-header>
             <div *ngFor="let baseLayer of (baseLayers$ | async)">
                 <div class="flex flex-row">
-                    <button mat-button class="row-button flex-1 !justify-start" (click)="selectBaseLayer(baseLayer)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Select base layer {{baseLayer.key}}">
+                    <button mat-button class="row-button flex-1 justify-start!" (click)="selectBaseLayer(baseLayer)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Select base layer {{baseLayer.key}}">
                         <span><i class="fa" [ngClass]="{'icon-eye': isBaseLayerSelected(baseLayer), 'icon-eye-slash': !isBaseLayerSelected(baseLayer)}"></i></span>
                         <span class="break-all">{{resources.translate(baseLayer.key)}}</span>
                     </button>
@@ -44,13 +44,13 @@
                         <p class="w-full">{{resources.overlays}}</p>
                     </div>
                     <div class="w-1/5">
-                        <button mat-button class="w-full !h-full" (click)="hideAllOverlays($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Hide all overlays"><i class="fa fa-lg" [ngClass]="isAllOverlaysHidden() ? 'icon-eye-slash' : 'icon-eye'"></i></button>
+                        <button mat-button class="w-full h-full!" (click)="hideAllOverlays($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Hide all overlays"><i class="fa fa-lg" [ngClass]="isAllOverlaysHidden() ? 'icon-eye-slash' : 'icon-eye'"></i></button>
                     </div>
                 </div>
             </mat-expansion-panel-header>
             <div *ngFor="let overlay of (overlays$ | async)">
                 <div class="flex flex-row">
-                    <button mat-button class="row-button flex-1 !justify-start" (click)="toggleVisibility(overlay)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle overlay visibility {{overlay.key}}">
+                    <button mat-button class="row-button flex-1 justify-start!" (click)="toggleVisibility(overlay)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle overlay visibility {{overlay.key}}">
                         <span><i class="fa" [ngClass]="{'icon-eye': overlay.visible, 'icon-eye-slash': !overlay.visible}"></i></span>
                         <span class="break-all">{{resources.translate(overlay.key)}}</span>
                     </button>
@@ -74,14 +74,14 @@
                         <p class="w-full">{{resources.privateRoutes}}</p>
                     </div>
                     <div class="w-1/5">
-                        <button mat-button class="w-full !h-full" (click)="toggleAllRoutes($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle all routes"><i class="fa fa-lg" [ngClass]="isAllRoutesHidden() ? 'icon-eye-slash' : 'icon-eye'"></i></button>
+                        <button mat-button class="w-full h-full!" (click)="toggleAllRoutes($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle all routes"><i class="fa fa-lg" [ngClass]="isAllRoutesHidden() ? 'icon-eye-slash' : 'icon-eye'"></i></button>
                     </div>
                 </div>
             </mat-expansion-panel-header>
             <div cdkDropList (cdkDropListDropped)="dropRoute($event)">
                 <div *ngFor="let route of (routes$ | async); let i = index" cdkDrag>
                     <div class="flex flex-row" [class.active]="isShowActive(route)" matTooltip="{{route.description}}" matTooltipPosition="below">
-                        <button mat-button class="row-button flex-1 !justify-start" [style.color]="route.color" (click)="toggleRoute(route)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle route visibility">
+                        <button mat-button class="row-button flex-1 justify-start!" [style.color]="route.color" (click)="toggleRoute(route)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle route visibility">
                             <span><i class="fa" [ngClass]="{ 'icon-pencil': isRouteInEditMode(route), 'icon-eye': isRouteVisible(route) && !isRouteInEditMode(route), 'icon-eye-slash': !isRouteVisible(route) }"></i></span>
                             <span class="break-all cursor-move">{{route.name}}</span>
                         </button>

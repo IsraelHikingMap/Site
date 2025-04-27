@@ -1,19 +1,19 @@
 ﻿﻿<div [dir]="resources.direction" [class.minimized]="isMinimized && !isEditMode()">
     <div class="flex flex-row sticky top-0 z-10 bg-white">
         <div class="flex-1" *ngIf="!isHideEditMode()">
-            <button mat-button class="w-full min-w-unset !p-0" (click)="setEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Edit POI"><i class="fa icon-pencil"></i></button>
+            <button mat-button class="w-full min-w-unset p-0!" (click)="setEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Edit POI"><i class="fa icon-pencil"></i></button>
         </div>
         <div class="flex-1" *ngIf="!isEditMode()">
-            <button mat-button class="w-full min-w-unset !p-0" (click)="navigateHere()" matTooltip="{{resources.navigateHere}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Navigate here"><i class="fa icon-recordings"></i></button>
+            <button mat-button class="w-full min-w-unset p-0!" (click)="navigateHere()" matTooltip="{{resources.navigateHere}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Navigate here"><i class="fa icon-recordings"></i></button>
         </div>
         <div class="flex-1" *ngIf="isEditMode()">
-            <button mat-button class="w-full min-w-unset !p-0" (click)="save()" [disabled]="isLoading" matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
+            <button mat-button class="w-full min-w-unset p-0!" (click)="save()" [disabled]="isLoading" matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
         </div>
         <div class="flex-1" *ngIf="isRoute() && !isEditMode()">
-            <button mat-button class="w-full min-w-unset !p-0" (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to route"><i class="fa icon-plus"></i></button>
+            <button mat-button class="w-full min-w-unset p-0!" (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to route"><i class="fa icon-plus"></i></button>
         </div>
         <div class="flex-1" *ngIf="!isRoute() && !isEditMode()">
-            <button mat-button class="w-full min-w-unset !p-0" (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to point"><i class="fa icon-plus"></i></button>
+            <button mat-button class="w-full min-w-unset p-0!" (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to point"><i class="fa icon-plus"></i></button>
         </div>
         <div class="flex-1" *ngIf="shareLinks.poiLink && !isEditMode()">
             <mat-menu #appMenu="matMenu">
@@ -27,16 +27,16 @@
                     </div>
                 </div>
             </mat-menu>
-            <button mat-button class="w-full min-w-unset !p-0" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="below"><i class="fa icon-share-alt"></i></button>
+            <button mat-button class="w-full min-w-unset p-0!" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="below"><i class="fa icon-share-alt"></i></button>
         </div>
         <div class="flex-1" *ngIf="!isEditMode() && !isMinimized && isApp()">
-            <button mat-button class="w-full min-w-unset !p-0" (click)="isMinimized = !isMinimized" matTooltip="{{resources.minimize}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Minimize POI window"><i class="fa icon-chevron-down"></i></button>
+            <button mat-button class="w-full min-w-unset p-0!" (click)="isMinimized = !isMinimized" matTooltip="{{resources.minimize}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Minimize POI window"><i class="fa icon-chevron-down"></i></button>
         </div>
         <div class="flex-1" *ngIf="!isEditMode() && isMinimized && isApp()">
-            <button mat-button class="w-full min-w-unset !p-0" (click)="isMinimized = !isMinimized" matTooltip="{{resources.restore}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Restore POI window"><i class="fa icon-chevron-up"></i></button>
+            <button mat-button class="w-full min-w-unset p-0!" (click)="isMinimized = !isMinimized" matTooltip="{{resources.restore}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Restore POI window"><i class="fa icon-chevron-up"></i></button>
         </div>
         <div class="flex-1">
-            <button mat-button class="w-full min-w-unset !p-0" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below">
+            <button mat-button class="w-full min-w-unset p-0!" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below">
                 <i class="fa icon-close" *ngIf="!isLoading"></i>
                 <mat-spinner diameter="24" *ngIf="isLoading"></mat-spinner>    
             </button>
