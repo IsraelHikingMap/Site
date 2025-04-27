@@ -214,8 +214,9 @@ jobs:
         if: ${{ github.event.inputs.publishios == 'true' }}
         run: |
           cd IsraelHiking.Web/ios/App
-          fastlane upload_ios
-      #    xcrun altool --upload-app --type ios --file ./App.ipa --username $FASTLANE_USER --password $FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD
+          xcrun altool --upload-app --type ios --file ./App.ipa --username $FASTLANE_USER --password $FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD
+          fastlane review
+      #    fastlane upload_ios
           
           
         env:

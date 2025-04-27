@@ -29,4 +29,11 @@ platform :ios do
       skip_waiting_for_build_processing: true
     )
   end
+  lane :review do
+    deliver(
+      force: true,  # Forces metadata upload even if unchanged
+      skip_screenshots: true,  # Set to true to skip screenshots if unchanged
+      skip_metadata: true,     # Set to true to skip metadata upload if unchanged
+      submit_for_review: true,  # Automatically submits the build for review
+    )
 end
