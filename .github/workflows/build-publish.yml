@@ -210,7 +210,7 @@ jobs:
           cd IsraelHiking.Web/ios/App
           fastlane upload_ios
         env:
-          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APPSTORE_PASSWORD }}
+          FASTLANE_USER: ${{ secrets.APPLE_APPSTORE_USER }}
           FASTLANE_PASSWORD: ${{ secrets.APPLE_APPSTORE_PASSWORD }}
       #- name: Build iOS no signing
       #  if: ${{ github.secret_source == 'None' }}
