@@ -183,9 +183,7 @@ jobs:
 
       - name: Set up Git to use GITHUB_TOKEN for private match repo
         run: |
-          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git config --global url."https://x-access-token:${{ secrets.FASTLANE_MATCH_PAT }}@github.com/".insteadOf "https://github.com/"
 
       - name: Build UI
         run: |
@@ -203,7 +201,15 @@ jobs:
         if: ${{ github.secret_source == 'Actions' }}
         run: |
           cd IsraelHiking.Web/ios/App
-          fastlane beta
+          fastlane build_ios
+        env:
+          MATCH_PASSWORD: ${{ secrets.PASSWORD }}
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APPSTORE_PASSWORD }}
+      - name: Publish to appstore
+        if: ${{ github.event.inputs.publishios == 'true' }}
+        run: |
+          cd IsraelHiking.Web/ios/App
+          fastlane upload_ios
         env:
           MATCH_PASSWORD: ${{ secrets.PASSWORD }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APPSTORE_PASSWORD }}
