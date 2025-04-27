@@ -19,7 +19,6 @@ platform :ios do
   desc "Build the iOS app only"
   lane :build_ios do
     setup_ci
-
     sync_code_signing(type: "appstore")
     build_app(workspace: "App.xcworkspace", scheme: "App")
   end
