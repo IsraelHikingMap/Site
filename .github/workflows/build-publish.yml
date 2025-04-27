@@ -181,7 +181,7 @@ jobs:
         with:
           podfile-path: IsraelHiking.Web/ios/App/Podfile.lock
 
-      - name: Set up Git to use GITHUB_TOKEN for private match repo
+      - name: Set up Git to use PAT for private match repo
         run: |
           git config --global url."https://x-access-token:${{ secrets.FASTLANE_MATCH_PAT }}@github.com/".insteadOf "https://github.com/"
 
@@ -211,6 +211,7 @@ jobs:
           fastlane upload_ios
         env:
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APPSTORE_PASSWORD }}
+          FASTLANE_PASSWORD: ${{ secrets.APPLE_APPSTORE_PASSWORD }}
       #- name: Build iOS no signing
       #  if: ${{ github.secret_source == 'None' }}
       #  run: |
