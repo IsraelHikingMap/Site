@@ -36,4 +36,5 @@ platform :ios do
       skip_metadata: true,     # Set to true to skip metadata upload if unchanged
       submit_for_review: true,  # Automatically submits the build for review
     )
+  end
 end
