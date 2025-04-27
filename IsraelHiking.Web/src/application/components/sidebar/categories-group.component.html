@@ -5,7 +5,7 @@
                 <p class="w-full">{{resources.translate(categoriesGroup().type)}}</p>
             </div>
             <div class="w-1/5">
-                <button class="w-full !h-full" mat-button (click)="toggleVisibility($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle visibility of category layer {{categoriesGroup().type}}">
+                <button class="w-full h-full!" mat-button (click)="toggleVisibility($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle visibility of category layer {{categoriesGroup().type}}">
                     <i class="fa fa-lg" [ngClass]="{'icon-eye': categoriesGroup().visible, 'icon-eye-slash': !categoriesGroup().visible}"></i>
                 </button>
             </div>
@@ -13,7 +13,7 @@
     </mat-expansion-panel-header>
     <div *ngFor="let category of categoriesGroup().categories">
         <div class="flex flex-row">
-            <button mat-button class="row-button w-full !justify-start" (click)="toggleCategory(category)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle category visibility {{category.name}}">
+            <button mat-button class="row-button w-full justify-start!" (click)="toggleCategory(category)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle category visibility {{category.name}}">
                 <i class="fa" [ngClass]="{'icon-eye': category.visible, 'icon-eye-slash': !category.visible}"></i>
                 <i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i>
                 <span>{{resources.translate(category.name)}}</span>

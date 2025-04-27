@@ -84,7 +84,6 @@ export class SearchComponent {
     public routingType: RoutingType = "Hike";
     public searchFrom = new FormControl<string | SearchResultsPointOfInterest>("");
     public searchTo = new FormControl<string | SearchResultsPointOfInterest>("");
-    public hasFocus: boolean;
     public showCoordinates: boolean;
     public directional: DirectionalContext = {
         isOn: false,
@@ -146,7 +145,6 @@ export class SearchComponent {
     public focusOnSearchInput() {
         // ChangeDetectionRef doesn't work well for some reason...
         setTimeout(() => {            
-            this.hasFocus = true;
             this.searchFromInput().nativeElement.focus();
             this.searchFromInput().nativeElement.select();
         }, 100);
@@ -226,6 +224,7 @@ export class SearchComponent {
 
     @HostListener("window:keydown", ["$event"])
     public onSearchShortcutKeys($event: KeyboardEvent) {
+        console.log("key was pressed");
         if ($event.key === "Enter") {
             return this.handleEnterKeydown();
         }
@@ -252,9 +251,6 @@ export class SearchComponent {
      * @returns true - if no operations was made, false otherwise
      */
     private handleEnterKeydown(): boolean {
-        if (!this.hasFocus) {
-            return true;
-        }
         if (this.matAutocompleteTriggers()[0] == null) {
             return true;
         }

@@ -4,9 +4,8 @@
 @use "../fonts/icons.css";
 @use "font-awesome/css/font-awesome.css";
 @use "maplibre-gl/dist/maplibre-gl.css";
-@use "tailwindcss/components";
-@use "tailwindcss/utilities";
 @use "sass:map";
+@use "import-tailwind";
 
 $app-primary: mat.m2-define-palette(mat.$m2-green-palette, 600);
 $app-accent: mat.m2-define-palette(mat.$m2-yellow-palette);
