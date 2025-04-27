@@ -76,10 +76,10 @@
                 </button>
             </mat-menu>
             <div class="flex-1">
-                <button mat-button *ngIf="!isNew" [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Route" angularticsAction="Toggle advance options"><i class="fa icon-ellipsis-v fa-lg"></i></button>
+                <button mat-button *ngIf="!isNew" [matMenuTriggerFor]="appMenu" class="w-full" angulartics2On="click" angularticsCategory="Route" angularticsAction="Toggle advance options"><i class="fa icon-ellipsis-v fa-lg"></i></button>
             </div>
             <div class="flex-1">
-                <button mat-button *ngIf="!isNew" matDialogClose type="button" class="w-full"  (click)="deleteRoute()" matTooltip="{{resources.deleteRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsAction="Delete route"><i class="fa fa-lg icon-trash"></i></button>
+                <button mat-button *ngIf="!isNew" matDialogClose type="button" class="w-full" (click)="deleteRoute()" matTooltip="{{resources.deleteRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsAction="Delete route"><i class="fa fa-lg icon-trash"></i></button>
             </div>
             <div class="flex-1">
                 <button mat-button matDialogClose type="button" class="w-full"  (click)="saveRoute()" matTooltip="{{resources.save}}" matTooltipPosition="above"><i class="fa icon-check"></i></button>
