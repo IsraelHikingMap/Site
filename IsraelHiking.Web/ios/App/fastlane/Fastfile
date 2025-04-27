@@ -26,7 +26,7 @@ platform :ios do
   desc "Upload the previously built IPA to TestFlight"
   lane :upload_ios do
     upload_to_testflight(
-      ipa: "build/App.ipa",
+      ipa: "App.ipa",
       skip_waiting_for_build_processing: true
     )
   end

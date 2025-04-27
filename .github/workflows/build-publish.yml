@@ -204,14 +204,12 @@ jobs:
           fastlane build_ios
         env:
           MATCH_PASSWORD: ${{ secrets.PASSWORD }}
-          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APPSTORE_PASSWORD }}
       - name: Publish to appstore
         if: ${{ github.event.inputs.publishios == 'true' }}
         run: |
           cd IsraelHiking.Web/ios/App
           fastlane upload_ios
         env:
-          MATCH_PASSWORD: ${{ secrets.PASSWORD }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APPSTORE_PASSWORD }}
       #- name: Build iOS no signing
       #  if: ${{ github.secret_source == 'None' }}
@@ -223,7 +221,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: IHM_signed_${{ needs.version.outputs.version_string }}.ipa
-          path: IsraelHiking.Web/ios/App.ipa
+          path: IsraelHiking.Web/ios/App/App.ipa
 
   github-release:
     if: ${{ github.event.inputs.tag == 'true' }}
