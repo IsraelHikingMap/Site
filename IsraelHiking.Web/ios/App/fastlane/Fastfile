@@ -24,12 +24,14 @@ platform :ios do
   end
   desc "Upload the previously built IPA to TestFlight"
   lane :upload_ios do
+    setup_ci
     upload_to_testflight(
       ipa: "App.ipa",
       skip_waiting_for_build_processing: true
     )
   end
   lane :review do
+    setup_ci
     deliver(
       force: true,  # Forces metadata upload even if unchanged
       skip_screenshots: true,  # Set to true to skip screenshots if unchanged
