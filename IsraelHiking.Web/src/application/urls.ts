@@ -16,9 +16,10 @@ export class Urls {
     public static readonly offlineFiles = Urls.files + "/offline";
     public static readonly search = Urls.apiBase + "search/";
     public static readonly images = Urls.apiBase + "images/";
-    public static readonly osm = Urls.apiBase + "osm/";
-    public static readonly osmTrace = Urls.osm + "trace/";
-    public static readonly osmTraceRoute = Urls.osmTrace + "route";
+    public static readonly missingParts = Urls.apiBase + "osm/";
+    public static readonly uploadDataContainer = Urls.apiBase + "osm/trace/route/";
+    public static readonly traceAsDataContainer = Urls.apiBase + "osm/trace/";
+    public static readonly tracePicture = Urls.apiBase + "osm/trace/";
     public static readonly userLayers = Urls.apiBase + "userLayers/";
     public static readonly poi = Urls.apiBase + "points/";
     public static readonly poiCategories = Urls.poi + "categories/";
@@ -28,6 +29,8 @@ export class Urls {
 
     public static readonly osmApi = "https://api.openstreetmap.org/api/0.6/";
     public static readonly osmUser = Urls.osmApi + "user/details.json";
+    public static readonly osmGpx = Urls.osmApi + "gpx";
+    public static readonly osmGpxFiles = Urls.osmApi + "user/gpx_files.json";
 
     public static readonly facebook = "https://www.facebook.com/sharer/sharer.php?u=";
     public static readonly waze = "https://www.waze.com/ul?navigate=yes&zoom=17&ll=";
