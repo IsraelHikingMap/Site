@@ -215,20 +215,9 @@ jobs:
         run: |
           cd IsraelHiking.Web/ios/App
           fastlane upload_ios
-          fastlane review
-      #    
-      #    xcrun altool --upload-app --type ios --file ./App.ipa --username $FASTLANE_USER --password $FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD
-          
-          
+       #   fastlane review   
         env:
-          FASTLANE_USER: ${{ secrets.APPLE_APPSTORE_USER }}
-      #    FASTLANE_PASSWORD: ${{ secrets.APPLE_STORE_USER_PASSWORD }}
-          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APPSTORE_PASSWORD }}
-      #- name: Build iOS no signing
-      #  if: ${{ github.secret_source == 'None' }}
-      #  run: |
-      #    cd IsraelHiking.Web/ios
-      #    xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive -quiet CODE_SIGN_IDENTITY=""
+          APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
 
   github-release:
     if: ${{ github.event.inputs.tag == 'true' }}
