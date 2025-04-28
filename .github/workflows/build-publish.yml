@@ -221,7 +221,7 @@ jobs:
           
         env:
           FASTLANE_USER: ${{ secrets.APPLE_APPSTORE_USER }}
-          FASTLANE_PASSWORD: ${{ secrets.APPLE_APPSTORE_PASSWORD }}
+          FASTLANE_PASSWORD: ${{ secrets.APPLE_STORE_USER_PASSWORD }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APPSTORE_PASSWORD }}
       #- name: Build iOS no signing
       #  if: ${{ github.secret_source == 'None' }}
