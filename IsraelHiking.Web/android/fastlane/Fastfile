@@ -18,7 +18,6 @@ default_platform(:android)
 platform :android do
   desc "Build the Android aab file"
   lane :build_aab do
-    setup_ci
     gradle(
       task: "bundleRelease",
       print_command: false,
@@ -33,7 +32,6 @@ platform :android do
 
   lane :build_apk do
     desc "Build the Android apk file"
-    setup_ci
     gradle(
       task: "assembleRelease",
       print_command: false,
