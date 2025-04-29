@@ -97,17 +97,11 @@ jobs:
         if: ${{ github.secret_source == 'Actions' }}
         run: |
           cd IsraelHiking.Web/android
-          ./gradlew :app:assembleRelease --no-daemon "-Pandroid.injected.signing.store.file=$WORKSPACE/IsraelHiking.Web/signing/IHM.jks" "-Pandroid.injected.signing.store.password=$STORE_PASSWORD" "-Pandroid.injected.signing.key.alias=ihmkey" "-Pandroid.injected.signing.key.password=$PASSWORD"
-          ./gradlew :app:bundleRelease --no-daemon "-Pandroid.injected.signing.store.file=$WORKSPACE/IsraelHiking.Web/signing/IHM.jks" "-Pandroid.injected.signing.store.password=$STORE_PASSWORD" "-Pandroid.injected.signing.key.alias=ihmkey" "-Pandroid.injected.signing.key.password=$PASSWORD"
+          fastlane build_apk
+          fastlane build_aab
         env:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           PASSWORD: ${{ secrets.PASSWORD }}
-          WORKSPACE: ${{ github.workspace }}
-      - name: Build Android Debug
-        if: ${{ github.secret_source == 'None' }}
-        run: |
-          cd IsraelHiking.Web/android
-          ./gradlew :app:assembleDebug --no-daemon
       - name: Upload aab artifacts
         if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
@@ -124,12 +118,11 @@ jobs:
       
       - name: Publish to Google Play
         if: ${{ github.event.inputs.publishandroid == 'true' }}
-        uses: r0adkll/upload-google-play@v1
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-          packageName: il.org.osm.israelhiking
-          releaseFiles: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
-          track: internal
+        run: |
+          cd IsraelHiking.Web/android
+          fastlane upload
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
 
   docker: 
     runs-on: ubuntu-latest

@@ -16,8 +16,9 @@
 default_platform(:android)
 
 platform :android do
-  desc "Deploy a new version to the Google Play"
-  lane :deploy do
+  desc "Build the Android aab file"
+  lane :build_aab do
+    setup_ci
     gradle(
       task: "bundleRelease"
       print_command: false,
@@ -28,10 +29,11 @@ platform :android do
         "android.injected.signing.key.password" => ENV["PASSWORD"],
       }
     )
-    upload_to_play_store
   end
 
   lane :build_apk do
+    desc "Build the Android apk file"
+    setup_ci
     gradle(
       task: "assembleRelease"
       print_command: false,
@@ -41,6 +43,19 @@ platform :android do
         "android.injected.signing.key.alias" => "ihmkey",
         "android.injected.signing.key.password" => ENV["PASSWORD"],
       }
+    )
+  end
+
+  lane :upload do
+    desc "Deploy a new version to the Google Play"
+    upload_to_play_store(
+      track: "internal",
+      skip_upload_aab: true,
+      skip_upload_metadata: false,
+      skip_upload_images: false,
+      skip_upload_screenshots: false,
+      json_key_data: ENV["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"]
+      aab: "app/build/outputs/bundle/release/app-release.aab"
     )
   end
 end
