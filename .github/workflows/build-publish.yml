@@ -98,7 +98,7 @@ jobs:
         run: |
           cd IsraelHiking.Web/android
           fastlane build_aab
-        #  fastlane build_apk
+          fastlane build_apk
         env:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           PASSWORD: ${{ secrets.PASSWORD }}
@@ -110,12 +110,12 @@ jobs:
           name: IHM_signed_${{ needs.version.outputs.version_string }}.aab
           path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
 
-      #- name: Upload apk artifacts
-      #  if: ${{ github.secret_source == 'Actions' }}
-      #  uses: actions/upload-artifact@v4
-      #  with:
-      #    name: IHM_signed_${{ needs.version.outputs.version_string }}.apk
-      #    path: IsraelHiking.Web/android/app/build/outputs/apk/release/app-release.apk
+      - name: Upload apk artifacts
+        if: ${{ github.secret_source == 'Actions' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: IHM_signed_${{ needs.version.outputs.version_string }}.apk
+          path: IsraelHiking.Web/android/app/build/outputs/apk/release/app-release.apk
       
       - name: Publish to Google Play
         if: ${{ github.event.inputs.publishandroid == 'true' }}
