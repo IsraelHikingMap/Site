@@ -19,7 +19,7 @@ platform :android do
   desc "Build the Android aab file"
   lane :build_aab do
     gradle(
-      task: "bundleRelease",
+      task: ":app:bundleRelease",
       print_command: false,
       properties: {
         "android.injected.signing.store.file" => ENV["KEYSTORE_PATH"],
@@ -33,7 +33,7 @@ platform :android do
   lane :build_apk do
     desc "Build the Android apk file"
     gradle(
-      task: "assembleRelease",
+      task: ":app:assembleRelease",
       print_command: false,
       properties: {
         "android.injected.signing.store.file" => ENV["KEYSTORE_PATH"],
