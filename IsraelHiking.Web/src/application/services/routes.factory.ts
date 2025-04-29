@@ -9,18 +9,18 @@ export class RoutesFactory {
 
     // default values - in case the response from server takes too long.
     public colors: string[] = [
-        "#0000FF",
-        "#FF0000",
-        "#FF6600",
-        "#FF00DD",
-        "#008000",
-        "#B700FF",
-        "#00B0A4",
-        "#FFFF00",
-        "#9C3E00",
-        "#00FFFF",
-        "#7F8282",
-        "#101010"
+        "#0000FF", // blue
+        "#FF6600", // orange
+        "#7F8282", // gray
+        "#00FFFF", // light blue
+        "#FF00DD", // purple
+        "#00B0A4", // cyan
+        "#B700FF", // pink
+        "#9C3E00", // brown
+        "#008000", // green
+        "#FF0000", // red
+        "#101010", // black
+        "#FFFF00" // yellow
     ];
 
     private nextColorIndex = 0;

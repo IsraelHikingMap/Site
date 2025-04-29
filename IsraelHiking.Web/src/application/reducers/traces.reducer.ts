@@ -20,6 +20,11 @@ export class RemoveTraceAction {
     constructor(public traceId: string) {}
 }
 
+export class BulkReplaceTracesAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public traces: Trace[]) {}
+}
+
 export class SetVisibleTraceAction {
     public static type = this.prototype.constructor.name;
     constructor(public traceId: string) {}
@@ -34,6 +39,7 @@ export class RemoveMissingPartAction {
     public static type = this.prototype.constructor.name;
     constructor(public missingPartIndex: number) {}
 }
+
 @State<TracesState>({
     name: "tracesState",
     defaults: initialState.tracesState
@@ -63,6 +69,14 @@ export class TracesReducer {
         ctx.setState(produce(ctx.getState(), lastState => {
             const traceToRemove = lastState.traces.find(r => r.id === action.traceId);
             lastState.traces.splice(lastState.traces.indexOf(traceToRemove), 1);
+            return lastState;
+        }));
+    }
+
+    @Action(BulkReplaceTracesAction)
+    public bulkReplace(ctx: StateContext<TracesState>, action: BulkReplaceTracesAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.traces = action.traces;
             return lastState;
         }));
     }
