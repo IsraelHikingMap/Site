@@ -48,10 +48,9 @@ platform :android do
     desc "Deploy a new version to the Google Play"
     upload_to_play_store(
       track: "internal",
-      skip_upload_aab: true,
-      skip_upload_metadata: false,
-      skip_upload_images: false,
-      skip_upload_screenshots: false,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
       json_key_data: ENV["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"],
       aab: "app/build/outputs/bundle/release/app-release.aab"
     )
