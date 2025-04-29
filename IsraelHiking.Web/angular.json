@@ -64,7 +64,9 @@
               "cordova-plugin-purchase",
               "xml-beautify",
               "d3-regression",
-              "platform"
+              "platform",
+              "osm2geojson-lite",
+              "piexif-ts"
             ],
             "extractLicenses": false,
             "sourceMap": true,
