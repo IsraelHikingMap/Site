@@ -1,0 +1,46 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:android)
+
+platform :android do
+  desc "Deploy a new version to the Google Play"
+  lane :deploy do
+    gradle(
+      task: "bundleRelease"
+      print_command: false,
+      properties: {
+        "android.injected.signing.store.file" => "../signing/IHM.jks",
+        "android.injected.signing.store.password" => ENV["STORE_PASSWORD"],
+        "android.injected.signing.key.alias" => "ihmkey",
+        "android.injected.signing.key.password" => ENV["PASSWORD"],
+      }
+    )
+    upload_to_play_store
+  end
+
+  lane :build_apk do
+    gradle(
+      task: "assembleRelease"
+      print_command: false,
+      properties: {
+        "android.injected.signing.store.file" => "keystore.jks",
+        "android.injected.signing.store.password" => ENV["STORE_PASSWORD"],
+        "android.injected.signing.key.alias" => "ihmkey",
+        "android.injected.signing.key.password" => ENV["PASSWORD"],
+      }
+    )
+  end
+end

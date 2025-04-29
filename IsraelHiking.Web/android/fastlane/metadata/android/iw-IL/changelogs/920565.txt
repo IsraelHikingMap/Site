@@ -1,0 +1,4 @@
+השינויים המרכזיים בגרסה הם:
+  - תיקוני באגים שונים
+
+הרשימה המלאה מופיעה בקישור https://github.com/IsraelHikingMap/Site/milestone/87?closed=1
