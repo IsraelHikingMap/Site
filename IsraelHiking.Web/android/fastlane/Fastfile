@@ -22,7 +22,7 @@ platform :android do
       task: "bundleRelease",
       print_command: false,
       properties: {
-        "android.injected.signing.store.file" => "IHM.jks",
+        "android.injected.signing.store.file" => ENV["KEYSTORE_PATH"],
         "android.injected.signing.store.password" => ENV["STORE_PASSWORD"],
         "android.injected.signing.key.alias" => "ihmkey",
         "android.injected.signing.key.password" => ENV["PASSWORD"],
@@ -36,7 +36,7 @@ platform :android do
       task: "assembleRelease",
       print_command: false,
       properties: {
-        "android.injected.signing.store.file" => "IHM.jks",
+        "android.injected.signing.store.file" => ENV["KEYSTORE_PATH"],
         "android.injected.signing.store.password" => ENV["STORE_PASSWORD"],
         "android.injected.signing.key.alias" => "ihmkey",
         "android.injected.signing.key.password" => ENV["PASSWORD"],

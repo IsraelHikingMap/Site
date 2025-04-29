@@ -102,6 +102,7 @@ jobs:
         env:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           PASSWORD: ${{ secrets.PASSWORD }}
+          KEYSTORE_PATH: ${{WORKSPACE}}/IsraelHiking.Web/android/app/IHM.jks
       - name: Upload aab artifacts
         if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
