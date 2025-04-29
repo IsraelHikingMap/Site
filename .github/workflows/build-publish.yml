@@ -97,8 +97,8 @@ jobs:
         if: ${{ github.secret_source == 'Actions' }}
         run: |
           cd IsraelHiking.Web/android
-          fastlane build_apk
           fastlane build_aab
+          fastlane build_apk
         env:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           PASSWORD: ${{ secrets.PASSWORD }}
