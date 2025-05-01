@@ -44,7 +44,7 @@ platform :ios do
       in_house: false # optional but may be required if using match/sigh
     )
     deliver(
-      force: false,  # Forces metadata upload even if unchanged
+      force: true,  # Skip HTML report verification
       skip_screenshots: true,  # Set to true to skip screenshots if unchanged
       skip_metadata: false, # This is needed to publish the release notes, those are updated through the CI
       submit_for_review: true,  # Automatically submits the build for review
