@@ -55,4 +55,14 @@ platform :android do
       aab: "app/build/outputs/bundle/release/app-release.aab"
     )
   end
+
+  lane :promote do
+    desc "Promote the latest internal build to production"
+    upload_to_play_store(
+      track: "internal",
+      track_promote_to: "production",
+      rollout: 1.0,
+      json_key_data: ENV["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"],
+    )
+  end
 end

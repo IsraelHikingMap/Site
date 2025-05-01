@@ -24,8 +24,8 @@ on:
         required: false
         default: 'false'
         type: boolean
-      tag:
-        description: 'Tag and create a Github release'
+      production:
+        description: 'Publish to production'
         required: false
         default: 'false'
         type: boolean
@@ -58,9 +58,25 @@ jobs:
           echo "version_code=$(($MAJOR * 100000 + $MINOR * 1000 + $PATCH % 1000))" >> $GITHUB_OUTPUT
           echo "version_string=$version_string" >> $GITHUB_OUTPUT
           echo "Version: $version_string" >> $GITHUB_STEP_SUMMARY
+      - name: Get all milestones
+        id: get_milestones
+        uses: octokit/request-action@v2.x
+        with:
+          route: GET /repos/${{ github.repository }}/milestones?state=open
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract milestone ID
+        id: extract
+        run: |
+          echo '${{ steps.get_milestones.outputs.data }}' | jq '.[] | select(.title == "Next Release") | .number' > id.txt
+          milestone_id=$(cat id.txt)
+          echo "milestone_id=$milestone_id" >> $GITHUB_OUTPUT
+        shell: bash
     outputs:
       version_code: ${{ steps.version-code.outputs.version_code }}
       version_string: ${{ steps.version-code.outputs.version_string }}
+      milestone_id: ${{ steps.extract.outputs.milestone_id }}
 
   android:
     runs-on: ubuntu-latest
@@ -121,7 +137,17 @@ jobs:
         if: ${{ github.event.inputs.publishandroid == 'true' }}
         run: |
           cd IsraelHiking.Web/android
+          echo "ראו https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}" > fastlane/metadata/android/iw-IL/changelogs/default.txt
+          echo "See https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}" > fastlane/metadata/android/en-US/changelogs/default.txt
           fastlane upload
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+
+      - name: Promote to production
+        if: ${{ github.event.inputs.publishandroid == 'true' && github.event.inputs.production == 'true' }}
+        run: |
+          cd IsraelHiking.Web/android
+          fastlane promote
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
 
@@ -214,7 +240,7 @@ jobs:
           APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
 
   github-release:
-    if: ${{ github.event.inputs.tag == 'true' }}
+    if: ${{ github.event.inputs.production == 'true' }}
     runs-on: ubuntu-latest
     needs: [version, ios, android]
 
@@ -237,12 +263,28 @@ jobs:
           mv ${{ github.workspace }}/artifacts/*.ipa ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.ipa
           mv ${{ github.workspace }}/artifacts/*.aab ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.aab
           mv ${{ github.workspace }}/artifacts/*.apk ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.apk
+      - name: Rename and close milestone
+        uses: octokit/request-action@v2.x
+        with:
+          route: PATCH /repos/${{ github.repository }}/milestones/${{ steps.extract.outputs.milestone_id }}
+          title: Version ${{ needs.version.outputs.version_string }}
+          state: closed
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create new "Next Release" milestone
+        uses: octokit/request-action@v2.x
+        with:
+          route: POST /repos/${{ github.repository }}/milestones
+          title: Next Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          draft: true
           tag_name: v${{ needs.version.outputs.version_string }}
           name: v${{ needs.version.outputs.version_string }}
+          body: |
+            See [Milestone ${{ needs.version.outputs.version_string }}](https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }})
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             IHM_signed_${{ needs.version.outputs.version_string }}.ipa
