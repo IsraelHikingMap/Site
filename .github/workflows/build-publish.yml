@@ -230,20 +230,20 @@ jobs:
         with:
           name: IHM_signed_${{ needs.version.outputs.version_string }}.ipa
           path: IsraelHiking.Web/ios/App/App.ipa
-      - name: Upload to appstore
-        if: ${{ github.event.inputs.publishios == 'true' }}
+      - name: Upload to testers
+        if: ${{ github.event.inputs.publishios == 'true' && github.event.inputs.production == 'false' }}
         run: |
           cd IsraelHiking.Web/ios/App
-          fastlane upload_ios
+          fastlane upload_to_testers
         env:
           APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
-      - name: Send for review
+      - name: Upload and send for review
         if: ${{ github.event.inputs.publishios == 'true' && github.event.inputs.production == 'true' }}
         run: |
           cd IsraelHiking.Web/ios/App
           echo "ראו https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/he/release_notes.txt
           echo "See https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/en-US/release_notes.txt
-          fastlane review
+          fastlane upload_to_production
         env:
           APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
 

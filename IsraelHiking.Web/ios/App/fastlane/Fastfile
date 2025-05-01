@@ -23,7 +23,7 @@ platform :ios do
     build_app(workspace: "App.xcworkspace", scheme: "App")
   end
   desc "Upload the previously built IPA to TestFlight"
-  lane :upload_ios do
+  lane :upload_to_testers do
     setup_ci
     app_store_connect_api_key(
       key_id: "BTS253W4SC",
@@ -35,7 +35,7 @@ platform :ios do
       ipa: "App.ipa"
     )
   end
-  lane :review do
+  lane :upload_to_production do
     setup_ci
     app_store_connect_api_key(
       key_id: "BTS253W4SC",
@@ -48,6 +48,7 @@ platform :ios do
       skip_screenshots: true,  # Set to true to skip screenshots if unchanged
       skip_metadata: true,     # Set to true to skip metadata upload if unchanged
       submit_for_review: true,  # Automatically submits the build for review
+      ipa: "App.ipa"
     )
   end
 end
