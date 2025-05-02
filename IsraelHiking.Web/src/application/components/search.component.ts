@@ -224,7 +224,6 @@ export class SearchComponent {
 
     @HostListener("window:keydown", ["$event"])
     public onSearchShortcutKeys($event: KeyboardEvent) {
-        console.log("key was pressed");
         if ($event.key === "Enter") {
             return this.handleEnterKeydown();
         }

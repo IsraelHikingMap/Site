@@ -292,7 +292,7 @@ jobs:
           tag_name: v${{ needs.version.outputs.version_string }}
           name: v${{ needs.version.outputs.version_string }}
           body: |
-            See [Milestone ${{ needs.version.outputs.version_string }}](https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }})
+            See [Milestone ${{ needs.version.outputs.version_string }}](https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1)
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             IHM_signed_${{ needs.version.outputs.version_string }}.ipa
