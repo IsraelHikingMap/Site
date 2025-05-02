@@ -278,14 +278,14 @@ jobs:
           title: Version ${{ needs.version.outputs.version_string }}
           state: closed
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.FASTLANE_MATCH_PAT }}
       - name: Create new "Next Release" milestone
         uses: octokit/request-action@v2.x
         with:
           route: POST /repos/${{ github.repository }}/milestones
           title: Next Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.FASTLANE_MATCH_PAT }}
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
