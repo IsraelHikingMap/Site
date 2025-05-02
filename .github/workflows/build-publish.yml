@@ -274,18 +274,18 @@ jobs:
       - name: Rename and close milestone
         uses: octokit/request-action@v2.x
         with:
-          route: PATCH /repos/${{ github.repository }}/milestones/${{ steps.extract.outputs.milestone_id }}
+          route: PATCH /repos/${{ github.repository }}/milestones/${{ needs.version.outputs.milestone_id }}
           title: Version ${{ needs.version.outputs.version_string }}
           state: closed
         env:
-          GITHUB_TOKEN: ${{ secrets.FASTLANE_MATCH_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create new "Next Release" milestone
         uses: octokit/request-action@v2.x
         with:
           route: POST /repos/${{ github.repository }}/milestones
           title: Next Release
         env:
-          GITHUB_TOKEN: ${{ secrets.FASTLANE_MATCH_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
