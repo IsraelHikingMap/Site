@@ -1,0 +1,72 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:android)
+
+platform :android do
+  desc "Build the Android aab file"
+  lane :build_aab do
+    gradle(
+      task: ":app:bundleRelease",
+      print_command: false,
+      properties: {
+        "android.injected.signing.store.file" => ENV["KEYSTORE_PATH"],
+        "android.injected.signing.store.password" => ENV["STORE_PASSWORD"],
+        "android.injected.signing.key.alias" => "ihmkey",
+        "android.injected.signing.key.password" => ENV["PASSWORD"],
+      }
+    )
+  end
+
+  lane :build_apk do
+    desc "Build the Android apk file"
+    gradle(
+      task: ":app:assembleRelease",
+      print_command: false,
+      properties: {
+        "android.injected.signing.store.file" => ENV["KEYSTORE_PATH"],
+        "android.injected.signing.store.password" => ENV["STORE_PASSWORD"],
+        "android.injected.signing.key.alias" => "ihmkey",
+        "android.injected.signing.key.password" => ENV["PASSWORD"],
+      }
+    )
+  end
+
+  lane :upload do
+    desc "Deploy a new version to the Google Play"
+    upload_to_play_store(
+      track: "internal",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      json_key_data: ENV["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"],
+      aab: "app/build/outputs/bundle/release/app-release.aab"
+    )
+  end
+
+  lane :promote do
+    desc "Promote the latest internal build to production"
+    upload_to_play_store(
+      track: "internal",
+      track_promote_to: "production",
+      rollout: "1.0",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true,
+      json_key_data: ENV["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"],
+    )
+  end
+end
