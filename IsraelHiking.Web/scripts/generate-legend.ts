@@ -1,5 +1,5 @@
 import puppeteer from 'puppeteer';
-import legendJson from './src/content/legend/legend.json' with { type: 'json' };
+import legendJson from '../src/content/legend/legend.json' with { type: 'json' };
 
 /**
  * This script generates images for the legend items.
@@ -11,7 +11,7 @@ import legendJson from './src/content/legend/legend.json' with { type: 'json' };
 
 const browser = await puppeteer.launch({headless: false});
 
-async function createImage(style, center, zoom, name, width = 50) {
+async function createImage(style: string, center: {lat: number, lng: number}, zoom: number, name: string, width = 50) {
     const html = `
 <!DOCTYPE html>
 <html lang="en">
