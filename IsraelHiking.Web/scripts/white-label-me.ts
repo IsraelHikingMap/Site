@@ -18,6 +18,18 @@ const version = '1.2.34';
 const buildNumber = 1234;
 const websiteUrl = 'www.somthing.com';
 
+// Update capcacitor config
+const configPath = 'capacitor.config.ts';
+let configFile = fs.readFileSync(configPath, 'utf8');
+
+// Example: replace appId and appName dynamically
+configFile = configFile
+  .replace(/appId: ['"`](.*?)['"`]/, `appId: '${appId}'`)
+  .replace(/appName: ['"`](.*?)['"`]/, `appName: '${appName}'`);
+
+fs.writeFileSync(configPath, configFile);
+
+
 const project = new MobileProject('.', config);
 await project.load();
 
@@ -42,15 +54,4 @@ await project.ios?.setBuild(null, "Release", version);
 await project.ios?.setVersion(null, "Release", version);
 
 await project.commit();
-
-// Update capcacitor config
-const configPath = path.join(__dirname, '../capacitor.config.ts');
-let configFile = fs.readFileSync(configPath, 'utf8');
-
-// Example: replace appId and appName dynamically
-configFile = configFile
-  .replace(/appId: ['"`](.*?)['"`]/, `appId: '${appId}'`)
-  .replace(/appName: ['"`](.*?)['"`]/, `appName: '${appName}'`);
-
-fs.writeFileSync(configPath, configFile);
 
