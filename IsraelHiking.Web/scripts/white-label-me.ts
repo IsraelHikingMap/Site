@@ -25,14 +25,16 @@ await project.android?.setVersionCode(buildNumber);
 const appBuildGradleFile = await project.android?.getGradleFile('app/build.gradle');
 await appBuildGradleFile?.setApplicationId(appId);
 await appBuildGradleFile?.setNamespace(appId);
-project.android?.getAndroidManifest().setAttrs('manifest/application/activity/intent-filter', {
-    'android:host': websiteUrl,
-});
+for (const intentFilter of project.android?.getAndroidManifest().find('manifest/application/activity/intent-filter/data')) {
+    if (intentFilter.getAttribute('android:host') === "israelhiking.osm.org.il") {
+        intentFilter.setAttribute('android:host', websiteUrl);
+    }
+}
 
-await project.ios?.setBundleId(null, null, appId);
-await project.ios?.setDisplayName(null, null, appName);
-await project.ios?.setBuild(null, null, version);
-await project.ios?.setVersion(null, null, version);
+await project.ios?.setBundleId(null, "Release", appId);
+await project.ios?.setDisplayName(null, "Release", appName);
+await project.ios?.setBuild(null, "Release", version);
+await project.ios?.setVersion(null, "Release", version);
 
 await project.commit();
 
