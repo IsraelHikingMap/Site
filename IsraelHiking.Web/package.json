@@ -153,7 +153,8 @@
     "test-ci": "ng test --code-coverage --watch=false",
     "lint": "ng lint --fix",
     "extract": "tsx ./scripts/extract-strings.js",
-    "generate-legend": "tsx ./scripts/generate-legend.js"
+    "generate-legend": "tsx ./scripts/generate-legend.js",
+    "white-label-me": "tsx ./scripts/white-label-me.ts"
   },
   "type": "module",
   "version": "9.20.0"
