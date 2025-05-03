@@ -1,4 +1,4 @@
-package org.entrypoint;
+package il.org.osm.israelhiking;
 
 import android.content.Intent;
 import android.net.Uri;

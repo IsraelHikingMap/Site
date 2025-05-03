@@ -10,7 +10,7 @@
         <activity
             android:exported="true"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation"
-            android:name="org.entrypoint.MainActivity"
+            android:name="il.org.osm.israelhiking.MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleInstance">
