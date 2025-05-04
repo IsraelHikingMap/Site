@@ -13,7 +13,7 @@ const config: MobileProjectConfig = {
 const oldAppName = "Israel Hiking Map";
 const newAppName = "__APP_NAME__";
 
-const newAppId = 'this.is.the.app.id';
+const newAppId = 'that.is.the.app.id';
 const oldAppId = 'il.org.osm.israelhiking';
 const version = '1.2.34';
 const buildNumber = 1234;
@@ -37,9 +37,21 @@ async function updateAndroidFiles(project: MobileProject) {
     await project.android?.setPackageName(newAppId);
     await project.android?.setVersionName(version);
     await project.android?.setVersionCode(buildNumber);
-    await project.android?.getResourceXmlFile("res/values/strings.xml")?.setAttrs("package_name", appId);
-    await project.android?.getResourceXmlFile("res/values/strings.xml")?.setAttrs("plugin_bgloc_account_type", appId + "account");
-    await project.android?.getResourceXmlFile("res/values/strings.xml")?.setAttrs("app_name", appName);
+    const stringsFile = await project.android?.getResourceXmlFile("values/strings.xml");
+    await stringsFile.load();
+    for (let element of stringsFile.find("resources/string")) {
+        if (element.getAttribute('name') === 'app_name') {
+            element.textContent = newAppName;
+        }
+        if (element.getAttribute('name') === 'plugin_bgloc_account_type') {
+            element.textContent = newAppId + "account";
+        }
+        if (element.getAttribute('name') === 'package_name') {
+            element.textContent = newAppId;
+        }
+    }
+    await project.android?.getResourceXmlFile("res/values/strings.xml")?.setAttrs("plugin_bgloc_account_type", newAppId + "account");
+    await project.android?.getResourceXmlFile("res/values/strings.xml")?.setAttrs("app_name", newAppName);
     const appBuildGradleFile = await project.android?.getGradleFile('app/build.gradle');
     await appBuildGradleFile?.setApplicationId(newAppId);
     await appBuildGradleFile?.setNamespace(newAppId);
