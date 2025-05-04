@@ -1,5 +1,5 @@
 import { MobileProject } from '@trapezedev/project';
-import {replaceInFile} from 'replace-in-file'
+import { replaceInFile } from 'replace-in-file'
 import type { MobileProjectConfig } from '@trapezedev/project';
 
 const config: MobileProjectConfig = {
@@ -20,14 +20,14 @@ const buildNumber = 1234;
 const oldWebsiteUrl = 'israelhiking.osm.org.il';
 const newWebsiteUrl = 'www.the-app-url.com';
 
-function searchAndReplaceInFiles() {
-    replaceInFile({
-        files: "**/*.*",
+async function searchAndReplaceInFiles() {
+    await replaceInFile({
+        files: ["capacitor.config.ts"],
         from: new RegExp(oldAppName, 'g'),
         to: newAppName
     });
-    replaceInFile({
-        files: "**/*.*",
+    await replaceInFile({
+        files: ["capacitor.config.ts"],
         from: new RegExp(oldAppId, 'g'),
         to: newAppId
     });
@@ -77,6 +77,6 @@ const project = new MobileProject('.', config);
 await project.load();
 await updateAndroidFiles(project);
 await updateIosFiles(project);
-//searchAndReplaceInFiles();
+await searchAndReplaceInFiles();
 await project.commit();
 
