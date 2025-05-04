@@ -12,6 +12,7 @@ import { remove } from "lodash-es";
 import { Angulartics2GoogleGlobalSiteTag, Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
 
+import { Urls } from "../../urls";
 import { ILegendItem, LegendItemComponent } from "./legend-item.component";
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
@@ -36,6 +37,8 @@ export type LegendSection = {
 export class InfoSidebarComponent {
     public legendSections: LegendSection[] = [];
     public selectedTabIndex: number = 0;
+    public androidAppUrl: string = Urls.ANDROID_APP_URL;
+    public iosAppUrl: string = Urls.IOS_APP_URL;
     private selectedSection: LegendSection = null;
 
     public readonly resources = inject(ResourcesService);
