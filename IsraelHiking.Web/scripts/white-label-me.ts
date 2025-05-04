@@ -27,7 +27,7 @@ async function searchAndReplaceInFiles() {
         to: newAppName
     });
     await replaceInFile({
-        files: ["capacitor.config.ts"],
+        files: ["capacitor.config.ts", "**/Appfile"],
         from: new RegExp(oldAppId, 'g'),
         to: newAppId
     });
