@@ -44,7 +44,7 @@ async function updateAndroidFiles(project: MobileProject) {
             element.textContent = newAppName;
         }
         if (element.getAttribute('name') === 'plugin_bgloc_account_type') {
-            element.textContent = newAppId + "account";
+            element.textContent = newAppId + ".account";
         }
         if (element.getAttribute('name') === 'package_name') {
             element.textContent = newAppId;
@@ -63,10 +63,12 @@ async function updateAndroidFiles(project: MobileProject) {
 }
 
 async function updateIosFiles(project: MobileProject) {
-    await project.ios?.setBundleId(null, "Release", newAppId);
-    await project.ios?.setDisplayName(null, "Release", newAppName);
-    await project.ios?.setBuild(null, "Release", version);
-    await project.ios?.setVersion(null, "Release", version);
+    for (const bundleName of ["Debug", "Release"]) {
+        await project.ios?.setBundleId(null, bundleName, newAppId);
+        await project.ios?.setDisplayName(null, bundleName, newAppName);
+        await project.ios?.setBuild(null, bundleName, version);
+        await project.ios?.setVersion(null, bundleName, version);
+    }
 }
 
 
