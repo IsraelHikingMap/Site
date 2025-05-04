@@ -1,6 +1,6 @@
 import { MobileProject } from '@trapezedev/project';
+import {replaceInFile} from 'replace-in-file'
 import type { MobileProjectConfig } from '@trapezedev/project';
-import fs from 'fs';
 
 const config: MobileProjectConfig = {
     ios: {
@@ -10,55 +10,59 @@ const config: MobileProjectConfig = {
         path: 'android',
     },
 };
+const oldAppName = "Israel Hiking Map";
+const newAppName = "__APP_NAME__";
 
-let appName = "My New App";
-const appId = 'com.123.app';
+const newAppId = 'this.is.the.app.id';
+const oldAppId = 'il.org.osm.israelhiking';
 const version = '1.2.34';
 const buildNumber = 1234;
-const websiteUrl = 'www.somthing.com';
+const oldWebsiteUrl = 'israelhiking.osm.org.il';
+const newWebsiteUrl = 'www.the-app-url.com';
 
-function updateCapacitorConfigFile() {
-    const configPath = 'capacitor.config.ts';
-    let configFile = fs.readFileSync(configPath, 'utf8');
-
-    // Example: replace appId and appName dynamically
-    configFile = configFile
-    .replace(/appId: ['"`](.*?)['"`]/, `appId: '${appId}'`)
-    .replace(/appName: ['"`](.*?)['"`]/, `appName: '${appName}'`);
-
-    fs.writeFileSync(configPath, configFile);
+function searchAndReplaceInFiles() {
+    replaceInFile({
+        files: "**/*.*",
+        from: new RegExp(oldAppName, 'g'),
+        to: newAppName
+    });
+    replaceInFile({
+        files: "**/*.*",
+        from: new RegExp(oldAppId, 'g'),
+        to: newAppId
+    });
 }
 
 async function updateAndroidFiles(project: MobileProject) {
-    await project.android?.setPackageName(appId);
+    await project.android?.setPackageName(newAppId);
     await project.android?.setVersionName(version);
     await project.android?.setVersionCode(buildNumber);
     await project.android?.getResourceXmlFile("res/values/strings.xml")?.setAttrs("package_name", appId);
     await project.android?.getResourceXmlFile("res/values/strings.xml")?.setAttrs("plugin_bgloc_account_type", appId + "account");
     await project.android?.getResourceXmlFile("res/values/strings.xml")?.setAttrs("app_name", appName);
     const appBuildGradleFile = await project.android?.getGradleFile('app/build.gradle');
-    await appBuildGradleFile?.setApplicationId(appId);
-    await appBuildGradleFile?.setNamespace(appId);
+    await appBuildGradleFile?.setApplicationId(newAppId);
+    await appBuildGradleFile?.setNamespace(newAppId);
     for (const intentFilter of project.android?.getAndroidManifest().find('manifest/application/activity/intent-filter/data')) {
-        if (intentFilter.getAttribute('android:host') === "israelhiking.osm.org.il") {
-            intentFilter.setAttribute('android:host', websiteUrl);
+        if (intentFilter.getAttribute('android:host') === oldWebsiteUrl) {
+            intentFilter.setAttribute('android:host', newWebsiteUrl);
         }
     }
 }
 
 async function updateIosFiles(project: MobileProject) {
-    await project.ios?.setBundleId(null, "Release", appId);
-    await project.ios?.setDisplayName(null, "Release", appName);
+    await project.ios?.setBundleId(null, "Release", newAppId);
+    await project.ios?.setDisplayName(null, "Release", newAppName);
     await project.ios?.setBuild(null, "Release", version);
     await project.ios?.setVersion(null, "Release", version);
 }
 
 
 ///// Main function to run the script //////
-updateCapacitorConfigFile();
 const project = new MobileProject('.', config);
 await project.load();
-updateAndroidFiles(project);
-updateIosFiles(project);
+await updateAndroidFiles(project);
+await updateIosFiles(project);
+//searchAndReplaceInFiles();
 await project.commit();
 

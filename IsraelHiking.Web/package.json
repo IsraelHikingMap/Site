@@ -131,6 +131,7 @@
     "karma-jasmine-html-reporter": "^2.1.0",
     "karma-junit-reporter": "^2.0.1",
     "puppeteer": "^24.7.2",
+    "replace-in-file": "^8.3.0",
     "tailwindcss": "^4.1.4",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
