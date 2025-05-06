@@ -123,6 +123,10 @@ public class ConfigurationData
     /// </summary>
     public string OfflineFilesFolder { get; set; }
     /// <summary>
+    /// A location where offline files are saved in order to allow them to be downloaded
+    /// </summary>
+    public string ExternalFilesFolder { get; set; }
+    /// <summary>
     /// OSM server base address
     /// </summary>
     public string OsmBaseAddress { get; set; }
@@ -171,6 +175,7 @@ public class ConfigurationData
         ElevationServerAddress = "http://localhost:11211/";
         ImageCreatorServerAddress = "http://localhost:11311/";
         OfflineFilesFolder = "./";
+        ExternalFilesFolder = "./";
         OsmBaseAddress = "https://www.openstreetmap.org";
         ImageUrlsAllowList =
         [
