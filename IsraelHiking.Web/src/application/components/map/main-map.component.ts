@@ -200,6 +200,7 @@ export class MainMapComponent {
 
         // Terrain is off and pitch is high, turning on.
         this.isTerrainOn = true;
+        // HM TODO: change this for global terrain
         let source: RasterDEMSourceSpecification = {
             type: "raster-dem",
             url: "https://israelhiking.osm.org.il/vector/data/TerrainRGB.json",

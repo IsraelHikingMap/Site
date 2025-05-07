@@ -38,6 +38,17 @@ async function searchAndReplaceInFiles() {
     });
     await replaceInFile({
         files: [
+            "**/metadata/**/*.*",
+            "**/*.html",
+            "robot.txt",
+            "**/environments/environment.mobile.ts"
+        ],
+        from: new RegExp(oldWebsiteUrl, 'g'),
+        to: newWebsiteUrl
+    });
+
+    await replaceInFile({
+        files: [
             "capacitor.config.ts", 
             "**/Appfile",
             "src/**/*.ts",
