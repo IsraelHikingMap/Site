@@ -22,7 +22,7 @@ const newWebsiteUrl = 'www.the-app-url.com';
 
 async function searchAndReplaceInFiles() {
     await replaceInFile({
-        files: ["capacitor.config.ts"],
+        files: ["capacitor.config.ts", "../**/String.cs"],
         from: new RegExp(oldAppName, 'g'),
         to: newAppName
     });
