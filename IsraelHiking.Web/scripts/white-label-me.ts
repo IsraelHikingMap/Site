@@ -36,11 +36,12 @@ async function searchAndReplaceInFiles() {
         from: new RegExp(oldAppName, 'g'),
         to: newAppName
     });
+    
     await replaceInFile({
         files: [
             "**/metadata/**/*.*",
             "**/*.html",
-            "robot.txt",
+            "../**/robot.txt",
             "**/environments/environment.mobile.ts",
             "**/open-with.service.ts",
         ],
