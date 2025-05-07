@@ -41,7 +41,7 @@ async function searchAndReplaceInFiles() {
             "capacitor.config.ts", 
             "**/Appfile",
             "src/**/*.ts",
-            "**/App.xcodeproj",
+            "**/project.pbxproj",
             "../**/*.cs",
         ],
         from: new RegExp(oldAppId, 'g'),
