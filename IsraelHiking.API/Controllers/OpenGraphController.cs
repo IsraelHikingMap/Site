@@ -47,7 +47,7 @@ public class OpenGraphController : ControllerBase
         var title = string.IsNullOrWhiteSpace(url.Title) ? Branding.ROUTE_SHARE_DEFAULT_TITLE : url.Title;
         var contentResult = new ContentResult
         {
-            Content = _homePageHelper.Render(title, url.Description ?? Branding.DESCRIPTION, "https://israelhiking.osm.org.il/api/images/" + url.Id),
+            Content = _homePageHelper.Render(title, url.Description ?? Branding.DESCRIPTION, Branding.BASE_URL + "/api/images/" + url.Id),
             ContentType = "text/html"
         };
         return contentResult;

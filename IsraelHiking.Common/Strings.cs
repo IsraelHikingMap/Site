@@ -130,4 +130,6 @@ public static class Branding
 
     public const string USER_AGENT =
         "IsraelHikingMapSite/5.x bot (https://israelhiking.osm.org.il; israelhikingmap@gmail.com)";
+
+    public const string BASE_URL = "https://israelhiking.osm.org.il";
 }

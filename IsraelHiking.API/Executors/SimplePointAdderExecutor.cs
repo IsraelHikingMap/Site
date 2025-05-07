@@ -31,7 +31,7 @@ public class SimplePointAdderExecutor(
     {
         var change = await GetOsmChange(osmGateway, request);
         await osmGateway.UploadToOsmWithRetries(
-            $"Uploading simple POI, type: {request.PointType} using IsraelHiking.osm.org.il",
+            $"Uploading simple POI, type: {request.PointType} using {Branding.BASE_URL}",
             async changeSetId => await osmGateway.UploadChangeset(changeSetId, change),
             logger);
     }

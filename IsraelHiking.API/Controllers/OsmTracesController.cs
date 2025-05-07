@@ -219,7 +219,7 @@ public class OsmTracesController : ControllerBase
             Id = gpxFile.Id.ToString(),
             Name = gpxFile.Name,
             Description = gpxFile.Description,
-            ImageUrl = $"https://israelhiking.osm.org.il/api/osm/trace/{gpxFile.Id}/picture",
+            ImageUrl = $"{Branding.BASE_URL}/api/osm/trace/{gpxFile.Id}/picture",
             Url = $"https://www.openstreetmap.org/user/{gpxFile.User}/traces/{gpxFile.Id}",
             TagsString = string.Join(",", gpxFile.Tags),
             TimeStamp = gpxFile.TimeStamp,
