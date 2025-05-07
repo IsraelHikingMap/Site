@@ -44,6 +44,7 @@ async function searchAndReplaceInFiles() {
             "../**/robots.txt",
             "**/environments/environment.mobile.ts",
             "**/open-with.service.ts",
+            "**/App.entitlements"
         ],
         from: new RegExp(oldWebsiteUrl, 'g'),
         to: newWebsiteUrl
