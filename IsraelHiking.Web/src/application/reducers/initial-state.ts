@@ -1,4 +1,5 @@
 ﻿import { Urls } from "../urls";
+import { environment } from "environments/environment";
 import type { Language, MutableApplicationState, RouteData, StateWithHistory } from "../models/models";
 
 export const ISRAEL_HIKING_MAP = "Israel Hiking Map";
@@ -95,7 +96,7 @@ export const initialState =
                 },
                 {
                     key: SATELLITE,
-                    address: "https://israelhiking.osm.org.il/Ortho/{z}/{y}/{x}.jpg",
+                    address: environment.baseTilesAddress + "/Ortho/{z}/{y}/{x}.jpg",
                     isEditable: false,
                     isOfflineAvailable: false,
                     isOfflineOn: false,

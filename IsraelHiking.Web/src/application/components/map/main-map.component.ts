@@ -29,6 +29,7 @@ import { DrawingComponent } from "../drawing.component";
 import { RouteStatisticsComponent } from "../route-statistics.component";
 import { CenterMeComponent } from "../center-me.component";
 import { IhmLinkComponent } from "../ihm-link.component";
+import { environment } from "environments/environment";
 
 @Component({
     selector: "main-map",
@@ -203,7 +204,7 @@ export class MainMapComponent {
         // HM TODO: change this for global terrain
         let source: RasterDEMSourceSpecification = {
             type: "raster-dem",
-            url: "https://israelhiking.osm.org.il/vector/data/TerrainRGB.json",
+            url: environment.baseTilesAddress + "/vector/data/TerrainRGB.json",
             tileSize: 256
         };
         if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate != null) {

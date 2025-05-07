@@ -61,7 +61,7 @@ public class CrawlersMiddlewareTests
             Request =
             {
                 Path = new PathString("/api/something"),
-                Host = new HostString("israelhiking.osm.org.il"),
+                Host = new HostString("www.example.com"),
                 QueryString = QueryString.Empty,
                 PathBase = PathString.Empty,
                 Scheme = "http"
@@ -81,7 +81,7 @@ public class CrawlersMiddlewareTests
             Request =
             {
                 Path = new PathString("/share"),
-                Host = new HostString("israelhiking.osm.org.il"),
+                Host = new HostString("www.example.com"),
                 QueryString = QueryString.Empty,
                 PathBase = PathString.Empty,
                 Scheme = "http"
@@ -205,7 +205,7 @@ public class CrawlersMiddlewareTests
         var stream = new MemoryStream();
         context.Response.Body = stream;
         context.Request.Path = new PathString($"/share/{id}");
-        context.Request.Host = new HostString("israelhiking.osm.org.il");
+        context.Request.Host = new HostString("www.example.com");
         context.Request.QueryString = QueryString.Empty;
         context.Request.PathBase = PathString.Empty;
         context.Request.Scheme = "http";
@@ -226,7 +226,7 @@ public class CrawlersMiddlewareTests
         var stream = new MemoryStream();
         context.Response.Body = stream;
         context.Request.Path = new PathString($"/share/{id}");
-        context.Request.Host = new HostString("israelhiking.osm.org.il");
+        context.Request.Host = new HostString("www.example.com");
         context.Request.QueryString = QueryString.Empty;
         context.Request.PathBase = PathString.Empty;
         context.Request.Scheme = "http";

@@ -31,7 +31,7 @@ public class SpaDefaultHtmlMiddlewareTests
             Request =
             {
                 Path = new PathString("/api/something"),
-                Host = new HostString("israelhiking.osm.org.il"),
+                Host = new HostString("www.example.com"),
                 QueryString = QueryString.Empty,
                 PathBase = PathString.Empty,
                 Scheme = "http"
@@ -51,7 +51,7 @@ public class SpaDefaultHtmlMiddlewareTests
             Request =
             {
                 Path = new PathString("/pther"),
-                Host = new HostString("israelhiking.osm.org.il"),
+                Host = new HostString("www.example.com"),
                 QueryString = QueryString.Empty,
                 PathBase = PathString.Empty,
                 Scheme = "http"
