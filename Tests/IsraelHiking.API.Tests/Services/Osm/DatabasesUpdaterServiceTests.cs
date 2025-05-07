@@ -110,7 +110,7 @@ public class DatabasesUpdaterServiceTests
             
         _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
 
-        _pointsOfInterestFilesCreatorExecutor.Received(1).CreateOfflinePoisFile(Arg.Any<List<IFeature>>());
+        _pointsOfInterestFilesCreatorExecutor.Received(1).CreateExtenalPoisFile(Arg.Any<List<IFeature>>());
         _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
     }
         
@@ -130,7 +130,7 @@ public class DatabasesUpdaterServiceTests
             
         _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
 
-        _pointsOfInterestFilesCreatorExecutor.Received(1).CreateOfflinePoisFile(Arg.Any<List<IFeature>>());
+        _pointsOfInterestFilesCreatorExecutor.Received(1).CreateExtenalPoisFile(Arg.Any<List<IFeature>>());
         _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
     }
         
@@ -164,7 +164,7 @@ public class DatabasesUpdaterServiceTests
             
         _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
 
-        _pointsOfInterestFilesCreatorExecutor.Received(1).CreateOfflinePoisFile(Arg.Is<List<IFeature>>(a => a.Count == 1));
+        _pointsOfInterestFilesCreatorExecutor.Received(1).CreateExtenalPoisFile(Arg.Is<List<IFeature>>(a => a.Count == 1));
         _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
     }
         
