@@ -128,6 +128,7 @@ public static class Branding
 
     public const string ROUTE_SHARE_DEFAULT_TITLE = "Israel Hiking Map Route Share";
 
+    // HM TODO: decide what to do with this
     public const string USER_AGENT =
         "IsraelHikingMapSite/5.x bot (https://israelhiking.osm.org.il; israelhikingmap@gmail.com)";
 
