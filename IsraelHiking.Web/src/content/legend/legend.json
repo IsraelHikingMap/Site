@@ -169,12 +169,12 @@
       {
         "key": "legendAdvanced",
         "latlng": {
-          "lat": 32.6425,
-          "lng": 35.1115
+          "lat": 32.991155,
+          "lng": 35.431853
         },
         "zoom": 16,
         "type": "Way",
-        "osmTags": [ "mtb:scale=2 or mtb:scale=3" ],
+        "osmTags": [ "mtb:scale=2" ],
         "link": "osm-key-link"
       },
       {
@@ -185,7 +185,7 @@
         },
         "zoom": 18,
         "type": "Way",
-        "osmTags": [ "mtb:scale=4 or mtb:scale=5" ],
+        "osmTags": [ "mtb:scale=3, mtb:scale=4, or mtb:scale=5" ],
         "link": "osm-key-link"
       }
     ]
