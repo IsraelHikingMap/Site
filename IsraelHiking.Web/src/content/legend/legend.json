@@ -169,12 +169,12 @@
       {
         "key": "legendAdvanced",
         "latlng": {
-          "lat": 32.6425,
-          "lng": 35.1115
+          "lat": 32.991155,
+          "lng": 35.431853
         },
         "zoom": 16,
         "type": "Way",
-        "osmTags": [ "mtb:scale=2 or mtb:scale=3" ],
+        "osmTags": [ "mtb:scale=2" ],
         "link": "osm-key-link"
       },
       {
@@ -185,7 +185,7 @@
         },
         "zoom": 18,
         "type": "Way",
-        "osmTags": [ "mtb:scale=4 or mtb:scale=5" ],
+        "osmTags": [ "mtb:scale=3, mtb:scale=4, or mtb:scale=5" ],
         "link": "osm-key-link"
       }
     ]
@@ -1114,7 +1114,7 @@
           "lat": 30.611540,
           "lng": 34.8035610
         },
-        "zoom": 17,
+        "zoom": 18,
         "type": "POI",
         "osmTags": [ "tourism=information" ],
         "link": "osm-tag-link"
@@ -1248,8 +1248,8 @@
       {
         "key": "legendQuarry",
         "latlng": {
-          "lat": 31.715015,
-          "lng": 35.022489
+          "lat": 31.715017,
+          "lng": 35.022441
         },
         "zoom": 19,
         "type": "POI",
@@ -1259,8 +1259,8 @@
       {
         "key": "legendConstructionSite",
         "latlng": {
-          "lat": 31.7895042,
-          "lng": 35.1360069
+          "lat": 32.037241,
+          "lng": 34.811401
         },
         "zoom": 17,
         "type": "POI",
