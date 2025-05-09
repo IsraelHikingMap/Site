@@ -139,7 +139,7 @@
           "lat": 31.7181377,
           "lng": 35.074078
         },
-        "zoom": 16,
+        "zoom": 17,
         "type": "Way",
         "osmTags": [ "no \"mtb:scale\" tag" ],
         "link": "https://wiki.openstreetmap.org/wiki/Key:mtb:scale"
@@ -172,7 +172,7 @@
           "lat": 32.991155,
           "lng": 35.431853
         },
-        "zoom": 16,
+        "zoom": 17,
         "type": "Way",
         "osmTags": [ "mtb:scale=2" ],
         "link": "osm-key-link"
@@ -183,7 +183,7 @@
           "lat": 31.7503,
           "lng": 35.10555
         },
-        "zoom": 18,
+        "zoom": 17,
         "type": "Way",
         "osmTags": [ "mtb:scale=3, mtb:scale=4, or mtb:scale=5" ],
         "link": "osm-key-link"
