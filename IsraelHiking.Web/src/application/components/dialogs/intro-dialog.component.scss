@@ -1,3 +1,7 @@
+.safe-top {
+    padding-top: env(safe-area-inset-top, 0);
+}
+
 .square-container {
     // width: 100%;
     max-width: 528px;

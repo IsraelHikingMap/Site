@@ -1,4 +1,4 @@
-<div [dir]="resources.direction">
+<div [dir]="resources.direction" class="safe-top">
     <div mat-dialog-content>
         <div *ngIf="step === 0">
             <mat-radio-group (change)=resources.setLanguage($event.value) [value]="getLanuguageCode()">
