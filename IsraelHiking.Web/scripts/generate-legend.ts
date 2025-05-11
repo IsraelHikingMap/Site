@@ -55,9 +55,9 @@ async function createImage(style: string, center: {lat: number, lng: number}, zo
             deviceScaleFactor: 2
         });
         await page.setContent(html);
-        // Wait for map to load, then wait two more seconds for images, etc. to load.
+        // Wait for map to load, then wait for images, etc. to load.
         await page.waitForFunction('map.loaded()');
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 3000));
         const filename = `./src/content/legend/${style.split("/").pop().replace(".json","")}_${name}.png`;
         await page.screenshot({
             path: filename,
