@@ -39,7 +39,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: '20.12'
+          node-file: IsraelHiking.Web/.nvmrc
 
       - name: Get version
         uses: bbonkr/get-version-action@v1
@@ -81,6 +81,8 @@ jobs:
   android:
     runs-on: ubuntu-latest
     needs: version
+    matrix:
+      appType: ["IHM"]
 
     steps:
       - name: Checkout code
@@ -89,24 +91,19 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: '20.12'
+          node-file: IsraelHiking.Web/.nvmrc
 
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
-
-      - name: Bump versions in gradle
-        uses: chkfung/android-version-actions@v1.2.2
-        with:
-          gradlePath: IsraelHiking.Web/android/app/build.gradle
-          versionCode: ${{ needs.version.outputs.version_code }}
-          versionName: ${{ needs.version.outputs.version_string }}
+  
       - name: Build UI
         run: |
           cd IsraelHiking.Web
           npm ci
+          npm run white-label-me ${{ needs.version.outputs.version_string }} ${{ needs.version.outputs.version_code }} ${{ matrix.appType }}
           npm run build:mobile -- --no-progress
           npx cap sync android
       - name: Build Android Release
@@ -123,14 +120,14 @@ jobs:
         if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
         with:
-          name: IHM_signed_${{ needs.version.outputs.version_string }}.aab
+          name: ${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.aab
           path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
 
       - name: Upload apk artifacts
         if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
         with:
-          name: IHM_signed_${{ needs.version.outputs.version_string }}.apk
+          name: ${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.apk
           path: IsraelHiking.Web/android/app/build/outputs/apk/release/app-release.apk
       
       - name: Publish to Google Play
@@ -154,10 +151,23 @@ jobs:
   docker: 
     runs-on: ubuntu-latest
     needs: version
+    matrix:
+      appType: ["IHM"]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-file: IsraelHiking.Web/.nvmrc
+
+      - name: Run white label script
+        run: |
+          cd IsraelHiking.Web
+          npm ci
+          npm run white-label-me ${{ needs.version.outputs.version_string }} ${{ needs.version.outputs.version_code }} ${{ matrix.appType }}
 
       - name: Login to GitHub Container Registry
         if: ${{ github.secret_source == 'Actions' }}
@@ -182,6 +192,8 @@ jobs:
   ios:
     runs-on: macos-15
     needs: version
+    matrix:
+      appType: ["IHM"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -189,7 +201,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: '20.12'
+          node-file: IsraelHiking.Web/.nvmrc
 
       - name: Setup xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -209,14 +221,9 @@ jobs:
         run: |
           cd IsraelHiking.Web
           npm ci
+          npm run white-label-me ${{ needs.version.outputs.version_string }} ${{ needs.version.outputs.version_code }} ${{ matrix.appType }}
           npm run build:mobile -- --no-progress
           npx cap sync ios
-      - name: Update Info.plist with build version
-        uses: damienaicheh/update-ios-version-info-plist-action@v1.2.0
-        with:
-          info-plist-path: "./IsraelHiking.Web/ios/App/App/Info.plist"
-          bundle-short-version-string: ${{ needs.version.outputs.version_string }}
-          bundle-version: ${{ needs.version.outputs.version_string }}
       - name: Build iOS with signing
         if: ${{ github.secret_source == 'Actions' }}
         run: |
@@ -228,7 +235,7 @@ jobs:
         if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
         with:
-          name: IHM_signed_${{ needs.version.outputs.version_string }}.ipa
+          name: ${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.ipa
           path: IsraelHiking.Web/ios/App/App.ipa
       - name: Upload to testers
         if: ${{ github.event.inputs.publishios == 'true' && github.event.inputs.production == 'false' }}
@@ -268,9 +275,9 @@ jobs:
           merge-multiple: true
       - name: Rename artifacts
         run: |
-          mv ${{ github.workspace }}/artifacts/*.ipa ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.ipa
-          mv ${{ github.workspace }}/artifacts/*.aab ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.aab
-          mv ${{ github.workspace }}/artifacts/*.apk ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.apk
+          mv ${{ github.workspace }}/artifacts/IHM*.ipa ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.ipa
+          mv ${{ github.workspace }}/artifacts/IHM*.aab ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.aab
+          mv ${{ github.workspace }}/artifacts/IHM*.apk ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.apk
       - name: Rename and close milestone
         uses: octokit/request-action@v2.x
         with:
