@@ -39,7 +39,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-file: IsraelHiking.Web/.nvmrc
+          node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Get version
         uses: bbonkr/get-version-action@v1
@@ -93,7 +93,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-file: IsraelHiking.Web/.nvmrc
+          node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -165,7 +165,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-file: IsraelHiking.Web/.nvmrc
+          node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Run white label script
         run: |
@@ -207,7 +207,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-file: IsraelHiking.Web/.nvmrc
+          node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Setup xcode
         uses: maxim-lobanov/setup-xcode@v1
