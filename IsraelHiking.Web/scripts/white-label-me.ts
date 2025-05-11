@@ -10,15 +10,30 @@ const config: MobileProjectConfig = {
         path: 'android',
     },
 };
-const oldAppName = "Israel Hiking Map";
-const newAppName = "__APP_NAME__";
 
-const newAppId = 'that.is.the.app.id';
+if (process.argv.length < 3) {
+    console.error("Usage: npm run white-lable-me -- <version> <build-number>");
+    console.error("Example: npm run white-lable-me -- 9.20.0 920000");
+    console.error("Example: npm run white-lable-me -- 9.20.0 920000 mapeak");
+    process.exit(1);
+}
+
+const version = process.argv[2] || '9.20.0';
+const buildNumber = +process.argv[3] || 920000;
+
+const oldAppName = "Israel Hiking Map";
 const oldAppId = 'il.org.osm.israelhiking';
-const version = '1.2.34';
-const buildNumber = 1234;
 const oldWebsiteUrl = 'israelhiking.osm.org.il';
-const newWebsiteUrl = 'www.the-app-url.com';
+
+const newAppName = "Israel Hiking Map";
+const newAppId = 'il.org.osm.israelhiking';
+const newWebsiteUrl = 'israelhiking.osm.org.il';
+
+if (process.argv[3] === 'mapeak') {
+    const newAppName = "Mapeak";
+    const newAppId = 'com.mapeak.www';
+    const newWebsiteUrl = 'www.mapeak.com';
+}
 
 async function searchAndReplaceInFiles() {
     await replaceInFile({
@@ -46,7 +61,7 @@ async function searchAndReplaceInFiles() {
             "**/open-with.service.ts",
             "**/App.entitlements"
         ],
-        from: new RegExp(oldWebsiteUrl, 'g'),
+        from: new RegExp(oldWebsiteUrl.replace(/\./g, "\\."), 'g'),
         to: newWebsiteUrl
     });
 
