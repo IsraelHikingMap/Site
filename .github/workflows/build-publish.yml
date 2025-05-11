@@ -84,7 +84,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        appType: ["IHM"]
+        appType: ["IHM", "mapeak"]
 
     steps:
       - name: Checkout code
