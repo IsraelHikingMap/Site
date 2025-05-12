@@ -13,7 +13,6 @@ using NSubstitute;
 using OsmSharp.IO.API;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
@@ -27,17 +26,14 @@ public class DatabasesUpdaterServiceTests
     private IDatabasesUpdaterService _service;
     private IClientsFactory _clientsFactory;
     private INonAuthClient _osmGateway;
-    private IOsmRepository _osmRepository;
     private IExternalSourcesRepository _externalSourcesRepository;
     private IPointsOfInterestRepository _pointsOfInterestRepository;
-    private IHighwaysRepository _highwaysRepository;
-    private IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
-    private IOsmLatestFileGateway _osmLatestFileGateway;
     private IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
     private IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
     private IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
     private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
     private IElevationGateway _elevationGateway;
+    private IOverpassTurboGateway _overpassTurboGateway;
         
     [TestInitialize]
     public void TestInitialize()
@@ -50,25 +46,19 @@ public class DatabasesUpdaterServiceTests
         optionsProvider.Value.Returns(options);
         _externalSourcesRepository = Substitute.For<IExternalSourcesRepository>();
         _pointsOfInterestRepository = Substitute.For<IPointsOfInterestRepository>();
-        _highwaysRepository = Substitute.For<IHighwaysRepository>();
-        _osmRepository = Substitute.For<IOsmRepository>();
-        _geoJsonPreprocessorExecutor = Substitute.For<IOsmGeoJsonPreprocessorExecutor>();
-        _osmLatestFileGateway = Substitute.For<IOsmLatestFileGateway>();
         _pointsOfInterestFilesCreatorExecutor = Substitute.For<IPointsOfInterestFilesCreatorExecutor>();
         _pointsOfInterestAdapterFactory = Substitute.For<IPointsOfInterestAdapterFactory>();
         _externalSourceUpdaterExecutor = Substitute.For<IExternalSourceUpdaterExecutor>();
         _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
         _elevationGateway = Substitute.For<IElevationGateway>();
+        _overpassTurboGateway = Substitute.For<IOverpassTurboGateway>();
         _service = new DatabasesUpdaterService(_externalSourcesRepository,
             _pointsOfInterestRepository,
-            _highwaysRepository,
-            _geoJsonPreprocessorExecutor,
-            _osmRepository,
             _pointsOfInterestAdapterFactory,
-            _osmLatestFileGateway,
             _pointsOfInterestFilesCreatorExecutor,
             _imagesUrlsStorageExecutor,
             _externalSourceUpdaterExecutor, Substitute.For<IElevationSetterExecutor>(),
+            _overpassTurboGateway,
             Substitute.For<ILogger>());
     }
 
@@ -84,15 +74,6 @@ public class DatabasesUpdaterServiceTests
     }
         
     [TestMethod]
-    public void TestRebuild_Highways_ShouldRebuildHighwaysAndPoints()
-    { 
-        _service.Rebuild(new UpdateRequest {Highways = true}).Wait();
-
-        _highwaysRepository.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<IFeature>>());
-        _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
-    }
-        
-    [TestMethod]
     public void TestRebuild_Images_ShouldRebuildImages()
     {
         const string imageUrl = "imageUrl";
@@ -102,7 +83,7 @@ public class DatabasesUpdaterServiceTests
         });
         feature.SetLastModified(new DateTime(0));
         _pointsOfInterestRepository.GetAllPointsOfInterest().Returns([feature]);
-        _osmRepository.GetImagesUrls(Arg.Any<Stream>()).Returns([imageUrl]);
+        _overpassTurboGateway.GetImagesUrls().Returns([imageUrl]);
             
         _service.Rebuild(new UpdateRequest {Images = true}).Wait();
 
@@ -129,7 +110,7 @@ public class DatabasesUpdaterServiceTests
             
         _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
 
-        _pointsOfInterestFilesCreatorExecutor.Received(1).CreateOfflinePoisFile(Arg.Any<List<IFeature>>());
+        _pointsOfInterestFilesCreatorExecutor.Received(1).CreateExtenalPoisFile(Arg.Any<List<IFeature>>());
         _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
     }
         
@@ -143,13 +124,13 @@ public class DatabasesUpdaterServiceTests
         adapter.Source.Returns(Sources.NAKEB);
         _pointsOfInterestAdapterFactory.GetAll().Returns([adapter]);
         _externalSourcesRepository.GetExternalPoisBySource(Arg.Any<string>()).Returns([feature]);
-        _osmRepository.GetExternalReferences(Arg.Any<Stream>()).Returns(new Dictionary<string, List<string>> { { Sources.WIKIDATA,
+        _overpassTurboGateway.GetExternalReferences().Returns(new Dictionary<string, List<string>> { { Sources.WIKIDATA,
             ["Q123"]
         }});
             
         _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
 
-        _pointsOfInterestFilesCreatorExecutor.Received(1).CreateOfflinePoisFile(Arg.Any<List<IFeature>>());
+        _pointsOfInterestFilesCreatorExecutor.Received(1).CreateExtenalPoisFile(Arg.Any<List<IFeature>>());
         _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
     }
         
@@ -177,13 +158,13 @@ public class DatabasesUpdaterServiceTests
         adapter.Source.Returns(Sources.WIKIDATA);
         _pointsOfInterestAdapterFactory.GetAll().Returns([adapter]);
         _externalSourcesRepository.GetExternalPoisBySource(Arg.Any<string>()).Returns([feature1, feature2, feature3]);
-        _osmRepository.GetExternalReferences(Arg.Any<Stream>()).Returns(new Dictionary<string, List<string>> { { Sources.WIKIDATA,
+        _overpassTurboGateway.GetExternalReferences().Returns(new Dictionary<string, List<string>> { { Sources.WIKIDATA,
             ["Q111", "Q222"]
         }});
             
         _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
 
-        _pointsOfInterestFilesCreatorExecutor.Received(1).CreateOfflinePoisFile(Arg.Is<List<IFeature>>(a => a.Count == 1));
+        _pointsOfInterestFilesCreatorExecutor.Received(1).CreateExtenalPoisFile(Arg.Is<List<IFeature>>(a => a.Count == 1));
         _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
     }
         

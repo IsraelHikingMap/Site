@@ -24,8 +24,8 @@ on:
         required: false
         default: 'false'
         type: boolean
-      tag:
-        description: 'Tag and create a Github release'
+      production:
+        description: 'Publish to production'
         required: false
         default: 'false'
         type: boolean
@@ -58,9 +58,25 @@ jobs:
           echo "version_code=$(($MAJOR * 100000 + $MINOR * 1000 + $PATCH % 1000))" >> $GITHUB_OUTPUT
           echo "version_string=$version_string" >> $GITHUB_OUTPUT
           echo "Version: $version_string" >> $GITHUB_STEP_SUMMARY
+      - name: Get all milestones
+        id: get_milestones
+        uses: octokit/request-action@v2.x
+        with:
+          route: GET /repos/${{ github.repository }}/milestones?state=open
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract milestone ID
+        id: extract
+        run: |
+          echo '${{ steps.get_milestones.outputs.data }}' | jq '.[] | select(.title == "Next Release") | .number' > id.txt
+          milestone_id=$(cat id.txt)
+          echo "milestone_id=$milestone_id" >> $GITHUB_OUTPUT
+        shell: bash
     outputs:
       version_code: ${{ steps.version-code.outputs.version_code }}
       version_string: ${{ steps.version-code.outputs.version_string }}
+      milestone_id: ${{ steps.extract.outputs.milestone_id }}
 
   android:
     runs-on: ubuntu-latest
@@ -97,17 +113,12 @@ jobs:
         if: ${{ github.secret_source == 'Actions' }}
         run: |
           cd IsraelHiking.Web/android
-          ./gradlew :app:assembleRelease --no-daemon "-Pandroid.injected.signing.store.file=$WORKSPACE/IsraelHiking.Web/signing/IHM.jks" "-Pandroid.injected.signing.store.password=$STORE_PASSWORD" "-Pandroid.injected.signing.key.alias=ihmkey" "-Pandroid.injected.signing.key.password=$PASSWORD"
-          ./gradlew :app:bundleRelease --no-daemon "-Pandroid.injected.signing.store.file=$WORKSPACE/IsraelHiking.Web/signing/IHM.jks" "-Pandroid.injected.signing.store.password=$STORE_PASSWORD" "-Pandroid.injected.signing.key.alias=ihmkey" "-Pandroid.injected.signing.key.password=$PASSWORD"
+          fastlane build_aab
+          fastlane build_apk
         env:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           PASSWORD: ${{ secrets.PASSWORD }}
-          WORKSPACE: ${{ github.workspace }}
-      - name: Build Android Debug
-        if: ${{ github.secret_source == 'None' }}
-        run: |
-          cd IsraelHiking.Web/android
-          ./gradlew :app:assembleDebug --no-daemon
+          KEYSTORE_PATH: ${{ github.workspace }}/IsraelHiking.Web/android/app/IHM.jks
       - name: Upload aab artifacts
         if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
@@ -124,12 +135,21 @@ jobs:
       
       - name: Publish to Google Play
         if: ${{ github.event.inputs.publishandroid == 'true' }}
-        uses: r0adkll/upload-google-play@v1
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-          packageName: il.org.osm.israelhiking
-          releaseFiles: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
-          track: internal
+        run: |
+          cd IsraelHiking.Web/android
+          echo "ראו https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/android/iw-IL/changelogs/default.txt
+          echo "See https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/android/en-US/changelogs/default.txt
+          fastlane upload
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+
+      - name: Promote to production
+        if: ${{ github.event.inputs.publishandroid == 'true' && github.event.inputs.production == 'true' }}
+        run: |
+          cd IsraelHiking.Web/android
+          fastlane promote
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
 
   docker: 
     runs-on: ubuntu-latest
@@ -181,26 +201,10 @@ jobs:
         with:
           podfile-path: IsraelHiking.Web/ios/App/Podfile.lock
 
-      - name: Keychain setup
-        if: ${{ github.secret_source == 'Actions' }}
+      - name: Set up Git to use PAT for private match repo
         run: |
-          cd IsraelHiking.Web
-          openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/CI.mobileprovision.enc -d -a -out ./signing/CI.mobileprovision
-          openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/ihm-dist.cer.enc -d -a -out ./signing/ihm-dist.cer
-          openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/ihm-dist.p12.enc -d -a -out ./signing/ihm-dist.p12
-          security create-keychain -p CI ios-build.keychain
-          security default-keychain -s ios-build.keychain
-          security unlock-keychain -p CI ios-build.keychain
-          security set-keychain-settings -t 3600 -l ~/Library/Keychains/ios-build.keychain
-          security import ./signing/apple.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
-          security import ./signing/ihm-dist.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
-          security import ./signing/ihm-dist.p12 -k ~/Library/Keychains/ios-build.keychain -P $STORE_PASSWORD -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k CI ~/Library/Keychains/ios-build.keychain > /dev/null
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp ./signing/CI.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
-        env:
-          PASSWORD: ${{ secrets.PASSWORD }}
-          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          git config --global url."https://x-access-token:${{ secrets.FASTLANE_MATCH_PAT }}@github.com/".insteadOf "https://github.com/"
+
       - name: Build UI
         run: |
           cd IsraelHiking.Web
@@ -216,36 +220,35 @@ jobs:
       - name: Build iOS with signing
         if: ${{ github.secret_source == 'Actions' }}
         run: |
-          cd IsraelHiking.Web/ios
-          xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive -quiet
-      - name: Build iOS no signing
-        if: ${{ github.secret_source == 'None' }}
-        run: |
-          cd IsraelHiking.Web/ios
-          xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive -quiet CODE_SIGN_IDENTITY=""
-      - name: Export iOS Archive
-        if: ${{ github.secret_source == 'Actions' }}
-        run: |
-          cd IsraelHiking.Web/ios
-          xcodebuild -exportArchive -archivePath App.xcarchive -exportPath ./ -exportOptionsPlist exportOptions.plist
+          cd IsraelHiking.Web/ios/App
+          fastlane build_ios
+        env:
+          MATCH_PASSWORD: ${{ secrets.PASSWORD }}
       - name: Upload artifacts
         if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
         with:
           name: IHM_signed_${{ needs.version.outputs.version_string }}.ipa
-          path: IsraelHiking.Web/ios/App.ipa
-
-      - name: Publish to App Store
-        if: ${{ github.event.inputs.publishios == 'true' }}
+          path: IsraelHiking.Web/ios/App/App.ipa
+      - name: Upload to testers
+        if: ${{ github.event.inputs.publishios == 'true' && github.event.inputs.production == 'false' }}
         run: |
-          cd IsraelHiking.Web/ios
-          xcrun altool --upload-app --type ios --file ./App.ipa --username $APPLE_APPSTORE_USER --password $APPLE_APPSTORE_PASSWORD
+          cd IsraelHiking.Web/ios/App
+          fastlane upload_to_testers
         env:
-          APPLE_APPSTORE_USER: ${{ secrets.APPLE_APPSTORE_USER }}
-          APPLE_APPSTORE_PASSWORD: ${{ secrets.APPLE_APPSTORE_PASSWORD }}
+          APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
+      - name: Upload and send for review
+        if: ${{ github.event.inputs.publishios == 'true' && github.event.inputs.production == 'true' }}
+        run: |
+          cd IsraelHiking.Web/ios/App
+          echo "ראו https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/he/release_notes.txt
+          echo "See https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/en-US/release_notes.txt
+          fastlane upload_to_production
+        env:
+          APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
 
   github-release:
-    if: ${{ github.event.inputs.tag == 'true' }}
+    if: ${{ github.event.inputs.production == 'true' }}
     runs-on: ubuntu-latest
     needs: [version, ios, android]
 
@@ -268,12 +271,28 @@ jobs:
           mv ${{ github.workspace }}/artifacts/*.ipa ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.ipa
           mv ${{ github.workspace }}/artifacts/*.aab ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.aab
           mv ${{ github.workspace }}/artifacts/*.apk ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.apk
+      - name: Rename and close milestone
+        uses: octokit/request-action@v2.x
+        with:
+          route: PATCH /repos/${{ github.repository }}/milestones/${{ needs.version.outputs.milestone_id }}
+          title: Version ${{ needs.version.outputs.version_string }}
+          state: closed
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create new "Next Release" milestone
+        uses: octokit/request-action@v2.x
+        with:
+          route: POST /repos/${{ github.repository }}/milestones
+          title: Next Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          draft: true
           tag_name: v${{ needs.version.outputs.version_string }}
           name: v${{ needs.version.outputs.version_string }}
+          body: |
+            See [Milestone ${{ needs.version.outputs.version_string }}](https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1)
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             IHM_signed_${{ needs.version.outputs.version_string }}.ipa

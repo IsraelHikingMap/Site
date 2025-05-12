@@ -1,0 +1,8 @@
+app_identifier("il.org.osm.israelhiking") # The bundle identifier of your app
+apple_id("israelhikingmap@gmail.com") # Your Apple Developer Portal username
+
+itc_team_id("119682213") # App Store Connect Team ID
+team_id("2KT88923M5") # Developer Portal Team ID
+
+# For more information about the Appfile, see:
+#     https://docs.fastlane.tools/advanced/#appfile

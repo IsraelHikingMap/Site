@@ -7,14 +7,6 @@ public class UpdateRequest
     /// </summary>
     public bool AllExternalSources { get; set; }
     /// <summary>
-    /// Update points of interest database
-    /// </summary>
-    public bool PointsOfInterest { get; set; }
-    /// <summary>
-    /// Update highway database
-    /// </summary>
-    public bool Highways { get; set; }
-    /// <summary>
     /// Updates images mirror
     /// </summary>
     public bool Images { get; set; }

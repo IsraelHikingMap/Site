@@ -55,18 +55,14 @@ public class UpdateController : ControllerBase
                 return BadRequest("This operation can't be done from a remote client, please run this from the server");
             }
             if (request == null || 
-                request.Highways == false &&
                 request.AllExternalSources == false &&
-                request.PointsOfInterest == false &&
                 request.Images == false &&
                 request.SiteMap == false &&
                 request.OfflinePoisFile == false)
             {
                 request = new UpdateRequest
                 {
-                    Highways = true,
                     AllExternalSources = true,
-                    PointsOfInterest = true,
                     SiteMap = true,
                     Images = true,
                     OfflinePoisFile = true

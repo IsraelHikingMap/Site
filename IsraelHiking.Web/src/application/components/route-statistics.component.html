@@ -87,7 +87,7 @@
         </div>
         <div class="absolute top-0 end-0 flex flex-col">
             <button mat-button class="m-1" (click)="toggle()" angularticsCategory="Route statistics" angularticsAction="Route statistics close"><i class="fa icon-close fa-lg"></i></button>
-            <button mat-button class="m-1 max-sm:!hidden" *ngIf="!isTable" (click)="toggleExpand()" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle expand view"><i class="fa fa-lg" [ngClass]="{ 'icon-chevron-right' : isExpanded && resources.end === 'left' || !isExpanded && resources.end === 'right', 'icon-chevron-left' : !isExpanded && resources.end === 'left' || isExpanded && resources.end === 'right'}"></i></button>
+            <button mat-button class="m-1 max-sm:hidden!" *ngIf="!isTable" (click)="toggleExpand()" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle expand view"><i class="fa fa-lg" [ngClass]="{ 'icon-chevron-right' : isExpanded && resources.end === 'left' || !isExpanded && resources.end === 'right', 'icon-chevron-left' : !isExpanded && resources.end === 'left' || isExpanded && resources.end === 'right'}"></i></button>
             <mat-menu #appMenu="matMenu" overlapTrigger="false" xPosition="before">
                 <button mat-menu-item (click)="toggleKmMarker()" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle KM markers">
                     <i [class.active]="isKmMarkersOn" class="fa icon-map-marker p-1"></i> 

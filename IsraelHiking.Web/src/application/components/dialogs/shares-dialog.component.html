@@ -50,10 +50,10 @@
     <div mat-dialog-actions>
         <div class="flex flex-row w-full">
             <div class="flex-1" *ngIf="!isShareUrlInEditMode(selectedShareUrlId)">
-                <button mat-button class="w-full min-w-unset !p-0" [disabled]="!hasSelected()" (click)="setShareUrlInEditMode()" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Toggle edit share"><i class="fa icon-pencil"></i></button>
+                <button mat-button class="w-full min-w-unset p-0!" [disabled]="!hasSelected()" (click)="setShareUrlInEditMode()" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Toggle edit share"><i class="fa icon-pencil"></i></button>
             </div>
             <div class="flex-1" *ngIf="isShareUrlInEditMode(selectedShareUrlId)">
-                <button mat-button class="w-full min-w-unset !p-0" [disabled]="!hasSelected()" (click)="updateShareUrl()" matTooltip="{{resources.update}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Update share"><i class="fa icon-check"></i></button>
+                <button mat-button class="w-full min-w-unset p-0!" [disabled]="!hasSelected()" (click)="updateShareUrl()" matTooltip="{{resources.update}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Update share"><i class="fa icon-check"></i></button>
             </div>
             <div class="flex-1" *ngIf="!isApp()">
                 <mat-menu #appMenu="matMenu" yPosition="above" overlapTrigger="false">
@@ -65,19 +65,19 @@
                         </div>
                     </div>
                 </mat-menu>
-                <button mat-button class="w-full min-w-unset !p-0" [disabled]="!hasSelected()" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share open menu for share"><i class="fa icon-share-alt"></i></button>
+                <button mat-button class="w-full min-w-unset p-0!" [disabled]="!hasSelected()" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share open menu for share"><i class="fa icon-share-alt"></i></button>
             </div>
             <div class="flex-1" *ngIf="isApp()">
-                <button mat-button class="w-full min-w-unset !p-0" [disabled]="!hasSelected()" (click)="share()" angulartics2On="click" angularticsCategory="Share" angularticsAction="Mobile social share"><i class="fa icon-share-alt"></i></button>
+                <button mat-button class="w-full min-w-unset p-0!" [disabled]="!hasSelected()" (click)="share()" angulartics2On="click" angularticsCategory="Share" angularticsAction="Mobile social share"><i class="fa icon-share-alt"></i></button>
             </div>
             <div class="flex-1">
-                <button mat-button class="w-full min-w-unset !p-0" [disabled]="!hasSelected()" matDialogClose (click)="showShareUrl()" matTooltip="{{resources.presentShare}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Present share"><i class="fa icon-eye"></i></button>
+                <button mat-button class="w-full min-w-unset p-0!" [disabled]="!hasSelected()" matDialogClose (click)="showShareUrl()" matTooltip="{{resources.presentShare}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Present share"><i class="fa icon-eye"></i></button>
             </div>
             <div class="flex-1">
-                <button mat-button class="w-full min-w-unset !p-0" [disabled]="!hasSelected()" matDialogClose (click)="addShareUrlToRoutes()" matTooltip="{{resources.addToRoutes}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Add share to routes"><i class="fa icon-plus"></i></button>
+                <button mat-button class="w-full min-w-unset p-0!" [disabled]="!hasSelected()" matDialogClose (click)="addShareUrlToRoutes()" matTooltip="{{resources.addToRoutes}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Add share to routes"><i class="fa icon-plus"></i></button>
             </div>
             <div class="flex-1">
-                <button mat-button class="w-full min-w-unset !p-0" [disabled]="!hasSelected()" (click)="deleteShareUrl()" matTooltip="{{resources.delete}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Delete share"><i class="fa icon-trash"></i></button>
+                <button mat-button class="w-full min-w-unset p-0!" [disabled]="!hasSelected()" (click)="deleteShareUrl()" matTooltip="{{resources.delete}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Delete share"><i class="fa icon-trash"></i></button>
             </div>
         </div>
     </div>

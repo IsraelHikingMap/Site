@@ -1,8 +1,8 @@
-﻿﻿<div class="side-control maplibregl-ctrl !absolute align-next-to-menu" [dir]="resources.direction">
+﻿﻿<div class="side-control maplibregl-ctrl absolute! align-next-to-menu" [dir]="resources.direction">
     <div class="flex flex-row">
         <div>
             <mat-form-field class="search-input-container" subscriptSizing="dynamic">
-                <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom" [matAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(fromContext.searchTerm)" (focus)="focusOnSearchInput()" (blur)="hasFocus = false">
+                <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom" [matAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(fromContext.searchTerm)" (focus)="focusOnSearchInput()">
                 <mat-autocomplete positionY="below" autoActiveFirstOption="true" #autoFrom="matAutocomplete" [displayWith]="displayResults">
                     <mat-option *ngFor="let result of fromContext.searchResults" [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']" [dir]="resources.getDirection(result.title)">
                         <i *ngIf="result.icon" class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>

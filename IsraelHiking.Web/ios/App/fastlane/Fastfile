@@ -1,0 +1,55 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Build the iOS app only"
+  lane :build_ios do
+    setup_ci
+    sync_code_signing(type: "appstore")
+    build_app(workspace: "App.xcworkspace", scheme: "App")
+  end
+  desc "Upload the previously built IPA to TestFlight"
+  lane :upload_to_testers do
+    setup_ci
+    app_store_connect_api_key(
+      key_id: "BTS253W4SC",
+      issuer_id: "3a1173da-1717-450e-b168-14d039b851a1",
+      key_content: ENV["APPSTORE_CONNECT_API_KEY"], # The content of the .p8 file
+      in_house: false # optional but may be required if using match/sigh
+    )
+    upload_to_testflight(
+      ipa: "App.ipa"
+    )
+  end
+  lane :upload_to_production do
+    setup_ci
+    app_store_connect_api_key(
+      key_id: "BTS253W4SC",
+      issuer_id: "3a1173da-1717-450e-b168-14d039b851a1",
+      key_content: ENV["APPSTORE_CONNECT_API_KEY"], # The content of the .p8 file
+      in_house: false # optional but may be required if using match/sigh
+    )
+    deliver(
+      force: true,  # Skip HTML report verification
+      skip_screenshots: true,  # Set to true to skip screenshots if unchanged
+      skip_metadata: false, # This is needed to publish the release notes, those are updated through the CI
+      submit_for_review: true,  # Automatically submits the build for review
+      run_precheck_before_submit: false,  # Precheck cannot check In-app purchases with the App Store Connect API Key (yet)
+      ipa: "App.ipa"
+    )
+  end
+end

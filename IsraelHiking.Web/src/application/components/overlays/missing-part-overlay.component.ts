@@ -56,7 +56,7 @@ export class MissingPartOverlayComponent {
 
     public async addMissingPartToOsm() {
         try {
-            await firstValueFrom(this.httpClient.put(Urls.osm, this.feature()));
+            await firstValueFrom(this.httpClient.put(Urls.missingParts, this.feature()));
             this.toastService.success(this.resources.routeAddedSuccessfullyItWillTakeTime);
             this.remove();
         } catch (ex) {

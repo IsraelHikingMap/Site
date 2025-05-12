@@ -61,9 +61,9 @@ public class PointsOfInterestFilesCreatorExecutor : IPointsOfInterestFilesCreato
     }
 
     /// <inheritdoc/>
-    public void CreateOfflinePoisFile(List<IFeature> features)
+    public void CreateExtenalPoisFile(List<IFeature> features)
     {
-        var fullFolderPath = Path.GetFullPath(_options.OfflineFilesFolder);
+        var fullFolderPath = Path.GetFullPath(_options.ExternalFilesFolder);
         var externalFeatures = new FeatureCollection();
         foreach (var feature in features.Where(f => f.Attributes[FeatureAttributes.POI_SOURCE].ToString() != Sources.OSM).ToList()) {
             externalFeatures.Add(feature);

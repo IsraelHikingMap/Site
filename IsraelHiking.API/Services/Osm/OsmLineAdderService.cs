@@ -2,7 +2,6 @@
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
-using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -14,16 +13,17 @@ using ProjNet.CoordinateSystems.Transformations;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.API.Services.Osm;
 
 /// <inheritdoc/>
 public class OsmLineAdderService : IOsmLineAdderService
 {
-    private readonly IHighwaysRepository _highwaysRepository;
+    private readonly IOverpassTurboGateway _overpassTurboGateway;
     private readonly MathTransform _itmWgs84MathTransform;
     private readonly MathTransform _wgs84ItmMathTransform;
-    private readonly IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
+    private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
     private readonly GeometryFactory _geometryFactory;
     private readonly ConfigurationData _options;
 
@@ -32,22 +32,22 @@ public class OsmLineAdderService : IOsmLineAdderService
     /// <summary>
     /// Constructor
     /// </summary>
-    /// <param name="highwaysRepository"></param>
+    /// <param name="overpassTurboGateway"></param>
     /// <param name="itmWgs84MathTransformFactory"></param>
     /// <param name="options"></param>
-    /// <param name="geoJsonPreprocessorExecutor"></param>
+    /// <param name="osmGeoJsonPreprocessorExecutor"></param>
     /// <param name="geometryFactory"></param>
-    public OsmLineAdderService(IHighwaysRepository highwaysRepository,
+    public OsmLineAdderService(IOverpassTurboGateway overpassTurboGateway,
         IItmWgs84MathTransformFactory itmWgs84MathTransformFactory,
         IOptions<ConfigurationData> options,
-        IOsmGeoJsonPreprocessorExecutor geoJsonPreprocessorExecutor,
+        IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
         GeometryFactory geometryFactory)
     {
-        _highwaysRepository = highwaysRepository;
+        _overpassTurboGateway = overpassTurboGateway;
         _itmWgs84MathTransform = itmWgs84MathTransformFactory.Create();
         _wgs84ItmMathTransform = itmWgs84MathTransformFactory.CreateInverse();
         _options = options.Value;
-        _geoJsonPreprocessorExecutor = geoJsonPreprocessorExecutor;
+        _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
         _geometryFactory = geometryFactory;
     }
 
@@ -123,13 +123,7 @@ public class OsmLineAdderService : IOsmLineAdderService
         var changesetId = await _osmGateway.CreateChangeset(CreateCommentFromTags(tags));
         try
         {
-            var diffResult = await _osmGateway.UploadChangeset(changesetId, changes);
-            waysToUpdateIds = waysToUpdateIds.Select(id =>
-            {
-                var newIdResult = diffResult.Results.FirstOrDefault(r => r.OldId.Equals(id));
-                return newIdResult?.NewId ?? id;
-            }).ToList();
-            await AddWaysToElasticSearch(waysToUpdateIds);
+            await _osmGateway.UploadChangeset(changesetId, changes);
         }
         finally
         {
@@ -252,8 +246,9 @@ public class OsmLineAdderService : IOsmLineAdderService
         var northEastLatLon = _itmWgs84MathTransform.Transform(northEast.x, northEast.y);
         var southWestLatLon = _itmWgs84MathTransform.Transform(southWest.x, southWest.y);
 
-        var highways = await _highwaysRepository.GetHighways(new Coordinate(northEastLatLon.x, northEastLatLon.y), 
+        var ways = await _overpassTurboGateway.GetHighways(new Coordinate(northEastLatLon.x, northEastLatLon.y), 
             new Coordinate(southWestLatLon.x, southWestLatLon.y));
+        var highways = _osmGeoJsonPreprocessorExecutor.Preprocess(ways);
         return highways.ToList();
     }
 
@@ -302,14 +297,6 @@ public class OsmLineAdderService : IOsmLineAdderService
             way.Tags.Add("source", "GPS");
         }
         return way;
-    }
-
-    private async Task AddWaysToElasticSearch(List<long?> wayIds)
-    {
-        var tasksList = wayIds.Select(wayId => _osmGateway.GetCompleteWay(wayId.Value)).ToList();
-        var newlyAddedWays = await Task.WhenAll(tasksList);
-        var newlyHighwaysFeatures = _geoJsonPreprocessorExecutor.Preprocess(newlyAddedWays.ToList());
-        await _highwaysRepository.UpdateHighwaysData(newlyHighwaysFeatures);
     }
 
     private string CreateCommentFromTags(Dictionary<string, string> tags)
@@ -376,7 +363,7 @@ public class OsmLineAdderService : IOsmLineAdderService
 
     private Node CreateNodeFromExistingHighway(IFeature closetHighway, int indexOnWay)
     {
-        var closestNodeId = long.Parse(((IEnumerable<object>)closetHighway.Attributes[FeatureAttributes.POI_OSM_NODES]).ElementAt(indexOnWay).ToString());
+        var closestNodeId = ((long?[])closetHighway.Attributes[FeatureAttributes.POI_OSM_NODES]).ElementAt(indexOnWay).Value;
         return new Node
         {
             Id = closestNodeId,
