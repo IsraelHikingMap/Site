@@ -79,7 +79,7 @@ export class WikidataService {
             feature.properties["name:" + lang] = wikidata.sitelinks[link].title;
         }
         feature.properties.name = wikidata.labels?.mul || wikidata.sitelinks[Object.keys(wikidata.sitelinks)[0]]?.title;
-        for (let lang of Object.keys(wikidata.labels || {})) {
+        for (const lang of Object.keys(wikidata.labels || {})) {
             if (lang === "mul") {
                 continue;
             }
