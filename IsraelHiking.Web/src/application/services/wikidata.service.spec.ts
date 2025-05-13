@@ -84,6 +84,38 @@ describe("WikidataService", () => {
         expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([2,1]);
     }));
 
+    it("should create a feature from wikidata page id english title", inject([WikidataService, HttpTestingController], async (serive: WikidataService, backend: HttpTestingController) => {
+        const wikidataId = "Q123";
+        const language = "he";
+        const title = "en-test";
+        const promise = serive.createFeatureFromPageId(wikidataId, language);
+
+        backend.expectOne(r => r.url === `https://www.wikidata.org/w/rest.php/wikibase/v1/entities/items/${wikidataId}`).flush({
+            sitelinks: {
+                enwiki: {
+                    title
+                }
+            },
+            statements: {
+                P625: [{
+                    value: {
+                        content: {
+                            latitude: 1,
+                            longitude: 2
+                        }
+                    }
+                }]
+            }
+        });
+        
+        const feature = await promise;
+        expect(feature.properties["name:en"]).toBe(title);
+        expect(feature.properties.name).toBe(title);
+        expect(feature.geometry.type).toBe("Point");
+        expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([2,1]);
+    }));
+
+
     it("should create a feature from wikidata page id without image, links and description", inject([WikidataService, HttpTestingController], async (serive: WikidataService, backend: HttpTestingController) => {
         const wikidataId = "Q123";
         const language = "he";

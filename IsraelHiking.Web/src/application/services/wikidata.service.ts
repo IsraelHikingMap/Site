@@ -72,7 +72,11 @@ export class WikidataService {
         await this.setDescriptionAndImages(wikidata, feature, language || this.resources.getCurrentLanguageCodeSimplified());
         const lngLat = this.setLocation(wikidata, feature);
         feature.geometry.coordinates = [lngLat.lng, lngLat.lat];
-        feature.properties.name = this.getTitle(wikidata, language);
+        for (const link of Object.keys(wikidata.sitelinks).filter(l => l.endsWith("wiki"))) {
+            const lang = link.replace("wiki", "");
+            feature.properties["name:" + lang] = wikidata.sitelinks[link].title;
+        }
+        feature.properties.name = wikidata.sitelinks[Object.keys(wikidata.sitelinks)[0]]?.title;
         if (!feature.properties.description && !feature.properties.poiExternalDescription && !feature.properties["description:" + language]) {
             GeoJSONUtils.setDescription(feature, this.resources.noDescriptionAvailableInYourLanguage, language);
         }
@@ -89,7 +93,7 @@ export class WikidataService {
 
     private async setDescriptionAndImages(wikidata: WikiDataPage, feature: GeoJSON.Feature, language: string): Promise<void> {
         await this.setImageFromWikidata(wikidata, feature);
-        const title = this.getTitle(wikidata, language);
+        const title = wikidata.sitelinks[`${language}wiki`]?.title;
         if (!title) {
             return;
         }
@@ -116,10 +120,6 @@ export class WikidataService {
         }
         GeoJSONUtils.setLocation(feature, latLng);
         return latLng;
-    }
-
-    private getTitle(wikidata: WikiDataPage, language: string): string {
-        return wikidata.sitelinks[`${language}wiki`]?.title;
     }
 
     private async setImageFromWikidata(wikidata: WikiDataPage, feature: GeoJSON.Feature) {
