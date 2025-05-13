@@ -167,7 +167,7 @@ describe("Poi Service", () => {
                     },
                     properties: {
                         natural: "spring",
-                        "name:en": "name"
+                        "name:ru": "name"
                     }
                 }
             ] as any;
