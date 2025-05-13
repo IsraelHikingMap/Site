@@ -31,6 +31,8 @@ internal class WikidataBinding
     public WikidataLiteral Location { get; set; }
     [JsonPropertyName("links")]
     public WikidataLiteral WikipediaLinks { get; set; }
+    [JsonPropertyName("allLabels")]
+    public WikidataLiteral Labels { get; set; }
     [JsonPropertyName("image")]
     public WikidataLiteral Image { get; set; }
 }
@@ -65,7 +67,7 @@ public class WikidataGateway : IWikidataGateway
     public async Task<List<IFeature>> GetByBoundingBox(Coordinate southWest, Coordinate northEast)
     {
         _logger.LogInformation($"Starting getting Wikidata items for coordinates: ({southWest.X}, {southWest.Y}), ({northEast.X}, {northEast.Y})");
-        var query = "SELECT ?place ?location ?links ?image WHERE {\n" +
+        var query = "SELECT ?place ?location ?links ?image (GROUP_CONCAT(CONCAT(LANG(?label), \":\", ?label); SEPARATOR=\" | \") AS ?allLabels) WHERE {\n" +
                     "  SERVICE wikibase:box {\n" +
                     "    ?place wdt:P625 ?location.\n" +
                     $"    bd:serviceParam wikibase:cornerWest \"Point({southWest.X} {southWest.Y})\"^^geo:wktLiteral.\n" +
@@ -73,7 +75,9 @@ public class WikidataGateway : IWikidataGateway
                     "  }\n" +
                     "  OPTIONAL {\n" +
                     "    ?place wdt:P18 ?image.\n" +
-                    "  }\n";
+                    "  }\n" +
+                    "  ?place rdfs:label ?label .\n";
+        
         foreach (var language in Languages.Array)
         {
             query += "  OPTIONAL {\n" +
@@ -85,7 +89,8 @@ public class WikidataGateway : IWikidataGateway
                 "  }\n\n";
         }
         var languagesCoalesce = Languages.Array.Select(l => "COALESCE(?" + l + ", \"\")");
-        query += "  BIND(CONCAT(" + string.Join(",\";\",", languagesCoalesce) + ") AS ?links).\n}";
+        query += "  BIND(CONCAT(" + string.Join(",\";\",", languagesCoalesce) + ") AS ?links).\n";
+        query += "}\nGROUP BY ?place ?location ?image ?links";
         var client = _httpClientFactory.CreateClient();
         client.DefaultRequestHeaders.Add("User-Agent", Branding.USER_AGENT);
         client.DefaultRequestHeaders.Add("Accept", "application/sparql-results+json");
@@ -108,7 +113,7 @@ public class WikidataGateway : IWikidataGateway
             (
                 Language: l.Replace("https://", "").Split(".").First(),
                 Title: l.Split("/").Last().Replace("_", " "),
-                Link: l
+                Link: l.Replace("_", "%20")
             )).ToArray();
             var feature = new Feature(point, new AttributesTable
             {
@@ -128,12 +133,17 @@ public class WikidataGateway : IWikidataGateway
                 feature.Attributes.Add(FeatureAttributes.IMAGE_URL, b.Image.Value);
                 feature.Attributes[FeatureAttributes.POI_LANGUAGES] = Languages.Array;
             }
+            foreach (var languageAndLabel in b.Labels.Value.Split("|").Where(l => l.Contains(':')))
+            {
+                var language = languageAndLabel.Split(":").First().Trim();
+                var label = languageAndLabel.Split(":").Last().Trim();
+                feature.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + language, label);
+            }
             for (var index = 0; index < languagesTitlesAndLinks.Length; index++)
             {
                 feature.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + languagesTitlesAndLinks[index].Language,
                     languagesTitlesAndLinks[index].Title);
                 var posix = index > 0 ? index.ToString() : string.Empty;
-                // HM TODO: website is with "_" instead of space.
                 feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + posix, languagesTitlesAndLinks[index].Link);
                 feature.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL + posix, WIKIDATA_LOGO);
             }

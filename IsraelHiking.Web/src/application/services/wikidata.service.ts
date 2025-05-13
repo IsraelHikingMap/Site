@@ -8,6 +8,8 @@ import { GeoJSONUtils } from "./geojson-utils";
 type WikiDataPage = {
     sitelinks: { [key: string]: { site: string, title: string } };
     statements: { [key: string]: { value: { content: any } }[] };
+    labels?: { [key: string]: string };
+    descriptions?: { [key: string]: string };
 }
 
 export type WikiPage = {
@@ -76,9 +78,17 @@ export class WikidataService {
             const lang = link.replace("wiki", "");
             feature.properties["name:" + lang] = wikidata.sitelinks[link].title;
         }
-        feature.properties.name = wikidata.sitelinks[Object.keys(wikidata.sitelinks)[0]]?.title;
+        feature.properties.name = wikidata.labels?.mul || wikidata.sitelinks[Object.keys(wikidata.sitelinks)[0]]?.title;
+        for (let lang of Object.keys(wikidata.labels || {})) {
+            if (lang === "mul") {
+                continue;
+            }
+            if (!feature.properties["name:" + lang]) {
+                feature.properties["name:" + lang] = wikidata.labels[lang];
+            }
+        }
         if (!feature.properties.description && !feature.properties.poiExternalDescription && !feature.properties["description:" + language]) {
-            GeoJSONUtils.setDescription(feature, this.resources.noDescriptionAvailableInYourLanguage, language);
+            GeoJSONUtils.setDescription(feature, wikidata.descriptions?.[language] || this.resources.noDescriptionAvailableInYourLanguage, language);
         }
         if (!feature.properties.website) {
             GeoJSONUtils.setProperty(feature, "website", `https://www.wikidata.org/wiki/${wikidataId}`);
