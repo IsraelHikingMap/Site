@@ -41,11 +41,17 @@ export class GeoJSONUtils {
         if (feature.properties["name:" + language]) {
             return feature.properties["name:" + language];
         }
+        if (feature.properties["name:en"]) {
+            return feature.properties["name:en"];
+        }
         if (feature.properties.name) {
             return feature.properties.name;
         }
         if (feature.properties["mtb:name:"+ language]) {
             return feature.properties["mtb:name:"+ language];
+        }
+        if (feature.properties["mtb:name:en"]) {
+            return feature.properties["mtb:name:en"];
         }
         if (feature.properties["mtb:name"]) {
             return feature.properties["mtb:name"];

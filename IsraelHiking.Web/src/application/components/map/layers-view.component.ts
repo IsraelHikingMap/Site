@@ -35,7 +35,7 @@ import type { ApplicationState, LatLngAlt, LinkData, Overlay } from "../../model
     imports: [AutomaticLayerPresentationComponent, NgFor, SourceDirective, GeoJSONSourceComponent, MarkersForClustersComponent, PointDirective, Angulartics2OnModule, NgIf, ClusterPointDirective, PopupComponent, ClusterOverlayComponent, Dir, MatButton, MatTooltip, CoordinatesComponent, MarkerComponent, LayerComponent, AsyncPipe]
 })
 export class LayersViewComponent implements OnInit {
-    private static readonly MAX_MENU_POINTS_IN_CLUSTER = 7;
+    private static readonly MAX_MENU_POINTS_IN_CLUSTER = 50;
 
     public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public selectedPoiFeature: GeoJSON.Feature<GeoJSON.Point> = null;
