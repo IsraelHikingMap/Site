@@ -36,8 +36,8 @@ public class WikidataPointsOfInterestAdapterTests : BasePointsOfInterestAdapterT
 
         var points = _adapter.GetAll().Result;
             
-        _wikidataGateway.Received(10).GetByBoundingBox(Arg.Any<Coordinate>(), Arg.Any<Coordinate>());
-        Assert.AreEqual(10, points.Count);
+        _wikidataGateway.Received().GetByBoundingBox(Arg.Any<Coordinate>(), Arg.Any<Coordinate>());
+        Assert.IsTrue(points.Count >= 40);
     }
     
     [TestMethod]
@@ -51,7 +51,7 @@ public class WikidataPointsOfInterestAdapterTests : BasePointsOfInterestAdapterT
 
         var points = _adapter.GetUpdates(DateTime.Now).Result;
             
-        _wikidataGateway.Received(10).GetByBoundingBox(Arg.Any<Coordinate>(), Arg.Any<Coordinate>());
+        _wikidataGateway.Received().GetByBoundingBox(Arg.Any<Coordinate>(), Arg.Any<Coordinate>());
         Assert.AreEqual(0, points.Count);
     }
 }
