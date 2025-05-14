@@ -96,6 +96,11 @@ public class WikidataGateway : IWikidataGateway
         client.DefaultRequestHeaders.Add("Accept", "application/sparql-results+json");
         var response = await client.GetAsync(QUERY_API + Uri.EscapeDataString(query));
         var content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError("Unable to get wikidata results:\n" + content);
+            throw new Exception("Unable to get wikidata results");
+        }
         var results = JsonSerializer.Deserialize<WikidataResults>(content);
         var features = results.Results.Bindings.Select(b =>
         {
