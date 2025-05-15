@@ -62,7 +62,7 @@ describe("WikidataService", () => {
             }
         });
         await new Promise((resolve) => setTimeout(resolve, 10));
-        backend.expectOne(r => r.url.startsWith(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&explaintext=&titles=${title}`)).flush({
+        backend.expectOne(r => r.url.startsWith(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles=${title}`)).flush({
             query: {
                 pages: { 
                     "1": {
@@ -76,6 +76,9 @@ describe("WikidataService", () => {
         });
         
         const feature = await promise;
+        expect(feature.properties.identifier).toBe(wikidataId);
+        expect(feature.properties.poiId).toBe("Wikidata_" + wikidataId);
+        expect(feature.properties.poiSource).toBe("Wikidata");
         expect(feature.properties.image).toBe("image-url");
         expect(feature.properties.image1).toBe("image-url2");
         expect(feature.properties.name).toBe(title);
@@ -221,7 +224,7 @@ describe("WikidataService", () => {
             }
         });
         await new Promise((resolve) => setTimeout(resolve, 10));
-        backend.expectOne(r => r.url.startsWith(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&explaintext=&titles=${title}`)).flush({
+        backend.expectOne(r => r.url.startsWith(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles=${title}`)).flush({
             query: {
                 pages: {}
             }
