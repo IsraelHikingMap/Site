@@ -264,4 +264,42 @@ describe("Traces Service", () => {
             const trace = await promise;
             expect(trace.id).toBe("1");
     }));
+
+    it("Should update a trace without an empty tag", inject([TracesService, HttpTestingController],
+        async (tracesService: TracesService, mockBackend: HttpTestingController) => {
+            const trace = {
+                id: "1",
+                visibility: "private",
+                tagsString: "",
+                timeStamp: new Date()
+            } as Trace;
+            const promise = tracesService.updateTrace(trace);
+
+            mockBackend.expectOne(request => 
+                !request.body.includes("<tag></tag>") && request.method === "PUT").flush({ id: "1"});
+
+            await expectAsync(promise).toBeResolved();
+        }
+    ));
+
+    it("Should update a trace", inject([TracesService, HttpTestingController],
+        async (tracesService: TracesService, mockBackend: HttpTestingController) => {
+            const trace = {
+                id: "1",
+                visibility: "private",
+                tagsString: "tag1,tag2",
+                description: "description",
+                timeStamp: new Date()
+            } as Trace;
+            const promise = tracesService.updateTrace(trace);
+
+            mockBackend.expectOne(request => 
+                request.body.includes("<tag>tag1</tag>") && 
+                request.body.includes("<tag>tag2</tag>") &&
+                request.body.includes("<description>description</description>") &&
+                request.method === "PUT").flush({ id: "1"});
+
+            await expectAsync(promise).toBeResolved();
+        }
+    ));
 });

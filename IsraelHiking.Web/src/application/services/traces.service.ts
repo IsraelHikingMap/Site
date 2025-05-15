@@ -164,7 +164,7 @@ export class TracesService {
 <osm version="0.6" generator="OpenStreetMap server">
 	<gpx_file id="${trace.id}" name="${trace.name}" visibility="${trace.visibility}" timestamp="${trace.timeStamp.toISOString()}">
 		<description>${trace.description}</description>
-        ${trace.tagsString.split(",").map(tag => `<tag>${tag}</tag>`).join("\n")}
+        ${trace.tagsString.split(",").filter(t => t).map(tag => `<tag>${tag}</tag>`).join("\n")}
 	</gpx_file>
 </osm>`
             await firstValueFrom(this.httpClient.put(Urls.osmGpx + "/" + trace.id, xmlTreace));
