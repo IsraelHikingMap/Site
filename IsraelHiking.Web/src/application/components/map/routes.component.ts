@@ -208,7 +208,7 @@ export class RoutesComponent implements AfterViewInit {
 
     private routeToProperties(route: Immutable<RouteData>): RouteViewProperties {
         const color = route.color;
-        const opacity = route.opacity || 1.0;
+        const opacity = route.opacity == null ? 1.0 : route.opacity;
         const width = route.weight;
         const iconColor = opacity > 0.5 ? invert(color, true) : color;
         const iconSize = width < 10 ? 0.5 : 0.5 * width / 10.0;
