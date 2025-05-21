@@ -68,7 +68,7 @@ export class PoiService {
 
     private static readonly POIS_SOURCE_LAYER_NAMES = ["global_points", "external"];
     private static readonly POIS_SOURCE_ID = "points-of-interest";
-    private static readonly POIS_SOURCE_ADDRESS = environment.baseTilesAddress +  "vector/data/global_points.json";
+    private static readonly POIS_SOURCE_ADDRESS = environment.baseTilesAddress +  "/vector/data/global_points.json";
 
     private poisCache: GeoJSON.Feature[] = [];
     private queueIsProcessing: boolean = false;

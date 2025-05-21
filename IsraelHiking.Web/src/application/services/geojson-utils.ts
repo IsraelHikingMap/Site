@@ -76,7 +76,7 @@ export class GeoJSONUtils {
     }
 
     public static hasExtraData(feature: GeoJSON.Feature, language: string): boolean {
-        return feature.properties["description:" + language] || 
+        return feature.properties["description:" + language] != null || 
             Object.keys(feature.properties).find(k => k.startsWith("image")) != null ||
             Object.keys(feature.properties).find(k => k.startsWith("wikipedia")) != null ||
             Object.keys(feature.properties).find(k => k.startsWith("wikidata")) != null;

@@ -4,7 +4,6 @@ $control-border: 4px;
 $container-height-small-screen: 130px;
 $container-height: 200px;
 $container-height-expanded: 300px;
-$button-size: 36px;
 $buttons-margin: 5px;
 
 .chart-control-container {
@@ -13,7 +12,7 @@ $buttons-margin: 5px;
 }
 
 .chart-control-container.expanded {
-    width: calc(100vw - #{$control-border} - #{$button-size} - 2 * #{$buttons-margin});
+    width: calc(100vw - #{$control-border} - #{v.$app-button-size} - 2 * #{$buttons-margin});
     height: $container-height-expanded;
 }
 
