@@ -37,19 +37,29 @@ export class OverpassTurboService {
 
     private processFeature(content: Parameters<typeof osmtogeojson>[0]): GeoJSON.Feature {
         const geojson = osmtogeojson(content, {completeFeature: true, excludeWay: false}) as GeoJSON.FeatureCollection;
-            if (geojson.features.length === 1 && geojson.features[0].geometry.type !== "MultiLineString") {
-                return geojson.features[0];
-            }
-            if (geojson.features.every(f => f.geometry.type === "LineString")) {
-                const geometry = SpatialService.mergeLines(geojson.features.map(f => f.geometry as GeoJSON.LineString));
-                geojson.features[0].geometry = geometry;
-                return geojson.features[0];
-            }
-            if (geojson.features.length === 1 && geojson.features[0].geometry.type === "MultiLineString") {
-                geojson.features[0].geometry = SpatialService.mergeLines(geojson.features[0].geometry.coordinates.map(l => ({ type: "LineString", coordinates: l})));
-                return geojson.features[0];
-            }
+        if (geojson.features.length === 1 && geojson.features[0].geometry.type !== "MultiLineString") {
             return geojson.features[0];
+        }
+        if (geojson.features.length === 1 && geojson.features[0].geometry.type === "MultiLineString") {
+            geojson.features[0].geometry = SpatialService.mergeLines(geojson.features[0].geometry.coordinates.map(l => ({ type: "LineString", coordinates: l})));
+            return geojson.features[0];
+        }
+        let hasPolygon = false;
+        const allLines = geojson.features.reduce((acc, f) => {
+            if (f.geometry.type === "MultiLineString") {
+                acc.push(...f.geometry.coordinates);
+            } else if (f.geometry.type === "LineString") {
+                acc.push(f.geometry.coordinates);
+            } else if (f.geometry.type === "Polygon") {
+                hasPolygon = true;
+            }
+            return acc;
+        }, [] as GeoJSON.Position[][]);
+        if (allLines.length === 0 || hasPolygon) {
+            return geojson.features[0];
+        }
+        geojson.features[0].geometry = SpatialService.mergeLines(allLines.map(l => ({ type: "LineString", coordinates: l})));
+        return geojson.features[0];
     }
 
     public async getLongWay(id: string, name: string, isWaterway: boolean, isMtbRoute: boolean): Promise<GeoJSON.Feature> {

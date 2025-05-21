@@ -47,14 +47,19 @@ describe("GeoJsonUtils", () => {
         expect(results).toBe("name");
     });
 
-    it("should get title even when there's no title for language description", () => {
-        const results = GeoJSONUtils.getTitle({properties: { name: "name"}} as any as GeoJSON.Feature, "he");
-        expect(results).toBe("name");
+    it("should get English title when there's mtb name without language", () => {
+        const results = GeoJSONUtils.getTitle({properties: { "mtb:name:en": "name-en"}} as any as GeoJSON.Feature, "he");
+        expect(results).toBe("name-en");
     });
 
     it("should get title even when there's no title for language description", () => {
         const results = GeoJSONUtils.getTitle({properties: { name: "name"}} as any as GeoJSON.Feature, "he");
         expect(results).toBe("name");
+    });
+
+    it("should get English title even when there's no title for language description", () => {
+        const results = GeoJSONUtils.getTitle({properties: { "name:en": "name-en"}} as any as GeoJSON.Feature, "he");
+        expect(results).toBe("name-en");
     });
     it("should return has extra data for feature with description", () => {
         expect(GeoJSONUtils.hasExtraData({properties: { "description:he": "desc"}} as any as GeoJSON.Feature, "he")).toBeTruthy();

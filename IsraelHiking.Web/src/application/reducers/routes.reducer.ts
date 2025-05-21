@@ -192,7 +192,7 @@ export class RoutesReducer {
         this.changeState(ctx, (lastState) => {
             const route = lastState.find(r => r.id === action.routeId);
             route.name = action.routeData.name;
-            route.opacity = action.routeData.opacity || route.opacity;
+            route.opacity = action.routeData.opacity == null ? route.opacity : action.routeData.opacity;
             route.weight = action.routeData.weight || route.weight;
             route.color =  action.routeData.color || route.color;
             route.description = action.routeData.description || route.description;

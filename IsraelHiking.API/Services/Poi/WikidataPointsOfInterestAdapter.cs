@@ -38,9 +38,15 @@ public class WikidataPointsOfInterestAdapter : IPointsOfInterestAdapter
     public async Task<List<IFeature>> GetAll()
     {
         _logger.LogInformation("Starting getting Wikidata items for indexing.");
-        var startCoordinate = new Coordinate(34, 29);
-        var endCoordinate = new Coordinate(36, 34);
-        var allFeatures = await _wikidataGateway.GetByBoundingBox(startCoordinate, endCoordinate);
+        List<IFeature> allFeatures = new List<IFeature>();
+        var step = 0.5;
+        for (double x = 34; x < 36; x += step) {
+            for (double y = 29; y < 34; y += step) {
+                var startCoordinate = new Coordinate(x, y);
+                var endCoordinate = new Coordinate(x + step, y + step);
+                allFeatures.AddRange(await _wikidataGateway.GetByBoundingBox(startCoordinate, endCoordinate));
+            }
+        }
         _logger.LogInformation($"Finished getting Wikidata items for indexing, got {allFeatures.Count} items.");
         return allFeatures;
     }

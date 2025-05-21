@@ -82,6 +82,35 @@ describe("OverpassTurboService", () => {
         expect(results.geometry.type).toBe("LineString");
     }));
 
+    it("Should get a relation feature by id with multiple roles and convert it to a line", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
+        const response = {
+            elements: [{
+                type: "relation",
+                id: 1,
+                members: [{
+                    role: "forward",
+                    type: "way",
+                    ref: 2,
+                    geometry: [{lat: 3, lon: 4}, {lat: 5, lon: 6}]
+                }, {
+                    role: "backward",
+                    type: "way",
+                    ref: 3,
+                    geometry: [{lat: 1, lon: 2}, {lat: 3, lon: 4}]
+                }, {
+                    role: "backward",
+                    type: "way",
+                    ref: 4,
+                    geometry: [{lat: 5, lon: 6}, {lat: 7, lon: 8}]
+                }]
+            }]
+        };
+        const promise = service.getFeature("way", "42");
+        mockBackend.expectOne(r => r.url.startsWith(Urls.osmApi)).flush(response);
+        const results = await promise;
+        expect(results.geometry.type).toBe("LineString");
+    }));
+
     it("Should get a long way with multiple ways and merge them", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
         const response = {
             elements: [{
@@ -161,7 +190,7 @@ describe("OverpassTurboService", () => {
         mockBackend.expectOne("https://overpass-api.de/api/interpreter").flush(response);
         // Assert
         const results = await promise;
-        expect(results).toBeNull();
+        expect(results).toBeUndefined();
     }));
 
     it("Should get a long mtb way by name", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
@@ -173,7 +202,7 @@ describe("OverpassTurboService", () => {
         mockBackend.expectOne(u => u.body.includes("mtb:name")).flush(response);
         // Assert
         const results = await promise;
-        expect(results).toBeNull();
+        expect(results).toBeUndefined();
     }));
 
     it("Should get a long waterway way by name", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
@@ -185,7 +214,7 @@ describe("OverpassTurboService", () => {
         mockBackend.expectOne(u => u.body.includes("waterway")).flush(response);
         // Assert
         const results = await promise;
-        expect(results).toBeNull();
+        expect(results).toBeUndefined();
     }));
 
     it("Should get a long way by name with '\"'", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
@@ -197,7 +226,7 @@ describe("OverpassTurboService", () => {
         mockBackend.expectOne(u => u.body.includes("lalala\\\"")).flush(response);
         // Assert
         const results = await promise;
-        expect(results).toBeNull();
+        expect(results).toBeUndefined();
     }));
 
 
@@ -210,6 +239,10 @@ describe("OverpassTurboService", () => {
         mockBackend.expectOne("https://overpass-api.de/api/interpreter").flush(response);
         // Assert
         const results = await promise;
-        expect(results).toBeNull();
+        expect(results).toBeUndefined();
     }));
 });
+
+
+
+

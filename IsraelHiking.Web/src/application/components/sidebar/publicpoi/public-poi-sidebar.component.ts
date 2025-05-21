@@ -151,7 +151,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
                 if (feature.geometry.type === "Point" && uploadMarkerData != null) {
                     this.showLocationUpdate = true;
                 }
-                await this.poiService.updateExtendedInfo(feature);
+                await this.poiService.updateExtendedInfo(feature, data.language);
                 if (this.getRouteUrlInfo().id !== data.id) {
                     return;
                 }

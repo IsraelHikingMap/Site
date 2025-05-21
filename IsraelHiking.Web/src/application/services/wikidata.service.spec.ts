@@ -62,7 +62,7 @@ describe("WikidataService", () => {
             }
         });
         await new Promise((resolve) => setTimeout(resolve, 10));
-        backend.expectOne(r => r.url.startsWith(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&explaintext=&titles=${title}`)).flush({
+        backend.expectOne(r => r.url.startsWith(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles=${title}`)).flush({
             query: {
                 pages: { 
                     "1": {
@@ -76,6 +76,9 @@ describe("WikidataService", () => {
         });
         
         const feature = await promise;
+        expect(feature.properties.identifier).toBe(wikidataId);
+        expect(feature.properties.poiId).toBe("Wikidata_" + wikidataId);
+        expect(feature.properties.poiSource).toBe("Wikidata");
         expect(feature.properties.image).toBe("image-url");
         expect(feature.properties.image1).toBe("image-url2");
         expect(feature.properties.name).toBe(title);
@@ -83,6 +86,69 @@ describe("WikidataService", () => {
         expect(feature.geometry.type).toBe("Point");
         expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([2,1]);
     }));
+
+    it("should create a feature from wikidata page id english title", inject([WikidataService, HttpTestingController], async (serive: WikidataService, backend: HttpTestingController) => {
+        const wikidataId = "Q123";
+        const language = "he";
+        const title = "en-test";
+        const promise = serive.createFeatureFromPageId(wikidataId, language);
+
+        backend.expectOne(r => r.url === `https://www.wikidata.org/w/rest.php/wikibase/v1/entities/items/${wikidataId}`).flush({
+            sitelinks: {
+                enwiki: {
+                    title
+                }
+            },
+            statements: {
+                P625: [{
+                    value: {
+                        content: {
+                            latitude: 1,
+                            longitude: 2
+                        }
+                    }
+                }]
+            }
+        });
+        
+        const feature = await promise;
+        expect(feature.properties["name:en"]).toBe(title);
+        expect(feature.properties.name).toBe(title);
+        expect(feature.geometry.type).toBe("Point");
+        expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([2,1]);
+    }));
+
+    it("should create a feature from wikidata page id with title from label", inject([WikidataService, HttpTestingController], async (serive: WikidataService, backend: HttpTestingController) => {
+        const wikidataId = "Q123";
+        const language = "he";
+        const title = "en-test";
+        const promise = serive.createFeatureFromPageId(wikidataId, language);
+
+        backend.expectOne(r => r.url === `https://www.wikidata.org/w/rest.php/wikibase/v1/entities/items/${wikidataId}`).flush({
+            labels: {
+                en: title,
+                mul: "default-name"
+            },
+            sitelinks: {},
+            statements: {
+                P625: [{
+                    value: {
+                        content: {
+                            latitude: 1,
+                            longitude: 2
+                        }
+                    }
+                }]
+            }
+        });
+        
+        const feature = await promise;
+        expect(feature.properties["name:en"]).toBe(title);
+        expect(feature.properties.name).toBe("default-name");
+        expect(feature.geometry.type).toBe("Point");
+        expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([2,1]);
+    }));
+
 
     it("should create a feature from wikidata page id without image, links and description", inject([WikidataService, HttpTestingController], async (serive: WikidataService, backend: HttpTestingController) => {
         const wikidataId = "Q123";
@@ -158,7 +224,7 @@ describe("WikidataService", () => {
             }
         });
         await new Promise((resolve) => setTimeout(resolve, 10));
-        backend.expectOne(r => r.url.startsWith(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&explaintext=&titles=${title}`)).flush({
+        backend.expectOne(r => r.url.startsWith(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles=${title}`)).flush({
             query: {
                 pages: {}
             }
