@@ -84,7 +84,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        appType: ["IHM", "mapeak"]
+        appType: ["IHM"]
 
     steps:
       - name: Checkout code
@@ -101,11 +101,11 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
   
-      - name: Build UI
+      - name: Build UI and set version
         run: |
           cd IsraelHiking.Web
           npm ci
-          npm run white-label-me ${{ needs.version.outputs.version_string }} ${{ needs.version.outputs.version_code }} ${{ matrix.appType }}
+          npm run set-version ${{ needs.version.outputs.version_string }} ${{ needs.version.outputs.version_code }}
           npm run build:mobile -- --no-progress
           npx cap sync android
       - name: Build Android Release
@@ -156,7 +156,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        appType: ["ihm", "mapeak"]
+        appType: ["ihm"]
 
     steps:
       - name: Checkout code
@@ -166,12 +166,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
-
-      - name: Run white label script
-        run: |
-          cd IsraelHiking.Web
-          npm ci
-          npm run white-label-me ${{ needs.version.outputs.version_string }} ${{ needs.version.outputs.version_code }} ${{ matrix.appType }}
 
       - name: Login to GitHub Container Registry
         if: ${{ github.secret_source == 'Actions' }}
@@ -183,13 +177,13 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build . -t ghcr.io/israelhikingmap/website-${{matrix.appType}}:$VERSION --build-arg VERSION=$VERSION
+          docker build . -t ghcr.io/israelhikingmap/website:$VERSION --build-arg VERSION=$VERSION
         env:
           VERSION: ${{ needs.version.outputs.version_string }}
       - name: Push Docker image
         if: ${{ github.secret_source == 'Actions' }}
         run: |
-          docker push ghcr.io/israelhikingmap/website-${{matrix.appType}}:$VERSION
+          docker push ghcr.io/israelhikingmap/website:$VERSION
         env:
           VERSION: ${{ needs.version.outputs.version_string }}
 
@@ -227,7 +221,7 @@ jobs:
         run: |
           cd IsraelHiking.Web
           npm ci
-          npm run white-label-me ${{ needs.version.outputs.version_string }} ${{ needs.version.outputs.version_code }} ${{ matrix.appType }}
+          npm run set-version ${{ needs.version.outputs.version_string }} ${{ needs.version.outputs.version_code }}
           npm run build:mobile -- --no-progress
           npx cap sync ios
       - name: Build iOS with signing

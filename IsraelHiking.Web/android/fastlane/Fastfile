@@ -62,7 +62,7 @@ platform :android do
       track: "internal",
       track_promote_to: "production",
       rollout: "1.0",
-      skip_upload_metadata: true,
+      skip_upload_metadata: false,
       skip_upload_images: true,
       skip_upload_screenshots: true,
       skip_upload_changelogs: true,

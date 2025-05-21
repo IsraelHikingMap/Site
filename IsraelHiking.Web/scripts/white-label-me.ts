@@ -12,14 +12,10 @@ const config: MobileProjectConfig = {
 };
 
 if (process.argv.length < 3) {
-    console.error("Usage: npm run white-lable-me -- <version> <build-number>");
-    console.error("Example: npm run white-lable-me -- 9.20.0 920000");
-    console.error("Example: npm run white-lable-me -- 9.20.0 920000 mapeak");
+    console.error("Usage: npm run white-lable-me -- <mapeak | IHM>");
+    console.error("Example: npm run white-lable-me -- mapeak");
     process.exit(1);
 }
-
-const version = process.argv[2] || "9.20.0";
-const buildNumber = +process.argv[3] || 920000;
 
 const oldAppName = "Israel Hiking Map";
 const oldAppId = "il.org.osm.israelhiking";
@@ -30,7 +26,7 @@ let newAppId = "il.org.osm.israelhiking";
 let newWebsiteUrl = "israelhiking.osm.org.il";
 let supportEmail = "israelhiking@osm.rg.il";
 
-if (process.argv[4] === "mapeak") {
+if (process.argv[2] === "mapeak") {
     newAppName = "Mapeak";
     newAppId = "com.mapeak";
     newWebsiteUrl = "www.mapeak.com";
@@ -82,8 +78,6 @@ async function searchAndReplaceInFiles() {
 
 async function updateAndroidFiles(project: MobileProject) {
     await project.android?.setPackageName(newAppId);
-    await project.android?.setVersionName(version);
-    await project.android?.setVersionCode(buildNumber);
     const stringsFile = await project.android?.getResourceXmlFile("values/strings.xml");
     await stringsFile.load();
     for (let element of stringsFile.find("resources/string")) {
@@ -113,8 +107,6 @@ async function updateIosFiles(project: MobileProject) {
     for (const bundleName of ["Debug", "Release"]) {
         await project.ios?.setBundleId(null, bundleName, newAppId);
         await project.ios?.setDisplayName(null, bundleName, newAppName);
-        await project.ios?.setBuild(null, bundleName, version);
-        await project.ios?.setVersion(null, bundleName, version);
     }
 }
 
