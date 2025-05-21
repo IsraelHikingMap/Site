@@ -115,8 +115,16 @@ export class LayersViewComponent implements OnInit {
             this.clusterFeatures = [];
             return;
         }
-        this.clusterFeatures = await sourceComponent.getClusterLeaves(feature.properties.cluster_id,
+        let features = await sourceComponent.getClusterLeaves(feature.properties.cluster_id,
             LayersViewComponent.MAX_MENU_POINTS_IN_CLUSTER, 0) as GeoJSON.Feature<GeoJSON.Point>[];
+        const language = this.resources.getCurrentLanguageCodeSimplified();
+        features.sort((a, b) => {
+            if (GeoJSONUtils.hasExtraData(a, language) !== GeoJSONUtils.hasExtraData(b, language)) {
+                return GeoJSONUtils.hasExtraData(a, language) ? -1 : 1;
+            } 
+            return GeoJSONUtils.getTitle(a, language).localeCompare(GeoJSONUtils.getTitle(b, language));
+        });
+        this.clusterFeatures = features;
         this.selectedCluster = feature;
     }
 

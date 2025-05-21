@@ -1,8 +1,10 @@
 ﻿﻿<div [dir]="resources.direction" class="max-h-[280px] overflow-y-auto pt-2 pb-2">
-    <div *ngFor="let feature of features()" class="flex flex-row relative" [dir]="resources.getDirection(getTitle(feature))">
+    <div *ngFor="let feature of features()" class="flex flex-row relative w-full items-center" [dir]="resources.getDirection(getTitle(feature))">
         <span *ngIf="hasExtraData(feature)" class="has-extra-data" [style.background]="feature.properties.poiIconColor"></span>
         <button mat-button class="break-button-text w-full justify-stretch!" (click)="clickOnItem(feature)" [ngClass]="resources.getTextAlignment(getTitle(feature))" angulartics2On="click" angularticsCategory="POI" angularticsAction="Open POI sidebar from map cluster">
-            <i class="fa {{feature.properties.poiIcon}}" [style.color]="feature.properties.poiIconColor"></i> {{getTitle(feature)}}
-        </button><br/>
+            <i class="fa {{feature.properties.poiIcon}} w-6 text-center fa-lg" [style.color]="feature.properties.poiIconColor"></i>
+            {{getTitle(feature)}}
+        </button>
+        <br/>
     </div>
 </div>
