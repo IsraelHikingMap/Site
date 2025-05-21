@@ -5,6 +5,7 @@ using OsmSharp.IO.API;
 using OsmSharp.Tags;
 using System;
 using System.Threading.Tasks;
+using IsraelHiking.Common;
 
 namespace IsraelHiking.API.Services.Osm;
 
@@ -45,7 +46,7 @@ public static class OsmApiClientExtensions
     {
         return client.CreateChangeset(new TagsCollection
         {
-            new Tag {Key = "created_by", Value = "IsraelHiking.osm.org.il"},
+            new Tag {Key = "created_by", Value = Branding.BASE_URL},
             new Tag {Key = "comment", Value = comment}
         });
     }

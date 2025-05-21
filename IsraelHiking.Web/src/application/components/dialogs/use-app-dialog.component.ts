@@ -4,6 +4,7 @@ import { MatButton, MatAnchor } from "@angular/material/button";
 import { MatDialog, MatDialogTitle, MatDialogClose, MatDialogActions } from "@angular/material/dialog";
 import { Angulartics2OnModule } from "angulartics2";
 
+import { Urls } from "../../urls";
 import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
 
@@ -21,8 +22,8 @@ export class UseAppDialogComponent {
 
     constructor() {
         this.appAddress = this.runningContextServive.isIos
-            ? "https://apps.apple.com/us/app/israel-hiking-map/id1451300509"
-            : "https://play.google.com/store/apps/details?id=il.org.osm.israelhiking&hl=en";
+            ? Urls.IOS_APP_URL
+            : Urls.ANDROID_APP_URL;
     }
 
     public static openDialog(dialog: MatDialog) {

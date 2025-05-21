@@ -1,4 +1,4 @@
-Copyright (c) 2013-2019 Israel Hiking Map
+Copyright (c) 2013-2025 Israel Hiking Map
 
 [![Creative Commons License](https://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png)](http://creativecommons.org/licenses/by-nc-sa/3.0/)
 

@@ -311,7 +311,7 @@ public class OsmLineAdderService : IOsmLineAdderService
         {
             highway = tags["highway"];
         }
-        return $"Added a missing {colour}{highway} from a GPS trace using IsraelHiking.osm.org.il";
+        return $"Added a missing {colour}{highway} from a GPS trace using {Branding.BASE_URL}";
     }
 
     /// <summary>

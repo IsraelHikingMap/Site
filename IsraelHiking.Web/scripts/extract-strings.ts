@@ -17,7 +17,7 @@ const jsonKeys = fileContent.replace(/\"\s*\+\s*\"/g, "")
 
 const translationFiles = fs.readdirSync("./src/translations");
 for (let translationFile of translationFiles) {
-    const output = {};
+    const output: Record<string, string> = {};
     for (let key of jsonKeys) {
         const targetJson = JSON.parse(fs.readFileSync(`./src/translations/${translationFile}`, "utf-8"));
         if (!Object.keys(targetJson).includes(key)) {

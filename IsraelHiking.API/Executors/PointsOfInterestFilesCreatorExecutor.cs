@@ -44,14 +44,14 @@ public class PointsOfInterestFilesCreatorExecutor : IPointsOfInterestFilesCreato
             return new tUrl
             {
                 lastmod = feature.GetLastModified().ToUniversalTime().ToString("o"),
-                loc = "https://israelhiking.osm.org.il/poi/" + feature.Attributes[FeatureAttributes.POI_SOURCE] + "/" + feature.Attributes[FeatureAttributes.ID],
+                loc = Branding.BASE_URL + "/poi/" + feature.Attributes[FeatureAttributes.POI_SOURCE] + "/" + feature.Attributes[FeatureAttributes.ID],
             };
         });
         var siteMap = new urlset
         {
             url = list.Concat([
                 new tUrl {
-                loc = "https://israelhiking.osm.org.il/",
+                loc = Branding.BASE_URL + "/",
                 lastmod =  DateTime.Now.ToUniversalTime().ToString("o")
             }
             ]).ToArray()

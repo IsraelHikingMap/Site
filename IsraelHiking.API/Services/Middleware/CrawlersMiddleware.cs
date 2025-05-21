@@ -78,7 +78,7 @@ public class CrawlersMiddleware
                 
             title = string.IsNullOrWhiteSpace(url.Title) ? Branding.ROUTE_SHARE_DEFAULT_TITLE : url.Title;
             description = url.Description;
-            thumbnailUrl = "https://israelhiking.osm.org.il/api/images/" + url.Id;
+            thumbnailUrl = Branding.BASE_URL + "/api/images/" + url.Id;
             if (isWhatsApp)
             {
                 thumbnailUrl += "?width=256&height=256";

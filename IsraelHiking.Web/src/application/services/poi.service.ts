@@ -8,6 +8,7 @@ import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 import type { GeoJSONFeature } from "maplibre-gl";
 
+import { environment } from "environments/environment";
 import { ResourcesService } from "./resources.service";
 import { HashService, PoiRouteUrlInfo, RouteStrings } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
@@ -67,7 +68,7 @@ export class PoiService {
 
     private static readonly POIS_SOURCE_LAYER_NAMES = ["global_points", "external"];
     private static readonly POIS_SOURCE_ID = "points-of-interest";
-    private static readonly POIS_SOURCE_ADDRESS = "https://israelhiking.osm.org.il/vector/data/global_points.json";
+    private static readonly POIS_SOURCE_ADDRESS = environment.baseTilesAddress +  "vector/data/global_points.json";
 
     private poisCache: GeoJSON.Feature[] = [];
     private queueIsProcessing: boolean = false;

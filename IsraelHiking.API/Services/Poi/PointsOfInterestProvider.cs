@@ -282,7 +282,7 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
         AddTagsByIcon(node.Tags, feature.Attributes[FeatureAttributes.POI_ICON].ToString());
         RemoveEmptyTagsAndWhiteSpaces(node.Tags);
         await osmGateway.UploadToOsmWithRetries(
-            $"Added {feature.GetTitle(language)} using IsraelHiking.osm.org.il",
+            $"Added {feature.GetTitle(language)} using {Branding.BASE_URL}",
             async changeSetId =>
             {
                 node.Id = await osmGateway.CreateElement(changeSetId, node);
@@ -335,7 +335,7 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
 
         var feature = ConvertOsmToFeature(completeOsmGeo);
         await osmGateway.UploadToOsmWithRetries(
-            $"Updated {feature?.GetTitle(language)} using IsraelHiking.osm.org.il",
+            $"Updated {feature?.GetTitle(language)} using {Branding.BASE_URL}",
             async changeSetId =>
             {
                 await osmGateway.UpdateElement(changeSetId, completeOsmGeo);

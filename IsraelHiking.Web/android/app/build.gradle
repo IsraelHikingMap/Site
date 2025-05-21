@@ -10,7 +10,7 @@ android {
         applicationId "il.org.osm.israelhiking"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 92000
+        versionCode 920000
         versionName "9.20.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
