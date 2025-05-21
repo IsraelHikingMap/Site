@@ -86,8 +86,8 @@ export class ResourcesService {
     public slope: string;
     public convertToRoute: string;
     public addPointToRoute: string;
-    public israelMTBMap: string;
-    public israelHikingMap: string;
+    public mtbMap: string;
+    public hikingMap: string;
     public satelliteImagery: string;
     public hikingTrails: string;
     public popularityHeatmap: string;
@@ -320,7 +320,6 @@ export class ResourcesService {
     public infoHelpfulLinks: string;
     public infoFacebookLink: string;
     public infoGithubLink: string;
-    public infoOsmWikiLink: string;
     public infoFAQLink: string;
     public infoDownloadMapForOfflineUse: string;
     public infoDownloadOldMapsForOfflineUse: string;
@@ -538,8 +537,8 @@ export class ResourcesService {
         this.slope = this.gettextCatalog.getString("Slope");
         this.convertToRoute = this.gettextCatalog.getString("Convert to Route");
         this.addPointToRoute = this.gettextCatalog.getString("Add Point to Route");
-        this.israelMTBMap = this.gettextCatalog.getString("Israel MTB Map");
-        this.israelHikingMap = this.gettextCatalog.getString("Israel Hiking Map");
+        this.mtbMap = this.gettextCatalog.getString("MTB Map");
+        this.hikingMap = this.gettextCatalog.getString("Hiking Map");
         this.hikingTrails = this.gettextCatalog.getString("Hiking Trails");
         this.popularityHeatmap = this.gettextCatalog.getString("Popularity Heatmap");
         this.route = this.gettextCatalog.getString("Route");
@@ -799,8 +798,6 @@ export class ResourcesService {
         this.infoFacebookLink = this.gettextCatalog.getString("Interact with other users in our Facebook group");
         this.infoGithubLink = this.gettextCatalog
             .getString("Request features and report bugs on our Github project page");
-        this.infoOsmWikiLink = this.gettextCatalog
-            .getString("Learn Israel-specific mapping rules at the Israel OSM Wiki Project");
         this.infoFAQLink = this.gettextCatalog.getString("F.A.Q");
         this.infoDownloadMapForOfflineUse = this.gettextCatalog.getString("Download Map for Offline Use");
         this.infoFooterThanks = this.gettextCatalog.getString("Thank you for your support!");

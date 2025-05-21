@@ -30,7 +30,7 @@ public class ReceiptValidationGateway : IReceiptValidationGateway
     {
         var client = _httpClientFactory.CreateClient();
         // Docs: https://www.iaptic.com/documentation/api/v3/#api-Customers-GetCustomerPurchases
-        var response = await client.GetAsync(VALIDATOR_URL + userId + "/purchases?appName=il.org.osm.israelhiking&apiKey=" + _options.FoveaApiKey);
+        var response = await client.GetAsync(VALIDATOR_URL + userId + "/purchases?appName=com.mapeak&apiKey=" + _options.FoveaApiKey);
         var responseStr = await response.Content.ReadAsStringAsync();
         if (response.StatusCode != HttpStatusCode.OK)
         {

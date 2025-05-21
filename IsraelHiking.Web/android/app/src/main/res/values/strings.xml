@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8' ?>
 <resources>
-    <string name="app_name">Israel Hiking Map</string>
+    <string name="app_name">Mapeak</string>
     <string name="title_activity_main">@string/app_name</string>
-    <string name="package_name">il.org.osm.israelhiking</string>
+    <string name="package_name">com.mapeak</string>
     <string name="plugin_bgloc_account_name">@string/app_name</string>
-    <string name="plugin_bgloc_account_type">il.org.osm.israelhiking.account</string>
+    <string name="plugin_bgloc_account_type">com.mapeak.account</string>
     <string name="plugin_bgloc_content_authority">@string/package_name</string>
 </resources>

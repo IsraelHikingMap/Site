@@ -49,7 +49,7 @@ export class PurchaseService {
             log: (message: string | unknown) => this.loggingService.info(this.logMessageToString(message))
         };
         CdvPurchase.store.validator = {
-            url: "https://validator.iaptic.com/v1/validate?appName=il.org.osm.israelhiking" +
+            url: "https://validator.iaptic.com/v1/validate?appName=com.mapeak" +
             "&apiKey=1245b587-4bbc-4fbd-a3f1-d51169a53063",
             timeout: 5000,
         };

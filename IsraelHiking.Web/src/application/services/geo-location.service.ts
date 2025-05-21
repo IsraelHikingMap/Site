@@ -7,7 +7,6 @@ import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
-import { SpatialService } from "./spatial.service";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models/models";
 
@@ -148,7 +147,7 @@ export class GeoLocationService {
             desiredAccuracy: BackgroundGeolocation.HIGH_ACCURACY,
             stationaryRadius: 10,
             distanceFilter: 5,
-            notificationTitle: "Israel Hiking Map",
+            notificationTitle: "Mapeak",
             notificationText: this.resources.runningInBackground,
             interval: 1000,
             fastestInterval: 1000,
@@ -217,7 +216,7 @@ export class GeoLocationService {
         this.gettingLocations = true;
         const locations = await BackgroundGeolocation.getValidLocationsAndDelete();
         this.gettingLocations = false;
-        const positions = locations.map(l => this.locationToPosition(l)).filter(p => !SpatialService.isJammingTarget(GeoLocationService.positionToLatLngTime(p)));
+        const positions = locations.map(l => this.locationToPosition(l));
         if (positions.length === 0) {
             this.loggingService.debug("[GeoLocation] There's nothing to send - valid locations array is empty");
         } else if (positions.length === 1) {
@@ -252,10 +251,6 @@ export class GeoLocationService {
     private handlePositionChange(position: GeolocationPosition): void {
         const latLng = GeoLocationService.positionToLatLngTime(position);
         this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(latLng));
-        if (SpatialService.isJammingTarget(latLng)) {
-            this.toastService.info(this.resources.jammedPositionReceived);
-            return;
-        }
         if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "searching") {
             this.store.dispatch(new SetTrackingStateAction("tracking"));
         }

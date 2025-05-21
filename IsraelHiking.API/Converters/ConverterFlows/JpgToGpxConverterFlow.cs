@@ -44,7 +44,7 @@ public class JpgToGpxConverterFlow : IConverterFlowItem
         var wayPoint = gpx.Waypoints.First();
         var gpxObject = new GpxFile
         {
-            Metadata = new GpxMetadata(GpxDataContainerConverter.ISRAEL_HIKING_MAP + "_jpg")
+            Metadata = new GpxMetadata(GpxDataContainerConverter.MAPEAK + "_jpg")
         };
         gpxObject.Waypoints.Add(
             new GpxWaypoint(wayPoint.Longitude, wayPoint.Latitude)

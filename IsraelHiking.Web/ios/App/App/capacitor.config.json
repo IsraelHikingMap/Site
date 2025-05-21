@@ -1,6 +1,6 @@
 {
-	"appId": "il.org.osm.israelhiking",
-	"appName": "Israel Hiking Map",
+	"appId": "com.mapeak",
+	"appName": "Mapeak",
 	"webDir": "www",
 	"server": {
 		"iosScheme": "ionic",

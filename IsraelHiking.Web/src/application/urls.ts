@@ -37,11 +37,11 @@ export class Urls {
     public static readonly osmBase = "https://www.openstreetmap.org";
     public static readonly osmAuth = Urls.osmBase + "/oauth2";
 
-    public static readonly DEFAULT_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/IHM.json";
+    public static readonly HIKING_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/IHM.json";
     public static readonly MTB_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/ilMTB.json";
     public static readonly HEATMAP_TILES_ADDRESS =
         "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/OSM_traces.json";
 
-    public static readonly ANDROID_APP_URL = "https://play.google.com/store/apps/details?id=il.org.osm.israelhiking&hl=en";
+    public static readonly ANDROID_APP_URL = "https://play.google.com/store/apps/details?id=com.mapeak&hl=en";
     public static readonly IOS_APP_URL = "https://apps.apple.com/us/app/israel-hiking-map/id1451300509";
 }

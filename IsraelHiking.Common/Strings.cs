@@ -122,15 +122,15 @@ public static class Languages
 
 public static class Branding
 {
-    public static string SITE_NAME = "Israel Hiking Map";
+    public static string SITE_NAME = "Mapeak";
 
-    public static string DESCRIPTION =  "בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע.";
+    public static string DESCRIPTION =  "Whether you are planning your next hike, ride drive or run, this is where you can find everything you'll need in order to plan your next outdoor visit.";
 
-    public const string ROUTE_SHARE_DEFAULT_TITLE = "Israel Hiking Map Route Share";
+    public const string ROUTE_SHARE_DEFAULT_TITLE = "Mapeak Route Share";
 
     // HM TODO: decide what to do with this
     public const string USER_AGENT =
-        "IsraelHikingMapSite/5.x bot (https://israelhiking.osm.org.il; israelhikingmap@gmail.com)";
+        "Mapeak/5.x bot (https://www.mapeak.com; support@mapeak.com)";
 
-    public const string BASE_URL = "https://israelhiking.osm.org.il";
+    public const string BASE_URL = "https://www.mapeak.com";
 }

@@ -19,7 +19,7 @@ public class GpxToSingleTrackGpxConverterFlow : IConverterFlowItem
         var gpx = content.ToGpx();
         var singleTrackGpx = new GpxFile
         {
-            Metadata = new GpxMetadata(GpxDataContainerConverter.ISRAEL_HIKING_MAP + "_single_track")
+            Metadata = new GpxMetadata(GpxDataContainerConverter.MAPEAK + "_single_track")
         };
         singleTrackGpx.Waypoints.AddRange(gpx.Waypoints);
         singleTrackGpx.Tracks.AddRange((gpx.Tracks ?? []).Select(t => new GpxTrack(

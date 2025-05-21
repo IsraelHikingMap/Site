@@ -1,15 +1,13 @@
 ﻿import { Urls } from "../urls";
-import { environment } from "environments/environment";
 import type { Language, MutableApplicationState, RouteData, StateWithHistory } from "../models/models";
 
-export const ISRAEL_HIKING_MAP = "Israel Hiking Map";
-export const ISRAEL_MTB_MAP = "Israel MTB Map";
-export const SATELLITE = "Satellite Imagery";
+export const HIKING_MAP = "Hiking Map";
+export const MTB_MAP = "MTB Map";
 export const HIKING_TRAILS = "Hiking Trails";
 export const BICYCLE_TRAILS = "Bicycle Trails";
 export const POPULARITY_HEATMAP = "Popularity Heatmap";
 
-export const SPECIAL_BASELAYERS = [ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE];
+export const SPECIAL_BASELAYERS = [HIKING_MAP, MTB_MAP];
 export const SPECIAL_OVERLAYS =  [HIKING_TRAILS, BICYCLE_TRAILS, POPULARITY_HEATMAP];
 export const SPECIAL_LAYERS = [...SPECIAL_BASELAYERS, ...SPECIAL_OVERLAYS];
 
@@ -77,8 +75,8 @@ export const initialState =
         layersState: {
             baseLayers: [
                 {
-                    key: ISRAEL_HIKING_MAP,
-                    address: Urls.DEFAULT_TILES_ADDRESS,
+                    key: HIKING_MAP,
+                    address: Urls.HIKING_TILES_ADDRESS,
                     isEditable: false,
                     isOfflineAvailable: true,
                     isOfflineOn: false,
@@ -86,19 +84,10 @@ export const initialState =
                     maxZoom: 16
                 },
                 {
-                    key: ISRAEL_MTB_MAP,
+                    key: MTB_MAP,
                     address: Urls.MTB_TILES_ADDRESS,
                     isEditable: false,
                     isOfflineAvailable: true,
-                    isOfflineOn: false,
-                    minZoom: 7,
-                    maxZoom: 16
-                },
-                {
-                    key: SATELLITE,
-                    address: environment.baseTilesAddress + "/Ortho/{z}/{y}/{x}.jpg",
-                    isEditable: false,
-                    isOfflineAvailable: false,
                     isOfflineOn: false,
                     minZoom: 7,
                     maxZoom: 16
@@ -107,7 +96,7 @@ export const initialState =
             overlays: [
                 {
                     key: HIKING_TRAILS,
-                    address: Urls.DEFAULT_TILES_ADDRESS,
+                    address: Urls.HIKING_TILES_ADDRESS,
                     minZoom: 7,
                     maxZoom: 16,
                     isOfflineAvailable: true,
@@ -137,7 +126,7 @@ export const initialState =
                 }
 
             ],
-            selectedBaseLayerKey: ISRAEL_HIKING_MAP,
+            selectedBaseLayerKey: HIKING_MAP,
             expanded: ["Base Layers", "Overlays", "Private Routes"],
             categoriesGroups: [{
                 type: "Points of Interest",

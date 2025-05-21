@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="il.org.osm.israelhiking">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.mapeak">
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -10,7 +10,7 @@
         <activity
             android:exported="true"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation"
-            android:name="il.org.osm.israelhiking.MainActivity"
+            android:name="com.mapeak.MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleInstance">
@@ -129,31 +129,31 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="israelhiking.osm.org.il" android:scheme="https" android:pathPattern="/share/.*" />
+                <data android:host="www.mapeak.com" android:scheme="https" android:pathPattern="/share/.*" />
             </intent-filter>
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="israelhiking.osm.org.il" android:scheme="https" android:pathPattern="/poi/.*" />
+                <data android:host="www.mapeak.com" android:scheme="https" android:pathPattern="/poi/.*" />
             </intent-filter>
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="israelhiking.osm.org.il" android:scheme="https" android:pathPattern="/url/.*" />
+                <data android:host="www.mapeak.com" android:scheme="https" android:pathPattern="/url/.*" />
             </intent-filter>
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="israelhiking.osm.org.il" android:scheme="https" android:pathPattern="/map/.*" />
+                <data android:host="www.mapeak.com" android:scheme="https" android:pathPattern="/map/.*" />
             </intent-filter>
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="israelhiking.osm.org.il" android:scheme="https" android:path="/" />
+                <data android:host="www.mapeak.com" android:scheme="https" android:path="/" />
             </intent-filter>
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />

@@ -103,7 +103,7 @@ public class WikimediaCommonGateway : IWikimediaCommonGateway
                "=={{int:license-header}}==" + Environment.NewLine +
                "{{PD-self}}" + Environment.NewLine + Environment.NewLine +
                $"{{{{Location|1={location.Y}|2={location.X}}}}}" + Environment.NewLine + Environment.NewLine +
-               "[[Category:Israel Hiking Map]]";
+               "[[Category:Mapeak]]";
     }
 
     public async Task<string> GetImageUrl(string pageName)

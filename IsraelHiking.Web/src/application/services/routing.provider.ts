@@ -6,7 +6,6 @@ import { VectorTile } from "@mapbox/vector-tile";
 import { Store } from "@ngxs/store";
 import PathFinder from "geojson-path-finder";
 import Protobuf from "pbf";
-import polyline from "@mapbox/polyline";
 
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
@@ -30,10 +29,6 @@ export class RoutingProvider {
     private readonly store = inject(Store);
 
     public async getRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {
-
-        if (routinType !== "None" && (!SpatialService.isInIsrael(latlngStart) || !SpatialService.isInIsrael(latlngEnd))) {
-            return this.getRouteOutsideIsrael(latlngStart, latlngEnd, routinType);
-        }
         const address = Urls.routing + "?from=" + latlngStart.lat + "," + latlngStart.lng +
             "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + routinType;
         try {
@@ -53,108 +48,6 @@ export class RoutingProvider {
                 return [latlngStart, latlngEnd];
             }
         }
-    }
-
-    private async getRouteOutsideIsrael(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {
-        const json = {
-            directions_options: {
-                directions_type: "none"
-            },
-            locations:[
-                {
-                    lon: latlngStart.lng,
-                    lat: latlngStart.lat,
-                    type: "break"
-                },
-                {
-                    lon: latlngEnd.lng,
-                    lat: latlngEnd.lat,
-                    type: "break"
-                }
-            ],
-        } as any;
-        switch (routinType) {
-            case "Hike":
-                json.costing = "pedestrian";
-                json.costing_options = {
-                    pedestrian: {
-                        "use_ferry": 1,
-                        "use_living_streets": 0.5,
-                        "use_tracks": 0,
-                        "service_penalty": 15,
-                        "service_factor": 1,
-                        "shortest": true,
-                        "use_hills": 0.5,
-                        "walking_speed": 5.1,
-                        "walkway_factor": 1,
-                        "sidewalk_factor": 1,
-                        "alley_factor": 2,
-                        "driveway_factor": 5,
-                        "step_penalty": 0,
-                        "max_hiking_difficulty": 6,
-                        "use_lit": 0,
-                        "transit_start_end_max_distance": 2145,
-                        "transit_transfer_max_distance": 800
-                    }
-                };
-                break;
-            case "Bike":
-                json.costing = "bicycle";
-                json.costing_options = {
-                    bicycle: {
-                        "maneuver_penalty": 5,
-                        "country_crossing_cost": 600,
-                        "use_ferry": 1,
-                        "shortest": true,
-                        "bicycle_type": "Hybrid",
-                        "cycling_speed": 20,
-                        "use_roads": 0.5,
-                        "use_hills": 0.5,
-                        "avoid_bad_surfaces": 0.25,
-                        "gate_penalty": 300,
-                        "gate_cost": 30
-                    }
-                };
-                break;
-            case "4WD":
-                json.costing = "auto"; 
-                json.costing_options = {
-                    auto: {
-                        "maneuver_penalty": 5,
-                        "country_crossing_penalty": 0,
-                        "country_crossing_cost": 600,
-                        "width": 1.6,
-                        "height": 1.9,
-                        "use_highways": 1,
-                        "use_tolls": 1,
-                        "use_ferry": 1,
-                        "ferry_cost": 300,
-                        "use_living_streets": 0.5,
-                        "use_tracks": 1,
-                        "private_access_penalty": 450,
-                        "ignore_closures": false,
-                        "closure_factor": 9,
-                        "service_penalty": 15,
-                        "service_factor": 1,
-                        "exclude_unpaved": 0,
-                        "shortest": true,
-                        "exclude_cash_only_tolls": false,
-                        "top_speed": 140,
-                        "fixed_speed": 0,
-                        "toll_booth_penalty": 0,
-                        "toll_booth_cost": 15,
-                        "gate_penalty": 300,
-                        "gate_cost": 30,
-                        "include_hov2": false,
-                        "include_hov3": false,
-                        "include_hot": false
-                    }
-                };
-                break;
-        }
-        const response = await firstValueFrom(this.httpClient.get(`https://valhalla1.openstreetmap.de/route?json=${JSON.stringify(json)}`)) as any;
-        const linestring = polyline.toGeoJSON(response.trip.legs[0].shape, 6);
-        return linestring.coordinates.map((c: GeoJSON.Position) => SpatialService.toLatLng(c));
     }
 
     private async getOffineRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {

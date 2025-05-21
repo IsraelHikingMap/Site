@@ -101,7 +101,7 @@ export class OpenWithService {
 
     private handleHttpUrl(href: string) {
         const url = new URL(href);
-        if (url.host.toLocaleLowerCase() === "israelhiking.osm.org.il") {
+        if (url.host.toLocaleLowerCase() === "www.mapeak.com") {
             this.handleIHMUrl(url);
             return;
         }

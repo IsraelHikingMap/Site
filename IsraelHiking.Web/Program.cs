@@ -61,7 +61,7 @@ void SetupApplication(WebApplication app)
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Israel Hiking Map API V1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Mapeak API V1");
     });
     app.UseMiddleware<CrawlersMiddleware>();
     // This should be the last middleware
@@ -138,7 +138,7 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("IHM"));
     services.AddSwaggerGen(c =>
     {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Israel Hiking API", Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() });
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Mapeak API", Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() });
         c.SchemaFilter<FeatureExampleFilter>();
         c.SchemaFilter<FeatureCollectionExampleFilter>();
         c.AddSecurityDefinition("Bearer",

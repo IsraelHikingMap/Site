@@ -1,4 +1,4 @@
-package il.org.osm.israelhiking;
+package com.mapeak;
 
 import android.content.Intent;
 import android.net.Uri;

@@ -26,7 +26,6 @@ export class ElevationProvider {
     public async updateHeights(latlngs: LatLngAlt[]): Promise<void> {
         const relevantIndexes = [] as number[];
         const missingElevation = [] as LatLngAlt[]
-        let isInIsrael = true;
         for (let i = 0; i < latlngs.length; i++) {
             const latlng = latlngs[i];
             if (latlng.alt) {
@@ -34,23 +33,8 @@ export class ElevationProvider {
             }
             relevantIndexes.push(i);
             missingElevation.push(latlng);
-            if (!SpatialService.isInIsrael(latlng)) {
-                isInIsrael = false;
-            }
         }
         if (relevantIndexes.length === 0) {
-            return;
-        }
-        if (!isInIsrael) {
-            const body = {
-                id: "valhalla_height",
-                range: false,
-                shape: missingElevation.map(l => ({ lat: l.lat, lon: l.lng}))
-            };
-            const response = await firstValueFrom(this.httpClient.post("https://valhalla1.openstreetmap.de/height", body)) as { height: number[]};
-            for (let index = 0; index < relevantIndexes.length; index++) {
-                latlngs[relevantIndexes[index]].alt = response.height[index];
-            }
             return;
         }
 
