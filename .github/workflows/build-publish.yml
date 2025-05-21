@@ -84,7 +84,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        appType: ["IHM"]
+        appType: ["Mapeak"]
 
     steps:
       - name: Checkout code
@@ -153,10 +153,6 @@ jobs:
   docker: 
     runs-on: ubuntu-latest
     needs: version
-    strategy:
-      fail-fast: false
-      matrix:
-        appType: ["ihm"]
 
     steps:
       - name: Checkout code
@@ -172,13 +168,13 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build . -t ghcr.io/israelhikingmap/website:$VERSION --build-arg VERSION=$VERSION
+          docker build . -t ghcr.io/israelhikingmap/website-mapeak:$VERSION --build-arg VERSION=$VERSION
         env:
           VERSION: ${{ needs.version.outputs.version_string }}
       - name: Push Docker image
         if: ${{ github.secret_source == 'Actions' }}
         run: |
-          docker push ghcr.io/israelhikingmap/website:$VERSION
+          docker push ghcr.io/israelhikingmap/website-mapeak:$VERSION
         env:
           VERSION: ${{ needs.version.outputs.version_string }}
 
@@ -188,7 +184,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        appType: ["IHM"]
+        appType: ["Mapeak"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -256,7 +252,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        appType: ["IHM"]
+        appType: ["Mapeak"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
