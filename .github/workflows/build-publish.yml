@@ -273,9 +273,9 @@ jobs:
           merge-multiple: true
       - name: Rename artifacts
         run: |
-          mv ${{ github.workspace }}/artifacts/${{ martix.appType }}*.ipa ${{ github.workspace }}/${{ martix.appType }}_signed_${{ needs.version.outputs.version_string }}.ipa
-          mv ${{ github.workspace }}/artifacts/${{ martix.appType }}*.aab ${{ github.workspace }}/${{ martix.appType }}_signed_${{ needs.version.outputs.version_string }}.aab
-          mv ${{ github.workspace }}/artifacts/${{ martix.appType }}*.apk ${{ github.workspace }}/${{ martix.appType }}_signed_${{ needs.version.outputs.version_string }}.apk
+          mv ${{ github.workspace }}/artifacts/${{ matrix.appType }}*.ipa ${{ github.workspace }}/${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.ipa
+          mv ${{ github.workspace }}/artifacts/${{ matrix.appType }}*.aab ${{ github.workspace }}/${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.aab
+          mv ${{ github.workspace }}/artifacts/${{ matrix.appType }}*.apk ${{ github.workspace }}/${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.apk
       - name: Rename and close milestone
         uses: octokit/request-action@v2.x
         with:
@@ -300,6 +300,6 @@ jobs:
             See [Milestone ${{ needs.version.outputs.version_string }}](https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1)
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
-            ${{ martix.appType }}_signed_${{ needs.version.outputs.version_string }}.ipa
-            ${{ martix.appType }}_signed_${{ needs.version.outputs.version_string }}.aab
-            ${{ martix.appType }}_signed_${{ needs.version.outputs.version_string }}.apk
+            ${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.ipa
+            ${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.aab
+            ${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.apk
