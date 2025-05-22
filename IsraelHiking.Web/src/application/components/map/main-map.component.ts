@@ -9,7 +9,7 @@ import { Store } from "@ngxs/store";
 
 import { TracesDialogComponent } from "../dialogs/traces-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
-import { IHMTitleService } from "../../services/ihm-title.service";
+import { MapeakTitleService } from "../../services/mapeak-title.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
@@ -28,7 +28,7 @@ import { SearchComponent } from "../search.component";
 import { DrawingComponent } from "../drawing.component";
 import { RouteStatisticsComponent } from "../route-statistics.component";
 import { CenterMeComponent } from "../center-me.component";
-import { IhmLinkComponent } from "../ihm-link.component";
+import { MapeakLinkComponent } from "../mapeak-link.component";
 import { environment } from "environments/environment";
 
 @Component({
@@ -36,7 +36,7 @@ import { environment } from "environments/environment";
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersViewComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, NgIf, LocationComponent, MainMenuComponent, SearchComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, IhmLinkComponent]
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersViewComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, NgIf, LocationComponent, MainMenuComponent, SearchComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent]
 })
 export class MainMapComponent {
 
@@ -52,7 +52,7 @@ export class MainMapComponent {
 
     public readonly resources = inject(ResourcesService);
 
-    private readonly titleService = inject(IHMTitleService);
+    private readonly titleService = inject(MapeakTitleService);
     private readonly mapService = inject(MapService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly defaultStyleService = inject(DefaultStyleService);

@@ -103,7 +103,7 @@ export class ShareDialogComponent implements AfterViewInit {
             this.imageUrl = this.shareUrlsService.getImageFromShareId(shareUrl);
             const links = this.shareUrlsService.getShareSocialLinks(shareUrl);
             this.toastService.success(this.resources.dataUpdatedSuccessfully);
-            this.shareAddress = links.ihm;
+            this.shareAddress = links.app;
             this.whatsappShareAddress = links.whatsapp;
             this.facebookShareAddress = links.facebook;
             this.nakebCreateHikeAddress = links.nakeb;

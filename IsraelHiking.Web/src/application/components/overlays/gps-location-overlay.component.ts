@@ -97,9 +97,9 @@ export class GpsLocationOverlayComponent {
     }
 
     public shareMyLocation() {
-        const ihmCoordinateUrl = this.hashService.getFullUrlFromLatLng(this.latlng());
+        const coordinateUrl = this.hashService.getFullUrlFromLatLng(this.latlng());
         this.socialSharing.shareWithOptions({
-            message: `geo:${this.latlng().lat},${this.latlng().lng}\n${ihmCoordinateUrl}`
+            message: `geo:${this.latlng().lat},${this.latlng().lng}\n${coordinateUrl}`
         });
         this.closed.emit();
     }

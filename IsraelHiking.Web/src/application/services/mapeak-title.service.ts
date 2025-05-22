@@ -2,7 +2,7 @@ import { inject, Injectable } from "@angular/core";
 import { Title } from "@angular/platform-browser";
 
 @Injectable()
-export class IHMTitleService {
+export class MapeakTitleService {
     
     private readonly titleService = inject(Title);
 

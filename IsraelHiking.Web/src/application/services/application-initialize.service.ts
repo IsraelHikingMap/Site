@@ -64,7 +64,7 @@ export class ApplicationInitializeService {
             this.angulartics.startTracking();
             await this.loggingService.initialize();
             await this.loggingService.info("---------------------------------------");
-            await this.loggingService.info("Starting IHM Application Initialization");
+            await this.loggingService.info("Starting Mapeak Application Initialization");
             await this.databaseService.initialize();
             this.overpassTurboService.initialize();
             this.screenService.initialize();
@@ -107,7 +107,7 @@ export class ApplicationInitializeService {
             this.shareUrlsService.initialize(); // no need to wait for it to complete
             this.offlineFilesDownloadService.initialize(); // no need to wait for it to complete
             this.locationService.initialize();
-            await this.loggingService.info("Finished IHM Application Initialization");
+            await this.loggingService.info("Finished Mapeak Application Initialization");
         } catch (ex) {
             if (this.runningContextService.isIFrame) {
                 return;
@@ -116,10 +116,10 @@ export class ApplicationInitializeService {
                 alert("Sorry, this site does not support running FireFox in private mode...");
             } else {
                 alert("Ooopppss... We have encountered an unexpected failure. Please try again.\n" +
-                      "If that does not help, please take a screenshot and send it to israelhiking@osm.org.il\n" +
+                      "If that does not help, please take a screenshot and send it to support@mapeak.com\n" +
                       `Init failed: ${(ex as Error).message}`);
             }
-            this.loggingService.error(`Failed IHM Application Initialization: ${(ex as Error).message}`);
+            this.loggingService.error(`Failed Mapeak Application Initialization: ${(ex as Error).message}`);
         }
     }
 }

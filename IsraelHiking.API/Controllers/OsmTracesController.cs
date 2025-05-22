@@ -134,7 +134,7 @@ public class OsmTracesController : ControllerBase
         {
             return defaultDescription;
         }
-        return defaultDescription.Replace("Recorded using IHM at", containerName);
+        return defaultDescription.Replace("Recorded using Mapeak at", containerName);
     }
 
     private Trace GpxFileToTrace(GpxFile gpxFile)

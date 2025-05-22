@@ -20,7 +20,7 @@ import { PublicPointOfInterestEditComponent } from "./public-poi-edit.component"
 import { ImageScrollerComponent } from "./image-scroller.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { PoiService, PoiSocialLinks } from "../../../services/poi.service";
-import { IHMTitleService } from "../../../services/ihm-title.service";
+import { MapeakTitleService } from "../../../services/mapeak-title.service";
 import { ToastService } from "../../../services/toast.service";
 import { RouteStrings, PoiRouteUrlInfo } from "../../../services/hash.service";
 import { SelectedRouteService } from "../../../services/selected-route.service";
@@ -72,7 +72,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
 
     public readonly resources = inject(ResourcesService);
 
-    private readonly titleService = inject(IHMTitleService);
+    private readonly titleService = inject(MapeakTitleService);
     private readonly router = inject(Router);
     private readonly poiService = inject(PoiService);
     private readonly osmAddressesService = inject(OsmAddressesService);

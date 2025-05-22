@@ -9,12 +9,12 @@ import { RunningContextService } from "../services/running-context.service";
 import { Urls } from "../urls";
 
 @Component({
-    selector: "ihm-link",
-    templateUrl: "./ihm-link.component.html",
-    styleUrls: ["./ihm-link.component.scss"],
+    selector: "mapeak-link",
+    templateUrl: "./mapeak-link.component.html",
+    styleUrls: ["./mapeak-link.component.scss"],
     imports: [Angulartics2OnModule, MatTooltip, NgIf]
 })
-export class IhmLinkComponent {
+export class MapeakLinkComponent {
 
     public target: string = "";
 
