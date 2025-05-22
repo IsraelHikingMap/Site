@@ -159,7 +159,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="oauth_callback" android:scheme="ihm" />
+                <data android:host="oauth_callback" android:scheme="mapeak" />
             </intent-filter>
         </activity>
 

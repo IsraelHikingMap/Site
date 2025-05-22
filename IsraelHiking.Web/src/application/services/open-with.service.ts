@@ -30,7 +30,7 @@ export class OpenWithService {
             if (!data || !data.url) {
                 return;
             }
-            if (data.url.startsWith("ihm://")) {
+            if (data.url.startsWith("mapeak://")) {
                 // no need to do anything as this is part of the login flow
                 return;
             }
@@ -48,7 +48,7 @@ export class OpenWithService {
         });
     }
 
-    private handleIHMUrl(url: URL) {
+    private handleMapeakUrl(url: URL) {
         this.logAndCloseDialogs(url);
         const pathname = url.pathname;
         if (pathname.startsWith("/share")) {
@@ -102,7 +102,7 @@ export class OpenWithService {
     private handleHttpUrl(href: string) {
         const url = new URL(href);
         if (url.host.toLocaleLowerCase() === "www.mapeak.com") {
-            this.handleIHMUrl(url);
+            this.handleMapeakUrl(url);
             return;
         }
         this.loggingService.info("[OpenWith] Opening an external url: " + href);

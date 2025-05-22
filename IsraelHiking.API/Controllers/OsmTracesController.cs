@@ -62,19 +62,6 @@ public class OsmTracesController : ControllerBase
     }
 
     /// <summary>
-    /// Get OSM user traces
-    /// </summary>
-    /// <returns>A list of traces</returns>
-    [HttpGet]
-    [Obsolete("This endpoint is deprecated and should be removed by 9.2025, this is now going to OSM directly")]
-    public async Task<Trace[]> GetTraces()
-    {
-        var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
-        var gpxFiles = await gateway.GetTraces();
-        return gpxFiles.Select(GpxFileToTrace).ToArray();
-    }
-
-    /// <summary>
     /// Get OSM user trace
     /// </summary>
     /// <param name="id">The trace id</param>
@@ -104,33 +91,6 @@ public class OsmTracesController : ControllerBase
         container.BaseLayer = new LayerData();
         var image = await _imageCreationGateway.Create(container, 128, 128);
         return new FileContentResult(image, new MediaTypeHeaderValue("image/png"));
-    }
-
-
-    /// <summary>
-    /// Allows upload of traces to OSM
-    /// </summary>
-    /// <returns></returns>
-    [HttpPost]
-    [Obsolete("This endpoint is deprecated and should be removed by 9.2025, this is now going to OSM directly")]
-    public async Task<IActionResult> PostUploadGpsTrace(IFormFile file)
-    {
-        if (file == null)
-        {
-            return new BadRequestResult();
-        }
-
-        await using var memoryStream = new MemoryStream();
-        await file.CopyToAsync(memoryStream);
-        var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
-        memoryStream.Seek(0, SeekOrigin.Begin);
-        await gateway.CreateTrace(new GpxFile
-        {
-            Name = file.FileName,
-            Description = Path.GetFileNameWithoutExtension(file.FileName),
-            Visibility = Visibility.Trackable
-        }, memoryStream);
-        return Ok();
     }
 
     /// <summary>
@@ -175,41 +135,6 @@ public class OsmTracesController : ControllerBase
             return defaultDescription;
         }
         return defaultDescription.Replace("Recorded using IHM at", containerName);
-    }
-
-    /// <summary>
-    /// Allows update OSM trace meta data
-    /// </summary>
-    /// <param name="id">The ID of the trace</param>
-    /// <param name="trace">The trace data</param>
-    /// <returns></returns>
-    [Route("{id}")]
-    [HttpPut]
-    [Obsolete("This endpoint is deprecated and should be removed by 9.2025, this is now going to OSM directly")]
-    public async Task<IActionResult> PutGpsTrace(string id, [FromBody]Trace trace)
-    {
-        if (id != trace.Id)
-        {
-            return BadRequest("trace id and url id do not match");
-        }
-        var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
-        await gateway.UpdateTrace(TraceToGpxFile(trace));
-        return Ok(trace);
-    }
-
-    /// <summary>
-    /// Allows the deletion of OSM trace
-    /// </summary>
-    /// <param name="id">The ID of the trace</param>
-    /// <returns></returns>
-    [Route("{id}")]
-    [HttpDelete]
-    [Obsolete("This endpoint is deprecated and should be removed by 9.2025, this is now going to OSM directly")]
-    public async Task<IActionResult> DeleteGpsTrace(long id)
-    {
-        var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
-        await gateway.DeleteTrace(id);
-        return Ok();
     }
 
     private Trace GpxFileToTrace(GpxFile gpxFile)

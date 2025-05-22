@@ -135,7 +135,7 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     }
     services.Configure<NonPublicConfigurationData>(nonPublicConfiguration.Build());
 
-    services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("IHM"));
+    services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Mapeak"));
     services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "Mapeak API", Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() });

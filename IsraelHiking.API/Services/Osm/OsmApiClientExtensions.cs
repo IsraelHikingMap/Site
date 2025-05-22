@@ -37,7 +37,7 @@ public static class OsmApiClientExtensions
     }
 
     /// <summary>
-    /// Creates IHM changeset
+    /// Creates OSM changeset
     /// </summary>
     /// <param name="client"></param>
     /// <param name="comment"></param>

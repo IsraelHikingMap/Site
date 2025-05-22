@@ -68,23 +68,6 @@ public class PointsOfInterestController : ControllerBase
     }
 
     /// <summary>
-    /// Get points of interest in a bounding box.
-    /// </summary>
-    /// <param name="northEast">North east bounding box corner</param>
-    /// <param name="southWest">South west bounding box corner</param>
-    /// <param name="categories">The relevant categories to include</param>
-    /// <param name="language">The required language</param>
-    /// <returns>A list of GeoJSON features</returns>
-    [Route("")]
-    [HttpGet]
-    [Obsolete("Should be removed by 6.2025")]
-    public IFeature[] GetPointsOfInterest(string northEast, string southWest, string categories,
-        string language = "")
-    {
-        return [];
-    }
-
-    /// <summary>
     /// Get a POI by id and source
     /// </summary>
     /// <param name="source">The source</param>
@@ -212,25 +195,6 @@ public class PointsOfInterestController : ControllerBase
     public Task<IFeature> GetClosestPoint(string location, string source, string language)
     {
         return _pointsOfInterestProvider.GetClosestPoint(location.ToCoordinate(), source, language);
-    }
-
-    /// <summary>
-    /// Get POIs that were updated between lastModified and modifiedUntil or now if not provided
-    /// </summary>
-    /// <param name="lastModified">Start date for updates</param>
-    /// <param name="modifiedUntil">End date for updates</param>
-    /// <returns></returns>
-    [Route("updates/{lastModified}/")]
-    [Route("updates/{lastModified}/{modifiedUntil}")]
-    [HttpGet]
-    [Obsolete("Remove by 5.2025")]
-    public UpdatesResponse GetPointOfInterestUpdates(DateTime lastModified, DateTime? modifiedUntil)
-    {
-        return new UpdatesResponse
-        {
-            Features = [],
-            Images = []
-        };
     }
 
     /// <summary>

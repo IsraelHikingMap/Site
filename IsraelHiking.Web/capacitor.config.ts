@@ -4,13 +4,9 @@ const config: CapacitorConfig = {
   appId: 'com.mapeak',
   appName: 'Mapeak',
   webDir: 'www',
-  server: {
-    iosScheme: "ionic",
-    androidScheme: "http"
-  },
   cordova: {
     preferences: {
-      "OAuthScheme": "ihm"
+      "OAuthScheme": "mapeak"
     }
   },
   plugins: {
