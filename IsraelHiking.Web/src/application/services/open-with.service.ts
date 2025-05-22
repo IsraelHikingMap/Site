@@ -101,7 +101,7 @@ export class OpenWithService {
 
     private handleHttpUrl(href: string) {
         const url = new URL(href);
-        if (url.host.toLocaleLowerCase() === "www.mapeak.com") {
+        if (url.host.toLocaleLowerCase() === "www.mapeak.com" || url.host.toLocaleLowerCase() === "mapeak.com") {
             this.handleMapeakUrl(url);
             return;
         }

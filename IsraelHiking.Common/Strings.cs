@@ -130,7 +130,7 @@ public static class Branding
 
     // HM TODO: decide what to do with this
     public const string USER_AGENT =
-        "Mapeak/5.x bot (https://www.mapeak.com; support@mapeak.com)";
+        "Mapeak/5.x bot (https://mapeak.com; support@mapeak.com)";
 
-    public const string BASE_URL = "https://www.mapeak.com";
+    public const string BASE_URL = "https://mapeak.com";
 }

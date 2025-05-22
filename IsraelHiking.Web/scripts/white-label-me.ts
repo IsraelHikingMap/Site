@@ -29,7 +29,7 @@ let supportEmail = "israelhiking@osm.rg.il";
 if (process.argv[2] === "mapeak") {
     newAppName = "Mapeak";
     newAppId = "com.mapeak";
-    newWebsiteUrl = "www.mapeak.com";
+    newWebsiteUrl = "mapeak.com";
     supportEmail = "support@mapeak.com"
 }
 

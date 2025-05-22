@@ -1,4 +1,4 @@
-# robots.txt for https://www.mapeak.com/
+# robots.txt for https://mapeak.com/
 
 User-agent: *
 # Virtual directories
@@ -36,4 +36,4 @@ Disallow: *.JPEG
 Disallow: *.GIF
 
 # Sitemap files
-Sitemap: https://www.mapeak.com/sitemap.xml
+Sitemap: https://mapeak.com/sitemap.xml
