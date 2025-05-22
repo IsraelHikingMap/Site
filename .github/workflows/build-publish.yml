@@ -115,9 +115,9 @@ jobs:
           fastlane build_aab
           fastlane build_apk
         env:
-          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-          KEYSTORE_PATH: ${{ github.workspace }}/IsraelHiking.Web/android/app/IHM.jks
+          STORE_PASSWORD: ${{ secrets.MAPEAK_STORE_PASSWORD }}
+          PASSWORD: ${{ secrets.MAPEAK_PASSWORD }}
+          KEYSTORE_PATH: ${{ github.workspace }}/IsraelHiking.Web/android/app/Mapeak.jks
       - name: Upload aab artifacts
         if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
