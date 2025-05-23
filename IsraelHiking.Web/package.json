@@ -77,7 +77,7 @@
     "ngx-infinite-scroll": "^19.0.0",
     "ngx-lottie": "^13.0.1",
     "ngx-progressbar": "^14.0.0",
-    "osm2geojson-lite": "^1.0.3",
+    "osm2geojson-lite": "^1.1.1",
     "pbf": "^3.2.1",
     "photoswipe": "^5.4.4",
     "piexif-ts": "^2.1.0",
