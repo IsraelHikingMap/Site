@@ -37,8 +37,8 @@ export class Urls {
     public static readonly osmBase = "https://www.openstreetmap.org";
     public static readonly osmAuth = Urls.osmBase + "/oauth2";
 
-    public static readonly HIKING_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/IHM.json";
-    public static readonly MTB_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/ilMTB.json";
+    public static readonly HIKING_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/IHM-schema.json";
+    public static readonly MTB_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/ilMTB-schema.json";
     public static readonly HEATMAP_TILES_ADDRESS =
         "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/OSM_traces.json";
 
