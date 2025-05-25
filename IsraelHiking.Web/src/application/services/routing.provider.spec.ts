@@ -51,7 +51,7 @@ describe("RoutingProvider", () => {
         });
     });
 
-    it("Should route between two points inside Israel", inject([RoutingProvider, HttpTestingController],
+    it("Should route between two points", inject([RoutingProvider, HttpTestingController],
         async (router: RoutingProvider, mockBackend: HttpTestingController) => {
             const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike").then((data) => {
                 expect(data.length).toBe(3);
@@ -73,23 +73,6 @@ describe("RoutingProvider", () => {
                         } as GeoJSON.Feature<GeoJSON.LineString>
                     ]
                 } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>);
-            return promise;
-        }
-    ));
-
-    it("Should route between two points outside Israel", inject([RoutingProvider, HttpTestingController],
-        async (router: RoutingProvider, mockBackend: HttpTestingController) => {
-            const promise = router.getRoute({ lat: 0, lng: 0 }, { lat: 1, lng: 1 }, "Hike").then((data) => {
-                expect(data.length).toBe(3);
-            }, fail);
-
-            mockBackend.expectOne(u => u.url.startsWith("https://valhalla")).flush({
-                trip: {
-                    legs:[{
-                        shape: polyline.encode([[1, 1], [1.5, 1.5], [2, 2]], 6)
-                    }]
-                }
-            });
             return promise;
         }
     ));
