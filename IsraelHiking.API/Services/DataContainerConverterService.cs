@@ -70,7 +70,7 @@ public class DataContainerConverterService : IDataContainerConverterService
     {
         var gpx = (await Convert(content, fileName, GPX)).ToGpx();
         var container = _gpxDataContainerConverter.ToDataContainer(gpx);
-        if (gpx.Metadata.Creator == GpxDataContainerConverter.MAPEAK)
+        if (gpx.Metadata.Creator == GpxDataContainerConverter.MAPEAK || gpx.Metadata.Creator == "IsraelHikingMap") // for backwards compatibilty with IHM
         {
             return container;
         }
