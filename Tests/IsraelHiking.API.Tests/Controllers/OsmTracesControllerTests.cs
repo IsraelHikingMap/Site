@@ -40,27 +40,6 @@ public class OsmTracesControllerTests
     }
 
     [TestMethod]
-    public void GetTraces_ShouldGetThemFromOsm()
-    {
-        _controller.SetupIdentity();
-        var osmGateWay = SetupOAuthClient();
-        _controller.Url = Substitute.For<IUrlHelper>();
-        osmGateWay.GetTraces().Returns([
-            new GpxFile
-            {
-                Id = 42,
-                Description = "description",
-                Name = "name",
-                Tags = []
-            }
-        ]);
-
-        _controller.GetTraces().Wait();
-
-        osmGateWay.Received(1).GetTraces();
-    }
-
-    [TestMethod]
     public void GetTraceById_ShouldGetIt()
     {
         _controller.SetupIdentity();
@@ -88,42 +67,6 @@ public class OsmTracesControllerTests
         var results = _controller.GetTraceByIdImage(42).Result as FileContentResult;
             
         Assert.IsNotNull(results);
-    }
-        
-    [TestMethod]
-    public void PostUploadGpsTrace_NoFile_ShouldReturnBadRequest()
-    {
-        var results = _controller.PostUploadGpsTrace(null).Result as BadRequestResult;
-
-        Assert.IsNotNull(results);
-    }
-
-    [TestMethod]
-    public void PostUploadGpsTrace_UploadFileWhenAlreadyInCache_ShouldReturnOK()
-    {
-        var file = Substitute.For<IFormFile>();
-        file.FileName.Returns("SomeFile.gpx");
-        SetupOAuthClient();
-        _distributedCache.Get(Arg.Any<string>()).Returns(Encoding.UTF8.GetBytes("something"));
-        _controller.SetupIdentity();
-        
-        var response = _controller.PostUploadGpsTrace(file).Result;
-
-        Assert.IsNotNull(response as OkResult);
-    }
-        
-    [TestMethod]
-    public void PostUploadGpsTrace_UploadFile_ShouldSendItToOsmGateway()
-    {
-        var file = Substitute.For<IFormFile>();
-        file.FileName.Returns("SomeFile.gpx");
-        var osmGateWay = SetupOAuthClient();
-
-        _controller.SetupIdentity();
-        
-        _controller.PostUploadGpsTrace(file).Wait();
-
-        osmGateWay.Received(1).CreateTrace(Arg.Any<GpxFile>(), Arg.Any<MemoryStream>());
     }
 
     [TestMethod]
@@ -194,40 +137,6 @@ public class OsmTracesControllerTests
         _controller.PostUploadRouteData(routeData, Languages.ENGLISH).Wait();
 
         osmGateWay.Received(1).CreateTrace(Arg.Is<GpxFile>(f => f.Description.Contains("area") && f.Name.Contains("Recorded using Mapeak")), Arg.Any<Stream>());
-    }
-
-    [TestMethod]
-    public void PutGpsTrace_ShouldUpdate()
-    {
-        _controller.SetupIdentity();
-        var osmGateWay = SetupOAuthClient();
-
-        _controller.PutGpsTrace("42", new Trace { Id = "42", Visibility = "public" }).Wait();
-
-        osmGateWay.Received(1).UpdateTrace(Arg.Any<GpxFile>());
-    }
-
-    [TestMethod]
-    public void PutGpsTrace_WrongId_ShouldNotUpdate()
-    {
-        _controller.SetupIdentity();
-        var osmGateWay = SetupOAuthClient();
-
-        _controller.PutGpsTrace("7", new Trace { Id = "42", Visibility = "public" }).Wait();
-
-        osmGateWay.Received(0).UpdateTrace(Arg.Any<GpxFile>());
-    }
-
-    [TestMethod]
-    public void DeleteGpsTrace_ShouldDeleteIt()
-    {
-        long id = 1;
-        _controller.SetupIdentity();
-        var osmGateWay = SetupOAuthClient();
-
-        _controller.DeleteGpsTrace(id).Wait();
-
-        osmGateWay.Received(1).DeleteTrace(id);
     }
 
     private IAuthClient SetupOAuthClient()
