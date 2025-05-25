@@ -4,7 +4,6 @@ import { HttpTestingController, provideHttpClientTesting } from "@angular/common
 import { NgxsModule, Store } from "@ngxs/store";
 import geojsonVt from "geojson-vt";
 import vtpbf from "vt-pbf";
-import polyline from "@mapbox/polyline";
 
 import { RoutingProvider } from "./routing.provider";
 import { ResourcesService } from "./resources.service";
