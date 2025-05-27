@@ -80,7 +80,7 @@ export const initialState =
                     isEditable: false,
                     isOfflineAvailable: true,
                     isOfflineOn: false,
-                    minZoom: 7,
+                    minZoom: 1,
                     maxZoom: 16
                 },
                 {
@@ -89,7 +89,7 @@ export const initialState =
                     isEditable: false,
                     isOfflineAvailable: true,
                     isOfflineOn: false,
-                    minZoom: 7,
+                    minZoom: 1,
                     maxZoom: 16
                 }
             ],
@@ -97,7 +97,7 @@ export const initialState =
                 {
                     key: HIKING_TRAILS,
                     address: Urls.HIKING_TILES_ADDRESS,
-                    minZoom: 7,
+                    minZoom: 1,
                     maxZoom: 16,
                     isOfflineAvailable: true,
                     isOfflineOn: false,
@@ -107,7 +107,7 @@ export const initialState =
                 {
                     key: BICYCLE_TRAILS,
                     address: Urls.MTB_TILES_ADDRESS,
-                    minZoom: 7,
+                    minZoom: 1,
                     maxZoom: 16,
                     isOfflineAvailable: true,
                     isOfflineOn: false,
