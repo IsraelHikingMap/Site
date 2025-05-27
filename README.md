@@ -45,7 +45,6 @@ The architecture is based heavily on Angular:
   * models - used to store data types that are common to the entire app.
   * reducers - used for redux reducers, actions and payloads.
   * services - this layer holds the lower level data handling.
-    * layers - where the layers logic is - POI, route, wiki, nakeb, relevant services, etc...
 * content - used for images and static content.
 * environments - used for angular-cli to define production and dev variables.
 * fonts - [icomoon](https://icomoon.io/app/) generated font for icons instead of images.
@@ -54,38 +53,17 @@ The architecture is based heavily on Angular:
  
 # Architecture and folder stucture of the server side
 The architecture is based on layers:
-* Contollers - the topmost layer to catch all the requests
-* Services - responsible for orchestrating executors
-* Converters - converters logic between types of geo structures
-* Executers - basic logical building blocks
+* API - the client entry point and main business logic module
+  * Contollers - the top-most layer to catch all the requests
+  * Services - responsible for orchestrating executors
+  * Converters - converters logic between types of geo structures
+  * Executers - basic logical building blocks
+* Web - the entry point of the app and where the client side code gets built
 * DataAccessInterfaces - a slim layer to decouple business logic from data access
 * DataAccess - database, file system and network request are processed in this layer
 * Common - Mainly for POCOs
+* Tests - where the tests are located, they mirror the BL hierarchy
 
-# Setting Up the Project for site Development (To setup iOS and Android follow the capacitor guides)
-In order to be able to build this site you'll need some tools:
-* Install [Docker](https://www.docker.com/products/docker-desktop)
-* Install [.Net core SDK 9.0 ](https://www.microsoft.com/net/download/core)
-* Install [node.js](https://nodejs.org/en/) (20+).
-* Run from command line `dotnet restore` and after that `dotnet build`
-* Go to `IsraelHiking.Web` and run from command line: 
-  * `npm install` to install all npm packages for the client side code
-  * `npm run build` to generate the Angular UI client. It should create `wwwroot` folder on a successful run
-* Run `docker compose up graphhopper` - it should fail for the first time
-* Run `gh-update.ps1` (set chmod +x if needed) to generate the graphhopper routing data
-* Run `docker compose up` to load the rest of the sercives
-* Run `dotnet run --project IsraelHiking.Web`
-* If you want to update the translations or upload images from your debug environment, you'll need to add the following secrets to `IsraelHiking.Web`. Otherwise, skip this step.    
-  <img width="397" alt="2017-10-22 10_47_32-" src="https://user-images.githubusercontent.com/1304610/31860867-3b283092-b72a-11e7-8119-fe04ecd13852.png">    
-  In the `secrets.json` at the end there should be these fields.
-  ```
-  {
-    "wikiMediaUserName": "your wikimedia user",
-    "wikiMediaPassword": "your wikimedia password"
-    "imgurClientId": "your imgur client ID"
-  }
-  ```
-
-# Starting a debug session
+# Setup environment and start a debug session
 [See the relevant page in our wiki](https://github.com/IsraelHikingMap/Site/wiki/Debug-Environment-Setup)
 
