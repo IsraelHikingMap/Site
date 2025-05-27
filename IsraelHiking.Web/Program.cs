@@ -161,6 +161,7 @@ void InitializeServices(IServiceProvider serviceProvider)
 {
     var logger = serviceProvider.GetRequiredService<ILogger>();
     logger.LogInformation("-----------------------------------------------");
+    logger.LogInformation($"Version: {Assembly.GetExecutingAssembly().GetName().Version?.ToString()}");
     logger.LogInformation("Initializing singleton services");
     var initializableServices = serviceProvider.GetServices<IInitializable>();
     foreach (var service in initializableServices)
