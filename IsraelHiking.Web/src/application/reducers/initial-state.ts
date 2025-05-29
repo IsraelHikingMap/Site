@@ -47,9 +47,9 @@ export const initialState =
             language: AVAILABLE_LANGUAGES.find(l => l.code === navigator.language) ?? AVAILABLE_LANGUAGES[0],
         },
         locationState: {
-            longitude: 35.12,
-            latitude: 31.773,
-            zoom: 13
+            longitude: 0,
+            latitude: 0,
+            zoom: 1
         },
         routes: {
             past: [],
