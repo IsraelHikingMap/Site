@@ -49,8 +49,8 @@ public class ElasticSearchGatewayTests
     [Ignore]
     public void GetContainerName_ShouldReturnResults()
     {
-        var results = _gateway.GetContainerName([new Coordinate(35.05746, 32.596838)], Languages.HEBREW).Result;
-        Assert.AreEqual("רמות מנשה", results);
+        var results = _gateway.GetContainerName([new Coordinate(35.05746, 32.596838)], Languages.RUSSIAN).Result;
+        Assert.AreEqual("Ramot Menashe", results);
     }
 
     [TestMethod]
