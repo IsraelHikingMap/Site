@@ -284,7 +284,8 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                             .Relation(GeoShapeRelation.Contains))
                 )
         );
-        return response.Documents.FirstOrDefault()?.Name.GetValueOrDefault(language, null);
+        var document = response.Documents.FirstOrDefault();
+        return document?.Name.GetValueOrDefault(language, document.Name.GetValueOrDefault(Languages.ENGLISH, document.Name.GetValueOrDefault(Languages.DEFAULT, string.Empty)));
     }
 
     private async Task UpdateData(List<IFeature> features, string alias)
