@@ -81,11 +81,6 @@ jobs:
   android:
     runs-on: ubuntu-latest
     needs: version
-    strategy:
-      fail-fast: false
-      matrix:
-        appType: ["Mapeak"]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -122,14 +117,14 @@ jobs:
         if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.aab
+          name: Mapeak_signed_${{ needs.version.outputs.version_string }}.aab
           path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
 
       - name: Upload apk artifacts
         if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.apk
+          name: Mapeak_signed_${{ needs.version.outputs.version_string }}.apk
           path: IsraelHiking.Web/android/app/build/outputs/apk/release/app-release.apk
       
       - name: Publish to Google Play
@@ -181,10 +176,6 @@ jobs:
   ios:
     runs-on: macos-15
     needs: version
-    strategy:
-      fail-fast: false
-      matrix:
-        appType: ["Mapeak"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -226,7 +217,7 @@ jobs:
         if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.ipa
+          name: Mapeak_signed_${{ needs.version.outputs.version_string }}.ipa
           path: IsraelHiking.Web/ios/App/App.ipa
       - name: Upload to testers
         if: ${{ github.event.inputs.publishios == 'true' && github.event.inputs.production == 'false' }}
@@ -249,10 +240,6 @@ jobs:
     if: ${{ github.event.inputs.production == 'true' }}
     runs-on: ubuntu-latest
     needs: [version, ios, android]
-    strategy:
-      fail-fast: false
-      matrix:
-        appType: ["Mapeak"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -269,9 +256,9 @@ jobs:
           merge-multiple: true
       - name: Rename artifacts
         run: |
-          mv ${{ github.workspace }}/artifacts/${{ matrix.appType }}*.ipa ${{ github.workspace }}/${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.ipa
-          mv ${{ github.workspace }}/artifacts/${{ matrix.appType }}*.aab ${{ github.workspace }}/${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.aab
-          mv ${{ github.workspace }}/artifacts/${{ matrix.appType }}*.apk ${{ github.workspace }}/${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.apk
+          mv ${{ github.workspace }}/artifacts/*.ipa ${{ github.workspace }}/Mapeak_signed_${{ needs.version.outputs.version_string }}.ipa
+          mv ${{ github.workspace }}/artifacts/*.aab ${{ github.workspace }}/Mapeak_signed_${{ needs.version.outputs.version_string }}.aab
+          mv ${{ github.workspace }}/artifacts/*.apk ${{ github.workspace }}/Mapeak_signed_${{ needs.version.outputs.version_string }}.apk
       - name: Rename and close milestone
         uses: octokit/request-action@v2.x
         with:
@@ -296,6 +283,6 @@ jobs:
             See [Milestone ${{ needs.version.outputs.version_string }}](https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1)
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
-            ${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.ipa
-            ${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.aab
-            ${{ matrix.appType }}_signed_${{ needs.version.outputs.version_string }}.apk
+            Mapeak_signed_${{ needs.version.outputs.version_string }}.ipa
+            Mapeak_signed_${{ needs.version.outputs.version_string }}.aab
+            Mapeak_signed_${{ needs.version.outputs.version_string }}.apk
