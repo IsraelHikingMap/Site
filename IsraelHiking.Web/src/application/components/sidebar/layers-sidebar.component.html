@@ -94,9 +94,6 @@
             <button mat-button (click)="addRoute($event)" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add route"><i class="fa fa-lg icon-plus"></i> {{resources.addRoute}}</button>
         </mat-expansion-panel>
     </mat-accordion>
-    <div class="flex flex-row" *ngIf="isOfflineDownloadAvailable() && (lastModified$ | async)">
-        <div class="w-full ms-2">{{resources.lastUpdatedOn}} {{lastModified$ | async | date:'dd/MM/yyyy'}}</div>
-    </div>
     <p class="ms-2" *ngIf="isOfflineDownloadAvailable()">
         {{resources.offlinePurchaseGraditude}}<br/>
         <a [href]="manageSubscriptions" target="_blank" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Manage subscriptions">{{resources.manageSubscriptions}}</a>

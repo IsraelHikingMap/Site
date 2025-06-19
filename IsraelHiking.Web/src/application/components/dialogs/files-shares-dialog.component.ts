@@ -14,8 +14,7 @@ import { DataContainerService } from "../../services/data-container.service";
 import { FileService, FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
-import { SetOfflineMapsLastModifiedDateAction } from "../../reducers/offline.reducer";
-import type { ApplicationState, DataContainer } from "../../models/models";
+import type { DataContainer } from "../../models/models";
 
 @Component({
     selector: "files-share-dialog",
@@ -51,23 +50,11 @@ export class FilesSharesDialogComponent {
         if (!file) {
             return;
         }
-        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        if (file.name.endsWith(".ihm") && offlineState.isOfflineAvailable) {
-            this.toastService.info(this.resources.openingAFilePleaseWait);
-            try {
-                await this.fileService.writeStyles(file);
-                this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
-            } catch (ex) {
-                this.toastService.error(ex, "Error opening ihm file");
-            }
-            return;
-        }
         if (file.name.endsWith(".pmtiles")) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
             await this.fileService.storeFileToCache(file.name, file);
             await this.fileService.moveFileFromCacheToDataDirectory(file.name);
             this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
-            this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(new Date(file.lastModified)));
             return;
         }
         if (file.name.endsWith(".json")) {

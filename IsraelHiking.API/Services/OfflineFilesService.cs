@@ -13,7 +13,6 @@ namespace IsraelHiking.API.Services;
 public class OfflineFilesService : IOfflineFilesService
 {
     private readonly IFileProvider _fileProvider;
-    private readonly IFileSystemHelper _fileSystemHelper;
 
     /// <summary>
     /// Constructor
@@ -25,25 +24,34 @@ public class OfflineFilesService : IOfflineFilesService
         IOptions<ConfigurationData> options,
         ILogger logger)
     {
-        _fileSystemHelper = fileSystemHelper;
         if (string.IsNullOrEmpty(options.Value.OfflineFilesFolder))
         {
             logger.LogWarning("offlineFilesFolder was not provided! This mean you won't be able to use this service");
         }
         else
         {
-            _fileProvider = _fileSystemHelper.CreateFileProvider(options.Value.OfflineFilesFolder);
+            _fileProvider = fileSystemHelper.CreateFileProvider(options.Value.OfflineFilesFolder);
         }
     }
 
     /// <inheritdoc/>
-    public Dictionary<string, DateTime> GetUpdatedFilesList(DateTime lastModifiedDate)
+    public Dictionary<string, DateTime> GetUpdatedFilesList(DateTime lastModifiedDate, long tileX, long tileY)
     {
         var filesDictionary = new Dictionary<string, DateTime>();
-        var contents = _fileProvider.GetDirectoryContents(string.Empty);
-        foreach (var content in contents)
+        var relativePath = "7/" + tileX + "/" + tileY;
+        var zoom7Folder = _fileProvider.GetDirectoryContents(relativePath);
+        foreach (var content in zoom7Folder)
         {
-            if (_fileSystemHelper.IsHidden(content.PhysicalPath))
+            if (lastModifiedDate != DateTime.MinValue && content.LastModified.DateTime.ToUniversalTime() - lastModifiedDate.ToUniversalTime() <= new TimeSpan(0, 0, 1))
+            {
+                continue;
+            }
+            filesDictionary[relativePath + "/" + content.Name] = content.LastModified.DateTime;
+        }
+        var rootFolder = _fileProvider.GetDirectoryContents(string.Empty);
+        foreach (var content in rootFolder)
+        {
+            if (content.IsDirectory)
             {
                 continue;
             }
@@ -51,10 +59,7 @@ public class OfflineFilesService : IOfflineFilesService
             {
                 continue;
             }
-            if (content.Name.EndsWith(".pmtiles") || content.Name.StartsWith("style"))
-            {
-                filesDictionary[content.Name] = content.LastModified.DateTime;
-            }
+            filesDictionary[content.Name] = content.LastModified.DateTime;
         }
         return filesDictionary;
     }

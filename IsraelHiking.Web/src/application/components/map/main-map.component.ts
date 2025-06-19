@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildr
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { NgStyle, NgIf } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
-import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike, IControl, ControlPosition } from "maplibre-gl";
+import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, PointLike, IControl, ControlPosition } from "maplibre-gl";
 import { NgProgressbar } from "ngx-progressbar";
 import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";
@@ -29,7 +29,6 @@ import { DrawingComponent } from "../drawing.component";
 import { RouteStatisticsComponent } from "../route-statistics.component";
 import { CenterMeComponent } from "../center-me.component";
 import { MapeakLinkComponent } from "../mapeak-link.component";
-import { environment } from "environments/environment";
 
 @Component({
     selector: "main-map",
@@ -48,7 +47,6 @@ export class MainMapComponent {
 
     public location: LocationState;
     public initialStyle: StyleSpecification;
-    private isTerrainOn: boolean = false;
 
     public readonly resources = inject(ResourcesService);
 
@@ -175,54 +173,5 @@ export class MainMapComponent {
 
     public isApp() {
         return this.runningContextService.isCapacitor;
-    }
-
-    public pitchChanged() {
-        if (this.runningContextService.isMobile) {
-            return;
-        }
-        const pitch = this.mapComponent().mapInstance.getPitch();
-        if (pitch <= 10 && !this.isTerrainOn) {
-            // Terrain is off and pitch is low, nothing to do.
-            return;
-        }
-
-        if (pitch > 10 && this.isTerrainOn) {
-            // Terrain is on and pitch is high, nothing to do.
-            return;
-        }
-
-        if (pitch <= 10 && this.isTerrainOn) {
-            // Terrain is on and pitch is low, turning off.
-            this.isTerrainOn = false;
-            this.mapComponent().mapInstance.setTerrain(null);
-            return;
-        }
-
-        // Terrain is off and pitch is high, turning on.
-        this.isTerrainOn = true;
-        // HM TODO: change this for global terrain
-        let source: RasterDEMSourceSpecification = {
-            type: "raster-dem",
-            url: environment.baseTilesAddress + "/vector/data/TerrainRGB.json",
-            tileSize: 256
-        };
-        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate != null) {
-            // Using offline source
-            source = {
-                type: "raster-dem",
-                tiles:["custom://TerrainRGB/{z}/{x}/{y}.png"],
-                maxzoom:12,
-                minzoom:7
-            };
-        }
-        const currentSourceTerrain = this.mapComponent().mapInstance.getSource("terrain");
-        if (!currentSourceTerrain) {
-            this.mapComponent().mapInstance.addSource("terrain", source);
-        } else if (currentSourceTerrain && currentSourceTerrain.serialize().url !== source.url) {
-            this.mapComponent().mapInstance.removeSource("terrain");
-            this.mapComponent().mapInstance.addSource("terrain", source);
-        }
-        this.mapComponent().mapInstance.setTerrain({source: "terrain", exaggeration: 2});
     }
 }

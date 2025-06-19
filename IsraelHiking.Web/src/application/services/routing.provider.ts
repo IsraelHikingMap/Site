@@ -41,7 +41,7 @@ export class RoutingProvider {
             } catch (ex2) {
                 this.loggingService.error(`[Routing] failed: ${(ex as Error).message}, ${(ex2 as Error).message}`);
                 const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-                this.toastService.warning(offlineState.isOfflineAvailable || !this.runningContextService.isCapacitor
+                this.toastService.warning(offlineState.isSubscribed || !this.runningContextService.isCapacitor
                     ? this.resources.routingFailedTryShorterRoute
                     : this.resources.routingFailedBuySubscription
                 );
@@ -55,9 +55,10 @@ export class RoutingProvider {
             return [latlngStart, latlngEnd];
         }
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        if (!offlineState.isOfflineAvailable || offlineState.lastModifiedDate == null) {
+        if (!offlineState.isSubscribed || offlineState.downloadedTiles == null) {
             throw new Error("Offline routing is only supported after downloading offline data");
         }
+        // HM TODO: check if the right tiles are downloaded
         const zoom = 14; // this is the max zoom for these tiles
         const tiles = [latlngStart, latlngEnd].map(latlng => SpatialService.toTile(latlng, zoom));
         let tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));

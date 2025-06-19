@@ -20,6 +20,8 @@ public interface IOfflineFilesService
     /// Get a list of files that have been updated since a given date
     /// </summary>
     /// <param name="lastModifiedDate">The date to check against</param>
+    /// <param name="tileX">The tile's X coordinates</param>
+    /// <param name="tileY">The tile's Y coordinates</param>
     /// <returns>A list of file names</returns>
-    Dictionary<string, DateTime> GetUpdatedFilesList(DateTime lastModifiedDate);
+    Dictionary<string, DateTime> GetUpdatedFilesList(DateTime lastModifiedDate, long tileX, long tileY);
 }

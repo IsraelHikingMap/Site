@@ -119,12 +119,14 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Get a list of files that need to be downloaded since they are out dated
     /// </summary>
-    /// <param name="lastModified"></param>
+    /// <param name="lastModified">The last time this tile was downloaded</param>
+    /// <param name="tileX">The tile's X coordinates</param>
+    /// <param name="tileY">The tile's Y coordinates</param>
     /// <returns></returns>
     [HttpGet]
     [Route("offline")]
     [Authorize]
-    public async Task<IActionResult> GetOfflineFiles([FromQuery] DateTime lastModified)
+    public async Task<IActionResult> GetOfflineFiles([FromQuery] DateTime lastModified, [FromQuery] long tileX, [FromQuery] long tileY)
     {
         if (!await _receiptValidationGateway.IsEntitled(User.Identity?.Name))
         {
@@ -132,7 +134,7 @@ public class FilesController : ControllerBase
             return Forbid();
         }
         _logger.LogInformation($"Getting the list of offline files for user: {User.Identity?.Name}, date: {lastModified}");
-        return Ok(_offlineFilesService.GetUpdatedFilesList(lastModified));
+        return Ok(_offlineFilesService.GetUpdatedFilesList(lastModified, tileX, tileY));
     }
 
     /// <summary>
@@ -150,8 +152,10 @@ public class FilesController : ControllerBase
             _logger.LogInformation($"Unable to get the offline file for user: {User.Identity?.Name} since the user is not entitled, file: {id}");
             return Forbid();
         }
-        _logger.LogInformation($"Getting the offline file for user: {User.Identity?.Name}, file: {id}");
-        var file = _offlineFilesService.GetFileContent(id);
-        return File(file, id.EndsWith("json") ? "application/json": "application/zip", id);
+
+        var fileDecoded = Uri.UnescapeDataString(id);
+        _logger.LogInformation($"Getting the offline file for user: {User.Identity?.Name}, file: {fileDecoded}");
+        var file = _offlineFilesService.GetFileContent(fileDecoded);
+        return File(file, id.EndsWith("json") ? "application/json": "application/octet-stream", fileDecoded);
     }
 }

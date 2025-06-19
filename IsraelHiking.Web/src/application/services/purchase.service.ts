@@ -7,7 +7,7 @@ import { LoggingService } from "./logging.service";
 import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
-import { SetOfflineAvailableAction } from "../reducers/offline.reducer";
+import { SetOfflineSubscribedAction } from "../reducers/offline.reducer";
 import type { ApplicationState } from "../models/models";
 
 const OFFLINE_MAPS_SUBSCRIPTION = "offline_map";
@@ -36,7 +36,7 @@ export class PurchaseService {
             this.offlineFilesDownloadService.isExpired().then((isExpired) => {
                 if (isExpired) {
                     this.loggingService.debug("[Store] Product is expired from server");
-                    this.store.dispatch(new SetOfflineAvailableAction(false));
+                    this.store.dispatch(new SetOfflineSubscribedAction(false));
                 }
             });
         });
@@ -73,8 +73,8 @@ export class PurchaseService {
             this.loggingService.info(`[Store] Verified. ${receipt.id}, owned: ${CdvPurchase.store.owned(OFFLINE_MAPS_SUBSCRIPTION)}`);
             if (CdvPurchase.store.owned(OFFLINE_MAPS_SUBSCRIPTION)) {
                 const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-                this.loggingService.info("[Store] Product owned! Last modified: " + offlineState.lastModifiedDate);
-                this.store.dispatch(new SetOfflineAvailableAction(true));
+                this.loggingService.info("[Store] Product owned! Number of tiles downloaded: " + Object.keys(offlineState.downloadedTiles || {}).length);
+                this.store.dispatch(new SetOfflineSubscribedAction(true));
             }
             receipt.finish();
         });
@@ -115,14 +115,14 @@ export class PurchaseService {
     public isPurchaseAvailable(): boolean {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         return this.runningContextService.isCapacitor &&
-            !offlineState.isOfflineAvailable &&
-            offlineState.lastModifiedDate == null;
+            !offlineState.isSubscribed &&
+            offlineState.downloadedTiles == null;
     }
 
     public isRenewAvailable() {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         return this.runningContextService.isCapacitor &&
-            !offlineState.isOfflineAvailable &&
-            offlineState.lastModifiedDate != null;
+            !offlineState.isSubscribed &&
+            offlineState.downloadedTiles != null;
     }
 }

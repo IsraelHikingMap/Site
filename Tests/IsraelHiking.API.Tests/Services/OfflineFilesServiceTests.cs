@@ -39,21 +39,6 @@ public class OfflineFilesServiceTests
 
         _fileSystemHelper.Received(1).CreateFileProvider(Arg.Any<string>());
     }
-
-    [TestMethod]
-    public void GetUpdatedFilesList_OneHidden_ShouldReturnEmptyList()
-    {
-        var fileInfo = Substitute.For<IFileInfo>();
-        var directory = Substitute.For<IDirectoryContents>();
-        var files = new List<IFileInfo> {fileInfo} as IEnumerable<IFileInfo>;
-        directory.GetEnumerator().Returns(_ => files.GetEnumerator());
-        _fileProvider.GetDirectoryContents(Arg.Any<string>()).Returns(directory);
-        _fileSystemHelper.IsHidden(Arg.Any<string>()).Returns(true);
-            
-        var results = _service.GetUpdatedFilesList(new DateTime(0));
-            
-        Assert.AreEqual(0, results.Count);
-    }
         
     [TestMethod]
     public void GetUpdatedFilesList_OneUpToDate_ShouldReturnEmptyList()
@@ -67,7 +52,7 @@ public class OfflineFilesServiceTests
         _fileProvider.GetDirectoryContents(Arg.Any<string>()).Returns(directory);
         _fileSystemHelper.IsHidden(Arg.Any<string>()).Returns(false);
             
-        var results = _service.GetUpdatedFilesList(lastModified);
+        var results = _service.GetUpdatedFilesList(lastModified, 1, 2);
             
         Assert.AreEqual(0, results.Count);
     }
@@ -85,9 +70,9 @@ public class OfflineFilesServiceTests
         _fileProvider.GetDirectoryContents(Arg.Any<string>()).Returns(directory);
         _fileSystemHelper.IsHidden(Arg.Any<string>()).Returns(false);
             
-        var results = _service.GetUpdatedFilesList(lastModified);
+        var results = _service.GetUpdatedFilesList(lastModified, 1, 2);
             
-        Assert.AreEqual(1, results.Count);
+        Assert.AreEqual(2, results.Count);
     }
 
     [TestMethod]

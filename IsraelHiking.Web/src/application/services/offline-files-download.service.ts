@@ -1,15 +1,16 @@
 import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { MatDialog } from "@angular/material/dialog";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
 
 import { LayersService } from "./layers.service";
-import { SidebarService } from "./sidebar.service";
 import { FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
+import { OfflineManagementDialogComponent } from "application/components/dialogs/offline-management-dialog.component";
 import { ToggleOfflineAction } from "../reducers/layers.reducer";
 import { SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
@@ -19,39 +20,37 @@ import type { ApplicationState } from "../models/models";
 export class OfflineFilesDownloadService {
 
     private readonly resources = inject(ResourcesService);
-    private readonly sidebarService = inject(SidebarService);
     private readonly layersService = inject(LayersService);
     private readonly fileService = inject(FileService);
     private readonly loggingService = inject(LoggingService);
     private readonly httpClient = inject(HttpClient);
+    private readonly matDialog = inject(MatDialog);
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
 
     public async initialize(): Promise<void> {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         const userState = this.store.selectSnapshot((s: ApplicationState) => s.userState);
-        if (offlineState.isOfflineAvailable === true &&
-            (offlineState.lastModifiedDate == null || offlineState.isPmtilesDownloaded === false) &&
+        if (offlineState.isSubscribed === true &&
+            offlineState.downloadedTiles == null &&
             userState.userInfo != null) {
             // In case the user has purchased the map and never downloaded them, and now starts the app
-            return await this.downloadOfflineMaps(false);
+            OfflineManagementDialogComponent.openDialog(this.matDialog);
         }
     }
 
-    public async downloadOfflineMaps(showMessage = true): Promise<void> {
+    public async downloadTile(tileX: number, tileY: number, reportProgress: (progressValue: number) => void): Promise<void> {
         this.loggingService.info("[Offline Download] Starting downloading offline files");
         try {
-            const fileNames = await this.getFilesToDownloadDictionary();
+            const fileNames = await this.getFilesToDownloadDictionary(tileX, tileY);
             if (Object.keys(fileNames).length === 0) {
                 this.toastService.success(this.resources.allFilesAreUpToDate + " " + this.resources.useTheCloudIconToGoOffline);
                 return;
             }
 
-            this.toastService.progress({
-                action: (progress) => this.downloadOfflineFilesProgressAction(progress, fileNames),
-                showContinueButton: true,
-                continueText: this.resources.largeFilesUseWifi
-            });
+            const newestFileDate = await this.downloadOfflineFilesProgressAction(reportProgress, fileNames);
+            this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(newestFileDate, tileX, tileY));
+            // HM TODO: think about zoom 6 repeated download?
         } catch (ex) {
             const typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
             switch (typeAndMessage.type) {
@@ -66,17 +65,12 @@ export class OfflineFilesDownloadService {
                     this.loggingService.error("[Offline Download] Failed to get download files list due to server side error: " +
                         typeAndMessage.message);
             }
-            if (showMessage) {
-                this.toastService.warning(this.resources.unexpectedErrorPleaseTryAgainLater);
-            }
         }
     }
 
     private async downloadOfflineFilesProgressAction(reportProgress: (progressValue: number) => void, fileNames: Record<string, string>):
-        Promise<void> {
-        this.loggingService.info("[Offline Download] Starting downloading offline files, last update: " +
-        this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate);
-        this.sidebarService.hide();
+        Promise<Date> {
+        this.loggingService.info("[Offline Download] Starting downloading offline files, last update");
         let setBackToOffline = false;
         if (this.layersService.getSelectedBaseLayer().isOfflineOn) {
             this.store.dispatch(new ToggleOfflineAction(this.layersService.getSelectedBaseLayer().key, false));
@@ -103,9 +97,9 @@ export class OfflineFilesDownloadService {
             }
             this.loggingService.info("[Offline Download] Finished downloading offline files, update date to: "
                 + newestFileDate.toUTCString());
-            this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(newestFileDate));
+            
             this.toastService.success(this.resources.downloadFinishedSuccessfully + " " + this.resources.useTheCloudIconToGoOffline);
-            this.sidebarService.show("layers");
+            return newestFileDate;
         } finally {
             if (setBackToOffline) {
                 this.store.dispatch(new ToggleOfflineAction(this.layersService.getSelectedBaseLayer().key, false));
@@ -113,17 +107,14 @@ export class OfflineFilesDownloadService {
         }
     }
 
-    private async getFilesToDownloadDictionary(): Promise<Record<string, string>> {
+    private async getFilesToDownloadDictionary(tileX: number, tileY: number): Promise<Record<string, string>> {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        let lastModifiedString = offlineState.lastModifiedDate ? offlineState.lastModifiedDate.toISOString() : null;
-        if (!offlineState.isPmtilesDownloaded) {
-            this.loggingService.info("[Offline Download] This is the first time downloading pmtiles, downloading all files");
-            lastModifiedString = null;
-        }
+        const lastModifiedString = offlineState.downloadedTiles[`${tileX}-${tileY}`]?.toISOString();
         const fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
             params: { 
                 lastModified: lastModifiedString,
-                pmtiles: true
+                tileX: tileX.toString(),
+                tileY: tileY.toString()
             }
         }).pipe(timeout(5000)));
         this.loggingService.info(

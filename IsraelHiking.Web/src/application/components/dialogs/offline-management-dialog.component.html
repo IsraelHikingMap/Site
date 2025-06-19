@@ -1,0 +1,68 @@
+<div [dir]="resources.direction">
+    <div matDialogTitle>
+        <div>ניהול מפות לא מקוונות</div>
+        <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+    </div>
+    <div mat-dialog-content>
+        <div class="w-full offline-map-container">
+            <mgl-map
+                [style]="offlineMapStyleUrl"
+                zoom="5"
+                [center]="initialCenter"
+                [minZoom]="4"
+                [maxZoom]="6"
+                (moveEnd)="onMoveEnd($event)"
+                [attributionControl]="false">
+                <mgl-geojson-source id="tiles-grid" 
+                                    [data]="tilesGrid">
+                </mgl-geojson-source>
+                <mgl-layer
+                    id="tiles-grid-border"
+                    type="line"
+                    source="tiles-grid"
+                    [layout]="{
+                        'line-cap': 'round', 
+                        'line-join': 'round'
+                    }"
+                    [paint]="{
+                        'line-color': ['get', 'color'],
+                        'line-width': 3
+                    }">
+                </mgl-layer>
+                <mgl-layer
+                    id="tiles-grid-fill"
+                    type="fill"
+                    source="tiles-grid"
+                    [paint]="{
+                        'fill-color': ['get', 'fillColor']
+                    }">
+                </mgl-layer>
+                <mgl-layer
+                    id="tiles-grid-text"
+                    type="symbol"
+                    source="tiles-grid"
+                    [layout]="{
+                        'text-field': ['get', 'label'],
+                        'text-font': ['Open Sans Regular'],
+                        'text-size': 30,
+                    }"
+                    [paint]="{
+                        'text-color': ['get', 'color'],
+                        'text-halo-color' : 'white',
+                        'text-halo-width': 2
+                    }">
+                </mgl-layer>            
+            </mgl-map>
+        </div>
+    </div>
+    <div mat-dialog-actions>
+        <div class="flex flex-row w-full">
+            <div class="flex-1">
+                <button mat-raised-button class="w-full" color="primary" (click)="downloadCenter()">
+                    <i class="fa fa-lg icon-download"></i>
+                    הורדת מרכז המפה
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

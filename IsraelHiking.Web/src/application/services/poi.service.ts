@@ -140,7 +140,8 @@ export class PoiService {
             }, this.resources.endOfBaseLayer);
         }
 
-        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState.lastModifiedDate) != null) {
+        // HM TODO: check if the protocol here is correct.
+        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState.downloadedTiles) != null) {
             this.mapService.map.addSource(`${PoiService.POIS_SOURCE_ID}-offline`, {
                 type: "vector",
                 tiles: [`custom://${PoiService.POIS_SOURCE_ADDRESS.split("/").pop().replace(".json", "")}/{z}/{x}/{y}.pbf`],

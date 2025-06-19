@@ -164,11 +164,10 @@ export const initialState =
             currentPosition: null
         },
         offlineState: {
-            isOfflineAvailable: false,
-            lastModifiedDate: null,
+            isSubscribed: false,
+            downloadedTiles: null,
             shareUrlsLastModifiedDate: null,
-            uploadPoiQueue: [],
-            isPmtilesDownloaded: false
+            uploadPoiQueue: []
         },
         uiComponentsState: {
             drawingVisible: false,

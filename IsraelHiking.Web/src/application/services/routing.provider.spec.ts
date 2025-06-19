@@ -173,8 +173,8 @@ describe("RoutingProvider", () => {
 
             store.reset({
                 offlineState: {
-                    isOfflineAvailable: true,
-                    lastModifiedDate: new Date()
+                    isSubscribed: true,
+                    downloadedTiles: {}
                 }
             });
 
@@ -212,8 +212,8 @@ describe("RoutingProvider", () => {
 
             store.reset({
                 offlineState: {
-                    isOfflineAvailable: true,
-                    lastModifiedDate: new Date()
+                    isSubscribed: true,
+                    downloadedTiles: {}
                 }
             });
 
@@ -257,8 +257,8 @@ describe("RoutingProvider", () => {
 
             store.reset({
                 offlineState: {
-                    isOfflineAvailable: true,
-                    lastModifiedDate: new Date()
+                    isSubscribed: true,
+                    downloadedTiles: {}
                 }
             });
 
@@ -337,8 +337,8 @@ describe("RoutingProvider", () => {
 
             store.reset({
                 offlineState: {
-                    isOfflineAvailable: true,
-                    lastModifiedDate: new Date()
+                    isSubscribed: true,
+                    downloadedTiles: {}
                 }
             });
 

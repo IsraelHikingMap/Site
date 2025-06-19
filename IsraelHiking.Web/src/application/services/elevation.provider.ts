@@ -60,9 +60,10 @@ export class ElevationProvider {
 
     private async populateElevationCache(latlngs: LatLngAlt[]) {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        if (!offlineState.isOfflineAvailable || offlineState.lastModifiedDate == null) {
+        if (!offlineState.isSubscribed || offlineState.downloadedTiles == null) {
             throw new Error("[Elevation] Getting elevation is only supported after downloading offline data");
         }
+        // HM TODO: check if the right tiles are downloaded
         const zoom = 12; // elevation tiles are at zoom 12
         const tiles = latlngs.map(latlng => SpatialService.toTile(latlng, zoom));
         const tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));

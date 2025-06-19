@@ -78,8 +78,8 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
                 return;
             }
             this.hasInternetAccess = online;
-            if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate == null
-                || this.layerData().isOfflineAvailable === false) {
+            if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles == null || 
+                this.layerData().isOfflineAvailable === false) {
                 return;
             }
             if (this.layerData().isOfflineOn === true) {

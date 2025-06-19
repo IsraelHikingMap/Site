@@ -3,7 +3,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag } from "@angular/cdk/drag-drop";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
-import { NgIf, NgFor, NgClass, AsyncPipe, DatePipe } from "@angular/common";
+import { NgIf, NgFor, NgClass, AsyncPipe } from "@angular/common";
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from "@angular/material/expansion";
 import { MatTooltip } from "@angular/material/tooltip";
 import { Angulartics2OnModule } from "angulartics2";
@@ -18,6 +18,7 @@ import { OverlayAddDialogComponent } from "../dialogs/layers/overlay-add-dialog.
 import { OverlayEditDialogComponent } from "../dialogs/layers/overlay-edit-dialog-component";
 import { RouteAddDialogComponent } from "../dialogs/routes/route-add-dialog.component";
 import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.component";
+import { OfflineManagementDialogComponent } from "../dialogs/offline-management-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers.service";
 import { SidebarService } from "../../services/sidebar.service";
@@ -36,7 +37,7 @@ import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGro
     templateUrl: "./layers-sidebar.component.html",
     styleUrls: ["./layers-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, NgIf, Angulartics2OnModule, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgFor, NgClass, MatTooltip, CategoriesGroupComponent, CdkDropList, CdkDrag, AsyncPipe, DatePipe]
+    imports: [Dir, MatButton, NgIf, Angulartics2OnModule, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgFor, NgClass, MatTooltip, CategoriesGroupComponent, CdkDropList, CdkDrag, AsyncPipe]
 })
 export class LayersSidebarComponent {
 
@@ -44,7 +45,6 @@ export class LayersSidebarComponent {
     public overlays$: Observable<Immutable<Overlay[]>>;
     public categoriesGroups$: Observable<Immutable<CategoriesGroup[]>>;
     public routes$: Observable<Immutable<RouteData[]>>;
-    public lastModified$: Observable<Date>;
 
     public manageSubscriptions: string;
 
@@ -64,7 +64,6 @@ export class LayersSidebarComponent {
         this.manageSubscriptions = this.runningContextService.isIos
             ? "https://apps.apple.com/account/subscriptions"
             : "https://play.google.com/store/account/subscriptions";
-        this.lastModified$ = this.store.select((state: ApplicationState) => state.offlineState.lastModifiedDate);
         this.baseLayers$ = this.store.select((state: ApplicationState) => state.layersState.baseLayers);
         this.overlays$ = this.store.select((state: ApplicationState) => state.layersState.overlays);
         this.categoriesGroups$ = this.store.select((state: ApplicationState) => state.layersState.categoriesGroups);
@@ -148,16 +147,20 @@ export class LayersSidebarComponent {
     }
 
     public showOfflineButton(layer: EditableLayer) {
+        return true;
+        // HM TODO: bring this back!
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         return layer.isOfflineAvailable &&
             this.runningContextService.isCapacitor &&
-            (offlineState.lastModifiedDate != null ||
-            offlineState.isOfflineAvailable);
+            (offlineState.downloadedTiles != null ||
+            offlineState.isSubscribed);
     }
 
     public isOfflineDownloadAvailable() {
+        return true; 
+        // HM TODO: bring this back!
         return this.runningContextService.isCapacitor &&
-            this.store.selectSnapshot((s: ApplicationState) => s.offlineState).isOfflineAvailable;
+            this.store.selectSnapshot((s: ApplicationState) => s.offlineState).isSubscribed;
     }
 
     public isPurchaseAvailable() {
@@ -184,12 +187,12 @@ export class LayersSidebarComponent {
             return;
         }
 
-        this.offlineFilesDownloadService.downloadOfflineMaps();
+        OfflineManagementDialogComponent.openDialog(this.dialog);
     }
 
     public toggleOffline(event: Event, layer: EditableLayer, isOverlay: boolean) {
         event.stopPropagation();
-        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate == null && !layer.isOfflineOn) {
+        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles == null && !layer.isOfflineOn) {
             this.toastService.warning(this.resources.noOfflineFilesPleaseDownload);
             return;
         }
