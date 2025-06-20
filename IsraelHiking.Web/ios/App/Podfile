@@ -20,6 +20,7 @@ def capacitor_pods
   pod 'CapacitorTextZoom', :path => '../../node_modules/@capacitor/text-zoom'
   pod 'CapawesomeCapacitorAppUpdate', :path => '../../node_modules/@capawesome/capacitor-app-update'
   pod 'CapgoNativeAudio', :path => '../../node_modules/@capgo/native-audio'
+  pod 'CapacitorEmailComposer', :path => '../../node_modules/capacitor-email-composer'
   pod 'CordovaPlugins', :path => '../capacitor-cordova-ios-plugins'
   pod 'CordovaPluginsResources', :path => '../capacitor-cordova-ios-plugins'
 end

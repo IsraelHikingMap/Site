@@ -48,6 +48,7 @@
     "angulartics2": "^14.1.0",
     "base64-arraybuffer": "^1.0.2",
     "broadcast-channel": "^7.1.0",
+    "capacitor-email-composer": "^7.0.0",
     "cordova-background-geolocation-plugin": "^2.3.3",
     "cordova-plugin-device-orientation": "^3.0.0",
     "cordova-plugin-file": "^8.1.0",

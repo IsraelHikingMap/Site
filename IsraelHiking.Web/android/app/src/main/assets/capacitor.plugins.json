@@ -34,5 +34,9 @@
 	{
 		"pkg": "@capgo/native-audio",
 		"classpath": "ee.forgr.audio.NativeAudio"
+	},
+	{
+		"pkg": "capacitor-email-composer",
+		"classpath": "de.einfachhans.emailcomposer.EmailComposerPlugin"
 	}
 ]

@@ -18,6 +18,7 @@ dependencies {
     implementation project(':capacitor-text-zoom')
     implementation project(':capawesome-capacitor-app-update')
     implementation project(':capgo-native-audio')
+    implementation project(':capacitor-email-composer')
     implementation "com.google.android.gms:play-services-location:17+"
     implementation "androidx.core:core:1.1.0"
     implementation "androidx.appcompat:appcompat:1.1.0"

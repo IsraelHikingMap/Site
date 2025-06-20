@@ -9,8 +9,8 @@ import { Angulartics2OnModule } from "angulartics2";
 import { timer } from "rxjs";
 import { Device } from "@capacitor/device";
 import { App } from "@capacitor/app";
-import { Share } from "@capacitor/share";
 import { Store } from "@ngxs/store";
+import { EmailComposer } from 'capacitor-email-composer'
 import platform from "platform";
 
 import { OfflineImagePipe } from "../pipes/offline-image.pipe";
@@ -190,17 +190,21 @@ export class MainMenuComponent {
                 `App version: ${(await App.getInfo()).version}`
             ].join("\n");
             const geoLocationLogs = await this.geoLocationService.getLog();
-            const supportZipUrl = await this.fileService.compressTextToZipAndGetCacheUrl([
+            const supportZipBase64 = await this.fileService.compressTextToBase64Zip([
                 { name: "log.txt", text: logs},
                 { name: "geolocation.txt", text: geoLocationLogs}
             ]);
             this.toastService.info(this.resources.pleaseFillReport);
             
-            Share.share({
-                title: subject,
-                text: this.resources.reportAnIssueInstructions + "\n\n--\n\n" + infoString,
-                files: [supportZipUrl]
-
+            EmailComposer.open({
+                to: ["israelhiking@osm.org.il"],
+                subject: subject,
+                body: this.resources.reportAnIssueInstructions + "\n\n--\n\n" + infoString,
+                attachments: [{
+                    type: "base64",
+                    name: "support.zip",
+                    path: supportZipBase64
+                }]
             });
         } catch (ex) {
             alert("Ooopppss... Any chance you can take a screenshot and send it to israelhiking@osm.org.il?" +
