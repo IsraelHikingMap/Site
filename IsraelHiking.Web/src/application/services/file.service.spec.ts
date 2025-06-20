@@ -3,7 +3,6 @@ import { HttpEventType, provideHttpClient, withInterceptorsFromDi } from "@angul
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
-import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { StyleSpecification } from "maplibre-gl";
 import { decode } from "base64-arraybuffer";
 import { strToU8, zipSync, unzipSync, strFromU8 } from "fflate";
@@ -18,6 +17,7 @@ import { LoggingService } from "./logging.service";
 import { ConnectionService } from "./connection.service";
 import { Urls } from "../urls";
 import type { DataContainer, MarkerData, RouteData } from "../models/models";
+import { Share } from "@capacitor/share";
 
 describe("FileService", () => {
 
@@ -51,7 +51,6 @@ describe("FileService", () => {
                 FileTransfer,
                 GpxDataContainerConverterService,
                 { provide: ConnectionService, useValue: { stateChanged: { subscribe: () => {} }} },
-                { provide: SocialSharing, useValue: {} },
                 { provide: FileSystemWrapper, useValue: {} },
                 { provide: LoggingService, useValue: loggingServiceMock },
                 { provide: FitBoundsService, useValue: fitBoundsService },
@@ -76,8 +75,8 @@ describe("FileService", () => {
             return promise;
     }));
 
-    it("Should save to file on mobile", inject([FileService, SocialSharing, RunningContextService],
-        async (service: FileService, socialSharing: SocialSharing, runningContextService: RunningContextService) => {
+    it("Should save to file on mobile", inject([FileService, RunningContextService],
+        async (service: FileService, runningContextService: RunningContextService) => {
 
             (runningContextService as any).isCapacitor = true;
             const dataContainer = { 
@@ -87,7 +86,7 @@ describe("FileService", () => {
                 }], 
             } as DataContainer
             const spy = jasmine.createSpy();
-            socialSharing.shareWithOptions = spy;
+            Share.share = spy;
 
             await service.saveToFile("file.gpx", "gpx", dataContainer);
 
@@ -305,7 +304,7 @@ describe("FileService", () => {
     it("Should compress text to base 64 zip", inject([FileService], 
         async (service: FileService) => {
             const contents = [{ name: "log.txt", text: "some text" }];
-            const compressed = await service.compressTextToBase64Zip(contents);
+            const compressed = await service.compressTextToZipAndGetCacheUrl(contents);
             
             const files = unzipSync(new Uint8Array(decode(compressed)));
             expect(Object.keys(files)).toEqual([contents[0].name]);

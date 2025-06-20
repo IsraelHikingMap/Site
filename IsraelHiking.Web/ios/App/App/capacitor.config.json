@@ -28,6 +28,7 @@
 		"AppPlugin",
 		"CAPCameraPlugin",
 		"DevicePlugin",
+		"SharePlugin",
 		"TextZoomPlugin",
 		"AppUpdatePlugin",
 		"NativeAudio",
