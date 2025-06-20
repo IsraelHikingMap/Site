@@ -39,7 +39,7 @@ public class WikidataPointsOfInterestAdapter : IPointsOfInterestAdapter
     {
         _logger.LogInformation("Starting getting Wikidata items for indexing.");
         List<IFeature> allFeatures = new List<IFeature>();
-        var step = 0.5;
+        var step = 0.25;
         for (double x = 34; x < 36; x += step) {
             for (double y = 29; y < 34; y += step) {
                 var startCoordinate = new Coordinate(x, y);
