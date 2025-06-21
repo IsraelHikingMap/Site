@@ -9,6 +9,7 @@ import { Angulartics2OnModule } from "angulartics2";
 import { timer } from "rxjs";
 import { Device } from "@capacitor/device";
 import { App } from "@capacitor/app";
+import { encode } from "base64-arraybuffer";
 import { Store } from "@ngxs/store";
 import { EmailComposer } from 'capacitor-email-composer'
 import platform from "platform";
@@ -190,20 +191,25 @@ export class MainMenuComponent {
                 `App version: ${(await App.getInfo()).version}`
             ].join("\n");
             const geoLocationLogs = await this.geoLocationService.getLog();
-            const supportZipBase64 = await this.fileService.compressTextToBase64Zip([
+            const logBase64zipped = await this.fileService.compressTextToBase64Zip([
                 { name: "log.txt", text: logs},
                 { name: "geolocation.txt", text: geoLocationLogs}
             ]);
+            const infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
             
             EmailComposer.open({
                 to: ["israelhiking@osm.org.il"],
                 subject: subject,
-                body: this.resources.reportAnIssueInstructions + "\n\n--\n\n" + infoString,
+                body: this.resources.reportAnIssueInstructions,
                 attachments: [{
                     type: "base64",
-                    name: "support.zip",
-                    path: supportZipBase64
+                    name: "log.zip",
+                    path: logBase64zipped
+                }, {
+                    type: "base64",
+                    name: `info-${userInfo.id}.txt`,
+                    path: infoBase64
                 }]
             });
         } catch (ex) {
