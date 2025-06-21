@@ -131,6 +131,7 @@
     "karma-jasmine": "^5.1.0",
     "karma-jasmine-html-reporter": "^2.1.0",
     "karma-junit-reporter": "^2.0.1",
+    "patch-package": "^8.0.0",
     "puppeteer": "^24.7.2",
     "replace-in-file": "^8.3.0",
     "tailwindcss": "^4.1.4",
@@ -157,7 +158,8 @@
     "extract": "tsx ./scripts/extract-strings.ts",
     "generate-legend": "tsx ./scripts/generate-legend.ts",
     "set-version": "tsx ./scripts/set-version.ts",
-    "white-label-me": "tsx ./scripts/white-label-me.ts"
+    "white-label-me": "tsx ./scripts/white-label-me.ts",
+    "prepare": "patch-package"
   },
   "type": "module",
   "version": "9.20.0"
