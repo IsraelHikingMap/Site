@@ -11,7 +11,7 @@ import { Device } from "@capacitor/device";
 import { App } from "@capacitor/app";
 import { encode } from "base64-arraybuffer";
 import { Store } from "@ngxs/store";
-import { EmailComposer } from 'capacitor-email-composer'
+import { EmailComposer } from "capacitor-email-composer"
 import platform from "platform";
 
 import { OfflineImagePipe } from "../pipes/offline-image.pipe";
