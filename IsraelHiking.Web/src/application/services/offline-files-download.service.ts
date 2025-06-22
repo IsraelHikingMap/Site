@@ -70,7 +70,7 @@ export class OfflineFilesDownloadService {
 
     private async downloadOfflineFilesProgressAction(reportProgress: (progressValue: number) => void, fileNames: Record<string, string>):
         Promise<Date> {
-        this.loggingService.info("[Offline Download] Starting downloading offline files, last update");
+        this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${Object.keys(fileNames).length}`);
         let setBackToOffline = false;
         if (this.layersService.getSelectedBaseLayer().isOfflineOn) {
             this.store.dispatch(new ToggleOfflineAction(this.layersService.getSelectedBaseLayer().key, false));
@@ -109,7 +109,7 @@ export class OfflineFilesDownloadService {
 
     private async getFilesToDownloadDictionary(tileX: number, tileY: number): Promise<Record<string, string>> {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        const lastModifiedString = offlineState.downloadedTiles[`${tileX}-${tileY}`]?.toISOString();
+        const lastModifiedString = offlineState.downloadedTiles ? offlineState.downloadedTiles[`${tileX}-${tileY}`]?.toISOString() : null;
         const fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
             params: { 
                 lastModified: lastModifiedString,
