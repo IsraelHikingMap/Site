@@ -11,8 +11,8 @@ import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from "@angular/m
 import { MatCheckbox } from "@angular/material/checkbox";
 import { FormsModule } from "@angular/forms";
 import { Router, NavigationEnd } from "@angular/router";
+import { Share } from "@capacitor/share";
 import { Angulartics2OnModule } from "angulartics2";
-import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { filter, skip } from "rxjs";
 import { Store } from "@ngxs/store";
 
@@ -84,7 +84,6 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     private readonly runningContextSerivce = inject(RunningContextService);
     private readonly navigateHereService = inject(NavigateHereService);
     private readonly geoJsonParser = inject(GeoJsonParser);
-    private readonly socialSharing = inject(SocialSharing);
     private readonly elevasionProvider = inject(ElevationProvider);
     private readonly store = inject(Store);
 
@@ -367,7 +366,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     }
 
     public share() {
-        this.socialSharing.shareWithOptions({
+        Share.share({
             url: this.shareLinks.poiLink
         });
     }

@@ -290,7 +290,7 @@
     "Renew offline maps subscription": "Renew offline maps subscription",
     "Report an issue": "Report an issue",
     "Report an issue instructions": "Please describe the problem as best as you can and attach screenshots that show it.\n\nUnfortunately, we will not be able to help without the following information:\n1. What happened?\n2. At what date and time did it happen?\n3. What did you do right before it happened?\n4. Is this the first time it happened?\n5. Is there a way to reproduce the problem?\n",
-    "Report an issue site instructions": "A report file was just downloaded. We need this file in order to better understand the issue.\nBelow is a button that allows you to send us a mail to israelhiking@osm.org.il.\nAfter pressing this button please attach the downloaded file.\nYou can also open you favorite mail client without using the button below.\nThanks!",
+    "Report an issue site instructions": "A report file was just downloaded. We need this file in order to better understand the issue.\nBelow is a button that allows you to send us a mail to support@mapeak.com.\nAfter pressing this button please attach the downloaded file.\nYou can also open you favorite mail client without using the button below.\nThanks!",
     "Request features and report bugs on our Github project page": "Request features and report bugs on our Github project page",
     "Reset Data": "Reset Data",
     "Residential": "Residential",

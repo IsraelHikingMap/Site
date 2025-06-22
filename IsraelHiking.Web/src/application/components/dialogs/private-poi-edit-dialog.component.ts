@@ -9,8 +9,8 @@ import { FormsModule } from "@angular/forms";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatDialogRef, MatDialog, MAT_DIALOG_DATA, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
+import { Share } from "@capacitor/share";
 import { Angulartics2OnModule } from "angulartics2";
-import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
@@ -71,7 +71,6 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
     private readonly dialogRef = inject(MatDialogRef);
     private readonly navigateHereService = inject(NavigateHereService);
     private readonly runningContextService = inject(RunningContextService);
-    private readonly socialSharing = inject(SocialSharing);
     private readonly hashService = inject(HashService);
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
@@ -234,8 +233,8 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
 
     public shareLocation() {
         const coordinateUrl = this.hashService.getFullUrlFromLatLng(this.marker.latlng);
-        this.socialSharing.shareWithOptions({
-            message: `geo:${this.marker.latlng.lat},${this.marker.latlng.lng}\n${coordinateUrl}`
+        Share.share({
+            text: `geo:${this.marker.latlng.lat},${this.marker.latlng.lng}\n${coordinateUrl}`
         });
     }
 

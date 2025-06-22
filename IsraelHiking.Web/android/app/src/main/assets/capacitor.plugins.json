@@ -20,6 +20,10 @@
 		"classpath": "com.capacitorjs.plugins.device.DevicePlugin"
 	},
 	{
+		"pkg": "@capacitor/share",
+		"classpath": "com.capacitorjs.plugins.share.SharePlugin"
+	},
+	{
 		"pkg": "@capacitor/text-zoom",
 		"classpath": "com.capacitorjs.plugins.textzoom.TextZoomPlugin"
 	},
@@ -30,5 +34,9 @@
 	{
 		"pkg": "@capgo/native-audio",
 		"classpath": "ee.forgr.audio.NativeAudio"
+	},
+	{
+		"pkg": "capacitor-email-composer",
+		"classpath": "de.einfachhans.emailcomposer.EmailComposerPlugin"
 	}
 ]

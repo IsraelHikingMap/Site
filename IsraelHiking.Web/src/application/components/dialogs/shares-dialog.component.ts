@@ -12,9 +12,9 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { MatDialog, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
 import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { Share } from "@capacitor/share";
 import { Angulartics2OnModule } from "angulartics2";
 import { InfiniteScrollDirective } from "ngx-infinite-scroll";
-import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { take, orderBy } from "lodash-es";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
@@ -55,7 +55,6 @@ export class SharesDialogComponent implements OnInit {
     private readonly toastService = inject(ToastService);
     private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly dataContainerService = inject(DataContainerService);
-    private readonly socialSharing = inject(SocialSharing);
     private readonly runningContextService = inject(RunningContextService);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly store = inject(Store);
@@ -85,7 +84,7 @@ export class SharesDialogComponent implements OnInit {
     }
 
     public share() {
-        this.socialSharing.shareWithOptions({
+        Share.share({
             url: this.getShareSocialLinks().app
         });
     }

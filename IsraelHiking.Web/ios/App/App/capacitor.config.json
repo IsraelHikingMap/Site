@@ -24,9 +24,11 @@
 		"AppPlugin",
 		"CAPCameraPlugin",
 		"DevicePlugin",
+		"SharePlugin",
 		"TextZoomPlugin",
 		"AppUpdatePlugin",
 		"NativeAudio",
+		"EmailComposerPlugin",
 		"CDVPlugin"
 	]
 }

@@ -11,8 +11,8 @@ import { MatCheckbox } from "@angular/material/checkbox";
 import { MatTooltip } from "@angular/material/tooltip";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
+import { Share } from "@capacitor/share";
 import { Angulartics2OnModule } from "angulartics2";
-import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
@@ -51,7 +51,6 @@ export class ShareDialogComponent implements AfterViewInit {
     private readonly dataContainerService = inject(DataContainerService);
     private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly toastService = inject(ToastService);
-    private readonly socialSharing = inject(SocialSharing);
     private readonly runningContextService = inject(RunningContextService);
     private readonly store = inject(Store);
 
@@ -85,7 +84,7 @@ export class ShareDialogComponent implements AfterViewInit {
     }
 
     public share() {
-        this.socialSharing.shareWithOptions({
+        Share.share({
             url: this.shareAddress
         });
     }

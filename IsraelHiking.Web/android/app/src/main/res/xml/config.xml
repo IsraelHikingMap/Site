@@ -27,10 +27,6 @@
     <param name="android-package" value="cc.fovea.PurchasePlugin"/>
   </feature>
 
-  <feature name="SocialSharing">
-    <param name="android-package" value="nl.xservices.plugins.SocialSharing"/>
-  </feature>
-
   
   <preference name="OAuthScheme" value="mapeak" />
 </widget>

@@ -4,9 +4,9 @@ import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { NgIf, AsyncPipe } from "@angular/common";
+import { Share } from "@capacitor/share";
 import { Angulartics2OnModule } from "angulartics2";
 import { Observable } from "rxjs";
-import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { Store } from "@ngxs/store";
 
 import { CoordinatesComponent } from "../coordinates.component";
@@ -41,7 +41,6 @@ export class GpsLocationOverlayComponent {
     private readonly matDialog = inject(MatDialog);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly runningContextService = inject(RunningContextService);
-    private readonly socialSharing = inject(SocialSharing);
     private readonly hashService = inject(HashService);
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
@@ -98,8 +97,8 @@ export class GpsLocationOverlayComponent {
 
     public shareMyLocation() {
         const coordinateUrl = this.hashService.getFullUrlFromLatLng(this.latlng());
-        this.socialSharing.shareWithOptions({
-            message: `geo:${this.latlng().lat},${this.latlng().lng}\n${coordinateUrl}`
+        Share.share({
+            text: `geo:${this.latlng().lat},${this.latlng().lng}\n${coordinateUrl}`
         });
         this.closed.emit();
     }

@@ -34,11 +34,6 @@
     <param name="ios-package" value="CDVVibration"/>
   </feature>
 
-  <feature name="SocialSharing">
-    <param name="ios-package" value="SocialSharing"/>
-    <param name="onload" value="true"/>
-  </feature>
-
   
   <preference name="OAuthScheme" value="mapeak" />
 </widget>

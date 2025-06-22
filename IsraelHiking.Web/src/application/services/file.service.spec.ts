@@ -3,7 +3,6 @@ import { HttpEventType, provideHttpClient, withInterceptorsFromDi } from "@angul
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
-import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { StyleSpecification } from "maplibre-gl";
 import { decode } from "base64-arraybuffer";
 import { strToU8, zipSync, unzipSync, strFromU8 } from "fflate";
@@ -51,8 +50,9 @@ describe("FileService", () => {
                 FileTransfer,
                 GpxDataContainerConverterService,
                 { provide: ConnectionService, useValue: { stateChanged: { subscribe: () => {} }} },
-                { provide: SocialSharing, useValue: {} },
-                { provide: FileSystemWrapper, useValue: {} },
+                { provide: FileSystemWrapper, useValue: {
+                    writeFile: () => Promise.resolve()
+                } },
                 { provide: LoggingService, useValue: loggingServiceMock },
                 { provide: FitBoundsService, useValue: fitBoundsService },
                 { provide: SelectedRouteService, useValue: selectedRouteService },
@@ -76,22 +76,22 @@ describe("FileService", () => {
             return promise;
     }));
 
-    it("Should save to file on mobile", inject([FileService, SocialSharing, RunningContextService],
-        async (service: FileService, socialSharing: SocialSharing, runningContextService: RunningContextService) => {
-
+    it("Should save to file on mobile", inject([FileService, RunningContextService, FileSystemWrapper],
+        async (service: FileService, runningContextService: RunningContextService, fileSystemWrapper: FileSystemWrapper) => {
+            fileSystemWrapper.resolveLocalFilesystemUrl = jasmine.createSpy().and.returnValue(Promise.resolve({
+                nativeURL: "file:///some-file",
+            }));
             (runningContextService as any).isCapacitor = true;
             const dataContainer = { 
                 routes: [{
                     markers: [{latlng: { lat: 1, lng: 2}, urls: []}],
                     segments: []
                 }], 
-            } as DataContainer
-            const spy = jasmine.createSpy();
-            socialSharing.shareWithOptions = spy;
+            } as DataContainer;
 
             await service.saveToFile("file.gpx", "gpx", dataContainer);
 
-            expect(spy).toHaveBeenCalled();
+            expect(fileSystemWrapper.resolveLocalFilesystemUrl).toHaveBeenCalled();
     }));
 
     it("Should add routes from url", inject([FileService, HttpTestingController],
@@ -217,8 +217,7 @@ describe("FileService", () => {
 
     it("Should get gpx file from URL", inject([FileService, FileSystemWrapper], 
         async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-        const spy = jasmine.createSpy();
-        fileSystemWrapper.resolveLocalFilesystemUrl = spy.and.returnValue(Promise.resolve({
+        fileSystemWrapper.resolveLocalFilesystemUrl = jasmine.createSpy().and.returnValue(Promise.resolve({
             file: (cb: any) => { cb(new Blob([]))},
             name: "file.gpx"
         }))
@@ -231,8 +230,7 @@ describe("FileService", () => {
 
     it("Should get kml file from URL", inject([FileService, FileSystemWrapper], 
         async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-        const spy = jasmine.createSpy();
-        fileSystemWrapper.resolveLocalFilesystemUrl = spy.and.returnValue(Promise.resolve({
+        fileSystemWrapper.resolveLocalFilesystemUrl = jasmine.createSpy().and.returnValue(Promise.resolve({
             file: (cb: any) => { cb(new Blob([]))},
             name: "file.kml"
         }))
@@ -245,8 +243,7 @@ describe("FileService", () => {
 
     it("Should get jpg file from URL", inject([FileService, FileSystemWrapper], 
         async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-        const spy = jasmine.createSpy();
-        fileSystemWrapper.resolveLocalFilesystemUrl = spy.and.returnValue(Promise.resolve({
+        fileSystemWrapper.resolveLocalFilesystemUrl = jasmine.createSpy().and.returnValue(Promise.resolve({
             file: (cb: any) => { cb(new Blob([]))},
             name: "file.jpg"
         }))
@@ -259,8 +256,7 @@ describe("FileService", () => {
 
     it("Should get file extention type from URL", inject([FileService, FileSystemWrapper], 
         async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-        const spy = jasmine.createSpy();
-        fileSystemWrapper.resolveLocalFilesystemUrl = spy.and.returnValue(Promise.resolve({
+        fileSystemWrapper.resolveLocalFilesystemUrl = jasmine.createSpy().and.returnValue(Promise.resolve({
             file: (cb: any) => { cb(new Blob([]))},
             name: "file.something"
         }))
@@ -273,8 +269,7 @@ describe("FileService", () => {
 
     it("Should get file extention from URL", inject([FileService, FileSystemWrapper], 
         async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-        const spy = jasmine.createSpy();
-        fileSystemWrapper.resolveLocalFilesystemUrl = spy.and.returnValue(Promise.resolve({
+        fileSystemWrapper.resolveLocalFilesystemUrl = jasmine.createSpy().and.returnValue(Promise.resolve({
             file: (cb: any) => { cb(new Blob([]))},
             name: "file"
         }))

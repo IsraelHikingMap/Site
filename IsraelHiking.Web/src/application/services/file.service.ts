@@ -3,11 +3,11 @@ import { HttpClient, HttpEventType } from "@angular/common/http";
 import { StyleSpecification } from "maplibre-gl";
 import { File as FileSystemWrapper, FileEntry } from "@awesome-cordova-plugins/file/ngx";
 import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
-import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
+import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
 import { firstValueFrom } from "rxjs";
 import { zipSync, strToU8, unzipSync, strFromU8, Zippable } from "fflate";
-import { encode } from "base64-arraybuffer";
+import { decode, encode } from "base64-arraybuffer";
 import type { saveAs as saveAsForType } from "file-saver";
 
 import { ImageResizeService } from "./image-resize.service";
@@ -39,7 +39,6 @@ export class FileService {
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly fitBoundsService = inject(FitBoundsService);
     private readonly gpxDataContainerConverterService = inject(GpxDataContainerConverterService);
-    private readonly socialSharing = inject(SocialSharing);
     private readonly loggingService = inject(LoggingService);
     private readonly saveAs = inject(SaveAsFactory);
 
@@ -144,9 +143,10 @@ export class FileService {
             return;
         }
         fileName = fileName.replace(/[/\\?%*:|"<>]/g, "-");
-        const contentType = format === "gpx" ? "application/gpx+xml" : "application/octet-stream";
-        this.socialSharing.shareWithOptions({
-            files: [`df:${fileName};data:${contentType};base64,${responseData}`]
+        await this.storeFileToCache(fileName, decode(responseData))
+        const entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(this.fileSystemWrapper.cacheDirectory + fileName);
+        Share.share({
+            files: [entry.nativeURL]
         });
     }
 
@@ -283,7 +283,7 @@ export class FileService {
         });
     }
 
-    public storeFileToCache(fileName: string, content: string | Blob) {
+    public storeFileToCache(fileName: string, content: string | Blob | ArrayBuffer): Promise<void> {
         return this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, content,
             { replace: true, append: false, truncate: 0 });
     }
