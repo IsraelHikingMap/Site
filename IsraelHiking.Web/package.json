@@ -22,6 +22,7 @@
     "@capacitor/core": "^7.2.0",
     "@capacitor/device": "^7.0.1",
     "@capacitor/ios": "^7.2.0",
+    "@capacitor/share": "^7.0.1",
     "@capacitor/text-zoom": "^7.0.1",
     "@capawesome/capacitor-app-update": "^7.0.1",
     "@capgo/native-audio": "^7.3.22",
@@ -47,6 +48,7 @@
     "angulartics2": "^14.1.0",
     "base64-arraybuffer": "^1.0.2",
     "broadcast-channel": "^7.1.0",
+    "capacitor-email-composer": "^7.0.0",
     "cordova-background-geolocation-plugin": "^2.3.3",
     "cordova-plugin-device-orientation": "^3.0.0",
     "cordova-plugin-file": "^8.1.0",
@@ -54,7 +56,6 @@
     "cordova-plugin-oauth": "^4.0.1",
     "cordova-plugin-purchase": "^13.11.1",
     "cordova-plugin-vibration": "^3.1.1",
-    "cordova-plugin-x-socialsharing": "^6.0.4",
     "core-js": "^3.38.1",
     "d3": "^7.9.0",
     "d3-regression": "^1.3.10",
@@ -130,6 +131,7 @@
     "karma-jasmine": "^5.1.0",
     "karma-jasmine-html-reporter": "^2.1.0",
     "karma-junit-reporter": "^2.0.1",
+    "patch-package": "^8.0.0",
     "puppeteer": "^24.7.2",
     "replace-in-file": "^8.3.0",
     "tailwindcss": "^4.1.4",
@@ -156,7 +158,8 @@
     "extract": "tsx ./scripts/extract-strings.ts",
     "generate-legend": "tsx ./scripts/generate-legend.ts",
     "set-version": "tsx ./scripts/set-version.ts",
-    "white-label-me": "tsx ./scripts/white-label-me.ts"
+    "white-label-me": "tsx ./scripts/white-label-me.ts",
+    "prepare": "patch-package"
   },
   "type": "module",
   "version": "9.20.0"

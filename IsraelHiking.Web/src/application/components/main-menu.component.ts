@@ -9,9 +9,9 @@ import { Angulartics2OnModule } from "angulartics2";
 import { timer } from "rxjs";
 import { Device } from "@capacitor/device";
 import { App } from "@capacitor/app";
-import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { encode } from "base64-arraybuffer";
 import { Store } from "@ngxs/store";
+import { EmailComposer } from "capacitor-email-composer"
 import platform from "platform";
 
 import { OfflineImagePipe } from "../pipes/offline-image.pipe";
@@ -52,7 +52,6 @@ export class MainMenuComponent {
 
     public readonly resources = inject(ResourcesService);
 
-    private readonly socialSharing = inject(SocialSharing);
     private readonly authorizationService = inject(AuthorizationService);
     private readonly osmAddressesService = inject(OsmAddressesService);
     private readonly dialog = inject(MatDialog);
@@ -198,17 +197,21 @@ export class MainMenuComponent {
             ]);
             const infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
-            this.socialSharing.shareViaEmail(
-                this.resources.reportAnIssueInstructions,
-                subject,
-                ["israelhiking@osm.org.il"],
-                null,
-                null,
-                [
-                    `df:log.zip;data:application/zip;base64,${logBase64zipped}`,
-                    `df:info-${userInfo.id}.txt;data:text/plain;base64,${infoBase64}`
-                ]
-            );
+            
+            EmailComposer.open({
+                to: ["israelhiking@osm.org.il"],
+                subject: subject,
+                body: this.resources.reportAnIssueInstructions,
+                attachments: [{
+                    type: "base64",
+                    name: "log.zip",
+                    path: logBase64zipped
+                }, {
+                    type: "base64",
+                    name: `info-${userInfo.id}.txt`,
+                    path: infoBase64
+                }]
+            });
         } catch (ex) {
             alert("Ooopppss... Any chance you can take a screenshot and send it to israelhiking@osm.org.il?" +
                 `\nSend issue failed: ${ex.toString()}`);
