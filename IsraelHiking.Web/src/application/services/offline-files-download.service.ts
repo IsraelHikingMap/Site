@@ -85,9 +85,11 @@ export class OfflineFilesDownloadService {
                 newestFileDate = fileDate > newestFileDate ? fileDate : newestFileDate;
                 const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
                 if (fileName.endsWith(".pmtiles")) {
-                    await this.fileService.downloadFileToCacheAuthenticated(`${Urls.offlineFiles}/${fileName}`, fileName, token,
+                    // HM TODO: think about this!
+                    const folderlessFileName = fileName.replace(/\//g, "--")
+                    await this.fileService.downloadFileToCacheAuthenticated(`${Urls.offlineFiles}/${encodeURIComponent(encodeURIComponent(fileName))}`, folderlessFileName, token,
                         (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
-                    await this.fileService.moveFileFromCacheToDataDirectory(fileName);
+                    await this.fileService.moveFileFromCacheToDataDirectory(folderlessFileName);
                 } else {
                     const fileContent = await this.fileService.getFileContentWithProgress(`${Urls.offlineFiles}/${fileName}`,
                         (value) => reportProgress((value + fileNameIndex) * 100.0 / length));

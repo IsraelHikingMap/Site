@@ -345,21 +345,6 @@ describe("FileService", () => {
         await expectAsync(promise).toBeRejected();
     }));
 
-    it("Should download a file to cache", inject([FileService, FileTransfer], 
-        async (service: FileService, fileTransfer: FileTransfer) => {
-        const spy = jasmine.createSpy();
-        const fileTransferObject = { 
-            download: jasmine.createSpy(),
-            onProgress: () => {}
-        };
-        fileTransfer.create = spy.and.returnValue(fileTransferObject);
-        const url = "http://123.mbtiles";
-        const promise = service.downloadFileToCache(url, spy);
-
-        expect(fileTransferObject.download).toHaveBeenCalled();
-        return promise;
-    }));
-
     it("Should get file from cache", inject([FileService, FileSystemWrapper], 
         async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
         const spy = jasmine.createSpy();

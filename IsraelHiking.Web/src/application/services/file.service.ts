@@ -331,10 +331,6 @@ export class FileService {
         await this.fileSystemWrapper.removeFile(this.fileSystemWrapper.cacheDirectory, url.split("/").pop());
     }
 
-    public downloadFileToCache(url: string, progressCallback: (value: number) => void) {
-        return this.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressCallback);
-    }
-
     public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void) {
         const fileTransferObject = this.fileTransfer.create();
         fileTransferObject.onProgress((event) => {
