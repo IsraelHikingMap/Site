@@ -44,7 +44,7 @@ services:
     image: israelhikingmap/elevationwebapi
     container_name: elevation
     ports:
-      - 11211:80
+      - 11211:8080
     restart: always
     volumes:
       - ./elevation-cache:/app/elevation-cache
