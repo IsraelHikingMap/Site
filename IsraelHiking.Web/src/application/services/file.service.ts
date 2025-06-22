@@ -7,7 +7,7 @@ import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
 import { firstValueFrom } from "rxjs";
 import { zipSync, strToU8, unzipSync, strFromU8, Zippable } from "fflate";
-import { encode } from "base64-arraybuffer";
+import { decode, encode } from "base64-arraybuffer";
 import type { saveAs as saveAsForType } from "file-saver";
 
 import { ImageResizeService } from "./image-resize.service";
@@ -143,7 +143,7 @@ export class FileService {
             return;
         }
         fileName = fileName.replace(/[/\\?%*:|"<>]/g, "-");
-        await this.storeFileToCache(fileName, responseData)
+        await this.storeFileToCache(fileName, decode(responseData))
         const entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(this.fileSystemWrapper.cacheDirectory + fileName);
         Share.share({
             files: [entry.nativeURL]
