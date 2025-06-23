@@ -1,5 +1,5 @@
-import { inject, Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { EventEmitter, inject, Injectable } from "@angular/core";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { MatDialog } from "@angular/material/dialog";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
@@ -28,6 +28,9 @@ export class OfflineFilesDownloadService {
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
 
+    private inProgressTilesList: Record<string, number> = {};
+    public tilesProgressChanged = new EventEmitter<{tileX: number, tileY: number, progressValue: number}>();
+
     public async initialize(): Promise<void> {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         const userState = this.store.selectSnapshot((s: ApplicationState) => s.userState);
@@ -39,17 +42,22 @@ export class OfflineFilesDownloadService {
         }
     }
 
-    public async downloadTile(tileX: number, tileY: number, reportProgress: (progressValue: number) => void): Promise<void> {
+    public async downloadTile(tileX: number, tileY: number): Promise<void> {
         this.loggingService.info("[Offline Download] Starting downloading offline files");
         try {
-            const fileNames = await this.getFilesToDownloadDictionary(tileX, tileY);
-            if (Object.keys(fileNames).length === 0) {
+            const fileNamesForRoot = await this.getFilesToDownloadDictionary();
+            const fileNamesForTile = await this.getFilesToDownloadDictionary(tileX, tileY);
+            if (Object.keys(fileNamesForTile).length === 0 && Object.keys(fileNamesForRoot).length === 0) {
+                this.loggingService.info("[Offline Download] No files to download, all files are up to date");
                 this.toastService.success(this.resources.allFilesAreUpToDate + " " + this.resources.useTheCloudIconToGoOffline);
                 return;
             }
+            const newestFileDateForRoot = await this.downloadOfflineFilesProgressAction(fileNamesForRoot);
+            this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(newestFileDateForRoot, undefined, undefined));
 
-            const newestFileDate = await this.downloadOfflineFilesProgressAction(reportProgress, fileNames);
-            this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(newestFileDate, tileX, tileY));
+            const newestFileDateForTile = await this.downloadOfflineFilesProgressAction(fileNamesForTile, tileX, tileY);
+            this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(newestFileDateForTile, tileX, tileY));
+            
             // HM TODO: think about zoom 6 repeated download?
         } catch (ex) {
             const typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
@@ -68,7 +76,7 @@ export class OfflineFilesDownloadService {
         }
     }
 
-    private async downloadOfflineFilesProgressAction(reportProgress: (progressValue: number) => void, fileNames: Record<string, string>):
+    private async downloadOfflineFilesProgressAction(fileNames: Record<string, string>, tileX?: number, tileY?: number):
         Promise<Date> {
         this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${Object.keys(fileNames).length}`);
         let setBackToOffline = false;
@@ -85,14 +93,12 @@ export class OfflineFilesDownloadService {
                 newestFileDate = fileDate > newestFileDate ? fileDate : newestFileDate;
                 const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
                 if (fileName.endsWith(".pmtiles")) {
-                    // HM TODO: think about this!
-                    const folderlessFileName = fileName.replace(/\//g, "--")
-                    await this.fileService.downloadFileToCacheAuthenticated(`${Urls.offlineFiles}/${encodeURIComponent(encodeURIComponent(fileName))}`, folderlessFileName, token,
-                        (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
-                    await this.fileService.moveFileFromCacheToDataDirectory(folderlessFileName);
+                    await this.fileService.downloadFileToCacheAuthenticated(`${Urls.offlineFiles}/${fileName}?tileX=${tileX}&tileY=${tileY}`, fileName, token,
+                        (value) => this.updateInProgressTilesList(tileX, tileY, (value + fileNameIndex) * 100.0 / length));
+                    await this.fileService.moveFileFromCacheToDataDirectory(fileName);
                 } else {
                     const fileContent = await this.fileService.getFileContentWithProgress(`${Urls.offlineFiles}/${fileName}`,
-                        (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
+                        (value) => this.updateInProgressTilesList(tileX, tileY, (value + fileNameIndex) * 100.0 / length));
                     await this.fileService.writeStyles(fileContent as Blob);
                 }
                 this.loggingService.info(`[Offline Download] Finished downloading ${fileName}`);
@@ -109,31 +115,23 @@ export class OfflineFilesDownloadService {
         }
     }
 
-    private async getFilesToDownloadDictionary(tileX: number, tileY: number): Promise<Record<string, string>> {
+    private updateInProgressTilesList(tileX: number, tileY: number, progressValue: number) {
+        this.inProgressTilesList[`${tileX}-${tileY}`] = progressValue;
+        this.tilesProgressChanged.emit({tileX, tileY, progressValue});
+    }
+
+    private async getFilesToDownloadDictionary(tileX?: number, tileY?: number): Promise<Record<string, string>> {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         const lastModifiedString = offlineState.downloadedTiles ? offlineState.downloadedTiles[`${tileX}-${tileY}`]?.toISOString() : null;
-        const fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
-            params: { 
-                lastModified: lastModifiedString,
-                tileX: tileX.toString(),
-                tileY: tileY.toString()
-            }
-        }).pipe(timeout(5000)));
+        const params = new HttpParams();
+        params.set("lastModified", lastModifiedString);
+        if (tileX != null && tileY != null) {
+            params.set("tileX", tileX.toString());
+            params.set("tileY", tileY.toString());
+        }
+        const fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, { params }).pipe(timeout(5000)));
         this.loggingService.info(
             `[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
         return fileNames as Record<string, string>;
-    }
-
-    public async isExpired(): Promise<boolean> {
-        try {
-            await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
-                params: { lastModified: null }
-            }).pipe(timeout(5000)));
-            return false;
-        } catch (ex) {
-            const typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
-            return typeAndMessage.type === "server" && typeAndMessage.statusCode === 403;
-        }
-
     }
 }

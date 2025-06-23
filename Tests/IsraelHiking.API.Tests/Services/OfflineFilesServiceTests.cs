@@ -72,7 +72,7 @@ public class OfflineFilesServiceTests
             
         var results = _service.GetUpdatedFilesList(lastModified, 1, 2);
             
-        Assert.AreEqual(2, results.Count);
+        Assert.AreEqual(1, results.Count);
     }
 
     [TestMethod]

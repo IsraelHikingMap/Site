@@ -6,61 +6,138 @@
     <div mat-dialog-content>
         <div class="w-full offline-map-container">
             <mgl-map
-                [style]="offlineMapStyleUrl"
+                [style]="offlineMapStyle"
                 zoom="5"
                 [center]="initialCenter"
                 [minZoom]="4"
                 [maxZoom]="6"
                 (moveEnd)="onMoveEnd($event)"
                 [attributionControl]="false">
-                <mgl-geojson-source id="tiles-grid" 
-                                    [data]="tilesGrid">
+                <!--
+                HM TODO: there is a problem here with the base layer language that I need to find a way to solve.
+                <auto-layer [layerData]="baseLayerData"
+                            [visible]="true"
+                            [isBaselayer]="true"
+                            [isMainMap]="false">
+                </auto-layer>
+                -->
+                <mgl-geojson-source id="download-tiles" 
+                                    [data]="downloadedTiles">
                 </mgl-geojson-source>
                 <mgl-layer
-                    id="tiles-grid-border"
+                    id="download-tiles-border"
                     type="line"
-                    source="tiles-grid"
+                    source="download-tiles"
                     [layout]="{
                         'line-cap': 'round', 
                         'line-join': 'round'
                     }"
                     [paint]="{
-                        'line-color': ['get', 'color'],
+                        'line-color': 'orange',
                         'line-width': 3
                     }">
                 </mgl-layer>
                 <mgl-layer
-                    id="tiles-grid-fill"
-                    type="fill"
-                    source="tiles-grid"
-                    [paint]="{
-                        'fill-color': ['get', 'fillColor']
-                    }">
-                </mgl-layer>
-                <mgl-layer
-                    id="tiles-grid-text"
+                    id="download-tiles-text"
                     type="symbol"
-                    source="tiles-grid"
+                    source="download-tiles"
                     [layout]="{
                         'text-field': ['get', 'label'],
                         'text-font': ['Open Sans Regular'],
                         'text-size': 30,
                     }"
                     [paint]="{
-                        'text-color': ['get', 'color'],
+                        'text-color': 'orange',
                         'text-halo-color' : 'white',
                         'text-halo-width': 2
                     }">
-                </mgl-layer>            
+                </mgl-layer>
+                <mgl-geojson-source id="selected-tile" 
+                                    [data]="selectedTile">
+                </mgl-geojson-source>
+                <mgl-layer
+                    id="selected-tile-border"
+                    type="line"
+                    source="selected-tile"
+                    [layout]="{
+                        'line-cap': 'round', 
+                        'line-join': 'round'
+                    }"
+                    [paint]="{
+                        'line-color': 'green',
+                        'line-width': 3
+                    }">
+                </mgl-layer>
+                <mgl-layer
+                    id="selected-tile-text"
+                    type="symbol"
+                    source="selected-tile"
+                    [layout]="{
+                        'text-field': ['get', 'label'],
+                        'text-font': ['Open Sans Regular'],
+                        'text-size': 30,
+                    }"
+                    [paint]="{
+                        'text-color': 'green',
+                        'text-halo-color' : 'white',
+                        'text-halo-width': 2
+                    }">
+                </mgl-layer>
+                 <mgl-geojson-source id="in-progress-tile" 
+                                    [data]="inProgressTile">
+                </mgl-geojson-source>
+                <mgl-layer
+                    id="in-progress-tile-border"
+                    type="line"
+                    source="in-progress-tile"
+                    [layout]="{
+                        'line-cap': 'round', 
+                        'line-join': 'round'
+                    }"
+                    [paint]="{
+                        'line-color': 'blue',
+                        'line-width': 3
+                    }">
+                </mgl-layer>
+                <mgl-layer
+                    id="in-progress-tile-text"
+                    type="symbol"
+                    source="in-progress-tile"
+                    [filter]="['==', ['get', 'stroke'], 'true']"
+                    [layout]="{
+                        'text-field': ['get', 'label'],
+                        'text-font': ['Open Sans Regular'],
+                        'text-size': 30,
+                        'text-allow-overlap': true
+                    }"
+                    [paint]="{
+                        'text-color': 'blue',
+                        'text-halo-color' : 'white',
+                        'text-halo-width': 2
+                    }">
+                </mgl-layer>
+                <mgl-layer
+                    id="in-progress-tile-fill"
+                    type="fill"
+                    source="in-progress-tile"
+                    [filter]="['==', ['get', 'fill'], 'true']"
+                    [paint]="{
+                        'fill-color': 'rgba(0, 128, 128, 0.5)'
+                    }">
+                </mgl-layer>
             </mgl-map>
         </div>
     </div>
     <div mat-dialog-actions>
         <div class="flex flex-row w-full">
             <div class="flex-1">
-                <button mat-raised-button class="w-full" color="primary" (click)="downloadCenter()">
+                <button *ngIf="!downloadingTile" mat-raised-button class="w-full" color="primary" (click)="downloadCenter()">
                     <i class="fa fa-lg icon-download"></i>
                     הורדת מרכז המפה
+                </button>
+                <button *ngIf="downloadingTile" mat-raised-button class="w-full" color="primary" (click)="cancelDownload()">
+                    <i class="fa fa-lg icon-close"></i>
+                    ביטול
                 </button>
             </div>
         </div>

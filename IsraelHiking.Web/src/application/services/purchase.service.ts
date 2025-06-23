@@ -1,13 +1,15 @@
 import { inject, Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
+import { firstValueFrom, timeout } from "rxjs";
 import "cordova-plugin-purchase";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
-import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { SetOfflineSubscribedAction } from "../reducers/offline.reducer";
+import { Urls } from "application/urls";
 import type { ApplicationState } from "../models/models";
 
 const OFFLINE_MAPS_SUBSCRIPTION = "offline_map";
@@ -17,7 +19,7 @@ export class PurchaseService {
 
     private readonly runningContextService = inject(RunningContextService);
     private readonly loggingService = inject(LoggingService);
-    private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
+    private readonly httpClient = inject(HttpClient);
     private readonly toastService = inject(ToastService);
     private readonly resources = inject(ResourcesService);
     private readonly store = inject(Store);
@@ -27,19 +29,30 @@ export class PurchaseService {
             return;
         }
 
-        this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe(userInfo => {
+        this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe(async (userInfo) => {
             if (userInfo == null) {
                 return;
             }
             this.loggingService.info("[Store] Logged in: " + userInfo.id);
             this.initializeCdvStore(userInfo.id);
-            this.offlineFilesDownloadService.isExpired().then((isExpired) => {
-                if (isExpired) {
-                    this.loggingService.debug("[Store] Product is expired from server");
-                    this.store.dispatch(new SetOfflineSubscribedAction(false));
-                }
-            });
+            
+            if (await this.isExpired()) {
+                this.loggingService.debug("[Store] Product is expired from server");
+                this.store.dispatch(new SetOfflineSubscribedAction(false));
+            } else {
+                // HM TODO: remove this after setup puchase from the stores
+                this.loggingService.debug("[Store] Product is valid from server");
+                this.store.dispatch(new SetOfflineSubscribedAction(true));
+            }
         });
+    }
+
+    private async isExpired(): Promise<boolean> {
+        try {
+            return !(await firstValueFrom(this.httpClient.get(Urls.subscribed).pipe(timeout(5000))) as any as boolean);
+        } catch {
+            return false;
+        }
     }
 
     private async initializeCdvStore(userId: string) {

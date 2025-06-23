@@ -206,7 +206,7 @@ public class FilesControllerTests
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(false);
 
-        var results = _controller.GetOfflineFile("file").Result as ForbidResult;
+        var results = _controller.GetOfflineFile("file", 1 , 2).Result as ForbidResult;
             
         Assert.IsNotNull(results);
     }
@@ -218,7 +218,7 @@ public class FilesControllerTests
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
         _offlineFilesService.GetFileContent("file").Returns(new MemoryStream());
             
-        var results = _controller.GetOfflineFile("file").Result as FileResult;
+        var results = _controller.GetOfflineFile("file", null, null).Result as FileResult;
             
         Assert.IsNotNull(results);
     }
@@ -228,10 +228,22 @@ public class FilesControllerTests
     {
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
-        _offlineFilesService.GetFileContent("folder/file.extension").Returns(new MemoryStream());
+        _offlineFilesService.GetFileContent("7/1/2/file.extension").Returns(new MemoryStream());
             
-        var results = _controller.GetOfflineFile("folder%2Ffile.extension").Result as FileResult;
+        var results = _controller.GetOfflineFile("file.extension", 1, 2).Result as FileResult;
             
         Assert.IsNotNull(results);
+    }
+    
+    [TestMethod]
+    public void IsSubscribed_ShouldGetIt()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+        _offlineFilesService.GetFileContent("7/1/2/file.extension").Returns(new MemoryStream());
+            
+        var results = _controller.IsSubscribed().Result;
+            
+        Assert.IsTrue(results);
     }
 }

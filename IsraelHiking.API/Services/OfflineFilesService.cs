@@ -35,21 +35,16 @@ public class OfflineFilesService : IOfflineFilesService
     }
 
     /// <inheritdoc/>
-    public Dictionary<string, DateTime> GetUpdatedFilesList(DateTime lastModifiedDate, long tileX, long tileY)
+    public Dictionary<string, DateTime> GetUpdatedFilesList(DateTime lastModifiedDate, long? tileX, long? tileY)
     {
         var filesDictionary = new Dictionary<string, DateTime>();
-        var relativePath = "7/" + tileX + "/" + tileY;
-        var zoom7Folder = _fileProvider.GetDirectoryContents(relativePath);
-        foreach (var content in zoom7Folder)
+        var relativePath = string.Empty;
+        if (tileX.HasValue && tileY.HasValue)
         {
-            if (lastModifiedDate != DateTime.MinValue && content.LastModified.DateTime.ToUniversalTime() - lastModifiedDate.ToUniversalTime() <= new TimeSpan(0, 0, 1))
-            {
-                continue;
-            }
-            filesDictionary[relativePath + "/" + content.Name] = content.LastModified.DateTime;
+            relativePath = "7/" + tileX + "/" + tileY;
         }
-        var rootFolder = _fileProvider.GetDirectoryContents(string.Empty);
-        foreach (var content in rootFolder)
+        var contents = _fileProvider.GetDirectoryContents(relativePath);
+        foreach (var content in contents)
         {
             if (content.IsDirectory)
             {
@@ -65,8 +60,8 @@ public class OfflineFilesService : IOfflineFilesService
     }
 
     /// <inheritdoc/>
-    public Stream GetFileContent(string fileName)
+    public Stream GetFileContent(string fileRelativePath)
     {
-        return _fileProvider.GetFileInfo(fileName).CreateReadStream();
+        return _fileProvider.GetFileInfo(fileRelativePath).CreateReadStream();
     }
 }

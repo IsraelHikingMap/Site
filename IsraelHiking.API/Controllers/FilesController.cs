@@ -120,13 +120,13 @@ public class FilesController : ControllerBase
     /// Get a list of files that need to be downloaded since they are out dated
     /// </summary>
     /// <param name="lastModified">The last time this tile was downloaded</param>
-    /// <param name="tileX">The tile's X coordinates</param>
-    /// <param name="tileY">The tile's Y coordinates</param>
+    /// <param name="tileX">The tile's X coordinates, null for root</param>
+    /// <param name="tileY">The tile's Y coordinates, null for root</param>
     /// <returns></returns>
     [HttpGet]
     [Route("offline")]
     [Authorize]
-    public async Task<IActionResult> GetOfflineFiles([FromQuery] DateTime lastModified, [FromQuery] long tileX, [FromQuery] long tileY)
+    public async Task<IActionResult> GetOfflineFiles([FromQuery] DateTime lastModified, [FromQuery] long? tileX, [FromQuery] long? tileY)
     {
         if (!await _receiptValidationGateway.IsEntitled(User.Identity?.Name))
         {
@@ -141,11 +141,13 @@ public class FilesController : ControllerBase
     /// Get a specific file
     /// </summary>
     /// <param name="id"></param>
-    /// <returns></returns>
+    /// <param name="tileX">The tile's X coordinates, null for root</param>
+    /// <param name="tileY">The tile's Y coordinates, null for root</param>
+    /// <returns>A file stream</returns>
     [HttpGet]
     [Route("offline/{id}")]
     [Authorize]
-    public async Task<IActionResult> GetOfflineFile(string id)
+    public async Task<IActionResult> GetOfflineFile(string id, [FromQuery] long? tileX, [FromQuery] long? tileY)
     {
         if (!await _receiptValidationGateway.IsEntitled(User.Identity?.Name))
         {
@@ -153,9 +155,25 @@ public class FilesController : ControllerBase
             return Forbid();
         }
 
-        var fileDecoded = Uri.UnescapeDataString(id);
-        _logger.LogInformation($"Getting the offline file for user: {User.Identity?.Name}, file: {fileDecoded}");
-        var file = _offlineFilesService.GetFileContent(fileDecoded);
-        return File(file, id.EndsWith("json") ? "application/json": "application/octet-stream", fileDecoded);
+        _logger.LogInformation($"Getting the offline file for user: {User.Identity?.Name}, file: {id}, tileX: {tileX}, tileY: {tileY}");
+        var fullPath = id;
+        if (tileX.HasValue && tileY.HasValue)
+        {
+            fullPath = $"7/{tileX}/{tileY}/{id}";
+        } 
+        var file = _offlineFilesService.GetFileContent(fullPath);
+        return File(file, id.EndsWith("json") ? "application/json": "application/octet-stream", id);
+    }
+    
+    /// <summary>
+    /// Check if user is subscribed
+    /// </summary>
+    /// <returns>true if the user is subscribed, false otherwise</returns>
+    [HttpGet]
+    [Route("subscribed")]
+    [Authorize]
+    public async Task<bool> IsSubscribed()
+    {
+        return await _receiptValidationGateway.IsEntitled(User.Identity?.Name);
     }
 }

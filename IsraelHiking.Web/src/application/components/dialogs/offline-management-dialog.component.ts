@@ -1,15 +1,18 @@
 import { Component, inject } from "@angular/core";
 import { MatDialog, MatDialogActions, MatDialogClose, MatDialogTitle } from "@angular/material/dialog";
+import { NgIf } from "@angular/common";
 import { Store } from "@ngxs/store";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
-import { MapMouseEvent, MercatorCoordinate, LngLatLike } from "maplibre-gl";
+import { MapMouseEvent, MercatorCoordinate, LngLatLike, StyleSpecification } from "maplibre-gl";
 import { MatButton } from "@angular/material/button";
 import { Angulartics2OnModule } from "angulartics2";
 
-import { ResourcesService } from "../../services/resources.service";
-import { OfflineFilesDownloadService } from "application/services/offline-files-download.service";
 import { Urls } from "../../urls";
-import type { ApplicationState } from "../../models/models";
+import { ResourcesService } from "../../services/resources.service";
+import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
+import { DefaultStyleService } from "../../services/default-style.service";
+import { LayersService } from "../../services/layers.service";
+import type { ApplicationState, EditableLayer } from "../../models/models";
 
 const TILES_ZOOM = 7;
 
@@ -17,18 +20,22 @@ const TILES_ZOOM = 7;
     selector: "offline-management-dialog",
     templateUrl: "./offline-management-dialog.component.html",
     styleUrls: ["./offline-management-dialog.component.scss"],
-    imports: [MapComponent, Angulartics2OnModule, MatDialogActions, MatDialogTitle, MatDialogClose, MatButton, LayerComponent, GeoJSONSourceComponent],
+    imports: [MapComponent, Angulartics2OnModule, MatDialogActions, MatDialogTitle, MatDialogClose, MatButton, LayerComponent, GeoJSONSourceComponent, NgIf],
 })
 export class OfflineManagementDialogComponent {
-    public selectedTabIndex: number = 0;
-    public offlineMapStyleUrl: string = Urls.HIKING_TILES_ADDRESS;
+    public offlineMapStyle: StyleSpecification;
     public initialCenter: LngLatLike;
-    public tilesGrid: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
+    public selectedTile: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
+    public inProgressTile: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
+    public downloadedTiles: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
+    public baseLayerData: EditableLayer;
+    public downloadingTile: {tileX: number; tileY: number} = null;
 
-    private inProgressTilesList: Record<string, number> = {};
     private center: LngLatLike;
 
-    private readonly OfflineFilesDownloadService = inject(OfflineFilesDownloadService);
+    private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
+    private readonly defaultStyleService = inject(DefaultStyleService);
+    private readonly layersService = inject(LayersService);
     private readonly store = inject(Store);
     public readonly resources = inject(ResourcesService);
 
@@ -44,36 +51,46 @@ export class OfflineManagementDialogComponent {
         const location = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
         this.center = [location.longitude, location.latitude];
         this.initialCenter = this.center;
-        this.updateTilesGrid();
+        this.offlineMapStyle = this.defaultStyleService.style;
+        // HM TODO: remove this?
+        this.offlineMapStyle = Urls.HIKING_TILES_ADDRESS as any;
+        this.baseLayerData = this.layersService.getSelectedBaseLayer();
+        this.updateDownloadedTiles();
+        this.updateSelectedTile();
+        this.offlineFilesDownloadService.tilesProgressChanged.subscribe((tileProgress) => {
+            if (this.downloadingTile && this.downloadingTile.tileX === tileProgress.tileX && this.downloadingTile.tileY === tileProgress.tileY) {
+                this.updateInProgressTile(tileProgress.progressValue);
+            }
+        });
     }
 
     public async downloadCenter() {
-        this.selectedTabIndex = 1;
-        const tileCount = Math.pow(2, TILES_ZOOM);
-        const mercator = MercatorCoordinate.fromLngLat(this.center);
-        const tileX = Math.floor((mercator.x * tileCount));
-        const tileY = Math.floor((mercator.y * tileCount));
-
-        this.inProgressTilesList[`${tileX}-${tileY}`] = 0;
-        this.updateTilesGrid();
-
-        await this.OfflineFilesDownloadService.downloadTile(tileX, tileY, (progressValue: number) => {
-            this.inProgressTilesList[`${tileX}-${tileY}`] = progressValue;
-            this.updateTilesGrid();
-            if (progressValue === 100) {
-                delete this.inProgressTilesList[`${tileX}-${tileY}`];
-            }
-        });
-        if (this.inProgressTilesList[`${tileX}-${tileY}`] != null) {
-            delete this.inProgressTilesList[`${tileX}-${tileY}`];
-            // HM TODO: in case of error - show a message to the user?
+        const { tileX, tileY } = this.getCenterTileXY();
+        this.downloadingTile = { tileX, tileY };
+        this.updateDownloadedTiles();
+        this.updateSelectedTile();
+        // simulate download progress
+        for (let i = 0; i <= 10; i++) {
+            
+            this.offlineFilesDownloadService.tilesProgressChanged.emit({
+                tileX: tileX,
+                tileY: tileY,
+                progressValue: i * 10
+            });
+            await new Promise(resolve => setTimeout(resolve, 500)); // Simulate a delay for the download progress
         }
-        this.updateTilesGrid();
+        //await this.offlineFilesDownloadService.downloadTile(tileX, tileY);
+        this.downloadingTile = null;
+        
+        this.updateInProgressTile(100);
+        this.updateDownloadedTiles();
+        this.updateSelectedTile();
     }
 
     public onMoveEnd(event: MapMouseEvent) {
         this.center = event.target.getCenter();
-        this.updateTilesGrid();
+        this.updateSelectedTile();
+        this.updateDownloadedTiles();
     }
 
     private lngLatFromTileCoords(x: number, y: number, z: number): [number, number] {
@@ -84,7 +101,7 @@ export class OfflineManagementDialogComponent {
         return [lon_deg, lat_deg];
     }
 
-    private tileCoordinatesToPolygon(tileX: number, tileY: number, color: string, label: string, progress: number): GeoJSON.Feature {
+    private tileCoordinatesToPolygon(tileX: number, tileY: number, label: string = "", progress: number = 1): GeoJSON.Feature {
         return {
             type: "Feature",
             geometry: {
@@ -100,42 +117,81 @@ export class OfflineManagementDialogComponent {
                 ],
             },
             properties: {
-                color,
-                label,
-                fillColor: progress === 1 ? "transparent" : color,
+                label
             }
         }
     }
 
-    private updateTilesGrid() {
-        const tileCount = Math.pow(2, TILES_ZOOM);
-        const mercator = MercatorCoordinate.fromLngLat(this.center);
-        const tileX = Math.floor((mercator.x * tileCount));
-        const tileY = Math.floor((mercator.y * tileCount));
+    private updateDownloadedTiles() {
         const features: GeoJSON.Feature[] = [];
-        if (Object.keys(this.inProgressTilesList).length === 0) {
-            features.push(this.tileCoordinatesToPolygon(tileX, tileY, "green", "לחץ\nלהורדה", 1));
-        }
         const downloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.offlineState.downloadedTiles);
         for (const key of Object.keys(downloadedTiles || {})) {
-            if (this.inProgressTilesList[key] != null) {
+            const [tileXDownloaded, tileYDownloaded] = key.split("-").map(Number);
+            if (this.downloadingTile && this.downloadingTile.tileX === tileXDownloaded && this.downloadingTile.tileY === tileYDownloaded) {
                 continue; // Skip tiles that are in progress
             }
-            const [tileXDownloaded, tileYDownloaded] = key.split("-").map(Number);
+            const { tileX, tileY } = this.getCenterTileXY();
+            if (this.downloadingTile == null && tileXDownloaded === tileX && tileYDownloaded === tileY) {
+                continue; // Skip the center tile if not downloading
+            }
+            
             const downloadedDate = new Date(downloadedTiles[key]);
             const label = downloadedDate.getFullYear() + "\n" + 
                 (downloadedDate.getMonth() + 1).toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), {minimumIntegerDigits: 2}) + "\n" + 
                 downloadedDate.getDay().toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), {minimumIntegerDigits: 2});
-            features.push(this.tileCoordinatesToPolygon(tileXDownloaded, tileYDownloaded, "orange", label, 1));
+            features.push(this.tileCoordinatesToPolygon(tileXDownloaded, tileYDownloaded, label, 1));
         }
-        for (const key of Object.keys(this.inProgressTilesList)) {
-            const [tileXInProgress, tileYInProgress] = key.split("-").map(Number);
-            features.push(this.tileCoordinatesToPolygon(tileXInProgress, tileYInProgress, "rgba(0, 90, 128, 0.5)", this.inProgressTilesList[key].toFixed(1) + "%", this.inProgressTilesList[key] as number / 100));
-        }
-        this.tilesGrid = {
+
+        this.downloadedTiles = {
             type: "FeatureCollection",
-            features
+            features: features,
         };
     }
 
+    private updateSelectedTile() {
+        const { tileX, tileY } = this.getCenterTileXY();
+        this.selectedTile = {
+            type: "FeatureCollection",
+            features: this.downloadingTile != null ? [] : [this.tileCoordinatesToPolygon(tileX, tileY, "לחצו\nלהורדה")]
+        };
+    }
+
+    private updateInProgressTile(progress: number) {
+        console.log("Updating in progress tile with progress:", progress, this.inProgressTile);
+        if (this.downloadingTile == null) {
+            this.inProgressTile = { type: "FeatureCollection", features: [] };
+            return;
+        }
+        const fillFeature = this.tileCoordinatesToPolygon(
+            this.downloadingTile.tileX,
+            this.downloadingTile.tileY,
+            "", 
+            progress / 100.0,
+        );
+        fillFeature.properties.fill = "true";
+        const strokeFeature = this.tileCoordinatesToPolygon(
+            this.downloadingTile.tileX,
+            this.downloadingTile.tileY,
+            progress.toFixed(2) + "%"
+        );
+        strokeFeature.properties.stroke = "true";
+        this.inProgressTile = {
+            type: "FeatureCollection",
+            features: [fillFeature, strokeFeature]
+        };
+    }
+
+    public cancelDownload() {
+        this.downloadingTile = null;
+        this.updateDownloadedTiles();
+    }
+
+    getCenterTileXY(): { tileX: number; tileY: number } {
+        const tileCount = Math.pow(2, TILES_ZOOM);
+        const mercator = MercatorCoordinate.fromLngLat(this.center);
+        const tileX = Math.floor((mercator.x * tileCount));
+        const tileY = Math.floor((mercator.y * tileCount));
+        return { tileX, tileY };
+
+    }
 }

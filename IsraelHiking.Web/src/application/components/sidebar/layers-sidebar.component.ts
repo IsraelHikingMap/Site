@@ -26,7 +26,6 @@ import { SelectedRouteService } from "../../services/selected-route.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { PurchaseService } from "../../services/purchase.service";
-import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
 import { ExpandGroupAction, CollapseGroupAction } from "../../reducers/layers.reducer";
 import { ChangeRouteStateAction, BulkReplaceRoutesAction, ToggleAllRoutesAction } from "../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../reducers/route-editing.reducer";
@@ -57,7 +56,6 @@ export class LayersSidebarComponent {
     private readonly sidebarService = inject(SidebarService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly toastService = inject(ToastService);
-    private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
     private readonly store = inject(Store);
 
     constructor() {
@@ -147,8 +145,6 @@ export class LayersSidebarComponent {
     }
 
     public showOfflineButton(layer: EditableLayer) {
-        return true;
-        // HM TODO: bring this back!
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         return layer.isOfflineAvailable &&
             this.runningContextService.isCapacitor &&
@@ -157,8 +153,6 @@ export class LayersSidebarComponent {
     }
 
     public isOfflineDownloadAvailable() {
-        return true; 
-        // HM TODO: bring this back!
         return this.runningContextService.isCapacitor &&
             this.store.selectSnapshot((s: ApplicationState) => s.offlineState).isSubscribed;
     }
