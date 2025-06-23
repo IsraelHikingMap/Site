@@ -69,19 +69,8 @@ export class OfflineManagementDialogComponent {
         this.downloadingTile = { tileX, tileY };
         this.updateDownloadedTiles();
         this.updateSelectedTile();
-        // simulate download progress
-        for (let i = 0; i <= 10; i++) {
-            
-            this.offlineFilesDownloadService.tilesProgressChanged.emit({
-                tileX: tileX,
-                tileY: tileY,
-                progressValue: i * 10
-            });
-            await new Promise(resolve => setTimeout(resolve, 500)); // Simulate a delay for the download progress
-        }
-        //await this.offlineFilesDownloadService.downloadTile(tileX, tileY);
+        await this.offlineFilesDownloadService.downloadTile(tileX, tileY);
         this.downloadingTile = null;
-        
         this.updateInProgressTile(100);
         this.updateDownloadedTiles();
         this.updateSelectedTile();
