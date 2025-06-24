@@ -156,13 +156,16 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
         if (getOfflineStyleFile) {
             for (const source of Object.values(styleJson.sources)) {
                 if (source.type === "vector") {
+                    delete source.url;
                     source.tiles[0] = source.tiles[0].replace("https://", "slice://");
                 }
                 if (source.type === "raster-dem" ) {
+                    delete source.url;
                     source.tiles[0] = source.tiles[0].replace("https://", "slice://");
                 }
             }
         }
+        console.log(styleJson.sources);
         this.updateSourcesAndLayers(layerData, styleJson.sources, styleJson.layers);
     }
 

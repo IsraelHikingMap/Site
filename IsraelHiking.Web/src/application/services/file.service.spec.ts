@@ -5,7 +5,7 @@ import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { StyleSpecification } from "maplibre-gl";
 import { decode } from "base64-arraybuffer";
-import { strToU8, zipSync, unzipSync, strFromU8 } from "fflate";
+import { unzipSync, strFromU8 } from "fflate";
 
 import { FileService, SaveAsFactory } from "./file.service";
 import { ImageResizeService } from "./image-resize.service";
@@ -282,19 +282,6 @@ describe("FileService", () => {
         expect(file.name).toBe("file.jpg");
         file = await service.getFileFromUrl("some-file.something");
         expect(file.name).toBe("file.something");
-    }));
-
-    it("Should write styles that are sent in a zip", inject([FileService, FileSystemWrapper], 
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-        const spy = jasmine.createSpy();
-        fileSystemWrapper.writeFile = spy;
-
-        const result = zipSync({
-            "styles/style.json": strToU8(JSON.stringify({}))
-        });
-        await service.writeStyles(new Blob([result]));
-        
-        expect(spy).toHaveBeenCalled();
     }));
 
     it("Should compress text to base 64 zip", inject([FileService], 

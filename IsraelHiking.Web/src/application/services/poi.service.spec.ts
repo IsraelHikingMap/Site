@@ -25,7 +25,7 @@ import { Urls } from "../urls";
 import { LayersReducer } from "../reducers/layers.reducer";
 import { AddToPoiQueueAction, OfflineReducer } from "../reducers/offline.reducer";
 import { ConfigurationReducer, SetLanguageAction } from "../reducers/configuration.reducer";
-import type { Category, MarkerData } from "../models/models";
+import type { ApplicationState, Category, MarkerData } from "../models/models";
 
 describe("Poi Service", () => {
 
@@ -233,7 +233,7 @@ describe("Poi Service", () => {
             const promise = poiService.initialize();
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            expect(store.snapshot().offlineState.uploadPoiQueue.length).toBe(0);
+            expect(store.selectSnapshot((state: ApplicationState) => state.offlineState).uploadPoiQueue.length).toBe(0);
 
             return promise;
         }
@@ -261,7 +261,7 @@ describe("Poi Service", () => {
             mockBackend.expectOne(r => r.url.startsWith(Urls.poi)).flush({ properties: {}});
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            expect(store.snapshot().offlineState.uploadPoiQueue.length).toBe(0);
+            expect(store.selectSnapshot((state: ApplicationState) => state.offlineState).uploadPoiQueue.length).toBe(0);
 
             return promise;
         }

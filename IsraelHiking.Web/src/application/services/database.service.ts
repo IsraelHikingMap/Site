@@ -114,7 +114,7 @@ export class DatabaseService {
             } catch (ex) {
                 this.loggingService.info(`[Database] Failed fetching with error: ${(ex as any).message}: ${params.url}`);
                 // Timeout or other error
-                if (!this.store.snapshot().offlineState.isOfflineAvailable) {
+                if (!this.store.selectSnapshot((state: ApplicationState) => state.offlineState).isSubscribed) {
                     throw ex;
                 }
                 const splitUrl = params.url.split("/");
