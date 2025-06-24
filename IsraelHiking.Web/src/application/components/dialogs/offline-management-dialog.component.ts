@@ -141,7 +141,7 @@ export class OfflineManagementDialogComponent {
             const downloadedDate = new Date(downloadedTiles[key]);
             const label = downloadedDate.getFullYear() + "\n" + 
                 (downloadedDate.getMonth() + 1).toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), {minimumIntegerDigits: 2}) + "\n" + 
-                downloadedDate.getDay().toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), {minimumIntegerDigits: 2});
+                downloadedDate.getDate().toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), {minimumIntegerDigits: 2});
             features.push(this.tileCoordinatesToPolygon(tileXDownloaded, tileYDownloaded, label, 1));
         }
 

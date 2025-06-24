@@ -8,7 +8,6 @@ import { Store } from "@ngxs/store";
 import { LayersService } from "./layers.service";
 import { FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
-import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { OfflineManagementDialogComponent } from "application/components/dialogs/offline-management-dialog.component";
 import { ToggleOfflineAction } from "../reducers/layers.reducer";
@@ -25,7 +24,6 @@ export class OfflineFilesDownloadService {
     private readonly loggingService = inject(LoggingService);
     private readonly httpClient = inject(HttpClient);
     private readonly matDialog = inject(MatDialog);
-    private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
 
     private inProgressTilesList: Record<string, number> = {};
@@ -51,12 +49,16 @@ export class OfflineFilesDownloadService {
                 this.loggingService.info("[Offline Download] No files to download, all files are up to date");
                 return "up-to-date";
             }
-
-            const newestFileDateForTile = await this.downloadOfflineFilesProgressAction(fileNamesForTile, tileX, tileY);
-            this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(newestFileDateForTile, tileX, tileY));
-
-            const newestFileDateForRoot = await this.downloadOfflineFilesProgressAction(fileNamesForRoot);
-            this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(newestFileDateForRoot, undefined, undefined));
+            this.updateInProgressTilesList(tileX, tileY, 0);
+            const fileNames = {...fileNamesForRoot, ...fileNamesForTile};
+            await this.downloadOfflineFilesProgressAction(fileNames, Object.keys(fileNamesForRoot).length, tileX, tileY);
+            
+            if (Object.keys(fileNamesForTile).length > 0) {
+                this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(this.getNewestFileDateFromFileList(fileNamesForTile), tileX, tileY));
+            }
+            if (Object.keys(fileNamesForRoot).length > 0) {
+                this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(this.getNewestFileDateFromFileList(fileNamesForRoot), undefined, undefined));
+            }
             return "downloaded";
         } catch (ex) {
             const typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
@@ -76,8 +78,19 @@ export class OfflineFilesDownloadService {
         }
     }
 
-    private async downloadOfflineFilesProgressAction(fileNames: Record<string, string>, tileX?: number, tileY?: number):
-        Promise<Date> {
+    private getNewestFileDateFromFileList(fileNames: Record<string, string>): Date {
+        let newestFileDate = new Date(0);
+        for (const fileName of Object.keys(fileNames)) {
+            const fileDate = new Date(fileNames[fileName]);
+            if (fileDate > newestFileDate) {
+                newestFileDate = fileDate;
+            }
+        }
+        return newestFileDate;
+    }
+
+    private async downloadOfflineFilesProgressAction(fileNames: Record<string, string>, rootFilesCount: number, tileX: number, tileY: number):
+        Promise<void> {
         this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${Object.keys(fileNames).length}`);
         let setBackToOffline = false;
         if (this.layersService.getSelectedBaseLayer().isOfflineOn) {
@@ -85,28 +98,27 @@ export class OfflineFilesDownloadService {
             setBackToOffline = true;
         }
         try {
-            let newestFileDate = new Date(0);
             const length = Object.keys(fileNames).length;
             for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
                 const fileName = Object.keys(fileNames)[fileNameIndex];
-                const fileDate = new Date(fileNames[fileName]);
-                newestFileDate = fileDate > newestFileDate ? fileDate : newestFileDate;
+                
                 const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
+                let fileDownloadUrl = `${Urls.offlineFiles}/${fileName}`;
                 if (fileName.endsWith(".pmtiles")) {
-                    await this.fileService.downloadFileToCacheAuthenticated(`${Urls.offlineFiles}/${fileName}?tileX=${tileX}&tileY=${tileY}`, fileName, token,
+                    if (fileNameIndex >= rootFilesCount) {
+                        fileDownloadUrl += `?tileX=${tileX}&tileY=${tileY}`;
+                    }
+                    await this.fileService.downloadFileToCacheAuthenticated(fileDownloadUrl, fileName, token,
                         (value) => this.updateInProgressTilesList(tileX, tileY, (value + fileNameIndex) * 100.0 / length));
                     await this.fileService.moveFileFromCacheToDataDirectory(fileName);
                 } else {
-                    const fileContent = await this.fileService.getFileContentWithProgress(`${Urls.offlineFiles}/${fileName}`,
+                    const fileContent = await this.fileService.getFileContentWithProgress(fileDownloadUrl,
                         (value) => this.updateInProgressTilesList(tileX, tileY, (value + fileNameIndex) * 100.0 / length));
-                    await this.fileService.writeStyles(fileContent as Blob);
+                    await this.fileService.writeStyle(fileName, await this.fileService.getFileContent(fileContent as File));
                 }
                 this.loggingService.info(`[Offline Download] Finished downloading ${fileName}`);
             }
-            this.loggingService.info("[Offline Download] Finished downloading offline files, update date to: "
-                + newestFileDate.toUTCString());
-        
-            return newestFileDate;
+            this.loggingService.info("[Offline Download] Finished downloading offline files");
         } finally {
             if (setBackToOffline) {
                 this.store.dispatch(new ToggleOfflineAction(this.layersService.getSelectedBaseLayer().key, false));
@@ -122,8 +134,9 @@ export class OfflineFilesDownloadService {
     private async getFilesToDownloadDictionary(tileX?: number, tileY?: number): Promise<Record<string, string>> {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         const lastModifiedString = offlineState.downloadedTiles ? offlineState.downloadedTiles[`${tileX}-${tileY}`]?.toISOString() : null;
-        const params: Record<string, string> = {
-            lastModified: lastModifiedString
+        const params: Record<string, string> = {};
+        if (lastModifiedString) {
+            params.lastModified = lastModifiedString;
         };
         if (tileX != null && tileY != null) {
             params.tileX = tileX.toString();

@@ -1,6 +1,8 @@
 import { inject, Injectable } from "@angular/core";
+import { HttpClient, HttpResponse } from "@angular/common/http";
 import { Store } from "@ngxs/store";
-import { debounceTime } from "rxjs/operators";
+import { firstValueFrom } from "rxjs";
+import { debounceTime, timeout } from "rxjs/operators";
 import { addProtocol } from "maplibre-gl";
 import Dexie from "dexie";
 import deepmerge from "deepmerge";
@@ -45,6 +47,7 @@ export class DatabaseService {
     private readonly loggingService = inject(LoggingService);
     private readonly runningContext = inject(RunningContextService);
     private readonly pmTilesService = inject(PmTilesService);
+    private readonly httpClient = inject(HttpClient);
     private readonly store = inject(Store);
 
     public async initialize() {
@@ -99,15 +102,17 @@ export class DatabaseService {
         addProtocol("slice", async (params, _abortController) => {
             // slice://mapeak.com/vector/data/IHM-schema/{z}/{x}/{y}.mvt
             try {
-                this.loggingService.debug(`[Database] Fetching ${params.url}`);
-                const response = await fetch(params.url.replace("slice://", "https://"), {
-                    method: "GET",
-                    signal: AbortSignal.any([_abortController.signal, AbortSignal.timeout(2000)])
-                });
-                const data = await response.arrayBuffer();
+                this.loggingService.info(`[Database] Fetching ${params.url}`);
+                const response = await firstValueFrom(this.httpClient.get(params.url.replace("slice://", "https://"), { observe: "response", responseType: "arraybuffer" })
+                    .pipe(timeout(2000))) as any as HttpResponse<any>;
+                if (!response.ok) {
+                    this.loggingService.info(`[Database] Failed fetching with error: ${response.status}: ${params.url}`);
+                    throw new Error(`Failed to get ${params.url}: ${response.statusText}`);
+                }
+                const data = response.body;
                 return {data, cacheControl: response.headers.get("Cache-Control"), expires: response.headers.get("Expires")};
             } catch (ex) {
-                this.loggingService.debug(`[Database] Failed fetching with error: ${(ex as any).message}: ${params.url}`);
+                this.loggingService.info(`[Database] Failed fetching with error: ${(ex as any).message}: ${params.url}`);
                 // Timeout or other error
                 if (!this.store.snapshot().offlineState.isOfflineAvailable) {
                     throw ex;
@@ -125,12 +130,12 @@ export class DatabaseService {
                     const tileY = Math.floor(y / scale);
                     const fileName = `${type}+${TILES_ZOOM}-${tileX}-${tileY}.pmtiles`;
                     const data = await this.pmTilesService.getTileFromFile(fileName, z, x, y);
-                    this.loggingService.debug(`[Database] got tile for ${z}/${x}/${y} from ${fileName}`);
+                    this.loggingService.info(`[Database] got tile for ${z}/${x}/${y} from ${fileName}`);
                     return { data };
                 } else {
                     const fileName = `${type}-${TILES_ZOOM-1}.pmtiles`;
                     const data = await this.pmTilesService.getTileFromFile(fileName, z, x, y);
-                    this.loggingService.debug(`[Database] got tile for ${z}/${x}/${y} from ${fileName}`);
+                    this.loggingService.info(`[Database] got tile for ${z}/${x}/${y} from ${fileName}`);
                     return { data };
                 }
             }

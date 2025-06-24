@@ -6,7 +6,7 @@ import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
 import { firstValueFrom } from "rxjs";
-import { zipSync, strToU8, unzipSync, strFromU8, Zippable } from "fflate";
+import { zipSync, strToU8, Zippable } from "fflate";
 import { decode, encode } from "base64-arraybuffer";
 import type { saveAs as saveAsForType } from "file-saver";
 
@@ -114,11 +114,12 @@ export class FileService {
             if (isOffline || (this.runningContextService.isCapacitor && url.startsWith("."))) {
                 const styleFileName = last(url.split("/"));
                 const styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
+                this.loggingService.info(`[Files] Read style file from data directory: ${styleFileName} ${styleText}`);
                 return JSON.parse(styleText) as StyleSpecification;
             }
             return await firstValueFrom(this.httpClient.get(url)) as StyleSpecification;
         } catch (ex) {
-            this.loggingService.error(`[Files] Unable to get style file, isOffline: ${isOffline}, ${(ex as Error).message}`);
+            this.loggingService.error(`[Files] Unable to get style file, isOffline: ${isOffline}, ${url}, ${(ex as Error).message}`);
             return {
                 version: 8.0,
                 layers: [],
@@ -241,18 +242,6 @@ export class FileService {
     private addRoutesFromContainer(container: DataContainer) {
         this.selectedRouteService.addRoutes(container.routes);
         this.fitBoundsService.fitBounds(SpatialService.getBounds([container.southWest, container.northEast]));
-    }
-
-    public async writeStyles(blob: Blob) {
-        const zipData = new Uint8Array(await blob.arrayBuffer());
-        const files = unzipSync(zipData, {
-            filter: file => file.name.startsWith("styles/") && file.name.endsWith(".json")
-        });
-
-        for (const styleFileName in files) {
-            const styleText = strFromU8(files[styleFileName]);
-            this.writeStyle(styleFileName.replace("styles/", ""), styleText);
-        }
     }
 
     public async writeStyle(styleFileName: string, styleText: string) {
