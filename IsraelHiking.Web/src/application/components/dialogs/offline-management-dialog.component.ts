@@ -12,6 +12,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
+import { ToastService } from "application/services/toast.service";
 import type { ApplicationState, EditableLayer } from "../../models/models";
 
 const TILES_ZOOM = 7;
@@ -36,6 +37,7 @@ export class OfflineManagementDialogComponent {
     private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
     private readonly defaultStyleService = inject(DefaultStyleService);
     private readonly layersService = inject(LayersService);
+    private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
     public readonly resources = inject(ResourcesService);
 
@@ -58,7 +60,7 @@ export class OfflineManagementDialogComponent {
         this.updateDownloadedTiles();
         this.updateSelectedTile();
         this.offlineFilesDownloadService.tilesProgressChanged.subscribe((tileProgress) => {
-            if (this.downloadingTile && this.downloadingTile.tileX === tileProgress.tileX && this.downloadingTile.tileY === tileProgress.tileY) {
+            if (this.downloadingTile) {
                 this.updateInProgressTile(tileProgress.progressValue);
             }
         });
@@ -69,7 +71,20 @@ export class OfflineManagementDialogComponent {
         this.downloadingTile = { tileX, tileY };
         this.updateDownloadedTiles();
         this.updateSelectedTile();
-        await this.offlineFilesDownloadService.downloadTile(tileX, tileY);
+        const status = await this.offlineFilesDownloadService.downloadTile(tileX, tileY);
+        switch (status) {
+            case "up-to-date":
+                this.toastService.success(this.resources.allFilesAreUpToDate + " " + this.resources.useTheCloudIconToGoOffline);
+                break;
+            case "downloaded":
+                this.toastService.success(this.resources.downloadFinishedSuccessfully + " " + this.resources.useTheCloudIconToGoOffline);
+                break;
+            case "error":
+                // HM TODO: i18n
+                this.toastService.warning("הייתה בעיה בהורדה, אנא נסו שוב");
+                break;
+        }
+
         this.downloadingTile = null;
         this.updateInProgressTile(100);
         this.updateDownloadedTiles();
@@ -146,7 +161,6 @@ export class OfflineManagementDialogComponent {
     }
 
     private updateInProgressTile(progress: number) {
-        console.log("Updating in progress tile with progress:", progress, this.inProgressTile);
         if (this.downloadingTile == null) {
             this.inProgressTile = { type: "FeatureCollection", features: [] };
             return;

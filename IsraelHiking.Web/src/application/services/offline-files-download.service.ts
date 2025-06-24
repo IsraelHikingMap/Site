@@ -1,5 +1,5 @@
 import { EventEmitter, inject, Injectable } from "@angular/core";
-import { HttpClient, HttpParams } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { MatDialog } from "@angular/material/dialog";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
@@ -42,23 +42,22 @@ export class OfflineFilesDownloadService {
         }
     }
 
-    public async downloadTile(tileX: number, tileY: number): Promise<void> {
+    public async downloadTile(tileX: number, tileY: number): Promise<"up-to-date" | "downloaded" | "error"> {
         this.loggingService.info("[Offline Download] Starting downloading offline files");
         try {
             const fileNamesForRoot = await this.getFilesToDownloadDictionary();
             const fileNamesForTile = await this.getFilesToDownloadDictionary(tileX, tileY);
             if (Object.keys(fileNamesForTile).length === 0 && Object.keys(fileNamesForRoot).length === 0) {
                 this.loggingService.info("[Offline Download] No files to download, all files are up to date");
-                this.toastService.success(this.resources.allFilesAreUpToDate + " " + this.resources.useTheCloudIconToGoOffline);
-                return;
+                return "up-to-date";
             }
-            const newestFileDateForRoot = await this.downloadOfflineFilesProgressAction(fileNamesForRoot);
-            this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(newestFileDateForRoot, undefined, undefined));
 
             const newestFileDateForTile = await this.downloadOfflineFilesProgressAction(fileNamesForTile, tileX, tileY);
             this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(newestFileDateForTile, tileX, tileY));
-            
-            // HM TODO: think about zoom 6 repeated download?
+
+            const newestFileDateForRoot = await this.downloadOfflineFilesProgressAction(fileNamesForRoot);
+            this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(newestFileDateForRoot, undefined, undefined));
+            return "downloaded";
         } catch (ex) {
             const typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
             switch (typeAndMessage.type) {
@@ -73,6 +72,7 @@ export class OfflineFilesDownloadService {
                     this.loggingService.error("[Offline Download] Failed to get download files list due to server side error: " +
                         typeAndMessage.message);
             }
+            return "error";
         }
     }
 
@@ -105,8 +105,7 @@ export class OfflineFilesDownloadService {
             }
             this.loggingService.info("[Offline Download] Finished downloading offline files, update date to: "
                 + newestFileDate.toUTCString());
-            
-            this.toastService.success(this.resources.downloadFinishedSuccessfully + " " + this.resources.useTheCloudIconToGoOffline);
+        
             return newestFileDate;
         } finally {
             if (setBackToOffline) {
@@ -123,13 +122,14 @@ export class OfflineFilesDownloadService {
     private async getFilesToDownloadDictionary(tileX?: number, tileY?: number): Promise<Record<string, string>> {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         const lastModifiedString = offlineState.downloadedTiles ? offlineState.downloadedTiles[`${tileX}-${tileY}`]?.toISOString() : null;
-        const params = new HttpParams();
-        params.set("lastModified", lastModifiedString);
+        const params: Record<string, string> = {
+            lastModified: lastModifiedString
+        };
         if (tileX != null && tileY != null) {
-            params.set("tileX", tileX.toString());
-            params.set("tileY", tileY.toString());
+            params.tileX = tileX.toString();
+            params.tileY = tileY.toString();
         }
-        const fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, { params }).pipe(timeout(5000)));
+        const fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {params: params}).pipe(timeout(5000)));
         this.loggingService.info(
             `[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
         return fileNames as Record<string, string>;
