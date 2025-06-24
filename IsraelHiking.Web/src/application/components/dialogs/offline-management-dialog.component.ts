@@ -12,10 +12,9 @@ import { ResourcesService } from "../../services/resources.service";
 import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
-import { ToastService } from "application/services/toast.service";
+import { ToastService } from "../../services/toast.service";
+import { TILES_ZOOM } from "../../services/database.service";
 import type { ApplicationState, EditableLayer } from "../../models/models";
-
-const TILES_ZOOM = 7;
 
 @Component({
     selector: "offline-management-dialog",
@@ -54,7 +53,7 @@ export class OfflineManagementDialogComponent {
         this.center = [location.longitude, location.latitude];
         this.initialCenter = this.center;
         this.offlineMapStyle = this.defaultStyleService.style;
-        // HM TODO: remove this?
+        // HM TODO: remove this? - there's a need to solve language problem here
         this.offlineMapStyle = Urls.HIKING_TILES_ADDRESS as any;
         this.baseLayerData = this.layersService.getSelectedBaseLayer();
         this.updateDownloadedTiles();

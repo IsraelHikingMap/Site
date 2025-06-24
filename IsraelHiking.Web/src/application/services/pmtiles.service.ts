@@ -57,6 +57,10 @@ export class PmTilesService {
         const z = +splitUrl[splitUrl.length - 3];
         const x = +splitUrl[splitUrl.length - 2];
         const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
+        return this.getTileFromFile(fileName, z, x, y);
+    }
+
+    public async getTileFromFile(fileName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {
         const source = await this.getSource(fileName);
         const pmTilesProvider = new PMTiles(source);
         const response = await pmTilesProvider.getZxy(z, x, y);

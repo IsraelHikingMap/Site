@@ -152,6 +152,17 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
         const response = await this.fileService.getStyleJsonContent(layerData.address, getOfflineStyleFile);
         const language = this.resources.getCurrentLanguageCodeSimplified();
         const styleJson = JSON.parse(JSON.stringify(response).replace(/name:he/g, `name:${language}`)) as StyleSpecification;
+        // HM TODO: consider doing it on server side or when saving the file instead of here
+        if (getOfflineStyleFile) {
+            for (const source of Object.values(styleJson.sources)) {
+                if (source.type === "vector") {
+                    source.tiles[0] = source.tiles[0].replace("https://", "slice://");
+                }
+                if (source.type === "raster-dem" ) {
+                    source.tiles[0] = source.tiles[0].replace("https://", "slice://");
+                }
+            }
+        }
         this.updateSourcesAndLayers(layerData, styleJson.sources, styleJson.layers);
     }
 
