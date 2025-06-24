@@ -114,7 +114,6 @@ export class FileService {
             if (isOffline || (this.runningContextService.isCapacitor && url.startsWith("."))) {
                 const styleFileName = last(url.split("/"));
                 const styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
-                this.loggingService.info(`[Files] Read style file from data directory: ${styleFileName} ${styleText}`);
                 return JSON.parse(styleText) as StyleSpecification;
             }
             return await firstValueFrom(this.httpClient.get(url)) as StyleSpecification;
