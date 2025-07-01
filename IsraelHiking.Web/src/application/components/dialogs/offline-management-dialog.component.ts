@@ -7,20 +7,21 @@ import { MapMouseEvent, MercatorCoordinate, LngLatLike, StyleSpecification } fro
 import { MatButton } from "@angular/material/button";
 import { Angulartics2OnModule } from "angulartics2";
 
-import { Urls } from "../../urls";
+import { AutomaticLayerPresentationComponent } from "../map/automatic-layer-presentation.component";
 import { ResourcesService } from "../../services/resources.service";
 import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
 import { ToastService } from "../../services/toast.service";
 import { TILES_ZOOM } from "../../services/database.service";
+import { HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import type { ApplicationState, EditableLayer } from "../../models/models";
 
 @Component({
     selector: "offline-management-dialog",
     templateUrl: "./offline-management-dialog.component.html",
     styleUrls: ["./offline-management-dialog.component.scss"],
-    imports: [MapComponent, Angulartics2OnModule, MatDialogActions, MatDialogTitle, MatDialogClose, MatButton, LayerComponent, GeoJSONSourceComponent, NgIf],
+    imports: [MapComponent, Angulartics2OnModule, MatDialogActions, MatDialogTitle, MatDialogClose, MatButton, LayerComponent, GeoJSONSourceComponent, NgIf, AutomaticLayerPresentationComponent],
 })
 export class OfflineManagementDialogComponent {
     public offlineMapStyle: StyleSpecification;
@@ -50,10 +51,11 @@ export class OfflineManagementDialogComponent {
     constructor() {
         const location = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
         this.center = [location.longitude, location.latitude];
-        this.offlineMapStyle = this.defaultStyleService.style;
-        // HM TODO: remove this? - there's a need to solve language problem here
-        this.offlineMapStyle = Urls.HIKING_TILES_ADDRESS as any;
+        this.offlineMapStyle = this.defaultStyleService.getStyleWithPlaceholders();
         this.baseLayerData = this.layersService.getSelectedBaseLayer();
+        if (this.baseLayerData.key !== HIKING_MAP && this.baseLayerData.key !== MTB_MAP) {
+            this.baseLayerData = {...this.store.selectSnapshot((state: ApplicationState) => state.layersState.baseLayers).find((layer) => layer.key === HIKING_MAP)};
+        }
         this.updateDownloadedTiles();
         this.offlineFilesDownloadService.tilesProgressChanged.subscribe((tileProgress) => {
             if (this.downloadingTileXY) {
@@ -127,7 +129,7 @@ export class OfflineManagementDialogComponent {
             if (this.downloadingTileXY && this.downloadingTileXY.tileX === tileXDownloaded && this.downloadingTileXY.tileY === tileYDownloaded) {
                 continue; // Skip tiles that are in progress
             }
-            const { tileX, tileY } = this.selectedTileXY;
+            const { tileX, tileY } = this.selectedTileXY || { tileX: null, tileY: null };
             if (this.downloadingTileXY == null && tileXDownloaded === tileX && tileYDownloaded === tileY) {
                 continue; // Skip the center tile if not downloading
             }
@@ -149,7 +151,7 @@ export class OfflineManagementDialogComponent {
         const { tileX, tileY } = this.selectedTileXY;
         this.selectedTile = {
             type: "FeatureCollection",
-            features: this.downloadingTileXY != null || this.selectedTileXY == null ? [] : [this.tileCoordinatesToPolygon(tileX, tileY, "")]
+            features: this.downloadingTileXY != null || this.selectedTileXY == null ? [] : [this.tileCoordinatesToPolygon(tileX, tileY, this.resources.clickBelow)]
         };
     }
 

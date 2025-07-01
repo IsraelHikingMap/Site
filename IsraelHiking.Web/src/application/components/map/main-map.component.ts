@@ -62,46 +62,7 @@ export class MainMapComponent {
     constructor() {
         
         this.location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
-        this.initialStyle = { ...this.defaultStyleService.style };
-        this.initialStyle.sources = {
-            dummy: {
-                type: "geojson",
-                data: {
-                    type: "Feature",
-                    properties: {},
-                    geometry: {
-                        type: "Point",
-                        coordinates: [0, 0]
-                    }
-                }
-            }
-        };
-        this.initialStyle.layers = [
-            {
-                id: this.resources.endOfBaseLayer,
-                type: "circle",
-                source: "dummy",
-                layout: { visibility: "none" }
-            },
-            {
-                id: this.resources.endOfOverlays,
-                type: "circle",
-                source: "dummy",
-                layout: { visibility: "none" }
-            },
-            {
-                id: this.resources.endOfClusters,
-                type: "circle",
-                source: "dummy",
-                layout: { visibility: "none" }
-            },
-            {
-                id: this.resources.endOfRoutes,
-                type: "circle",
-                source: "dummy",
-                layout: { visibility: "none" }
-            }
-        ];
+        this.initialStyle = this.defaultStyleService.getStyleWithPlaceholders();
         this.titleService.clear();
     }
 

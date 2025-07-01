@@ -165,7 +165,6 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
                 }
             }
         }
-        console.log(styleJson.sources);
         this.updateSourcesAndLayers(layerData, styleJson.sources, styleJson.layers);
     }
 

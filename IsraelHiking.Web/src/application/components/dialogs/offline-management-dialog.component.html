@@ -13,14 +13,12 @@
                 [maxZoom]="6"
                 (mapClick)="onMapClick($event)"
                 [attributionControl]="false">
-                <!--
-                HM TODO: there is a problem here with the base layer language that I need to find a way to solve.
                 <auto-layer [layerData]="baseLayerData"
                             [visible]="true"
                             [isBaselayer]="true"
-                            [isMainMap]="false">
+                            [isMainMap]="false"
+                            [before]="resources.endOfBaseLayer">
                 </auto-layer>
-                -->
                 <mgl-geojson-source id="download-tiles" 
                                     [data]="downloadedTiles">
                 </mgl-geojson-source>
@@ -76,6 +74,7 @@
                         'text-field': ['get', 'label'],
                         'text-font': ['Open Sans Regular'],
                         'text-size': 30,
+                        'text-allow-overlap': true
                     }"
                     [paint]="{
                         'text-color': 'green',
@@ -83,7 +82,7 @@
                         'text-halo-width': 2
                     }">
                 </mgl-layer>
-                 <mgl-geojson-source id="in-progress-tile" 
+                <mgl-geojson-source id="in-progress-tile" 
                                     [data]="inProgressTile">
                 </mgl-geojson-source>
                 <mgl-layer
