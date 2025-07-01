@@ -67,15 +67,17 @@ export class OfflineManagementDialogComponent {
     public async downloadSelected() {
         const { tileX, tileY } = this.selectedTileXY;
         this.downloadingTileXY = { tileX, tileY };
-        this.center = this.lngLatFromTileCoords(tileX, tileY, TILES_ZOOM);
+        this.center = this.lngLatFromTileCoords(tileX + 0.5, tileY + 0.5, TILES_ZOOM);
         this.updateDownloadedTiles();
         this.updateSelectedTile();
         const status = await this.offlineFilesDownloadService.downloadTile(tileX, tileY);
         switch (status) {
             case "up-to-date":
+                this.selectedTileXY = null;
                 this.toastService.success(this.resources.allFilesAreUpToDate + " " + this.resources.useTheCloudIconToGoOffline);
                 break;
             case "downloaded":
+                this.selectedTileXY = null;
                 this.toastService.success(this.resources.downloadFinishedSuccessfully + " " + this.resources.useTheCloudIconToGoOffline);
                 break;
             case "error":
@@ -194,5 +196,6 @@ export class OfflineManagementDialogComponent {
         const tileY = Math.floor((mercator.y * tileCount));
         this.selectedTileXY = { tileX, tileY };
         this.updateSelectedTile();
+        this.updateDownloadedTiles();
     }
 }
