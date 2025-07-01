@@ -1,6 +1,6 @@
 <div [dir]="resources.direction">
     <div matDialogTitle>
-        <div>ניהול מפות לא מקוונות</div>
+        <div>{{resources.manageOfflineMaps}}</div>
         <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-content>
@@ -8,10 +8,10 @@
             <mgl-map
                 [style]="offlineMapStyle"
                 zoom="5"
-                [center]="initialCenter"
+                [center]="center"
                 [minZoom]="4"
                 [maxZoom]="6"
-                (moveEnd)="onMoveEnd($event)"
+                (mapClick)="onMapClick($event)"
                 [attributionControl]="false">
                 <!--
                 HM TODO: there is a problem here with the base layer language that I need to find a way to solve.
@@ -131,13 +131,16 @@
     <div mat-dialog-actions>
         <div class="flex flex-row w-full">
             <div class="flex-1">
-                <button *ngIf="!downloadingTile" mat-raised-button class="w-full" color="primary" (click)="downloadCenter()">
+                <div *ngIf="!selectedTileXY && !downloadingTileXY">
+                    {{resources.clickTheMapToSelectATile}}
+                </div>
+                <button *ngIf="selectedTileXY && !downloadingTileXY" mat-raised-button class="w-full" color="primary" (click)="downloadSelected()">
                     <i class="fa fa-lg icon-download"></i>
-                    הורדת מרכז המפה
+                    {{resources.startDownload}}
                 </button>
-                <button *ngIf="downloadingTile" mat-raised-button class="w-full" color="primary" (click)="cancelDownload()">
+                <button *ngIf="downloadingTileXY" mat-raised-button class="w-full" color="primary" (click)="cancelDownload()">
                     <i class="fa fa-lg icon-close"></i>
-                    ביטול
+                    {{resources.cancel}}
                 </button>
             </div>
         </div>

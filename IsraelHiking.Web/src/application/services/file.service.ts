@@ -28,6 +28,12 @@ export type FormatViewModel = {
     extension: string;
 };
 
+export type DownloadResponse = {
+    promise: Promise<any>;
+    abort: () => void;
+    aborted?: boolean;
+}
+
 @Injectable()
 export class FileService {
 
@@ -319,7 +325,7 @@ export class FileService {
         await this.fileSystemWrapper.removeFile(this.fileSystemWrapper.cacheDirectory, url.split("/").pop());
     }
 
-    public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void) {
+    public downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void): DownloadResponse {
         const fileTransferObject = this.fileTransfer.create();
         fileTransferObject.onProgress((event) => {
             progressCallback(event.loaded / event.total);
@@ -330,8 +336,20 @@ export class FileService {
                 Authorization: `Bearer ${token}`
             }
         };
-        await fileTransferObject.download(url, this.fileSystemWrapper.cacheDirectory + fileName, true, options);
-        this.loggingService.info(`[Files] Finished downloading and writing file to cache, file name ${fileName}`);
+        const promise = fileTransferObject.download(url, this.fileSystemWrapper.cacheDirectory + fileName, true, options);
+        promise.then(() => {
+            this.loggingService.info(`[Files] Finished downloading and writing file to cache, file name ${fileName}`);
+        });
+        const response: DownloadResponse = {
+            abort: () => {
+                response.aborted = true;
+                this.loggingService.info(`[Files] Aborting download of file ${fileName}`);
+                fileTransferObject.abort();
+            },
+            promise
+        }
+        return response;
+        
     }
 
     public async moveFileFromCacheToDataDirectory(fileName: string): Promise<void> {

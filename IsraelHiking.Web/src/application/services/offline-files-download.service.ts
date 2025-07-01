@@ -6,9 +6,8 @@ import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
 
 import { LayersService } from "./layers.service";
-import { FileService } from "./file.service";
+import { DownloadResponse, FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
-import { ResourcesService } from "./resources.service";
 import { OfflineManagementDialogComponent } from "application/components/dialogs/offline-management-dialog.component";
 import { ToggleOfflineAction } from "../reducers/layers.reducer";
 import { SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
@@ -17,8 +16,6 @@ import type { ApplicationState } from "../models/models";
 
 @Injectable()
 export class OfflineFilesDownloadService {
-
-    private readonly resources = inject(ResourcesService);
     private readonly layersService = inject(LayersService);
     private readonly fileService = inject(FileService);
     private readonly loggingService = inject(LoggingService);
@@ -27,6 +24,7 @@ export class OfflineFilesDownloadService {
     private readonly store = inject(Store);
 
     private inProgressTilesList: Record<string, number> = {};
+    private currentDownloadResponse: DownloadResponse | null = null;
     public tilesProgressChanged = new EventEmitter<{tileX: number, tileY: number, progressValue: number}>();
 
     public async initialize(): Promise<void> {
@@ -40,7 +38,7 @@ export class OfflineFilesDownloadService {
         }
     }
 
-    public async downloadTile(tileX: number, tileY: number): Promise<"up-to-date" | "downloaded" | "error"> {
+    public async downloadTile(tileX: number, tileY: number): Promise<"up-to-date" | "downloaded" | "error" | "aborted"> {
         this.loggingService.info("[Offline Download] Starting downloading offline files");
         try {
             const fileNamesForRoot = await this.getFilesToDownloadDictionary();
@@ -61,6 +59,9 @@ export class OfflineFilesDownloadService {
             }
             return "downloaded";
         } catch (ex) {
+            if (this.currentDownloadResponse?.aborted) {
+                return "aborted";
+            }
             const typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
             switch (typeAndMessage.type) {
                 case "timeout":
@@ -75,6 +76,8 @@ export class OfflineFilesDownloadService {
                         typeAndMessage.message);
             }
             return "error";
+        } finally {
+            this.currentDownloadResponse = null;
         }
     }
 
@@ -100,6 +103,10 @@ export class OfflineFilesDownloadService {
         try {
             const length = Object.keys(fileNames).length;
             for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
+                if (this.currentDownloadResponse?.aborted) {
+                    this.loggingService.info("[Offline Download] Aborted downloading offline files");
+                    return;
+                }
                 const fileName = Object.keys(fileNames)[fileNameIndex];
                 
                 const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
@@ -108,8 +115,9 @@ export class OfflineFilesDownloadService {
                     if (fileNameIndex >= rootFilesCount) {
                         fileDownloadUrl += `?tileX=${tileX}&tileY=${tileY}`;
                     }
-                    await this.fileService.downloadFileToCacheAuthenticated(fileDownloadUrl, fileName, token,
+                    this.currentDownloadResponse = this.fileService.downloadFileToCacheAuthenticated(fileDownloadUrl, fileName, token,
                         (value) => this.updateInProgressTilesList(tileX, tileY, (value + fileNameIndex) * 100.0 / length));
+                    await this.currentDownloadResponse.promise;
                     await this.fileService.moveFileFromCacheToDataDirectory(fileName);
                 } else {
                     const fileContent = await this.fileService.getFileContentWithProgress(fileDownloadUrl,
@@ -146,5 +154,13 @@ export class OfflineFilesDownloadService {
         this.loggingService.info(
             `[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
         return fileNames as Record<string, string>;
+    }
+
+    public abortCurrentDownload(): void {
+        if (this.currentDownloadResponse != null) {
+            this.loggingService.info("[Offline Download] Aborting current download");
+            this.currentDownloadResponse.abort();
+        }
+        this.inProgressTilesList = {};
     }
 }
