@@ -357,6 +357,18 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiCategory).toBe("Other");
     });
 
+    it("Should set icon color category for alpine hut", () => {
+        // Arrange
+        const feature = createFeature({tourism: "alpine_hut" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("#734a08");
+        expect(poi.properties.poiIcon).toBe("icon-home");
+        expect(poi.properties.poiCategory).toBe("Camping");
+    });
+
     it("Should set icon color category for mtb route", () => {
         // Arrange
         const feature = createFeature({ "mtb:name": "route" });
