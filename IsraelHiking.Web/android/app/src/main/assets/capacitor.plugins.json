@@ -28,6 +28,10 @@
 		"classpath": "com.capacitorjs.plugins.textzoom.TextZoomPlugin"
 	},
 	{
+		"pkg": "@capawesome-team/capacitor-android-battery-optimization",
+		"classpath": "io.capawesome.capacitorjs.plugins.batteryoptimization.BatteryOptimizationPlugin"
+	},
+	{
 		"pkg": "@capawesome/capacitor-app-update",
 		"classpath": "io.capawesome.capacitorjs.plugins.appupdate.AppUpdatePlugin"
 	},
