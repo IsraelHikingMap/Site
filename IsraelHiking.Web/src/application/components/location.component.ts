@@ -169,7 +169,7 @@ export class LocationComponent {
                 return;
             }
             const { enabled } = await BatteryOptimization.isBatteryOptimizationEnabled();
-            if (enabled) {
+            if (!enabled) {
                 this.recordedRouteService.startRecording();
                 return;
             }
