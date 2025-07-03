@@ -10,9 +10,9 @@
                  (mapLoad)="mapLoaded()"
                  (pitchEvt)="pitchChanged()"
                  [doubleClickZoom]="false"
-                 [attributionControl]="false"
-                 [canvasContextAttributes]="{ preserveDrawingBuffer: true }">
-            <layers-view></layers-view>
+                 [attributionControl]="false">
+            <layers></layers>
+            <public-pois></public-pois>
             <routes></routes>
             <recorded-route></recorded-route>
             <traces></traces>

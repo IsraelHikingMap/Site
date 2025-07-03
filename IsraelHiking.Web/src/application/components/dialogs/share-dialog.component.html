@@ -4,9 +4,16 @@
         <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-content>
-        <div class="flex flex-row" *ngIf="imageUrl">
-             <div class="img-container-small">
-                <img [src]="imageUrl" class="img-responsive-full img-center"/>
+        <div class="flex flex-row justify-center">
+            <div style="width: 256px; height: 256px">
+                <mgl-map
+                    [interactive]="false"
+                    [style]="style"
+                    [attributionControl]="false"
+                    (mapLoad)="mapLoaded($event)">
+                    <layers></layers>
+                    <routes></routes>
+                </mgl-map>
             </div>
         </div>
         <div *ngIf="!shareAddress">
