@@ -231,7 +231,12 @@ public class UrlsController : ControllerBase
             // update can be made without the datacontainer data
             shareUrlFromDatabase.DataContainer = shareUrl.DataContainer;
         }
-
+        if (!string.IsNullOrWhiteSpace(shareUrl.Base64Preview))
+        {
+            // update can be made without the image
+            shareUrlFromDatabase.Base64Preview = shareUrl.Base64Preview;
+        }
+            
         await _repository.Update(shareUrlFromDatabase);
         return Ok(shareUrlFromDatabase);
     }

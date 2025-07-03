@@ -10,6 +10,7 @@
                     [interactive]="false"
                     [style]="style"
                     [attributionControl]="false"
+                    [canvasContextAttributes]="{ preserveDrawingBuffer: true }"
                     (mapLoad)="mapLoaded($event)">
                     <layers></layers>
                     <routes></routes>
