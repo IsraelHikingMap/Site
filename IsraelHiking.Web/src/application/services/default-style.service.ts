@@ -22,7 +22,7 @@ export class DefaultStyleService {
     }
 
     public getStyleWithPlaceholders(): StyleSpecification {
-        let styleWithPlaceholder = {...this.style};
+        const styleWithPlaceholder = {...this.style};
         styleWithPlaceholder.sources = {
             dummy: {
                 type: "geojson",
