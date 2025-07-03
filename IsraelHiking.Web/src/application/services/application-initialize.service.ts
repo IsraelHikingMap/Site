@@ -88,18 +88,6 @@ export class ApplicationInitializeService {
                 && this.store.selectSnapshot((s: ApplicationState) => s.configuration).isShowIntro) {
                     IntroDialogComponent.openDialog(this.dialog, this.runningContextService);
             }
-            // HM TODO: remove this at 01.2025
-            if (this.store.selectSnapshot((s: ApplicationState) => s.userState).token?.includes(";")) {
-                this.toastService.confirm({
-                    type: "OkCancel",
-                    message: this.resources.loginTokenExpiredPleaseLoginAgain,
-                    confirmAction: () => {
-                        this.authorizationService.logout();
-                        this.authorizationService.login();
-                    },
-                    declineAction: () => { }
-                });
-            }
             this.poiService.initialize(); // do not wait for it to complete
             this.recordedRouteService.initialize();
             this.deviceOrientationService.initialize();
