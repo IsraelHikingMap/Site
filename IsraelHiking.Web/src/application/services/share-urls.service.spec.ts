@@ -226,18 +226,8 @@ describe("Share Urls Service", () => {
         }));
 
     it("Should get image for share url", inject([ShareUrlsService], (shareUrlsService: ShareUrlsService) => {
-        const shareUrl = { id: "42" } as ShareUrl;
-        const imageUrl = shareUrlsService.getImageFromShareId(shareUrl);
+        const imageUrl = shareUrlsService.getImageUrlFromShareId("42");
 
-        expect(imageUrl).toContain(shareUrl.id);
+        expect(imageUrl).toContain("42");
     }));
-
-    it("Should get image preview by sending a request to server",
-        inject([ShareUrlsService, HttpTestingController],
-            async (shareUrlsService: ShareUrlsService) => {
-
-            const res = shareUrlsService.getImagePreview();
-
-            expect(res).not.toBeNull();
-        }));
 });

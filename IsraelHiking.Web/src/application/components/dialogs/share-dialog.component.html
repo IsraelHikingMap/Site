@@ -4,20 +4,20 @@
         <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-content>
-        <div class="flex flex-row justify-center">
-            <div style="width: 256px; height: 256px">
-                <mgl-map
-                    [interactive]="false"
-                    [style]="style"
-                    [attributionControl]="false"
-                    [canvasContextAttributes]="{ preserveDrawingBuffer: true }"
-                    (mapLoad)="mapLoaded($event)">
-                    <layers></layers>
-                    <routes></routes>
-                </mgl-map>
-            </div>
-        </div>
         <div *ngIf="!shareAddress">
+            <div class="flex flex-row justify-center">
+                <div style="width: 256px; height: 256px">
+                    <mgl-map
+                        [interactive]="false"
+                        [style]="style"
+                        [attributionControl]="false"
+                        [canvasContextAttributes]="{ preserveDrawingBuffer: true }"
+                        (mapLoad)="mapLoaded($event)">
+                        <layers></layers>
+                        <routes></routes>
+                    </mgl-map>
+                </div>
+            </div>
             <div class="flex flex-row">
                 <mat-form-field class="w-full" hintLabel="{{resources.titlePlaceHolder}}">
                     <mat-label>{{resources.title}}</mat-label>
@@ -45,6 +45,13 @@
             <div class="input-wrapper-spacer"></div>
             <div class="flex flex-row">
                 <button mat-raised-button class="w-full" color="primary" (click)="uploadShareUrl()" [disabled]="isLoading" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share {{updateCurrentShare ? 'update' : 'create'}}{{shareOverlays ? ' with overlays' : ''}}">{{updateCurrentShare ? resources.update : resources.generateUrlToShareWithYourFriends}}</button>
+            </div>
+        </div>
+        <div *ngIf="shareAddress">
+            <div class="flex flex-row">
+                <div class="img-container-small">
+                    <img [src]="imageUrl" class="img-responsive-full img-center"/>
+                </div>
             </div>
         </div>
         <div *ngIf="shareAddress && !isApp()">

@@ -51,6 +51,7 @@ export class ShareDialogComponent {
     public style: StyleSpecification;
     public center: LngLatLike;
     public baseLayerData: EditableLayer;
+    public imageUrl: string;
 
     public readonly resources = inject(ResourcesService);
 
@@ -116,6 +117,7 @@ export class ShareDialogComponent {
             const links = this.shareUrlsService.getShareSocialLinks(shareUrl);
             this.toastService.success(this.resources.dataUpdatedSuccessfully);
             this.shareAddress = links.ihm;
+            this.imageUrl = this.shareUrlsService.getImageUrlFromShareId(shareUrl.id);
             this.whatsappShareAddress = links.whatsapp;
             this.facebookShareAddress = links.facebook;
             this.nakebCreateHikeAddress = links.nakeb;

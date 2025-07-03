@@ -201,7 +201,7 @@ export class SharesDialogComponent implements OnInit {
     }
 
     public getImageFromShareId(shareUrl: ShareUrl, width: number, height: number) {
-        return this.shareUrlsService.getImageFromShareId(shareUrl, width, height);
+        return this.shareUrlsService.getImageUrlFromShareId(shareUrl.id, width, height);
     }
 
     public getShareSocialLinks() {
