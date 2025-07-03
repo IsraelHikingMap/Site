@@ -276,7 +276,7 @@ describe("Poi Service", () => {
                         {name: "iNature", items: []},
                         {name: "Wikipedia", items: []},
                         {name: "Water", items: [
-                            {iconColorCategory: { icon: "icon-nature-reserve"}},
+                            {iconColorCategory: { icon: "icon-leaf"}},
                             {iconColorCategory: { icon: "other-icon"}}
                         ]}
                     ]}]

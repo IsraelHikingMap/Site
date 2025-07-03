@@ -625,7 +625,7 @@ public class FeaturesMergeExecutor : IFeaturesMergeExecutor
     private void AddAlternativeTitleToNatureReserves(List<IFeature> features)
     {
         WriteToBothLoggers("Starting adding alternative names to nature reserves");
-        var natureReserveFeatures = features.Where(f => f.Attributes[FeatureAttributes.POI_ICON].Equals("icon-nature-reserve")).ToList();
+        var natureReserveFeatures = features.Where(f => f.Attributes[FeatureAttributes.POI_ICON].Equals("icon-leaf")).ToList();
         WriteToBothLoggers($"Processing {natureReserveFeatures.Count} nature reserves");
         foreach (var natureReserveFeature in natureReserveFeatures)
         {

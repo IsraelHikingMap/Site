@@ -26,7 +26,7 @@ export class OsmTagsService {
             feature.properties.boundary === "national_park" ||
             feature.properties.leisure === "nature_reserve") {
             poi.properties.poiIconColor = "#008000";
-            poi.properties.poiIcon = "icon-nature-reserve";
+            poi.properties.poiIcon = "icon-leaf";
             poi.properties.poiCategory = "Other";
             return;
         }
