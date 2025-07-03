@@ -60,7 +60,6 @@ export class MainMapComponent {
     private addedControls: IControl[] = [];
 
     constructor() {
-        
         this.location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
         this.initialStyle = this.defaultStyleService.getStyleWithPlaceholders();
         this.titleService.clear();
