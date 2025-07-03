@@ -16,6 +16,7 @@ dependencies {
     implementation project(':capacitor-device')
     implementation project(':capacitor-share')
     implementation project(':capacitor-text-zoom')
+    implementation project(':capawesome-team-capacitor-android-battery-optimization')
     implementation project(':capawesome-capacitor-app-update')
     implementation project(':capgo-native-audio')
     implementation project(':capacitor-email-composer')

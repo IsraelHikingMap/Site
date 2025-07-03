@@ -24,6 +24,7 @@
     "@capacitor/ios": "^7.2.0",
     "@capacitor/share": "^7.0.1",
     "@capacitor/text-zoom": "^7.0.1",
+    "@capawesome-team/capacitor-android-battery-optimization": "^7.0.0",
     "@capawesome/capacitor-app-update": "^7.0.1",
     "@capgo/native-audio": "^7.3.22",
     "@mapbox/mapbox-gl-rtl-text": "^0.3.0",

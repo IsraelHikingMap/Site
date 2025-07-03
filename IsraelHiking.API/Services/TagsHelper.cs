@@ -204,7 +204,7 @@ public class TagsHelper : ITagsHelper
         otherCategory.Items.Add(new IconAndTags(attractionIcon, "tourism", "attraction"));
         var natureReserveIcon = new IconColorCategory
         {
-            Icon = "icon-nature-reserve",
+            Icon = "icon-leaf",
             Color = "#008000",
             Category = Categories.OTHER,
             Label = "Nature Reserve, National Park"

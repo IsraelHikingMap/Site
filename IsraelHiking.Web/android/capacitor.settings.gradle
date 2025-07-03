@@ -23,6 +23,9 @@ project(':capacitor-share').projectDir = new File('../node_modules/@capacitor/sh
 include ':capacitor-text-zoom'
 project(':capacitor-text-zoom').projectDir = new File('../node_modules/@capacitor/text-zoom/android')
 
+include ':capawesome-team-capacitor-android-battery-optimization'
+project(':capawesome-team-capacitor-android-battery-optimization').projectDir = new File('../node_modules/@capawesome-team/capacitor-android-battery-optimization/android')
+
 include ':capawesome-capacitor-app-update'
 project(':capawesome-capacitor-app-update').projectDir = new File('../node_modules/@capawesome/capacitor-app-update/android')
 

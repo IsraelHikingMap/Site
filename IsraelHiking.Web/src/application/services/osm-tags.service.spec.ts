@@ -42,7 +42,7 @@ describe("OsmTagsService", () => {
         OsmTagsService.setIconColorCategory(feature, poi);
         // Assert
         expect(poi.properties.poiIconColor).toBe("#008000");
-        expect(poi.properties.poiIcon).toBe("icon-nature-reserve");
+        expect(poi.properties.poiIcon).toBe("icon-leaf");
         expect(poi.properties.poiCategory).toBe("Other");
     });
 

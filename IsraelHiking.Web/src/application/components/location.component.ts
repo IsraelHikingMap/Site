@@ -7,6 +7,7 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { MapComponent, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent } from "@maplibre/ngx-maplibre-gl";
 import { Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
+import { BatteryOptimization } from "@capawesome-team/capacitor-android-battery-optimization";
 
 import { GpsLocationOverlayComponent } from "./overlays/gps-location-overlay.component";
 import { ResourcesService } from "../services/resources.service";
@@ -16,6 +17,7 @@ import { SpatialService } from "../services/spatial.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
 import { LocationService } from "../services/location.service";
 import { FileService } from "../services/file.service";
+import { RunningContextService } from "../services/running-context.service";
 import { ToggleDistanceAction, SetPannedAction, SetFollowingAction, ToggleKeepNorthUpAction } from "../reducers/in-memory.reducer";
 import { StopShowingBatteryConfirmationAction } from "../reducers/configuration.reducer";
 import { ChangeRouteStateAction } from "../reducers/routes.reducer";
@@ -40,6 +42,7 @@ export class LocationComponent {
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly recordedRouteService = inject(RecordedRouteService);
     private readonly fileService = inject(FileService);
+    private readonly runningContextService = inject(RunningContextService);
     private readonly store = inject(Store);
     private readonly mapComponent = inject(MapComponent);
 
@@ -150,7 +153,7 @@ export class LocationComponent {
         return this.recordedRouteService.isRecording();
     }
 
-    public toggleRecording() {
+    public async toggleRecording() {
         if (this.isRecording()) {
             this.toastService.confirm({
                 message: this.resources.areYouSureYouWantToStopRecording,
@@ -161,10 +164,22 @@ export class LocationComponent {
                 }
             });
         } else {
+            if (this.runningContextService.isCapacitor && this.runningContextService.isIos) {
+                this.recordedRouteService.startRecording();
+                return;
+            }
+            const { enabled } = await BatteryOptimization.isBatteryOptimizationEnabled();
+            if (!enabled) {
+                this.recordedRouteService.startRecording();
+                return;
+            }
             if (this.store.selectSnapshot((s: ApplicationState) => s.configuration).isShowBatteryConfirmation) {
                 this.toastService.confirm({
                     message: this.resources.makeSureBatteryOptimizationIsOff,
                     type: "Custom",
+                    confirmAction: () => {
+                        BatteryOptimization.openBatteryOptimizationSettings();
+                    },
                     declineAction: () => {
                         this.store.dispatch(new StopShowingBatteryConfirmationAction());
                     },
