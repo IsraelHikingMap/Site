@@ -1,11 +1,13 @@
-﻿﻿<div [dir]="resources.direction" class="dialog-xs">
+﻿﻿<div [dir]="resources.direction">
     <div matDialogTitle>
         <div>{{title}}</div>
         <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-content>
         <div class="flex flex-row" *ngIf="imageUrl">
-            <img [src]="imageUrl" class="w-full h-full" />
+             <div class="img-container-small">
+                <img [src]="imageUrl" class="img-responsive-full img-center"/>
+            </div>
         </div>
         <div *ngIf="!shareAddress">
             <div class="flex flex-row">

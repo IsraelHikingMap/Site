@@ -10,10 +10,11 @@ import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
 import { ConnectionService } from "./connection.service";
+import { MapService } from "./map.service";
 import { AddShareUrlAction, RemoveShareUrlAction, ShareUrlsReducer, UpdateShareUrlAction } from "../reducers/share-urls.reducer";
 import { SetShareUrlsLastModifiedDateAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
-import type { ShareUrl, DataContainer } from "../models/models";
+import type { ShareUrl } from "../models/models";
 
 describe("Share Urls Service", () => {
     beforeEach(() => {
@@ -37,7 +38,9 @@ describe("Share Urls Service", () => {
                 { provide: HashService, useValue: hashService },
                 { provide: LoggingService, useValue: loggingService },
                 { provide: DatabaseService, useValue: databaseService },
-                { provide: ConnectionService, useValue: { stateChanged: { subscribe: () => {} }} },                RunningContextService,
+                { provide: ConnectionService, useValue: { stateChanged: { subscribe: () => {} }} },
+                { provide: MapService, useValue: { map: { getCanvas: () => ({ toDataURL: () => "url" })}}},
+                RunningContextService,
                 WhatsAppService,
                 ShareUrlsService,
                 provideHttpClient(withInterceptorsFromDi()),
@@ -231,13 +234,10 @@ describe("Share Urls Service", () => {
 
     it("Should get image preview by sending a request to server",
         inject([ShareUrlsService, HttpTestingController],
-            async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController) => {
+            async (shareUrlsService: ShareUrlsService) => {
 
-            const promise = shareUrlsService.getImagePreview({} as DataContainer).then((res) => {
-                expect(res).not.toBeNull();
-            });
+            const res = shareUrlsService.getImagePreview();
 
-            mockBackend.expectOne(Urls.images).flush(new Blob());
-            return promise;
+            expect(res).not.toBeNull();
         }));
 });

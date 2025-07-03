@@ -10,7 +10,8 @@
                  (mapLoad)="mapLoaded()"
                  (pitchEvt)="pitchChanged()"
                  [doubleClickZoom]="false"
-                 [attributionControl]="false">
+                 [attributionControl]="false"
+                 [canvasContextAttributes]="{ preserveDrawingBuffer: true }">
             <layers-view></layers-view>
             <routes></routes>
             <recorded-route></recorded-route>

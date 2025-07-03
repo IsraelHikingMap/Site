@@ -1,5 +1,5 @@
 import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildren } from "@angular/core";
-import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
+import { MatDialog } from "@angular/material/dialog";
 import { NgStyle, NgIf } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
 import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike, IControl, ControlPosition } from "maplibre-gl";
@@ -161,7 +161,7 @@ export class MainMapComponent {
             ] as [PointLike, PointLike];
             const features = this.mapComponent().mapInstance.queryRenderedFeatures(bbox).filter(f => f.sourceLayer === "record_lines");
             if (features.length <= 0) { return; }
-            this.dialog.open(TracesDialogComponent, { width: "480px", data: features.map(f => f.properties.trace_id) } as MatDialogConfig);
+            this.dialog.open(TracesDialogComponent, { width: "480px", data: features.map(f => f.properties.trace_id) });
         });
     }
 

@@ -74,8 +74,7 @@ export class ShareDialogComponent implements AfterViewInit {
     }
 
     public async ngAfterViewInit(): Promise<void> {
-        const dataToPreview = this.getDataFiltered();
-        const imageUrl = await this.shareUrlsService.getImagePreview(dataToPreview);
+        const imageUrl = this.shareUrlsService.getImagePreview();
         this.imageUrl = this.sanitizer.bypassSecurityTrustUrl(imageUrl) as string;
     }
 

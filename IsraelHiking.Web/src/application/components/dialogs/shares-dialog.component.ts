@@ -90,7 +90,7 @@ export class SharesDialogComponent implements OnInit {
     }
 
     public createShare() {
-        this.dialog.open(ShareDialogComponent);
+        this.dialog.open(ShareDialogComponent, { width: "480px" });
     }
 
     private updateFilteredLists(searchTerm: string) {

@@ -43,7 +43,7 @@
            [paint]="{
                 'circle-color': ['get', 'color'],
                 'circle-radius': 7,
-                'circle-stroke-color': 'white',
+                'circle-stroke-color': ['get', 'strokeColor'],
                 'circle-stroke-width': 3
             }"
             (layerClick)="nonEditRoutePointClick($event)">

@@ -11,11 +11,12 @@ import { RouteStrings } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
+import { MapService } from "./map.service";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import { UpdateShareUrlAction, RemoveShareUrlAction, AddShareUrlAction } from "../reducers/share-urls.reducer";
 import { SetShareUrlsLastModifiedDateAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
-import type { ShareUrl, DataContainer, ApplicationState } from "../models/models";
+import type { ShareUrl, ApplicationState } from "../models/models";
 
 interface IShareUrlSocialLinks {
     facebook: string;
@@ -33,6 +34,7 @@ export class ShareUrlsService {
     private readonly whatsAppService = inject(WhatsAppService);
     private readonly loggingService = inject(LoggingService);
     private readonly databaseService = inject(DatabaseService);
+    private readonly mapService = inject(MapService);
     private readonly store = inject(Store);
 
     public async initialize() {
@@ -171,9 +173,8 @@ export class ShareUrlsService {
         return address;
     }
 
-    public async getImagePreview(dataContainer: DataContainer) {
-        const image = await firstValueFrom(this.httpClient.post(Urls.images, dataContainer, { responseType: "blob" }));
-        return window.URL.createObjectURL(image);
+    public getImagePreview(): string {
+        return this.mapService.map.getCanvas().toDataURL("image/png");
     }
 
     public setShareUrl(shareUrl: Immutable<ShareUrl>) {
