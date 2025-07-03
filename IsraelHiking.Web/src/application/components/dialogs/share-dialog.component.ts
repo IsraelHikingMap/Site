@@ -136,7 +136,8 @@ export class ShareDialogComponent implements AfterViewInit {
             title: this.title,
             description: this.description,
             dataContainer: this.getDataFiltered(),
-            osmUserId: osmUserId
+            osmUserId: osmUserId,
+            base64Preview: this.imageUrl,
         } as ShareUrl;
         return shareUrl;
     }
