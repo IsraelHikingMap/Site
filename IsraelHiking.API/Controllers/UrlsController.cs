@@ -87,7 +87,7 @@ public class UrlsController : ControllerBase
     }
 
     /// <summary>
-    /// Returns the last modifed timestamp relevant to a given shared route
+    /// Returns the last modified timestamp relevant to a given shared route
     /// </summary>
     /// <param name="id">The shared route ID</param>
     /// <returns>The shared last modified timestamp</returns>
