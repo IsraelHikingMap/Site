@@ -63,10 +63,10 @@ export class PrivatePoiShowDialogComponent {
         this.url = this.marker.urls.find(u => !u.mimeType.startsWith("image"));
     }
 
-    public static openDialog(matDialog: MatDialog, marker: MarkerData, routeId: string, index: number) {
+    public static openDialog(dialog: MatDialog, marker: MarkerData, routeId: string, index: number) {
         setTimeout(() => {
             // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
-            matDialog.open(PrivatePoiShowDialogComponent,
+            dialog.open(PrivatePoiShowDialogComponent,
                 {
                     maxWidth: "378px",
                     data: {

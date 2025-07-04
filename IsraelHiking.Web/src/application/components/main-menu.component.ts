@@ -4,7 +4,7 @@ import { NgIf, NgClass, AsyncPipe } from "@angular/common";
 import { MatButton } from "@angular/material/button";
 import { MatMenuTrigger, MatMenu, MatMenuContent, MatMenuItem } from "@angular/material/menu";
 import { Dir } from "@angular/cdk/bidi";
-import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
+import { MatDialog } from "@angular/material/dialog";
 import { Angulartics2OnModule } from "angulartics2";
 import { timer } from "rxjs";
 import { Device } from "@capacitor/device";
@@ -104,7 +104,7 @@ export class MainMenuComponent {
             return;
         }
         if (!this.store.selectSnapshot((s: ApplicationState) => s.userState).agreedToTheTermsOfService) {
-            const component = this.dialog.open(TermsOfServiceDialogComponent);
+            const component = this.dialog.open(TermsOfServiceDialogComponent, { width: "480px"});
             component.afterClosed().subscribe((results: string) => {
                 if (results === "true") {
                     this.store.dispatch(new SetAgreeToTermsAction(true));
@@ -246,15 +246,15 @@ export class MainMenuComponent {
     }
 
     public openTraces() {
-        this.dialog.open(TracesDialogComponent, { width: "480px", data: [] } as MatDialogConfig);
+        this.dialog.open(TracesDialogComponent, { width: "480px", data: [] });
     }
 
     public openShares() {
-        this.dialog.open(SharesDialogComponent, { width: "480px" } as MatDialogConfig);
+        this.dialog.open(SharesDialogComponent, { width: "480px" });
     }
 
     public openConfigurationDialog() {
-        this.dialog.open(ConfigurationDialogComponent, { width: "480px" } as MatDialogConfig);
+        this.dialog.open(ConfigurationDialogComponent, { width: "480px" });
     }
 
     public isShowOrderButton() {

@@ -1,18 +1,3 @@
-﻿﻿<auto-layer [layerData]="getBaseLayer()"
-            [visible]="true"
-            [before]="resources.endOfBaseLayer"
-            [isBaselayer]="true"
-            [isMainMap]="true">
-</auto-layer>
-<div *ngFor="let overlay of (overlays$ | async); trackBy:trackByKey">
-    <auto-layer [layerData]="overlay"
-                [visible]="overlay.visible"
-                [before]="resources.endOfOverlays"
-                [isBaselayer]="false"
-                [isMainMap]="true"
-                [isSameBaselayerOn]="isSameBaselayerOn(overlay)">
-    </auto-layer>
-</div>
 <mgl-geojson-source #clusterSource
                     id="poi-cluster-source"
                     [data]="poiGeoJsonData"

@@ -95,6 +95,18 @@ public class UrlsControllerTests
     }
 
     [TestMethod]
+    public void GetShareUrlLastModifiedTimeStamp_ShouldReturnLastModifiedTimeStamp()
+    {
+        var id = "someId";
+        var date = DateTime.Now.AddDays(-1);
+        _repository.GetUrlTimestampById(id).Returns(date);
+        
+        var results = _controller.GetShareUrlLastModifiedTimeStamp(id).Result;
+        
+        Assert.AreEqual(results, date);
+    }
+    
+    [TestMethod]
     public void PostShareUrl_NullShare_ShouldReturnBadRequest()
     {
         var results = _controller.PostShareUrl(null).Result as BadRequestObjectResult;
@@ -205,7 +217,7 @@ public class UrlsControllerTests
     }
 
     [TestMethod]
-    public void PutShareUrl_ItemBelongsToUSer_ShouldUpdateIt()
+    public void PutShareUrl_ItemBelongsToUser_ShouldUpdateIt()
     {
         var shareUrl = new ShareUrl { Id = "1", OsmUserId = "1" };
         _repository.GetUrlById(shareUrl.Id).Returns(shareUrl);
@@ -214,7 +226,22 @@ public class UrlsControllerTests
         var results = _controller.PutShareUrl(shareUrl.Id, shareUrl).Result as OkObjectResult;
 
         Assert.IsNotNull(results);
-        _repository.Received(1).Update(Arg.Any<ShareUrl>());
+        _repository.Received(1).Update(Arg.Is<ShareUrl>(s => s.DataContainer == null && s.Base64Preview == null));
+    }
+    
+    [TestMethod]
+    public void PutShareUrl_WithNewImageAndDataContainer_ShouldUpdateIt()
+    {
+        var shareUrlFromDb = new ShareUrl { Id = "1", OsmUserId = "1" };
+        _repository.GetUrlById(shareUrlFromDb.Id).Returns(shareUrlFromDb);
+        _controller.SetupIdentity(shareUrlFromDb.OsmUserId);
+
+        var updatedShareUrl = new ShareUrl { Id = shareUrlFromDb.Id, OsmUserId = shareUrlFromDb.OsmUserId, DataContainer = new DataContainerPoco(), Base64Preview = "image" };
+        
+        var results = _controller.PutShareUrl(updatedShareUrl.Id, updatedShareUrl).Result as OkObjectResult;
+
+        Assert.IsNotNull(results);
+        _repository.Received(1).Update(Arg.Is<ShareUrl>(s => s.DataContainer != null && s.Base64Preview == updatedShareUrl.Base64Preview));
     }
 
     [TestMethod]

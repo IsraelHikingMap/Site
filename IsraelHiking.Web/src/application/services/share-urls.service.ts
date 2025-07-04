@@ -15,7 +15,7 @@ import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import { UpdateShareUrlAction, RemoveShareUrlAction, AddShareUrlAction } from "../reducers/share-urls.reducer";
 import { SetShareUrlsLastModifiedDateAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
-import type { ShareUrl, DataContainer, ApplicationState } from "../models/models";
+import type { ShareUrl, ApplicationState } from "../models/models";
 
 interface IShareUrlSocialLinks {
     facebook: string;
@@ -163,17 +163,12 @@ export class ShareUrlsService {
         await this.databaseService.deleteShareUrlById(shareUrl.id);
     }
 
-    public getImageFromShareId(shareUrl: Immutable<ShareUrl>, width?: number, height?: number) {
-        let address = Urls.images + shareUrl.id;
+        public getImageUrlFromShareId(shareUrlId: string, width?: number, height?: number) {
+        let address = Urls.images + shareUrlId;
         if (width && height) {
             address += `?width=${width}&height=${height}`;
         }
         return address;
-    }
-
-    public async getImagePreview(dataContainer: DataContainer) {
-        const image = await firstValueFrom(this.httpClient.post(Urls.images, dataContainer, { responseType: "blob" }));
-        return window.URL.createObjectURL(image);
     }
 
     public setShareUrl(shareUrl: Immutable<ShareUrl>) {

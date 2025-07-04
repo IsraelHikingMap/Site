@@ -27,6 +27,8 @@ public class ShareUrl
 
     [JsonPropertyName("dataContainer")]
     public DataContainerPoco DataContainer { get; set; }
+    [JsonPropertyName("base64Preview")]
+    public string Base64Preview { get; set; }
 }
 
 public static class ShareUrlExtensions

@@ -33,8 +33,8 @@ export class AddSimplePoiDialogComponent {
     private readonly toastService = inject(ToastService);
     private readonly data = inject<AddSimplePoiDialogData>(MAT_DIALOG_DATA);
 
-    public static openDialog(matDialog: MatDialog, data: AddSimplePoiDialogData) {
-        matDialog.open(AddSimplePoiDialogComponent, { data });
+    public static openDialog(dialog: MatDialog, data: AddSimplePoiDialogData) {
+        dialog.open(AddSimplePoiDialogComponent, { data });
     }
 
     public async addSimplePoint(pointType: SimplePointType) {

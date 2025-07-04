@@ -53,7 +53,7 @@ export class IntroDialogComponent {
                 right: "0px"
             };
         } else {
-            options.width = "450px";
+            options.width = "480px";
         }
         dialog.open(IntroDialogComponent, options);
     }

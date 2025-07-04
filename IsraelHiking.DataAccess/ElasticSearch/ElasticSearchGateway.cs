@@ -459,7 +459,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             .Query(q => q.Term(t => t.OsmUserId, osmUserId))
             .Source(src => src
                 .IncludeAll()
-                .Excludes(e => e.Fields(p => p.DataContainer))
+                .Excludes(e => e.Fields(p => p.DataContainer, p => p.Base64Preview))
             )
         );
         return response.Documents.ToList();
