@@ -87,7 +87,7 @@ public class UrlsController : ControllerBase
     }
 
     /// <summary>
-    /// Returns the last modifed timestamp relevant to a given shared route
+    /// Returns the last modified timestamp relevant to a given shared route
     /// </summary>
     /// <param name="id">The shared route ID</param>
     /// <returns>The shared last modified timestamp</returns>
@@ -231,7 +231,12 @@ public class UrlsController : ControllerBase
             // update can be made without the datacontainer data
             shareUrlFromDatabase.DataContainer = shareUrl.DataContainer;
         }
-
+        if (!string.IsNullOrWhiteSpace(shareUrl.Base64Preview))
+        {
+            // update can be made without the image
+            shareUrlFromDatabase.Base64Preview = shareUrl.Base64Preview;
+        }
+            
         await _repository.Update(shareUrlFromDatabase);
         return Ok(shareUrlFromDatabase);
     }

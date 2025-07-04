@@ -1,5 +1,5 @@
 import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildren } from "@angular/core";
-import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
+import { MatDialog } from "@angular/material/dialog";
 import { NgStyle, NgIf } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
 import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, PointLike, IControl, ControlPosition } from "maplibre-gl";
@@ -17,7 +17,7 @@ import { SetLocationAction } from "../../reducers/location.reducer";
 import type { ApplicationState, LocationState } from "../../models/models";
 import { SidebarComponent } from "../sidebar/sidebar.component";
 import { BackgroundTextComponent } from "../background-text.component";
-import { LayersViewComponent } from "./layers-view.component";
+import { LayersComponent } from "./layers.component";
 import { RoutesComponent } from "./routes.component";
 import { RecordedRouteComponent } from "./recorded-route.component";
 import { TracesComponent } from "./traces.component";
@@ -29,13 +29,14 @@ import { DrawingComponent } from "../drawing.component";
 import { RouteStatisticsComponent } from "../route-statistics.component";
 import { CenterMeComponent } from "../center-me.component";
 import { MapeakLinkComponent } from "../mapeak-link.component";
+import { PublicPoisComponent } from "./public-pois.component";
 
 @Component({
     selector: "main-map",
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersViewComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, NgIf, LocationComponent, MainMenuComponent, SearchComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent]
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, NgIf, LocationComponent, MainMenuComponent, SearchComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent]
 })
 export class MainMapComponent {
 
@@ -119,7 +120,7 @@ export class MainMapComponent {
             ] as [PointLike, PointLike];
             const features = this.mapComponent().mapInstance.queryRenderedFeatures(bbox).filter(f => f.sourceLayer === "record_lines");
             if (features.length <= 0) { return; }
-            this.dialog.open(TracesDialogComponent, { width: "480px", data: features.map(f => f.properties.trace_id) } as MatDialogConfig);
+            this.dialog.open(TracesDialogComponent, { width: "480px", data: features.map(f => f.properties.trace_id) });
         });
     }
 

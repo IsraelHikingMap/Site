@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
@@ -97,11 +98,10 @@ public class CrawlersMiddleware
                 .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
                 .Select(p => feature.Attributes[p].ToString())
                 .FirstOrDefault() ?? string.Empty;
-            // HM TODO: check if that gets the image in whataapp - i.e. remove this code if OK
-            //if (isWhatsApp)
-            //{
-            //    thumbnailUrl = Regex.Replace(thumbnailUrl, @"(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)", "$1thumb/$2$3/200px-$3");
-            //}
+            if (isWhatsApp)
+            {
+                thumbnailUrl = Regex.Replace(thumbnailUrl, @"(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)", "$1thumb/$2$3/200px-$3");
+            }
             feature.SetTitles();
             context.Request.Query.TryGetValue("language", out var languages);
             language = languages.FirstOrDefault() ?? Languages.HEBREW;

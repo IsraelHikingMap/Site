@@ -1,5 +1,5 @@
 import { Component, DestroyRef, inject, OnInit } from "@angular/core";
-import { NgFor, NgIf, AsyncPipe } from "@angular/common";
+import { NgIf } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
@@ -7,17 +7,14 @@ import { Angulartics2OnModule } from "angulartics2";
 import { MatDialog } from "@angular/material/dialog";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router } from "@angular/router";
-import { Observable } from "rxjs";
 import { GeoJSONSourceComponent, SourceDirective, MarkersForClustersComponent, PointDirective, ClusterPointDirective, PopupComponent, MarkerComponent, LayerComponent } from "@maplibre/ngx-maplibre-gl";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { CoordinatesComponent } from "../coordinates.component";
 import { ClusterOverlayComponent } from "../overlays/cluster-overlay.component";
-import { AutomaticLayerPresentationComponent } from "./automatic-layer-presentation.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { PoiService } from "../../services/poi.service";
-import { LayersService } from "../../services/layers.service";
 import { RouteStrings } from "../../services/hash.service";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
@@ -26,15 +23,15 @@ import { NavigateHereService } from "../../services/navigate-here.service";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import { GeoJSONUtils } from "../../services/geojson-utils";
-import type { ApplicationState, LatLngAlt, LinkData, Overlay } from "../../models/models";
+import type { ApplicationState, LatLngAlt, LinkData } from "../../models/models";
 
 @Component({
-    selector: "layers-view",
-    templateUrl: "layers-view.component.html",
-    styleUrls: ["layers-view.component.scss"],
-    imports: [AutomaticLayerPresentationComponent, NgFor, SourceDirective, GeoJSONSourceComponent, MarkersForClustersComponent, PointDirective, Angulartics2OnModule, NgIf, ClusterPointDirective, PopupComponent, ClusterOverlayComponent, Dir, MatButton, MatTooltip, CoordinatesComponent, MarkerComponent, LayerComponent, AsyncPipe]
+    selector: "public-pois",
+    templateUrl: "public-pois.component.html",
+    styleUrls: ["public-pois.component.scss"],
+    imports: [SourceDirective, GeoJSONSourceComponent, MarkersForClustersComponent, PointDirective, Angulartics2OnModule, NgIf, ClusterPointDirective, PopupComponent, ClusterOverlayComponent, Dir, MatButton, MatTooltip, CoordinatesComponent, MarkerComponent, LayerComponent]
 })
-export class LayersViewComponent implements OnInit {
+export class PublicPoisComponent implements OnInit {
     private static readonly MAX_MENU_POINTS_IN_CLUSTER = 50;
 
     public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point>;
@@ -47,26 +44,16 @@ export class LayersViewComponent implements OnInit {
     public clusterFeatures: GeoJSON.Feature<GeoJSON.Point>[];
     public hoverFeature: GeoJSON.Feature<GeoJSON.Point> = null;
     public isShowCoordinatesPopup: boolean = false;
-    public overlays$: Observable<Immutable<Overlay[]>>;	
 
     public readonly resources = inject(ResourcesService);
 
     private readonly router = inject(Router);
     private readonly matDialog = inject(MatDialog);
-    private readonly layersService = inject(LayersService);
     private readonly poiService = inject(PoiService);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly navigateHereService = inject(NavigateHereService);
     private readonly store = inject(Store);
     private readonly destroyRef = inject(DestroyRef);
-
-    constructor() {
-        this.overlays$ = this.store.select((state: ApplicationState) => state.layersState.overlays);
-    }
-
-    public getBaseLayer() {
-        return this.layersService.getSelectedBaseLayer();
-    }
 
     public ngOnInit() {
         this.poiGeoJsonData = this.poiService.poiGeojsonFiltered;
@@ -116,7 +103,7 @@ export class LayersViewComponent implements OnInit {
             return;
         }
         const features = await sourceComponent.getClusterLeaves(feature.properties.cluster_id,
-            LayersViewComponent.MAX_MENU_POINTS_IN_CLUSTER, 0) as GeoJSON.Feature<GeoJSON.Point>[];
+            PublicPoisComponent.MAX_MENU_POINTS_IN_CLUSTER, 0) as GeoJSON.Feature<GeoJSON.Point>[];
         const language = this.resources.getCurrentLanguageCodeSimplified();
         features.sort((a, b) => {
             if (GeoJSONUtils.hasExtraData(a, language) !== GeoJSONUtils.hasExtraData(b, language)) {
@@ -162,10 +149,6 @@ export class LayersViewComponent implements OnInit {
         return feature.properties.poiSource === RouteStrings.COORDINATES;
     }
 
-    public trackByKey(_: number, el: Overlay) {
-        return el.key;
-    }
-
     public addPointToRoute() {
         let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         const markerData = {
@@ -194,9 +177,5 @@ export class LayersViewComponent implements OnInit {
     public navigateHere() {
         this.navigateHereService.addNavigationSegment(this.getSelectedFeatureLatlng());
         this.clearSelected();
-    }
-
-    public isSameBaselayerOn(overlay: Overlay) {
-        return overlay.address === this.getBaseLayer()?.address;
     }
 }

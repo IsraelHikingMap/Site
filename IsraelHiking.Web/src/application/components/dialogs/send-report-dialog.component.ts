@@ -29,8 +29,8 @@ export class SendReportDialogComponent {
         this.mailToLink = `mailto:${to}?subject=${subject}&body=${body}`;
     }
 
-    public static openDialog(matDialog: MatDialog, subject: string) {
-        matDialog.open(SendReportDialogComponent,
+    public static openDialog(dialog: MatDialog, subject: string) {
+        dialog.open(SendReportDialogComponent,
             {
                 maxWidth: "378px",
                 data: {

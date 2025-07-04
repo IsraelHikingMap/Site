@@ -102,7 +102,7 @@ export class FilesSharesDialogComponent {
     }
 
     public openShare() {
-        this.dialog.open(ShareDialogComponent);
+        this.dialog.open(ShareDialogComponent, { width: "480px" });
     }
 
     private getName(data: DataContainer): string {

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using System.Threading.Tasks;
+using IsraelHiking.API.Converters;
 
 namespace IsraelHiking.API.Controllers;
 
@@ -19,6 +20,7 @@ public class ImagesController : ControllerBase
     private readonly IImageCreationGateway _imageCreationGateway;
     private readonly IImgurGateway _imgurGateway;
     private readonly IShareUrlsRepository _repository;
+    private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
 
     /// <summary>
     /// Controller's constructor
@@ -26,13 +28,16 @@ public class ImagesController : ControllerBase
     /// <param name="repository"></param>
     /// <param name="imageCreationGateway"></param>
     /// <param name="imgurGateway"></param>
+    /// <param name="base64ImageConverter"></param>
     public ImagesController(IShareUrlsRepository repository,
         IImageCreationGateway imageCreationGateway,
-        IImgurGateway imgurGateway)
+        IImgurGateway imgurGateway, 
+        IBase64ImageStringToFileConverter base64ImageConverter)
     {
         _repository = repository;
         _imageCreationGateway = imageCreationGateway;
         _imgurGateway = imgurGateway;
+        _base64ImageConverter = base64ImageConverter;
     }
 
     /// <summary>
@@ -96,7 +101,10 @@ public class ImagesController : ControllerBase
         {
             return NotFound();
         }
-        var imageData = await _imageCreationGateway.Create(url.DataContainer, width ?? 600, height ?? 315);
+
+        var imageData = string.IsNullOrWhiteSpace(url.Base64Preview)
+            ? await _imageCreationGateway.Create(url.DataContainer, width ?? 600, height ?? 315)
+            : _base64ImageConverter.ConvertToFile(url.Base64Preview).Content;
         return new FileContentResult(imageData, new MediaTypeHeaderValue("image/png"));
     }
 

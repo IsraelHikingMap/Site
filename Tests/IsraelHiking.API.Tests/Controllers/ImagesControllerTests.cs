@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using System.IO;
+using IsraelHiking.API.Converters;
 
 namespace IsraelHiking.API.Tests.Controllers;
 
@@ -26,7 +27,7 @@ public class ImagesControllerTests
         _imageCreationGateway = Substitute.For<IImageCreationGateway>();
         _imgurGateway = Substitute.For<IImgurGateway>();
             
-        _controller = new ImagesController(_repository, _imageCreationGateway, _imgurGateway);
+        _controller = new ImagesController(_repository, _imageCreationGateway, _imgurGateway, new Base64ImageStringToFileConverter());
     }
 
     [TestMethod]
@@ -52,6 +53,21 @@ public class ImagesControllerTests
         {
             Id = "1",
             DataContainer = new DataContainerPoco()
+        };
+        _repository.GetUrlById(siteUrl.Id).Returns(siteUrl);
+
+        var results = _controller.GetImageForShare(siteUrl.Id).Result as FileContentResult;
+
+        Assert.IsNotNull(results);
+    }
+    
+    [TestMethod]
+    public void GetImageForShare_ImageInDatabase_ShouldReturnIt()
+    {
+        var siteUrl = new ShareUrl
+        {
+            Id = "1",
+            Base64Preview = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
         };
         _repository.GetUrlById(siteUrl.Id).Returns(siteUrl);
 
