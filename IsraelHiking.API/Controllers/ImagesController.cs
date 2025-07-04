@@ -101,10 +101,10 @@ public class ImagesController : ControllerBase
         {
             return NotFound();
         }
-        
-        var imageData = url.Base64Preview != null 
-            ? _base64ImageConverter.ConvertToFile(url.Base64Preview).Content
-            : await _imageCreationGateway.Create(url.DataContainer, width ?? 600, height ?? 315);
+
+        var imageData = string.IsNullOrWhiteSpace(url.Base64Preview)
+            ? await _imageCreationGateway.Create(url.DataContainer, width ?? 600, height ?? 315)
+            : _base64ImageConverter.ConvertToFile(url.Base64Preview).Content;
         return new FileContentResult(imageData, new MediaTypeHeaderValue("image/png"));
     }
 
