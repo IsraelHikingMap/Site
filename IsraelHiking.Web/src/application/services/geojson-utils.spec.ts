@@ -66,7 +66,7 @@ describe("GeoJsonUtils", () => {
     });
 
     it("should return has extra data for feature with image", () => {
-        expect(GeoJSONUtils.hasExtraData({properties: { image: "image-url"}} as any as GeoJSON.Feature, "he")).toBeTruthy();
+        expect(GeoJSONUtils.hasExtraData({properties: { image: "File:valid-image.png"}} as any as GeoJSON.Feature, "he")).toBeTruthy();
     });
 
     it("should return has extra data for feature with wikipedia", () => {
@@ -75,5 +75,30 @@ describe("GeoJsonUtils", () => {
 
     it("should return has extra data for feature with wikidat", () => {
         expect(GeoJSONUtils.hasExtraData({properties: { wikidata: "wiki" }} as any as GeoJSON.Feature, "he")).toBeTruthy();
+    });
+    
+    it("should return only valid image urls", () => {
+        const feature = {
+            properties: {
+                image: "File:123.jpg",
+                image1: "www.wikimedia.org/Building_no_free_image_yet",
+                image2: "www.wikimedia.org/svg.png",
+                image3: "www.wikimedia.org/svg",
+                image4: "www.wikimedia.org/good-image.png",
+                image5: "inature.info/image.jpg",
+                image6: "nakeb.co.il/image.jpg",
+                image7: "jeepolog.com/image.jpg",
+                image8: "invalid-url",
+                image9: "https://example.com/image4.gif"
+            }
+        } as any as GeoJSON.Feature;
+        const validUrls = GeoJSONUtils.getValidImageUrls(feature);
+        expect(validUrls).toEqual([
+            "File:123.jpg",
+            "www.wikimedia.org/good-image.png",
+            "inature.info/image.jpg",
+            "nakeb.co.il/image.jpg",
+            "jeepolog.com/image.jpg"
+        ]);
     });
 });

@@ -785,10 +785,7 @@ export class PoiService {
 
     public async getEditableDataFromFeature(feature: Immutable<GeoJSON.Feature>): Promise<EditablePublicPointData> {
         const language = this.resources.getCurrentLanguageCodeSimplified();
-        let imagesUrls = Object.keys(feature.properties)
-            .filter(k => k.startsWith("image"))
-            .map(k => feature.properties[k])
-            .filter(u => this.isValidImageUrl(u));
+        let imagesUrls = GeoJSONUtils.getValidImageUrls(feature);
         const imageAttributions = await Promise.all(imagesUrls.map(u => this.imageAttributinoService.getAttributionForImage(u)));
         imagesUrls = imagesUrls.filter((_, i) => imageAttributions[i] != null);
         return {
@@ -806,29 +803,6 @@ export class PoiService {
                 ? SpatialService.getLengthInMetersForGeometry(feature.geometry) / 1000.0
                 : null
         };
-    }
-
-    private isValidImageUrl(url: string): boolean {
-        if (url.startsWith("File:")) {
-            return true;
-        }
-        if (url.includes("wikimedia.org") && 
-            !url.includes("Building_no_free_image_yet") && 
-            !url.endsWith("svg.png") &&
-            !url.endsWith("svg")) {
-            return true;
-        }
-        if (url.includes("inature.info"))
-        {
-            return true;
-        }
-        if (url.includes("nakeb.co.il")) {
-            return true;
-        }
-        if (url.includes("jeepolog.com")) {
-            return true;
-        }
-        return false;
     }
 
     public getFeatureFromEditableData(info: EditablePublicPointData): GeoJSON.Feature {
