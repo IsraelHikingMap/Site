@@ -16,8 +16,8 @@ export class OverpassTurboService {
         addProtocol("overpass", async (params, _abortController) => {
             let url = params.url;
             if (url.startsWith("overpass://s/")) {
-                let unshortenAddress = Urls.baseAddress +  "/unshorten/overpass-turbo.eu/s/" + url.replace("overpass://s/", "");
-                let overpassUrl = await firstValueFrom(this.httpClient.get(unshortenAddress, {responseType: "text" })) as string;
+                const unshortenAddress = Urls.baseAddress +  "/unshorten/overpass-turbo.eu/s/" + url.replace("overpass://s/", "");
+                const overpassUrl = await firstValueFrom(this.httpClient.get(unshortenAddress, {responseType: "text" })) as string;
                 url = overpassUrl.trim().replace("https://overpass-turbo.eu/?Q=", "");
             }
             let query = decodeURIComponent(url.replace("overpass://Q/", "").replace("overpass://", ""));
