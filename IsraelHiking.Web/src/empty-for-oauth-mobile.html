@@ -1,0 +1,11 @@
+﻿<html><head></head>
+  <body>
+    <script>
+      try {
+        location.href = "ihm://oauth_callback/" + location.search;
+      } catch {
+        setTimeout(window.close, 1000);
+      }
+    </script>
+  </body>
+</html>

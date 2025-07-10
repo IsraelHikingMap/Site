@@ -5,7 +5,7 @@ export class Urls {
     public static readonly baseTilesAddress = environment.baseTilesAddress;
     public static readonly apiBase = environment.baseApiAddress;
     public static readonly emptyAuthHtml = Urls.baseAddress + "/empty-for-oauth.html";
-    public static readonly ihmAuthUrl = "ihm://oauth_callback/";
+    public static readonly emptyAuthMobileHtml = Urls.baseAddress + "/empty-for-oauth-mobile.html";
     public static readonly translations = "translations/";
     public static readonly urls = Urls.apiBase + "urls/";
     public static readonly health = Urls.apiBase + "health/";
