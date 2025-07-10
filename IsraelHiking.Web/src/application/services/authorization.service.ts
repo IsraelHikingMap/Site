@@ -18,7 +18,7 @@ export class AuthorizationService {
     private readonly runningContextService = inject(RunningContextService);
     private readonly loggingService = inject(LoggingService);
     private readonly store = inject(Store);
-    private readonly redirectUrl = this.runningContextService.isCapacitor ? Urls.emptyAuthMobileHtml : Urls.emptyAuthHtml;
+    private readonly redirectUrl = this.runningContextService.isCapacitor ? Urls.ihmAuthUrl : Urls.emptyAuthHtml;
 
     public isLoggedIn(): boolean {
         const userState = this.store.selectSnapshot((s: ApplicationState) => s.userState);
