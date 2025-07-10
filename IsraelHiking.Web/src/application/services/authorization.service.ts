@@ -95,11 +95,20 @@ export class AuthorizationService {
     private getCodeFromWindow(popup: Window, authorizeUrl: string): Promise<string> {
         return new Promise((resolve, reject) => {
             if (!this.runningContextService.isCapacitor) {
-                popup.location.href = authorizeUrl;
                 if (typeof popup.focus === "function") {
                     popup.focus();
                 }
-                setTimeout(() => this.watchPopup(popup, resolve, reject), 100);
+                popup.location.href = authorizeUrl;
+                const bc = new BroadcastChannel("osm-api-auth-complete");
+                bc.addEventListener("message", (event) => {
+                    const redirectedUrl = new URL(event.data);
+                    bc.close();
+                    resolve(redirectedUrl.searchParams.get(AuthorizationService.OAUTH_CODE));
+                });
+                setTimeout(() => {
+                    bc.close();
+                    reject(new Error("The OSM sign in flow timed out"))
+                }, 5*60000);
             } else {
                 const callback = (event: MessageEvent) => {
                     if (event.data.match(/^oauth::/)) {
@@ -113,21 +122,5 @@ export class AuthorizationService {
                 window.open(authorizeUrl, "oauth:osm", "");
             }
         });
-    }
-
-    private async watchPopup(popup: Window, resolve: (value: string) => void, reject: (value: Error) => void) {
-        try {
-            if (popup.closed) {
-                reject(new Error("The OSM sign in flow was canceled"));
-                return;
-            }
-            if (popup.location.href.startsWith(this.redirectUrl)) {
-                popup.close();
-                const redirectedUrl = new URL(popup.location.href);
-                resolve(redirectedUrl.searchParams.get(AuthorizationService.OAUTH_CODE));
-                return;
-            }
-        } catch { } // eslint-disable-line
-        setTimeout(() => this.watchPopup(popup, resolve, reject), 100);
     }
 }
