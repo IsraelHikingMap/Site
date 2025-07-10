@@ -107,8 +107,8 @@ export class AuthorizationService {
                 });
                 setTimeout(() => {
                     bc.close();
-                    reject(new Error("The OSM sign in flow timed out")), 5*60000
-                });
+                    reject(new Error("The OSM sign in flow timed out"))
+                }, 5*60000);
             } else {
                 const callback = (event: MessageEvent) => {
                     if (event.data.match(/^oauth::/)) {
