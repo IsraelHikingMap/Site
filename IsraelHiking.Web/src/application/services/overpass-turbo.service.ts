@@ -14,8 +14,21 @@ export class OverpassTurboService {
 
     public initialize() {
         addProtocol("overpass", async (params, _abortController) => {
-            const query = decodeURIComponent(params.url.replace("overpass://Q/", "").replace("overpass://", ""));
-            const geojson = await this.getFeatureFromQuery(query, 20000);
+            let url = params.url;
+            if (url.startsWith("overpass://s/")) {
+                const unshortenAddress = Urls.baseAddress +  "/unshorten/overpass-turbo.eu/s/" + url.replace("overpass://s/", "");
+                const overpassUrl = await firstValueFrom(this.httpClient.get(unshortenAddress, {responseType: "text" })) as string;
+                url = overpassUrl.trim().replace("https://overpass-turbo.eu/?Q=", "");
+            }
+            let query = decodeURIComponent(url.replace("overpass://Q/", "").replace("overpass://", ""));
+            if (!query.startsWith("[out: ")) {
+                query = `[out: json];${query}`;
+            }
+            if (!query.match(/out.*geom;/)) {
+                query += "out geom;";
+            }
+            const content = await firstValueFrom(this.httpClient.post(OverpassTurboService.OVERPASS_API_URL, query).pipe(timeout(20000))) as unknown;
+            const geojson = osmtogeojson(content, {completeFeature: true, excludeWay: false}) as GeoJSON.FeatureCollection;
             return {data: geojson};
         });
     }

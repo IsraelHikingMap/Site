@@ -158,6 +158,7 @@
     "lint": "ng lint --fix",
     "extract": "tsx ./scripts/extract-strings.ts",
     "generate-legend": "tsx ./scripts/generate-legend.ts",
+    "generate-sprite": "tsx ./scripts/generate-sprite.ts",
     "set-version": "tsx ./scripts/set-version.ts",
     "white-label-me": "tsx ./scripts/white-label-me.ts",
     "prepare": "patch-package"
