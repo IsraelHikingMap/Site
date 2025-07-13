@@ -1,5 +1,6 @@
 import puppeteer from 'puppeteer';
 import legendJson from '../src/content/legend/legend.json' with { type: 'json' };
+import type { Map } from 'maplibre-gl';
 
 /**
  * This script generates images for the legend items.
@@ -7,11 +8,12 @@ import legendJson from '../src/content/legend/legend.json' with { type: 'json' }
  * It uses a headless browser to render the maps using MapLibre.
  * The images are saved in the src/content/legend folder.
  */
+const browser = await puppeteer.launch({headless: true});
 
+// This is used in the evaluate function in puppeteer to access the map instance, the definition here is to allow TypeScript to recognize the type.
+const map: Map = null;
 
-const browser = await puppeteer.launch({headless: false});
-
-async function createImage(style: string, center: {lat: number, lng: number}, zoom: number, name: string, width = 50) {
+async function createImages(style: string) {
     const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -36,8 +38,8 @@ async function createImage(style: string, center: {lat: number, lng: number}, zo
     const map = new maplibregl.Map({
         container: 'map',
         style: '${style}',
-        center: [${center.lng}, ${center.lat}],
-        zoom: ${zoom - 1}, 
+        center: [0, 0],
+        zoom: 1, 
         maplibreLogo: false,
         attributionControl: false,
         preserveDrawingBuffer: true
@@ -49,29 +51,39 @@ async function createImage(style: string, center: {lat: number, lng: number}, zo
     const height = 50
     const page = await browser.newPage();
     try {        
-        await page.setViewport({
-            width,
-            height,
-            deviceScaleFactor: 2
-        });
         await page.setContent(html);
-        // Wait for map to load, then wait for images, etc. to load.
-        await page.waitForFunction('map.loaded()');
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        const filename = `./src/content/legend/${style.split("/").pop().replace(".json","")}_${name}.png`;
-        await page.screenshot({
-            path: filename,
-            type: 'png',
-            clip: {
-                x: 0,
-                y: 0,
-                width,
-                height
+        await page.waitForFunction(() => map.loaded());
+
+        for (const legendSection of legendJson) {
+            for (let legendItem of legendSection.items) {
+                const width = legendItem.type === "POI" ? 50 : 200;
+                await page.setViewport({
+                    width,
+                    height,
+                    deviceScaleFactor: 2
+                });
+                await page.evaluate((lnglat, zoom) => {
+                    map.setCenter(lnglat);
+                    map.setZoom(zoom - 1);
+                    return map.once('idle');
+                }, legendItem.latlng, legendItem.zoom);
+
+                const filename = `./src/content/legend/${style.split("/").pop().replace(".json","")}_${legendItem.key}.png`;
+                await page.screenshot({
+                    path: filename,
+                    type: 'png',
+                    clip: {
+                        x: 0,
+                        y: 0,
+                        width,
+                        height
+                    }
+                })
+                console.log(`Created ${filename}`);
             }
-        })
-        console.log(`Created ${filename}`);
+        }
     } catch (err) {
-        console.log(err, name);
+        console.log(err);
     }
     
     await page.close();
@@ -79,11 +91,7 @@ async function createImage(style: string, center: {lat: number, lng: number}, zo
 for (let style of ["https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/IHM.json", 
     "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/ilMTB.json"]) {
 
-    for (const legendSection of legendJson) {
-        for (let legendItem of legendSection.items) {
-            await createImage(style, legendItem.latlng, legendItem.zoom, legendItem.key, legendItem.type === "POI" ? 50 : 200);
-        }
-    }
+    await createImages(style);
 }
 
 
