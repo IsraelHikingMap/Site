@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="26" height="19" version="1.1" viewBox="0 0 15 11" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<svg width="30" height="22" version="1.1" viewBox="0 0 15 11" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
  <g transform="translate(-151 -93)">
   <path fill="#734a08ff" d="m153.99 93v4.9746c0 1.0257 0.998 3.0254 2.9941 3.0254h2.9941c1.9961 0 2.9941-2 2.9941-3h0.99805c1.5553 0 2.041-1.4535 2.0254-2.4668-0.0159-1.0288-0.54636-2.5332-2.0254-2.5332h-1.1504zm8.9824 1h0.99805c0.99807 1e-5 1.0098 1.0069 1.0098 1.4922 0 0.48533-0.0117 1.5078-1.0098 1.5078h-0.99805c-0.01-0.99038 0-3 0-3zm-11.479 8c-0.31753-3e-3 -0.50042 0.21227-0.49805 0.42383 1e-3 0.15231 0.10025 0.30414 0.3125 0.375l3.4219 1.1562c0.0585 0.0202 0.12051 0.0309 0.18359 0.0312l6.9883 0.01372c0.0607 2e-5 0.12111-0.01 0.17773-0.0273l3.5645-1.1387c0.23864-0.0739 0.33675-0.25161 0.32031-0.41992-0.0193-0.19762-0.19731-0.38462-0.49609-0.38281z"/>
  </g>

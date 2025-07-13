@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="26" height="26" version="1.1" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<svg width="30" height="30" version="1.1" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
  <g transform="translate(-29 -151)">
   <path fill="#0000ffff" d="m30.455 151c-0.80626 0-1.4551 0.64882-1.4551 1.4551v12.09c0 0.80626 0.64882 1.4551 1.4551 1.4551h12.09c0.80626 0 1.4551-0.64882 1.4551-1.4551v-12.09c0-0.80626-0.64882-1.4551-1.4551-1.4551zm1.3203 1.9453 5.5312 0.01c1.7137 0.0265 3.4683 1.0355 3.4473 3.3184 0.02106 2.5564-1.5025 3.704-3.5117 3.7402l-3.4922-0.0176 0.0098 3.9277-2.0059 0.0215zm1.9785 2 2e-3 2.9922 3.4688 8e-3c0.71692-0.0566 1.4937-0.48437 1.5273-1.4297 0.03752-1.0526-0.77902-1.549-1.4844-1.5586z"/>
  </g>
