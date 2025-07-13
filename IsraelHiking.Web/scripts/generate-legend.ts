@@ -8,7 +8,7 @@ import type { Map } from 'maplibre-gl';
  * It uses a headless browser to render the maps using MapLibre.
  * The images are saved in the src/content/legend folder.
  */
-const browser = await puppeteer.launch({headless: true});
+const browser = await puppeteer.launch({headless: false});
 
 // This is used in the evaluate function in puppeteer to access the map instance, the definition here is to allow TypeScript to recognize the type.
 const map: Map = null;
@@ -50,36 +50,43 @@ async function createImages(style: string) {
 `;
     const height = 50
     const page = await browser.newPage();
-    try {        
-        await page.setContent(html);
-        await page.waitForFunction(() => map.loaded());
-
-        for (const legendSection of legendJson) {
-            for (let legendItem of legendSection.items) {
-                const width = legendItem.type === "POI" ? 50 : 200;
-                await page.setViewport({
+    try {
+        for (const width of [50, 200]) {
+            // This needs to happen before set content so that the map loading will respect the device scale factor.
+            await page.setViewport({
                     width,
                     height,
                     deviceScaleFactor: 2
                 });
-                await page.evaluate((lnglat, zoom) => {
-                    map.setCenter(lnglat);
-                    map.setZoom(zoom - 1);
-                    return map.once('idle');
-                }, legendItem.latlng, legendItem.zoom);
-
-                const filename = `./src/content/legend/${style.split("/").pop().replace(".json","")}_${legendItem.key}.png`;
-                await page.screenshot({
-                    path: filename,
-                    type: 'png',
-                    clip: {
-                        x: 0,
-                        y: 0,
-                        width,
-                        height
+            await page.setContent(html);
+            await page.waitForFunction(() => map.loaded());
+            for (const legendSection of legendJson) {
+                for (let legendItem of legendSection.items) {
+                    if (width === 50 && legendItem.type !== "POI") {
+                        continue;
                     }
-                })
-                console.log(`Created ${filename}`);
+                    if (width === 200 && legendItem.type === "POI") {
+                        continue;
+                    }
+                    await page.evaluate((lnglat, zoom) => {
+                        map.setCenter(lnglat);
+                        map.setZoom(zoom - 1);
+                        return map.once('idle');
+                    }, legendItem.latlng, legendItem.zoom);
+
+                    const filename = `./src/content/legend/${style.split("/").pop().replace(".json","")}_${legendItem.key}.png`;
+                    await page.screenshot({
+                        path: filename,
+                        type: 'png',
+                        clip: {
+                            x: 0,
+                            y: 0,
+                            width,
+                            height
+                        }
+                    })
+                    console.log(`Created ${filename}`);
+                }
             }
         }
     } catch (err) {
