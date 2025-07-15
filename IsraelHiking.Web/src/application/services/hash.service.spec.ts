@@ -35,17 +35,24 @@ describe("HashService", () => {
         });
     });
 
-    it("Should not reset address bar if sidebar is open", inject([HashService, Router, Store], 
-        (service: HashService, routerMock: Router, store: Store) => {
+    it("Should not reset address bar if sidebar is open", inject([HashService, Router, Store, SidebarService], 
+        (service: HashService, routerMock: Router, store: Store, sidebar: SidebarService) => {
             const spy = jasmine.createSpy();
             routerMock.navigate = spy;
             store.reset({
                 poiState: {}
             });
             service.initialize();
+            sidebar.show("public-poi");
             store.reset({
                 poiState: {
                     selectedPointOfInterest: {}
+                },
+                inMemoryState: {},
+                locationState: {
+                    zoom: 1,
+                    latitude: 2,
+                    longitude: 3
                 }
             });
 
@@ -61,6 +68,11 @@ describe("HashService", () => {
                 poiState: {},
                 inMemoryState: {
                     shareUrl: {}
+                },
+                locationState: {
+                    zoom: 1,
+                    latitude: 2,
+                    longitude: 3
                 }
             });
 
@@ -78,6 +90,11 @@ describe("HashService", () => {
                 inMemoryState: {
                     fileUrl: {},
                     baseLayer: "baseLayer"
+                },
+                locationState: {
+                    zoom: 1,
+                    latitude: 2,
+                    longitude: 3
                 }
             });
             expect(spy).toHaveBeenCalled();
