@@ -101,7 +101,7 @@ export class HashService {
     }
 
     private resetAddressbar(): void {
-        if (this.store.selectSnapshot((s: ApplicationState) => s.poiState).selectedPointOfInterest) {
+        if (this.sidebarService.viewName === "public-poi") {
             return;
         }
         const inMemoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
