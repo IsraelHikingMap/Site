@@ -1,5 +1,9 @@
 [
 	{
+		"pkg": "@capacitor-community/background-geolocation",
+		"classpath": "com.equimaps.capacitor_background_geolocation.BackgroundGeolocation"
+	},
+	{
 		"pkg": "@capacitor-community/keep-awake",
 		"classpath": "com.getcapacitor.community.keepawake.KeepAwakePlugin"
 	},

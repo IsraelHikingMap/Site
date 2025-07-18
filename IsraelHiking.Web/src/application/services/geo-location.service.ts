@@ -1,5 +1,7 @@
 import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
-import { BackgroundGeolocationPlugin, Location } from "cordova-background-geolocation-plugin";
+import { registerPlugin } from "@capacitor/core";
+import { BackgroundGeolocationPlugin, Location } from "@capacitor-community/background-geolocation";
+import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { App } from "@capacitor/app";
 import { Store } from "@ngxs/store";
 
@@ -11,7 +13,7 @@ import { SpatialService } from "./spatial.service";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models/models";
 
-declare let BackgroundGeolocation: BackgroundGeolocationPlugin;
+const BackgroundGeolocation = registerPlugin<BackgroundGeolocationPlugin>("BackgroundGeolocation");
 
 @Injectable()
 export class GeoLocationService {
@@ -19,9 +21,11 @@ export class GeoLocationService {
     private static readonly SHORT_TIME_OUT = 10000; // Only for first position for good UX
 
     private watchNumber = -1;
+    private watchId = "";
     private isBackground = false;
     private wasInitialized = false;
     private gettingLocations = false;
+    private locations: Location[] = [];
 
     public bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
     public backToForeground = new EventEmitter<void>();
@@ -31,6 +35,7 @@ export class GeoLocationService {
     private readonly loggingService = inject(LoggingService);
     private readonly toastService = inject(ToastService);
     private readonly ngZone = inject(NgZone);
+    private readonly fileSystemWrapper = inject(FileSystemWrapper);
     private readonly store = inject(Store);
 
     public static positionToLatLngTime(position: GeolocationPosition): LatLngAltTime {
@@ -70,7 +75,8 @@ export class GeoLocationService {
                     this.backToForeground.next();
                 });
             } else if (!this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording) {
-                BackgroundGeolocation.stop();
+                BackgroundGeolocation.removeWatcher({id: this.watchId});
+                this.watchId = "";
             }
         });
     }
@@ -138,67 +144,41 @@ export class GeoLocationService {
 
     private async startBackgroundGeolocation() {
         if (this.wasInitialized) {
-            this.startBackgroundGeolocationWithRoughPosition();
+            this.getRoughPosition();
             return;
         }
-        this.loggingService.info("[GeoLocation] Initializing background tracking");
+        this.loggingService.info("[GeoLocation] Starting background tracking");
         this.wasInitialized = true;
-        BackgroundGeolocation.configure({
-            locationProvider: BackgroundGeolocation.RAW_PROVIDER,
-            desiredAccuracy: BackgroundGeolocation.HIGH_ACCURACY,
-            stationaryRadius: 10,
-            distanceFilter: 5,
-            notificationTitle: "Israel Hiking Map",
-            notificationText: this.resources.runningInBackground,
-            interval: 1000,
-            fastestInterval: 1000,
-            activitiesInterval: 10000,
-            startForeground: true,
-            notificationIconLarge: "bg_notification",
-            notificationIconSmall: "bg_notification",
-        });
-
-        BackgroundGeolocation.on("location").subscribe(async (_: Location) => {
-            if (this.isBackground) {
-                return;
-            }
-            await this.onLocationUpdate();
-        });
-
-
-        BackgroundGeolocation.on("authorization").subscribe(
-            (status) => {
-                if (status === BackgroundGeolocation.NOT_AUTHORIZED) {
-                    this.loggingService.error("[GeoLocation] Failed to start background tracking - unauthorized");
-                    this.disable();
-                    this.toastService.confirm({
-                        message: this.resources.noLocationPermissionOpenAppSettings,
-                        type: "OkCancel",
-                        confirmAction: () => BackgroundGeolocation.showAppSettings(),
-                        declineAction: () => { }
-                    });
+        try {
+            this.watchId = await BackgroundGeolocation.addWatcher({
+                backgroundMessage:  this.resources.runningInBackground,
+                backgroundTitle: "Israel Hiking Map",
+                requestPermissions: true,
+                stale: true,
+                distanceFilter: 5
+            }, (location?: Location, _error?: Error) => {
+                this.locations.push(location);
+                if (this.isBackground) {
+                    return;
                 }
+                this.onLocationUpdate();
             });
-
-        BackgroundGeolocation.on("error").subscribe(
-            (error) => {
-                this.loggingService.error(`[GeoLocation] Failed to start background tracking ${error.message}`);
-                this.toastService.warning(this.resources.unableToFindYourLocation);
-                this.disable();
+            this.getRoughPosition();
+        } catch {
+            this.loggingService.error("[GeoLocation] Failed to start background tracking");
+            this.disable();
+            this.toastService.confirm({
+                message: this.resources.noLocationPermissionOpenAppSettings,
+                type: "OkCancel",
+                confirmAction: () => BackgroundGeolocation.openSettings(),
+                declineAction: () => { }
             });
+        }
         
-        this.startBackgroundGeolocationWithRoughPosition();
     }
 
-    private async startBackgroundGeolocationWithRoughPosition() {
-        this.loggingService.info("[GeoLocation] Starting background tracking");
-        BackgroundGeolocation.start();
-
+    private async getRoughPosition() {
         if (window.navigator?.geolocation == null) {
-            return;
-        }
-        const status = await BackgroundGeolocation.checkStatus();
-        if (status.authorization === BackgroundGeolocation.NOT_AUTHORIZED) {
             return;
         }
         window.navigator.geolocation.getCurrentPosition((position: GeolocationPosition) => {
@@ -215,7 +195,8 @@ export class GeoLocationService {
             return;
         }
         this.gettingLocations = true;
-        const locations = await BackgroundGeolocation.getValidLocationsAndDelete();
+        const locations = [...this.locations];
+        this.locations = [];
         this.gettingLocations = false;
         const positions = locations.map(l => this.locationToPosition(l)).filter(p => !SpatialService.isJammingTarget(GeoLocationService.positionToLatLngTime(p)));
         if (positions.length === 0) {
@@ -234,7 +215,8 @@ export class GeoLocationService {
         this.store.dispatch(new SetCurrentPositionAction(null));
         if (this.runningContextService.isCapacitor) {
             this.loggingService.debug("[GeoLocation] Stopping background tracking");
-            await BackgroundGeolocation.stop();
+            await BackgroundGeolocation.removeWatcher({id: this.watchId});
+            this.watchId = "";
         } else {
             this.loggingService.debug("[GeoLocation] Stopping browser tracking: " + this.watchNumber);
             this.stopNavigator();
@@ -280,11 +262,6 @@ export class GeoLocationService {
     }
 
     public async getLog(): Promise<string> {
-        const logEntries = await BackgroundGeolocation.getLogEntries(10000, 0, BackgroundGeolocation.LOG_TRACE);
-        return logEntries.map((logLine) => {
-            const dateString = new Date(logLine.timestamp - new Date().getTimezoneOffset() * 60 * 1000)
-                .toISOString().replace(/T/, " ").replace(/\..+/, "");
-            return dateString + " | " + logLine.level.padStart(5).toUpperCase() + " | " + logLine.message;
-        }).join("\n");
+        return await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, "bg_geolocation_log.txt");
     }
 }

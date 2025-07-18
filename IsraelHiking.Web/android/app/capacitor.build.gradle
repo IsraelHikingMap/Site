@@ -9,6 +9,7 @@ android {
 
 apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
+    implementation project(':capacitor-community-background-geolocation')
     implementation project(':capacitor-community-keep-awake')
     implementation project(':capacitor-community-screen-brightness')
     implementation project(':capacitor-app')
@@ -20,14 +21,11 @@ dependencies {
     implementation project(':capawesome-capacitor-app-update')
     implementation project(':capgo-native-audio')
     implementation project(':capacitor-email-composer')
-    implementation "com.google.android.gms:play-services-location:17+"
-    implementation "androidx.core:core:1.1.0"
-    implementation "androidx.appcompat:appcompat:1.1.0"
     implementation "androidx.webkit:webkit:1.4.0"
     implementation "androidx.browser:browser:1.3.0"
     implementation "com.android.billingclient:billing:7.1.1"
 }
-apply from: "../../node_modules/cordova-background-geolocation-plugin/android/dependencies.gradle"
+
 
 if (hasProperty('postBuildExtras')) {
   postBuildExtras()
