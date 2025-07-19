@@ -1,5 +1,5 @@
 diff --git a/node_modules/@capacitor-community/background-geolocation/android/src/main/java/com/equimaps/capacitor_background_geolocation/BackgroundGeolocation.java b/node_modules/@capacitor-community/background-geolocation/android/src/main/java/com/equimaps/capacitor_background_geolocation/BackgroundGeolocation.java
-index 86bd74c..19d6ce6 100644
+index 86bd74c..9bc550f 100644
 --- a/node_modules/@capacitor-community/background-geolocation/android/src/main/java/com/equimaps/capacitor_background_geolocation/BackgroundGeolocation.java
 +++ b/node_modules/@capacitor-community/background-geolocation/android/src/main/java/com/equimaps/capacitor_background_geolocation/BackgroundGeolocation.java
 @@ -38,7 +38,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -23,15 +23,6 @@ index 86bd74c..19d6ce6 100644
                              )
                      )
                      .setContentText(backgroundMessage)
-@@ -104,7 +105,7 @@ public class BackgroundGeolocation extends Plugin {
- 
-             try {
-                 String name = getAppString(
--                        "capacitor_background_geolocation_notification_icon",
-+                        "bg_notification",
-                         "mipmap/ic_launcher"
-                 );
-                 String[] parts = name.split("/");
 @@ -286,7 +287,8 @@ public class BackgroundGeolocation extends Plugin {
      public void load() {
          super.load();
@@ -58,7 +49,7 @@ index 86bd74c..19d6ce6 100644
                      @Override
                      public void onServiceConnected(ComponentName name, IBinder binder) {
 diff --git a/node_modules/@capacitor-community/background-geolocation/android/src/main/java/com/equimaps/capacitor_background_geolocation/BackgroundGeolocationService.java b/node_modules/@capacitor-community/background-geolocation/android/src/main/java/com/equimaps/capacitor_background_geolocation/BackgroundGeolocationService.java
-index fafbb86..faa0e5c 100644
+index fafbb86..d2e07a2 100644
 --- a/node_modules/@capacitor-community/background-geolocation/android/src/main/java/com/equimaps/capacitor_background_geolocation/BackgroundGeolocationService.java
 +++ b/node_modules/@capacitor-community/background-geolocation/android/src/main/java/com/equimaps/capacitor_background_geolocation/BackgroundGeolocationService.java
 @@ -2,22 +2,23 @@ package com.equimaps.capacitor_background_geolocation;
@@ -94,20 +85,21 @@ index fafbb86..faa0e5c 100644
  
  import androidx.localbroadcastmanager.content.LocalBroadcastManager;
  
-@@ -25,6 +26,12 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+@@ -25,6 +26,13 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
  // (showing a persistent notification) when the first background watcher is
  // added, and demoted when the last background watcher is removed.
  public class BackgroundGeolocationService extends Service {
 +
 +    @Override
 +    public int onStartCommand(Intent intent, int flags, int startId) {
++        writeToLogFile("onStartCommand called");
 +        return START_STICKY;
 +    }
 +
      static final String ACTION_BROADCAST = (
              BackgroundGeolocationService.class.getPackage().getName() + ".broadcast"
      );
-@@ -33,11 +40,11 @@ public class BackgroundGeolocationService extends Service {
+@@ -33,11 +41,11 @@ public class BackgroundGeolocationService extends Service {
      // Must be unique for this application.
      private static final int NOTIFICATION_ID = 28351;
  
@@ -123,7 +115,7 @@ index fafbb86..faa0e5c 100644
          public Notification backgroundNotification;
      }
      private HashSet<Watcher> watchers = new HashSet<Watcher>();
-@@ -54,9 +61,9 @@ public class BackgroundGeolocationService extends Service {
+@@ -54,9 +62,9 @@ public class BackgroundGeolocationService extends Service {
      @Override
      public boolean onUnbind(Intent intent) {
          for (Watcher watcher : watchers) {
@@ -135,7 +127,7 @@ index fafbb86..faa0e5c 100644
          stopSelf();
          return false;
      }
-@@ -77,39 +84,24 @@ public class BackgroundGeolocationService extends Service {
+@@ -77,39 +85,24 @@ public class BackgroundGeolocationService extends Service {
                  Notification backgroundNotification,
                  float distanceFilter
          ) {
@@ -189,7 +181,7 @@ index fafbb86..faa0e5c 100644
              watcher.backgroundNotification = backgroundNotification;
              watchers.add(watcher);
  
-@@ -118,7 +110,9 @@ public class BackgroundGeolocationService extends Service {
+@@ -118,7 +111,9 @@ public class BackgroundGeolocationService extends Service {
              // we simply ignore the exception.
              try {
                  watcher.client.requestLocationUpdates(
@@ -200,7 +192,7 @@ index fafbb86..faa0e5c 100644
                          watcher.locationCallback,
                          null
                  );
-@@ -143,9 +137,10 @@ public class BackgroundGeolocationService extends Service {
+@@ -143,9 +138,10 @@ public class BackgroundGeolocationService extends Service {
          }
  
          void removeWatcher(String id) {
@@ -212,7 +204,7 @@ index fafbb86..faa0e5c 100644
                      watchers.remove(watcher);
                      if (getNotification() == null) {
                          stopForeground(true);
-@@ -159,17 +154,36 @@ public class BackgroundGeolocationService extends Service {
+@@ -159,17 +155,36 @@ public class BackgroundGeolocationService extends Service {
              // If permissions were granted while the app was in the background, for example in
              // the Settings app, the watchers need restarting.
              for (Watcher watcher : watchers) {
@@ -241,17 +233,17 @@ index fafbb86..faa0e5c 100644
          void stopService() {
              BackgroundGeolocationService.this.stopSelf();
 +            writeToLogFile("stopService called");
-+        }
-+
-+        void writeToLogFile(String message) {
-+            File filesDir = getFilesDir();
-+            File file = new File(filesDir, "bg_geolocation_log.txt");
-+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS", Locale.US);
-+            try (FileWriter writer = new FileWriter(file, true)) {
-+                Date now = new Date();
-+                String formattedDateTime = formatter.format(now);
-+                writer.write(formattedDateTime + " | " + message + "\n");
-+            } catch (Exception ignored) { }
          }
      }
++
++    void writeToLogFile(String message) {
++        File filesDir = getFilesDir();
++        File file = new File(filesDir, "bg_geolocation_log.txt");
++        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS", Locale.US);
++        try (FileWriter writer = new FileWriter(file, true)) {
++            Date now = new Date();
++            String formattedDateTime = formatter.format(now);
++            writer.write(formattedDateTime + " | " + message + "\n");
++        } catch (Exception ignored) { }
++    }
  }
