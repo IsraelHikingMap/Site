@@ -21,7 +21,7 @@ export class GeoLocationService {
     private static readonly SHORT_TIME_OUT = 10000; // Only for first position for good UX
 
     private watchNumber = -1;
-    private watchId = "";
+    private watchId: string = null;
     private isBackground = false;
     private gettingLocations = false;
     private locations: Location[] = [];
@@ -73,9 +73,9 @@ export class GeoLocationService {
                     await this.onLocationUpdate();
                     this.backToForeground.next();
                 });
-            } else if (!this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording) {
+            } else if (!this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording && this.watchId) {
                 BackgroundGeolocation.removeWatcher({id: this.watchId});
-                this.watchId = "";
+                this.watchId = null;
             }
         });
     }
@@ -142,6 +142,10 @@ export class GeoLocationService {
     }
 
     private async startBackgroundGeolocation() {
+        if (this.watchId) {
+            this.loggingService.debug("[GeoLocation] Background tracking already started, skipping...");
+            return;
+        }
         this.loggingService.info("[GeoLocation] Starting background tracking");
         try {
             this.watchId = await BackgroundGeolocation.addWatcher({
@@ -211,7 +215,7 @@ export class GeoLocationService {
         if (this.runningContextService.isCapacitor) {
             this.loggingService.debug("[GeoLocation] Stopping background tracking");
             await BackgroundGeolocation.removeWatcher({id: this.watchId});
-            this.watchId = "";
+            this.watchId = null;
         } else {
             this.loggingService.debug("[GeoLocation] Stopping browser tracking: " + this.watchNumber);
             this.stopNavigator();
