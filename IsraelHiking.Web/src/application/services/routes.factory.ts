@@ -11,11 +11,11 @@ export class RoutesFactory {
     public colors: string[] = [
         "#0000FF", // blue
         "#FF6600", // orange
-        "#7F8282", // gray
+        "#B700FF", // purple
         "#00FFFF", // light blue
-        "#FF00DD", // purple
+        "#FF00DD", // pink
         "#00B0A4", // cyan
-        "#B700FF", // pink
+        "#7F8282", // gray
         "#9C3E00", // brown
         "#008000", // green
         "#FF0000", // red
