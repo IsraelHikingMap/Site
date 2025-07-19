@@ -23,7 +23,6 @@ export class GeoLocationService {
     private watchNumber = -1;
     private watchId = "";
     private isBackground = false;
-    private wasInitialized = false;
     private gettingLocations = false;
     private locations: Location[] = [];
 
@@ -143,12 +142,7 @@ export class GeoLocationService {
     }
 
     private async startBackgroundGeolocation() {
-        if (this.wasInitialized) {
-            this.getRoughPosition();
-            return;
-        }
         this.loggingService.info("[GeoLocation] Starting background tracking");
-        this.wasInitialized = true;
         try {
             this.watchId = await BackgroundGeolocation.addWatcher({
                 backgroundMessage:  this.resources.runningInBackground,
@@ -184,6 +178,7 @@ export class GeoLocationService {
         window.navigator.geolocation.getCurrentPosition((position: GeolocationPosition) => {
             // Upon starting location watching get the current position as fast as we can, even if not accurate, only update if we didn't reveice a location already.
             if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "searching") {
+                this.loggingService.info("[GeoLocation] Got rough position");
                 this.handlePositionChange(position);
             }
         }, () => {}, { timeout: GeoLocationService.SHORT_TIME_OUT });
