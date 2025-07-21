@@ -308,8 +308,7 @@ describe("FileService", () => {
             
             expect(spy).toHaveBeenCalled();
             expect(fileUri).toBe("/some-file");
-            const content = spy.calls.first().args[2];
-            const files = unzipSync(content);
+            const files = unzipSync(new Uint8Array(spy.calls.first().args[2]));
             expect(Object.keys(files)).toEqual([contents[0].name]);
             expect(strFromU8(files[contents[0].name])).toEqual(contents[0].text);
     }));
