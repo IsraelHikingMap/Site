@@ -268,8 +268,8 @@ export class FileService {
         }
         const result = zipSync(zippable);
         const fileName = "log.zip";
-        const directory = this.runningContextService.isIos ? this.fileSystemWrapper.tempDirectory : this.fileSystemWrapper.externalCacheDirectory;
-        await this.fileSystemWrapper.writeFile(directory, fileName, result, { replace: true, append: false, truncate: 0 });
+        const directory = this.fileSystemWrapper.cacheDirectory;
+        await this.fileSystemWrapper.writeFile(directory, fileName, await new Response(result).arrayBuffer(), { replace: true, append: false, truncate: 0 });
         const entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(directory + fileName);
         return entry.nativeURL.replace("file://", "");
     }
