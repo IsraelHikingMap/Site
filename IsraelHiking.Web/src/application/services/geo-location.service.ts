@@ -10,6 +10,8 @@ import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { SpatialService } from "./spatial.service";
+import { SelectedRouteService } from "./selected-route.service";
+import { AudioPlayerFactory, IAudioPlayer } from "./audio-player.factory";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models/models";
 
@@ -25,16 +27,20 @@ export class GeoLocationService {
     private isBackground = false;
     private gettingLocations = false;
     private locations: Location[] = [];
+    private audioPlayer: IAudioPlayer;
+    private isCloseToRoute = true;
 
     public bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
     public backToForeground = new EventEmitter<void>();
 
     private readonly resources = inject(ResourcesService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly loggingService = inject(LoggingService);
     private readonly toastService = inject(ToastService);
     private readonly ngZone = inject(NgZone);
     private readonly fileSystemWrapper = inject(FileSystemWrapper);
+    private readonly audioPlayerFactory = inject(AudioPlayerFactory);
     private readonly store = inject(Store);
 
     public static positionToLatLngTime(position: GeolocationPosition): LatLngAltTime {
@@ -49,7 +55,7 @@ export class GeoLocationService {
         };
     }
 
-    public initialize() {
+    public async initialize() {
         if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking !== "disabled") {
             this.store.dispatch(new SetTrackingStateAction("disabled"));
             this.enable();
@@ -59,23 +65,33 @@ export class GeoLocationService {
             return;
         }
 
+        this.audioPlayer = await this.audioPlayerFactory.create();
+
         App.addListener("appStateChange", (state) => {
             if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "disabled") {
                 return;
             }
             this.isBackground = !state.isActive;
             this.loggingService.debug(`[GeoLocation] Now in ${this.isBackground ? "back" : "fore"}ground`);
+            if (this.isBackground && 
+                !this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording && 
+                !this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings &&
+                this.watchId) {
+                BackgroundGeolocation.removeWatcher({id: this.watchId});
+                this.watchId = null;
+                return;
+            }
+            if (state.isActive &&
+                !this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording &&
+                this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings &&
+                this.watchId == null) {
+                this.startWatching();
+            }
             if (state.isActive) {
-                if (!this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording) {
-                    this.startWatching();
-                }
                 this.ngZone.run(async () => {
                     await this.onLocationUpdate();
                     this.backToForeground.next();
                 });
-            } else if (!this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording && this.watchId) {
-                BackgroundGeolocation.removeWatcher({id: this.watchId});
-                this.watchId = null;
             }
         });
     }
@@ -156,6 +172,19 @@ export class GeoLocationService {
                 distanceFilter: 5
             }, (location?: Location, _error?: Error) => {
                 this.locations.push(location);
+                if (this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings) {
+                    const currentLocation = GeoLocationService.positionToLatLngTime(this.locationToPosition(location));
+                    const closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, location.speed === 0 ? null : location.bearing);
+                    const isPreviousCloseToRoute = this.isCloseToRoute;
+                    this.isCloseToRoute = closestRouteToGps != null;
+                    if (this.isCloseToRoute === false && isPreviousCloseToRoute === true) {
+                        if (navigator.vibrate) {
+                            navigator.vibrate([200, 100, 200]);
+                        }
+                        this.audioPlayer.play();
+                    }
+                }
+
                 if (this.isBackground) {
                     return;
                 }
