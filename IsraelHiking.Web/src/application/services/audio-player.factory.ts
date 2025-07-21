@@ -27,7 +27,7 @@ export class AudioPlayerFactory {
             audioChannelNum: 1,
             isUrl: false
         };
-        if (!await NativeAudio.isPreloaded(options)) {
+        if ((await NativeAudio.isPreloaded(options)).found === false) {
             await NativeAudio.preload(options);
         }
         

@@ -28,7 +28,7 @@ export class GeoLocationService {
     private gettingLocations = false;
     private locations: Location[] = [];
     private audioPlayer: IAudioPlayer;
-    private isCloseToRoute = true;
+    private isCloseToRoute = false;
 
     public bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
     public backToForeground = new EventEmitter<void>();
