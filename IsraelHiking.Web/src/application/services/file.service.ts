@@ -7,7 +7,7 @@ import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
 import { firstValueFrom } from "rxjs";
 import { zipSync, strToU8, Zippable } from "fflate";
-import { decode, encode } from "base64-arraybuffer";
+import { decode } from "base64-arraybuffer";
 import type { saveAs as saveAsForType } from "file-saver";
 
 import { ImageResizeService } from "./image-resize.service";
@@ -255,13 +255,17 @@ export class FileService {
         this.loggingService.info(`[Files] Write style finished successfully: ${styleFileName}`);
     }
 
-    public async compressTextToBase64Zip(contents: {name: string; text: string}[]): Promise<string> {
+    public async compressTextToLogZip(contents: {name: string; text: string}[]): Promise<string> {
         const zippable: Zippable = {};
         for (const content of contents) {
             zippable[content.name] = strToU8(content.text);
         }
         const result = zipSync(zippable);
-        return encode(await new Response(result).arrayBuffer());
+        const fileName = "log.zip";
+        const directory = this.fileSystemWrapper.cacheDirectory;
+        await this.fileSystemWrapper.writeFile(directory, fileName, await new Response(result).arrayBuffer(), { replace: true, append: false, truncate: 0 });
+        const entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(directory + fileName);
+        return entry.nativeURL.replace("file://", "");
     }
 
     public getFileContent(file: File): Promise<string> {

@@ -191,7 +191,7 @@ export class MainMenuComponent {
                 `App version: ${(await App.getInfo()).version}`
             ].join("\n");
             const geoLocationLogs = await this.geoLocationService.getLog();
-            const logBase64zipped = await this.fileService.compressTextToBase64Zip([
+            const zippedLogFileUri = await this.fileService.compressTextToLogZip([
                 { name: "log.txt", text: logs},
                 { name: "geolocation.txt", text: geoLocationLogs}
             ]);
@@ -203,9 +203,9 @@ export class MainMenuComponent {
                 subject: subject,
                 body: this.resources.reportAnIssueInstructions,
                 attachments: [{
-                    type: "base64",
+                    type: "absolute",
                     name: "log.zip",
-                    path: logBase64zipped
+                    path: zippedLogFileUri
                 }, {
                     type: "base64",
                     name: `info-${userInfo.id}.txt`,
