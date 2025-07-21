@@ -14,7 +14,7 @@ PODS:
   - CapacitorCordova (7.2.0)
   - CapacitorDevice (7.0.1):
     - Capacitor
-  - CapacitorEmailComposer (7.0.0):
+  - CapacitorEmailComposer (7.0.2):
     - Capacitor
   - CapacitorShare (7.0.1):
     - Capacitor
@@ -86,7 +86,7 @@ SPEC CHECKSUMS:
   CapacitorCommunityScreenBrightness: 508f3d0f79024cd8da7d063f456870a4a1932723
   CapacitorCordova: 5967b9ba03915ef1d585469d6e31f31dc49be96f
   CapacitorDevice: c6f6d587dd310527f8a48bf09c4e7b4a4cf14329
-  CapacitorEmailComposer: 08d192ce46c9b1056b9dd829232f0539c062e05a
+  CapacitorEmailComposer: 47e488b85f3a4400e3b616fe56b5b9f65a4aa2f3
   CapacitorShare: e573823f511f260f598d0423c33b1e3d7bbe5fd1
   CapacitorTextZoom: ccb82513c95a64bd9d4de4fc2399c2690a8705de
   CapawesomeCapacitorAppUpdate: d1f04c1c870388248889908cf2ca960c7fdbf0ef
