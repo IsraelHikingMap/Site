@@ -1,29 +1,8 @@
 diff --git a/node_modules/@capacitor-community/background-geolocation/android/src/main/java/com/equimaps/capacitor_background_geolocation/BackgroundGeolocation.java b/node_modules/@capacitor-community/background-geolocation/android/src/main/java/com/equimaps/capacitor_background_geolocation/BackgroundGeolocation.java
-index 86bd74c..9bc550f 100644
+index 86bd74c..21caa0c 100644
 --- a/node_modules/@capacitor-community/background-geolocation/android/src/main/java/com/equimaps/capacitor_background_geolocation/BackgroundGeolocation.java
 +++ b/node_modules/@capacitor-community/background-geolocation/android/src/main/java/com/equimaps/capacitor_background_geolocation/BackgroundGeolocation.java
-@@ -38,7 +38,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-                 // As of API level 31, the coarse permission MUST accompany
-                 // the fine permission.
-                 Manifest.permission.ACCESS_COARSE_LOCATION,
--                Manifest.permission.ACCESS_FINE_LOCATION
-+                Manifest.permission.ACCESS_FINE_LOCATION,
-+                Manifest.permission.POST_NOTIFICATIONS
-         },
-         // A random integer which is hopefully unique to this plugin.
-         permissionRequestCode = 28351
-@@ -93,8 +94,8 @@ public class BackgroundGeolocation extends Plugin {
-             Notification.Builder builder = new Notification.Builder(getContext())
-                     .setContentTitle(
-                             call.getString(
--                                "backgroundTitle",
--                                "Using your location"
-+                                    "backgroundTitle",
-+                                    "Using your location"
-                             )
-                     )
-                     .setContentText(backgroundMessage)
-@@ -286,7 +287,8 @@ public class BackgroundGeolocation extends Plugin {
+@@ -286,7 +286,8 @@ public class BackgroundGeolocation extends Plugin {
      public void load() {
          super.load();
  
@@ -33,7 +12,7 @@ index 86bd74c..9bc550f 100644
          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
              NotificationManager manager = (NotificationManager) getContext().getSystemService(
                      Context.NOTIFICATION_SERVICE
-@@ -303,10 +305,13 @@ public class BackgroundGeolocation extends Plugin {
+@@ -303,10 +304,13 @@ public class BackgroundGeolocation extends Plugin {
              channel.enableVibration(false);
              channel.setSound(null, null);
              manager.createNotificationChannel(channel);
@@ -48,8 +27,26 @@ index 86bd74c..9bc550f 100644
                  new ServiceConnection() {
                      @Override
                      public void onServiceConnected(ComponentName name, IBinder binder) {
+@@ -329,6 +333,7 @@ public class BackgroundGeolocation extends Plugin {
+     @Override
+     protected void handleOnResume() {
+         if (service != null) {
++            service.writeToLogFile("onResume");
+             if (stoppedWithoutPermissions && hasRequiredPermissions()) {
+                 service.onPermissionsGranted();
+             }
+@@ -338,6 +343,9 @@ public class BackgroundGeolocation extends Plugin {
+ 
+     @Override
+     protected void handleOnPause() {
++        if (service != null) {
++            service.writeToLogFile("onPause");
++        }
+         stoppedWithoutPermissions = !hasRequiredPermissions();
+         super.handleOnPause();
+     }
 diff --git a/node_modules/@capacitor-community/background-geolocation/android/src/main/java/com/equimaps/capacitor_background_geolocation/BackgroundGeolocationService.java b/node_modules/@capacitor-community/background-geolocation/android/src/main/java/com/equimaps/capacitor_background_geolocation/BackgroundGeolocationService.java
-index fafbb86..d2e07a2 100644
+index fafbb86..8e71abd 100644
 --- a/node_modules/@capacitor-community/background-geolocation/android/src/main/java/com/equimaps/capacitor_background_geolocation/BackgroundGeolocationService.java
 +++ b/node_modules/@capacitor-community/background-geolocation/android/src/main/java/com/equimaps/capacitor_background_geolocation/BackgroundGeolocationService.java
 @@ -2,22 +2,23 @@ package com.equimaps.capacitor_background_geolocation;
@@ -204,7 +201,7 @@ index fafbb86..d2e07a2 100644
                      watchers.remove(watcher);
                      if (getNotification() == null) {
                          stopForeground(true);
-@@ -159,17 +155,36 @@ public class BackgroundGeolocationService extends Service {
+@@ -159,17 +155,40 @@ public class BackgroundGeolocationService extends Service {
              // If permissions were granted while the app was in the background, for example in
              // the Settings app, the watchers need restarting.
              for (Watcher watcher : watchers) {
@@ -234,7 +231,11 @@ index fafbb86..d2e07a2 100644
              BackgroundGeolocationService.this.stopSelf();
 +            writeToLogFile("stopService called");
          }
-     }
++
++        void writeToLogFile(String message) {
++            BackgroundGeolocationService.this.writeToLogFile(message);
++        }
++    }
 +
 +    void writeToLogFile(String message) {
 +        File filesDir = getFilesDir();
@@ -245,5 +246,5 @@ index fafbb86..d2e07a2 100644
 +            String formattedDateTime = formatter.format(now);
 +            writer.write(formattedDateTime + " | " + message + "\n");
 +        } catch (Exception ignored) { }
-+    }
+     }
  }
