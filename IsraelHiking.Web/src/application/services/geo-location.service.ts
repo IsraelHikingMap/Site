@@ -172,7 +172,7 @@ export class GeoLocationService {
                 distanceFilter: 5
             }, (location: Location, _error?: Error) => {
                 this.locations.push(location);
-                this.audioPlayer.play();
+                //this.audioPlayer.play();
                 if (this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings) {
                     const currentLocation = GeoLocationService.positionToLatLngTime(this.locationToPosition(location));
                     const closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, location.speed === 0 ? null : location.bearing);
