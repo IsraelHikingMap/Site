@@ -13,7 +13,7 @@
     "@awesome-cordova-plugins/core": "^6.16.0",
     "@awesome-cordova-plugins/file": "^6.16.0",
     "@awesome-cordova-plugins/file-transfer": "^6.16.0",
-    "@capacitor-community/background-geolocation": "^1.2.22",
+    "@capacitor-community/background-geolocation": "^1.2.23",
     "@capacitor-community/keep-awake": "^7.0.0",
     "@capacitor-community/screen-brightness": "^7.0.0",
     "@capacitor/android": "^7.2.0",

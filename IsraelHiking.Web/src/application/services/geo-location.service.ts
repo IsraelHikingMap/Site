@@ -259,8 +259,4 @@ export class GeoLocationService {
             timestamp: location.time
         } as GeolocationPosition;
     }
-
-    public async getLog(): Promise<string> {
-        return await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, "bg_geolocation_log.txt");
-    }
 }

@@ -261,19 +261,6 @@ export class FileService {
         this.loggingService.info(`[Files] Write style finished successfully: ${styleFileName}`);
     }
 
-    public async compressTextToLogZip(contents: {name: string; text: string}[]): Promise<string> {
-        const zippable: Zippable = {};
-        for (const content of contents) {
-            zippable[content.name] = strToU8(content.text);
-        }
-        const result = zipSync(zippable);
-        const fileName = "log.zip";
-        const directory = this.fileSystemWrapper.cacheDirectory;
-        await this.fileSystemWrapper.writeFile(directory, fileName, await new Response(result).arrayBuffer(), { replace: true, append: false, truncate: 0 });
-        const entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(directory + fileName);
-        return entry.nativeURL.replace("file://", "");
-    }
-
     public getFileContent(file: File): Promise<string> {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -287,9 +274,11 @@ export class FileService {
         });
     }
 
-    public storeFileToCache(fileName: string, content: string | Blob | ArrayBuffer): Promise<void> {
-        return this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, content,
+    public async storeFileToCache(fileName: string, content: string | Blob | ArrayBuffer): Promise<string> {
+        await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, content,
             { replace: true, append: false, truncate: 0 });
+        const entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(this.fileSystemWrapper.cacheDirectory + fileName);
+        return entry.nativeURL.replace("file://", "");
     }
 
     /**
