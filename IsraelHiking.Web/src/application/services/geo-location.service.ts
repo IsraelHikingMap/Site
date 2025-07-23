@@ -154,38 +154,25 @@ export class GeoLocationService {
                 requestPermissions: true,
                 stale: true,
                 distanceFilter: 5
-            }, (location?: Location, _error?: Error) => {
+            }, (location?: Location, error?: Error) => {
+                if (error) {
+                    this.loggingService.error("[GeoLocation] Failed to start background tracking: " + error.message);
+                    this.disable();
+                    this.toastService.confirm({
+                        message: this.resources.noLocationPermissionOpenAppSettings,
+                        type: "OkCancel",
+                        confirmAction: () => BackgroundGeolocation.openSettings(),
+                        declineAction: () => { }
+                    });
+                    return;
+                }
                 this.locations.push(location);
                 if (this.isBackground) {
                     return;
                 }
                 this.onLocationUpdate();
             });
-            this.getRoughPosition();
-        } catch {
-            this.loggingService.error("[GeoLocation] Failed to start background tracking");
-            this.disable();
-            this.toastService.confirm({
-                message: this.resources.noLocationPermissionOpenAppSettings,
-                type: "OkCancel",
-                confirmAction: () => BackgroundGeolocation.openSettings(),
-                declineAction: () => { }
-            });
-        }
-        
-    }
-
-    private async getRoughPosition() {
-        if (window.navigator?.geolocation == null) {
-            return;
-        }
-        window.navigator.geolocation.getCurrentPosition((position: GeolocationPosition) => {
-            // Upon starting location watching get the current position as fast as we can, even if not accurate, only update if we didn't reveice a location already.
-            if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "searching") {
-                this.loggingService.info("[GeoLocation] Got rough position");
-                this.handlePositionChange(position);
-            }
-        }, () => {}, { timeout: GeoLocationService.SHORT_TIME_OUT });
+        } catch { }
     }
 
     private async onLocationUpdate() {
