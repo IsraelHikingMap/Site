@@ -13,7 +13,7 @@ if (fs.existsSync(inputDir)) {
 fs.mkdirSync(inputDir, { recursive: true });
 
 const publishDir = './src/content/sprite';
-const dockerImage = 'ghcr.io/harelm/spreet:0.13.0';
+const dockerImage = 'ghcr.io/flother/spreet:0.12.0';
 let haloIcons = fs.readdirSync(iconsDir)
   .filter(file => file.endsWith('.svg') && !file.includes('pattern') && !file.includes('arrowline') && !file.includes('triangle') && !file.includes('square'));
 
@@ -64,12 +64,11 @@ for (let file of otherIcons) {
     fs.copyFileSync(path.join(iconsDir, file), path.join(inputDir, file));
 }
 
- copyIconWithDifferentColor('red_nesw_pattern.svg', 'orange_nesw_pattern.svg', '#ffa500ff');
- copyIconWithDifferentColor('red_nwse_pattern.svg', 'orange_nwse_pattern.svg', '#ffa500ff');
- copyIconWithDifferentColor('red_nesw_pattern.svg', 'green_nesw_pattern.svg', '#008000ff');
+copyIconWithDifferentColor('red_nesw_pattern.svg', 'orange_nesw_pattern.svg', '#ffa500ff');
+copyIconWithDifferentColor('red_nwse_pattern.svg', 'orange_nwse_pattern.svg', '#ffa500ff');
+copyIconWithDifferentColor('red_nesw_pattern.svg', 'green_nesw_pattern.svg', '#008000ff');
 
-// HM TODO: cross and plus patterns
-
+console.log("Running docker image to generate sprites...");
 // Generate sprites using the docker image
 execSync(`docker run --rm -v ${inputDir}:/app/input -v ${publishDir}:/app/output ${dockerImage} input output/sprite`);
 execSync(`docker run --rm -v ${inputDir}:/app/input -v ${publishDir}:/app/output ${dockerImage} input --retina output/sprite@2x`);

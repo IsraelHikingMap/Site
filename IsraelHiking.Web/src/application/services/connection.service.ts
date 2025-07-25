@@ -15,7 +15,7 @@ export class ConnectionService {
     /**
      * Timeout used to retry internet connectivity checks before determining that there's no connection.
      */
-    private static readonly SINGLE_RETRY_TIMEOUT = 1000;
+    private static readonly SINGLE_RETRY_TIMEOUT = 2000;
     /**
      * Interval used to retry internet connectivity checks when an error is detected (when no Internet connection).
      */
