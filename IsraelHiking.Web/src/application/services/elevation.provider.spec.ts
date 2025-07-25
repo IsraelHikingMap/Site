@@ -87,7 +87,7 @@ describe("ElevationProvider", () => {
             ctx.save();
             const url = canvas.toDataURL("image/png");
 
-            db.getTile = () => fetch(url).then(r => r.arrayBuffer());
+            db.getTileAboveZoom = () => fetch(url).then(r => r.arrayBuffer());
 
             const promise = elevationProvider.updateHeights(latlngs);
             promise.then(() => {

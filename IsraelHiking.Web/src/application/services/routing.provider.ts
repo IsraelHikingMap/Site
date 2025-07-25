@@ -58,7 +58,6 @@ export class RoutingProvider {
         if (!offlineState.isSubscribed || offlineState.downloadedTiles == null) {
             throw new Error("Offline routing is only supported after downloading offline data");
         }
-        // HM TODO: check if the right tiles are downloaded
         const zoom = 14; // this is the max zoom for these tiles
         const tiles = [latlngStart, latlngEnd].map(latlng => SpatialService.toTile(latlng, zoom));
         let tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));
@@ -123,7 +122,7 @@ export class RoutingProvider {
                     type: "FeatureCollection",
                     features: []
                 } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
-                const arrayBuffer = await this.pmTilesService.getTile(`custom://IHM/${zoom}/${tileX}/${tileY}.pbf`);
+                const arrayBuffer = await this.pmTilesService.getTileAboveZoom(zoom, tileX, tileY, "IHM-schema");
                 const tile = new VectorTile(new Protobuf(arrayBuffer));
                 for (const layerKey of Object.keys(tile.layers)) {
                     const layer = tile.layers[layerKey];

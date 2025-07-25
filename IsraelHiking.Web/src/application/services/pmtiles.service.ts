@@ -2,6 +2,8 @@ import { inject, Injectable } from "@angular/core";
 import { File as FileSystemWrapper, IFile } from "@awesome-cordova-plugins/file/ngx";
 import { Source, RangeResponse, PMTiles } from "pmtiles";
 
+export const TILES_ZOOM = 7;
+
 class CapacitorSource implements Source {
 
     constructor(private file: IFile) {}
@@ -58,6 +60,16 @@ export class PmTilesService {
         const x = +splitUrl[splitUrl.length - 2];
         const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
         return this.getTileFromFile(fileName, z, x, y);
+    }
+
+    public async getTileAboveZoom(z: number, x: number, y: number, type: string): Promise<ArrayBuffer> {
+        const targetZoom = TILES_ZOOM;
+        const scale = Math.pow(2, z - targetZoom);
+        const tileX = Math.floor(x / scale);
+        const tileY = Math.floor(y / scale);
+        const fileName = `${type}+${TILES_ZOOM}-${tileX}-${tileY}.pmtiles`;
+        return await this.getTileFromFile(fileName, z, x, y);
+
     }
 
     public async getTileFromFile(fileName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {

@@ -9,13 +9,11 @@ import deepmerge from "deepmerge";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
-import { PmTilesService } from "./pmtiles.service";
+import { PmTilesService, TILES_ZOOM } from "./pmtiles.service";
 import { POPULARITY_HEATMAP, initialState } from "../reducers/initial-state";
 import { ClearHistoryAction } from "../reducers/routes.reducer";
 import { SetSelectedPoiAction } from "../reducers/poi.reducer";
 import type { ApplicationState, MutableApplicationState, ShareUrl, Trace } from "../models/models";
-
-export const TILES_ZOOM = 7;
 
 export type ImageUrlAndData = {
     imageUrl: string;
@@ -124,13 +122,8 @@ export class DatabaseService {
                 const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
                 // find the tile x, y, for zoom 7:
                 if (z >= TILES_ZOOM) {
-                    const targetZoom = TILES_ZOOM;
-                    const scale = Math.pow(2, z - targetZoom);
-                    const tileX = Math.floor(x / scale);
-                    const tileY = Math.floor(y / scale);
-                    const fileName = `${type}+${TILES_ZOOM}-${tileX}-${tileY}.pmtiles`;
-                    const data = await this.pmTilesService.getTileFromFile(fileName, z, x, y);
-                    this.loggingService.info(`[Database] got tile for ${z}/${x}/${y} from ${fileName}`);
+                    const data = await this.pmTilesService.getTileAboveZoom(z, x, y, type);
+                    this.loggingService.info(`[Database] got tile for ${z}/${x}/${y} from ${type}`);
                     return { data };
                 } else {
                     const fileName = `${type}-${TILES_ZOOM-1}.pmtiles`;

@@ -169,7 +169,7 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
+            db.getTileAboveZoom = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
             store.reset({
                 offlineState: {
@@ -208,7 +208,7 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
+            db.getTileAboveZoom = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
             store.reset({
                 offlineState: {
@@ -253,7 +253,7 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
+            db.getTileAboveZoom = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
             store.reset({
                 offlineState: {
@@ -289,7 +289,7 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
+            db.getTileAboveZoom = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
             store.reset({
                 offlineState: {
@@ -333,7 +333,7 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
+            db.getTileAboveZoom = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
             store.reset({
                 offlineState: {

@@ -13,7 +13,8 @@ import { OfflineFilesDownloadService } from "../../services/offline-files-downlo
 import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
 import { ToastService } from "../../services/toast.service";
-import { TILES_ZOOM } from "../../services/database.service";
+import { TILES_ZOOM } from "../../services/pmtiles.service";
+import { SpatialService } from "../../services/spatial.service";
 import { HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import type { ApplicationState, EditableLayer } from "../../models/models";
 
@@ -67,7 +68,7 @@ export class OfflineManagementDialogComponent {
     public async downloadSelected() {
         const { tileX, tileY } = this.selectedTileXY;
         this.downloadingTileXY = { tileX, tileY };
-        this.center = this.lngLatFromTileCoords(tileX + 0.5, tileY + 0.5, TILES_ZOOM);
+        this.center = SpatialService.toCoordinate(SpatialService.fromTile({x: tileX + 0.5, y: tileY + 0.5}, TILES_ZOOM));
         this.updateDownloadedTiles();
         this.updateSelectedTile();
         const status = await this.offlineFilesDownloadService.downloadTile(tileX, tileY);
@@ -94,13 +95,6 @@ export class OfflineManagementDialogComponent {
         this.updateSelectedTile();
     }
 
-    private lngLatFromTileCoords(x: number, y: number, z: number): [number, number] {
-        const n = Math.pow(2, z);
-        const lon_deg = x / n * 360.0 - 180.0;
-        const lat_rad = Math.atan(Math.sinh(Math.PI * (1 - 2 * y / n)));
-        const lat_deg = lat_rad * (180.0 / Math.PI);
-        return [lon_deg, lat_deg];
-    }
 
     private tileCoordinatesToPolygon(tileX: number, tileY: number, label: string = "", progress: number = 1): GeoJSON.Feature {
         return {
@@ -109,11 +103,11 @@ export class OfflineManagementDialogComponent {
                 type: "Polygon",
                 coordinates: [
                     [
-                        this.lngLatFromTileCoords(tileX, tileY, TILES_ZOOM),
-                        this.lngLatFromTileCoords(tileX + progress, tileY, TILES_ZOOM),
-                        this.lngLatFromTileCoords(tileX + progress, tileY + 1, TILES_ZOOM),
-                        this.lngLatFromTileCoords(tileX, tileY + 1, TILES_ZOOM),
-                        this.lngLatFromTileCoords(tileX, tileY, TILES_ZOOM),
+                        SpatialService.toCoordinate(SpatialService.fromTile({x: tileX, y: tileY}, TILES_ZOOM)),
+                        SpatialService.toCoordinate(SpatialService.fromTile({x: tileX + progress, y: tileY}, TILES_ZOOM)),
+                        SpatialService.toCoordinate(SpatialService.fromTile({x: tileX + progress, y: tileY + 1}, TILES_ZOOM)),
+                        SpatialService.toCoordinate(SpatialService.fromTile({x: tileX, y: tileY + 1}, TILES_ZOOM)),
+                        SpatialService.toCoordinate(SpatialService.fromTile({x: tileX, y: tileY}, TILES_ZOOM)),
                     ],
                 ],
             },

@@ -14,6 +14,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { ConnectionService } from "../../services/connection.service";
 import { MapService } from "../../services/map.service";
+import { HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models/models";
 
 @Component({
@@ -164,6 +165,9 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
                     source.tiles[0] = source.tiles[0].replace("https://", "slice://");
                 }
             }
+        }
+        if (layerData.key == HIKING_MAP || layerData.key == MTB_MAP) {
+            this.fileService.writeStyle(layerData.address.split("/").pop(), JSON.stringify(styleJson));
         }
         this.updateSourcesAndLayers(layerData, styleJson.sources, styleJson.layers);
     }
