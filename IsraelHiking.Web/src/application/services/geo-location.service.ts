@@ -166,7 +166,7 @@ export class GeoLocationService {
                 backgroundTitle: "Israel Hiking Map",
                 requestPermissions: true,
                 stale: true,
-                distanceFilter: 5
+                distanceFilter: 2
             }, (location?: Location, error?: Error) => {
                 if (error) {
                     this.loggingService.error("[GeoLocation] Failed to start background tracking: " + error.message);
