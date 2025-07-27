@@ -1,9 +1,9 @@
 @font-face {
-  font-family: 'IsraelHikingMap';
+  font-family: 'Mapeak';
   src:
-    url('IsraelHikingMap.ttf?pq32nj') format('truetype'),
-    url('IsraelHikingMap.woff?pq32nj') format('woff'),
-    url('IsraelHikingMap.svg?pq32nj#IsraelHikingMap') format('svg');
+    url('Mapeak.ttf?pq32nj') format('truetype'),
+    url('Mapeak.woff?pq32nj') format('woff'),
+    url('Mapeak.svg?pq32nj#Mapeak') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -11,7 +11,7 @@
 
 [class^="icon-"], [class*=" icon-"] {
   /* use !important to prevent issues with browser extensions that change fonts */
-  font-family: 'IsraelHikingMap' !important;
+  font-family: 'Mapeak' !important;
   speak: never;
   font-style: normal;
   font-weight: normal;

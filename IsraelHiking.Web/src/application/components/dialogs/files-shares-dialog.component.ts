@@ -106,7 +106,7 @@ export class FilesSharesDialogComponent {
     }
 
     private getName(data: DataContainer): string {
-        let name = "IsraelHikingMap";
+        let name = "Mapeak";
         if (data.routes.length === 1 && data.routes[0].name) {
             name = data.routes[0].name;
         }
