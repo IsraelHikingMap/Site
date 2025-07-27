@@ -92,7 +92,7 @@ export class ElevationProvider {
         const r = data[(relative.pixelY * tileSize + relative.pixelX) * 4];
         const g = data[(relative.pixelY * tileSize + relative.pixelX) * 4 + 1];
         const b = data[(relative.pixelY * tileSize + relative.pixelX) * 4 + 2];
-        return -10000 + ((r * 256 * 256 + g * 256 + b) * 0.1);
+        return -32768 + ((r * 256 + g + b / 256.0));
     }
 
     private async getImageData(data: ArrayBuffer): Promise<Uint8ClampedArray> {
