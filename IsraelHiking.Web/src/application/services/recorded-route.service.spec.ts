@@ -1,3 +1,4 @@
+import { EventEmitter } from "@angular/core";
 import { provideHttpClientTesting } from "@angular/common/http/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { TestBed, inject } from "@angular/core/testing";
@@ -47,7 +48,7 @@ describe("Recorded Route Service", () => {
                 { provide: RunningContextService, useValue: runnningContextServiceMock },
                 { provide: ConnectionService, useValue: { stateChanged: { subscribe: () => {} }} },
                 { provide: FileSystemWrapper, useValue: {} },
-                GeoLocationService,
+                { provide: GeoLocationService, useValue: { bulkPositionChanged: new EventEmitter() } },
                 RoutesFactory,
                 RecordedRouteService,
                 provideHttpClient(withInterceptorsFromDi()),

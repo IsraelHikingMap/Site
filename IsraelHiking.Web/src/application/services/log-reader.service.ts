@@ -11,7 +11,7 @@ export class LogReaderService {
         const lines = content.split("\n");
         const recordingRelatedLines: string[] = [];
         let foundEndOfRecording = false;
-        for (let line of lines) {
+        for (const line of lines) {
             if (!line.includes("[Record] Stop recording") && !foundEndOfRecording) {
                 continue;
             }
@@ -33,8 +33,8 @@ export class LogReaderService {
         };
         for (const line of recordingRelatedLines) {
             if (line.includes("[GeoLocation] Received position")) {
-                let timeString = line.split('time: ')[1].split(',')[0];
-                let foreground = line.split('background: ')[1] === "false";
+                const timeString = line.split("time: ")[1].split(",")[0];
+                const foreground = line.split("background: ")[1] === "false";
                 pointsGeojson.features.push({
                     type: "Feature",
                     geometry: {
@@ -54,14 +54,14 @@ export class LogReaderService {
                 continue;
             }
             if (line.includes("[Record] Valid position")) {
-                const time = new Date(line.split('timestamp":"')[1].split('"')[0]).toISOString();
+                const time = new Date(line.split("timestamp\":\"")[1].split("\"")[0]).toISOString();
                 if (pointsGeojson.features.length !== 0 && pointsGeojson.features[pointsGeojson.features.length - 1].properties.time === time) {
                     pointsGeojson.features[pointsGeojson.features.length - 1].properties.valid = true;
                 }
                 continue;
             }
             if (line.includes("[Record] Rejecting position")) {
-                const time = new Date(line.split('timestamp":"')[1].split('"')[0]).toISOString();
+                const time = new Date(line.split("timestamp\":\"")[1].split("\"")[0]).toISOString();
                 const feature = pointsGeojson.features.find(f => f.properties.time === time);
                 if (feature) {
                     feature.properties.valid = false;
@@ -85,8 +85,8 @@ export class LogReaderService {
                         type: "LineString",
                         coordinates: recordingRelatedLines.filter(l => l.includes("[Record] Valid position")).map(line => {
                             return [
-                                parseFloat(line.split('lng":')[1].split(",")[0]),
-                                parseFloat(line.split('lat":')[1].split(",")[0])
+                                parseFloat(line.split("lng\":")[1].split(",")[0]),
+                                parseFloat(line.split("lat\":")[1].split(",")[0])
                             ]
                         }),
                     },

@@ -6,7 +6,7 @@ import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
 import { firstValueFrom } from "rxjs";
-import { zipSync, strToU8, unzipSync, strFromU8, Zippable } from "fflate";
+import { zipSync, strToU8, unzipSync, strFromU8 } from "fflate";
 import { decode } from "base64-arraybuffer";
 import type { saveAs as saveAsForType } from "file-saver";
 

@@ -4,7 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from "@angular/common
 import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { StyleSpecification } from "maplibre-gl";
-import { strToU8, zipSync, unzipSync, strFromU8 } from "fflate";
+import { strToU8, zipSync } from "fflate";
 
 import { FileService, SaveAsFactory } from "./file.service";
 import { ImageResizeService } from "./image-resize.service";
