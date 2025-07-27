@@ -224,7 +224,7 @@ export class GeoLocationService {
     private async stopWatching() {
         this.store.dispatch(new SetTrackingStateAction("disabled"));
         this.store.dispatch(new SetCurrentPositionAction(null));
-        if (this.runningContextService.isCapacitor) {
+        if (this.runningContextService.isCapacitor && this.watchId) {
             this.loggingService.debug("[GeoLocation] Stopping background tracking");
             await BackgroundGeolocation.removeWatcher({id: this.watchId});
             this.watchId = null;
