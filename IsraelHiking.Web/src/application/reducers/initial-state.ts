@@ -93,41 +93,9 @@ export const initialState =
                     maxZoom: 16
                 }
             ],
-            overlays: [
-                {
-                    key: HIKING_TRAILS,
-                    address: Urls.HIKING_TILES_ADDRESS,
-                    minZoom: 1,
-                    maxZoom: 16,
-                    isOfflineAvailable: true,
-                    isOfflineOn: false,
-                    visible: false,
-                    isEditable: false
-                },
-                {
-                    key: BICYCLE_TRAILS,
-                    address: Urls.MTB_TILES_ADDRESS,
-                    minZoom: 1,
-                    maxZoom: 16,
-                    isOfflineAvailable: true,
-                    isOfflineOn: false,
-                    visible: false,
-                    isEditable: false
-                },
-                {
-                    key: POPULARITY_HEATMAP,
-                    address: Urls.HEATMAP_TILES_ADDRESS,
-                    minZoom: 7,
-                    maxZoom: 16,
-                    isOfflineAvailable: true,
-                    isOfflineOn: false,
-                    visible: false,
-                    isEditable: false
-                }
-
-            ],
+            overlays: [],
             selectedBaseLayerKey: HIKING_MAP,
-            expanded: ["Base Layers", "Overlays", "Private Routes"],
+            expanded: ["Base Layers", "Private Routes"],
             categoriesGroups: [{
                 type: "Points of Interest",
                 categories: [],
