@@ -14,6 +14,7 @@ import { DataContainerService } from "../../services/data-container.service";
 import { FileService, FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
+import { LogReaderService } from "../../services/log-reader.service";
 import { SetOfflineMapsLastModifiedDateAction } from "../../reducers/offline.reducer";
 import type { ApplicationState, DataContainer } from "../../models/models";
 
@@ -35,6 +36,7 @@ export class FilesSharesDialogComponent {
     private readonly dataContainerService = inject(DataContainerService);
     private readonly fileService = inject(FileService);
     private readonly toastService = inject(ToastService);
+    private readonly logReaderService = inject(LogReaderService);
     private readonly store = inject(Store);
 
     constructor() {
@@ -74,6 +76,13 @@ export class FilesSharesDialogComponent {
             this.toastService.info(this.resources.openingAFilePleaseWait);
             await this.fileService.writeStyle(file.name, await this.fileService.getFileContent(file));
             this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
+            return;
+        }
+        if (file.name.endsWith(".txt") && file.name.includes("log")) {
+            this.toastService.info(this.resources.openingAFilePleaseWait);
+            const fileContent = await this.fileService.getFileContent(file);
+            this.logReaderService.readLogFile(fileContent);
+            this.matDialogRef.close();
             return;
         }
         try {
