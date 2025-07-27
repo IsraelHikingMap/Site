@@ -31,40 +31,39 @@ export class LogReaderService {
             type: "FeatureCollection",
             features: []
         };
+        const accuracyGeojson: GeoJSON.FeatureCollection = {
+            type: "FeatureCollection",
+            features: []
+        };
         for (const line of recordingRelatedLines) {
             if (line.includes("[GeoLocation] Received position")) {
                 const timeString = line.split("time: ")[1].split(",")[0];
                 const foreground = line.split("background: ")[1] === "false";
+                const accuracy = parseFloat(line.split("accuracy: ")[1].split(",")[0]);
+                const lat = parseFloat(line.split("lat: ")[1].split(",")[0]);
+                const lng = parseFloat(line.split("lng: ")[1].split(",")[0]);
                 pointsGeojson.features.push({
                     type: "Feature",
                     geometry: {
                         type: "Point",
-                        coordinates: [
-                            parseFloat(line.split("lng: ")[1].split(",")[0]),
-                            parseFloat(line.split("lat: ")[1].split(",")[0])
-                        ]
+                        coordinates: [lng, lat]
                     },
                     properties: {
                         time: new Date(timeString).toISOString(),
-                        displayTime: (foreground ? "fg " : "bg ") + timeString.split("T")[1],
+                        label: (foreground ? "fg " : "bg ") + "acc: " + accuracy + "m\n" + timeString.split("T")[1].replace("Z", ""),
                         foreground,
-                        accuracy: parseFloat(line.split("accuracy: ")[1].split(",")[0])
+                        accuracy,
+                        color: foreground ? "#00FF00" : "#0000FF",
                     }
                 });
-                continue;
-            }
-            if (line.includes("[Record] Valid position")) {
-                const time = new Date(line.split("timestamp\":\"")[1].split("\"")[0]).toISOString();
-                if (pointsGeojson.features.length !== 0 && pointsGeojson.features[pointsGeojson.features.length - 1].properties.time === time) {
-                    pointsGeojson.features[pointsGeojson.features.length - 1].properties.valid = true;
-                }
+                accuracyGeojson.features.push(SpatialService.getCirclePolygonFeature({lng, lat}, accuracy));
                 continue;
             }
             if (line.includes("[Record] Rejecting position")) {
                 const time = new Date(line.split("timestamp\":\"")[1].split("\"")[0]).toISOString();
                 const feature = pointsGeojson.features.find(f => f.properties.time === time);
                 if (feature) {
-                    feature.properties.valid = false;
+                    feature.properties.color = "#FF0000";
                 }
                 continue;
             }
@@ -73,6 +72,11 @@ export class LogReaderService {
         this.mapService.map.addSource("log-points-geojson", {
             type: "geojson",
             data: pointsGeojson,
+        });
+
+        this.mapService.map.addSource("log-accuracy-geojson", {
+            type: "geojson",
+            data: accuracyGeojson,
         });
 
         this.mapService.map.addSource("log-record-line-geojson", {
@@ -96,18 +100,25 @@ export class LogReaderService {
         });
 
         this.mapService.map.addLayer({
+            id: "log-accuracy-geojson-layer",
+            type: "fill",
+            source: "log-accuracy-geojson",
+            paint: {
+                "fill-color": "#0000FF",
+                "fill-opacity": 0.2
+            }
+        });
+
+        this.mapService.map.addLayer({
             id: "log-points-geojson-layer",
             type: "circle",
             source: "log-points-geojson",
             paint: {
-                "circle-radius": 3,
-                "circle-color": [
-                    "case",
-                    ["==", ["get", "valid"], true],
-                    "#00FF00",
-                    "#FF0000"
-                ],
-                "circle-opacity": 0.8
+                "circle-radius": 5,
+                "circle-color": ["get", "color"],
+                "circle-opacity": 0.8,
+                "circle-stroke-width": 2,
+                "circle-stroke-color": "white"
             }
         });
         this.mapService.map.addLayer({
@@ -115,9 +126,9 @@ export class LogReaderService {
             type: "symbol",
             source: "log-points-geojson",
             layout: {
-                "text-field": ["get", "displayTime"],
+                "text-field": ["get", "label"],
                 "text-font": ["Open Sans Regular"],
-                "text-size": 12,
+                "text-size": 14,
                 "text-offset": [0, 1.5],
                 "text-anchor": "top",
             },
