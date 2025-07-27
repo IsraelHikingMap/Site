@@ -80,7 +80,7 @@ export class GeoLocationService {
             }
             if (!this.isBackground &&
                 !this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording &&
-                this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings &&
+                !this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings &&
                 this.watchId == null) {
                 this.startWatching();
             }
