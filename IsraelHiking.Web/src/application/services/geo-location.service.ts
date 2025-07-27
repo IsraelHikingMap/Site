@@ -1,7 +1,6 @@
 import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
 import { registerPlugin } from "@capacitor/core";
 import { BackgroundGeolocationPlugin, Location } from "@capacitor-community/background-geolocation";
-import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { App } from "@capacitor/app";
 import { Store } from "@ngxs/store";
 
@@ -23,7 +22,6 @@ export class GeoLocationService {
     private watchNumber = -1;
     private watchId: string = null;
     private isBackground = false;
-    private gettingLocations = false;
     private locations: Location[] = [];
 
     public bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
@@ -34,7 +32,6 @@ export class GeoLocationService {
     private readonly loggingService = inject(LoggingService);
     private readonly toastService = inject(ToastService);
     private readonly ngZone = inject(NgZone);
-    private readonly fileSystemWrapper = inject(FileSystemWrapper);
     private readonly store = inject(Store);
 
     public static positionToLatLngTime(position: GeolocationPosition): LatLngAltTime {
@@ -167,6 +164,7 @@ export class GeoLocationService {
                     return;
                 }
                 this.locations.push(location);
+                this.loggingService.debug("[GeoLocation] Received position: " + `lat: ${location.latitude}, lng: ${location.longitude}, time: ${new Date(location.time).toISOString()}, accuracy: ${location.accuracy}, background: ${this.isBackground}`);
                 if (this.isBackground) {
                     return;
                 }
@@ -176,21 +174,13 @@ export class GeoLocationService {
     }
 
     private async onLocationUpdate() {
-        if (this.gettingLocations) {
-            this.loggingService.debug("[GeoLocation] Trying to get locations while already getting them, skipping...");
-            return;
-        }
-        this.gettingLocations = true;
         const locations = [...this.locations];
         this.locations = [];
-        this.gettingLocations = false;
         const positions = locations.map(l => this.locationToPosition(l)).filter(p => !SpatialService.isJammingTarget(GeoLocationService.positionToLatLngTime(p)));
-        if (positions.length === 0) {
-            this.loggingService.debug("[GeoLocation] There's nothing to send - valid locations array is empty");
-        } else if (positions.length === 1) {
+        this.loggingService.debug("[GeoLocation] Handle location update, received " + positions.length + " positions");
+        if (positions.length === 1) {
             this.handlePositionChange(positions[0]);
-        } else {
-            this.loggingService.debug(`[GeoLocation] Sending bulk location update: ${positions.length}`);
+        } else if (positions.length > 1) {
             this.bulkPositionChanged.next(positions.splice(0, positions.length - 1));
             this.handlePositionChange(positions[0]);
         }
@@ -219,7 +209,6 @@ export class GeoLocationService {
 
     private handlePositionChange(position: GeolocationPosition): void {
         const latLng = GeoLocationService.positionToLatLngTime(position);
-        this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(latLng));
         if (SpatialService.isJammingTarget(latLng)) {
             this.toastService.info(this.resources.jammedPositionReceived);
             return;
