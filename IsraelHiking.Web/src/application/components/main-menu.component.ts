@@ -190,11 +190,7 @@ export class MainMenuComponent {
                 `OS version: ${info.osVersion}`,
                 `App version: ${(await App.getInfo()).version}`
             ].join("\n");
-            const geoLocationLogs = await this.geoLocationService.getLog();
-            const zippedLogFileUri = await this.fileService.compressTextToLogZip([
-                { name: "log.txt", text: logs},
-                { name: "geolocation.txt", text: geoLocationLogs}
-            ]);
+            const logFileUri = await this.fileService.storeFileToCache("log.txt", logs);
             const infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
             
@@ -204,8 +200,8 @@ export class MainMenuComponent {
                 body: this.resources.reportAnIssueInstructions,
                 attachments: [{
                     type: "absolute",
-                    name: "log.zip",
-                    path: zippedLogFileUri
+                    name: "log.txt",
+                    path: logFileUri
                 }, {
                     type: "base64",
                     name: `info-${userInfo.id}.txt`,

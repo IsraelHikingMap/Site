@@ -24,7 +24,6 @@ import { CancelableTimeoutService } from "../services/cancelable-timeout.service
 import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
 import { GeoLocationService } from "../services/geo-location.service";
-import { AudioPlayerFactory, IAudioPlayer } from "../services/audio-player.factory";
 import { ToggleIsShowKmMarkersAction, ToggleIsShowSlopeAction } from "../reducers/configuration.reducer";
 import type { LatLngAlt, ApplicationState, LatLngAltTime } from "../models/models";
 
@@ -121,7 +120,6 @@ export class RouteStatisticsComponent implements OnInit {
     };
     private zoom: number = 7;
     private routeColor: string;
-    private audioPlayer: IAudioPlayer;
     private heading: number | null = null;
 
     public readonly resources = inject(ResourcesService);
@@ -130,7 +128,6 @@ export class RouteStatisticsComponent implements OnInit {
     private readonly routeStatisticsService = inject(RouteStatisticsService);
     private readonly cancelableTimeoutService = inject(CancelableTimeoutService);
     private readonly sidebarService = inject(SidebarService);
-    private readonly audioPlayerFactory = inject(AudioPlayerFactory);
     private readonly store = inject(Store);
     private readonly destroyRef = inject(DestroyRef);
 
@@ -245,7 +242,6 @@ export class RouteStatisticsComponent implements OnInit {
                 this.updateDurationString((new Date().getTime() - recordingStartTime) / 1000);
             }
         });
-        this.audioPlayer = await this.audioPlayerFactory.create();
     }
 
     public changeState(state: string) {
@@ -943,13 +939,6 @@ export class RouteStatisticsComponent implements OnInit {
             return;
         }
         this.isFollowing = newIsFollowing;
-        if (this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings && this.isFollowing === false) {
-            // is following stopped - playing sound and vibration
-            if (navigator.vibrate) {
-                navigator.vibrate([200, 100, 200]);
-            }
-            this.audioPlayer.play();
-        }
     }
 
     private updateSlopeRoute() {

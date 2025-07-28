@@ -3,7 +3,5 @@
     <string name="app_name">Israel Hiking Map</string>
     <string name="title_activity_main">@string/app_name</string>
     <string name="package_name">il.org.osm.israelhiking</string>
-    <string name="plugin_bgloc_account_name">@string/app_name</string>
-    <string name="plugin_bgloc_account_type">il.org.osm.israelhiking.account</string>
-    <string name="plugin_bgloc_content_authority">@string/package_name</string>
+    <string name="capacitor_background_geolocation_notification_icon">drawable/bg_notification</string>
 </resources>
