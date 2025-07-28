@@ -7,13 +7,13 @@ import { MatHint } from "@angular/material/form-field";
 import { MatDialog, MatDialogRef, MatDialogTitle, MatDialogClose, MatDialogContent } from "@angular/material/dialog";
 import { Angulartics2OnModule } from "angulartics2";
 import { every } from "lodash-es";
-import { Store } from "@ngxs/store";
 
 import { ShareDialogComponent } from "./share-dialog.component";
 import { DataContainerService } from "../../services/data-container.service";
 import { FileService, FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
+import { LogReaderService } from "../../services/log-reader.service";
 import type { DataContainer } from "../../models/models";
 
 @Component({
@@ -34,7 +34,7 @@ export class FilesSharesDialogComponent {
     private readonly dataContainerService = inject(DataContainerService);
     private readonly fileService = inject(FileService);
     private readonly toastService = inject(ToastService);
-    private readonly store = inject(Store);
+    private readonly logReaderService = inject(LogReaderService);
 
     constructor() {
         this.formats = this.fileService.formats;
@@ -61,6 +61,13 @@ export class FilesSharesDialogComponent {
             this.toastService.info(this.resources.openingAFilePleaseWait);
             await this.fileService.writeStyle(file.name, await this.fileService.getFileContent(file));
             this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
+            return;
+        }
+        if (file.name.endsWith(".txt") && file.name.includes("log")) {
+            this.toastService.info(this.resources.openingAFilePleaseWait);
+            const fileContent = await this.fileService.getFileContent(file);
+            this.logReaderService.readLogFile(fileContent);
+            this.matDialogRef.close();
             return;
         }
         try {

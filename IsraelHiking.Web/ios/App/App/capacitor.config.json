@@ -19,6 +19,7 @@
 		"adjustMarginsForEdgeToEdge": "auto"
 	},
 	"packageClassList": [
+		"BackgroundGeolocation",
 		"KeepAwakePlugin",
 		"ScreenBrightnessPlugin",
 		"AppPlugin",

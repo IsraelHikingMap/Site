@@ -4,7 +4,6 @@ import { HttpTestingController, provideHttpClientTesting } from "@angular/common
 import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { StyleSpecification } from "maplibre-gl";
-import { unzipSync, strFromU8 } from "fflate";
 
 import { FileService, SaveAsFactory } from "./file.service";
 import { ImageResizeService } from "./image-resize.service";
@@ -283,31 +282,18 @@ describe("FileService", () => {
         expect(file.name).toBe("file.something");
     }));
 
-    it("Should compress text to zip and return uri", inject([FileService, FileSystemWrapper], 
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-            const spy = jasmine.createSpy();
-            fileSystemWrapper.writeFile = spy;
-            fileSystemWrapper.resolveLocalFilesystemUrl = jasmine.createSpy().and.returnValue(Promise.resolve({
-                nativeURL: "file:///some-file",
-            }));
-            const contents = [{ name: "log.txt", text: "some text" }];
-            const fileUri = await service.compressTextToLogZip(contents);
-            
-            expect(spy).toHaveBeenCalled();
-            expect(fileUri).toBe("/some-file");
-            const files = unzipSync(new Uint8Array(spy.calls.first().args[2]));
-            expect(Object.keys(files)).toEqual([contents[0].name]);
-            expect(strFromU8(files[contents[0].name])).toEqual(contents[0].text);
-    }));
-
     it("Should store file to cache", inject([FileService, FileSystemWrapper], 
         async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
         const spy = jasmine.createSpy();
         fileSystemWrapper.writeFile = spy;
+        fileSystemWrapper.resolveLocalFilesystemUrl = jasmine.createSpy().and.returnValue(Promise.resolve({
+            nativeURL: "file:///file.txt",
+        }));
 
-        await service.storeFileToCache("file.txt", "content");
+        const fileUri = await service.storeFileToCache("file.txt", "content");
 
         expect(spy).toHaveBeenCalled();
+        expect(fileUri).toBe("/file.txt");
     }));
 
     it("Should get file with progress", inject([FileService, HttpTestingController], 
