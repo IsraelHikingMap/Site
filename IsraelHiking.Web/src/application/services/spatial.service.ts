@@ -139,14 +139,14 @@ export class SpatialService {
                 }
                 if (SpatialService.insideBbox(start, lineToCheck.bbox)) {
                     const nearestPoint = nearestPointOnLine(lineToCheck, start, { units: "meters" });
-                    if (nearestPoint.properties.dist < 2) {
+                    if (nearestPoint.properties.dist < 0.5) {
                         lineToCheck.geometry.coordinates.splice(nearestPoint.properties.index + 1, 0, nearestPoint.geometry.coordinates);
                         continue;
                     }
                 }
                 if (SpatialService.insideBbox(end, lineToCheck.bbox)) {
                     const nearestPoint = nearestPointOnLine(lineToCheck, end, { units: "meters" });
-                    if (nearestPoint.properties.dist < 2) {
+                    if (nearestPoint.properties.dist < 0.5) {
                         lineToCheck.geometry.coordinates.splice(nearestPoint.properties.index + 1, 0, nearestPoint.geometry.coordinates);
                         continue;
                     }
