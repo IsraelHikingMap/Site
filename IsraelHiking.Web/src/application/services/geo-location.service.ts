@@ -1,6 +1,5 @@
 import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
-import { registerPlugin } from "@capacitor/core";
-import { BackgroundGeolocationPlugin, Location } from "@capacitor-community/background-geolocation";
+import { BackgroundGeolocation, Location } from "@capgo/background-geolocation";
 import { App } from "@capacitor/app";
 import { Store } from "@ngxs/store";
 
@@ -14,14 +13,8 @@ import { AudioPlayerFactory, IAudioPlayer } from "./audio-player.factory";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models/models";
 
-const BackgroundGeolocation = registerPlugin<BackgroundGeolocationPlugin>("BackgroundGeolocation");
-
 @Injectable()
 export class GeoLocationService {
-    private static readonly TIME_OUT = 30000;
-    private static readonly SHORT_TIME_OUT = 10000; // Only for first position for good UX
-
-    private watchNumber = -1;
     private watchId: string = null;
     private isBackground = false;
     private locations: Location[] = [];
@@ -58,11 +51,11 @@ export class GeoLocationService {
             this.enable();
         }
 
+        this.audioPlayer = await this.audioPlayerFactory.create();
+
         if (!this.runningContextService.isCapacitor) {
             return;
         }
-        
-        this.audioPlayer = await this.audioPlayerFactory.create();
 
         App.addListener("appStateChange", (state) => {
             if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "disabled") {
@@ -124,34 +117,7 @@ export class GeoLocationService {
 
     private startWatching() {
         this.store.dispatch(new SetTrackingStateAction("searching"));
-        if (this.runningContextService.isCapacitor) {
-            this.startBackgroundGeolocation();
-        } else {
-            this.startNavigator();
-        }
-    }
-
-    private startNavigator() {
-        this.loggingService.info("[GeoLocation] Starting browser tracking");
-        if (!window.navigator || !window.navigator.geolocation) {
-            return;
-        }
-        if (this.watchNumber !== -1) {
-            return;
-        }
-        this.watchNumber = window.navigator.geolocation.watchPosition(
-            (position: GeolocationPosition): void => this.handlePositionChange(position),
-            (err) => {
-                this.ngZone.run(() => {
-                    this.loggingService.error("[GeoLocation] Failed to start browser tracking " + JSON.stringify(err));
-                    this.toastService.warning(this.resources.unableToFindYourLocation);
-                    this.disable();
-                });
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: GeoLocationService.TIME_OUT
-            });
+        this.startBackgroundGeolocation();
     }
 
     private async startBackgroundGeolocation() {
@@ -224,21 +190,10 @@ export class GeoLocationService {
     private async stopWatching() {
         this.store.dispatch(new SetTrackingStateAction("disabled"));
         this.store.dispatch(new SetCurrentPositionAction(null));
-        if (this.runningContextService.isCapacitor && this.watchId) {
+        if (this.watchId) {
             this.loggingService.debug("[GeoLocation] Stopping background tracking");
             await BackgroundGeolocation.removeWatcher({id: this.watchId});
             this.watchId = null;
-        } else {
-            this.loggingService.debug("[GeoLocation] Stopping browser tracking: " + this.watchNumber);
-            this.stopNavigator();
-        }
-    }
-
-    private stopNavigator() {
-        if (this.watchNumber !== -1) {
-            this.loggingService.info("[GeoLocation] Stopping browser tracking");
-            window.navigator.geolocation.clearWatch(this.watchNumber);
-            this.watchNumber = -1;
         }
     }
 
