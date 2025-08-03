@@ -248,7 +248,7 @@ describe("ImageAttributionService", () => {
         expect(response).toBeNull();
     }));
 
-    it("should return unknown when getting wikimedia image without artist and license with IHM_ prefix", inject([ImageAttributionService, HttpTestingController],
+    it("should return the author from page content", inject([ImageAttributionService, HttpTestingController],
         async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
         const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
         mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
@@ -259,6 +259,9 @@ describe("ImageAttributionService", () => {
                             extmetadata: {
                                 somthing: {},
                             }
+                        }],
+                        revisions: [{
+                            "*": "|author=John Doe\n|date=2023-01-01"
                         }]
                     }
                 }
@@ -268,6 +271,32 @@ describe("ImageAttributionService", () => {
         const response = await promise;
 
         expect(response).toBeDefined();
-        expect(response.author).toBe("Unknown");
+        expect(response.author).toBe("John Doe");
+    }));
+
+    it("should return the author from page content that has a link", inject([ImageAttributionService, HttpTestingController],
+        async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
+        const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
+        mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
+            query: {
+                pages: {
+                    "-1": {
+                        imageinfo: [{
+                            extmetadata: {
+                                somthing: {},
+                            }
+                        }],
+                        revisions: [{
+                            "*": "|author=[//www.openstreetmap.org/user/osm-user OSM User]"
+                        }]
+                    }
+                }
+            }
+        });
+
+        const response = await promise;
+
+        expect(response).toBeDefined();
+        expect(response.author).toBe("OSM User");
     }));
 });
