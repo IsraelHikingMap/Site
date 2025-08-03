@@ -1,9 +1,5 @@
 [
 	{
-		"pkg": "@capacitor-community/background-geolocation",
-		"classpath": "com.equimaps.capacitor_background_geolocation.BackgroundGeolocation"
-	},
-	{
 		"pkg": "@capacitor-community/keep-awake",
 		"classpath": "com.getcapacitor.community.keepawake.KeepAwakePlugin"
 	},
@@ -38,6 +34,10 @@
 	{
 		"pkg": "@capawesome/capacitor-app-update",
 		"classpath": "io.capawesome.capacitorjs.plugins.appupdate.AppUpdatePlugin"
+	},
+	{
+		"pkg": "@capgo/background-geolocation",
+		"classpath": "com.capgo.capacitor_background_geolocation.BackgroundGeolocation"
 	},
 	{
 		"pkg": "@capgo/native-audio",
