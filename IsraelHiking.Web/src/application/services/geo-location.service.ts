@@ -17,7 +17,6 @@ export class GeoLocationService {
     private isBackground = false;
     private wasInitialized = false;
     private locations: Location[] = [];
-    private isCloseToRoute = false;
 
     public bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
     public backToForeground = new EventEmitter<void>();
@@ -47,6 +46,15 @@ export class GeoLocationService {
             this.store.dispatch(new SetTrackingStateAction("disabled"));
             this.enable();
         }
+
+        this.store.select((s: ApplicationState) => s.routes.present).subscribe(() => {
+            if (!this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings) {
+                return;
+            }
+            let route = this.selectedRouteService.getSelectedRoute();
+            const routePoints = route?.segments.map(segment => segment.latlngs.map(l => ([l.lng, l.lat] as [number, number]))).flat(1) || [];
+            BackgroundGeolocation.setPlannedRoute({route: routePoints, soundFile: "content/uh-oh.mp3", distance: 50});
+        });
 
         if (!this.runningContextService.isCapacitor) {
             return;
@@ -138,8 +146,6 @@ export class GeoLocationService {
                 }
                 this.locations.push(location);
                 this.loggingService.debug("[GeoLocation] Received position: " + `lat: ${location.latitude}, lng: ${location.longitude}, time: ${new Date(location.time).toISOString()}, accuracy: ${location.accuracy}, background: ${this.isBackground}`);
-                BackgroundGeolocation.playSound({ soundFile: "content/uh-oh.mp3" });
-                this.playOffRouteSoundIfNeeded(location);
                 if (this.isBackground) {
                     return;
                 }
@@ -148,19 +154,6 @@ export class GeoLocationService {
             this.wasInitialized = true;
         } catch { 
             // ignore errors.
-        }
-    }
-
-    private playOffRouteSoundIfNeeded(location: Location) {
-        if (!this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings) {
-            return;
-        }
-        const currentLocation = GeoLocationService.positionToLatLngTime(this.locationToPosition(location));
-        const closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, location.speed === 0 ? null : location.bearing);
-        const isPreviousCloseToRoute = this.isCloseToRoute;
-        this.isCloseToRoute = closestRouteToGps != null;
-        if (this.isCloseToRoute === false && isPreviousCloseToRoute === true) {
-            BackgroundGeolocation.playSound({ soundFile: "content/uh-oh.mp3" });
         }
     }
 
