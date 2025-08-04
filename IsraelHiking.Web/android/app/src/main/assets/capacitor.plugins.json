@@ -40,10 +40,6 @@
 		"classpath": "com.capgo.capacitor_background_geolocation.BackgroundGeolocation"
 	},
 	{
-		"pkg": "@capgo/native-audio",
-		"classpath": "ee.forgr.audio.NativeAudio"
-	},
-	{
 		"pkg": "capacitor-email-composer",
 		"classpath": "de.einfachhans.emailcomposer.EmailComposerPlugin"
 	}

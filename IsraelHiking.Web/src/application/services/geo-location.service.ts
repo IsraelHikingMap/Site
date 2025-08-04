@@ -9,7 +9,6 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { SpatialService } from "./spatial.service";
 import { SelectedRouteService } from "./selected-route.service";
-import { AudioPlayerFactory, IAudioPlayer } from "./audio-player.factory";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models/models";
 
@@ -18,7 +17,6 @@ export class GeoLocationService {
     private isBackground = false;
     private wasInitialized = false;
     private locations: Location[] = [];
-    private audioPlayer: IAudioPlayer;
     private isCloseToRoute = false;
 
     public bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
@@ -30,7 +28,6 @@ export class GeoLocationService {
     private readonly loggingService = inject(LoggingService);
     private readonly toastService = inject(ToastService);
     private readonly ngZone = inject(NgZone);
-    private readonly audioPlayerFactory = inject(AudioPlayerFactory);
     private readonly store = inject(Store);
 
     public static positionToLatLngTime(position: GeolocationPosition): LatLngAltTime {
@@ -45,13 +42,11 @@ export class GeoLocationService {
         };
     }
 
-    public async initialize() {
+    public initialize() {
         if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking !== "disabled") {
             this.store.dispatch(new SetTrackingStateAction("disabled"));
             this.enable();
         }
-
-        this.audioPlayer = await this.audioPlayerFactory.create();
 
         if (!this.runningContextService.isCapacitor) {
             return;
@@ -143,6 +138,7 @@ export class GeoLocationService {
                 }
                 this.locations.push(location);
                 this.loggingService.debug("[GeoLocation] Received position: " + `lat: ${location.latitude}, lng: ${location.longitude}, time: ${new Date(location.time).toISOString()}, accuracy: ${location.accuracy}, background: ${this.isBackground}`);
+                BackgroundGeolocation.playSound({ soundFile: "content/uh-oh.mp3" });
                 this.playOffRouteSoundIfNeeded(location);
                 if (this.isBackground) {
                     return;
@@ -164,10 +160,7 @@ export class GeoLocationService {
         const isPreviousCloseToRoute = this.isCloseToRoute;
         this.isCloseToRoute = closestRouteToGps != null;
         if (this.isCloseToRoute === false && isPreviousCloseToRoute === true) {
-            if (navigator.vibrate) {
-                navigator.vibrate([200, 100, 200]);
-            }
-            this.audioPlayer.play();
+            BackgroundGeolocation.playSound({ soundFile: "content/uh-oh.mp3" });
         }
     }
 

@@ -20,9 +20,7 @@ PODS:
     - Capacitor
   - CapawesomeCapacitorAppUpdate (7.0.1):
     - Capacitor
-  - CapgoBackgroundGeolocation (7.0.9):
-    - Capacitor
-  - CapgoNativeAudio (7.3.22):
+  - CapgoBackgroundGeolocation (7.0.10):
     - Capacitor
   - CordovaPlugins (7.2.0):
     - CapacitorCordova
@@ -41,7 +39,6 @@ DEPENDENCIES:
   - "CapacitorTextZoom (from `../../node_modules/@capacitor/text-zoom`)"
   - "CapawesomeCapacitorAppUpdate (from `../../node_modules/@capawesome/capacitor-app-update`)"
   - "CapgoBackgroundGeolocation (from `../../node_modules/@capgo/background-geolocation`)"
-  - "CapgoNativeAudio (from `../../node_modules/@capgo/native-audio`)"
   - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
   - CordovaPluginsResources (from `../capacitor-cordova-ios-plugins`)
 
@@ -70,8 +67,6 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capawesome/capacitor-app-update"
   CapgoBackgroundGeolocation:
     :path: "../../node_modules/@capgo/background-geolocation"
-  CapgoNativeAudio:
-    :path: "../../node_modules/@capgo/native-audio"
   CordovaPlugins:
     :path: "../capacitor-cordova-ios-plugins"
   CordovaPluginsResources:
@@ -89,11 +84,10 @@ SPEC CHECKSUMS:
   CapacitorShare: e573823f511f260f598d0423c33b1e3d7bbe5fd1
   CapacitorTextZoom: ccb82513c95a64bd9d4de4fc2399c2690a8705de
   CapawesomeCapacitorAppUpdate: d1f04c1c870388248889908cf2ca960c7fdbf0ef
-  CapgoBackgroundGeolocation: f3b1d3408b9fd3c711350c5feaa842a7ca9bb577
-  CapgoNativeAudio: c2b0208ef393f72c67e5db73e55c11fe496d2e8f
-  CordovaPlugins: dcbb774740273ff03972d8154a70ad966b65a1d0
+  CapgoBackgroundGeolocation: fef9c39049377d8098361b29e318eee346d3419c
+  CordovaPlugins: 4829fe005adcf826abe06af65b2a95f62706a1cb
   CordovaPluginsResources: da93847212bf7b16ba770e4d6c3e7dba820174c7
 
-PODFILE CHECKSUM: abb9c3697e629e5694d7d05a384ec5bff8df25de
+PODFILE CHECKSUM: fbfa7c09576a51affd7774ea51ff56f7cd085532
 
 COCOAPODS: 1.16.2

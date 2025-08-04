@@ -25,10 +25,6 @@
     <param name="onload" value="true"/>
   </feature>
 
-  <feature name="Vibration">
-    <param name="ios-package" value="CDVVibration"/>
-  </feature>
-
   
   <preference name="OAuthScheme" value="ihm" />
 </widget>

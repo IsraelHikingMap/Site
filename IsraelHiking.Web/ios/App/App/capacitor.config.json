@@ -32,7 +32,6 @@
 		"TextZoomPlugin",
 		"AppUpdatePlugin",
 		"BackgroundGeolocation",
-		"NativeAudio",
 		"EmailComposerPlugin",
 		"CDVPlugin"
 	]
