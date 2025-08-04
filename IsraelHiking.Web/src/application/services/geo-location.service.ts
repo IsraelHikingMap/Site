@@ -15,8 +15,8 @@ import type { ApplicationState, LatLngAltTime } from "../models/models";
 
 @Injectable()
 export class GeoLocationService {
-    private watchId: string = null;
     private isBackground = false;
+    private wasInitialized = false;
     private locations: Location[] = [];
     private audioPlayer: IAudioPlayer;
     private isCloseToRoute = false;
@@ -66,15 +66,15 @@ export class GeoLocationService {
             if (this.isBackground && 
                 !this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording && 
                 !this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings &&
-                this.watchId) {
-                BackgroundGeolocation.removeWatcher({id: this.watchId});
-                this.watchId = null;
+                this.wasInitialized) {
+                BackgroundGeolocation.stop();
+                this.wasInitialized = false;
                 return;
             }
             if (!this.isBackground &&
                 !this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording &&
                 !this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings &&
-                this.watchId == null) {
+                !this.wasInitialized) {
                 this.startWatching();
             }
             if (!this.isBackground) {
@@ -115,19 +115,15 @@ export class GeoLocationService {
         }
     }
 
-    private startWatching() {
+    private async startWatching() {
         this.store.dispatch(new SetTrackingStateAction("searching"));
-        this.startBackgroundGeolocation();
-    }
-
-    private async startBackgroundGeolocation() {
-        if (this.watchId) {
+        if (this.wasInitialized) {
             this.loggingService.debug("[GeoLocation] Background tracking already started, skipping...");
             return;
         }
         this.loggingService.info("[GeoLocation] Starting background tracking");
         try {
-            this.watchId = await BackgroundGeolocation.addWatcher({
+            await BackgroundGeolocation.start({
                 backgroundMessage:  this.resources.runningInBackground,
                 backgroundTitle: "Israel Hiking Map",
                 requestPermissions: true,
@@ -153,6 +149,7 @@ export class GeoLocationService {
                 }
                 this.onLocationUpdate();
             });
+            this.wasInitialized = true;
         } catch { 
             // ignore errors.
         }
@@ -190,10 +187,10 @@ export class GeoLocationService {
     private async stopWatching() {
         this.store.dispatch(new SetTrackingStateAction("disabled"));
         this.store.dispatch(new SetCurrentPositionAction(null));
-        if (this.watchId) {
+        if (this.wasInitialized) {
             this.loggingService.debug("[GeoLocation] Stopping background tracking");
-            await BackgroundGeolocation.removeWatcher({id: this.watchId});
-            this.watchId = null;
+            await BackgroundGeolocation.stop();
+            this.wasInitialized = false;
         }
     }
 
