@@ -145,8 +145,7 @@ export class RecordedRouteService {
             this.loggingService.debug(`[Record] Processing ${positions.length} pending positions`);
             this.store.dispatch(new ClearPendingProcessingRoutePointsAction());
         }
-        if (position != null && (positions.length == 0 || positions[positions.length - 1].timestamp !== position.timestamp)) {
-            // Avoid adding the same position twice due to how geolocation service works.
+        if (position != null) {
             positions.push(position);
         }
         if (positions.length === 0) {
@@ -169,6 +168,11 @@ export class RecordedRouteService {
     }
 
     private validateRecordingAndUpdateState(position: Immutable<GeolocationPosition>, lastValidLocation: LatLngAltTime): boolean {
+        if (position.timestamp === new Date(lastValidLocation.timestamp).getTime()) {
+            // Ignore positions with the same timestamp as the last valid position without any logging 
+            // as this can happen when the device comes back from background and the GPS position is not updated yet.
+            return false;
+        }
         let nonValidReason = this.isValid(lastValidLocation, position);
         if (nonValidReason === "") {
             this.loggingService.debug("[Record] Valid position, updating. " +
@@ -178,7 +182,7 @@ export class RecordedRouteService {
         }
         if (this.rejectedPosition == null) {
             this.rejectedPosition = GeoLocationService.positionToLatLngTime(position);
-            this.loggingService.debug(`[Record] Rejecting position, reason: ${nonValidReason}` +
+            this.loggingService.debug(`[Record] Rejecting position, reason: ${nonValidReason} ` +
                 JSON.stringify(GeoLocationService.positionToLatLngTime(position)));
             return false;
         }
