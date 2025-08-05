@@ -129,9 +129,16 @@ export class OsmTagsService {
             }
         }
 
-        if (feature.properties.waterway || feature.properties.type === "waterway") {
+        if (feature.properties.waterway === "waterfall") {
             poi.properties.poiIconColor = "blue";
             poi.properties.poiIcon = "icon-waterfall";
+            poi.properties.poiCategory = "Water";
+            return;
+        }
+
+        if (feature.properties.waterway || feature.properties.type === "waterway") {
+            poi.properties.poiIconColor = "blue";
+            poi.properties.poiIcon = "icon-river";
             poi.properties.poiCategory = "Water";
             return;
         }
@@ -156,9 +163,13 @@ export class OsmTagsService {
                     poi.properties.poiCategory = "Camping";
                     return;
                 case "attraction":
-                case "artwork":
                     poi.properties.poiIconColor = "#ffb800";
                     poi.properties.poiIcon = "icon-star";
+                    poi.properties.poiCategory = "Other";
+                    return;
+                case "artwork":
+                    poi.properties.poiIconColor = "#ffb800";
+                    poi.properties.poiIcon = "icon-artwork";
                     poi.properties.poiCategory = "Other";
                     return;
                 case "alpine_hut":
