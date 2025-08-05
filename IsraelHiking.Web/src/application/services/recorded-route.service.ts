@@ -23,7 +23,6 @@ export class RecordedRouteService {
     private static readonly MIN_ACCURACY = 100; // meters
 
     private rejectedPosition: LatLngAltTime;
-    private lastValidLocation: LatLngAltTime;
 
     private readonly resources = inject(ResourcesService);
     private readonly geoLocationService = inject(GeoLocationService);
@@ -60,7 +59,6 @@ export class RecordedRouteService {
         this.rejectedPosition = null;
         const gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
         const currentLocation = GeoLocationService.positionToLatLngTime(gpsState.currentPosition);
-        this.lastValidLocation = currentLocation;
         this.store.dispatch(new StartRecordingAction());
         this.store.dispatch(new AddRecordingRoutePointsAction([currentLocation]));
     }
@@ -150,10 +148,12 @@ export class RecordedRouteService {
             return;
         }
         const validPositions = [];
+        const routeLatLngs = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState.route).latlngs;
+        let lastValidLocation = routeLatLngs[routeLatLngs.length - 1];
         for (const position of positions) {
-            if (this.validateRecordingAndUpdateState(position)) {
+            if (this.validateRecordingAndUpdateState(position, lastValidLocation)) {
                 validPositions.push(position);
-                this.lastValidLocation = GeoLocationService.positionToLatLngTime(position);
+                lastValidLocation = GeoLocationService.positionToLatLngTime(position);
             }
         }
         if (validPositions.length === 0) {
@@ -163,8 +163,8 @@ export class RecordedRouteService {
         this.store.dispatch(new AddRecordingRoutePointsAction(locations));
     }
 
-    private validateRecordingAndUpdateState(position: Immutable<GeolocationPosition>): boolean {
-        let nonValidReason = this.isValid(this.lastValidLocation, position);
+    private validateRecordingAndUpdateState(position: Immutable<GeolocationPosition>, lastValidLocation: LatLngAltTime): boolean {
+        let nonValidReason = this.isValid(lastValidLocation, position);
         if (nonValidReason === "") {
             this.loggingService.debug("[Record] Valid position, updating. " +
                 JSON.stringify(GeoLocationService.positionToLatLngTime(position)));

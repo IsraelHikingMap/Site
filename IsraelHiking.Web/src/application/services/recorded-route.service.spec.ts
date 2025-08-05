@@ -14,7 +14,7 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { RunningContextService } from "./running-context.service";
 import { ConnectionService } from "./connection.service";
-import { StopRecordingAction, RecordedRouteReducer, ClearPendingProcessingRoutePointsAction } from "../reducers/recorded-route.reducer";
+import { StopRecordingAction, RecordedRouteReducer, ClearPendingProcessingRoutePointsAction, AddRecordingRoutePointsAction } from "../reducers/recorded-route.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
 import { SetCurrentPositionAction, GpsReducer } from "../reducers/gps.reducer";
 import type { ApplicationState, MarkerData } from "../models/models";
@@ -128,6 +128,46 @@ describe("Recorded Route Service", () => {
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ClearPendingProcessingRoutePointsAction);
             expect(spy.calls.all()[1].args[0]).toBeInstanceOf(StopRecordingAction);
             expect(spy.calls.all()[2].args[0]).toBeInstanceOf(AddRouteAction);
+        }
+    ));
+
+    it("Should initialize after a recording stopped in the middle with pending proccessing location and stop the recording gracefully",
+        inject([RecordedRouteService, Store],
+        (service: RecordedRouteService, store: Store) => {
+            store.reset({
+                recordedRouteState: {
+                    isRecording: true,
+                    route: {
+                        markers: [],
+                        latlngs: [{
+                            lat: 1,
+                            lng: 2,
+                            alt: 10,
+                            timestamp: new Date(0)}
+                        ]
+                    },
+                    pendingProcessing: [{ 
+                        coords: { 
+                            latitude: 1, 
+                            longitude: 2 
+                        } as GeolocationCoordinates, 
+                        timestamp: new Date(1000).getTime()
+                    } as GeolocationPosition]
+                },
+                routeEditingState: {
+                    routingType: "Hike"
+                },
+                userState: {
+                    userInfo: null
+                }
+            });
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+            service.initialize();
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ClearPendingProcessingRoutePointsAction);
+            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(AddRecordingRoutePointsAction);
+            expect(spy.calls.all()[2].args[0]).toBeInstanceOf(StopRecordingAction);
+            expect(spy.calls.all()[3].args[0]).toBeInstanceOf(AddRouteAction);
         }
     ));
 
