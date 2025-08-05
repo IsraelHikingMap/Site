@@ -139,8 +139,8 @@ export class RecordedRouteService {
         if (!this.isRecording()) {
             return;
         }
-        let readOnlyPositions = this.store.selectSnapshot((state: ApplicationState) => state.recordedRouteState.pendingProcessing) || [];
-        let positions = [...readOnlyPositions];
+        const readOnlyPositions = this.store.selectSnapshot((state: ApplicationState) => state.recordedRouteState.pendingProcessing) || [];
+        const positions = [...readOnlyPositions];
         if (positions.length > 0) {
             this.loggingService.debug(`[Record] Processing ${positions.length} pending positions`);
         }

@@ -82,7 +82,7 @@ export class GeoLocationService {
             }
             if (!this.isBackground) {
                 this.ngZone.run(async () => {
-                    await this.onLocationUpdate();
+                    this.handlePositionChange(this.lastReceivedPosition);
                     this.backToForeground.next();
                 });
             }
@@ -140,7 +140,7 @@ export class GeoLocationService {
                         this.positionWhileInBackground.next(this.lastReceivedPosition);
                         return;
                     }
-                    this.onLocationUpdate();
+                    this.handlePositionChange(this.lastReceivedPosition);
                     return;
                 }
                 if (error && error.code !== "2") { // "2" is location unaavailable in the browser, ignore it.
@@ -157,12 +157,6 @@ export class GeoLocationService {
             this.wasInitialized = true;
         } catch { 
             // ignore errors.
-        }
-    }
-
-    private async onLocationUpdate() {
-        if (this.lastReceivedPosition !== null && !SpatialService.isJammingTarget(GeoLocationService.positionToLatLngTime(this.lastReceivedPosition))) {
-            this.handlePositionChange(this.lastReceivedPosition);
         }
     }
 
