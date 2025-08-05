@@ -65,7 +65,8 @@ export const initialState =
         recordedRouteState: {
             isAddingPoi: false,
             isRecording: false,
-            route: null
+            route: null,
+            pendingProcessing: []
         },
         tracesState: {
             visibleTraceId: null,
