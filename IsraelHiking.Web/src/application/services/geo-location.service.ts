@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
-import { BackgroundGeolocation, Location } from "@capgo/background-geolocation";
+import { BackgroundGeolocation, Location, CallbackError } from "@capgo/background-geolocation";
 import { App } from "@capacitor/app";
 import { Store } from "@ngxs/store";
 
@@ -51,7 +51,7 @@ export class GeoLocationService {
             if (!this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings) {
                 return;
             }
-            let route = this.selectedRouteService.getSelectedRoute();
+            const route = this.selectedRouteService.getSelectedRoute();
             const routePoints = route?.segments.map(segment => segment.latlngs.map(l => ([l.lng, l.lat] as [number, number]))).flat(1) || [];
             BackgroundGeolocation.setPlannedRoute({route: routePoints, soundFile: "content/uh-oh.mp3", distance: 50});
         });
@@ -132,9 +132,18 @@ export class GeoLocationService {
                 requestPermissions: true,
                 stale: true,
                 distanceFilter: 2
-            }, (location?: Location, error?: Error) => {
-                if (error) {
-                    this.loggingService.error("[GeoLocation] Failed to start background tracking: " + error.message);
+            }, (location?: Location, error?: CallbackError) => {
+                if (location) {
+                    this.locations.push(location);
+                    this.loggingService.debug("[GeoLocation] Received position: " + `lat: ${location.latitude}, lng: ${location.longitude}, time: ${new Date(location.time).toISOString()}, accuracy: ${location.accuracy}, background: ${this.isBackground}`);
+                    if (this.isBackground) {
+                        return;
+                    }
+                    this.onLocationUpdate();
+                    return;
+                }
+                if (error && error.code !== "2") { // "2" is location unaavailable in the browser, ignore it.
+                    this.loggingService.error(`[GeoLocation] Failed to start background tracking: ${error.message} code: ${error.code}`);
                     this.disable();
                     this.toastService.confirm({
                         message: this.resources.noLocationPermissionOpenAppSettings,
@@ -142,14 +151,7 @@ export class GeoLocationService {
                         confirmAction: () => BackgroundGeolocation.openSettings(),
                         declineAction: () => { }
                     });
-                    return;
                 }
-                this.locations.push(location);
-                this.loggingService.debug("[GeoLocation] Received position: " + `lat: ${location.latitude}, lng: ${location.longitude}, time: ${new Date(location.time).toISOString()}, accuracy: ${location.accuracy}, background: ${this.isBackground}`);
-                if (this.isBackground) {
-                    return;
-                }
-                this.onLocationUpdate();
             });
             this.wasInitialized = true;
         } catch { 
