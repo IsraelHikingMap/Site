@@ -84,7 +84,7 @@ export class ElevationProvider {
     }
 
     private getElevationForLatlng(latlng: LatLngAlt): number {
-        const tileSize = 256;
+        const tileSize = 512;
         const tile = SpatialService.toTile(latlng, ElevationProvider.MAX_ELEVATION_ZOOM);
         const relative = SpatialService.toRelativePixel(latlng, ElevationProvider.MAX_ELEVATION_ZOOM, tileSize);
         const tileIndex = { tileX: Math.floor(tile.x), tileY: Math.floor(tile.y) };
