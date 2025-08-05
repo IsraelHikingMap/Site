@@ -280,13 +280,15 @@ describe("Recorded Route Service", () => {
             geoService.positionWhileInBackground.next({ coords: { longitude: 1.1, latitude: 2 } as GeolocationCoordinates, timestamp: new Date(5000).getTime() } as GeolocationPosition);
 
             geoService.backToForeground.next();
-            expect(spy.calls.all()[0].args[0].startsWith("[Record] Valid position")).toBeTruthy();
-            expect(spy.calls.all()[1].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy();
-            expect(spy.calls.all()[2].args[0].startsWith("[Record] Validating a rejected position")).toBeTruthy();
-            expect(spy.calls.all()[3].args[0].startsWith("[Record] Valid position")).toBeTruthy();
-            expect(spy.calls.all()[4].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy();
-            expect(spy.calls.all()[5].args[0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
-            expect(spy.calls.all()[6].args[0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
+            let i = 0;
+            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Processing 7")).toBeTruthy();
+            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Valid position")).toBeTruthy();
+            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy();
+            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Validating a rejected position")).toBeTruthy();
+            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Valid position")).toBeTruthy();
+            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy();
+            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
+            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
 
             expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(4);
     }));

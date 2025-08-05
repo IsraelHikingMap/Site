@@ -139,9 +139,13 @@ export class RecordedRouteService {
         if (!this.isRecording()) {
             return;
         }
-        let positions = this.store.selectSnapshot((state: ApplicationState) => state.recordedRouteState.pendingProcessing) || [];
+        let readOnlyPositions = this.store.selectSnapshot((state: ApplicationState) => state.recordedRouteState.pendingProcessing) || [];
+        let positions = [...readOnlyPositions];
+        if (positions.length > 0) {
+            this.loggingService.debug(`[Record] Processing ${positions.length} pending positions`);
+        }
         if (position != null) {
-            positions = [...positions, position];
+            positions.push(position);
         }
         this.store.dispatch(new ClearPendingProcessingRoutePointsAction());
         if (positions.length === 0) {
