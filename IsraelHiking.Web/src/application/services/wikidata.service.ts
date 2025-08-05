@@ -12,6 +12,18 @@ type WikiDataPage = {
     descriptions?: { [key: string]: string };
 }
 
+export type WikiMetadata = {
+    Artist?: {
+        value: string;
+    };
+    Attribution?: {
+        value: string;
+    };
+    LicenseShortName?: {
+        value: string;
+    }
+};
+
 export type WikiPage = {
     query: {
         pages: {
@@ -20,19 +32,10 @@ export type WikiPage = {
                 original?: {
                     source: string
                 };
+                revisions?: [Record<string, string>];
                 imageinfo: {
                     url?: string;
-                    extmetadata: {
-                        Artist?: {
-                            value: string;
-                        };
-                        Attribution?: {
-                            value: string;
-                        };
-                        LicenseShortName?: {
-                            value: string;
-                        }
-                    };
+                    extmetadata: WikiMetadata;
                 }[];
             }
         },
