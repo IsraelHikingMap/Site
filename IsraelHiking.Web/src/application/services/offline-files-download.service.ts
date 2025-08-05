@@ -9,7 +9,6 @@ import { LayersService } from "./layers.service";
 import { DownloadResponse, FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
 import { OfflineManagementDialogComponent } from "application/components/dialogs/offline-management-dialog.component";
-import { ToggleOfflineAction } from "../reducers/layers.reducer";
 import { SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState } from "../models/models";
@@ -95,43 +94,32 @@ export class OfflineFilesDownloadService {
     private async downloadOfflineFilesProgressAction(fileNames: Record<string, string>, rootFilesCount: number, tileX: number, tileY: number):
         Promise<void> {
         this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${Object.keys(fileNames).length}`);
-        let setBackToOffline = false;
-        if (this.layersService.getSelectedBaseLayer().isOfflineOn) {
-            this.store.dispatch(new ToggleOfflineAction(this.layersService.getSelectedBaseLayer().key, false));
-            setBackToOffline = true;
-        }
-        try {
-            const length = Object.keys(fileNames).length;
-            for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
-                if (this.currentDownloadResponse?.aborted) {
-                    this.loggingService.info("[Offline Download] Aborted downloading offline files");
-                    return;
-                }
-                const fileName = Object.keys(fileNames)[fileNameIndex];
-                
-                const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
-                let fileDownloadUrl = `${Urls.offlineFiles}/${fileName}`;
-                if (fileName.endsWith(".pmtiles")) {
-                    if (fileNameIndex >= rootFilesCount) {
-                        fileDownloadUrl += `?tileX=${tileX}&tileY=${tileY}`;
-                    }
-                    this.currentDownloadResponse = this.fileService.downloadFileToCacheAuthenticated(fileDownloadUrl, fileName, token,
-                        (value) => this.updateInProgressTilesList(tileX, tileY, (value + fileNameIndex) * 100.0 / length));
-                    await this.currentDownloadResponse.promise;
-                    await this.fileService.moveFileFromCacheToDataDirectory(fileName);
-                } else {
-                    const fileContent = await this.fileService.getFileContentWithProgress(fileDownloadUrl,
-                        (value) => this.updateInProgressTilesList(tileX, tileY, (value + fileNameIndex) * 100.0 / length));
-                    await this.fileService.writeStyle(fileName, await this.fileService.getFileContent(fileContent as File));
-                }
-                this.loggingService.info(`[Offline Download] Finished downloading ${fileName}`);
+        const length = Object.keys(fileNames).length;
+        for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
+            if (this.currentDownloadResponse?.aborted) {
+                this.loggingService.info("[Offline Download] Aborted downloading offline files");
+                return;
             }
-            this.loggingService.info("[Offline Download] Finished downloading offline files");
-        } finally {
-            if (setBackToOffline) {
-                this.store.dispatch(new ToggleOfflineAction(this.layersService.getSelectedBaseLayer().key, false));
+            const fileName = Object.keys(fileNames)[fileNameIndex];
+            
+            const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
+            let fileDownloadUrl = `${Urls.offlineFiles}/${fileName}`;
+            if (fileName.endsWith(".pmtiles")) {
+                if (fileNameIndex >= rootFilesCount) {
+                    fileDownloadUrl += `?tileX=${tileX}&tileY=${tileY}`;
+                }
+                this.currentDownloadResponse = this.fileService.downloadFileToCacheAuthenticated(fileDownloadUrl, fileName, token,
+                    (value) => this.updateInProgressTilesList(tileX, tileY, (value + fileNameIndex) * 100.0 / length));
+                await this.currentDownloadResponse.promise;
+                await this.fileService.moveFileFromCacheToDataDirectory(fileName);
+            } else {
+                const fileContent = await this.fileService.getFileContentWithProgress(fileDownloadUrl,
+                    (value) => this.updateInProgressTilesList(tileX, tileY, (value + fileNameIndex) * 100.0 / length));
+                await this.fileService.writeStyle(fileName, await this.fileService.getFileContent(fileContent as File));
             }
+            this.loggingService.info(`[Offline Download] Finished downloading ${fileName}`);
         }
+        this.loggingService.info("[Offline Download] Finished downloading offline files");
     }
 
     private updateInProgressTilesList(tileX: number, tileY: number, progressValue: number) {

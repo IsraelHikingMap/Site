@@ -5,7 +5,7 @@ import { File as FileSystemWrapper, FileEntry } from "@awesome-cordova-plugins/f
 import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom, timeout } from "rxjs";
 import { zipSync, strToU8 } from "fflate";
 import { decode } from "base64-arraybuffer";
 import type { saveAs as saveAsForType } from "file-saver";
@@ -115,22 +115,29 @@ export class FileService {
         return (window.origin || window.location.origin) + "/" + relativePath;
     }
 
-    public async getStyleJsonContent(url: string, isOffline: boolean): Promise<StyleSpecification> {
+    public async getStyleJsonContent(url: string, tryLocalStyle: boolean): Promise<StyleSpecification> {
         try {
-            if (isOffline || (this.runningContextService.isCapacitor && url.startsWith("."))) {
-                const styleFileName = last(url.split("/"));
-                const styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
-                return JSON.parse(styleText) as StyleSpecification;
+            if (this.runningContextService.isCapacitor && url.startsWith(".")) {
+                return await this.getLocalStyleJson(url);
             }
-            return await firstValueFrom(this.httpClient.get(url)) as StyleSpecification;
+            return await firstValueFrom(this.httpClient.get(url).pipe(timeout(5000))) as any as StyleSpecification;
         } catch (ex) {
-            this.loggingService.error(`[Files] Unable to get style file, isOffline: ${isOffline}, ${url}, ${(ex as Error).message}`);
+            if (tryLocalStyle) {
+                return await this.getLocalStyleJson(url);
+            }
+            this.loggingService.error(`[Files] Unable to get style file, tryLocalStyle: ${tryLocalStyle}, ${url}, ${(ex as Error).message}`);
             return {
                 version: 8.0,
                 layers: [],
                 sources: {}
             };
         }
+    }
+
+    private async getLocalStyleJson(url: string): Promise<StyleSpecification> {
+        const styleFileName = last(url.split("/"));
+        const styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
+        return JSON.parse(styleText) as StyleSpecification;
     }
 
     private async base64StringToBlob(base64: string, type = "application/octet-stream"): Promise<Blob> {

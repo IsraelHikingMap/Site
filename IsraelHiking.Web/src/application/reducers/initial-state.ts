@@ -80,7 +80,6 @@ export const initialState =
                     address: Urls.HIKING_TILES_ADDRESS,
                     isEditable: false,
                     isOfflineAvailable: true,
-                    isOfflineOn: false,
                     minZoom: 1,
                     maxZoom: 16
                 },
@@ -89,7 +88,6 @@ export const initialState =
                     address: Urls.MTB_TILES_ADDRESS,
                     isEditable: false,
                     isOfflineAvailable: true,
-                    isOfflineOn: false,
                     minZoom: 1,
                     maxZoom: 16
                 }

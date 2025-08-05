@@ -8,7 +8,7 @@ import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { LayersService } from "./layers.service";
 import { SetUserInfoAction, UserInfoReducer } from "../reducers/user.reducer";
-import { AddBaseLayerAction, AddOverlayAction, LayersReducer, RemoveBaseLayerAction, RemoveOverlayAction, SelectBaseLayerAction, ToggleOfflineAction, UpdateBaseLayerAction, UpdateOverlayAction } from "../reducers/layers.reducer";
+import { AddBaseLayerAction, AddOverlayAction, LayersReducer, RemoveBaseLayerAction, RemoveOverlayAction, SelectBaseLayerAction, UpdateBaseLayerAction, UpdateOverlayAction } from "../reducers/layers.reducer";
 import type { EditableLayer, LayerData, Overlay } from "../models/models";
 
 describe("LayersService", () => {
@@ -556,19 +556,5 @@ describe("LayersService", () => {
         service.removeOverlay(overlay);
         
         expect(spy.calls.first().args[0]).toBeInstanceOf(RemoveOverlayAction);
-    }));
-
-    it("should toggle offline", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const overlay = { key: "overlay1", id: "1", isOfflineOn: false } as Overlay;
-        store.reset({ 
-            layersState: { 
-                overlays: [overlay]
-            } 
-        });
-        const spy = spyOn(store, "dispatch").and.callThrough();
-        
-        service.toggleOffline(overlay, true);
-        
-        expect(spy.calls.first().args[0]).toBeInstanceOf(ToggleOfflineAction);
     }));
 });

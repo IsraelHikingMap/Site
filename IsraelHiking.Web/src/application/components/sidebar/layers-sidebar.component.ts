@@ -145,14 +145,6 @@ export class LayersSidebarComponent {
         this.layersService.hideAllOverlays();
     }
 
-    public showOfflineButton(layer: EditableLayer) {
-        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        return layer.isOfflineAvailable &&
-            this.runningContextService.isCapacitor &&
-            (offlineState.downloadedTiles != null ||
-            offlineState.isSubscribed);
-    }
-
     public isOfflineDownloadAvailable() {
         return this.runningContextService.isCapacitor &&
             this.store.selectSnapshot((s: ApplicationState) => s.offlineState).isSubscribed;
@@ -183,15 +175,6 @@ export class LayersSidebarComponent {
         }
 
         OfflineManagementDialogComponent.openDialog(this.dialog);
-    }
-
-    public toggleOffline(event: Event, layer: EditableLayer, isOverlay: boolean) {
-        event.stopPropagation();
-        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles == null && !layer.isOfflineOn) {
-            this.toastService.warning(this.resources.noOfflineFilesPleaseDownload);
-            return;
-        }
-        this.layersService.toggleOffline(layer, isOverlay);
     }
 
     public toggleRoute(routeData: RouteData) {

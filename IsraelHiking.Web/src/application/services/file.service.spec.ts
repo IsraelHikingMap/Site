@@ -183,28 +183,44 @@ describe("FileService", () => {
         expect(response).toEqual({} as StyleSpecification);
     }));
 
-    it("Should get style json content from local when offline", inject([FileService, FileSystemWrapper], async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-        const spy = jasmine.createSpy();
-        fileSystemWrapper.readAsText = spy.and.returnValue(Promise.resolve("{}"));
+    it("Should get style json content from local when remote fails", inject([FileService, FileSystemWrapper, HttpTestingController], 
+        async (service: FileService, fileSystemWrapper: FileSystemWrapper, mockBackend: HttpTestingController) => {
+            const spy = jasmine.createSpy();
+            fileSystemWrapper.readAsText = spy.and.returnValue(Promise.resolve("{}"));
+            const promise = service.getStyleJsonContent("s.json", true);
 
-        const promise = service.getStyleJsonContent("./style.json", true);
+            mockBackend.expectOne("s.json").flush(null, { status: 404, statusText: "Not Found" });
 
-        const response = await promise;
-        expect(spy).toHaveBeenCalled();
-        expect(response).toEqual({} as StyleSpecification);
+            const response = await promise;
+            expect(spy).toHaveBeenCalled();
+            expect(response).toEqual({} as StyleSpecification);
     }));
 
-    it("Should get empty style json on failure", inject([FileService, FileSystemWrapper], 
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-        const spy = jasmine.createSpy();
-        fileSystemWrapper.readAsText = spy.and.returnValue(Promise.resolve({}));
+    it("Should get style json content from local when offline", inject([FileService, FileSystemWrapper, RunningContextService], 
+        async (service: FileService, fileSystemWrapper: FileSystemWrapper, runningContextService: RunningContextService) => {
+            (runningContextService as any).isCapacitor = true;
+            const spy = jasmine.createSpy();
+            fileSystemWrapper.readAsText = spy.and.returnValue(Promise.resolve("{}"));
 
-        const promise = service.getStyleJsonContent("./style.json", true);
+            const promise = service.getStyleJsonContent("./style.json", false);
 
-        const response = await promise;
-        expect(spy).toHaveBeenCalled();
-        expect(response.layers.length).toBe(0);
-        expect(response.sources).toEqual({});
+            const response = await promise;
+            expect(spy).toHaveBeenCalled();
+            expect(response).toEqual({} as StyleSpecification);
+    }));
+
+    it("Should get empty style json on failure", inject([FileService, FileSystemWrapper, RunningContextService], 
+        async (service: FileService, fileSystemWrapper: FileSystemWrapper, runningContextService: RunningContextService) => {
+            (runningContextService as any).isCapacitor = true;
+            const spy = jasmine.createSpy();
+            fileSystemWrapper.readAsText = spy.and.returnValue(Promise.resolve({}));
+
+            const promise = service.getStyleJsonContent("./style.json", false);
+
+            const response = await promise;
+            expect(spy).toHaveBeenCalled();
+            expect(response.layers.length).toBe(0);
+            expect(response.sources).toEqual({});
     }));
 
     it("Should save log to zip file", inject([FileService], async (service: FileService) => {

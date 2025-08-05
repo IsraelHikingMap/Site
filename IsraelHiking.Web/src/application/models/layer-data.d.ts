@@ -9,7 +9,6 @@
 export type EditableLayer = LayerData & {
     isEditable: boolean;
     isOfflineAvailable: boolean;
-    isOfflineOn: boolean;
     id: string;
 };
 

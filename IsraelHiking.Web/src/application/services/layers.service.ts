@@ -17,8 +17,7 @@ import {
     SelectBaseLayerAction,
     RemoveOverlayAction,
     RemoveBaseLayerAction,
-    AddOverlayAction,
-    ToggleOfflineAction
+    AddOverlayAction
 } from "../reducers/layers.reducer";
 import type {
     DataContainer,
@@ -164,8 +163,7 @@ export class LayersService {
         const baseLayer = {
             ...layerData,
             isEditable: true,
-            isOfflineAvailable: false,
-            isOfflineOn: false
+            isOfflineAvailable: false
         } as EditableLayer;
         this.store.dispatch(new AddBaseLayerAction(baseLayer));
         return baseLayer;
@@ -220,8 +218,7 @@ export class LayersService {
             ...layerData,
             visible,
             isEditable: true,
-            isOfflineAvailable: false,
-            isOfflineOn: false,
+            isOfflineAvailable: false
         } as Overlay;
         this.store.dispatch(new AddOverlayAction(overlay));
         return overlay;
@@ -338,8 +335,7 @@ export class LayersService {
             minZoom: layerData.minZoom,
             maxZoom: layerData.maxZoom,
             isEditable: true,
-            isOfflineAvailable: false,
-            isOfflineOn: false,
+            isOfflineAvailable: false
         } as EditableLayer);
     }
 
@@ -378,9 +374,5 @@ export class LayersService {
 
     private compareKeys(key1: string, key2: string): boolean {
         return key1.trim().toLowerCase() === key2.trim().toLowerCase();
-    }
-
-    public toggleOffline(layer: EditableLayer, isOverlay: boolean) {
-        this.store.dispatch(new ToggleOfflineAction(layer.key, isOverlay));
     }
 }

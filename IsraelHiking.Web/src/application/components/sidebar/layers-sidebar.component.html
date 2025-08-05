@@ -30,9 +30,6 @@
                     <div *ngIf="baseLayer.isEditable" class="w-1/12">
                         <button mat-button class="w-full short-button" (click)="editBaseLayer($event, baseLayer)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit base layer"><i class="fa icon-ellipsis-v"></i></button>
                     </div>
-                    <div *ngIf="showOfflineButton(baseLayer)" class="w-1/12">
-                        <button mat-button class="w-full short-button" [class.active]="baseLayer.isOfflineOn" (click)="toggleOffline($event, baseLayer, false)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle base layer offline"><i class="fa icon-{{baseLayer.isOfflineOn ? 'offline' : 'online'}}"></i></button>
-                    </div>
                 </div>
             </div>
             <button mat-button (click)="addBaseLayer($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add base layer"><i class="fa fa-lg icon-plus"></i> {{resources.addBaseLayer}}</button>
@@ -56,9 +53,6 @@
                     </button>
                     <div *ngIf="overlay.isEditable" class="w-1/12">
                         <button mat-button class="w-full short-button" (click)="editOverlay($event, overlay)" matTooltip="{{resources.overlayProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit overlay"><i class="fa icon-ellipsis-v"></i></button>
-                    </div>
-                    <div *ngIf="showOfflineButton(overlay)" class="w-1/12">
-                        <button mat-button class="w-full short-button" [class.active]="overlay.isOfflineOn" (click)="toggleOffline($event, overlay, true)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle overlay offline"><i class="fa icon-{{overlay.isOfflineOn ? 'offline' : 'online'}}"></i></button>
                     </div>
                 </div>
             </div>

@@ -76,10 +76,6 @@ export class SetCategoryVisibilityAction {
     constructor(public name: string, public groupType: CategoriesGroupType, public visible: boolean) {}
 }
 
-export class ToggleOfflineAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public key: string, public isOverlay: boolean) {}
-}
 @State({
     name: "layersState",
     defaults: initialState.layersState
@@ -229,17 +225,6 @@ export class LayersReducer{
                 category.visible = action.visible;
             }
             group.visible = action.visible;
-            return lastState;
-        }));
-    }
-
-    @Action(ToggleOfflineAction)
-    public toggleOffline( ctx: StateContext<LayersState>, action: ToggleOfflineAction){
-        ctx.setState(produce(ctx.getState(), lastState => {
-            const layer = action.isOverlay
-                ? lastState.overlays.find(b => b.key === action.key)
-                : lastState.baseLayers.find(b => b.key === action.key);
-            layer.isOfflineOn = !layer.isOfflineOn;
             return lastState;
         }));
     }

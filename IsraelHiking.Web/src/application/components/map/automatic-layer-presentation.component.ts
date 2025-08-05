@@ -83,9 +83,6 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
                 this.layerData().isOfflineAvailable === false) {
                 return;
             }
-            if (this.layerData().isOfflineOn === true) {
-                return;
-            }
             this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
         }));
     }
@@ -149,12 +146,11 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     }
 
     private async createJsonLayer(layerData: EditableLayer) {
-        const getOfflineStyleFile = layerData.isOfflineAvailable && (layerData.isOfflineOn || !this.hasInternetAccess);
-        const response = await this.fileService.getStyleJsonContent(layerData.address, getOfflineStyleFile);
+        const tryLocalStyle = layerData.isOfflineAvailable && this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles != null;
+        const response = await this.fileService.getStyleJsonContent(layerData.address, tryLocalStyle);
         const language = this.resources.getCurrentLanguageCodeSimplified();
         const styleJson = JSON.parse(JSON.stringify(response).replace(/name:he/g, `name:${language}`)) as StyleSpecification;
-        // HM TODO: consider doing it on server side or when saving the file instead of here
-        if (getOfflineStyleFile) {
+        if (tryLocalStyle) {
             for (const source of Object.values(styleJson.sources)) {
                 if (source.type === "vector") {
                     delete source.url;

@@ -33,8 +33,7 @@ export abstract class LayerBaseDialogComponent {
             address: "",
             opacity: 1.0,
             isEditable: true,
-            isOfflineAvailable: false,
-            isOfflineOn: true
+            isOfflineAvailable: false
         } as EditableLayer;
         
         this.location$ = this.store.select((state: ApplicationState) => state.locationState);
