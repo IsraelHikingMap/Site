@@ -321,7 +321,6 @@ describe("Recorded Route Service", () => {
             expect(spy.calls.all()[i++].args[0].startsWith("[Record] Valid position")).toBeTruthy();
             expect(spy.calls.all()[i++].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy();
             expect(spy.calls.all()[i++].args[0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
-            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
 
             expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(4);
     }));
