@@ -14,7 +14,7 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { RunningContextService } from "./running-context.service";
 import { ConnectionService } from "./connection.service";
-import { StopRecordingAction, RecordedRouteReducer } from "../reducers/recorded-route.reducer";
+import { StopRecordingAction, RecordedRouteReducer, ClearPendingProcessingRoutePointsAction, AddRecordingRoutePointsAction } from "../reducers/recorded-route.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
 import { SetCurrentPositionAction, GpsReducer } from "../reducers/gps.reducer";
 import type { ApplicationState, MarkerData } from "../models/models";
@@ -48,7 +48,10 @@ describe("Recorded Route Service", () => {
                 { provide: RunningContextService, useValue: runnningContextServiceMock },
                 { provide: ConnectionService, useValue: { stateChanged: { subscribe: () => {} }} },
                 { provide: FileSystemWrapper, useValue: {} },
-                { provide: GeoLocationService, useValue: { bulkPositionChanged: new EventEmitter() } },
+                { provide: GeoLocationService, useValue: { 
+                    positionWhileInBackground: new EventEmitter(),
+                    backToForeground: new EventEmitter()
+                } },
                 RoutesFactory,
                 RecordedRouteService,
                 provideHttpClient(withInterceptorsFromDi()),
@@ -127,6 +130,46 @@ describe("Recorded Route Service", () => {
         }
     ));
 
+    it("Should initialize after a recording stopped in the middle with pending proccessing location and stop the recording gracefully",
+        inject([RecordedRouteService, Store],
+        (service: RecordedRouteService, store: Store) => {
+            store.reset({
+                recordedRouteState: {
+                    isRecording: true,
+                    route: {
+                        markers: [],
+                        latlngs: [{
+                            lat: 1,
+                            lng: 2,
+                            alt: 10,
+                            timestamp: new Date(0)}
+                        ]
+                    },
+                    pendingProcessing: [{ 
+                        coords: { 
+                            latitude: 1, 
+                            longitude: 2 
+                        } as GeolocationCoordinates, 
+                        timestamp: new Date(1000).getTime()
+                    } as GeolocationPosition]
+                },
+                routeEditingState: {
+                    routingType: "Hike"
+                },
+                userState: {
+                    userInfo: null
+                }
+            });
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+            service.initialize();
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ClearPendingProcessingRoutePointsAction);
+            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(AddRecordingRoutePointsAction);
+            expect(spy.calls.all()[2].args[0]).toBeInstanceOf(StopRecordingAction);
+            expect(spy.calls.all()[3].args[0]).toBeInstanceOf(AddRouteAction);
+        }
+    ));
+
     it("Should not do anything when not recording and a new position is received", inject([RecordedRouteService, Store],
         (service: RecordedRouteService, store: Store) => {
 
@@ -148,15 +191,13 @@ describe("Recorded Route Service", () => {
         }
     ));
 
-    it("Should add a valid location", inject([RecordedRouteService, Store],
+    it("Should add a valid location when a position changes", inject([RecordedRouteService, Store],
         (service: RecordedRouteService, store: Store) => {
             store.reset({
                 recordedRouteState: {
-                    isRecording: false
-                }
-            });
-            service.initialize();
-            store.reset({
+                    isRecording: false,
+                    route: {}
+                },
                 gpsState: {
                     currentPosition: {
                         coords: {
@@ -166,43 +207,23 @@ describe("Recorded Route Service", () => {
                         },
                         timestamp: new Date(0).getTime()
                     }
-                },
-                recordedRouteState: {
-                    route: {}
-                },
-            });
-            service.startRecording();
-            store.reset({
-                userState: {},
-                gpsState: {},
-                recordedRouteState: {
-                    route: {
-                        latlngs: [{
-                            lat: 1,
-                            lng: 2,
-                            alt: 10,
-                            timestamp: new Date(0)
-                        }]
-                    },
-                    isRecording: true
                 }
             });
+            service.initialize();
+            service.startRecording();
+            positionChanged(store, { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(2).getTime()} as GeolocationPosition);
 
-            positionChanged(store, { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(1).getTime()} as GeolocationPosition);
-
-            expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(1);
+            expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(2);
         }
     ));
 
-    it("Should add a valid locations when returning from background", inject([RecordedRouteService, GeoLocationService, Store],
+    it("Should add a valid locations when a new position arrives and other are recieved while in background", inject([RecordedRouteService, GeoLocationService, Store],
         (service: RecordedRouteService, geoService: GeoLocationService, store: Store) => {
             store.reset({
                 recordedRouteState: {
-                    isRecording: false
-                }
-            });
-            service.initialize();
-            store.reset({
+                    isRecording: false,
+                    route: {}
+                },
                 gpsState: {
                     currentPosition: {
                         coords: {
@@ -213,44 +234,13 @@ describe("Recorded Route Service", () => {
                         timestamp: new Date(0).getTime()
                     }
                 },
-                recordedRouteState: {
-                    route: {}
-                },
             });
+            service.initialize();
             service.startRecording();
-            store.reset({
-                gpsState: {},
-                recordedRouteState: {
-                    route: {
-                        latlngs: [{
-                            lat: 1,
-                            lng: 2,
-                            alt: 10,
-                            timestamp: new Date(0)
-                        }]
-                    },
-                    isRecording: true
-                }
-            });
-
-            geoService.bulkPositionChanged.next([
-                {
-                    coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(1).getTime()
-                } as GeolocationPosition,
-                {
-                    coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(60000).getTime()
-                } as GeolocationPosition,
-                {
-                    coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(120000).getTime()
-                } as GeolocationPosition,
-                {
-                    coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(180000).getTime()
-                } as GeolocationPosition
-            ]);
+            geoService.positionWhileInBackground.next({ coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(60000).getTime()} as GeolocationPosition);
+            geoService.positionWhileInBackground.next({ coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(120000).getTime()} as GeolocationPosition);
+            geoService.positionWhileInBackground.next({ coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(180000).getTime()} as GeolocationPosition);
+            
             positionChanged(store,
                 { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(240000).getTime()} as GeolocationPosition
             );
@@ -258,16 +248,14 @@ describe("Recorded Route Service", () => {
         }
     ));
 
-    it("Should invalidate multiple locations once", inject([RecordedRouteService, GeoLocationService, LoggingService, Store],
+    it("Should not add the same location twice in case of a duplicate position due to how geolocation service works", inject([RecordedRouteService, GeoLocationService, LoggingService, Store],
         (service: RecordedRouteService, geoService: GeoLocationService,
-         logginService: LoggingService, store: Store) => {
+         loggingService: LoggingService, store: Store) => {
             store.reset({
                 recordedRouteState: {
-                    isRecording: false
-                }
-            });
-            service.initialize();
-            store.reset({
+                    isRecording: false,
+                    route: {}
+                },
                 gpsState: {
                     currentPosition: {
                         coords: {
@@ -278,63 +266,62 @@ describe("Recorded Route Service", () => {
                         timestamp: new Date(0).getTime()
                     }
                 },
-                recordedRouteState: {
-                    route: {}
-                },
             });
-            const spy = spyOn(logginService, "debug");
+            service.initialize();
             service.startRecording();
+            geoService.positionWhileInBackground.next({ coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(60000).getTime()} as GeolocationPosition);
+            geoService.positionWhileInBackground.next({ coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(120000).getTime()} as GeolocationPosition);
+            geoService.positionWhileInBackground.next({ coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(180000).getTime()} as GeolocationPosition);
+            const spy = spyOn(loggingService, "debug");
+            positionChanged(store,
+                { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(180000).getTime()} as GeolocationPosition
+            );
+            geoService.backToForeground.next();
+            expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(4);
+            expect(spy.calls.all().some(c => c.args[0].startsWith("[Record] Rejecting position"))).toBeFalsy();
+        }
+    ));
+
+    it("Should invalidate multiple locations once and update recoding when comming back to foregound", inject([RecordedRouteService, GeoLocationService, LoggingService, Store],
+        (service: RecordedRouteService, geoService: GeoLocationService,
+         loggingService: LoggingService, store: Store) => {
             store.reset({
                 recordedRouteState: {
-                    route: {
-                        latlngs: [{
-                            lat: 1,
-                            lng: 2,
-                            alt: 10,
-                            timestamp: new Date(0)
-                        }]
-                    },
-                    isRecording: true
-                }
+                    isRecording: false,
+                    route: {}
+                },
+                gpsState: {
+                    currentPosition: {
+                        coords: {
+                            latitude: 1,
+                            loggitude: 2,
+                            altitude: 10,
+                        },
+                        timestamp: new Date(0).getTime()
+                    }
+                },
             });
+            service.initialize();
+            const spy = spyOn(loggingService, "debug");
+            service.startRecording();
+            geoService.positionWhileInBackground.next({ coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(150000).getTime()} as GeolocationPosition);
+            geoService.positionWhileInBackground.next({ coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates, timestamp: new Date(1000).getTime()} as GeolocationPosition);
+            geoService.positionWhileInBackground.next({ coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates, timestamp: new Date(2000).getTime()} as GeolocationPosition);
+            geoService.positionWhileInBackground.next({ coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates, timestamp: new Date(3000).getTime()} as GeolocationPosition);
+            geoService.positionWhileInBackground.next({ coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates, timestamp: new Date(3000).getTime()} as GeolocationPosition);
+            geoService.positionWhileInBackground.next({ coords: { longitude: 1, latitude: 2, accuracy: 1000 } as GeolocationCoordinates, timestamp: new Date(4000).getTime() } as GeolocationPosition);
+            geoService.positionWhileInBackground.next({ coords: { longitude: 1.1, latitude: 2 } as GeolocationCoordinates, timestamp: new Date(5000).getTime() } as GeolocationPosition);
 
-            geoService.bulkPositionChanged.next([
-                {
-                    coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(150000).getTime()
-                } as GeolocationPosition,
-                {
-                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(1000).getTime()
-                } as GeolocationPosition,
-                {
-                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(2000).getTime()
-                } as GeolocationPosition,
-                {
-                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(3000).getTime()
-                } as GeolocationPosition,
-                {
-                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(3000).getTime()
-                } as GeolocationPosition,
-                {
-                    coords: { longitude: 1, latitude: 2, accuracy: 1000 } as GeolocationCoordinates,
-                    timestamp: new Date(4000).getTime()
-                } as GeolocationPosition,
-                {
-                    coords: { longitude: 1.1, latitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(5000).getTime()
-                } as GeolocationPosition
-            ]);
-            expect(spy.calls.all()[0].args[0].startsWith("[Record] Valid position")).toBeTruthy();
-            expect(spy.calls.all()[1].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy();
-            expect(spy.calls.all()[2].args[0].startsWith("[Record] Validating a rejected position")).toBeTruthy();
-            expect(spy.calls.all()[3].args[0].startsWith("[Record] Valid position")).toBeTruthy();
-            expect(spy.calls.all()[4].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy();
-            expect(spy.calls.all()[5].args[0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
-            expect(spy.calls.all()[6].args[0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
+            geoService.backToForeground.next();
+            let i = 0;
+            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Processing 7")).toBeTruthy();
+            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Valid position")).toBeTruthy();
+            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy();
+            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Validating a rejected position")).toBeTruthy();
+            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Valid position")).toBeTruthy();
+            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy();
+            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
+            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
 
             expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(4);
     }));
