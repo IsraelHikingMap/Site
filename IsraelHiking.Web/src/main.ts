@@ -100,7 +100,6 @@ import { WikidataService } from "./application/services/wikidata.service";
 import { OsmAddressesService } from "./application/services/osm-addresses.service";
 import { LocationService } from "./application/services/location.service";
 import { LogReaderService } from "./application/services/log-reader.service";
-import { AudioPlayerFactory } from "./application/services/audio-player.factory";
 // Components
 import { RouteEditPoiInteraction } from "./application/components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./application/components/intercations/route-edit-route.interaction";
@@ -246,7 +245,6 @@ bootstrapApplication(MainMapComponent, {
         OsmAddressesService,
         LocationService,
         LogReaderService,
-        AudioPlayerFactory,
         FileSystemWrapper,
         FileTransfer,
         RouteEditPoiInteraction,

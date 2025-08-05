@@ -2,9 +2,6 @@
 include ':capacitor-android'
 project(':capacitor-android').projectDir = new File('../node_modules/@capacitor/android/capacitor')
 
-include ':capacitor-community-background-geolocation'
-project(':capacitor-community-background-geolocation').projectDir = new File('../node_modules/@capacitor-community/background-geolocation/android')
-
 include ':capacitor-community-keep-awake'
 project(':capacitor-community-keep-awake').projectDir = new File('../node_modules/@capacitor-community/keep-awake/android')
 
@@ -32,8 +29,8 @@ project(':capawesome-team-capacitor-android-battery-optimization').projectDir = 
 include ':capawesome-capacitor-app-update'
 project(':capawesome-capacitor-app-update').projectDir = new File('../node_modules/@capawesome/capacitor-app-update/android')
 
-include ':capgo-native-audio'
-project(':capgo-native-audio').projectDir = new File('../node_modules/@capgo/native-audio/android')
+include ':capgo-background-geolocation'
+project(':capgo-background-geolocation').projectDir = new File('../node_modules/@capgo/background-geolocation/android')
 
 include ':capacitor-email-composer'
 project(':capacitor-email-composer').projectDir = new File('../node_modules/capacitor-email-composer/android')

@@ -19,7 +19,6 @@
 		"adjustMarginsForEdgeToEdge": "auto"
 	},
 	"packageClassList": [
-		"BackgroundGeolocation",
 		"KeepAwakePlugin",
 		"ScreenBrightnessPlugin",
 		"AppPlugin",
@@ -28,7 +27,7 @@
 		"SharePlugin",
 		"TextZoomPlugin",
 		"AppUpdatePlugin",
-		"NativeAudio",
+		"BackgroundGeolocation",
 		"EmailComposerPlugin",
 		"CDVPlugin"
 	]
