@@ -5,8 +5,6 @@ PODS:
     - Capacitor
   - CapacitorCamera (7.0.1):
     - Capacitor
-  - CapacitorCommunityBackgroundGeolocation (0.0.1):
-    - Capacitor
   - CapacitorCommunityKeepAwake (7.0.0):
     - Capacitor
   - CapacitorCommunityScreenBrightness (7.0.0):
@@ -22,7 +20,7 @@ PODS:
     - Capacitor
   - CapawesomeCapacitorAppUpdate (7.0.1):
     - Capacitor
-  - CapgoNativeAudio (7.3.22):
+  - CapgoBackgroundGeolocation (7.0.11):
     - Capacitor
   - CordovaPlugins (7.2.0):
     - CapacitorCordova
@@ -32,7 +30,6 @@ DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorCamera (from `../../node_modules/@capacitor/camera`)"
-  - "CapacitorCommunityBackgroundGeolocation (from `../../node_modules/@capacitor-community/background-geolocation`)"
   - "CapacitorCommunityKeepAwake (from `../../node_modules/@capacitor-community/keep-awake`)"
   - "CapacitorCommunityScreenBrightness (from `../../node_modules/@capacitor-community/screen-brightness`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
@@ -41,7 +38,7 @@ DEPENDENCIES:
   - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
   - "CapacitorTextZoom (from `../../node_modules/@capacitor/text-zoom`)"
   - "CapawesomeCapacitorAppUpdate (from `../../node_modules/@capawesome/capacitor-app-update`)"
-  - "CapgoNativeAudio (from `../../node_modules/@capgo/native-audio`)"
+  - "CapgoBackgroundGeolocation (from `../../node_modules/@capgo/background-geolocation`)"
   - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
   - CordovaPluginsResources (from `../capacitor-cordova-ios-plugins`)
 
@@ -52,8 +49,6 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/app"
   CapacitorCamera:
     :path: "../../node_modules/@capacitor/camera"
-  CapacitorCommunityBackgroundGeolocation:
-    :path: "../../node_modules/@capacitor-community/background-geolocation"
   CapacitorCommunityKeepAwake:
     :path: "../../node_modules/@capacitor-community/keep-awake"
   CapacitorCommunityScreenBrightness:
@@ -70,8 +65,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/text-zoom"
   CapawesomeCapacitorAppUpdate:
     :path: "../../node_modules/@capawesome/capacitor-app-update"
-  CapgoNativeAudio:
-    :path: "../../node_modules/@capgo/native-audio"
+  CapgoBackgroundGeolocation:
+    :path: "../../node_modules/@capgo/background-geolocation"
   CordovaPlugins:
     :path: "../capacitor-cordova-ios-plugins"
   CordovaPluginsResources:
@@ -81,7 +76,6 @@ SPEC CHECKSUMS:
   Capacitor: 03bc7cbdde6a629a8b910a9d7d78c3cc7ed09ea7
   CapacitorApp: febecbb9582cb353aed037e18ec765141f880fe9
   CapacitorCamera: 6e73f1fc6c629a672658705a02409b60854bc0f1
-  CapacitorCommunityBackgroundGeolocation: 834a8f8eca8ebada8debffe1236e5674b831cead
   CapacitorCommunityKeepAwake: ae762ce29b53147d28cfcaae5273cd1db0c38fc4
   CapacitorCommunityScreenBrightness: 508f3d0f79024cd8da7d063f456870a4a1932723
   CapacitorCordova: 5967b9ba03915ef1d585469d6e31f31dc49be96f
@@ -90,10 +84,10 @@ SPEC CHECKSUMS:
   CapacitorShare: e573823f511f260f598d0423c33b1e3d7bbe5fd1
   CapacitorTextZoom: ccb82513c95a64bd9d4de4fc2399c2690a8705de
   CapawesomeCapacitorAppUpdate: d1f04c1c870388248889908cf2ca960c7fdbf0ef
-  CapgoNativeAudio: c2b0208ef393f72c67e5db73e55c11fe496d2e8f
-  CordovaPlugins: dcbb774740273ff03972d8154a70ad966b65a1d0
+  CapgoBackgroundGeolocation: 5106f11127d05d135eaa242e0dfebae0cf52e7cd
+  CordovaPlugins: 4829fe005adcf826abe06af65b2a95f62706a1cb
   CordovaPluginsResources: da93847212bf7b16ba770e4d6c3e7dba820174c7
 
-PODFILE CHECKSUM: ff30f37988ac2bd4314daa2865e6c97e63cb01fd
+PODFILE CHECKSUM: fbfa7c09576a51affd7774ea51ff56f7cd085532
 
 COCOAPODS: 1.16.2
