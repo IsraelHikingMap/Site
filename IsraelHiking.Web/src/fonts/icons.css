@@ -1,9 +1,10 @@
 @font-face {
-  font-family: 'Mapeak';
-  src:
-    url('Mapeak.ttf?pq32nj') format('truetype'),
-    url('Mapeak.woff?pq32nj') format('woff'),
-    url('Mapeak.svg?pq32nj#Mapeak') format('svg');
+  font-family: 'icomoon';
+  src:  url('icomoon.eot?274ash');
+  src:  url('icomoon.eot?274ash#iefix') format('embedded-opentype'),
+    url('icomoon.ttf?274ash') format('truetype'),
+    url('icomoon.woff?274ash') format('woff'),
+    url('icomoon.svg?274ash#icomoon') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -11,7 +12,7 @@
 
 [class^="icon-"], [class*=" icon-"] {
   /* use !important to prevent issues with browser extensions that change fonts */
-  font-family: 'Mapeak' !important;
+  font-family: 'icomoon' !important;
   speak: never;
   font-style: normal;
   font-weight: normal;
@@ -24,25 +25,25 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-measure:before {
+.icon-river:before {
   content: "\e900";
 }
-.icon-follow-me:before {
+.icon-artwork:before {
   content: "\e901";
 }
-.icon-recordings:before {
+.icon-measure:before {
   content: "\e902";
 }
-.icon-routes:before {
+.icon-follow-me:before {
   content: "\e903";
 }
-.icon-jeepolog:before {
+.icon-recordings:before {
   content: "\e904";
 }
-.icon-kaldanei-hashetakh:before {
+.icon-routes:before {
   content: "\e905";
 }
-.icon-loveil:before {
+.icon-jeepolog:before {
   content: "\e906";
 }
 .icon-bike:before {
@@ -78,9 +79,6 @@
 .icon-nakeb:before {
   content: "\e911";
 }
-.icon-off-road:before {
-  content: "\e912";
-}
 .icon-map-marker-rect:before {
   content: "\e913";
 }
@@ -92,9 +90,6 @@
 }
 .icon-cave:before {
   content: "\e916";
-}
-.icon-nature-reserve:before {
-  content: "\e917";
 }
 .icon-peak:before {
   content: "\e918";
@@ -477,7 +472,7 @@
 .icon-gift:before {
   content: "\f06b";
 }
-.icon-leaf:before {
+.icon-leaf1:before {
   content: "\f06c";
 }
 .icon-fire:before {
@@ -2195,4 +2190,7 @@
 }
 .icon-meetup:before {
   content: "\f2e0";
+}
+.icon-leaf:before {
+  content: "\e9a4";
 }
