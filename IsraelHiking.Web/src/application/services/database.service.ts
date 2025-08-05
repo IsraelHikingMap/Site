@@ -213,9 +213,6 @@ export class DatabaseService {
             arrayMerge: (destinationArray, sourceArray) => sourceArray == null ? destinationArray : sourceArray
         });
         storedState.inMemoryState = initialState.inMemoryState;
-        if (storedState.layersState.overlays.find(o => o.key === POPULARITY_HEATMAP) == null) {
-            storedState.layersState.overlays.push(initialState.layersState.overlays.find(o => o.key === POPULARITY_HEATMAP));
-        }
         if (!this.runningContext.isCapacitor) {
             storedState.routes = initialState.routes;
             storedState.poiState = initialState.poiState;
