@@ -162,9 +162,6 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
                 }
             }
         }
-        if (layerData.key == HIKING_MAP || layerData.key == MTB_MAP) {
-            this.fileService.writeStyle(layerData.address.split("/").pop(), JSON.stringify(styleJson));
-        }
         this.updateSourcesAndLayers(layerData, styleJson.sources, styleJson.layers);
     }
 
