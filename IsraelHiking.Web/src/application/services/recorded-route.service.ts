@@ -143,11 +143,12 @@ export class RecordedRouteService {
         const positions = [...readOnlyPositions];
         if (positions.length > 0) {
             this.loggingService.debug(`[Record] Processing ${positions.length} pending positions`);
+            this.store.dispatch(new ClearPendingProcessingRoutePointsAction());
         }
-        if (position != null) {
+        if (position != null && (positions.length == 0 || positions[positions.length - 1].timestamp !== position.timestamp)) {
+            // Avoid adding the same position twice due to how geolocation service works.
             positions.push(position);
         }
-        this.store.dispatch(new ClearPendingProcessingRoutePointsAction());
         if (positions.length === 0) {
             return;
         }
