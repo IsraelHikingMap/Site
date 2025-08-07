@@ -99,8 +99,10 @@ export class SpatialService {
     public static clipLinesToTileBoundary(lines: GeoJSON.Feature<GeoJSON.LineString>[],
         tile: { x: number; y: number},
         zoom: number): GeoJSON.Feature<GeoJSON.LineString>[] {
-        const northEast = SpatialService.fromTile(tile, zoom);
-        const southWest = SpatialService.fromTile({x: tile.x + 1, y: tile.y + 1}, zoom);
+        const roundedTileX = Math.floor(tile.x);
+        const roundedTileY = Math.floor(tile.y);
+        const northEast = SpatialService.fromTile({x: roundedTileX, y: roundedTileY}, zoom);
+        const southWest = SpatialService.fromTile({x: roundedTileX + 1, y: roundedTileY + 1}, zoom);
         const tilePolygon = bboxPolygon([northEast.lng, southWest.lat, southWest.lng, northEast.lat]);
         // This is to overcome accuracy issues...
         const tilePolygonTest = bboxPolygon([northEast.lng - 1e-6, southWest.lat - 1e-6, southWest.lng + 1e-6, northEast.lat + 1e-6]);
@@ -342,8 +344,8 @@ export class SpatialService {
 
     public static fromTile(tile: {x: number; y: number}, zoom: number): LatLngAlt {
         const n = Math.pow(2, zoom);
-        const lng = Math.floor(tile.x) / n * 360 - 180;
-        const lat = Math.atan(Math.sinh(Math.PI * (1 - 2 * Math.floor(tile.y) / n))) * 180 / Math.PI;
+        const lng = tile.x / n * 360 - 180;
+        const lat = Math.atan(Math.sinh(Math.PI * (1 - 2 * tile.y / n))) * 180 / Math.PI;
         return {lat, lng};
     }
 
