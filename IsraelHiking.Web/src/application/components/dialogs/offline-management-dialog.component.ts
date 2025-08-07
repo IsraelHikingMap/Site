@@ -144,7 +144,7 @@ export class OfflineManagementDialogComponent {
     }
 
     private updateSelectedTile() {
-        const { tileX, tileY } = this.selectedTileXY;
+        const { tileX, tileY } = this.selectedTileXY || { tileX: null, tileY: null };
         this.selectedTile = {
             type: "FeatureCollection",
             features: this.downloadingTileXY != null || this.selectedTileXY == null ? [] : [this.tileCoordinatesToPolygon(tileX, tileY, this.resources.clickBelow)]
