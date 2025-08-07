@@ -152,8 +152,8 @@ describe("RoutingProvider", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available",
-        inject([RoutingProvider, HttpTestingController, PmTilesService, Store],
-        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, PmTilesService],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -181,8 +181,8 @@ describe("RoutingProvider", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available for a multiline string",
-        inject([RoutingProvider, HttpTestingController, PmTilesService, Store],
-        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, PmTilesService],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -213,8 +213,8 @@ describe("RoutingProvider", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available only through one line",
-        inject([RoutingProvider, HttpTestingController, PmTilesService, Store],
-        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, PmTilesService],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -286,8 +286,8 @@ describe("RoutingProvider", () => {
     ));
 
     it("Should return a route between two lines when points are not exactly the same",
-        inject([RoutingProvider, HttpTestingController, PmTilesService, Store],
-        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, PmTilesService],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
             const featureCollection = {
                 type: "FeatureCollection",
                 features: [{

@@ -162,7 +162,7 @@ public class FilesController : ControllerBase
             fullPath = $"7/{tileX}/{tileY}/{id}";
         } 
         var file = _offlineFilesService.GetFileContent(fullPath);
-        return File(file, id.EndsWith("json") ? "application/json": "application/octet-stream", id);
+        return File(file, "application/octet-stream", id);
     }
     
     /// <summary>

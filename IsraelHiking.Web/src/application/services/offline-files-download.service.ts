@@ -40,18 +40,18 @@ export class OfflineFilesDownloadService {
         try {
             const fileNamesForRoot = await this.getFilesToDownloadDictionary();
             const fileNamesForTile = await this.getFilesToDownloadDictionary(tileX, tileY);
-            if (Object.keys(fileNamesForTile).length === 0 && Object.keys(fileNamesForRoot).length === 0) {
+            if (fileNamesForTile.length === 0 && fileNamesForRoot.length === 0) {
                 this.loggingService.info("[Offline Download] No files to download, all files are up to date");
                 return "up-to-date";
             }
             this.updateInProgressTilesList(tileX, tileY, 0);
-            const fileNames = {...fileNamesForRoot, ...fileNamesForTile};
-            await this.downloadOfflineFilesProgressAction(fileNames, Object.keys(fileNamesForRoot).length, tileX, tileY);
+            const fileNames = [...fileNamesForRoot, ...fileNamesForTile];
+            await this.downloadOfflineFilesProgressAction(fileNames, fileNamesForRoot.length, tileX, tileY);
             
-            if (Object.keys(fileNamesForTile).length > 0) {
+            if (fileNamesForTile.length > 0) {
                 this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(this.getNewestFileDateFromFileList(fileNamesForTile), tileX, tileY));
             }
-            if (Object.keys(fileNamesForRoot).length > 0) {
+            if (fileNamesForRoot.length > 0) {
                 this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(this.getNewestFileDateFromFileList(fileNamesForRoot), undefined, undefined));
             }
             return "downloaded";
@@ -78,10 +78,10 @@ export class OfflineFilesDownloadService {
         }
     }
 
-    private getNewestFileDateFromFileList(fileNames: Record<string, string>): Date {
+    private getNewestFileDateFromFileList(fileNames: [string, string][]): Date {
         let newestFileDate = new Date(0);
-        for (const fileName of Object.keys(fileNames)) {
-            const fileDate = new Date(fileNames[fileName]);
+        for (const fileNameAndDate of fileNames) {
+            const fileDate = new Date(fileNameAndDate[1]);
             if (fileDate > newestFileDate) {
                 newestFileDate = fileDate;
             }
@@ -89,17 +89,17 @@ export class OfflineFilesDownloadService {
         return newestFileDate;
     }
 
-    private async downloadOfflineFilesProgressAction(fileNames: Record<string, string>, rootFilesCount: number, tileX: number, tileY: number):
+    private async downloadOfflineFilesProgressAction(fileNames: [string, string][], rootFilesCount: number, tileX: number, tileY: number):
         Promise<void> {
-        this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${Object.keys(fileNames).length}`);
-        const length = Object.keys(fileNames).length;
+        this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${fileNames.length}`);
+        const length = fileNames.length;
         for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
             if (this.currentDownloadResponse?.aborted) {
                 this.loggingService.info("[Offline Download] Aborted downloading offline files");
                 return;
             }
-            const fileName = Object.keys(fileNames)[fileNameIndex];
-            
+            const [fileName] = fileNames[fileNameIndex];
+
             const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
             let fileDownloadUrl = `${Urls.offlineFiles}/${fileName}`;
             if (fileName.endsWith(".pmtiles")) {
@@ -125,7 +125,7 @@ export class OfflineFilesDownloadService {
         this.tilesProgressChanged.emit({tileX, tileY, progressValue});
     }
 
-    private async getFilesToDownloadDictionary(tileX?: number, tileY?: number): Promise<Record<string, string>> {
+    private async getFilesToDownloadDictionary(tileX?: number, tileY?: number): Promise<[string, string][]> {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         const lastModifiedString = offlineState.downloadedTiles ? offlineState.downloadedTiles[`${tileX}-${tileY}`]?.toISOString() : null;
         const params: Record<string, string> = {};
@@ -136,10 +136,14 @@ export class OfflineFilesDownloadService {
             params.tileX = tileX.toString();
             params.tileY = tileY.toString();
         }
-        const fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {params: params}).pipe(timeout(5000)));
-        this.loggingService.info(
-            `[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
-        return fileNames as Record<string, string>;
+        const fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {params: params}).pipe(timeout(5000))) as any as Record<string, string>;
+        this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
+        if (Object.keys(fileNames).length === 0) {
+            return [];
+        }
+        const sortedFileList = Object.entries(fileNames).map(([key, value]) => [key, value] as [string, string]);
+        sortedFileList.sort((a, b) => { if (a[0].endsWith("json")) { return -1; } if (b[0].endsWith("json")) { return 1; } return 0; });
+        return sortedFileList;
     }
 
     public abortCurrentDownload(): void {
