@@ -1,14 +1,11 @@
 import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Store } from "@ngxs/store";
-import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 
 import { LoggingService } from "./logging.service";
 import { SpatialService } from "./spatial.service";
 import { PmTilesService } from "./pmtiles.service";
-import { Urls } from "../urls";
-import type { ApplicationState, LatLngAlt } from "../models/models";
+import type { LatLngAlt } from "../models/models";
 
 @Injectable()
 export class ElevationProvider {
@@ -23,7 +20,6 @@ export class ElevationProvider {
     private readonly httpClient = inject(HttpClient);
     private readonly loggingService = inject(LoggingService);
     private readonly pmTilesService = inject(PmTilesService);
-    private readonly store = inject(Store);
 
     public async updateHeights(latlngs: LatLngAlt[]): Promise<void> {
         const relevantIndexes = [] as number[];
@@ -39,32 +35,19 @@ export class ElevationProvider {
         if (relevantIndexes.length === 0) {
             return;
         }
-
         try {
-            const points = missingElevation.map(latlng => [latlng.lng, latlng.lat]);
-            const response = await firstValueFrom(this.httpClient.post(Urls.elevation, points).pipe(timeout(1000)));
-            for (let index = 0; index < relevantIndexes.length; index++) {
-                latlngs[relevantIndexes[index]].alt = (response as number[])[index];
+            await this.populateElevationCache(latlngs);
+            for (const relevantIndex of relevantIndexes) {
+                const latlng = latlngs[relevantIndex];
+                latlng.alt = this.getElevationForLatlng(latlng);
             }
         } catch (ex) {
-            try {
-                await this.populateElevationCache(latlngs);
-                for (const relevantIndexe of relevantIndexes) {
-                    const latlng = latlngs[relevantIndexe];
-                    latlng.alt = this.getElevationForLatlng(latlng);
-                }
-            } catch (ex2) {
-                this.loggingService.warning(`[Elevation] Unable to get elevation data for ${latlngs.length} points. ` +
-                    `${(ex as Error).message}, ${(ex2 as Error).message}`);
-            }
+            this.loggingService.warning(`[Elevation] Unable to get elevation data for ${latlngs.length} points. ` +
+                `${(ex as Error).message}`);
         }
     }
 
     private async populateElevationCache(latlngs: LatLngAlt[]) {
-        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        if (!offlineState.isSubscribed || offlineState.downloadedTiles == null) {
-            throw new Error("[Elevation] Getting elevation is only supported after downloading offline data");
-        }
         const tiles = latlngs.map(latlng => SpatialService.toTile(latlng, ElevationProvider.MAX_ELEVATION_ZOOM));
         const tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));
         const tileXmin = Math.min(...tiles.map(tile => Math.floor(tile.x)));
@@ -76,8 +59,14 @@ export class ElevationProvider {
                 if (this.elevationCache.has(key)) {
                     continue;
                 }
-                const arrayBuffer = await this.pmTilesService.getTileAboveZoom(ElevationProvider.MAX_ELEVATION_ZOOM, tileX, tileY, "jaxa_terrarium0-11_v2");
-                const data = await this.getImageData(arrayBuffer);
+                let data: Uint8ClampedArray;
+                if (this.pmTilesService.isOfflineFileAvailable(ElevationProvider.MAX_ELEVATION_ZOOM, tileX, tileY)) {
+                    const arrayBuffer = await this.pmTilesService.getTileAboveZoom(ElevationProvider.MAX_ELEVATION_ZOOM, tileX, tileY, "jaxa_terrarium0-11_v2");
+                    data = await this.getImageData(arrayBuffer);
+                } else {
+                    const arrayBuffer = await firstValueFrom(this.httpClient.get(`https://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/${ElevationProvider.MAX_ELEVATION_ZOOM}/${tileX}/${tileY}.png`, { responseType: "arraybuffer"}));
+                    data = await this.getImageData(arrayBuffer);
+                }
                 this.elevationCache.set(key, data);
         }
       }
@@ -85,13 +74,42 @@ export class ElevationProvider {
 
     private getElevationForLatlng(latlng: LatLngAlt): number {
         const tileSize = 512;
-        const tile = SpatialService.toTile(latlng, ElevationProvider.MAX_ELEVATION_ZOOM);
-        const relative = SpatialService.toRelativePixel(latlng, ElevationProvider.MAX_ELEVATION_ZOOM, tileSize);
+        const zoom = ElevationProvider.MAX_ELEVATION_ZOOM;
+        const tile = SpatialService.toTile(latlng, zoom);
+        const relative = SpatialService.toRelativePixel(latlng, zoom, tileSize);
+
+        // Get the coordinates of the top-left pixel
+        const pixelX1 = Math.floor(relative.pixelX);
+        const pixelY1 = Math.floor(relative.pixelY);
+
+        // Get the coordinates of the other three nearest pixels
+        const pixelX2 = Math.min(pixelX1 + 1, tileSize - 1);
+        const pixelY2 = Math.min(pixelY1 + 1, tileSize - 1);
+
         const tileIndex = { tileX: Math.floor(tile.x), tileY: Math.floor(tile.y) };
         const data = this.elevationCache.get(`${tileIndex.tileX}/${tileIndex.tileY}`);
-        const r = data[(relative.pixelY * tileSize + relative.pixelX) * 4];
-        const g = data[(relative.pixelY * tileSize + relative.pixelX) * 4 + 1];
-        const b = data[(relative.pixelY * tileSize + relative.pixelX) * 4 + 2];
+
+        // Get the elevations of the four nearest pixels
+        const elevation1 = this.getPixelElevation(data, pixelX1, pixelY1, tileSize);
+        const elevation2 = this.getPixelElevation(data, pixelX2, pixelY1, tileSize);
+        const elevation3 = this.getPixelElevation(data, pixelX1, pixelY2, tileSize);
+        const elevation4 = this.getPixelElevation(data, pixelX2, pixelY2, tileSize);
+
+        // Get the fractional part of the coordinates for interpolation
+        const dx = relative.pixelX - pixelX1;
+        const dy = relative.pixelY - pixelY1;
+
+        // Perform bilinear interpolation
+        const elevationX1 = elevation1 * (1 - dx) + elevation2 * dx;
+        const elevationX2 = elevation3 * (1 - dx) + elevation4 * dx;
+        return elevationX1 * (1 - dy) + elevationX2 * dy;
+    }
+
+    private getPixelElevation(data: Uint8ClampedArray, x: number, y: number, tileSize: number): number {
+        const index = (y * tileSize + x) * 4;
+        const r = data[index];
+        const g = data[index + 1];
+        const b = data[index + 2];
         return -32768 + ((r * 256 + g + b / 256.0));
     }
 

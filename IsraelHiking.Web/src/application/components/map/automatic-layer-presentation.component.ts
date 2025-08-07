@@ -12,9 +12,7 @@ import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
-import { ConnectionService } from "../../services/connection.service";
 import { MapService } from "../../services/map.service";
-import { HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models/models";
 
 @Component({
@@ -39,7 +37,6 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     private subscriptions: OutputRefSubscription[] = [];
     private jsonSourcesIds: string[] = [];
     private jsonLayersIds: string[] = [];
-    private hasInternetAccess: boolean = true;
     private mapLoadedPromise: Promise<void>;
     private currentLanguageCode: LanguageCode;
     private recreateQueue: Subject<() => Promise<void>> = new Subject();
@@ -48,7 +45,6 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     
     private readonly mapComponent = inject(MapComponent);
     private readonly fileService = inject(FileService);
-    private readonly connectionSerive = inject(ConnectionService);
     private readonly mapService = inject(MapService);
     private readonly store = inject(Store);
 
@@ -73,17 +69,6 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
                 this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
             }
             this.currentLanguageCode = language.code;
-        }));
-        this.subscriptions.push(this.connectionSerive.stateChanged.subscribe((online) => {
-            if (online === this.hasInternetAccess) {
-                return;
-            }
-            this.hasInternetAccess = online;
-            if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles == null || 
-                this.layerData().isOfflineAvailable === false) {
-                return;
-            }
-            this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
         }));
     }
 

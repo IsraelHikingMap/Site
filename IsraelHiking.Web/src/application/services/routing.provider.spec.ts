@@ -41,7 +41,9 @@ describe("RoutingProvider", () => {
                 } },
                 { provide: LoggingService, useValue: { error: () => { } } },
                 { provide: RunningContextService, useValue: {} },
-                { provide: PmTilesService, useValue: {} },
+                { provide: PmTilesService, useValue: {
+                    isOfflineFileAvailable: () => false,
+                } },
                 GeoJsonParser,
                 RoutingProvider,
                 provideHttpClient(withInterceptorsFromDi()),
@@ -84,12 +86,12 @@ describe("RoutingProvider", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike").then((data) => {
-                expect(data.length).toBe(2);
-            }, fail);
+            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike");
 
             mockBackend.expectOne(() => true).flush({});
-            return promise;
+            await promise;
+            const data = await promise;
+            expect(data.length).toBe(2);
         }
     ));
 
@@ -102,12 +104,12 @@ describe("RoutingProvider", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike").then((data) => {
-                expect(data.length).toBe(2);
-            }, fail);
+            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
 
             mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-            return promise;
+            await promise;
+            const data = await promise;
+            expect(data.length).toBe(2);
         }
     ));
 
@@ -122,12 +124,11 @@ describe("RoutingProvider", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike").then((data) => {
-                expect(data.length).toBe(2);
-            }, fail);
+            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
 
             mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-            return promise;
+            const data = await promise;
+            expect(data.length).toBe(2);
         }
     ));
 
@@ -142,12 +143,11 @@ describe("RoutingProvider", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike").then((data) => {
-                expect(data.length).toBe(2);
-            }, fail);
+            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike");
 
             mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-            return promise;
+            const data = await promise;
+            expect(data.length).toBe(2);
         }
     ));
 
@@ -169,21 +169,14 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.getTileAboveZoom = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
+            db.isOfflineFileAvailable = () => true;
+            db.getTileAboveZoom = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
-            store.reset({
-                offlineState: {
-                    isSubscribed: true,
-                    downloadedTiles: {}
-                }
-            });
-
-            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0001 }, "Hike").then((data) => {
-                expect(data.length).toBe(3);
-            }, fail);
+            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0001 }, "Hike");
 
             mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-            return promise;
+            const data = await promise;
+            expect(data.length).toBe(3);
         }
     ));
 
@@ -208,21 +201,14 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.getTileAboveZoom = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
+            db.isOfflineFileAvailable = () => true;
+            db.getTileAboveZoom = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
-            store.reset({
-                offlineState: {
-                    isSubscribed: true,
-                    downloadedTiles: {}
-                }
-            });
-
-            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Hike").then((data) => {
-                expect(data.length).toBe(5);
-            }, fail);
+            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Hike");
 
             mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-            return promise;
+            const data = await promise;
+            expect(data.length).toBe(5);
         }
     ));
 
@@ -253,25 +239,18 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.getTileAboveZoom = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
+            db.isOfflineFileAvailable = () => true;
+            db.getTileAboveZoom = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
-            store.reset({
-                offlineState: {
-                    isSubscribed: true,
-                    downloadedTiles: {}
-                }
-            });
-
-            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike").then((data) => {
-                expect(data.length).toBe(3);
-            }, fail);
+            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike");
 
             mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-            return promise;
+            const data = await promise;
+            expect(data.length).toBe(3);
         }
     ));
 
-    it("Should return srart and end point when all lines are filtered out",
+    it("Should return start and end point when all lines are filtered out",
         inject([RoutingProvider, HttpTestingController, PmTilesService, Store],
         async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
 
@@ -289,7 +268,7 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.getTileAboveZoom = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
+            db.getTileAboveZoom = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
             store.reset({
                 offlineState: {
@@ -298,12 +277,11 @@ describe("RoutingProvider", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "4WD").then((data) => {
-                expect(data.length).toBe(2);
-            }, fail);
+            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "4WD");
 
             mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-            return promise;
+            const data = await promise;
+            expect(data.length).toBe(2);
         }
     ));
 
@@ -333,21 +311,14 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.getTileAboveZoom = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
+            db.isOfflineFileAvailable = () => true;
+            db.getTileAboveZoom = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
-            store.reset({
-                offlineState: {
-                    isSubscribed: true,
-                    downloadedTiles: {}
-                }
-            });
-
-            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike").then((data) => {
-                expect(data.length).toBe(5);
-            }, fail);
+            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike");
 
             mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-            return promise;
+            const data = await promise;
+            expect(data.length).toBe(5);
         }
     ));
 });

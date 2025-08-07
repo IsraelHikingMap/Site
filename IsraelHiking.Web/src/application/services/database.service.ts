@@ -10,7 +10,7 @@ import deepmerge from "deepmerge";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { PmTilesService, TILES_ZOOM } from "./pmtiles.service";
-import { POPULARITY_HEATMAP, initialState } from "../reducers/initial-state";
+import { initialState } from "../reducers/initial-state";
 import { ClearHistoryAction } from "../reducers/routes.reducer";
 import { SetSelectedPoiAction } from "../reducers/poi.reducer";
 import type { ApplicationState, MutableApplicationState, ShareUrl, Trace } from "../models/models";
@@ -99,10 +99,19 @@ export class DatabaseService {
         });
         addProtocol("slice", async (params, _abortController) => {
             // slice://mapeak.com/vector/data/IHM-schema/{z}/{x}/{y}.mvt
-            try {
+            const splitUrl = params.url.split("/");
+            const type = splitUrl[splitUrl.length - 4];
+            const z = +splitUrl[splitUrl.length - 3];
+            const x = +splitUrl[splitUrl.length - 2];
+            const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
+            try {    
+                let timeoutPipe = undefined;
+                if (this.pmTilesService.isOfflineFileAvailable(z, x, y)) {
+                    timeoutPipe = timeout(2000);
+                }
                 this.loggingService.info(`[Database] Fetching ${params.url}`);
                 const response = await firstValueFrom(this.httpClient.get(params.url.replace("slice://", "https://"), { observe: "response", responseType: "arraybuffer" })
-                    .pipe(timeout(2000))) as any as HttpResponse<any>;
+                    .pipe(timeoutPipe)) as any as HttpResponse<any>;
                 if (!response.ok) {
                     this.loggingService.info(`[Database] Failed fetching with error: ${response.status}: ${params.url}`);
                     throw new Error(`Failed to get ${params.url}: ${response.statusText}`);
@@ -112,14 +121,9 @@ export class DatabaseService {
             } catch (ex) {
                 this.loggingService.info(`[Database] Failed fetching with error: ${(ex as any).message}: ${params.url}`);
                 // Timeout or other error
-                if (!this.store.selectSnapshot((state: ApplicationState) => state.offlineState).isSubscribed) {
+                if (!this.pmTilesService.isOfflineFileAvailable(z, x, y)) {
                     throw ex;
                 }
-                const splitUrl = params.url.split("/");
-                const type = splitUrl[splitUrl.length - 4];
-                const z = +splitUrl[splitUrl.length - 3];
-                const x = +splitUrl[splitUrl.length - 2];
-                const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
                 // find the tile x, y, for zoom 7:
                 if (z >= TILES_ZOOM) {
                     const data = await this.pmTilesService.getTileAboveZoom(z, x, y, type);

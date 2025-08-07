@@ -1,13 +1,27 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { NgxsModule } from "@ngxs/store";
 
 import { ElevationProvider } from "./elevation.provider";
 import { LoggingService } from "./logging.service";
 import { PmTilesService } from "./pmtiles.service";
 
 describe("ElevationProvider", () => {
+
+    async function getArrayBufferOfNonEmptyTile(): Promise<ArrayBuffer> {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = 512;
+        canvas.height = 512;
+        ctx.fillStyle = "red";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        const url = canvas.toDataURL("image/png");
+
+        const response = await fetch(url);
+        return response.arrayBuffer();
+    }
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -16,7 +30,9 @@ describe("ElevationProvider", () => {
             ],
             providers: [
                 { provide: LoggingService, useValue: { warning: () => { } } },
-                { provide: PmTilesService, useValue: {} },
+                { provide: PmTilesService, useValue: {
+                    isOfflineFileAvailable: () => false,
+                } },
                 ElevationProvider,
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting()
@@ -29,12 +45,11 @@ describe("ElevationProvider", () => {
 
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
-            const promise = elevationProvider.updateHeights(latlngs).then(() => {
-                expect(latlngs[0].alt).toBe(1);
-            });
+            const promise = elevationProvider.updateHeights(latlngs);
 
-            mockBackend.match(() => true)[0].flush([1]);
-            return promise;
+            mockBackend.match(() => true)[0].flush(await getArrayBufferOfNonEmptyTile());
+            await promise;
+            expect(latlngs[0].alt).toBe(32512);
         }
     ));
 
@@ -56,46 +71,25 @@ describe("ElevationProvider", () => {
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
             const promise = elevationProvider.updateHeights(latlngs);
-            promise.then(() => {
-                expect(latlngs[0].alt).toBe(0);
-            }, () => fail());
 
             mockBackend.match(() => true)[0].flush(null, { status: 500, statusText: "Server Error" });
-            return promise;
+            await promise;
+            expect(latlngs[0].alt).toBe(0);
         }
     ));
 
-    it("Should update elevation when getting an error from server and offline is available",
-        inject([ElevationProvider, HttpTestingController, PmTilesService, Store],
-        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
+    it("Should update elevation when offline is available",
+        inject([ElevationProvider, PmTilesService],
+        async (elevationProvider: ElevationProvider, db: PmTilesService) => {
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
-            store.reset({
-                offlineState: {
-                    isSubscribed: true,
-                    downloadedTiles: {}
-                }
-            });
-
-            // create a blue image 256x256
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            canvas.width = 256;
-            canvas.height = 256;
-            ctx.fillStyle = "blue";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.save();
-            const url = canvas.toDataURL("image/png");
-
-            db.getTileAboveZoom = () => fetch(url).then(r => r.arrayBuffer());
+            db.isOfflineFileAvailable = () => true;
+            db.getTileAboveZoom = getArrayBufferOfNonEmptyTile;
 
             const promise = elevationProvider.updateHeights(latlngs);
-            promise.then(() => {
-                expect(latlngs[0].alt).not.toBe(0);
-            }, () => fail());
 
-            mockBackend.match(() => true)[0].flush(null, { status: 500, statusText: "Server Error" });
-            return promise;
+            await promise;
+            expect(latlngs[0].alt).not.toBe(0);
         }
     ));
 });

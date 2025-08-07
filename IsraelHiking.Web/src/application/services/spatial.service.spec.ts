@@ -310,8 +310,8 @@ describe("Spatial service", () => {
     it("Should get relative pixel location", () => {
         const latlng = {lat: 0.1, lng: 0.1};
         const pixel = SpatialService.toRelativePixel(latlng, 12, 256);
-        expect(pixel.pixelX).toBe(35);
-        expect(pixel.pixelY).toBe(220);
+        expect(pixel.pixelX).toBeCloseTo(35, 0);
+        expect(pixel.pixelY).toBeCloseTo(221, 0);
     });
 
     it("Should merge lines", () => {

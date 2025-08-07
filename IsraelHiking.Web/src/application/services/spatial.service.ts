@@ -347,11 +347,19 @@ export class SpatialService {
         return {lat, lng};
     }
 
+    public static getParentZoomTileCoordinates(tile: {x: number; y: number}, zoom: number, targetZoom: number): {tileX: number; tileY: number} {
+        const scale = Math.pow(2, zoom - targetZoom);
+        return {
+            tileX: Math.floor(tile.x / scale),
+            tileY: Math.floor(tile.y / scale)
+        };
+    }
+
     public static toRelativePixel(latlng: LatLngAlt, zoom: number, tileSize: number) {
         const tile = SpatialService.toTile(latlng, zoom);
         return {
-            pixelX: Math.floor((tile.x - Math.floor(tile.x)) * tileSize),
-            pixelY: Math.floor((tile.y - Math.floor(tile.y)) * tileSize)
+            pixelX: (tile.x - Math.floor(tile.x)) * tileSize,
+            pixelY: (tile.y - Math.floor(tile.y)) * tileSize
         };
     }
 

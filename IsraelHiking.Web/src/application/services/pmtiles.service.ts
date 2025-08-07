@@ -1,6 +1,9 @@
 import { inject, Injectable } from "@angular/core";
 import { File as FileSystemWrapper, IFile } from "@awesome-cordova-plugins/file/ngx";
 import { Source, RangeResponse, PMTiles } from "pmtiles";
+import { SpatialService } from "./spatial.service";
+import { Store } from "@ngxs/store";
+import type { ApplicationState } from "../models/models";
 
 export const TILES_ZOOM = 7;
 
@@ -32,6 +35,7 @@ export class PmTilesService {
     private sourcesCache = new Map<string, CapacitorSource>;
 
     private readonly fileStsyemWrapper = inject(FileSystemWrapper);
+    private readonly store = inject(Store);
 
     private async getSource(filePath: string): Promise<Source> {
         if (this.sourcesCache.has(filePath)) {
@@ -63,10 +67,7 @@ export class PmTilesService {
     }
 
     public async getTileAboveZoom(z: number, x: number, y: number, type: string): Promise<ArrayBuffer> {
-        const targetZoom = TILES_ZOOM;
-        const scale = Math.pow(2, z - targetZoom);
-        const tileX = Math.floor(x / scale);
-        const tileY = Math.floor(y / scale);
+        const { tileX, tileY } = SpatialService.getParentZoomTileCoordinates({x, y}, z, TILES_ZOOM);
         const fileName = `${type}+${TILES_ZOOM}-${tileX}-${tileY}.pmtiles`;
         return await this.getTileFromFile(fileName, z, x, y);
 
@@ -77,5 +78,17 @@ export class PmTilesService {
         const pmTilesProvider = new PMTiles(source);
         const response = await pmTilesProvider.getZxy(z, x, y);
         return response.data;
+    }
+
+    public isOfflineFileAvailable(z: number, x: number, y: number): boolean {
+        if (this.store.selectSnapshot((state: ApplicationState) => state.offlineState).isSubscribed === false) {
+            return false;
+        }
+        let tileX = undefined;
+        let tileY = undefined;
+        if (z >= TILES_ZOOM) {
+            ({ tileX, tileY } = SpatialService.getParentZoomTileCoordinates({x, y}, z, TILES_ZOOM));   
+        }
+        return this.store.selectSnapshot((state: ApplicationState) => state.offlineState).downloadedTiles[`${tileX}-${tileY}`] != null;
     }
 }

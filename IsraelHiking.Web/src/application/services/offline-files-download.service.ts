@@ -5,7 +5,6 @@ import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
 
-import { LayersService } from "./layers.service";
 import { DownloadResponse, FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
 import { OfflineManagementDialogComponent } from "application/components/dialogs/offline-management-dialog.component";
@@ -15,7 +14,6 @@ import type { ApplicationState } from "../models/models";
 
 @Injectable()
 export class OfflineFilesDownloadService {
-    private readonly layersService = inject(LayersService);
     private readonly fileService = inject(FileService);
     private readonly loggingService = inject(LoggingService);
     private readonly httpClient = inject(HttpClient);

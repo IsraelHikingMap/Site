@@ -54,10 +54,7 @@ export class RoutingProvider {
         if (routinType === "None") {
             return [latlngStart, latlngEnd];
         }
-        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        if (!offlineState.isSubscribed || offlineState.downloadedTiles == null) {
-            throw new Error("Offline routing is only supported after downloading offline data");
-        }
+        
         const zoom = 14; // this is the max zoom for these tiles
         const tiles = [latlngStart, latlngEnd].map(latlng => SpatialService.toTile(latlng, zoom));
         let tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));
@@ -66,6 +63,9 @@ export class RoutingProvider {
         const tileYmin = Math.min(...tiles.map(tile => Math.floor(tile.y)));
         if (tileXmax - tileXmin > 2 || tileYmax - tileYmin > 2) {
             throw new Error("Offline routing is only supported for adjecent tiles maximum...");
+        }
+        if (tiles.some(t => !this.pmTilesService.isOfflineFileAvailable(zoom, t.x, t.y))) {
+            throw new Error("Unable to find offline route, some tiles are missing");
         }
         // increase the chance of getting a route by adding more tiles
         if (tileXmax === tileXmin) {
