@@ -104,17 +104,13 @@ export class DatabaseService {
             const z = +splitUrl[splitUrl.length - 3];
             const x = +splitUrl[splitUrl.length - 2];
             const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
-            try {    
-                let timeoutPipe = undefined;
-                if (this.pmTilesService.isOfflineFileAvailable(z, x, y)) {
-                    timeoutPipe = timeout(2000);
-                }
+            try {
                 this.loggingService.info(`[Database] Fetching ${params.url}`);
                 const response = await firstValueFrom(this.httpClient.get(params.url.replace("slice://", "https://"), { observe: "response", responseType: "arraybuffer" })
-                    .pipe(timeoutPipe)) as any as HttpResponse<any>;
+                    .pipe(this.pmTilesService.isOfflineFileAvailable(z, x, y) ? timeout(2000) : timeout(60000))) as any as HttpResponse<any>;
                 if (!response.ok) {
                     this.loggingService.info(`[Database] Failed fetching with error: ${response.status}: ${params.url}`);
-                    throw new Error(`Failed to get ${params.url}: ${response.statusText}`);
+                    throw new Error(`Failed to get ${params.url}: ${response.statusText} (${response.status})`);
                 }
                 const data = response.body;
                 return {data, cacheControl: response.headers.get("Cache-Control"), expires: response.headers.get("Expires")};
@@ -122,7 +118,7 @@ export class DatabaseService {
                 this.loggingService.info(`[Database] Failed fetching with error: ${(ex as any).message}: ${params.url}`);
                 // Timeout or other error
                 if (!this.pmTilesService.isOfflineFileAvailable(z, x, y)) {
-                    throw ex;
+                    throw new Error(`Failed to get ${params.url}: ${(ex as Error).message}`);
                 }
                 // find the tile x, y, for zoom 7:
                 if (z >= TILES_ZOOM) {
