@@ -188,7 +188,8 @@ export class MainMenuComponent {
                 `Model: ${info.model}`,
                 `Platform: ${info.platform}`,
                 `OS version: ${info.osVersion}`,
-                `App version: ${(await App.getInfo()).version}`
+                `App version: ${(await App.getInfo()).version}`,
+                `Has Subscription: ${!this.isShowOrderButton()}`
             ].join("\n");
             const logFileUri = await this.fileService.storeFileToCache("log.txt", logs);
             const infoBase64 = encode(await new Response(infoString).arrayBuffer());
