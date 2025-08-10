@@ -1,6 +1,7 @@
 import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
+import QuickLRU from "quick-lru";
 
 import { LoggingService } from "./logging.service";
 import { SpatialService } from "./spatial.service";
@@ -15,7 +16,7 @@ export class ElevationProvider {
     private readonly transparentPngUrl =
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=";
 
-    private elevationCache = new Map<string, Uint8ClampedArray>();
+    private elevationCache = new QuickLRU<string, Uint8ClampedArray>({ maxSize: 100 });
 
     private readonly httpClient = inject(HttpClient);
     private readonly loggingService = inject(LoggingService);
@@ -76,18 +77,17 @@ export class ElevationProvider {
         const tileSize = 512;
         const zoom = ElevationProvider.MAX_ELEVATION_ZOOM;
         const tile = SpatialService.toTile(latlng, zoom);
-        const relative = SpatialService.toRelativePixel(latlng, zoom, tileSize);
+        const tileIndex = { tileX: Math.floor(tile.x), tileY: Math.floor(tile.y) };
+        const data = this.elevationCache.get(`${tileIndex.tileX}/${tileIndex.tileY}`);
 
-        // Get the coordinates of the top-left pixel
+        const relative = SpatialService.toRelativePixelCenter(latlng, zoom, tileSize);
+        // Get the coordinates of the center of the top-left pixel
         const pixelX1 = Math.floor(relative.pixelX);
         const pixelY1 = Math.floor(relative.pixelY);
 
         // Get the coordinates of the other three nearest pixels
         const pixelX2 = Math.min(pixelX1 + 1, tileSize - 1);
         const pixelY2 = Math.min(pixelY1 + 1, tileSize - 1);
-
-        const tileIndex = { tileX: Math.floor(tile.x), tileY: Math.floor(tile.y) };
-        const data = this.elevationCache.get(`${tileIndex.tileX}/${tileIndex.tileY}`);
 
         // Get the elevations of the four nearest pixels
         const elevation1 = this.getPixelElevation(data, pixelX1, pixelY1, tileSize);

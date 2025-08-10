@@ -6,6 +6,7 @@ import { VectorTile } from "@mapbox/vector-tile";
 import { Store } from "@ngxs/store";
 import PathFinder from "geojson-path-finder";
 import Protobuf from "pbf";
+import QuickLRU from "quick-lru";
 
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
@@ -18,7 +19,7 @@ import type { ApplicationState, LatLngAlt, RoutingType } from "../models/models"
 
 @Injectable()
 export class RoutingProvider {
-    private featuresCache = new Map<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>();
+    private featuresCache = new QuickLRU<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>({ maxSize: 100 });
 
     private readonly httpClient = inject(HttpClient);
     private readonly resources = inject(ResourcesService);
@@ -29,6 +30,17 @@ export class RoutingProvider {
     private readonly store = inject(Store);
 
     public async getRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {
+        if (routinType === "None") {
+            const distance = SpatialService.getDistanceInMeters(latlngStart, latlngEnd);
+            const pointsCount = Math.min(100, Math.ceil(distance / 100));
+            const latlngs = [];
+            for (let i = 0; i <= pointsCount; i++) {
+                const lat = latlngStart.lat + (latlngEnd.lat - latlngStart.lat) * (i / pointsCount);
+                const lng = latlngStart.lng + (latlngEnd.lng - latlngStart.lng) * (i / pointsCount);
+                latlngs.push({ lat, lng });
+            }
+            return latlngs;
+        }
         const address = Urls.routing + "?from=" + latlngStart.lat + "," + latlngStart.lng +
             "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + routinType;
         try {
@@ -51,10 +63,6 @@ export class RoutingProvider {
     }
 
     private async getOffineRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {
-        if (routinType === "None") {
-            return [latlngStart, latlngEnd];
-        }
-        
         const zoom = 14; // this is the max zoom for these tiles
         const tiles = [latlngStart, latlngEnd].map(latlng => SpatialService.toTile(latlng, zoom));
         let tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));

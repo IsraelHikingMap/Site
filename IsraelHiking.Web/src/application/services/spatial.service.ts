@@ -357,11 +357,11 @@ export class SpatialService {
         };
     }
 
-    public static toRelativePixel(latlng: LatLngAlt, zoom: number, tileSize: number) {
+    public static toRelativePixelCenter(latlng: LatLngAlt, zoom: number, tileSize: number) {
         const tile = SpatialService.toTile(latlng, zoom);
         return {
-            pixelX: (tile.x - Math.floor(tile.x)) * tileSize,
-            pixelY: (tile.y - Math.floor(tile.y)) * tileSize
+            pixelX: Math.max(0, (tile.x - Math.floor(tile.x)) * tileSize - 0.5),
+            pixelY: Math.max(0, (tile.y - Math.floor(tile.y)) * tileSize - 0.5)
         };
     }
 

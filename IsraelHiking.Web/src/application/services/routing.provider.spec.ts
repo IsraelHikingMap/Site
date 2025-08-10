@@ -52,6 +52,34 @@ describe("RoutingProvider", () => {
         });
     });
 
+    it("Should route between two distant points with None routing type", inject([RoutingProvider, HttpTestingController],
+        async (router: RoutingProvider, mockBackend: HttpTestingController) => {
+            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "None");
+
+            mockBackend.expectNone(() => true);
+            const data = await promise;
+            expect(data.length).toBe(101);
+            expect(data[0].lat).toBe(32);
+            expect(data[0].lng).toBe(35);
+            expect(data[data.length - 1].lat).toBe(33);
+            expect(data[data.length - 1].lng).toBe(35);
+        }
+    ));
+
+    it("Should route between two close points with None routing type", inject([RoutingProvider, HttpTestingController],
+        async (router: RoutingProvider, mockBackend: HttpTestingController) => {
+            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.0001, lng: 35.0001 }, "None");
+
+            mockBackend.expectNone(() => true);
+            const data = await promise;
+            expect(data.length).toBe(2);
+            expect(data[0].lat).toBe(32);
+            expect(data[0].lng).toBe(35);
+            expect(data[1].lat).toBe(32.0001);
+            expect(data[1].lng).toBe(35.0001);
+        }
+    ));
+
     it("Should route between two points", inject([RoutingProvider, HttpTestingController],
         async (router: RoutingProvider, mockBackend: HttpTestingController) => {
             const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike").then((data) => {
