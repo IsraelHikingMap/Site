@@ -6,7 +6,6 @@ using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
-using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -29,10 +28,7 @@ public class OsmGeoJsonPreprocessorExecutorTests
         var options = new ConfigurationData();
         var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
         optionsProvider.Value.Returns(options);
-        var elevationGateway = Substitute.For<IElevationGateway>();
-        elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(info => Enumerable.Repeat(1.0, info.Arg<Coordinate[]>().Length).ToArray());
         _preprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), 
-            elevationGateway, 
             new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper(optionsProvider));
     }
 

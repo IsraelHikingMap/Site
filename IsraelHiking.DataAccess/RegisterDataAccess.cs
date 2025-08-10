@@ -22,7 +22,6 @@ public static class RegisterDataAccess
         services.AddSingleton<IUserLayersRepository>(x => x.GetService<ElasticSearchGateway>());
         services.AddSingleton<IImagesRepository>(x => x.GetService<ElasticSearchGateway>());
         services.AddSingleton<IExternalSourcesRepository>(x => x.GetService<ElasticSearchGateway>());
-        services.AddSingleton<IElevationGateway, ElevationGateway>();
         services.AddTransient<INakebGateway, NakebGateway>();
         services.AddSingleton<IWikidataGateway, WikidataGateway>();
         services.AddSingleton<IWikimediaCommonGateway, WikimediaCommonGateway>();

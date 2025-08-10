@@ -1,9 +1,7 @@
-﻿using System.Linq;
-using IsraelHiking.API.Services;
+﻿using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
-using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -13,15 +11,12 @@ namespace IsraelHiking.API.Tests.Services.Poi;
 
 public abstract class BasePointsOfInterestAdapterTestsHelper
 {
-    protected IElevationGateway _elevationGateway;
     protected IDataContainerConverterService _dataContainerConverterService;
     protected IOptions<ConfigurationData> _options;
 
     protected void InitializeSubstitutes()
     {
         _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
-        _elevationGateway = Substitute.For<IElevationGateway>();
-        _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(info => Enumerable.Repeat(1.0, info.Arg<Coordinate[]>().Length).ToArray());
         _options = Substitute.For<IOptions<ConfigurationData>>();
         _options.Value.Returns(new ConfigurationData());
     }

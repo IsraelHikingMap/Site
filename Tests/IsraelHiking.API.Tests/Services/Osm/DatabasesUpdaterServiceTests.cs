@@ -32,7 +32,6 @@ public class DatabasesUpdaterServiceTests
     private IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
     private IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
     private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
-    private IElevationGateway _elevationGateway;
     private IOverpassTurboGateway _overpassTurboGateway;
         
     [TestInitialize]
@@ -50,14 +49,13 @@ public class DatabasesUpdaterServiceTests
         _pointsOfInterestAdapterFactory = Substitute.For<IPointsOfInterestAdapterFactory>();
         _externalSourceUpdaterExecutor = Substitute.For<IExternalSourceUpdaterExecutor>();
         _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
-        _elevationGateway = Substitute.For<IElevationGateway>();
         _overpassTurboGateway = Substitute.For<IOverpassTurboGateway>();
         _service = new DatabasesUpdaterService(_externalSourcesRepository,
             _pointsOfInterestRepository,
             _pointsOfInterestAdapterFactory,
             _pointsOfInterestFilesCreatorExecutor,
             _imagesUrlsStorageExecutor,
-            _externalSourceUpdaterExecutor, Substitute.For<IElevationSetterExecutor>(),
+            _externalSourceUpdaterExecutor,
             _overpassTurboGateway,
             Substitute.For<ILogger>());
     }
@@ -105,7 +103,6 @@ public class DatabasesUpdaterServiceTests
     {
         var feature = new Feature(new Point(0, 0), new AttributesTable());
         _pointsOfInterestRepository.GetAllPointsOfInterest().Returns([feature]);
-        _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns([1.0]);
         _pointsOfInterestAdapterFactory.GetAll().Returns([]);
             
         _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
@@ -119,7 +116,6 @@ public class DatabasesUpdaterServiceTests
     {
         var feature = new Feature(new Point(0, 0), new AttributesTable());
         _pointsOfInterestRepository.GetAllPointsOfInterest().Returns([feature]);
-        _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns([1.0]);
         var adapter = Substitute.For<IPointsOfInterestAdapter>();
         adapter.Source.Returns(Sources.NAKEB);
         _pointsOfInterestAdapterFactory.GetAll().Returns([adapter]);
@@ -153,7 +149,6 @@ public class DatabasesUpdaterServiceTests
             { FeatureAttributes.WIKIDATA, "Q333"}
         });
         _pointsOfInterestRepository.GetAllPointsOfInterest().Returns([feature1]);
-        _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns([1.0]);
         var adapter = Substitute.For<IPointsOfInterestAdapter>();
         adapter.Source.Returns(Sources.WIKIDATA);
         _pointsOfInterestAdapterFactory.GetAll().Returns([adapter]);

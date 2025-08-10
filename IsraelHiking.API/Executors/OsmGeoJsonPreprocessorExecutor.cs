@@ -2,7 +2,6 @@
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
-using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -18,24 +17,20 @@ public class OsmGeoJsonPreprocessorExecutor : IOsmGeoJsonPreprocessorExecutor
 {
     private readonly ILogger _logger;
     private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
-    private readonly IElevationGateway _elevationGateway;
     private readonly ITagsHelper _tagsHelper;
 
     /// <summary>
     /// Constructor
     /// </summary>
     /// <param name="logger"></param>
-    /// <param name="elevationGateway"></param>
     /// <param name="osmGeoJsonConverter"></param>
     /// <param name="tagsHelper"></param>
     public OsmGeoJsonPreprocessorExecutor(ILogger logger,
-        IElevationGateway elevationGateway,
         IOsmGeoJsonConverter osmGeoJsonConverter,
         ITagsHelper tagsHelper)
     {
         _logger = logger;
         _osmGeoJsonConverter = osmGeoJsonConverter;
-        _elevationGateway = elevationGateway;
         _tagsHelper = tagsHelper;
     }
 
@@ -45,7 +40,6 @@ public class OsmGeoJsonPreprocessorExecutor : IOsmGeoJsonPreprocessorExecutor
         _logger.LogInformation("Preprocessing OSM data to GeoJson, total entities: " + osmEntities.Count);
         osmEntities = RemoveDuplicateWaysThatExistInRelations(osmEntities);
         var featuresToReturn = osmEntities.Select(ConvertToFeature).Where(f => f != null).ToList();
-        UpdateAltitude(featuresToReturn);
         _logger.LogInformation("Finished GeoJson conversion: " + featuresToReturn.Count);
         return featuresToReturn;
     }
@@ -153,18 +147,5 @@ public class OsmGeoJsonPreprocessorExecutor : IOsmGeoJsonPreprocessorExecutor
             geoLocation = feature.Geometry.Centroid.Coordinate;
         }
         feature.Attributes.SetLocation(geoLocation);
-    }
-
-    private void UpdateAltitude(List<IFeature> features)
-    {
-        _logger.LogInformation("Starting to get altitude for features " + features.Count);
-        var coordinates = features.Select(f => f.GetLocation()).ToArray();
-        var elevationValues = _elevationGateway.GetElevation(coordinates).Result;
-        for (var index = 0; index < features.Count; index++)
-        {
-            var feature = features[index];
-            feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ALT, elevationValues[index]);
-        }
-        _logger.LogInformation("Finished to get altitude for features " + features.Count);
     }
 }

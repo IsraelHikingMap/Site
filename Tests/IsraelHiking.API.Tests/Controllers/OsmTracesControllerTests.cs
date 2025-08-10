@@ -2,14 +2,12 @@
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces.Repositories;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using OsmSharp.API;
 using OsmSharp.IO.API;
 using System.IO;
-using System.Text;
 using IsraelHiking.Common.DataContainer;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Caching.Distributed;

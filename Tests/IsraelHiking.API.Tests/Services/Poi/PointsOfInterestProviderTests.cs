@@ -44,7 +44,6 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         _clientsFactory = Substitute.For<IClientsFactory>();
         _tagsHelper = new TagsHelper(_options);
         _osmGeoJsonPreprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(),
-            _elevationGateway,
             new OsmGeoJsonConverter(new GeometryFactory()), _tagsHelper);
         _pointsOfInterestRepository = Substitute.For<IPointsOfInterestRepository>();
         _externalSourcesRepository = Substitute.For<IExternalSourcesRepository>();
@@ -52,7 +51,6 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
         _adapter = new PointsOfInterestProvider(_pointsOfInterestRepository,
             _externalSourcesRepository,
-            new ElevationSetterExecutor(_elevationGateway),
             _osmGeoJsonPreprocessorExecutor,
             _wikimediaCommonGateway,
             new Base64ImageStringToFileConverter(),
@@ -117,7 +115,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         
         
     [TestMethod]
-    public void GetFeatureById_NonOsmWithNoElevation_ShouldAddElevation()
+    public void GetFeatureById_NonOsmWithNoElevation_ShouldNotAddElevation()
     {
         var someId = "some-id";
         var featureStr =
@@ -145,7 +143,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         var result = _adapter.GetFeatureById(Sources.INATURE, someId).Result;
 
         Assert.IsNotNull(result);
-        Assert.AreEqual(1, result.Geometry.Coordinates.First().Z);
+        Assert.AreEqual(double.NaN, result.Geometry.Coordinates.First().Z);
     }
 
     [TestMethod]

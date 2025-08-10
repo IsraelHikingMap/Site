@@ -5,7 +5,6 @@ using IsraelHiking.Common.DataContainer;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using NetTopologySuite.Geometries;

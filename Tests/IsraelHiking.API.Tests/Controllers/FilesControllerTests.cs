@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NetTopologySuite.Geometries;
 using NSubstitute;
 using System.Collections.Generic;
 using System.IO;
@@ -31,7 +30,6 @@ public class FilesControllerTests
     private FilesController _controller;
 
     private IGpsBabelGateway _gpsBabelGateway;
-    private IElevationGateway _elevationGateway;
     private IRemoteFileFetcherGateway _remoteFileFetcherGateway;
     private IDataContainerConverterService _dataContainerConverterService;
     private IGpxDataContainerConverter _gpxDataContainerConverter;
@@ -60,8 +58,6 @@ public class FilesControllerTests
     public void TestInitialize()
     {
         _gpsBabelGateway = Substitute.For<IGpsBabelGateway>();
-        _elevationGateway = Substitute.For<IElevationGateway>();
-        _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(info => Enumerable.Repeat(1.0, info.Arg<Coordinate[]>().Length).ToArray());
         _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
         _gpxDataContainerConverter = new GpxDataContainerConverter();
         var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
@@ -69,7 +65,7 @@ public class FilesControllerTests
         _dataContainerConverterService = new DataContainerConverterService(_gpsBabelGateway, _gpxDataContainerConverter, new RouteDataSplitterService(new ItmWgs84MathTransformFactory(), optionsProvider), Array.Empty<IConverterFlowItem>());
         _offlineFilesService = Substitute.For<IOfflineFilesService>();
         _receiptValidationGateway = Substitute.For<IReceiptValidationGateway>();
-        _controller = new FilesController(_elevationGateway, _remoteFileFetcherGateway, _dataContainerConverterService, _offlineFilesService, _receiptValidationGateway, Substitute.For<ILogger>());
+        _controller = new FilesController(_remoteFileFetcherGateway, _dataContainerConverterService, _offlineFilesService, _receiptValidationGateway, Substitute.For<ILogger>());
     }
 
     [TestMethod]
