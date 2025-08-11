@@ -24,6 +24,7 @@ public class UrlsControllerTests
     private IShareUrlsRepository _repository;
     private IDataContainerConverterService _containerConverterService;
     private IImgurGateway _imgurGateway;
+    private IImageCreationGateway _imageCreationGateway;
 
     [TestInitialize]
     public void TestInitialize()
@@ -31,7 +32,8 @@ public class UrlsControllerTests
         _repository = Substitute.For<IShareUrlsRepository>();
         _containerConverterService = Substitute.For<IDataContainerConverterService>();
         _imgurGateway = Substitute.For<IImgurGateway>();
-        _controller = new UrlsController(_repository, _containerConverterService, new Base64ImageStringToFileConverter(), _imgurGateway, Substitute.For<ILogger>());
+        _imageCreationGateway = Substitute.For<IImageCreationGateway>();
+        _controller = new UrlsController(_repository, _containerConverterService, new Base64ImageStringToFileConverter(), _imgurGateway, _imageCreationGateway, Substitute.For<ILogger>());
     }
 
     [TestMethod]
@@ -104,6 +106,45 @@ public class UrlsControllerTests
         var results = _controller.GetShareUrlLastModifiedTimeStamp(id).Result;
         
         Assert.AreEqual(results, date);
+    }
+    
+    [TestMethod]
+    public void GetImageForShare_NoUrl_ShouldNotFound()
+    {
+        var results = _controller.GetImageForShare("42").Result as NotFoundResult;
+
+        Assert.IsNotNull(results);
+    }
+
+    [TestMethod]
+    public void GetImageForShare_UrlInDatabase_ShouldCreateIt()
+    {
+        var siteUrl = new ShareUrl
+        {
+            Id = "1",
+            DataContainer = new DataContainerPoco()
+        };
+        _repository.GetUrlById(siteUrl.Id).Returns(siteUrl);
+
+        var results = _controller.GetImageForShare(siteUrl.Id).Result as FileContentResult;
+
+        Assert.IsNotNull(results);
+        _imageCreationGateway.Received(1).Create(Arg.Any<DataContainerPoco>(), 600, 315);
+    }
+    
+    [TestMethod]
+    public void GetImageForShare_ImageInDatabase_ShouldReturnIt()
+    {
+        var siteUrl = new ShareUrl
+        {
+            Id = "1",
+            Base64Preview = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
+        };
+        _repository.GetUrlById(siteUrl.Id).Returns(siteUrl);
+
+        var results = _controller.GetImageForShare(siteUrl.Id).Result as FileContentResult;
+
+        Assert.IsNotNull(results);
     }
     
     [TestMethod]
