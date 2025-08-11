@@ -1,7 +1,6 @@
 ﻿using IsraelHiking.Common;
 using IsraelHiking.Common.DataContainer;
 using IsraelHiking.DataAccessInterfaces;
-using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
@@ -19,22 +18,22 @@ public class ImagesController : ControllerBase
 {
     private readonly IImageCreationGateway _imageCreationGateway;
     private readonly IImgurGateway _imgurGateway;
-    private readonly IShareUrlsRepository _repository;
+    private readonly IShareUrlGateway _shareUrlGateway;
     private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
 
     /// <summary>
     /// Controller's constructor
     /// </summary>
-    /// <param name="repository"></param>
+    /// <param name="shareUrlGateway"></param>
     /// <param name="imageCreationGateway"></param>
     /// <param name="imgurGateway"></param>
     /// <param name="base64ImageConverter"></param>
-    public ImagesController(IShareUrlsRepository repository,
+    public ImagesController(IShareUrlGateway shareUrlGateway,
         IImageCreationGateway imageCreationGateway,
         IImgurGateway imgurGateway, 
         IBase64ImageStringToFileConverter base64ImageConverter)
     {
-        _repository = repository;
+        _shareUrlGateway = shareUrlGateway;
         _imageCreationGateway = imageCreationGateway;
         _imgurGateway = imgurGateway;
         _base64ImageConverter = base64ImageConverter;
@@ -96,7 +95,7 @@ public class ImagesController : ControllerBase
     [Route("{id}")]
     public async Task<IActionResult> GetImageForShare(string id, [FromQuery] int? width = null, [FromQuery] int? height = null)
     {
-        var url = await _repository.GetUrlById(id);
+        var url = await _shareUrlGateway.GetUrlById(id);
         if (url == null)
         {
             return NotFound();

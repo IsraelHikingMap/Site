@@ -18,5 +18,5 @@ public interface IPointsOfInterestFilesCreatorExecutor
     /// This function creates the external points file inside the wwwroot folder
     /// </summary>
     /// <param name="features"></param>
-    void CreateExtenalPoisFile(List<IFeature> features);
+    void CreateExternalPoisFile(List<IFeature> features);
 }

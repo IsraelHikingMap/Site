@@ -3,7 +3,6 @@ using OsmSharp.IO.API;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services.Osm;
 using LazyCache;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -39,15 +38,8 @@ public class OsmAccessTokenEventsHelper
                     token = authorization.Substring("Bearer ".Length).Trim();
                 }
             }
-            var optionalAuthorization = context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<OptionalAuthorizationAttribute>() != null;
-            if (optionalAuthorization && string.IsNullOrEmpty(token)) 
-            {
-                context.Success();
-                return;
-            }
 
-            var needToCheckToken = context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<IAuthorizeData>() != null ||
-                                   optionalAuthorization;
+            var needToCheckToken = context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<IAuthorizeData>() != null;
             if (!needToCheckToken) 
             {
                 context.Success();

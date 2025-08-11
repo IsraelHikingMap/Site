@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
-using IsraelHiking.DataAccessInterfaces.Repositories;
+using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Wangkanai.Detection.Services;
 
@@ -15,7 +15,7 @@ namespace IsraelHiking.API.Services.Middleware;
 /// </summary>
 public class CrawlersMiddleware
 {
-    private readonly IShareUrlsRepository _shareUrlsRepository;
+    private readonly IShareUrlGateway _shareUrlGateway;
     private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
     private readonly RequestDelegate _next;
     private readonly IHomePageHelper _homePageHelper;
@@ -25,17 +25,17 @@ public class CrawlersMiddleware
     /// </summary>
     /// <param name="next"></param>
     /// <param name="homePageHelper"></param>
-    /// <param name="shareUrlsRepository"></param>
+    /// <param name="shareUrlGateway"></param>
     /// <param name="pointsOfInterestProvider"></param>
     public CrawlersMiddleware(RequestDelegate next,
         IHomePageHelper homePageHelper,
-        IShareUrlsRepository shareUrlsRepository,
+        IShareUrlGateway shareUrlGateway,
         IPointsOfInterestProvider pointsOfInterestProvider)
     {
         _next = next;
         _homePageHelper = homePageHelper;
 
-        _shareUrlsRepository = shareUrlsRepository;
+        _shareUrlGateway = shareUrlGateway;
         _pointsOfInterestProvider = pointsOfInterestProvider;
     }
 
@@ -71,7 +71,7 @@ public class CrawlersMiddleware
         string language = string.Empty;
         if (context.Request.Path.StartsWithSegments("/share"))
         {
-            var url = await _shareUrlsRepository.GetUrlById(context.Request.Path.Value.Split("/").Last());
+            var url = await _shareUrlGateway.GetUrlById(context.Request.Path.Value.Split("/").Last());
             if (url == null) {
                 await _next.Invoke(context);
                 return;

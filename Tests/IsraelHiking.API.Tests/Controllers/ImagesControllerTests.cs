@@ -2,7 +2,6 @@
 using IsraelHiking.Common;
 using IsraelHiking.Common.DataContainer;
 using IsraelHiking.DataAccessInterfaces;
-using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,18 +15,18 @@ namespace IsraelHiking.API.Tests.Controllers;
 public class ImagesControllerTests
 {
     private ImagesController _controller;
-    private IShareUrlsRepository _repository;
+    private IShareUrlGateway _shareUrlGateway;
     private IImageCreationGateway _imageCreationGateway;
     private IImgurGateway _imgurGateway;
 
     [TestInitialize]
     public void TestInitialize()
     {
-        _repository = Substitute.For<IShareUrlsRepository>();
+        _shareUrlGateway = Substitute.For<IShareUrlGateway>();
         _imageCreationGateway = Substitute.For<IImageCreationGateway>();
         _imgurGateway = Substitute.For<IImgurGateway>();
             
-        _controller = new ImagesController(_repository, _imageCreationGateway, _imgurGateway, new Base64ImageStringToFileConverter());
+        _controller = new ImagesController(_shareUrlGateway, _imageCreationGateway, _imgurGateway, new Base64ImageStringToFileConverter());
     }
 
     [TestMethod]
@@ -54,7 +53,7 @@ public class ImagesControllerTests
             Id = "1",
             DataContainer = new DataContainerPoco()
         };
-        _repository.GetUrlById(siteUrl.Id).Returns(siteUrl);
+        _shareUrlGateway.GetUrlById(siteUrl.Id).Returns(siteUrl);
 
         var results = _controller.GetImageForShare(siteUrl.Id).Result as FileContentResult;
 
@@ -69,7 +68,7 @@ public class ImagesControllerTests
             Id = "1",
             Base64Preview = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
         };
-        _repository.GetUrlById(siteUrl.Id).Returns(siteUrl);
+        _shareUrlGateway.GetUrlById(siteUrl.Id).Returns(siteUrl);
 
         var results = _controller.GetImageForShare(siteUrl.Id).Result as FileContentResult;
 
