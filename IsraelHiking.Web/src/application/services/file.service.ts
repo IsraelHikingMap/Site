@@ -247,8 +247,8 @@ export class FileService {
 
     private async addElevationToDataContainer(dataContainer: DataContainer): Promise<void> {
         const promises = [];
-        for (const route of dataContainer.routes) {
-            for (const segment of route.segments) {
+        for (const route of dataContainer.routes || []) {
+            for (const segment of route.segments || []) {
                 promises.push(this.elevationProvider.updateHeights(segment.latlngs));
             }
         }

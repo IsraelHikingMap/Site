@@ -13,6 +13,7 @@ import { FitBoundsService } from "./fit-bounds.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { LoggingService } from "./logging.service";
 import { ConnectionService } from "./connection.service";
+import { ElevationProvider } from "./elevation.provider";
 import { Urls } from "../urls";
 import type { DataContainer, MarkerData, RouteData } from "../models/models";
 
@@ -55,6 +56,7 @@ describe("FileService", () => {
                 { provide: FitBoundsService, useValue: fitBoundsService },
                 { provide: SelectedRouteService, useValue: selectedRouteService },
                 { provide: ImageResizeService, useValue: imageResizeService },
+                { provide: ElevationProvider, useValue: {} },
                 { provide: SaveAsFactory, useFactory: () => saveAsSpy },
                 FileService,
                 provideHttpClient(withInterceptorsFromDi()),
@@ -66,12 +68,11 @@ describe("FileService", () => {
     it("Should save to file on web", inject([FileService, HttpTestingController],
         async (service: FileService, mockBackend: HttpTestingController) => {
 
-            const promise = service.saveToFile("file.name", "format", {} as DataContainer).then(() => {
-                expect(saveAsSpy).toHaveBeenCalled();
-            });
+            const promise = service.saveToFile("file.name", "format", {} as DataContainer);
 
             mockBackend.expectOne(Urls.files + "?format=format").flush(btoa("bytes"));
-            return promise;
+            await promise;
+            expect(saveAsSpy).toHaveBeenCalled();
     }));
 
     it("Should save to file on mobile", inject([FileService, RunningContextService, FileSystemWrapper],
@@ -95,22 +96,20 @@ describe("FileService", () => {
     it("Should add routes from url", inject([FileService, HttpTestingController],
         async (service: FileService, mockBackend: HttpTestingController) => {
 
-            const promise = service.addRoutesFromUrl("someurl").then(() => {
-                expect(selectedRouteService.addRoutes).toHaveBeenCalled();
-            }, fail);
+            const promise = service.addRoutesFromUrl("someurl");
 
             mockBackend.expectOne(Urls.files + "?url=someurl").flush({
                 northEast: { lat: 1, lng: 1}, southWest: { lat: 2, lng: 2}
             });
-            return promise;
+            await promise;
+
+            expect(selectedRouteService.addRoutes).toHaveBeenCalled();
         }));
 
     it("Should open from url by uploading", inject([FileService, HttpTestingController],
         async (service: FileService, mockBackend: HttpTestingController) => {
 
-            const promise = service.addRoutesFromFile(new Blob([""]) as File).then(() => {
-                expect(selectedRouteService.addRoutes).toHaveBeenCalled();
-            }, fail);
+            const promise = service.addRoutesFromFile(new Blob([""]) as File);
 
             setTimeout(() => {
                 mockBackend.expectOne(Urls.openFile).flush({
@@ -122,7 +121,8 @@ describe("FileService", () => {
                 } as DataContainer);
             }, 1000);
 
-            return promise;
+            await promise;
+            expect(selectedRouteService.addRoutes).toHaveBeenCalled();
         }));
 
     it("Should open jpeg file and resize it", inject([FileService, HttpTestingController],

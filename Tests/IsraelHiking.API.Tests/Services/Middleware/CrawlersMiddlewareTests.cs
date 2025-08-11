@@ -241,7 +241,7 @@ public class CrawlersMiddlewareTests
 
         _middleware.InvokeAsync(context, detectionService).Wait();
 
-        var checkUrl = Arg.Is<string>(x => x.EndsWith(shareUrl.Id + "?width=256&height=256"));
+        var checkUrl = Arg.Is<string>(x => x.EndsWith(shareUrl.Id + "/thumbnail?width=256&height=256"));
         _homePageHelper.Received().Render(shareUrl.Title, shareUrl.Description, checkUrl);
         _next.DidNotReceive().Invoke(context);
     }
