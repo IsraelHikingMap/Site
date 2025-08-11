@@ -164,7 +164,7 @@ export class ShareUrlsService {
     }
 
         public getImageUrlFromShareId(shareUrlId: string, width?: number, height?: number) {
-        let address = Urls.images + shareUrlId;
+        let address = Urls.urls + shareUrlId + "/thumbnail";
         if (width && height) {
             address += `?width=${width}&height=${height}`;
         }
