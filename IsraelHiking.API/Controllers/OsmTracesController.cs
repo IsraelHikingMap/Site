@@ -134,32 +134,4 @@ public class OsmTracesController : ControllerBase
         }
         return defaultDescription.Replace("Recorded using Mapeak at", containerName);
     }
-
-    private Trace GpxFileToTrace(GpxFile gpxFile)
-    {
-        return new Trace
-        {
-            Id = gpxFile.Id.ToString(),
-            Name = gpxFile.Name,
-            Description = gpxFile.Description,
-            ImageUrl = $"{Branding.BASE_URL}/api/osm/trace/{gpxFile.Id}/picture",
-            Url = $"https://www.openstreetmap.org/user/{gpxFile.User}/traces/{gpxFile.Id}",
-            TagsString = string.Join(",", gpxFile.Tags),
-            TimeStamp = gpxFile.TimeStamp,
-            Visibility = gpxFile.Visibility?.ToString().ToLower()
-        };
-    }
-
-    private GpxFile TraceToGpxFile(Trace trace)
-    {
-        return new GpxFile
-        {
-            Id = int.Parse(trace.Id),
-            Name = trace.Name,
-            Description = trace.Description,
-            Tags = trace.TagsString?.Split(",", StringSplitOptions.RemoveEmptyEntries).ToArray() ?? [],
-            TimeStamp = trace.TimeStamp,
-            Visibility = Enum.Parse<Visibility>(trace.Visibility, true)
-        };
-    }
 }
