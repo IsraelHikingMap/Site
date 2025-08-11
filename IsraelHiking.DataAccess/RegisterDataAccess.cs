@@ -23,7 +23,6 @@ public static class RegisterDataAccess
         services.AddTransient<INakebGateway, NakebGateway>();
         services.AddSingleton<IWikidataGateway, WikidataGateway>();
         services.AddSingleton<IWikimediaCommonGateway, WikimediaCommonGateway>();
-        services.AddTransient<IImgurGateway, ImgurGateway>();
         services.AddSingleton<IINatureGateway, INatureGateway>();
         services.AddTransient<IReceiptValidationGateway, ReceiptValidationGateway>();
         services.AddTransient<IOverpassTurboGateway, OverpassTurboGateway>();

@@ -61,6 +61,5 @@ public static class RegisterApi
         services.AddTransient<IConverterFlowItem, GpxGzToGpxConverterFlow>();
         services.AddTransient<IConverterFlowItem, GpxVersion1ToGpxVersion11ConverterFlow>();
         services.AddTransient<IConverterFlowItem, GpxBz2ToGpxConverterFlow>();
-        services.AddTransient<IConverterFlowItem, JpgToGpxConverterFlow>();
     }
 }

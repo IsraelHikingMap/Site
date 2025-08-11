@@ -15,7 +15,6 @@ export class Urls {
     public static readonly offlineFiles = Urls.files + "/offline";
     public static readonly subscribed = Urls.files + "/subscribed";
     public static readonly search = Urls.apiBase + "search/";
-    public static readonly images = Urls.apiBase + "images/";
     public static readonly missingParts = Urls.apiBase + "osm/";
     public static readonly uploadDataContainer = Urls.apiBase + "osm/trace/route/";
     public static readonly traceAsDataContainer = Urls.apiBase + "osm/trace/";

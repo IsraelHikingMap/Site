@@ -79,7 +79,7 @@ public class CrawlersMiddleware
                 
             title = string.IsNullOrWhiteSpace(url.Title) ? Branding.ROUTE_SHARE_DEFAULT_TITLE : url.Title;
             description = url.Description;
-            thumbnailUrl = Branding.BASE_URL + "/api/images/" + url.Id;
+            thumbnailUrl = Branding.BASE_URL + "/api/urls/" + url.Id + "/thumbnail";
             if (isWhatsApp)
             {
                 thumbnailUrl += "?width=256&height=256";
