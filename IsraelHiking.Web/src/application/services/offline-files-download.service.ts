@@ -5,7 +5,7 @@ import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
 
-import { DownloadResponse, FileService } from "./file.service";
+import { FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
 import { OfflineManagementDialogComponent } from "application/components/dialogs/offline-management-dialog.component";
 import { SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
@@ -20,8 +20,7 @@ export class OfflineFilesDownloadService {
     private readonly matDialog = inject(MatDialog);
     private readonly store = inject(Store);
 
-    private inProgressTilesList: Record<string, number> = {};
-    private currentDownloadResponse: DownloadResponse | null = null;
+    private abortController = new AbortController();
     public tilesProgressChanged = new EventEmitter<{tileX: number, tileY: number, progressValue: number}>();
 
     public async initialize(): Promise<void> {
@@ -46,8 +45,13 @@ export class OfflineFilesDownloadService {
             }
             this.updateInProgressTilesList(tileX, tileY, 0);
             const fileNames = [...fileNamesForRoot, ...fileNamesForTile];
-            await this.downloadOfflineFilesProgressAction(fileNames, fileNamesForRoot.length, tileX, tileY);
-            
+            const currentAbortController = this.abortController; // keep a referece to the current abort controller for the case of aborting and then downloading again
+            await this.downloadOfflineFilesProgressAction(fileNames, fileNamesForRoot.length, tileX, tileY, currentAbortController);
+
+            if (currentAbortController.signal.aborted) {
+                return "aborted";
+            }
+
             if (fileNamesForTile.length > 0) {
                 this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(this.getNewestFileDateFromFileList(fileNamesForTile), tileX, tileY));
             }
@@ -56,9 +60,6 @@ export class OfflineFilesDownloadService {
             }
             return "downloaded";
         } catch (ex) {
-            if (this.currentDownloadResponse?.aborted) {
-                return "aborted";
-            }
             const typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
             switch (typeAndMessage.type) {
                 case "timeout":
@@ -74,7 +75,7 @@ export class OfflineFilesDownloadService {
             }
             return "error";
         } finally {
-            this.currentDownloadResponse = null;
+            this.abortController = new AbortController();
         }
     }
 
@@ -89,16 +90,15 @@ export class OfflineFilesDownloadService {
         return newestFileDate;
     }
 
-    private async downloadOfflineFilesProgressAction(fileNames: [string, string][], rootFilesCount: number, tileX: number, tileY: number):
-        Promise<void> {
-        this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${fileNames.length}`);
+    private async downloadOfflineFilesProgressAction(fileNames: [string, string][], rootFilesCount: number, tileX: number, tileY: number, abortController: AbortController): Promise<void> {
+        this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${fileNames.length}, tile: ${tileX}-${tileY}`);
         const length = fileNames.length;
         for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
-            if (this.currentDownloadResponse?.aborted) {
-                this.loggingService.info("[Offline Download] Aborted downloading offline files");
+            const [fileName] = fileNames[fileNameIndex];
+            if (abortController.signal.aborted) {
+                this.loggingService.info("[Offline Download] Aborted downloading offline files, current file: " + fileName);
                 return;
             }
-            const [fileName] = fileNames[fileNameIndex];
 
             const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
             let fileDownloadUrl = `${Urls.offlineFiles}/${fileName}`;
@@ -106,9 +106,11 @@ export class OfflineFilesDownloadService {
                 if (fileNameIndex >= rootFilesCount) {
                     fileDownloadUrl += `?tileX=${tileX}&tileY=${tileY}`;
                 }
-                this.currentDownloadResponse = this.fileService.downloadFileToCacheAuthenticated(fileDownloadUrl, fileName, token,
-                    (value) => this.updateInProgressTilesList(tileX, tileY, (value + fileNameIndex) * 100.0 / length));
-                await this.currentDownloadResponse.promise;
+                await this.fileService.downloadFileToCacheAuthenticated(fileDownloadUrl, fileName, token,
+                    (value) => this.updateInProgressTilesList(tileX, tileY, (value + fileNameIndex) * 100.0 / length), abortController);
+                if (abortController.signal.aborted) {
+                    return;
+                }
                 await this.fileService.moveFileFromCacheToDataDirectory(fileName);
             } else {
                 const fileContent = await this.fileService.getFileContentWithProgress(fileDownloadUrl,
@@ -117,11 +119,10 @@ export class OfflineFilesDownloadService {
             }
             this.loggingService.info(`[Offline Download] Finished downloading ${fileName}`);
         }
-        this.loggingService.info("[Offline Download] Finished downloading offline files");
+        this.loggingService.info(`[Offline Download] Finished downloading offline files, current tile: ${tileX}-${tileY}`);
     }
 
     private updateInProgressTilesList(tileX: number, tileY: number, progressValue: number) {
-        this.inProgressTilesList[`${tileX}-${tileY}`] = progressValue;
         this.tilesProgressChanged.emit({tileX, tileY, progressValue});
     }
 
@@ -147,10 +148,7 @@ export class OfflineFilesDownloadService {
     }
 
     public abortCurrentDownload(): void {
-        if (this.currentDownloadResponse != null) {
-            this.loggingService.info("[Offline Download] Aborting current download");
-            this.currentDownloadResponse.abort();
-        }
-        this.inProgressTilesList = {};
+        this.loggingService.info("[Offline Download] Aborting current download");
+        this.abortController.abort();
     }
 }
