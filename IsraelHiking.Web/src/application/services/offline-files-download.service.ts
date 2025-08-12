@@ -5,11 +5,11 @@ import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
 
+import { Urls } from "../urls";
+import { OfflineManagementDialogComponent } from "../components/dialogs/offline-management-dialog.component";
 import { FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
-import { OfflineManagementDialogComponent } from "application/components/dialogs/offline-management-dialog.component";
 import { SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
-import { Urls } from "../urls";
 import type { ApplicationState } from "../models";
 
 @Injectable()

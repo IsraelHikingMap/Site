@@ -16,7 +16,7 @@ import { ToastService } from "../../services/toast.service";
 import { TILES_ZOOM } from "../../services/pmtiles.service";
 import { SpatialService } from "../../services/spatial.service";
 import { HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
-import type { ApplicationState, EditableLayer } from "../../models/models";
+import type { ApplicationState, EditableLayer } from "../../models";
 
 @Component({
     selector: "offline-management-dialog",

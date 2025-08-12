@@ -3,7 +3,7 @@ import { File as FileSystemWrapper, IFile } from "@awesome-cordova-plugins/file/
 import { Source, RangeResponse, PMTiles } from "pmtiles";
 import { SpatialService } from "./spatial.service";
 import { Store } from "@ngxs/store";
-import type { ApplicationState } from "../models/models";
+import type { ApplicationState } from "../models";
 
 export const TILES_ZOOM = 7;
 
