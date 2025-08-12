@@ -20,7 +20,7 @@ PODS:
     - Capacitor
   - CapawesomeCapacitorAppUpdate (7.0.1):
     - Capacitor
-  - CapgoBackgroundGeolocation (7.0.11):
+  - CapgoBackgroundGeolocation (7.0.12):
     - Capacitor
   - CordovaPlugins (7.2.0):
     - CapacitorCordova
@@ -84,7 +84,7 @@ SPEC CHECKSUMS:
   CapacitorShare: e573823f511f260f598d0423c33b1e3d7bbe5fd1
   CapacitorTextZoom: ccb82513c95a64bd9d4de4fc2399c2690a8705de
   CapawesomeCapacitorAppUpdate: d1f04c1c870388248889908cf2ca960c7fdbf0ef
-  CapgoBackgroundGeolocation: 5106f11127d05d135eaa242e0dfebae0cf52e7cd
+  CapgoBackgroundGeolocation: 08827bdfd8aa4417baf9b8c33f73a7638d7fd0da
   CordovaPlugins: 4829fe005adcf826abe06af65b2a95f62706a1cb
   CordovaPluginsResources: da93847212bf7b16ba770e4d6c3e7dba820174c7
 
