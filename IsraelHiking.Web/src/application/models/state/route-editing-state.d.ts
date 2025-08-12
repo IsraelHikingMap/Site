@@ -1,4 +1,4 @@
-﻿import type { RoutingType } from "../models";
+﻿import type { RoutingType } from "..";
 
 export type RouteEditingState = {
     routingType: RoutingType;

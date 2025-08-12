@@ -28,7 +28,7 @@ import type {
     LatLngAltTime,
     LatLngAlt,
     RouteEditStateType
-} from "../models/models";
+} from "../models";
 
 @Injectable()
 export class SelectedRouteService {

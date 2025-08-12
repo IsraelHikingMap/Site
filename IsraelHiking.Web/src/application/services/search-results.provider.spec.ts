@@ -8,7 +8,7 @@ import { RunningContextService } from "./running-context.service";
 import { PoiService } from "./poi.service";
 import { CoordinatesService } from "./coordinates.service";
 import { ResourcesService } from "./resources.service";
-import type { SearchResultsPointOfInterest } from "../models/models";
+import type { SearchResultsPointOfInterest } from "../models";
 
 describe("SearchResultsProvider", () => {
     beforeEach(() => {

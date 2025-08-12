@@ -13,7 +13,7 @@ import { ResourcesService } from "./resources.service";
 import { ToggleOfflineAction } from "../reducers/layers.reducer";
 import { SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
-import type { ApplicationState } from "../models/models";
+import type { ApplicationState } from "../models";
 
 @Injectable()
 export class OfflineFilesDownloadService {

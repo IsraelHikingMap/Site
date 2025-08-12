@@ -12,7 +12,7 @@ import { MatOption } from "@angular/material/core";
 import { ImageScrollerComponent } from "./image-scroller.component";
 import { PoiService, ISelectableCategory } from "../../../services/poi.service";
 import { ResourcesService } from "../../../services/resources.service";
-import type { EditablePublicPointData, IconColorLabel } from "../../../models/models";
+import type { EditablePublicPointData, IconColorLabel } from "../../../models";
 
 @Component({
     selector: "public-poi-edit",

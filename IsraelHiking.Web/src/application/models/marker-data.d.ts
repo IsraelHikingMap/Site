@@ -1,4 +1,4 @@
-﻿import type { LinkData, LatLngAlt } from "./models";
+﻿import type { LinkData, LatLngAlt } from ".";
 
 export type MarkerData = {
     latlng: LatLngAlt;

@@ -11,7 +11,7 @@ import { CoordinatesComponent } from "../coordinates.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { Urls } from "../../urls";
-import type { LatLngAlt } from "../../models/models";
+import type { LatLngAlt } from "../../models";
 
 @Component({
     selector: "missing-part-overlay",

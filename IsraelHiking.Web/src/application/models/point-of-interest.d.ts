@@ -1,4 +1,4 @@
-﻿import type { LatLngAlt } from "./models";
+﻿import type { LatLngAlt } from ".";
 
 export type SearchResultsPointOfInterest = {
     icon: string;

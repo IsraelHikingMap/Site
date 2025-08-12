@@ -11,7 +11,7 @@ import { PoiService } from "../../services/poi.service";
 import { ResourcesService } from "../../services/resources.service";
 import { AddPrivatePoiAction, UpdatePrivatePoiAction } from "../../reducers/routes.reducer";
 import { AddRecordingPoiAction, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
-import type { ApplicationState, MarkerData, LatLngAlt } from "../../models/models";
+import type { ApplicationState, MarkerData, LatLngAlt } from "../../models";
 
 @Injectable()
 export class RouteEditPoiInteraction {

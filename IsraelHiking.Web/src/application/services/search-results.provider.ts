@@ -7,7 +7,7 @@ import { CoordinatesService } from "./coordinates.service";
 import { RouteStrings, getIdFromLatLng } from "./hash.service";
 import { ResourcesService } from "./resources.service";
 import { Urls } from "../urls";
-import type { SearchResultsPointOfInterest } from "../models/models";
+import type { SearchResultsPointOfInterest } from "../models";
 
 @Injectable()
 export class SearchResultsProvider {

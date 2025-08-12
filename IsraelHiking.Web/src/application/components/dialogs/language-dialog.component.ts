@@ -12,7 +12,7 @@ import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../../services/resources.service";
 import { AVAILABLE_LANGUAGES } from "../../reducers/initial-state";
-import { ApplicationState, LanguageCode } from "../../models/models";
+import { ApplicationState, LanguageCode } from "../../models";
 
 @Component({
     selector: "language-dialog",

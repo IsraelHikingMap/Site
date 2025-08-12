@@ -1,4 +1,4 @@
-﻿import type { RouteSegmentData, MarkerData } from "./models";
+﻿import type { RouteSegmentData, MarkerData } from ".";
 
 export type RouteEditStateType = "Poi" | "Route" | "ReadOnly" | "Hidden";
 

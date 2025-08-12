@@ -36,7 +36,7 @@ import { FilesSharesDialogComponent } from "./dialogs/files-shares-dialog.compon
 import { SendReportDialogComponent } from "./dialogs/send-report-dialog.component";
 import { SetUIComponentVisibilityAction } from "../reducers/ui-components.reducer";
 import { SetAgreeToTermsAction } from "../reducers/user.reducer";
-import type { UserInfo, ApplicationState } from "../models/models";
+import type { UserInfo, ApplicationState } from "../models";
 
 @Component({
     selector: "main-menu",

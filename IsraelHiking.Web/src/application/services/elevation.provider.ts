@@ -8,7 +8,7 @@ import { LoggingService } from "./logging.service";
 import { SpatialService } from "./spatial.service";
 import { PmTilesService } from "./pmtiles.service";
 import { Urls } from "../urls";
-import type { ApplicationState, LatLngAlt } from "../models/models";
+import type { ApplicationState, LatLngAlt } from "../models";
 
 @Injectable()
 export class ElevationProvider {

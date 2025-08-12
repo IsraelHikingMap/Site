@@ -5,7 +5,7 @@ import { SidebarService } from "./sidebar.service";
 import { MapService } from "./map.service";
 import { SpatialService } from "./spatial.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
-import type { Bounds, LatLngAlt } from "../models/models";
+import type { Bounds, LatLngAlt } from "../models";
 
 @Injectable()
 export class FitBoundsService {

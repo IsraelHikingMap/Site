@@ -2,7 +2,7 @@ import { TestBed, inject } from "@angular/core/testing";
 
 import { SnappingService } from "./snapping.service";
 import { MapService } from "./map.service";
-import type { LatLngAlt } from "../models/models";
+import type { LatLngAlt } from "../models";
 
 describe("SnappingService", () => {
 

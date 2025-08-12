@@ -11,7 +11,7 @@ import { PmTilesService } from "./pmtiles.service";
 import { POPULARITY_HEATMAP, initialState } from "../reducers/initial-state";
 import { ClearHistoryAction } from "../reducers/routes.reducer";
 import { SetSelectedPoiAction } from "../reducers/poi.reducer";
-import type { ApplicationState, MutableApplicationState, ShareUrl, Trace } from "../models/models";
+import type { ApplicationState, MutableApplicationState, ShareUrl, Trace } from "../models";
 
 export type ImageUrlAndData = {
     imageUrl: string;

@@ -1,4 +1,4 @@
-﻿import type { ShareUrl } from "../models";
+﻿import type { ShareUrl } from "..";
 
 export type ShareUrlsState = {
     shareUrls: ShareUrl[];

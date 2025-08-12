@@ -3,7 +3,7 @@ import linearInterpolator from "linear-interpolator";
 import type { Immutable } from "immer";
 
 import { SpatialService } from "./spatial.service";
-import type { LatLngAlt, LatLngAltTime } from "../models/models";
+import type { LatLngAlt, LatLngAltTime } from "../models";
 
 export const MINIMAL_DISTANCE = 50;
 export const MINIMAL_ANGLE = 30;

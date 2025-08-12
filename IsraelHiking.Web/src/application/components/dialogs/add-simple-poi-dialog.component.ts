@@ -9,7 +9,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { PoiService, SimplePointType} from "../../services/poi.service";
 import { ToastService } from "../../services/toast.service";
 import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
-import type { LatLngAlt, LinkData } from "../../models/models";
+import type { LatLngAlt, LinkData } from "../../models";
 
 export type AddSimplePoiDialogData = {
     latlng: LatLngAlt;

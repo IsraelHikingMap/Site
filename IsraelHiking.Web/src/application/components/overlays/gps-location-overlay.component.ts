@@ -20,7 +20,7 @@ import { ToastService } from "../../services/toast.service";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import { ToggleDistanceAction } from "../../reducers/in-memory.reducer";
 import { AddRecordingPoiAction } from "../../reducers/recorded-route.reducer";
-import type { ApplicationState, LatLngAlt, LinkData } from "../../models/models";
+import type { ApplicationState, LatLngAlt, LinkData } from "../../models";
 
 @Component({
     selector: "gps-location-overlay",

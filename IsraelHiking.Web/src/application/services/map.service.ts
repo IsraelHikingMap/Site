@@ -4,7 +4,7 @@ import { Store } from "@ngxs/store";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
-import type { ApplicationState } from "../models/models";
+import type { ApplicationState } from "../models";
 
 @Injectable()
 export class MapService {

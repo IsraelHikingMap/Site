@@ -1,6 +1,6 @@
 ﻿import { Urls } from "../urls";
 import { environment } from "environments/environment";
-import type { Language, MutableApplicationState, RouteData, StateWithHistory } from "../models/models";
+import type { Language, MutableApplicationState, RouteData, StateWithHistory } from "../models";
 
 export const ISRAEL_HIKING_MAP = "Israel Hiking Map";
 export const ISRAEL_MTB_MAP = "Israel MTB Map";

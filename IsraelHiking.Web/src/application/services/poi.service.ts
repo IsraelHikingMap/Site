@@ -44,7 +44,7 @@ import type {
     NorthEast,
     EditablePublicPointData,
     OfflineState
-} from "../models/models";
+} from "../models";
 
 
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite"

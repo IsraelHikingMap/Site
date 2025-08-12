@@ -6,7 +6,7 @@ import { Store } from "@ngxs/store";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
-import type { ApplicationState } from "../models/models";
+import type { ApplicationState } from "../models";
 
 @Injectable()
 export class DeviceOrientationService {

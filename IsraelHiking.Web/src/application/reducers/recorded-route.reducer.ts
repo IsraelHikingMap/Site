@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { LatLngAltTime, MarkerData, RecordedRouteState } from "../models/models";
+import type { LatLngAltTime, MarkerData, RecordedRouteState } from "../models";
 
 export class StartRecordingAction {
     public static type = this.prototype.constructor.name;

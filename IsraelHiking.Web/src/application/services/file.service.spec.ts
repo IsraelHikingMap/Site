@@ -15,7 +15,7 @@ import { GpxDataContainerConverterService } from "./gpx-data-container-converter
 import { LoggingService } from "./logging.service";
 import { ConnectionService } from "./connection.service";
 import { Urls } from "../urls";
-import type { DataContainer, MarkerData, RouteData } from "../models/models";
+import type { DataContainer, MarkerData, RouteData } from "../models";
 
 describe("FileService", () => {
 

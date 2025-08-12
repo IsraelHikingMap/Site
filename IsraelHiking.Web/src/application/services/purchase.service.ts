@@ -8,7 +8,7 @@ import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { SetOfflineAvailableAction } from "../reducers/offline.reducer";
-import type { ApplicationState } from "../models/models";
+import type { ApplicationState } from "../models";
 
 const OFFLINE_MAPS_SUBSCRIPTION = "offline_map";
 

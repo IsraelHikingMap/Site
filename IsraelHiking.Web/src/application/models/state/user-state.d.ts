@@ -1,4 +1,4 @@
-﻿import type { UserInfo } from "../models";
+﻿import type { UserInfo } from "..";
 
 export type UserState = {
     userInfo: UserInfo;

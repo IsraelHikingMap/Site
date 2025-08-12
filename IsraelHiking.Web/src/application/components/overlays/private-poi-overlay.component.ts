@@ -7,7 +7,7 @@ import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialo
 import { PrivatePoiShowDialogComponent } from "../dialogs/private-poi-show-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
-import type { MarkerData, LinkData } from "../../models/models";
+import type { MarkerData, LinkData } from "../../models";
 
 @Component({
     selector: "private-poi-overlay",

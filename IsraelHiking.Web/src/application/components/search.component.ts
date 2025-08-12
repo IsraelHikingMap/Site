@@ -35,7 +35,7 @@ import { SpatialService } from "../services/spatial.service";
 import { GpxDataContainerConverterService } from "../services/gpx-data-container-converter.service";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
-import type { RoutingType, LatLngAlt, SearchResultsPointOfInterest, LatLngAltTime } from "../models/models";
+import type { RoutingType, LatLngAlt, SearchResultsPointOfInterest, LatLngAltTime } from "../models";
 
 export type SearchContext = {
     searchTerm: string;

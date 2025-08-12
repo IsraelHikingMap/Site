@@ -4,7 +4,7 @@ import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
 import { Urls } from "../urls";
-import type { ApplicationState } from "../models/models";
+import type { ApplicationState } from "../models";
 
 export function osmTokenInterceptor(request: HttpRequest<any>, next: HttpHandlerFn): Observable<HttpEvent<any>> {
     const store = inject(Store);
