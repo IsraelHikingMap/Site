@@ -28,7 +28,7 @@ import { ApplicationUpdateService } from "./application-update.service";
 import { LocationService } from "./location.service";
 import { HashService } from "./hash.service";
 import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
-import type { ApplicationState } from "../models/models";
+import type { ApplicationState } from "../models";
 
 @Injectable()
 export class ApplicationInitializeService {

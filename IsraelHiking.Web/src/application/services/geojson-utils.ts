@@ -1,5 +1,6 @@
 import { Immutable } from "immer";
-import { LatLngAlt } from "../models/models";
+
+import { LatLngAlt } from "../models";
 
 export class GeoJSONUtils {
     public static setPropertyUnique(feature: GeoJSON.Feature, key: string, value: string) {

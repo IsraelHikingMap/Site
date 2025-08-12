@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { OfflineState } from "../models/models";
+import type { OfflineState } from "../models";
 
 export class SetOfflineSubscribedAction {
     public static type = this.prototype.constructor.name;

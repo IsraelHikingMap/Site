@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { LocationState } from "../models/models";
+import type { LocationState } from "../models";
 
 export class SetLocationAction {
     public static type = this.prototype.constructor.name;

@@ -7,7 +7,7 @@ import { Angulartics2OnModule } from "angulartics2";
 import { LayersService } from "../../services/layers.service";
 import { ResourcesService } from "../../services/resources.service";
 import { FitBoundsService } from "../../services/fit-bounds.service";
-import type { LatLngAlt } from "../../models/models";
+import type { LatLngAlt } from "../../models";
 
 type LegendItemType = "POI" | "Way";
 

@@ -15,7 +15,7 @@ import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { AutomaticLayerPresentationComponent } from "../../map/automatic-layer-presentation.component";
 import { NameInUseValidatorDirective } from "../../../directives/name-in-use-validator.directive";
 import { LayerBaseDialogComponent } from "./layer-base-dialog.component";
-import type { LayerData } from "../../../models/models";
+import type { LayerData } from "../../../models";
 
 @Component({
     selector: "baselayer-add-dialog",

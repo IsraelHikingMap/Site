@@ -14,7 +14,7 @@ import { FileService, FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { LogReaderService } from "../../services/log-reader.service";
-import type { DataContainer } from "../../models/models";
+import type { DataContainer } from "../../models";
 
 @Component({
     selector: "files-share-dialog",

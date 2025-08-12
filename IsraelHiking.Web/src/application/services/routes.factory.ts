@@ -2,7 +2,7 @@ import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
-import type { RouteData, ApplicationState } from "../models/models";
+import type { RouteData, ApplicationState } from "../models";
 
 @Injectable()
 export class RoutesFactory {

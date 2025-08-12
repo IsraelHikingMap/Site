@@ -7,7 +7,7 @@ import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { SetTokenAction, SetUserInfoAction } from "../reducers/user.reducer";
 import { Urls } from "../urls";
-import type { ApplicationState, OsmUserDetails } from "../models/models";
+import type { ApplicationState, OsmUserDetails } from "../models";
 
 @Injectable()
 export class AuthorizationService {

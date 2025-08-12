@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { ShareUrl, InMemoryState } from "../models/models";
+import type { ShareUrl, InMemoryState } from "../models";
 
 export class ToggleDistanceAction {
     public static type = this.prototype.constructor.name;

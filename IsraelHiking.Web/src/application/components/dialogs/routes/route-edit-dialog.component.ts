@@ -18,7 +18,7 @@ import { FitBoundsService } from "../../../services/fit-bounds.service";
 import { SpatialService } from "../../../services/spatial.service";
 import { DeleteRouteAction, ChangeRoutePropertiesAction } from "../../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../../reducers/route-editing.reducer";
-import type { DataContainer, RouteData, LatLngAlt } from "../../../models/models";
+import type { DataContainer, RouteData, LatLngAlt } from "../../../models";
 
 @Component({
     selector: "route-edit-dialog",

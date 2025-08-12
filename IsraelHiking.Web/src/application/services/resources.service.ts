@@ -6,7 +6,7 @@ import { GetTextCatalogService } from "./gettext-catalog.service";
 import { SetLanguageAction } from "../reducers/configuration.reducer";
 import { AVAILABLE_LANGUAGES } from "../reducers/initial-state";
 import { Urls } from "../urls";
-import type { ApplicationState, Language, LanguageCode } from "../models/models";
+import type { ApplicationState, Language, LanguageCode } from "../models";
 
 @Injectable()
 export class ResourcesService {

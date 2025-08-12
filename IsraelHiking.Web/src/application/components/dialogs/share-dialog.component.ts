@@ -27,7 +27,7 @@ import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
 import { MapService } from "../../services/map.service";
-import type { ApplicationState, DataContainer, EditableLayer, ShareUrl } from "../../models/models";
+import type { ApplicationState, DataContainer, EditableLayer, ShareUrl } from "../../models";
 
 @Component({
     selector: "share-dialog",

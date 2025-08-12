@@ -19,7 +19,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { MTB_MAP, HIKING_MAP } from "../../reducers/initial-state";
-import type { ApplicationState } from "../../models/models";
+import type { ApplicationState } from "../../models";
 import legendSectionsJson from "../../../content/legend/legend.json";
 
 export type LegendSection = {

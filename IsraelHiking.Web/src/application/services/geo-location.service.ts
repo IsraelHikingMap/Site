@@ -9,7 +9,7 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { SelectedRouteService } from "./selected-route.service";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
-import type { ApplicationState, LatLngAltTime } from "../models/models";
+import type { ApplicationState, LatLngAltTime } from "../models";
 
 @Injectable()
 export class GeoLocationService {

@@ -4,7 +4,7 @@ import { produce } from "immer";
 import { orderBy, remove } from "lodash-es";
 
 import { initialState, SPECIAL_LAYERS } from "./initial-state";
-import type { LayersState, EditableLayer, Overlay, CategoriesGroupType, Category } from "../models/models";
+import type { LayersState, EditableLayer, Overlay, CategoriesGroupType, Category } from "../models";
 
 export class AddBaseLayerAction {
     public static type = this.prototype.constructor.name;

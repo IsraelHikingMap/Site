@@ -11,7 +11,7 @@ import { RunningContextService } from "./running-context.service";
 import { DatabaseService } from "./database.service";
 import { BulkReplaceTracesAction, RemoveTraceAction, UpdateTraceAction } from "../reducers/traces.reducer";
 import { Urls } from "../urls";
-import type { Trace, ApplicationState, DataContainer, RouteData } from "../models/models";
+import type { Trace, ApplicationState, DataContainer, RouteData } from "../models";
 
 type OsmTrace = { 
     description: string;

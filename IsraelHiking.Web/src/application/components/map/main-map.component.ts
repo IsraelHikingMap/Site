@@ -8,13 +8,6 @@ import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";
 
 import { TracesDialogComponent } from "../dialogs/traces-dialog.component";
-import { ResourcesService } from "../../services/resources.service";
-import { MapeakTitleService } from "../../services/mapeak-title.service";
-import { MapService } from "../../services/map.service";
-import { RunningContextService } from "../../services/running-context.service";
-import { DefaultStyleService } from "../../services/default-style.service";
-import { SetLocationAction } from "../../reducers/location.reducer";
-import type { ApplicationState, LocationState } from "../../models/models";
 import { SidebarComponent } from "../sidebar/sidebar.component";
 import { BackgroundTextComponent } from "../background-text.component";
 import { LayersComponent } from "./layers.component";
@@ -30,6 +23,13 @@ import { RouteStatisticsComponent } from "../route-statistics.component";
 import { CenterMeComponent } from "../center-me.component";
 import { MapeakLinkComponent } from "../mapeak-link.component";
 import { PublicPoisComponent } from "./public-pois.component";
+import { MapeakTitleService } from "../../services/mapeak-title.service";
+import { ResourcesService } from "../../services/resources.service";
+import { MapService } from "../../services/map.service";
+import { RunningContextService } from "../../services/running-context.service";
+import { DefaultStyleService } from "../../services/default-style.service";
+import { SetLocationAction } from "../../reducers/location.reducer";
+import type { ApplicationState, LocationState } from "../../models";
 
 @Component({
     selector: "main-map",

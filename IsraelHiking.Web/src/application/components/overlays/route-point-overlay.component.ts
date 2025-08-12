@@ -7,7 +7,7 @@ import { NgIf } from "@angular/common";
 import { CoordinatesComponent } from "../coordinates.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
-import type { LatLngAlt } from "../../models/models";
+import type { LatLngAlt } from "../../models";
 
 @Component({
     selector: "route-point-overlay",

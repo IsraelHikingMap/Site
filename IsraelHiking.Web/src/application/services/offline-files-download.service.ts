@@ -10,7 +10,7 @@ import { LoggingService } from "./logging.service";
 import { OfflineManagementDialogComponent } from "application/components/dialogs/offline-management-dialog.component";
 import { SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
-import type { ApplicationState } from "../models/models";
+import type { ApplicationState } from "../models";
 
 @Injectable()
 export class OfflineFilesDownloadService {

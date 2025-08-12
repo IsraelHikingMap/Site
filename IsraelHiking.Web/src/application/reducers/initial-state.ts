@@ -1,5 +1,5 @@
 ﻿import { Urls } from "../urls";
-import type { Language, MutableApplicationState, RouteData, StateWithHistory } from "../models/models";
+import type { Language, MutableApplicationState, RouteData, StateWithHistory } from "../models";
 
 export const HIKING_MAP = "Hiking Map";
 export const MTB_MAP = "MTB Map";

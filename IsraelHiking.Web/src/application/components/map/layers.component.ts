@@ -8,7 +8,7 @@ import type { Immutable } from "immer";
 import { AutomaticLayerPresentationComponent } from "./automatic-layer-presentation.component";
 import { LayersService } from "../../services/layers.service";
 import { ResourcesService } from "../../services/resources.service";
-import type { ApplicationState, Overlay } from "../../models/models";
+import type { ApplicationState, Overlay } from "../../models";
 
 @Component({
     selector: "layers",

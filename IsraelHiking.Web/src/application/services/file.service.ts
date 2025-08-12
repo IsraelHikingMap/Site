@@ -18,7 +18,7 @@ import { LoggingService } from "./logging.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { ElevationProvider } from "./elevation.provider";
 import { Urls } from "../urls";
-import type { DataContainer } from "../models/models";
+import type { DataContainer } from "../models";
 
 export const SaveAsFactory = new InjectionToken<typeof saveAsForType>(null);
 

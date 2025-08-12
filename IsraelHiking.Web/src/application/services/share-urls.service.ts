@@ -15,7 +15,7 @@ import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import { UpdateShareUrlAction, RemoveShareUrlAction, AddShareUrlAction } from "../reducers/share-urls.reducer";
 import { SetShareUrlsLastModifiedDateAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
-import type { ShareUrl, ApplicationState } from "../models/models";
+import type { ShareUrl, ApplicationState } from "../models";
 
 interface IShareUrlSocialLinks {
     facebook: string;

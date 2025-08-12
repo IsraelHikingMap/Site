@@ -25,7 +25,7 @@ import { Urls } from "../urls";
 import { LayersReducer } from "../reducers/layers.reducer";
 import { AddToPoiQueueAction, OfflineReducer } from "../reducers/offline.reducer";
 import { ConfigurationReducer, SetLanguageAction } from "../reducers/configuration.reducer";
-import type { ApplicationState, Category, MarkerData } from "../models/models";
+import type { ApplicationState, Category, MarkerData } from "../models";
 
 describe("Poi Service", () => {
 

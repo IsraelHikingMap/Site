@@ -9,8 +9,8 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { SetOfflineSubscribedAction } from "../reducers/offline.reducer";
-import { Urls } from "application/urls";
-import type { ApplicationState } from "../models/models";
+import { Urls } from "../urls";
+import type { ApplicationState } from "../models";
 
 const OFFLINE_MAPS_SUBSCRIPTION = "offline_map";
 

@@ -26,7 +26,7 @@ import type {
     Overlay,
     ApplicationState,
     UserInfo,
-} from "../models/models";
+} from "../models";
 import { Urls } from "../urls";
 import { LoggingService } from "./logging.service";
 

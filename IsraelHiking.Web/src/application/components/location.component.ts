@@ -22,7 +22,7 @@ import { ToggleDistanceAction, SetPannedAction, SetFollowingAction, ToggleKeepNo
 import { StopShowingBatteryConfirmationAction } from "../reducers/configuration.reducer";
 import { ChangeRouteStateAction } from "../reducers/routes.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
-import type { LatLngAlt, ApplicationState } from "../models/models";
+import type { LatLngAlt, ApplicationState } from "../models";
 
 @Component({
     selector: "location",

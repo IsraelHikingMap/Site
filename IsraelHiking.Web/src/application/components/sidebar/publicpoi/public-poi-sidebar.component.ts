@@ -43,7 +43,7 @@ import type {
     ApplicationState,
     EditablePublicPointData,
     LatLngAltTime
-} from "../../../models/models";
+} from "../../../models";
 
 export type SourceImageUrlPair = {
     imageUrl: string;

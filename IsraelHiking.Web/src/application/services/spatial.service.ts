@@ -13,7 +13,7 @@ import lineIntersect from "@turf/line-intersect";
 import booleanWithin from "@turf/boolean-within";
 import type { Immutable } from "immer";
 
-import type { LatLngAlt, Bounds, LatLngAltTime } from "../models/models";
+import type { LatLngAlt, Bounds, LatLngAltTime } from "../models";
 
 export class SpatialService {
 

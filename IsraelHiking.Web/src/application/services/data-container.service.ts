@@ -16,7 +16,7 @@ import { RunningContextService } from "./running-context.service";
 import { BulkReplaceRoutesAction } from "../reducers/routes.reducer";
 import { SetFileUrlAndBaseLayerAction } from "../reducers/in-memory.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
-import type { DataContainer, ApplicationState, LayerData, RouteData } from "../models/models";
+import type { DataContainer, ApplicationState, LayerData, RouteData } from "../models";
 
 @Injectable()
 export class DataContainerService {

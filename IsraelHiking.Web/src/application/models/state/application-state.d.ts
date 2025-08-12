@@ -16,7 +16,7 @@ import type {
     OfflineState,
     UICompoentsState,
     StateWithHistory
-} from "../models";
+} from "..";
 
 export type ApplicationState = Immutable<MutableApplicationState>;
 

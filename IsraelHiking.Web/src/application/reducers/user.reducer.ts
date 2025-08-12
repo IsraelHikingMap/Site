@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { UserInfo, UserState } from "../models/models";
+import type { UserInfo, UserState } from "../models";
 
 export class SetUserInfoAction {
     public static type = this.prototype.constructor.name;

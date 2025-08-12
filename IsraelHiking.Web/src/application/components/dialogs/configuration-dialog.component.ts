@@ -20,7 +20,7 @@ import {
     ToggleAutomaticRecordingUploadAction,
     ToggleGotLostWarningsAction
 } from "../../reducers/configuration.reducer";
-import type { ApplicationState, BatteryOptimizationType } from "../../models/models";
+import type { ApplicationState, BatteryOptimizationType } from "../../models";
 
 @Component({
     selector: "configuration-dialog",

@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { RouteData, MarkerData, RouteSegmentData, RouteEditStateType, StateWithHistory } from "../models/models";
+import type { RouteData, MarkerData, RouteSegmentData, RouteEditStateType, StateWithHistory } from "../models";
 
 export class UndoAction {
     public static type = this.prototype.constructor.name;

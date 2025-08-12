@@ -15,7 +15,7 @@ import { PmTilesService } from "./pmtiles.service";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { Urls } from "../urls";
-import type { ApplicationState, LatLngAlt, RoutingType } from "../models/models";
+import type { ApplicationState, LatLngAlt, RoutingType } from "../models";
 
 @Injectable()
 export class RoutingProvider {

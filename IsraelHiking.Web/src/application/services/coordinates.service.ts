@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import Proj from "proj4";
 
-import { LatLngAlt, NorthEast } from "../models/models";
+import { LatLngAlt, NorthEast } from "../models";
 
 const DECIMAL_DEGREES_REGEX_STRING = "([-+]?\\d{1,3}(?:\\.\\d+)?)°?";
 const DELIMITER_REGEX_STRING = "(?:\\s*[,/\\s]\\s*)";

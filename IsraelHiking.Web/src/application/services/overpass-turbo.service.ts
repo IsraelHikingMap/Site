@@ -4,7 +4,7 @@ import { firstValueFrom, timeout } from "rxjs";
 import { addProtocol } from "maplibre-gl";
 import osmtogeojson from "osm2geojson-lite";
 import { SpatialService } from "./spatial.service";
-import { Urls } from "application/urls";
+import { Urls } from "../urls";
 
 @Injectable()
 export class OverpassTurboService {

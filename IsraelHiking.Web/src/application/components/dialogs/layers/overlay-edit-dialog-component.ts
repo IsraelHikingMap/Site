@@ -16,7 +16,7 @@ import type { Immutable } from "immer";
 import { AutomaticLayerPresentationComponent } from "../../map/automatic-layer-presentation.component";
 import { NameInUseValidatorDirective } from "../../../directives/name-in-use-validator.directive";
 import { LayerBaseDialogComponent } from "./layer-base-dialog.component";
-import type { LayerData, Overlay } from "../../../models/models";
+import type { LayerData, Overlay } from "../../../models";
 
 @Component({
     selector: "overlay-edit-dialog",

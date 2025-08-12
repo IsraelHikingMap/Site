@@ -6,7 +6,7 @@ import QuickLRU from "quick-lru";
 import { LoggingService } from "./logging.service";
 import { SpatialService } from "./spatial.service";
 import { PmTilesService } from "./pmtiles.service";
-import type { LatLngAlt } from "../models/models";
+import type { LatLngAlt } from "../models";
 
 @Injectable()
 export class ElevationProvider {

@@ -27,7 +27,7 @@ import { ToastService } from "../../services/toast.service";
 import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducers/routes.reducer";
 import { DeleteRecordingPoiAction, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
 import { Urls } from "../../urls";
-import type { LinkData, MarkerData, ApplicationState } from "../../models/models";
+import type { LinkData, MarkerData, ApplicationState } from "../../models";
 
 interface IIconsGroup {
     icons: string[];

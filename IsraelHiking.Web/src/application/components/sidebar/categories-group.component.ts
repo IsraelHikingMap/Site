@@ -12,7 +12,7 @@ import {
     SetCategoriesGroupVisibilityAction,
     SetCategoryVisibilityAction
 } from "../../reducers/layers.reducer";
-import type { ApplicationState, CategoriesGroup, Category } from "../../models/models";
+import type { ApplicationState, CategoriesGroup, Category } from "../../models";
 
 @Component({
     selector: "categories-group",

@@ -17,7 +17,7 @@ import { ConnectionService } from "./connection.service";
 import { StopRecordingAction, RecordedRouteReducer, ClearPendingProcessingRoutePointsAction, AddRecordingRoutePointsAction } from "../reducers/recorded-route.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
 import { SetCurrentPositionAction, GpsReducer } from "../reducers/gps.reducer";
-import type { ApplicationState, MarkerData } from "../models/models";
+import type { ApplicationState, MarkerData } from "../models";
 
 describe("Recorded Route Service", () => {
 
