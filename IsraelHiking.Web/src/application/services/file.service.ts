@@ -2,7 +2,6 @@ import { inject, Injectable, InjectionToken } from "@angular/core";
 import { HttpClient, HttpEventType } from "@angular/common/http";
 import { StyleSpecification } from "maplibre-gl";
 import { File as FileSystemWrapper, FileEntry } from "@awesome-cordova-plugins/file/ngx";
-import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
 import { firstValueFrom, timeout } from "rxjs";
@@ -40,7 +39,6 @@ export class FileService {
 
     private readonly httpClient = inject(HttpClient);
     private readonly fileSystemWrapper = inject(FileSystemWrapper);
-    private readonly fileTransfer = inject(FileTransfer);
     private readonly runningContextService = inject(RunningContextService);
     private readonly imageResizeService = inject(ImageResizeService);
     private readonly selectedRouteService = inject(SelectedRouteService);
@@ -322,8 +320,8 @@ export class FileService {
                             reject(new Error(event.statusText));
                         }
                     }
-            }, error: (error) => reject(error)
-        });
+                }, error: (error) => reject(error)
+            });
         });
     }
 
@@ -342,30 +340,52 @@ export class FileService {
     }
 
     public downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void): DownloadResponse {
-        const fileTransferObject = this.fileTransfer.create();
-        fileTransferObject.onProgress((event) => {
-            progressCallback(event.loaded / event.total);
-        });
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
-        const options = !token ? undefined : {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        };
-        const promise = fileTransferObject.download(url, this.fileSystemWrapper.cacheDirectory + fileName, true, options);
-        promise.then(() => {
-            this.loggingService.info(`[Files] Finished downloading and writing file to cache, file name ${fileName}`);
-        });
-        const response: DownloadResponse = {
+        let previousPercentage = 0;
+        const downloadResponse: DownloadResponse = {
             abort: () => {
-                response.aborted = true;
-                this.loggingService.info(`[Files] Aborting download of file ${fileName}`);
-                fileTransferObject.abort();
+                downloadResponse.aborted = true;
             },
-            promise
+            promise: new Promise<void>((resolve, reject) => {
+                fetch(url, { headers: { Authorization: `Bearer ${token}` } }).then(async (response) => {
+                    if (!response.ok) {
+                        this.loggingService.error(`[Files] Failed to download file: ${fileName}, status: ${response.statusText}`);
+                        reject(new Error(`Failed to download file: ${fileName}, status: ${response.statusText}`));
+                        return;
+                    }
+                    const reader = response.body.getReader();
+                    const contentLength = Number(response.headers.get("Content-Length"));
+                    let receivedLength = 0;
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (downloadResponse.aborted) {
+                            this.loggingService.info(`[Files] Aborting download of file ${fileName}`);
+                            reject(new Error("Download aborted"));
+                            return;
+                        }
+                        if (done) {
+                            this.loggingService.info(`[Files] Finished downloading and writing file to cache, file name ${fileName}`);
+                            resolve();
+                            break;
+                        }
+                        if (receivedLength === 0) {
+                            await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, value.buffer, { append: false, replace: true, truncate: 0 });
+                        } else {
+                            await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, value.buffer, { append: true });
+                        }
+                        receivedLength += value.length;
+                        if (contentLength > 0) {
+                            const currentPercentage = receivedLength / contentLength;
+                            if (currentPercentage - previousPercentage > 0.001) {
+                                progressCallback(currentPercentage);
+                                previousPercentage = currentPercentage;
+                            }
+                        }
+                    }
+                });
+            })
         }
-        return response;
-        
+        return downloadResponse;
     }
 
     public async moveFileFromCacheToDataDirectory(fileName: string): Promise<void> {
