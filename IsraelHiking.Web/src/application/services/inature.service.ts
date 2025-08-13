@@ -31,7 +31,6 @@ export class INatureService {
         };
         feature.properties.poiSource = "iNature";
         feature.properties.poiCategory = "iNature";
-        feature.properties.poiLanguage = "he";
         feature.properties.poiId = "iNature_" + pageId;
         feature.properties.identifier = pageId;
         feature.properties.name = title;
@@ -64,7 +63,7 @@ export class INatureService {
     }
 
     private setImageWebsiteAndExternalDescription(content: string, feature: GeoJSON.Feature, title: string) {
-        feature.properties.poiExternalDescription = content.match(/סקירה=(.*)/)[1];
+        feature.properties["poiExternalDescription:he"] = content.match(/סקירה=(.*)/)[1];
         const indexString = GeoJSONUtils.setProperty(feature, "website", `https://inature.info/wiki/${title}`);
         feature.properties["poiSourceImageUrl" + indexString] = "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png";
         const image = content.match(/תמונה=(.*)/)[1];

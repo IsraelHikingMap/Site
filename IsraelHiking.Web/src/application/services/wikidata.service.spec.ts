@@ -11,8 +11,7 @@ describe("WikidataService", () => {
             providers: [
                 WikidataService,
                 { provide: ResourcesService, useValue: {
-                    getCurrentLanguageCodeSimplified: () => "he",
-                    noDescriptionAvailableInYourLanguage: "noDescriptionAvailableInYourLanguage"
+                    getCurrentLanguageCodeSimplified: () => "he"
                 } },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting()
@@ -82,7 +81,7 @@ describe("WikidataService", () => {
         expect(feature.properties.image).toBe("image-url");
         expect(feature.properties.image1).toBe("image-url2");
         expect(feature.properties.name).toBe(title);
-        expect(feature.properties.poiExternalDescription).toBe("external descriptiopn");
+        expect(feature.properties["poiExternalDescription:" + language]).toBe("external descriptiopn");
         expect(feature.geometry.type).toBe("Point");
         expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([2,1]);
     }));
@@ -110,10 +109,24 @@ describe("WikidataService", () => {
                 }]
             }
         });
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        backend.expectOne(r => r.url === `https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles=${title}&origin=*`).flush({
+            query: {
+                pages: {
+                    "1": {
+                        extract: "external description",
+                        original: {
+                            source: "image-url2"
+                        }
+                    },
+                }
+            }
+        });
         
         const feature = await promise;
         expect(feature.properties["name:en"]).toBe(title);
         expect(feature.properties.name).toBe(title);
+        expect(feature.properties["description:en"]).toBe("external description");
         expect(feature.geometry.type).toBe("Point");
         expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([2,1]);
     }));
@@ -150,13 +163,16 @@ describe("WikidataService", () => {
     }));
 
 
-    it("should create a feature from wikidata page id without image, links and description", inject([WikidataService, HttpTestingController], async (serive: WikidataService, backend: HttpTestingController) => {
+    it("should create a feature from wikidata page id without image and links but with description", inject([WikidataService, HttpTestingController], async (serive: WikidataService, backend: HttpTestingController) => {
         const wikidataId = "Q123";
         const language = "he";
         const promise = serive.createFeatureFromPageId(wikidataId, language);
 
         backend.expectOne(r => r.url === `https://www.wikidata.org/w/rest.php/wikibase/v1/entities/items/${wikidataId}`).flush({
             sitelinks: {},
+            descriptions: {
+                he: "description"
+            },
             statements: {
                 P625: [{
                     value: {
@@ -173,7 +189,7 @@ describe("WikidataService", () => {
         const feature = await promise;
         expect(feature.properties.image).toBeUndefined();
         expect(feature.properties.name).toBeUndefined();
-        expect(feature.properties["description:" + language]).toBeDefined();
+        expect(feature.properties["description:" + language]).toBe("description");
         expect(feature.geometry.type).toBe("Point");
         expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([2,1]);
     }));

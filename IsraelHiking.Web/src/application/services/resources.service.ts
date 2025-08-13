@@ -251,6 +251,8 @@ export class ResourcesService {
     public imageUploadWaiver: string;
     public subscriptionDetails: string;
     public noDescriptionAvailableInYourLanguage: string;
+    public translatedBy: string;
+    public clickToTranslate: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -476,7 +478,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1754341476333");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1755081648290");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -708,6 +710,8 @@ export class ResourcesService {
         this.subscriptionDetails = this.gettextCatalog.getString("Offline Maps Subscription: - Allows using maps when there's no reception. - Only 99₪ per year. - Paid once a year.")
             .replace(/ - /g, "\n - ");
         this.noDescriptionAvailableInYourLanguage = this.gettextCatalog.getString("No description available in your language");
+        this.translatedBy = this.gettextCatalog.getString("Translated by LibreTranslate, click to view original text");
+        this.clickToTranslate = this.gettextCatalog.getString("Click to translate");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
