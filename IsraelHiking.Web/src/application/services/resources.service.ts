@@ -254,6 +254,8 @@ export class ResourcesService {
     public manageOfflineMaps: string;
     public clickTheMapToSelectATile: string;
     public clickBelow: string;
+    public translatedBy: string;
+    public clickToTranslate: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -478,7 +480,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1754341476333");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1755081648290");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -713,6 +715,8 @@ export class ResourcesService {
         this.manageOfflineMaps = this.gettextCatalog.getString("Manage Offline Maps");
         this.clickTheMapToSelectATile = this.gettextCatalog.getString("Click the map to select a tile");
         this.clickBelow = this.gettextCatalog.getString("Click below");
+        this.translatedBy = this.gettextCatalog.getString("Translated by LibreTranslate, click to view original text");
+        this.clickToTranslate = this.gettextCatalog.getString("Click to translate");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

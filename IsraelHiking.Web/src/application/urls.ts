@@ -30,11 +30,12 @@ export class Urls {
     public static readonly osmUser = Urls.osmApi + "user/details.json";
     public static readonly osmGpx = Urls.osmApi + "gpx";
     public static readonly osmGpxFiles = Urls.osmApi + "user/gpx_files.json";
+    public static readonly osmBase = "https://www.openstreetmap.org";
+    public static readonly osmAuth = Urls.osmBase + "/oauth2";
 
     public static readonly facebook = "https://www.facebook.com/sharer/sharer.php?u=";
     public static readonly waze = "https://www.waze.com/ul?navigate=yes&zoom=17&ll=";
-    public static readonly osmBase = "https://www.openstreetmap.org";
-    public static readonly osmAuth = Urls.osmBase + "/oauth2";
+    public static readonly tranlation = "https://mapeak.com/api/translation/translate";
 
     public static readonly HIKING_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json";
     public static readonly MTB_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-bike.json";

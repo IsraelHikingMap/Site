@@ -46,8 +46,18 @@ services:
     ports:
       - 11311:80
     restart: always
+  translation:
+    image: libretranslate/libretranslate
+    container_name: translation
+    volumes:
+      - tldata:/home/libretranslate:rw
+    ports:
+      - 5432:5000
+    restart: always
 volumes:
   esdata:
     driver: local
   ghdata:
+    driver: local
+  tldata:
     driver: local

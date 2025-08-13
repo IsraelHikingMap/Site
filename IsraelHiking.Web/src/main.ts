@@ -99,6 +99,7 @@ import { WikidataService } from "./application/services/wikidata.service";
 import { OsmAddressesService } from "./application/services/osm-addresses.service";
 import { LocationService } from "./application/services/location.service";
 import { LogReaderService } from "./application/services/log-reader.service";
+import { TranslationService } from "./application/services/translation.service";
 // Components
 import { RouteEditPoiInteraction } from "./application/components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./application/components/intercations/route-edit-route.interaction";
@@ -244,6 +245,7 @@ bootstrapApplication(MainMapComponent, {
         OsmAddressesService,
         LocationService,
         LogReaderService,
+        TranslationService,
         FileSystemWrapper,
         RouteEditPoiInteraction,
         RouteEditRouteInteraction,

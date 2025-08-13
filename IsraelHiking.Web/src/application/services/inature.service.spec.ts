@@ -75,10 +75,9 @@ describe("INatureService", () => {
             type: "LineString",
             coordinates: [[1,1], [2,2]]
         });
-        expect(result.properties.poiExternalDescription).toBe("description");
+        expect(result.properties["poiExternalDescription:he"]).toBe("description");
         expect(result.properties.poiSource).toBe("iNature");
         expect(result.properties.poiCategory).toBe("Hiking");
-        expect(result.properties.poiLanguage).toBe("he");
         expect(result.properties.poiId).toBe("iNature_123");
         expect(result.properties.identifier).toBe("123");
         expect(result.properties.name).toContain("title");
@@ -115,10 +114,9 @@ describe("INatureService", () => {
             type: "Point",
             coordinates: [2.3, 1.2]
         });
-        expect(result.properties.poiExternalDescription).toBe("description");
+        expect(result.properties["poiExternalDescription:he"]).toBe("description");
         expect(result.properties.poiSource).toBe("iNature");
         expect(result.properties.poiCategory).toBe("iNature");
-        expect(result.properties.poiLanguage).toBe("he");
         expect(result.properties.poiId).toBe("iNature_123");
         expect(result.properties.identifier).toBe("123");
         expect(result.properties.name).toContain("title");
