@@ -25,18 +25,6 @@ describe("GeoJsonUtils", () => {
         expect(feature.properties.name1).toBeUndefined()
     });
 
-    it("should get extenal description for hebrew", () => {
-        const results = GeoJSONUtils.getExternalDescription(
-            {properties: { "poiExternalDescription:he": "desc"}} as any as GeoJSON.Feature, "he");
-        expect(results).toBe("desc");
-    });
-
-    it("should get extenal description for language independant", () => {
-        const results = GeoJSONUtils.getExternalDescription(
-            {properties: { poiExternalDescription: "desc"}} as any as GeoJSON.Feature, "he");
-        expect(results).toBe("desc");
-    });
-
     it("should get title when there's mtb name with language", () => {
         const results = GeoJSONUtils.getTitle({properties: { "mtb:name:he": "name"}} as any as GeoJSON.Feature, "he");
         expect(results).toBe("name");

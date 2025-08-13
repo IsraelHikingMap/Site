@@ -64,9 +64,17 @@
                 <image-scroller [images]="info.imagesUrls" [canEdit]="false"></image-scroller>
                 <p class="text-center" *ngIf="info.lengthInKm && isRoute()">{{resources.length}}: {{info.lengthInKm | number : '1.2-2'}} {{resources.kmUnit}}</p>
                 <div class="flex flex-row">
-                    <p class="w-full break-lines" [ngClass]="resources.getTextAlignment(getDescription())" [dir]="resources.getDirection(getDescription())">
-                        {{getDescription()}}
+                    <p class="w-full break-lines" [ngClass]="resources.getTextAlignment(description)" [dir]="resources.getDirection(description)">
+                        {{description}}
                     </p>
+                </div>
+                <div class="flex flex-row cursor-pointer">
+                    <span class="w-full text-sm text-center" *ngIf="showToggleTranslation() && showingTranslated" (click)="toggleTranslation()">
+                        {{resources.translatedBy}}
+                    </span>
+                    <span class="w-full text-sm text-center" *ngIf="showToggleTranslation() && !showingTranslated" (click)="toggleTranslation()">
+                        {{resources.clickToTranslate}}
+                    </span>
                 </div>
                 <div class="flex flex-row max-sm:hidden" *ngIf="isShowSeeAlso()">
                     <h4>{{resources.seeAlso}}</h4>
