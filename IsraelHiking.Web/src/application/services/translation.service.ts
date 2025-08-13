@@ -28,7 +28,7 @@ export class TranslationService {
 
     public getBestDescription(feature: GeoJSON.Feature): string {
         const language = this.resources.getCurrentLanguageCodeSimplified();
-        let keys = Object.keys(feature.properties).filter(key => key.startsWith("poiExternalDescription:"));
+        const keys = Object.keys(feature.properties).filter(key => key.startsWith("poiExternalDescription:"));
 
         return feature.properties["description:" + language] ||
             feature.properties["poiExternalDescription:" + language] ||

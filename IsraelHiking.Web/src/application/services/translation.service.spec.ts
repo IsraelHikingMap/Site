@@ -5,9 +5,8 @@ import { HttpTestingController, provideHttpClientTesting } from "@angular/common
 import { TranslationResponse, TranslationService } from "./translation.service";
 import { ResourcesService } from "./resources.service";
 import { Urls } from "../urls";
-import { description } from "platform";
 
-describe('TranslationService', () => {
+describe("TranslationService", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [
@@ -21,8 +20,8 @@ describe('TranslationService', () => {
         });
     });
 
-    it('return false if translation is not needed because of available language description', inject([TranslationService], (service: TranslationService) => {
-        let isTranslationNeeded = service.isTranslationPossibleAndNeeded({
+    it("return false if translation is not needed because of available language description", inject([TranslationService], (service: TranslationService) => {
+        const isTranslationNeeded = service.isTranslationPossibleAndNeeded({
             type: "Feature",
             geometry: {
                 type: "Point",
@@ -35,8 +34,8 @@ describe('TranslationService', () => {
         expect(isTranslationNeeded).toBeFalse();
     }));
 
-    it('return false if translation is not needed beacuse of external description', inject([TranslationService], (service: TranslationService) => {
-        let isTranslationNeeded = service.isTranslationPossibleAndNeeded({
+    it("return false if translation is not needed beacuse of external description", inject([TranslationService], (service: TranslationService) => {
+        const isTranslationNeeded = service.isTranslationPossibleAndNeeded({
             type: "Feature",
             geometry: {
                 type: "Point",
@@ -50,8 +49,8 @@ describe('TranslationService', () => {
         expect(isTranslationNeeded).toBeFalse();
     }));
 
-    it('return false if translation is not possible', inject([TranslationService], (service: TranslationService) => {
-        let isTranslationPossible = service.isTranslationPossibleAndNeeded({
+    it("return false if translation is not possible", inject([TranslationService], (service: TranslationService) => {
+        const isTranslationPossible = service.isTranslationPossibleAndNeeded({
             type: "Feature",
             geometry: {
                 type: "Point",
@@ -62,8 +61,8 @@ describe('TranslationService', () => {
         expect(isTranslationPossible).toBeFalse();
     }));
 
-    it('return true if translation is possible and needed in original language', inject([TranslationService], (service: TranslationService) => {
-        let isTranslationPossible = service.isTranslationPossibleAndNeeded({
+    it("return true if translation is possible and needed in original language", inject([TranslationService], (service: TranslationService) => {
+        const isTranslationPossible = service.isTranslationPossibleAndNeeded({
             type: "Feature",
             geometry: {
                 type: "Point",
@@ -76,8 +75,8 @@ describe('TranslationService', () => {
         expect(isTranslationPossible).toBeTrue();
     }));
 
-    it('return true if translation is possible and needed in english', inject([TranslationService], (service: TranslationService) => {
-        let isTranslationPossible = service.isTranslationPossibleAndNeeded({
+    it("return true if translation is possible and needed in english", inject([TranslationService], (service: TranslationService) => {
+        const isTranslationPossible = service.isTranslationPossibleAndNeeded({
             type: "Feature",
             geometry: {
                 type: "Point",
@@ -90,8 +89,8 @@ describe('TranslationService', () => {
         expect(isTranslationPossible).toBeTrue();
     }));
 
-    it('return true if translation is possible by external translation from another language', inject([TranslationService], (service: TranslationService) => {
-        let isTranslationPossible = service.isTranslationPossibleAndNeeded({
+    it("return true if translation is possible by external translation from another language", inject([TranslationService], (service: TranslationService) => {
+        const isTranslationPossible = service.isTranslationPossibleAndNeeded({
             type: "Feature",
             geometry: {
                 type: "Point",
@@ -104,7 +103,7 @@ describe('TranslationService', () => {
         expect(isTranslationPossible).toBeTrue();
     }));
 
-    it('should return the best description from relevant language', inject([TranslationService], (service: TranslationService) => {
+    it("should return the best description from relevant language", inject([TranslationService], (service: TranslationService) => {
         const feature: GeoJSON.Feature = {
             type: "Feature",
             geometry: {
@@ -122,7 +121,7 @@ describe('TranslationService', () => {
         expect(bestDescription).toBe("תיאור בעברית");
     }));
 
-    it('should return the best description from external description in relevant language', inject([TranslationService], (service: TranslationService) => {
+    it("should return the best description from external description in relevant language", inject([TranslationService], (service: TranslationService) => {
         const feature: GeoJSON.Feature = {
             type: "Feature",
             geometry: {
@@ -139,7 +138,7 @@ describe('TranslationService', () => {
         expect(bestDescription).toBe("External description");
     }));
 
-    it('should return the best description from description in original language', inject([TranslationService], (service: TranslationService) => {
+    it("should return the best description from description in original language", inject([TranslationService], (service: TranslationService) => {
         const feature: GeoJSON.Feature = {
             type: "Feature",
             geometry: {
@@ -155,7 +154,7 @@ describe('TranslationService', () => {
         expect(bestDescription).toBe("Original description");
     }));
 
-    it('should return the best description from description in english', inject([TranslationService], (service: TranslationService) => {
+    it("should return the best description from description in english", inject([TranslationService], (service: TranslationService) => {
         const feature: GeoJSON.Feature = {
             type: "Feature",
             geometry: {
@@ -170,7 +169,7 @@ describe('TranslationService', () => {
         expect(bestDescription).toBe("Description in English");
     }));
 
-    it('should return the best description from external description in any language', inject([TranslationService], (service: TranslationService) => {
+    it("should return the best description from external description in any language", inject([TranslationService], (service: TranslationService) => {
         const feature: GeoJSON.Feature = {
             type: "Feature",
             geometry: {
@@ -185,7 +184,7 @@ describe('TranslationService', () => {
         expect(bestDescription).toBe("External description in Arabic");
     }));
 
-    it('should return empty string if no relevant description is available', inject([TranslationService], (service: TranslationService) => {
+    it("should return empty string if no relevant description is available", inject([TranslationService], (service: TranslationService) => {
         const feature: GeoJSON.Feature = {
             type: "Feature",
             geometry: {
@@ -200,7 +199,7 @@ describe('TranslationService', () => {
         expect(bestDescription).toBe("");
     }));
 
-    it('should get a description translation', inject([TranslationService, HttpTestingController], async (service: TranslationService, backend: HttpTestingController) => {
+    it("should get a description translation", inject([TranslationService, HttpTestingController], async (service: TranslationService, backend: HttpTestingController) => {
         const feature: GeoJSON.Feature = {
             type: "Feature",
             geometry: {
@@ -213,7 +212,7 @@ describe('TranslationService', () => {
         };
         const promise = service.getTranslatedDescription(feature);
 
-        backend.expectOne(req => req.method === 'POST' && req.url === Urls.tranlation).flush({
+        backend.expectOne(req => req.method === "POST" && req.url === Urls.tranlation).flush({
             translatedText: "Translated Description",
         } as TranslationResponse);
 
@@ -221,7 +220,7 @@ describe('TranslationService', () => {
         expect(translation).toBe("Translated Description");
     }));
 
-    it('should get a description translation from cache', inject([TranslationService, HttpTestingController], async (service: TranslationService, backend: HttpTestingController) => {
+    it("should get a description translation from cache", inject([TranslationService, HttpTestingController], async (service: TranslationService, backend: HttpTestingController) => {
         const feature: GeoJSON.Feature = {
             type: "Feature",
             geometry: {
@@ -235,7 +234,7 @@ describe('TranslationService', () => {
         };
         const promise = service.getTranslatedDescription(feature);
 
-        backend.expectOne(req => req.method === 'POST' && req.url === Urls.tranlation).flush({
+        backend.expectOne(req => req.method === "POST" && req.url === Urls.tranlation).flush({
             translatedText: "Translated Description",
         } as TranslationResponse);
 
@@ -245,7 +244,7 @@ describe('TranslationService', () => {
         expect(translation2).toBe("Translated Description");
     }));
 
-    it('should return empty string in case of error', inject([TranslationService, HttpTestingController], async (service: TranslationService, backend: HttpTestingController) => {
+    it("should return empty string in case of error", inject([TranslationService, HttpTestingController], async (service: TranslationService, backend: HttpTestingController) => {
         const feature: GeoJSON.Feature = {
             type: "Feature",
             geometry: {
@@ -259,7 +258,7 @@ describe('TranslationService', () => {
         };
         const promise = service.getTranslatedDescription(feature);
 
-        backend.expectOne(req => req.method === 'POST' && req.url === Urls.tranlation).flush({}, { status: 500, statusText: "Server Error" });
+        backend.expectOne(req => req.method === "POST" && req.url === Urls.tranlation).flush({}, { status: 500, statusText: "Server Error" });
 
         const translation = await promise;
         expect(translation).toBe("");
