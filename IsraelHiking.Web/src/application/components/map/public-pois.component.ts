@@ -23,7 +23,7 @@ import { NavigateHereService } from "../../services/navigate-here.service";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import { GeoJSONUtils } from "../../services/geojson-utils";
-import type { ApplicationState, LatLngAlt, LinkData } from "../../models/models";
+import type { ApplicationState, LatLngAlt, LinkData } from "../../models";
 
 @Component({
     selector: "public-pois",

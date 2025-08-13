@@ -29,7 +29,7 @@ import { OfflineFilesDownloadService } from "../../services/offline-files-downlo
 import { ExpandGroupAction, CollapseGroupAction } from "../../reducers/layers.reducer";
 import { ChangeRouteStateAction, BulkReplaceRoutesAction, ToggleAllRoutesAction } from "../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../reducers/route-editing.reducer";
-import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGroup } from "../../models/models";
+import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGroup } from "../../models";
 
 @Component({
     selector: "layers-sidebar",

@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { RoutingType, RouteEditingState } from "../models/models";
+import type { RoutingType, RouteEditingState } from "../models";
 
 export class SetSelectedRouteAction {
     public static type = this.prototype.constructor.name;

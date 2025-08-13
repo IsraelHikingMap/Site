@@ -1,4 +1,4 @@
-﻿import type { RouteData, LayerData, LatLngAlt  } from "./models";
+﻿import type { RouteData, LayerData, LatLngAlt  } from ".";
 
 export type DataContainer = {
     routes: RouteData[];

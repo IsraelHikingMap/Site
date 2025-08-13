@@ -1,4 +1,4 @@
-﻿import type { Trace } from "../models";
+﻿import type { Trace } from "..";
 
 export type TracesState = {
     visibleTraceId: string;

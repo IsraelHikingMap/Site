@@ -5,7 +5,7 @@ import { Dir } from "@angular/cdk/bidi";
 import { ResourcesService } from "../services/resources.service";
 import { ElevationProvider } from "../services/elevation.provider";
 import { CoordinatesService } from "../services/coordinates.service";
-import type { LatLngAlt, NorthEast } from "../models/models";
+import type { LatLngAlt, NorthEast } from "../models";
 
 @Component({
     selector: "coordinates",

@@ -16,7 +16,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { LogReaderService } from "../../services/log-reader.service";
 import { SetOfflineMapsLastModifiedDateAction } from "../../reducers/offline.reducer";
-import type { ApplicationState, DataContainer } from "../../models/models";
+import type { ApplicationState, DataContainer } from "../../models";
 
 @Component({
     selector: "files-share-dialog",

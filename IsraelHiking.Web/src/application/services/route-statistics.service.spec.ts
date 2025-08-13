@@ -1,5 +1,5 @@
 import { RouteStatisticsService, RouteStatistics, RouteStatisticsPoint } from "./route-statistics.service";
-import type { LatLngAltTime } from "../models/models";
+import type { LatLngAltTime } from "../models";
 
 describe("RouteStatisticsService", () => {
     let service: RouteStatisticsService;

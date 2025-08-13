@@ -10,15 +10,15 @@ import { ToastService } from "./toast.service";
 import { SpatialService } from "./spatial.service";
 import { SelectedRouteService } from "./selected-route.service";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
-import type { ApplicationState, LatLngAltTime } from "../models/models";
+import type { ApplicationState, LatLngAltTime } from "../models";
 
 @Injectable()
 export class GeoLocationService {
     private isBackground = false;
     private wasInitialized = false;
-    private locations: Location[] = [];
+    private lastReceivedPosition: GeolocationPosition | null = null;
 
-    public bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
+    public positionWhileInBackground = new EventEmitter<GeolocationPosition>();
     public backToForeground = new EventEmitter<void>();
 
     private readonly resources = inject(ResourcesService);
@@ -82,7 +82,7 @@ export class GeoLocationService {
             }
             if (!this.isBackground) {
                 this.ngZone.run(async () => {
-                    await this.onLocationUpdate();
+                    this.handlePositionChange(this.lastReceivedPosition);
                     this.backToForeground.next();
                 });
             }
@@ -134,12 +134,13 @@ export class GeoLocationService {
                 distanceFilter: 2
             }, (location?: Location, error?: CallbackError) => {
                 if (location) {
-                    this.locations.push(location);
                     this.loggingService.debug("[GeoLocation] Received position: " + `lat: ${location.latitude}, lng: ${location.longitude}, time: ${new Date(location.time).toISOString()}, accuracy: ${location.accuracy}, background: ${this.isBackground}`);
+                    this.lastReceivedPosition = this.locationToPosition(location);
                     if (this.isBackground) {
+                        this.positionWhileInBackground.next(this.lastReceivedPosition);
                         return;
                     }
-                    this.onLocationUpdate();
+                    this.handlePositionChange(this.lastReceivedPosition);
                     return;
                 }
                 if (error && error.code !== "2") { // "2" is location unaavailable in the browser, ignore it.
@@ -156,19 +157,6 @@ export class GeoLocationService {
             this.wasInitialized = true;
         } catch { 
             // ignore errors.
-        }
-    }
-
-    private async onLocationUpdate() {
-        const locations = [...this.locations];
-        this.locations = [];
-        const positions = locations.map(l => this.locationToPosition(l)).filter(p => !SpatialService.isJammingTarget(GeoLocationService.positionToLatLngTime(p)));
-        this.loggingService.debug("[GeoLocation] Handle location update, received " + positions.length + " positions");
-        if (positions.length === 1) {
-            this.handlePositionChange(positions[0]);
-        } else if (positions.length > 1) {
-            this.bulkPositionChanged.next(positions.splice(0, positions.length - 1));
-            this.handlePositionChange(positions[0]);
         }
     }
 

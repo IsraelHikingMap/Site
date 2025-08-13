@@ -15,7 +15,6 @@ export class Urls {
     public static readonly openFile = Urls.files + "/open";
     public static readonly offlineFiles = Urls.files + "/offline";
     public static readonly search = Urls.apiBase + "search/";
-    public static readonly images = Urls.apiBase + "images/";
     public static readonly missingParts = Urls.apiBase + "osm/";
     public static readonly uploadDataContainer = Urls.apiBase + "osm/trace/route/";
     public static readonly traceAsDataContainer = Urls.apiBase + "osm/trace/";
@@ -31,11 +30,12 @@ export class Urls {
     public static readonly osmUser = Urls.osmApi + "user/details.json";
     public static readonly osmGpx = Urls.osmApi + "gpx";
     public static readonly osmGpxFiles = Urls.osmApi + "user/gpx_files.json";
+    public static readonly osmBase = "https://www.openstreetmap.org";
+    public static readonly osmAuth = Urls.osmBase + "/oauth2";
 
     public static readonly facebook = "https://www.facebook.com/sharer/sharer.php?u=";
     public static readonly waze = "https://www.waze.com/ul?navigate=yes&zoom=17&ll=";
-    public static readonly osmBase = "https://www.openstreetmap.org";
-    public static readonly osmAuth = Urls.osmBase + "/oauth2";
+    public static readonly tranlation = "https://mapeak.com/api/translation/translate";
 
     public static readonly DEFAULT_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/IHM.json";
     public static readonly MTB_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/ilMTB.json";

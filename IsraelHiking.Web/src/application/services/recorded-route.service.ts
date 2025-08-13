@@ -11,11 +11,11 @@ import { TracesService } from "./traces.service";
 import { SpatialService } from "./spatial.service";
 import { RunningContextService } from "./running-context.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
-import { StopRecordingAction, StartRecordingAction, AddRecordingRoutePointsAction } from "../reducers/recorded-route.reducer";
+import { StopRecordingAction, StartRecordingAction, AddRecordingRoutePointsAction, AddPendingProcessingRoutePointAction, ClearPendingProcessingRoutePointsAction } from "../reducers/recorded-route.reducer";
 import { AddTraceAction } from "../reducers/traces.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
-import type { TraceVisibility, DataContainer, ApplicationState, RouteData, LatLngAltTime, RecordedRoute, MarkerData } from "../models/models";
+import type { TraceVisibility, DataContainer, ApplicationState, RouteData, LatLngAltTime, RecordedRoute, MarkerData } from "../models";
 
 @Injectable()
 export class RecordedRouteService {
@@ -23,7 +23,6 @@ export class RecordedRouteService {
     private static readonly MIN_ACCURACY = 100; // meters
 
     private rejectedPosition: LatLngAltTime;
-    private lastValidLocation: LatLngAltTime;
 
     private readonly resources = inject(ResourcesService);
     private readonly geoLocationService = inject(GeoLocationService);
@@ -35,21 +34,24 @@ export class RecordedRouteService {
     private readonly store = inject(Store);
 
     public initialize() {
-        if (this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording) {
+        if (this.isRecording()) {
             this.loggingService.info("[Record] Recording was interrupted");
+            this.updateRecordingRoute(null); // This will add the last position to the route that might have not been processed.
             this.stopRecording(false);
             this.toastService.warning(this.resources.lastRecordingDidNotEndWell);
         }
 
         this.store.select((state: ApplicationState) => state.gpsState.currentPosition).subscribe(position => {
-            if (position != null) {
-                this.updateRecordingRoute([position]);
+            this.updateRecordingRoute(position);
+        });
+        this.geoLocationService.positionWhileInBackground.subscribe((position: GeolocationPosition) => {
+            if (this.isRecording()) {
+                this.store.dispatch(new AddPendingProcessingRoutePointAction(position));
             }
         });
-        this.geoLocationService.bulkPositionChanged.subscribe(
-            (positions: GeolocationPosition[]) => {
-                this.updateRecordingRoute(positions);
-            });
+        this.geoLocationService.backToForeground.subscribe(() => {
+            this.updateRecordingRoute(null);
+        });
     }
 
     public startRecording() {
@@ -57,7 +59,6 @@ export class RecordedRouteService {
         this.rejectedPosition = null;
         const gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
         const currentLocation = GeoLocationService.positionToLatLngTime(gpsState.currentPosition);
-        this.lastValidLocation = currentLocation;
         this.store.dispatch(new StartRecordingAction());
         this.store.dispatch(new AddRecordingRoutePointsAction([currentLocation]));
     }
@@ -134,15 +135,29 @@ export class RecordedRouteService {
         await this.tracesService.uploadLocalTracesIfNeeded();
     }
 
-    private updateRecordingRoute(positions: GeolocationPosition[]) {
-        if (!this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording) {
+    private updateRecordingRoute(position: GeolocationPosition) {
+        if (!this.isRecording()) {
+            return;
+        }
+        const readOnlyPositions = this.store.selectSnapshot((state: ApplicationState) => state.recordedRouteState.pendingProcessing) || [];
+        const positions = [...readOnlyPositions];
+        if (positions.length > 0) {
+            this.loggingService.debug(`[Record] Processing ${positions.length} pending positions`);
+            this.store.dispatch(new ClearPendingProcessingRoutePointsAction());
+        }
+        if (position != null) {
+            positions.push(position);
+        }
+        if (positions.length === 0) {
             return;
         }
         const validPositions = [];
+        const routeLatLngs = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState.route).latlngs;
+        let lastValidLocation = routeLatLngs[routeLatLngs.length - 1];
         for (const position of positions) {
-            if (this.validateRecordingAndUpdateState(position)) {
+            if (this.validateRecordingAndUpdateState(position, lastValidLocation)) {
                 validPositions.push(position);
-                this.lastValidLocation = GeoLocationService.positionToLatLngTime(position);
+                lastValidLocation = GeoLocationService.positionToLatLngTime(position);
             }
         }
         if (validPositions.length === 0) {
@@ -152,8 +167,13 @@ export class RecordedRouteService {
         this.store.dispatch(new AddRecordingRoutePointsAction(locations));
     }
 
-    private validateRecordingAndUpdateState(position: GeolocationPosition): boolean {
-        let nonValidReason = this.isValid(this.lastValidLocation, position);
+    private validateRecordingAndUpdateState(position: Immutable<GeolocationPosition>, lastValidLocation: LatLngAltTime): boolean {
+        if (position.timestamp === new Date(lastValidLocation.timestamp).getTime()) {
+            // Ignore positions with the same timestamp as the last valid position without any logging 
+            // as this can happen when the device comes back from background and the GPS position is not updated yet.
+            return false;
+        }
+        let nonValidReason = this.isValid(lastValidLocation, position);
         if (nonValidReason === "") {
             this.loggingService.debug("[Record] Valid position, updating. " +
                 JSON.stringify(GeoLocationService.positionToLatLngTime(position)));
@@ -162,7 +182,7 @@ export class RecordedRouteService {
         }
         if (this.rejectedPosition == null) {
             this.rejectedPosition = GeoLocationService.positionToLatLngTime(position);
-            this.loggingService.debug(`[Record] Rejecting position, reason: ${nonValidReason}` +
+            this.loggingService.debug(`[Record] Rejecting position, reason: ${nonValidReason} ` +
                 JSON.stringify(GeoLocationService.positionToLatLngTime(position)));
             return false;
         }
@@ -179,7 +199,7 @@ export class RecordedRouteService {
         return false;
     }
 
-    private isValid(test: LatLngAltTime, position: GeolocationPosition): string {
+    private isValid(test: LatLngAltTime, position: Immutable<GeolocationPosition>): string {
         const positionLatLng = GeoLocationService.positionToLatLngTime(position);
         const distance = SpatialService.getDistanceInMeters(test, positionLatLng);
         const timeDifference = (position.timestamp - new Date(test.timestamp).getTime()) / 1000;

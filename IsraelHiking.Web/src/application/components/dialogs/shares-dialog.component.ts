@@ -27,7 +27,7 @@ import { ShareUrlsService } from "../../services/share-urls.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
-import type { ApplicationState, ShareUrl } from "../../models/models";
+import type { ApplicationState, ShareUrl } from "../../models";
 
 @Component({
     selector: "shares-dialog",

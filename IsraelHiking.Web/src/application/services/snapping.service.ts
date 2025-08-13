@@ -3,7 +3,7 @@ import type { Immutable } from "immer";
 
 import { SpatialService } from "./spatial.service";
 import { MapService } from "./map.service";
-import type { LatLngAlt, MarkerData } from "../models/models";
+import type { LatLngAlt, MarkerData } from "../models";
 
 export type SnappingPointResponse = {
     latlng: LatLngAlt;

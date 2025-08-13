@@ -1,5 +1,6 @@
 import { Immutable } from "immer";
-import { LatLngAlt } from "../models/models";
+
+import { LatLngAlt } from "../models";
 
 export class GeoJSONUtils {
     public static setPropertyUnique(feature: GeoJSON.Feature, key: string, value: string) {
@@ -63,10 +64,6 @@ export class GeoJSONUtils {
         return feature.properties["description:" + language] || feature.properties.description;
     }
 
-    public static getExternalDescription(feature: GeoJSON.Feature, language: string): string {
-        return feature.properties["poiExternalDescription:" + language] || feature.properties.poiExternalDescription;
-    }
-
     public static getLocation(feature: GeoJSON.Feature): LatLngAlt {
         return {
             lat: feature.properties.poiGeolocation.lat,
@@ -76,7 +73,7 @@ export class GeoJSONUtils {
     }
 
     public static hasExtraData(feature: GeoJSON.Feature, language: string): boolean {
-        return feature.properties["description:" + language] != null || 
+        return GeoJSONUtils.getDescription(feature, language) != null ||
             GeoJSONUtils.getValidImageUrls(feature).length > 0 ||
             Object.keys(feature.properties).find(k => k.startsWith("wikipedia")) != null ||
             Object.keys(feature.properties).find(k => k.startsWith("wikidata")) != null;

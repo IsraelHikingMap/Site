@@ -1,3 +1,4 @@
+import { inject } from "@angular/core";
 import invert from "invert-color";
 import { Store } from "@ngxs/store";
 
@@ -6,8 +7,7 @@ import { ToastService } from "../../../services/toast.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { SelectedRouteService } from "../../../services/selected-route.service";
 import { SetOpacityAndWeightAction } from "../../../reducers/route-editing.reducer";
-import type { RouteData } from "../../../models/models";
-import { inject } from "@angular/core";
+import type { RouteData } from "../../../models";
 
 export abstract class RouteBaseDialogComponent {
     public colors: string[];

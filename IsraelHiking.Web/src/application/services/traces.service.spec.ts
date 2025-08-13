@@ -10,7 +10,7 @@ import { RunningContextService } from "./running-context.service";
 import { DatabaseService } from "./database.service";
 import { Urls } from "../urls";
 import { BulkReplaceTracesAction, RemoveTraceAction, UpdateTraceAction } from "../reducers/traces.reducer";
-import type { Trace } from "../models/models";
+import type { Trace } from "../models";
 
 describe("Traces Service", () => {
     beforeEach(() => {

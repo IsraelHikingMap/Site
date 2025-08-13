@@ -10,7 +10,7 @@ import { DataContainerService } from "./data-container.service";
 import { FitBoundsService } from "./fit-bounds.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { SetFileUrlAndBaseLayerAction, SetShareUrlAction } from "../reducers/in-memory.reducer";
-import type { ApplicationState, LatLngAlt } from "../models/models";
+import type { ApplicationState, LatLngAlt } from "../models";
 
 export type PoiRouteUrlInfo = {
     source: string;

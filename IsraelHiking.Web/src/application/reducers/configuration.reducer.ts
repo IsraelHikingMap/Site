@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { ConfigurationState, Language, BatteryOptimizationType } from "../models/models";
+import type { ConfigurationState, Language, BatteryOptimizationType } from "../models";
 
 
 export class SetLanguageAction {

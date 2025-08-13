@@ -15,7 +15,7 @@ import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import { UpdateShareUrlAction, RemoveShareUrlAction, AddShareUrlAction } from "../reducers/share-urls.reducer";
 import { SetShareUrlsLastModifiedDateAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
-import type { ShareUrl, ApplicationState } from "../models/models";
+import type { ShareUrl, ApplicationState } from "../models";
 
 interface IShareUrlSocialLinks {
     facebook: string;
@@ -164,7 +164,7 @@ export class ShareUrlsService {
     }
 
         public getImageUrlFromShareId(shareUrlId: string, width?: number, height?: number) {
-        let address = Urls.images + shareUrlId;
+        let address = Urls.urls + shareUrlId + "/thumbnail";
         if (width && height) {
             address += `?width=${width}&height=${height}`;
         }

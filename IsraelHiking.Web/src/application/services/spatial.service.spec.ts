@@ -1,7 +1,8 @@
-import { SpatialService } from "./spatial.service";
 import { lineString } from "@turf/helpers";
-import { Bounds } from "../models/models";
 import { LngLatBounds } from "maplibre-gl";
+
+import { SpatialService } from "./spatial.service";
+import { Bounds } from "../models";
 
 describe("Spatial service", () => {
     it("Should get length in meters for a line string", () => {

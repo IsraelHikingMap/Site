@@ -1,4 +1,4 @@
-﻿import type { MarkerData } from "../models";
+﻿import type { MarkerData } from "..";
 
 export type PointsOfInterestState = {
     selectedPointOfInterest: GeoJSON.Feature;

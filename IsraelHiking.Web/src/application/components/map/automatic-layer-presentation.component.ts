@@ -14,7 +14,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { ConnectionService } from "../../services/connection.service";
 import { MapService } from "../../services/map.service";
-import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models/models";
+import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models";
 
 @Component({
     selector: "auto-layer",

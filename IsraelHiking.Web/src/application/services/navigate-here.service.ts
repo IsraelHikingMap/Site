@@ -9,7 +9,7 @@ import { RoutingProvider } from "./routing.provider";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { RoutesFactory } from "./routes.factory";
 import { AddRouteAction } from "../reducers/routes.reducer";
-import type { ApplicationState, LatLngAlt, LatLngAltTime } from "../models/models";
+import type { ApplicationState, LatLngAlt, LatLngAltTime } from "../models";
 
 @Injectable()
 export class NavigateHereService {

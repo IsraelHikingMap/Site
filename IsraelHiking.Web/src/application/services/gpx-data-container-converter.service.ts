@@ -14,7 +14,7 @@ import type {
     LinkData,
     LatLngAlt,
     RoutingType
-} from "../models/models";
+} from "../models";
 
 interface Link {
     $: { href: string };

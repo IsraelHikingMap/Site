@@ -1,4 +1,5 @@
-﻿using IsraelHiking.Common;
+﻿using System;
+using IsraelHiking.Common;
 using IsraelHiking.Common.DataContainer;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
@@ -15,6 +16,7 @@ namespace IsraelHiking.API.Controllers;
 /// This controller is responsible for image creation
 /// </summary>
 [Route("api/[controller]")]
+[Obsolete("Should be removed at 12.2025")]
 public class ImagesController : ControllerBase
 {
     private readonly IImageCreationGateway _imageCreationGateway;

@@ -13,7 +13,7 @@ import { SelectedRouteService } from "./selected-route.service";
 import { RoutesFactory } from "./routes.factory";
 import { MapService } from "./map.service";
 import { RunningContextService } from "./running-context.service";
-import { ShareUrl } from "application/models/share-url";
+import type { ShareUrl } from "../models";
 
 describe("DataContainerService", () => {
     beforeEach(() => {

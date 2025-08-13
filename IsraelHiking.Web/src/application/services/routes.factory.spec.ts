@@ -1,8 +1,9 @@
 import { NgxsModule, Store } from "@ngxs/store";
 import { TestBed, inject } from "@angular/core/testing";
+
 import { RoutesFactory } from "./routes.factory";
 import { RouteEditingReducer } from "../reducers/route-editing.reducer";
-import type { RouteData } from "../models/route-data";
+import type { RouteData } from "../models";
 
 describe("RoutesFactory", () => {
     beforeEach(() => {

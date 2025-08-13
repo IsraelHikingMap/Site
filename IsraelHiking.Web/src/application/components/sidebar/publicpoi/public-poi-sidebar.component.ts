@@ -32,6 +32,7 @@ import { SidebarService } from "../../../services/sidebar.service";
 import { NavigateHereService } from "../../../services/navigate-here.service";
 import { GpxDataContainerConverterService } from "../../../services/gpx-data-container-converter.service";
 import { OsmAddressesService } from "../../../services/osm-addresses.service";
+import { TranslationService } from "../../../services/translation.service";
 import { ElevationProvider } from "../../../services/elevation.provider";
 import { GeoJsonParser } from "../../../services/geojson.parser";
 import { AddRouteAction, AddPrivatePoiAction } from "../../../reducers/routes.reducer";
@@ -43,7 +44,7 @@ import type {
     ApplicationState,
     EditablePublicPointData,
     LatLngAltTime
-} from "../../../models/models";
+} from "../../../models";
 
 export type SourceImageUrlPair = {
     imageUrl: string;
@@ -66,6 +67,8 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     public sourceImageUrls: SourceImageUrlPair[];
     public latlng: LatLngAlt;
     public shareLinks = {} as PoiSocialLinks;
+    public showingTranslated: boolean = true;
+    public description: string = "";
 
     private editMode: boolean;
     private fullFeature: GeoJSON.Feature;
@@ -85,6 +88,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     private readonly navigateHereService = inject(NavigateHereService);
     private readonly geoJsonParser = inject(GeoJsonParser);
     private readonly elevasionProvider = inject(ElevationProvider);
+    private readonly translationService = inject(TranslationService);
     private readonly store = inject(Store);
 
     constructor() {
@@ -176,6 +180,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         this.sourceImageUrls = this.getSourceImageUrls(feature);
         this.shareLinks = this.poiService.getPoiSocialLinks(feature);
         this.info = await this.poiService.getEditableDataFromFeature(feature);
+        this.description = await this.getDescription();
         const language = this.resources.getCurrentLanguageCodeSimplified();
         this.titleService.set(GeoJSONUtils.getTitle(feature, language));
     }
@@ -214,18 +219,19 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             this.editMode;
     }
 
-    public getDescription(): string {
+    private async getDescription(): Promise<string> {
         if (!this.fullFeature) {
             return "";
         }
-        const language = this.resources.getCurrentLanguageCodeSimplified();
-        const description = GeoJSONUtils.getDescription(this.fullFeature, language) ||
-            GeoJSONUtils.getExternalDescription(this.fullFeature, language);
+        const description = this.showingTranslated && this.translationService.isTranslationPossibleAndNeeded(this.fullFeature)
+            ? await this.translationService.getTranslatedDescription(this.fullFeature)
+            : this.translationService.getBestDescription(this.fullFeature);
+
         if (description) {
             return description;
         }
         if (!this.isEditable()) {
-            return description;
+            return this.resources.noDescriptionAvailableInYourLanguage;
         }
         const isLoggedOut = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo) == null;
         if (isLoggedOut) {
@@ -385,5 +391,14 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     private isBadWikipediaUrl(url: string) {
         const language = this.resources.getCurrentLanguageCodeSimplified();
         return url == null || (url.includes("wikipedia") && !url.includes(language + ".wikipedia"));
+    }
+
+    public showToggleTranslation(): boolean {
+        return this.fullFeature && this.translationService.isTranslationPossibleAndNeeded(this.fullFeature);
+    }
+
+    public async toggleTranslation(): Promise<void> {
+        this.showingTranslated = !this.showingTranslated;
+        this.description = await this.getDescription();
     }
 }

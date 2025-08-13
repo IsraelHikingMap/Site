@@ -27,7 +27,6 @@ import { ImageAttributionService } from "./image-attribution.service";
 import { LatLon, OsmTagsService, PoiProperties } from "./osm-tags.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction } from "../reducers/offline.reducer";
 import { SetSelectedPoiAction, SetUploadMarkerDataAction } from "../reducers/poi.reducer";
-import { AVAILABLE_LANGUAGES } from "../reducers/initial-state";
 import {
     SetCategoriesGroupVisibilityAction,
     AddCategoryAction,
@@ -44,7 +43,7 @@ import type {
     NorthEast,
     EditablePublicPointData,
     OfflineState
-} from "../models/models";
+} from "../models";
 
 
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite"
@@ -357,12 +356,7 @@ export class PoiService {
         if (typeof poi.properties.poiGeolocation === "string") {
             poi.properties.poiGeolocation = JSON.parse(poi.properties.poiGeolocation);
         }
-        if (typeof poi.properties.poiLanguages === "string") {
-            poi.properties.poiLanguages = (poi.properties.poiLanguages as string).split(",");
-        }
         poi.properties.poiGeolocation = poi.properties.poiGeolocation || this.getGeolocation(feature);
-        poi.properties.poiLanguage = poi.properties.poiLanguage || "all";
-        poi.properties.poiLanguages = poi.properties.poiLanguages || AVAILABLE_LANGUAGES.map(l => l.code.split("-")[0]);
         OsmTagsService.setIconColorCategory(feature, poi);
         return poi;
     }
@@ -372,9 +366,6 @@ export class PoiService {
         const visibleCategories = this.getVisibleCategories();
         const language = this.resources.getCurrentLanguageCodeSimplified();
         for (const feature of features) {
-            if (!feature.properties.poiLanguages.includes(language)) {
-                continue;
-            }
             if (visibleCategories.indexOf(feature.properties.poiCategory) === -1) {
                 continue;
             }
@@ -547,7 +538,7 @@ export class PoiService {
         if (feature.properties.wikidata) {
             wikidataPromise = this.wikidataService.enritchFeatureFromWikimedia(feature, language);
         }
-        if (feature.properties["ref:IL:inature"] && language === "he") {
+        if (feature.properties["ref:IL:inature"]) {
             inaturePromise = this.iNatureService.enritchFeatureFromINature(feature);
         }
         if (type === "node" && feature.properties.place) {

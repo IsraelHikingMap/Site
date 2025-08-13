@@ -14,7 +14,7 @@ import { MapService } from "./map.service";
 import { AddShareUrlAction, RemoveShareUrlAction, ShareUrlsReducer, UpdateShareUrlAction } from "../reducers/share-urls.reducer";
 import { SetShareUrlsLastModifiedDateAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
-import type { ShareUrl } from "../models/models";
+import type { ShareUrl } from "../models";
 
 describe("Share Urls Service", () => {
     beforeEach(() => {

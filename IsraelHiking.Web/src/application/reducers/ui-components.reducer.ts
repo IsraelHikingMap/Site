@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { UICompoentsState } from "../models/models";
+import type { UICompoentsState } from "../models";
 
 export type UIComponentType = "drawing" | "statistics";
 

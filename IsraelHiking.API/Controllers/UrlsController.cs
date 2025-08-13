@@ -36,6 +36,7 @@ public class UrlsController : ControllerBase
     private readonly IDataContainerConverterService _dataContainerConverterService;
     private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
     private readonly IImgurGateway _imgurGateway;
+    private readonly IImageCreationGateway _imageCreationGateway;
     private readonly ILogger _logger;
 
     /// <summary>
@@ -45,11 +46,13 @@ public class UrlsController : ControllerBase
     /// <param name="dataContainerConverterService"></param>
     /// <param name="base64ImageConverter"></param>
     /// <param name="imgurGateway"></param>
+    /// <param name="imageCreationGateway"></param>
     /// <param name="logger"></param>
     public UrlsController(IShareUrlsRepository repository,
         IDataContainerConverterService dataContainerConverterService,
         IBase64ImageStringToFileConverter base64ImageConverter,
         IImgurGateway imgurGateway,
+        IImageCreationGateway imageCreationGateway,
         ILogger logger)
     {
         _repository = repository;
@@ -57,6 +60,7 @@ public class UrlsController : ControllerBase
         _base64ImageConverter = base64ImageConverter;
         _imgurGateway = imgurGateway;
         _logger = logger;
+        _imageCreationGateway = imageCreationGateway;
     }
 
     /// <summary>
@@ -97,6 +101,29 @@ public class UrlsController : ControllerBase
     public async Task<DateTime> GetShareUrlLastModifiedTimeStamp(string id)
     {
         return await _repository.GetUrlTimestampById(id);
+    }
+    
+    /// <summary>
+    /// Creates an image for the relevant shared route in the database if the image was not created
+    /// </summary>
+    /// <param name="id">The share route ID</param>
+    /// <param name="width">Optional - the width of the image</param>
+    /// <param name="height">Optional - the height of the image</param>
+    /// <returns>An image</returns>
+    [HttpGet]
+    [Route("{id}/thumbnail")]
+    public async Task<IActionResult> GetImageForShare(string id, [FromQuery] int? width = null, [FromQuery] int? height = null)
+    {
+        var url = await _repository.GetUrlById(id);
+        if (url == null)
+        {
+            return NotFound();
+        }
+
+        var imageData = string.IsNullOrWhiteSpace(url.Base64Preview)
+            ? await _imageCreationGateway.Create(url.DataContainer, width ?? 600, height ?? 315)
+            : _base64ImageConverter.ConvertToFile(url.Base64Preview).Content;
+        return new FileContentResult(imageData, new MediaTypeHeaderValue("image/png"));
     }
 
     private async Task<IActionResult> GetUrlAsFile(string id, string format, ShareUrl shareUrl)

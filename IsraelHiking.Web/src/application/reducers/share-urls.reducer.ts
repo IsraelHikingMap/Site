@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { ShareUrl, ShareUrlsState } from "../models/models";
+import type { ShareUrl, ShareUrlsState } from "../models";
 
 export class AddShareUrlAction {
     public static type = this.prototype.constructor.name;

@@ -10,7 +10,7 @@ import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { SelectedRouteService } from "./selected-route.service";
 import { SetFollowingAction, SetPannedAction, ToggleDistanceAction } from "../reducers/in-memory.reducer";
-import type { ApplicationState, LatLngAlt } from "../models/models";
+import type { ApplicationState, LatLngAlt } from "../models";
 
 export type LocationWithBearing = { 
     center: LatLngAlt; 

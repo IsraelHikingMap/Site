@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 
 import { SpatialService } from "./spatial.service";
-import type { LatLngAlt, MarkerData } from "../models/models";
+import type { LatLngAlt, MarkerData } from "../models";
 
 @Injectable()
 export class GeoJsonParser {

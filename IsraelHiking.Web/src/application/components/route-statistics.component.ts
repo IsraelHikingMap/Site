@@ -25,7 +25,7 @@ import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
 import { GeoLocationService } from "../services/geo-location.service";
 import { ToggleIsShowKmMarkersAction, ToggleIsShowSlopeAction } from "../reducers/configuration.reducer";
-import type { LatLngAlt, ApplicationState, LatLngAltTime } from "../models/models";
+import type { LatLngAlt, ApplicationState, LatLngAltTime } from "../models";
 
 declare type DragState = "start" | "drag" | "none";
 

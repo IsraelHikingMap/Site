@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import {load, dump, insert, GPSHelper, TagValues, type IExif} from "piexif-ts";
 
-import type { LatLngAlt, DataContainer, RouteSegmentData, MarkerData, RouteData } from "../models/models";
+import type { LatLngAlt, DataContainer, RouteSegmentData, MarkerData, RouteData } from "../models";
 
 @Injectable()
 export class ImageResizeService {

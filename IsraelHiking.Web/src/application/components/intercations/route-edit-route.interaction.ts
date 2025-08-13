@@ -19,7 +19,7 @@ import type {
     RouteSegmentData,
     LatLngAltTime,
     MarkerData
-} from "../../models/models";
+} from "../../models";
 
 const SEGMENT = "_segment_";
 const SEGMENT_POINT = "_segmentpoint_";

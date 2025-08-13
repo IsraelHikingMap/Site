@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { LatLngAltTime, MarkerData, RecordedRouteState } from "../models/models";
+import type { LatLngAltTime, MarkerData, RecordedRouteState } from "../models";
 
 export class StartRecordingAction {
     public static type = this.prototype.constructor.name;
@@ -22,6 +22,15 @@ export class AddRecordingRoutePointsAction {
     constructor(public latlngs: LatLngAltTime[]) {}
 }
 
+export class AddPendingProcessingRoutePointAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public position: GeolocationPosition) {}
+}
+
+export class ClearPendingProcessingRoutePointsAction {
+    public static type = this.prototype.constructor.name;
+}
+
 export class AddRecordingPoiAction {
     public static type = this.prototype.constructor.name;
     constructor(public markerData: MarkerData) {}
@@ -36,6 +45,7 @@ export class DeleteRecordingPoiAction {
     public static type = this.prototype.constructor.name;
     constructor(public index: number) {}
 }
+
 @State<RecordedRouteState>({
     name: "recordedRouteState",
     defaults: initialState.recordedRouteState
@@ -70,6 +80,25 @@ export class RecordedRouteReducer {
     public addRecordingPoints(ctx: StateContext<RecordedRouteState>, action: AddRecordingRoutePointsAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.route.latlngs = [...lastState.route.latlngs, ...action.latlngs];
+            return lastState;
+        }));
+    }
+
+    @Action(AddPendingProcessingRoutePointAction)
+    public addPendingProcessingPoint(ctx: StateContext<RecordedRouteState>, action: AddPendingProcessingRoutePointAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            if (lastState.pendingProcessing == null) {
+                lastState.pendingProcessing = [];
+            }
+            lastState.pendingProcessing.push(action.position);
+            return lastState;
+        }));
+    }
+
+    @Action(ClearPendingProcessingRoutePointsAction)
+    public clearPendingProcessingPoints(ctx: StateContext<RecordedRouteState>) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.pendingProcessing = [];
             return lastState;
         }));
     }

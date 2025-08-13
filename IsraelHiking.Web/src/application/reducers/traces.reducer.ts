@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { TracesState, Trace } from "../models/models";
+import type { TracesState, Trace } from "../models";
 
 export class AddTraceAction {
     public static type = this.prototype.constructor.name;

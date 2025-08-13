@@ -3,13 +3,13 @@ import { inject, TestBed } from "@angular/core/testing";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 
-import { Urls } from "application/urls";
+import { Urls } from "../urls";
 import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { LayersService } from "./layers.service";
 import { SetUserInfoAction, UserInfoReducer } from "../reducers/user.reducer";
 import { AddBaseLayerAction, AddOverlayAction, LayersReducer, RemoveBaseLayerAction, RemoveOverlayAction, SelectBaseLayerAction, ToggleOfflineAction, UpdateBaseLayerAction, UpdateOverlayAction } from "../reducers/layers.reducer";
-import type { EditableLayer, LayerData, Overlay } from "../models/models";
+import type { EditableLayer, LayerData, Overlay } from "../models";
 
 describe("LayersService", () => {
     beforeEach(() => {

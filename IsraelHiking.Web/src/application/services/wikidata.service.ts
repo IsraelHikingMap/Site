@@ -68,7 +68,6 @@ export class WikidataService {
                 poiCategory: "Wikipedia",
                 poiIconColor: "black",
                 poiSourceImageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Wikidata-logo.svg/128px-Wikidata-logo.svg.png",
-                poiLanguage: language
             },
             geometry: {
                 type: "Point",
@@ -91,8 +90,15 @@ export class WikidataService {
                 feature.properties["name:" + lang] = wikidata.labels[lang];
             }
         }
-        if (!feature.properties.description && !feature.properties.poiExternalDescription && !feature.properties["description:" + language]) {
-            GeoJSONUtils.setDescription(feature, wikidata.descriptions?.[language] || this.resources.noDescriptionAvailableInYourLanguage, language);
+        if (!feature.properties.description && !feature.properties.poiExternalDescription && !feature.properties["description:" + language] && wikidata.descriptions?.[language]) {
+            GeoJSONUtils.setDescription(feature, wikidata.descriptions[language], language);
+        }
+        if (language !== "en" && wikidata.sitelinks["enwiki"]) {
+            feature.properties["name:en"] = wikidata.sitelinks["enwiki"].title;
+            const imageAndDescription = await this.getDescriptionAndImageByLanguageAndTitle("en", wikidata.sitelinks["enwiki"].title);
+            if (imageAndDescription) {
+                feature.properties["description:en"] = imageAndDescription.description;
+            }
         }
         if (!feature.properties.website) {
             GeoJSONUtils.setProperty(feature, "website", `https://www.wikidata.org/wiki/${wikidataId}`);
@@ -102,7 +108,7 @@ export class WikidataService {
 
     private async getWikidataFromId(wikidataId: string): Promise<WikiDataPage> {
         const url = `https://www.wikidata.org/w/rest.php/wikibase/v1/entities/items/${wikidataId}`;
-        return await firstValueFrom(this.httpClient.get(url).pipe(timeout(3000))) as unknown as WikiDataPage;
+        return await firstValueFrom(this.httpClient.get<WikiDataPage>(url).pipe(timeout(3000)));
     }
 
     private async setDescriptionAndImages(wikidata: WikiDataPage, feature: GeoJSON.Feature, language: string): Promise<void> {
@@ -113,16 +119,26 @@ export class WikidataService {
         }
         const indexString = GeoJSONUtils.setProperty(feature, "website", `https://${language}.wikipedia.org/wiki/${title}`);
         feature.properties["poiSourceImageUrl" + indexString] = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/128px-Wikipedia-logo-v2.svg.png";
-        const wikipediaPage = await firstValueFrom(this.httpClient.get(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles=${title}&origin=*`).pipe(timeout(3000))) as unknown as WikiPage;
+        const imageAndDescription = await this.getDescriptionAndImageByLanguageAndTitle(language, title);
+        if (imageAndDescription?.image) {
+            GeoJSONUtils.setPropertyUnique(feature, "image", imageAndDescription.image);
+        }
+        if (imageAndDescription?.description) {
+            feature.properties["poiExternalDescription:" + language] = imageAndDescription.description;
+        }
+    }
+
+    private async getDescriptionAndImageByLanguageAndTitle(language: string, title: string): Promise<{ image?: string; description?: string }> {
+        const wikipediaPage = await firstValueFrom(this.httpClient.get<WikiPage>(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles=${title}&origin=*`).pipe(timeout(3000)));
         const pagesIds = Object.keys(wikipediaPage.query.pages);
         if (pagesIds.length === 0) {
-            return;
+            return null;
         }
         const page = wikipediaPage.query.pages[pagesIds[0]];
-        feature.properties.poiExternalDescription = page.extract;
-        if (page.original?.source) {
-            GeoJSONUtils.setPropertyUnique(feature, "image", page.original.source);
-        }
+        return {
+            description: page.extract,
+            image: page.original?.source
+        };
     }
 
     private setLocation(wikidata: WikiDataPage, feature: GeoJSON.Feature) {
@@ -141,7 +157,7 @@ export class WikidataService {
             return;
         }
         const url = `https://commons.wikimedia.org/w/api.php?action=query&titles=File:${wikidata.statements.P18[0].value.content}&prop=imageinfo&iiprop=url&redirects&format=json&origin=*`;
-        const imagePage = await firstValueFrom(this.httpClient.get(url).pipe(timeout(3000))) as unknown as WikiPage;
+        const imagePage = await firstValueFrom(this.httpClient.get<WikiPage>(url).pipe(timeout(3000)));
         const pagesIds = Object.keys(imagePage.query.pages);
         if (pagesIds.length === 0) {
             return;

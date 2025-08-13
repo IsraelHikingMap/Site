@@ -6,7 +6,7 @@ import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../services/resources.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
-import type { ApplicationState } from "../models/models";
+import type { ApplicationState } from "../models";
 
 @Component({
     selector: "center-me",

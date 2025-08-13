@@ -1,4 +1,4 @@
-﻿import type { EditableLayer, Overlay, CategoriesGroup } from "../models";
+﻿import type { EditableLayer, Overlay, CategoriesGroup } from "..";
 
 export type LayersState = {
     baseLayers: EditableLayer[];

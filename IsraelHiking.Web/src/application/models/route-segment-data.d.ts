@@ -1,4 +1,4 @@
-﻿import type { LatLngAlt, LatLngAltTime } from "./models";
+﻿import type { LatLngAlt, LatLngAltTime } from ".";
 
 export type RoutingType = "Hike" | "Bike" | "4WD" | "None";
 

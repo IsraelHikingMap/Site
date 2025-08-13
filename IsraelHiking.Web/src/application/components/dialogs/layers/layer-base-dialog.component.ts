@@ -1,14 +1,14 @@
+import { inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable, firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
 import { LayersService } from "../../../services/layers.service";
-import type { LayerData, ApplicationState, EditableLayer, LocationState } from "../../../models/models";
-import type { Immutable } from "immer";
-import { inject } from "@angular/core";
+import type { LayerData, ApplicationState, EditableLayer, LocationState } from "../../../models";
 
 export abstract class LayerBaseDialogComponent {
     public title: string;

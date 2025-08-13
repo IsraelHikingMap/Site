@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { PointsOfInterestState, MarkerData } from "../models/models";
+import type { PointsOfInterestState, MarkerData } from "../models";
 
 
 export class SetSelectedPoiAction {

@@ -1,4 +1,4 @@
-﻿import type { DataContainer } from "./models";
+﻿import type { DataContainer } from ".";
 
 export type ShareUrl = {
     id: string;

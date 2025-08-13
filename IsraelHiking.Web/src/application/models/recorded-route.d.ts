@@ -1,4 +1,4 @@
-import { LatLngAltTime, MarkerData } from "./models";
+import { LatLngAltTime, MarkerData } from ".";
 
 export type RecordedRoute = {
     markers: MarkerData[];

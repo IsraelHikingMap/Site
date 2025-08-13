@@ -293,7 +293,7 @@ describe("OsmTagsService", () => {
         OsmTagsService.setIconColorCategory(feature, poi);
         // Assert
         expect(poi.properties.poiIconColor).toBe("blue");
-        expect(poi.properties.poiIcon).toBe("icon-waterfall");
+        expect(poi.properties.poiIcon).toBe("icon-river");
         expect(poi.properties.poiCategory).toBe("Water");
     });
 
@@ -345,7 +345,7 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiCategory).toBe("Other");
     });
 
-    it("Should set icon color category for attraction", () => {
+    it("Should set icon color category for artwork", () => {
         // Arrange
         const feature = createFeature({tourism: "artwork" });
         const poi = createPoi();
@@ -353,7 +353,7 @@ describe("OsmTagsService", () => {
         OsmTagsService.setIconColorCategory(feature, poi);
         // Assert
         expect(poi.properties.poiIconColor).toBe("#ffb800");
-        expect(poi.properties.poiIcon).toBe("icon-star");
+        expect(poi.properties.poiIcon).toBe("icon-artwork");
         expect(poi.properties.poiCategory).toBe("Other");
     });
 
