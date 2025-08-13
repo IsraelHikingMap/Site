@@ -170,6 +170,36 @@ describe('TranslationService', () => {
         expect(bestDescription).toBe("Description in English");
     }));
 
+    it('should return the best description from external description in any language', inject([TranslationService], (service: TranslationService) => {
+        const feature: GeoJSON.Feature = {
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates: [0, 0]
+            },
+            properties: {
+                "poiExternalDescription:ar": "External description in Arabic"
+            }
+        };
+        const bestDescription = service.getBestDescription(feature);
+        expect(bestDescription).toBe("External description in Arabic");
+    }));
+
+    it('should return empty string if no relevant description is available', inject([TranslationService], (service: TranslationService) => {
+        const feature: GeoJSON.Feature = {
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates: [0, 0]
+            },
+            properties: {
+                "description:ar": "Description in Arabic"
+            }
+        };
+        const bestDescription = service.getBestDescription(feature);
+        expect(bestDescription).toBe("");
+    }));
+
     it('should get a description translation', inject([TranslationService, HttpTestingController], async (service: TranslationService, backend: HttpTestingController) => {
         const feature: GeoJSON.Feature = {
             type: "Feature",
