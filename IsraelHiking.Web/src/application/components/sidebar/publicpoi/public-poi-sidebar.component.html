@@ -68,12 +68,9 @@
                         {{description}}
                     </p>
                 </div>
-                <div class="flex flex-row cursor-pointer">
-                    <span class="w-full text-sm text-center" *ngIf="showToggleTranslation() && showingTranslated" (click)="toggleTranslation()">
-                        {{resources.translatedBy}}
-                    </span>
-                    <span class="w-full text-sm text-center" *ngIf="showToggleTranslation() && !showingTranslated" (click)="toggleTranslation()">
-                        {{resources.clickToTranslate}}
+                <div class="flex flex-row cursor-pointer" *ngIf="showToggleTranslation()" (click)="toggleTranslation()" angulartics2On="click" angularticsCategory="POI" angularticsAction="Toggle translation">
+                    <span class="w-full text-sm text-center">
+                        {{showingTranslated ? resources.translatedBy : resources.clickToTranslate}}
                     </span>
                 </div>
                 <div class="flex flex-row max-sm:hidden" *ngIf="isShowSeeAlso()">
