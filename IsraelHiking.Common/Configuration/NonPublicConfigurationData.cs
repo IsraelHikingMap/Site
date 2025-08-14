@@ -18,4 +18,8 @@ public class NonPublicConfigurationData
     /// Fovea API Key for server side receipt validation
     /// </summary>
     public string FoveaApiKey { get; set; }
+    /// <summary>
+    /// Revenuecat API key for server side validation
+    /// </summary>
+    public string RevenueCatApiKey { get; set; }
 }
