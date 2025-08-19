@@ -38,8 +38,8 @@ public class FilesController : ControllerBase
     public FilesController(IElevationGateway elevationGateway,
         IRemoteFileFetcherGateway remoteFileFetcherGateway,
         IDataContainerConverterService dataContainerConverterService,
-        IOfflineFilesService offlineFilesService, 
-        IReceiptValidationGateway receiptValidationGateway, 
+        IOfflineFilesService offlineFilesService,
+        IReceiptValidationGateway receiptValidationGateway,
         ILogger logger)
     {
         _elevationGateway = elevationGateway;
@@ -72,7 +72,7 @@ public class FilesController : ControllerBase
     /// <returns>A byte representation of file in the converted format</returns>
     [HttpPost]
     // POST api/files?format=gpx
-    public async Task<IActionResult> PostConvertFile(string format, [FromBody]DataContainerPoco dataContainer)
+    public async Task<IActionResult> PostConvertFile(string format, [FromBody] DataContainerPoco dataContainer)
     {
         if (!_dataContainerConverterService.IsValidFormat(format))
         {
@@ -152,6 +152,19 @@ public class FilesController : ControllerBase
         }
         _logger.LogInformation($"Getting the offline file for user: {User.Identity?.Name}, file: {id}");
         var file = _offlineFilesService.GetFileContent(id);
-        return File(file, id.EndsWith("json") ? "application/json": "application/zip", id);
+        return File(file, id.EndsWith("json") ? "application/json" : "application/zip", id);
+    }
+    
+
+    /// <summary>
+    /// Check if user is subscribed
+    /// </summary>
+    /// <returns>true if the user is subscribed, false otherwise</returns>
+    [HttpGet]
+    [Route("subscribed")]
+    [Authorize]
+    public async Task<bool> IsSubscribed()
+    {
+        return await _receiptValidationGateway.IsEntitled(User.Identity?.Name);
     }
 }

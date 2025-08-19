@@ -130,17 +130,4 @@ export class OfflineFilesDownloadService {
             `[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
         return fileNames as Record<string, string>;
     }
-
-    public async isExpired(): Promise<boolean> {
-        try {
-            await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
-                params: { lastModified: null }
-            }).pipe(timeout(5000)));
-            return false;
-        } catch (ex) {
-            const typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
-            return typeAndMessage.type === "server" && typeAndMessage.statusCode === 403;
-        }
-
-    }
 }
