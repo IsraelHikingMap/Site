@@ -37,7 +37,7 @@ public class FilesControllerTests
     private IGpxDataContainerConverter _gpxDataContainerConverter;
     private IOfflineFilesService _offlineFilesService;
     private IReceiptValidationGateway _receiptValidationGateway;
-        
+
     private const string GPX_DATA = @"<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
             <gpx xmlns='http://www.topografix.com/GPX/1/1' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd' version='1.1' creator='IsraelHikingMap'>
             <wpt lat='31.85073184447357' lon='34.964332580566406'>
@@ -80,7 +80,7 @@ public class FilesControllerTests
         _remoteFileFetcherGateway.GetFileContent(url).Returns(new RemoteFileFetcherGatewayResponse { Content = bytes, FileName = "file.KML" });
         _gpsBabelGateway.ConvertFileFromat(bytes, Arg.Is<string>(x => x.Contains("kml")), Arg.Is<string>(x => x.Contains("gpx"))).Returns(bytes);
         _controller.SetupIdentity();
-            
+
         var dataContainer = _controller.GetRemoteFile(url).Result;
 
         Assert.AreEqual(1, dataContainer.Routes.Count);
@@ -94,7 +94,7 @@ public class FilesControllerTests
 
         Assert.IsNotNull(result);
     }
-        
+
     [TestMethod]
     public void PostConvertFile_ConvertToGpx_ShouldReturnByteArray()
     {
@@ -131,13 +131,13 @@ public class FilesControllerTests
 
         Assert.IsNotNull(results);
     }
-        
+
     [TestMethod]
     public void PostOpenFile_FileWithBadExtension_ShouldReturnBadRequest()
     {
         var file = Substitute.For<IFormFile>();
         file.FileName.Returns("someFile.nope!");
-            
+
         var results = _controller.PostOpenFile(file).Result as BadRequestResult;
 
         Assert.IsNotNull(results);
@@ -170,10 +170,10 @@ public class FilesControllerTests
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(false);
 
         var results = _controller.GetOfflineFiles(DateTime.Now).Result as ForbidResult;
-            
+
         Assert.IsNotNull(results);
     }
-        
+
     [TestMethod]
     public void GetOfflineFiles_CommunicationIssue_ShouldGetServerError()
     {
@@ -182,18 +182,18 @@ public class FilesControllerTests
 
         Assert.ThrowsException<AggregateException>(() => _controller.GetOfflineFiles(DateTime.Now).Result);
     }
-        
+
     [TestMethod]
     public void GetOfflineFiles_ShouldGetTheList()
     {
         _controller.SetupIdentity();
-        var dict = new Dictionary<string, DateTime>(); 
+        var dict = new Dictionary<string, DateTime>();
         _offlineFilesService.GetUpdatedFilesList(Arg.Any<DateTime>())
             .Returns(dict);
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
-            
+
         var results = _controller.GetOfflineFiles(DateTime.Now).Result as OkObjectResult;
-            
+
         Assert.IsNotNull(results);
         var resultDict = results.Value as Dictionary<string, DateTime>;
         Assert.IsNotNull(resultDict);
@@ -207,19 +207,30 @@ public class FilesControllerTests
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(false);
 
         var results = _controller.GetOfflineFile("file").Result as ForbidResult;
-            
+
         Assert.IsNotNull(results);
     }
-        
+
     [TestMethod]
     public void GetOfflineFile_ShouldGetIt()
     {
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
         _offlineFilesService.GetFileContent("file").Returns(new MemoryStream());
-            
+
         var results = _controller.GetOfflineFile("file").Result as FileResult;
-            
+
         Assert.IsNotNull(results);
+    }
+
+    [TestMethod]
+    public void IsSubscribed_ShouldGetIt()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+
+        var results = _controller.IsSubscribed().Result;
+
+        Assert.IsTrue(results);
     }
 }
