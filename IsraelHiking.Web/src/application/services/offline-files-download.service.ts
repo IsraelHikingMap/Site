@@ -120,7 +120,7 @@ export class OfflineFilesDownloadService {
             this.loggingService.info("[Offline Download] This is the first time downloading pmtiles, downloading all files");
             lastModifiedString = null;
         }
-        const fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
+        const fileNames = await firstValueFrom(this.httpClient.get<Record<string, string>>(Urls.offlineFiles, {
             params: { 
                 lastModified: lastModifiedString,
                 pmtiles: true
@@ -128,6 +128,6 @@ export class OfflineFilesDownloadService {
         }).pipe(timeout(5000)));
         this.loggingService.info(
             `[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
-        return fileNames as Record<string, string>;
+        return fileNames;
     }
 }

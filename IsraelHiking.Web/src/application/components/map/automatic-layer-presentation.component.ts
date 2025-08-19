@@ -177,9 +177,12 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             if (!this.isBaselayer() && layer.metadata && !(layer.metadata as any)["IHM:overlay"]) {
                 continue;
             }
-            if (!this.isBaselayer()) {
+            if (!this.isBaselayer() && layer.type === "background") {
+                continue;
+            }
+            if (!this.isBaselayer() && layer.type !== "background") {
                 layer.id = layerData.key + "_" + layer.id;
-                (layer as any).source = layerData.key + "_" + (layer as any).source;
+                layer.source = layerData.key + "_" + layer.source;
             }
             this.mapComponent.mapInstance.addLayer(layer, this.before());
             this.jsonLayersIds.push(layer.id);

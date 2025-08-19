@@ -47,7 +47,7 @@ export class ElevationProvider {
                 range: false,
                 shape: missingElevation.map(l => ({ lat: l.lat, lon: l.lng}))
             };
-            const response = await firstValueFrom(this.httpClient.post("https://valhalla1.openstreetmap.de/height", body)) as { height: number[]};
+            const response = await firstValueFrom(this.httpClient.post<{ height: number[]}>("https://valhalla1.openstreetmap.de/height", body));
             for (let index = 0; index < relevantIndexes.length; index++) {
                 latlngs[relevantIndexes[index]].alt = response.height[index];
             }
@@ -56,9 +56,9 @@ export class ElevationProvider {
 
         try {
             const points = missingElevation.map(latlng => [latlng.lng, latlng.lat]);
-            const response = await firstValueFrom(this.httpClient.post(Urls.elevation, points).pipe(timeout(1000)));
+            const response = await firstValueFrom(this.httpClient.post<number[]>(Urls.elevation, points).pipe(timeout(1000)));
             for (let index = 0; index < relevantIndexes.length; index++) {
-                latlngs[relevantIndexes[index]].alt = (response as number[])[index];
+                latlngs[relevantIndexes[index]].alt = response[index];
             }
         } catch (ex) {
             try {

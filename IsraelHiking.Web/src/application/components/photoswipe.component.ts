@@ -41,7 +41,7 @@ export class PhotoSwpieComponent implements AfterViewInit{
 
         pswp.on("destroy", () => this.closed.emit());
         pswp.on("beforeOpen", () => {
-            const ds = pswp?.options?.dataSource as any[];
+            const ds = pswp?.options?.dataSource as { src: string; width?: number; height?: number }[];
               for (let idx = 0; idx < ds.length; idx++) {
                 const item = ds[idx];
                 const img = new Image();

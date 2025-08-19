@@ -116,7 +116,7 @@ export class FileService {
                 const styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
                 return JSON.parse(styleText) as StyleSpecification;
             }
-            return await firstValueFrom(this.httpClient.get(url)) as StyleSpecification;
+            return await firstValueFrom(this.httpClient.get<StyleSpecification>(url));
         } catch (ex) {
             this.loggingService.error(`[Files] Unable to get style file, isOffline: ${isOffline}, ${(ex as Error).message}`);
             return {
@@ -135,7 +135,7 @@ export class FileService {
     public async saveToFile(fileName: string, format: string, dataContainer: DataContainer) {
         const responseData = format === "gpx"
             ? await this.gpxDataContainerConverterService.toGpx(dataContainer)
-            : await firstValueFrom(this.httpClient.post(Urls.files + "?format=" + format, dataContainer)) as string;
+            : await firstValueFrom(this.httpClient.post<string>(Urls.files + "?format=" + format, dataContainer));
 
         if (!this.runningContextService.isCapacitor) {
             const blobToSave = await this.base64StringToBlob(responseData);
@@ -219,7 +219,7 @@ export class FileService {
                 const formData = new FormData();
                 formData.append("file", file, file.name);
                 this.loggingService.info(`[Files] The file is not a GPX file, sending it to server for conversion: ${file.name}`);
-                dataContainer = await firstValueFrom(this.httpClient.post(Urls.openFile, formData)) as DataContainer;
+                dataContainer = await firstValueFrom(this.httpClient.post<DataContainer>(Urls.openFile, formData));
             }
         }
         if (dataContainer.routes.length === 0 ||
@@ -230,7 +230,7 @@ export class FileService {
     }
 
     public openFromUrl(url: string): Promise<DataContainer> {
-        return firstValueFrom(this.httpClient.get(Urls.files + "?url=" + url)) as Promise<DataContainer>;
+        return firstValueFrom(this.httpClient.get<DataContainer>(Urls.files + "?url=" + url));
     }
 
     public async addRoutesFromUrl(url: string) {

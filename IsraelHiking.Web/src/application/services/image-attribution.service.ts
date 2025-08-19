@@ -72,7 +72,7 @@ export class ImageAttributionService {
         }
         const address = `${wikiPrefix}w/api.php?action=query&prop=imageinfo|revisions&iiprop=extmetadata&rvprop=content&format=json&origin=*&titles=File:${imageName}`;
         try {
-            const response = await firstValueFrom(this.httpClient.get(address).pipe(timeout(3000))) as unknown as WikiPage;
+            const response = await firstValueFrom(this.httpClient.get<WikiPage>(address).pipe(timeout(3000)));
             const pagesIds = Object.keys(response.query.pages);
             if (pagesIds.length === 0) {
                 return null;
