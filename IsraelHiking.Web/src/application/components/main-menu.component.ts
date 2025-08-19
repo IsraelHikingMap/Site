@@ -267,6 +267,5 @@ export class MainMenuComponent {
             return;
         }
         this.purchaseService.order();
-        this.sidebarService.show("layers");
     }
 }
