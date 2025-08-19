@@ -19,7 +19,7 @@ public class NonPublicConfigurationData
     /// </summary>
     public string FoveaApiKey { get; set; }
     /// <summary>
-    /// Revenuecat API key for server side validation
+    /// RevenueCat API key for server side validation
     /// </summary>
     public string RevenueCatApiKey { get; set; }
 }
