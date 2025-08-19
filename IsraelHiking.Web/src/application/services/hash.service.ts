@@ -110,7 +110,7 @@ export class HashService {
             return;
         }
         if (inMemoryState.fileUrl) {
-            const queryParams = {} as any;
+            const queryParams: Record<string, string> = {};
             if (inMemoryState.baseLayer) {
                 queryParams.baselayer = inMemoryState.baseLayer;
             }

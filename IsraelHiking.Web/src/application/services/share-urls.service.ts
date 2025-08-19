@@ -67,9 +67,9 @@ export class ShareUrlsService {
 
     private async getShareFromServerAndCacheIt(shareUrlId: string, timeToWait = 60000): Promise<ShareUrl> {
         this.loggingService.info(`[Shares] Getting share by id ${shareUrlId}`);
-        const shareUrl = await firstValueFrom(this.httpClient.get(Urls.urls + shareUrlId).pipe(timeout(timeToWait)));
-        this.databaseService.storeShareUrl(shareUrl as ShareUrl);
-        return shareUrl as ShareUrl;
+        const shareUrl = await firstValueFrom(this.httpClient.get<ShareUrl>(Urls.urls + shareUrlId).pipe(timeout(timeToWait)));
+        this.databaseService.storeShareUrl(shareUrl);
+        return shareUrl;
     }
 
     public async getShareUrl(shareUrlId: string): Promise<ShareUrl> {
@@ -79,8 +79,8 @@ export class ShareUrlsService {
         }
         // Refresh it in the background if needed...
         try {
-            const timestamp = await firstValueFrom(this.httpClient.get(Urls.urls + shareUrlId + "/timestamp").pipe(timeout(2000)));
-            if (new Date(timestamp as string) < new Date(shareUrl.lastModifiedDate)) {
+            const timestamp = await firstValueFrom(this.httpClient.get<string>(Urls.urls + shareUrlId + "/timestamp").pipe(timeout(2000)));
+            if (new Date(timestamp) < new Date(shareUrl.lastModifiedDate)) {
                 return shareUrl;
             }
             this.loggingService.warning(`[Shares] Cached share is outdated ${shareUrlId}, fetching it again...`);
@@ -105,8 +105,7 @@ export class ShareUrlsService {
             let sharesToGetFromServer = [] as ShareUrl[];
             this.loggingService.info("[Shares] Starting shares sync, last modified: " +
                 (sharesLastSuccessfullSync || new Date(0)).toUTCString());
-            const shareUrls$ = this.httpClient.get(Urls.urls).pipe(timeout(20000));
-            const shareUrls = await firstValueFrom(shareUrls$) as ShareUrl[];
+            const shareUrls = await firstValueFrom(this.httpClient.get<ShareUrl[]>(Urls.urls).pipe(timeout(20000)));
             this.loggingService.info("[Shares] Got the list of shares, starting to compare against exiting list");
             const exitingShareUrls = this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState).shareUrls;
             for (const shareUrl of shareUrls) {
@@ -142,7 +141,7 @@ export class ShareUrlsService {
 
     public async createShareUrl(shareUrl: ShareUrl): Promise<Immutable<ShareUrl>> {
         this.loggingService.info(`[Shares] Creating share with title: ${shareUrl.title}`);
-        const createdShareUrl = await firstValueFrom(this.httpClient.post(Urls.urls, shareUrl)) as ShareUrl;
+        const createdShareUrl = await firstValueFrom(this.httpClient.post<ShareUrl>(Urls.urls, shareUrl));
         createdShareUrl.lastModifiedDate = new Date(createdShareUrl.lastModifiedDate);
         this.store.dispatch(new AddShareUrlAction(createdShareUrl));
         return createdShareUrl;
@@ -150,7 +149,7 @@ export class ShareUrlsService {
 
     public async updateShareUrl(shareUrl: ShareUrl): Promise<Immutable<ShareUrl>> {
         this.loggingService.info(`[Shares] Updating share with id: ${shareUrl.id}`);
-        const updatedShareUrl = await firstValueFrom(this.httpClient.put(Urls.urls + shareUrl.id, shareUrl)) as ShareUrl;
+        const updatedShareUrl = await firstValueFrom(this.httpClient.put<ShareUrl>(Urls.urls + shareUrl.id, shareUrl));
         updatedShareUrl.lastModifiedDate = new Date(updatedShareUrl.lastModifiedDate);
         this.store.dispatch(new UpdateShareUrlAction(updatedShareUrl));
         return updatedShareUrl;

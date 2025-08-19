@@ -16,8 +16,8 @@ class CapacitorSource implements Source {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = (event) => {
-                const arrayBuffer = event.target.result;
-                resolve({ data: arrayBuffer as any});
+                const arrayBuffer = event.target.result as ArrayBuffer;
+                resolve({ data: arrayBuffer });
             };
             reader.onerror = () => {
                 reject(new Error("Unable to read file: " + this.file.name));

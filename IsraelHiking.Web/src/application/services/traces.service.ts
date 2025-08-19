@@ -43,8 +43,7 @@ export class TracesService {
 
     public getMissingParts(traceId: string): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
         this.loggingService.info(`[Traces] Getting missing parts for ${traceId}`);
-        const missingParts$ = this.httpClient.post(Urls.missingParts + "?traceId=" + traceId, null);
-        return firstValueFrom(missingParts$) as Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
+        return firstValueFrom(this.httpClient.post<GeoJSON.FeatureCollection<GeoJSON.LineString>>(Urls.missingParts + "?traceId=" + traceId, null));
     }
 
     public async initialize(): Promise<void> {
@@ -78,7 +77,7 @@ export class TracesService {
     public async syncTraces(): Promise<void> {
         try {
             this.loggingService.info("[Traces] Starting syncing traces");
-            const response = await firstValueFrom(this.httpClient.get(Urls.osmGpxFiles).pipe(timeout(20000))) as unknown as OsmTraces;
+            const response = await firstValueFrom(this.httpClient.get<OsmTraces>(Urls.osmGpxFiles).pipe(timeout(20000)));
             this.loggingService.info("[Traces] Got traces from server, updating local store");
             const existingTraces = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces;
             const serverTraces = response.traces.map(traceJson => ({
@@ -129,7 +128,7 @@ export class TracesService {
                 dataContainer: storedTrace.dataContainer
             };
         }
-        const dataContainer = await firstValueFrom(this.httpClient.get(Urls.traceAsDataContainer + traceId)) as DataContainer;
+        const dataContainer = await firstValueFrom(this.httpClient.get<DataContainer>(Urls.traceAsDataContainer + traceId));
         this.loggingService.info(`[Traces] Got trace from server: ${traceId}`);
         const traceToStore = {
             ...trace,

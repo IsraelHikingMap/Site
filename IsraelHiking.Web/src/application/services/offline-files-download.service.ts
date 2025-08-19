@@ -37,8 +37,8 @@ export class OfflineFilesDownloadService {
     public async downloadTile(tileX: number, tileY: number): Promise<"up-to-date" | "downloaded" | "error" | "aborted"> {
         this.loggingService.info("[Offline Download] Starting downloading offline files");
         try {
-            const fileNamesForRoot = await this.getFilesToDownloadDictionary();
-            const fileNamesForTile = await this.getFilesToDownloadDictionary(tileX, tileY);
+            const fileNamesForRoot = await this.getFilesToDownload();
+            const fileNamesForTile = await this.getFilesToDownload(tileX, tileY);
             if (fileNamesForTile.length === 0 && fileNamesForRoot.length === 0) {
                 this.loggingService.info("[Offline Download] No files to download, all files are up to date");
                 return "up-to-date";
@@ -126,7 +126,7 @@ export class OfflineFilesDownloadService {
         this.tilesProgressChanged.emit({tileX, tileY, progressValue});
     }
 
-    private async getFilesToDownloadDictionary(tileX?: number, tileY?: number): Promise<[string, string][]> {
+    private async getFilesToDownload(tileX?: number, tileY?: number): Promise<[string, string][]> {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         const lastModifiedString = offlineState.downloadedTiles ? offlineState.downloadedTiles[`${tileX}-${tileY}`]?.toISOString() : null;
         const params: Record<string, string> = {};
@@ -137,14 +137,12 @@ export class OfflineFilesDownloadService {
             params.tileX = tileX.toString();
             params.tileY = tileY.toString();
         }
-        const fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {params: params}).pipe(timeout(5000))) as any as Record<string, string>;
+        const fileNames = await firstValueFrom(this.httpClient.get<Record<string, string>>(Urls.offlineFiles, {params: params}).pipe(timeout(5000)));
         this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
         if (Object.keys(fileNames).length === 0) {
             return [];
         }
-        const sortedFileList = Object.entries(fileNames).map(([key, value]) => [key, value] as [string, string]);
-        sortedFileList.sort((a, b) => { if (a[0].endsWith("json")) { return -1; } if (b[0].endsWith("json")) { return 1; } return 0; });
-        return sortedFileList;
+        return Object.entries(fileNames).map(([key, value]) => [key, value] as [string, string]);
     }
 
     public abortCurrentDownload(): void {

@@ -196,9 +196,9 @@ export class PoiService {
             const postAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
             const putAddress = Urls.poi + this.getFeatureId(feature) + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
             const poi$ = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(this.getFeatureId(feature))
-                ? this.httpClient.post(postAddress, feature).pipe(timeout(180000))
-                : this.httpClient.put(putAddress, feature).pipe(timeout(180000));
-            const poi = await firstValueFrom(poi$) as GeoJSON.Feature;
+                ? this.httpClient.post<GeoJSON.Feature>(postAddress, feature).pipe(timeout(180000))
+                : this.httpClient.put<GeoJSON.Feature>(putAddress, feature).pipe(timeout(180000));
+            const poi = await firstValueFrom(poi$);
             if (feature.properties.poiIsSimple) {
                 this.loggingService.info("[POIs] Uploaded successfully a simple feature with generated id: " +
                 `${firstItemId} at: ${JSON.stringify(GeoJSONUtils.getLocation(feature))}, removing from upload queue`);
@@ -409,8 +409,7 @@ export class PoiService {
         try {
             const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
             for (const categoriesGroup of layersState.categoriesGroups) {
-                const categories$ = this.httpClient.get(Urls.poiCategories + categoriesGroup.type).pipe(timeout(10000));
-                const categories = await firstValueFrom(categories$) as Category[];
+                const categories = await firstValueFrom(this.httpClient.get<Category[]>(Urls.poiCategories + categoriesGroup.type).pipe(timeout(10000)));
                 let visibility = categoriesGroup.visible;
                 if (this.runningContextService.isIFrame) {
                     this.store.dispatch(new SetCategoriesGroupVisibilityAction(categoriesGroup.type, false));
@@ -513,7 +512,7 @@ export class PoiService {
                 }
                 default: { 
                     const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
-                    const poi = await firstValueFrom(this.httpClient.get(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000))) as any as GeoJSON.Feature;
+                    const poi = await firstValueFrom(this.httpClient.get<GeoJSON.Feature>(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000)));
                     this.poisCache.splice(0, 0, poi);
                     const clone = cloneDeep(poi);
                     this.store.dispatch(new SetSelectedPoiAction(clone));
@@ -653,12 +652,12 @@ export class PoiService {
     public async getClosestPoint(location: LatLngAlt, source: string, language: string): Promise<MarkerData> {
         let feature = null;
         try {
-            const feature$ = this.httpClient.get(Urls.poiClosest, { params: {
+            const feature$ = this.httpClient.get<GeoJSON.Feature<GeoJSON.Point>>(Urls.poiClosest, { params: {
                 location: location.lat + "," + location.lng,
                 source,
                 language
             }}).pipe(timeout(1000));
-            feature = await firstValueFrom(feature$) as GeoJSON.Feature<GeoJSON.Point>;
+            feature = await firstValueFrom(feature$);
         } catch (ex) {
             this.loggingService.warning(`[POIs] Unable to get closest POI: ${(ex as Error).message}`);
         }

@@ -114,7 +114,7 @@ export class FileService {
             if (this.runningContextService.isCapacitor && url.startsWith(".")) {
                 return await this.getLocalStyleJson(url);
             }
-            return await firstValueFrom(this.httpClient.get(url).pipe(timeout(5000))) as any as StyleSpecification;
+            return await firstValueFrom(this.httpClient.get<StyleSpecification>(url).pipe(timeout(5000)));
         } catch (ex) {
             if (tryLocalStyle) {
                 return await this.getLocalStyleJson(url);
@@ -142,7 +142,7 @@ export class FileService {
     public async saveToFile(fileName: string, format: string, dataContainer: DataContainer) {
         const responseData = format === "gpx"
             ? await this.gpxDataContainerConverterService.toGpx(dataContainer)
-            : await firstValueFrom(this.httpClient.post(Urls.files + "?format=" + format, dataContainer)) as string;
+            : await firstValueFrom(this.httpClient.post<string>(Urls.files + "?format=" + format, dataContainer));
 
         if (!this.runningContextService.isCapacitor) {
             const blobToSave = await this.base64StringToBlob(responseData);
@@ -226,7 +226,7 @@ export class FileService {
                 const formData = new FormData();
                 formData.append("file", file, file.name);
                 this.loggingService.info(`[Files] The file is not a GPX file, sending it to server for conversion: ${file.name}`);
-                dataContainer = await firstValueFrom(this.httpClient.post(Urls.openFile, formData)) as DataContainer;
+                dataContainer = await firstValueFrom(this.httpClient.post<DataContainer>(Urls.openFile, formData));
             }
         }
         if (dataContainer.routes.length === 0 ||
@@ -248,7 +248,7 @@ export class FileService {
     }
 
     public async openFromUrl(url: string): Promise<DataContainer> {
-        const container = await firstValueFrom(this.httpClient.get(Urls.files + "?url=" + url)) as DataContainer;
+        const container = await firstValueFrom(this.httpClient.get<DataContainer>(Urls.files + "?url=" + url));
         await this.addElevationToDataContainer(container);
         return container;
     }
