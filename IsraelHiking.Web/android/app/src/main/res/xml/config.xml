@@ -15,10 +15,6 @@
     <param name="android-package" value="com.ayogo.cordova.oauth.OAuthPlugin"/>
   </feature>
 
-  <feature name="InAppBillingPlugin">
-    <param name="android-package" value="cc.fovea.PurchasePlugin"/>
-  </feature>
-
   
   <preference name="OAuthScheme" value="mapeak" />
 </widget>

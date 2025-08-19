@@ -2,7 +2,7 @@ import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { firstValueFrom, timeout } from "rxjs";
-import "cordova-plugin-purchase";
+import { Purchases } from "@revenuecat/purchases-capacitor";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
@@ -34,8 +34,8 @@ export class PurchaseService {
                 return;
             }
             this.loggingService.info("[Store] Logged in: " + userInfo.id);
-            this.initializeCdvStore(userInfo.id);
-            
+            this.initializeStoreConnection(userInfo.id);
+
             if (await this.isExpired()) {
                 this.loggingService.debug("[Store] Product is expired from server");
                 this.store.dispatch(new SetOfflineSubscribedAction(false));
@@ -49,50 +49,31 @@ export class PurchaseService {
 
     private async isExpired(): Promise<boolean> {
         try {
-            return !(await firstValueFrom(this.httpClient.get(Urls.subscribed).pipe(timeout(5000))) as any as boolean);
+            return !(await firstValueFrom(this.httpClient.get<boolean>(Urls.subscribed).pipe(timeout(5000))));
         } catch {
             return false;
         }
     }
 
-    private async initializeCdvStore(userId: string) {
-        CdvPurchase.Logger.console = {
-            error: (message: string | unknown) => this.loggingService.error(this.logMessageToString(message)),
-            warn: (message: string | unknown) => this.loggingService.warning(this.logMessageToString(message)),
-            log: (message: string | unknown) => this.loggingService.info(this.logMessageToString(message))
-        };
-        CdvPurchase.store.validator = {
-            url: "https://validator.iaptic.com/v1/validate?appName=com.mapeak" +
-            "&apiKey=1245b587-4bbc-4fbd-a3f1-d51169a53063",
-            timeout: 5000,
-        };
+    private async checkAndUpdateOfflineAvailability() {
+        const customerInfo = await Purchases.getCustomerInfo();
+        if (customerInfo.customerInfo.entitlements.active[OFFLINE_MAPS_SUBSCRIPTION]?.isActive) {
+            this.loggingService.info("[Store] Product owned! Last modified: " + customerInfo.customerInfo.entitlements.active[OFFLINE_MAPS_SUBSCRIPTION]?.latestPurchaseDate);
+            this.store.dispatch(new SetOfflineSubscribedAction(true));
+        }
+    }
 
-        CdvPurchase.store.applicationUsername = userId;
-        CdvPurchase.store.register([{
-            id: OFFLINE_MAPS_SUBSCRIPTION,
-            type: CdvPurchase.ProductType.PAID_SUBSCRIPTION,
-            platform: CdvPurchase.Platform.GOOGLE_PLAY
-        }, {
-            id: OFFLINE_MAPS_SUBSCRIPTION,
-            type: CdvPurchase.ProductType.PAID_SUBSCRIPTION,
-            platform: CdvPurchase.Platform.APPLE_APPSTORE
-        }]);
-        CdvPurchase.store.when().approved((transaction) => transaction.verify());
-        CdvPurchase.store.when().unverified((unverified) => {
-            this.loggingService.info(`[Store] Unverified. code: ${unverified.payload.code}, ` +
-                "status: " + unverified.payload.status + ", " + unverified.payload.message);
-        });
-        CdvPurchase.store.when().verified((receipt) => {
-            this.loggingService.info(`[Store] Verified. ${receipt.id}, owned: ${CdvPurchase.store.owned(OFFLINE_MAPS_SUBSCRIPTION)}`);
-            if (CdvPurchase.store.owned(OFFLINE_MAPS_SUBSCRIPTION)) {
-                const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-                this.loggingService.info("[Store] Product owned! Number of tiles downloaded: " + Object.keys(offlineState.downloadedTiles || {}).length);
-                this.store.dispatch(new SetOfflineSubscribedAction(true));
-            }
-            receipt.finish();
-        });
-        CdvPurchase.store.verbosity = CdvPurchase.LogLevel.WARNING;
-        await CdvPurchase.store.initialize();
+    private async initializeStoreConnection(userId: string) {
+        try {
+            const apiKey = this.runningContextService.isIos ? "appl_dYhzcYSUYYFWbXBeHYPMsDmraQp" : "goog_WFtGQuaZOimKuqvxOLUYNoekMbQ";
+            await Purchases.configure({
+                apiKey,
+                appUserID: userId
+            });
+            this.checkAndUpdateOfflineAvailability();
+        } catch (error) {
+            this.loggingService.error("[Store] Failed to get customer info: " + (error as any).message);
+        }
     }
 
     public order() {
@@ -112,17 +93,14 @@ export class PurchaseService {
         
     }
 
-    private orderInternal() {
+    private async orderInternal() {
         this.loggingService.info("[Store] Ordering product");
-        const offer = CdvPurchase.store.get(OFFLINE_MAPS_SUBSCRIPTION).getOffer();
-        offer.order();
-    }
-
-    private logMessageToString(message: string | unknown): string {
-        if (typeof message !== "string") {
-            return `[Store] ${JSON.stringify(message)}`;
-        }
-        return `[Store] ${message}`;
+        const offerings = await Purchases.getOfferings();
+            
+        await Purchases.purchasePackage({
+            aPackage: offerings.current.annual
+        });
+        await this.checkAndUpdateOfflineAvailability();
     }
 
     public isPurchaseAvailable(): boolean {

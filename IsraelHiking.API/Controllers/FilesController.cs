@@ -33,8 +33,8 @@ public class FilesController : ControllerBase
     /// <param name="logger"></param>
     public FilesController(IRemoteFileFetcherGateway remoteFileFetcherGateway,
         IDataContainerConverterService dataContainerConverterService,
-        IOfflineFilesService offlineFilesService, 
-        IReceiptValidationGateway receiptValidationGateway, 
+        IOfflineFilesService offlineFilesService,
+        IReceiptValidationGateway receiptValidationGateway,
         ILogger logger)
     {
         _remoteFileFetcherGateway = remoteFileFetcherGateway;
@@ -66,7 +66,7 @@ public class FilesController : ControllerBase
     /// <returns>A byte representation of file in the converted format</returns>
     [HttpPost]
     // POST api/files?format=gpx
-    public async Task<IActionResult> PostConvertFile(string format, [FromBody]DataContainerPoco dataContainer)
+    public async Task<IActionResult> PostConvertFile(string format, [FromBody] DataContainerPoco dataContainer)
     {
         if (!_dataContainerConverterService.IsValidFormat(format))
         {

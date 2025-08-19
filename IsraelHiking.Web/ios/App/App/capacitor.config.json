@@ -28,6 +28,7 @@
 		"TextZoomPlugin",
 		"AppUpdatePlugin",
 		"BackgroundGeolocation",
+		"PurchasesPlugin",
 		"EmailComposerPlugin",
 		"CDVPlugin"
 	]

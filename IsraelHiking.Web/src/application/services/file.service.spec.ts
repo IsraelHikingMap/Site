@@ -2,7 +2,6 @@ import { TestBed, inject } from "@angular/core/testing";
 import { HttpEventType, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
-import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { StyleSpecification } from "maplibre-gl";
 
 import { FileService, SaveAsFactory } from "./file.service";
@@ -46,7 +45,6 @@ describe("FileService", () => {
         TestBed.configureTestingModule({
             providers: [
                 RunningContextService,
-                FileTransfer,
                 GpxDataContainerConverterService,
                 { provide: ConnectionService, useValue: { stateChanged: { subscribe: () => {} }} },
                 { provide: FileSystemWrapper, useValue: {
