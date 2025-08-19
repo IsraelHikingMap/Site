@@ -17,7 +17,7 @@ export class OverpassTurboService {
             let url = params.url;
             if (url.startsWith("overpass://s/")) {
                 const unshortenAddress = Urls.baseAddress +  "/unshorten/overpass-turbo.eu/s/" + url.replace("overpass://s/", "");
-                const overpassUrl = await firstValueFrom(this.httpClient.get(unshortenAddress, {responseType: "text" })) as string;
+                const overpassUrl = await firstValueFrom(this.httpClient.get(unshortenAddress, {responseType: "text" }));
                 url = overpassUrl.trim().replace("https://overpass-turbo.eu/?Q=", "");
             }
             let query = decodeURIComponent(url.replace("overpass://Q/", "").replace("overpass://", ""));
