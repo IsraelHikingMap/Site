@@ -92,7 +92,7 @@ export class OfflineFilesDownloadService {
                 const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
                 if (fileName.endsWith(".pmtiles")) {
                     await this.fileService.downloadFileToCacheAuthenticated(`${Urls.offlineFiles}/${fileName}`, fileName, token,
-                        (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
+                        (value) => reportProgress((value + fileNameIndex) * 100.0 / length), new AbortController());
                     await this.fileService.moveFileFromCacheToDataDirectory(fileName);
                 } else {
                     const fileContent = await this.fileService.getFileContentWithProgress(`${Urls.offlineFiles}/${fileName}`,

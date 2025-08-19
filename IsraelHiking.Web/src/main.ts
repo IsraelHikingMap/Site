@@ -28,7 +28,6 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { ClipboardModule } from "@angular/cdk/clipboard";
 import { provideRouter } from "@angular/router";
 import { DragDropModule } from "@angular/cdk/drag-drop";
-import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { NgxMapLibreGLModule } from "@maplibre/ngx-maplibre-gl";
 import { provideNgIdle } from "@ng-idle/core";
@@ -248,7 +247,6 @@ bootstrapApplication(MainMapComponent, {
         LogReaderService,
         TranslationService,
         FileSystemWrapper,
-        FileTransfer,
         RouteEditPoiInteraction,
         RouteEditRouteInteraction,
         { provide: ErrorHandler, useClass: GlobalErrorHandler },
