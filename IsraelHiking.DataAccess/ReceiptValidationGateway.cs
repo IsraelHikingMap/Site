@@ -59,7 +59,7 @@ public class ReceiptValidationGateway(
         logger.LogInformation("Is entitled with Iaptic for user: " + userId + " is: " + iapticEntitled);
         if (iapticEntitled)
         {
-            //return true;
+            return true;
         }
         //https://api.revenuecat.com/v2/projects/proj1b16c0fa/customers/1257210/active_entitlements
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _options.RevenueCatApiKey);
