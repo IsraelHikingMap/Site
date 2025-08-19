@@ -191,9 +191,6 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - name: Download missing iOS platform
-        run: sudo xcodebuild -downloadPlatform iOS
-
       - name: setup-cocoapods
         uses: maxim-lobanov/setup-cocoapods@v1
         with:
