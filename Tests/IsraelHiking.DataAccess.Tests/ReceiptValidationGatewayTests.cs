@@ -21,7 +21,8 @@ public class ReceiptValidationGatewayTests
         var options = Substitute.For<IOptions<NonPublicConfigurationData>>();
         options.Value.Returns(new NonPublicConfigurationData
         {
-            FoveaApiKey = "fill-here"
+            FoveaApiKey = "fill-here",
+            RevenueCatApiKey = "fill-here"
         });
         _gateway = new ReceiptValidationGateway(factory, options, Substitute.For<ILogger>());
     }
