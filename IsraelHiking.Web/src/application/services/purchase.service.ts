@@ -42,6 +42,14 @@ export class PurchaseService {
         });
     }
 
+    private async checkAndUpdateOfflineAvailability() {
+        const customerInfo = await Purchases.getCustomerInfo();
+        if (customerInfo.customerInfo.entitlements.active[OFFLINE_MAPS_SUBSCRIPTION]?.isActive) {
+            this.loggingService.info("[Store] Product owned! Last modified: " + customerInfo.customerInfo.entitlements.active[OFFLINE_MAPS_SUBSCRIPTION]?.latestPurchaseDate);
+            this.store.dispatch(new SetOfflineAvailableAction(true));
+        }
+    }
+
     private async initializeStoreConnection(userId: string) {
         try {
             let apiKey = this.runningContextService.isIos ? "appl_dYhzcYSUYYFWbXBeHYPMsDmraQp" : "goog_WFtGQuaZOimKuqvxOLUYNoekMbQ";
@@ -49,11 +57,7 @@ export class PurchaseService {
                 apiKey,
                 appUserID: userId
             });
-            const customerInfo = await Purchases.getCustomerInfo();
-            if (customerInfo.customerInfo.entitlements.active[OFFLINE_MAPS_SUBSCRIPTION]?.isActive) {
-                this.loggingService.info("[Store] Product owned! Last modified: " + customerInfo.customerInfo.entitlements.active[OFFLINE_MAPS_SUBSCRIPTION]?.latestPurchaseDate);
-                this.store.dispatch(new SetOfflineAvailableAction(true));
-            }
+            this.checkAndUpdateOfflineAvailability();
         } catch (error) {
             this.loggingService.error("[Store] Failed to get customer info: " + (error as any).message);
         }
@@ -83,7 +87,7 @@ export class PurchaseService {
         await Purchases.purchasePackage({
             aPackage: offerings.current.annual
         });
-        // HM TODO: update the user state to reflect the purchase?
+        await this.checkAndUpdateOfflineAvailability();
     }
 
     public isPurchaseAvailable(): boolean {
