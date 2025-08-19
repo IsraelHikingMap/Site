@@ -1,13 +1,15 @@
 import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
-import { Purchases } from '@revenuecat/purchases-capacitor';
+import { Purchases } from "@revenuecat/purchases-capacitor";
+import { HttpClient } from "@angular/common/http";
+import { firstValueFrom, timeout } from "rxjs";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
-import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { SetOfflineAvailableAction } from "../reducers/offline.reducer";
+import { Urls } from "../urls";
 import type { ApplicationState } from "../models";
 
 const OFFLINE_MAPS_SUBSCRIPTION = "offline_map";
@@ -17,7 +19,7 @@ export class PurchaseService {
 
     private readonly runningContextService = inject(RunningContextService);
     private readonly loggingService = inject(LoggingService);
-    private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
+    private readonly httpClient = inject(HttpClient);
     private readonly toastService = inject(ToastService);
     private readonly resources = inject(ResourcesService);
     private readonly store = inject(Store);
@@ -27,19 +29,26 @@ export class PurchaseService {
             return;
         }
 
-        this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe(userInfo => {
+        this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe(async (userInfo) => {
             if (userInfo == null) {
                 return;
             }
             this.loggingService.info("[Store] Logged in: " + userInfo.id);
             this.initializeStoreConnection(userInfo.id);
-            this.offlineFilesDownloadService.isExpired().then((isExpired) => {
-                if (isExpired) {
-                    this.loggingService.debug("[Store] Product is expired from server");
-                    this.store.dispatch(new SetOfflineAvailableAction(false));
-                }
-            });
+
+            if (await this.isExpired()) {
+                this.loggingService.debug("[Store] Product is expired from server");
+                this.store.dispatch(new SetOfflineAvailableAction(false));
+            }
         });
+    }
+
+    private async isExpired(): Promise<boolean> {
+        try {
+            return !(await firstValueFrom(this.httpClient.get<boolean>(Urls.subscribed).pipe(timeout(5000))));
+        } catch {
+            return false;
+        }
     }
 
     private async checkAndUpdateOfflineAvailability() {
@@ -52,7 +61,7 @@ export class PurchaseService {
 
     private async initializeStoreConnection(userId: string) {
         try {
-            let apiKey = this.runningContextService.isIos ? "appl_dYhzcYSUYYFWbXBeHYPMsDmraQp" : "goog_WFtGQuaZOimKuqvxOLUYNoekMbQ";
+            const apiKey = this.runningContextService.isIos ? "appl_dYhzcYSUYYFWbXBeHYPMsDmraQp" : "goog_WFtGQuaZOimKuqvxOLUYNoekMbQ";
             await Purchases.configure({
                 apiKey,
                 appUserID: userId
