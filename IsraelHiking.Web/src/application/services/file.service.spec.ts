@@ -343,7 +343,7 @@ describe("FileService", () => {
 
         const mockResponse = { ok: false };
 
-        const fetchSpy = spyOn(window, 'fetch').and.returnValue(Promise.resolve(mockResponse as any));
+        const fetchSpy = spyOn(window, "fetch").and.returnValue(Promise.resolve(mockResponse as any));
 
         await expectAsync(service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, new AbortController())).toBeRejected();
 
@@ -356,7 +356,7 @@ describe("FileService", () => {
         const progressSpy = jasmine.createSpy();
         const url = "http://123.pmtiles";
         const mockReader = {
-            read: jasmine.createSpy('read').and.returnValues(
+            read: jasmine.createSpy("read").and.returnValues(
                 Promise.resolve({ done: false, value: new Uint8Array([1, 2]) }),
                 Promise.resolve({ done: false, value: new Uint8Array([3, 4]) }),
                 Promise.resolve({ done: true })
@@ -366,15 +366,15 @@ describe("FileService", () => {
         const mockResponse = {
             ok: true,
             body: {
-                getReader: jasmine.createSpy('getReader').and.returnValue(mockReader)
+                getReader: jasmine.createSpy("getReader").and.returnValue(mockReader)
             },
             headers: {
-                get: jasmine.createSpy('get').and.returnValue('')
+                get: jasmine.createSpy("get").and.returnValue("")
             }
         };
 
         // Mock fetch
-        const fetchSpy = spyOn(window, 'fetch').and.returnValue(Promise.resolve(mockResponse as any));
+        const fetchSpy = spyOn(window, "fetch").and.returnValue(Promise.resolve(mockResponse as any));
 
 
         await service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, new AbortController());
@@ -389,7 +389,7 @@ describe("FileService", () => {
         const progressSpy = jasmine.createSpy();
         const url = "http://123.pmtiles";
         const mockReader = {
-            read: jasmine.createSpy('read').and.returnValues(
+            read: jasmine.createSpy("read").and.returnValues(
                 Promise.resolve({ done: false, value: new Uint8Array([1, 2]) }),
                 new Promise(resolve => setTimeout(() => { resolve({ done: false, value: new Uint8Array([3, 4]) }); }, 100)),
                 new Promise(resolve => setTimeout(() => { resolve({ done: true }); }, 100))
@@ -399,21 +399,23 @@ describe("FileService", () => {
         const mockResponse = {
             ok: true,
             body: {
-                getReader: jasmine.createSpy('getReader').and.returnValue(mockReader)
+                getReader: jasmine.createSpy("getReader").and.returnValue(mockReader)
             },
             headers: {
-                get: jasmine.createSpy('get').and.returnValue('4')
+                get: jasmine.createSpy("get").and.returnValue("4")
             }
         };
 
         // Mock fetch
-        const fetchSpy = spyOn(window, 'fetch').and.returnValue(Promise.resolve(mockResponse as any));
+        const fetchSpy = spyOn(window, "fetch").and.returnValue(Promise.resolve(mockResponse as any));
 
         const abortController = new AbortController();
         const promise = service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, abortController);
 
         await new Promise(resolve => setTimeout(resolve, 50));
         abortController.abort();
+
+        await promise;
 
         expect(fetchSpy).toHaveBeenCalledTimes(1);
         expect(mockReader.read).toHaveBeenCalledTimes(2);
