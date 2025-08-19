@@ -329,10 +329,6 @@ export class FileService {
         }
     }
 
-    public async deleteFileFromCache(url: string): Promise<void> {
-        await this.fileSystemWrapper.removeFile(this.fileSystemWrapper.cacheDirectory, url.split("/").pop());
-    }
-
     public downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void, abortController: AbortController): Promise<void> {
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
         let previousPercentage = 0;
