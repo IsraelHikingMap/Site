@@ -364,8 +364,8 @@ describe("OsmTagsService", () => {
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
         // Assert
-        expect(poi.properties.poiIconColor).toBe("#734a08");
-        expect(poi.properties.poiIcon).toBe("icon-home");
+        expect(poi.properties.poiIconColor).toBe("#0092da");
+        expect(poi.properties.poiIcon).toBe("icon-alpinehut");
         expect(poi.properties.poiCategory).toBe("Camping");
     });
 

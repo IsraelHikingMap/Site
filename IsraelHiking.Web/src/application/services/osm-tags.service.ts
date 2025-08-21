@@ -171,8 +171,8 @@ export class OsmTagsService {
                     poi.properties.poiCategory = "Other";
                     return;
                 case "alpine_hut":
-                    poi.properties.poiIconColor = "#734a08";
-                    poi.properties.poiIcon = "icon-home";
+                    poi.properties.poiIconColor = "#0092da";
+                    poi.properties.poiIcon = "icon-alpinehut";
                     poi.properties.poiCategory = "Camping";
                     return;
             }
