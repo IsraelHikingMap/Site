@@ -13,7 +13,7 @@ if (fs.existsSync(inputDir)) {
 fs.mkdirSync(inputDir, { recursive: true });
 
 const publishDir = './src/content/sprite';
-const dockerImage = 'ghcr.io/flother/spreet:0.12.0';
+const dockerImage = 'ghcr.io/flother/spreet:0.12.1';
 let haloIcons = fs.readdirSync(iconsDir)
   .filter(file => file.endsWith('.svg') && !file.includes('pattern') && !file.includes('arrowline') && !file.includes('triangle') && !file.includes('square'));
 
