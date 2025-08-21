@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'icomoon';
-  src:  url('icomoon.eot?274ash');
-  src:  url('icomoon.eot?274ash#iefix') format('embedded-opentype'),
-    url('icomoon.ttf?274ash') format('truetype'),
-    url('icomoon.woff?274ash') format('woff'),
-    url('icomoon.svg?274ash#icomoon') format('svg');
+  src:  url('icomoon.eot?kkhxd2');
+  src:  url('icomoon.eot?kkhxd2#iefix') format('embedded-opentype'),
+    url('icomoon.ttf?kkhxd2') format('truetype'),
+    url('icomoon.woff?kkhxd2') format('woff'),
+    url('icomoon.svg?kkhxd2#icomoon') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -25,6 +25,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-alpinehut:before {
+  content: "\e912";
+}
 .icon-river:before {
   content: "\e900";
 }
