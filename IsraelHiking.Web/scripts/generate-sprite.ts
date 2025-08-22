@@ -52,7 +52,7 @@ function copyIconWithDifferentColor(originalFile: string, newFile: string, color
 // Handle duplicate icons with different colors
 copyIconWithDifferentColor('synagogue.svg', 'first_aid.svg', 'red');
 copyIconWithDifferentColor('gate_open.svg', 'gate_closed.svg', 'red');
-copyIconWithDifferentColor('dot.svg', 'spring.svg', '#1e80e3ff');
+copyIconWithDifferentColor('dot.svg', 'spring.svg', '#1e80e3');
 copyIconWithDifferentColor('shield_black.svg', 'shield_red.svg', 'red');
 copyIconWithDifferentColor('shield_black.svg', 'shield_green.svg', 'green');
 copyIconWithDifferentColor('shield_black.svg', 'shield_blue.svg', 'blue');

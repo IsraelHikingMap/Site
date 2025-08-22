@@ -82,7 +82,7 @@ export class OsmTagsService {
                     poi.properties.poiCategory = "Natural";
                     return;
                 case "spring":
-                    poi.properties.poiIconColor = "blue";
+                    poi.properties.poiIconColor = "#1e80e3";
                     poi.properties.poiIcon = "icon-tint";
                     poi.properties.poiCategory = "Water";
                     return;
@@ -97,7 +97,7 @@ export class OsmTagsService {
                     poi.properties.poiCategory = "Natural";
                     return;
                 case "waterhole":
-                    poi.properties.poiIconColor = "blue";
+                    poi.properties.poiIconColor = "#1e80e3";
                     poi.properties.poiIcon = "icon-waterhole";
                     poi.properties.poiCategory = "Water";
                     return;
@@ -108,14 +108,14 @@ export class OsmTagsService {
             feature.properties.water === "pond" ||
             feature.properties.water === "lake" ||
             feature.properties.water === "stream_pool") {
-            poi.properties.poiIconColor = "blue";
+            poi.properties.poiIconColor = "#1e80e3";
             poi.properties.poiIcon = "icon-tint";
             poi.properties.poiCategory = "Water";
             return;
         }
 
         if (feature.properties.man_made) {
-            poi.properties.poiIconColor = "blue";
+            poi.properties.poiIconColor = "#1e80e3";
             poi.properties.poiCategory = "Water";
             switch (feature.properties.man_made) {
                 case "water_well":
@@ -128,14 +128,14 @@ export class OsmTagsService {
         }
 
         if (feature.properties.waterway === "waterfall") {
-            poi.properties.poiIconColor = "blue";
+            poi.properties.poiIconColor = "#1e80e3";
             poi.properties.poiIcon = "icon-waterfall";
             poi.properties.poiCategory = "Water";
             return;
         }
 
         if (feature.properties.waterway || feature.properties.type === "waterway") {
-            poi.properties.poiIconColor = "blue";
+            poi.properties.poiIconColor = "#1e80e3";
             poi.properties.poiIcon = "icon-river";
             poi.properties.poiCategory = "Water";
             return;
@@ -171,7 +171,7 @@ export class OsmTagsService {
                     poi.properties.poiCategory = "Other";
                     return;
                 case "alpine_hut":
-                    poi.properties.poiIconColor = "#0092da";
+                    poi.properties.poiIconColor = "#734a08";
                     poi.properties.poiIcon = "icon-alpinehut";
                     poi.properties.poiCategory = "Camping";
                     return;
