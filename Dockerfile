@@ -1,4 +1,4 @@
-FROM node:20.12 as build-node
+FROM node:20.12 AS build-node
 
 WORKDIR /angular
 COPY ./IsraelHiking.Web/ ./
@@ -6,7 +6,7 @@ COPY ./IsraelHiking.Web/ ./
 RUN npm ci
 RUN npm run build:prod -- --no-progress
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0 as build-net
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build-net
 ARG VERSION=9.20.0
 WORKDIR /net
 COPY . .
@@ -15,7 +15,7 @@ WORKDIR /net/IsraelHiking.Web
 
 RUN echo "Building version $VERSION" && dotnet publish -p:"Version=$VERSION;AssemblyVersion=$VERSION"
 
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 as release
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS release
 
 RUN apt-get update -y --allow-unauthenticated --allow-insecure-repositories && apt-get install -y curl
 
