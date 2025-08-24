@@ -100,7 +100,6 @@ describe("FileService", () => {
                 northEast: { lat: 1, lng: 1}, southWest: { lat: 2, lng: 2}
             });
             await promise;
-
             expect(selectedRouteService.addRoutes).toHaveBeenCalled();
         }));
 

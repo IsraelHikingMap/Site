@@ -51,7 +51,7 @@ export class TracesService {
     }
 
     public async uploadLocalTracesIfNeeded(): Promise<void> {
-        const state = this.store.snapshot() as ApplicationState;
+        const state = this.store.selectSnapshot((s: ApplicationState) => s);
         if (!state.configuration.isAutomaticRecordingUpload) {
             return;
         }

@@ -139,7 +139,7 @@ export class DatabaseService {
         // reduce database size and memory footprint
         this.store.dispatch(new ClearHistoryAction());
         this.store.dispatch(new SetSelectedPoiAction(null));
-        const finalState = this.store.snapshot() as ApplicationState;
+        const finalState = this.store.selectSnapshot((s: ApplicationState) => s);
         await this.updateState(finalState);
     }
 

@@ -58,9 +58,9 @@ describe("ElevationProvider", () => {
 
             const latlngs = [{ lat: 32, lng: 35, alt: 1 }];
 
-            elevationProvider.updateHeights(latlngs).then(() => {
-                expect(latlngs[0].alt).toBe(1);
-            });
+            await elevationProvider.updateHeights(latlngs);
+
+            expect(latlngs[0].alt).toBe(1);
         }
     ));
 
