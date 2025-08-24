@@ -14,6 +14,8 @@ import type { ApplicationState, LatLngAlt } from "../models";
 @Injectable()
 export class ElevationProvider {
 
+    static readonly MAX_ELEVATION_ZOOM = 12;
+
     private readonly transparentPngUrl =
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=";
 
@@ -64,7 +66,7 @@ export class ElevationProvider {
         if (!offlineState.isOfflineAvailable || offlineState.lastModifiedDate == null) {
             throw new Error("[Elevation] Getting elevation is only supported after downloading offline data");
         }
-        const zoom = 12; // elevation tiles are at zoom 12
+        const zoom = ElevationProvider.MAX_ELEVATION_ZOOM;
         const tiles = latlngs.map(latlng => SpatialService.toTile(latlng, zoom));
         const tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));
         const tileXmin = Math.min(...tiles.map(tile => Math.floor(tile.x)));
@@ -85,8 +87,8 @@ export class ElevationProvider {
     }
 
     private getElevationForLatlng(latlng: LatLngAlt): number {
-        const zoom = 12;
         const tileSize = 256;
+        const zoom = ElevationProvider.MAX_ELEVATION_ZOOM;
         const tile = SpatialService.toTile(latlng, zoom);
         const tileIndex = { tileX: Math.floor(tile.x), tileY: Math.floor(tile.y) };
         const data = this.elevationCache.get(`${tileIndex.tileX}/${tileIndex.tileY}`);

@@ -171,11 +171,6 @@ export class GeoLocationService {
     }
 
     private handlePositionChange(position: GeolocationPosition): void {
-        const latLng = GeoLocationService.positionToLatLngTime(position);
-        if (SpatialService.isJammingTarget(latLng)) {
-            this.toastService.info(this.resources.jammedPositionReceived);
-            return;
-        }
         if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "searching") {
             this.store.dispatch(new SetTrackingStateAction("tracking"));
         }

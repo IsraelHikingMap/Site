@@ -162,7 +162,7 @@ export class ShareUrlsService {
         await this.databaseService.deleteShareUrlById(shareUrl.id);
     }
 
-        public getImageUrlFromShareId(shareUrlId: string, width?: number, height?: number) {
+    public getImageUrlFromShareId(shareUrlId: string, width?: number, height?: number) {
         let address = Urls.urls + shareUrlId + "/thumbnail";
         if (width && height) {
             address += `?width=${width}&height=${height}`;

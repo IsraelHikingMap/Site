@@ -30,7 +30,6 @@ export class RoutingProvider {
     private readonly store = inject(Store);
 
     public async getRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {
-
         if (routinType === "None") {
             const distance = SpatialService.getDistanceInMeters(latlngStart, latlngEnd);
             const pointsCount = Math.min(100, Math.ceil(distance / 100));
@@ -63,9 +62,6 @@ export class RoutingProvider {
     }
 
     private async getOffineRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {
-        if (routinType === "None") {
-            return [latlngStart, latlngEnd];
-        }
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         if (!offlineState.isOfflineAvailable || offlineState.lastModifiedDate == null) {
             throw new Error("Offline routing is only supported after downloading offline data");

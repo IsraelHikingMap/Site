@@ -303,8 +303,8 @@ export class FileService {
                             reject(new Error(event.statusText));
                         }
                     }
-            }, error: (error) => reject(error)
-        });
+                }, error: (error) => reject(error)
+            });
         });
     }
 
