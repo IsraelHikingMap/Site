@@ -3,6 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
+import QuickLRU from "quick-lru";
 
 import { LoggingService } from "./logging.service";
 import { SpatialService } from "./spatial.service";
@@ -16,7 +17,7 @@ export class ElevationProvider {
     private readonly transparentPngUrl =
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=";
 
-    private elevationCache = new Map<string, Uint8ClampedArray>();
+    private elevationCache = new QuickLRU<string, Uint8ClampedArray>({ maxSize: 100 });
 
     private readonly httpClient = inject(HttpClient);
     private readonly loggingService = inject(LoggingService);
