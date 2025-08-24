@@ -3,7 +3,7 @@
 public class NonPublicConfigurationData
 {
     /// <summary>
-    /// Wikimedia user name for public images upload
+    /// Wikimedia username for public images upload
     /// </summary>
     public string WikiMediaUserName { get; set; }
     /// <summary>

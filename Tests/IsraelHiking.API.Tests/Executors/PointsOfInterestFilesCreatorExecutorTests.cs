@@ -65,7 +65,7 @@ public class PointsOfInterestFilesCreatorExecutorTests
         });
         feature.SetLastModified(DateTime.Now);
 
-        _executor.CreateExtenalPoisFile([feature]);
+        _executor.CreateExternalPoisFile([feature]);
 
         _fileSystemHelper.Received(1).WriteAllBytes(Arg.Any<string>(), Arg.Any<byte[]>());
     }

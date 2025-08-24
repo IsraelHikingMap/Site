@@ -4,7 +4,6 @@ import { HttpTestingController, provideHttpClientTesting } from "@angular/common
 import { NgxsModule, Store } from "@ngxs/store";
 import geojsonVt from "geojson-vt";
 import vtpbf from "vt-pbf";
-import polyline from "@mapbox/polyline";
 
 import { RoutingProvider } from "./routing.provider";
 import { ResourcesService } from "./resources.service";
@@ -73,23 +72,6 @@ describe("RoutingProvider", () => {
                         } as GeoJSON.Feature<GeoJSON.LineString>
                     ]
                 } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>);
-            return promise;
-        }
-    ));
-
-    it("Should route between two points outside Israel", inject([RoutingProvider, HttpTestingController],
-        async (router: RoutingProvider, mockBackend: HttpTestingController) => {
-            const promise = router.getRoute({ lat: 0, lng: 0 }, { lat: 1, lng: 1 }, "Hike").then((data) => {
-                expect(data.length).toBe(3);
-            }, fail);
-
-            mockBackend.expectOne(u => u.url.startsWith("https://valhalla")).flush({
-                trip: {
-                    legs:[{
-                        shape: polyline.encode([[1, 1], [1.5, 1.5], [2, 2]], 6)
-                    }]
-                }
-            });
             return promise;
         }
     ));

@@ -61,7 +61,7 @@ public class PointsOfInterestFilesCreatorExecutor : IPointsOfInterestFilesCreato
     }
 
     /// <inheritdoc/>
-    public void CreateExtenalPoisFile(List<IFeature> features)
+    public void CreateExternalPoisFile(List<IFeature> features)
     {
         var fullFolderPath = Path.GetFullPath(_options.ExternalFilesFolder);
         var externalFeatures = new FeatureCollection();

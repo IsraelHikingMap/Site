@@ -303,14 +303,14 @@ describe("Spatial service", () => {
 
     it("Should get relative pixel location of zero coordinates", () => {
         const latlng = {lat: 0, lng: 0};
-        const pixel = SpatialService.toRelativePixel(latlng, 12, 256);
+        const pixel = SpatialService.toRelativePixelCenter(latlng, 12, 256);
         expect(pixel.pixelX).toBe(0);
         expect(pixel.pixelY).toBe(0);
     });
 
     it("Should get relative pixel location", () => {
         const latlng = {lat: 0.1, lng: 0.1};
-        const pixel = SpatialService.toRelativePixel(latlng, 12, 256);
+        const pixel = SpatialService.toRelativePixelCenter(latlng, 12, 256);
         expect(pixel.pixelX).toBe(35);
         expect(pixel.pixelY).toBe(220);
     });
