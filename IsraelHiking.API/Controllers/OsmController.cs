@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
-using OsmSharp.API;
 using OsmSharp.IO.API;
 using ProjNet.CoordinateSystems.Transformations;
 using System;
@@ -57,18 +56,6 @@ public class OsmController : ControllerBase
         _addibleGpxLinesFinderService = addibleGpxLinesFinderService;
         _osmLineAdderService = osmLineAdderService;
         _geometryFactory = geometryFactory;
-    }
-
-    /// <summary>
-    /// Used to get user details from OSM
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet]
-    [Route("details")]
-    public Task<User> GetUserDetails()
-    {
-        var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
-        return gateway.GetUserDetails();
     }
 
     /// <summary>

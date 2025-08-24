@@ -3,6 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
+import QuickLRU from "quick-lru";
 
 import { LoggingService } from "./logging.service";
 import { SpatialService } from "./spatial.service";
@@ -16,7 +17,7 @@ export class ElevationProvider {
     private readonly transparentPngUrl =
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=";
 
-    private elevationCache = new Map<string, Uint8ClampedArray>();
+    private elevationCache = new QuickLRU<string, Uint8ClampedArray>({ maxSize: 100 });
 
     private readonly httpClient = inject(HttpClient);
     private readonly loggingService = inject(LoggingService);
@@ -26,7 +27,6 @@ export class ElevationProvider {
     public async updateHeights(latlngs: LatLngAlt[]): Promise<void> {
         const relevantIndexes = [] as number[];
         const missingElevation = [] as LatLngAlt[]
-        let isInIsrael = true;
         for (let i = 0; i < latlngs.length; i++) {
             const latlng = latlngs[i];
             if (latlng.alt) {
@@ -34,23 +34,8 @@ export class ElevationProvider {
             }
             relevantIndexes.push(i);
             missingElevation.push(latlng);
-            if (!SpatialService.isInIsrael(latlng)) {
-                isInIsrael = false;
-            }
         }
         if (relevantIndexes.length === 0) {
-            return;
-        }
-        if (!isInIsrael) {
-            const body = {
-                id: "valhalla_height",
-                range: false,
-                shape: missingElevation.map(l => ({ lat: l.lat, lon: l.lng}))
-            };
-            const response = await firstValueFrom(this.httpClient.post<{ height: number[]}>("https://valhalla1.openstreetmap.de/height", body));
-            for (let index = 0; index < relevantIndexes.length; index++) {
-                latlngs[relevantIndexes[index]].alt = response.height[index];
-            }
             return;
         }
 
@@ -103,12 +88,39 @@ export class ElevationProvider {
         const zoom = 12;
         const tileSize = 256;
         const tile = SpatialService.toTile(latlng, zoom);
-        const relative = SpatialService.toRelativePixel(latlng, zoom, tileSize);
         const tileIndex = { tileX: Math.floor(tile.x), tileY: Math.floor(tile.y) };
         const data = this.elevationCache.get(`${tileIndex.tileX}/${tileIndex.tileY}`);
-        const r = data[(relative.pixelY * tileSize + relative.pixelX) * 4];
-        const g = data[(relative.pixelY * tileSize + relative.pixelX) * 4 + 1];
-        const b = data[(relative.pixelY * tileSize + relative.pixelX) * 4 + 2];
+
+        const relative = SpatialService.toRelativePixelCenter(latlng, zoom, tileSize);
+        // Get the coordinates of the center of the top-left pixel
+        const pixelX1 = Math.floor(relative.pixelX);
+        const pixelY1 = Math.floor(relative.pixelY);
+
+        // Get the coordinates of the other three nearest pixels
+        const pixelX2 = Math.min(pixelX1 + 1, tileSize - 1);
+        const pixelY2 = Math.min(pixelY1 + 1, tileSize - 1);
+
+        // Get the elevations of the four nearest pixels
+        const elevation1 = this.getPixelElevation(data, pixelX1, pixelY1, tileSize);
+        const elevation2 = this.getPixelElevation(data, pixelX2, pixelY1, tileSize);
+        const elevation3 = this.getPixelElevation(data, pixelX1, pixelY2, tileSize);
+        const elevation4 = this.getPixelElevation(data, pixelX2, pixelY2, tileSize);
+
+        // Get the fractional part of the coordinates for interpolation
+        const dx = relative.pixelX - pixelX1;
+        const dy = relative.pixelY - pixelY1;
+
+        // Perform bilinear interpolation
+        const elevationX1 = elevation1 * (1 - dx) + elevation2 * dx;
+        const elevationX2 = elevation3 * (1 - dx) + elevation4 * dx;
+        return elevationX1 * (1 - dy) + elevationX2 * dy;
+    }
+
+    private getPixelElevation(data: Uint8ClampedArray, x: number, y: number, tileSize: number): number {
+        const index = (y * tileSize + x) * 4;
+        const r = data[index];
+        const g = data[index + 1];
+        const b = data[index + 2];
         return -10000 + ((r * 256 * 256 + g * 256 + b) * 0.1);
     }
 

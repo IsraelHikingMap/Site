@@ -16,7 +16,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { LogReaderService } from "../../services/log-reader.service";
 import { SetOfflineMapsLastModifiedDateAction } from "../../reducers/offline.reducer";
-import type { ApplicationState, DataContainer } from "../../models";
+import type { DataContainer } from "../../models";
 
 @Component({
     selector: "files-share-dialog",
@@ -51,17 +51,6 @@ export class FilesSharesDialogComponent {
     public async open(e: any) {
         const file = this.fileService.getFileFromEvent(e);
         if (!file) {
-            return;
-        }
-        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        if (file.name.endsWith(".ihm") && offlineState.isOfflineAvailable) {
-            this.toastService.info(this.resources.openingAFilePleaseWait);
-            try {
-                await this.fileService.writeStyles(file);
-                this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
-            } catch (ex) {
-                this.toastService.error(ex, "Error opening ihm file");
-            }
             return;
         }
         if (file.name.endsWith(".pmtiles")) {

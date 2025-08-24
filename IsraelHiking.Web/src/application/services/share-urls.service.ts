@@ -21,7 +21,7 @@ interface IShareUrlSocialLinks {
     facebook: string;
     whatsapp: string;
     nakeb: string;
-    ihm: string;
+    app: string;
 }
 
 @Injectable()
@@ -49,16 +49,16 @@ export class ShareUrlsService {
     public getShareSocialLinks(shareUrl: Immutable<ShareUrl>): IShareUrlSocialLinks {
         if (shareUrl == null) {
             return {
-                ihm: "",
+                app: "",
                 facebook: "",
                 whatsapp: "",
                 nakeb: ""
             };
         }
-        const ihm = this.getFullUrlFromShareId(shareUrl.id);
-        const escaped = encodeURIComponent(ihm);
+        const app = this.getFullUrlFromShareId(shareUrl.id);
+        const escaped = encodeURIComponent(app);
         return {
-            ihm,
+            app: app,
             facebook: `${Urls.facebook}${escaped}`,
             whatsapp: this.whatsAppService.getUrl(this.getShareUrlDisplayName(shareUrl), escaped) as string,
             nakeb: `https://www.nakeb.co.il/add_new_hike?ihm_link=${shareUrl.id}`
