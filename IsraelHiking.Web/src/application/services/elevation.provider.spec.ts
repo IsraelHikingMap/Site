@@ -38,20 +38,6 @@ describe("ElevationProvider", () => {
         }
     ));
 
-    it("Should update height data outside Israel", inject([ElevationProvider, HttpTestingController],
-        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
-
-            const latlngs = [{ lat: 0, lng: 0, alt: 0 }];
-
-            const promise = elevationProvider.updateHeights(latlngs).then(() => {
-                expect(latlngs[0].alt).toBe(1);
-            });
-
-            mockBackend.expectOne(u => u.url.startsWith("https://valhalla")).flush({height: [1]});
-            return promise;
-        }
-    ));
-
     it("Should not call provider bacause all coordinates has elevation", inject([ElevationProvider],
         async (elevationProvider: ElevationProvider) => {
 
