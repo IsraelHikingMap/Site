@@ -66,7 +66,6 @@ public class SearchControllerTests
             {FeatureAttributes.POI_ICON_COLOR, "black"},
             {FeatureAttributes.ID, "id"}
         });
-        featureInPlace.SetTitles();
         featureInPlace.SetLocation(featureLocation);
         var featuresInsidePlace = new List<Feature> { featureInPlace };
         _searchRepository.SearchPlaces(searchTerm, Languages.ENGLISH).Returns([]);
@@ -95,7 +94,6 @@ public class SearchControllerTests
             {FeatureAttributes.NAME, place},
             {FeatureAttributes.ID, "place_id" }
         });
-        placeFeature.SetTitles();
         var featureLocation = new Coordinate(0.5, 0.5);
         var featureInPlace = new Feature(new Point(featureLocation), new AttributesTable
         {
@@ -106,7 +104,6 @@ public class SearchControllerTests
             {FeatureAttributes.POI_ICON_COLOR, "black"},
             {FeatureAttributes.ID, "id"}
         });
-        featureInPlace.SetTitles();
         featureInPlace.SetLocation(featureLocation);
         var featuresInsidePlace = new List<IFeature> { featureInPlace };
         _searchRepository.SearchPlaces(searchTerm, Languages.ENGLISH).Returns(featuresInsidePlace);
@@ -134,7 +131,6 @@ public class SearchControllerTests
             {FeatureAttributes.NAME, place},
             {FeatureAttributes.ID, "place_id" }
         });
-        placeFeature.SetTitles();
         var featureLocation = new Coordinate(0.5, 0.5);
         var featureInPlace = new Feature(new GeometryCollection([
                 new Point(featureLocation)
@@ -148,7 +144,6 @@ public class SearchControllerTests
                 {FeatureAttributes.ID, "id"}
             }
         );
-        featureInPlace.SetTitles();
         featureInPlace.SetLocation(featureLocation);
         var featuresInsidePlace = new List<IFeature> { featureInPlace };
         _searchRepository.SearchPlaces(searchTerm, Languages.ENGLISH).Returns(featuresInsidePlace);
@@ -176,7 +171,6 @@ public class SearchControllerTests
             {FeatureAttributes.NAME, place},
             {FeatureAttributes.ID, "place_id" }
         });
-        placeFeature.SetTitles();
         var featureLocation = new Coordinate(0.5, 0.5);
         var featureInPlace = new Feature(new GeometryCollection([
                 new Point(featureLocation),
@@ -191,7 +185,6 @@ public class SearchControllerTests
                 {FeatureAttributes.ID, "id"}
             }
         );
-        featureInPlace.SetTitles();
         featureInPlace.SetLocation(featureLocation);
         var featuresInsidePlace = new List<IFeature> { featureInPlace };
         _searchRepository.SearchPlaces(searchTerm, Languages.ENGLISH).Returns(featuresInsidePlace);
@@ -218,7 +211,6 @@ public class SearchControllerTests
             {FeatureAttributes.POI_ICON_COLOR, "black"},
             {FeatureAttributes.ID, "id"}
         });
-        featureInPlace.SetTitles();
         featureInPlace.SetLocation(featureLocation);
         _searchRepository.Search(searchTerm, Languages.ENGLISH).Returns([featureInPlace]);
         _searchRepository.GetContainerName(Arg.Any<Coordinate[]>(), Arg.Any<string>()).Returns(place);

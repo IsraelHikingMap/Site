@@ -160,6 +160,7 @@ public class INatureGateway : IINatureGateway
         var geoLocation = new LatLng(double.Parse(match.Groups[1].Value), double.Parse(match.Groups[2].Value));
         var feature = new Feature(new Point(geoLocation.ToCoordinate()), new AttributesTable
         {
+            {FeatureAttributes.DESCRIPTION, description},
             {FeatureAttributes.DESCRIPTION + ":" + Languages.HEBREW, description},
             {FeatureAttributes.NAME, page.Title},
             {FeatureAttributes.NAME + ":" + Languages.HEBREW, page.Title},
@@ -193,7 +194,6 @@ public class INatureGateway : IINatureGateway
             feature.Attributes.Add(FeatureAttributes.POI_ICON_COLOR, "#116C00");
             feature.Attributes.Add(FeatureAttributes.POI_CATEGORY, Categories.INATURE);
         }
-        feature.SetTitles();
         feature.SetId();
         return feature;
     }

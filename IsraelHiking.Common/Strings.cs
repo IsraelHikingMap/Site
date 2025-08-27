@@ -59,7 +59,6 @@ public static class FeatureAttributes
     public const string POI_CATEGORY = POI_PREFIX + "Category";
     public const string POI_LANGUAGE = POI_PREFIX + "Language";
     public const string POI_LANGUAGES = POI_PREFIX + "Languages";
-    public const string POI_NAMES = POI_PREFIX + "Names";
     public const string POI_CONTAINER = POI_PREFIX + "Container";
     public const string POI_SHARE_REFERENCE = POI_PREFIX + "ShareReference";
     public const string POI_LAST_MODIFIED = POI_PREFIX + "LastModified";

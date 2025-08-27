@@ -114,26 +114,6 @@ public static class GeoJsonExtensions
                feature.Attributes.Has("boundary", "protected_area");
     }
 
-    /// <summary>
-    /// This function will search the feature attributes for all relevant names and place them in an object 
-    /// to allow database search and a single place to look for a feature names.
-    /// </summary>
-    /// <param name="feature"></param>
-    public static void SetTitles(this IFeature feature)
-    {
-        var table = new AttributesTable();
-        var names = feature.Attributes.GetNames().OrderBy(n => n.Length).Where(a => a.Contains(FeatureAttributes.NAME)).ToArray();
-        foreach (var language in Languages.Array)
-        {
-            var namesByLanguage = names.Where(n => n.Contains(":" + language)).Select(a => feature.Attributes[a].ToString()).ToArray();
-            names = names.Except(names.Where(n => n.Contains(":" + language))).ToArray();
-            table.Add(language, namesByLanguage);
-        }
-        // names with no specific language
-        table.Add(Languages.ALL, names.Select(n => feature.Attributes[n].ToString()).ToArray());
-        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_NAMES, table);
-    }
-
     public static void SetId(this IFeature feature)
     {
         feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ID, GetId(feature.Attributes[FeatureAttributes.POI_SOURCE].ToString(), feature.Attributes[FeatureAttributes.ID].ToString()));
@@ -151,25 +131,25 @@ public static class GeoJsonExtensions
 
     public static string GetTitle(this IFeature feature, string language)
     {
-        if (!feature.Attributes.Exists(FeatureAttributes.POI_NAMES))
-        {
-            return string.Empty;
+        if (feature.Attributes.Exists("name:" + language)) {
+            return feature.Attributes.GetOptionalValue("name:" + language) as string;
         }
-        if (feature.Attributes[FeatureAttributes.POI_NAMES] is not IAttributesTable titleByLanguage)
-        {
-            return string.Empty;
+        if (feature.Attributes.Exists("name:en")) {
+            return feature.Attributes["name:en"].ToString();
         }
-        if (string.IsNullOrEmpty(language) || !titleByLanguage.Exists(language))
-        {
-            language = Languages.ALL;
+        if (feature.Attributes.Exists("name")) {
+            return feature.Attributes["name"].ToString();
         }
-        var title = GetStringListFromAttributeValue(titleByLanguage[language]).FirstOrDefault();
-        if (string.IsNullOrWhiteSpace(title) && language != Languages.ALL)
-        {
-            title = GetStringListFromAttributeValue(titleByLanguage[Languages.ALL]).FirstOrDefault();
+        if (feature.Attributes.Exists("mtb:name:" + language)) {
+            return feature.Attributes["mtb:name:" + language].ToString();
         }
-        return title ?? string.Empty;
-
+        if (feature.Attributes.Exists("mtb:name:en")) {
+            return feature.Attributes["mtb:name:en"].ToString();
+        }
+        if (feature.Attributes.Exists("mtb:name")) {
+            return feature.Attributes["mtb:name"].ToString();
+        }
+        return string.Empty;
     }
 
     public static string GetDescription(this IFeature feature, string language)
@@ -205,13 +185,6 @@ public static class GeoJsonExtensions
         return string.Empty;
     }
 
-    public static string[] GetTitles(this IFeature feature)
-    {
-        return feature.Attributes[FeatureAttributes.POI_NAMES] is not IAttributesTable titleByLanguage 
-            ? [] 
-            : titleByLanguage.GetValues().Select(GetStringListFromAttributeValue).SelectMany(v => v).Distinct().ToArray();
-    }
-
     public static List<string> GetStringListFromAttributeValue(object value)
     {
         var titles = new List<string>();
@@ -243,9 +216,9 @@ public static class GeoJsonExtensions
                feature.HasExtraData(language);
     }
 
-    private static bool HasExtraData(this IFeature feature, string language)
+    public static bool HasExtraData(this IFeature feature, string language)
     {
-        return feature.Attributes.GetByLanguage(FeatureAttributes.DESCRIPTION, language) != string.Empty ||
+        return !string.IsNullOrEmpty(feature.GetDescription(language)) ||
                feature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.IMAGE_URL)) ||
                feature.Attributes.GetNames().Any(n => n.Contains(FeatureAttributes.MTB_NAME));
     }

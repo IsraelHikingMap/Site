@@ -78,6 +78,7 @@ public class NakebGateway : INakebGateway
             description += ".";
         }
         description += $"\n{string.Join(", ", nakebItem.Attributes)}.";
+        attributes.Add(FeatureAttributes.DESCRIPTION, description);
         attributes.Add(FeatureAttributes.DESCRIPTION + ":" + Languages.HEBREW, description);
         attributes.Add(FeatureAttributes.IMAGE_URL, nakebItem.Picture);
         attributes.Add(FeatureAttributes.WEBSITE, nakebItem.Link);
@@ -85,7 +86,6 @@ public class NakebGateway : INakebGateway
         var lineString = new LineString(nakebItem.Latlngs.Select(l => l.ToCoordinate()).ToArray());
         // Ignoring markers for simplification
         var feature = new Feature(lineString, attributes);
-        feature.SetTitles();
         feature.SetId();
         return feature;
     }
