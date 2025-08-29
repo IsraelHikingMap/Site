@@ -9,6 +9,7 @@ export type SearchResultsPointOfInterest = {
     displayName: string;
     source: string;
     id: string;
+    hasExtraData: boolean;
 };
 
 export type EditablePublicPointData = {

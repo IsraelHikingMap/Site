@@ -75,8 +75,7 @@ export class GeoJSONUtils {
     public static hasExtraData(feature: GeoJSON.Feature, language: string): boolean {
         return GeoJSONUtils.getDescription(feature, language) != null ||
             GeoJSONUtils.getValidImageUrls(feature).length > 0 ||
-            Object.keys(feature.properties).find(k => k.startsWith("wikipedia")) != null ||
-            Object.keys(feature.properties).find(k => k.startsWith("wikidata")) != null;
+            feature.properties["mtb:name"] != null;
     }
 
     public static getValidImageUrls(feature: Immutable<GeoJSON.Feature>): string[] {

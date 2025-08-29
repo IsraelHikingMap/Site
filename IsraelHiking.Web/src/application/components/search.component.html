@@ -5,6 +5,7 @@
                 <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom" [matAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(fromContext.searchTerm)" (focus)="focusOnSearchInput()">
                 <mat-autocomplete positionY="below" autoActiveFirstOption="true" #autoFrom="matAutocomplete" [displayWith]="displayResults">
                     <mat-option *ngFor="let result of fromContext.searchResults" [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']" [dir]="resources.getDirection(result.title)">
+                        <span *ngIf="result.hasExtraData" class="has-extra-data" [style.background]="result.iconColor"></span>
                         <i *ngIf="result.icon" class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
                         <span>{{result.displayName}}</span>
                     </mat-option>

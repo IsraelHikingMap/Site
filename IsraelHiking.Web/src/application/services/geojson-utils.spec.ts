@@ -57,12 +57,8 @@ describe("GeoJsonUtils", () => {
         expect(GeoJSONUtils.hasExtraData({properties: { image: "File:valid-image.png"}} as any as GeoJSON.Feature, "he")).toBeTruthy();
     });
 
-    it("should return has extra data for feature with wikipedia", () => {
-        expect(GeoJSONUtils.hasExtraData({properties: { wikipedia: "wiki" }} as any as GeoJSON.Feature, "he")).toBeTruthy();
-    });
-
-    it("should return has extra data for feature with wikidat", () => {
-        expect(GeoJSONUtils.hasExtraData({properties: { wikidata: "wiki" }} as any as GeoJSON.Feature, "he")).toBeTruthy();
+    it("should return has extra data for feature with mtb:name", () => {
+        expect(GeoJSONUtils.hasExtraData({properties: { "mtb:name": "mtb:name" }} as any as GeoJSON.Feature, "he")).toBeTruthy();
     });
     
     it("should return only valid image urls", () => {
