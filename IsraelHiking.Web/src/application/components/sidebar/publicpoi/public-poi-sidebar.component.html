@@ -1,21 +1,21 @@
-﻿﻿<div [dir]="resources.direction" [class.minimized]="isMinimized && !isEditMode()">
+﻿﻿<div [dir]="resources.direction" *ngIf="isEditMode()">
+    <public-poi-edit [info]="osmEditableInfo"></public-poi-edit>
+</div>
+<div [dir]="resources.direction" [class.minimized]="isMinimized" *ngIf="!isEditMode()">
     <div class="flex flex-row sticky top-0 z-10 bg-white">
         <div class="flex-1" *ngIf="!isHideEditMode()">
             <button mat-button class="w-full min-w-unset p-0!" (click)="setEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Edit POI"><i class="fa icon-pencil"></i></button>
         </div>
-        <div class="flex-1" *ngIf="!isEditMode()">
+        <div class="flex-1">
             <button mat-button class="w-full min-w-unset p-0!" (click)="navigateHere()" matTooltip="{{resources.navigateHere}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Navigate here"><i class="fa icon-recordings"></i></button>
         </div>
-        <div class="flex-1" *ngIf="isEditMode()">
-            <button mat-button class="w-full min-w-unset p-0!" (click)="save()" [disabled]="isLoading" matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
-        </div>
-        <div class="flex-1" *ngIf="isRoute() && !isEditMode()">
+        <div class="flex-1" *ngIf="isRoute()">
             <button mat-button class="w-full min-w-unset p-0!" (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to route"><i class="fa icon-plus"></i></button>
         </div>
-        <div class="flex-1" *ngIf="!isRoute() && !isEditMode()">
+        <div class="flex-1" *ngIf="!isRoute()">
             <button mat-button class="w-full min-w-unset p-0!" (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to point"><i class="fa icon-plus"></i></button>
         </div>
-        <div class="flex-1" *ngIf="shareLinks.poiLink && !isEditMode()">
+        <div class="flex-1" *ngIf="shareLinks.poiLink">
             <mat-menu #appMenu="matMenu">
                 <div mat-menu-item disableRipple="true">
                     <div class="flex flex-row">
@@ -29,10 +29,10 @@
             </mat-menu>
             <button mat-button class="w-full min-w-unset p-0!" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="below"><i class="fa icon-share-alt"></i></button>
         </div>
-        <div class="flex-1" *ngIf="!isEditMode() && !isMinimized && isApp()">
+        <div class="flex-1" *ngIf="!isMinimized && isApp()">
             <button mat-button class="w-full min-w-unset p-0!" (click)="isMinimized = !isMinimized" matTooltip="{{resources.minimize}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Minimize POI window"><i class="fa icon-chevron-down"></i></button>
         </div>
-        <div class="flex-1" *ngIf="!isEditMode() && isMinimized && isApp()">
+        <div class="flex-1" *ngIf="isMinimized && isApp()">
             <button mat-button class="w-full min-w-unset p-0!" (click)="isMinimized = !isMinimized" matTooltip="{{resources.restore}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Restore POI window"><i class="fa icon-chevron-up"></i></button>
         </div>
         <div class="flex-1">
@@ -42,52 +42,42 @@
             </button>
         </div>
     </div>
-    <div *ngIf="isEditMode()">
-        <mat-card appearance="outlined" class="mat-elevation-z0">
-            <public-poi-edit [info]="info"></public-poi-edit>
-            <div class="flex flex-row" *ngIf="showLocationUpdate">
-                <mat-checkbox color="primary" [(ngModel)]="updateLocation">{{resources.updateLocation}}</mat-checkbox>
+    <mat-card appearance="outlined" class="mat-elevation-z0">
+        <mat-card-header>
+            <mat-card-title [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)">
+                <a *ngIf="hasUrl()" [href]="getUrl()" [target]="'_blank'" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site from title">
+                    <span class="text-xl">{{title}}</span>
+                </a>
+                <span *ngIf="!hasUrl()" class="text-xl">{{title}}</span>
+            </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <image-scroller [images]="imagesUrls" [canEdit]="false"></image-scroller>
+            <p class="text-center" *ngIf="lengthInKm && isRoute()">{{resources.length}}: {{lengthInKm | number : '1.2-2'}} {{resources.kmUnit}}</p>
+            <div class="flex flex-row">
+                <p class="w-full break-lines" [ngClass]="resources.getTextAlignment(description)" [dir]="resources.getDirection(description)">
+                    {{description}}
+                </p>
             </div>
-        </mat-card>
-    </div>
-    <div *ngIf="!isEditMode()">
-        <mat-card appearance="outlined" class="mat-elevation-z0">
-            <mat-card-header>
-                <mat-card-title [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">
-                    <a *ngIf="hasUrl()" [href]="getUrl()" [target]="'_blank'" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site from title">
-                        <span class="text-xl">{{info.title}}</span>
-                    </a>
-                    <span *ngIf="!hasUrl()" class="text-xl">{{info.title}}</span>
-                </mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-                <image-scroller [images]="info.imagesUrls" [canEdit]="false"></image-scroller>
-                <p class="text-center" *ngIf="info.lengthInKm && isRoute()">{{resources.length}}: {{info.lengthInKm | number : '1.2-2'}} {{resources.kmUnit}}</p>
-                <div class="flex flex-row">
-                    <p class="w-full break-lines" [ngClass]="resources.getTextAlignment(description)" [dir]="resources.getDirection(description)">
-                        {{description}}
-                    </p>
-                </div>
-                <div class="flex flex-row cursor-pointer" *ngIf="showToggleTranslation()" (click)="toggleTranslation()" angulartics2On="click" angularticsCategory="POI" angularticsAction="Toggle translation">
-                    <span class="w-full text-sm text-center">
-                        {{showingTranslated ? resources.translatedBy : resources.clickToTranslate}}
-                    </span>
-                </div>
-                <div class="flex flex-row max-sm:hidden" *ngIf="isShowSeeAlso()">
-                    <h4>{{resources.seeAlso}}</h4>
-                </div>
-                <div class="flex flex-row">
-                    <a *ngIf="getElementOsmAddress()" [href]="getElementOsmAddress()" [target]="'_blank'" class="me-2" angulartics2On="click" angularticsCategory="OSM" angularticsAction="View element in OSM">
-                        <img src="content/openstreetmap-logo.png" height="32" width="32" />
-                    </a>
-                    <a *ngFor="let urlPair of sourceImageUrls" [href]="urlPair.url" [target]="'_blank'" class="me-2" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site">
-                        <div *ngIf="!urlPair.imageUrl" style="width: 32px; height: 32px">
-                            <i class="fa fa-2x icon-external-link"></i>
-                        </div>
-                        <img *ngIf="urlPair.imageUrl" [src]="urlPair.imageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(info.title)" />
-                    </a>
-                </div>
-            </mat-card-content>
-        </mat-card>
-    </div>
+            <div class="flex flex-row cursor-pointer" *ngIf="showToggleTranslation()" (click)="toggleTranslation()" angulartics2On="click" angularticsCategory="POI" angularticsAction="Toggle translation">
+                <span class="w-full text-sm text-center">
+                    {{showingTranslated ? resources.translatedBy : resources.clickToTranslate}}
+                </span>
+            </div>
+            <div class="flex flex-row max-sm:hidden" *ngIf="isShowSeeAlso()">
+                <h4>{{resources.seeAlso}}</h4>
+            </div>
+            <div class="flex flex-row">
+                <a *ngIf="getElementOsmAddress()" [href]="getElementOsmAddress()" [target]="'_blank'" class="me-2" angulartics2On="click" angularticsCategory="OSM" angularticsAction="View element in OSM">
+                    <img src="content/openstreetmap-logo.png" height="32" width="32" />
+                </a>
+                <a *ngFor="let urlPair of sourceImageUrls" [href]="urlPair.url" [target]="'_blank'" class="me-2" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site">
+                    <div *ngIf="!urlPair.imageUrl" style="width: 32px; height: 32px">
+                        <i class="fa fa-2x icon-external-link"></i>
+                    </div>
+                    <img *ngIf="urlPair.imageUrl" [src]="urlPair.imageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(title)" />
+                </a>
+            </div>
+        </mat-card-content>
+    </mat-card>
 </div>
