@@ -73,7 +73,8 @@ describe("GeoJsonUtils", () => {
                 image6: "nakeb.co.il/image.jpg",
                 image7: "jeepolog.com/image.jpg",
                 image8: "invalid-url",
-                image9: "https://example.com/image4.gif"
+                image9: "https://example.com/image4.gif",
+                image10: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"
             }
         } as any as GeoJSON.Feature;
         const validUrls = GeoJSONUtils.getValidImageUrls(feature);
@@ -82,7 +83,8 @@ describe("GeoJsonUtils", () => {
             "www.wikimedia.org/good-image.png",
             "inature.info/image.jpg",
             "nakeb.co.il/image.jpg",
-            "jeepolog.com/image.jpg"
+            "jeepolog.com/image.jpg",
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"
         ]);
     });
 });
