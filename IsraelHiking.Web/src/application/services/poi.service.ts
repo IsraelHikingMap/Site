@@ -42,7 +42,8 @@ import type {
     IconColorLabel,
     NorthEast,
     EditablePublicPointData,
-    OfflineState
+    OfflineState,
+    UpdateablePublicPoiData
 } from "../models";
 
 
@@ -480,7 +481,6 @@ export class PoiService {
                             coordinates: SpatialService.toCoordinate(uploadMarkerData.latlng)
                         }
                     };
-                    this.mergeFeatureWithUploadMarker(newFeature);
                     return newFeature;
                 }
                 case "OSM": {
@@ -564,7 +564,6 @@ export class PoiService {
             this.loggingService.warning(`[POIs] Failed to enrich feature with id: ${feature.properties.poiId}, error: ${(ex as Error).message}`);
         }
         this.store.dispatch(new SetSelectedPoiAction(cloneDeep(feature)));
-        this.mergeFeatureWithUploadMarker(feature);
         return feature;
     }
 
@@ -619,27 +618,15 @@ export class PoiService {
         };
     }
 
-    private mergeFeatureWithUploadMarker(feature: GeoJSON.Feature) {
-        const markerData = this.store.selectSnapshot((s: ApplicationState) => s.poiState).uploadMarkerData;
-        if (markerData == null) {
-            return;
-        }
+    private mergeFeatureWithUploadMarker(feature: GeoJSON.Feature, markerData: Immutable<MarkerData>) {
         const language = this.resources.getCurrentLanguageCodeSimplified();
         GeoJSONUtils.setTitle(feature, feature.properties["name:" + language] || markerData.title, language);
         GeoJSONUtils.setDescription(feature, feature.properties["description:" + language] || markerData.description, language);
         GeoJSONUtils.setLocation(feature, markerData.latlng);
         feature.properties.poiIcon = feature.properties.poiIcon || `icon-${markerData.type || "star"}`;
-        let lastIndex = Math.max(-1, ...Object.keys(feature.properties)
-            .filter(k => k.startsWith("image"))
-            .map(k => +k.replace("image", "")));
-        markerData.urls.filter(u => u.mimeType.startsWith("image")).map(u => u.url).forEach(url => {
-            let name = "image" + ++lastIndex;
-            if (name === "image0") {
-                name = "image";
-            }
-            feature.properties[name] = url;
-        });
-        this.store.dispatch(new SetUploadMarkerDataAction(null));
+        for (const url of (markerData.urls.filter(u => u.mimeType.startsWith("image")).map(u => u.url))) {
+            GeoJSONUtils.setProperty(feature, "image", url);
+        };
     }
 
     public getItmCoordinates(feature: GeoJSON.Feature): NorthEast {
@@ -687,23 +674,23 @@ export class PoiService {
         return this.addPointToUploadQueue(feature);
     }
 
-    public addComplexPoi(info: EditablePublicPointData, location: LatLngAlt): Promise<void> {
+    public addComplexPoi(info: EditablePublicPointData): Promise<void> {
         const feature = this.getFeatureFromEditableData(info);
-        GeoJSONUtils.setLocation(feature, location);
+        GeoJSONUtils.setLocation(feature, info.location);
         const id = uuidv4();
         feature.id = id;
         feature.properties.poiId = id;
         feature.properties.poiSource = "OSM";
         feature.geometry = {
             type: "Point",
-            coordinates: SpatialService.toCoordinate(location)
+            coordinates: SpatialService.toCoordinate(info.location)
         };
         return this.addPointToUploadQueue(feature);
     }
 
-    public async updateComplexPoi(info: EditablePublicPointData, newLocation?: LatLngAlt) {
-        const originalFeature = this.store.selectSnapshot((s: ApplicationState) => s.poiState).selectedPointOfInterest;
-        const editableDataBeforeChanges = await this.getEditableDataFromFeature(originalFeature);
+    public async updateComplexPoi(info: EditablePublicPointData, updateLocation: boolean) {
+        const originalFeature = info.originalFeature
+        const editableDataBeforeChanges = await this.getUpdatableDataFromFeature(originalFeature);
         let hasChages = false;
         const originalId = this.getFeatureId(originalFeature);
         let featureContainingOnlyChanges = {
@@ -726,8 +713,8 @@ export class PoiService {
             }
         }
 
-        if (newLocation) {
-            GeoJSONUtils.setLocation(featureContainingOnlyChanges, newLocation);
+        if (updateLocation) {
+            GeoJSONUtils.setLocation(featureContainingOnlyChanges, info.location);
             hasChages = true;
         }
         const language = this.resources.getCurrentLanguageCodeSimplified();
@@ -773,25 +760,48 @@ export class PoiService {
         await this.addPointToUploadQueue(featureContainingOnlyChanges);
     }
 
-    public async getEditableDataFromFeature(feature: Immutable<GeoJSON.Feature>): Promise<EditablePublicPointData> {
-        const language = this.resources.getCurrentLanguageCodeSimplified();
-        let imagesUrls = GeoJSONUtils.getValidImageUrls(feature);
+    public getLengthInKm(feature: Immutable<GeoJSON.Feature>): number | null {
+        if (feature.geometry.type === "LineString" || feature.geometry.type === "MultiLineString") {
+            return SpatialService.getLengthInMetersForGeometry(feature.geometry) / 1000.0;
+        }
+        return null;
+    }
+
+    public async getImagesThatHaveAttribution(feature: Immutable<GeoJSON.Feature>) {
+        const imagesUrls = GeoJSONUtils.getValidImageUrls(feature);
         const imageAttributions = await Promise.all(imagesUrls.map(u => this.imageAttributinoService.getAttributionForImage(u)));
-        imagesUrls = imagesUrls.filter((_, i) => imageAttributions[i] != null);
+        return imagesUrls.filter((_, i) => imageAttributions[i] != null);
+    }
+
+    public async createEditableData(feature: GeoJSON.Feature): Promise<EditablePublicPointData> {
+        const originalFeature = structuredClone(feature);
+        const markerData = this.store.selectSnapshot((s: ApplicationState) => s.poiState).uploadMarkerData;
+        if (markerData != null) {
+            this.mergeFeatureWithUploadMarker(feature, markerData);
+            this.store.dispatch(new SetUploadMarkerDataAction(null));
+        }
+        const data = this.getUpdatableDataFromFeature(feature) as EditablePublicPointData;
+        data.originalFeature = originalFeature;
+        data.canEditTitle = !feature.properties["mtb:name"];
+        data.id = this.getFeatureId(feature);
+        data.category = feature.properties.poiCategory;
+        data.isPoint = feature.geometry.type === "Point" || feature.geometry.type === "MultiPoint";
+        if (feature.geometry.type === "Point" && markerData != null) {
+            data.showLocationUpdate = data.id != "";
+            data.location = markerData.latlng;
+        }
+        return data;
+    }
+
+    private getUpdatableDataFromFeature(feature: Immutable<GeoJSON.Feature>): UpdateablePublicPoiData {
+        const language = this.resources.getCurrentLanguageCodeSimplified();
         return {
-            id: this.getFeatureId(feature),
-            category: feature.properties.poiCategory,
             description: GeoJSONUtils.getDescription(feature, language),
             title: GeoJSONUtils.getTitle(feature, language),
             icon: feature.properties.poiIcon,
             iconColor: feature.properties.poiIconColor,
-            imagesUrls,
-            urls: Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => feature.properties[k]),
-            isPoint: feature.geometry.type === "Point" || feature.geometry.type === "MultiPoint",
-            canEditTitle: !feature.properties.poiMerged && !feature.properties["mtb:name"],
-            lengthInKm: (feature.geometry.type === "LineString" || feature.geometry.type === "MultiLineString")
-                ? SpatialService.getLengthInMetersForGeometry(feature.geometry) / 1000.0
-                : null
+            imagesUrls: GeoJSONUtils.getValidImageUrls(feature),
+            urls: GeoJSONUtils.getUrls(feature),
         };
     }
 
