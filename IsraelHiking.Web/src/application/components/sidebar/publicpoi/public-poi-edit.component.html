@@ -3,11 +3,11 @@
         <button mat-button class="w-full min-w-unset p-0!" (click)="save()" [disabled]="isLoading" matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
     </div>
     <div class="flex-1">
-            <button mat-button class="w-full min-w-unset p-0!" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below">
-                <i class="fa icon-close" *ngIf="!isLoading"></i>
-                <mat-spinner diameter="24" *ngIf="isLoading"></mat-spinner>    
-            </button>
-        </div>
+        <button mat-button class="w-full min-w-unset p-0!" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below">
+            <i class="fa icon-close" *ngIf="!isLoading"></i>
+            <mat-spinner diameter="24" *ngIf="isLoading"></mat-spinner>    
+        </button>
+    </div>
 </div>
 <mat-card appearance="outlined" class="mat-elevation-z0">
     <mat-card-header *ngIf="!info().canEditTitle">

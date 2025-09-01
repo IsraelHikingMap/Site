@@ -10,6 +10,7 @@ import { FormsModule } from "@angular/forms";
 import { MatIconButton, MatButton } from "@angular/material/button";
 import { MatOption } from "@angular/material/core";
 import { MatCheckbox } from "@angular/material/checkbox";
+import { MatProgressSpinner } from "@angular/material/progress-spinner";
 
 import { ImageScrollerComponent } from "./image-scroller.component";
 import { PoiService, ISelectableCategory } from "../../../services/poi.service";
@@ -22,13 +23,13 @@ import type { EditablePublicPointData, IconColorLabel } from "../../../models";
     selector: "public-poi-edit",
     templateUrl: "./public-poi-edit.component.html",
     styleUrls: ["./public-poi-edit.component.scss"],
-    imports: [Dir, NgIf, MatCard, MatCardHeader, MatCardTitle, NgClass, MatFormField, MatLabel, MatInput, FormsModule, ImageScrollerComponent, NgFor, MatIconButton, MatSuffix, MatButton, MatSelect, MatOption, MatTooltip, MatCheckbox]
+    imports: [Dir, NgIf, MatCard, MatCardHeader, MatCardTitle, NgClass, MatFormField, MatLabel, MatInput, FormsModule, ImageScrollerComponent, NgFor, MatIconButton, MatSuffix, MatButton, MatSelect, MatOption, MatTooltip, MatCheckbox, MatProgressSpinner]
 })
 export class PublicPointOfInterestEditComponent implements OnInit {
 
     public info = input<EditablePublicPointData>();
 
-    public isLoading: boolean = true;
+    public isLoading: boolean = false;
     public categories: ISelectableCategory[] = [];
     public selectedCategory: ISelectableCategory = null;
     public updateLocation: boolean = false;
