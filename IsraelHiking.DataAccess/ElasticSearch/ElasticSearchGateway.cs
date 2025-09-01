@@ -131,11 +131,18 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             { FeatureAttributes.POI_LANGUAGE, Languages.ALL },
             { FeatureAttributes.ID, string.Join("_", d.Id.Split("_").Skip(1)) }
         });
+        foreach (var key in d.Source.Name.Keys.Where(k => k != Languages.DEFAULT))
+        {
+            feature.Attributes.AddOrUpdate("name:" + key, d.Source.Name[key]);
+        }
+        foreach (var key in d.Source.Description.Keys.Where(k => k != Languages.DEFAULT))
+        {
+            feature.Attributes.AddOrUpdate("description:" + key, d.Source.Description[key]);
+        }
         if (!string.IsNullOrWhiteSpace(d.Source.Image))
         {
             feature.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, d.Source.Image);
         }
-        feature.SetTitles();
         feature.SetLocation(new Coordinate(d.Source.Location[0], d.Source.Location[1]));
         return feature;
     }

@@ -142,6 +142,7 @@ public class CsvPointsOfInterestAdapter : IPointsOfInterestAdapter
         {
             {FeatureAttributes.NAME, pointOfInterest.Title},
             {FeatureAttributes.NAME + ":" + Languages.HEBREW, pointOfInterest.Title},
+            {FeatureAttributes.DESCRIPTION, pointOfInterest.Description},
             {FeatureAttributes.DESCRIPTION + ":" + Languages.HEBREW, pointOfInterest.Description},
             {FeatureAttributes.POI_ICON, pointOfInterest.Icon},
             {FeatureAttributes.POI_ICON_COLOR, pointOfInterest.IconColor},
@@ -162,7 +163,6 @@ public class CsvPointsOfInterestAdapter : IPointsOfInterestAdapter
         var feature = new Feature(new Point(new Coordinate(pointOfInterest.Longitude, pointOfInterest.Latitude)), table);
         feature.SetLocation(new Coordinate(pointOfInterest.Longitude, pointOfInterest.Latitude));
         feature.SetLastModified(pointOfInterest.LastModified > DateTime.Now ? DateTime.Now : pointOfInterest.LastModified);
-        feature.SetTitles();
         feature.SetId();
         return feature;
     }

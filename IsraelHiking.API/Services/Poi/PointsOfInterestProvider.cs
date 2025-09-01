@@ -294,7 +294,6 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
         var oldIcon = _tagsHelper.GetInfo(new AttributesTable(completeOsmGeo.Tags.ToDictionary(t => t.Key, t => t.Value as object))).IconColorCategory.Icon;
         var oldTags = completeOsmGeo.Tags.ToArray();
         var locationWasUpdated = false;
-        partialFeature.SetTitles();
         if (partialFeature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.NAME)))
         {
             SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.NAME, partialFeature.GetTitle(language), language);
@@ -411,7 +410,6 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
     private async Task<string[]> UploadImages(IFeature feature, string language, IAuthClient osmGateway)
     {
         var user = await osmGateway.GetUserDetails();
-        feature.SetTitles();
         var imageUrls = feature.Attributes.GetNames()
             .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
             .Select(p => feature.Attributes[p].ToString())

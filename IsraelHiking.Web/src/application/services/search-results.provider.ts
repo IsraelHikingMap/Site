@@ -30,6 +30,7 @@ export class SearchResultsProvider {
                 iconColor: "black",
                 location: latlng,
                 description: "",
+                hasExtraData: false
             }];
         }
         const params = new HttpParams().set("language", this.resources.getCurrentLanguageCodeSimplified());

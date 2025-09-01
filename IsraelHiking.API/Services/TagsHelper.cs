@@ -40,14 +40,14 @@ public class TagsHelper : ITagsHelper
     {
         var waterCategory = new Category
         {
-            Color = "blue",
+            Color = "#1e80e3",
             Icon = "icon-tint",
             Name = Categories.WATER
         };
         var springIcon = new IconColorCategory
         {
             Category = Categories.WATER,
-            Color = "blue",
+            Color = "#1e80e3",
             Icon = "icon-tint",
             Label = "Spring, Pond"
         };
@@ -59,7 +59,7 @@ public class TagsHelper : ITagsHelper
         var waterfallIcon = new IconColorCategory
         {
             Category = Categories.WATER,
-            Color = "blue",
+            Color = "#1e80e3",
             Icon = "icon-waterfall",
             Label = "Waterfall"
         };
@@ -67,7 +67,7 @@ public class TagsHelper : ITagsHelper
         var waterHole = new IconColorCategory
         {
             Category = Categories.WATER,
-            Color = "blue",
+            Color = "#1e80e3",
             Icon = "icon-waterhole",
             Label = "Waterhole"
         };
@@ -75,7 +75,7 @@ public class TagsHelper : ITagsHelper
         var waterWell = new IconColorCategory
         {
             Category = Categories.WATER,
-            Color = "blue",
+            Color = "#1e80e3",
             Icon = "icon-water-well",
             Label = "Water Well"
         };
@@ -83,7 +83,7 @@ public class TagsHelper : ITagsHelper
         var cistern = new IconColorCategory
         {
             Category = Categories.WATER,
-            Color = "blue",
+            Color = "#1e80e3",
             Icon = "icon-cistern",
             Label = "Cistern"
         };

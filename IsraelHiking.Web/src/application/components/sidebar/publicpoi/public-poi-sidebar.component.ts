@@ -8,7 +8,6 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from "@angular/material/card";
-import { MatCheckbox } from "@angular/material/checkbox";
 import { FormsModule } from "@angular/forms";
 import { Router, NavigationEnd } from "@angular/router";
 import { Share } from "@capacitor/share";
@@ -40,7 +39,6 @@ import { SetSelectedPoiAction } from "../../../reducers/poi.reducer";
 import { GeoJSONUtils } from "../../../services/geojson-utils";
 import type {
     LinkData,
-    LatLngAlt,
     ApplicationState,
     EditablePublicPointData,
     LatLngAltTime
@@ -56,19 +54,20 @@ export type SourceImageUrlPair = {
     templateUrl: "./public-poi-sidebar.component.html",
     styleUrls: ["./public-poi-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, NgIf, MatButton, Angulartics2OnModule, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, MatCard, PublicPointOfInterestEditComponent, MatCheckbox, FormsModule, MatCardHeader, MatCardTitle, NgClass, MatCardContent, ImageScrollerComponent, NgFor, DecimalPipe]
+    imports: [Dir, NgIf, MatButton, Angulartics2OnModule, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, MatCard, PublicPointOfInterestEditComponent, FormsModule, MatCardHeader, MatCardTitle, NgClass, MatCardContent, ImageScrollerComponent, NgFor, DecimalPipe]
 })
 export class PublicPoiSidebarComponent implements OnDestroy {
-    public info = { imagesUrls: [], urls: [] } as EditablePublicPointData;
     public isLoading: boolean = true;
     public isMinimized: boolean = false;
-    public showLocationUpdate: boolean = false;
-    public updateLocation: boolean = false;
     public sourceImageUrls: SourceImageUrlPair[];
-    public latlng: LatLngAlt;
     public shareLinks = {} as PoiSocialLinks;
     public showingTranslated: boolean = true;
+    public lengthInKm: number = null;
     public description: string = "";
+    public title: string = "";
+    public imagesUrls: string[] = [];
+    public urls: string[] = [];
+    public osmEditableInfo: EditablePublicPointData;
 
     private editMode: boolean;
     private fullFeature: GeoJSON.Feature;
@@ -149,11 +148,8 @@ export class PublicPoiSidebarComponent implements OnDestroy {
                 return;
             }
             await this.initFromFeature(feature);
+            this.osmEditableInfo = await this.poiService.createEditableData(feature);
             if (data.source === "OSM") {
-                const uploadMarkerData = this.store.selectSnapshot((s: ApplicationState) => s.poiState).uploadMarkerData;
-                if (feature.geometry.type === "Point" && uploadMarkerData != null) {
-                    this.showLocationUpdate = true;
-                }
                 await this.poiService.updateExtendedInfo(feature, data.language);
                 if (this.getRouteUrlInfo().id !== data.id) {
                     return;
@@ -176,13 +172,15 @@ export class PublicPoiSidebarComponent implements OnDestroy {
 
     private async initFromFeature(feature: GeoJSON.Feature) {
         this.fullFeature = feature;
-        this.latlng = GeoJSONUtils.getLocation(feature);
         this.sourceImageUrls = this.getSourceImageUrls(feature);
         this.shareLinks = this.poiService.getPoiSocialLinks(feature);
-        this.info = await this.poiService.getEditableDataFromFeature(feature);
+        this.imagesUrls = await this.poiService.getImagesThatHaveAttribution(feature);
+        this.urls = GeoJSONUtils.getUrls(feature);
         this.description = await this.getDescription();
+        this.lengthInKm = this.poiService.getLengthInKm(feature);
         const language = this.resources.getCurrentLanguageCodeSimplified();
         this.titleService.set(GeoJSONUtils.getTitle(feature, language));
+        this.title = GeoJSONUtils.getTitle(feature, language);
     }
 
     private getSourceImageUrls(feature: GeoJSON.Feature): SourceImageUrlPair[] {
@@ -274,30 +272,13 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         return "icon-camera";
     }
 
-    public async save() {
-        this.isLoading = true;
-        try {
-            if (!this.info.id) {
-                await this.poiService.addComplexPoi(this.info, this.latlng);
-            } else {
-                await this.poiService.updateComplexPoi(this.info, this.updateLocation ? this.latlng : null);
-            }
-            this.toastService.success(this.resources.dataUpdatedSuccessfullyItWillTakeTimeToSeeIt);
-            this.close();
-        } catch {
-            this.toastService.confirm({ message: this.resources.unableToSaveData, type: "Ok" });
-        } finally {
-            this.isLoading = false;
-        }
-    }
-
     public async convertToRoute() {
         const routes = this.geoJsonParser.toRoutes(this.fullFeature as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString>);
         for (const route of routes) {
             const name = this.selectedRouteService.createRouteName(route.name);
             const newRoute = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
             await this.elevasionProvider.updateHeights(route.latlngs);
-            newRoute.description = this.info.description;
+            newRoute.description = this.description;
             newRoute.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs as LatLngAltTime[], "Hike");
             this.store.dispatch(new AddRouteAction(newRoute));
             this.selectedRouteService.setSelectedRoute(newRoute.id);
@@ -305,21 +286,14 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         this.close();
     }
 
-    public async addPointToRoute() {
+    public addPointToRoute() {
         const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
-        let icon = "icon-star";
-        let id = "";
-        if (this.fullFeature) {
-            icon = this.fullFeature.properties.poiIcon;
-            id = this.fullFeature.properties.identifier;
-        }
-        const urls = this.getUrls();
+        const urls = this.getLinkDataUrls();
         this.store.dispatch(new AddPrivatePoiAction(selectedRoute.id, {
-            latlng: this.latlng,
-            title: this.info.title,
-            description: this.info.description,
-            type: icon.replace("icon-", ""),
-            id,
+            latlng: GeoJSONUtils.getLocation(this.fullFeature),
+            title: this.title,
+            description: this.description,
+            type: this.fullFeature.properties.poiIcon.replace("icon-", ""),
             urls
         }));
         this.close();
@@ -332,12 +306,12 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         this.close();
     }
 
-    private getUrls(): LinkData[] {
-        const urls = [] as LinkData[];
-        for (const url of this.info.urls) {
+    private getLinkDataUrls(): LinkData[] {
+        const urls: LinkData[] = [];
+        for (const url of this.urls) {
             urls.push({
                 mimeType: "text/html",
-                text: this.info.title,
+                text: this.title,
                 url
             });
         }
@@ -382,10 +356,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     }
 
     public getUrl(): string {
-        if (this.info.urls == null) {
-            return null;
-        }
-        return this.info.urls.find(u => !this.isBadWikipediaUrl(u));
+        return this.urls.find(u => !this.isBadWikipediaUrl(u));
     }
 
     private isBadWikipediaUrl(url: string) {

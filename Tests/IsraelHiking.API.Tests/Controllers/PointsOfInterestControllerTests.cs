@@ -212,7 +212,6 @@ public class PointsOfInterestControllerTests
             { FeatureAttributes.POI_ICON, "icon" },
             { FeatureAttributes.NAME, string.Join("", Enumerable.Repeat("i", 256)) },
         });
-        poi.SetTitles();
         poi.SetLocation(new Coordinate());
 
         var result = _controller.UpdatePointOfInterest(poi.GetId(), poi, Languages.HEBREW).Result as BadRequestObjectResult;

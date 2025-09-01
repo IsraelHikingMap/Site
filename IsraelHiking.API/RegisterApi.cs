@@ -31,7 +31,6 @@ public static class RegisterApi
         services.AddTransient<IGpxLoopsSplitterExecutor, GpxLoopsSplitterExecutor>();
         services.AddTransient<IAddibleGpxLinesFinderService, AddibleGpxLinesFinderService>();
         services.AddTransient<IOsmGeoJsonPreprocessorExecutor, OsmGeoJsonPreprocessorExecutor>();
-        services.AddTransient<IFeaturesMergeExecutor, FeaturesMergeExecutor>();
         services.AddTransient<IOsmLineAdderService, OsmLineAdderService>();
         services.AddTransient<ITagsHelper, TagsHelper>();
         services.AddTransient<IPointsOfInterestProvider, PointsOfInterestProvider>();

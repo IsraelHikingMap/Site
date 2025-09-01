@@ -57,12 +57,8 @@ describe("GeoJsonUtils", () => {
         expect(GeoJSONUtils.hasExtraData({properties: { image: "File:valid-image.png"}} as any as GeoJSON.Feature, "he")).toBeTruthy();
     });
 
-    it("should return has extra data for feature with wikipedia", () => {
-        expect(GeoJSONUtils.hasExtraData({properties: { wikipedia: "wiki" }} as any as GeoJSON.Feature, "he")).toBeTruthy();
-    });
-
-    it("should return has extra data for feature with wikidat", () => {
-        expect(GeoJSONUtils.hasExtraData({properties: { wikidata: "wiki" }} as any as GeoJSON.Feature, "he")).toBeTruthy();
+    it("should return has extra data for feature with mtb:name", () => {
+        expect(GeoJSONUtils.hasExtraData({properties: { "mtb:name": "mtb:name" }} as any as GeoJSON.Feature, "he")).toBeTruthy();
     });
     
     it("should return only valid image urls", () => {
@@ -77,7 +73,8 @@ describe("GeoJsonUtils", () => {
                 image6: "nakeb.co.il/image.jpg",
                 image7: "jeepolog.com/image.jpg",
                 image8: "invalid-url",
-                image9: "https://example.com/image4.gif"
+                image9: "https://example.com/image4.gif",
+                image10: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"
             }
         } as any as GeoJSON.Feature;
         const validUrls = GeoJSONUtils.getValidImageUrls(feature);
@@ -86,7 +83,8 @@ describe("GeoJsonUtils", () => {
             "www.wikimedia.org/good-image.png",
             "inature.info/image.jpg",
             "nakeb.co.il/image.jpg",
-            "jeepolog.com/image.jpg"
+            "jeepolog.com/image.jpg",
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"
         ]);
     });
 });

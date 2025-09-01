@@ -102,7 +102,6 @@ public class CrawlersMiddleware
             {
                 thumbnailUrl = Regex.Replace(thumbnailUrl, @"(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)", "$1thumb/$2$3/200px-$3");
             }
-            feature.SetTitles();
             context.Request.Query.TryGetValue("language", out var languages);
             language = languages.FirstOrDefault() ?? Languages.HEBREW;
             title = feature.GetTitle(language);
