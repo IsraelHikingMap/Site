@@ -42,6 +42,13 @@ export class OsmTagsService {
                     poi.properties.poiIcon = "icon-bike";
                     poi.properties.poiCategory = "Bicycle";
                     return;
+                case "road":
+                    if (feature.properties.scenic === "yes") {
+                        poi.properties.poiIconColor = "black";
+                        poi.properties.poiCategory = "4x4";
+                        poi.properties.poiIcon = "icon-four-by-four";
+                        return;
+                    }
             }
         }
         if (feature.properties.historic) {
