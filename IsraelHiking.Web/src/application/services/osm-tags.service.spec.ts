@@ -70,6 +70,18 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiCategory).toBe("Bicycle");
     });
 
+    it("Should set icon color category for scenic route bicycle", () => {
+        // Arrange
+        const feature = createFeature({route: "road", scenic: "yes" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("black");
+        expect(poi.properties.poiIcon).toBe("icon-four-by-four");
+        expect(poi.properties.poiCategory).toBe("4x4");
+    });
+
     it("Should set icon color category for historic ruins", () => {
         // Arrange
         const feature = createFeature({historic: "ruins" });
