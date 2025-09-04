@@ -9,6 +9,7 @@ export class Urls {
     public static readonly translations = "translations/";
     public static readonly urls = Urls.apiBase + "urls/";
     public static readonly health = Urls.apiBase + "health/";
+    public static readonly log = Urls.apiBase + "log/";
     public static readonly elevation = Urls.apiBase + "elevation";
     public static readonly routing = Urls.apiBase + "routing";
     public static readonly files = Urls.apiBase + "files";

@@ -51,11 +51,22 @@ export class PurchaseService {
         }
     }
 
-    private async checkAndUpdateOfflineAvailability() {
+    private async checkAndUpdateOfflineAvailability(fromOrder: boolean) {
         const customerInfo = await Purchases.getCustomerInfo();
         if (customerInfo.customerInfo.entitlements.active[OFFLINE_MAPS_SUBSCRIPTION]?.isActive) {
             this.loggingService.info("[Store] Product owned! Last modified: " + customerInfo.customerInfo.entitlements.active[OFFLINE_MAPS_SUBSCRIPTION]?.latestPurchaseDate);
             this.store.dispatch(new SetOfflineAvailableAction(true));
+            // HM TODO: remove this after we finish debugging this issue
+            try {
+                await firstValueFrom(this.httpClient.post(Urls.log, {
+                    message: "User ID from App: " + this.store.selectSnapshot((s: ApplicationState) => s.userState.userInfo)?.id + 
+                    ", User ID from Store: " + (await Purchases.getAppUserID())?.appUserID + 
+                    ", From Order: " + fromOrder +
+                    ", Last Purchase Date: " + customerInfo.customerInfo.entitlements.active[OFFLINE_MAPS_SUBSCRIPTION]?.latestPurchaseDate
+                }));
+            } catch (error) {
+                this.loggingService.error("[Store] Failed to log offline availability: " + (error as any).message);
+            }
         }
     }
 
@@ -66,7 +77,7 @@ export class PurchaseService {
                 apiKey,
                 appUserID: userId
             });
-            this.checkAndUpdateOfflineAvailability();
+            this.checkAndUpdateOfflineAvailability(false);
         } catch (error) {
             this.loggingService.error("[Store] Failed to get customer info: " + (error as any).message);
         }
@@ -96,7 +107,7 @@ export class PurchaseService {
         await Purchases.purchasePackage({
             aPackage: offerings.current.annual
         });
-        await this.checkAndUpdateOfflineAvailability();
+        await this.checkAndUpdateOfflineAvailability(true);
     }
 
     public isPurchaseAvailable(): boolean {
