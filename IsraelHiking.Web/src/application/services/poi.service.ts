@@ -773,7 +773,7 @@ export class PoiService {
         return imagesUrls.filter((_, i) => imageAttributions[i] != null);
     }
 
-    public async createEditableData(feature: GeoJSON.Feature): Promise<EditablePublicPointData> {
+    public async createEditableDataAndMerge(feature: GeoJSON.Feature): Promise<EditablePublicPointData> {
         const originalFeature = structuredClone(feature);
         const markerData = this.store.selectSnapshot((s: ApplicationState) => s.poiState).uploadMarkerData;
         if (markerData != null) {

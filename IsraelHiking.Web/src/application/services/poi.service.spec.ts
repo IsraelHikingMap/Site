@@ -305,7 +305,7 @@ describe("Poi Service", () => {
         })
 
         const feature = await poiService.getBasicInfo("", "new", "he");
-        const data = await poiService.createEditableData(feature);
+        const data = await poiService.createEditableDataAndMerge(feature);
         expect(data.location.lat).toBe(2);
         expect(data.location.lng).toBe(1);
         expect(data.description).toBe("description");
@@ -341,7 +341,7 @@ describe("Poi Service", () => {
             }
         }
 
-        const data = await poiService.createEditableData(structuredClone(feature));
+        const data = await poiService.createEditableDataAndMerge(structuredClone(feature));
         expect(data.location.lat).toBe(2);
         expect(data.location.lng).toBe(1);
         expect(data.description).toBe("description");
@@ -842,7 +842,7 @@ describe("Poi Service", () => {
                         uploadMarkerData: null
                     }
                 });
-                const info = await poiService.createEditableData(feature);
+                const info = await poiService.createEditableDataAndMerge(feature);
                 expect(info.imagesUrls.length).toBe(0);
             }
         )
@@ -869,7 +869,7 @@ describe("Poi Service", () => {
                         uploadMarkerData: null
                     }
                 });
-                const info = await poiService.createEditableData(feature);
+                const info = await poiService.createEditableDataAndMerge(feature);
                 expect(info.imagesUrls.length).toBe(0);
             }
         )
