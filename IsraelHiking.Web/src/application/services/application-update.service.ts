@@ -27,7 +27,16 @@ export class ApplicationUpdateService {
                 type: "YesNo",
                 message: this.resourcesService.newVersionAvailable,
                 confirmAction: () => {
-                    AppUpdate.openAppStore();
+                    if (result.immediateUpdateAllowed) {
+                        AppUpdate.performImmediateUpdate();
+                    } else {
+                        AppUpdate.openAppStore();
+                    }
+                }, 
+                declineAction: () => {
+                    if (result.flexibleUpdateAllowed) {
+                        AppUpdate.startFlexibleUpdate();
+                    }
                 }
             });
         } catch (ex) {

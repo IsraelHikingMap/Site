@@ -147,8 +147,8 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             if (this.getRouteUrlInfo().id !== data.id) {
                 return;
             }
+            this.osmEditableInfo = await this.poiService.createEditableDataAndMerge(feature);
             await this.initFromFeature(feature);
-            this.osmEditableInfo = await this.poiService.createEditableData(feature);
             if (data.source === "OSM") {
                 await this.poiService.updateExtendedInfo(feature, data.language);
                 if (this.getRouteUrlInfo().id !== data.id) {
