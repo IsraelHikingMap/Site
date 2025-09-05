@@ -58,29 +58,42 @@ export class PurchaseService {
             this.store.dispatch(new SetOfflineAvailableAction(true));
             // HM TODO: remove this after we finish debugging this issue
             try {
-                await firstValueFrom(this.httpClient.post(Urls.log, {
-                    message: "User ID from App: " + this.store.selectSnapshot((s: ApplicationState) => s.userState.userInfo)?.id + 
-                    ", User ID from Store: " + (await Purchases.getAppUserID())?.appUserID + 
+                this.logToServer("User ID from App: " + this.store.selectSnapshot((s: ApplicationState) => s.userState.userInfo)?.id +
+                    ", User ID from Store: " + (await Purchases.getAppUserID())?.appUserID +
                     ", From Order: " + fromOrder +
                     ", Last Purchase Date: " + customerInfo.customerInfo.entitlements.active[OFFLINE_MAPS_SUBSCRIPTION]?.latestPurchaseDate
-                }));
+                );
             } catch (error) {
                 this.loggingService.error("[Store] Failed to log offline availability: " + (error as any).message);
             }
         }
     }
 
+
+
     private async initializeStoreConnection(userId: string) {
         try {
             const apiKey = this.runningContextService.isIos ? "appl_dYhzcYSUYYFWbXBeHYPMsDmraQp" : "goog_WFtGQuaZOimKuqvxOLUYNoekMbQ";
-            await Purchases.configure({
-                apiKey,
-                appUserID: userId
-            });
+            const isConfigured = (await Purchases.isConfigured()).isConfigured;
+            if (!isConfigured && userId) {
+                await Purchases.configure({
+                    apiKey,
+                    appUserID: userId
+                });
+            } else if (!userId) {
+                this.logToServer("User is empty, User ID from Store: " + (await Purchases.getAppUserID())?.appUserID);
+            } else if (isConfigured) {
+                this.logToServer("Configured was already called before, User ID from App: " + userId + ", User ID from Store: " + (await Purchases.getAppUserID())?.appUserID);
+                Purchases.logIn({ appUserID: userId });
+            }
             this.checkAndUpdateOfflineAvailability(false);
         } catch (error) {
             this.loggingService.error("[Store] Failed to get customer info: " + (error as any).message);
         }
+    }
+
+    private async logToServer(message: string) {
+        await firstValueFrom(this.httpClient.post(Urls.log, { message: "v1 | " + message }).pipe(timeout(5000)));
     }
 
     public order() {
@@ -103,7 +116,13 @@ export class PurchaseService {
     private async orderInternal() {
         this.loggingService.info("[Store] Ordering product");
         const offerings = await Purchases.getOfferings();
-            
+
+        const appUserId = (await Purchases.getAppUserID())?.appUserID;
+        const osmUserId = this.store.selectSnapshot((s: ApplicationState) => s.userState.userInfo)?.id;
+        if (appUserId !== osmUserId) {
+            this.logToServer("Inside order flow but users do not match, User ID from App: " + osmUserId + ", User ID from Store: " + appUserId);
+        }
+
         await Purchases.purchasePackage({
             aPackage: offerings.current.annual
         });
