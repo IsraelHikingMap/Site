@@ -1,6 +1,6 @@
 import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
-import { Purchases } from "@revenuecat/purchases-capacitor";
+import { LOG_LEVEL, Purchases } from "@revenuecat/purchases-capacitor";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, timeout } from "rxjs";
 
@@ -72,6 +72,11 @@ export class PurchaseService {
 
 
     private async initializeStoreConnection(userId: string) {
+        let log = "";
+        await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
+        await Purchases.setLogHandler((_logLevel, message) => {
+            log += userId + " | " + message + "\n";
+        });
         try {
             const apiKey = this.runningContextService.isIos ? "appl_dYhzcYSUYYFWbXBeHYPMsDmraQp" : "goog_WFtGQuaZOimKuqvxOLUYNoekMbQ";
             const isConfigured = (await Purchases.isConfigured()).isConfigured;
@@ -84,11 +89,18 @@ export class PurchaseService {
                 this.logToServer("User is empty, User ID from Store: " + (await Purchases.getAppUserID())?.appUserID);
             } else if (isConfigured) {
                 this.logToServer("Configured was already called before, User ID from App: " + userId + ", User ID from Store: " + (await Purchases.getAppUserID())?.appUserID);
-                Purchases.logIn({ appUserID: userId });
+                await Purchases.logIn({ appUserID: userId });
+            }
+            if ((await Purchases.isAnonymous()).isAnonymous && userId) {
+                await this.logToServer("User is still anonymous after configure. Logs:\n" + log);
             }
             this.checkAndUpdateOfflineAvailability(false);
         } catch (error) {
             this.loggingService.error("[Store] Failed to get customer info: " + (error as any).message);
+            this.logToServer("Failed to configure the store for user: " + userId + ", " + (error as any).message);
+        } finally {
+            await Purchases.setLogHandler(() => { });
+            await Purchases.setLogLevel({ level: LOG_LEVEL.ERROR });
         }
     }
 
