@@ -106,7 +106,7 @@ export class PurchaseService {
 
     private async logToServer(message: string) {
         try {
-            await firstValueFrom(this.httpClient.post(Urls.log, { message: "v1 | " + message }).pipe(timeout(5000)));
+            await firstValueFrom(this.httpClient.post(Urls.log, { message: "v2 | " + message }).pipe(timeout(5000)));
         } catch { }
     }
 
