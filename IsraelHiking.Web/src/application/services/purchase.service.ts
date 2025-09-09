@@ -83,16 +83,16 @@ export class PurchaseService {
             if (!isConfigured && userId) {
                 await Purchases.configure({
                     apiKey,
-                    appUserID: userId
+                    appUserID: `${userId}`
                 });
             } else if (!userId) {
-                this.logToServer("User is empty, User ID from Store: " + (await Purchases.getAppUserID())?.appUserID);
+                await this.logToServer("User is empty, User ID from Store: " + (await Purchases.getAppUserID())?.appUserID);
             } else if (isConfigured) {
-                this.logToServer("Configured was already called before, User ID from App: " + userId + ", User ID from Store: " + (await Purchases.getAppUserID())?.appUserID);
-                await Purchases.logIn({ appUserID: userId });
+                await this.logToServer("Configured was already called before, User ID from App: " + userId + ", User ID from Store: " + (await Purchases.getAppUserID())?.appUserID);
+                await Purchases.logIn({ appUserID: `${userId}` });
             }
             if ((await Purchases.isAnonymous()).isAnonymous && userId) {
-                await this.logToServer("User is still anonymous after configure. Logs:\n" + log);
+                await this.logToServer(`User ${userId} is still anonymous after configure. Logs:\n${log}`);
             }
             this.checkAndUpdateOfflineAvailability(false);
         } catch (error) {
@@ -106,7 +106,7 @@ export class PurchaseService {
 
     private async logToServer(message: string) {
         try {
-            await firstValueFrom(this.httpClient.post(Urls.log, { message: "v2 | " + message }).pipe(timeout(5000)));
+            await firstValueFrom(this.httpClient.post(Urls.log, { message: "v3 | " + message }).pipe(timeout(5000)));
         } catch { }
     }
 
