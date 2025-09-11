@@ -1,6 +1,6 @@
 import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
-import {QonversionConfigBuilder, LaunchMode, Qonversion as QonversionInstance, UserPropertyKey, Entitlement} from "@qonversion/capacitor-plugin";
+import { Qonversion, QonversionConfigBuilder, LaunchMode, UserPropertyKey} from "@qonversion/capacitor-plugin";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, timeout } from "rxjs";
 
@@ -11,8 +11,6 @@ import { ResourcesService } from "./resources.service";
 import { SetOfflineAvailableAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState } from "../models";
-
-declare const Qonversion: typeof QonversionInstance;
 
 const OFFLINE_MAPS_SUBSCRIPTION = "offline_map";
 
@@ -55,7 +53,6 @@ export class PurchaseService {
 
     private async checkAndUpdateOfflineAvailability() {
         const entitlements = await Qonversion.getSharedInstance().checkEntitlements();
-
         const premiumEntitlement = entitlements.get(OFFLINE_MAPS_SUBSCRIPTION);
         if (premiumEntitlement?.isActive) {
             this.loggingService.info("[Store] Product owned! Last modified: " + premiumEntitlement.lastPurchaseDate);
@@ -66,7 +63,7 @@ export class PurchaseService {
     private async initializeStoreConnection(userId: string) {
         try {
             const config = new QonversionConfigBuilder(
-                OFFLINE_MAPS_SUBSCRIPTION,
+                "5k-mmshtDq9TkwaMwFeBh2EkoejQFWKy",
                 LaunchMode.SUBSCRIPTION_MANAGEMENT,
             ).build();
             Qonversion.initialize(config);
@@ -103,7 +100,7 @@ export class PurchaseService {
             await Qonversion.getSharedInstance().purchaseProduct(product, null);
             await this.checkAndUpdateOfflineAvailability();
         } catch (e) {
-            
+            this.loggingService.error("[Store] Failed to order product: " + (e as any).message);
         }
     }
 
