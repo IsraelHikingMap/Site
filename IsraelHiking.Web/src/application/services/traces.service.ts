@@ -128,6 +128,15 @@ export class TracesService {
                 dataContainer: storedTrace.dataContainer
             };
         }
+        const traceFromState = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces.find(t => t.id === traceId);
+        if (traceFromState != null && traceFromState.dataContainer != null) {
+            this.loggingService.info(`[Traces] Got trace from state: ${traceId}`);
+            return {
+                ...trace,
+                dataContainer: structuredClone(traceFromState.dataContainer) as DataContainer
+            };
+        }
+
         const dataContainer = await firstValueFrom(this.httpClient.get<DataContainer>(Urls.traceAsDataContainer + traceId));
         this.loggingService.info(`[Traces] Got trace from server: ${traceId}`);
         const traceToStore = {

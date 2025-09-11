@@ -65,6 +65,11 @@ public class ReceiptValidationGateway(
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _options.RevenueCatApiKey);
         response = await client.GetAsync(REVENUECAT_VALIDATOR_URL + userId + "/active_entitlements");
         responseStr = await response.Content.ReadAsStringAsync();
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            logger.LogInformation("Is entitled with Revenuecat for user: " + userId + " is: false");
+            return false;
+        }
         if (response.StatusCode != HttpStatusCode.OK)
         {
             throw new Exception("There was a problem communicating with the receipt validation server, code: "
