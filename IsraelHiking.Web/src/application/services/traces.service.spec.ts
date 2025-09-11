@@ -230,6 +230,27 @@ describe("Traces Service", () => {
             expect(trace.id).toBe("1");
     }));
 
+    it("Should return a trace stored in the state in case of a local recording and not in database", inject([TracesService, Store, DatabaseService],
+        async (tracesService: TracesService, store: Store, databaseService: DatabaseService) => {
+            databaseService.getTraceById = () => { return Promise.resolve(null as Trace)};
+
+            store.reset({
+                tracesState: {
+                    traces: [{
+                        id: "1",
+                        visibility: "local",
+                        dataContainer: {
+                            routes: [{}]
+                        }
+                    }]
+                }
+            });
+            const trace = await tracesService.getTraceById("1");
+
+            expect(trace.id).toBe("1");
+            expect(trace.dataContainer).not.toBeNull();
+    }));
+
     it("Should get a trace from server when it's not in the DB", inject([TracesService, Store, DatabaseService, HttpTestingController],
         async (tracesService: TracesService, store: Store, databaseService: DatabaseService, mockBackend: HttpTestingController) => {
             databaseService.getTraceById = () => { return Promise.resolve(null as Trace) };
