@@ -25,12 +25,14 @@ PODS:
   - CordovaPlugins (7.2.0):
     - CapacitorCordova
   - CordovaPluginsResources (0.0.105)
-  - PurchasesHybridCommon (16.2.0):
-    - RevenueCat (= 5.34.0)
-  - RevenueCat (5.34.0)
-  - RevenuecatPurchasesCapacitor (11.1.1):
+  - Qonversion (5.13.4):
+    - Qonversion/Main (= 5.13.4)
+  - Qonversion/Main (5.13.4)
+  - QonversionCapacitorPlugin (0.3.1):
     - Capacitor
-    - PurchasesHybridCommon (= 16.2.0)
+    - QonversionSandwich (= 5.2.1)
+  - QonversionSandwich (5.2.1):
+    - Qonversion (= 5.13.4)
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -47,12 +49,12 @@ DEPENDENCIES:
   - "CapgoBackgroundGeolocation (from `../../node_modules/@capgo/background-geolocation`)"
   - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
   - CordovaPluginsResources (from `../capacitor-cordova-ios-plugins`)
-  - "RevenuecatPurchasesCapacitor (from `../../node_modules/@revenuecat/purchases-capacitor`)"
+  - "QonversionCapacitorPlugin (from `../../node_modules/@qonversion/capacitor-plugin`)"
 
 SPEC REPOS:
   trunk:
-    - PurchasesHybridCommon
-    - RevenueCat
+    - Qonversion
+    - QonversionSandwich
 
 EXTERNAL SOURCES:
   Capacitor:
@@ -83,8 +85,8 @@ EXTERNAL SOURCES:
     :path: "../capacitor-cordova-ios-plugins"
   CordovaPluginsResources:
     :path: "../capacitor-cordova-ios-plugins"
-  RevenuecatPurchasesCapacitor:
-    :path: "../../node_modules/@revenuecat/purchases-capacitor"
+  QonversionCapacitorPlugin:
+    :path: "../../node_modules/@qonversion/capacitor-plugin"
 
 SPEC CHECKSUMS:
   Capacitor: 03bc7cbdde6a629a8b910a9d7d78c3cc7ed09ea7
@@ -101,10 +103,10 @@ SPEC CHECKSUMS:
   CapgoBackgroundGeolocation: 08827bdfd8aa4417baf9b8c33f73a7638d7fd0da
   CordovaPlugins: cab79a1483b58c2e110b3c98d0bf164d9429881f
   CordovaPluginsResources: da93847212bf7b16ba770e4d6c3e7dba820174c7
-  PurchasesHybridCommon: 55e97b4e090015ed138988e6559def2bd4c50ebe
-  RevenueCat: eb2aa042789d9c99ad5172bd96e28b96286d6ada
-  RevenuecatPurchasesCapacitor: 420b762736c2842bfb64436b7e0b88d2f672c943
+  Qonversion: 40c22c4da4aa07f999115f6bf7ce4abaf3f4a90b
+  QonversionCapacitorPlugin: b0c3c1366e77bfbb9826fe8ea950a17980814347
+  QonversionSandwich: 36e19e9c7c2016b2b12ade6660fa6d0b25539775
 
-PODFILE CHECKSUM: b7071d6c4dcf65718a2f0d291094c225625c57f1
+PODFILE CHECKSUM: 67577e799013f82b612830fb9efa46a5ee48fb7b
 
 COCOAPODS: 1.16.2

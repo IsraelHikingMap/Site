@@ -1,6 +1,6 @@
 import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
-import { Purchases } from "@revenuecat/purchases-capacitor";
+import {QonversionConfigBuilder, LaunchMode, Qonversion as QonversionInstance, UserPropertyKey, Entitlement} from "@qonversion/capacitor-plugin";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, timeout } from "rxjs";
 
@@ -11,6 +11,8 @@ import { ResourcesService } from "./resources.service";
 import { SetOfflineAvailableAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState } from "../models";
+
+declare const Qonversion: typeof QonversionInstance;
 
 const OFFLINE_MAPS_SUBSCRIPTION = "offline_map";
 
@@ -52,20 +54,23 @@ export class PurchaseService {
     }
 
     private async checkAndUpdateOfflineAvailability() {
-        const customerInfo = await Purchases.getCustomerInfo();
-        if (customerInfo.customerInfo.entitlements.active[OFFLINE_MAPS_SUBSCRIPTION]?.isActive) {
-            this.loggingService.info("[Store] Product owned! Last modified: " + customerInfo.customerInfo.entitlements.active[OFFLINE_MAPS_SUBSCRIPTION]?.latestPurchaseDate);
+        const entitlements = await Qonversion.getSharedInstance().checkEntitlements();
+
+        const premiumEntitlement = entitlements.get(OFFLINE_MAPS_SUBSCRIPTION);
+        if (premiumEntitlement?.isActive) {
+            this.loggingService.info("[Store] Product owned! Last modified: " + premiumEntitlement.lastPurchaseDate);
             this.store.dispatch(new SetOfflineAvailableAction(true));
         }
     }
 
     private async initializeStoreConnection(userId: string) {
         try {
-            const apiKey = this.runningContextService.isIos ? "appl_dYhzcYSUYYFWbXBeHYPMsDmraQp" : "goog_WFtGQuaZOimKuqvxOLUYNoekMbQ";
-            await Purchases.configure({
-                apiKey,
-                appUserID: userId
-            });
+            const config = new QonversionConfigBuilder(
+                OFFLINE_MAPS_SUBSCRIPTION,
+                LaunchMode.SUBSCRIPTION_MANAGEMENT,
+            ).build();
+            Qonversion.initialize(config);
+            Qonversion.getSharedInstance().setUserProperty(UserPropertyKey.CUSTOM_USER_ID, userId.toString());
             this.checkAndUpdateOfflineAvailability();
         } catch (error) {
             this.loggingService.error("[Store] Failed to get customer info: " + (error as any).message);
@@ -91,12 +96,15 @@ export class PurchaseService {
 
     private async orderInternal() {
         this.loggingService.info("[Store] Ordering product");
-        const offerings = await Purchases.getOfferings();
+        
+        try {
+            const offerings = await Qonversion.getSharedInstance().offerings();
+            const product = offerings.availableOffering[0].products[0];
+            await Qonversion.getSharedInstance().purchaseProduct(product, null);
+            await this.checkAndUpdateOfflineAvailability();
+        } catch (e) {
             
-        await Purchases.purchasePackage({
-            aPackage: offerings.current.annual
-        });
-        await this.checkAndUpdateOfflineAvailability();
+        }
     }
 
     public isPurchaseAvailable(): boolean {

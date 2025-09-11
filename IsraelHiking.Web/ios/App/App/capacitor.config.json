@@ -32,7 +32,7 @@
 		"TextZoomPlugin",
 		"AppUpdatePlugin",
 		"BackgroundGeolocation",
-		"PurchasesPlugin",
+		"QonversionPlugin",
 		"EmailComposerPlugin",
 		"CDVPlugin"
 	]
