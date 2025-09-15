@@ -62,10 +62,15 @@ export class PurchaseService {
     private async initializeStoreConnection(userId: string) {
         try {
             const apiKey = this.runningContextService.isIos ? "appl_dYhzcYSUYYFWbXBeHYPMsDmraQp" : "goog_WFtGQuaZOimKuqvxOLUYNoekMbQ";
-            await Purchases.configure({
-                apiKey,
-                appUserID: userId
-            });
+            const isConfigured = (await Purchases.isConfigured()).isConfigured;
+            if (!isConfigured && userId) {
+                await Purchases.configure({
+                    apiKey,
+                    appUserID: `${userId}`
+                });
+            } else if (isConfigured) {
+                await Purchases.logIn({ appUserID: `${userId}` });
+            }
             this.checkAndUpdateOfflineAvailability();
         } catch (error) {
             this.loggingService.error("[Store] Failed to get customer info: " + (error as any).message);
