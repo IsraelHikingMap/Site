@@ -22,4 +22,8 @@ public class NonPublicConfigurationData
     /// RevenueCat API key for server side validation
     /// </summary>
     public string RevenueCatApiKey { get; set; }
+    /// <summary>
+    /// Qonversion API key for server side validation
+    /// </summary>
+    public string QonversionApiKey { get; set; }
 }

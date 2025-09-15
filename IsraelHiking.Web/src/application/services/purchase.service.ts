@@ -68,6 +68,7 @@ export class PurchaseService {
             ).build();
             Qonversion.initialize(config);
             Qonversion.getSharedInstance().setUserProperty(UserPropertyKey.CUSTOM_USER_ID, userId.toString());
+            await Qonversion.getSharedInstance().identify(userId.toString());
             this.checkAndUpdateOfflineAvailability();
         } catch (error) {
             this.loggingService.error("[Store] Failed to get customer info: " + (error as any).message);
