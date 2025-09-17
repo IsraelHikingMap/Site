@@ -152,11 +152,12 @@ export class OfflineFilesDownloadService {
 
     public async deleteTile(tileX: number, tileY: number): Promise<void> {
         this.loggingService.info(`[Offline Download] Deleting tile ${tileX}-${tileY}`);
-        // This assumes that the tiles that needs to be downloaded have the same names as the ones that needs to be deleted
+        this.store.dispatch(new DeleteOfflineMapsTileAction(tileX, tileY));
+        // This assumes that the tiles that needs to be downloaded have the same names as the ones that needs to be deleted.
+        // It looks for the download date, so there's a need to clean the date before this call, which is done above.
         const files = await this.getFilesToDownload(tileX, tileY);
         for (const [fileName] of files) {
             await this.fileService.deleteFileInDataDirectory(fileName);
         }
-        this.store.dispatch(new DeleteOfflineMapsTileAction(tileX, tileY));
     }
 }
