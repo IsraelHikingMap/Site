@@ -75,11 +75,11 @@ export class OfflineManagementDialogComponent {
         switch (status) {
             case "up-to-date":
                 this.selectedTileXY = null;
-                this.toastService.success(this.resources.allFilesAreUpToDate + " " + this.resources.useTheCloudIconToGoOffline);
+                this.toastService.success(this.resources.allFilesAreUpToDate);
                 break;
             case "downloaded":
                 this.selectedTileXY = null;
-                this.toastService.success(this.resources.downloadFinishedSuccessfully + " " + this.resources.useTheCloudIconToGoOffline);
+                this.toastService.success(this.resources.downloadFinishedSuccessfully);
                 break;
             case "error":
                 this.toastService.warning(this.resources.unexpectedErrorPleaseTryAgainLater);

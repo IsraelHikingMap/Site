@@ -307,7 +307,6 @@ export class ResourcesService {
     public databaseUpgrade: string;
     public cantEditWhileOffline: string;
     public downloadingPoisForOfflineUsage: string;
-    public useTheCloudIconToGoOffline: string;
     public largeFilesUseWifi: string;
     public thisWillDeteleAllCurrentRoutesAreYouSure: string;
     public pleaseFillReport: string;
@@ -780,7 +779,6 @@ export class ResourcesService {
         this.databaseUpgrade = this.gettextCatalog.getString("The offline database has been upgraded...");
         this.cantEditWhileOffline = this.gettextCatalog.getString("You can't edit while offline...");
         this.downloadingPoisForOfflineUsage = this.gettextCatalog.getString("Downloading points of interest for offline usage...");
-        this.useTheCloudIconToGoOffline = this.gettextCatalog.getString("Use the cloud icon to go offline");
         this.largeFilesUseWifi = this.gettextCatalog
             .getString("You are about to download large files, you can change to wifi before clicking continue...");
         this.thisWillDeteleAllCurrentRoutesAreYouSure = this.gettextCatalog
