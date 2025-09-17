@@ -149,4 +149,14 @@ export class OfflineFilesDownloadService {
         this.loggingService.info("[Offline Download] Aborting current download");
         this.abortController.abort();
     }
+
+    public async deleteTile(tileX: number, tileY: number): Promise<void> {
+        this.loggingService.info(`[Offline Download] Deleting tile ${tileX}-${tileY}`);
+        // This assumes that the tiles that needs to be downloaded have the same names as the ones that needs to be deleted
+        const files = await this.getFilesToDownload(tileX, tileY);
+        for (const [fileName] of files) {
+            await this.fileService.deleteFileInDataDirectory(fileName);
+        }
+        this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(null, tileX, tileY));
+    }
 }

@@ -192,4 +192,28 @@ export class OfflineManagementDialogComponent {
         this.updateSelectedTile();
         this.updateDownloadedTiles();
     }
+
+    public isSelectedAvailableForOffline(): boolean {
+        if (!this.selectedTileXY) {
+            return false;
+        }
+        const downloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.offlineState.downloadedTiles);
+        return downloadedTiles != null && downloadedTiles[`${this.selectedTileXY.tileX}-${this.selectedTileXY.tileY}`] != null;
+    }
+
+    public async deleteSelected() {
+        if (!this.selectedTileXY) {
+            return;
+        }
+        this.toastService.confirm({
+            message: this.resources.areYouSure,
+            type: "YesNo",
+            confirmAction: async () => {
+                await this.offlineFilesDownloadService.deleteTile(this.selectedTileXY.tileX, this.selectedTileXY.tileY);
+                this.selectedTileXY = null;
+                this.updateSelectedTile();
+                this.updateDownloadedTiles();
+            }
+        });
+    }
 }

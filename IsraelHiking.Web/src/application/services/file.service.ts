@@ -375,4 +375,13 @@ export class FileService {
     public async moveFileFromCacheToDataDirectory(fileName: string): Promise<void> {
         await this.fileSystemWrapper.moveFile(this.fileSystemWrapper.cacheDirectory, fileName, this.fileSystemWrapper.dataDirectory, fileName);
     }
+
+    public async deleteFileInDataDirectory(fileName: string): Promise<void> {
+        try {
+            await this.fileSystemWrapper.removeFile(this.fileSystemWrapper.dataDirectory, fileName);
+            this.loggingService.info(`[Files] Deleted file: ${fileName}`);
+        } catch (ex) {
+            this.loggingService.error(`[Files] Failed to delete file: ${fileName}, ${(ex as Error).message}`);
+        }
+    }
 }

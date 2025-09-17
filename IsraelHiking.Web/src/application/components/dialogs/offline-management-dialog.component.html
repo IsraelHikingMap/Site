@@ -129,15 +129,33 @@
     </div>
     <div mat-dialog-actions>
         <div class="flex flex-row w-full">
-            <div class="flex-1">
-                <div *ngIf="!selectedTileXY && !downloadingTileXY">
+            <div class="flex-1" *ngIf="!selectedTileXY && !downloadingTileXY">
+                <div>
                     {{resources.clickTheMapToSelectATile}}
                 </div>
-                <button *ngIf="selectedTileXY && !downloadingTileXY" mat-raised-button class="w-full" color="primary" (click)="downloadSelected()">
+            </div>
+            <div class="flex-1" *ngIf="selectedTileXY && !isSelectedAvailableForOffline() && !downloadingTileXY">
+                <button mat-raised-button class="w-full" color="primary" (click)="downloadSelected()">
                     <i class="fa fa-lg icon-download"></i>
                     {{resources.startDownload}}
                 </button>
-                <button *ngIf="downloadingTileXY" mat-raised-button class="w-full" color="primary" (click)="cancelDownload()">
+            </div>
+            <ng-container *ngIf="selectedTileXY && isSelectedAvailableForOffline() && !downloadingTileXY">
+                <div class="flex-1">
+                    <button mat-raised-button class="w-full" color="primary" (click)="downloadSelected()">
+                        <i class="fa fa-lg icon-download"></i>
+                        {{resources.update}}
+                    </button>
+                </div>
+                <div class="flex-1">
+                    <button mat-raised-button class="w-full" color="warn" (click)="deleteSelected()">
+                        <i class="fa fa-lg icon-trash"></i>
+                        {{resources.delete}}
+                    </button>
+                </div>
+            </ng-container>
+            <div class="flex-1" *ngIf="downloadingTileXY">
+                <button mat-raised-button class="w-full" color="primary" (click)="cancelDownload()">
                     <i class="fa fa-lg icon-close"></i>
                     {{resources.cancel}}
                 </button>

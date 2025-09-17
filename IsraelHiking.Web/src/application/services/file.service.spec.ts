@@ -432,4 +432,31 @@ describe("FileService", () => {
         expect(spy).toHaveBeenCalled();
         return promise;
     }));
+
+    it("Should move file from cache to data directory", inject([FileService, FileSystemWrapper], 
+        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
+        const spy = jasmine.createSpy();
+        fileSystemWrapper.moveFile = spy;
+        await service.moveFileFromCacheToDataDirectory("file");
+
+        expect(spy).toHaveBeenCalled();
+    }));
+
+    it("Should delete file", inject([FileService, FileSystemWrapper], 
+        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
+        const spy = jasmine.createSpy();
+        fileSystemWrapper.removeFile = spy.and.returnValue(Promise.resolve());
+        await service.deleteFileInDataDirectory("file");
+
+        expect(spy).toHaveBeenCalled();
+    }));
+
+    it("Should not throw if delete file fails", inject([FileService, FileSystemWrapper], 
+        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
+        const spy = jasmine.createSpy();
+        fileSystemWrapper.removeFile = spy.and.returnValue(Promise.reject(new Error("fail")));
+        await service.deleteFileInDataDirectory("file");
+
+        expect(spy).toHaveBeenCalled();
+    }));
 });
