@@ -9,7 +9,7 @@ import { Urls } from "../urls";
 import { OfflineManagementDialogComponent } from "../components/dialogs/offline-management-dialog.component";
 import { FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
-import { SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
+import { DeleteOfflineMapsTileAction, SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
 import type { ApplicationState } from "../models";
 
 @Injectable()
@@ -157,6 +157,6 @@ export class OfflineFilesDownloadService {
         for (const [fileName] of files) {
             await this.fileService.deleteFileInDataDirectory(fileName);
         }
-        this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(null, tileX, tileY));
+        this.store.dispatch(new DeleteOfflineMapsTileAction(tileX, tileY));
     }
 }
