@@ -1,49 +1,65 @@
 <div [dir]="resources.direction" class="safe-top">
-    <div mat-dialog-content>
-        <div *ngIf="step === 0">
-            <mat-radio-group (change)=resources.setLanguage($event.value) [value]="getLanuguageCode()">
-                <div *ngFor="let language of availableLanguages">
-                    <mat-radio-button [value]="language.code" color="primary" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Select language {{language.code}}">{{language.label}}</mat-radio-button>
-                </div>
-            </mat-radio-group>
-            <br />
-            <div class="square-container">
-                <ng-lottie class="img-responsive" style="padding-right: 13px;" [options]="lottieLanguage"></ng-lottie>
+  <div mat-dialog-content>
+    @if (step === 0) {
+      <div>
+        <mat-radio-group (change)=resources.setLanguage($event.value) [value]="getLanuguageCode()">
+          @for (language of availableLanguages; track language) {
+            <div>
+              <mat-radio-button [value]="language.code" color="primary" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Select language {{language.code}}">{{language.label}}</mat-radio-button>
             </div>
+          }
+        </mat-radio-group>
+        <br />
+        <div class="square-container">
+          <ng-lottie class="img-responsive" style="padding-right: 13px;" [options]="lottieLanguage"></ng-lottie>
         </div>
-        <div *ngIf="step === 1">
-            <h2>{{resources.maps}}</h2>
-            <p>{{resources.introMapsDescription}}</p>
-            <div class="square-container">
-                <ng-lottie class="img-responsive" [options]="lottieMaps"></ng-lottie>
-            </div>
+      </div>
+    }
+    @if (step === 1) {
+      <div>
+        <h2>{{resources.maps}}</h2>
+        <p>{{resources.introMapsDescription}}</p>
+        <div class="square-container">
+          <ng-lottie class="img-responsive" [options]="lottieMaps"></ng-lottie>
         </div>
-        <div *ngIf="step === 2">
-            <h2>{{resources.routesAndPoints}}</h2>
-            <p>{{resources.introRoutesAndPointsDescription}}</p>
-            <div class="square-container">
-                <ng-lottie class="img-responsive" [options]="lottiePlan"></ng-lottie>
-            </div>
+      </div>
+    }
+    @if (step === 2) {
+      <div>
+        <h2>{{resources.routesAndPoints}}</h2>
+        <p>{{resources.introRoutesAndPointsDescription}}</p>
+        <div class="square-container">
+          <ng-lottie class="img-responsive" [options]="lottiePlan"></ng-lottie>
         </div>
-        <div *ngIf="step === 3">
-            <h2>{{resources.andSoMuchMore}}</h2>
-            <p>{{resources.introAndSoMuchMoreDescription}}</p>
-            <div class="square-container">
-                <ng-lottie class="img-responsive" [options]="lottieMore"></ng-lottie>
-            </div>
+      </div>
+    }
+    @if (step === 3) {
+      <div>
+        <h2>{{resources.andSoMuchMore}}</h2>
+        <p>{{resources.introAndSoMuchMoreDescription}}</p>
+        <div class="square-container">
+          <ng-lottie class="img-responsive" [options]="lottieMore"></ng-lottie>
         </div>
+      </div>
+    }
+  </div>
+  <div mat-dialog-actions>
+    <div class="flex flex-row w-full">
+      <div class="flex-1">
+        @if (step !== 0) {
+          <button mat-button class="w-full" (click)="step = step - 1" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro back">{{resources.back}}</button>
+        }
+      </div>
+      @if (step !== 3) {
+        <div class="flex-1">
+          <button mat-raised-button color="primary" class="w-full" (click)="step = step + 1" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro next">{{resources.next}}</button>
+        </div>
+      }
+      @if (step === 3) {
+        <div class="flex-1">
+          <button mat-raised-button color="primary" class="w-full" (click)="close()" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro close">{{resources.close}}</button>
+        </div>
+      }
     </div>
-    <div mat-dialog-actions>
-        <div class="flex flex-row w-full">
-            <div class="flex-1">
-                <button *ngIf="step !== 0" mat-button class="w-full" (click)="step = step - 1" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro back">{{resources.back}}</button>
-            </div>
-            <div class="flex-1" *ngIf="step !== 3">
-                <button mat-raised-button color="primary" class="w-full" (click)="step = step + 1" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro next">{{resources.next}}</button>
-            </div>
-            <div class="flex-1" *ngIf="step === 3">
-                <button mat-raised-button color="primary" class="w-full" (click)="close()" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro close">{{resources.close}}</button>
-            </div>
-        </div>
-    </div>
+  </div>
 </div>

@@ -1,4 +1,4 @@
-import { Directive, AfterViewInit, input } from "@angular/core";
+import { Directive, AfterViewInit, input, inject } from "@angular/core";
 import { Validator, AbstractControl, NG_VALIDATORS } from "@angular/forms";
 
 import { LayersService } from "../services/layers.service";
@@ -14,7 +14,7 @@ export class NameInUseValidatorDirective implements Validator, AfterViewInit {
 
     private initialKey: string;
 
-    public constructor(private readonly layersService: LayersService) { }
+    private readonly layersService: LayersService = inject(LayersService);
 
     public ngAfterViewInit(): void {
         this.initialKey = this.nameInUse();

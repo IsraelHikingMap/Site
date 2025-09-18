@@ -1,7 +1,7 @@
 import { Component, inject, input, OnInit } from "@angular/core";
 import { MatSelectChange, MatSelect } from "@angular/material/select";
 import { Dir } from "@angular/cdk/bidi";
-import { NgIf, NgClass, NgFor } from "@angular/common";
+import { NgClass } from "@angular/common";
 import { MatCard, MatCardHeader, MatCardTitle } from "@angular/material/card";
 import { MatFormField, MatLabel, MatSuffix } from "@angular/material/form-field";
 import { MatInput } from "@angular/material/input";
@@ -23,7 +23,7 @@ import type { EditablePublicPointData, IconColorLabel } from "../../../models";
     selector: "public-poi-edit",
     templateUrl: "./public-poi-edit.component.html",
     styleUrls: ["./public-poi-edit.component.scss"],
-    imports: [Dir, NgIf, MatCard, MatCardHeader, MatCardTitle, NgClass, MatFormField, MatLabel, MatInput, FormsModule, ImageScrollerComponent, NgFor, MatIconButton, MatSuffix, MatButton, MatSelect, MatOption, MatTooltip, MatCheckbox, MatProgressSpinner]
+    imports: [Dir, MatCard, MatCardHeader, MatCardTitle, NgClass, MatFormField, MatLabel, MatInput, FormsModule, ImageScrollerComponent, MatIconButton, MatSuffix, MatButton, MatSelect, MatOption, MatTooltip, MatCheckbox, MatProgressSpinner]
 })
 export class PublicPointOfInterestEditComponent implements OnInit {
 
@@ -98,10 +98,6 @@ export class PublicPointOfInterestEditComponent implements OnInit {
 
     public removeUrl(i: number) {
         this.info().urls.splice(i, 1);
-    }
-
-    public trackByIndex(index: number) {
-        return index;
     }
 
     public isPoint(): boolean {

@@ -2,7 +2,7 @@ import { Component, HostListener, OnChanges, inject, output, input } from "@angu
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
-import { NgIf } from "@angular/common";
+
 
 import { CoordinatesComponent } from "../coordinates.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -12,7 +12,7 @@ import type { LatLngAlt } from "../../models";
 @Component({
     selector: "route-point-overlay",
     templateUrl: "./route-point-overlay.component.html",
-    imports: [Dir, MatButton, MatTooltip, NgIf, CoordinatesComponent]
+    imports: [Dir, MatButton, MatTooltip, CoordinatesComponent]
 })
 export class RoutePointOverlayComponent implements OnChanges {
     public canMerge: boolean = false;

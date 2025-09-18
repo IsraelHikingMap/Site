@@ -1,5 +1,5 @@
 import { Component, inject } from "@angular/core";
-import { NgIf, NgClass, NgFor } from "@angular/common";
+import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
@@ -21,7 +21,7 @@ import type { ApplicationState, LatLngAlt } from "../../models";
 @Component({
     selector: "traces",
     templateUrl: "./traces.component.html",
-    imports: [SourceDirective, GeoJSONSourceComponent, LayerComponent, NgIf, MarkerComponent, PopupComponent, Dir, NgClass, MatButton, Angulartics2OnModule, MatTooltip, CoordinatesComponent, MissingPartOverlayComponent, NgFor]
+    imports: [SourceDirective, GeoJSONSourceComponent, LayerComponent, MarkerComponent, PopupComponent, Dir, NgClass, MatButton, Angulartics2OnModule, MatTooltip, CoordinatesComponent, MissingPartOverlayComponent]
 })
 export class TracesComponent {
 

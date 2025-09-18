@@ -1,4 +1,4 @@
-import { Component, OnChanges, input } from "@angular/core";
+import { Component, OnChanges, inject, input } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 import { HttpClient } from "@angular/common/http";
 import { BehaviorSubject, Observable } from "rxjs";
@@ -26,7 +26,8 @@ export class SecuredImageComponent implements OnChanges {
     // new resource would be loaded
     dataUrl$ = this.src$.pipe(switchMap(url => this.loadImage(url)));
 
-    constructor(private httpClient: HttpClient, private domSanitizer: DomSanitizer) { }
+    private readonly httpClient: HttpClient = inject(HttpClient);
+    private readonly domSanitizer: DomSanitizer = inject(DomSanitizer);
 
     public ngOnChanges(): void {
         this.src$.next(this.src());

@@ -1,21 +1,29 @@
-﻿﻿<div [dir]="resources.direction">
-    <div class="flex flex-row">
-        <div class="flex-1">
-            <button mat-button class="w-full min-w-unset" (click)="remove()" matTooltip="{{resources.deletePoi}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
-        </div>
-        <div class="flex-1">
-            <button mat-button class="w-full min-w-unset" (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
-        </div>
-        <div class="flex-1" *ngIf="!isMiddle">
-            <button mat-button class="w-full min-w-unset" (click)="reverse()" matTooltip="{{resources.reverseRoute}}" matTooltipPosition="above"><i class="fa icon-arrows-h"></i></button>
-        </div>
-        <div class="flex-1">
-            <button mat-button class="w-full min-w-unset" *ngIf="isMiddle" (click)="split()" matTooltip="{{resources.split}}" matTooltipPosition="above"><i class="fa icon-cut"></i></button>
-            <button mat-button class="w-full min-w-unset" *ngIf="!isMiddle" [disabled]="!canMerge" (click)="merge()" matTooltip="{{resources.merge}}" matTooltipPosition="above"><i class="fa icon-merge"></i></button>
-        </div>
+﻿<div [dir]="resources.direction">
+  <div class="flex flex-row">
+    <div class="flex-1">
+      <button mat-button class="w-full min-w-unset" (click)="remove()" matTooltip="{{resources.deletePoi}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
     </div>
-    <div *ngIf="!hideCoordinates">
-        <coordinates [latlng]="latlng()"></coordinates>
+    <div class="flex-1">
+      <button mat-button class="w-full min-w-unset" (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
     </div>
+    @if (!isMiddle) {
+      <div class="flex-1">
+        <button mat-button class="w-full min-w-unset" (click)="reverse()" matTooltip="{{resources.reverseRoute}}" matTooltipPosition="above"><i class="fa icon-arrows-h"></i></button>
+      </div>
+    }
+    <div class="flex-1">
+      @if (isMiddle) {
+        <button mat-button class="w-full min-w-unset" (click)="split()" matTooltip="{{resources.split}}" matTooltipPosition="above"><i class="fa icon-cut"></i></button>
+      }
+      @if (!isMiddle) {
+        <button mat-button class="w-full min-w-unset" [disabled]="!canMerge" (click)="merge()" matTooltip="{{resources.merge}}" matTooltipPosition="above"><i class="fa icon-merge"></i></button>
+      }
+    </div>
+  </div>
+  @if (!hideCoordinates) {
+    <div>
+      <coordinates [latlng]="latlng()"></coordinates>
+    </div>
+  }
 </div>
 

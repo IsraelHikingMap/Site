@@ -1,6 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { transition, trigger, style, animate } from "@angular/animations";
-import { NgIf, NgSwitch, NgSwitchCase } from "@angular/common";
+
 
 import { LayersSidebarComponent } from "./layers-sidebar.component";
 import { InfoSidebarComponent } from "./info-sidebar.component";
@@ -25,7 +25,7 @@ import { ResourcesService } from "../../services/resources.service";
             ], { params: { startTransform: "translateX(-100%)" } }) // Default ltr
         ])
     ],
-    imports: [NgIf, NgSwitch, NgSwitchCase, LayersSidebarComponent, InfoSidebarComponent, PublicPoiSidebarComponent]
+    imports: [LayersSidebarComponent, InfoSidebarComponent, PublicPoiSidebarComponent]
 })
 export class SidebarComponent {
 

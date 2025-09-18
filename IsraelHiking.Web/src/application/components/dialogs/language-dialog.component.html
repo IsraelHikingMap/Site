@@ -1,19 +1,21 @@
-﻿﻿<div [dir]="resources.direction">
-    <div matDialogTitle>
-        <div>{{resources.language}}</div>
-        <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
-    </div>
-    <div mat-dialog-content>
-        <mat-radio-group [(ngModel)]="selectedLanguageCode">
-            <div *ngFor="let language of availableLanguages">
-                <mat-radio-button [value]="language.code" color="primary" angulartics2On="click" angularticsCategory="Language" angularticsAction="Select language {{language.code}}">{{language.label}}</mat-radio-button>
-            </div>
-        </mat-radio-group>
-        <br />
-    </div>
-    <div mat-dialog-actions>
-        <div class="flex flex-row w-full">
-            <button class="w-full" matDialogClose mat-button (click)="saveLanguage()" angulartics2On="click" angularticsCategory="Language" angularticsAction="Save language {{selectedLanguageCode}}" matTooltip="{{resources.save}}" matTooltipPosition="above"><i class="fa icon-check"></i></button>
+﻿<div [dir]="resources.direction">
+  <div matDialogTitle>
+    <div>{{resources.language}}</div>
+    <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+  </div>
+  <div mat-dialog-content>
+    <mat-radio-group [(ngModel)]="selectedLanguageCode">
+      @for (language of availableLanguages; track language) {
+        <div>
+          <mat-radio-button [value]="language.code" color="primary" angulartics2On="click" angularticsCategory="Language" angularticsAction="Select language {{language.code}}">{{language.label}}</mat-radio-button>
         </div>
+      }
+    </mat-radio-group>
+    <br />
+  </div>
+  <div mat-dialog-actions>
+    <div class="flex flex-row w-full">
+      <button class="w-full" matDialogClose mat-button (click)="saveLanguage()" angulartics2On="click" angularticsCategory="Language" angularticsAction="Save language {{selectedLanguageCode}}" matTooltip="{{resources.save}}" matTooltipPosition="above"><i class="fa icon-check"></i></button>
     </div>
+  </div>
 </div>

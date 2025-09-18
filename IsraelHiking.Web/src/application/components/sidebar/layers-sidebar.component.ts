@@ -3,7 +3,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag } from "@angular/cdk/drag-drop";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
-import { NgIf, NgFor, NgClass, AsyncPipe, DatePipe } from "@angular/common";
+import { NgClass, AsyncPipe, DatePipe } from "@angular/common";
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from "@angular/material/expansion";
 import { MatTooltip } from "@angular/material/tooltip";
 import { Angulartics2OnModule } from "angulartics2";
@@ -36,7 +36,7 @@ import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGro
     templateUrl: "./layers-sidebar.component.html",
     styleUrls: ["./layers-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, NgIf, Angulartics2OnModule, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgFor, NgClass, MatTooltip, CategoriesGroupComponent, CdkDropList, CdkDrag, AsyncPipe, DatePipe]
+    imports: [Dir, MatButton, Angulartics2OnModule, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatTooltip, CategoriesGroupComponent, CdkDropList, CdkDrag, AsyncPipe, DatePipe]
 })
 export class LayersSidebarComponent {
 

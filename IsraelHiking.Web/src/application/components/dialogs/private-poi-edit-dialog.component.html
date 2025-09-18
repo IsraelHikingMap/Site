@@ -1,85 +1,107 @@
-﻿﻿<div [dir]="resources.direction" dnd-droppable (onDropSuccess)="addImage($event.mouseEvent)">
-    <div matDialogTitle>
-        <div *ngIf="!url">
-            {{title}}
-        </div>
-        <a *ngIf="url" href="{{url.url}}" target="_blank">
-            {{title}}
-        </a>
-        <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
-    </div>
-    <div mat-dialog-content>
+﻿<div [dir]="resources.direction" dnd-droppable (onDropSuccess)="addImage($event.mouseEvent)">
+  <div matDialogTitle>
+    @if (!url) {
+      <div>
+        {{title}}
+      </div>
+    }
+    @if (url) {
+      <a href="{{url.url}}" target="_blank">
+        {{title}}
+      </a>
+    }
+    <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+  </div>
+  <div mat-dialog-content>
+    <div class="flex flex-row">
+      <div class="w-3/5 me-2">
         <div class="flex flex-row">
-            <div class="w-3/5 me-2">
-                <div class="flex flex-row">
-                    <mat-form-field class="w-full">
-                        <mat-label>{{resources.title}}</mat-label>
-                        <input matInput #titleInput class="w-full" type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" />
-                    </mat-form-field>
-                </div>
-                <div class="flex flex-row">
-                    <mat-form-field class="w-full">
-                        <mat-label>{{resources.description}}</mat-label>
-                        <textarea class="w-full" rows="4" maxlength="255" matInput [dir]="resources.getDirection(description)" [(ngModel)]="description"></textarea>
-                    </mat-form-field>
-                </div>
-            </div>
-            <div class="w-2/5">
-                <div class="flex flex-row">
-                    <label *ngIf="!imageLink">
-                        <a mat-button class="w-full h-unset" [style.color]="'black'" imageCapture (changed)="addImage($event)" angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
-                        <input type="file" (change)="addImage($event)" [style.display]="'none'" accept="image/*;capture=camera" />
-                    </label>
-                    <img *ngIf="imageLink"
-                         [src]="resources.getResizedImageUrl(imageLink.url, 300)"
-                         class="img-responsive w-full" />
-                </div>
-                <div class="flex flex-row" *ngIf="imageLink">
-                    <button mat-button class="w-full" (click)="clearImage()" matTooltip="{{resources.clear}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
-                </div>
-                <div *ngIf="showIcons">
-                    <br />
-                    <div *ngFor="let group of iconsGroups">
-                        <div class="flex flex-row w-full">
-                            <div *ngFor="let icon of group.icons" (click)="setMarkerType(icon)" class="cursor-pointer text-center" [ngStyle]="{width:100/iconsGroups.length + '%'}" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Select icon {{icon}}">
-                                <i class="fa icon-{{icon}} fa-lg" [ngClass]="{ 'active': icon === markerType }"></i>
-                            </div>
-                        </div>
+          <mat-form-field class="w-full">
+            <mat-label>{{resources.title}}</mat-label>
+            <input matInput #titleInput class="w-full" type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" />
+          </mat-form-field>
+        </div>
+        <div class="flex flex-row">
+          <mat-form-field class="w-full">
+            <mat-label>{{resources.description}}</mat-label>
+            <textarea class="w-full" rows="4" maxlength="255" matInput [dir]="resources.getDirection(description)" [(ngModel)]="description"></textarea>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="w-2/5">
+        <div class="flex flex-row">
+          @if (!imageLink) {
+            <label>
+              <a mat-button class="w-full h-unset" [style.color]="'black'" imageCapture (changed)="addImage($event)" angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
+              <input type="file" (change)="addImage($event)" [style.display]="'none'" accept="image/*;capture=camera" />
+            </label>
+          }
+          @if (imageLink) {
+            <img
+              [src]="resources.getResizedImageUrl(imageLink.url, 300)"
+              class="img-responsive w-full" />
+          }
+        </div>
+        @if (imageLink) {
+          <div class="flex flex-row">
+            <button mat-button class="w-full" (click)="clearImage()" matTooltip="{{resources.clear}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
+          </div>
+        }
+        @if (showIcons) {
+          <div>
+            <br />
+            @for (group of iconsGroups; track group) {
+              <div>
+                <div class="flex flex-row w-full">
+                  @for (icon of group.icons; track icon) {
+                    <div (click)="setMarkerType(icon)" class="cursor-pointer text-center" [ngStyle]="{width:100/iconsGroups.length + '%'}" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Select icon {{icon}}">
+                      <i class="fa icon-{{icon}} fa-lg" [ngClass]="{ 'active': icon === markerType }"></i>
                     </div>
+                  }
                 </div>
-            </div>
-        </div>
-        <div class="flex flex-row" *ngIf="showUrl && url">
-            <mat-form-field class="w-full">
-                <mat-label>{{resources.aLinkToAWebsite}}</mat-label>
-                <input matInput class="w-full" type="text" dir="ltr" [(ngModel)]="url.url"/>
-                <button matSuffix mat-icon-button (click)="removeUrl()"><i class="fa icon-trash"></i></button>
-            </mat-form-field>
-        </div>
-        <div class="flex flex-row" *ngIf="showCoordinates">
-            <coordinates [latlng]="marker.latlng"></coordinates>
-        </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
     </div>
-    <div mat-dialog-actions>
-        <div class="flex-1">
-            <mat-menu #appMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
-                <button mat-menu-item (click)="toggleCoordinates()" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Toggle coordinates"><i class="fa icon-globe"></i> {{resources.showCoordinates}}</button>
-                <button mat-menu-item (click)="showIcons = !showIcons" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Toggle select icon"><i class="fa icon-{{markerType}}"></i> {{resources.selectIcon}}</button>
-                <button mat-menu-item (click)="addUrl()" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Add link"><i class="fa icon-external-link"></i> {{resources.aLinkToAWebsite}}</button>
-                <button mat-menu-item (click)="navigateHere()" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Navigate here"><i class="fa icon-recordings"></i> {{resources.navigateHere}}</button>
-                <button mat-menu-item (click)="shareLocation()" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Share location" *ngIf="canShareLocation()"><i class="fa icon-share-alt"></i> {{resources.shareLocation}}</button>
-                <a mat-menu-item [href]="getWazeAddress()" target="_blank" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Share with Waze"><i class="fa icon-waze"></i> {{resources.navigateWithWaze}}</a>
-            </mat-menu>
-            <button mat-button [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="More"><i class="fa icon-ellipsis-v fa-lg"></i></button>
-        </div>
-        <div class="flex-1">
-            <button mat-button class="w-full" type="button" matDialogClose (click)="remove()" matTooltip="{{resources.deletePoi}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
-        </div>
-        <div class="flex-1">
-            <button mat-button class="w-full" type="button" matDialogClose (click)="uploadPoint()" matTooltip="{{resources.uploadPoint}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Open upload point dialog"><i class="fa icon-cloud-upload"></i></button>
-        </div>
-        <div class="flex-1">
-            <button mat-button class="w-full" type="button" matDialogClose (click)="save()" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Save"><i class="fa icon-check"></i></button>
-        </div>
+    @if (showUrl && url) {
+      <div class="flex flex-row">
+        <mat-form-field class="w-full">
+          <mat-label>{{resources.aLinkToAWebsite}}</mat-label>
+          <input matInput class="w-full" type="text" dir="ltr" [(ngModel)]="url.url"/>
+          <button matSuffix mat-icon-button (click)="removeUrl()"><i class="fa icon-trash"></i></button>
+        </mat-form-field>
+      </div>
+    }
+    @if (showCoordinates) {
+      <div class="flex flex-row">
+        <coordinates [latlng]="marker.latlng"></coordinates>
+      </div>
+    }
+  </div>
+  <div mat-dialog-actions>
+    <div class="flex-1">
+      <mat-menu #appMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
+        <button mat-menu-item (click)="toggleCoordinates()" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Toggle coordinates"><i class="fa icon-globe"></i> {{resources.showCoordinates}}</button>
+        <button mat-menu-item (click)="showIcons = !showIcons" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Toggle select icon"><i class="fa icon-{{markerType}}"></i> {{resources.selectIcon}}</button>
+        <button mat-menu-item (click)="addUrl()" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Add link"><i class="fa icon-external-link"></i> {{resources.aLinkToAWebsite}}</button>
+        <button mat-menu-item (click)="navigateHere()" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Navigate here"><i class="fa icon-recordings"></i> {{resources.navigateHere}}</button>
+        @if (canShareLocation()) {
+          <button mat-menu-item (click)="shareLocation()" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Share location"><i class="fa icon-share-alt"></i> {{resources.shareLocation}}</button>
+        }
+        <a mat-menu-item [href]="getWazeAddress()" target="_blank" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Share with Waze"><i class="fa icon-waze"></i> {{resources.navigateWithWaze}}</a>
+      </mat-menu>
+      <button mat-button [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="More"><i class="fa icon-ellipsis-v fa-lg"></i></button>
     </div>
+    <div class="flex-1">
+      <button mat-button class="w-full" type="button" matDialogClose (click)="remove()" matTooltip="{{resources.deletePoi}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
+    </div>
+    <div class="flex-1">
+      <button mat-button class="w-full" type="button" matDialogClose (click)="uploadPoint()" matTooltip="{{resources.uploadPoint}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Open upload point dialog"><i class="fa icon-cloud-upload"></i></button>
+    </div>
+    <div class="flex-1">
+      <button mat-button class="w-full" type="button" matDialogClose (click)="save()" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Save"><i class="fa icon-check"></i></button>
+    </div>
+  </div>
 </div>
