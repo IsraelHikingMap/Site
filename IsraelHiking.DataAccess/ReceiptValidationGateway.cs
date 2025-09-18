@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
@@ -39,11 +38,21 @@ public class ReceiptValidationGateway(
     : IReceiptValidationGateway
 {
     private const string IAPTIC_VALIDATOR_URL = "https://validator.iaptic.com/v3/customers/";
-    private const string REVENUECAT_VALIDATOR_URL = "https://api.revenuecat.com/v2/projects/proj877f8747/customers/";
+    private const string REVENUECAT_VALIDATOR_URL = "https://api.revenuecat.com/v2/projects/";
 
     private readonly NonPublicConfigurationData _options = options.Value;
 
     public async Task<bool> IsEntitled(string userId)
+    {
+        var results = await Task.WhenAll([
+            ValidateIaptic(userId),
+            ValidateRevenueCat(userId, "proj1b16c0fa"),
+            ValidateRevenueCat(userId, "proj877f8747")
+        ]);
+        return results.Any(r => r);
+    }
+
+    private async Task<bool> ValidateIaptic(string userId)
     {
         var client = httpClientFactory.CreateClient();
         // Docs: https://www.iaptic.com/documentation/api/v3/#api-Customers-GetCustomerPurchases
@@ -51,20 +60,24 @@ public class ReceiptValidationGateway(
         var responseStr = await response.Content.ReadAsStringAsync();
         if (response.StatusCode != HttpStatusCode.OK)
         {
-            throw new Exception("There was a problem communicating with the receipt validation server, code: "
+            logger.LogWarning("There was a problem communicating with the receipt validation server, code: "
                                 + response.StatusCode + ", " + responseStr);
+            return false;
         }
         var iapticResponse = JsonSerializer.Deserialize<IapticPurchaseResponse>(responseStr);
         var iapticEntitled = iapticResponse.Purchases.Values.Any(v => v.IsExpired == false);
         logger.LogInformation("Is entitled with Iaptic for user: " + userId + " is: " + iapticEntitled);
-        if (iapticEntitled)
-        {
-            return true;
-        }
-        //https://api.revenuecat.com/v2/projects/proj877f8747/customers/1257210/active_entitlements
+        return iapticEntitled;
+    }
+
+    private async Task<bool> ValidateRevenueCat(string userId, string projectId)
+    {
+        var client = httpClientFactory.CreateClient();
+
+        //https://api.revenuecat.com/v2/projects/proj1b16c0fa/customers/1257210/active_entitlements
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _options.RevenueCatApiKey);
-        response = await client.GetAsync(REVENUECAT_VALIDATOR_URL + userId + "/active_entitlements");
-        responseStr = await response.Content.ReadAsStringAsync();
+        var response = await client.GetAsync(REVENUECAT_VALIDATOR_URL + projectId + "/customers/" + userId + "/active_entitlements");
+        var responseStr = await response.Content.ReadAsStringAsync();
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
             logger.LogInformation("Is entitled with Revenuecat for user: " + userId + " is: false");
@@ -72,8 +85,9 @@ public class ReceiptValidationGateway(
         }
         if (response.StatusCode != HttpStatusCode.OK)
         {
-            throw new Exception("There was a problem communicating with the receipt validation server, code: "
+            logger.LogWarning("There was a problem communicating with the receipt validation server, code: "
                                 + response.StatusCode + ", " + responseStr);
+            return false;
         }
         var hasEntitlements = JsonSerializer.Deserialize<RevenueCatEntitlementsResponse>(responseStr).Items.Any();
         logger.LogInformation("Is entitled with Revenuecat for user: " + userId + " is: " + hasEntitlements);
