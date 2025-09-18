@@ -708,7 +708,7 @@ export class ResourcesService {
         this.imageBy = this.gettextCatalog.getString("Image by");
         this.notYet = this.gettextCatalog.getString("Not yet...");
         this.imageUploadWaiver = this.gettextCatalog.getString("The pictures I will upload are my own work, and they can be used without any restrictions.");
-        this.subscriptionDetails = this.gettextCatalog.getString("Offline Maps Subscription: - Allows using maps when there's no reception. - Only 99₪ per year. - Paid once a year.")
+        this.subscriptionDetails = this.gettextCatalog.getString("Offline Maps Subscription: - Allows using maps when there's no reception. - Only 29.99$ per year. - Paid once a year.")
             .replace(/ - /g, "\n - ");
         this.noDescriptionAvailableInYourLanguage = this.gettextCatalog.getString("No description available in your language");
         this.manageOfflineMaps = this.gettextCatalog.getString("Manage Offline Maps");
