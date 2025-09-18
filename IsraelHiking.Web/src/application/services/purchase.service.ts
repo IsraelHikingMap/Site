@@ -65,7 +65,7 @@ export class PurchaseService {
 
     private async initializeStoreConnection(userId: string) {
         try {
-            const apiKey = this.runningContextService.isIos ? "appl_dYhzcYSUYYFWbXBeHYPMsDmraQp" : "goog_WFtGQuaZOimKuqvxOLUYNoekMbQ";
+            const apiKey = this.runningContextService.isIos ? "appl_OKCoIjEkNVfloKjpNfNaAdgGOwO" : "goog_NEtHVocOwpDpmIcHEETTdUdrtpd";
             const isConfigured = (await Purchases.isConfigured()).isConfigured;
             if (!isConfigured && userId) {
                 await Purchases.configure({

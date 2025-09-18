@@ -39,7 +39,7 @@ public class ReceiptValidationGateway(
     : IReceiptValidationGateway
 {
     private const string IAPTIC_VALIDATOR_URL = "https://validator.iaptic.com/v3/customers/";
-    private const string REVENUECAT_VALIDATOR_URL = "https://api.revenuecat.com/v2/projects/proj1b16c0fa/customers/";
+    private const string REVENUECAT_VALIDATOR_URL = "https://api.revenuecat.com/v2/projects/proj877f8747/customers/";
 
     private readonly NonPublicConfigurationData _options = options.Value;
 
@@ -61,7 +61,7 @@ public class ReceiptValidationGateway(
         {
             return true;
         }
-        //https://api.revenuecat.com/v2/projects/proj1b16c0fa/customers/1257210/active_entitlements
+        //https://api.revenuecat.com/v2/projects/proj877f8747/customers/1257210/active_entitlements
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _options.RevenueCatApiKey);
         response = await client.GetAsync(REVENUECAT_VALIDATOR_URL + userId + "/active_entitlements");
         responseStr = await response.Content.ReadAsStringAsync();
