@@ -16,15 +16,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '20.12'
+          node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '9.0'
 
@@ -38,7 +38,7 @@ jobs:
           npx ng lint
       - name: Codecov upload
         if: always()
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: ./Tests/IsraelHiking.API.Tests/coverage.info,./IsraelHiking.Web/coverage/lcov.info
         env:
