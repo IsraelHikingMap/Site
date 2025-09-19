@@ -5,7 +5,7 @@ import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatFormField, MatLabel } from "@angular/material/form-field";
 import { MatInput } from "@angular/material/input";
 import { FormsModule } from "@angular/forms";
-import { NgFor, NgIf, NgStyle } from "@angular/common";
+import { NgStyle } from "@angular/common";
 import { MatSlider, MatSliderThumb } from "@angular/material/slider";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatTooltip } from "@angular/material/tooltip";
@@ -25,7 +25,7 @@ import type { DataContainer, RouteData, LatLngAlt } from "../../../models";
     templateUrl: "./route-properties-dialog.component.html",
     styleUrls: ["./route-properties-dialog.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, NgFor, MatMiniFabButton, NgIf, MatSlider, MatSliderThumb, NgStyle, MatDialogActions, MatMenu, MatMenuItem, Angulartics2OnModule, MatMenuTrigger, MatTooltip]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatMiniFabButton, MatSlider, MatSliderThumb, NgStyle, MatDialogActions, MatMenu, MatMenuItem, Angulartics2OnModule, MatMenuTrigger, MatTooltip]
 })
 export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     private originalName: string;

@@ -4,7 +4,7 @@ import { MatButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
 import { FormsModule } from "@angular/forms";
-import { NgFor } from "@angular/common";
+
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatDialog, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
 import { Angulartics2OnModule } from "angulartics2";
@@ -17,7 +17,7 @@ import { ApplicationState, LanguageCode } from "../../models";
 @Component({
     selector: "language-dialog",
     templateUrl: "./language-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, FormsModule, NgFor, MatRadioButton, Angulartics2OnModule, MatDialogActions, MatTooltip]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, FormsModule, MatRadioButton, Angulartics2OnModule, MatDialogActions, MatTooltip]
 })
 export class LanguageDialogComponent {
     public selectedLanguageCode: LanguageCode;

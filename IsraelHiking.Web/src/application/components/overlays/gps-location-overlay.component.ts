@@ -3,7 +3,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { Share } from "@capacitor/share";
 import { Angulartics2OnModule } from "angulartics2";
 import { Observable } from "rxjs";
@@ -25,7 +25,7 @@ import type { ApplicationState, LatLngAlt, LinkData } from "../../models";
 @Component({
     selector: "gps-location-overlay",
     templateUrl: "./gps-location-overlay.component.html",
-    imports: [Dir, MatButton, Angulartics2OnModule, MatTooltip, NgIf, CoordinatesComponent, AsyncPipe]
+    imports: [Dir, MatButton, Angulartics2OnModule, MatTooltip, CoordinatesComponent, AsyncPipe]
 })
 export class GpsLocationOverlayComponent {
 

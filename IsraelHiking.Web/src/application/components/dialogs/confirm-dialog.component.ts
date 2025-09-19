@@ -1,7 +1,7 @@
 import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
-import { NgIf } from "@angular/common";
+
 
 import { ResourcesService } from "../../services/resources.service";
 
@@ -10,7 +10,7 @@ export type ConfirmType = "YesNo" | "OkCancel" | "Ok" | "Custom";
 @Component({
     selector: "confirm-dialog",
     templateUrl: "confirm-dialog.component.html",
-    imports: [Dir, MatButton, NgIf]
+    imports: [Dir, MatButton]
 })
 export class ConfirmDialogComponent {
     public confirmAction: () => void;

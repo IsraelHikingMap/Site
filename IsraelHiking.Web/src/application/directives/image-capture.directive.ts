@@ -21,12 +21,13 @@ export class ImageCaptureDirective implements OnDestroy {
     private readonly resources = inject(ResourcesService);
     private readonly toastService = inject(ToastService);
     private readonly fileService = inject(FileService);
+    private readonly elementRef = inject(ElementRef);
 
     private unsbscribeFn: () => void;
 
-    constructor(elementRef: ElementRef) {
+    constructor() {
 
-        this.unsbscribeFn = this.renderer.listen(elementRef.nativeElement, "click", (event) => {
+        this.unsbscribeFn = this.renderer.listen(this.elementRef.nativeElement, "click", (event) => {
             if (!environment.isCapacitor) {
                 return;
             }

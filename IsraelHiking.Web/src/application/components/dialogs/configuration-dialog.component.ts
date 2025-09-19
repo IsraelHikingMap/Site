@@ -2,7 +2,7 @@ import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton, MatAnchor } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatDialogRef, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
@@ -25,7 +25,7 @@ import type { ApplicationState, BatteryOptimizationType } from "../../models";
 @Component({
     selector: "configuration-dialog",
     templateUrl: "./configuration-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, NgIf, MatRadioGroup, MatRadioButton, Angulartics2OnModule, MatCheckbox, MatDialogActions, MatAnchor, AsyncPipe]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, MatRadioButton, Angulartics2OnModule, MatCheckbox, MatDialogActions, MatAnchor, AsyncPipe]
 })
 export class ConfigurationDialogComponent {
 

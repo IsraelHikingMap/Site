@@ -1,6 +1,6 @@
 import { Component, AfterViewInit, ViewEncapsulation, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { NgIf, NgFor } from "@angular/common";
+
 import { Dir } from "@angular/cdk/bidi";
 import { MatAnchor, MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
@@ -41,7 +41,7 @@ interface RoutePointViewData {
     templateUrl: "./routes.component.html",
     styleUrls: ["./routes.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [SourceDirective, GeoJSONSourceComponent, LayerComponent, NgIf, PopupComponent, RoutePointOverlayComponent, Dir, MatAnchor, MatTooltip, MatButton, NgFor, MarkerComponent, PrivatePoiOverlayComponent]
+    imports: [SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, RoutePointOverlayComponent, Dir, MatAnchor, MatTooltip, MatButton, MarkerComponent, PrivatePoiOverlayComponent]
 })
 export class RoutesComponent implements AfterViewInit {
 

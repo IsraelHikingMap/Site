@@ -1,7 +1,7 @@
 import { Component, inject, input } from "@angular/core";
 import { MatExpansionPanel, MatExpansionPanelHeader } from "@angular/material/expansion";
 import { MatButton } from "@angular/material/button";
-import { NgClass, NgFor } from "@angular/common";
+import { NgClass } from "@angular/common";
 import { Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
 
@@ -17,7 +17,7 @@ import type { ApplicationState, CategoriesGroup, Category } from "../../models";
 @Component({
     selector: "categories-group",
     templateUrl: "./categories-group.component.html",
-    imports: [MatExpansionPanel, MatExpansionPanelHeader, MatButton, Angulartics2OnModule, NgClass, NgFor]
+    imports: [MatExpansionPanel, MatExpansionPanelHeader, MatButton, Angulartics2OnModule, NgClass]
 })
 export class CategoriesGroupComponent {
 

@@ -1,89 +1,99 @@
-﻿﻿<div [dir]="resources.direction">
-    <div matDialogTitle>
-        <div>
-            {{title}}
-        </div>
-        <div>
-            <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
-        </div>
+﻿<div [dir]="resources.direction">
+  <div matDialogTitle>
+    <div>
+      {{title}}
     </div>
-    <div mat-dialog-content>
-        <mat-form-field class="w-full">
-            <mat-label>{{resources.name}}</mat-label>
-            <input matInput type="text" class="w-full" [(ngModel)]="routeData.name" required=""/>
-        </mat-form-field>
-        <mat-form-field class="w-full">
-            <mat-label>{{resources.description}}</mat-label>
-            <textarea matInput rows="2" type="text" class="w-full" [dir]="resources.getDirection(routeData.description)" [(ngModel)]="routeData.description"></textarea>
-        </mat-form-field>
-        
-        <div class="flex flex-row flex-wrap justify-between items-stretch">
-            <div class="sm:w-1/2 w-full">
-                <div class="flex flex-col gap-1">
-                    <div *ngFor="let rowIndex of [0,1,2]" class="button-row">
-                        <div class="flex flex-row gap-1">
-                            <div *ngFor="let currentColor of colors; let i = index" class="flex-1" [hidden]="i % 3 !== rowIndex">
-                                <button mat-mini-fab color="primary" class="w-full" type="button" [style.backgroundColor]="currentColor" (click)="routeData.color = currentColor"> <i *ngIf="currentColor === routeData.color" class="fa icon-check" [style.color]="getCheckIconColor(currentColor)"></i>  </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="sm:w-1/2 w-full">
-                <div class="flex flex-row w-full">
-                    <label>{{resources.width}}</label>
-                </div>
-                <div class="flex flex-row w-full" dir="ltr">
-                    <mat-slider class="w-full!" min="4" max="20" step="2" color="primary"><input [(ngModel)]="routeData.weight" matSliderThumb /></mat-slider>
-                </div>
-                <div class="flex flex-row w-full">
-                    <label>{{resources.opacity}}</label>
-                </div>
-                <div class="flex flex-row w-full" dir="ltr">
-                    <mat-slider class="w-full!" min="0" max="1.0" step="0.1" color="primary"><input [(ngModel)]="routeData.opacity" matSliderThumb /></mat-slider>
-                </div>
-            </div>
-        </div>
-        <div class="flex flex-row" style="position: relative">
-            <img width="100%" height="50px" src="content/legend/IHM_legendLight4WDVehicles.png">
-            <hr class="preview-line" 
-                [ngStyle]="{
-                    'height': routeData.weight + 'px', 
-                    'background-color': routeData.color, 
-                    'opacity': routeData.opacity,
-                    'margin-top': (17 - (routeData.weight / 2)) + 'px'
-                }" />
-        </div>
+    <div>
+      <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
-    <div mat-dialog-actions>
+  </div>
+  <div mat-dialog-content>
+    <mat-form-field class="w-full">
+      <mat-label>{{resources.name}}</mat-label>
+      <input matInput type="text" class="w-full" [(ngModel)]="routeData.name" required=""/>
+    </mat-form-field>
+    <mat-form-field class="w-full">
+      <mat-label>{{resources.description}}</mat-label>
+      <textarea matInput rows="2" type="text" class="w-full" [dir]="resources.getDirection(routeData.description)" [(ngModel)]="routeData.description"></textarea>
+    </mat-form-field>
+
+    <div class="flex flex-row flex-wrap justify-between items-stretch">
+      <div class="sm:w-1/2 w-full">
+        <div class="flex flex-col gap-1">
+          @for (rowIndex of [0,1,2]; track rowIndex) {
+            <div class="button-row">
+              <div class="flex flex-row gap-1">
+                @for (currentColor of colors; track currentColor; let i = $index) {
+                  <div class="flex-1" [hidden]="i % 3 !== rowIndex">
+                    <button mat-mini-fab color="primary" class="w-full" type="button" [style.backgroundColor]="currentColor" (click)="routeData.color = currentColor"> @if (currentColor === routeData.color) {
+                      <i class="fa icon-check" [style.color]="getCheckIconColor(currentColor)"></i>
+                    }  </button>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+      <div class="sm:w-1/2 w-full">
         <div class="flex flex-row w-full">
-            <mat-menu #appMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
-                <button mat-menu-item (click)="saveRouteToFile()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Save route to file">
-                    <i class="fa fa-lg icon-external-link-square"></i>
-                    <span class="ms-2">{{resources.saveRouteToFile}}</span>
-                </button>
-                <button mat-menu-item (click)="moveToRoute()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Move to route">
-                    <i class="fa fa-lg icon-crosshairs"></i>
-                    <span class="ms-2">{{resources.moveToRoute}}</span>
-                </button>
-                <button mat-menu-item (click)="makeAllPointsEditable()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Make all points editable">
-                    <i class="fa fa-lg icon-map-marker-group"></i>
-                    <span class="ms-2">{{resources.generateMarkersForAllPoints}}</span>
-                </button>
-                <button mat-menu-item (click)="reverseRoute()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Reverse route">
-                    <i class="fa fa-lg icon-arrows-h"></i>
-                    <span class="ms-2">{{resources.reverseRoute}}</span>
-                </button>
-            </mat-menu>
-            <div class="flex-1">
-                <button mat-button *ngIf="!isNew" [matMenuTriggerFor]="appMenu" class="w-full" angulartics2On="click" angularticsCategory="Route" angularticsAction="Toggle advance options"><i class="fa icon-ellipsis-v fa-lg"></i></button>
-            </div>
-            <div class="flex-1">
-                <button mat-button *ngIf="!isNew" matDialogClose type="button" class="w-full" (click)="deleteRoute()" matTooltip="{{resources.deleteRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsAction="Delete route"><i class="fa fa-lg icon-trash"></i></button>
-            </div>
-            <div class="flex-1">
-                <button mat-button matDialogClose type="button" class="w-full"  (click)="saveRoute()" matTooltip="{{resources.save}}" matTooltipPosition="above"><i class="fa icon-check"></i></button>
-            </div>
+          <label>{{resources.width}}</label>
         </div>
+        <div class="flex flex-row w-full" dir="ltr">
+          <mat-slider class="w-full!" min="4" max="20" step="2" color="primary"><input [(ngModel)]="routeData.weight" matSliderThumb /></mat-slider>
+        </div>
+        <div class="flex flex-row w-full">
+          <label>{{resources.opacity}}</label>
+        </div>
+        <div class="flex flex-row w-full" dir="ltr">
+          <mat-slider class="w-full!" min="0" max="1.0" step="0.1" color="primary"><input [(ngModel)]="routeData.opacity" matSliderThumb /></mat-slider>
+        </div>
+      </div>
     </div>
+    <div class="flex flex-row" style="position: relative">
+      <img width="100%" height="50px" src="content/legend/IHM_legendLight4WDVehicles.png">
+      <hr class="preview-line"
+        [ngStyle]="{
+            'height': routeData.weight + 'px', 
+            'background-color': routeData.color, 
+            'opacity': routeData.opacity,
+            'margin-top': (17 - (routeData.weight / 2)) + 'px'
+        }" />
+    </div>
+  </div>
+  <div mat-dialog-actions>
+    <div class="flex flex-row w-full">
+      <mat-menu #appMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
+        <button mat-menu-item (click)="saveRouteToFile()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Save route to file">
+          <i class="fa fa-lg icon-external-link-square"></i>
+          <span class="ms-2">{{resources.saveRouteToFile}}</span>
+        </button>
+        <button mat-menu-item (click)="moveToRoute()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Move to route">
+          <i class="fa fa-lg icon-crosshairs"></i>
+          <span class="ms-2">{{resources.moveToRoute}}</span>
+        </button>
+        <button mat-menu-item (click)="makeAllPointsEditable()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Make all points editable">
+          <i class="fa fa-lg icon-map-marker-group"></i>
+          <span class="ms-2">{{resources.generateMarkersForAllPoints}}</span>
+        </button>
+        <button mat-menu-item (click)="reverseRoute()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Reverse route">
+          <i class="fa fa-lg icon-arrows-h"></i>
+          <span class="ms-2">{{resources.reverseRoute}}</span>
+        </button>
+      </mat-menu>
+      <div class="flex-1">
+        @if (!isNew) {
+          <button mat-button [matMenuTriggerFor]="appMenu" class="w-full" angulartics2On="click" angularticsCategory="Route" angularticsAction="Toggle advance options"><i class="fa icon-ellipsis-v fa-lg"></i></button>
+        }
+      </div>
+      <div class="flex-1">
+        @if (!isNew) {
+          <button mat-button matDialogClose type="button" class="w-full" (click)="deleteRoute()" matTooltip="{{resources.deleteRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsAction="Delete route"><i class="fa fa-lg icon-trash"></i></button>
+        }
+      </div>
+      <div class="flex-1">
+        <button mat-button matDialogClose type="button" class="w-full"  (click)="saveRoute()" matTooltip="{{resources.save}}" matTooltipPosition="above"><i class="fa icon-check"></i></button>
+      </div>
+    </div>
+  </div>
 </div>

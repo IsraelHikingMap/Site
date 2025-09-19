@@ -1,9 +1,13 @@
-﻿﻿ <div class="maplibregl-popup-anchor-bottom popup-like-marker" [dir]="resources.direction">
-    <div class="maplibregl-popup-content cursor-pointer" (click)="overlayClick($event)">
-        <div class="text-center" [dir]="resources.getDirection(marker().title)">
-            <img *ngIf="imageLink" [src]="resources.getResizedImageUrl(imageLink.url, 200)" class="img-placeholder" alt="{{marker().title}}" />
-            <div [ngClass]="resources.getTextAlignment(marker().title)"><i class="fa icon-{{marker().type || 'star'}}" [style.color]="color()"></i> {{marker().title}}<span *ngIf="marker().description">...</span></div>
-        </div>
-    </div>
-    <div class="maplibregl-popup-tip"></div>
+﻿<div class="maplibregl-popup-anchor-bottom popup-like-marker" [dir]="resources.direction">
+  <div class="maplibregl-popup-content cursor-pointer" (click)="overlayClick($event)">
+    <div class="text-center" [dir]="resources.getDirection(marker().title)">
+      @if (imageLink) {
+        <img [src]="resources.getResizedImageUrl(imageLink.url, 200)" class="img-placeholder" alt="{{marker().title}}" />
+      }
+      <div [ngClass]="resources.getTextAlignment(marker().title)"><i class="fa icon-{{marker().type || 'star'}}" [style.color]="color()"></i> {{marker().title}}@if (marker().description) {
+      <span>...</span>
+    }</div>
+  </div>
+</div>
+<div class="maplibregl-popup-tip"></div>
 </div>

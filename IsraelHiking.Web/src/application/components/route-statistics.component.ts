@@ -1,6 +1,6 @@
 import { Component, ViewEncapsulation, OnInit, ElementRef, ChangeDetectorRef, DestroyRef, inject, viewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { NgIf, NgClass, AsyncPipe, DecimalPipe } from "@angular/common";
+import { NgClass, AsyncPipe, DecimalPipe } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { MatGridList, MatGridTile } from "@angular/material/grid-list";
 import { MatTooltip } from "@angular/material/tooltip";
@@ -74,7 +74,7 @@ interface IChartElements {
             ], { params: { start: "right" }})
         ])
     ],
-    imports: [NgIf, Dir, NgClass, MatGridList, MatGridTile, MatTooltip, MatButton, Angulartics2OnModule, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, AsyncPipe, DecimalPipe]
+    imports: [Dir, NgClass, MatGridList, MatGridTile, MatTooltip, MatButton, Angulartics2OnModule, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, AsyncPipe, DecimalPipe]
 })
 export class RouteStatisticsComponent implements OnInit {
     private static readonly HOVER_BOX_WIDTH = 160;

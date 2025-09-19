@@ -1,3 +1,5 @@
-<div class="side-control maplibregl-ctrl" *ngIf="showButton()">
+@if (showButton()) {
+  <div class="side-control maplibregl-ctrl">
     <button class="center-me" mat-button (click)="centerMe()" angulartics2On="click" angularticsCategory="Location" angularticsAction="Center me"><i class="fa fa-lg icon-follow-me"></i> {{resources.centerMe}}</button>
-</div>
+  </div>
+}

@@ -1,5 +1,5 @@
 import { Component, inject } from "@angular/core";
-import { NgIf } from "@angular/common";
+
 import { MatButton } from "@angular/material/button";
 import { Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
@@ -12,7 +12,7 @@ import type { ApplicationState } from "../models";
     selector: "center-me",
     templateUrl: "./center-me.component.html",
     styleUrls: ["./center-me.component.scss"],
-    imports: [NgIf, MatButton, Angulartics2OnModule]
+    imports: [MatButton, Angulartics2OnModule]
 })
 export class CenterMeComponent {
 

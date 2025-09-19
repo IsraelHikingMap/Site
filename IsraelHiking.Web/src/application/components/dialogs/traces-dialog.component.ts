@@ -5,7 +5,7 @@ import { MatFormField, MatLabel } from "@angular/material/form-field";
 import { MatInput } from "@angular/material/input";
 import { MatButton, MatAnchor } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
-import { NgFor, NgClass, NgIf, DatePipe } from "@angular/common";
+import { NgClass, DatePipe } from "@angular/common";
 import { MatSelect } from "@angular/material/select";
 import { MatOption } from "@angular/material/core";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
@@ -37,7 +37,7 @@ import type { ApplicationState, Trace, TraceVisibility } from "../../models";
     templateUrl: "./traces-dialog.component.html",
     styleUrls: ["./traces-dialog.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [InfiniteScrollDirective, Dir, MatDialogTitle, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatAnchor, Angulartics2OnModule, NgFor, NgClass, NgIf, SecuredImageComponent, MatSelect, MatOption, MatProgressSpinner, MatDialogActions, MatTooltip, DatePipe]
+    imports: [InfiniteScrollDirective, Dir, MatDialogTitle, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatAnchor, Angulartics2OnModule, NgClass, SecuredImageComponent, MatSelect, MatOption, MatProgressSpinner, MatDialogActions, MatTooltip, DatePipe]
 })
 export class TracesDialogComponent implements OnInit {
 
@@ -262,7 +262,7 @@ export class TracesDialogComponent implements OnInit {
         }
     }
 
-    public trackById(_: number, trace: Trace) {
+    public trackById(_: number, trace: Immutable<Trace>) {
         return trace.id;
     }
 }

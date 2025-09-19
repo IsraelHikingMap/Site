@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation, inject, input, output } from "@angular/co
 import { HttpClient } from "@angular/common/http";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
-import { NgClass, NgIf } from "@angular/common";
+import { NgClass } from "@angular/common";
 import { MatTooltip } from "@angular/material/tooltip";
 import { Angulartics2OnModule } from "angulartics2";
 import { firstValueFrom } from "rxjs";
@@ -18,7 +18,7 @@ import type { LatLngAlt } from "../../models";
     templateUrl: "./missing-part-overlay.component.html",
     styleUrls: ["./missing-part-overlay.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, NgClass, MatTooltip, Angulartics2OnModule, NgIf, CoordinatesComponent]
+    imports: [Dir, MatButton, NgClass, MatTooltip, Angulartics2OnModule, CoordinatesComponent]
 })
 export class MissingPartOverlayComponent {
 

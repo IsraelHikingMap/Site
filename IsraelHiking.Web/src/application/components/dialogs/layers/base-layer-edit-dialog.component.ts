@@ -6,7 +6,7 @@ import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatFormField, MatLabel, MatError } from "@angular/material/form-field";
 import { MatInput } from "@angular/material/input";
 import { FormsModule } from "@angular/forms";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { MatSlider, MatSliderThumb } from "@angular/material/slider";
 import { MatTooltip } from "@angular/material/tooltip";
 import { Angulartics2OnModule } from "angulartics2";
@@ -20,7 +20,7 @@ import type { LayerData, EditableLayer } from "../../../models";
 @Component({
     selector: "baselayer-edit-dialog",
     templateUrl: "./layer-properties-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, NameInUseValidatorDirective, NgIf, MatError, MatSlider, MatSliderThumb, MapComponent, AutomaticLayerPresentationComponent, MatDialogActions, Angulartics2OnModule, MatTooltip, AsyncPipe]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, NameInUseValidatorDirective, MatError, MatSlider, MatSliderThumb, MapComponent, AutomaticLayerPresentationComponent, MatDialogActions, Angulartics2OnModule, MatTooltip, AsyncPipe]
 })
 export class BaseLayerEditDialogComponent extends LayerBaseDialogComponent {
     private backupBaseLayer: EditableLayer;

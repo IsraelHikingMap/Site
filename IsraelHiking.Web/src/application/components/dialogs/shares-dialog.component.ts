@@ -5,7 +5,7 @@ import { MatFormField, MatLabel } from "@angular/material/form-field";
 import { MatInput } from "@angular/material/input";
 import { MatButton, MatAnchor } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
-import { NgFor, NgClass, NgIf, AsyncPipe, DatePipe } from "@angular/common";
+import { NgClass, AsyncPipe, DatePipe } from "@angular/common";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
@@ -34,7 +34,7 @@ import type { ApplicationState, ShareUrl } from "../../models";
     templateUrl: "shares-dialog.component.html",
     styleUrls: ["shares-dialog.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [InfiniteScrollDirective, Dir, MatDialogTitle, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, Angulartics2OnModule, NgFor, NgClass, NgIf, MatProgressSpinner, MatDialogActions, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, AsyncPipe, DatePipe]
+    imports: [InfiniteScrollDirective, Dir, MatDialogTitle, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, Angulartics2OnModule, NgClass, MatProgressSpinner, MatDialogActions, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, AsyncPipe, DatePipe]
 })
 export class SharesDialogComponent implements OnInit {
 
@@ -212,7 +212,7 @@ export class SharesDialogComponent implements OnInit {
         return !this.loadingShareUrls && this.filteredShareUrls.length === 0;
     }
 
-    public trackById(_: number, shareUrl: ShareUrl) {
+    public trackById(_: number, shareUrl: Immutable<ShareUrl>) {
         return shareUrl.id;
     }
 }

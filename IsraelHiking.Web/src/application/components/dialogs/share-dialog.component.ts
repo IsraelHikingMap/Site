@@ -3,7 +3,7 @@ import { Dir } from "@angular/cdk/bidi";
 import { MatDialogTitle, MatDialogClose, MatDialogContent } from "@angular/material/dialog";
 import { MatButton, MatAnchor } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
-import { NgIf, NgClass } from "@angular/common";
+import { NgClass } from "@angular/common";
 import { MatFormField, MatLabel, MatHint } from "@angular/material/form-field";
 import { MatInput } from "@angular/material/input";
 import { FormsModule } from "@angular/forms";
@@ -32,7 +32,7 @@ import type { ApplicationState, DataContainer, EditableLayer, ShareUrl } from ".
 @Component({
     selector: "share-dialog",
     templateUrl: "./share-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, NgIf, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, Angulartics2OnModule, NgClass, MatAnchor, MatTooltip, CdkCopyToClipboard, MapComponent, LayersComponent, RoutesComponent]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, Angulartics2OnModule, NgClass, MatAnchor, MatTooltip, CdkCopyToClipboard, MapComponent, LayersComponent, RoutesComponent]
 })
 export class ShareDialogComponent {
 

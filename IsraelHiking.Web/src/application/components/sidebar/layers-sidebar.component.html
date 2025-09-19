@@ -1,104 +1,128 @@
-﻿﻿<div class="sidebar-header flex flex-row justify-center items-center sticky top-0 z-10 bg-white" [dir]="resources.direction">
-    <div class="flex-1 text-center text-xl title">{{resources.layers}}</div>
-    <button mat-button class="w-1/6" type="button" (click)="close()" tabindex="-1"><i class="fa fa-lg icon-close"></i></button>
+﻿<div class="sidebar-header flex flex-row justify-center items-center sticky top-0 z-10 bg-white" [dir]="resources.direction">
+  <div class="flex-1 text-center text-xl title">{{resources.layers}}</div>
+  <button mat-button class="w-1/6" type="button" (click)="close()" tabindex="-1"><i class="fa fa-lg icon-close"></i></button>
 </div>
 <div [dir]="resources.direction">
-    <div class="flex flex-row justify-center" *ngIf="isPurchaseAvailable()">
-        <button mat-raised-button color="primary" (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Purchase offline maps"><i class="fa icon-dollar"></i> {{resources.purchaseOfflineMaps}}</button>
+  @if (isPurchaseAvailable()) {
+    <div class="flex flex-row justify-center">
+      <button mat-raised-button color="primary" (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Purchase offline maps"><i class="fa icon-dollar"></i> {{resources.purchaseOfflineMaps}}</button>
     </div>
-    <div class="flex flex-row justify-center" *ngIf="isRenewAvailable()">
-        <button mat-raised-button color="primary" (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Renew offline maps"><i class="fa icon-dollar"></i> {{resources.renewOfflineMaps}}</button>
+  }
+  @if (isRenewAvailable()) {
+    <div class="flex flex-row justify-center">
+      <button mat-raised-button color="primary" (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Renew offline maps"><i class="fa icon-dollar"></i> {{resources.renewOfflineMaps}}</button>
     </div>
-    <div class="flex flex-row justify-center" *ngIf="isOfflineDownloadAvailable()">
-        <button mat-raised-button color="primary" (click)="downloadOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Download offline maps"><i class="fa icon-download"></i> {{resources.infoDownloadMapForOfflineUse}}</button>
+  }
+  @if (isOfflineDownloadAvailable()) {
+    <div class="flex flex-row justify-center">
+      <button mat-raised-button color="primary" (click)="downloadOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Download offline maps"><i class="fa icon-download"></i> {{resources.infoDownloadMapForOfflineUse}}</button>
     </div>
-    <mat-accordion multi="true">
-        <mat-expansion-panel [expanded]="getExpandState('Base Layers')" (opened)="expand('Base Layers')" (closed)="collapse('Base Layers')">
-            <mat-expansion-panel-header>
-                <mat-panel-title>
-                    <div class="flex flex-row w-full">
-                        <p class="w-full">{{resources.baseLayers}}</p>
-                    </div>
-                </mat-panel-title>
-            </mat-expansion-panel-header>
-            <div *ngFor="let baseLayer of (baseLayers$ | async)">
-                <div class="flex flex-row">
-                    <button mat-button class="row-button flex-1 justify-start!" (click)="selectBaseLayer(baseLayer)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Select base layer {{baseLayer.key}}">
-                        <span><i class="fa" [ngClass]="{'icon-eye': isBaseLayerSelected(baseLayer), 'icon-eye-slash': !isBaseLayerSelected(baseLayer)}"></i></span>
-                        <span class="break-all">{{resources.translate(baseLayer.key)}}</span>
-                    </button>
-                    <div *ngIf="baseLayer.isEditable" class="w-1/12">
-                        <button mat-button class="w-full short-button" (click)="editBaseLayer($event, baseLayer)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit base layer"><i class="fa icon-ellipsis-v"></i></button>
-                    </div>
-                    <div *ngIf="showOfflineButton(baseLayer)" class="w-1/12">
-                        <button mat-button class="w-full short-button" [class.active]="baseLayer.isOfflineOn" (click)="toggleOffline($event, baseLayer, false)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle base layer offline"><i class="fa icon-{{baseLayer.isOfflineOn ? 'offline' : 'online'}}"></i></button>
-                    </div>
-                </div>
+  }
+  <mat-accordion multi="true">
+    <mat-expansion-panel [expanded]="getExpandState('Base Layers')" (opened)="expand('Base Layers')" (closed)="collapse('Base Layers')">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <div class="flex flex-row w-full">
+            <p class="w-full">{{resources.baseLayers}}</p>
+          </div>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      @for (baseLayer of (baseLayers$ | async); track baseLayer) {
+        <div>
+          <div class="flex flex-row">
+            <button mat-button class="row-button flex-1 justify-start!" (click)="selectBaseLayer(baseLayer)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Select base layer {{baseLayer.key}}">
+              <span><i class="fa" [ngClass]="{'icon-eye': isBaseLayerSelected(baseLayer), 'icon-eye-slash': !isBaseLayerSelected(baseLayer)}"></i></span>
+              <span class="break-all">{{resources.translate(baseLayer.key)}}</span>
+            </button>
+            @if (baseLayer.isEditable) {
+              <div class="w-1/12">
+                <button mat-button class="w-full short-button" (click)="editBaseLayer($event, baseLayer)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit base layer"><i class="fa icon-ellipsis-v"></i></button>
+              </div>
+            }
+            @if (showOfflineButton(baseLayer)) {
+              <div class="w-1/12">
+                <button mat-button class="w-full short-button" [class.active]="baseLayer.isOfflineOn" (click)="toggleOffline($event, baseLayer, false)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle base layer offline"><i class="fa icon-{{baseLayer.isOfflineOn ? 'offline' : 'online'}}"></i></button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+      <button mat-button (click)="addBaseLayer($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add base layer"><i class="fa fa-lg icon-plus"></i> {{resources.addBaseLayer}}</button>
+    </mat-expansion-panel>
+    <mat-expansion-panel [expanded]="getExpandState('Overlays')" (opened)="expand('Overlays')" (closed)="collapse('Overlays')">
+      <mat-expansion-panel-header>
+        <div class="flex flex-row w-full">
+          <div class="w-4/5">
+            <p class="w-full">{{resources.overlays}}</p>
+          </div>
+          <div class="w-1/5">
+            <button mat-button class="w-full h-full!" (click)="hideAllOverlays($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Hide all overlays"><i class="fa fa-lg" [ngClass]="isAllOverlaysHidden() ? 'icon-eye-slash' : 'icon-eye'"></i></button>
+          </div>
+        </div>
+      </mat-expansion-panel-header>
+      @for (overlay of (overlays$ | async); track overlay) {
+        <div>
+          <div class="flex flex-row">
+            <button mat-button class="row-button flex-1 justify-start!" (click)="toggleVisibility(overlay)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle overlay visibility {{overlay.key}}">
+              <span><i class="fa" [ngClass]="{'icon-eye': overlay.visible, 'icon-eye-slash': !overlay.visible}"></i></span>
+              <span class="break-all">{{resources.translate(overlay.key)}}</span>
+            </button>
+            @if (overlay.isEditable) {
+              <div class="w-1/12">
+                <button mat-button class="w-full short-button" (click)="editOverlay($event, overlay)" matTooltip="{{resources.overlayProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit overlay"><i class="fa icon-ellipsis-v"></i></button>
+              </div>
+            }
+            @if (showOfflineButton(overlay)) {
+              <div class="w-1/12">
+                <button mat-button class="w-full short-button" [class.active]="overlay.isOfflineOn" (click)="toggleOffline($event, overlay, true)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle overlay offline"><i class="fa icon-{{overlay.isOfflineOn ? 'offline' : 'online'}}"></i></button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+      <button mat-button (click)="addOverlay($event)" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add overlay"><i class="fa fa-lg icon-plus"></i> {{resources.addOverlay}} </button>
+    </mat-expansion-panel>
+    @for (categoriesGroup of (categoriesGroups$ | async); track trackByGroupType($index, categoriesGroup)) {
+      <categories-group [categoriesGroup]="categoriesGroup"></categories-group>
+    }
+    <mat-expansion-panel [expanded]="getExpandState('Private Routes')" (opened)="expand('Private Routes')" (closed)="collapse('Private Routes')">
+      <mat-expansion-panel-header>
+        <div class="flex flex-row w-full">
+          <div class="w-4/5">
+            <p class="w-full">{{resources.privateRoutes}}</p>
+          </div>
+          <div class="w-1/5">
+            <button mat-button class="w-full h-full!" (click)="toggleAllRoutes($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle all routes"><i class="fa fa-lg" [ngClass]="isAllRoutesHidden() ? 'icon-eye-slash' : 'icon-eye'"></i></button>
+          </div>
+        </div>
+      </mat-expansion-panel-header>
+      <div cdkDropList (cdkDropListDropped)="dropRoute($event)">
+        @for (route of (routes$ | async); track route; let i = $index) {
+          <div cdkDrag>
+            <div class="flex flex-row" [class.active]="isShowActive(route)" matTooltip="{{route.description}}" matTooltipPosition="below">
+              <button mat-button class="row-button flex-1 justify-start!" [style.color]="route.color" (click)="toggleRoute(route)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle route visibility">
+                <span><i class="fa" [ngClass]="{ 'icon-pencil': isRouteInEditMode(route), 'icon-eye': isRouteVisible(route) && !isRouteInEditMode(route), 'icon-eye-slash': !isRouteVisible(route) }"></i></span>
+                <span class="break-all cursor-move">{{route.name}}</span>
+              </button>
+              <div class="w-1/12">
+                <button mat-button class="w-full short-button" (click)="editRoute(route, $event)" matTooltip="{{resources.routeProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Route" angularticsAction="Edit route"><i class="fa icon-ellipsis-v"></i></button>
+              </div>
             </div>
-            <button mat-button (click)="addBaseLayer($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add base layer"><i class="fa fa-lg icon-plus"></i> {{resources.addBaseLayer}}</button>
-        </mat-expansion-panel>
-        <mat-expansion-panel [expanded]="getExpandState('Overlays')" (opened)="expand('Overlays')" (closed)="collapse('Overlays')">
-            <mat-expansion-panel-header>
-                <div class="flex flex-row w-full">
-                    <div class="w-4/5">
-                        <p class="w-full">{{resources.overlays}}</p>
-                    </div>
-                    <div class="w-1/5">
-                        <button mat-button class="w-full h-full!" (click)="hideAllOverlays($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Hide all overlays"><i class="fa fa-lg" [ngClass]="isAllOverlaysHidden() ? 'icon-eye-slash' : 'icon-eye'"></i></button>
-                    </div>
-                </div>
-            </mat-expansion-panel-header>
-            <div *ngFor="let overlay of (overlays$ | async)">
-                <div class="flex flex-row">
-                    <button mat-button class="row-button flex-1 justify-start!" (click)="toggleVisibility(overlay)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle overlay visibility {{overlay.key}}">
-                        <span><i class="fa" [ngClass]="{'icon-eye': overlay.visible, 'icon-eye-slash': !overlay.visible}"></i></span>
-                        <span class="break-all">{{resources.translate(overlay.key)}}</span>
-                    </button>
-                    <div *ngIf="overlay.isEditable" class="w-1/12">
-                        <button mat-button class="w-full short-button" (click)="editOverlay($event, overlay)" matTooltip="{{resources.overlayProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit overlay"><i class="fa icon-ellipsis-v"></i></button>
-                    </div>
-                    <div *ngIf="showOfflineButton(overlay)" class="w-1/12">
-                        <button mat-button class="w-full short-button" [class.active]="overlay.isOfflineOn" (click)="toggleOffline($event, overlay, true)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle overlay offline"><i class="fa icon-{{overlay.isOfflineOn ? 'offline' : 'online'}}"></i></button>
-                    </div>
-                </div>
-            </div>
-            <button mat-button (click)="addOverlay($event)" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add overlay"><i class="fa fa-lg icon-plus"></i> {{resources.addOverlay}} </button>
-        </mat-expansion-panel>
-        <ng-container *ngFor="let categoriesGroup of (categoriesGroups$ | async); trackBy:trackByGroupType">
-            <categories-group [categoriesGroup]="categoriesGroup"></categories-group>
-        </ng-container>
-        <mat-expansion-panel [expanded]="getExpandState('Private Routes')" (opened)="expand('Private Routes')" (closed)="collapse('Private Routes')">
-            <mat-expansion-panel-header>
-                <div class="flex flex-row w-full">
-                    <div class="w-4/5">
-                        <p class="w-full">{{resources.privateRoutes}}</p>
-                    </div>
-                    <div class="w-1/5">
-                        <button mat-button class="w-full h-full!" (click)="toggleAllRoutes($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle all routes"><i class="fa fa-lg" [ngClass]="isAllRoutesHidden() ? 'icon-eye-slash' : 'icon-eye'"></i></button>
-                    </div>
-                </div>
-            </mat-expansion-panel-header>
-            <div cdkDropList (cdkDropListDropped)="dropRoute($event)">
-                <div *ngFor="let route of (routes$ | async); let i = index" cdkDrag>
-                    <div class="flex flex-row" [class.active]="isShowActive(route)" matTooltip="{{route.description}}" matTooltipPosition="below">
-                        <button mat-button class="row-button flex-1 justify-start!" [style.color]="route.color" (click)="toggleRoute(route)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle route visibility">
-                            <span><i class="fa" [ngClass]="{ 'icon-pencil': isRouteInEditMode(route), 'icon-eye': isRouteVisible(route) && !isRouteInEditMode(route), 'icon-eye-slash': !isRouteVisible(route) }"></i></span>
-                            <span class="break-all cursor-move">{{route.name}}</span>
-                        </button>
-                        <div class="w-1/12">
-                            <button mat-button class="w-full short-button" (click)="editRoute(route, $event)" matTooltip="{{resources.routeProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Route" angularticsAction="Edit route"><i class="fa icon-ellipsis-v"></i></button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <button mat-button (click)="addRoute($event)" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add route"><i class="fa fa-lg icon-plus"></i> {{resources.addRoute}}</button>
-        </mat-expansion-panel>
-    </mat-accordion>
-    <div class="flex flex-row" *ngIf="isOfflineDownloadAvailable() && (lastModified$ | async)">
-        <div class="w-full ms-2">{{resources.lastUpdatedOn}} {{lastModified$ | async | date:'dd/MM/yyyy'}}</div>
+          </div>
+        }
+      </div>
+      <button mat-button (click)="addRoute($event)" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add route"><i class="fa fa-lg icon-plus"></i> {{resources.addRoute}}</button>
+    </mat-expansion-panel>
+  </mat-accordion>
+  @if (isOfflineDownloadAvailable() && (lastModified$ | async)) {
+    <div class="flex flex-row">
+      <div class="w-full ms-2">{{resources.lastUpdatedOn}} {{lastModified$ | async | date:'dd/MM/yyyy'}}</div>
     </div>
-    <p class="ms-2" *ngIf="isOfflineDownloadAvailable()">
-        {{resources.offlinePurchaseGraditude}}<br/>
-        <a [href]="manageSubscriptions" target="_blank" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Manage subscriptions">{{resources.manageSubscriptions}}</a>
+  }
+  @if (isOfflineDownloadAvailable()) {
+    <p class="ms-2">
+      {{resources.offlinePurchaseGraditude}}<br/>
+      <a [href]="manageSubscriptions" target="_blank" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Manage subscriptions">{{resources.manageSubscriptions}}</a>
     </p>
+  }
 </div>

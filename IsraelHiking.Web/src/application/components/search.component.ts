@@ -11,7 +11,7 @@ import { Router } from "@angular/router";
 import { MatButton } from "@angular/material/button";
 import { Angulartics2OnModule } from "angulartics2";
 import { MatTooltip } from "@angular/material/tooltip";
-import { NgClass, NgFor, NgIf } from "@angular/common";
+import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { MatFormField } from "@angular/material/form-field";
 import { MatInput } from "@angular/material/input";
@@ -67,7 +67,7 @@ type DirectionalContext = {
     templateUrl: "./search.component.html",
     styleUrls: ["./search.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [MatButton, Angulartics2OnModule, MatTooltip, NgClass, Dir, MatFormField, MatInput, FormsModule, MatAutocompleteTrigger, ReactiveFormsModule, MatAutocomplete, NgFor, MatOption, NgIf, SourceDirective, GeoJSONSourceComponent, FeatureComponent, LayerComponent, PopupComponent, CoordinatesComponent]
+    imports: [MatButton, Angulartics2OnModule, MatTooltip, NgClass, Dir, MatFormField, MatInput, FormsModule, MatAutocompleteTrigger, ReactiveFormsModule, MatAutocomplete, MatOption, SourceDirective, GeoJSONSourceComponent, FeatureComponent, LayerComponent, PopupComponent, CoordinatesComponent]
 })
 export class SearchComponent {
 

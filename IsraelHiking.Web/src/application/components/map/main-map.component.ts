@@ -1,6 +1,6 @@
 import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildren } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
-import { NgStyle, NgIf } from "@angular/common";
+import { NgStyle } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
 import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike, IControl, ControlPosition } from "maplibre-gl";
 import { NgProgressbar } from "ngx-progressbar";
@@ -37,7 +37,7 @@ import type { ApplicationState, LocationState } from "../../models";
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, NgIf, LocationComponent, MainMenuComponent, SearchComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, IhmLinkComponent]
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, LocationComponent, MainMenuComponent, SearchComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, IhmLinkComponent]
 })
 export class MainMapComponent {
 
