@@ -115,7 +115,7 @@
     "@typescript-eslint/parser": "^8.33.1",
     "eslint": "^9.28.0",
     "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-jsdoc": "^59.0.1",
+    "eslint-plugin-jsdoc": "^59.0.2",
     "eslint-plugin-prefer-arrow": "^1.2.3",
     "geojson-vt": "^4.0.2",
     "jasmine-core": "^5.10.0",
