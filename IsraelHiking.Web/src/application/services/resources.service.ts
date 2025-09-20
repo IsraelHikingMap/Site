@@ -479,7 +479,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1755081648290");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1758360313523");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -809,7 +809,7 @@ export class ResourcesService {
         this.infoFAQLink = this.gettextCatalog.getString("F.A.Q");
         this.infoDownloadMapForOfflineUse = this.gettextCatalog.getString("Download Map for Offline Use");
         this.infoFooterThanks = this.gettextCatalog.getString("Thank you for your support!");
-        this.infoFooterAuthors = this.gettextCatalog.getString("Harel, Zeev and Guy");
+        this.infoFooterAuthors = this.gettextCatalog.getString("Harel and Zeev");
         this.infoPrivacyPolicyTermsOfService = this.gettextCatalog.getString("Privacy Policy and Terms of Service");
         // Legend
         this.legendMarkedTrails = this.gettextCatalog.getString("Marked Trails");

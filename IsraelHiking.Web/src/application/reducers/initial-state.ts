@@ -12,11 +12,6 @@ export const SPECIAL_OVERLAYS =  [HIKING_TRAILS, BICYCLE_TRAILS, POPULARITY_HEAT
 export const SPECIAL_LAYERS = [...SPECIAL_BASELAYERS, ...SPECIAL_OVERLAYS];
 
 export const AVAILABLE_LANGUAGES: Language[] = [{
-        code: "he",
-        rtl: true,
-        label: "עברית"
-    },
-    {
         code: "en-US",
         rtl: false,
         label: "English"
@@ -27,11 +22,15 @@ export const AVAILABLE_LANGUAGES: Language[] = [{
         label: "Русский"
     },
     {
+        code: "he",
+        rtl: true,
+        label: "עברית"
+    },
+    {
         code: "ar",
         rtl: true,
         label: "العربية"
-    }
-];
+    }];
 
 export const initialState =
     {
