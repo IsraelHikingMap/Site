@@ -160,7 +160,7 @@
           }
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
             "codeCoverageExclude": [
               "src/application/services/database.service.ts",
@@ -171,19 +171,9 @@
               "src/application/pipes/**",
               "src/application/reducers/**"
             ],
-            "karmaConfig": "./karma.conf.cjs",
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
             "tsConfig": "./tsconfig.spec.json",
-            "scripts": [],
-            "assets": [
-              "src/content",
-              "src/translations",
-              "src/resource-not-found.html",
-              "src/empty-for-oauth.html"
-            ]
+            "runner": "vitest",
+            "buildTarget": "::production"
           }
         },
         "lint": {

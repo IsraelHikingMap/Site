@@ -1,6 +1,7 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
+import { expect, it, describe, beforeEach } from "vitest";
 import { GetTextCatalogService } from "./gettext-catalog.service";
 
 describe("GetTextCatalogService", () => {

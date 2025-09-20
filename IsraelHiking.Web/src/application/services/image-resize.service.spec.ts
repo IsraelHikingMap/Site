@@ -1,4 +1,5 @@
 import { TestBed, inject } from "@angular/core/testing";
+import { expect, it, describe, beforeEach } from "vitest";
 import {dump, insert, TagValues, type IExif} from "piexif-ts";
 
 import { ImageResizeService } from "./image-resize.service";
@@ -16,8 +17,8 @@ describe("ImageResizeService", () => {
         });
     });
 
-    it("Should fial to convert the image without location data", inject([ImageResizeService], async (service: ImageResizeService) => {
-        await expectAsync(service.resizeImageAndConvert(new Blob([""]) as File)).toBeRejected();
+    it("Should fail to convert the image without location data", inject([ImageResizeService], async (service: ImageResizeService) => {
+        await expect(service.resizeImageAndConvert(new Blob([""]) as File)).rejects.toThrow("Image does not contain geolocation information");
     }));
 
     it("Should not fail when 0th is missing", inject([ImageResizeService], async (service: ImageResizeService) => {
@@ -26,7 +27,7 @@ describe("ImageResizeService", () => {
         const dataUrl = insert(exifbytes, IMAGE_BASE_64);
         const res = await fetch(dataUrl);
         const blob = await res.blob();
-        await expectAsync(service.resizeImage(blob as File)).toBeResolved();
+        await expect(service.resizeImage(blob as File)).resolves.toBeDefined();
     }));
 
     it("Should not fail when GPS values are empty", inject([ImageResizeService], async (service: ImageResizeService) => {
@@ -42,7 +43,7 @@ describe("ImageResizeService", () => {
         const dataUrl = insert(exifbytes, IMAGE_BASE_64);
         const res = await fetch(dataUrl);
         const blob = await res.blob();
-        await expectAsync(service.resizeImageAndConvert(blob as File)).toBeRejectedWithError("Image does not contain geolocation information");
+        await expect(service.resizeImageAndConvert(blob as File)).rejects.toThrow("Image does not contain geolocation information");
     }));
 
     it("Should not fail when GPS values are bad", inject([ImageResizeService], async (service: ImageResizeService) => {
@@ -58,7 +59,7 @@ describe("ImageResizeService", () => {
         const dataUrl = insert(exifbytes, IMAGE_BASE_64);
         const res = await fetch(dataUrl);
         const blob = await res.blob();
-        await expectAsync(service.resizeImageAndConvert(blob as File)).toBeRejectedWithError("Image does not contain geolocation information");
+        await expect(service.resizeImageAndConvert(blob as File)).rejects.toThrow("Image does not contain geolocation information");
     }));
 
     it("Should convert the image with location data", inject([ImageResizeService], async (service: ImageResizeService) => {

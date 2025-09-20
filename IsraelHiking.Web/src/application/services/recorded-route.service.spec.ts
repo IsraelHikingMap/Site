@@ -1,6 +1,7 @@
 import { EventEmitter } from "@angular/core";
 import { provideHttpClientTesting } from "@angular/common/http/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { vi, expect, it, describe, beforeEach } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
@@ -41,7 +42,7 @@ describe("Recorded Route Service", () => {
             providers: [
                 { provide: ResourcesService, useValue: {} },
                 { provide: ToastService, useValue: {
-                    warning: jasmine.createSpy()
+                    warning: vi.fn()
                 } },
                 { provide: LoggingService, useValue: loggingServiceMock },
                 { provide: TracesService, useValue: tracesServiceMock },
@@ -67,7 +68,7 @@ describe("Recorded Route Service", () => {
                     isRecording: false
                 }
             });
-            expect(service.isRecording()).toBeFalse();
+            expect(service.isRecording()).toBeFalsy();
         }
     ));
 
@@ -78,7 +79,7 @@ describe("Recorded Route Service", () => {
                     tracking: "searching"
                 }
             });
-            expect(service.canRecord()).toBeFalse();
+            expect(service.canRecord()).toBeFalsy();
         }
     ));
 
@@ -122,11 +123,11 @@ describe("Recorded Route Service", () => {
                     userInfo: null
                 }
             });
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
             service.initialize();
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(StopRecordingAction);
-            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(AddRouteAction);
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(StopRecordingAction);
+            expect(spy.mock.calls[1][0]).toBeInstanceOf(AddRouteAction);
         }
     ));
 
@@ -160,13 +161,13 @@ describe("Recorded Route Service", () => {
                     userInfo: null
                 }
             });
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
             service.initialize();
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ClearPendingProcessingRoutePointsAction);
-            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(AddRecordingRoutePointsAction);
-            expect(spy.calls.all()[2].args[0]).toBeInstanceOf(StopRecordingAction);
-            expect(spy.calls.all()[3].args[0]).toBeInstanceOf(AddRouteAction);
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(ClearPendingProcessingRoutePointsAction);
+            expect(spy.mock.calls[1][0]).toBeInstanceOf(AddRecordingRoutePointsAction);
+            expect(spy.mock.calls[2][0]).toBeInstanceOf(StopRecordingAction);
+            expect(spy.mock.calls[3][0]).toBeInstanceOf(AddRouteAction);
         }
     ));
 
@@ -272,13 +273,13 @@ describe("Recorded Route Service", () => {
             geoService.positionWhileInBackground.next({ coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(60000).getTime()} as GeolocationPosition);
             geoService.positionWhileInBackground.next({ coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(120000).getTime()} as GeolocationPosition);
             geoService.positionWhileInBackground.next({ coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(180000).getTime()} as GeolocationPosition);
-            const spy = spyOn(loggingService, "debug");
+            const spy = vi.spyOn(loggingService, "debug");
             positionChanged(store,
                 { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(180000).getTime()} as GeolocationPosition
             );
             geoService.backToForeground.next();
             expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(4);
-            expect(spy.calls.all().some(c => c.args[0].startsWith("[Record] Rejecting position"))).toBeFalsy();
+            expect(spy.mock.calls.some(c => c[0].startsWith("[Record] Rejecting position"))).toBeFalsy();
         }
     ));
 
@@ -302,7 +303,7 @@ describe("Recorded Route Service", () => {
                 },
             });
             service.initialize();
-            const spy = spyOn(loggingService, "debug");
+            const spy = vi.spyOn(loggingService, "debug");
             service.startRecording();
             geoService.positionWhileInBackground.next({ coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(150000).getTime()} as GeolocationPosition);
             geoService.positionWhileInBackground.next({ coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates, timestamp: new Date(1000).getTime()} as GeolocationPosition);
@@ -314,13 +315,13 @@ describe("Recorded Route Service", () => {
 
             geoService.backToForeground.next();
             let i = 0;
-            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Processing 7")).toBeTruthy();
-            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Valid position")).toBeTruthy();
-            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy();
-            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Validating a rejected position")).toBeTruthy();
-            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Valid position")).toBeTruthy();
-            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy();
-            expect(spy.calls.all()[i++].args[0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
+            expect(spy.mock.calls[i++][0].startsWith("[Record] Processing 7")).toBeTruthy();
+            expect(spy.mock.calls[i++][0].startsWith("[Record] Valid position")).toBeTruthy();
+            expect(spy.mock.calls[i++][0].startsWith("[Record] Rejecting position,")).toBeTruthy();
+            expect(spy.mock.calls[i++][0].startsWith("[Record] Validating a rejected position")).toBeTruthy();
+            expect(spy.mock.calls[i++][0].startsWith("[Record] Valid position")).toBeTruthy();
+            expect(spy.mock.calls[i++][0].startsWith("[Record] Rejecting position,")).toBeTruthy();
+            expect(spy.mock.calls[i++][0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
 
             expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(4);
     }));
@@ -353,11 +354,11 @@ describe("Recorded Route Service", () => {
                 userInfo: null
             }
         });
-        const spy = jasmine.createSpy();
+        const spy = vi.fn();
         store.dispatch = spy;
         service.stopRecording();
 
-        expect(spy.calls.all().some(c => c.args[0].trace &&
-            c.args[0].trace.dataContainer.routes[0].markers.length > 0)).toBeTruthy();
+        expect(spy.mock.calls.some(c => c[0].trace &&
+            c[0].trace.dataContainer.routes[0].markers.length > 0)).toBeTruthy();
     }));
 });

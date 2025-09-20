@@ -1,3 +1,4 @@
+import { expect, it, describe } from "vitest";
 import { OsmTagsService, PoiProperties } from "./osm-tags.service";
 
 function createFeature(properties: any): GeoJSON.Feature {

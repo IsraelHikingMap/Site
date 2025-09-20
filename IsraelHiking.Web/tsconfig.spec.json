@@ -4,7 +4,6 @@
     "emitDecoratorMetadata": false,
     "outDir": "./out-tsc/spec",
     "types": [
-      "jasmine",
       "node",
       "geojson"
     ]

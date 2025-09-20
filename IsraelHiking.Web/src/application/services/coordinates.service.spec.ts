@@ -1,4 +1,5 @@
 import { inject, TestBed } from "@angular/core/testing";
+import { expect, it, describe, beforeEach } from "vitest";
 import { CoordinatesService } from "./coordinates.service";
 
 describe("Coordinates Service", () => {

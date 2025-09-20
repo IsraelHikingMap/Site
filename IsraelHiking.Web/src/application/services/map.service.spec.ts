@@ -1,4 +1,5 @@
 import { TestBed, inject } from "@angular/core/testing";
+import { vi, expect, it, describe, beforeEach } from "vitest";
 import { NgxsModule } from "@ngxs/store";
 import { Map } from "maplibre-gl";
 import { MapService } from "./map.service";
@@ -21,12 +22,12 @@ describe("MapService", () => {
     it("Should resolve promise when setting the map", inject([MapService], async (service: MapService) => {
         service.setMap({ on: () => {} } as any as Map);
         await service.initializationPromise;
-        expect(true).toBeTrue();
+        expect(true).toBeTruthy();
     }));
 
     it("Should set panned state on drag start", inject([MapService, CancelableTimeoutService], 
         async (service: MapService, cancelableTimeoutService: CancelableTimeoutService) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             cancelableTimeoutService.setTimeoutByName = spy;
             service.setMap({ on: (event: string, callback: () => void) => {
                 if (event == "dragstart") callback();
@@ -37,7 +38,7 @@ describe("MapService", () => {
 
     it("Should should not do anything when missing image addres does not start with http", inject([MapService], 
         async (service: MapService) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             const mapMock = {
                 loadImage: spy,
                 on: (event: string, callback: (e: any) => void) => {
@@ -51,8 +52,8 @@ describe("MapService", () => {
 
     it("Should load image when missing", inject([MapService], 
         async (service: MapService) => {
-            const spy = jasmine.createSpy().and.returnValue(Promise.resolve({ data: "123" }));
-            const addImageSpy = jasmine.createSpy();
+            const spy = vi.fn().mockReturnValue(Promise.resolve({ data: "123" }));
+            const addImageSpy = vi.fn();
             const mapMock = {
                 loadImage: spy,
                 addImage: addImageSpy,
@@ -70,8 +71,8 @@ describe("MapService", () => {
     
     it("Should not call twice on the same missing", inject([MapService], 
         async (service: MapService) => {
-            const spy = jasmine.createSpy().and.returnValue(Promise.resolve({ data: "123" }));
-            const addImageSpy = jasmine.createSpy();
+            const spy = vi.fn().mockReturnValue(Promise.resolve({ data: "123" }));
+            const addImageSpy = vi.fn();
             let storedCallback = (_e: any) => {};
             const mapMock = {
                 loadImage: spy,

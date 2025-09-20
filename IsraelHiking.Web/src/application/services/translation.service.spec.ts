@@ -1,6 +1,7 @@
 import { inject, TestBed } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
+import { expect, it, describe, beforeEach } from "vitest";
 
 import { TranslationResponse, TranslationService } from "./translation.service";
 import { ResourcesService } from "./resources.service";
@@ -31,7 +32,7 @@ describe("TranslationService", () => {
                 "description:he": "תיאור בעברית"
             }
         } as GeoJSON.Feature);
-        expect(isTranslationNeeded).toBeFalse();
+        expect(isTranslationNeeded).toBeFalsy();
     }));
 
     it("return false if translation is not needed beacuse of external description", inject([TranslationService], (service: TranslationService) => {
@@ -46,7 +47,7 @@ describe("TranslationService", () => {
                 description: "Original description"
             }
         } as GeoJSON.Feature);
-        expect(isTranslationNeeded).toBeFalse();
+        expect(isTranslationNeeded).toBeFalsy();
     }));
 
     it("return false if translation is not possible", inject([TranslationService], (service: TranslationService) => {
@@ -58,7 +59,7 @@ describe("TranslationService", () => {
             },
             properties: {}
         } as GeoJSON.Feature);
-        expect(isTranslationPossible).toBeFalse();
+        expect(isTranslationPossible).toBeFalsy();
     }));
 
     it("return true if translation is possible and needed in original language", inject([TranslationService], (service: TranslationService) => {
@@ -72,7 +73,7 @@ describe("TranslationService", () => {
                 description: "Original description"
             }
         } as GeoJSON.Feature);
-        expect(isTranslationPossible).toBeTrue();
+        expect(isTranslationPossible).toBeTruthy();
     }));
 
     it("return true if translation is possible and needed in english", inject([TranslationService], (service: TranslationService) => {
@@ -86,7 +87,7 @@ describe("TranslationService", () => {
                 "description:en": "Description in English"
             }
         } as GeoJSON.Feature);
-        expect(isTranslationPossible).toBeTrue();
+        expect(isTranslationPossible).toBeTruthy();
     }));
 
     it("return true if translation is possible by external translation from another language", inject([TranslationService], (service: TranslationService) => {
@@ -100,7 +101,7 @@ describe("TranslationService", () => {
                 "poiExternalDescription:en": "External description",
             }
         } as GeoJSON.Feature);
-        expect(isTranslationPossible).toBeTrue();
+        expect(isTranslationPossible).toBeTruthy();
     }));
 
     it("should return the best description from relevant language", inject([TranslationService], (service: TranslationService) => {

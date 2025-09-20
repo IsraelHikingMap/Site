@@ -1,8 +1,8 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { HttpRequest, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
+import { vi, expect, it, describe, beforeEach } from "vitest";
 import { NgxsModule, Store } from "@ngxs/store";
-import { LngLatBounds } from "maplibre-gl";
 
 import { ResourcesService } from "./resources.service";
 import { WhatsAppService } from "./whatsapp.service";
@@ -42,9 +42,9 @@ describe("Poi Service", () => {
             getPoisForClustering: () => Promise.resolve([]),
             addPoiToUploadQueue: () => Promise.resolve(),
             getPoiById: () => Promise.resolve(),
-            deletePois: jasmine.createSpy().and.returnValue(Promise.resolve()),
-            storePois: jasmine.createSpy().and.returnValue(Promise.resolve()),
-            storeImages: jasmine.createSpy().and.returnValue(Promise.resolve())
+            deletePois: vi.fn().mockReturnValue(Promise.resolve()),
+            storePois: vi.fn().mockReturnValue(Promise.resolve()),
+            storeImages: vi.fn().mockReturnValue(Promise.resolve())
         } as any;
         const mapServiceMock = {
             map: {
@@ -52,7 +52,6 @@ describe("Poi Service", () => {
                 off: () => { },
                 getCenter: () => ({ lat: 0, lng: 0}),
                 getZoom: () => 11,
-                getBounds: () => new LngLatBounds([1,1,2,2]),
                 addSource: () => {},
                 addLayer: () => {},
                 querySourceFeatures: () => [] as any[]
@@ -355,7 +354,7 @@ describe("Poi Service", () => {
 
     it("Should get a point by id and source from the server", (inject([PoiService, HttpTestingController, Store],
         async (poiService: PoiService, mockBackend: HttpTestingController, store: Store) => {
-            store.dispatch = jasmine.createSpy();
+            store.dispatch = vi.fn();
             const id = "42";
             const source = "source";
 
@@ -372,7 +371,7 @@ describe("Poi Service", () => {
 
     it("Should get a point by id and source from iNature", (inject([PoiService, Store],
         async (poiService: PoiService, store: Store) => {
-            store.dispatch = jasmine.createSpy();
+            store.dispatch = vi.fn();
             const id = "42";
             const source = "iNature";
 
@@ -384,7 +383,7 @@ describe("Poi Service", () => {
 
     it("Should get a point by id and source from Wikidata", (inject([PoiService, Store],
         async (poiService: PoiService, store: Store) => {
-            store.dispatch = jasmine.createSpy();
+            store.dispatch = vi.fn();
             const id = "42";
             const source = "Wikidata";
 
@@ -467,7 +466,7 @@ describe("Poi Service", () => {
 
                 const id = "node_42";
                 const source = "source";
-                const spy = spyOn(mapServiceMock.map, "querySourceFeatures").and.returnValue([{ id: "421", properties: {}, geometry: { type: "Point", coordinates: [0,0]}} as any]);
+                const spy = vi.spyOn(mapServiceMock.map, "querySourceFeatures").mockReturnValue([{ id: "421", properties: {}, geometry: { type: "Point", coordinates: [0,0]}} as any]);
 
                 const promise = poiService.getBasicInfo(id, source);
 
@@ -494,7 +493,7 @@ describe("Poi Service", () => {
                 mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes(id) &&
                         request.url.includes(source)).flush("Some error", { status: 500, statusText: "Time out"});
 
-                await expectAsync(promise).toBeRejectedWithError("Failed to load POI from offline or in-memory tiles.")
+                await expect(promise).rejects.toThrow("Failed to load POI from offline or in-memory tiles.")
             }
         )
     ));
@@ -505,7 +504,7 @@ describe("Poi Service", () => {
 
                 const id = "42";
                 const source = "source";
-                const spy = spyOn(mapServiceMock.map, "querySourceFeatures").and.returnValue([]);
+                const spy = vi.spyOn(mapServiceMock.map, "querySourceFeatures").mockReturnValue([]);
 
                 const promise = poiService.getBasicInfo(id, source);
                         
@@ -513,7 +512,7 @@ describe("Poi Service", () => {
                 mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes(id) &&
                         request.url.includes(source)).flush("Some error", { status: 500, statusText: "Time out"});
 
-                await expectAsync(promise).toBeRejected();
+                await expect(promise).rejects.toBeDefined();
                 expect(spy).toHaveBeenCalled();
             }
         )
@@ -543,7 +542,7 @@ describe("Poi Service", () => {
     )));
 
     it("Should get coordinates basic info", inject([PoiService, Store], async (service: PoiService, store: Store) => {
-        store.dispatch = jasmine.createSpy();
+        store.dispatch = vi.fn();
 
         const coordinatesFeature = await service.getBasicInfo("1_2", RouteStrings.COORDINATES, "he");
         
@@ -555,11 +554,11 @@ describe("Poi Service", () => {
     it("Should create simple point",
         inject([PoiService, Store],
             async (poiService: PoiService, store: Store) => {
-                const spy = jasmine.createSpy();
+                const spy = vi.fn();
                 store.dispatch = spy;
                 const promise = poiService.addSimplePoint({ lat: 0, lng: 0}, "Tap").then(() => {
                     expect(store.dispatch).toHaveBeenCalled();
-                    expect(spy.calls.first().args[0]).toBeInstanceOf(AddToPoiQueueAction);
+                    expect(spy.mock.calls[0][0]).toBeInstanceOf(AddToPoiQueueAction);
                 });
 
                 return promise;
@@ -570,8 +569,8 @@ describe("Poi Service", () => {
     it("Should create complex point",
         inject([PoiService, DatabaseService, Store],
             async (poiService: PoiService, dbMock: DatabaseService, store: Store) => {
-                const spy = spyOn(dbMock, "addPoiToUploadQueue");
-                store.dispatch = jasmine.createSpy();
+                const spy = vi.spyOn(dbMock, "addPoiToUploadQueue");
+                store.dispatch = vi.fn();
                 const promise = poiService.addComplexPoi({
                     id: "poiId",
                     isPoint: true,
@@ -588,13 +587,13 @@ describe("Poi Service", () => {
                     location: { lat: 0, lng: 0 } as LatLngAlt
                 }).then(() => {
                     expect(store.dispatch).toHaveBeenCalled();
-                    expect(spy.calls.mostRecent().args[0].properties.poiId).not.toBeNull();
-                    expect(spy.calls.mostRecent().args[0].properties.poiSource).toBe("OSM");
-                    expect(spy.calls.mostRecent().args[0].properties["description:he"]).toBe("description");
-                    expect(spy.calls.mostRecent().args[0].properties["name:he"]).toBe("title");
-                    expect(spy.calls.mostRecent().args[0].properties.website).toBe("some-url");
-                    expect(spy.calls.mostRecent().args[0].properties.image).toBe("some-image-url");
-                    expect(spy.calls.mostRecent().args[0].geometry.type).toBe("Point");
+                    expect(spy.mock.calls[spy.mock.calls.length -1][0].properties.poiId).not.toBeNull();
+                    expect(spy.mock.calls[spy.mock.calls.length -1][0].properties.poiSource).toBe("OSM");
+                    expect(spy.mock.calls[spy.mock.calls.length -1][0].properties["description:he"]).toBe("description");
+                    expect(spy.mock.calls[spy.mock.calls.length -1][0].properties["name:he"]).toBe("title");
+                    expect(spy.mock.calls[spy.mock.calls.length -1][0].properties.website).toBe("some-url");
+                    expect(spy.mock.calls[spy.mock.calls.length -1][0].properties.image).toBe("some-image-url");
+                    expect(spy.mock.calls[spy.mock.calls.length -1][0].geometry.type).toBe("Point");
                 });
 
                 return promise;
@@ -610,8 +609,8 @@ describe("Poi Service", () => {
                         uploadPoiQueue: [] as any[]
                     }
                 });
-                store.dispatch = jasmine.createSpy();
-                const spy = spyOn(dbMock, "addPoiToUploadQueue");
+                store.dispatch = vi.fn();
+                const spy = vi.spyOn(dbMock, "addPoiToUploadQueue");
                 const promise = poiService.updateComplexPoi({
                     id: "poiId",
                     isPoint: true,
@@ -640,7 +639,7 @@ describe("Poi Service", () => {
                     } as GeoJSON.Feature
                 }, true).then(() => {
                     expect(store.dispatch).toHaveBeenCalled();
-                    const feature = spy.calls.mostRecent().args[0];
+                    const feature = spy.mock.calls[0][0];
                     expect(feature.properties.poiId).not.toBeNull();
                     expect(feature.properties.poiSource).toBe("OSM");
                     expect(feature.properties["description:he"]).toBe("description");
@@ -674,7 +673,7 @@ describe("Poi Service", () => {
                         uploadPoiQueue: [] as any[]
                     }
                 });
-                const spy = spyOn(dbMock, "addPoiToUploadQueue");
+                const spy = vi.spyOn(dbMock, "addPoiToUploadQueue");
                 const promise = poiService.updateComplexPoi({
                     id: "poiId",
                     isPoint: true,
@@ -736,8 +735,8 @@ describe("Poi Service", () => {
                         uploadPoiQueue: ["poiId"]
                     }
                 });
-                store.dispatch = jasmine.createSpy();
-                const spy = spyOn(dbMock, "addPoiToUploadQueue");
+                store.dispatch = vi.fn();
+                const spy = vi.spyOn(dbMock, "addPoiToUploadQueue");
                 const promise = poiService.updateComplexPoi({
                     id: "poiId",
                     isPoint: true,
@@ -766,7 +765,7 @@ describe("Poi Service", () => {
                     } as GeoJSON.Feature
                 }, false).then(() => {
                     expect(store.dispatch).toHaveBeenCalled();
-                    const feature = spy.calls.mostRecent().args[0];
+                    const feature = spy.mock.calls[0][0];
                     expect(feature.properties.poiId).not.toBeNull();
                     expect(feature.properties.poiSource).toBe("OSM");
                     expect(feature.properties["description:he"]).toBe("description");
@@ -892,7 +891,7 @@ describe("Poi Service", () => {
                         coordinates: [1, 2]
                     }
                 } as GeoJSON.Feature;
-                spyOn(attributionService, "getAttributionForImage").and.returnValues(Promise.resolve(null), Promise.resolve("aaa") as any, Promise.resolve(null));
+                vi.spyOn(attributionService, "getAttributionForImage").mockReturnValueOnce(Promise.resolve(null)).mockReturnValueOnce(Promise.resolve("aaa") as any).mockReturnValueOnce(Promise.resolve(null));
 
                 const imagesUrls = await poiService.getImagesThatHaveAttribution(feature);
                 expect(imagesUrls.length).toBe(1);
@@ -955,7 +954,7 @@ describe("Poi Service", () => {
                     }]
                 }
             });
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
             (runningContextService as any).isIFrame = false;
 
@@ -975,7 +974,7 @@ describe("Poi Service", () => {
 
             await promise;
             expect(store.dispatch).toHaveBeenCalledTimes(1);
-            expect(spy.calls.first().args[0].category.name).toBe("name");
+            expect(spy.mock.calls[0][0].category.name).toBe("name");
     })));
 
     it("should sync categories and hide on iFrame", (inject([PoiService, HttpTestingController, RunningContextService, Store],
@@ -989,7 +988,7 @@ describe("Poi Service", () => {
                     }]
                 }
             });
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
             (runningContextService as any).isIFrame = true;
             const promise = poiService.syncCategories();
@@ -1008,7 +1007,7 @@ describe("Poi Service", () => {
 
             await promise;
             expect(store.dispatch).toHaveBeenCalledTimes(2);
-            expect(spy.calls.first().args[0].visible).toBeFalsy();
+            expect(spy.mock.calls[0][0].visible).toBeFalsy();
     })));
 
     it("should sync categories when categories are not the same", (inject([PoiService, HttpTestingController, RunningContextService, Store],
@@ -1032,7 +1031,7 @@ describe("Poi Service", () => {
                     }]
                 }
             });
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
             (runningContextService as any).isIFrame = false;
 
@@ -1052,7 +1051,7 @@ describe("Poi Service", () => {
 
             await promise;
             expect(store.dispatch).toHaveBeenCalledTimes(1);
-            expect(spy.calls.first().args[0].category.items[0].iconColorCategory.label).toBe("label2");
+            expect(spy.mock.calls[0][0].category.items[0].iconColorCategory.label).toBe("label2");
     })));
 
     it("should sync categories when categories are not the same but ignore visibility",
@@ -1077,7 +1076,7 @@ describe("Poi Service", () => {
                     }]
                 }
             });
-            store.dispatch = jasmine.createSpy();
+            store.dispatch = vi.fn();
             (runningContextService as any).isIFrame = false;
 
             const promise = poiService.syncCategories();
@@ -1119,7 +1118,7 @@ describe("Poi Service", () => {
                     }]
                 }
             });
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
             (runningContextService as any).isIFrame = false;
 
@@ -1129,7 +1128,7 @@ describe("Poi Service", () => {
 
             await promise;
             expect(store.dispatch).toHaveBeenCalledTimes(1);
-            expect(spy.calls.first().args[0].categoryName).toBe("name");
+            expect(spy.mock.calls[0][0].categoryName).toBe("name");
     })));
 
     it("Should get social links", inject([PoiService], (poiService: PoiService) => {

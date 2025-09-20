@@ -1,6 +1,7 @@
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { inject, TestBed } from "@angular/core/testing";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
+import { vi, expect, it, describe, beforeEach, Mock } from "vitest";
 import { NgxsModule, Store } from "@ngxs/store";
 
 import { Urls } from "../urls";
@@ -19,14 +20,17 @@ describe("LayersService", () => {
                 LayersService,
                 provideHttpClient(withInterceptorsFromDi()),                
                 provideHttpClientTesting(),
-                { provide: LoggingService, useValue: jasmine.createSpyObj("LoggingService", ["info", "warning"]) },
-                { provide: ResourcesService, useValue: jasmine.createSpyObj("ResourcesService", ["getCurrentLanguageCodeSimplified"]) }
+                { provide: LoggingService, useValue: {
+                    info: vi.fn(),
+                    warning: vi.fn(),
+                }},
+                { provide: ResourcesService, useValue: { getCurrentLanguageCodeSimplified: vi.fn() } }
             ]
         });
     });
 
     it("should sync user layers when user logs off", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
-        spyOn(store, "dispatch").and.callThrough();
+        vi.spyOn(store, "dispatch");
 
         store.reset({
             userState: {
@@ -34,11 +38,11 @@ describe("LayersService", () => {
             }
         })
         backend.expectNone(_ => true);
-        expect(true).toBeTrue();
+        expect(true).toBeTruthy();
     }));
 
     it("should sync user layers when user logs in with no data", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
-        spyOn(store, "dispatch").and.callThrough();
+        vi.spyOn(store, "dispatch");
 
         store.reset({
             userState: {
@@ -48,11 +52,11 @@ describe("LayersService", () => {
         
         backend.expectOne(u => u.url.startsWith(Urls.userLayers)).flush(null);
 
-        expect(true).toBeTrue();
+        expect(true).toBeTruthy();
     }));
 
     it("should sync user layers when user logs in with data that needs addintion, update and removal", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
 
         store.reset({
             userState: {
@@ -80,13 +84,13 @@ describe("LayersService", () => {
         ]);
 
         await new Promise(resolve => setTimeout(resolve, 10));
-        expect(spy.calls.all()[0].args[0]).toBeInstanceOf(SetUserInfoAction);
-        expect(spy.calls.all()[1].args[0]).toBeInstanceOf(UpdateBaseLayerAction);
-        expect(spy.calls.all()[2].args[0]).toBeInstanceOf(AddBaseLayerAction);
-        expect(spy.calls.all()[3].args[0]).toBeInstanceOf(UpdateOverlayAction);
-        expect(spy.calls.all()[4].args[0]).toBeInstanceOf(AddOverlayAction);
-        expect(spy.calls.all()[5].args[0]).toBeInstanceOf(RemoveOverlayAction);
-        expect(spy.calls.all()[6].args[0]).toBeInstanceOf(RemoveBaseLayerAction);
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(SetUserInfoAction);
+        expect(spy.mock.calls[1][0]).toBeInstanceOf(UpdateBaseLayerAction);
+        expect(spy.mock.calls[2][0]).toBeInstanceOf(AddBaseLayerAction);
+        expect(spy.mock.calls[3][0]).toBeInstanceOf(UpdateOverlayAction);
+        expect(spy.mock.calls[4][0]).toBeInstanceOf(AddOverlayAction);
+        expect(spy.mock.calls[5][0]).toBeInstanceOf(RemoveOverlayAction);
+        expect(spy.mock.calls[6][0]).toBeInstanceOf(RemoveBaseLayerAction);
     }));
 
     it("should check if base layer is selected", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -96,7 +100,7 @@ describe("LayersService", () => {
                 selectedBaseLayerKey: layer.key 
             } 
         });
-        expect(service.isBaseLayerSelected(layer)).toBeTrue();
+        expect(service.isBaseLayerSelected(layer)).toBeTruthy();
     }));
 
     it("should get selected base layer", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -157,7 +161,7 @@ describe("LayersService", () => {
             } 
         });
         
-        (resourcesService.getCurrentLanguageCodeSimplified as jasmine.Spy).and.returnValue("he");
+        (resourcesService.getCurrentLanguageCodeSimplified as Mock).mockReturnValue("he");
         
         const address = service.getSelectedBaseLayerAddressForOSM();
         
@@ -178,7 +182,7 @@ describe("LayersService", () => {
             } 
         });
         
-        (resourcesService.getCurrentLanguageCodeSimplified as jasmine.Spy).and.returnValue("en");
+        (resourcesService.getCurrentLanguageCodeSimplified as Mock).mockReturnValue("en");
         
         const address = service.getSelectedBaseLayerAddressForOSM();
         
@@ -199,7 +203,7 @@ describe("LayersService", () => {
             } 
         });
         
-        (resourcesService.getCurrentLanguageCodeSimplified as jasmine.Spy).and.returnValue("he");
+        (resourcesService.getCurrentLanguageCodeSimplified as Mock).mockReturnValue("he");
         
         const address = service.getSelectedBaseLayerAddressForOSM();
         
@@ -218,32 +222,32 @@ describe("LayersService", () => {
         });
         
         // Same name as existing key is available for that layer
-        expect(service.isNameAvailable("layer1", "layer1", false)).toBeTrue();
+        expect(service.isNameAvailable("layer1", "layer1", false)).toBeTruthy();
         // Different name that doesn't exist is available
-        expect(service.isNameAvailable("layer1", "newLayer", false)).toBeTrue();
+        expect(service.isNameAvailable("layer1", "newLayer", false)).toBeTruthy();
         // Name that already exists is not available
-        expect(service.isNameAvailable("layer1", "layer2", false)).toBeFalse();
+        expect(service.isNameAvailable("layer1", "layer2", false)).toBeFalsy();
         // Empty name is not available
-        expect(service.isNameAvailable("layer1", "", false)).toBeFalse();
+        expect(service.isNameAvailable("layer1", "", false)).toBeFalsy();
         // For overlays
-        expect(service.isNameAvailable("overlay2", "overlay1", true)).toBeFalse();
+        expect(service.isNameAvailable("overlay2", "overlay1", true)).toBeFalsy();
     }));
 
     it("should select base layer", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         
         service.selectBaseLayer("newLayer");
         
-        expect(spy.calls.first().args[0]).toBeInstanceOf(SelectBaseLayerAction);
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(SelectBaseLayerAction);
     }));
 
     it("should toggle overlay", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         const overlay: Overlay = { key: "overlay1", visible: false } as Overlay;
         
         service.toggleOverlay(overlay);
-        
-        expect(spy.calls.first().args[0]).toBeInstanceOf(UpdateOverlayAction);
+
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(UpdateOverlayAction);
     }));
 
     it("should check if all overlays are hidden", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -255,13 +259,13 @@ describe("LayersService", () => {
             } 
         });
         
-        expect(service.isAllOverlaysHidden()).toBeTrue();
+        expect(service.isAllOverlaysHidden()).toBeTruthy();
         service.toggleOverlay(overlay1);
-        expect(service.isAllOverlaysHidden()).toBeFalse();
+        expect(service.isAllOverlaysHidden()).toBeFalsy();
     }));
 
     it("should hide all overlays", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        spyOn(store, "dispatch").and.callThrough();
+        vi.spyOn(store, "dispatch");
         const overlay1: Overlay = { key: "overlay1", visible: true } as Overlay;
         const overlay2: Overlay = { key: "overlay2", visible: true } as Overlay;
         store.reset({ 
@@ -272,11 +276,11 @@ describe("LayersService", () => {
         
         service.hideAllOverlays();
         
-        expect(service.isAllOverlaysHidden()).toBeTrue();
+        expect(service.isAllOverlaysHidden()).toBeTruthy();
     }));
 
     it("should ignore null or empty layer data", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         
         service.addExternalBaseLayer(null);
         service.addExternalBaseLayer({ address: "", key: "" } as LayerData);
@@ -285,16 +289,16 @@ describe("LayersService", () => {
     }));
 
     it("should add external base layer with valid data", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         const layerData = { key: "newLayer", address: "https://tiles.server/{z}/{x}/{y}.png" } as LayerData;
         
         service.addExternalBaseLayer(layerData);
-        
-        expect(spy.calls.first().args[0]).toBeInstanceOf(AddBaseLayerAction);
+
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(AddBaseLayerAction);
     }));
     
     it("should select existing base layer when address matches case insensitively", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         const baseLayer: EditableLayer = { 
             key: "existingLayer", 
             address: "https://existing.address/tiles" 
@@ -310,22 +314,22 @@ describe("LayersService", () => {
             key: "newLayer" 
         } as LayerData);
         
-        expect(spy.calls.first().args[0]).toBeInstanceOf(SelectBaseLayerAction);
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(SelectBaseLayerAction);
     }));
     
     it("should generate custom layer name when key is empty", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         
         service.addExternalBaseLayer({ 
             address: "https://new.address/tiles", 
             key: "" 
         } as LayerData);
         
-        expect(spy.calls.first().args[0]).toBeInstanceOf(AddBaseLayerAction);
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(AddBaseLayerAction);
     }));
     
     it("should increment custom layer index when custom layers exist", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         
         service.addExternalBaseLayer({ 
             address: "https://new.address/tiles", 
@@ -335,14 +339,14 @@ describe("LayersService", () => {
             address: "https://new.address/tiles2", 
             key: "" 
         } as LayerData);
-        
-        expect(spy.calls.first().args[0]).toBeInstanceOf(AddBaseLayerAction);
-        expect(spy.calls.all()[1].args[0]).toBeInstanceOf(SelectBaseLayerAction);
-        expect((spy.calls.all()[2].args[0] as AddBaseLayerAction).layerData.key).toContain("2");
+
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(AddBaseLayerAction);
+        expect(spy.mock.calls[1][0]).toBeInstanceOf(SelectBaseLayerAction);
+        expect((spy.mock.calls[2][0] as AddBaseLayerAction).layerData.key).toContain("2");
     }));
 
     it("should do nothing if overlays array is null or empty", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
 
         service.addExternalOverlays(null);
         service.addExternalOverlays([]);
@@ -351,7 +355,7 @@ describe("LayersService", () => {
     }));
 
     it("should add external overlays and toggle visibility of hidden ones", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         const overlayData1 = { key: "overlay1", address: "https://test.com/1", visible: false } as Overlay;
         const overlayData2 = { key: "overlay2", address: "https://test.com/2" } as LayerData;
         const overlays = [overlayData1, overlayData2];
@@ -364,12 +368,12 @@ describe("LayersService", () => {
 
         service.addExternalOverlays(overlays);
 
-        expect(spy.calls.all()[0].args[0]).toBeInstanceOf(UpdateOverlayAction);
-        expect(spy.calls.all()[1].args[0]).toBeInstanceOf(AddOverlayAction);
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(UpdateOverlayAction);
+        expect(spy.mock.calls[1][0]).toBeInstanceOf(AddOverlayAction);
     }));
 
     it("should hide overlays that are not part of the share", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         const existingOverlay = { key: "existingOverlay", address: "https://existing.com", visible: true } as Overlay;
         const overlayData = { key: "newOverlay", address: "https://new.com" } as LayerData;
         const overlays = [overlayData] as LayerData[];
@@ -382,8 +386,8 @@ describe("LayersService", () => {
 
         service.addExternalOverlays(overlays);
 
-        expect(spy.calls.first().args[0]).toBeInstanceOf(AddOverlayAction);
-        expect(spy.calls.all()[1].args[0]).toBeInstanceOf(UpdateOverlayAction);
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(AddOverlayAction);
+        expect(spy.mock.calls[1][0]).toBeInstanceOf(UpdateOverlayAction);
     }));
 
     it("should get data container with selected layers", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -406,12 +410,12 @@ describe("LayersService", () => {
     }));
 
     it("should add base layer for non logged-in user", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         const layerData = { key: "newLayer", address: "https://test.com" } as LayerData;
         
         service.addBaseLayer(layerData);
-        
-        expect(spy.calls.first().args[0]).toBeInstanceOf(AddBaseLayerAction);
+
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(AddBaseLayerAction);
     }))
 
     it("should add base layer for logged-in user", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
@@ -424,7 +428,7 @@ describe("LayersService", () => {
             }
         });
         backend.expectOne(u => u.method == "GET" && u.url.startsWith(Urls.userLayers)).flush(null);
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         const layerData = { key: "newLayer", address: "https://test.com" } as LayerData;
 
         service.addBaseLayer(layerData);
@@ -433,13 +437,13 @@ describe("LayersService", () => {
 
         await new Promise(resolve => setTimeout(resolve, 10));
 
-        expect(spy.calls.first().args[0]).toBeInstanceOf(AddBaseLayerAction);
-        expect(spy.calls.all()[1].args[0]).toBeInstanceOf(SelectBaseLayerAction);
-        expect(spy.calls.all()[2].args[0]).toBeInstanceOf(UpdateBaseLayerAction);
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(AddBaseLayerAction);
+        expect(spy.mock.calls[1][0]).toBeInstanceOf(SelectBaseLayerAction);
+        expect(spy.mock.calls[2][0]).toBeInstanceOf(UpdateBaseLayerAction);
     }));
 
     it("should not add base layer if it already exists", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        spyOn(store, "dispatch").and.callThrough();
+        vi.spyOn(store, "dispatch");
         const existingLayer = { key: "existingLayer" } as EditableLayer;
         store.reset({ 
             layersState: { 
@@ -453,12 +457,12 @@ describe("LayersService", () => {
     }));
 
     it("should add overlay for non logged-in user", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         const overlayData = { key: "newOverlay", address: "https://test.com" } as LayerData;
         
         service.addOverlay(overlayData);
-        
-        expect(spy.calls.first().args[0]).toBeInstanceOf(AddOverlayAction);
+
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(AddOverlayAction);
     }));
 
     it("should add overlay for non logged-in user", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
@@ -471,7 +475,7 @@ describe("LayersService", () => {
             }
         });
         backend.expectOne(u => u.method == "GET" && u.url.startsWith(Urls.userLayers)).flush(null);
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         const overlayData = { key: "newOverlay", address: "https://test.com" } as LayerData;
         
         service.addOverlay(overlayData);
@@ -480,12 +484,12 @@ describe("LayersService", () => {
 
         await new Promise(resolve => setTimeout(resolve, 10));
 
-        expect(spy.calls.first().args[0]).toBeInstanceOf(AddOverlayAction);
-        expect(spy.calls.all()[1].args[0]).toBeInstanceOf(UpdateOverlayAction);
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(AddOverlayAction);
+        expect(spy.mock.calls[1][0]).toBeInstanceOf(UpdateOverlayAction);
     }));
 
     it("should not add overlay if it already exists", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        spyOn(store, "dispatch").and.callThrough();
+        vi.spyOn(store, "dispatch");
         const existingOverlay = { key: "existingOverlay" } as Overlay;
         store.reset({ 
             layersState: { 
@@ -500,7 +504,7 @@ describe("LayersService", () => {
     }));
 
     it("should update base layer and select it", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         const layer = { key: "layer1", id: "1" } as EditableLayer;
         store.reset({ 
             layersState: { 
@@ -510,8 +514,8 @@ describe("LayersService", () => {
 
         service.updateBaseLayer(layer, layer);
 
-        expect(spy.calls.first().args[0]).toBeInstanceOf(UpdateBaseLayerAction);
-        expect(spy.calls.all()[1].args[0]).toBeInstanceOf(SelectBaseLayerAction);
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(UpdateBaseLayerAction);
+        expect(spy.mock.calls[1][0]).toBeInstanceOf(SelectBaseLayerAction);
     }));
 
     it("should update overlay when user is logged in", inject([LayersService, Store, HttpTestingController], (service: LayersService, store: Store, backend: HttpTestingController) => {
@@ -523,17 +527,17 @@ describe("LayersService", () => {
                 overlays: []
             }
         })
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         const layer = { key: "layer1", id: "1" } as Overlay;
 
         service.updateOverlay(layer, layer);
 
         backend.expectOne(u => u.method == "PUT" && u.url.startsWith(Urls.userLayers)).flush(null);
-        expect(spy.calls.first().args[0]).toBeInstanceOf(UpdateOverlayAction);
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(UpdateOverlayAction);
     }));
 
     it("should remove base layer and select first layer", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         const layer1 = { key: "layer1", id: "1" } as EditableLayer;
         const layer2 = { key: "layer2", id: "2" } as EditableLayer;
         store.reset({ 
@@ -544,18 +548,18 @@ describe("LayersService", () => {
         });
         
         service.removeBaseLayer(layer2);
-        
-        expect(spy.calls.first().args[0]).toBeInstanceOf(SelectBaseLayerAction);
-        expect(spy.calls.all()[1].args[0]).toBeInstanceOf(RemoveBaseLayerAction);
+
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(SelectBaseLayerAction);
+        expect(spy.mock.calls[1][0]).toBeInstanceOf(RemoveBaseLayerAction);
     }));
 
     it("should remove overlay for non registered user", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         const overlay = { key: "overlay1", id: "1" } as Overlay;
         
         service.removeOverlay(overlay);
-        
-        expect(spy.calls.first().args[0]).toBeInstanceOf(RemoveOverlayAction);
+
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(RemoveOverlayAction);
     }));
 
     it("should toggle offline", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -565,10 +569,10 @@ describe("LayersService", () => {
                 overlays: [overlay]
             } 
         });
-        const spy = spyOn(store, "dispatch").and.callThrough();
+        const spy = vi.spyOn(store, "dispatch");
         
         service.toggleOffline(overlay, true);
-        
-        expect(spy.calls.first().args[0]).toBeInstanceOf(ToggleOfflineAction);
+
+        expect(spy.mock.calls[0][0]).toBeInstanceOf(ToggleOfflineAction);
     }));
 });

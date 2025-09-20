@@ -1,4 +1,5 @@
 import { inject, TestBed } from "@angular/core/testing";
+import { vi, expect, it, describe, beforeEach } from "vitest";
 import { NgxsModule, Store } from "@ngxs/store";
 
 import { SelectedRouteService } from "./selected-route.service";
@@ -51,7 +52,7 @@ describe("Selected Route Service", () => {
 
     it("Should sync selected route with editing route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            store.dispatch = jasmine.createSpy();
+            store.dispatch = vi.fn();
             setupRoutes(store, [{ id: "42", state: "Poi" } as any]);
             setupSelectedRoute(store, "1");
 
@@ -71,13 +72,13 @@ describe("Selected Route Service", () => {
                     weight: 10
                 }
             });
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.getOrCreateSelectedRoute();
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.first().args[0]).toBeInstanceOf(AddRouteAction);
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(AddRouteAction);
         }
     ));
 
@@ -95,7 +96,7 @@ describe("Selected Route Service", () => {
     it("Should set selected route if there's no selected route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupSelectedRoute(store, null);
-            store.dispatch = jasmine.createSpy();
+            store.dispatch = vi.fn();
 
             selectedRouteService.setSelectedRoute("42");
 
@@ -106,12 +107,12 @@ describe("Selected Route Service", () => {
     it("Should unselect selected route and selected the given route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupSelectedRoute(store, "1");
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
             selectedRouteService.setSelectedRoute("42");
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.first().args[0]).toBeInstanceOf(SetSelectedRouteAction);
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(SetSelectedRouteAction);
         }
     ));
 
@@ -136,13 +137,13 @@ describe("Selected Route Service", () => {
                     isAddingPoi: false,
                 }
             });
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.changeRouteEditState("42", "ReadOnly");
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.first().args[0]).toBeInstanceOf(ChangeRouteStateAction);
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(ChangeRouteStateAction);
         }
     ));
 
@@ -153,14 +154,14 @@ describe("Selected Route Service", () => {
                     isAddingPoi: true,
                 }
             });
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.changeRouteEditState("42", "ReadOnly");
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ToggleAddRecordingPoiAction);
-            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(ChangeRouteStateAction);
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(ToggleAddRecordingPoiAction);
+            expect(spy.mock.calls[1][0]).toBeInstanceOf(ChangeRouteStateAction);
         }
     ));
 
@@ -431,13 +432,13 @@ describe("Selected Route Service", () => {
             }]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.splitRoute(1);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(SplitRouteAction);
-            const action = spy.calls.all()[0].args[0] as SplitRouteAction;
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(SplitRouteAction);
+            const action = spy.mock.calls[0][0] as SplitRouteAction;
             expect(action.routeId).toBe("1");
             expect(action.routeData.segments.length).toBe(2);
             expect(action.routeData.segments[0].latlngs[0].lat).toBe(1);
@@ -483,13 +484,13 @@ describe("Selected Route Service", () => {
             }]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.splitRoute(1);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(SplitRouteAction);
-            const action = spy.calls.all()[0].args[0] as SplitRouteAction;
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(SplitRouteAction);
+            const action = spy.mock.calls[0][0] as SplitRouteAction;
             expect(action.splitRouteData.name).toBe("name split 2");
     }));
 
@@ -540,15 +541,15 @@ describe("Selected Route Service", () => {
             }]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.mergeRoutes(false);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(MergeRoutesAction);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments.length).toBe(3);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(MergeRoutesAction);
+            expect(spy.mock.calls[0][0].mergedRouteData.segments.length).toBe(3);
+            expect(spy.mock.calls[0][0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
+            expect(spy.mock.calls[0][0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
     }));
 
     it("Should merge routes with the same direction when selected route is second", inject([SelectedRouteService, Store],
@@ -598,15 +599,15 @@ describe("Selected Route Service", () => {
             }]);
             setupSelectedRoute(store, "2");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.mergeRoutes(true);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(MergeRoutesAction);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments.length).toBe(3);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(MergeRoutesAction);
+            expect(spy.mock.calls[0][0].mergedRouteData.segments.length).toBe(3);
+            expect(spy.mock.calls[0][0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
+            expect(spy.mock.calls[0][0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
     }));
 
     it("Should merge routes with oposite direction", inject([SelectedRouteService, Store],
@@ -656,15 +657,15 @@ describe("Selected Route Service", () => {
             }]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.mergeRoutes(false);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(MergeRoutesAction);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments.length).toBe(3);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(MergeRoutesAction);
+            expect(spy.mock.calls[0][0].mergedRouteData.segments.length).toBe(3);
+            expect(spy.mock.calls[0][0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
+            expect(spy.mock.calls[0][0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
     }));
 
     it("Should merge routes with a gap and remove the gap", inject([SelectedRouteService, Store],
@@ -714,18 +715,18 @@ describe("Selected Route Service", () => {
             }]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.mergeRoutes(false);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(MergeRoutesAction);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments.length).toBe(3);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[1].latlngs[1].lat).toBe(2);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[0].lat).toBe(2);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[1].lat).toBe(2.0001);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[2].lat).toBe(3);
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(MergeRoutesAction);
+            expect(spy.mock.calls[0][0].mergedRouteData.segments.length).toBe(3);
+            expect(spy.mock.calls[0][0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
+            expect(spy.mock.calls[0][0].mergedRouteData.segments[1].latlngs[1].lat).toBe(2);
+            expect(spy.mock.calls[0][0].mergedRouteData.segments[2].latlngs[0].lat).toBe(2);
+            expect(spy.mock.calls[0][0].mergedRouteData.segments[2].latlngs[1].lat).toBe(2.0001);
+            expect(spy.mock.calls[0][0].mergedRouteData.segments[2].latlngs[2].lat).toBe(3);
     }));
 
     it("Should revese a route", inject([SelectedRouteService, Store],
@@ -761,13 +762,13 @@ describe("Selected Route Service", () => {
             }]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.reverseRoute("1");
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ReplaceRouteAction);
-            const action = spy.calls.all()[0].args[0] as ReplaceRouteAction;
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(ReplaceRouteAction);
+            const action = spy.mock.calls[0][0] as ReplaceRouteAction;
             expect(action.routeId).toBe("1");
             expect(action.routeData.segments.length).toBe(3);
             expect(action.routeData.segments[0].latlngs[0].lat).toBe(3);
@@ -809,13 +810,13 @@ describe("Selected Route Service", () => {
             }]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.removeSegment(0);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(UpdateSegmentsAction);
-            const action = spy.calls.all()[0].args[0] as UpdateSegmentsAction;
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(UpdateSegmentsAction);
+            const action = spy.mock.calls[0][0] as UpdateSegmentsAction;
             expect(action.routeId).toBe("1");
             expect(action.indices).toEqual([0, 1]);
             expect(action.segmentsData[0].latlngs[0].lat).toBe(2);
@@ -855,13 +856,13 @@ describe("Selected Route Service", () => {
             }]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.removeSegment(2);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(DeleteSegmentAction);
-            const action = spy.calls.all()[0].args[0] as DeleteSegmentAction;
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(DeleteSegmentAction);
+            const action = spy.mock.calls[0][0] as DeleteSegmentAction;
             expect(action.routeId).toBe("1");
             expect(action.index).toBe(2);
     }));
@@ -899,13 +900,13 @@ describe("Selected Route Service", () => {
             }]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             await selectedRouteService.removeSegment(1);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(UpdateSegmentsAction);
-            const action = spy.calls.all()[0].args[0] as UpdateSegmentsAction;
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(UpdateSegmentsAction);
+            const action = spy.mock.calls[0][0] as UpdateSegmentsAction;
             expect(action.routeId).toBe("1");
             expect(action.indices).toEqual([1, 2]);
             expect(action.segmentsData[0].routePoint.lat).toBe(3);
@@ -913,7 +914,7 @@ describe("Selected Route Service", () => {
 
     it("Should make all points editable for not exiting route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.makeAllPointsEditable("1");
@@ -948,13 +949,13 @@ describe("Selected Route Service", () => {
             }]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.makeAllPointsEditable("1");
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ReplaceSegmentsAction);
-            const action = spy.calls.all()[0].args[0] as ReplaceSegmentsAction;
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(ReplaceSegmentsAction);
+            const action = spy.mock.calls[0][0] as ReplaceSegmentsAction;
             expect(action.routeId).toBe("1");
             expect(action.segmentsData.length).toBe(3);
             expect(action.segmentsData[0].latlngs[0].lat).toBe(1);
@@ -966,7 +967,7 @@ describe("Selected Route Service", () => {
 
     it("Add external empty route should not fail", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.addRoutes([]);
@@ -986,13 +987,13 @@ describe("Selected Route Service", () => {
             }]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.addRoutes([{ segments: [], markers: [{ title: "title"}]} as RouteData]);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddPrivatePoiAction);
-            const action = spy.calls.all()[0].args[0] as AddPrivatePoiAction;
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(AddPrivatePoiAction);
+            const action = spy.mock.calls[0][0] as AddPrivatePoiAction;
             expect(action.routeId).toBe("1");
             expect(action.markerData.title).toBe("title");
     }));
@@ -1009,13 +1010,13 @@ describe("Selected Route Service", () => {
             }]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.addRoutes([{ name: "name", segments: [{}], markers: [{ title: "title"}]} as RouteData]);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddRouteAction);
-            const action = spy.calls.all()[0].args[0] as AddRouteAction;
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(AddRouteAction);
+            const action = spy.mock.calls[0][0] as AddRouteAction;
             expect(action.routeData.name).toBe("name 1");
     }));
 });

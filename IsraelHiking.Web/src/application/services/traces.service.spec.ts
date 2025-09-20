@@ -1,6 +1,7 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
+import { vi, expect, it, describe, beforeEach } from "vitest";
 import { NgxsModule, Store } from "@ngxs/store";
 
 import { TracesService } from "./traces.service";
@@ -113,7 +114,7 @@ describe("Traces Service", () => {
 
     it("Should upload local traces and run sync with no traces", inject([TracesService, HttpTestingController, Store, RunningContextService],
         async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store, runningContextService: RunningContextService) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
             store.reset({
                 configuration: {
@@ -142,13 +143,13 @@ describe("Traces Service", () => {
             mockBackend.expectOne(u => u.url.startsWith(Urls.osmGpxFiles)).flush({traces: []});
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(RemoveTraceAction);
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(RemoveTraceAction);
             return promise;
     }));
 
     it("Should upload local traces and run sync with traces", inject([TracesService, HttpTestingController, Store, RunningContextService],
         async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store, runningContextService: RunningContextService) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
             store.reset({
                 configuration: {
@@ -187,8 +188,8 @@ describe("Traces Service", () => {
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(RemoveTraceAction);
-            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(BulkReplaceTracesAction);
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(RemoveTraceAction);
+            expect(spy.mock.calls[1][0]).toBeInstanceOf(BulkReplaceTracesAction);
 
             const req = mockBackend.match(u => u.url.startsWith(Urls.osmGpx));
             expect(req.length).toBe(2);
@@ -196,8 +197,8 @@ describe("Traces Service", () => {
             req[1].flush({});
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            expect(spy.calls.all()[2].args[0]).toBeInstanceOf(UpdateTraceAction);
-            expect(spy.calls.all()[3].args[0]).toBeInstanceOf(UpdateTraceAction);
+            expect(spy.mock.calls[2][0]).toBeInstanceOf(UpdateTraceAction);
+            expect(spy.mock.calls[3][0]).toBeInstanceOf(UpdateTraceAction);
 
             return promise;
     }));
@@ -299,7 +300,7 @@ describe("Traces Service", () => {
             mockBackend.expectOne(request => 
                 !request.body.includes("<tag></tag>") && request.method === "PUT").flush({ id: "1"});
 
-            await expectAsync(promise).toBeResolved();
+            await expect(promise).resolves.toBeDefined();
         }
     ));
 
@@ -320,7 +321,7 @@ describe("Traces Service", () => {
                 request.body.includes("<description>description</description>") &&
                 request.method === "PUT").flush({ id: "1"});
 
-            await expectAsync(promise).toBeResolved();
+            await expect(promise).resolves.toBeDefined();
         }
     ));
 });

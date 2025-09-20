@@ -1,5 +1,6 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { NgxsModule } from "@ngxs/store";
+import { vi, expect, it, describe, beforeEach } from "vitest";
 
 import { FitBoundsService } from "./fit-bounds.service";
 import { SidebarService } from "./sidebar.service";
@@ -29,36 +30,36 @@ describe("FitBoundsService", () => {
     it("Should fit bounds when sidebar serive is open with padding", inject([FitBoundsService, SidebarService, MapService], 
         async (service: FitBoundsService, sidebarService: SidebarService, mapService: MapService) => {
             sidebarService.isSidebarOpen = () => true;
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             mapService.map.fitBounds = spy;
             (window as any).innerWidth = 1500;
             await service.fitBounds({ northEast: { lat: 1, lng: 1}, southWest: { lat: 2, lng: 2}});
-            expect(spy.calls.all()[0].args[1].padding.left).toBe(400);
+            expect(spy.mock.calls[0][1].padding.left).toBe(400);
     }));
 
     it("Should fit bounds when sidebar serive is open with padding", inject([FitBoundsService, SidebarService, MapService], 
         async (service: FitBoundsService, sidebarService: SidebarService, mapService: MapService) => {
             sidebarService.isSidebarOpen = () => true;
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             mapService.map.fitBounds = spy;
             (window as any).innerWidth = 500;
             await service.fitBounds({ northEast: { lat: 1, lng: 1}, southWest: { lat: 2, lng: 2}});
-            expect(spy.calls.all()[0].args[1].padding.bottom).toBe(window.innerHeight / 2);
+            expect(spy.mock.calls[0][1].padding.bottom).toBe(window.innerHeight / 2);
     }));
 
     it("Should fit bounds when sidebar serive is closed without padding", inject([FitBoundsService, SidebarService, MapService], 
         async (service: FitBoundsService, sidebarService: SidebarService, mapService: MapService) => {
             sidebarService.isSidebarOpen = () => false;
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             mapService.map.fitBounds = spy;
             await service.fitBounds({ northEast: { lat: 1, lng: 1}, southWest: { lat: 2, lng: 2}}, true);
-            expect(spy.calls.all()[0].args[1].padding).toBe(0);
+            expect(spy.mock.calls[0][1].padding).toBe(0);
     }));
 
     it("Should not fly to on small changes", inject([FitBoundsService, MapService], 
         async (service: FitBoundsService, mapService: MapService) => {
             mapService.map.getCenter = () => { return { lat: 1, lng: 1} as LngLat};
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             mapService.map.flyTo = spy;
             await service.flyTo({lng: 1, lat: 1}, 1);
             expect(spy).not.toHaveBeenCalled();
@@ -67,7 +68,7 @@ describe("FitBoundsService", () => {
     it("Should fly to on large changes", inject([FitBoundsService, MapService], 
         async (service: FitBoundsService, mapService: MapService) => {
             mapService.map.getCenter = () => { return { lat: 1, lng: 1} as LngLat};
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             mapService.map.flyTo = spy;
             await service.flyTo({lng: 2, lat: 2}, 1);
             expect(spy).toHaveBeenCalled();
@@ -75,7 +76,7 @@ describe("FitBoundsService", () => {
 
     it("Should move to", inject([FitBoundsService, MapService], 
         async (service: FitBoundsService, mapService: MapService) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             mapService.map.easeTo = spy;
             await service.moveTo({lng: 2, lat: 2}, 1, 1);
             expect(spy).toHaveBeenCalled();

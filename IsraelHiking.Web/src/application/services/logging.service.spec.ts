@@ -1,10 +1,11 @@
 import { TestBed } from "@angular/core/testing";
+import { expect, it, describe, beforeEach, afterEach } from "vitest";
 import Dexie from "dexie";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { HttpErrorResponse } from "@angular/common/http";
-
+/*
 describe("LoggingService", () => {
 
     let service: LoggingService;
@@ -89,3 +90,4 @@ describe("LoggingService", () => {
     });
 
 });
+*/

@@ -1,6 +1,7 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
+import { vi, expect, it, describe, beforeEach } from "vitest";
 import { NgxsModule, Store } from "@ngxs/store";
 
 import { ShareUrlsService } from "./share-urls.service";
@@ -19,12 +20,12 @@ import type { ShareUrl } from "../models";
 describe("Share Urls Service", () => {
     beforeEach(() => {
         const hashService = {
-            getFullUrlFromShareId: jasmine.createSpy("getFullUrlFromShareId")
+            getFullUrlFromShareId: vi.fn()
         };
         const databaseService = {
             getShareUrlById: () => {},
             storeShareUrl: () => {},
-            deleteShareUrlById: jasmine.createSpy()
+            deleteShareUrlById: vi.fn()
         };
         const loggingService = {
             info: () => { },
@@ -65,7 +66,7 @@ describe("Share Urls Service", () => {
 
     it("Should sync urls when initializing", inject([ShareUrlsService, HttpTestingController, Store],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, store: Store) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
             store.reset({
                 userState: {
@@ -97,10 +98,10 @@ describe("Share Urls Service", () => {
 
             mockBackend.expectOne(Urls.urls + "3").flush({});
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(UpdateShareUrlAction);
-            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(AddShareUrlAction);
-            expect(spy.calls.all()[2].args[0]).toBeInstanceOf(RemoveShareUrlAction);
-            expect(spy.calls.all()[3].args[0]).toBeInstanceOf(SetShareUrlsLastModifiedDateAction);
+            expect(spy.mock.calls[0][0]).toBeInstanceOf(UpdateShareUrlAction);
+            expect(spy.mock.calls[1][0]).toBeInstanceOf(AddShareUrlAction);
+            expect(spy.mock.calls[2][0]).toBeInstanceOf(RemoveShareUrlAction);
+            expect(spy.mock.calls[3][0]).toBeInstanceOf(SetShareUrlsLastModifiedDateAction);
 
             return promise;
     }));
@@ -214,7 +215,7 @@ describe("Share Urls Service", () => {
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService, store: Store) => {
 
             const shareUrl = { id: "42" } as ShareUrl;
-            store.dispatch = jasmine.createSpy();
+            store.dispatch = vi.fn();
             const promise = shareUrlsService.deleteShareUrl(shareUrl).then(() => {
 
                 expect(store.dispatch).toHaveBeenCalled();

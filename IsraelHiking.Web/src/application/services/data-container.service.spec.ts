@@ -1,4 +1,5 @@
 import { inject, TestBed } from "@angular/core/testing";
+import { vi, expect, it, describe, beforeEach } from "vitest";
 import { NgxsModule, Store } from "@ngxs/store";
 
 import { RoutesReducer } from "../reducers/routes.reducer";
@@ -28,8 +29,8 @@ describe("DataContainerService", () => {
                     setShareUrl: () => {}
                 } },
                 { provide: LayersService, useValue: {
-                    addExternalOverlays: jasmine.createSpy(),
-                    addExternalBaseLayer: jasmine.createSpy(),
+                    addExternalOverlays: vi.fn(),
+                    addExternalBaseLayer: vi.fn(),
                     getData: () => ({})
                 } },
                 { provide: FileService, useValue: {
@@ -42,7 +43,7 @@ describe("DataContainerService", () => {
                     warning: () => {}
                 } },
                 { provide: FitBoundsService, useValue: {
-                    fitBounds: jasmine.createSpy()
+                    fitBounds: vi.fn()
                 } },
                 { provide: SelectedRouteService, useValue: {
                     getSelectedRoute: () => null as any
@@ -110,8 +111,8 @@ describe("DataContainerService", () => {
     }));
 
     it("should return if the share URL is already selected", inject([DataContainerService, ShareUrlsService], async (service: DataContainerService, shareUrlsService: ShareUrlsService) => {
-        spyOn(shareUrlsService, "getSelectedShareUrl").and.returnValue({ id: "123" } as any);
-        spyOn(shareUrlsService, "setShareUrlById");
+        vi.spyOn(shareUrlsService, "getSelectedShareUrl").mockReturnValue({ id: "123" } as any);
+        vi.spyOn(shareUrlsService, "setShareUrlById");
 
         await service.setShareUrlAfterNavigation("123");
 
@@ -124,9 +125,9 @@ describe("DataContainerService", () => {
             northEast: { lat: 1, lng: 2 },
             southWest: { lat: 3, lng: 4 }
         }, description: "desc", title: "title" } as ShareUrl;
-        spyOn(shareUrlsService, "getSelectedShareUrl").and.returnValue(null);
-        spyOn(shareUrlsService, "setShareUrlById").and.returnValue(Promise.resolve(shareUrl));
-        spyOn(toastService, "info");
+        vi.spyOn(shareUrlsService, "getSelectedShareUrl").mockReturnValue(null);
+        vi.spyOn(shareUrlsService, "setShareUrlById").mockReturnValue(Promise.resolve(shareUrl));
+        vi.spyOn(toastService, "info");
         (runningContextService as any).isIFrame = false;
         await service.setShareUrlAfterNavigation("42");
 
@@ -136,14 +137,14 @@ describe("DataContainerService", () => {
     }));
 
     it("should set file url after navigation", inject([DataContainerService, FileService, ToastService], async (service: DataContainerService, fileService: FileService, toastService: ToastService) => {
-        spyOn(fileService, "openFromUrl").and.returnValue(Promise.resolve({} as any));
-        spyOn(toastService, "warning");
+        vi.spyOn(fileService, "openFromUrl").mockReturnValue(Promise.resolve({} as any));
+        vi.spyOn(toastService, "warning");
         await service.setFileUrlAfterNavigation("url", "baseLayer");
 
         expect(toastService.warning).toHaveBeenCalled();
     }));
 
-    /*
+    /* HM TODO: bring this back?
     it("should set share URL and not show toast message if in iframe", async () => {
         runningContextService.isIFrame = true;
         const shareUrl = { id: "123", dataContainer: {}, description: "desc", title: "title" };

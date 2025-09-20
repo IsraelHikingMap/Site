@@ -1,5 +1,6 @@
 import { lineString } from "@turf/helpers";
 import { LngLatBounds } from "maplibre-gl";
+import { expect, it, describe } from "vitest";
 
 import { SpatialService } from "./spatial.service";
 import { Bounds } from "../models";

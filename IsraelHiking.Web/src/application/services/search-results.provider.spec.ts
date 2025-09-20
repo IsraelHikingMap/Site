@@ -1,6 +1,7 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
+import { expect, it, describe, beforeEach } from "vitest";
 
 import { SearchResultsProvider } from "./search-results.provider";
 import { GeoJsonParser } from "./geojson.parser";
@@ -32,7 +33,7 @@ describe("SearchResultsProvider", () => {
         async (provider: SearchResultsProvider, mockBackend: HttpTestingController) => {
             const promise = provider.getResults("searchTerm").then((results: SearchResultsPointOfInterest[]) => {
                 expect(results.length).toBe(1);
-            }, fail);
+            });
 
             mockBackend.match(() => true)[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
             return promise;

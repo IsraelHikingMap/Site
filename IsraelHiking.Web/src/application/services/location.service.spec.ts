@@ -1,5 +1,6 @@
 import { EventEmitter } from "@angular/core";
 import { inject, TestBed } from "@angular/core/testing";
+import { vi, expect, it, describe, beforeEach } from "vitest";
 import { NgxsModule, Store } from "@ngxs/store";
 
 import { LocationService } from "./location.service";
@@ -22,16 +23,16 @@ describe("LocationService", () => {
             bulkPositionChanged: {
                 subscribe: () => { }
             },
-            enable: jasmine.createSpy("enable"),
-            disable: jasmine.createSpy("disable")
+            enable: vi.fn(),
+            disable: vi.fn()
         };
         const deviceOrientationService = {
             orientationChanged: new EventEmitter<number>(),
-            enable: jasmine.createSpy("enable"),
-            disable: jasmine.createSpy("disable")
+            enable: vi.fn(),
+            disable: vi.fn()
         };
         const fitBoundsService = {
-            moveTo: jasmine.createSpy("moveTo")
+            moveTo: vi.fn()
         };
         const mapService = {
             map: {
@@ -41,7 +42,7 @@ describe("LocationService", () => {
             initializationPromise: Promise.resolve()
         };
         const toastService = {
-            warning: jasmine.createSpy()
+            warning: vi.fn()
         }
         TestBed.configureTestingModule({
             imports: [NgxsModule.forRoot([InMemoryReducer, GpsReducer])],
@@ -53,14 +54,14 @@ describe("LocationService", () => {
                 { provide: LoggingService, useValue: { warning: () => {} } },
                 { provide: ToastService, useValue: toastService },
                 { provide: ResourcesService, useValue: {} },
-                { provide: SelectedRouteService, useValue: { getSelectedRoute: jasmine.createSpy().and.returnValue({ state: "Poi" }) } },
+                { provide: SelectedRouteService, useValue: { getSelectedRoute: vi.fn().mockReturnValue({ state: "Poi" }) } },
                 LocationService
             ]
         });
     });
 
     it("Should initialize without any failures", inject([LocationService], async (service: LocationService) => {
-        await expectAsync(service.initialize()).toBeResolved();
+        await expect(service.initialize()).resolves.toBeUndefined();
         expect(service.getLocationCenter()).toBeUndefined();
     }));
 
@@ -92,7 +93,7 @@ describe("LocationService", () => {
             inMemoryState: { following: false }
         });
         await service.initialize();
-        const eventSpy = jasmine.createSpy();
+        const eventSpy = vi.fn();
         service.changed.subscribe(eventSpy);
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: 1, longitude: 2}} as any));
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: 2, longitude: 3}} as any));
@@ -108,7 +109,7 @@ describe("LocationService", () => {
             inMemoryState: { following: false }
         });
         await service.initialize();
-        const eventSpy = jasmine.createSpy();
+        const eventSpy = vi.fn();
         service.changed.subscribe(eventSpy);
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: 1, longitude: 2}} as any));
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: 2, longitude: 3, speed: 3, heading: 4}} as any));
@@ -124,7 +125,7 @@ describe("LocationService", () => {
             inMemoryState: { following: false, keepNorthUp: true }
         });
         await service.initialize();
-        const eventSpy = jasmine.createSpy();
+        const eventSpy = vi.fn();
         service.changed.subscribe(eventSpy);
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: 1, longitude: 2}} as any));
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: 2, longitude: 3, speed: 3, heading: 4}} as any));
@@ -140,7 +141,7 @@ describe("LocationService", () => {
             inMemoryState: { following: false }
         });
         await service.initialize();
-        const eventSpy = jasmine.createSpy();
+        const eventSpy = vi.fn();
         service.changed.subscribe(eventSpy);
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: NaN, longitude: NaN}} as any));
 
@@ -151,7 +152,7 @@ describe("LocationService", () => {
     it("Should not do anything on orientation change and no location", inject([LocationService, DeviceOrientationService], 
         async (service: LocationService, deviceOrientationService: DeviceOrientationService) => {
         await service.initialize();
-        const eventSpy = jasmine.createSpy();
+        const eventSpy = vi.fn();
         service.changed.subscribe(eventSpy);
         deviceOrientationService.orientationChanged.emit(1);
 
@@ -168,7 +169,7 @@ describe("LocationService", () => {
             inMemoryState: { following: true }
         });
         await service.initialize();
-        const eventSpy = jasmine.createSpy();
+        const eventSpy = vi.fn();
         service.changed.subscribe(eventSpy);
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: 1, longitude: 2}} as any));
         deviceOrientationService.orientationChanged.emit(1);
@@ -186,7 +187,7 @@ describe("LocationService", () => {
             inMemoryState: { following: true }
         });
         await service.initialize();
-        const eventSpy = jasmine.createSpy();
+        const eventSpy = vi.fn();
         service.changed.subscribe(eventSpy);
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: 1, longitude: 2, speed: 3, heading: 4}} as any));
         deviceOrientationService.orientationChanged.emit(5);
@@ -204,7 +205,7 @@ describe("LocationService", () => {
             inMemoryState: { following: true }
         });
         await service.initialize();
-        const eventSpy = jasmine.createSpy();
+        const eventSpy = vi.fn();
         service.changed.subscribe(eventSpy);
         store.dispatch(new SetCurrentPositionAction({coords: {latitude: 2, longitude: 3}} as any));
         deviceOrientationService.orientationChanged.emit(5);

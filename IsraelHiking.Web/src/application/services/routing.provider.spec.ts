@@ -1,6 +1,7 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
+import { vi, expect, it, describe, beforeEach } from "vitest";
 import { NgxsModule, Store } from "@ngxs/store";
 import geojsonVt from "geojson-vt";
 import vtpbf from "vt-pbf";
@@ -37,7 +38,7 @@ describe("RoutingProvider", () => {
             providers: [
                 { provide: ResourcesService, useValue: {} },
                 { provide: ToastService, useValue: {
-                    warning: jasmine.createSpy()
+                    warning: vi.fn()
                 } },
                 { provide: LoggingService, useValue: { error: () => { } } },
                 { provide: RunningContextService, useValue: {} },
@@ -82,7 +83,7 @@ describe("RoutingProvider", () => {
         async (router: RoutingProvider, mockBackend: HttpTestingController) => {
             const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike").then((data) => {
                 expect(data.length).toBe(3);
-            }, fail);
+            });
 
             mockBackend.expectOne(() => true).flush(
                 {

@@ -1,3 +1,4 @@
+import { expect, describe, it, beforeEach } from "vitest"
 import { CancelableTimeoutService } from "./cancelable-timeout.service"
 
 describe("CancelableTimeoutService", () => {
@@ -11,7 +12,7 @@ describe("CancelableTimeoutService", () => {
         const promise = new Promise((res) => resolve = res);
         service.setTimeoutByName(resolve, 0, "test");
 
-        await expectAsync(promise).toBeResolved();
+        await expect(promise).resolves.toBeUndefined();
     });
 
     it("should fire timeout only once", async () => {
@@ -28,7 +29,7 @@ describe("CancelableTimeoutService", () => {
             resolve(); 
         }, 10, "test");
 
-        await expectAsync(promise).toBeResolved();
+        await expect(promise).resolves.toBeUndefined();
         expect(counter).toBe(1);
     });
 

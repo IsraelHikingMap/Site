@@ -1,4 +1,5 @@
 import { inject, TestBed } from "@angular/core/testing";
+import { vi, expect, it, describe, beforeEach } from "vitest";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatDialog } from "@angular/material/dialog";
 
@@ -13,7 +14,7 @@ describe("ToastService", () => {
         confirmDialog = {} as any;
         const snackBar = { 
             open: () => null as any, 
-            dismiss: jasmine.createSpy(),
+            dismiss: vi.fn(),
             openFromComponent: () => { return { instance: confirmDialog } }
         } as any;
         const resourceServiceMock = {
@@ -47,7 +48,7 @@ describe("ToastService", () => {
         const options: IConfirmOptions = {
             message: "message",
             type: "Ok",
-            confirmAction: jasmine.createSpy()
+            confirmAction: vi.fn()
         } 
 
         service.confirm(options);
@@ -121,11 +122,11 @@ describe("ToastService", () => {
     it("should raise undo toast and call final action when dismissed",
         inject([ToastService, MatSnackBar],
             (service: ToastService, snackBar: MatSnackBar) => {
-        const undoAction = jasmine.createSpy();
+        const undoAction = vi.fn();
         const snackbarRef = {
             onAction: () => ({ subscribe: (callback: () => void) => callback() }),
         } as any;
-        spyOn(snackBar, "open").and.returnValue(snackbarRef);
+        vi.spyOn(snackBar, "open").mockReturnValue(snackbarRef);
         service.undo("message", undoAction);
         expect(undoAction).toHaveBeenCalled();
     }));

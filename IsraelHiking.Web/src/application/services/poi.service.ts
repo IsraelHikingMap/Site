@@ -8,7 +8,7 @@ import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 import type { GeoJSONFeature } from "maplibre-gl";
 
-import { environment } from "environments/environment";
+import { environment } from "../../environments/environment";
 import { ResourcesService } from "./resources.service";
 import { HashService, PoiRouteUrlInfo, RouteStrings } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";

@@ -1,4 +1,5 @@
 import { inject, TestBed } from "@angular/core/testing";
+import { expect, it, describe, beforeEach } from "vitest";
 import { File as FileSystemWrapper, IFile } from "@awesome-cordova-plugins/file/ngx";
 import { PmTilesService } from "./pmtiles.service";
 
@@ -18,12 +19,12 @@ describe("PmTilesService", () => {
         });
     });
 
-    it("Should get a tile", inject([PmTilesService, ], async (service: PmTilesService) => {
+    it("Should get a tile", inject([PmTilesService], async (service: PmTilesService) => {
         const results = await service.getTile("custom://filename-without-pmtiles-extention/0/0/0.png");
         expect(results).toBeDefined();
     }));
 
-    it("Should use the cache when getting a tile", inject([PmTilesService, ], async (service: PmTilesService) => {
+    it("Should use the cache when getting a tile", inject([PmTilesService], async (service: PmTilesService) => {
         let results = await service.getTile("custom://filename-without-pmtiles-extention/0/0/0.png");
         results = await service.getTile("custom://filename-without-pmtiles-extention/0/0/0.png");
         expect(results).toBeDefined();

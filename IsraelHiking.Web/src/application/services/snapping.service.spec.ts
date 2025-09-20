@@ -1,4 +1,5 @@
 import { TestBed, inject } from "@angular/core/testing";
+import { expect, it, describe, beforeEach } from "vitest";
 
 import { SnappingService } from "./snapping.service";
 import { MapService } from "./map.service";

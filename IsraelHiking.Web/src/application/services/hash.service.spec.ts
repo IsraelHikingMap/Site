@@ -1,4 +1,5 @@
 import { NavigationEnd, provideRouter, Router, UrlTree } from "@angular/router";
+import { vi, expect, it, describe, beforeEach } from "vitest";
 import { NgxsModule, Store } from "@ngxs/store";
 import { TestBed, inject } from "@angular/core/testing";
 import { Subject } from "rxjs";
@@ -15,7 +16,7 @@ import { InMemoryReducer } from "../reducers/in-memory.reducer";
 describe("HashService", () => {
     beforeEach(() => {
         const routerMock = {
-            navigate: jasmine.createSpy("navigate"),
+            navigate: vi.fn(),
             events: new Subject<any>(),
             createUrlTree: (array: []) => array.join("/"),
             parseUrl: (url: string) => ({ root: { children: { primary: {segments: url.split("/")}, }}, queryParams: {} })
@@ -37,7 +38,7 @@ describe("HashService", () => {
 
     it("Should not reset address bar if sidebar is open", inject([HashService, Router, Store, SidebarService], 
         (service: HashService, routerMock: Router, store: Store, sidebar: SidebarService) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             routerMock.navigate = spy;
             store.reset({
                 poiState: {}
@@ -61,7 +62,7 @@ describe("HashService", () => {
 
     it("Should navigate to share url if it stored in the state", inject([HashService, Router, Store], 
         (service: HashService, routerMock: Router, store: Store) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             routerMock.navigate = spy;
             service.initialize();
             store.reset({
@@ -77,12 +78,12 @@ describe("HashService", () => {
             });
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.all()[0].args[0][0]).toBe(RouteStrings.ROUTE_SHARE);
+            expect(spy.mock.calls[0][0][0]).toBe(RouteStrings.ROUTE_SHARE);
     }));
 
     it("Should navigate to file url if it stored in the state", inject([HashService, Router, Store], 
         (service: HashService, routerMock: Router, store: Store) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             routerMock.navigate = spy;
             service.initialize();
             store.reset({
@@ -98,12 +99,12 @@ describe("HashService", () => {
                 }
             });
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.all()[0].args[0][0]).toBe(RouteStrings.ROUTE_URL);
+            expect(spy.mock.calls[0][0][0]).toBe(RouteStrings.ROUTE_URL);
     }));
 
     it("Should not navigate to location if the map is moving", inject([HashService, Router, Store, MapService], 
         (service: HashService, routerMock: Router, store: Store, mapService: MapService) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             routerMock.navigate = spy;
             service.initialize();
             mapService.map = { isMoving: () => true } as any;
@@ -122,7 +123,7 @@ describe("HashService", () => {
 
     it("Should navigate to location if the map is not moving", inject([HashService, Router, Store, MapService], 
         (service: HashService, routerMock: Router, store: Store, mapService: MapService) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             routerMock.navigate = spy;
             mapService.map = { isMoving: () => false } as any;
             service.initialize();
@@ -137,7 +138,7 @@ describe("HashService", () => {
             });
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.all()[0].args[0][0]).toBe(RouteStrings.ROUTE_MAP);
+            expect(spy.mock.calls[0][0][0]).toBe(RouteStrings.ROUTE_MAP);
     }));
 
     it("Should return map address",
@@ -190,7 +191,7 @@ describe("HashService", () => {
 
         it("Should flyTo in case of map url", inject([HashService, Router, FitBoundsService], 
             (service: HashService, routerMock: Router, fitBoundService: FitBoundsService) => {
-                fitBoundService.flyTo = jasmine.createSpy();
+                fitBoundService.flyTo = vi.fn();
                 (routerMock as any).url = RouteStrings.ROUTE_MAP + "/2.00/2.000000/3.000000";
                 (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
 
@@ -200,7 +201,7 @@ describe("HashService", () => {
 
         it("Should set share in case of share url", inject([HashService, Router, DataContainerService], 
             (service: HashService, routerMock: Router, dataContainerService: DataContainerService) => {
-                dataContainerService.setShareUrlAfterNavigation = jasmine.createSpy();
+                dataContainerService.setShareUrlAfterNavigation = vi.fn();
                 (routerMock as any).url = RouteStrings.ROUTE_SHARE + "/1234";
                 (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
 
@@ -210,7 +211,7 @@ describe("HashService", () => {
 
         it("Should set file in case of file url", inject([HashService, Router, DataContainerService], 
             (service: HashService, routerMock: Router, dataContainerService: DataContainerService) => {
-                dataContainerService.setFileUrlAfterNavigation = jasmine.createSpy();
+                dataContainerService.setFileUrlAfterNavigation = vi.fn();
                 (routerMock as any).url = RouteStrings.ROUTE_URL + "/1234";
                 (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
 
@@ -219,7 +220,7 @@ describe("HashService", () => {
 
         it("Should open poi pane in case of poi url", inject([HashService, Router, SidebarService], 
             (service: HashService, routerMock: Router, sidebarService: SidebarService) => {
-                sidebarService.show = jasmine.createSpy();
+                sidebarService.show = vi.fn();
                 (routerMock as any).url = RouteStrings.ROUTE_POI + "/1234";
                 (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
 
@@ -228,7 +229,7 @@ describe("HashService", () => {
 
         it("Should hide sidebar in case of root url", inject([HashService, Router, SidebarService], 
             (service: HashService, routerMock: Router, sidebarService: SidebarService) => {
-                sidebarService.hide = jasmine.createSpy();
+                sidebarService.hide = vi.fn();
                 (routerMock as any).url = RouteStrings.ROUTE_ROOT;
                 (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
 

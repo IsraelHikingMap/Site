@@ -1,4 +1,5 @@
 import { inject, TestBed } from "@angular/core/testing";
+import { expect, it, describe, beforeEach } from "vitest";
 import { decode } from "base64-arraybuffer";
 
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
@@ -158,11 +159,11 @@ describe("GpxDataContainerConverterService", () => {
 
     }));
 
-    it("Should regect invalid GPX", inject([GpxDataContainerConverterService], async (service: GpxDataContainerConverterService) => {
+    it("Should reject invalid GPX", inject([GpxDataContainerConverterService], async (service: GpxDataContainerConverterService) => {
         const gpxString = `<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
-            <gpx></gpi>`
+            <gpx></gpx>`;
             const promise = service.toDataContainer(gpxString);
-            await expectAsync(promise).toBeRejected();
+            await expect(promise).rejects.toBeDefined();
     }));
 
     it("Should convert GPX with rte", inject([GpxDataContainerConverterService], async (service: GpxDataContainerConverterService) => {

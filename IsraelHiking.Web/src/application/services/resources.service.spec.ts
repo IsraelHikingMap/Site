@@ -1,4 +1,5 @@
 import { TestBed, inject } from "@angular/core/testing";
+import { vi, expect, it, describe, beforeEach } from "vitest";
 import { NgxsModule, Store } from "@ngxs/store";
 
 import { ResourcesService } from "./resources.service";
@@ -30,7 +31,7 @@ describe("ResourcesService", () => {
                 }
             }
         });
-        store.dispatch = jasmine.createSpy();
+        store.dispatch = vi.fn();
 
         const promise = service.setLanguage("he").then(() => {
             expect(service.getCurrentLanguageCodeSimplified()).toBe("he");
@@ -42,7 +43,7 @@ describe("ResourcesService", () => {
     it("Should faciliate translation", inject([ResourcesService, GetTextCatalogService],
         (service: ResourcesService, getText: GetTextCatalogService) => {
 
-        spyOn(getText, "getString").and.returnValue("word's translation");
+        vi.spyOn(getText, "getString").mockReturnValue("word's translation");
 
         expect(service.translate("word")).toBe("word's translation");
     }));

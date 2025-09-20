@@ -1,5 +1,6 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { NgxsModule } from "@ngxs/store";
+import { expect, it, describe, beforeEach } from "vitest";
 
 import { SidebarService } from "./sidebar.service";
 import { HashService } from "./hash.service";
