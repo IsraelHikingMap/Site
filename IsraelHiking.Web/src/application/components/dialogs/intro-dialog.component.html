@@ -25,6 +25,7 @@
                 <ng-lottie class="img-responsive" [options]="lottiePlan"></ng-lottie>
             </div>
         </div>
+        <!-- HM TODO: bring back last intro screen
         <div *ngIf="step === 3">
             <h2>{{resources.andSoMuchMore}}</h2>
             <p>{{resources.introAndSoMuchMoreDescription}}</p>
@@ -32,16 +33,17 @@
                 <ng-lottie class="img-responsive" [options]="lottieMore"></ng-lottie>
             </div>
         </div>
+        -->
     </div>
     <div mat-dialog-actions>
         <div class="flex flex-row w-full">
             <div class="flex-1">
                 <button *ngIf="step !== 0" mat-button class="w-full" (click)="step = step - 1" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro back">{{resources.back}}</button>
             </div>
-            <div class="flex-1" *ngIf="step !== 3">
+            <div class="flex-1" *ngIf="step !== 2">
                 <button mat-raised-button color="primary" class="w-full" (click)="step = step + 1" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro next">{{resources.next}}</button>
             </div>
-            <div class="flex-1" *ngIf="step === 3">
+            <div class="flex-1" *ngIf="step === 2">
                 <button mat-raised-button color="primary" class="w-full" (click)="close()" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro close">{{resources.close}}</button>
             </div>
         </div>
