@@ -15,7 +15,11 @@ public class NonPublicConfigurationData
     /// </summary>
     public string FoveaApiKey { get; set; }
     /// <summary>
-    /// RevenueCat API key for server side validation
+    /// RevenueCat API key for server side validation for IHM
+    /// </summary>
+    public string RevenueCatApiKeyIHM { get; set; }
+    /// <summary>
+    /// RevenueCat API key for server side validation for Mapeak
     /// </summary>
     public string RevenueCatApiKey { get; set; }
 }
