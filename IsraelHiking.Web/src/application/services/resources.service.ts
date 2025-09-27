@@ -669,7 +669,7 @@ export class ResourcesService {
         this.lastUpdatedOn = this.gettextCatalog.getString("Last updated on");
         this.remainingDistance = this.gettextCatalog.getString("Remaining distance");
         this.traveledDistance = this.gettextCatalog.getString("Traveled distance");
-        this.longPressHint = this.gettextCatalog.getString("Long press on any button will shows its usage");
+        this.longPressHint = this.gettextCatalog.getString("Long press on any button will show its usage");
         this.continue = this.gettextCatalog.getString("Continue");
         this.navigateHere = this.gettextCatalog.getString("Navigate Here");
         this.updateLocation = this.gettextCatalog.getString("Update the point's location");
