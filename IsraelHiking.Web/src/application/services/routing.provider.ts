@@ -14,6 +14,7 @@ import { SpatialService } from "./spatial.service";
 import { PmTilesService } from "./pmtiles.service";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
+import { ElevationProvider } from "./elevation.provider";
 import { Urls } from "../urls";
 import type { ApplicationState, LatLngAlt, RoutingType } from "../models";
 
@@ -27,6 +28,7 @@ export class RoutingProvider {
     private readonly pmTilesService = inject(PmTilesService);
     private readonly loggingService = inject(LoggingService);
     private readonly runningContextService = inject(RunningContextService);
+    private readonly elevationProvider = inject(ElevationProvider);
     private readonly store = inject(Store);
 
     public async getRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {
@@ -45,7 +47,9 @@ export class RoutingProvider {
             "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + routinType;
         try {
             const data = await firstValueFrom(this.httpClient.get<GeoJSON.FeatureCollection<GeoJSON.LineString>>(address).pipe(timeout(4500)));
-            return data.features[0].geometry.coordinates.map(c => SpatialService.toLatLng(c));
+            let latlngs = data.features[0].geometry.coordinates.map(c => SpatialService.toLatLng(c));
+            await this.elevationProvider.updateHeights(latlngs);
+            return latlngs;
         } catch (ex) {
             try {
                 return await this.getOffineRoute(latlngStart, latlngEnd, routinType);

@@ -13,6 +13,7 @@ import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { SpatialService } from "./spatial.service";
 import { PmTilesService } from "./pmtiles.service";
+import { ElevationProvider } from "./elevation.provider";
 
 const createTileFromFeatureCollection = (featureCollection: GeoJSON.FeatureCollection): ArrayBuffer => {
     const tileindex = geojsonVt(featureCollection);
@@ -43,6 +44,9 @@ describe("RoutingProvider", () => {
                 { provide: RunningContextService, useValue: {} },
                 { provide: PmTilesService, useValue: {
                     isOfflineFileAvailable: () => false,
+                } },
+                { provide: ElevationProvider, useValue: {
+                    updateHeights: () => Promise.resolve()
                 } },
                 GeoJsonParser,
                 RoutingProvider,
@@ -82,9 +86,7 @@ describe("RoutingProvider", () => {
 
     it("Should route between two points", inject([RoutingProvider, HttpTestingController],
         async (router: RoutingProvider, mockBackend: HttpTestingController) => {
-            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike").then((data) => {
-                expect(data.length).toBe(3);
-            }, fail);
+            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike");
 
             mockBackend.expectOne(() => true).flush(
                 {
@@ -97,12 +99,13 @@ describe("RoutingProvider", () => {
                             },
                             geometry: {
                                 type: "LineString",
-                                coordinates: [[1, 1] as GeoJSON.Position, [1.5, 1.5], [2, 2]]
+                                coordinates: [[1, 1], [1.5, 1.5], [2, 2]]
                             } as GeoJSON.LineString
                         } as GeoJSON.Feature<GeoJSON.LineString>
                     ]
                 } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>);
-            return promise;
+            const data = await promise;
+            expect(data.length).toBe(3);
         }
     ));
 
