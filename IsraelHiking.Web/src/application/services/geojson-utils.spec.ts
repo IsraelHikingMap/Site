@@ -87,4 +87,22 @@ describe("GeoJsonUtils", () => {
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"
         ]);
     });
+
+    it("should return color when colour property exists", () => {
+        const feature = {properties: { colour: "red" }} as any as GeoJSON.Feature;
+        const color = GeoJSONUtils.getFeatureColor(feature);
+        expect(color).toBe("red");
+    });
+
+    it("should return color when osmc:symbol property exists", () => {
+        const feature = {properties: { "osmc:symbol": "green:white:green_bar" }} as any as GeoJSON.Feature;
+        const color = GeoJSONUtils.getFeatureColor(feature);
+        expect(color).toBe("green");
+    });
+
+    it("should return null when no color properties exist", () => {
+        const feature = {properties: { name: "name" }} as any as GeoJSON.Feature;
+        const color = GeoJSONUtils.getFeatureColor(feature);
+        expect(color).toBeNull();
+    });
 });
