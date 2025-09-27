@@ -114,4 +114,14 @@ export class GeoJSONUtils {
     public static getUrls(feature: Immutable<GeoJSON.Feature>): string[] {
         return Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => feature.properties[k]);
     }
+
+    public static getFeatureColor(feature: Immutable<GeoJSON.Feature>): string | null {
+        if (feature.properties.colour) {
+            return feature.properties.colour;
+        }
+        if (feature.properties["osmc:symbol"]) {
+            return feature.properties["osmc:symbol"].split(":")[0];
+        }
+        return null;
+    }
 }
