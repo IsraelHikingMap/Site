@@ -99,8 +99,10 @@ export class SpatialService {
     public static clipLinesToTileBoundary(lines: GeoJSON.Feature<GeoJSON.LineString>[],
         tile: { x: number; y: number},
         zoom: number): GeoJSON.Feature<GeoJSON.LineString>[] {
-        const northEast = SpatialService.fromTile(tile, zoom);
-        const southWest = SpatialService.fromTile({x: tile.x + 1, y: tile.y + 1}, zoom);
+        const roundedTileX = Math.floor(tile.x);
+        const roundedTileY = Math.floor(tile.y);
+        const northEast = SpatialService.fromTile({x: roundedTileX, y: roundedTileY}, zoom);
+        const southWest = SpatialService.fromTile({x: roundedTileX + 1, y: roundedTileY + 1}, zoom);
         const tilePolygon = bboxPolygon([northEast.lng, southWest.lat, southWest.lng, northEast.lat]);
         // This is to overcome accuracy issues...
         const tilePolygonTest = bboxPolygon([northEast.lng - 1e-6, southWest.lat - 1e-6, southWest.lng + 1e-6, northEast.lat + 1e-6]);
@@ -342,34 +344,22 @@ export class SpatialService {
 
     public static fromTile(tile: {x: number; y: number}, zoom: number): LatLngAlt {
         const n = Math.pow(2, zoom);
-        const lng = Math.floor(tile.x) / n * 360 - 180;
-        const lat = Math.atan(Math.sinh(Math.PI * (1 - 2 * Math.floor(tile.y) / n))) * 180 / Math.PI;
+        const lng = tile.x / n * 360 - 180;
+        const lat = Math.atan(Math.sinh(Math.PI * (1 - 2 * tile.y / n))) * 180 / Math.PI;
         return {lat, lng};
     }
 
-    public static toRelativePixel(latlng: LatLngAlt, zoom: number, tileSize: number) {
+    public static toRelativePixelCenter(latlng: LatLngAlt, zoom: number, tileSize: number) {
         const tile = SpatialService.toTile(latlng, zoom);
         return {
-            pixelX: Math.floor((tile.x - Math.floor(tile.x)) * tileSize),
-            pixelY: Math.floor((tile.y - Math.floor(tile.y)) * tileSize)
+            pixelX: Math.max(0, (tile.x - Math.floor(tile.x)) * tileSize - 0.5),
+            pixelY: Math.max(0, (tile.y - Math.floor(tile.y)) * tileSize - 0.5)
         };
     }
 
     public static insideBbox(position: GeoJSON.Position, bbox: GeoJSON.BBox): boolean {
         return position[0] >= bbox[0] && position[0] <= bbox[2] &&
             position[1] >= bbox[1] && position[1] <= bbox[3];
-    }
-
-    public static isInIsrael(latlng: LatLngAlt): boolean {
-        const position = SpatialService.toCoordinate(latlng);
-        return SpatialService.insideBbox(position, [34.07929, 29.37711, 35.91531, 33.35091]);
-    }
-
-    public static isJammingTarget(latlng: LatLngAlt): boolean {
-        const position = SpatialService.toCoordinate(latlng);
-        return SpatialService.insideBbox(position, [35.48, 33.811, 35.50, 33.823]) ||
-            SpatialService.insideBbox(position, [31.350, 30.0817, 31.355, 30.0860]) ||
-            SpatialService.insideBbox(position, [35.98, 31.70, 36.02, 31.73]);
     }
 
     private static canBeMreged(line1: GeoJSON.Position[], line2: GeoJSON.Position[]): "start-start" | "start-end" | "end-start" | "end-end" | null {

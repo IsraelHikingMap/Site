@@ -109,7 +109,7 @@ describe("GpxDataContainerConverterService", () => {
         expect(dataContainer.routes[0].segments[0].latlngs[0].lng).toBe(0);
     }));
 
-    it("Should roundtrip datacontiner with one route and split it - pretend the GPX was not create in IHM site",
+    it("Should roundtrip datacontiner with one route and split it - pretend the GPX was not created in this site",
         inject([GpxDataContainerConverterService], async (service: GpxDataContainerConverterService) => {
         const gpxBase64String = await service.toGpx({
             baseLayer: { address: "address", key: "key", maxZoom: 1, minZoom: 0, opacity: 1},
@@ -144,7 +144,7 @@ describe("GpxDataContainerConverterService", () => {
                     weight: 10
                 }]
         });
-        // as if this was a not create in IHM site
+        // as if this was a not create in this site
         const gpxString = (await new Response(decode(gpxBase64String)).text()).replace("IsraelHikingMap", "");
         const dataContainer = await service.toDataContainer(gpxString);
         expect(dataContainer.routes.length).toBe(1);

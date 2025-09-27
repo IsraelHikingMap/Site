@@ -32,5 +32,8 @@ project(':capawesome-capacitor-app-update').projectDir = new File('../node_modul
 include ':capgo-background-geolocation'
 project(':capgo-background-geolocation').projectDir = new File('../node_modules/@capgo/background-geolocation/android')
 
+include ':revenuecat-purchases-capacitor'
+project(':revenuecat-purchases-capacitor').projectDir = new File('../node_modules/@revenuecat/purchases-capacitor/android')
+
 include ':capacitor-email-composer'
 project(':capacitor-email-composer').projectDir = new File('../node_modules/capacitor-email-composer/android')

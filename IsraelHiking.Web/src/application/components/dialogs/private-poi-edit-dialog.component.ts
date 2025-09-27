@@ -232,9 +232,9 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
     }
 
     public shareLocation() {
-        const ihmCoordinateUrl = this.hashService.getFullUrlFromLatLng(this.marker.latlng);
+        const coordinateUrl = this.hashService.getFullUrlFromLatLng(this.marker.latlng);
         Share.share({
-            text: `geo:${this.marker.latlng.lat},${this.marker.latlng.lng}\n${ihmCoordinateUrl}`
+            text: `geo:${this.marker.latlng.lat},${this.marker.latlng.lng}\n${coordinateUrl}`
         });
     }
 

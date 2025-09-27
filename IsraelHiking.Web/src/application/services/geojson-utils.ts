@@ -64,7 +64,7 @@ export class GeoJSONUtils {
         return feature.properties["description:" + language] || feature.properties.description;
     }
 
-    public static getLocation(feature: GeoJSON.Feature): LatLngAlt {
+    public static getLocation(feature: Immutable<GeoJSON.Feature>): LatLngAlt {
         return {
             lat: feature.properties.poiGeolocation.lat,
             lng: feature.properties.poiGeolocation.lon,
@@ -75,8 +75,7 @@ export class GeoJSONUtils {
     public static hasExtraData(feature: GeoJSON.Feature, language: string): boolean {
         return GeoJSONUtils.getDescription(feature, language) != null ||
             GeoJSONUtils.getValidImageUrls(feature).length > 0 ||
-            Object.keys(feature.properties).find(k => k.startsWith("wikipedia")) != null ||
-            Object.keys(feature.properties).find(k => k.startsWith("wikidata")) != null;
+            feature.properties["mtb:name"] != null;
     }
 
     public static getValidImageUrls(feature: Immutable<GeoJSON.Feature>): string[] {
@@ -87,25 +86,42 @@ export class GeoJSONUtils {
     }
 
     private static isValidImageUrl(url: string): boolean {
-            if (url.startsWith("File:")) {
-                return true;
-            }
-            if (url.includes("wikimedia.org") && 
-                !url.includes("Building_no_free_image_yet") && 
-                !url.endsWith("svg.png") &&
-                !url.endsWith("svg")) {
-                return true;
-            }
-            if (url.includes("inature.info"))
-            {
-                return true;
-            }
-            if (url.includes("nakeb.co.il")) {
-                return true;
-            }
-            if (url.includes("jeepolog.com")) {
-                return true;
-            }
-            return false;
+        if (url.startsWith("File:")) {
+            return true;
         }
+        if (url.startsWith("data:image")) {
+            return true;
+        }
+        if (url.includes("wikimedia.org") && 
+            !url.includes("Building_no_free_image_yet") && 
+            !url.endsWith("svg.png") &&
+            !url.endsWith("svg")) {
+            return true;
+        }
+        if (url.includes("inature.info"))
+        {
+            return true;
+        }
+        if (url.includes("nakeb.co.il")) {
+            return true;
+        }
+        if (url.includes("jeepolog.com")) {
+            return true;
+        }
+        return false;
+    }
+
+    public static getUrls(feature: Immutable<GeoJSON.Feature>): string[] {
+        return Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => feature.properties[k]);
+    }
+
+    public static getFeatureColor(feature: Immutable<GeoJSON.Feature>): string | null {
+        if (feature.properties.colour) {
+            return feature.properties.colour;
+        }
+        if (feature.properties["osmc:symbol"]) {
+            return feature.properties["osmc:symbol"].split(":")[0];
+        }
+        return null;
+    }
 }

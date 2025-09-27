@@ -18,4 +18,6 @@ public class SearchResultsPointOfInterest
     public string IconColor { get; set; }
     [JsonPropertyName("location")]
     public LatLng Location { get; set; }
+    [JsonPropertyName("hasExtraData")]
+    public bool HasExtraData { get; set; }
 }

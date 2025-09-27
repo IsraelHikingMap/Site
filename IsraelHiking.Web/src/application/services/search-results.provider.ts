@@ -30,13 +30,13 @@ export class SearchResultsProvider {
                 iconColor: "black",
                 location: latlng,
                 description: "",
+                hasExtraData: false
             }];
         }
         const params = new HttpParams().set("language", this.resources.getCurrentLanguageCodeSimplified());
-        const response = await firstValueFrom(this.httpClient.get(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
+        return await firstValueFrom(this.httpClient.get<SearchResultsPointOfInterest[]>(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
             params
         }).pipe(timeout(3000)));
-        return response as SearchResultsPointOfInterest[];
         // HM TODO: think if there's a way to have offline search results
     }
 }

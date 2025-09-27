@@ -143,11 +143,18 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             { FeatureAttributes.POI_LANGUAGE, Languages.ALL },
             { FeatureAttributes.ID, string.Join("_", d.Id.Split("_").Skip(1)) }
         });
+        foreach (var key in d.Source.Name.Keys.Where(k => k != Languages.DEFAULT))
+        {
+            feature.Attributes.AddOrUpdate("name:" + key, d.Source.Name[key]);
+        }
+        foreach (var key in d.Source.Description.Keys.Where(k => k != Languages.DEFAULT))
+        {
+            feature.Attributes.AddOrUpdate("description:" + key, d.Source.Description[key]);
+        }
         if (!string.IsNullOrWhiteSpace(d.Source.Image))
         {
             feature.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, d.Source.Image);
         }
-        feature.SetTitles();
         feature.SetLocation(new Coordinate(d.Source.Location[0], d.Source.Location[1]));
         return feature;
     }
@@ -155,19 +162,38 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     private QueryContainer DocumentNameSearchQuery<T>(QueryContainerDescriptor<T> q, string searchTerm) where T: class
     {
         return q.DisMax(dm =>
-            dm.Queries(sh =>
-                    sh.MultiMatch(m =>
-                        m.Type(TextQueryType.Phrase)
-                        .Query(searchTerm)
-                        .Boost(5)
-                        .Fields(f => f.Fields(Languages.ArrayWithDefault.Select(l => new Field("name." + l + ".keyword"))))
-                    ),
-                sh => 
-                    sh.MultiMatch(m =>
+            dm.Queries(
+                // Exact phrase match (highest boost)
+                sh => sh.MultiMatch(m =>
+                    m.Type(TextQueryType.Phrase)
+                    .Query(searchTerm)
+                    .Boost(10)
+                    .Fields(f => f.Fields(Languages.ArrayWithDefault.Select(l => new Field("name." + l + ".keyword"))))
+                ),
+
+                // Prefix matching for "starts with" searches
+                sh => sh.MultiMatch(m =>
+                    m.Type(TextQueryType.PhrasePrefix)
+                    .Query(searchTerm)
+                    .Boost(8)
+                    .Fields(f => f.Fields(Languages.ArrayWithDefault.Select(l => new Field("name." + l))))
+                ),
+
+                // Wildcard matching for substring searches
+                sh => sh.MultiMatch(m =>
+                    m.Query($"*{searchTerm.ToLower()}*")
+                    .Type(TextQueryType.BestFields)
+                    .Boost(6)
+                    .Fields(f => f.Fields(Languages.ArrayWithDefault.Select(l => new Field("name." + l + ".keyword"))))
+                ),
+
+                // Fuzzy matching (lowest boost)
+                sh => sh.MultiMatch(m =>
                     m.Type(TextQueryType.BestFields)
-                        .Query(searchTerm)
-                        .Fuzziness(Fuzziness.Auto)
-                        .Fields(f => f.Fields(Languages.ArrayWithDefault.Select(l => new Field("name." + l))))
+                    .Query(searchTerm)
+                    .Fuzziness(Fuzziness.Auto)
+                    .Boost(2)
+                    .Fields(f => f.Fields(Languages.ArrayWithDefault.Select(l => new Field("name." + l))))
                 )
             )
         );

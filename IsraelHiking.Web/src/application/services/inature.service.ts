@@ -5,6 +5,19 @@ import { firstValueFrom, timeout } from "rxjs";
 import { GeoJSONUtils } from "./geojson-utils";
 import { Urls } from "../urls";
 
+type INatureRsponse = {
+    query: {
+        pages: Record<string, {
+            pageid: number;
+            ns: number;
+            title: string;
+            revisions: Array<{
+                "*": string;
+            }>;
+        }>;
+    };
+}
+
 @Injectable()
 export class INatureService {
     private readonly API_URL = "https://inature.info/w/api.php";
@@ -80,7 +93,7 @@ export class INatureService {
     }
 
     private async getPageContentAndTitleFromAddress(address: string): Promise<{content: string, title: string}> {
-        const iNatureJson = await firstValueFrom(this.httpClient.get(address).pipe(timeout(this.TIMEOUT))) as any;
+        const iNatureJson = await firstValueFrom(this.httpClient.get<INatureRsponse>(address).pipe(timeout(this.TIMEOUT)));
         const pageData = iNatureJson.query.pages[Object.keys(iNatureJson.query.pages)[0]];
         return {
             content: pageData.revisions[0]["*"],
@@ -96,7 +109,7 @@ export class INatureService {
         }
         const shareId = match[1];
         const url = Urls.urls + shareId + "?format=geojson";
-        const geojson = await firstValueFrom(this.httpClient.get(url)) as GeoJSON.FeatureCollection;
+        const geojson = await firstValueFrom(this.httpClient.get<GeoJSON.FeatureCollection>(url));
         return geojson.features.find(f => f.geometry.type !== "Point")?.geometry;
     }
 }

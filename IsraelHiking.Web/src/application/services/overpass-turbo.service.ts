@@ -17,7 +17,7 @@ export class OverpassTurboService {
             let url = params.url;
             if (url.startsWith("overpass://s/")) {
                 const unshortenAddress = Urls.baseAddress +  "/unshorten/overpass-turbo.eu/s/" + url.replace("overpass://s/", "");
-                const overpassUrl = await firstValueFrom(this.httpClient.get(unshortenAddress, {responseType: "text" })) as string;
+                const overpassUrl = await firstValueFrom(this.httpClient.get(unshortenAddress, {responseType: "text" }));
                 url = overpassUrl.trim().replace("https://overpass-turbo.eu/?Q=", "");
             }
             let query = decodeURIComponent(url.replace("overpass://Q/", "").replace("overpass://", ""));
@@ -27,7 +27,7 @@ export class OverpassTurboService {
             if (!query.match(/out.*geom;/)) {
                 query += "out geom;";
             }
-            const content = await firstValueFrom(this.httpClient.post(OverpassTurboService.OVERPASS_API_URL, query).pipe(timeout(20000))) as unknown;
+            const content = await firstValueFrom(this.httpClient.post<string | Record<string, any>>(OverpassTurboService.OVERPASS_API_URL, query).pipe(timeout(20000)));
             const geojson = osmtogeojson(content, {completeFeature: true, excludeWay: false}) as GeoJSON.FeatureCollection;
             return {data: geojson};
         });
@@ -35,20 +35,20 @@ export class OverpassTurboService {
 
     public async getFeature(type: string, id: string): Promise<GeoJSON.Feature> {
         const address = Urls.osmApi + type + "/" + id + (type !== "node" ? "/full" : "") + ".json";
-        const content = await firstValueFrom(this.httpClient.get(address).pipe(timeout(6000))) as unknown;
+        const content = await firstValueFrom(this.httpClient.get<string | Record<string, any>>(address).pipe(timeout(6000)));
         return this.processFeature(content);
     }
 
     private async getFeatureFromQuery(query: string, timeoutInMilliseconds = 2000): Promise<GeoJSON.Feature> {
         try {
-            const json = await firstValueFrom(this.httpClient.post(OverpassTurboService.OVERPASS_API_URL, `[out: json];${query}out geom;`).pipe(timeout(timeoutInMilliseconds))) as unknown;
+            const json = await firstValueFrom(this.httpClient.post<string | Record<string, any>>(OverpassTurboService.OVERPASS_API_URL, `[out: json];${query}out geom;`).pipe(timeout(timeoutInMilliseconds)));
             return this.processFeature(json);
         } catch {
             return null;
         }
     }
 
-    private processFeature(content: Parameters<typeof osmtogeojson>[0]): GeoJSON.Feature {
+    private processFeature(content: string | Record<string, any>): GeoJSON.Feature {
         const geojson = osmtogeojson(content, {completeFeature: true, excludeWay: false}) as GeoJSON.FeatureCollection;
         if (geojson.features.length === 1 && geojson.features[0].geometry.type !== "MultiLineString") {
             return geojson.features[0];

@@ -4,7 +4,7 @@
     min-height: 0;
     line-height: initial;
     padding: 5px;
-    top: 0;
+    top: env(safe-area-inset-top, 0);
     right: 5px;
 }
 

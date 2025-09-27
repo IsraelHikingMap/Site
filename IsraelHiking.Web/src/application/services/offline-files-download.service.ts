@@ -92,7 +92,7 @@ export class OfflineFilesDownloadService {
                 const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
                 if (fileName.endsWith(".pmtiles")) {
                     await this.fileService.downloadFileToCacheAuthenticated(`${Urls.offlineFiles}/${fileName}`, fileName, token,
-                        (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
+                        (value) => reportProgress((value + fileNameIndex) * 100.0 / length), new AbortController());
                     await this.fileService.moveFileFromCacheToDataDirectory(fileName);
                 } else {
                     const fileContent = await this.fileService.getFileContentWithProgress(`${Urls.offlineFiles}/${fileName}`,
@@ -120,7 +120,7 @@ export class OfflineFilesDownloadService {
             this.loggingService.info("[Offline Download] This is the first time downloading pmtiles, downloading all files");
             lastModifiedString = null;
         }
-        const fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
+        const fileNames = await firstValueFrom(this.httpClient.get<Record<string, string>>(Urls.offlineFiles, {
             params: { 
                 lastModified: lastModifiedString,
                 pmtiles: true
@@ -128,19 +128,6 @@ export class OfflineFilesDownloadService {
         }).pipe(timeout(5000)));
         this.loggingService.info(
             `[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
-        return fileNames as Record<string, string>;
-    }
-
-    public async isExpired(): Promise<boolean> {
-        try {
-            await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
-                params: { lastModified: null }
-            }).pipe(timeout(5000)));
-            return false;
-        } catch (ex) {
-            const typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
-            return typeAndMessage.type === "server" && typeAndMessage.statusCode === 403;
-        }
-
+        return fileNames;
     }
 }

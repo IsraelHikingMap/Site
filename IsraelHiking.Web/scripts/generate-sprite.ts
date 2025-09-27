@@ -13,7 +13,7 @@ if (fs.existsSync(inputDir)) {
 fs.mkdirSync(inputDir, { recursive: true });
 
 const publishDir = './src/content/sprite';
-const dockerImage = 'ghcr.io/flother/spreet:0.12.0';
+const dockerImage = 'ghcr.io/flother/spreet:0.12.1';
 let haloIcons = fs.readdirSync(iconsDir)
   .filter(file => file.endsWith('.svg') && !file.includes('pattern') && !file.includes('arrowline') && !file.includes('triangle') && !file.includes('square'));
 
@@ -50,9 +50,8 @@ function copyIconWithDifferentColor(originalFile: string, newFile: string, color
 }
 
 // Handle duplicate icons with different colors
-copyIconWithDifferentColor('synagogue.svg', 'first_aid.svg', 'red');
 copyIconWithDifferentColor('gate_open.svg', 'gate_closed.svg', 'red');
-copyIconWithDifferentColor('dot.svg', 'spring.svg', '#1e80e3ff');
+copyIconWithDifferentColor('dot.svg', 'spring.svg', '#1e80e3');
 copyIconWithDifferentColor('shield_black.svg', 'shield_red.svg', 'red');
 copyIconWithDifferentColor('shield_black.svg', 'shield_green.svg', 'green');
 copyIconWithDifferentColor('shield_black.svg', 'shield_blue.svg', 'blue');

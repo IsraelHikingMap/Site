@@ -78,6 +78,7 @@ public class SearchController : ControllerBase
             IconColor = feature.Attributes[FeatureAttributes.POI_ICON_COLOR].ToString(),
             Source = feature.Attributes[FeatureAttributes.POI_SOURCE].ToString(),
             Location = latLng,
+            HasExtraData = feature.HasExtraData(language)
         };
         searchResultsPoi.DisplayName = await GetDisplayName(feature, language, searchResultsPoi.Title);
         return searchResultsPoi;

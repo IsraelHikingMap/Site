@@ -98,7 +98,7 @@ export class LayersService {
             return;
         }
         try {
-            const data = await firstValueFrom(this.httpClient.get(Urls.userLayers).pipe(timeout(10000))) as any as UserLayer[];
+            const data = await firstValueFrom(this.httpClient.get<UserLayer[]>(Urls.userLayers).pipe(timeout(10000)));
             if (data == null) {
                 return;
             }
@@ -181,7 +181,7 @@ export class LayersService {
         const layerToStore = { ...layer } as UserLayer;
         layerToStore.isOverlay = false;
         layerToStore.osmUserId = this.userInfo.id;
-        const response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as UserLayer;
+        const response = await firstValueFrom(this.httpClient.post<UserLayer>(Urls.userLayers, layerToStore));
         this.store.dispatch(new UpdateBaseLayerAction(layer.key, {
             ...layer,
             id: response.id
@@ -237,7 +237,7 @@ export class LayersService {
         const layerToStore = { ...layer } as UserLayer;
         layerToStore.isOverlay = true;
         layerToStore.osmUserId = this.userInfo.id;
-        const response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as UserLayer;
+        const response = await firstValueFrom(this.httpClient.post<UserLayer>(Urls.userLayers, layerToStore));
         this.store.dispatch(new UpdateOverlayAction(layer.key, {
             ...layer,
             id: response.id

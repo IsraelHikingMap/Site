@@ -116,7 +116,7 @@ export class ShareDialogComponent {
             this.shareUrlsService.setShareUrl(shareUrl);
             const links = this.shareUrlsService.getShareSocialLinks(shareUrl);
             this.toastService.success(this.resources.dataUpdatedSuccessfully);
-            this.shareAddress = links.ihm;
+            this.shareAddress = links.app;
             this.imageUrl = this.shareUrlsService.getImageUrlFromShareId(shareUrl.id);
             this.whatsappShareAddress = links.whatsapp;
             this.facebookShareAddress = links.facebook;

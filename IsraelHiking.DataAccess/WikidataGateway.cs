@@ -153,7 +153,6 @@ public class WikidataGateway : IWikidataGateway
                 feature.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL + posix, WIKIDATA_LOGO);
             }
             feature.SetLocation(point.Coordinate);
-            feature.SetTitles();
             feature.SetId();
             return feature;
         }).Where(f => f != null).ToList();

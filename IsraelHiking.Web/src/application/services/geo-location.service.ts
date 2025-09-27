@@ -7,7 +7,6 @@ import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
-import { SpatialService } from "./spatial.service";
 import { SelectedRouteService } from "./selected-route.service";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models";
@@ -171,11 +170,6 @@ export class GeoLocationService {
     }
 
     private handlePositionChange(position: GeolocationPosition): void {
-        const latLng = GeoLocationService.positionToLatLngTime(position);
-        if (SpatialService.isJammingTarget(latLng)) {
-            this.toastService.info(this.resources.jammedPositionReceived);
-            return;
-        }
         if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "searching") {
             this.store.dispatch(new SetTrackingStateAction("tracking"));
         }

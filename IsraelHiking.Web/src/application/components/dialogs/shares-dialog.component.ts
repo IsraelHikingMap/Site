@@ -85,7 +85,7 @@ export class SharesDialogComponent implements OnInit {
 
     public share() {
         Share.share({
-            url: this.getShareSocialLinks().ihm
+            url: this.getShareSocialLinks().app
         });
     }
 

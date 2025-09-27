@@ -23,7 +23,7 @@ export class GetTextCatalogService {
     }
 
     public async loadRemote(url: string): Promise<void> {
-        const response = await firstValueFrom(this.httpClient.get(url)) as Record<string, string>;
+        const response = await firstValueFrom(this.httpClient.get<Record<string, string>>(url));
         this.strings = response;
     }
 }

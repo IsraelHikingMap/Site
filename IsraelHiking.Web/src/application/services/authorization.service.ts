@@ -52,7 +52,7 @@ export class AuthorizationService {
 
     private async getAccessToken(oauthCode: string): Promise<string> {
         const accessTokenUrl =  Urls.osmAuth + "/token";
-        const response = await firstValueFrom(this.httpClient.post(accessTokenUrl, null, {
+        const response = await firstValueFrom(this.httpClient.post<{ access_token: string }>(accessTokenUrl, null, {
             params: {
                 client_id: "jqxu2hhG-gUa-XUxiepzkQPZQf7iQguMC0sTVSRpaKE",
                 grant_type: "authorization_code",
@@ -60,12 +60,12 @@ export class AuthorizationService {
                 redirect_uri: this.redirectUrl,
             },
             headers: {"Content-Type": "application/x-www-form-urlencoded" }
-        })) as { access_token: string };
+        }));
         return response.access_token;
     }
 
     private updateUserDetails = async () => {
-        const detailJson = await firstValueFrom(this.httpClient.get(Urls.osmUser)) as OsmUserDetails;
+        const detailJson = await firstValueFrom(this.httpClient.get<OsmUserDetails>(Urls.osmUser));
         const userInfo = {
             displayName: detailJson.user.display_name,
             id: detailJson.user.id.toString(),

@@ -2,7 +2,6 @@ import { TestBed, inject } from "@angular/core/testing";
 import { HttpEventType, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
-import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { StyleSpecification } from "maplibre-gl";
 import { strToU8, zipSync } from "fflate";
 
@@ -46,7 +45,6 @@ describe("FileService", () => {
         TestBed.configureTestingModule({
             providers: [
                 RunningContextService,
-                FileTransfer,
                 GpxDataContainerConverterService,
                 { provide: ConnectionService, useValue: { stateChanged: { subscribe: () => {} }} },
                 { provide: FileSystemWrapper, useValue: {
@@ -67,12 +65,11 @@ describe("FileService", () => {
     it("Should save to file on web", inject([FileService, HttpTestingController],
         async (service: FileService, mockBackend: HttpTestingController) => {
 
-            const promise = service.saveToFile("file.name", "format", {} as DataContainer).then(() => {
-                expect(saveAsSpy).toHaveBeenCalled();
-            });
+            const promise = service.saveToFile("file.name", "format", {} as DataContainer)
 
             mockBackend.expectOne(Urls.files + "?format=format").flush(btoa("bytes"));
-            return promise;
+            await promise;
+            expect(saveAsSpy).toHaveBeenCalled();
     }));
 
     it("Should save to file on mobile", inject([FileService, RunningContextService, FileSystemWrapper],
@@ -96,22 +93,19 @@ describe("FileService", () => {
     it("Should add routes from url", inject([FileService, HttpTestingController],
         async (service: FileService, mockBackend: HttpTestingController) => {
 
-            const promise = service.addRoutesFromUrl("someurl").then(() => {
-                expect(selectedRouteService.addRoutes).toHaveBeenCalled();
-            }, fail);
+            const promise = service.addRoutesFromUrl("someurl");
 
             mockBackend.expectOne(Urls.files + "?url=someurl").flush({
                 northEast: { lat: 1, lng: 1}, southWest: { lat: 2, lng: 2}
             });
-            return promise;
+            await promise;
+            expect(selectedRouteService.addRoutes).toHaveBeenCalled();
         }));
 
     it("Should open from url by uploading", inject([FileService, HttpTestingController],
         async (service: FileService, mockBackend: HttpTestingController) => {
 
-            const promise = service.addRoutesFromFile(new Blob([""]) as File).then(() => {
-                expect(selectedRouteService.addRoutes).toHaveBeenCalled();
-            }, fail);
+            const promise = service.addRoutesFromFile(new Blob([""]) as File);
 
             setTimeout(() => {
                 mockBackend.expectOne(Urls.openFile).flush({
@@ -123,7 +117,8 @@ describe("FileService", () => {
                 } as DataContainer);
             }, 1000);
 
-            return promise;
+            await promise;
+            expect(selectedRouteService.addRoutes).toHaveBeenCalled();
         }));
 
     it("Should open jpeg file and resize it", inject([FileService, HttpTestingController],
@@ -338,19 +333,90 @@ describe("FileService", () => {
         await expectAsync(promise).toBeRejected();
     }));
 
-    it("Should download a file to cache", inject([FileService, FileTransfer], 
-        async (service: FileService, fileTransfer: FileTransfer) => {
-        const spy = jasmine.createSpy();
-        const fileTransferObject = { 
-            download: jasmine.createSpy(),
-            onProgress: () => {}
-        };
-        fileTransfer.create = spy.and.returnValue(fileTransferObject);
-        const url = "http://123.mbtiles";
-        const promise = service.downloadFileToCache(url, spy);
+    it("Should not download a file to cache due to network error", inject([FileService], 
+        async (service: FileService) => {
+        const progressSpy = jasmine.createSpy();
+        const url = "http://123.pmtiles";
 
-        expect(fileTransferObject.download).toHaveBeenCalled();
-        return promise;
+        const mockResponse = { ok: false };
+
+        const fetchSpy = spyOn(window, "fetch").and.returnValue(Promise.resolve(mockResponse as any));
+
+        await expectAsync(service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, new AbortController())).toBeRejected();
+
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+        expect(progressSpy).not.toHaveBeenCalled();
+    }));
+
+    it("Should download a file to cache without interruptions but without progress", inject([FileService], 
+        async (service: FileService) => {
+        const progressSpy = jasmine.createSpy();
+        const url = "http://123.pmtiles";
+        const mockReader = {
+            read: jasmine.createSpy("read").and.returnValues(
+                Promise.resolve({ done: false, value: new Uint8Array([1, 2]) }),
+                Promise.resolve({ done: false, value: new Uint8Array([3, 4]) }),
+                Promise.resolve({ done: true })
+            ),
+        };
+
+        const mockResponse = {
+            ok: true,
+            body: {
+                getReader: jasmine.createSpy("getReader").and.returnValue(mockReader)
+            },
+            headers: {
+                get: jasmine.createSpy("get").and.returnValue("")
+            }
+        };
+
+        // Mock fetch
+        const fetchSpy = spyOn(window, "fetch").and.returnValue(Promise.resolve(mockResponse as any));
+
+
+        await service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, new AbortController());
+
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+        expect(mockReader.read).toHaveBeenCalledTimes(3);
+        expect(progressSpy).not.toHaveBeenCalled();
+    }));
+
+    it("Should stop download a file to cache when interrupted", inject([FileService], 
+        async (service: FileService) => {
+        const progressSpy = jasmine.createSpy();
+        const url = "http://123.pmtiles";
+        const mockReader = {
+            read: jasmine.createSpy("read").and.returnValues(
+                Promise.resolve({ done: false, value: new Uint8Array([1, 2]) }),
+                new Promise(resolve => setTimeout(() => { resolve({ done: false, value: new Uint8Array([3, 4]) }); }, 100)),
+                new Promise(resolve => setTimeout(() => { resolve({ done: true }); }, 100))
+            ),
+        };
+
+        const mockResponse = {
+            ok: true,
+            body: {
+                getReader: jasmine.createSpy("getReader").and.returnValue(mockReader)
+            },
+            headers: {
+                get: jasmine.createSpy("get").and.returnValue("4")
+            }
+        };
+
+        // Mock fetch
+        const fetchSpy = spyOn(window, "fetch").and.returnValue(Promise.resolve(mockResponse as any));
+
+        const abortController = new AbortController();
+        const promise = service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, abortController);
+
+        await new Promise(resolve => setTimeout(resolve, 50));
+        abortController.abort();
+
+        await promise;
+
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+        expect(mockReader.read).toHaveBeenCalledTimes(2);
+        expect(progressSpy).toHaveBeenCalledTimes(1);
     }));
 
     it("Should get file from cache", inject([FileService, FileSystemWrapper], 
@@ -358,16 +424,6 @@ describe("FileService", () => {
         const spy = jasmine.createSpy();
         fileSystemWrapper.readAsArrayBuffer = spy;
         const promise = service.getFileFromCache("file");
-
-        expect(spy).toHaveBeenCalled();
-        return promise;
-    }));
-
-    it("Should delete file from cache", inject([FileService, FileSystemWrapper], 
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-        const spy = jasmine.createSpy();
-        fileSystemWrapper.removeFile = spy;
-        const promise = service.deleteFileFromCache("file");
 
         expect(spy).toHaveBeenCalled();
         return promise;

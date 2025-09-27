@@ -3,7 +3,7 @@
 public class NonPublicConfigurationData
 {
     /// <summary>
-    /// Wikimedia user name for public images upload
+    /// Wikimedia username for public images upload
     /// </summary>
     public string WikiMediaUserName { get; set; }
     /// <summary>
@@ -18,4 +18,8 @@ public class NonPublicConfigurationData
     /// Fovea API Key for server side receipt validation
     /// </summary>
     public string FoveaApiKey { get; set; }
+    /// <summary>
+    /// RevenueCat API key for server side validation
+    /// </summary>
+    public string RevenueCatApiKey { get; set; }
 }

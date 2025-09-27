@@ -2,7 +2,6 @@ import { inject, Injectable, InjectionToken } from "@angular/core";
 import { HttpClient, HttpEventType } from "@angular/common/http";
 import { StyleSpecification } from "maplibre-gl";
 import { File as FileSystemWrapper, FileEntry } from "@awesome-cordova-plugins/file/ngx";
-import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
 import { firstValueFrom } from "rxjs";
@@ -33,7 +32,6 @@ export class FileService {
 
     private readonly httpClient = inject(HttpClient);
     private readonly fileSystemWrapper = inject(FileSystemWrapper);
-    private readonly fileTransfer = inject(FileTransfer);
     private readonly runningContextService = inject(RunningContextService);
     private readonly imageResizeService = inject(ImageResizeService);
     private readonly selectedRouteService = inject(SelectedRouteService);
@@ -116,7 +114,7 @@ export class FileService {
                 const styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
                 return JSON.parse(styleText) as StyleSpecification;
             }
-            return await firstValueFrom(this.httpClient.get(url)) as StyleSpecification;
+            return await firstValueFrom(this.httpClient.get<StyleSpecification>(url));
         } catch (ex) {
             this.loggingService.error(`[Files] Unable to get style file, isOffline: ${isOffline}, ${(ex as Error).message}`);
             return {
@@ -135,7 +133,7 @@ export class FileService {
     public async saveToFile(fileName: string, format: string, dataContainer: DataContainer) {
         const responseData = format === "gpx"
             ? await this.gpxDataContainerConverterService.toGpx(dataContainer)
-            : await firstValueFrom(this.httpClient.post(Urls.files + "?format=" + format, dataContainer)) as string;
+            : await firstValueFrom(this.httpClient.post<string>(Urls.files + "?format=" + format, dataContainer));
 
         if (!this.runningContextService.isCapacitor) {
             const blobToSave = await this.base64StringToBlob(responseData);
@@ -219,7 +217,7 @@ export class FileService {
                 const formData = new FormData();
                 formData.append("file", file, file.name);
                 this.loggingService.info(`[Files] The file is not a GPX file, sending it to server for conversion: ${file.name}`);
-                dataContainer = await firstValueFrom(this.httpClient.post(Urls.openFile, formData)) as DataContainer;
+                dataContainer = await firstValueFrom(this.httpClient.post<DataContainer>(Urls.openFile, formData));
             }
         }
         if (dataContainer.routes.length === 0 ||
@@ -230,7 +228,7 @@ export class FileService {
     }
 
     public openFromUrl(url: string): Promise<DataContainer> {
-        return firstValueFrom(this.httpClient.get(Urls.files + "?url=" + url)) as Promise<DataContainer>;
+        return firstValueFrom(this.httpClient.get<DataContainer>(Urls.files + "?url=" + url));
     }
 
     public async addRoutesFromUrl(url: string) {
@@ -305,8 +303,8 @@ export class FileService {
                             reject(new Error(event.statusText));
                         }
                     }
-            }, error: (error) => reject(error)
-        });
+                }, error: (error) => reject(error)
+            });
         });
     }
 
@@ -320,27 +318,47 @@ export class FileService {
         }
     }
 
-    public async deleteFileFromCache(url: string): Promise<void> {
-        await this.fileSystemWrapper.removeFile(this.fileSystemWrapper.cacheDirectory, url.split("/").pop());
-    }
-
-    public downloadFileToCache(url: string, progressCallback: (value: number) => void) {
-        return this.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressCallback);
-    }
-
-    public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void) {
-        const fileTransferObject = this.fileTransfer.create();
-        fileTransferObject.onProgress((event) => {
-            progressCallback(event.loaded / event.total);
-        });
+    public downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void, abortController: AbortController): Promise<void> {
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
-        const options = !token ? undefined : {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        };
-        await fileTransferObject.download(url, this.fileSystemWrapper.cacheDirectory + fileName, true, options);
-        this.loggingService.info(`[Files] Finished downloading and writing file to cache, file name ${fileName}`);
+        let previousPercentage = 0;
+        return new Promise<void>((resolve, reject) => {
+            fetch(url, { headers: { Authorization: `Bearer ${token}` } }).then(async (response) => {
+                if (!response.ok) {
+                    this.loggingService.error(`[Files] Failed to download file: ${fileName}, status: ${response.statusText}`);
+                    reject(new Error(`Failed to download file: ${fileName}, status: ${response.statusText}`));
+                    return;
+                }
+                const reader = response.body.getReader();
+                const contentLength = Number(response.headers.get("Content-Length"));
+                let receivedLength = 0;
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (abortController.signal.aborted) {
+                        this.loggingService.info(`[Files] Aborting download of file ${fileName}`);
+                        resolve();
+                        return;
+                    }
+                    if (done) {
+                        this.loggingService.info(`[Files] Finished downloading and writing file to cache, file name ${fileName}`);
+                        resolve();
+                        break;
+                    }
+                    if (receivedLength === 0) {
+                        await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, value.buffer, { append: false, replace: true, truncate: 0 });
+                    } else {
+                        await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, value.buffer, { append: true });
+                    }
+                    receivedLength += value.length;
+                    if (contentLength > 0) {
+                        const currentPercentage = receivedLength / contentLength;
+                        if (currentPercentage - previousPercentage > 0.001) {
+                            progressCallback(currentPercentage);
+                            previousPercentage = currentPercentage;
+                        }
+                    }
+                }
+            });
+        });
     }
 
     public async moveFileFromCacheToDataDirectory(fileName: string): Promise<void> {

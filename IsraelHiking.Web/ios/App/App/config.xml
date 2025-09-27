@@ -11,17 +11,8 @@
     <param name="onload" value="true"/>
   </feature>
 
-  <feature name="FileTransfer">
-    <param name="ios-package" value="CDVFileTransfer"/>
-  </feature>
-
   <feature name="OAuth">
     <param name="ios-package" value="CDVOAuthPlugin"/>
-    <param name="onload" value="true"/>
-  </feature>
-
-  <feature name="InAppPurchase">
-    <param name="ios-package" value="InAppPurchase"/>
     <param name="onload" value="true"/>
   </feature>
 

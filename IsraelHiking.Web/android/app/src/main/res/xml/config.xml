@@ -11,16 +11,8 @@
     <param name="onload" value="true"/>
   </feature>
 
-  <feature name="FileTransfer">
-    <param name="android-package" value="org.apache.cordova.filetransfer.FileTransfer"/>
-  </feature>
-
   <feature name="OAuth">
     <param name="android-package" value="com.ayogo.cordova.oauth.OAuthPlugin"/>
-  </feature>
-
-  <feature name="InAppBillingPlugin">
-    <param name="android-package" value="cc.fovea.PurchasePlugin"/>
   </feature>
 
   

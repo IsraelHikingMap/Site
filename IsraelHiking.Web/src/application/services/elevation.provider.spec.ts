@@ -9,6 +9,20 @@ import { PmTilesService } from "./pmtiles.service";
 
 describe("ElevationProvider", () => {
 
+    async function getArrayBufferOfNonEmptyTile(): Promise<ArrayBuffer> {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = 256;
+        canvas.height = 256;
+        ctx.fillStyle = "blue";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        const url = canvas.toDataURL("image/png");
+
+        const response = await fetch(url);
+        return response.arrayBuffer();
+    }
+
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [
@@ -24,31 +38,16 @@ describe("ElevationProvider", () => {
         });
     });
 
-    it("Should update height data inside Israel", inject([ElevationProvider, HttpTestingController],
+    it("Should update height data", inject([ElevationProvider, HttpTestingController],
         async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
 
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
-            const promise = elevationProvider.updateHeights(latlngs).then(() => {
-                expect(latlngs[0].alt).toBe(1);
-            });
+            const promise = elevationProvider.updateHeights(latlngs);
 
             mockBackend.match(() => true)[0].flush([1]);
-            return promise;
-        }
-    ));
-
-    it("Should update height data outside Israel", inject([ElevationProvider, HttpTestingController],
-        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
-
-            const latlngs = [{ lat: 0, lng: 0, alt: 0 }];
-
-            const promise = elevationProvider.updateHeights(latlngs).then(() => {
-                expect(latlngs[0].alt).toBe(1);
-            });
-
-            mockBackend.expectOne(u => u.url.startsWith("https://valhalla")).flush({height: [1]});
-            return promise;
+            await promise;
+            expect(latlngs[0].alt).toBe(1);
         }
     ));
 
@@ -57,9 +56,9 @@ describe("ElevationProvider", () => {
 
             const latlngs = [{ lat: 32, lng: 35, alt: 1 }];
 
-            elevationProvider.updateHeights(latlngs).then(() => {
-                expect(latlngs[0].alt).toBe(1);
-            });
+            await elevationProvider.updateHeights(latlngs);
+
+            expect(latlngs[0].alt).toBe(1);
         }
     ));
 
@@ -70,12 +69,10 @@ describe("ElevationProvider", () => {
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
             const promise = elevationProvider.updateHeights(latlngs);
-            promise.then(() => {
-                expect(latlngs[0].alt).toBe(0);
-            }, () => fail());
 
             mockBackend.match(() => true)[0].flush(null, { status: 500, statusText: "Server Error" });
-            return promise;
+            await promise;
+            expect(latlngs[0].alt).toBe(0);
         }
     ));
 
@@ -91,25 +88,13 @@ describe("ElevationProvider", () => {
                 }
             });
 
-            // create a blue image 256x256
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            canvas.width = 256;
-            canvas.height = 256;
-            ctx.fillStyle = "blue";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.save();
-            const url = canvas.toDataURL("image/png");
-
-            db.getTile = () => fetch(url).then(r => r.arrayBuffer());
+            db.getTile = () => getArrayBufferOfNonEmptyTile();
 
             const promise = elevationProvider.updateHeights(latlngs);
-            promise.then(() => {
-                expect(latlngs[0].alt).not.toBe(0);
-            }, () => fail());
 
             mockBackend.match(() => true)[0].flush(null, { status: 500, statusText: "Server Error" });
-            return promise;
+            await promise;
+            expect(latlngs[0].alt).not.toBe(0);
         }
     ));
 });

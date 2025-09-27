@@ -156,7 +156,7 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
         }
         _logger.LogInformation($"Starting rebuilding offline files with {externalFeatures.Count} features.");
         _elevationSetterExecutor.GeometryTo3D(externalFeatures);
-        _pointsOfInterestFilesCreatorExecutor.CreateExtenalPoisFile(externalFeatures);
+        _pointsOfInterestFilesCreatorExecutor.CreateExternalPoisFile(externalFeatures);
         _logger.LogInformation("Finished rebuilding offline pois file.");
     }
 
