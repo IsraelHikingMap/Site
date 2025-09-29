@@ -29,7 +29,7 @@ import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { SetLocationAction } from "../../reducers/location.reducer";
-import { environment } from "environments/environment";
+import { environment } from "../../../environments/environment";
 import type { ApplicationState, LocationState } from "../../models";
 
 @Component({
