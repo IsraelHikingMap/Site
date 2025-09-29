@@ -1,4 +1,4 @@
-﻿@use "@angular/material" as mat;
+@use "@angular/material" as mat;
 @use "variables" as v;
 @use "dialogs";
 @use "../fonts/icons.css";
@@ -28,17 +28,17 @@ $app-background: map.get($app-theme, background);
 
 .mat-mdc-snack-bar-container {
     &.success-snackbar {
-        --mdc-snackbar-container-color: #32CD6D;
+        --mat-snack-bar-container-color: #32CD6D;
     }
     &.warn-snackbar {
-        --mdc-snackbar-container-color: #{mat.m2-get-color-from-palette($app-accent)};
-        --mdc-snackbar-supporting-text-color: ##000;
+        --mat-snack-bar-container-color: #{mat.m2-get-color-from-palette($app-accent)};
+        --mat-snack-bar-supporting-text-color: ##000;
     }
     &.error-snackbar {
-        --mdc-snackbar-container-color: #{mat.m2-get-color-from-palette($app-warm)};
+        --mat-snack-bar-container-color: #{mat.m2-get-color-from-palette($app-warm)};
     }
     &.confirm-snackbar {
-        --mat-snack-bar-button-color: var(--mdc-snackbar-supporting-text-color);
+        --mat-snack-bar-button-color: var(--mat-snack-bar-supporting-text-color);
     }
   }
 
