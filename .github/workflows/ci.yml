@@ -21,7 +21,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: '20.12'
+          node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Setup dotnet
         uses: actions/setup-dotnet@v4

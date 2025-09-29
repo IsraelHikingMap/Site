@@ -159,7 +159,7 @@ export class FileService {
 
     public async saveLogToZipFile(fileName: string, content: string) {
         const result = zipSync({ "log.txt": strToU8(content) });
-        const resultBlob = new Blob([result]);
+        const resultBlob = new Blob([result as Uint8Array<ArrayBuffer>], { type: "application/zip" });
         this.saveAs(resultBlob, fileName, { autoBom: false });
     }
 
