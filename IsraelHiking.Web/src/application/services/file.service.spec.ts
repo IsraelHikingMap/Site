@@ -286,7 +286,7 @@ describe("FileService", () => {
         const result = zipSync({
             "styles/style.json": strToU8(JSON.stringify({}))
         });
-        await service.writeStyles(new Blob([result]));
+        await service.writeStyles(new Blob([result as Uint8Array<ArrayBuffer>], { type: "application/zip" }));
         
         expect(spy).toHaveBeenCalled();
     }));
