@@ -519,10 +519,12 @@ export class PoiService {
                     return clone;
                 }
             }
-        } catch {
+        } catch (ex) {
             const feature = this.getFeaturesFromTiles().find(f => this.osmTileFeatureToPoiIdentifier(f) === id);
             if (feature == null) {
-                throw new Error("Failed to load POI from offline or in-memory tiles.");
+                const message = `Failed to load POI ${id} from offline or in-memory tiles after failing to get it from server, error: ${(ex as Error).message}`;
+                this.loggingService.warning(`[POIs] ${message}`);
+                throw new Error(message);
             }
             return this.convertFeatureToPoi(feature, id);
         }

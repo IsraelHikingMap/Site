@@ -6,6 +6,11 @@ import osmtogeojson from "osm2geojson-lite";
 import { SpatialService } from "./spatial.service";
 import { Urls } from "../urls";
 
+type OsmResponse = {
+    elements: {type: string, id: string}[];
+}
+
+
 @Injectable()
 export class OverpassTurboService {
     private static readonly OVERPASS_API_URL = "https://overpass-api.de/api/interpreter";
@@ -35,20 +40,46 @@ export class OverpassTurboService {
 
     public async getFeature(type: string, id: string): Promise<GeoJSON.Feature> {
         const address = Urls.osmApi + type + "/" + id + (type !== "node" ? "/full" : "") + ".json";
-        const content = await firstValueFrom(this.httpClient.get<string | Record<string, any>>(address).pipe(timeout(6000)));
+        let content = await firstValueFrom(this.httpClient.get<OsmResponse>(address).pipe(timeout(6000)));
+        if (type === "relation") {
+            await this.handleNestedRelations(id, content, new Set<string>());
+        }
         return this.processFeature(content);
+    }
+
+    /**
+     * This method does a deep recursion to get all nested relations
+     * @param id the id of the relation
+     * @param content the content of the relation from OSM API
+     * @param visited a set of already visited relations to avoid loops
+     * @returns it doesn't return anything, it just updates the content object with all nested relations
+     */
+    private async handleNestedRelations(id: string, content: OsmResponse, visited: Set<string>): Promise<void> {
+        if (visited.has(id)) {
+            return;
+        }
+        visited.add(id);
+        const nestedRelations = content.elements.filter(e => e.type === "relation" && e.id.toString() !== id.toString());
+        if (nestedRelations.length === 0) {
+            return;
+        }
+        for (const relation of nestedRelations) {
+            const nestedContent = await firstValueFrom(this.httpClient.get<OsmResponse>(Urls.osmApi + "relation/" + relation.id + "/full.json").pipe(timeout(6000)));
+            await this.handleNestedRelations(relation.id, nestedContent, visited);
+            content.elements.push(...nestedContent.elements);
+        }
     }
 
     private async getFeatureFromQuery(query: string, timeoutInMilliseconds = 2000): Promise<GeoJSON.Feature> {
         try {
-            const json = await firstValueFrom(this.httpClient.post<string | Record<string, any>>(OverpassTurboService.OVERPASS_API_URL, `[out: json];${query}out geom;`).pipe(timeout(timeoutInMilliseconds)));
+            const json = await firstValueFrom(this.httpClient.post<Record<string, any>>(OverpassTurboService.OVERPASS_API_URL, `[out: json];${query}out geom;`).pipe(timeout(timeoutInMilliseconds)));
             return this.processFeature(json);
         } catch {
             return null;
         }
     }
 
-    private processFeature(content: string | Record<string, any>): GeoJSON.Feature {
+    private processFeature(content: Record<string, any>): GeoJSON.Feature {
         const geojson = osmtogeojson(content, {completeFeature: true, excludeWay: false}) as GeoJSON.FeatureCollection;
         if (geojson.features.length === 1 && geojson.features[0].geometry.type !== "MultiLineString") {
             return geojson.features[0];
