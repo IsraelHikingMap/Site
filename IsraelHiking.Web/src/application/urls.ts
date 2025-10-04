@@ -43,5 +43,5 @@ export class Urls {
         "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/OSM_traces.json";
 
     public static readonly ANDROID_APP_URL = "https://play.google.com/store/apps/details?id=com.mapeak&hl=en";
-    public static readonly IOS_APP_URL = "https://apps.apple.com/us/app/israel-hiking-map/id1451300509";
+    public static readonly IOS_APP_URL = "https://apps.apple.com/us/app/mapeak/id6751947875";
 }
