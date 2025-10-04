@@ -203,5 +203,6 @@ ModelManifest.xml
 /IsraelHiking.Web/.angular/
 /IsraelHiking.Web/Cache
 /IsraelHiking.Web/scripts/input
+/IsraelHiking.Web/dist
 *.swp
 elevation-cache

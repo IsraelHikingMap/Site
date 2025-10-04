@@ -3,7 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, timeout } from "rxjs";
 
 import { ResourcesService } from "./resources.service";
-import { Urls } from "application/urls";
+import { Urls } from "../urls";
 
 export type TranslationResponse = {
     translatedText: string;
