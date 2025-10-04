@@ -7,11 +7,11 @@
         <div class="w-full offline-map-container">
             <mgl-map
                 [style]="offlineMapStyle"
-                zoom="5"
+                [zoom]="zoom"
                 [center]="center"
-                [minZoom]="4"
                 [maxZoom]="6"
                 (mapClick)="onMapClick($event)"
+                (mapLoad)="onMapLoad($event)"
                 [attributionControl]="false">
                 <auto-layer [layerData]="baseLayerData"
                             [visible]="true"
@@ -31,7 +31,7 @@
                         'line-join': 'round'
                     }"
                     [paint]="{
-                        'line-color': 'blue',
+                        'line-color': ['get', 'color'],
                         'line-width': 3
                     }">
                 </mgl-layer>
@@ -39,13 +39,14 @@
                     id="download-tiles-text"
                     type="symbol"
                     source="download-tiles"
+                    [minzoom]="4"
                     [layout]="{
                         'text-field': ['get', 'label'],
                         'text-font': ['Open Sans Regular'],
                         'text-size': 30,
                     }"
                     [paint]="{
-                        'text-color': 'blue',
+                        'text-color': ['get', 'color'],
                         'text-halo-color' : 'white',
                         'text-halo-width': 2
                     }">
@@ -70,6 +71,7 @@
                     id="selected-tile-text"
                     type="symbol"
                     source="selected-tile"
+                    [minzoom]="4"
                     [layout]="{
                         'text-field': ['get', 'label'],
                         'text-font': ['Open Sans Regular'],
@@ -102,6 +104,7 @@
                     id="in-progress-tile-text"
                     type="symbol"
                     source="in-progress-tile"
+                    [minzoom]="4"
                     [filter]="['==', ['get', 'stroke'], 'true']"
                     [layout]="{
                         'text-field': ['get', 'label'],

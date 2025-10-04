@@ -165,7 +165,7 @@ public class FilesControllerTests
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(false);
 
         var results = _controller.GetOfflineFiles(DateTime.Now, 0, 0).Result as ForbidResult;
-            
+
         Assert.IsNotNull(results);
     }
 
@@ -182,13 +182,13 @@ public class FilesControllerTests
     public void GetOfflineFiles_ShouldGetTheList()
     {
         _controller.SetupIdentity();
-        var dict = new Dictionary<string, DateTime>(); 
+        var dict = new Dictionary<string, DateTime>();
         _offlineFilesService.GetUpdatedFilesList(Arg.Any<DateTime>(), 1, 2)
             .Returns(dict);
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
-            
+
         var results = _controller.GetOfflineFiles(DateTime.Now, 1, 2).Result as OkObjectResult;
-            
+
         Assert.IsNotNull(results);
         var resultDict = results.Value as Dictionary<string, DateTime>;
         Assert.IsNotNull(resultDict);
@@ -201,43 +201,55 @@ public class FilesControllerTests
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(false);
 
-        var results = _controller.GetOfflineFile("file", 1 , 2).Result as ForbidResult;
-            
+        var results = _controller.GetOfflineFile("file", 1, 2).Result as ForbidResult;
+
         Assert.IsNotNull(results);
     }
-    
+
     [TestMethod]
     public void GetOfflineFile_ShouldGetIt()
     {
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
         _offlineFilesService.GetFileContent("file").Returns(new MemoryStream());
-            
+
         var results = _controller.GetOfflineFile("file", null, null).Result as FileResult;
-            
+
         Assert.IsNotNull(results);
     }
-    
+
     [TestMethod]
     public void GetOfflineFile_FileInsideFolder_ShouldGetIt()
     {
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
         _offlineFilesService.GetFileContent("7/1/2/file.extension").Returns(new MemoryStream());
-            
+
         var results = _controller.GetOfflineFile("file.extension", 1, 2).Result as FileResult;
-            
+
         Assert.IsNotNull(results);
     }
-    
+
     [TestMethod]
     public void IsSubscribed_ShouldGetIt()
     {
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
-            
+
         var results = _controller.IsSubscribed().Result;
-            
+
         Assert.IsTrue(results);
+    }
+
+    [TestMethod]
+    public void GetLastSchemeBreakDate_ShouldGetIt()
+    {
+        var date = DateTime.Now;
+        _controller.SetupIdentity();
+        _offlineFilesService.GetLastSchemeBreakDate().Returns(date);
+
+        var results = _controller.GetLastSchemeBreakDate();
+
+        Assert.AreEqual(date, results);
     }
 }

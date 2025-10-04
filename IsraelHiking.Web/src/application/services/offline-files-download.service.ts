@@ -4,20 +4,25 @@ import { MatDialog } from "@angular/material/dialog";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
+import { last } from "lodash-es";
 
 import { Urls } from "../urls";
 import { OfflineManagementDialogComponent } from "../components/dialogs/offline-management-dialog.component";
 import { FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
+import { ToastService } from "./toast.service";
+import { ResourcesService } from "./resources.service";
 import { DeleteOfflineMapsTileAction, SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
 import type { ApplicationState } from "../models";
 
 @Injectable()
 export class OfflineFilesDownloadService {
+    private readonly resources = inject(ResourcesService);
     private readonly fileService = inject(FileService);
     private readonly loggingService = inject(LoggingService);
     private readonly httpClient = inject(HttpClient);
     private readonly matDialog = inject(MatDialog);
+    private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
 
     private abortController = new AbortController();
@@ -26,11 +31,24 @@ export class OfflineFilesDownloadService {
     public async initialize(): Promise<void> {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         const userState = this.store.selectSnapshot((s: ApplicationState) => s.userState);
-        if (offlineState.isSubscribed === true &&
-            offlineState.downloadedTiles == null &&
-            userState.userInfo != null) {
-            // In case the user has purchased the map and never downloaded them, and now starts the app
-            OfflineManagementDialogComponent.openDialog(this.matDialog);
+        if (userState == null || offlineState.isSubscribed === false) {
+            return;
+        }
+        for (const baseLayerUrl of [Urls.HIKING_TILES_ADDRESS, Urls.MTB_TILES_ADDRESS]) {
+            const style = await firstValueFrom(this.httpClient.get(baseLayerUrl, {responseType: "text"}).pipe(timeout(5000)));
+            await this.fileService.writeStyle(last(baseLayerUrl.split("/")), style);
+        }
+        const lastSchemeBreakDate = await this.getLastSchemeBreakDate();
+        const needToAskToRedownload = Object.values(offlineState.downloadedTiles ?? {}).every(d => d < lastSchemeBreakDate);
+        if (offlineState.downloadedTiles == null || needToAskToRedownload) {
+            this.toastService.confirm({
+                type: "YesNo",
+                message: this.resources.reccomendOfflineDownload,
+                confirmAction: () => {
+                    OfflineManagementDialogComponent.openDialog(this.matDialog);
+                }
+            })
+            return;
         }
     }
 
@@ -158,6 +176,15 @@ export class OfflineFilesDownloadService {
         const files = await this.getFilesToDownload(tileX, tileY);
         for (const [fileName] of files) {
             await this.fileService.deleteFileInDataDirectory(fileName);
+        }
+    }
+
+    public async getLastSchemeBreakDate(): Promise<Date> {
+        try {
+            const lastSchemeBreakString = await firstValueFrom(this.httpClient.get<string>(Urls.offlineFilesLastSchemeBreak).pipe(timeout(5000)));
+            return new Date(lastSchemeBreakString);
+        } catch {
+            return new Date(0);
         }
     }
 }

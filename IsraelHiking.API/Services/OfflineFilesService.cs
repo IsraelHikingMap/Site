@@ -64,4 +64,10 @@ public class OfflineFilesService : IOfflineFilesService
     {
         return _fileProvider.GetFileInfo(fileRelativePath).CreateReadStream();
     }
+
+    /// <inheritdoc/>
+    public DateTime GetLastSchemeBreakDate()
+    {
+        return _fileProvider.GetFileInfo("last-breaking-change.txt").LastModified.DateTime;
+    }
 }

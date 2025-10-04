@@ -22,8 +22,6 @@ import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { GeoLocationService } from "./geo-location.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
-import { AuthorizationService } from "./authorization.service";
-import { ToastService } from "./toast.service";
 import { ApplicationUpdateService } from "./application-update.service";
 import { LocationService } from "./location.service";
 import { HashService } from "./hash.service";
@@ -51,11 +49,9 @@ export class ApplicationInitializeService {
     private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
     private readonly geoLocationService = inject(GeoLocationService);
     private readonly overpassTurboService = inject(OverpassTurboService);
-    private readonly authorizationService = inject(AuthorizationService);
     private readonly applicationUpdateService = inject(ApplicationUpdateService);
     private readonly locationService = inject(LocationService);
     private readonly hashService = inject(HashService);
-    private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
     private readonly angulartics = inject(Angulartics2GoogleGlobalSiteTag);
 

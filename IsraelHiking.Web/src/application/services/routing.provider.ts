@@ -47,7 +47,7 @@ export class RoutingProvider {
             "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + routinType;
         try {
             const data = await firstValueFrom(this.httpClient.get<GeoJSON.FeatureCollection<GeoJSON.LineString>>(address).pipe(timeout(4500)));
-            let latlngs = data.features[0].geometry.coordinates.map(c => SpatialService.toLatLng(c));
+            const latlngs = data.features[0].geometry.coordinates.map(c => SpatialService.toLatLng(c));
             await this.elevationProvider.updateHeights(latlngs);
             return latlngs;
         } catch (ex) {

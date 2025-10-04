@@ -302,7 +302,7 @@ export class ResourcesService {
     public areYouSureYouWantToStopRecording: string;
     public youNeedToLoginToSeeYourTraces: string;
     public downloadFinishedSuccessfully: string;
-    public noOfflineFilesPleaseDownload: string;
+    public reccomendOfflineDownload: string;
     public allFilesAreUpToDate: string;
     public databaseUpgrade: string;
     public cantEditWhileOffline: string;
@@ -479,7 +479,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1758360313523");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1759612926479");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -772,8 +772,8 @@ export class ResourcesService {
         this.youNeedToLoginToSeeYourTraces = this.gettextCatalog.getString("You need to login in order to see your traces, " +
             "click the frowning face at the top");
         this.downloadFinishedSuccessfully = this.gettextCatalog.getString("Download finished successfully!");
-        this.noOfflineFilesPleaseDownload = this.gettextCatalog
-            .getString("No offline files available, please press the download button below.");
+        this.reccomendOfflineDownload = this.gettextCatalog
+            .getString("We recommend you to download offline files, would you like to do that now?");
         this.allFilesAreUpToDate = this.gettextCatalog.getString("All files are up-to-date :-)");
         this.thereSoMuchMoreYouCanDoWithOurApp = this.gettextCatalog.getString("There's so much more you can do with our app");
         this.databaseUpgrade = this.gettextCatalog.getString("The offline database has been upgraded...");

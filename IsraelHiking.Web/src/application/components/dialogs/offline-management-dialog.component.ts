@@ -3,7 +3,7 @@ import { MatDialog, MatDialogActions, MatDialogClose, MatDialogTitle } from "@an
 import { NgIf } from "@angular/common";
 import { Store } from "@ngxs/store";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
-import { MapMouseEvent, MercatorCoordinate, LngLatLike, StyleSpecification } from "maplibre-gl";
+import { Map, MapMouseEvent, MercatorCoordinate, LngLatLike, StyleSpecification } from "maplibre-gl";
 import { MatButton } from "@angular/material/button";
 import { Angulartics2OnModule } from "angulartics2";
 
@@ -27,12 +27,15 @@ import type { ApplicationState, EditableLayer } from "../../models";
 export class OfflineManagementDialogComponent {
     public offlineMapStyle: StyleSpecification;
     public center: LngLatLike;
+    public zoom: number;
     public selectedTile: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
     public inProgressTile: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
     public downloadedTiles: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
     public baseLayerData: EditableLayer;
     public downloadingTileXY: {tileX: number; tileY: number} = null;
     public selectedTileXY: {tileX: number; tileY: number} = null;
+
+    private lastSchemeBreak: Date = null;
 
     private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
     private readonly defaultStyleService = inject(DefaultStyleService);
@@ -50,19 +53,49 @@ export class OfflineManagementDialogComponent {
     }
 
     constructor() {
-        const location = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
-        this.center = [location.longitude, location.latitude];
         this.offlineMapStyle = this.defaultStyleService.getStyleWithPlaceholders();
         this.baseLayerData = this.layersService.getSelectedBaseLayer();
         if (this.baseLayerData.key !== HIKING_MAP && this.baseLayerData.key !== MTB_MAP) {
             this.baseLayerData = {...this.store.selectSnapshot((state: ApplicationState) => state.layersState.baseLayers).find((layer) => layer.key === HIKING_MAP)};
         }
+        
+        this.initializeCenterAndZoomFromDownloadingTile();
         this.updateDownloadedTiles();
         this.offlineFilesDownloadService.tilesProgressChanged.subscribe((tileProgress) => {
             if (this.downloadingTileXY) {
                 this.updateInProgressTile(tileProgress.progressValue);
             }
         });
+        this.offlineFilesDownloadService.getLastSchemeBreakDate().then((date) => {
+            this.lastSchemeBreak = date;
+            this.updateDownloadedTiles();
+        });
+    }
+
+    private initializeCenterAndZoomFromDownloadingTile() {
+        const dowloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.offlineState.downloadedTiles);
+        if (dowloadedTiles == null || Object.keys(dowloadedTiles).length === 0) {
+            const location = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
+            this.center = [location.longitude, location.latitude];
+            this.zoom = 5;
+            return;
+        }
+        let minTileX = Number.MAX_SAFE_INTEGER;
+        let maxTileX = Number.MIN_SAFE_INTEGER;
+        let minTileY = Number.MAX_SAFE_INTEGER;
+        let maxTileY = Number.MIN_SAFE_INTEGER;
+        for (const key of Object.keys(dowloadedTiles)) {
+            const [tileX, tileY] = key.split("-").map(Number);
+            if (isNaN(tileX) || isNaN(tileY)) {
+                continue;
+            }
+            minTileX = Math.min(minTileX, tileX);
+            maxTileX = Math.max(maxTileX, tileX);
+            minTileY = Math.min(minTileY, tileY);
+            maxTileY = Math.max(maxTileY, tileY);
+        }
+        this.center = SpatialService.toCoordinate(SpatialService.fromTile({x: (minTileX + maxTileX + 1) / 2, y: (minTileY + maxTileY + 1) / 2}, TILES_ZOOM));
+        this.zoom = Math.max(1, TILES_ZOOM - Math.log2(Math.max(maxTileX - minTileX + 1, maxTileY - minTileY + 1)) - 1);
     }
 
     public async downloadSelected() {
@@ -134,7 +167,9 @@ export class OfflineManagementDialogComponent {
             const label = downloadedDate.getFullYear() + "\n" + 
                 (downloadedDate.getMonth() + 1).toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), {minimumIntegerDigits: 2}) + "\n" + 
                 downloadedDate.getDate().toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), {minimumIntegerDigits: 2});
-            features.push(this.tileCoordinatesToPolygon(tileXDownloaded, tileYDownloaded, label, 1));
+            const feature = this.tileCoordinatesToPolygon(tileXDownloaded, tileYDownloaded, label, 1);
+            feature.properties.color = this.lastSchemeBreak && downloadedDate < this.lastSchemeBreak ? "red" : "blue";
+            features.push(feature);
         }
 
         this.downloadedTiles = {
@@ -191,6 +226,11 @@ export class OfflineManagementDialogComponent {
         this.selectedTileXY = { tileX, tileY };
         this.updateSelectedTile();
         this.updateDownloadedTiles();
+    }
+
+    public onMapLoad(map: Map) {
+        map.dragRotate.disable();
+        map.touchZoomRotate.disableRotation();
     }
 
     public isSelectedAvailableForOffline(): boolean {

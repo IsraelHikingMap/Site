@@ -146,11 +146,11 @@ public class FilesController : ControllerBase
         if (tileX.HasValue && tileY.HasValue)
         {
             fullPath = $"7/{tileX}/{tileY}/{id}";
-        } 
+        }
         var file = _offlineFilesService.GetFileContent(fullPath);
         return File(file, "application/octet-stream", id);
     }
-    
+
     /// <summary>
     /// Check if user is subscribed
     /// </summary>
@@ -161,5 +161,17 @@ public class FilesController : ControllerBase
     public async Task<bool> IsSubscribed()
     {
         return await _receiptValidationGateway.IsEntitled(User.Identity?.Name);
+    }
+
+    /// <summary>
+    /// Get the date of the last scheme break
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("lastSchemeBreak")]
+    [Authorize]
+    public DateTime GetLastSchemeBreakDate()
+    {
+        return _offlineFilesService.GetLastSchemeBreakDate();
     }
 }
