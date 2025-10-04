@@ -40,7 +40,7 @@ export class OverpassTurboService {
 
     public async getFeature(type: string, id: string): Promise<GeoJSON.Feature> {
         const address = Urls.osmApi + type + "/" + id + (type !== "node" ? "/full" : "") + ".json";
-        let content = await firstValueFrom(this.httpClient.get<OsmResponse>(address).pipe(timeout(6000)));
+        const content = await firstValueFrom(this.httpClient.get<OsmResponse>(address).pipe(timeout(6000)));
         if (type === "relation") {
             await this.handleNestedRelations(id, content, new Set<string>());
         }
