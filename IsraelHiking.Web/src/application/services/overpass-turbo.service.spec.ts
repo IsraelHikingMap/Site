@@ -241,6 +241,92 @@ describe("OverpassTurboService", () => {
         const results = await promise;
         expect(results).toBeUndefined();
     }));
+
+    it("Should handle super relations", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
+        const response1 = {
+            elements: [{
+                type: "relation",
+                id: 2,
+                members: [{
+                    type: "way",
+                    ref: 3,
+                }]
+            }, {
+                type: "relation",
+                id: 1,
+                members: [{
+                    type: "relation",
+                    ref: 2,
+                }]
+            }]
+        };
+        const response2 = {
+            elements: [{
+                type: "relation",
+                id: 2,
+                members: [{
+                    type: "way",
+                    ref: 3,
+                }]
+            }, {
+                type: "way",
+                id: 3,
+                nodes: [1, 2],
+                geometry: [{lat: 1, lon: 2}, {lat: 3, lon: 4}]
+            }
+        ]
+        };
+        const promise = service.getFeature("relation", "1");
+        mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/1/full.json").flush(response1);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/2/full.json").flush(response2);
+        const results = await promise;
+        expect(results.geometry.type).toBe("LineString");
+    }));
+
+    it("Should handle circular relations", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
+        const response1 = {
+            elements: [{
+                type: "relation",
+                id: 1,
+                members: [{
+                    type: "relation",
+                    ref: 2,
+                }]
+            },{
+                type: "relation",
+                id: 2,
+                members: [{
+                    type: "relation",
+                    ref: 1,
+                },{
+                    type: "way",
+                    ref: 3,
+                }]
+            }]
+        };
+        const response2 = {
+            elements: [{
+                type: "relation",
+                id: 2,
+                members: [{
+                    type: "way",
+                    ref: 3,
+                }]
+            }, {
+                type: "way",
+                id: 3,
+                nodes: [1, 2],
+                geometry: [{lat: 1, lon: 2}, {lat: 3, lon: 4}]
+            }]
+        };
+        const promise = service.getFeature("relation", "1");
+        mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/1/full.json").flush(response1);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/2/full.json").flush(response2);
+        const results = await promise;
+        expect(results).toBeUndefined();
+    }));
 });
 
 

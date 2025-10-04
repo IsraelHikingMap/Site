@@ -86,7 +86,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     private readonly runningContextSerivce = inject(RunningContextService);
     private readonly navigateHereService = inject(NavigateHereService);
     private readonly geoJsonParser = inject(GeoJsonParser);
-    private readonly elevasionProvider = inject(ElevationProvider);
+    private readonly elevationProvider = inject(ElevationProvider);
     private readonly translationService = inject(TranslationService);
     private readonly store = inject(Store);
 
@@ -282,7 +282,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             if (i === 0 && featureColor) {
                 newRoute.color = featureColor;
             }
-            await this.elevasionProvider.updateHeights(route.latlngs);
+            await this.elevationProvider.updateHeights(route.latlngs);
             newRoute.description = this.description;
             newRoute.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs as LatLngAltTime[], "Hike");
             this.store.dispatch(new AddRouteAction(newRoute));
