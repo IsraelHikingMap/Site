@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces;
@@ -17,7 +18,7 @@ public class OfflineFilesServiceTests
     private OfflineFilesService _service;
     private IFileSystemHelper _fileSystemHelper;
     private IFileProvider _fileProvider;
-        
+
     [TestInitialize]
     public void TestInitialize()
     {
@@ -33,13 +34,13 @@ public class OfflineFilesServiceTests
     public void ConstructWithoutFolder_ShouldNotCreateFileProviderAgain()
     {
         var options = Substitute.For<IOptions<ConfigurationData>>();
-        options.Value.Returns(new ConfigurationData {OfflineFilesFolder = string.Empty});
+        options.Value.Returns(new ConfigurationData { OfflineFilesFolder = string.Empty });
         _service = new OfflineFilesService(_fileSystemHelper, options,
             Substitute.For<ILogger>());
 
         _fileSystemHelper.Received(1).CreateFileProvider(Arg.Any<string>());
     }
-        
+
     [TestMethod]
     public void GetUpdatedFilesList_OneUpToDate_ShouldReturnEmptyList()
     {
@@ -47,16 +48,16 @@ public class OfflineFilesServiceTests
         var fileInfo = Substitute.For<IFileInfo>();
         fileInfo.LastModified.Returns(lastModified);
         var directory = Substitute.For<IDirectoryContents>();
-        var files = new List<IFileInfo> {fileInfo} as IEnumerable<IFileInfo>;
+        var files = new List<IFileInfo> { fileInfo } as IEnumerable<IFileInfo>;
         directory.GetEnumerator().Returns(_ => files.GetEnumerator());
         _fileProvider.GetDirectoryContents(Arg.Any<string>()).Returns(directory);
         _fileSystemHelper.IsHidden(Arg.Any<string>()).Returns(false);
-            
+
         var results = _service.GetUpdatedFilesList(lastModified, 1, 2);
-            
+
         Assert.AreEqual(0, results.Count);
     }
-        
+
     [TestMethod]
     public void GetUpdatedFilesList_OneNotUpToDate_ShouldReturnOneFile()
     {
@@ -65,13 +66,13 @@ public class OfflineFilesServiceTests
         fileInfo.LastModified.Returns(DateTime.Now);
         fileInfo.Name.Returns("some.pmtiles");
         var directory = Substitute.For<IDirectoryContents>();
-        var files = new List<IFileInfo> {fileInfo} as IEnumerable<IFileInfo>;
+        var files = new List<IFileInfo> { fileInfo } as IEnumerable<IFileInfo>;
         directory.GetEnumerator().Returns(_ => files.GetEnumerator());
         _fileProvider.GetDirectoryContents(Arg.Any<string>()).Returns(directory);
         _fileSystemHelper.IsHidden(Arg.Any<string>()).Returns(false);
-            
+
         var results = _service.GetUpdatedFilesList(lastModified, 1, 2);
-            
+
         Assert.AreEqual(1, results.Count);
     }
 
@@ -80,9 +81,27 @@ public class OfflineFilesServiceTests
     {
         var fileInfo = Substitute.For<IFileInfo>();
         _fileProvider.GetFileInfo(Arg.Any<string>()).Returns(fileInfo);
-            
+
         _service.GetFileContent("fileName");
 
         fileInfo.Received(1).CreateReadStream();
+    }
+
+    [TestMethod]
+    public void GetLastSchemeBreakDate_ShouldReturnTheDate()
+    {
+        var fileInfo = Substitute.For<IFileInfo>();
+        _fileProvider.GetFileInfo(Arg.Any<string>()).Returns(fileInfo);
+        var stream = new MemoryStream();
+        var writer = new StreamWriter(stream);
+        var date = DateTime.Now.AddDays(-5);
+        writer.Write(date.ToString("o"));
+        writer.Flush();
+        stream.Position = 0;
+        fileInfo.CreateReadStream().Returns(stream);
+
+        var result = _service.GetLastSchemeBreakDate();
+
+        Assert.AreEqual(date.Date, result.Date);
     }
 }
