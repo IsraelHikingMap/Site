@@ -25,12 +25,12 @@ PODS:
   - CordovaPlugins (7.4.3):
     - CapacitorCordova
   - CordovaPluginsResources (0.0.105)
-  - PurchasesHybridCommon (17.8.0):
-    - RevenueCat (= 5.40.0)
-  - RevenueCat (5.40.0)
-  - RevenuecatPurchasesCapacitor (11.2.3):
+  - PurchasesHybridCommon (17.9.1):
+    - RevenueCat (= 5.41.0)
+  - RevenueCat (5.41.0)
+  - RevenuecatPurchasesCapacitor (11.2.5):
     - Capacitor
-    - PurchasesHybridCommon (= 17.8.0)
+    - PurchasesHybridCommon (= 17.9.1)
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -101,9 +101,9 @@ SPEC CHECKSUMS:
   CapgoBackgroundGeolocation: b8e98a6781cbee3f0fea347f1894f4792ba98a83
   CordovaPlugins: 10f8b507c83a92b9e3f81dcfda2c0da2412aa4a5
   CordovaPluginsResources: da93847212bf7b16ba770e4d6c3e7dba820174c7
-  PurchasesHybridCommon: fad1084d9781388e181c8b855caf7a5853cebcb3
-  RevenueCat: 02c8d0082d3373bcbc831faa600943d6ba6cad6e
-  RevenuecatPurchasesCapacitor: 886039ffdb6fcbc28d0a3bb9b616bd7f2f5246ec
+  PurchasesHybridCommon: 8e4f864f140520f14f783a43998c79b00a9f8c46
+  RevenueCat: a094ccf2d12c4778144d3a0560a8b9f6bd3a84aa
+  RevenuecatPurchasesCapacitor: 4ce9898b01d8a9d8e16fdda1c2306a5cc6c8a94f
 
 PODFILE CHECKSUM: b7071d6c4dcf65718a2f0d291094c225625c57f1
 
