@@ -8,6 +8,7 @@ import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { SelectedRouteService } from "./selected-route.service";
+import { SpatialService } from "./spatial.service";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models";
 
@@ -134,7 +135,13 @@ export class GeoLocationService {
             }, (location?: Location, error?: CallbackError) => {
                 if (location) {
                     this.loggingService.debug("[GeoLocation] Received position: " + `lat: ${location.latitude}, lng: ${location.longitude}, time: ${new Date(location.time).toISOString()}, accuracy: ${location.accuracy}, background: ${this.isBackground}`);
-                    this.lastReceivedPosition = this.locationToPosition(location);
+                    const position = this.locationToPosition(location);
+                    const latLng = GeoLocationService.positionToLatLngTime(position);
+                    if (SpatialService.isJammingTarget(latLng)) {
+                        this.toastService.info(this.resources.jammedPositionReceived);
+                        return;
+                    }
+                    this.lastReceivedPosition = position;
                     if (this.isBackground) {
                         this.positionWhileInBackground.next(this.lastReceivedPosition);
                         return;
