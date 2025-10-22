@@ -160,15 +160,31 @@ export class DrawingComponent {
     }
 
     public deleteAllRoutes() {
-        const history = this.store.selectSnapshot((s: ApplicationState) => s.routes.past);
+        const presentRoutes = this.store.selectSnapshot((s: ApplicationState) => s.routes).present;
+        if (presentRoutes.length < 2) {
+            const history = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.routes.past)) as RouteData[][];
+            history.push(structuredClone(presentRoutes) as RouteData[]);
+            this.deleteAllRoutesInternal();
+            this.toastService.undo(this.resources.routesDeleted, () => {
+                this.store.dispatch(new RestoreHistoryAction(history));
+                this.undo();
+            });
+        } else {
+            this.toastService.confirm({
+                message: this.resources.areYouSureYouWantToDeleteAllRoutes + ` (${presentRoutes.length})`,
+                type: "YesNo",
+                confirmAction: () => {
+                    this.deleteAllRoutesInternal();
+                }
+            });
+        }
+    }
+
+    private deleteAllRoutesInternal() {
         this.store.dispatch(new SetSelectedRouteAction(null));
         this.store.dispatch(new DeleteAllRoutesAction());
         this.store.dispatch(new SetShareUrlAction(null));
         this.store.dispatch(new ClearHistoryAction());
-        this.toastService.undo(this.resources.routesDeleted, () => {
-            this.store.dispatch(new RestoreHistoryAction(history as RouteData[][]));
-            this.undo();    
-        });
     }
 
     public canDeleteAllRoutes() {
