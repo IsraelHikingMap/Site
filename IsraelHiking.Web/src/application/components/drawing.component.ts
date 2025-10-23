@@ -172,7 +172,7 @@ export class DrawingComponent {
         } else {
             this.toastService.confirm({
                 message: this.resources.areYouSureYouWantToDeleteAllRoutes
-                    .replace("{{count}}", presentRoutes.length),
+                    .replace("{{count}}", `${presentRoutes.length}`),
                 type: "YesNo",
                 confirmAction: () => {
                     this.deleteAllRoutesInternal();
