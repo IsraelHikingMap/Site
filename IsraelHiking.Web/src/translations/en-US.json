@@ -25,7 +25,7 @@
     "Antenna": "Antenna",
     "Application": "Application",
     "Archaeological Site": "Archaeological Site",
-    "Are you sure you want to delete all routes?": "Are you sure you want to delete all routes?",
+    "Are you sure you want to delete all routes?": "Are you sure you want to delete all {{count}} routes?",
     "Are you sure you want to stop the current recording?": "Are you sure you want to stop the current recording?",
     "Are you sure?": "Are you sure?",
     "Area A": "Area A",

@@ -25,7 +25,7 @@
     "Antenna": "هوائي",
     "Application": "تطبيق",
     "Archaeological Site": "موقع أثري",
-    "Are you sure you want to delete all routes?": "هل أنت متأكد أنك تريد حذف جميع المسارات؟",
+    "Are you sure you want to delete all routes?": "هل أنت متأكد أنك تريد حذف جميع المسارات الـ {{count}}؟",
     "Are you sure you want to stop the current recording?": "هل أنت متأكد أنك تريد إيقاف التسجيل الحالي؟",
     "Are you sure?": "هل أنت متأكد؟",
     "Area A": "المنطقة A",
