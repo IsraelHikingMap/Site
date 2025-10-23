@@ -25,7 +25,7 @@
     "Antenna": "Антенна",
     "Application": "Приложение",
     "Archaeological Site": "Археологический объект",
-    "Are you sure you want to delete all routes?": "Вы уверены, что хотите удалить все маршруты?",
+    "Are you sure you want to delete all routes?": "Вы уверены, что хотите удалить все {{count}} маршруты?",
     "Are you sure you want to stop the current recording?": "Вы уверены, что хотите остановить текущую запись?",
     "Are you sure?": "Вы уверены?",
     "Area A": "Область A",
