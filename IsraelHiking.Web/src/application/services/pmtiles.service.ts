@@ -57,7 +57,7 @@ export class PmTilesService {
      * @param url - should be something like custom://filename-without-pmtiles-extention/{z}/{x}/{y}.png
      * @returns 
      */
-    public async getTile(url: string): Promise<ArrayBuffer> {
+    public async getTileByUrl(url: string): Promise<ArrayBuffer> {
         const splitUrl = url.split("/");
         const fileName = splitUrl[2] + ".pmtiles";
         const z = +splitUrl[splitUrl.length - 3];
@@ -66,21 +66,28 @@ export class PmTilesService {
         return this.getTileFromFile(fileName, z, x, y);
     }
 
-    public async getTileAboveZoom(z: number, x: number, y: number, type: string): Promise<ArrayBuffer> {
-        const { tileX, tileY } = SpatialService.getParentZoomTileCoordinates({x, y}, z, TILES_ZOOM);
-        const fileName = `${type}+${TILES_ZOOM}-${tileX}-${tileY}.pmtiles`;
+    public async getTileByType(z: number, x: number, y: number, type: string): Promise<ArrayBuffer> {
+        const fileName = this.getFileNameByType(z, x, y, type);
         return await this.getTileFromFile(fileName, z, x, y);
-
     }
 
-    public async getTileFromFile(fileName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {
+    private getFileNameByType(z: number, x: number, y: number, type: string): string {
+        if (z >= TILES_ZOOM) {
+            const { tileX, tileY } = SpatialService.getParentZoomTileCoordinates({x, y}, z, TILES_ZOOM);
+            return `${type}+${TILES_ZOOM}-${tileX}-${tileY}.pmtiles`;
+        } else {
+            return `${type}-${TILES_ZOOM-1}.pmtiles`;
+        }
+    }
+
+    private async getTileFromFile(fileName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {
         const source = await this.getSource(fileName);
         const pmTilesProvider = new PMTiles(source);
         const response = await pmTilesProvider.getZxy(z, x, y);
         return response.data;
     }
 
-    public isOfflineFileAvailable(z: number, x: number, y: number): boolean {
+    public async isOfflineFileAvailable(z: number, x: number, y: number, type: string): Promise<boolean> {
         if (this.store.selectSnapshot((state: ApplicationState) => state.offlineState).isSubscribed === false) {
             return false;
         }
@@ -89,6 +96,15 @@ export class PmTilesService {
         if (z >= TILES_ZOOM) {
             ({ tileX, tileY } = SpatialService.getParentZoomTileCoordinates({x, y}, z, TILES_ZOOM));   
         }
-        return this.store.selectSnapshot((state: ApplicationState) => state.offlineState).downloadedTiles[`${tileX}-${tileY}`] != null;
+        if (this.store.selectSnapshot((state: ApplicationState) => state.offlineState).downloadedTiles[`${tileX}-${tileY}`] == null) {
+            return false;
+        }
+        try {
+            const fileName = this.getFileNameByType(z, x, y, type);
+            await this.getSource(fileName);
+        } catch {
+            return false;
+        }
+        return true;
     }
 }

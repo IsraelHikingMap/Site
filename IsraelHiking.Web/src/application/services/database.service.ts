@@ -9,7 +9,7 @@ import deepmerge from "deepmerge";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
-import { PmTilesService, TILES_ZOOM } from "./pmtiles.service";
+import { PmTilesService } from "./pmtiles.service";
 import { initialState } from "../reducers/initial-state";
 import { ClearHistoryAction } from "../reducers/routes.reducer";
 import { SetSelectedPoiAction } from "../reducers/poi.reducer";
@@ -94,7 +94,7 @@ export class DatabaseService {
 
     private initCustomTileLoadFunction() {
         addProtocol("custom", async (params, _abortController) => {
-            const data = await this.pmTilesService.getTile(params.url);
+            const data = await this.pmTilesService.getTileByUrl(params.url);
             return {data};
         });
         addProtocol("slice", async (params, _abortController) => {
@@ -104,10 +104,11 @@ export class DatabaseService {
             const z = +splitUrl[splitUrl.length - 3];
             const x = +splitUrl[splitUrl.length - 2];
             const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
+            const offlineAvailable = await this.pmTilesService.isOfflineFileAvailable(z, x, y, type);
             try {
                 this.loggingService.info(`[Database] Fetching ${params.url}`);
                 const response = await firstValueFrom(this.httpClient.get(params.url.replace("slice://", "https://"), { observe: "response", responseType: "arraybuffer" })
-                    .pipe(this.pmTilesService.isOfflineFileAvailable(z, x, y) ? timeout(2000) : timeout(60000))) as any as HttpResponse<any>;
+                    .pipe(offlineAvailable ? timeout(2000) : timeout(60000))) as any as HttpResponse<any>;
                 if (!response.ok) {
                     this.loggingService.debug(`[Database] Failed fetching with error: ${response.status}: ${params.url}`);
                     throw new Error(`Failed to get ${params.url}: ${response.statusText} (${response.status})`);
@@ -118,22 +119,14 @@ export class DatabaseService {
             } catch (ex) {
                 this.loggingService.debug(`[Database] Failed fetching with error: ${(ex as any).message}: ${params.url}`);
                 // Timeout or other error
-                if (!this.pmTilesService.isOfflineFileAvailable(z, x, y)) {
+                if (offlineAvailable === false) {
                     this.loggingService.debug(`[Database] Offline tile is not available for: ${params.url}`);
                     throw new Error(`Failed to get ${params.url}: ${(ex as Error).message}`);
                 }
                 try {
-                    // find the tile x, y, for zoom 7:
-                    if (z >= TILES_ZOOM) {
-                        const data = await this.pmTilesService.getTileAboveZoom(z, x, y, type);
-                        this.loggingService.debug(`[Database] got tile for ${z}/${x}/${y} from ${type}`);
-                        return { data };
-                    } else {
-                        const fileName = `${type}-${TILES_ZOOM-1}.pmtiles`;
-                        const data = await this.pmTilesService.getTileFromFile(fileName, z, x, y);
-                        this.loggingService.debug(`[Database] got tile for ${z}/${x}/${y} from ${fileName}`);
-                        return { data };
-                    }
+                    const data = await this.pmTilesService.getTileByType(z, x, y, type);
+                    this.loggingService.debug(`[Database] got tile from pmtiles for: ${params.url}`);
+                    return { data };
                 } catch (innerEx) {
                     this.loggingService.debug(`[Database] Failed getting tile from pmtiles, ${(innerEx as any).message}: ${params.url}`);
                     throw innerEx;

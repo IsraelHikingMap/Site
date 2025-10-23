@@ -21,13 +21,13 @@ describe("PmTilesService", () => {
     });
 
     it("Should get a tile", inject([PmTilesService, ], async (service: PmTilesService) => {
-        const results = await service.getTile("custom://filename-without-pmtiles-extention/0/0/0.png");
+        const results = await service.getTileByUrl("custom://filename-without-pmtiles-extention/0/0/0.png");
         expect(results).toBeDefined();
     }));
 
     it("Should use the cache when getting a tile", inject([PmTilesService], async (service: PmTilesService) => {
-        let results = await service.getTile("custom://filename-without-pmtiles-extention/0/0/0.png");
-        results = await service.getTile("custom://filename-without-pmtiles-extention/0/0/0.png");
+        let results = await service.getTileByUrl("custom://filename-without-pmtiles-extention/0/0/0.png");
+        results = await service.getTileByUrl("custom://filename-without-pmtiles-extention/0/0/0.png");
         expect(results).toBeDefined();
     }));
 

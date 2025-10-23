@@ -12,6 +12,7 @@ import type { LatLngAlt } from "../models";
 export class ElevationProvider {
 
     static readonly MAX_ELEVATION_ZOOM = 11;
+    static readonly ELEVATION_SCHEMA = "jaxa_terrarium0-11_v2";
 
     private readonly transparentPngUrl =
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=";
@@ -61,8 +62,8 @@ export class ElevationProvider {
                     continue;
                 }
                 let data: Uint8ClampedArray;
-                if (this.pmTilesService.isOfflineFileAvailable(ElevationProvider.MAX_ELEVATION_ZOOM, tileX, tileY)) {
-                    const arrayBuffer = await this.pmTilesService.getTileAboveZoom(ElevationProvider.MAX_ELEVATION_ZOOM, tileX, tileY, "jaxa_terrarium0-11_v2");
+                if (await this.pmTilesService.isOfflineFileAvailable(ElevationProvider.MAX_ELEVATION_ZOOM, tileX, tileY, ElevationProvider.ELEVATION_SCHEMA)) {
+                    const arrayBuffer = await this.pmTilesService.getTileByType(ElevationProvider.MAX_ELEVATION_ZOOM, tileX, tileY, ElevationProvider.ELEVATION_SCHEMA);
                     data = await this.getImageData(arrayBuffer);
                 } else {
                     const arrayBuffer = await firstValueFrom(this.httpClient.get(`https://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/${ElevationProvider.MAX_ELEVATION_ZOOM}/${tileX}/${tileY}.png`, { responseType: "arraybuffer"}));
