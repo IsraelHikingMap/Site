@@ -109,27 +109,34 @@ export class DatabaseService {
                 const response = await firstValueFrom(this.httpClient.get(params.url.replace("slice://", "https://"), { observe: "response", responseType: "arraybuffer" })
                     .pipe(this.pmTilesService.isOfflineFileAvailable(z, x, y) ? timeout(2000) : timeout(60000))) as any as HttpResponse<any>;
                 if (!response.ok) {
-                    this.loggingService.info(`[Database] Failed fetching with error: ${response.status}: ${params.url}`);
+                    this.loggingService.debug(`[Database] Failed fetching with error: ${response.status}: ${params.url}`);
                     throw new Error(`Failed to get ${params.url}: ${response.statusText} (${response.status})`);
                 }
                 const data = response.body;
+                this.loggingService.debug(`[Database] Successfully fetched: ${params.url}`);
                 return {data, cacheControl: response.headers.get("Cache-Control"), expires: response.headers.get("Expires")};
             } catch (ex) {
-                this.loggingService.info(`[Database] Failed fetching with error: ${(ex as any).message}: ${params.url}`);
+                this.loggingService.debug(`[Database] Failed fetching with error: ${(ex as any).message}: ${params.url}`);
                 // Timeout or other error
                 if (!this.pmTilesService.isOfflineFileAvailable(z, x, y)) {
+                    this.loggingService.debug(`[Database] Offline tile is not available for: ${params.url}`);
                     throw new Error(`Failed to get ${params.url}: ${(ex as Error).message}`);
                 }
-                // find the tile x, y, for zoom 7:
-                if (z >= TILES_ZOOM) {
-                    const data = await this.pmTilesService.getTileAboveZoom(z, x, y, type);
-                    this.loggingService.info(`[Database] got tile for ${z}/${x}/${y} from ${type}`);
-                    return { data };
-                } else {
-                    const fileName = `${type}-${TILES_ZOOM-1}.pmtiles`;
-                    const data = await this.pmTilesService.getTileFromFile(fileName, z, x, y);
-                    this.loggingService.info(`[Database] got tile for ${z}/${x}/${y} from ${fileName}`);
-                    return { data };
+                try {
+                    // find the tile x, y, for zoom 7:
+                    if (z >= TILES_ZOOM) {
+                        const data = await this.pmTilesService.getTileAboveZoom(z, x, y, type);
+                        this.loggingService.debug(`[Database] got tile for ${z}/${x}/${y} from ${type}`);
+                        return { data };
+                    } else {
+                        const fileName = `${type}-${TILES_ZOOM-1}.pmtiles`;
+                        const data = await this.pmTilesService.getTileFromFile(fileName, z, x, y);
+                        this.loggingService.debug(`[Database] got tile for ${z}/${x}/${y} from ${fileName}`);
+                        return { data };
+                    }
+                } catch (innerEx) {
+                    this.loggingService.debug(`[Database] Failed getting tile from pmtiles, ${(innerEx as any).message}: ${params.url}`);
+                    throw innerEx;
                 }
             }
         });
