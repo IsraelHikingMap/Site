@@ -43,11 +43,11 @@ export class LoggingService {
     }
 
     private async reduceStoredLogLinesIfNeeded() {
-        const lines = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).count();
-        if (lines <= LoggingService.MAX_LOG_LINES) {
+        if (this.deletingLogsInProgress) {
             return;
         }
-         if (this.deletingLogsInProgress) {
+        const lines = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).count();
+        if (lines <= LoggingService.MAX_LOG_LINES) {
             return;
         }
         const keysToDelete = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME)
