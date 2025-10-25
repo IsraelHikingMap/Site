@@ -229,14 +229,12 @@ export class MainMenuComponent {
 
     public getOsmAddress() {
         const poiState = this.store.selectSnapshot((s: ApplicationState) => s.poiState);
-        const baseLayerAddress = this.layersService.getSelectedBaseLayerAddressForOSM();
         if (poiState.selectedPointOfInterest != null &&
             poiState.selectedPointOfInterest.properties.poiSource.toLocaleLowerCase() === "osm") {
-            return this.osmAddressesService.getEditElementOsmAddress(baseLayerAddress,
-                poiState.selectedPointOfInterest.properties.identifier);
+            return this.osmAddressesService.getEditElementOsmAddress(poiState.selectedPointOfInterest.properties.identifier);
         }
         const currentLocation = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
-        return this.osmAddressesService.getEditOsmLocationAddress(baseLayerAddress,
+        return this.osmAddressesService.getEditOsmLocationAddress(
             currentLocation.zoom + 1,
             currentLocation.latitude,
             currentLocation.longitude);
