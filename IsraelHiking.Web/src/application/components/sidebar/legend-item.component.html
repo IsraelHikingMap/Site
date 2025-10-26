@@ -1,9 +1,12 @@
-﻿﻿<div class="legend-item" [ngClass]="{'legend-route': item().type === 'Way', 'legend-poi' : item().type === 'POI'}">
-    <div (click)="moveToLocation()" class="legend-item-map cursor-pointer" dir="ltr" angulartics2On="click" angularticsCategory="Info" angularticsAction="Legend move map">
-        <img [src]="getImageAddress()" />
-    </div>
-    <div class="legend-item-text-container" matTooltip="{{item().osmTags.join(', ')}}" matTooltipPosition="{{item().type === 'Way' ? 'above' : 'right'}}">
-        <a *ngIf="item().link" [href]="getLink()" [target]="'_blank'" class="legend-item-text" angulartics2On="click" angularticsCategory="Info" angularticsAction="Legend text OSM link" >{{item().title}}</a>
-        <span *ngIf="!item().link" class="legend-item-text">{{item().title}}</span>
-    </div>
+﻿<div class="legend-item" [ngClass]="{'legend-route': item().type === 'Way', 'legend-poi' : item().type === 'POI'}">
+  <div (click)="moveToLocation()" class="legend-item-map cursor-pointer" dir="ltr" angulartics2On="click" angularticsCategory="Info" angularticsAction="Legend move map">
+    <img [src]="getImageAddress()" />
+  </div>
+  <div class="legend-item-text-container" matTooltip="{{item().osmTags.join(', ')}}" matTooltipPosition="{{item().type === 'Way' ? 'above' : 'right'}}">
+    @if (item().link) {
+      <a [href]="getLink()" [target]="'_blank'" class="legend-item-text" angulartics2On="click" angularticsCategory="Info" angularticsAction="Legend text OSM link" >{{item().title}}</a>
+    } @else {
+      <span class="legend-item-text">{{item().title}}</span>
+    }
+  </div>
 </div>

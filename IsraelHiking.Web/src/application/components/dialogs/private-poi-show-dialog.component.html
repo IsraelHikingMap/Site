@@ -1,39 +1,48 @@
-﻿﻿<div [dir]="resources.direction">
-    <div matDialogTitle>
-        <div *ngIf="!url">
-            {{title}}
-        </div>
-        <a *ngIf="url" href="{{url.url}}" target="_blank">
-            {{title}}
-        </a>
-        <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+﻿<div [dir]="resources.direction">
+  <div matDialogTitle>
+    @if (!url) {
+      <div>
+        {{title}}
+      </div>
+    } @else {
+      <a href="{{url.url}}" target="_blank">
+        {{title}}
+      </a>
+    }
+    <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+  </div>
+  <div mat-dialog-content>
+    <div class="flex flex-row">
+      @if (imageLink) {
+        <img
+          [src]="resources.getResizedImageUrl(imageLink.url, 300)"
+          class="img-responsive cursor-pointer w-full"
+          (click)="showImage()" />
+      }
     </div>
-    <div mat-dialog-content>
-        <div class="flex flex-row">
-            <img *ngIf="imageLink"
-                 [src]="resources.getResizedImageUrl(imageLink.url, 300)"
-                 class="img-responsive cursor-pointer w-full"
-                 (click)="showImage()" />
-        </div>
-        <div class="flex flex-row">
-            <p [dir]="resources.getDirection(description)" class="break-lines {{resources.getTextAlignment(description)}}">{{description}}</p>
-        </div>
-        <div class="flex flex-row" *ngIf="showCoordinates">
-            <coordinates [latlng]="marker.latlng"></coordinates>
-        </div>
+    <div class="flex flex-row">
+      <p [dir]="resources.getDirection(description)" class="break-lines {{resources.getTextAlignment(description)}}">{{description}}</p>
     </div>
-    <div mat-dialog-actions>
-        <div class="flex-1">
-            <button mat-button type="button" class="w-full" matDialogClose (click)="uploadPoint()" matTooltip="{{resources.uploadPoint}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Open upload point dialog"><i class="fa icon-cloud-upload"></i></button>
-        </div>
-        <div class="flex-1">
-            <button mat-button type="button" class="w-full" (click)="toggleCoordinates()" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Toggle coordinates"><i class="fa icon-globe"></i></button>
-        </div>
-        <div class="flex-1">
-            <button mat-button type="button" class="w-full" matDialogClose (click)="edit()" matTooltip="{{resources.edit}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Edit"><i class="fa icon-pencil"></i></button>
-        </div>
-        <div class="flex-1" *ngIf="isShowAddToActiveRoute()">
-            <button mat-button type="button" class="w-full" matDialogClose (click)="addToActiveRoute()" matTooltip="{{resources.addPointToActiveRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Add to active route"><i class="fa icon-plus"></i></button>
-        </div>
+    @if (showCoordinates) {
+      <div class="flex flex-row">
+        <coordinates [latlng]="marker.latlng"></coordinates>
+      </div>
+    }
+  </div>
+  <div mat-dialog-actions>
+    <div class="flex-1">
+      <button mat-button type="button" class="w-full" matDialogClose (click)="uploadPoint()" matTooltip="{{resources.uploadPoint}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Open upload point dialog"><i class="fa icon-cloud-upload"></i></button>
     </div>
+    <div class="flex-1">
+      <button mat-button type="button" class="w-full" (click)="toggleCoordinates()" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Toggle coordinates"><i class="fa icon-globe"></i></button>
+    </div>
+    <div class="flex-1">
+      <button mat-button type="button" class="w-full" matDialogClose (click)="edit()" matTooltip="{{resources.edit}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Edit"><i class="fa icon-pencil"></i></button>
+    </div>
+    @if (isShowAddToActiveRoute()) {
+      <div class="flex-1">
+        <button mat-button type="button" class="w-full" matDialogClose (click)="addToActiveRoute()" matTooltip="{{resources.addPointToActiveRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Add to active route"><i class="fa icon-plus"></i></button>
+      </div>
+    }
+  </div>
 </div>

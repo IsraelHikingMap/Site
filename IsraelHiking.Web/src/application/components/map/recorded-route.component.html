@@ -1,39 +1,9 @@
-<div *ngIf="isRecording()">
-    <div *ngFor="let recordedReouteSegment of recordedRouteSegments; let idx = index; trackBy:trackByIndex">
-        <mgl-geojson-source id="{{'recorded-route-segment-geojson-' + idx}}" [data]="recordedReouteSegment"></mgl-geojson-source>
-        <mgl-layer id="{{'recorded-route-line-' + idx}}"
-            type="line"
-            source="{{'recorded-route-segment-geojson-' + idx}}"
-            [layout]="{
-                'line-cap': 'round',
-                'line-join': 'bevel'
-            }"
-            [paint]="{
-                'line-color': resources.recordedRouteColor,
-                'line-width': 6,
-                'line-opacity': 1.0
-            }">
-        </mgl-layer>
-        <mgl-layer id="{{'recorded-route-line-direction-' + idx}}"
-            type="symbol"
-            source="{{'recorded-route-segment-geojson-' + idx}}"
-            [layout]="{
-                'symbol-placement': 'line',
-                'symbol-spacing': 40,
-                'icon-image': 'arrow',
-                'icon-size': 0.5,
-                'icon-allow-overlap': true,
-                'icon-ignore-placement': true
-            }"
-            [paint]="{
-                'icon-color': 'black'
-            }">
-        </mgl-layer>
-    </div>
-    <mgl-geojson-source id="recorded-route-last-segment-geojson" [data]="lastRouteSegment"></mgl-geojson-source>
-    <mgl-layer id="recorded-route-last-line"
-        type="line"
-        source="recorded-route-last-segment-geojson"
+@if (isRecording()) {
+  @for (recordedReouteSegment of recordedRouteSegments; track trackByIndex(idx, recordedReouteSegment); let idx = $index) {
+    <mgl-geojson-source id="{{'recorded-route-segment-geojson-' + idx}}" [data]="recordedReouteSegment"></mgl-geojson-source>
+    <mgl-layer id="{{'recorded-route-line-' + idx}}"
+      type="line"
+      source="{{'recorded-route-segment-geojson-' + idx}}"
         [layout]="{
             'line-cap': 'round',
             'line-join': 'bevel'
@@ -44,9 +14,9 @@
             'line-opacity': 1.0
         }">
     </mgl-layer>
-    <mgl-layer id="recorded-route-last-line-direction"
-        type="symbol"
-        source="recorded-route-last-segment-geojson"
+    <mgl-layer id="{{'recorded-route-line-direction-' + idx}}"
+      type="symbol"
+      source="{{'recorded-route-segment-geojson-' + idx}}"
         [layout]="{
             'symbol-placement': 'line',
             'symbol-spacing': 40,
@@ -59,27 +29,59 @@
             'icon-color': 'black'
         }">
     </mgl-layer>
-    <mgl-geojson-source *ngIf="startPointGeoJson" id="recorded-route-start-geojson" [data]="startPointGeoJson"></mgl-geojson-source>
-    <mgl-layer *ngIf="startPointGeoJson"
-        id="recorded-route-start-point"
-        type="circle"
-        source="recorded-route-start-geojson"
-        [paint]="{
-            'circle-color': '#43a047',
-            'circle-radius': 7,
-            'circle-stroke-color': 'white',
-            'circle-stroke-width': 3
-        }">
+  }
+  <mgl-geojson-source id="recorded-route-last-segment-geojson" [data]="lastRouteSegment"></mgl-geojson-source>
+  <mgl-layer id="recorded-route-last-line"
+    type="line"
+    source="recorded-route-last-segment-geojson"
+      [layout]="{
+          'line-cap': 'round',
+          'line-join': 'bevel'
+      }"
+      [paint]="{
+          'line-color': resources.recordedRouteColor,
+          'line-width': 6,
+          'line-opacity': 1.0
+      }">
+  </mgl-layer>
+  <mgl-layer id="recorded-route-last-line-direction"
+    type="symbol"
+    source="recorded-route-last-segment-geojson"
+      [layout]="{
+          'symbol-placement': 'line',
+          'symbol-spacing': 40,
+          'icon-image': 'arrow',
+          'icon-size': 0.5,
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true
+      }"
+      [paint]="{
+          'icon-color': 'black'
+      }">
+  </mgl-layer>
+  @if (startPointGeoJson) {
+    <mgl-geojson-source id="recorded-route-start-geojson" [data]="startPointGeoJson"></mgl-geojson-source>
+    <mgl-layer
+      id="recorded-route-start-point"
+      type="circle"
+      source="recorded-route-start-geojson"
+      [paint]="{
+          'circle-color': '#43a047',
+          'circle-radius': 7,
+          'circle-stroke-color': 'white',
+          'circle-stroke-width': 3
+      }">
     </mgl-layer>
-</div>
+  }
+}
 
-<div *ngIf="(recordedRoute$ | async)">
-    <div *ngFor="let marker of (recordedRoute$ | async).markers; let idx = index">
-        <mgl-marker anchor="bottom"
-            [draggable]="isAddingPoi$ | async"
-            [lngLat]="marker.latlng"
-            (markerDragEnd)="markerDragEnd(idx, $event)">
-            <private-poi-overlay [marker]="marker" [index]="idx" [color]="resources.recordedRouteColor"></private-poi-overlay>
-        </mgl-marker>
-    </div>
-</div>
+@if ((recordedRoute$ | async)) {
+  @for (marker of (recordedRoute$ | async).markers; track marker; let idx = $index) {
+    <mgl-marker anchor="bottom"
+      [draggable]="isAddingPoi$ | async"
+      [lngLat]="marker.latlng"
+      (markerDragEnd)="markerDragEnd(idx, $event)">
+      <private-poi-overlay [marker]="marker" [index]="idx" [color]="resources.recordedRouteColor"></private-poi-overlay>
+    </mgl-marker>
+  }
+}

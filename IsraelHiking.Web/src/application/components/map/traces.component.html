@@ -1,26 +1,26 @@
-﻿﻿<mgl-geojson-source id="selected-trace" [data]="selectedTrace"></mgl-geojson-source>
+﻿<mgl-geojson-source id="selected-trace" [data]="selectedTrace"></mgl-geojson-source>
 <mgl-layer id="selected-trace-line"
-           type="line"
-           source="selected-trace"
-           [filter]="['==', '$type', 'LineString']"
+  type="line"
+  source="selected-trace"
+  [filter]="['==', '$type', 'LineString']"
            [paint]="{
             'line-color': 'magenta',
             'line-width': 3
            }">
 </mgl-layer>
 <mgl-layer id="selected-trace-points-circle"
-           type="circle"
-           source="selected-trace"
-           [filter]="['==', '$type', 'Point']"
+  type="circle"
+  source="selected-trace"
+  [filter]="['==', '$type', 'Point']"
            [paint]="{
             'circle-color': 'magenta',
             'circle-radius': 10
            }">
 </mgl-layer>
 <mgl-layer id="selected-trace-points-text"
-           type="symbol"
-           source="selected-trace"
-           [filter]="['==', '$type', 'Point']"
+  type="symbol"
+  source="selected-trace"
+  [filter]="['==', '$type', 'Point']"
            [layout]="{
             'text-field': ['get', 'title'],
             'text-font': ['Open Sans Regular'],
@@ -34,37 +34,39 @@
 </mgl-layer>
 
 
-<div *ngIf="selectedTraceStart">
-    <mgl-marker [lngLat]="selectedTraceStart" #tracesConfigMarker>
-        <span class='fa-stack fa-lg'>
-            <i class='fa icon-map-marker fa-stack-2x' style='color:white;text-shadow: 3px 3px 3px #000;'></i>
-            <i class='fa icon-cog fa-stack-1x stack-icon-top' style='color:magenta;'></i>
-        </span>
-    </mgl-marker>
-    <mgl-popup [marker]="tracesConfigMarker" (popupClose)="isConfigOpen = false">
-        <div [dir]="resources.direction">
-            <h3 *ngIf="visibleTraceName" [ngClass]="resources.getTextAlignment(visibleTraceName)" [dir]="resources.getDirection(visibleTraceName)" class="chrome-wordwrap-fix">{{visibleTraceName}}</h3>
-            <div class="flex flex-row">
-                <div class="w-1/3">
-                    <button mat-button class="w-full min-w-unset" (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Convert trace to route"><i class="fa icon-plus"></i></button>
-                </div>
-                <div class="w-1/3">
-                    <button mat-button class="w-full min-w-unset" (click)="clearTrace()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Remove trace from map"><i class="fa icon-eye-slash"></i></button>
-                </div>
-                <div class="w-1/3">
-                    <button mat-button class="w-full min-w-unset" (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
-                </div>
-            </div>
-            <div *ngIf="!hideCoordinates">
-                <coordinates [latlng]="selectedTraceStart"></coordinates>
-            </div>
+@if (selectedTraceStart) {
+  <mgl-marker [lngLat]="selectedTraceStart" #tracesConfigMarker>
+    <span class='fa-stack fa-lg'>
+      <i class='fa icon-map-marker fa-stack-2x' style='color:white;text-shadow: 3px 3px 3px #000;'></i>
+      <i class='fa icon-cog fa-stack-1x stack-icon-top' style='color:magenta;'></i>
+    </span>
+  </mgl-marker>
+  <mgl-popup [marker]="tracesConfigMarker" (popupClose)="isConfigOpen = false">
+    <div [dir]="resources.direction">
+      @if (visibleTraceName) {
+        <h3 [ngClass]="resources.getTextAlignment(visibleTraceName)" [dir]="resources.getDirection(visibleTraceName)" class="chrome-wordwrap-fix">{{visibleTraceName}}</h3>
+      }
+      <div class="flex flex-row">
+        <div class="w-1/3">
+          <button mat-button class="w-full min-w-unset" (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Convert trace to route"><i class="fa icon-plus"></i></button>
         </div>
-    </mgl-popup>
-</div>
+        <div class="w-1/3">
+          <button mat-button class="w-full min-w-unset" (click)="clearTrace()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Remove trace from map"><i class="fa icon-eye-slash"></i></button>
+        </div>
+        <div class="w-1/3">
+          <button mat-button class="w-full min-w-unset" (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
+        </div>
+      </div>
+      @if (!hideCoordinates) {
+        <coordinates [latlng]="selectedTraceStart"></coordinates>
+      }
+    </div>
+  </mgl-popup>
+}
 <mgl-geojson-source id="missing-parts" [data]="missingParts"></mgl-geojson-source>
 <mgl-layer id="missing-part-line"
-           source="missing-parts"
-           type="line"
+  source="missing-parts"
+  type="line"
            [paint]="{
             'line-color': 'red',
             'line-width': 3
@@ -72,23 +74,25 @@
 </mgl-layer>
 <mgl-geojson-source id="selected-feature" [data]="selectedFeatureSource"></mgl-geojson-source>
 <mgl-layer id="missing-part-line-selected"
-           source="selected-feature"
-           type="line"
+  source="selected-feature"
+  type="line"
            [paint]="{
             'line-color': 'brown',
             'line-width': 5
            }">
 </mgl-layer>
-<mgl-popup *ngIf="missingCoordinates" [lngLat]="missingCoordinates" [offset]="[0, -30]" (popupClose)="clearSelection()">
+@if (missingCoordinates) {
+  <mgl-popup [lngLat]="missingCoordinates" [offset]="[0, -30]" (popupClose)="clearSelection()">
     <missing-part-overlay [feature]="selectedFeature" [latlng]="missingCoordinates" (removed)="removeMissingPart()"></missing-part-overlay>
-</mgl-popup>
-<div *ngFor="let feature of missingParts.features">
-    <mgl-marker [lngLat]="getLatLngLikeForFeature(feature)" anchor="bottom">
-        <div (click)="setSelectedFeature(feature, $event)">
-            <span class='fa-stack fa-lg'>
-                <i class='fa icon-map-marker fa-stack-2x' style='color:white;text-shadow: 3px 3px 3px #000;'></i>
-                <i class='fa icon-star fa-stack-1x stack-icon-top' style='color:orange;'></i>
-            </span>
-        </div>
-    </mgl-marker>    
-</div>
+  </mgl-popup>
+}
+@for (feature of missingParts.features; track feature) {
+  <mgl-marker [lngLat]="getLatLngLikeForFeature(feature)" anchor="bottom">
+    <div (click)="setSelectedFeature(feature, $event)">
+      <span class='fa-stack fa-lg'>
+        <i class='fa icon-map-marker fa-stack-2x' style='color:white;text-shadow: 3px 3px 3px #000;'></i>
+        <i class='fa icon-star fa-stack-1x stack-icon-top' style='color:orange;'></i>
+      </span>
+    </div>
+  </mgl-marker>
+}

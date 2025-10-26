@@ -1,13 +1,15 @@
-﻿﻿<div class="sidebar-wrapper" *ngIf="visible" [dir]="resources.direction" [@animateSidebar]="{value: '', params: {startTransform: resources.direction === 'rtl' ? 'translateX(-100%)' : 'translateX(100%)'} }">
-    <div [ngSwitch]="viewName">
-        <div *ngSwitchCase="'layers'">
-            <layers-sidebar></layers-sidebar>
-        </div>
-        <div *ngSwitchCase="'info'">
-            <info-sidebar></info-sidebar>
-        </div>
-        <div *ngSwitchCase="'public-poi'">
-            <public-poi-sidebar></public-poi-sidebar>
-        </div>
-    </div>
-</div>
+﻿@if (visible) {
+  <div class="sidebar-wrapper" [dir]="resources.direction" [@animateSidebar]="{value: '', params: {startTransform: resources.direction === 'rtl' ? 'translateX(-100%)' : 'translateX(100%)'} }">
+    @switch (viewName) {
+      @case ('layers') {
+        <layers-sidebar></layers-sidebar>
+      }
+      @case ('info') {
+        <info-sidebar></info-sidebar>
+      }
+      @case ('public-poi') {
+        <public-poi-sidebar></public-poi-sidebar>
+      }
+    }
+  </div>
+}

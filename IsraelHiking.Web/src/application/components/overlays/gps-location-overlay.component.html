@@ -1,27 +1,29 @@
-﻿﻿<div [dir]="resources.direction">
+﻿<div [dir]="resources.direction">
+  <div class="flex flex-row">
+    <div class="w-1/2">
+      <button mat-button class="w-full" (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Location" angularticsAction="Convert location to point"><i class="fa icon-plus"></i></button>
+    </div>
+    <div class="w-1/2">
+      <button mat-button class="w-full" type="button" (click)="toggleDistance()" [class.active]="distance$ | async" matTooltip="{{resources.measureDistanceFromCurrentLocation}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Location" angularticsAction="Measure distance"><i class="fa icon-measure"></i></button>
+    </div>
+  </div>
+  <div class="flex flex-row">
+    <div class="w-1/2">
+      <button mat-button class="w-full" type="button" (click)="hideCoordinates = !hideCoordinates" [class.active]="!hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Location" angularticsAction="Toggle coordinates"><i class="fa icon-globe"></i></button>
+    </div>
+    <div class="w-1/2">
+      <button mat-button class="w-full" type="button" (click)="openAddSimplePointDialog()" matTooltip="{{resources.uploadPoint}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Location" angularticsAction="Open upload point dialog"><i class="fa icon-cloud-upload"></i></button>
+    </div>
+  </div>
+  @if (canShareLocation()) {
     <div class="flex flex-row">
-        <div class="w-1/2">
-            <button mat-button class="w-full" (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Location" angularticsAction="Convert location to point"><i class="fa icon-plus"></i></button>
-        </div>
-        <div class="w-1/2">
-            <button mat-button class="w-full" type="button" (click)="toggleDistance()" [class.active]="distance$ | async" matTooltip="{{resources.measureDistanceFromCurrentLocation}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Location" angularticsAction="Measure distance"><i class="fa icon-measure"></i></button>
-        </div>
+      <div class="w-full">
+        <button mat-button class="w-full" type="button" (click)="shareMyLocation()" angulartics2On="click" angularticsCategory="Location" angularticsAction="Share my location"><i class="fa icon-share-alt"></i> {{resources.shareLocation}}</button>
+      </div>
     </div>
-    <div class="flex flex-row">
-        <div class="w-1/2">
-            <button mat-button class="w-full" type="button" (click)="hideCoordinates = !hideCoordinates" [class.active]="!hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Location" angularticsAction="Toggle coordinates"><i class="fa icon-globe"></i></button>
-        </div>
-        <div class="w-1/2">
-            <button mat-button class="w-full" type="button" (click)="openAddSimplePointDialog()" matTooltip="{{resources.uploadPoint}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Location" angularticsAction="Open upload point dialog"><i class="fa icon-cloud-upload"></i></button>
-        </div>
-    </div>
-    <div class="flex flex-row" *ngIf="canShareLocation()">
-        <div class="w-full">
-            <button mat-button class="w-full" type="button" (click)="shareMyLocation()" angulartics2On="click" angularticsCategory="Location" angularticsAction="Share my location"><i class="fa icon-share-alt"></i> {{resources.shareLocation}}</button>
-        </div>
-    </div>
-    <div *ngIf="!hideCoordinates">
-        <coordinates [latlng]="latlng()"></coordinates>
-    </div>
+  }
+  @if (!hideCoordinates) {
+    <coordinates [latlng]="latlng()"></coordinates>
+  }
 </div>
 

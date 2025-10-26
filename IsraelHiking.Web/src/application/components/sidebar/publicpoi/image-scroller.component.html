@@ -1,42 +1,57 @@
-﻿﻿<div class="flex flex-row" *ngIf="images().length === 0">
-    <div class="img-container-small" style="overflow: hidden;" *ngIf="!canEdit()">
-        <ng-lottie class="img-responsive img-center" [options]="lottiePOI"></ng-lottie>
-    </div>
-    <label class="w-full" *ngIf="canEdit()" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
+﻿@if (images().length === 0) {
+  <div class="flex flex-row">
+    @if (canEdit()) {
+      <label class="w-full" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
         <a mat-button imageCapture class="w-full h-unset" (changed)="add($event)" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload image first image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
         <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*;capture=camera" multiple />
-    </label>
-</div>
-<div class="flex flex-row" *ngIf="images().length > 0">
+      </label>
+    } @else {
+      <div class="img-container-small" style="overflow: hidden;">
+        <ng-lottie class="img-responsive img-center" [options]="lottiePOI"></ng-lottie>
+      </div>
+    }
+  </div>
+} @else {
+  <div class="flex flex-row">
     <div class="img-container-small" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
-        <img [src]="getCurrentImage() | offlineImage:true | async"
-             class="img-responsive-full cursor-zoom-in img-center"
-             (click)="showImage()"/>
+      <img [src]="getCurrentImage() | offlineImage:true | async"
+        class="img-responsive-full cursor-zoom-in img-center"
+        (click)="showImage()"/>
     </div>
-</div>
-<div class="flex flex-row" *ngIf="canEdit()">
+  </div>
+}
+@if (canEdit()) {
+  <div class="flex flex-row">
     <div class="text-sm ml-2 mr-2 text-center">{{resources.imageUploadWaiver}}</div>
-</div>
-<div class="flex flex-row" *ngIf="hasNext() || hasPrevious() || canEdit()">
+  </div>
+}
+@if (hasNext() || hasPrevious() || canEdit()) {
+  <div class="flex flex-row">
     <div class="flex-1">
-        <button mat-button class="w-full" (click)="previous()" [disabled]="!hasPrevious()"><i class="fa icon-chevron-{{resources.start}}"></i></button>
+      <button mat-button class="w-full" (click)="previous()" [disabled]="!hasPrevious()"><i class="fa icon-chevron-{{resources.start}}"></i></button>
     </div>
-    <div class="flex-1" *ngIf="canEdit()">
+    @if (canEdit()) {
+      <div class="flex-1">
         <label class="w-full">
-            <a mat-button imageCapture class="w-full" (changed)="add($event)" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload non first image"><i class="fa icon-plus"></i></a>
-            <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*;capture=camera" multiple />
+          <a mat-button imageCapture class="w-full" (changed)="add($event)" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload non first image"><i class="fa icon-plus"></i></a>
+          <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*;capture=camera" multiple />
         </label>
-    </div>
-    <div class="flex-1" *ngIf="canEdit()">
+      </div>
+      <div class="flex-1">
         <button mat-button class="w-full" (click)="remove()"><i class="fa icon-trash"></i></button>
-    </div>
-    <div class="flex-1" *ngIf="!canEdit()" >
+      </div>
+    } @else {
+      <div class="flex-1" >
         <div class="w-full text-center" dir="ltr">{{getIndexString()}}</div>
-    </div>
+      </div>
+    }
     <div class="flex-1">
-        <button mat-button class="w-full" (click)="next()" [disabled]="!hasNext()"><i class="fa icon-chevron-{{resources.end}}"></i></button>
+      <button mat-button class="w-full" (click)="next()" [disabled]="!hasNext()"><i class="fa icon-chevron-{{resources.end}}"></i></button>
     </div>
-</div>
-<div class="flex flex-row" *ngIf="!canEdit() && currentImageAttribution" class="text-center text-sm">
+  </div>
+}
+@if (!canEdit() && currentImageAttribution) {
+  <div class="flex flex-row" class="text-center text-sm">
     <div class="w-full truncate" [dir]="resources.direction">{{resources.imageBy}} <a [href]="currentImageAttribution.url" target="_blank">{{currentImageAttribution.author}}</a></div>
-</div>
+  </div>
+}

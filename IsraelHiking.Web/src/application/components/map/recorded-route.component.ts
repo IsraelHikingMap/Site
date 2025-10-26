@@ -1,6 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { Observable, combineLatest, throttleTime } from "rxjs";
 import { Store } from "@ngxs/store";
 import { SourceDirective, GeoJSONSourceComponent, LayerComponent, MarkerComponent } from "@maplibre/ngx-maplibre-gl";
@@ -15,7 +15,7 @@ import { ApplicationState, LatLngAltTime, RecordedRoute } from "../../models";
 @Component({
     selector: "recorded-route",
     templateUrl: "./recorded-route.component.html",
-    imports: [NgIf, NgFor, SourceDirective, GeoJSONSourceComponent, LayerComponent, MarkerComponent, PrivatePoiOverlayComponent, AsyncPipe]
+    imports: [SourceDirective, GeoJSONSourceComponent, LayerComponent, MarkerComponent, PrivatePoiOverlayComponent, AsyncPipe]
 })
 export class RecordedRouteComponent {
 

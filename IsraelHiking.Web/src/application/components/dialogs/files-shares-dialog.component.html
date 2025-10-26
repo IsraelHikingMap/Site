@@ -1,41 +1,45 @@
 <div [dir]="resources.direction">
-    <div matDialogTitle>
-        <div>{{resources.save}} - {{resources.share}} - {{resources.files}}</div>
-        <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+  <div matDialogTitle>
+    <div>{{resources.save}} - {{resources.share}} - {{resources.files}}</div>
+    <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+  </div>
+  <div mat-dialog-content>
+    <div class="flex flex-row">
+      <button mat-button (click)="openShare()" matDialogClose angulartics2On="click" angularticsCategory="Share" angularticsAction="Share open">
+        <span><i class="fa fa-lg icon-cloud-upload mat-icon"></i> {{resources.uploadToCloudAndShare}}</span>
+      </button>
     </div>
-    <div mat-dialog-content>
-        <div class="flex flex-row">
-            <button mat-button (click)="openShare()" matDialogClose angulartics2On="click" angularticsCategory="Share" angularticsAction="Share open">
-                <span><i class="fa fa-lg icon-cloud-upload mat-icon"></i> {{resources.uploadToCloudAndShare}}</span>
-            </button>
-        </div>
-        <div class="flex flex-row">
-            <label>
-                <a mat-button angulartics2On="click" angularticsCategory="Files" angularticsAction="Open from file">
-                    <span><i class="fa icon-folder-open fa-lg mat-icon"></i> {{resources.openAFile}}</span>
-                </a>
-                <input type="file" name="file" id="openFile" #openFile (change)="open($event)" [style.display]="'none'" />
-            </label>
-        </div>
-        <div class="flex flex-row">
-            <button mat-button (click)="save()" matDialogClose angulartics2On="click" angularticsCategory="Files" angularticsAction="Save to file">
-                <span><i class="fa icon-external-link-square fa-lg mat-icon"></i> {{resources.export}}</span>
-            </button>
-        </div>
-        <div class="flex flex-row">
-            <button mat-button (click)="toggleSaveAs()" angulartics2On="click" angularticsCategory="Files" angularticsAction="Toggle save as">
-                <span><i class="fa icon-external-link fa-lg mat-icon"></i> {{resources.exportAs}}</span>
-            </button>
-        </div>
-        <div *ngIf="showHiddenWarning" class="flex flex-row">
-            <mat-hint class="text-sm">⚠️ {{resources.hiddenRoutesWillNotBeSaved}}</mat-hint>
-        </div>
-        <div *ngIf="isSaveAsOpen">
-            <div class="flex flex-row" *ngFor="let format of formats">
-                <button mat-button (click)="saveAs(format)" matDialogClose angulartics2On="click" angularticsCategory="Files" angularticsAction="Save as format {{format.label}}">
-                    <span class="text-sm" dir="ltr">{{format.label}}</span>
-                </button>
-            </div>
-        </div>
+    <div class="flex flex-row">
+      <label>
+        <a mat-button angulartics2On="click" angularticsCategory="Files" angularticsAction="Open from file">
+          <span><i class="fa icon-folder-open fa-lg mat-icon"></i> {{resources.openAFile}}</span>
+        </a>
+        <input type="file" name="file" id="openFile" #openFile (change)="open($event)" [style.display]="'none'" />
+      </label>
     </div>
+    <div class="flex flex-row">
+      <button mat-button (click)="save()" matDialogClose angulartics2On="click" angularticsCategory="Files" angularticsAction="Save to file">
+        <span><i class="fa icon-external-link-square fa-lg mat-icon"></i> {{resources.export}}</span>
+      </button>
+    </div>
+    <div class="flex flex-row">
+      <button mat-button (click)="toggleSaveAs()" angulartics2On="click" angularticsCategory="Files" angularticsAction="Toggle save as">
+        <span><i class="fa icon-external-link fa-lg mat-icon"></i> {{resources.exportAs}}</span>
+      </button>
+    </div>
+    @if (showHiddenWarning) {
+      <div class="flex flex-row">
+        <mat-hint class="text-sm">⚠️ {{resources.hiddenRoutesWillNotBeSaved}}</mat-hint>
+      </div>
+    }
+    @if (isSaveAsOpen) {
+      @for (format of formats; track format) {
+        <div class="flex flex-row">
+          <button mat-button (click)="saveAs(format)" matDialogClose angulartics2On="click" angularticsCategory="Files" angularticsAction="Save as format {{format.label}}">
+            <span class="text-sm" dir="ltr">{{format.label}}</span>
+          </button>
+        </div>
+      }
+    }
+  </div>
 </div>

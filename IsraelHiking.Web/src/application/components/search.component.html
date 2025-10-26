@@ -1,54 +1,65 @@
-﻿﻿<div class="side-control maplibregl-ctrl absolute! align-next-to-menu" [dir]="resources.direction">
-    <div class="flex flex-row">
-        <div>
-            <mat-form-field class="search-input-container" subscriptSizing="dynamic">
-                <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom" [matAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(fromContext.searchTerm)" (focus)="focusOnSearchInput()">
-                <mat-autocomplete positionY="below" autoActiveFirstOption="true" #autoFrom="matAutocomplete" [displayWith]="displayResults">
-                    <mat-option *ngFor="let result of fromContext.searchResults" [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']" [dir]="resources.getDirection(result.title)">
-                        <span *ngIf="result.hasExtraData" class="has-extra-data" [style.background]="result.iconColor"></span>
-                        <i *ngIf="result.icon" class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
-                        <span>{{result.displayName}}</span>
-                    </mat-option>
-                </mat-autocomplete>
-            </mat-form-field>
-        </div>
-        <button mat-button (click)="toggleDirectional()" matTooltip="{{resources.directionalSearch}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsAction="Toggle directional search"><i class="fa fa-lg" [ngClass]="{'icon-plus': !directional.isOn, 'icon-minus': directional.isOn}"></i></button>
+﻿<div class="side-control maplibregl-ctrl absolute! align-next-to-menu" [dir]="resources.direction">
+  <div class="flex flex-row">
+    <div>
+      <mat-form-field class="search-input-container" subscriptSizing="dynamic">
+        <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom" [matAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(fromContext.searchTerm)" (focus)="focusOnSearchInput()">
+        <mat-autocomplete positionY="below" autoActiveFirstOption="true" #autoFrom="matAutocomplete" [displayWith]="displayResults">
+          @for (result of fromContext.searchResults; track result) {
+            <mat-option [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']" [dir]="resources.getDirection(result.title)">
+              @if (result.hasExtraData) {
+                <span class="has-extra-data" [style.background]="result.iconColor"></span>
+              }
+              @if (result.icon) {
+                <i class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
+              }
+              <span>{{result.displayName}}</span>
+            </mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
     </div>
-    <ng-container *ngIf="directional.isOn">
-        <div class="flex flex-row justify-end mt-1 mb-1">
-            <button mat-button (click)="setRouting('Hike')" [ngClass]="{active : routingType === 'Hike' }" matTooltip="{{resources.hikeRouting}}" matTooltipPosition="below"><i class="fa icon-hike fa-lg"></i></button>
-            <button mat-button (click)="setRouting('Bike')" [ngClass]="{active : routingType === 'Bike' }" matTooltip="{{resources.bikeRouting}}" matTooltipPosition="below"><i class="fa icon-bike fa-lg"></i></button>
-            <button mat-button (click)="setRouting('4WD')" [ngClass]="{active : routingType === '4WD' }" matTooltip="{{resources.fourWheelDriveRouting}}" matTooltipPosition="below"><i class="fa icon-four-by-four fa-lg"></i></button>
-            <button mat-button (click)="setRouting('None')" [ngClass]="{active : routingType === 'None' }" matTooltip="{{resources.straightLines}}" matTooltipPosition="below"><i class="fa icon-none fa-lg"></i></button>
-        </div>
-        <div class="flex flex-row">
-            <div>
-                <mat-form-field class="search-input-container" subscriptSizing="dynamic">
-                    <input type="text" matInput #searchToInput [formControl]="searchTo" [matAutocomplete]="autoTo" class="control-container-item" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(toContext.searchTerm)">
-                    <mat-autocomplete positionY="below" #autoTo="matAutocomplete" [displayWith]="displayResults">
-                        <mat-option *ngFor="let result of toContext.searchResults" [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']" [dir]="resources.getDirection(result.title)">
-                            <i *ngIf="result.icon" class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
-                            {{result.displayName}}
-                        </mat-option>
-                    </mat-autocomplete>
-                </mat-form-field>
-            </div>
-            <button mat-button (click)="searchRoute()"><i class="fa icon-recordings fa-lg"></i></button>
-        </div>
-    </ng-container>
+    <button mat-button (click)="toggleDirectional()" matTooltip="{{resources.directionalSearch}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsAction="Toggle directional search"><i class="fa fa-lg" [ngClass]="{'icon-plus': !directional.isOn, 'icon-minus': directional.isOn}"></i></button>
+  </div>
+  @if (directional.isOn) {
+    <div class="flex flex-row justify-end mt-1 mb-1">
+      <button mat-button (click)="setRouting('Hike')" [ngClass]="{active : routingType === 'Hike' }" matTooltip="{{resources.hikeRouting}}" matTooltipPosition="below"><i class="fa icon-hike fa-lg"></i></button>
+      <button mat-button (click)="setRouting('Bike')" [ngClass]="{active : routingType === 'Bike' }" matTooltip="{{resources.bikeRouting}}" matTooltipPosition="below"><i class="fa icon-bike fa-lg"></i></button>
+      <button mat-button (click)="setRouting('4WD')" [ngClass]="{active : routingType === '4WD' }" matTooltip="{{resources.fourWheelDriveRouting}}" matTooltipPosition="below"><i class="fa icon-four-by-four fa-lg"></i></button>
+      <button mat-button (click)="setRouting('None')" [ngClass]="{active : routingType === 'None' }" matTooltip="{{resources.straightLines}}" matTooltipPosition="below"><i class="fa icon-none fa-lg"></i></button>
+    </div>
+    <div class="flex flex-row">
+      <div>
+        <mat-form-field class="search-input-container" subscriptSizing="dynamic">
+          <input type="text" matInput #searchToInput [formControl]="searchTo" [matAutocomplete]="autoTo" class="control-container-item" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(toContext.searchTerm)">
+          <mat-autocomplete positionY="below" #autoTo="matAutocomplete" [displayWith]="displayResults">
+            @for (result of toContext.searchResults; track result) {
+              <mat-option [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']" [dir]="resources.getDirection(result.title)">
+                @if (result.icon) {
+                  <i class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
+                }
+                {{result.displayName}}
+              </mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+      <button mat-button (click)="searchRoute()"><i class="fa icon-recordings fa-lg"></i></button>
+    </div>
+  }
 </div>
-<div *ngIf="directional.showResults && directional.routeCoordinates.length > 0">
+@if (directional.showResults && directional.routeCoordinates.length > 0) {
+  <div>
     <mgl-geojson-source id="directional-source">
-        <mgl-feature id="0" [geometry]="{ type: 'LineString', coordinates: directional.routeCoordinates }">
-        </mgl-feature>
-        <mgl-feature #start id="1" [properties]="{ 'class': 'start' }" [geometry]="{ type: 'Point', coordinates: directional.routeCoordinates[0] }">
-        </mgl-feature>
-        <mgl-feature id="2" [properties]="{ 'class': 'end' }" [geometry]="{ type: 'Point', coordinates: directional.routeCoordinates[directional.routeCoordinates.length - 1] }">
-        </mgl-feature>
+      <mgl-feature id="0" [geometry]="{ type: 'LineString', coordinates: directional.routeCoordinates }">
+      </mgl-feature>
+      <mgl-feature #start id="1" [properties]="{ 'class': 'start' }" [geometry]="{ type: 'Point', coordinates: directional.routeCoordinates[0] }">
+      </mgl-feature>
+      <mgl-feature id="2" [properties]="{ 'class': 'end' }" [geometry]="{ type: 'Point', coordinates: directional.routeCoordinates[directional.routeCoordinates.length - 1] }">
+      </mgl-feature>
     </mgl-geojson-source>
     <mgl-layer id="directional-layer-left"
-        type="line"
-        source="directional-source"
+      type="line"
+      source="directional-source"
         [paint]="{
             'line-color': 'magenta',
             'line-offset': -5,
@@ -57,8 +68,8 @@
         }">
     </mgl-layer>
     <mgl-layer id="directional-layer-right"
-        type="line"
-        source="directional-source"
+      type="line"
+      source="directional-source"
         [paint]="{
             'line-color': 'magenta',
             'line-offset': 5,
@@ -67,8 +78,8 @@
         }">
     </mgl-layer>
     <mgl-layer id="directional-layer"
-                type="symbol"
-                source="directional-source"
+      type="symbol"
+      source="directional-source"
                 [layout]="{
                     'symbol-placement': 'line',
                     'symbol-spacing': 40,
@@ -82,44 +93,51 @@
                 }">
     </mgl-layer>
     <mgl-layer id="directional-layer-start"
-            type="circle"
-            source="directional-source"
-            [filter]="['==', 'class', 'start']"
+      type="circle"
+      source="directional-source"
+      [filter]="['==', 'class', 'start']"
             [paint]="{ 
                     'circle-stroke-color': '#43a047', 
                     'circle-radius': 7, 
                     'circle-stroke-width': 4, 
                     'circle-color': 'magenta' 
                 }"
-            (layerClick)="openDirectionalSearchPopup($event)">
+      (layerClick)="openDirectionalSearchPopup($event)">
     </mgl-layer>
     <mgl-layer id="directional-layer-end"
-            type="circle"
-            source="directional-source"
-            [filter]="['==', 'class', 'end']"
+      type="circle"
+      source="directional-source"
+      [filter]="['==', 'class', 'end']"
             [paint]="{ 
                     'circle-stroke-color': 'red', 
                     'circle-radius': 7, 
                     'circle-stroke-width': 4, 
                     'circle-color': 'magenta' 
                 }"
-            (layerClick)="openDirectionalSearchPopup($event)">
+      (layerClick)="openDirectionalSearchPopup($event)">
     </mgl-layer>
-    <mgl-popup [lngLat]="directional.overlayLocation" *ngIf="directional.overlayLocation" [closeOnClick]="true">
-        <h3 *ngIf="directional.routeTitle" [ngClass]="resources.getTextAlignment(directional.routeTitle)" [dir]="resources.getDirection(directional.routeTitle)" class="chrome-wordwrap-fix">{{directional.routeTitle}}</h3>
+    @if (directional.overlayLocation) {
+      <mgl-popup [lngLat]="directional.overlayLocation" [closeOnClick]="true">
+        @if (directional.routeTitle) {
+          <h3 [ngClass]="resources.getTextAlignment(directional.routeTitle)" [dir]="resources.getDirection(directional.routeTitle)" class="chrome-wordwrap-fix">{{directional.routeTitle}}</h3>
+        }
         <div class="flex flex-row">
-            <div class="w-1/3">
-                <button mat-button class="w-full" (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Convert search to route"><i class="fa icon-plus"></i></button>
-            </div>
-            <div class="w-1/3">
-                <button mat-button class="w-full" (click)="clearDirectionalRoute()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Remove search route from map"><i class="fa icon-eye-slash"></i></button>
-            </div>
-            <div class="flex-1">
-                <button mat-button class="w-full" (click)="showCoordinates = !showCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Toggle coordinates"><i class="fa icon-globe"></i></button>
-            </div>
+          <div class="w-1/3">
+            <button mat-button class="w-full" (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Convert search to route"><i class="fa icon-plus"></i></button>
+          </div>
+          <div class="w-1/3">
+            <button mat-button class="w-full" (click)="clearDirectionalRoute()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Remove search route from map"><i class="fa icon-eye-slash"></i></button>
+          </div>
+          <div class="flex-1">
+            <button mat-button class="w-full" (click)="showCoordinates = !showCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Toggle coordinates"><i class="fa icon-globe"></i></button>
+          </div>
         </div>
-        <div *ngIf="showCoordinates">
+        @if (showCoordinates) {
+          <div>
             <coordinates [latlng]="directional.overlayLocation"></coordinates>
-        </div>
-    </mgl-popup>
-</div>
+          </div>
+        }
+      </mgl-popup>
+    }
+  </div>
+}

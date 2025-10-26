@@ -1,95 +1,105 @@
-﻿﻿<div class="sidebar-header flex flex-row justify-center items-center sticky top-0 z-10 bg-white" [dir]="resources.direction">
-    <div class="flex-1 text-center text-xl title">{{resources.about}} - {{resources.legend}}</div>
-    <button mat-button class="w-1/6" type="button" (click)="close()" tabindex="-1"><i class="fa fa-lg icon-close"></i></button>
+﻿<div class="sidebar-header flex flex-row justify-center items-center sticky top-0 z-10 bg-white" [dir]="resources.direction">
+  <div class="flex-1 text-center text-xl title">{{resources.about}} - {{resources.legend}}</div>
+  <button mat-button class="w-1/6" type="button" (click)="close()" tabindex="-1"><i class="fa fa-lg icon-close"></i></button>
 </div>
 <div [dir]="resources.direction">
-    <mat-tab-group [selectedIndex]="selectedTabIndex" (selectedIndexChange)="selectedTabChanged($event)" [dynamicHeight]="'true'">
-        <mat-tab label="{{resources.about}}">
-            <mat-card appearance="outlined">
-                <mat-card-content>
-                    <p><span [innerHtml]="resources.infoSubheader"></span></p>
-                    <div *ngIf="!isApp()" class="flex flex-row justify-center items-center">
-                        <a [href]="androidAppUrl" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Download from google play store">
-                            <img src="content/google-play-badge.png" width="200" />
-                        </a>
-                    </div>
-                    <div *ngIf="!isApp()" class="flex flex-row justify-center items-center">
-                        <a [href]="iosAppUrl" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Download from app store">
-                            <img src="content/app-store-badge.png" width="200" />
-                        </a>
-                    </div>
-                    <div *ngIf="isMobile()" class="flex flex-row">
-                        <div class="w-1/6 text-center"><i class="fa icon-question-circle-o w-full"></i></div>
-                        <div class="flex-1">{{resources.longPressHint}}</div>
-                    </div>
-                    <h4>{{resources.infoHelpfulLinks}}</h4>
-                    <div class="flex flex-row">
-                        <div class="w-1/6 text-center"><i class="fa icon-question-circle-o w-full"></i></div>
-                        <div class="flex-1">
-                            <a class="w-full link" href="https://github.com/IsraelHikingMap/Site/wiki/Israel-Hiking-Maps-FAQ" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="FAQ">{{resources.infoFAQLink}}</a>
-                        </div>
-                    </div>
-                    <mat-divider></mat-divider>
-                    <div class="flex flex-row">
-                        <div class="w-1/6 text-center"><i class="fa icon-facebook w-full"></i></div>
-                        <div class="flex-1">
-                            <a class="w-full link" href="https://www.facebook.com/groups/israelhikingmap/" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Facebook group">{{resources.infoFacebookLink}}</a>
-                        </div>
-                    </div>
-                    <mat-divider></mat-divider>
-                    <div class="flex flex-row">
-                        <div class="w-1/6 text-center"><i class="fa icon-github w-full"></i></div>
-                        <div class="flex-1">
-                            <a class="w-full link" href="https://www.github.com/IsraelHikingMap" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Github">{{resources.infoGithubLink}}</a>
-                        </div>
-                    </div>
-                    <mat-divider></mat-divider>
-                    <div class="flex flex-row">
-                        <div class="w-1/6 text-center"><i class="fa icon-wikipedia-w w-full"></i></div>
-                        <div class="flex-1">
-                            <a class="w-full link" href="https://wiki.openstreetmap.org/wiki/WikiProject_Israel" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="OSM Wiki">{{resources.infoOsmWikiLink}}</a>
-                        </div>
-                    </div>
-                    <mat-divider></mat-divider>
-                    <div class="flex flex-row">
-                        <div class="w-1/6 text-center"><i class="fa icon-edit w-full"></i></div>
-                        <div class="flex-1">
-                            <a class="w-full link" href="https://israelhiking.osm.org.il/terms-of-service-and-privacy-policy.html" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Terms of service">{{resources.infoPrivacyPolicyTermsOfService}}</a>
-                        </div>
-                    </div>
-                    <mat-divider></mat-divider>
-                    <div class="flex flex-row">
-                        <div class="w-1/6 text-center"><i class="fa icon-layers w-full"></i></div>
-                        <div class="flex-1">
-                            <a class="w-full link" href="https://github.com/IsraelHikingMap/Site/wiki/Attribution" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="FAQ">{{resources.attribution}}</a>
-                        </div>
-                    </div>
-                    <br />
-                    <p>
-                        <i>
-                            {{resources.infoFooterThanks}}<br />
-                            {{resources.infoFooterAuthors}}<br />
-                        </i>
-                    </p>
-                </mat-card-content>
-            </mat-card>
-        </mat-tab>
-        <mat-tab label="{{resources.legend}}">
-            <div *ngIf="legendSections.length === 0">
-                <p>{{resources.legendEmpty}}</p>
+  <mat-tab-group [selectedIndex]="selectedTabIndex" (selectedIndexChange)="selectedTabChanged($event)" [dynamicHeight]="'true'">
+    <mat-tab label="{{resources.about}}">
+      <mat-card appearance="outlined">
+        <mat-card-content>
+          <p><span [innerHtml]="resources.infoSubheader"></span></p>
+          @if (!isApp()) {
+            <div class="flex flex-row justify-center items-center">
+              <a [href]="androidAppUrl" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Download from google play store">
+                <img src="content/google-play-badge.png" width="200" />
+              </a>
             </div>
-            <mat-accordion>
-                <mat-expansion-panel *ngFor="let section of legendSections" [id]="section.key" (opened)="openSection(section)">
-                    <mat-expansion-panel-header [ngxScrollTo]="section.key">
-                        {{section.title}}
-                    </mat-expansion-panel-header>
-                    <div *ngIf="isSectionOpen(section)">
-                        <legend-item *ngFor="let item of section.items" [item]="item"></legend-item>
-                    </div>
-                </mat-expansion-panel>
-            </mat-accordion>
-        </mat-tab>
-    </mat-tab-group>
+            <div class="flex flex-row justify-center items-center">
+              <a [href]="iosAppUrl" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Download from app store">
+                <img src="content/app-store-badge.png" width="200" />
+              </a>
+            </div>
+          }
+          @if (isMobile()) {
+            <div class="flex flex-row">
+              <div class="w-1/6 text-center"><i class="fa icon-question-circle-o w-full"></i></div>
+              <div class="flex-1">{{resources.longPressHint}}</div>
+            </div>
+          }
+          <h4>{{resources.infoHelpfulLinks}}</h4>
+          <div class="flex flex-row">
+            <div class="w-1/6 text-center"><i class="fa icon-question-circle-o w-full"></i></div>
+            <div class="flex-1">
+              <a class="w-full link" href="https://github.com/IsraelHikingMap/Site/wiki/Israel-Hiking-Maps-FAQ" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="FAQ">{{resources.infoFAQLink}}</a>
+            </div>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="flex flex-row">
+            <div class="w-1/6 text-center"><i class="fa icon-facebook w-full"></i></div>
+            <div class="flex-1">
+              <a class="w-full link" href="https://www.facebook.com/groups/israelhikingmap/" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Facebook group">{{resources.infoFacebookLink}}</a>
+            </div>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="flex flex-row">
+            <div class="w-1/6 text-center"><i class="fa icon-github w-full"></i></div>
+            <div class="flex-1">
+              <a class="w-full link" href="https://www.github.com/IsraelHikingMap" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Github">{{resources.infoGithubLink}}</a>
+            </div>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="flex flex-row">
+            <div class="w-1/6 text-center"><i class="fa icon-wikipedia-w w-full"></i></div>
+            <div class="flex-1">
+              <a class="w-full link" href="https://wiki.openstreetmap.org/wiki/WikiProject_Israel" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="OSM Wiki">{{resources.infoOsmWikiLink}}</a>
+            </div>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="flex flex-row">
+            <div class="w-1/6 text-center"><i class="fa icon-edit w-full"></i></div>
+            <div class="flex-1">
+              <a class="w-full link" href="https://israelhiking.osm.org.il/terms-of-service-and-privacy-policy.html" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Terms of service">{{resources.infoPrivacyPolicyTermsOfService}}</a>
+            </div>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="flex flex-row">
+            <div class="w-1/6 text-center"><i class="fa icon-layers w-full"></i></div>
+            <div class="flex-1">
+              <a class="w-full link" href="https://github.com/IsraelHikingMap/Site/wiki/Attribution" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="FAQ">{{resources.attribution}}</a>
+            </div>
+          </div>
+          <br />
+          <p>
+            <i>
+              {{resources.infoFooterThanks}}<br />
+              {{resources.infoFooterAuthors}}<br />
+            </i>
+          </p>
+        </mat-card-content>
+      </mat-card>
+    </mat-tab>
+    <mat-tab label="{{resources.legend}}">
+      @if (legendSections.length === 0) {
+        <div>
+          <p>{{resources.legendEmpty}}</p>
+        </div>
+      }
+      <mat-accordion>
+        @for (section of legendSections; track section) {
+          <mat-expansion-panel [id]="section.key" (opened)="openSection(section)">
+            <mat-expansion-panel-header [ngxScrollTo]="section.key">
+              {{section.title}}
+            </mat-expansion-panel-header>
+            @if (isSectionOpen(section)) {
+              @for (item of section.items; track item) {
+                <legend-item [item]="item"></legend-item>
+              }
+            }
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+    </mat-tab>
+  </mat-tab-group>
 </div>
 
 
