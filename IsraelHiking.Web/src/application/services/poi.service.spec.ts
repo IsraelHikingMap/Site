@@ -493,7 +493,7 @@ describe("Poi Service", () => {
                 mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes(id) &&
                         request.url.includes(source)).flush("Some error", { status: 500, statusText: "Time out"});
 
-                await expectAsync(promise).toBeRejectedWithError(/Failed to load POI .* from offline or in-memory tiles after .*/)
+                await expect(promise).rejects.toThrowError(/Failed to load POI .* from offline or in-memory tiles after .*/);
             }
         )
     ));
