@@ -2,7 +2,7 @@ import { Component, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
-import { NgIf } from "@angular/common";
+
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { MapComponent, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent } from "@maplibre/ngx-maplibre-gl";
 import { Angulartics2OnModule } from "angulartics2";
@@ -28,7 +28,7 @@ import type { LatLngAlt, ApplicationState } from "../models";
     selector: "location",
     templateUrl: "./location.component.html",
     styleUrls: ["./location.component.scss"],
-    imports: [MatButton, Angulartics2OnModule, MatTooltip, NgIf, MatProgressSpinner, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, GpsLocationOverlayComponent]
+    imports: [MatButton, Angulartics2OnModule, MatTooltip, MatProgressSpinner, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, GpsLocationOverlayComponent]
 })
 export class LocationComponent {
     public locationFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;

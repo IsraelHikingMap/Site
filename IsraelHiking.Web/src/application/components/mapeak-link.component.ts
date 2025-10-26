@@ -1,6 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { MatTooltip } from "@angular/material/tooltip";
-import { NgIf } from "@angular/common";
+
 import { Angulartics2OnModule } from "angulartics2";
 
 import { HashService } from "../services/hash.service";
@@ -12,7 +12,7 @@ import { Urls } from "../urls";
     selector: "mapeak-link",
     templateUrl: "./mapeak-link.component.html",
     styleUrls: ["./mapeak-link.component.scss"],
-    imports: [Angulartics2OnModule, MatTooltip, NgIf]
+    imports: [Angulartics2OnModule, MatTooltip]
 })
 export class MapeakLinkComponent {
 

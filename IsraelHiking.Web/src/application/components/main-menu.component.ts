@@ -1,6 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { NgIf, NgClass, AsyncPipe } from "@angular/common";
+import { NgClass, AsyncPipe } from "@angular/common";
 import { MatButton } from "@angular/material/button";
 import { MatMenuTrigger, MatMenu, MatMenuContent, MatMenuItem } from "@angular/material/menu";
 import { Dir } from "@angular/cdk/bidi";
@@ -42,7 +42,7 @@ import type { UserInfo, ApplicationState } from "../models";
     selector: "main-menu",
     templateUrl: "./main-menu.component.html",
     styleUrls: ["./main-menu.component.scss"],
-    imports: [NgIf, MatButton, Angulartics2OnModule, MatMenuTrigger, NgClass, MatMenu, MatMenuContent, Dir, MatMenuItem, AsyncPipe, OfflineImagePipe]
+    imports: [MatButton, Angulartics2OnModule, MatMenuTrigger, NgClass, MatMenu, MatMenuContent, Dir, MatMenuItem, AsyncPipe, OfflineImagePipe]
 })
 export class MainMenuComponent {
 

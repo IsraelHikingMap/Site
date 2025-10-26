@@ -1,5 +1,5 @@
 import { Component, OnChanges, SimpleChanges, input, inject, output } from "@angular/core";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { MatAnchor, MatButton } from "@angular/material/button";
 import { Dir } from "@angular/cdk/bidi";
 import { Angulartics2OnModule } from "angulartics2";
@@ -18,7 +18,7 @@ import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.j
 @Component({
     selector: "image-scroller",
     templateUrl: "./image-scroller.component.html",
-    imports: [NgIf, LottieComponent, MatAnchor, ImageCaptureDirective, Angulartics2OnModule, MatButton, Dir, AsyncPipe, OfflineImagePipe]
+    imports: [LottieComponent, MatAnchor, ImageCaptureDirective, Angulartics2OnModule, MatButton, Dir, AsyncPipe, OfflineImagePipe]
 })
 export class ImageScrollerComponent implements OnChanges {
     lottiePOI: AnimationOptions = {

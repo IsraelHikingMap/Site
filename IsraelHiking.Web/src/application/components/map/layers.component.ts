@@ -1,5 +1,5 @@
 import { Component, inject } from "@angular/core";
-import { NgFor, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { Angulartics2OnModule } from "angulartics2";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
@@ -13,7 +13,7 @@ import type { ApplicationState, Overlay } from "../../models";
 @Component({
     selector: "layers",
     templateUrl: "layers.component.html",
-    imports: [AutomaticLayerPresentationComponent, NgFor, Angulartics2OnModule, AsyncPipe]
+    imports: [AutomaticLayerPresentationComponent, Angulartics2OnModule, AsyncPipe]
 })
 export class LayersComponent {
     public overlays$: Observable<Immutable<Overlay[]>>;	

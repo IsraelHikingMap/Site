@@ -4,7 +4,7 @@ import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTabGroup, MatTab } from "@angular/material/tabs";
 import { MatCard, MatCardContent } from "@angular/material/card";
-import { NgIf, NgFor } from "@angular/common";
+
 import { MatDivider } from "@angular/material/divider";
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from "@angular/material/expansion";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
@@ -32,7 +32,7 @@ export type LegendSection = {
     selector: "info-sidebar",
     templateUrl: "./info-sidebar.component.html",
     styleUrls: ["./info-sidebar.component.scss"],
-    imports: [Dir, MatButton, MatTabGroup, MatTab, MatCard, MatCardContent, NgIf, Angulartics2OnModule, MatDivider, MatAccordion, NgFor, MatExpansionPanel, MatExpansionPanelHeader, ScrollToModule, LegendItemComponent]
+    imports: [Dir, MatButton, MatTabGroup, MatTab, MatCard, MatCardContent, Angulartics2OnModule, MatDivider, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, ScrollToModule, LegendItemComponent]
 })
 export class InfoSidebarComponent {
     public legendSections: LegendSection[] = [];

@@ -1,6 +1,5 @@
 import { Component, inject } from "@angular/core";
 import { MatDialog, MatDialogActions, MatDialogClose, MatDialogTitle } from "@angular/material/dialog";
-import { NgIf } from "@angular/common";
 import { Store } from "@ngxs/store";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { Map, MapMouseEvent, MercatorCoordinate, LngLatLike, StyleSpecification } from "maplibre-gl";
@@ -22,7 +21,7 @@ import type { ApplicationState, EditableLayer } from "../../models";
     selector: "offline-management-dialog",
     templateUrl: "./offline-management-dialog.component.html",
     styleUrls: ["./offline-management-dialog.component.scss"],
-    imports: [MapComponent, Angulartics2OnModule, MatDialogActions, MatDialogTitle, MatDialogClose, MatButton, LayerComponent, GeoJSONSourceComponent, NgIf, AutomaticLayerPresentationComponent],
+    imports: [MapComponent, Angulartics2OnModule, MatDialogActions, MatDialogTitle, MatDialogClose, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent],
 })
 export class OfflineManagementDialogComponent {
     public offlineMapStyle: StyleSpecification;
