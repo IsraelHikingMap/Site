@@ -5,13 +5,11 @@
   [isMainMap]="true">
 </auto-layer>
 @for (overlay of (overlays$ | async); track trackByKey($index, overlay)) {
-  <div>
-    <auto-layer [layerData]="overlay"
-      [visible]="overlay.visible"
-      [before]="resources.endOfOverlays"
-      [isBaselayer]="false"
-      [isMainMap]="true"
-      [isSameBaselayerOn]="isSameBaselayerOn(overlay)">
-    </auto-layer>
-  </div>
+  <auto-layer [layerData]="overlay"
+    [visible]="overlay.visible"
+    [before]="resources.endOfOverlays"
+    [isBaselayer]="false"
+    [isMainMap]="true"
+    [isSameBaselayerOn]="isSameBaselayerOn(overlay)">
+  </auto-layer>
 }

@@ -1,19 +1,17 @@
 ﻿@if (images().length === 0) {
   <div class="flex flex-row">
-    @if (!canEdit()) {
-      <div class="img-container-small" style="overflow: hidden;">
-        <ng-lottie class="img-responsive img-center" [options]="lottiePOI"></ng-lottie>
-      </div>
-    }
     @if (canEdit()) {
       <label class="w-full" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
         <a mat-button imageCapture class="w-full h-unset" (changed)="add($event)" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload image first image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
         <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*;capture=camera" multiple />
       </label>
+    } @else {
+      <div class="img-container-small" style="overflow: hidden;">
+        <ng-lottie class="img-responsive img-center" [options]="lottiePOI"></ng-lottie>
+      </div>
     }
   </div>
-}
-@if (images().length > 0) {
+} @else {
   <div class="flex flex-row">
     <div class="img-container-small" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
       <img [src]="getCurrentImage() | offlineImage:true | async"
@@ -39,13 +37,10 @@
           <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*;capture=camera" multiple />
         </label>
       </div>
-    }
-    @if (canEdit()) {
       <div class="flex-1">
         <button mat-button class="w-full" (click)="remove()"><i class="fa icon-trash"></i></button>
       </div>
-    }
-    @if (!canEdit()) {
+    } @else {
       <div class="flex-1" >
         <div class="w-full text-center" dir="ltr">{{getIndexString()}}</div>
       </div>

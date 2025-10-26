@@ -1,23 +1,15 @@
 ﻿@if (visible) {
   <div class="sidebar-wrapper" [dir]="resources.direction" [@animateSidebar]="{value: '', params: {startTransform: resources.direction === 'rtl' ? 'translateX(-100%)' : 'translateX(100%)'} }">
-    <div>
-      @switch (viewName) {
-        @case ('layers') {
-          <div>
-            <layers-sidebar></layers-sidebar>
-          </div>
-        }
-        @case ('info') {
-          <div>
-            <info-sidebar></info-sidebar>
-          </div>
-        }
-        @case ('public-poi') {
-          <div>
-            <public-poi-sidebar></public-poi-sidebar>
-          </div>
-        }
+    @switch (viewName) {
+      @case ('layers') {
+        <layers-sidebar></layers-sidebar>
       }
-    </div>
+      @case ('info') {
+        <info-sidebar></info-sidebar>
+      }
+      @case ('public-poi') {
+        <public-poi-sidebar></public-poi-sidebar>
+      }
+    }
   </div>
 }

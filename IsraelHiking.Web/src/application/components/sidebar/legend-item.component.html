@@ -5,8 +5,7 @@
   <div class="legend-item-text-container" matTooltip="{{item().osmTags.join(', ')}}" matTooltipPosition="{{item().type === 'Way' ? 'above' : 'right'}}">
     @if (item().link) {
       <a [href]="getLink()" [target]="'_blank'" class="legend-item-text" angulartics2On="click" angularticsCategory="Info" angularticsAction="Legend text OSM link" >{{item().title}}</a>
-    }
-    @if (!item().link) {
+    } @else {
       <span class="legend-item-text">{{item().title}}</span>
     }
   </div>

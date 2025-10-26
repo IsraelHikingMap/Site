@@ -86,7 +86,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     private readonly runningContextSerivce = inject(RunningContextService);
     private readonly navigateHereService = inject(NavigateHereService);
     private readonly geoJsonParser = inject(GeoJsonParser);
-    private readonly elevasionProvider = inject(ElevationProvider);
+    private readonly elevationProvider = inject(ElevationProvider);
     private readonly translationService = inject(TranslationService);
     private readonly store = inject(Store);
 
@@ -274,10 +274,15 @@ export class PublicPoiSidebarComponent implements OnDestroy {
 
     public async convertToRoute() {
         const routes = this.geoJsonParser.toRoutes(this.fullFeature as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString>);
-        for (const route of routes) {
+        const featureColor = GeoJSONUtils.getFeatureColor(this.fullFeature);
+        for (let i = 0; i < routes.length; i++) {
+            const route = routes[i];
             const name = this.selectedRouteService.createRouteName(route.name);
             const newRoute = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
-            await this.elevasionProvider.updateHeights(route.latlngs);
+            if (i === 0 && featureColor) {
+                newRoute.color = featureColor;
+            }
+            await this.elevationProvider.updateHeights(route.latlngs);
             newRoute.description = this.description;
             newRoute.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs as LatLngAltTime[], "Hike");
             this.store.dispatch(new AddRouteAction(newRoute));

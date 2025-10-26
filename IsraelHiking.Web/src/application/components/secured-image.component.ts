@@ -26,8 +26,10 @@ export class SecuredImageComponent implements OnChanges {
     // new resource would be loaded
     dataUrl$ = this.src$.pipe(switchMap(url => this.loadImage(url)));
 
-    private readonly httpClient: HttpClient = inject(HttpClient);
-    private readonly domSanitizer: DomSanitizer = inject(DomSanitizer);
+    private readonly httpClient = inject(HttpClient);
+    private readonly domSanitizer = inject(DomSanitizer);
+
+    constructor() { }
 
     public ngOnChanges(): void {
         this.src$.next(this.src());

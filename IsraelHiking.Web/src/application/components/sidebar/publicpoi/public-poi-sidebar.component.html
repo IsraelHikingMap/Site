@@ -2,8 +2,7 @@
   <div [dir]="resources.direction">
     <public-poi-edit [info]="osmEditableInfo"></public-poi-edit>
   </div>
-}
-@if (!isEditMode()) {
+} @else {
   <div [dir]="resources.direction" [class.minimized]="isMinimized">
     <div class="flex flex-row sticky top-0 z-10 bg-white">
       @if (!isHideEditMode()) {
@@ -18,8 +17,7 @@
         <div class="flex-1">
           <button mat-button class="w-full min-w-unset p-0!" (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to route"><i class="fa icon-plus"></i></button>
         </div>
-      }
-      @if (!isRoute()) {
+      } @else {
         <div class="flex-1">
           <button mat-button class="w-full min-w-unset p-0!" (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to point"><i class="fa icon-plus"></i></button>
         </div>
@@ -29,18 +27,13 @@
           <mat-menu #appMenu="matMenu">
             <div mat-menu-item disableRipple="true">
               <div class="flex flex-row">
-                @if (!isApp()) {
-                  <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks.facebook" [target]="'_blank'" matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook poi"><i class="fa icon-facebook"></i></a></div>
-                }
-                @if (!isApp()) {
-                  <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks.whatsapp" [target]="'_blank'" matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatsapp poi"><i class="fa icon-whatsapp"></i></a></div>
-                }
                 <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks.waze" [target]="'_blank'" matTooltip="{{resources.navigateWithWaze}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Navigate with waze"><i class="fa icon-waze"></i></a></div>
-                @if (!isApp()) {
-                  <div class="flex-1"><button mat-button class="w-full" [cdkCopyToClipboard]="shareLinks.poiLink" matTooltip="{{resources.copyUrl}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard poi"><i class="fa icon-clipboard"></i></button></div>
-                }
                 @if (isApp()) {
                   <div class="flex-1"><button mat-button class="w-full" (click)=share() matTooltip="{{resources.share}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share with os capabilities"><i class="fa icon-ellipsis-v"></i></button></div>
+                } @else {
+                  <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks.facebook" [target]="'_blank'" matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook poi"><i class="fa icon-facebook"></i></a></div>
+                  <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks.whatsapp" [target]="'_blank'" matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatsapp poi"><i class="fa icon-whatsapp"></i></a></div>
+                  <div class="flex-1"><button mat-button class="w-full" [cdkCopyToClipboard]="shareLinks.poiLink" matTooltip="{{resources.copyUrl}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard poi"><i class="fa icon-clipboard"></i></button></div>
                 }
               </div>
             </div>
@@ -60,12 +53,11 @@
       }
       <div class="flex-1">
         <button mat-button class="w-full min-w-unset p-0!" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below">
-          @if (!isLoading) {
-            <i class="fa icon-close"></i>
-          }
           @if (isLoading) {
             <mat-spinner diameter="24"></mat-spinner>
-          }
+          } @else {
+            <i class="fa icon-close"></i>
+          }          
         </button>
       </div>
     </div>
@@ -76,8 +68,7 @@
             <a [href]="getUrl()" [target]="'_blank'" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site from title">
               <span class="text-xl">{{title}}</span>
             </a>
-          }
-          @if (!hasUrl()) {
+          } @else {
             <span class="text-xl">{{title}}</span>
           }
         </mat-card-title>
@@ -116,8 +107,7 @@
                 <div style="width: 32px; height: 32px">
                   <i class="fa fa-2x icon-external-link"></i>
                 </div>
-              }
-              @if (urlPair.imageUrl) {
+              } @else {
                 <img [src]="urlPair.imageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(title)" />
               }
             </a>

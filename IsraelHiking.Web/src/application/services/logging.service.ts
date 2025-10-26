@@ -28,6 +28,7 @@ export class LoggingService {
 
     private loggingDatabase: Dexie;
     private logToConsole: boolean;
+    private deletingLogsInProgress = false;
 
     public async initialize(logToConsole = true) {
         this.loggingDatabase = new Dexie(LoggingService.LOGGING_DB_NAME);
@@ -42,6 +43,9 @@ export class LoggingService {
     }
 
     private async reduceStoredLogLinesIfNeeded() {
+        if (this.deletingLogsInProgress) {
+            return;
+        }
         const lines = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).count();
         if (lines <= LoggingService.MAX_LOG_LINES) {
             return;
@@ -50,8 +54,13 @@ export class LoggingService {
             .orderBy("date")
             .primaryKeys();
         // keep only last MAX_LOG_LINES - 10% to reduce the need to do it every time.
-        keysToDelete.splice(keysToDelete.length - LoggingService.MAX_LOG_LINES, LoggingService.MAX_LOG_LINES * 0.9);
-        await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).bulkDelete(keysToDelete);
+        keysToDelete.splice(keysToDelete.length - LoggingService.MAX_LOG_LINES, LoggingService.MAX_LOG_LINES * 0.9);       
+        this.deletingLogsInProgress = true;
+        try {
+            await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).bulkDelete(keysToDelete);
+        } finally {
+            this.deletingLogsInProgress = false;
+        }
     }
 
     private writeToStorage(logLine: LogLine): void {

@@ -445,4 +445,11 @@ export class SpatialService {
             coordinates: coordinatesGroups
         };
     }
+
+    public static isJammingTarget(latlng: LatLngAlt): boolean {
+        const position = SpatialService.toCoordinate(latlng);
+        return SpatialService.insideBbox(position, [35.48, 33.811, 35.50, 33.823]) ||
+            SpatialService.insideBbox(position, [31.350, 30.0817, 31.355, 30.0860]) ||
+            SpatialService.insideBbox(position, [35.98, 31.70, 36.02, 31.73]);
+    }
 }

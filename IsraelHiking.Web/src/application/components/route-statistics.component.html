@@ -24,8 +24,7 @@
                     <span>{{toShortNumber(length)}} <span class="units">{{getUnits(length)}}</span></span>
                   </div>
                 </mat-grid-tile>
-              }
-              @if (isFollowing) {
+              } @else {
                 <mat-grid-tile>
                   <div class="flex flex-col items-center">
                     ETA
@@ -56,8 +55,7 @@
                   <i class="fa icon-avg-speed"></i>
                   @if (averageSpeed) {
                     <span>{{averageSpeed | number: '1.0-2'}} <span class="units">{{resources.kmPerHourUnit}}</span></span>
-                  }
-                  @if (!averageSpeed) {
+                  } @else {
                     <span>--</span>
                   }
                 </div>
@@ -67,16 +65,14 @@
                   <i class="fa icon-speed"></i>
                   @if (currentSpeed) {
                     <span>{{currentSpeed | number: '1.0-2'}} <span class="units">{{resources.kmPerHourUnit}}</span></span>
-                  }
-                  @if (!currentSpeed) {
+                  } @else {
                     <span>--</span>
                   }
                 </div>
               </mat-grid-tile>
             </mat-grid-list>
           </div>
-        }
-        @if (!isTable) {
+        } @else {
           <div class="chart-container" #lineChartContainer>
             <svg direction="ltr"></svg>
             @if (subRouteRange && subRouteRange.xEnd) {
@@ -121,8 +117,7 @@
           <button mat-button class="m-1" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="More"><i class="fa icon-ellipsis-v fa-lg"></i></button>
         </div>
       </div>
-    }
-    @if (!isOpen) {
+    } @else {
       <div class="flex flex-row" (click)="toggle()" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Route statistics open">
         <button mat-button [class.active]="isOpen" matTooltip="{{resources.routeStatistics}}" matTooltipPosition="above"><i class="fa {{isTable ? 'icon-table' : 'icon-area-chart'}} fa-lg"></i></button>
         @if (!isFollowing) {
@@ -135,8 +130,7 @@
           <div matTooltip="{{resources.length}}" matTooltipPosition="above">
             <span class="control-container-item gutters"><i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} <span class="units">{{getUnits(length)}}</span></span>
           </div>
-        }
-        @if (isFollowing) {
+        } @else {
           <div>
             <span class="control-container-item gutters">ETA <span dir="ltr">{{ETA}}</span></span>
           </div>

@@ -6,8 +6,7 @@
         <button mat-button class="high-button" [matMenuTriggerFor]="userMenu" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Toggle user menu">
           @if (userInfo?.imageUrl) {
             <img class="space-after profile-image" [src]="userInfo.imageUrl | offlineImage:true | async" alt=""/>
-          }
-          @if (!userInfo.imageUrl) {
+          } @else {
             <i class="fa icon-user fa-lg"></i>
           }
         </button>

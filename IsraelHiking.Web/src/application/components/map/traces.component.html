@@ -35,37 +35,33 @@
 
 
 @if (selectedTraceStart) {
-  <div>
-    <mgl-marker [lngLat]="selectedTraceStart" #tracesConfigMarker>
-      <span class='fa-stack fa-lg'>
-        <i class='fa icon-map-marker fa-stack-2x' style='color:white;text-shadow: 3px 3px 3px #000;'></i>
-        <i class='fa icon-cog fa-stack-1x stack-icon-top' style='color:magenta;'></i>
-      </span>
-    </mgl-marker>
-    <mgl-popup [marker]="tracesConfigMarker" (popupClose)="isConfigOpen = false">
-      <div [dir]="resources.direction">
-        @if (visibleTraceName) {
-          <h3 [ngClass]="resources.getTextAlignment(visibleTraceName)" [dir]="resources.getDirection(visibleTraceName)" class="chrome-wordwrap-fix">{{visibleTraceName}}</h3>
-        }
-        <div class="flex flex-row">
-          <div class="w-1/3">
-            <button mat-button class="w-full min-w-unset" (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Convert trace to route"><i class="fa icon-plus"></i></button>
-          </div>
-          <div class="w-1/3">
-            <button mat-button class="w-full min-w-unset" (click)="clearTrace()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Remove trace from map"><i class="fa icon-eye-slash"></i></button>
-          </div>
-          <div class="w-1/3">
-            <button mat-button class="w-full min-w-unset" (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
-          </div>
+  <mgl-marker [lngLat]="selectedTraceStart" #tracesConfigMarker>
+    <span class='fa-stack fa-lg'>
+      <i class='fa icon-map-marker fa-stack-2x' style='color:white;text-shadow: 3px 3px 3px #000;'></i>
+      <i class='fa icon-cog fa-stack-1x stack-icon-top' style='color:magenta;'></i>
+    </span>
+  </mgl-marker>
+  <mgl-popup [marker]="tracesConfigMarker" (popupClose)="isConfigOpen = false">
+    <div [dir]="resources.direction">
+      @if (visibleTraceName) {
+        <h3 [ngClass]="resources.getTextAlignment(visibleTraceName)" [dir]="resources.getDirection(visibleTraceName)" class="chrome-wordwrap-fix">{{visibleTraceName}}</h3>
+      }
+      <div class="flex flex-row">
+        <div class="w-1/3">
+          <button mat-button class="w-full min-w-unset" (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Convert trace to route"><i class="fa icon-plus"></i></button>
         </div>
-        @if (!hideCoordinates) {
-          <div>
-            <coordinates [latlng]="selectedTraceStart"></coordinates>
-          </div>
-        }
+        <div class="w-1/3">
+          <button mat-button class="w-full min-w-unset" (click)="clearTrace()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Remove trace from map"><i class="fa icon-eye-slash"></i></button>
+        </div>
+        <div class="w-1/3">
+          <button mat-button class="w-full min-w-unset" (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
+        </div>
       </div>
-    </mgl-popup>
-  </div>
+      @if (!hideCoordinates) {
+        <coordinates [latlng]="selectedTraceStart"></coordinates>
+      }
+    </div>
+  </mgl-popup>
 }
 <mgl-geojson-source id="missing-parts" [data]="missingParts"></mgl-geojson-source>
 <mgl-layer id="missing-part-line"
@@ -91,14 +87,12 @@
   </mgl-popup>
 }
 @for (feature of missingParts.features; track feature) {
-  <div>
-    <mgl-marker [lngLat]="getLatLngLikeForFeature(feature)" anchor="bottom">
-      <div (click)="setSelectedFeature(feature, $event)">
-        <span class='fa-stack fa-lg'>
-          <i class='fa icon-map-marker fa-stack-2x' style='color:white;text-shadow: 3px 3px 3px #000;'></i>
-          <i class='fa icon-star fa-stack-1x stack-icon-top' style='color:orange;'></i>
-        </span>
-      </div>
-    </mgl-marker>
-  </div>
+  <mgl-marker [lngLat]="getLatLngLikeForFeature(feature)" anchor="bottom">
+    <div (click)="setSelectedFeature(feature, $event)">
+      <span class='fa-stack fa-lg'>
+        <i class='fa icon-map-marker fa-stack-2x' style='color:white;text-shadow: 3px 3px 3px #000;'></i>
+        <i class='fa icon-star fa-stack-1x stack-icon-top' style='color:orange;'></i>
+      </span>
+    </div>
+  </mgl-marker>
 }

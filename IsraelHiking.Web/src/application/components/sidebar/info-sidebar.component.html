@@ -14,8 +14,6 @@
                 <img src="content/google-play-badge.png" width="200" />
               </a>
             </div>
-          }
-          @if (!isApp()) {
             <div class="flex flex-row justify-center items-center">
               <a [href]="iosAppUrl" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Download from app store">
                 <img src="content/app-store-badge.png" width="200" />
@@ -93,11 +91,9 @@
               {{section.title}}
             </mat-expansion-panel-header>
             @if (isSectionOpen(section)) {
-              <div>
-                @for (item of section.items; track item) {
-                  <legend-item [item]="item"></legend-item>
-                }
-              </div>
+              @for (item of section.items; track item) {
+                <legend-item [item]="item"></legend-item>
+              }
             }
           </mat-expansion-panel>
         }

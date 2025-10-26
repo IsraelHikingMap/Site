@@ -131,8 +131,7 @@ export class RouteStatisticsComponent implements OnInit {
     private readonly store = inject(Store);
     private readonly destroyRef = inject(DestroyRef);
 
-    constructor(
-    ) {
+    constructor() {
         this.store.select((state: ApplicationState) => state.locationState.zoom).pipe(takeUntilDestroyed()).subscribe((zoom) => {
             this.zoom = zoom;
             this.updateKmMarkers();

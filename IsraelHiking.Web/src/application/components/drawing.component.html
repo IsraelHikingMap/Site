@@ -4,14 +4,8 @@
     <button mat-button (click)="toggleEditRoute()" [ngClass]="{active : isRouteEditActive() }" [style.color]="getRouteColor()" matTooltip="{{resources.editRoute}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Draw route toggle"><i class="fa icon-pencil fa-lg"></i></button>
     @if (isRouteEditActive()) {
       <button mat-button class="mt-1" (click)="setRouting('Hike')" [ngClass]="{active : getRoutingType() === 'Hike' }" matTooltip="{{resources.hikeRouting}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Routing Hike"><i class="fa icon-hike fa-lg"></i></button>
-    }
-    @if (isRouteEditActive()) {
       <button mat-button (click)="setRouting('Bike')" [ngClass]="{active : getRoutingType() === 'Bike' }" matTooltip="{{resources.bikeRouting}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Routing Bike"><i class="fa icon-bike fa-lg"></i></button>
-    }
-    @if (isRouteEditActive()) {
       <button mat-button (click)="setRouting('4WD')" [ngClass]="{active : getRoutingType() === '4WD' }" matTooltip="{{resources.fourWheelDriveRouting}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Routing 4WD"><i class="fa icon-four-by-four fa-lg"></i></button>
-    }
-    @if (isRouteEditActive()) {
       <button mat-button (click)="setRouting('None')" [ngClass]="{active : getRoutingType() === 'None' }" matTooltip="{{resources.straightLines}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Routing None"><i class="fa icon-none fa-lg"></i></button>
     }
     <button mat-button (click)="undo()" [disabled]="(undoQueueLength$ | async) === 0" matTooltip="{{resources.undo}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Draw undo"><i class="fa icon-mail-reply fa-lg"></i></button>
@@ -23,8 +17,7 @@
     </mat-menu>
     @if (isEditActive()) {
       <button mat-button [matMenuTriggerFor]="appMenu" matTooltip="{{resources.clear}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Draw clear"><i class="fa icon-trash fa-lg"></i></button>
-    }
-    @if (!isEditActive()) {
+    } @else {
       <button mat-button (click)="deleteAllRoutes()" [disabled]="!canDeleteAllRoutes()" matTooltip="{{resources.deleteAllRoutes}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Delete all routes"><i class="fa icon-trash fa-lg"></i></button>
     }
   </div>

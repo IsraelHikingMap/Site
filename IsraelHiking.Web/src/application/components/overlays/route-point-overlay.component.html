@@ -14,16 +14,13 @@
     <div class="flex-1">
       @if (isMiddle) {
         <button mat-button class="w-full min-w-unset" (click)="split()" matTooltip="{{resources.split}}" matTooltipPosition="above"><i class="fa icon-cut"></i></button>
-      }
-      @if (!isMiddle) {
+      } @else {
         <button mat-button class="w-full min-w-unset" [disabled]="!canMerge" (click)="merge()" matTooltip="{{resources.merge}}" matTooltipPosition="above"><i class="fa icon-merge"></i></button>
       }
     </div>
   </div>
   @if (!hideCoordinates) {
-    <div>
-      <coordinates [latlng]="latlng()"></coordinates>
-    </div>
+    <coordinates [latlng]="latlng()"></coordinates>
   }
 </div>
 

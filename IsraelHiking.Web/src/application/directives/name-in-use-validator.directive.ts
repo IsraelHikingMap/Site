@@ -14,7 +14,9 @@ export class NameInUseValidatorDirective implements Validator, AfterViewInit {
 
     private initialKey: string;
 
-    private readonly layersService: LayersService = inject(LayersService);
+    private readonly layersService = inject(LayersService);
+
+    public constructor() { }
 
     public ngAfterViewInit(): void {
         this.initialKey = this.nameInUse();

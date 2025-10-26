@@ -1,4 +1,4 @@
-﻿<div [dir]="resources.direction">
+﻿﻿<div [dir]="resources.direction">
   <div matDialogTitle>
     <div>
       {{title}}
@@ -25,9 +25,11 @@
               <div class="flex flex-row gap-1">
                 @for (currentColor of colors; track currentColor; let i = $index) {
                   <div class="flex-1" [hidden]="i % 3 !== rowIndex">
-                    <button mat-mini-fab color="primary" class="w-full" type="button" [style.backgroundColor]="currentColor" (click)="routeData.color = currentColor"> @if (currentColor === routeData.color) {
-                      <i class="fa icon-check" [style.color]="getCheckIconColor(currentColor)"></i>
-                    }  </button>
+                    <button mat-mini-fab color="primary" class="w-full" type="button" [style.backgroundColor]="currentColor" (click)="routeData.color = currentColor">
+                      @if (currentColor === routeData.color) {
+                        <i class="fa icon-check" [style.color]="getCheckIconColor(currentColor)"></i>
+                      }
+                    </button>
                   </div>
                 }
               </div>
@@ -53,12 +55,12 @@
     <div class="flex flex-row" style="position: relative">
       <img width="100%" height="50px" src="content/legend/IHM_legendLight4WDVehicles.png">
       <hr class="preview-line"
-        [ngStyle]="{
-            'height': routeData.weight + 'px', 
-            'background-color': routeData.color, 
-            'opacity': routeData.opacity,
-            'margin-top': (17 - (routeData.weight / 2)) + 'px'
-        }" />
+                [ngStyle]="{
+                    'height': routeData.weight + 'px', 
+                    'background-color': routeData.color, 
+                    'opacity': routeData.opacity,
+                    'margin-top': (17 - (routeData.weight / 2)) + 'px'
+                }" />
     </div>
   </div>
   <div mat-dialog-actions>
