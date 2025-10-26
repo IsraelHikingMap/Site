@@ -1,6 +1,6 @@
 import { Component, ElementRef, AfterViewInit, HostListener, inject, viewChild } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
-import { NgStyle, NgClass } from "@angular/common";
+import { NgStyle } from "@angular/common";
 import { MatButton, MatAnchor, MatIconButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatFormField, MatLabel, MatSuffix } from "@angular/material/form-field";
