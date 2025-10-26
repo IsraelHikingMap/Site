@@ -1,4 +1,4 @@
-﻿import {Immutable} from "immer"
+﻿import {type Immutable} from "immer"
 
 import type {
     RouteData,

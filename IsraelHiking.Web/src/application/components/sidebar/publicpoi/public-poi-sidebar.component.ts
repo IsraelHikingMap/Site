@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, ViewEncapsulation } from "@angular/core";
+import { Component, inject, type OnDestroy, ViewEncapsulation } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass, DecimalPipe } from "@angular/common";
@@ -18,10 +18,10 @@ import { Store } from "@ngxs/store";
 import { PublicPointOfInterestEditComponent } from "./public-poi-edit.component";
 import { ImageScrollerComponent } from "./image-scroller.component";
 import { ResourcesService } from "../../../services/resources.service";
-import { PoiService, PoiSocialLinks } from "../../../services/poi.service";
+import { PoiService, type PoiSocialLinks } from "../../../services/poi.service";
 import { IHMTitleService } from "../../../services/ihm-title.service";
 import { ToastService } from "../../../services/toast.service";
-import { RouteStrings, PoiRouteUrlInfo } from "../../../services/hash.service";
+import { RouteStrings, type PoiRouteUrlInfo } from "../../../services/hash.service";
 import { SelectedRouteService } from "../../../services/selected-route.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { FitBoundsService } from "../../../services/fit-bounds.service";

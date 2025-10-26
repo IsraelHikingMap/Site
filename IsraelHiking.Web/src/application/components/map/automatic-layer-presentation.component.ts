@@ -1,6 +1,6 @@
-import { Component, OnInit, OnChanges, SimpleChanges, OnDestroy, OutputRefSubscription, inject, input } from "@angular/core";
+import { Component, type OnInit, type OnChanges, type SimpleChanges, type OnDestroy, type OutputRefSubscription, inject, input } from "@angular/core";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
-import {
+import type {
     StyleSpecification,
     RasterSourceSpecification,
     RasterLayerSpecification,

@@ -1,4 +1,4 @@
-import { State, Action, StateContext } from "@ngxs/store";
+import { State, Action, type StateContext } from "@ngxs/store";
 import { Injectable } from "@angular/core";
 import { produce } from "immer";
 import { orderBy, remove } from "lodash-es";

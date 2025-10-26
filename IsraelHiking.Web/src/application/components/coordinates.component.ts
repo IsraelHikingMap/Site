@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit } from "@angular/core";
+import { Component, inject, input, type OnInit } from "@angular/core";
 import { DecimalPipe } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 

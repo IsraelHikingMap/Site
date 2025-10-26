@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildr
 import { MatDialog } from "@angular/material/dialog";
 import { NgStyle } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
-import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike, IControl, ControlPosition } from "maplibre-gl";
+import { setRTLTextPlugin, type StyleSpecification, ScaleControl, type Unit, type RasterDEMSourceSpecification, type PointLike, type IControl, type ControlPosition } from "maplibre-gl";
 import { NgProgressbar } from "ngx-progressbar";
 import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";

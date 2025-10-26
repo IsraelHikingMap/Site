@@ -1,13 +1,13 @@
-import { Component, AfterViewInit, ViewEncapsulation, inject } from "@angular/core";
+import { Component, type AfterViewInit, ViewEncapsulation, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 import { Dir } from "@angular/cdk/bidi";
 import { MatAnchor, MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MapComponent, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, MarkerComponent } from "@maplibre/ngx-maplibre-gl";
-import { MapLayerMouseEvent } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 import invert from "invert-color";
+import type { MapLayerMouseEvent } from "maplibre-gl";
 import type { Immutable } from "immer";
 
 import { RoutePointOverlayComponent } from "../overlays/route-point-overlay.component";

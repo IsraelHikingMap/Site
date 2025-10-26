@@ -1,4 +1,4 @@
-import { Component, ElementRef, AfterViewInit, InjectionToken, ViewEncapsulation, EventEmitter, viewChild, inject } from "@angular/core";
+import { Component, type ElementRef, type AfterViewInit, InjectionToken, ViewEncapsulation, EventEmitter, viewChild, inject } from "@angular/core";
 import PhotoSwipe from "photoswipe";
 
 import { ResourcesService } from "../services/resources.service";

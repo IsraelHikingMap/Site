@@ -1,4 +1,4 @@
-import { NavigationEnd, provideRouter, Router, UrlTree } from "@angular/router";
+import { NavigationEnd, provideRouter, Router, type UrlTree } from "@angular/router";
 import { vi, expect, it, describe, beforeEach } from "vitest";
 import { NgxsModule, Store } from "@ngxs/store";
 import { TestBed, inject } from "@angular/core/testing";

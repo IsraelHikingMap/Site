@@ -1,10 +1,10 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { HttpEventType, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { vi, expect, it, describe, beforeEach, Mock } from "vitest";
+import { vi, expect, it, describe, beforeEach, type Mock } from "vitest";
 import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
-import { StyleSpecification } from "maplibre-gl";
 import { strToU8, zipSync } from "fflate";
+import type { StyleSpecification } from "maplibre-gl";
 
 import { FileService, SaveAsFactory } from "./file.service";
 import { ImageResizeService } from "./image-resize.service";

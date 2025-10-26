@@ -1,6 +1,6 @@
 import { inject } from "@angular/core";
-import { HttpHandlerFn, HttpRequest, HttpEvent } from "@angular/common/http";
-import { Observable } from "rxjs";
+import type { HttpHandlerFn, HttpRequest, HttpEvent } from "@angular/common/http";
+import type { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
 import { Urls } from "../urls";

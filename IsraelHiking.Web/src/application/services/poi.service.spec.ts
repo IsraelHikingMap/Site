@@ -1,5 +1,5 @@
 import { TestBed, inject } from "@angular/core/testing";
-import { HttpRequest, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { type HttpRequest, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { vi, expect, it, describe, beforeEach } from "vitest";
 import { NgxsModule, Store } from "@ngxs/store";
@@ -8,7 +8,7 @@ import { ResourcesService } from "./resources.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { RunningContextService } from "./running-context.service";
 import { PoiService } from "./poi.service";
-import { HashService, PoiRouteUrlInfo, RouteStrings } from "./hash.service";
+import { HashService, type PoiRouteUrlInfo, RouteStrings } from "./hash.service";
 import { DatabaseService } from "./database.service";
 import { LoggingService } from "./logging.service";
 import { FileService } from "./file.service";

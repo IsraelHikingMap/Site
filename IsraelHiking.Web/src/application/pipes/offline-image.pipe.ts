@@ -1,4 +1,4 @@
-import { inject, Pipe, PipeTransform } from "@angular/core";
+import { inject, Pipe, type PipeTransform } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { encode } from "base64-arraybuffer";
 import { firstValueFrom } from "rxjs";

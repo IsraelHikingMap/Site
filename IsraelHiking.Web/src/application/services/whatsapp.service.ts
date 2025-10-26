@@ -1,5 +1,5 @@
 import { inject, Injectable } from "@angular/core";
-import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
+import { DomSanitizer, type SafeUrl } from "@angular/platform-browser";
 
 import { RunningContextService } from "./running-context.service";
 

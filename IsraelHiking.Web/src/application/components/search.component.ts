@@ -2,7 +2,7 @@ import {
     Component,
     HostListener,
     ViewEncapsulation,
-    ElementRef,
+    type ElementRef,
     inject,
     viewChild,
     viewChildren

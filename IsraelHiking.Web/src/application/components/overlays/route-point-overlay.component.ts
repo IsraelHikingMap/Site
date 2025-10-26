@@ -1,4 +1,4 @@
-import { Component, HostListener, OnChanges, inject, output, input } from "@angular/core";
+import { Component, HostListener, type OnChanges, inject, output, input } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";

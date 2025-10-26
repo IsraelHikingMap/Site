@@ -1,4 +1,4 @@
-﻿import { LatLngAlt } from "./lat-lng";
+﻿import { type LatLngAlt } from "./lat-lng";
 
 export type Bounds = {
     northEast: LatLngAlt;

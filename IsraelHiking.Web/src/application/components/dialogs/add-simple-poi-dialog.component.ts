@@ -2,11 +2,11 @@ import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
-import { MAT_DIALOG_DATA, MatDialog, MatDialogTitle, MatDialogClose, MatDialogContent } from "@angular/material/dialog";
+import { MAT_DIALOG_DATA, type MatDialog, MatDialogTitle, MatDialogClose, MatDialogContent } from "@angular/material/dialog";
 import { Angulartics2OnModule } from "angulartics2";
 
 import { ResourcesService } from "../../services/resources.service";
-import { PoiService, SimplePointType} from "../../services/poi.service";
+import { PoiService, type SimplePointType} from "../../services/poi.service";
 import { ToastService } from "../../services/toast.service";
 import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
 import type { LatLngAlt, LinkData } from "../../models";

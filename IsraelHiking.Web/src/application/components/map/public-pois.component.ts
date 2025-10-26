@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit } from "@angular/core";
+import { Component, DestroyRef, inject, type OnInit } from "@angular/core";
 
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";

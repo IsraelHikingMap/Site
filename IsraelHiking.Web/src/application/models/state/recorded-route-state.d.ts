@@ -1,4 +1,4 @@
-import { RecordedRoute } from "..";
+import { type RecordedRoute } from "..";
 
 export type RecordedRouteState = {
     isRecording: boolean;

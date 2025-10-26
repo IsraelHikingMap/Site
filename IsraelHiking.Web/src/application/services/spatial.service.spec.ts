@@ -3,7 +3,7 @@ import { LngLatBounds } from "maplibre-gl";
 import { expect, it, describe } from "vitest";
 
 import { SpatialService } from "./spatial.service";
-import { Bounds } from "../models";
+import type { Bounds } from "../models";
 
 describe("Spatial service", () => {
     it("Should get length in meters for a line string", () => {

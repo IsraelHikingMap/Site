@@ -1,7 +1,7 @@
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { inject, TestBed } from "@angular/core/testing";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { vi, expect, it, describe, beforeEach, Mock } from "vitest";
+import { vi, expect, it, describe, beforeEach, type Mock } from "vitest";
 import { NgxsModule, Store } from "@ngxs/store";
 
 import { Urls } from "../urls";

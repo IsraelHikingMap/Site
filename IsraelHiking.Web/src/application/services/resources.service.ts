@@ -1,5 +1,5 @@
 import { inject, Injectable } from "@angular/core";
-import { Direction } from "@angular/cdk/bidi";
+import type { Direction } from "@angular/cdk/bidi";
 import { Store } from "@ngxs/store";
 
 import { GetTextCatalogService } from "./gettext-catalog.service";

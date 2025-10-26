@@ -3,7 +3,7 @@ import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http"
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { expect, it, describe, beforeEach } from "vitest";
 
-import { TranslationResponse, TranslationService } from "./translation.service";
+import { type TranslationResponse, TranslationService } from "./translation.service";
 import { ResourcesService } from "./resources.service";
 import { Urls } from "../urls";
 

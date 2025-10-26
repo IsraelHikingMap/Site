@@ -13,7 +13,7 @@ import { Angulartics2GoogleGlobalSiteTag, Angulartics2OnModule } from "angularti
 import { Store } from "@ngxs/store";
 
 import { Urls } from "../../urls";
-import { ILegendItem, LegendItemComponent } from "./legend-item.component";
+import { type ILegendItem, LegendItemComponent } from "./legend-item.component";
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers.service";

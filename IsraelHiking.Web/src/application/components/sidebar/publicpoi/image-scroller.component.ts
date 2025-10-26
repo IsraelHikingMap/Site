@@ -1,9 +1,9 @@
-import { Component, OnChanges, SimpleChanges, input, inject, output } from "@angular/core";
+import { Component, type OnChanges, type SimpleChanges, input, inject, output } from "@angular/core";
 import { AsyncPipe } from "@angular/common";
 import { MatAnchor, MatButton } from "@angular/material/button";
 import { Dir } from "@angular/cdk/bidi";
 import { Angulartics2OnModule } from "angulartics2";
-import { AnimationOptions, LottieComponent } from "ngx-lottie";
+import { type AnimationOptions, LottieComponent } from "ngx-lottie";
 
 import { ImageCaptureDirective } from "../../../directives/image-capture.directive";
 import { OfflineImagePipe } from "../../../pipes/offline-image.pipe";
@@ -12,7 +12,7 @@ import { FileService } from "../../../services/file.service";
 import { ImageGalleryService } from "../../../services/image-gallery.service";
 import { ImageResizeService } from "../../../services/image-resize.service";
 import { RunningContextService } from "../../../services/running-context.service";
-import { ImageAttributionService, ImageAttribution } from "../../../services/image-attribution.service";
+import { ImageAttributionService, type ImageAttribution } from "../../../services/image-attribution.service";
 import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.json";
 
 @Component({

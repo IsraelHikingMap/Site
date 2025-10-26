@@ -11,7 +11,7 @@ import { Store } from "@ngxs/store";
 
 import { ShareDialogComponent } from "./share-dialog.component";
 import { DataContainerService } from "../../services/data-container.service";
-import { FileService, FormatViewModel } from "../../services/file.service";
+import { FileService, type FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { LogReaderService } from "../../services/log-reader.service";

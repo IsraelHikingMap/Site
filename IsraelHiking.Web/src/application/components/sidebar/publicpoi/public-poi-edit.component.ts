@@ -1,5 +1,5 @@
-import { Component, inject, input, OnInit } from "@angular/core";
-import { MatSelectChange, MatSelect } from "@angular/material/select";
+import { Component, inject, input, type OnInit } from "@angular/core";
+import { type MatSelectChange, MatSelect } from "@angular/material/select";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
 import { MatCard, MatCardHeader, MatCardTitle } from "@angular/material/card";
@@ -13,7 +13,7 @@ import { MatCheckbox } from "@angular/material/checkbox";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 
 import { ImageScrollerComponent } from "./image-scroller.component";
-import { PoiService, ISelectableCategory } from "../../../services/poi.service";
+import { PoiService, type ISelectableCategory } from "../../../services/poi.service";
 import { ResourcesService } from "../../../services/resources.service";
 import { SidebarService } from "../../../services/sidebar.service";
 import { ToastService } from "../../../services/toast.service";

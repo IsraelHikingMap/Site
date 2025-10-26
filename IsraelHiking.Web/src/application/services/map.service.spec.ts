@@ -1,10 +1,10 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { vi, expect, it, describe, beforeEach } from "vitest";
 import { NgxsModule } from "@ngxs/store";
-import { Map } from "maplibre-gl";
 import { MapService } from "./map.service";
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { InMemoryReducer } from "../reducers/in-memory.reducer";
+import type { Map } from "maplibre-gl";
 
 describe("MapService", () => {
     beforeEach(() => {

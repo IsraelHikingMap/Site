@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, inject, input, type OnInit, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";

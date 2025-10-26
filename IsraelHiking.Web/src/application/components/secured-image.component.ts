@@ -1,7 +1,7 @@
-import { Component, OnChanges, inject, input } from "@angular/core";
+import { Component, type OnChanges, inject, input } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 import { HttpClient } from "@angular/common/http";
-import { BehaviorSubject, Observable } from "rxjs";
+import { BehaviorSubject, type Observable } from "rxjs";
 import { switchMap, map } from "rxjs/operators";
 import { AsyncPipe } from "@angular/common";
 

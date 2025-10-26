@@ -1,6 +1,6 @@
 import { inject, Injectable } from "@angular/core";
-import { Map } from "maplibre-gl";
 import { Store } from "@ngxs/store";
+import type { Map } from "maplibre-gl";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";

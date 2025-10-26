@@ -6,13 +6,13 @@ import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
 import { FormsModule } from "@angular/forms";
 
 import { MatTooltip } from "@angular/material/tooltip";
-import { MatDialog, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
+import { type MatDialog, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
 import { Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../../services/resources.service";
 import { AVAILABLE_LANGUAGES } from "../../reducers/initial-state";
-import { ApplicationState, LanguageCode } from "../../models";
+import type { ApplicationState, LanguageCode } from "../../models";
 
 @Component({
     selector: "language-dialog",

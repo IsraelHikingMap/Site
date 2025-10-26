@@ -1,4 +1,4 @@
-import { Directive, output, ElementRef, Renderer2, OnDestroy, NgZone, inject } from "@angular/core";
+import { Directive, output, ElementRef, Renderer2, type OnDestroy, NgZone, inject } from "@angular/core";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 
 import { environment } from "../../environments/environment";

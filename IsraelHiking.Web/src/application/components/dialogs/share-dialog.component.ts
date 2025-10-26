@@ -13,8 +13,8 @@ import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { Share } from "@capacitor/share";
 import { Angulartics2OnModule } from "angulartics2";
-import { LngLatLike, Map, StyleSpecification } from "maplibre-gl";
 import { Store } from "@ngxs/store";
+import type { LngLatLike, Map, StyleSpecification } from "maplibre-gl";
 
 import { LayersComponent } from "../map/layers.component";
 import { RoutesComponent } from "../map/routes.component";

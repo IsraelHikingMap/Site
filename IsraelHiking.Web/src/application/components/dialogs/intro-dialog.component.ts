@@ -4,15 +4,15 @@ import { CdkScrollable } from "@angular/cdk/scrolling";
 
 import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
 import { MatButton } from "@angular/material/button";
-import { MatDialog, MatDialogConfig, MatDialogRef, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
-import { AnimationOptions, LottieComponent } from "ngx-lottie";
+import { type MatDialog, type MatDialogConfig, MatDialogRef, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
+import { type AnimationOptions, LottieComponent } from "ngx-lottie";
 import { Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../../services/resources.service";
 import { StopShowingIntroAction } from "../../reducers/configuration.reducer";
 import { AVAILABLE_LANGUAGES } from "../../reducers/initial-state";
-import { RunningContextService } from "../../services/running-context.service";
+import type { RunningContextService } from "../../services/running-context.service";
 import languageAnimationData from "../../../content/lottie/dialog-language.json";
 import mapsAnimationData from "../../../content/lottie/dialog-maps.json";
 import planAnimationData from "../../../content/lottie/dialog-plan.json";

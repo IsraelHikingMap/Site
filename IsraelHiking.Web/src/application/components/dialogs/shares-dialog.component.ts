@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, inject, type OnInit, ViewEncapsulation } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
 import { MatFormField, MatLabel } from "@angular/material/form-field";
@@ -16,8 +16,8 @@ import { Share } from "@capacitor/share";
 import { Angulartics2OnModule } from "angulartics2";
 import { InfiniteScrollDirective } from "ngx-infinite-scroll";
 import { take, orderBy } from "lodash-es";
-import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
+import type { Observable } from "rxjs";
 import type { Immutable } from "immer";
 
 import { ShareDialogComponent } from "./share-dialog.component";

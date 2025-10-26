@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, OnInit, ElementRef, ChangeDetectorRef, DestroyRef, inject, viewChild } from "@angular/core";
+import { Component, ViewEncapsulation, type OnInit, type ElementRef, ChangeDetectorRef, DestroyRef, inject, viewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { NgClass, AsyncPipe, DecimalPipe } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
@@ -9,17 +9,17 @@ import { Angulartics2OnModule } from "angulartics2";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { SourceDirective, GeoJSONSourceComponent, LayerComponent } from "@maplibre/ngx-maplibre-gl";
 import { trigger, style, transition, animate } from "@angular/animations";
-import { Observable, interval } from "rxjs";
+import { type Observable, interval } from "rxjs";
 import { regressionLoess } from "d3-regression";
-import { LineLayerSpecification } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 import * as d3 from "d3";
+import type { LineLayerSpecification } from "maplibre-gl";
 import type { Selection, ScaleContinuousNumeric } from "d3";
 import type { Immutable } from "immer";
 
 import { SelectedRouteService } from "../services/selected-route.service";
 import { ResourcesService } from "../services/resources.service";
-import { RouteStatisticsService, RouteStatistics, RouteStatisticsPoint } from "../services/route-statistics.service";
+import { RouteStatisticsService, type RouteStatistics, type RouteStatisticsPoint } from "../services/route-statistics.service";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";

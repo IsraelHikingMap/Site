@@ -5,7 +5,7 @@ import { transition, trigger, style, animate } from "@angular/animations";
 import { LayersSidebarComponent } from "./layers-sidebar.component";
 import { InfoSidebarComponent } from "./info-sidebar.component";
 import { PublicPoiSidebarComponent } from "./publicpoi/public-poi-sidebar.component";
-import { SidebarService, SidebarView } from "../../services/sidebar.service";
+import { SidebarService, type SidebarView } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 
 @Component({

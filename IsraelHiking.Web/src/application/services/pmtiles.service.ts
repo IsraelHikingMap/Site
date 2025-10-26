@@ -1,6 +1,6 @@
 import { inject, Injectable } from "@angular/core";
-import { File as FileSystemWrapper, IFile } from "@awesome-cordova-plugins/file/ngx";
-import { Source, RangeResponse, PMTiles } from "pmtiles";
+import { File as FileSystemWrapper, type IFile } from "@awesome-cordova-plugins/file/ngx";
+import { type Source, type RangeResponse, PMTiles } from "pmtiles";
 
 class CapacitorSource implements Source {
 

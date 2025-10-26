@@ -3,9 +3,9 @@ import { vi, expect, it, describe, beforeEach } from "vitest";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatDialog } from "@angular/material/dialog";
 
-import { IConfirmOptions, ToastService } from "./toast.service";
+import { type IConfirmOptions, ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
-import { ConfirmDialogComponent } from "../components/dialogs/confirm-dialog.component";
+import { type ConfirmDialogComponent } from "../components/dialogs/confirm-dialog.component";
 import { LoggingService } from "./logging.service";
 
 describe("ToastService", () => {

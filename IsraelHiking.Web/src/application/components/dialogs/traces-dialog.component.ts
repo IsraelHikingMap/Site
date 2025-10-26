@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, inject } from "@angular/core";
+import { Component, type OnInit, ViewEncapsulation, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
 import { MatFormField, MatLabel } from "@angular/material/form-field";

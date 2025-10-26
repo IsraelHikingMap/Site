@@ -1,5 +1,5 @@
-import { Directive, AfterViewInit, input, inject } from "@angular/core";
-import { Validator, AbstractControl, NG_VALIDATORS } from "@angular/forms";
+import { Directive, type AfterViewInit, input, inject } from "@angular/core";
+import { type Validator, type AbstractControl, NG_VALIDATORS } from "@angular/forms";
 
 import { LayersService } from "../services/layers.service";
 

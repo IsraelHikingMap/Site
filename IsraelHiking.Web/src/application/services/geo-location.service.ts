@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
-import { BackgroundGeolocation, Location, CallbackError } from "@capgo/background-geolocation";
+import { BackgroundGeolocation, type Location, type CallbackError } from "@capgo/background-geolocation";
 import { App } from "@capacitor/app";
 import { Store } from "@ngxs/store";
 

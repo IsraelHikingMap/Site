@@ -10,7 +10,7 @@ import type { GeoJSONFeature } from "maplibre-gl";
 
 import { environment } from "../../environments/environment";
 import { ResourcesService } from "./resources.service";
-import { HashService, PoiRouteUrlInfo, RouteStrings } from "./hash.service";
+import { HashService, type PoiRouteUrlInfo, RouteStrings } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { DatabaseService } from "./database.service";
 import { RunningContextService } from "./running-context.service";
@@ -24,7 +24,7 @@ import { GeoJSONUtils } from "./geojson-utils";
 import { INatureService } from "./inature.service";
 import { WikidataService } from "./wikidata.service";
 import { ImageAttributionService } from "./image-attribution.service";
-import { LatLon, OsmTagsService, PoiProperties } from "./osm-tags.service";
+import { type LatLon, OsmTagsService, type PoiProperties } from "./osm-tags.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction } from "../reducers/offline.reducer";
 import { SetSelectedPoiAction, SetUploadMarkerDataAction } from "../reducers/poi.reducer";
 import {

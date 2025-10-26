@@ -1,7 +1,7 @@
 import { Component, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { AsyncPipe } from "@angular/common";
-import { Observable, combineLatest, throttleTime } from "rxjs";
+import { type Observable, combineLatest, throttleTime } from "rxjs";
 import { Store } from "@ngxs/store";
 import { SourceDirective, GeoJSONSourceComponent, LayerComponent, MarkerComponent } from "@maplibre/ngx-maplibre-gl";
 import type { Immutable } from "immer";
@@ -10,7 +10,7 @@ import { PrivatePoiOverlayComponent } from "../overlays/private-poi-overlay.comp
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { ResourcesService } from "../../services/resources.service";
 import { SpatialService } from "../../services/spatial.service";
-import { ApplicationState, LatLngAltTime, RecordedRoute } from "../../models";
+import type { ApplicationState, LatLngAltTime, RecordedRoute } from "../../models";
 
 @Component({
     selector: "recorded-route",

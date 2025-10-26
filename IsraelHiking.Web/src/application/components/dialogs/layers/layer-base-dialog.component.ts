@@ -1,6 +1,6 @@
 import { inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable, firstValueFrom } from "rxjs";
+import { type Observable, firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 

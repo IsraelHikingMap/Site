@@ -1,5 +1,5 @@
 import { inject, Injectable } from "@angular/core";
-import { StyleSpecification } from "maplibre-gl";
+import type { StyleSpecification } from "maplibre-gl";
 
 import { FileService } from "./file.service";
 import { ResourcesService } from "./resources.service";

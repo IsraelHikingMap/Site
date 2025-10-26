@@ -4,7 +4,7 @@ import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatProgressBar } from "@angular/material/progress-bar";
 import { DecimalPipe } from "@angular/common";
 import { MatButton } from "@angular/material/button";
-import { MatDialogRef, MatDialog, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions, MatDialogClose } from "@angular/material/dialog";
+import { MatDialogRef, type MatDialog, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions, MatDialogClose } from "@angular/material/dialog";
 import { Angulartics2OnModule } from "angulartics2";
 
 import { ResourcesService } from "../../services/resources.service";

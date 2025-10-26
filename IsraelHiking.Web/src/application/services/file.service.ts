@@ -1,12 +1,12 @@
 import { inject, Injectable, InjectionToken } from "@angular/core";
 import { HttpClient, HttpEventType } from "@angular/common/http";
-import { StyleSpecification } from "maplibre-gl";
-import { File as FileSystemWrapper, FileEntry } from "@awesome-cordova-plugins/file/ngx";
+import { File as FileSystemWrapper, type FileEntry } from "@awesome-cordova-plugins/file/ngx";
 import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
 import { firstValueFrom } from "rxjs";
 import { zipSync, strToU8, unzipSync, strFromU8 } from "fflate";
 import { decode } from "base64-arraybuffer";
+import type { StyleSpecification } from "maplibre-gl";
 import type { saveAs as saveAsForType } from "file-saver";
 
 import { ImageResizeService } from "./image-resize.service";

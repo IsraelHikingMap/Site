@@ -6,8 +6,8 @@ import { MatTooltip } from "@angular/material/tooltip";
 import { AsyncPipe } from "@angular/common";
 import { Share } from "@capacitor/share";
 import { Angulartics2OnModule } from "angulartics2";
-import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
+import type { Observable } from "rxjs";
 
 import { CoordinatesComponent } from "../coordinates.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";

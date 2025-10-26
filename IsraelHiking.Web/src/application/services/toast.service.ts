@@ -2,8 +2,8 @@ import { inject, Injectable } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { ResourcesService } from "./resources.service";
-import { ConfirmDialogComponent, ConfirmType } from "../components/dialogs/confirm-dialog.component";
-import { ProgressDialogComponent, IProgressDialogConfig } from "../components/dialogs/progress-dialog.component";
+import { ConfirmDialogComponent, type ConfirmType } from "../components/dialogs/confirm-dialog.component";
+import { ProgressDialogComponent, type IProgressDialogConfig } from "../components/dialogs/progress-dialog.component";
 import { LoggingService } from "./logging.service";
 import { firstValueFrom } from "rxjs";
 

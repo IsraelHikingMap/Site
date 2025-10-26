@@ -5,7 +5,7 @@ import { vi, expect, it, describe, beforeEach } from "vitest";
 import { FitBoundsService } from "./fit-bounds.service";
 import { SidebarService } from "./sidebar.service";
 import { MapService } from "./map.service";
-import { LngLat } from "maplibre-gl";
+import type { LngLat } from "maplibre-gl";
 
 describe("FitBoundsService", () => {
 

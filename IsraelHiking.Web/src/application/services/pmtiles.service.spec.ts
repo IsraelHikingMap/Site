@@ -1,6 +1,6 @@
 import { inject, TestBed } from "@angular/core/testing";
 import { expect, it, describe, beforeEach } from "vitest";
-import { File as FileSystemWrapper, IFile } from "@awesome-cordova-plugins/file/ngx";
+import { File as FileSystemWrapper, type IFile } from "@awesome-cordova-plugins/file/ngx";
 import { PmTilesService } from "./pmtiles.service";
 
 describe("PmTilesService", () => {

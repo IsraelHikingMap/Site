@@ -1,8 +1,8 @@
 import { Component, inject } from "@angular/core";
 import { AsyncPipe } from "@angular/common";
 import { Angulartics2OnModule } from "angulartics2";
-import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
+import type { Observable } from "rxjs";
 import type { Immutable } from "immer";
 
 import { AutomaticLayerPresentationComponent } from "./automatic-layer-presentation.component";
