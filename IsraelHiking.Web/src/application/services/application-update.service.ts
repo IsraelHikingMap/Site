@@ -27,7 +27,7 @@ export class ApplicationUpdateService {
                 type: "YesNo",
                 message: this.resourcesService.newVersionAvailable,
                 confirmAction: () => {
-                    if (result.immediateUpdateAllowed) {
+                    if (this.runningContextSerive.isIos === false) {
                         AppUpdate.performImmediateUpdate();
                     } else {
                         AppUpdate.openAppStore();
