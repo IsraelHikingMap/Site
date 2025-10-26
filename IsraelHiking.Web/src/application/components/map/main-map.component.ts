@@ -80,9 +80,6 @@ export class MainMapComponent {
 
     public mapLoaded() {
         setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
-
-        // HM TODO: remove this once it is no longer experimental
-        this.mapComponent().mapInstance._overzoomingByClippingTiles = true;
         this.mapService.setMap(this.mapComponent().mapInstance);
         this.mapComponent().mapInstance.doubleClickZoom.enable();
         this.store.select((state: ApplicationState) => state.configuration.language.rtl).subscribe((rtl) => {
