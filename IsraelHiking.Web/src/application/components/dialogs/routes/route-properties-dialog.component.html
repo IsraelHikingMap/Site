@@ -23,7 +23,9 @@
                     <div *ngFor="let rowIndex of [0,1,2]" class="button-row">
                         <div class="flex flex-row gap-1">
                             <div *ngFor="let currentColor of colors; let i = index" class="flex-1" [hidden]="i % 3 !== rowIndex">
-                                <button mat-mini-fab color="primary" class="w-full" type="button" [style.backgroundColor]="currentColor" (click)="routeData.color = currentColor"> <i *ngIf="currentColor === routeData.color" class="fa icon-check" [style.color]="getCheckIconColor(currentColor)"></i>  </button>
+                                <button mat-mini-fab color="primary" class="w-full" type="button" [style.backgroundColor]="currentColor" (click)="routeData.color = currentColor">
+                                    <i *ngIf="currentColor === routeData.color" class="fa icon-check" [style.color]="getCheckIconColor(currentColor)"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
