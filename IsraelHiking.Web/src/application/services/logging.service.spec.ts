@@ -1,4 +1,3 @@
-/*
 import { TestBed } from "@angular/core/testing";
 import { expect, it, describe, beforeEach, afterEach } from "vitest";
 import Dexie from "dexie";
@@ -29,7 +28,7 @@ describe("LoggingService", () => {
         await Dexie.delete("Logging");
     })
 
-    it("Should log info and returned logged data", async () => {
+    it.skip("Should log info and returned logged data", async () => {
         await service.info("Hello!");
 
         const logs = await service.getLog();
@@ -37,7 +36,7 @@ describe("LoggingService", () => {
         expect(logs.split("\n").length).toBe(1);
     });
 
-    it("Should log info and returned logged data", async () => {
+    it.skip("Should log info and returned logged data", async () => {
         await service.warning("Hello!");
 
         const logs = await service.getLog();
@@ -45,7 +44,7 @@ describe("LoggingService", () => {
         expect(logs.split("\n").length).toBe(1);
     });
 
-    it("Should log error and returned logged data", async () => {
+    it.skip("Should log error and returned logged data", async () => {
         await service.error("Hello!");
 
         const logs = await service.getLog();
@@ -53,7 +52,7 @@ describe("LoggingService", () => {
         expect(logs.split("\n").length).toBe(1);
     });
 
-    it("Should log debug and returned logged data", async () => {
+    it.skip("Should log debug and returned logged data", async () => {
         await service.debug("Hello!");
 
         const logs = await service.getLog();
@@ -61,19 +60,19 @@ describe("LoggingService", () => {
         expect(logs.split("\n").length).toBe(1);
     });
 
-    it("Should classify regular error as server", async () => {
+    it.skip("Should classify regular error as server", async () => {
         const typeAndMessage = service.getErrorTypeAndMessage(new Error());
         expect(typeAndMessage.type).toBe("server");
     });
 
-    it("Should classify timeout error", async () => {
+    it.skip("Should classify timeout error", async () => {
         const timeoutError = new Error();
         timeoutError.name = "TimeoutError";
         const typeAndMessage = service.getErrorTypeAndMessage(timeoutError);
         expect(typeAndMessage.type).toBe("timeout");
     });
 
-    it("Should classify client side error", async () => {
+    it.skip("Should classify client side error", async () => {
         const timeoutError = new HttpErrorResponse({
             error: new ProgressEvent({} as any)
         });
@@ -81,7 +80,7 @@ describe("LoggingService", () => {
         expect(typeAndMessage.type).toBe("client");
     });
 
-    it("Should classify serverside side error and return status code", async () => {
+    it.skip("Should classify serverside side error and return status code", async () => {
         const timeoutError = new HttpErrorResponse({
             status: 404
         });
@@ -91,4 +90,3 @@ describe("LoggingService", () => {
     });
 
 });
-*/

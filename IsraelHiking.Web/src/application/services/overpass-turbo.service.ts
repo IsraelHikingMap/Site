@@ -1,7 +1,6 @@
 import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, timeout } from "rxjs";
-import { addProtocol } from "maplibre-gl";
 import osmtogeojson from "osm2geojson-lite";
 import { SpatialService } from "./spatial.service";
 import { Urls } from "../urls";
@@ -10,7 +9,6 @@ type OsmResponse = {
     elements: {type: string, id: string}[];
 }
 
-
 @Injectable()
 export class OverpassTurboService {
     private static readonly OVERPASS_API_URL = "https://overpass-api.de/api/interpreter";
@@ -18,23 +16,25 @@ export class OverpassTurboService {
     private readonly httpClient = inject(HttpClient);
 
     public initialize() {
-        addProtocol("overpass", async (params, _abortController) => {
-            let url = params.url;
-            if (url.startsWith("overpass://s/")) {
-                const unshortenAddress = Urls.baseAddress +  "/unshorten/overpass-turbo.eu/s/" + url.replace("overpass://s/", "");
-                const overpassUrl = await firstValueFrom(this.httpClient.get(unshortenAddress, {responseType: "text" }));
-                url = overpassUrl.trim().replace("https://overpass-turbo.eu/?Q=", "");
-            }
-            let query = decodeURIComponent(url.replace("overpass://Q/", "").replace("overpass://", ""));
-            if (!query.startsWith("[out: ")) {
-                query = `[out: json];${query}`;
-            }
-            if (!query.match(/out.*geom;/)) {
-                query += "out geom;";
-            }
-            const content = await firstValueFrom(this.httpClient.post<string | Record<string, any>>(OverpassTurboService.OVERPASS_API_URL, query).pipe(timeout(20000)));
-            const geojson = osmtogeojson(content, {completeFeature: true, excludeWay: false}) as GeoJSON.FeatureCollection;
-            return {data: geojson};
+        import("maplibre-gl").then((maplibre) => {
+            maplibre.addProtocol("overpass", async (params, _abortController) => {
+                let url = params.url;
+                if (url.startsWith("overpass://s/")) {
+                    const unshortenAddress = Urls.baseAddress +  "/unshorten/overpass-turbo.eu/s/" + url.replace("overpass://s/", "");
+                    const overpassUrl = await firstValueFrom(this.httpClient.get(unshortenAddress, {responseType: "text" }));
+                    url = overpassUrl.trim().replace("https://overpass-turbo.eu/?Q=", "");
+                }
+                let query = decodeURIComponent(url.replace("overpass://Q/", "").replace("overpass://", ""));
+                if (!query.startsWith("[out: ")) {
+                    query = `[out: json];${query}`;
+                }
+                if (!query.match(/out.*geom;/)) {
+                    query += "out geom;";
+                }
+                const content = await firstValueFrom(this.httpClient.post<string | Record<string, any>>(OverpassTurboService.OVERPASS_API_URL, query).pipe(timeout(20000)));
+                const geojson = osmtogeojson(content, {completeFeature: true, excludeWay: false}) as GeoJSON.FeatureCollection;
+                return {data: geojson};
+            });
         });
     }
 

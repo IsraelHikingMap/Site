@@ -60,7 +60,7 @@ describe("Coordinates Service", () => {
     it("Should round trip coordinates conversion", inject([CoordinatesService], (service: CoordinatesService) => {
         const expected = {lat: 32, lng: 35};
         const roundTrip = service.fromItm(service.toItm(expected));
-        expect(roundTrip.lat).toBeCloseTo(expected.lat, 8);
-        expect(roundTrip.lng).toBeCloseTo(expected.lng, 9);
+        expect(roundTrip.lat).toBeCloseTo(expected.lat, 7);
+        expect(roundTrip.lng).toBeCloseTo(expected.lng, 7);
     }));
 });

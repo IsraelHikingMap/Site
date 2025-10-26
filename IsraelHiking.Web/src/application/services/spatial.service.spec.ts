@@ -1,5 +1,4 @@
 import { lineString } from "@turf/helpers";
-import { LngLatBounds } from "maplibre-gl";
 import { expect, it, describe } from "vitest";
 
 import { SpatialService } from "./spatial.service";
@@ -263,8 +262,11 @@ describe("Spatial service", () => {
 
     it("Should convert to bounds", () => {
         const latlng = {lat: 1, lng: 2};
-        const mbBounds = new LngLatBounds([latlng, latlng]);
-        const bounds = SpatialService.mBBoundsToBounds(mbBounds);
+        const mbBounds = {
+            getNorthEast: () => latlng,
+            getSouthWest: () => latlng
+        }
+        const bounds = SpatialService.mBBoundsToBounds(mbBounds as any);
         const mapBounds = SpatialService.getMapBounds({ getBounds: () => mbBounds } as any);
         expect(bounds.northEast.lat).toBe(latlng.lat);
         expect(bounds.southWest.lng).toBe(latlng.lng);

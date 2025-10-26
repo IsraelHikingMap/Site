@@ -1,7 +1,6 @@
 import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { debounceTime } from "rxjs/operators";
-import { addProtocol } from "maplibre-gl";
 import Dexie from "dexie";
 import deepmerge from "deepmerge";
 
@@ -90,9 +89,11 @@ export class DatabaseService {
     }
 
     private initCustomTileLoadFunction() {
-        addProtocol("custom", async (params, _abortController) => {
-            const data = await this.pmTilesService.getTile(params.url);
-            return {data};
+        import("maplibre-gl").then((maplibre) => {
+            maplibre.addProtocol("custom", async (params, _abortController) => {
+                const data = await this.pmTilesService.getTile(params.url);
+                return {data};
+            });
         });
     }
 

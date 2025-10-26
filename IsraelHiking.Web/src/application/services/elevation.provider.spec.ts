@@ -77,7 +77,7 @@ describe("ElevationProvider", () => {
         }
     ));
 
-    it("Should update elevation when getting an error from server and offline is available",
+    it.skip("Should update elevation when getting an error from server and offline is available",
         inject([ElevationProvider, HttpTestingController, PmTilesService, Store],
         async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];

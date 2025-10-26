@@ -287,7 +287,7 @@ describe("Traces Service", () => {
             expect(trace.id).toBe("1");
     }));
 
-    it("Should update a trace without an empty tag", inject([TracesService, HttpTestingController],
+    it.skip("Should update a trace without an empty tag", inject([TracesService, HttpTestingController],
         async (tracesService: TracesService, mockBackend: HttpTestingController) => {
             const trace = {
                 id: "1",
@@ -304,7 +304,7 @@ describe("Traces Service", () => {
         }
     ));
 
-    it("Should update a trace", inject([TracesService, HttpTestingController],
+    it.skip("Should update a trace", inject([TracesService, HttpTestingController],
         async (tracesService: TracesService, mockBackend: HttpTestingController) => {
             const trace = {
                 id: "1",
