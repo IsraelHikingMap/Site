@@ -23,8 +23,6 @@
           <br />
         </div>
       </div>
-    }
-    @if (isApp()) {
       <div class="flex flex-row">
         <div class="flex-1">
           <mat-checkbox [checked]="isAutomaticRecordingUpload$ | async" (change)="toggleAutomaticRecordingUpload()" color="primary" angulartics2On="click" angularticsCategory="Configuration" angularticsAction="Toggle automatic upload">{{resources.automaticRecordingUpload}}</mat-checkbox>
@@ -32,8 +30,6 @@
           <span class="text-sm">{{resources.automaticRecordingUploadHint}}</span>
         </div>
       </div>
-    }
-    @if (isApp()) {
       <div class="flex flex-row">
         <div class="flex-1">
           <mat-checkbox [checked]="isGotLostWarnings$ | async" (change)="toggleGotLostWarnings()" color="primary" angulartics2On="click" angularticsCategory="Configuration" angularticsAction="Toggle got lost warnings">{{resources.gotLostWarnings}}</mat-checkbox>

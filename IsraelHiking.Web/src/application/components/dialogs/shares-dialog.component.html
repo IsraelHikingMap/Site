@@ -30,8 +30,7 @@
                 {{shareUrl.creationDate | date:'dd/MM/yyyy'}}
               </div>
             </div>
-          }
-          @if (isShareUrlInEditMode(shareUrl.id)) {
+          } @else {
             <div class="flex flex-row">
               <mat-form-field class="w-full">
                 <mat-label>{{resources.titlePlaceHolder}}</mat-label>
@@ -61,8 +60,7 @@
         <div class="flex-1">
           <button mat-button class="w-full min-w-unset p-0!" [disabled]="!hasSelected()" (click)="setShareUrlInEditMode()" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Toggle edit share"><i class="fa icon-pencil"></i></button>
         </div>
-      }
-      @if (isShareUrlInEditMode(selectedShareUrlId)) {
+      } @else {
         <div class="flex-1">
           <button mat-button class="w-full min-w-unset p-0!" [disabled]="!hasSelected()" (click)="updateShareUrl()" matTooltip="{{resources.update}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Update share"><i class="fa icon-check"></i></button>
         </div>

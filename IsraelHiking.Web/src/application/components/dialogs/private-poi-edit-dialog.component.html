@@ -4,8 +4,7 @@
       <div>
         {{title}}
       </div>
-    }
-    @if (url) {
+    } @else {
       <a href="{{url.url}}" target="_blank">
         {{title}}
       </a>
@@ -35,8 +34,7 @@
               <a mat-button class="w-full h-unset" [style.color]="'black'" imageCapture (changed)="addImage($event)" angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
               <input type="file" (change)="addImage($event)" [style.display]="'none'" accept="image/*;capture=camera" />
             </label>
-          }
-          @if (imageLink) {
+          } @else {
             <img
               [src]="resources.getResizedImageUrl(imageLink.url, 300)"
               class="img-responsive w-full" />

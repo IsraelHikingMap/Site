@@ -42,8 +42,6 @@
             }"
     (layerClick)="openLocationPopup()">
   </mgl-layer>
-}
-@if (locationFeatures.features.length > 0) {
   <mgl-layer id="location-circle"
     type="fill"
     source="location-source"
@@ -54,8 +52,6 @@
                 'fill-opacity': 0.2
             }">
   </mgl-layer>
-}
-@if (locationFeatures.features.length > 0) {
   <mgl-layer id="location-circle-stroke"
     type="line"
     source="location-source"
