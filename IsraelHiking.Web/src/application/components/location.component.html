@@ -12,11 +12,10 @@
   <button mat-button class="mt-1" (click)="toggleKeepNorthUp()" [class.active]="isKeepNorthUp()"><div [style.transform]="getRotationAngle()" matTooltip="{{resources.northUp}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Location" angularticsAction="North Up"><i class="icon-north"></i></div></button>
   @if (canRecord()) {
     <button mat-button class="mt-1" (click)="toggleRecording()" [class.active]="isRecording()" angulartics2On="click" angularticsCategory="Location" angularticsAction="Toggle recording">
-      @if (!isRecording()) {
-        <i class="fa fa-lg icon-circle recording-button"></i>
-      }
       @if (isRecording()) {
         <i class="fa fa-lg icon-square"></i>
+      } @else {
+        <i class="fa fa-lg icon-circle recording-button"></i>
       }
     </button>
   }
@@ -88,8 +87,6 @@
                 'line-width': 5
             }">
   </mgl-layer>
-}
-@if (showDistance) {
   <mgl-layer id="distance-end"
     type="circle"
     source="distance-source"
@@ -101,8 +98,6 @@
                 'circle-opacity': 0
             }">
   </mgl-layer>
-}
-@if (showDistance) {
   <mgl-layer id="distance-line-text"
     type="symbol"
     source="distance-source"

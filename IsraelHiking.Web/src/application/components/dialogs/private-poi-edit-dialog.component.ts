@@ -42,7 +42,7 @@ interface PrivatePoiEditDialogData {
 @Component({
     selector: "private-poi-edit-dialog",
     templateUrl: "private-poi-edit-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatAnchor, ImageCaptureDirective, Angulartics2OnModule, MatTooltip, NgStyle, NgClass, MatIconButton, MatSuffix, CoordinatesComponent, MatDialogActions, MatMenu, MatMenuItem, MatMenuTrigger]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatAnchor, ImageCaptureDirective, Angulartics2OnModule, MatTooltip, NgStyle, MatIconButton, MatSuffix, CoordinatesComponent, MatDialogActions, MatMenu, MatMenuItem, MatMenuTrigger]
 })
 export class PrivatePoiEditDialogComponent implements AfterViewInit {
     private static readonly NUMBER_OF_ICONS_PER_ROW = 4;

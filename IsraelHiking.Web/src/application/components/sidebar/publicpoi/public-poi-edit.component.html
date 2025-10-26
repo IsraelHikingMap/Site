@@ -4,12 +4,11 @@
   </div>
   <div class="flex-1">
     <button mat-button class="w-full min-w-unset p-0!" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below">
-      @if (!isLoading) {
-        <i class="fa icon-close"></i>
-      }
       @if (isLoading) {
         <mat-spinner diameter="24"></mat-spinner>
-      }
+      } @else {
+        <i class="fa icon-close"></i>
+      }      
     </button>
   </div>
 </div>
@@ -20,15 +19,14 @@
         <span class="text-xl" [dir]="resources.getDirection(info().title)">{{info().title}}</span>
       </mat-card-title>
     </mat-card-header>
-  }
-  <div class="flex flex-row">
-    @if (info().canEditTitle) {
+  } @else {
+    <div class="flex flex-row">
       <mat-form-field class="w-full">
         <mat-label>{{resources.nameInLanguage}}</mat-label>
         <input matInput type="text" class="w-full" [dir]="resources.getDirection(info().title)" [(ngModel)]="info().title" />
       </mat-form-field>
-    }
-  </div>
+    </div>
+  }
   <image-scroller [images]="info().imagesUrls" [canEdit]="true"></image-scroller>
   <div class="flex flex-row">
     <mat-form-field class="w-full">
@@ -51,31 +49,29 @@
   </div>
   <br />
   @if (isPoint()) {
-    <div>
-      <div class="flex flex-row">
-        <mat-form-field class="w-full">
-          <mat-label>{{resources.categories}}</mat-label>
-          <mat-select class="w-full" [ngModel]="selectedCategory" (selectionChange)="selectCategory($event)">
-            @for (category of categories; track category) {
-              <mat-option [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{resources.translate(category.label)}}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-      </div>
-      <br />
-      @if (selectedCategory) {
-        <div class="flex flex-row flex-wrap">
-          @for (icon of selectedCategory.icons; track icon) {
-            <button mat-button (click)="selectIcon(icon)" class="flex-1 h-unset" [ngClass]="{active: icon === selectedCategory.selectedIcon}">
-              <i class="fa fa-lg" [ngClass]="icon.icon" [style.color]="icon.color"></i>
-              <br />
-              <span class="chrome-wordwrap-fix category-button-text">{{resources.translate(icon.label)}}</span>
-            </button>
+    <div class="flex flex-row">
+      <mat-form-field class="w-full">
+        <mat-label>{{resources.categories}}</mat-label>
+        <mat-select class="w-full" [ngModel]="selectedCategory" (selectionChange)="selectCategory($event)">
+          @for (category of categories; track category) {
+            <mat-option [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{resources.translate(category.label)}}</mat-option>
           }
-        </div>
-      }
-      <br />
+        </mat-select>
+      </mat-form-field>
     </div>
+    <br />
+    @if (selectedCategory) {
+      <div class="flex flex-row flex-wrap">
+        @for (icon of selectedCategory.icons; track icon) {
+          <button mat-button (click)="selectIcon(icon)" class="flex-1 h-unset" [ngClass]="{active: icon === selectedCategory.selectedIcon}">
+            <i class="fa fa-lg" [ngClass]="icon.icon" [style.color]="icon.color"></i>
+            <br />
+            <span class="chrome-wordwrap-fix category-button-text">{{resources.translate(icon.label)}}</span>
+          </button>
+        }
+      </div>
+    }
+    <br />
   }
   @if (info().showLocationUpdate) {
     <div class="flex flex-row">

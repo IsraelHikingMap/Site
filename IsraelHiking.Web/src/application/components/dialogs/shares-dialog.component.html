@@ -67,7 +67,11 @@
           <button mat-button class="w-full min-w-unset p-0!" [disabled]="!hasSelected()" (click)="updateShareUrl()" matTooltip="{{resources.update}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Update share"><i class="fa icon-check"></i></button>
         </div>
       }
-      @if (!isApp()) {
+      @if (isApp()) {
+        <div class="flex-1">
+          <button mat-button class="w-full min-w-unset p-0!" [disabled]="!hasSelected()" (click)="share()" angulartics2On="click" angularticsCategory="Share" angularticsAction="Mobile social share"><i class="fa icon-share-alt"></i></button>
+        </div>
+      } @else {
         <div class="flex-1">
           <mat-menu #appMenu="matMenu" yPosition="above" overlapTrigger="false">
             <div mat-menu-item disableRipple="true">
@@ -79,11 +83,6 @@
             </div>
           </mat-menu>
           <button mat-button class="w-full min-w-unset p-0!" [disabled]="!hasSelected()" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share open menu for share"><i class="fa icon-share-alt"></i></button>
-        </div>
-      }
-      @if (isApp()) {
-        <div class="flex-1">
-          <button mat-button class="w-full min-w-unset p-0!" [disabled]="!hasSelected()" (click)="share()" angulartics2On="click" angularticsCategory="Share" angularticsAction="Mobile social share"><i class="fa icon-share-alt"></i></button>
         </div>
       }
       <div class="flex-1">

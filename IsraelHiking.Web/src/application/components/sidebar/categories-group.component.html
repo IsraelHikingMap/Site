@@ -12,14 +12,12 @@
     </div>
   </mat-expansion-panel-header>
   @for (category of categoriesGroup().categories; track category) {
-    <div>
-      <div class="flex flex-row">
-        <button mat-button class="row-button w-full justify-start!" (click)="toggleCategory(category)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle category visibility {{category.name}}">
-          <i class="fa" [ngClass]="{'icon-eye': category.visible, 'icon-eye-slash': !category.visible}"></i>
-          <i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i>
-          <span>{{resources.translate(category.name)}}</span>
-        </button>
-      </div>
+    <div class="flex flex-row">
+      <button mat-button class="row-button w-full justify-start!" (click)="toggleCategory(category)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle category visibility {{category.name}}">
+        <i class="fa" [ngClass]="{'icon-eye': category.visible, 'icon-eye-slash': !category.visible}"></i>
+        <i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i>
+        <span>{{resources.translate(category.name)}}</span>
+      </button>
     </div>
   }
 </mat-expansion-panel>

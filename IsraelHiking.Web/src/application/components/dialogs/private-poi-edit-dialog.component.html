@@ -51,14 +51,12 @@
           <div>
             <br />
             @for (group of iconsGroups; track group) {
-              <div>
-                <div class="flex flex-row w-full">
-                  @for (icon of group.icons; track icon) {
-                    <div (click)="setMarkerType(icon)" class="cursor-pointer text-center" [ngStyle]="{width:100/iconsGroups.length + '%'}" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Select icon {{icon}}">
-                      <i class="fa icon-{{icon}} fa-lg" [ngClass]="{ 'active': icon === markerType }"></i>
-                    </div>
-                  }
-                </div>
+              <div class="flex flex-row w-full">
+                @for (icon of group.icons; track icon) {
+                  <div (click)="setMarkerType(icon)" class="cursor-pointer text-center" [ngStyle]="{width:100/iconsGroups.length + '%'}" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Select icon {{icon}}">
+                    <i class="fa icon-{{icon}} fa-lg p-1" [class.active]="icon === markerType"></i>
+                  </div>
+                }
               </div>
             }
           </div>

@@ -34,8 +34,7 @@
                 {{trace.tagsString}}
               </div>
             </div>
-          }
-          @if (isTraceInEditMode(trace.id)) {
+          } @else {
             <div class="flex flex-row">
               <mat-form-field class="w-full">
                 <mat-label>{{resources.description}}</mat-label>
@@ -76,8 +75,7 @@
         <div class="flex-1">
           <button mat-button class="w-full p-0! min-w-unset" [disabled]="!hasSelected()" (click)="setTraceInEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace start"><i class="fa icon-pencil"></i></button>
         </div>
-      }
-      @if (isTraceInEditMode(selectedTraceId)) {
+      } @else {
         <div class="flex-1">
           <button mat-button class="w-full p-0! min-w-unset" [disabled]="!hasSelected()" (click)="updateTrace()" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace end"><i class="fa icon-check"></i></button>
         </div>

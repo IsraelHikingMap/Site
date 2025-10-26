@@ -121,21 +121,15 @@
 
 
 @for (route of routes; track route) {
-  <div>
-    @if (route.state !== 'Hidden') {
-      <div>
-        @for (marker of route.markers; track marker; let idx = $index) {
-          <div>
-            <mgl-marker anchor="bottom"
-              [draggable]="isRouteInEditPoiMode(route)"
-              [lngLat]="marker.latlng"
-              (markerDragEnd)="markerDragEnd(idx, $event)">
-              <private-poi-overlay [marker]="marker" [routeId]="route.id" [index]="idx" [color]="route.color"></private-poi-overlay>
-            </mgl-marker>
-          </div>
-        }
-      </div>
+  @if (route.state !== 'Hidden') {
+    @for (marker of route.markers; track marker; let idx = $index) {
+      <mgl-marker anchor="bottom"
+        [draggable]="isRouteInEditPoiMode(route)"
+        [lngLat]="marker.latlng"
+        (markerDragEnd)="markerDragEnd(idx, $event)">
+        <private-poi-overlay [marker]="marker" [routeId]="route.id" [index]="idx" [color]="route.color"></private-poi-overlay>
+      </mgl-marker>
     }
-  </div>
+  }
 }
 
