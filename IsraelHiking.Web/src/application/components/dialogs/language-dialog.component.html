@@ -6,9 +6,7 @@
   <div mat-dialog-content>
     <mat-radio-group [(ngModel)]="selectedLanguageCode">
       @for (language of availableLanguages; track language) {
-        <div>
-          <mat-radio-button [value]="language.code" color="primary" angulartics2On="click" angularticsCategory="Language" angularticsAction="Select language {{language.code}}">{{language.label}}</mat-radio-button>
-        </div>
+        <mat-radio-button [value]="language.code" color="primary" angulartics2On="click" angularticsCategory="Language" angularticsAction="Select language {{language.code}}">{{language.label}}</mat-radio-button>
       }
     </mat-radio-group>
     <br />

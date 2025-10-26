@@ -262,7 +262,7 @@ export class TracesDialogComponent implements OnInit {
         }
     }
 
-    public trackById(_: number, trace: Trace) {
+    public trackById(_: number, trace: Immutable<Trace>) {
         return trace.id;
     }
 }

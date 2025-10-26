@@ -100,10 +100,6 @@ export class PublicPointOfInterestEditComponent implements OnInit {
         this.info().urls.splice(i, 1);
     }
 
-    public trackByIndex(index: number) {
-        return index;
-    }
-
     public isPoint(): boolean {
         return this.info != null && this.info().isPoint;
     }

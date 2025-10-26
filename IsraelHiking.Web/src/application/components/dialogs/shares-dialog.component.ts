@@ -212,7 +212,7 @@ export class SharesDialogComponent implements OnInit {
         return !this.loadingShareUrls && this.filteredShareUrls.length === 0;
     }
 
-    public trackById(_: number, shareUrl: ShareUrl) {
+    public trackById(_: number, shareUrl: Immutable<ShareUrl>) {
         return shareUrl.id;
     }
 }

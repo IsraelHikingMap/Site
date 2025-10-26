@@ -36,7 +36,7 @@
       <textarea rows="4" maxlength="255" matInput class="w-full" [dir]="resources.getDirection(info().description)" [(ngModel)]="info().description"></textarea>
     </mat-form-field>
   </div>
-  @for (url of info().urls; track trackByIndex(i, url); let i = $index) {
+  @for (url of info().urls; track url; let i = $index) {
     <div class="flex flex-row">
       <mat-form-field class="w-full">
         <mat-label>{{resources.aLinkToAWebsite}}</mat-label>
