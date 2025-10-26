@@ -1,67 +1,69 @@
-﻿﻿<div [dir]="resources.direction">
-    <div class="flex flex-row">
-        <div class="w-1/4">
-            <button mat-button class="w-full min-w-unset" (click)="setHighwayType('footway')" [ngClass]="{'active' : getHighwayType() === 'footway' }" matTooltip="{{resources.legendFootPath}}" matTooltipPosition="below"><i class="fa icon-hike fa-lg"></i></button>
-        </div>
-        <div class="w-1/4">
-            <button mat-button class="w-full min-w-unset" (click)="setHighwayType('cycleway')" [ngClass]="{'active' : getHighwayType() === 'cycleway' }" matTooltip="{{resources.legendBicyclePath}}" matTooltipPosition="below"><i class="fa icon-bike fa-lg"></i></button>
-        </div>
-        <div class="w-1/4">
-            <button mat-button class="w-full min-w-unset" (click)="setHighwayType('path')" [ngClass]="{'active' : getHighwayType() === 'path' }" matTooltip="{{resources.legendPath}}" matTooltipPosition="below"><i class="fa icon-hike fa-lg"></i><i class="fa icon-bike fa-lg"></i></button>
-        </div>
-        <div class="w-1/4">
-            <button mat-button class="w-full min-w-unset" (click)="setHighwayType('track')" [ngClass]="{'active' : getHighwayType() === 'track' }" matTooltip="{{resources.dirtRoad}}" matTooltipPosition="below"><i class="fa icon-four-by-four fa-lg"></i></button>
-        </div>
+﻿<div [dir]="resources.direction">
+  <div class="flex flex-row">
+    <div class="w-1/4">
+      <button mat-button class="w-full min-w-unset" (click)="setHighwayType('footway')" [ngClass]="{'active' : getHighwayType() === 'footway' }" matTooltip="{{resources.legendFootPath}}" matTooltipPosition="below"><i class="fa icon-hike fa-lg"></i></button>
     </div>
-    <br />
-    <div class="flex flex-row">
-        <div class="flex-1">
-            <button mat-button class="w-full symbol-button" (click)="setColor('none')" [ngClass]="{'active' : getColor() === 'none' }" matTooltip="{{resources.nonMarkedTrail}}" matTooltipPosition="below"></button>
-        </div>
-        <div class="flex-1">
-            <button mat-button class="w-full symbol-button" (click)="setColor('red')" [ngClass]="{'active' : getColor() === 'red' }" matTooltip="{{resources.legendRedMarkedTrail}}" matTooltipPosition="below">
-                <span class="middle-line bg-red"></span>
-            </button>
-        </div>
-        <div class="flex-1">
-            <button mat-button class="w-full symbol-button" (click)="setColor('blue')" [ngClass]="{'active' : getColor() === 'blue' }" matTooltip="{{resources.legendBlueMarkedTrail}}" matTooltipPosition="below">
-                <span class="middle-line bg-blue"></span>
-            </button>
-        </div>
-        <div class="flex-1">
-            <button mat-button class="w-full symbol-button" (click)="setColor('green')" [ngClass]="{'active' : getColor() === 'green' }" matTooltip="{{resources.legendGreenMarkedTrail}}" matTooltipPosition="below">
-                <span class="middle-line bg-green"></span>
-            </button>
-        </div>
-        <div class="flex-1">
-            <button mat-button class="w-full symbol-button" (click)="setColor('black')" [ngClass]="{'active' : getColor() === 'black' }" matTooltip="{{resources.legendBlackMarkedTrail}}" matTooltipPosition="below">
-                <span class="middle-line bg-black"></span>
-            </button>
-        </div>
-        <div class="flex-1">
-            <button mat-button class="w-full symbol-button" (click)="setColor('orange')" [ngClass]="{'active' : getColor() === 'orange' }" matTooltip="{{resources.legendOrangeRegionalTrail}}" matTooltipPosition="below">
-                <span class="middle-line bg-orange"></span>
-            </button>
-        </div>
-        <div class="flex-1">
-            <button mat-button class="w-full symbol-button" (click)="setColor('purple')" [ngClass]="{'active' : getColor() === 'purple' }" matTooltip="{{resources.legendPurpleRegionalTrail}}" matTooltipPosition="below">
-                <span class="middle-line bg-purple"></span>
-            </button>
-        </div>
+    <div class="w-1/4">
+      <button mat-button class="w-full min-w-unset" (click)="setHighwayType('cycleway')" [ngClass]="{'active' : getHighwayType() === 'cycleway' }" matTooltip="{{resources.legendBicyclePath}}" matTooltipPosition="below"><i class="fa icon-bike fa-lg"></i></button>
     </div>
-    <br />
-    <div class="flex flex-row">
-        <div class="w-1/3">
-            <button mat-button class="w-full min-w-unset" (click)="addMissingPartToOsm()" matTooltip="{{resources.addThisRouteToOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Add missing part to OSM"><i class="fa icon-plus"></i></button>
-        </div>
-        <div class="w-1/3">
-            <button mat-button class="w-full min-w-unset" (click)="remove()" matTooltip="{{resources.deleteRoute}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
-        </div>
-        <div class="w-1/3">
-            <button mat-button class="w-full min-w-unset" (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
-        </div>
+    <div class="w-1/4">
+      <button mat-button class="w-full min-w-unset" (click)="setHighwayType('path')" [ngClass]="{'active' : getHighwayType() === 'path' }" matTooltip="{{resources.legendPath}}" matTooltipPosition="below"><i class="fa icon-hike fa-lg"></i><i class="fa icon-bike fa-lg"></i></button>
     </div>
-    <div *ngIf="!hideCoordinates">
-        <coordinates [latlng]="latlng()"></coordinates>
+    <div class="w-1/4">
+      <button mat-button class="w-full min-w-unset" (click)="setHighwayType('track')" [ngClass]="{'active' : getHighwayType() === 'track' }" matTooltip="{{resources.dirtRoad}}" matTooltipPosition="below"><i class="fa icon-four-by-four fa-lg"></i></button>
     </div>
+  </div>
+  <br />
+  <div class="flex flex-row">
+    <div class="flex-1">
+      <button mat-button class="w-full symbol-button" (click)="setColor('none')" [ngClass]="{'active' : getColor() === 'none' }" matTooltip="{{resources.nonMarkedTrail}}" matTooltipPosition="below"></button>
+    </div>
+    <div class="flex-1">
+      <button mat-button class="w-full symbol-button" (click)="setColor('red')" [ngClass]="{'active' : getColor() === 'red' }" matTooltip="{{resources.legendRedMarkedTrail}}" matTooltipPosition="below">
+        <span class="middle-line bg-red"></span>
+      </button>
+    </div>
+    <div class="flex-1">
+      <button mat-button class="w-full symbol-button" (click)="setColor('blue')" [ngClass]="{'active' : getColor() === 'blue' }" matTooltip="{{resources.legendBlueMarkedTrail}}" matTooltipPosition="below">
+        <span class="middle-line bg-blue"></span>
+      </button>
+    </div>
+    <div class="flex-1">
+      <button mat-button class="w-full symbol-button" (click)="setColor('green')" [ngClass]="{'active' : getColor() === 'green' }" matTooltip="{{resources.legendGreenMarkedTrail}}" matTooltipPosition="below">
+        <span class="middle-line bg-green"></span>
+      </button>
+    </div>
+    <div class="flex-1">
+      <button mat-button class="w-full symbol-button" (click)="setColor('black')" [ngClass]="{'active' : getColor() === 'black' }" matTooltip="{{resources.legendBlackMarkedTrail}}" matTooltipPosition="below">
+        <span class="middle-line bg-black"></span>
+      </button>
+    </div>
+    <div class="flex-1">
+      <button mat-button class="w-full symbol-button" (click)="setColor('orange')" [ngClass]="{'active' : getColor() === 'orange' }" matTooltip="{{resources.legendOrangeRegionalTrail}}" matTooltipPosition="below">
+        <span class="middle-line bg-orange"></span>
+      </button>
+    </div>
+    <div class="flex-1">
+      <button mat-button class="w-full symbol-button" (click)="setColor('purple')" [ngClass]="{'active' : getColor() === 'purple' }" matTooltip="{{resources.legendPurpleRegionalTrail}}" matTooltipPosition="below">
+        <span class="middle-line bg-purple"></span>
+      </button>
+    </div>
+  </div>
+  <br />
+  <div class="flex flex-row">
+    <div class="w-1/3">
+      <button mat-button class="w-full min-w-unset" (click)="addMissingPartToOsm()" matTooltip="{{resources.addThisRouteToOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Add missing part to OSM"><i class="fa icon-plus"></i></button>
+    </div>
+    <div class="w-1/3">
+      <button mat-button class="w-full min-w-unset" (click)="remove()" matTooltip="{{resources.deleteRoute}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
+    </div>
+    <div class="w-1/3">
+      <button mat-button class="w-full min-w-unset" (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
+    </div>
+  </div>
+  @if (!hideCoordinates) {
+    <div>
+      <coordinates [latlng]="latlng()"></coordinates>
+    </div>
+  }
 </div>

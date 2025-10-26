@@ -1,7 +1,7 @@
 import { Component, inject, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
-import { NgIf, NgClass, NgFor, DecimalPipe } from "@angular/common";
+import { NgClass, DecimalPipe } from "@angular/common";
 import { MatButton, MatAnchor } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
@@ -54,7 +54,7 @@ export type SourceImageUrlPair = {
     templateUrl: "./public-poi-sidebar.component.html",
     styleUrls: ["./public-poi-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, NgIf, MatButton, Angulartics2OnModule, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, MatCard, PublicPointOfInterestEditComponent, FormsModule, MatCardHeader, MatCardTitle, NgClass, MatCardContent, ImageScrollerComponent, NgFor, DecimalPipe]
+    imports: [Dir, MatButton, Angulartics2OnModule, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, MatCard, PublicPointOfInterestEditComponent, FormsModule, MatCardHeader, MatCardTitle, NgClass, MatCardContent, ImageScrollerComponent, DecimalPipe]
 })
 export class PublicPoiSidebarComponent implements OnDestroy {
     public isLoading: boolean = true;

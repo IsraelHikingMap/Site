@@ -1,18 +1,24 @@
-﻿﻿<div [dir]="resources.direction">
-    <p class="whitespace-pre-wrap">{{confirmMessage}}</p>
-    <br />
-    <div class="flex flex-row">
-        <div class="flex-1">
-            <button mat-button class="mat-mdc-snack-bar-action w-full" (click)="confirmAction()">
-                <i *ngIf="confirmIcon" class="fa fa-lg icon-{{confirmIcon}}"></i>
-                {{confirmButtonText}}
-            </button>
-        </div>
-        <div *ngIf="hasTwoButtons" class="flex-1">
-            <button mat-button class="mat-mdc-snack-bar-action w-full" (click)="declineAction()">
-                <i *ngIf="declineIcon" class="fa fa-lg icon-{{declineIcon}}"></i>
-                {{declineButtonText}}
-            </button>
-        </div>
+﻿<div [dir]="resources.direction">
+  <p class="whitespace-pre-wrap">{{confirmMessage}}</p>
+  <br />
+  <div class="flex flex-row">
+    <div class="flex-1">
+      <button mat-button class="mat-mdc-snack-bar-action w-full" (click)="confirmAction()">
+        @if (confirmIcon) {
+          <i class="fa fa-lg icon-{{confirmIcon}}"></i>
+        }
+        {{confirmButtonText}}
+      </button>
     </div>
+    @if (hasTwoButtons) {
+      <div class="flex-1">
+        <button mat-button class="mat-mdc-snack-bar-action w-full" (click)="declineAction()">
+          @if (declineIcon) {
+            <i class="fa fa-lg icon-{{declineIcon}}"></i>
+          }
+          {{declineButtonText}}
+        </button>
+      </div>
+    }
+  </div>
 </div>

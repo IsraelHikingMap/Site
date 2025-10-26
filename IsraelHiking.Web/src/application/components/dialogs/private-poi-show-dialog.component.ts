@@ -1,6 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
-import { NgIf } from "@angular/common";
+
 import { MatButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatTooltip } from "@angular/material/tooltip";
@@ -27,7 +27,7 @@ interface IPrivatePoiShowDialogData {
 @Component({
     selector: "private-poi-show-dialog",
     templateUrl: "private-poi-show-dialog.component.html",
-    imports: [Dir, MatDialogTitle, NgIf, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, CoordinatesComponent, MatDialogActions, Angulartics2OnModule, MatTooltip]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, CoordinatesComponent, MatDialogActions, Angulartics2OnModule, MatTooltip]
 })
 export class PrivatePoiShowDialogComponent {
 

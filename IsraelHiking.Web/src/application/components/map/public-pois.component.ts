@@ -1,5 +1,5 @@
 import { Component, DestroyRef, inject, OnInit } from "@angular/core";
-import { NgIf } from "@angular/common";
+
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
@@ -29,7 +29,7 @@ import type { ApplicationState, LatLngAlt, LinkData } from "../../models";
     selector: "public-pois",
     templateUrl: "public-pois.component.html",
     styleUrls: ["public-pois.component.scss"],
-    imports: [SourceDirective, GeoJSONSourceComponent, MarkersForClustersComponent, PointDirective, Angulartics2OnModule, NgIf, ClusterPointDirective, PopupComponent, ClusterOverlayComponent, Dir, MatButton, MatTooltip, CoordinatesComponent, MarkerComponent, LayerComponent]
+    imports: [SourceDirective, GeoJSONSourceComponent, MarkersForClustersComponent, PointDirective, Angulartics2OnModule, ClusterPointDirective, PopupComponent, ClusterOverlayComponent, Dir, MatButton, MatTooltip, CoordinatesComponent, MarkerComponent, LayerComponent]
 })
 export class PublicPoisComponent implements OnInit {
     private static readonly MAX_MENU_POINTS_IN_CLUSTER = 50;

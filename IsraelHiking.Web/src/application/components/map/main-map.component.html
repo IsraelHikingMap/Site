@@ -1,27 +1,35 @@
-﻿﻿<ng-progress ngProgressHttp [ngStyle]="{'z-index':1500}"></ng-progress>
+﻿<ng-progress ngProgressHttp [ngStyle]="{'z-index':1500}"></ng-progress>
 <sidebar></sidebar>
 <background-text [dir]="resources.direction"></background-text>
 <div class="flex flex-row h-full w-full" [dir]="resources.direction">
-    <mgl-map [zoom]="[location.zoom]"
-                [center]="[location.longitude, location.latitude]"
-                [style]="initialStyle"
-                (moveEnd)="moveEnd($event)"
-                (mapLoad)="mapLoaded()"
-                (pitchEvt)="pitchChanged()"
-                [doubleClickZoom]="false"
-                [attributionControl]="false">
-        <layers></layers>
-        <public-pois></public-pois>
-        <routes></routes>
-        <recorded-route></recorded-route>
-        <traces></traces>
-        <main-menu #topStartControl></main-menu>
-        <search #topStartControl *ngIf="!isIFrame()"></search>
-        <drawing #topStartControl *ngIf="!isIFrame()"></drawing>
-        <zoom #topEndControl></zoom>
-        <location #topEndControl *ngIf="isMobile() || !isIFrame()"></location>
-        <route-statistics #bottomStartControl></route-statistics>
-        <center-me #bottomStartControl></center-me>
-        <ihm-link *ngIf="!isApp()" #bottomEndControl></ihm-link>
-    </mgl-map>
+  <mgl-map [zoom]="[location.zoom]"
+    [center]="[location.longitude, location.latitude]"
+    [style]="initialStyle"
+    (moveEnd)="moveEnd($event)"
+    (mapLoad)="mapLoaded()"
+    (pitchEvt)="pitchChanged()"
+    [doubleClickZoom]="false"
+    [attributionControl]="false">
+    <layers></layers>
+    <public-pois></public-pois>
+    <routes></routes>
+    <recorded-route></recorded-route>
+    <traces></traces>
+    <main-menu #topStartControl></main-menu>
+    @if (!isIFrame()) {
+      <search #topStartControl></search>
+    }
+    @if (!isIFrame()) {
+      <drawing #topStartControl></drawing>
+    }
+    <zoom #topEndControl></zoom>
+    @if (isMobile() || !isIFrame()) {
+      <location #topEndControl></location>
+    }
+    <route-statistics #bottomStartControl></route-statistics>
+    <center-me #bottomStartControl></center-me>
+    @if (!isApp()) {
+      <ihm-link #bottomEndControl></ihm-link>
+    }
+  </mgl-map>
 </div>
