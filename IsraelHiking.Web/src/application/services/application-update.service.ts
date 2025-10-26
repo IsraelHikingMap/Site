@@ -33,11 +33,7 @@ export class ApplicationUpdateService {
                         AppUpdate.openAppStore();
                     }
                 }, 
-                declineAction: () => {
-                    if (result.flexibleUpdateAllowed) {
-                        AppUpdate.startFlexibleUpdate();
-                    }
-                }
+                declineAction: () => { }
             });
         } catch (ex) {
             this.loggingService.warning("[Application Update] Failed to check for updates: " + (ex as Error).message);
