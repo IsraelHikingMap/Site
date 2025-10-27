@@ -31,7 +31,6 @@ export class OfflineManagementDialogComponent {
     public inProgressTile: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
     public downloadedTiles: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
     public baseLayerData: EditableLayer;
-    public downloadingTileXY: {tileX: number; tileY: number} = null;
     public selectedTileXY: {tileX: number; tileY: number} = null;
 
     private lastSchemeBreak: Date = null;
@@ -61,7 +60,7 @@ export class OfflineManagementDialogComponent {
         this.initializeCenterAndZoomFromDownloadingTile();
         this.updateDownloadedTiles();
         this.offlineFilesDownloadService.tilesProgressChanged.subscribe((tileProgress) => {
-            if (this.downloadingTileXY) {
+            if (this.downloadingTileXY()) {
                 this.updateInProgressTile(tileProgress.progressValue);
             }
         });
@@ -99,7 +98,6 @@ export class OfflineManagementDialogComponent {
 
     public async downloadSelected() {
         const { tileX, tileY } = this.selectedTileXY;
-        this.downloadingTileXY = { tileX, tileY };
         this.center = SpatialService.toCoordinate(SpatialService.fromTile({x: tileX + 0.5, y: tileY + 0.5}, TILES_ZOOM));
         this.updateDownloadedTiles();
         this.updateSelectedTile();
@@ -121,7 +119,6 @@ export class OfflineManagementDialogComponent {
                 break;
         }
 
-        this.downloadingTileXY = null;
         this.updateInProgressTile(100);
         this.updateDownloadedTiles();
         this.updateSelectedTile();
@@ -154,11 +151,11 @@ export class OfflineManagementDialogComponent {
         const downloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.offlineState.downloadedTiles);
         for (const key of Object.keys(downloadedTiles || {})) {
             const [tileXDownloaded, tileYDownloaded] = key.split("-").map(Number);
-            if (this.downloadingTileXY && this.downloadingTileXY.tileX === tileXDownloaded && this.downloadingTileXY.tileY === tileYDownloaded) {
+            if (this.downloadingTileXY()?.tileX === tileXDownloaded && this.downloadingTileXY()?.tileY === tileYDownloaded) {
                 continue; // Skip tiles that are in progress
             }
             const { tileX, tileY } = this.selectedTileXY || { tileX: null, tileY: null };
-            if (this.downloadingTileXY == null && tileXDownloaded === tileX && tileYDownloaded === tileY) {
+            if (this.downloadingTileXY() == null && tileXDownloaded === tileX && tileYDownloaded === tileY) {
                 continue; // Skip the center tile if not downloading
             }
             
@@ -181,25 +178,25 @@ export class OfflineManagementDialogComponent {
         const { tileX, tileY } = this.selectedTileXY || { tileX: null, tileY: null };
         this.selectedTile = {
             type: "FeatureCollection",
-            features: this.downloadingTileXY != null || this.selectedTileXY == null ? [] : [this.tileCoordinatesToPolygon(tileX, tileY, this.resources.clickBelow)]
+            features: this.downloadingTileXY() != null || this.selectedTileXY == null ? [] : [this.tileCoordinatesToPolygon(tileX, tileY, this.resources.clickBelow)]
         };
     }
 
     private updateInProgressTile(progress: number) {
-        if (this.downloadingTileXY == null) {
+        if (this.downloadingTileXY() == null) {
             this.inProgressTile = { type: "FeatureCollection", features: [] };
             return;
         }
         const fillFeature = this.tileCoordinatesToPolygon(
-            this.downloadingTileXY.tileX,
-            this.downloadingTileXY.tileY,
+            this.downloadingTileXY().tileX,
+            this.downloadingTileXY().tileY,
             "", 
             progress / 100.0,
         );
         fillFeature.properties.fill = "true";
         const strokeFeature = this.tileCoordinatesToPolygon(
-            this.downloadingTileXY.tileX,
-            this.downloadingTileXY.tileY,
+            this.downloadingTileXY().tileX,
+            this.downloadingTileXY().tileY,
             progress.toFixed(2) + "%"
         );
         strokeFeature.properties.stroke = "true";
@@ -211,7 +208,6 @@ export class OfflineManagementDialogComponent {
 
     public cancelDownload() {
         this.offlineFilesDownloadService.abortCurrentDownload();
-        this.downloadingTileXY = null;
         this.updateDownloadedTiles();
         this.updateInProgressTile(100);
         this.updateSelectedTile();
@@ -254,5 +250,9 @@ export class OfflineManagementDialogComponent {
                 this.updateDownloadedTiles();
             }
         });
+    }
+
+    public downloadingTileXY() {
+        return this.offlineFilesDownloadService.currentDownloadedTile;
     }
 }

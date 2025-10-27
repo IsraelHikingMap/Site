@@ -132,14 +132,14 @@
   </div>
   <div mat-dialog-actions>
     <div class="flex flex-row w-full">
-      @if (!selectedTileXY && !downloadingTileXY) {
+      @if (!selectedTileXY && !downloadingTileXY()) {
         <div class="flex-1">
           <div>
             {{resources.clickTheMapToSelectATile}}
           </div>
         </div>
       }
-      @if (selectedTileXY && !isSelectedAvailableForOffline() && !downloadingTileXY) {
+      @if (selectedTileXY && !isSelectedAvailableForOffline() && !downloadingTileXY()) {
         <div class="flex-1">
           <button mat-raised-button class="w-full" color="primary" (click)="downloadSelected()">
             <i class="fa fa-lg icon-download"></i>
@@ -147,7 +147,7 @@
           </button>
         </div>
       }
-      @if (selectedTileXY && isSelectedAvailableForOffline() && !downloadingTileXY) {
+      @if (selectedTileXY && isSelectedAvailableForOffline() && !downloadingTileXY()) {
         <div class="flex-1">
           <button mat-raised-button class="w-full" color="primary" (click)="downloadSelected()">
             <i class="fa fa-lg icon-download"></i>
@@ -161,7 +161,7 @@
           </button>
         </div>
       }
-      @if (downloadingTileXY) {
+      @if (downloadingTileXY()) {
         <div class="flex-1">
           <button mat-raised-button class="w-full" color="primary" (click)="cancelDownload()">
             <i class="fa fa-lg icon-close"></i>
