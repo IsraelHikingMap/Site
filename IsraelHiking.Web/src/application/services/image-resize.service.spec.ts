@@ -4,7 +4,6 @@ import {dump, insert, TagValues, type IExif} from "piexif-ts";
 
 import { ImageResizeService } from "./image-resize.service";
 import { encode } from "base64-arraybuffer";
-import { skip } from "node:test";
 
 const IMAGE_BASE_64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wCEAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAf/CABEIAAEAAQMBIgACEQEDEQH/xAAUAAEAAAAAAAAAAAAAAAAAAAAK/9oACAEBAAAAAH8f/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAhAAAAB//8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAxAAAAB//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPwB//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAgEBPwB//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAwEBPwB//9k=";
 
@@ -12,8 +11,16 @@ describe("ImageResizeService", () => {
 
     beforeEach(() => {
         const mockFileReader = vi.fn(() => ({
-            readAsDataURL: function (passthrough: any) {
-                this.onload({ target: { result: passthrough } });
+            readAsDataURL: function (blob: Blob) {
+                const self = this;
+                if (blob.arrayBuffer) {
+                    blob.arrayBuffer().then(buffer => {
+                        const dataBase64 = encode(buffer);
+                        self.onload({ target: { result: `data:image/jpeg;base64,${dataBase64}` } });
+                    });
+                } else {
+                    self.onload({ target: { result: blob } });
+                }
             },
             onload: null
         }));
@@ -27,13 +34,23 @@ describe("ImageResizeService", () => {
                 ImageResizeService
             ]
         });
+
+        Object.defineProperty(global.Image.prototype, 'src', {
+            set(url: string) {
+                if (url === 'error') {
+                    this.onerror();
+                } else if (this.onload) {
+                    this.onload();
+                }
+            }
+        });
     });
 
-    it.skip("Should fail to convert the image without location data", inject([ImageResizeService], async (service: ImageResizeService) => {
+    it("Should fail to convert the image without location data", inject([ImageResizeService], async (service: ImageResizeService) => {
         await expect(service.resizeImageAndConvert(new Blob([""]) as File)).rejects.toThrow("Image does not contain geolocation information");
     }));
 
-    it.skip("Should not fail when 0th is missing", inject([ImageResizeService], async (service: ImageResizeService) => {
+    it("Should not fail when 0th is missing", inject([ImageResizeService], async (service: ImageResizeService) => {
         const exifData: IExif = {};
         const exifbytes = dump(exifData);
         const dataUrl = insert(exifbytes, IMAGE_BASE_64);
