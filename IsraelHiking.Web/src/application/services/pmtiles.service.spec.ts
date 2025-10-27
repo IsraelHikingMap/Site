@@ -32,21 +32,21 @@ describe("PmTilesService", () => {
     }));
 
     it("Should get a tile above zoom", inject([PmTilesService, ], async (service: PmTilesService) => {
-        const results = await service.getTileAboveZoom(0, 0, 0, "filename-without-pmtiles-extention");
+        const results = await service.getTileByType(0, 0, 0, "filename-without-pmtiles-extention");
         expect(results).toBeDefined();
     }));
 
-    it("Should check if offline file is available without subscription", inject([PmTilesService, Store], (service: PmTilesService, store: Store) => {
+    it("Should check if offline file is available without subscription", inject([PmTilesService, Store], async (service: PmTilesService, store: Store) => {
          store.reset({
             offlineState: {
                 isSubscribed: false,
             }
         });
-        const isAvailable = service.isOfflineFileAvailable(0, 0, 0);
+        const isAvailable = await service.isOfflineFileAvailable(0, 0, 0, "filename-without-pmtiles-extention");
         expect(isAvailable).toBeFalse();
     }));
 
-    it("Should check if offline file is available below zoom 6", inject([PmTilesService, Store], (service: PmTilesService, store: Store) => {
+    it("Should check if offline file is available below zoom 6", inject([PmTilesService, Store], async (service: PmTilesService, store: Store) => {
         const tileX: number = undefined;
         const tileY: number = undefined;
         store.reset({
@@ -56,11 +56,11 @@ describe("PmTilesService", () => {
                 }
             }
         });
-        const isAvailable = service.isOfflineFileAvailable(0, 0, 0);
+        const isAvailable = await service.isOfflineFileAvailable(0, 0, 0, "filename-without-pmtiles-extention");
         expect(isAvailable).toBeTrue();
     }));
 
-    it("Should check if offline file is available above zoom 7", inject([PmTilesService, Store], (service: PmTilesService, store: Store) => {
+    it("Should check if offline file is available above zoom 7", inject([PmTilesService, Store], async (service: PmTilesService, store: Store) => {
         const tileX: number = 0;
         const tileY: number = 0;
         store.reset({
@@ -70,7 +70,7 @@ describe("PmTilesService", () => {
                 }
             }
         });
-        const isAvailable = service.isOfflineFileAvailable(10, 0, 0);
+        const isAvailable = await service.isOfflineFileAvailable(10, 0, 0, "filename-without-pmtiles-extention");
         expect(isAvailable).toBeTrue();
     }));
 });

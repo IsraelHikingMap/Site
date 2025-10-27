@@ -31,7 +31,7 @@ describe("ElevationProvider", () => {
             providers: [
                 { provide: LoggingService, useValue: { warning: () => { } } },
                 { provide: PmTilesService, useValue: {
-                    isOfflineFileAvailable: () => false,
+                    isOfflineFileAvailable: () => Promise.resolve(false),
                 } },
                 ElevationProvider,
                 provideHttpClient(withInterceptorsFromDi()),
@@ -46,6 +46,7 @@ describe("ElevationProvider", () => {
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
             const promise = elevationProvider.updateHeights(latlngs);
+            await new Promise((resolve) => setTimeout(resolve, 0)); // Let the http call be made
 
             mockBackend.match(() => true)[0].flush(await getArrayBufferOfNonEmptyTile());
             await promise;
@@ -72,6 +73,8 @@ describe("ElevationProvider", () => {
 
             const promise = elevationProvider.updateHeights(latlngs);
 
+            await new Promise((resolve) => setTimeout(resolve, 0)); // Let the http call be made
+
             mockBackend.match(() => true)[0].flush(null, { status: 500, statusText: "Server Error" });
             await promise;
             expect(latlngs[0].alt).toBe(0);
@@ -83,8 +86,8 @@ describe("ElevationProvider", () => {
         async (elevationProvider: ElevationProvider, db: PmTilesService) => {
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
-            db.isOfflineFileAvailable = () => true;
-            db.getTileAboveZoom = getArrayBufferOfNonEmptyTile;
+            db.isOfflineFileAvailable = () => Promise.resolve(true);
+            db.getTileByType = getArrayBufferOfNonEmptyTile;
 
             const promise = elevationProvider.updateHeights(latlngs);
 

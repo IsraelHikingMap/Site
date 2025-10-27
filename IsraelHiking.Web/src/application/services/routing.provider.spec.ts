@@ -43,7 +43,7 @@ describe("RoutingProvider", () => {
                 { provide: LoggingService, useValue: { error: () => { } } },
                 { provide: RunningContextService, useValue: {} },
                 { provide: PmTilesService, useValue: {
-                    isOfflineFileAvailable: () => false,
+                    isOfflineFileAvailable: () => Promise.resolve(false),
                 } },
                 { provide: ElevationProvider, useValue: {
                     updateHeights: () => Promise.resolve()
@@ -200,8 +200,8 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.isOfflineFileAvailable = () => true;
-            db.getTileAboveZoom = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
+            db.isOfflineFileAvailable = () => Promise.resolve(true);
+            db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
             const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0001 }, "Hike");
 
@@ -232,8 +232,8 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.isOfflineFileAvailable = () => true;
-            db.getTileAboveZoom = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
+            db.isOfflineFileAvailable = () => Promise.resolve(true);
+            db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
             const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Hike");
 
@@ -270,8 +270,8 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.isOfflineFileAvailable = () => true;
-            db.getTileAboveZoom = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
+            db.isOfflineFileAvailable = () => Promise.resolve(true);
+            db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
             const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike");
 
@@ -299,7 +299,7 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.getTileAboveZoom = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
+            db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
             store.reset({
                 offlineState: {
@@ -342,8 +342,8 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.isOfflineFileAvailable = () => true;
-            db.getTileAboveZoom = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
+            db.isOfflineFileAvailable = () => Promise.resolve(true);
+            db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
             const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike");
 
