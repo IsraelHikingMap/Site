@@ -99,23 +99,23 @@ export class OfflineManagementDialogComponent {
     public async downloadSelected() {
         const { tileX, tileY } = this.selectedTileXY;
         this.center = SpatialService.toCoordinate(SpatialService.fromTile({x: tileX + 0.5, y: tileY + 0.5}, TILES_ZOOM));
+        this.selectedTileXY = null;
         this.updateDownloadedTiles();
         this.updateSelectedTile();
         const status = await this.offlineFilesDownloadService.downloadTile(tileX, tileY);
         switch (status) {
             case "up-to-date":
-                this.selectedTileXY = null;
                 this.toastService.success(this.resources.allFilesAreUpToDate);
                 break;
             case "downloaded":
-                this.selectedTileXY = null;
                 this.toastService.success(this.resources.downloadFinishedSuccessfully);
                 break;
             case "error":
+                this.selectedTileXY = { tileX, tileY };
                 this.toastService.warning(this.resources.unexpectedErrorPleaseTryAgainLater);
                 break;
             case "aborted":
-                // No need to do anything
+                this.selectedTileXY = { tileX, tileY };
                 break;
         }
 
