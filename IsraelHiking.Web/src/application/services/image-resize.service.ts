@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import {load, dump, insert, GPSHelper, TagValues, type IExif} from "piexif-ts";
+import { v4 as uuidv4 } from "uuid";
 
 import type { LatLngAlt, DataContainer, RouteSegmentData, MarkerData, RouteData } from "../models";
 
@@ -89,6 +90,7 @@ export class ImageResizeService {
                     segments: [] as RouteSegmentData[],
                     markers: [
                         {
+                            id: uuidv4(),
                             title: name,
                             latlng: latLng,
                             type: "star",

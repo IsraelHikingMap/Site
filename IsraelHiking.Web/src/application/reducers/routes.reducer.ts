@@ -52,6 +52,11 @@ export class DeletePrivatePoiAction {
     constructor(public routeId: string, public index: number) {}
 }
 
+export class DeletePrivatePoiByIdAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public id: string) {}
+}
+
 export class AddSegmentAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string, public segmentData: RouteSegmentData) {}
@@ -223,6 +228,20 @@ export class RoutesReducer {
         this.changeState(ctx, (lastState) => {
             const route = lastState.find(r => r.id === action.routeId);
             route.markers.splice(action.index, 1);
+            return lastState;
+        });
+    }
+
+    @Action(DeletePrivatePoiByIdAction)
+    public deletePoiById(ctx: StateContext<StateWithHistory<RouteData[]>>, action: DeletePrivatePoiByIdAction) {
+        this.changeState(ctx, (lastState) => {
+            for (const route of lastState) {
+                const index = route.markers.findIndex(m => m.id === action.id);
+                if (index !== -1) {
+                    route.markers.splice(index, 1);
+                    break;
+                }
+            }
             return lastState;
         });
     }

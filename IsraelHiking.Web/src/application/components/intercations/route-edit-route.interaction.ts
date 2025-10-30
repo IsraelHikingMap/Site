@@ -1,6 +1,7 @@
 import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
 import { MapMouseEvent, Map, GeoJSONSource, type Point } from "maplibre-gl";
 import { Store } from "@ngxs/store";
+import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
 
 import { SelectedRouteService } from "../../services/selected-route.service";
@@ -378,6 +379,7 @@ export class RouteEditRouteInteraction {
         }
         // private POIs + Geo Location + Additional Point:
         const points = additionalLatlngs.map(l => ({
+            id: uuidv4(),
             latlng: l,
             type: "star",
             urls: [],

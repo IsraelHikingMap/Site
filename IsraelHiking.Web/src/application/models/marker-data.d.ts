@@ -5,6 +5,6 @@ export type MarkerData = {
     title: string;
     description: string;
     type: string;
-    id?: string;
+    id: string;
     urls: LinkData[];
 };

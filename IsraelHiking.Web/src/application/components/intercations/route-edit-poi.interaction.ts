@@ -2,6 +2,7 @@ import { inject, Injectable, NgZone } from "@angular/core";
 import { MapMouseEvent, Map } from "maplibre-gl";
 import { MatDialog } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
+import { v4 as uuidv4 } from "uuid";
 
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
@@ -67,6 +68,7 @@ export class RouteEditPoiInteraction {
 
     private async addPrivatePoi(latlng: LatLngAlt) {
         let markerData: MarkerData = {
+            id: uuidv4(),
             latlng,
             urls: [],
             title: "",
@@ -110,15 +112,14 @@ export class RouteEditPoiInteraction {
         if (gpsState.tracking === "tracking") {
             const currentLocation = GeoLocationService.positionToLatLngTime(gpsState.currentPosition);
             const snappingPointResponse = this.snappingService.snapToPoint(latlng,
-                [
-                    {
-                        latlng: currentLocation,
-                        type: "star",
-                        urls: [],
-                        title: "",
-                        description: "",
-                    } as MarkerData
-                ]);
+                [{
+                    id: uuidv4(),
+                    latlng: currentLocation,
+                    type: "star",
+                    urls: [],
+                    title: "",
+                    description: "",
+                }]);
             if (snappingPointResponse.markerData != null) {
                 return snappingPointResponse;
             }

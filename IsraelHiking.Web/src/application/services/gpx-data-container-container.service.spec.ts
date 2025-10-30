@@ -39,6 +39,7 @@ describe("GpxDataContainerConverterService", () => {
                 name: "name", 
                 segments: [], state: "ReadOnly",
                 markers: [{
+                    id: "markerId",
                     description: "desc", 
                     title: "title", 
                     type: "type", 

@@ -3,6 +3,7 @@ import { HttpRequest, provideHttpClient, withInterceptorsFromDi } from "@angular
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 import { LngLatBounds } from "maplibre-gl";
+import { v4 as uuidv4 } from "uuid";
 
 import { ResourcesService } from "./resources.service";
 import { WhatsAppService } from "./whatsapp.service";
@@ -25,7 +26,7 @@ import { Urls } from "../urls";
 import { LayersReducer } from "../reducers/layers.reducer";
 import { AddToPoiQueueAction, OfflineReducer } from "../reducers/offline.reducer";
 import { ConfigurationReducer, SetLanguageAction } from "../reducers/configuration.reducer";
-import type { ApplicationState, LatLngAlt, MarkerData } from "../models";
+import type { ApplicationState, LatLngAlt } from "../models";
 
 describe("Poi Service", () => {
 
@@ -253,12 +254,14 @@ describe("Poi Service", () => {
     )));
 
     it("Should allow adding a point from private marker for a new point", inject([PoiService, Store], async (poiService: PoiService, store: Store) => {
+        const id = uuidv4();
         const markerData = {
             description: "description",
             title: "title",
             type: "some-type",
             urls: [{mimeType: "image", url: "wikimedia.org/image-url", text: "text"}],
-            latlng: { lng: 1, lat: 2}
+            latlng: { lng: 1, lat: 2},
+            id
         };
 
         store.reset({
@@ -276,6 +279,7 @@ describe("Poi Service", () => {
         expect(data.imagesUrls[0]).toBe("wikimedia.org/image-url");
         expect(data.icon).toBe("icon-some-type");
         expect(data.showLocationUpdate).toBeFalsy();
+        expect(data.id).toBe(id);
     }));
 
     it("Should create data for updating a point from private marker by merging it, for an existing point", inject([PoiService, Store], async (poiService: PoiService, store: Store) => {
@@ -519,12 +523,10 @@ describe("Poi Service", () => {
             async (poiService: PoiService, store: Store) => {
                 const spy = jasmine.createSpy();
                 store.dispatch = spy;
-                const promise = poiService.addSimplePoint({ lat: 0, lng: 0}, "Tap").then(() => {
-                    expect(store.dispatch).toHaveBeenCalled();
-                    expect(spy.calls.first().args[0]).toBeInstanceOf(AddToPoiQueueAction);
-                });
+                await poiService.addSimplePoint({ lat: 0, lng: 0}, "Tap", "id");
 
-                return promise;
+                expect(store.dispatch).toHaveBeenCalled();
+                expect(spy.calls.first().args[0]).toBeInstanceOf(AddToPoiQueueAction);
             }
         )
     );
@@ -534,7 +536,7 @@ describe("Poi Service", () => {
             async (poiService: PoiService, dbMock: DatabaseService, store: Store) => {
                 const spy = spyOn(dbMock, "addPoiToUploadQueue");
                 store.dispatch = jasmine.createSpy();
-                const promise = poiService.addComplexPoi({
+                await poiService.addComplexPoi({
                     id: "poiId",
                     isPoint: true,
                     category: "natural",
@@ -548,18 +550,16 @@ describe("Poi Service", () => {
                     originalFeature: null,
                     showLocationUpdate: false,
                     location: { lat: 0, lng: 0 } as LatLngAlt
-                }).then(() => {
-                    expect(store.dispatch).toHaveBeenCalled();
-                    expect(spy.calls.mostRecent().args[0].properties.poiId).not.toBeNull();
-                    expect(spy.calls.mostRecent().args[0].properties.poiSource).toBe("OSM");
-                    expect(spy.calls.mostRecent().args[0].properties["description:he"]).toBe("description");
-                    expect(spy.calls.mostRecent().args[0].properties["name:he"]).toBe("title");
-                    expect(spy.calls.mostRecent().args[0].properties.website).toBe("some-url");
-                    expect(spy.calls.mostRecent().args[0].properties.image).toBe("some-image-url");
-                    expect(spy.calls.mostRecent().args[0].geometry.type).toBe("Point");
                 });
-
-                return promise;
+                
+                expect(store.dispatch).toHaveBeenCalled();
+                expect(spy.calls.mostRecent().args[0].properties.poiId).not.toBeNull();
+                expect(spy.calls.mostRecent().args[0].properties.poiSource).toBe("OSM");
+                expect(spy.calls.mostRecent().args[0].properties["description:he"]).toBe("description");
+                expect(spy.calls.mostRecent().args[0].properties["name:he"]).toBe("title");
+                expect(spy.calls.mostRecent().args[0].properties.website).toBe("some-url");
+                expect(spy.calls.mostRecent().args[0].properties.image).toBe("some-image-url");
+                expect(spy.calls.mostRecent().args[0].geometry.type).toBe("Point");
             }
         )
     );
@@ -574,7 +574,7 @@ describe("Poi Service", () => {
                 });
                 store.dispatch = jasmine.createSpy();
                 const spy = spyOn(dbMock, "addPoiToUploadQueue");
-                const promise = poiService.updateComplexPoi({
+                await poiService.updateComplexPoi({
                     id: "poiId",
                     isPoint: true,
                     category: "natural",
@@ -600,30 +600,28 @@ describe("Poi Service", () => {
                             coordinates: [0, 0]
                         }
                     } as GeoJSON.Feature
-                }, true).then(() => {
-                    expect(store.dispatch).toHaveBeenCalled();
-                    const feature = spy.calls.mostRecent().args[0];
-                    expect(feature.properties.poiId).not.toBeNull();
-                    expect(feature.properties.poiSource).toBe("OSM");
-                    expect(feature.properties["description:he"]).toBe("description");
-                    expect(GeoJSONUtils.getDescription(feature, "he")).toBe("description");
-                    expect(feature.properties["name:he"]).toBe("title");
-                    expect(GeoJSONUtils.getTitle(feature, "he")).toBe("title");
-                    expect(feature.properties.poiAddedUrls).toEqual(["some-new-url"]);
-                    expect(feature.properties.poiRemovedUrls).toEqual(["some-old-url"]);
-                    expect(feature.properties.poiAddedImages).toEqual(["some-new-image-url"]);
-                    expect(feature.properties.poiRemovedImages).toEqual(["wikimedia.org/some-old-image-url"]);
-                    expect(feature.properties.poiIcon).toBe("icon-spring");
-                    expect(feature.properties.poiGeolocation.lat).toBe(1);
-                    expect(feature.properties.poiGeolocation.lon).toBe(2);
-                    expect(GeoJSONUtils.getLocation(feature).lat).toBe(1);
-                    expect(GeoJSONUtils.getLocation(feature).lng).toBe(2);
-                    // expected to not change geometry
-                    expect(feature.geometry.type).toBe("Point");
-                    expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([0, 0]);
-                });
-
-                return promise;
+                }, true);
+                
+                expect(store.dispatch).toHaveBeenCalled();
+                const feature = spy.calls.mostRecent().args[0];
+                expect(feature.properties.poiId).not.toBeNull();
+                expect(feature.properties.poiSource).toBe("OSM");
+                expect(feature.properties["description:he"]).toBe("description");
+                expect(GeoJSONUtils.getDescription(feature, "he")).toBe("description");
+                expect(feature.properties["name:he"]).toBe("title");
+                expect(GeoJSONUtils.getTitle(feature, "he")).toBe("title");
+                expect(feature.properties.poiAddedUrls).toEqual(["some-new-url"]);
+                expect(feature.properties.poiRemovedUrls).toEqual(["some-old-url"]);
+                expect(feature.properties.poiAddedImages).toEqual(["some-new-image-url"]);
+                expect(feature.properties.poiRemovedImages).toEqual(["wikimedia.org/some-old-image-url"]);
+                expect(feature.properties.poiIcon).toBe("icon-spring");
+                expect(feature.properties.poiGeolocation.lat).toBe(1);
+                expect(feature.properties.poiGeolocation.lon).toBe(2);
+                expect(GeoJSONUtils.getLocation(feature).lat).toBe(1);
+                expect(GeoJSONUtils.getLocation(feature).lng).toBe(2);
+                // expected to not change geometry
+                expect(feature.geometry.type).toBe("Point");
+                expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([0, 0]);
             }
         )
     );
@@ -637,7 +635,7 @@ describe("Poi Service", () => {
                     }
                 });
                 const spy = spyOn(dbMock, "addPoiToUploadQueue");
-                const promise = poiService.updateComplexPoi({
+                await poiService.updateComplexPoi({
                     id: "poiId",
                     isPoint: true,
                     category: "natural",
@@ -668,11 +666,9 @@ describe("Poi Service", () => {
                             coordinates: [0, 0]
                         }
                     } as GeoJSON.Feature
-                }, false).then(() => {
-                    expect(spy).not.toHaveBeenCalled();
-                });
+                }, false);
 
-                return promise;
+                expect(spy).not.toHaveBeenCalled();
             }
         )
     );
@@ -700,7 +696,7 @@ describe("Poi Service", () => {
                 });
                 store.dispatch = jasmine.createSpy();
                 const spy = spyOn(dbMock, "addPoiToUploadQueue");
-                const promise = poiService.updateComplexPoi({
+                await poiService.updateComplexPoi({
                     id: "poiId",
                     isPoint: true,
                     category: "natural",
@@ -726,28 +722,26 @@ describe("Poi Service", () => {
                             coordinates: [0, 0]
                         }
                     } as GeoJSON.Feature
-                }, false).then(() => {
-                    expect(store.dispatch).toHaveBeenCalled();
-                    const feature = spy.calls.mostRecent().args[0];
-                    expect(feature.properties.poiId).not.toBeNull();
-                    expect(feature.properties.poiSource).toBe("OSM");
-                    expect(feature.properties["description:he"]).toBe("description");
-                    expect(GeoJSONUtils.getDescription(feature, "he")).toBe("description");
-                    expect(feature.properties["name:he"]).toBe("title");
-                    expect(GeoJSONUtils.getTitle(feature, "he")).toBe("title");
-                    expect(feature.properties.poiAddedUrls).toEqual(["some-url"]);
-                    expect(feature.properties.poiAddedImages).toEqual(["some-image-url"]);
-                    expect(feature.properties.poiIcon).toBeUndefined();
-                    expect(feature.properties.poiGeolocation.lat).toBe(1);
-                    expect(feature.properties.poiGeolocation.lon).toBe(2);
-                    expect(GeoJSONUtils.getLocation(feature).lat).toBe(1);
-                    expect(GeoJSONUtils.getLocation(feature).lng).toBe(2);
-                    // expected to not change geometry
-                    expect(feature.geometry.type).toBe("Point");
-                    expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([0, 0]);
-                });
+                }, false);
 
-                return promise;
+                expect(store.dispatch).toHaveBeenCalled();
+                const feature = spy.calls.mostRecent().args[0];
+                expect(feature.properties.poiId).not.toBeNull();
+                expect(feature.properties.poiSource).toBe("OSM");
+                expect(feature.properties["description:he"]).toBe("description");
+                expect(GeoJSONUtils.getDescription(feature, "he")).toBe("description");
+                expect(feature.properties["name:he"]).toBe("title");
+                expect(GeoJSONUtils.getTitle(feature, "he")).toBe("title");
+                expect(feature.properties.poiAddedUrls).toEqual(["some-url"]);
+                expect(feature.properties.poiAddedImages).toEqual(["some-image-url"]);
+                expect(feature.properties.poiIcon).toBeUndefined();
+                expect(feature.properties.poiGeolocation.lat).toBe(1);
+                expect(feature.properties.poiGeolocation.lon).toBe(2);
+                expect(GeoJSONUtils.getLocation(feature).lat).toBe(1);
+                expect(GeoJSONUtils.getLocation(feature).lng).toBe(2);
+                // expected to not change geometry
+                expect(feature.geometry.type).toBe("Point");
+                expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([0, 0]);
             }
         )
     );
@@ -866,10 +860,7 @@ describe("Poi Service", () => {
     it("should get closest point from server", (inject([PoiService, HttpTestingController],
         async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
-            const promise = poiService.getClosestPoint({lat: 0, lng: 0}, "", "").then((data: MarkerData) => {
-                expect(data.latlng.lat).toBe(1);
-                expect(data.latlng.lng).toBe(1);
-            });
+            const promise = poiService.getClosestPoint({lat: 0, lng: 0}, "", "");
 
             mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes(Urls.poiClosest))
                 .flush({
@@ -877,21 +868,22 @@ describe("Poi Service", () => {
                     properties: { "name:he": "name" },
                     geometry: { type: "Point", coordinates: [1, 1]}, } as GeoJSON.Feature);
 
-            return promise;
+            const data = await promise;
+            expect(data.latlng.lat).toBe(1);
+            expect(data.latlng.lng).toBe(1);
         })
     ));
 
     it("should not get closest point from server when there's a server error", (inject([PoiService, HttpTestingController],
         async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
-            const promise = poiService.getClosestPoint({lat: 0, lng: 0}, "", "").then((data: MarkerData) => {
-                expect(data).toBeNull();
-            });
+            const promise = poiService.getClosestPoint({lat: 0, lng: 0}, "", "");
 
             mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes(Urls.poiClosest))
                 .flush("Invalid", { status: 400, statusText: "Bad Request"});
 
-            return promise;
+            const data = await promise;
+            expect(data).toBeNull();
         })
     ));
 

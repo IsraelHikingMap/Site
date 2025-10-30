@@ -24,6 +24,7 @@ import { NavigateHereService } from "../../services/navigate-here.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { HashService } from "../../services/hash.service";
 import { ToastService } from "../../services/toast.service";
+import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
 import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducers/routes.reducer";
 import { DeleteRecordingPoiAction, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
 import { Urls } from "../../urls";
@@ -74,6 +75,7 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
     private readonly hashService = inject(HashService);
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
+    private readonly privatePoiUploaderService = inject(PrivatePoiUploaderService);
     private readonly data = inject<PrivatePoiEditDialogData>(MAT_DIALOG_DATA);
 
 
@@ -156,7 +158,8 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
             this.url.text = this.title;
             urls.push(this.url);
         }
-        const updatedMarker = {
+        const updatedMarker: MarkerData = {
+            id: this.marker.id,
             title: this.title,
             description: this.description,
             latlng: this.marker.latlng,
@@ -189,13 +192,25 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
             this.toastService.warning(this.resources.loginRequired);
             return;
         }
-        AddSimplePoiDialogComponent.openDialog(this.matDialog, {
-            latlng: this.marker.latlng,
-            imageLink: this.imageLink,
-            title: this.title,
-            description: this.description,
-            markerType: this.markerType
-        });
+        if (this.title || this.description || this.imageLink) {
+            await this.privatePoiUploaderService.uploadPoint(
+                this.marker.id,
+                this.marker.latlng,
+                this.imageLink,
+                this.title,
+                this.description,
+                this.markerType);
+        } else {
+            AddSimplePoiDialogComponent.openDialog(this.matDialog, {
+                id: this.marker.id,
+                latlng: this.marker.latlng,
+                imageLink: this.imageLink,
+                title: this.title,
+                description: this.description,
+                markerType: this.markerType
+            });
+        }
+        
         this.dialogRef.close();
     }
 
