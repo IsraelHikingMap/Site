@@ -9,8 +9,8 @@ import { ResourcesService } from "../../services/resources.service";
 import {
     CollapseGroupAction,
     ExpandGroupAction,
-    SetCategoriesGroupVisibilityAction,
-    SetCategoryVisibilityAction
+    ToggleCategoriesGroupVisibilityAction,
+    ToggleCategoryVisibilityAction
 } from "../../reducers/layers.reducer";
 import type { ApplicationState, CategoriesGroup, Category } from "../../models";
 
@@ -42,12 +42,12 @@ export class CategoriesGroupComponent {
     }
 
     public toggleCategory(category: Category) {
-        this.store.dispatch(new SetCategoryVisibilityAction(category.name, this.categoriesGroup().type, !this.isCategoryVisible(category)));
+        this.store.dispatch(new ToggleCategoryVisibilityAction(category.name, this.categoriesGroup().type));
     }
 
     public toggleVisibility(event: Event) {
         event.stopPropagation();
-        this.store.dispatch(new SetCategoriesGroupVisibilityAction(this.categoriesGroup().type, !this.isCategoryGroupVisible()));
+        this.store.dispatch(new ToggleCategoriesGroupVisibilityAction(this.categoriesGroup().type));
     }
 
     public isCategoryVisible(category: Category): boolean {
@@ -57,6 +57,6 @@ export class CategoriesGroupComponent {
 
     public isCategoryGroupVisible(): boolean {
         const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
-        return layersState.visibleCategories.find(c => this.categoriesGroup().categories.some(cat => cat.name === c.name && this.categoriesGroup().type == c.groupType)) != null;
+        return layersState.visibleCategories.some(c => this.categoriesGroup().type === c.groupType);
     }
 }

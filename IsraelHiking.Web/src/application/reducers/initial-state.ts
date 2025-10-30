@@ -159,7 +159,7 @@ export const initialState =
             isShowIntro: true,
             isShowKmMarker: false,
             isShowSlope: false,
-            version: 10,
+            version: "9.20",
             language: AVAILABLE_LANGUAGES.find(l => l.code === navigator.language) ?? AVAILABLE_LANGUAGES[0],
         },
         locationState: {

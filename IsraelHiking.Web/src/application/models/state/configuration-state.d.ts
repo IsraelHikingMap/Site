@@ -10,6 +10,6 @@ export type ConfigurationState = {
     isShowSlope: boolean;
     isShowKmMarker: boolean;
     isShowIntro: boolean;
-    version: number;
+    version: string;
     language: Language;
 };
