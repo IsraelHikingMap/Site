@@ -63,7 +63,7 @@ public class SimplePointAdderExecutorTests
         _overpassTurboGateway = Substitute.For<IOverpassTurboGateway>();
         
         _executor = new SimplePointAdderExecutor(options, 
-            _overpassTurboGateway, new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), Substitute.For<IElevationGateway>(), new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper(options)), 
+            _overpassTurboGateway, new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), Substitute.For<IElevationGateway>(), new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper()), 
             Substitute.For<ILogger>());
     }
 

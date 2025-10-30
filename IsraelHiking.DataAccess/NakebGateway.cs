@@ -109,7 +109,6 @@ public class NakebGateway : INakebGateway
             {FeatureAttributes.POI_LANGUAGES, new [] {Languages.HEBREW}},
             {FeatureAttributes.POI_ICON, "icon-hike"},
             {FeatureAttributes.POI_ICON_COLOR, "black"},
-            {FeatureAttributes.POI_SEARCH_FACTOR, 1.0}
         };
         attributes.SetLastModified(nakebItem.LastModified);
         attributes.SetLocation(new Coordinate(nakebItem.Start.Lng, nakebItem.Start.Lat));
