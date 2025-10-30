@@ -11,6 +11,7 @@ import { MatIconButton, MatButton } from "@angular/material/button";
 import { MatOption } from "@angular/material/core";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
+import { validate as validateUuid } from "uuid";
 
 import { ImageScrollerComponent } from "./image-scroller.component";
 import { PoiService, ISelectableCategory } from "../../../services/poi.service";
@@ -111,10 +112,10 @@ export class PublicPointOfInterestEditComponent implements OnInit {
     public async save() {
         this.isLoading = true;
         try {
-            if (!this.info().id) {
-                await this.poiService.addComplexPoi(this.info());
-            } else {
+            if (this.info().id && !validateUuid(this.info().id)) {
                 await this.poiService.updateComplexPoi(this.info(), this.updateLocation);
+            } else {
+                await this.poiService.addComplexPoi(this.info());
             }
             this.toastService.success(this.resources.dataUpdatedSuccessfullyItWillTakeTimeToSeeIt);
             this.close();

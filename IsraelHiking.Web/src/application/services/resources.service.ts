@@ -317,6 +317,7 @@ export class ResourcesService {
     public jammedPositionReceived: string;
     public newVersionAvailable: string;
     public routesDeleted: string;
+    public uploadingDataFromExternalSourceIsNotAllowed: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -478,7 +479,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1755081648290");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1761813596673");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -794,6 +795,7 @@ export class ResourcesService {
         this.jammedPositionReceived = this.gettextCatalog.getString("Jammed position received...");
         this.newVersionAvailable = this.gettextCatalog.getString("New version available, do you want to update?");
         this.routesDeleted = this.gettextCatalog.getString("Routes deleted");
+        this.uploadingDataFromExternalSourceIsNotAllowed = this.gettextCatalog.getString("Uploading data from external source is not allowed...");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog

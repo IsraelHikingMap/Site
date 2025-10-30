@@ -2,6 +2,7 @@ import { inject, Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { flatten } from "lodash-es";
 import { Store } from "@ngxs/store";
+import { validate } from "uuid";
 
 import { ResourcesService } from "./resources.service";
 import { PoiService } from "./poi.service";
@@ -20,26 +21,43 @@ export class PrivatePoiUploaderService {
     private readonly store = inject(Store);
 
     public async uploadPoint(
+        id: string,
         latLng: LatLngAlt,
         imageLink: LinkData,
         title: string,
         description: string,
         markerType: string
     ) {
-        const results = await this.poiService.getClosestPoint(latLng, "OSM", this.resources.getCurrentLanguageCodeSimplified());
         let urls = [] as LinkData[];
         if (imageLink) {
             urls = [imageLink];
         }
-        const markerData = {
+        const markerData: MarkerData = {
+            id,
             description: description ? description.substring(0, 255) : "",
             title,
             latlng: latLng,
             type: markerType,
             urls
-        } as MarkerData;
+        };
 
         this.store.dispatch(new SetUploadMarkerDataAction(markerData));
+
+        if (id && !validate(id) && (
+            id.toLocaleLowerCase().startsWith("way") ||
+            id.toLocaleLowerCase().startsWith("node") ||
+            id.toLocaleLowerCase().startsWith("relation")
+        )) {
+            // id is of an existing OSM POI:
+            this.router.navigate([RouteStrings.ROUTE_POI, "OSM", id],
+                    { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
+            return;
+        } else if (id && !validate(id)) {
+            this.toastService.warning(this.resources.uploadingDataFromExternalSourceIsNotAllowed);
+            return;
+        }
+
+        const results = await this.poiService.getClosestPoint(latLng, "OSM", this.resources.getCurrentLanguageCodeSimplified());
 
         if (results == null) {
             this.router.navigate([RouteStrings.ROUTE_POI, "new", ""],

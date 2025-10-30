@@ -557,7 +557,7 @@ describe("Poi Service", () => {
             async (poiService: PoiService, store: Store) => {
                 const spy = jasmine.createSpy();
                 store.dispatch = spy;
-                const promise = poiService.addSimplePoint({ lat: 0, lng: 0}, "Tap").then(() => {
+                const promise = poiService.addSimplePoint({ lat: 0, lng: 0}, "Tap", "id").then(() => {
                     expect(store.dispatch).toHaveBeenCalled();
                     expect(spy.calls.first().args[0]).toBeInstanceOf(AddToPoiQueueAction);
                 });

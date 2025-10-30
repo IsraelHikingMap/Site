@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { cloneDeep, isEqualWith } from "lodash-es";
 import { firstValueFrom } from "rxjs";
 import { timeout, skip } from "rxjs/operators";
-import { v4 as uuidv4 } from "uuid";
+import { validate as validateUuid } from "uuid";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 import type { GeoJSONFeature } from "maplibre-gl";
@@ -196,7 +196,7 @@ export class PoiService {
         try {
             const postAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
             const putAddress = Urls.poi + this.getFeatureId(feature) + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
-            const poi$ = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(this.getFeatureId(feature))
+            const poi$ = validateUuid(this.getFeatureId(feature))
                 ? this.httpClient.post<GeoJSON.Feature>(postAddress, feature).pipe(timeout(180000))
                 : this.httpClient.put<GeoJSON.Feature>(putAddress, feature).pipe(timeout(180000));
             const poi = await firstValueFrom(poi$);
@@ -622,6 +622,10 @@ export class PoiService {
 
     private mergeFeatureWithUploadMarker(feature: GeoJSON.Feature, markerData: Immutable<MarkerData>) {
         const language = this.resources.getCurrentLanguageCodeSimplified();
+        if (validateUuid(markerData.id)) {
+            feature.id = markerData.id;
+            feature.properties.identifier = markerData.id;
+        }
         GeoJSONUtils.setTitle(feature, feature.properties["name:" + language] || markerData.title, language);
         GeoJSONUtils.setDescription(feature, feature.properties["description:" + language] || markerData.description, language);
         GeoJSONUtils.setLocation(feature, markerData.latlng);
@@ -656,8 +660,7 @@ export class PoiService {
         return this.geoJsonParser.toMarkerData(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
-    public addSimplePoint(latlng: LatLngAlt, pointType: SimplePointType): Promise<any> {
-        const id = uuidv4();
+    public addSimplePoint(latlng: LatLngAlt, pointType: SimplePointType, id: string): Promise<any> {
         const feature = {
             id,
             type: "Feature",
@@ -679,7 +682,7 @@ export class PoiService {
     public addComplexPoi(info: EditablePublicPointData): Promise<void> {
         const feature = this.getFeatureFromEditableData(info);
         GeoJSONUtils.setLocation(feature, info.location);
-        const id = uuidv4();
+        const id = info.id;
         feature.id = id;
         feature.properties.poiId = id;
         feature.properties.poiSource = "OSM";
