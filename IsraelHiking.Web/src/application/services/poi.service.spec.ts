@@ -3,6 +3,7 @@ import { HttpRequest, provideHttpClient, withInterceptorsFromDi } from "@angular
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 import { LngLatBounds } from "maplibre-gl";
+import { v4 as uuidv4 } from "uuid";
 
 import { ResourcesService } from "./resources.service";
 import { WhatsAppService } from "./whatsapp.service";
@@ -253,12 +254,14 @@ describe("Poi Service", () => {
     )));
 
     it("Should allow adding a point from private marker for a new point", inject([PoiService, Store], async (poiService: PoiService, store: Store) => {
+        const id = uuidv4();
         const markerData = {
             description: "description",
             title: "title",
             type: "some-type",
             urls: [{mimeType: "image", url: "wikimedia.org/image-url", text: "text"}],
-            latlng: { lng: 1, lat: 2}
+            latlng: { lng: 1, lat: 2},
+            id
         };
 
         store.reset({
@@ -276,6 +279,7 @@ describe("Poi Service", () => {
         expect(data.imagesUrls[0]).toBe("wikimedia.org/image-url");
         expect(data.icon).toBe("icon-some-type");
         expect(data.showLocationUpdate).toBeFalsy();
+        expect(data.id).toBe(id);
     }));
 
     it("Should create data for updating a point from private marker by merging it, for an existing point", inject([PoiService, Store], async (poiService: PoiService, store: Store) => {

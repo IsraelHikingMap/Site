@@ -721,8 +721,8 @@ export class PoiService {
         data.id = this.getFeatureId(feature);
         data.category = feature.properties.poiCategory;
         data.isPoint = feature.geometry.type === "Point" || feature.geometry.type === "MultiPoint";
-        if (feature.geometry.type === "Point" && markerData != null) {
-            data.showLocationUpdate = data.id != "";
+        if (feature.geometry.type === "Point" && markerData != null && data.id) {
+            data.showLocationUpdate = !validateUuid(data.id);
             data.location = markerData.latlng;
         }
         return data;
