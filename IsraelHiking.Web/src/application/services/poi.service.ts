@@ -27,12 +27,6 @@ import { ImageAttributionService } from "./image-attribution.service";
 import { LatLon, OsmTagsService, PoiProperties } from "./osm-tags.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction } from "../reducers/offline.reducer";
 import { SetSelectedPoiAction, SetUploadMarkerDataAction } from "../reducers/poi.reducer";
-import {
-    SetCategoriesGroupVisibilityAction,
-    AddCategoryAction,
-    UpdateCategoryAction,
-    RemoveCategoryAction
-} from "../reducers/layers.reducer";
 import { Urls } from "../urls";
 import type {
     MarkerData,
@@ -46,7 +40,6 @@ import type {
     UpdateablePublicPoiData
 } from "../models";
 
-
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite"
 
 export type PoiSocialLinks = {
@@ -56,11 +49,9 @@ export type PoiSocialLinks = {
     waze: string;
 };
 
-export interface ISelectableCategory extends Category {
+export type SelectableCategory = Category & {
     isSelected: boolean;
     selectedIcon: IconColorLabel;
-    icons: IconColorLabel[];
-    label: string;
 }
 
 @Injectable()
@@ -111,7 +102,6 @@ export class PoiService {
             this.loggingService.info("[POIs] Categories changed, updating pois");
             this.updatePois();
         });
-        await this.syncCategories();
         await this.mapService.initializationPromise;
         this.store.select((state: ApplicationState) => state.offlineState.uploadPoiQueue).subscribe((items: Immutable<string[]>) => this.handleUploadQueueChanges(items));
         this.connectionService.stateChanged.subscribe(online => {
@@ -378,14 +368,7 @@ export class PoiService {
     }
 
     private getVisibleCategories(): string[] {
-        const visibleCategories = [];
-        const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
-        for (const categoriesGroup of layersState.categoriesGroups) {
-            visibleCategories.push(...categoriesGroup.categories
-                .filter(c => c.visible)
-                .map(c => c.name));
-        }
-        return visibleCategories;
+        return [...this.store.selectSnapshot((s: ApplicationState) => s.layersState).visibleCategories];
     }
 
     private async updatePois() {
@@ -404,59 +387,6 @@ export class PoiService {
             features: visibleFeatures
         };
         this.poisChanged.next();
-    }
-
-    public async syncCategories(): Promise<void> {
-        try {
-            const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
-            for (const categoriesGroup of layersState.categoriesGroups) {
-                const categories = await firstValueFrom(this.httpClient.get<Category[]>(Urls.poiCategories + categoriesGroup.type).pipe(timeout(10000)));
-                let visibility = categoriesGroup.visible;
-                if (this.runningContextService.isIFrame) {
-                    this.store.dispatch(new SetCategoriesGroupVisibilityAction(categoriesGroup.type, false));
-                    visibility = false;
-                }
-                for (const category of categories) {
-                    category.visible = visibility;
-                    const exsitingCategory = categoriesGroup.categories.find(c => c.name === category.name);
-                    if (exsitingCategory == null) {
-                        this.store.dispatch(new AddCategoryAction(categoriesGroup.type, category));
-                    } else if (!isEqualWith(category, exsitingCategory, (_v1, _v2, key) => key === "visible" ? true : undefined)) {
-                        this.store.dispatch(new UpdateCategoryAction(categoriesGroup.type, category));
-                    }
-                }
-                for (const exsitingCategory of categoriesGroup.categories) {
-                    if (categories.find(c => c.name === exsitingCategory.name) == null) {
-                        this.store.dispatch(new RemoveCategoryAction(categoriesGroup.type, exsitingCategory.name));
-                    }
-                }
-            }
-        } catch {
-            this.loggingService.warning("[POIs] Unable to sync categories, using local categories");
-        }
-
-    }
-
-    public getSelectableCategories(): ISelectableCategory[] {
-        const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
-        const categoriesGroup = layersState.categoriesGroups.find(g => g.type === "Points of Interest");
-        const selectableCategories = [] as ISelectableCategory[];
-        for (const category of categoriesGroup.categories) {
-            if (category.name === "Wikipedia" || category.name === "iNature") {
-                continue;
-            }
-            selectableCategories.push({
-                name: category.name,
-                isSelected: false,
-                label: category.name,
-                icon: category.icon,
-                color: category.color,
-                icons: category.items
-                    .filter(i => i.iconColorCategory.icon !== "icon-leaf")
-                    .map(i => i.iconColorCategory)
-            } as ISelectableCategory);
-        }
-        return selectableCategories;
     }
 
     public async getBasicInfo(id: string, source: string, language?: string): Promise<GeoJSON.Feature> {

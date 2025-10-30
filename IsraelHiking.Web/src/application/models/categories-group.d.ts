@@ -11,7 +11,7 @@ export type Category = {
     icon: string;
     color: string;
     visible: boolean;
-    items: { iconColorCategory: IconColorLabel; tags: any[] }[];
+    selectableItems: IconColorLabel[];
 };
 
 export type CategoriesGroup = {

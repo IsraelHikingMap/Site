@@ -54,7 +54,7 @@
         <mat-label>{{resources.categories}}</mat-label>
         <mat-select class="w-full" [ngModel]="selectedCategory" (selectionChange)="selectCategory($event)">
           @for (category of categories; track category) {
-            <mat-option [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{resources.translate(category.label)}}</mat-option>
+            <mat-option [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{resources.translate(category.name)}}</mat-option>
           }
         </mat-select>
       </mat-form-field>
@@ -62,8 +62,8 @@
     <br />
     @if (selectedCategory) {
       <div class="flex flex-row flex-wrap">
-        @for (icon of selectedCategory.icons; track icon) {
-          <button mat-button (click)="selectIcon(icon)" class="flex-1 h-unset" [ngClass]="{active: icon === selectedCategory.selectedIcon}">
+        @for (icon of selectedCategory.selectableItems; track icon) {
+          <button mat-button (click)="selectIcon(icon)" class="flex-1 h-unset" [class.active]="icon === selectedCategory.selectedIcon">
             <i class="fa fa-lg" [ngClass]="icon.icon" [style.color]="icon.color"></i>
             <br />
             <span class="chrome-wordwrap-fix category-button-text">{{resources.translate(icon.label)}}</span>

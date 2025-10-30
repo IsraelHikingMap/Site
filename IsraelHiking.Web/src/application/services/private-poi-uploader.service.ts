@@ -8,7 +8,7 @@ import { PoiService } from "./poi.service";
 import { ToastService } from "./toast.service";
 import { RouteStrings } from "./hash.service";
 import { SetUploadMarkerDataAction } from "../reducers/poi.reducer";
-import type { LinkData, LatLngAlt, MarkerData } from "../models";
+import type { LinkData, LatLngAlt, MarkerData, ApplicationState } from "../models";
 
 @Injectable()
 export class PrivatePoiUploaderService {
@@ -48,8 +48,8 @@ export class PrivatePoiUploaderService {
         }
         let message = `${this.resources.wouldYouLikeToUpdate} ${results.title || this.resources.translate(results.type)}?`;
         if (!results.title) {
-            const categories = this.poiService.getSelectableCategories();
-            const iconWithLabel = flatten(categories.map(c => c.icons))
+            const categories = this.store.selectSnapshot((s: ApplicationState) => s.layersState).categoriesGroups.find(cg => cg.type === "Points of Interest").categories;
+            const iconWithLabel = flatten(categories.map(c => c.selectableItems))
                 .find(i => i.icon === `icon-${results.type}`);
             if (iconWithLabel) {
                 const type = this.resources.translate(iconWithLabel.label);

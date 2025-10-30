@@ -153,7 +153,6 @@ public class CsvPointsOfInterestAdapter : IPointsOfInterestAdapter
             {FeatureAttributes.POI_SHARE_REFERENCE, pointOfInterest.FileUrl },
             {FeatureAttributes.POI_SOURCE_IMAGE_URL, pointOfInterest.SourceImageUrl},
             {FeatureAttributes.ID, pointOfInterest.Id},
-            {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
             {FeatureAttributes.WEBSITE, pointOfInterest.Website}
         };
         if (!string.IsNullOrWhiteSpace(pointOfInterest.ImageUrl))

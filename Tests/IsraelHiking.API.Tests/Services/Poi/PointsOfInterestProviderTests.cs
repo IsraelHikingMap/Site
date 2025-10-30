@@ -42,7 +42,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
     {
         InitializeSubstitutes();
         _clientsFactory = Substitute.For<IClientsFactory>();
-        _tagsHelper = new TagsHelper(_options);
+        _tagsHelper = new TagsHelper();
         _osmGeoJsonPreprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(),
             _elevationGateway,
             new OsmGeoJsonConverter(new GeometryFactory()), _tagsHelper);

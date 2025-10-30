@@ -8,6 +8,7 @@ export const SATELLITE = "Satellite Imagery";
 export const HIKING_TRAILS = "Hiking Trails";
 export const BICYCLE_TRAILS = "Bicycle Trails";
 export const POPULARITY_HEATMAP = "Popularity Heatmap";
+export const POINTS_OF_INTEREST = "Points of Interest";
 
 export const SPECIAL_BASELAYERS = [ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE];
 export const SPECIAL_OVERLAYS =  [HIKING_TRAILS, BICYCLE_TRAILS, POPULARITY_HEATMAP];
@@ -35,6 +36,130 @@ export const AVAILABLE_LANGUAGES: Language[] = [{
     }
 ];
 
+export const CATEGORIES_GROUPS = [{
+    type: POINTS_OF_INTEREST,
+    visible: true,
+    categories: [{
+        color: "#1e80e3",
+        icon: "icon-tint",
+        name: "Water",
+        visible: true,
+        selectableItems: [{
+            color: "#1e80e3",
+            icon: "icon-tint",
+            label: "Spring, Pond"
+        }, {
+            color: "#1e80e3",
+            icon: "icon-waterfall",
+            label: "Waterfall"
+        }, {
+            color: "#1e80e3",
+            icon: "icon-waterhole",
+            label: "Waterhole"
+        }, {
+            color: "#1e80e3",
+            icon: "icon-water-well",
+            label: "Water Well"
+        }, {
+            color: "#1e80e3",
+            icon: "icon-cistern",
+            label: "Cistern"
+        }]
+    }, {
+        color: "#666666",
+        icon: "icon-ruins",
+        name: "Historic",
+        visible: true,
+        selectableItems: [{
+            color: "#666666",
+            icon: "icon-ruins",
+            label: "Ruins"
+        }, {
+            color: "#666666",
+            icon: "icon-archaeological",
+            label: "Archaeological Site"
+        }, {
+            color: "#666666",
+            icon: "icon-memorial",
+            label: "Memorial"
+        }]
+    }, {
+        color: "#008000",
+        icon: "icon-viewpoint",
+        name: "Viewpoint",
+        visible: true,
+        selectableItems: [{
+            color: "#008000",
+            icon: "icon-viewpoint",
+            label: "Viewpoint"
+        }]
+    }, {
+        color: "#734a08",
+        icon: "icon-picnic",
+        name: "Camping",
+        visible: true,
+        selectableItems: [{
+            color: "#734a08",
+            icon: "icon-picnic",
+            label: "Picnic Area"
+        }, {
+            color: "#734a08",
+            icon: "icon-campsite",
+            label: "Campsite"
+        }]
+    }, {
+        color: "#008000",
+        icon: "icon-tree",
+        name: "Natural",
+        visible: true,
+        selectableItems: [{
+            color: "black",
+            icon: "icon-cave",
+            label: "Cave"
+        }, {
+            color: "#008000",
+            icon: "icon-tree",
+            label: "Tree"
+        }, {
+            color: "#008000",
+            icon: "icon-flowers",
+            label: "Flowers"
+        }]
+    }, {
+        color: "#ffb800",
+        icon: "icon-star",
+        name: "Other",
+        visible: true,
+        selectableItems: [{
+            color: "#ffb800",
+            icon: "icon-star",
+            label: "Attraction"
+        }]
+    }],
+}, {
+    type: "Routes",
+    visible: true,
+    categories: [{
+        color: "black",
+        icon: "icon-hike",
+        name: "Hiking",
+        visible: true,
+        selectableItems: []
+    }, {
+        color: "black",
+        icon: "icon-bike",
+        name: "Bicycle",
+        visible: true,
+        selectableItems: []
+    }, {
+        color: "black",
+        icon: "icon-four-by-four",
+        name: "4x4",
+        visible: true,
+        selectableItems: []
+    }]
+}];
+
 export const initialState =
     {
         configuration: {
@@ -45,7 +170,7 @@ export const initialState =
             isShowIntro: true,
             isShowKmMarker: false,
             isShowSlope: false,
-            version: "9.20",
+            version: 10,
             language: AVAILABLE_LANGUAGES.find(l => l.code === navigator.language) ?? AVAILABLE_LANGUAGES[0],
         },
         locationState: {
@@ -140,16 +265,7 @@ export const initialState =
             ],
             selectedBaseLayerKey: ISRAEL_HIKING_MAP,
             expanded: ["Base Layers", "Overlays", "Private Routes"],
-            categoriesGroups: [{
-                type: "Points of Interest",
-                categories: [],
-                visible: true
-            },
-            {
-                type: "Routes",
-                categories: [],
-                visible: true
-            }]
+            categoriesGroups: CATEGORIES_GROUPS
         },
         shareUrlsState: {
             shareUrls: []

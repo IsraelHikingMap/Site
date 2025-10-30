@@ -56,21 +56,6 @@ export class SetCategoriesGroupVisibilityAction {
     constructor(public groupType: CategoriesGroupType, public visible: boolean) {}
 }
 
-export class AddCategoryAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public groupType: CategoriesGroupType, public category: Category) {}
-}
-
-export class UpdateCategoryAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public groupType: CategoriesGroupType, public category: Category) {}
-}
-
-export class RemoveCategoryAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public groupType: CategoriesGroupType, public categoryName: string) {}
-}
-
 export class SetCategoryVisibilityAction {
     public static type = this.prototype.constructor.name;
     constructor(public name: string, public groupType: CategoriesGroupType, public visible: boolean) {}
@@ -176,36 +161,6 @@ export class LayersReducer{
                 return lastState;
             }
             lastState.expanded.splice(lastState.expanded.indexOf(action.name));
-            return lastState;
-        }));
-    }
-
-    @Action(AddCategoryAction)
-    public addCategory(ctx: StateContext<LayersState>, action: AddCategoryAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            const group = lastState.categoriesGroups.find(g => g.type === action.groupType);
-            group.categories.push(action.category);
-            return lastState;
-        }));
-    }
-
-    @Action(UpdateCategoryAction)
-    public updateCategory(ctx: StateContext<LayersState>, action: UpdateCategoryAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            const group = lastState.categoriesGroups.find(g => g.type === action.groupType);
-            const categories = group.categories;
-            const categoryIndex = categories.indexOf(categories.find(c => c.name === action.category.name));
-            categories.splice(categoryIndex, 1, action.category);
-            return lastState;
-        }));
-    }
-
-    @Action(RemoveCategoryAction)
-    public removeCategory(ctx: StateContext<LayersState>, action: RemoveCategoryAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            const group = lastState.categoriesGroups.find(g => g.type === action.groupType);
-            const categoryIndex = group.categories.indexOf(group.categories.find(c => c.name === action.categoryName));
-            group.categories.splice(categoryIndex, 1);
             return lastState;
         }));
     }
