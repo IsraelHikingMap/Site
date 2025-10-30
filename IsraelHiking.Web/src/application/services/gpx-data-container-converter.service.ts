@@ -3,6 +3,7 @@ import { minBy, maxBy, flatten, last, escape } from "lodash-es";
 import { parseString, Builder } from "isomorphic-xml2js";
 import { encode } from "base64-arraybuffer";
 import XmlBeautify from "xml-beautify";
+import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
 
 import type {
@@ -268,6 +269,7 @@ export class GpxDataContainerConverterService {
         } as DataContainer;
         dataContainer.routes = dataContainer.routes.concat(this.convertTracksToRouteData(gpxJsonObject.trk));
         const markers = gpxJsonObject.wpt.map(p => ({
+            id: uuidv4(),
             description: typeof p.desc === "string" ? p.desc : JSON.stringify(p.desc),
             latlng: { lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele },
             title: p.name,

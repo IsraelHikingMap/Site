@@ -1,5 +1,6 @@
 import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
+import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
 
 import type { RouteData, ApplicationState } from "../models";
@@ -52,6 +53,14 @@ export class RoutesFactory {
         route.weight = route.weight || routeEditingState.weight;
         route.id = route.id || this.generateRandomId();
         route.state = "ReadOnly";
+        if (!route.markers) {
+            route.markers = [];
+        }
+        for (const marker of route.markers) {
+            if (!marker.id) {
+                marker.id = uuidv4();
+            }
+        }
         return route;
     }
 

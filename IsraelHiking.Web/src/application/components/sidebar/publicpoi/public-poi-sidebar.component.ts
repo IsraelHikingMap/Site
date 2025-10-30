@@ -295,6 +295,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         const urls = this.getLinkDataUrls();
         this.store.dispatch(new AddPrivatePoiAction(selectedRoute.id, {
+            id: this.fullFeature.properties.identifier,
             latlng: GeoJSONUtils.getLocation(this.fullFeature),
             title: this.title,
             description: this.description,
