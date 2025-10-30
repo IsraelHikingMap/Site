@@ -149,7 +149,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
     }
 
     [TestMethod]
-    public void AddFeature_ShouldUpdateOsmAndElasticSearch()
+    public void AddFeature_ShouldUpdateOsm()
     {
         var user = new User { DisplayName = "DisplayName" };
         var gateway = SetupOsmAuthClient();
@@ -198,7 +198,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
     }
 
     [TestMethod]
-    public void AddFeature_WikipediaMobileLink_ShouldUpdateOsmAndElasticSearch()
+    public void AddFeature_WikipediaMobileLink_ShouldUpdateOsm()
     {
         var gateway = SetupOsmAuthClient();
         var language = Languages.HEBREW;
@@ -350,6 +350,30 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         _adapter.UpdateFeature(feature, gateway, Languages.ENGLISH).Wait();
 
         gateway.DidNotReceive().UpdateElement(Arg.Any<long>(), Arg.Any<ICompleteOsmGeo>());
+    }
+
+    [TestMethod]
+    public void UpdateFeature_UpdateIconToRemovePlaceTag_ShouldUpdate()
+    {
+        var gateway = SetupOsmAuthClient();
+        var feature = GetValidFeature("Node_1", Sources.OSM);
+        feature.SetLocation(new Coordinate(1, 1));
+        gateway.GetNode(1).Returns(new Node
+        {
+            Id = 1,
+            Tags = new TagsCollection
+            {
+                { FeatureAttributes.NAME, "name" },
+                { FeatureAttributes.NAME + ":" + Languages.ENGLISH, "name" },
+                { "place", "village" }
+            },
+            Latitude = 1,
+            Longitude = 1
+        });
+
+        _adapter.UpdateFeature(feature, gateway, Languages.ENGLISH).Wait();
+
+        gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(c => !c.Tags.ContainsKey("place")));
     }
 
     [TestMethod]
