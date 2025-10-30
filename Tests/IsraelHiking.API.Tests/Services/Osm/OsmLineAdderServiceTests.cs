@@ -38,7 +38,7 @@ public class OsmLineAdderServiceTests
         };
         var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
         optionsProvider.Value.Returns(options);
-        var geoJsonPreProcessor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper(optionsProvider));
+        var geoJsonPreProcessor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper());
         _service = new OsmLineAdderService(_overpassTurboGateway, new ItmWgs84MathTransformFactory(), optionsProvider, geoJsonPreProcessor, new GeometryFactory());
     }
 

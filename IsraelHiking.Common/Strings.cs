@@ -11,10 +11,8 @@ public static class Categories
     public const string HISTORIC = "Historic";
     public const string CAMPING = "Camping";
     public const string NATURAL = "Natural";
-    public const string WIKIPEDIA = "Wikipedia";
     public const string OTHER = "Other";
     public const string NONE = "None";
-    public const string INATURE = "iNature";
 
     public static readonly string[] Points =
     [
@@ -23,9 +21,7 @@ public static class Categories
         HISTORIC,
         CAMPING,
         NATURAL,
-        WIKIPEDIA,
-        OTHER,
-        INATURE
+        OTHER
     ];
 
     public const string ROUTES = "Routes";
@@ -65,7 +61,6 @@ public static class FeatureAttributes
     public const string POI_USER_NAME = POI_PREFIX + "UserName";
     public const string POI_USER_ADDRESS = POI_PREFIX + "UserAddress";
     public const string POI_SOURCE_IMAGE_URL = POI_PREFIX + "SourceImageUrl";
-    public const string POI_SEARCH_FACTOR = POI_PREFIX + "SearchFactor";
     public const string POI_GEOLOCATION = POI_PREFIX + "Geolocation";
     public const string POI_ICON = POI_PREFIX + "Icon";
     public const string POI_ICON_COLOR = POI_PREFIX + "IconColor";

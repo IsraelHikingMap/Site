@@ -25,11 +25,8 @@ public class OsmGeoJsonPreprocessorExecutorTests
     [TestInitialize]
     public void TestInitialize()
     {
-        var options = new ConfigurationData();
-        var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
-        optionsProvider.Value.Returns(options);
         _preprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), 
-            new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper(optionsProvider));
+            new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper());
     }
 
     private Node CreateNode(int id)

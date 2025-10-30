@@ -29,6 +29,7 @@ import { PurchaseService } from "../../services/purchase.service";
 import { ExpandGroupAction, CollapseGroupAction } from "../../reducers/layers.reducer";
 import { ChangeRouteStateAction, BulkReplaceRoutesAction, ToggleAllRoutesAction } from "../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../reducers/route-editing.reducer";
+import { CATEGORIES_GROUPS } from "../../reducers/initial-state";
 import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGroup } from "../../models";
 
 @Component({
@@ -42,7 +43,7 @@ export class LayersSidebarComponent {
 
     public baseLayers$: Observable<Immutable<EditableLayer[]>>;
     public overlays$: Observable<Immutable<Overlay[]>>;
-    public categoriesGroups$: Observable<Immutable<CategoriesGroup[]>>;
+    public categoriesGroups = CATEGORIES_GROUPS;
     public routes$: Observable<Immutable<RouteData[]>>;
 
     public manageSubscriptions: string;
@@ -64,7 +65,6 @@ export class LayersSidebarComponent {
             : "https://play.google.com/store/account/subscriptions";
         this.baseLayers$ = this.store.select((state: ApplicationState) => state.layersState.baseLayers);
         this.overlays$ = this.store.select((state: ApplicationState) => state.layersState.overlays);
-        this.categoriesGroups$ = this.store.select((state: ApplicationState) => state.layersState.categoriesGroups);
         this.routes$ = this.store.select((state: ApplicationState) => state.routes.present);
     }
 

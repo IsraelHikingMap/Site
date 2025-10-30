@@ -63,7 +63,7 @@ public class AddibleGpxLinesFinderServiceTests
             _overpassTurboGateway, 
             optionsProvider, 
             geometryFactory,
-            new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(geometryFactory), new TagsHelper(optionsProvider)),
+            new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(geometryFactory), new TagsHelper()),
             Substitute.For<ILogger>());
     }
 

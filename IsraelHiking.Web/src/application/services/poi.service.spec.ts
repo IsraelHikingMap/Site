@@ -25,7 +25,7 @@ import { Urls } from "../urls";
 import { LayersReducer } from "../reducers/layers.reducer";
 import { AddToPoiQueueAction, OfflineReducer } from "../reducers/offline.reducer";
 import { ConfigurationReducer, SetLanguageAction } from "../reducers/configuration.reducer";
-import type { ApplicationState, Category, LatLngAlt, MarkerData } from "../models";
+import type { ApplicationState, LatLngAlt, MarkerData } from "../models";
 
 describe("Poi Service", () => {
 
@@ -100,13 +100,11 @@ describe("Poi Service", () => {
         });
     });
 
-    it("Should initialize and sync categories from server", (inject([PoiService, HttpTestingController, Store],
-        async (poiService: PoiService, mockBackend: HttpTestingController, store: Store) => {
+    it("Should initialize", (inject([PoiService, Store],
+        async (poiService: PoiService, store: Store) => {
 
             store.reset({
-                layersState: {
-                    categoriesGroups: [{ type: "type", categories: [] as any[], visible: true }]
-                },
+                layersState: {},
                 offlineState: {
                     uploadPoiQueue: []
                 }
@@ -114,29 +112,20 @@ describe("Poi Service", () => {
             let changed = false;
             poiService.poisChanged.subscribe(() => changed = true);
             const promise = poiService.initialize();
-            mockBackend.match(r => r.url.startsWith(Urls.poiCategories)).forEach(t => t.flush([{ icon: "icon", name: "category" }]));
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
             await promise;
 
-            expect(changed).toBe(true);
+            expect(changed).toBeFalse();
             expect(poiService.poiGeojsonFiltered.features.length).toBe(0);
         }
     )));
 
-    it("Should initialize and show poi tiles, and update when changing language", (inject([PoiService, HttpTestingController, Store, RunningContextService, MapService],
-        async (poiService: PoiService, mockBackend: HttpTestingController, store: Store, runningContextService: RunningContextService, mapServiceMock: MapService) => {
+    it("Should initialize and show poi tiles, and update when changing language", (inject([PoiService, Store, RunningContextService, MapService],
+        async (poiService: PoiService, store: Store, runningContextService: RunningContextService, mapServiceMock: MapService) => {
 
             store.reset({
                 layersState: {
-                    categoriesGroups: [{ 
-                        type: "type",
-                        categories: [{
-                            icon: "icon",
-                            name: "Water",
-                            visible: true
-                        }] as any[], 
-                        visible: true }]
+                    visibleCategories: [{groupType: "Water", name: "Water"}]
                 },
                 configuration: {},
                 offlineState: {
@@ -172,7 +161,6 @@ describe("Poi Service", () => {
             ] as any;
             const promise = poiService.initialize();
 
-            mockBackend.match(r => r.url.startsWith(Urls.poiCategories)).forEach(t => t.flush([{ icon: "icon", name: "Water" }]));
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
             
             expect(poiService.poiGeojsonFiltered.features.length).toBe(1);
@@ -220,9 +208,7 @@ describe("Poi Service", () => {
         async (poiService: PoiService, store: Store, databaseService: DatabaseService) => {
 
             store.reset({
-                layersState: {
-                    categoriesGroups: []
-                },
+                layersState: {},
                 configuration: {},
                 offlineState: {
                     uploadPoiQueue: ["1"]
@@ -243,9 +229,7 @@ describe("Poi Service", () => {
         async (poiService: PoiService, store: Store, databaseService: DatabaseService, mockBackend: HttpTestingController,) => {
 
             store.reset({
-                layersState: {
-                    categoriesGroups: []
-                },
+                layersState: {},
                 configuration: {},
                 offlineState: {
                     uploadPoiQueue: ["1"]
@@ -266,28 +250,6 @@ describe("Poi Service", () => {
             return promise;
         }
     )));
-
-    it("Should get selectable categories", inject([PoiService, Store],
-        (poiService: PoiService, store: Store) => {
-            store.reset({
-                layersState: {
-                    categoriesGroups: [{type: "Points of Interest", categories: [
-                        {name: "iNature", items: []},
-                        {name: "Wikipedia", items: []},
-                        {name: "Water", items: [
-                            {iconColorCategory: { icon: "icon-leaf"}},
-                            {iconColorCategory: { icon: "other-icon"}}
-                        ]}
-                    ]}]
-                }
-            });
-
-            const categories = poiService.getSelectableCategories();
-
-            expect(categories.length).toBe(1);
-            expect(categories[0].icons.length).toBe(1);
-        }
-    ));
 
     it("Should allow adding a point from private marker for a new point", inject([PoiService, Store], async (poiService: PoiService, store: Store) => {
         const markerData = {
@@ -942,194 +904,6 @@ describe("Poi Service", () => {
         const results = poiService.getFeatureFromCoordinatesId("1_2", "he");
         expect((results.geometry as GeoJSON.Point).coordinates).toEqual([2,1]);
     }));
-
-    it("should sync categories when no categories exist", (inject([PoiService, HttpTestingController, RunningContextService, Store],
-        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService, store: Store) => {
-            store.reset({
-                layersState: {
-                    categoriesGroups: [{
-                        type: "my-type",
-                        visible: true,
-                        categories: []
-                    }]
-                }
-            });
-            const spy = jasmine.createSpy();
-            store.dispatch = spy;
-            (runningContextService as any).isIFrame = false;
-
-            const promise = poiService.syncCategories();
-
-            mockBackend.match(u => u.url.startsWith(Urls.poiCategories)).forEach(m => m.flush([{
-                color: "color",
-                icon: "icon",
-                name: "name",
-                visible: false,
-                items: [{iconColorCategory: {
-                    color: "color",
-                    icon: "icon",
-                    label: "label"
-                }}]
-            }] as Category[]));
-
-            await promise;
-            expect(store.dispatch).toHaveBeenCalledTimes(1);
-            expect(spy.calls.first().args[0].category.name).toBe("name");
-    })));
-
-    it("should sync categories and hide on iFrame", (inject([PoiService, HttpTestingController, RunningContextService, Store],
-        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService, store: Store) => {
-            store.reset({
-                layersState: {
-                    categoriesGroups: [{
-                        type: "my-type",
-                        visible: true,
-                        categories: []
-                    }]
-                }
-            });
-            const spy = jasmine.createSpy();
-            store.dispatch = spy;
-            (runningContextService as any).isIFrame = true;
-            const promise = poiService.syncCategories();
-
-            mockBackend.match(u => u.url.startsWith(Urls.poiCategories)).forEach(m => m.flush([{
-                color: "color",
-                icon: "icon",
-                name: "name",
-                visible: false,
-                items: [{iconColorCategory: {
-                    color: "color",
-                    icon: "icon",
-                    label: "label"
-                }}]
-            }] as Category[]));
-
-            await promise;
-            expect(store.dispatch).toHaveBeenCalledTimes(2);
-            expect(spy.calls.first().args[0].visible).toBeFalsy();
-    })));
-
-    it("should sync categories when categories are not the same", (inject([PoiService, HttpTestingController, RunningContextService, Store],
-        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService, store: Store) => {
-            store.reset({
-                layersState: {
-                    categoriesGroups: [{
-                        type: "my-type",
-                        visible: true,
-                        categories: [{
-                            color: "color",
-                            icon: "icon",
-                            name: "name",
-                            visible: false,
-                            items: [{iconColorCategory: {
-                                color: "color",
-                                icon: "icon",
-                                label: "label"
-                            }}]
-                        }]
-                    }]
-                }
-            });
-            const spy = jasmine.createSpy();
-            store.dispatch = spy;
-            (runningContextService as any).isIFrame = false;
-
-            const promise = poiService.syncCategories();
-
-            mockBackend.match(u => u.url.startsWith(Urls.poiCategories)).forEach(m => m.flush([{
-                color: "color",
-                icon: "icon",
-                name: "name",
-                visible: false,
-                items: [{iconColorCategory: {
-                    color: "color",
-                    icon: "icon",
-                    label: "label2"
-                }}]
-            }] as Category[]));
-
-            await promise;
-            expect(store.dispatch).toHaveBeenCalledTimes(1);
-            expect(spy.calls.first().args[0].category.items[0].iconColorCategory.label).toBe("label2");
-    })));
-
-    it("should sync categories when categories are not the same but ignore visibility",
-        (inject([PoiService, HttpTestingController, RunningContextService, Store],
-        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService, store: Store) => {
-            store.reset({
-                layersState: {
-                    categoriesGroups: [{
-                        type: "my-type",
-                        visible: true,
-                        categories: [{
-                            color: "color",
-                            icon: "icon",
-                            name: "name",
-                            visible: false,
-                            items: [{iconColorCategory: {
-                                color: "color",
-                                icon: "icon",
-                                label: "label"
-                            }}]
-                        }]
-                    }]
-                }
-            });
-            store.dispatch = jasmine.createSpy();
-            (runningContextService as any).isIFrame = false;
-
-            const promise = poiService.syncCategories();
-
-            mockBackend.match(u => u.url.startsWith(Urls.poiCategories)).forEach(m => m.flush([{
-                color: "color",
-                icon: "icon",
-                name: "name",
-                visible: true,
-                items: [{iconColorCategory: {
-                    color: "color",
-                    icon: "icon",
-                    label: "label"
-                }}]
-            }] as Category[]));
-
-            await promise;
-            expect(store.dispatch).toHaveBeenCalledTimes(0);
-    })));
-
-    it("should sync categories when need to remove a category", (inject([PoiService, HttpTestingController, RunningContextService, Store],
-        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService, store: Store) => {
-            store.reset({
-                layersState: {
-                    categoriesGroups: [{
-                        type: "my-type",
-                        visible: true,
-                        categories: [{
-                            color: "color",
-                            icon: "icon",
-                            name: "name",
-                            visible: false,
-                            items: [{iconColorCategory: {
-                                color: "color",
-                                icon: "icon",
-                                label: "label"
-                            }}]
-                        }]
-                    }]
-                }
-            });
-            const spy = jasmine.createSpy();
-            store.dispatch = spy;
-            (runningContextService as any).isIFrame = false;
-
-            const promise = poiService.syncCategories();
-
-            mockBackend.match(u => u.url.startsWith(Urls.poiCategories)).forEach(m => m.flush([]));
-
-            await promise;
-            expect(store.dispatch).toHaveBeenCalledTimes(1);
-            expect(spy.calls.first().args[0].categoryName).toBe("name");
-    })));
 
     it("Should get social links", inject([PoiService], (poiService: PoiService) => {
         const results = poiService.getPoiSocialLinks({

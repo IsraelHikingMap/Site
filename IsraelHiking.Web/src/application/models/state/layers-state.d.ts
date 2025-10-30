@@ -1,9 +1,9 @@
-﻿import type { EditableLayer, Overlay, CategoriesGroup } from "..";
+﻿import type { EditableLayer, Overlay, CategoriesGroupType } from "..";
 
 export type LayersState = {
     baseLayers: EditableLayer[];
     overlays: Overlay[];
     selectedBaseLayerKey: string;
     expanded: string[];
-    categoriesGroups: CategoriesGroup[];
+    visibleCategories: { name: string; groupType: CategoriesGroupType; }[];
 };
