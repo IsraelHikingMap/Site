@@ -1,6 +1,6 @@
 import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { cloneDeep, isEqualWith } from "lodash-es";
+import { cloneDeep } from "lodash-es";
 import { firstValueFrom } from "rxjs";
 import { timeout, skip } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
@@ -98,7 +98,7 @@ export class PoiService {
             this.loggingService.info("[POIs] Language changed, updating pois");
             this.updatePois();
         });
-        this.store.select((state: ApplicationState) => state.layersState.categoriesGroups).pipe(skip(1)).subscribe(() => {
+        this.store.select((state: ApplicationState) => state.layersState.visibleCategories).pipe(skip(1)).subscribe(() => {
             this.loggingService.info("[POIs] Categories changed, updating pois");
             this.updatePois();
         });
@@ -368,7 +368,7 @@ export class PoiService {
     }
 
     private getVisibleCategories(): string[] {
-        return [...this.store.selectSnapshot((s: ApplicationState) => s.layersState).visibleCategories];
+        return this.store.selectSnapshot((s: ApplicationState) => s.layersState).visibleCategories.map(c => c.name);
     }
 
     private async updatePois() {
@@ -381,7 +381,7 @@ export class PoiService {
             this.poisChanged.next();
             return;
         }
-        const visibleFeatures = await this.getPoisFromTiles();
+        const visibleFeatures = this.getPoisFromTiles();
         this.poiGeojsonFiltered = {
             type: "FeatureCollection",
             features: visibleFeatures

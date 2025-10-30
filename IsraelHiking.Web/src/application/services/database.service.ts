@@ -67,12 +67,7 @@ export class DatabaseService {
             traces: "id",
         });
         if (this.runningContext.isIFrame) {
-            for (const categoriesGroup of initialState.layersState.categoriesGroups) {
-                categoriesGroup.visible = false;
-                for (const category of categoriesGroup.categories) {
-                    category.visible = false;
-                }
-            }
+            initialState.layersState.visibleCategories = [];
             this.store.reset(initialState);
             return;
         }
@@ -176,12 +171,6 @@ export class DatabaseService {
     }
 
     private initialStateUpgrade(dbState: MutableApplicationState): MutableApplicationState {
-        if (+dbState.configuration.version < 10) {
-            // version 10 breaking change
-            dbState.configuration.version = initialState.configuration.version;
-            dbState.layersState.categoriesGroups = initialState.layersState.categoriesGroups;
-        }
-
         const storedState = deepmerge(initialState, dbState, {
             arrayMerge: (destinationArray, sourceArray) => sourceArray == null ? destinationArray : sourceArray
         });

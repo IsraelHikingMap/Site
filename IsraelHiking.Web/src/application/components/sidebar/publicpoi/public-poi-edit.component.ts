@@ -11,14 +11,14 @@ import { MatIconButton, MatButton } from "@angular/material/button";
 import { MatOption } from "@angular/material/core";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
-import { Store } from "@ngxs/store";
 
 import { ImageScrollerComponent } from "./image-scroller.component";
 import { PoiService, SelectableCategory } from "../../../services/poi.service";
 import { ResourcesService } from "../../../services/resources.service";
 import { SidebarService } from "../../../services/sidebar.service";
 import { ToastService } from "../../../services/toast.service";
-import type { ApplicationState, EditablePublicPointData, IconColorLabel } from "../../../models";
+import { CATEGORIES_GROUPS } from "application/reducers/initial-state";
+import type { EditablePublicPointData, IconColorLabel } from "../../../models";
 
 @Component({
     selector: "public-poi-edit",
@@ -40,11 +40,9 @@ export class PublicPointOfInterestEditComponent implements OnInit {
     private readonly poiService: PoiService = inject(PoiService);
     private readonly sidebarService = inject(SidebarService);
     private readonly toastService = inject(ToastService);
-    private readonly store = inject(Store);
 
     private initializeCategories() {
-        const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
-        this.categories = structuredClone(layersState.categoriesGroups.find(g => g.type === "Points of Interest").categories) as SelectableCategory[];
+        this.categories = structuredClone(CATEGORIES_GROUPS[0].categories) as SelectableCategory[];
     }
 
     public ngOnInit() {

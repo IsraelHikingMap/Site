@@ -78,7 +78,7 @@
       }
       <button mat-button (click)="addOverlay($event)" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add overlay"><i class="fa fa-lg icon-plus"></i> {{resources.addOverlay}} </button>
     </mat-expansion-panel>
-    @for (categoriesGroup of (categoriesGroups$ | async); track trackByGroupType($index, categoriesGroup)) {
+    @for (categoriesGroup of categoriesGroups; track trackByGroupType($index, categoriesGroup)) {
       <categories-group [categoriesGroup]="categoriesGroup"></categories-group>
     }
     <mat-expansion-panel [expanded]="getExpandState('Private Routes')" (opened)="expand('Private Routes')" (closed)="collapse('Private Routes')">

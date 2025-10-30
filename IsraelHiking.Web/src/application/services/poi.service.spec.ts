@@ -25,7 +25,7 @@ import { Urls } from "../urls";
 import { LayersReducer } from "../reducers/layers.reducer";
 import { AddToPoiQueueAction, OfflineReducer } from "../reducers/offline.reducer";
 import { ConfigurationReducer, SetLanguageAction } from "../reducers/configuration.reducer";
-import type { ApplicationState, Category, LatLngAlt, MarkerData } from "../models";
+import type { ApplicationState, LatLngAlt, MarkerData } from "../models";
 
 describe("Poi Service", () => {
 
@@ -101,13 +101,11 @@ describe("Poi Service", () => {
         });
     });
 
-    it("Should initialize and sync categories from server", (inject([PoiService, HttpTestingController, Store],
-        async (poiService: PoiService, mockBackend: HttpTestingController, store: Store) => {
+    it("Should initialize", (inject([PoiService, Store],
+        async (poiService: PoiService, store: Store) => {
 
             store.reset({
-                layersState: {
-                    categoriesGroups: [{ type: "type", categories: [] as any[], visible: true }]
-                },
+                layersState: {},
                 offlineState: {
                     uploadPoiQueue: []
                 }
@@ -115,28 +113,20 @@ describe("Poi Service", () => {
             let changed = false;
             poiService.poisChanged.subscribe(() => changed = true);
             const promise = poiService.initialize();
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
             await promise;
 
-            expect(changed).toBe(true);
+            expect(changed).toBeFalse();
             expect(poiService.poiGeojsonFiltered.features.length).toBe(0);
         }
     )));
 
-    it("Should initialize and show poi tiles, and update when changing language", (inject([PoiService, HttpTestingController, Store, RunningContextService, MapService],
-        async (poiService: PoiService, mockBackend: HttpTestingController, store: Store, runningContextService: RunningContextService, mapServiceMock: MapService) => {
+    it("Should initialize and show poi tiles, and update when changing language", (inject([PoiService, Store, RunningContextService, MapService],
+        async (poiService: PoiService, store: Store, runningContextService: RunningContextService, mapServiceMock: MapService) => {
 
             store.reset({
                 layersState: {
-                    categoriesGroups: [{ 
-                        type: "type",
-                        categories: [{
-                            icon: "icon",
-                            name: "Water",
-                            visible: true
-                        }] as any[], 
-                        visible: true }]
+                    visibleCategories: [{groupType: "Water", name: "Water"}]
                 },
                 configuration: {},
                 offlineState: {
@@ -219,9 +209,7 @@ describe("Poi Service", () => {
         async (poiService: PoiService, store: Store, databaseService: DatabaseService) => {
 
             store.reset({
-                layersState: {
-                    categoriesGroups: []
-                },
+                layersState: {},
                 configuration: {},
                 offlineState: {
                     uploadPoiQueue: ["1"]
@@ -242,9 +230,7 @@ describe("Poi Service", () => {
         async (poiService: PoiService, store: Store, databaseService: DatabaseService, mockBackend: HttpTestingController,) => {
 
             store.reset({
-                layersState: {
-                    categoriesGroups: []
-                },
+                layersState: {},
                 configuration: {},
                 offlineState: {
                     uploadPoiQueue: ["1"]

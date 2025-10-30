@@ -3,8 +3,8 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 import { orderBy, remove } from "lodash-es";
 
-import { initialState, SPECIAL_LAYERS } from "./initial-state";
-import type { LayersState, EditableLayer, Overlay, CategoriesGroupType, Category } from "../models";
+import { CATEGORIES_GROUPS, initialState, SPECIAL_LAYERS } from "./initial-state";
+import type { LayersState, EditableLayer, Overlay, CategoriesGroupType } from "../models";
 
 export class AddBaseLayerAction {
     public static type = this.prototype.constructor.name;
@@ -168,22 +168,38 @@ export class LayersReducer{
     @Action(SetCategoryVisibilityAction)
     public setCategoryVisibility(ctx: StateContext<LayersState>, action: SetCategoryVisibilityAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
-            const group = lastState.categoriesGroups.find(g => g.type === action.groupType);
-            const category = group.categories.find(c => c.name === action.name);
-            category.visible = action.visible;
-            group.visible = group.categories.some(c => c.visible);
+            const visiblityItem = lastState.visibleCategories.find(c => c.name === action.name && c.groupType === action.groupType);
+            if (action.visible && !visiblityItem) {
+                lastState.visibleCategories.push({ name: action.name, groupType: action.groupType });
+                return lastState;
+            } else if (!action.visible && visiblityItem) {
+                lastState.visibleCategories.splice(lastState.visibleCategories.indexOf(visiblityItem), 1);
+                return lastState;
+            }
             return lastState;
         }));
     }
 
     @Action(SetCategoriesGroupVisibilityAction)
-    public setCategoriesGroupVisibility( ctx: StateContext<LayersState>, action: SetCategoriesGroupVisibilityAction) {
+    public setCategoriesGroupVisibility(ctx: StateContext<LayersState>, action: SetCategoriesGroupVisibilityAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
-            const group = lastState.categoriesGroups.find(g => g.type === action.groupType);
-            for (const category of group.categories) {
-                category.visible = action.visible;
+            const names = CATEGORIES_GROUPS.find(g => g.type === action.groupType).categories.map(c => c.name);
+            if (action.visible) {
+                for (const name of names) {
+                    if (lastState.visibleCategories.find(g => g.name === name && g.groupType === action.groupType)) {
+                        continue;
+                    }
+                    lastState.visibleCategories.push({ name, groupType: action.groupType });
+                }
+                return lastState;
             }
-            group.visible = action.visible;
+            for (const name of names) {
+                const visiblityItem = lastState.visibleCategories.find(c => c.name === name && c.groupType === action.groupType);
+                if (visiblityItem) {
+                    lastState.visibleCategories.splice(lastState.visibleCategories.indexOf(visiblityItem), 1);
+                    continue;
+                }
+            }
             return lastState;
         }));
     }

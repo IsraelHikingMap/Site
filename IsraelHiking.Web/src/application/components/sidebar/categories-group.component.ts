@@ -42,11 +42,21 @@ export class CategoriesGroupComponent {
     }
 
     public toggleCategory(category: Category) {
-        this.store.dispatch(new SetCategoryVisibilityAction(category.name, this.categoriesGroup().type, !category.visible));
+        this.store.dispatch(new SetCategoryVisibilityAction(category.name, this.categoriesGroup().type, !this.isCategoryVisible(category)));
     }
 
     public toggleVisibility(event: Event) {
         event.stopPropagation();
-        this.store.dispatch(new SetCategoriesGroupVisibilityAction(this.categoriesGroup().type, !this.categoriesGroup().visible));
+        this.store.dispatch(new SetCategoriesGroupVisibilityAction(this.categoriesGroup().type, !this.isCategoryGroupVisible()));
+    }
+
+    public isCategoryVisible(category: Category): boolean {
+        const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
+        return layersState.visibleCategories.find(c => c.name === category.name && this.categoriesGroup().type == c.groupType) != null;
+    }
+
+    public isCategoryGroupVisible(): boolean {
+        const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
+        return layersState.visibleCategories.find(c => this.categoriesGroup().categories.some(cat => cat.name === c.name && this.categoriesGroup().type == c.groupType)) != null;
     }
 }

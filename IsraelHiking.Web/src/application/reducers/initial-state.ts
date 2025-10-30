@@ -1,6 +1,6 @@
 ﻿import { Urls } from "../urls";
 import { environment } from "../../environments/environment";
-import type { Language, MutableApplicationState, RouteData, StateWithHistory } from "../models";
+import type { CategoriesGroup, Language, MutableApplicationState, RouteData, StateWithHistory } from "../models";
 
 export const ISRAEL_HIKING_MAP = "Israel Hiking Map";
 export const ISRAEL_MTB_MAP = "Israel MTB Map";
@@ -36,14 +36,12 @@ export const AVAILABLE_LANGUAGES: Language[] = [{
     }
 ];
 
-export const CATEGORIES_GROUPS = [{
+export const CATEGORIES_GROUPS: CategoriesGroup[] = [{
     type: POINTS_OF_INTEREST,
-    visible: true,
     categories: [{
         color: "#1e80e3",
         icon: "icon-tint",
         name: "Water",
-        visible: true,
         selectableItems: [{
             color: "#1e80e3",
             icon: "icon-tint",
@@ -69,7 +67,6 @@ export const CATEGORIES_GROUPS = [{
         color: "#666666",
         icon: "icon-ruins",
         name: "Historic",
-        visible: true,
         selectableItems: [{
             color: "#666666",
             icon: "icon-ruins",
@@ -87,7 +84,6 @@ export const CATEGORIES_GROUPS = [{
         color: "#008000",
         icon: "icon-viewpoint",
         name: "Viewpoint",
-        visible: true,
         selectableItems: [{
             color: "#008000",
             icon: "icon-viewpoint",
@@ -97,7 +93,6 @@ export const CATEGORIES_GROUPS = [{
         color: "#734a08",
         icon: "icon-picnic",
         name: "Camping",
-        visible: true,
         selectableItems: [{
             color: "#734a08",
             icon: "icon-picnic",
@@ -111,7 +106,6 @@ export const CATEGORIES_GROUPS = [{
         color: "#008000",
         icon: "icon-tree",
         name: "Natural",
-        visible: true,
         selectableItems: [{
             color: "black",
             icon: "icon-cave",
@@ -129,7 +123,6 @@ export const CATEGORIES_GROUPS = [{
         color: "#ffb800",
         icon: "icon-star",
         name: "Other",
-        visible: true,
         selectableItems: [{
             color: "#ffb800",
             icon: "icon-star",
@@ -138,24 +131,20 @@ export const CATEGORIES_GROUPS = [{
     }],
 }, {
     type: "Routes",
-    visible: true,
     categories: [{
         color: "black",
         icon: "icon-hike",
         name: "Hiking",
-        visible: true,
         selectableItems: []
     }, {
         color: "black",
         icon: "icon-bike",
         name: "Bicycle",
-        visible: true,
         selectableItems: []
     }, {
         color: "black",
         icon: "icon-four-by-four",
         name: "4x4",
-        visible: true,
         selectableItems: []
     }]
 }];
@@ -265,7 +254,7 @@ export const initialState =
             ],
             selectedBaseLayerKey: ISRAEL_HIKING_MAP,
             expanded: ["Base Layers", "Overlays", "Private Routes"],
-            categoriesGroups: CATEGORIES_GROUPS
+            visibleCategories: CATEGORIES_GROUPS.map(cg => cg.categories.map(c => ({ groupType: cg.type, name: c.name }))).flat()
         },
         shareUrlsState: {
             shareUrls: []

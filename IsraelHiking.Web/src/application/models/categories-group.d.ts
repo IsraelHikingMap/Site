@@ -10,12 +10,10 @@ export type Category = {
     name: string;
     icon: string;
     color: string;
-    visible: boolean;
     selectableItems: IconColorLabel[];
 };
 
 export type CategoriesGroup = {
     type: CategoriesGroupType;
-    visible: boolean;
     categories: Category[];
 };
