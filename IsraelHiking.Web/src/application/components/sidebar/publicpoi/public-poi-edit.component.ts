@@ -13,10 +13,11 @@ import { MatCheckbox } from "@angular/material/checkbox";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 
 import { ImageScrollerComponent } from "./image-scroller.component";
-import { PoiService, ISelectableCategory } from "../../../services/poi.service";
+import { PoiService, SelectableCategory } from "../../../services/poi.service";
 import { ResourcesService } from "../../../services/resources.service";
 import { SidebarService } from "../../../services/sidebar.service";
 import { ToastService } from "../../../services/toast.service";
+import { CATEGORIES_GROUPS } from "application/reducers/initial-state";
 import type { EditablePublicPointData, IconColorLabel } from "../../../models";
 
 @Component({
@@ -30,8 +31,8 @@ export class PublicPointOfInterestEditComponent implements OnInit {
     public info = input<EditablePublicPointData>();
 
     public isLoading: boolean = false;
-    public categories: ISelectableCategory[] = [];
-    public selectedCategory: ISelectableCategory = null;
+    public categories: SelectableCategory[] = [];
+    public selectedCategory: SelectableCategory = null;
     public updateLocation: boolean = false;
 
     public readonly resources = inject(ResourcesService);
@@ -39,13 +40,9 @@ export class PublicPointOfInterestEditComponent implements OnInit {
     private readonly poiService: PoiService = inject(PoiService);
     private readonly sidebarService = inject(SidebarService);
     private readonly toastService = inject(ToastService);
-    
 
     private initializeCategories() {
-        const categories = this.poiService.getSelectableCategories();
-        for (const category of categories) {
-            this.categories.push(category);
-        }
+        this.categories = structuredClone(CATEGORIES_GROUPS[0].categories) as SelectableCategory[];
     }
 
     public ngOnInit() {
@@ -56,7 +53,7 @@ export class PublicPointOfInterestEditComponent implements OnInit {
         let selectedIcon = null;
         let selectedCategory = null;
         for (const category of this.categories) {
-            const icon = category.icons.find(iconToFind => iconToFind.icon === this.info().icon);
+            const icon = category.selectableItems.find(iconToFind => iconToFind.icon === this.info().icon);
             if (icon) {
                 selectedCategory = category;
                 selectedIcon = icon;
@@ -70,9 +67,9 @@ export class PublicPointOfInterestEditComponent implements OnInit {
 
         if (this.info().id && selectedIcon == null) {
             selectedIcon = { icon: this.info().icon, color: "black", label: this.resources.other } as IconColorLabel;
-            selectedCategory.icons.push(selectedIcon);
+            selectedCategory.selectableItems.push(selectedIcon);
         } else if (!this.info().id && selectedIcon == null) {
-            selectedIcon = selectedCategory.icons[0];
+            selectedIcon = selectedCategory.selectableItems[0];
         }
         this.selectCategory({ value: selectedCategory } as MatSelectChange);
         this.selectIcon(selectedIcon);
@@ -83,7 +80,7 @@ export class PublicPointOfInterestEditComponent implements OnInit {
         this.selectedCategory = e.value;
         this.selectedCategory.isSelected = true;
         if (this.selectedCategory.selectedIcon == null) {
-            this.selectIcon(this.selectedCategory.icons[0]);
+            this.selectIcon(this.selectedCategory.selectableItems[0]);
         }
     }
 

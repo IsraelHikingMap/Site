@@ -135,24 +135,26 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
         var tagsList = _tagsHelper.FindTagsForIcon(icon);
         if (tagsList.Any())
         {
-            tags.AddOrReplace(tagsList.First().Key, tagsList.First().Value);
+            tags.AddOrReplace(tagsList.First().First().Key, tagsList.First().First().Value);
         }
     }
 
     private void RemoveTagsByIcon(TagsCollectionBase tags, string icon)
     {
-        var tagsList = _tagsHelper.FindTagsForIcon(icon);
-        if (tagsList.Any() == false)
+        var tagsCombinations = _tagsHelper.FindTagsForIcon(icon);
+        if (tagsCombinations.Any() == false)
         {
             return;
         }
-        foreach (var keyValuePair in tagsList)
+        foreach (var tagsToFind in tagsCombinations)
         {
-            var tag = tags.FirstOrDefault(t => t.Key == keyValuePair.Key && t.Value == keyValuePair.Value);
-            if (tag.Equals(default(Tag)) == false)
+            var tagsToRemove = tags.Where(t => tagsToFind.Any(ttf => ttf.Key == t.Key && (ttf.Value == "*" || ttf.Value == t.Value)));
+            if (tagsToRemove.Count() == tagsToFind.Count)
             {
-                tags.RemoveKeyValue(tag);
-                // removing only one matching tag
+                foreach (var tag in tagsToRemove)
+                {
+                    tags.RemoveKeyValue(tag);
+                }
                 return;
             }
         }
@@ -296,7 +298,7 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
     public async Task<IFeature> UpdateFeature(IFeature partialFeature, IAuthClient osmGateway, string language)
     {
         ICompleteOsmGeo completeOsmGeo = await osmGateway.GetCompleteElement(partialFeature.GetOsmId(), partialFeature.GetOsmType());
-        var oldIcon = _tagsHelper.GetInfo(new AttributesTable(completeOsmGeo.Tags.ToDictionary(t => t.Key, t => t.Value as object))).IconColorCategory.Icon;
+        var oldIcon = _tagsHelper.GetIconColorCategoryForTags(new AttributesTable(completeOsmGeo.Tags.ToDictionary(t => t.Key, t => t.Value as object))).Icon;
         var oldTags = completeOsmGeo.Tags.ToArray();
         var locationWasUpdated = false;
         if (partialFeature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.NAME)))

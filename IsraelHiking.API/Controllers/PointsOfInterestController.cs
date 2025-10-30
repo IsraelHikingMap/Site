@@ -62,6 +62,7 @@ public class PointsOfInterestController : ControllerBase
     /// <returns></returns>
     [Route("categories/{categoriesGroup}")]
     [HttpGet]
+    [Obsolete("Should be removed by 1.2026")]
     public IEnumerable<Category> GetCategoriesByGroup(string categoriesGroup)
     {
         return _tagsHelper.GetCategoriesByGroup(categoriesGroup);
@@ -97,7 +98,7 @@ public class PointsOfInterestController : ControllerBase
     public async Task<IActionResult> CreatePointOfInterest([FromBody]IFeature feature,
         [FromQuery] string language)
     {
-        _logger.LogInformation("Processing create point of interest request");
+        _logger.LogInformation("Processing create point of interest request, " + feature.GetId());
         var validationResults = ValidateFeature(feature, language);
         if (!string.IsNullOrEmpty(validationResults))
         {
@@ -138,7 +139,7 @@ public class PointsOfInterestController : ControllerBase
     public async Task<IActionResult> UpdatePointOfInterest(string id, [FromBody]IFeature feature,
         [FromQuery] string language)
     {
-        _logger.LogInformation("Processing update point of interest request");
+        _logger.LogInformation("Processing update point of interest request, " + id);
         var validationResults = ValidateFeature(feature, language);
         if (!string.IsNullOrEmpty(validationResults))
         {

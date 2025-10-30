@@ -106,8 +106,7 @@ public class OsmGeoJsonPreprocessorExecutor : IOsmGeoJsonPreprocessorExecutor
             return null;
         }
 
-        var (searchFactor, iconColorCategory) = _tagsHelper.GetInfo(feature.Attributes);
-        feature.Attributes.Add(FeatureAttributes.POI_SEARCH_FACTOR, searchFactor);
+        var iconColorCategory = _tagsHelper.GetIconColorCategoryForTags(feature.Attributes);
         feature.Attributes.Add(FeatureAttributes.POI_ICON, iconColorCategory.Icon);
         feature.Attributes.Add(FeatureAttributes.POI_ICON_COLOR, iconColorCategory.Color);
         feature.Attributes.Add(FeatureAttributes.POI_CATEGORY, iconColorCategory.Category);
