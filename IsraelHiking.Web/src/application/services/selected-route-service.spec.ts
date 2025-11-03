@@ -443,7 +443,7 @@ describe("Selected Route Service", () => {
             expect(action.routeData.segments[0].latlngs[0].lat).toBe(1);
             expect(action.routeData.segments[0].latlngs[1].lat).toBe(1);
             expect(action.routeData.segments[1].latlngs[1].lat).toBe(2);
-            expect(action.splitRouteData.name).toBe("name split 1");
+            expect(action.splitRouteData.name).toBe("name split");
             expect(action.splitRouteData.segments.length).toBe(2);
             expect(action.splitRouteData.segments[0].latlngs[0].lat).toBe(2);
             expect(action.splitRouteData.segments[0].latlngs[1].lat).toBe(2);

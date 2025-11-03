@@ -106,9 +106,12 @@ export class SelectedRouteService {
     }
 
     public createRouteName(routeName: string = this.resources.route): string {
-        let index = 1;
-        routeName = routeName.replace(/(.*) \d+/, "$1");
-        let availableRouteName = `${routeName} ${index}`;
+        let availableRouteName = routeName;
+        if (routeName.match(/\d+$/)) {
+            // remove trailing numbers
+            routeName = routeName.replace(/(.*) \d+/, "$1");
+        }
+        let index = 0;
         while (some(this.routes, (route) => route.name === availableRouteName)) {
             index++;
             availableRouteName = `${routeName} ${index}`;
