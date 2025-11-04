@@ -13,6 +13,7 @@ import { FitBoundsService } from "./fit-bounds.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { LoggingService } from "./logging.service";
 import { ConnectionService } from "./connection.service";
+import { ElevationProvider } from "./elevation.provider";
 import { Urls } from "../urls";
 import type { DataContainer, MarkerData, RouteData } from "../models";
 
@@ -54,6 +55,7 @@ describe("FileService", () => {
                 { provide: FitBoundsService, useValue: fitBoundsService },
                 { provide: SelectedRouteService, useValue: selectedRouteService },
                 { provide: ImageResizeService, useValue: imageResizeService },
+                { provide: ElevationProvider, useValue: {} },
                 { provide: SaveAsFactory, useFactory: () => saveAsSpy },
                 FileService,
                 provideHttpClient(withInterceptorsFromDi()),

@@ -38,16 +38,21 @@ describe("ElevationProvider", () => {
         });
     });
 
-    it("Should update height data", inject([ElevationProvider, HttpTestingController],
-        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
-
+    it("Should update height data", inject([ElevationProvider, HttpTestingController, Store],
+        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, store: Store) => {
+            store.reset({
+                offlineState: {
+                    isOfflineAvailable: false,
+                }
+            });
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
             const promise = elevationProvider.updateHeights(latlngs);
+            await new Promise((resolve) => setTimeout(resolve, 0)); // Let the http call be made
 
-            mockBackend.match(() => true)[0].flush([1]);
+            mockBackend.match(() => true)[0].flush(await getArrayBufferOfNonEmptyTile());
             await promise;
-            expect(latlngs[0].alt).toBe(1);
+            expect(latlngs[0].alt).toBe(-9974.5);
         }
     ));
 
@@ -63,12 +68,19 @@ describe("ElevationProvider", () => {
     ));
 
     it("Should not update elevation when getting an error from server and offline is not available",
-        inject([ElevationProvider, HttpTestingController],
-        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
+        inject([ElevationProvider, HttpTestingController, Store],
+        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, store: Store) => {
+            store.reset({
+                offlineState: {
+                    isOfflineAvailable: false,
+                }
+            });
 
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
             const promise = elevationProvider.updateHeights(latlngs);
+
+            await new Promise((resolve) => setTimeout(resolve, 0)); // Let the http call be made
 
             mockBackend.match(() => true)[0].flush(null, { status: 500, statusText: "Server Error" });
             await promise;
@@ -76,7 +88,7 @@ describe("ElevationProvider", () => {
         }
     ));
 
-    it("Should update elevation when getting an error from server and offline is available",
+    it("Should update elevation when offline is available",
         inject([ElevationProvider, HttpTestingController, PmTilesService, Store],
         async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
@@ -92,7 +104,6 @@ describe("ElevationProvider", () => {
 
             const promise = elevationProvider.updateHeights(latlngs);
 
-            mockBackend.match(() => true)[0].flush(null, { status: 500, statusText: "Server Error" });
             await promise;
             expect(latlngs[0].alt).not.toBe(0);
         }
