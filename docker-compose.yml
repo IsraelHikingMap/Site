@@ -40,14 +40,6 @@ services:
     ports:
       - 11987:80
     restart: always
-  elevation:
-    image: israelhikingmap/elevationwebapi
-    container_name: elevation
-    ports:
-      - 11211:8080
-    restart: always
-    volumes:
-      - ./elevation-cache:/app/elevation-cache
   imagecreator:
     image: israelhikingmap/imagecreatorwebapi
     container_name: imagecreator

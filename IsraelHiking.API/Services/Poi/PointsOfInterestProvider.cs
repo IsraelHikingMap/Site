@@ -35,7 +35,6 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
     private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
     private readonly ITagsHelper _tagsHelper;
     private readonly IClientsFactory _clientsFactory;
-    private readonly IElevationSetterExecutor _elevationSetterExecutor;
     private readonly IPointsOfInterestRepository _pointsOfInterestRepository;
     private readonly IExternalSourcesRepository _externalSourcesRepository;
     private readonly IWikimediaCommonGateway _wikimediaCommonGateway;
@@ -48,7 +47,6 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
     /// </summary>
     /// <param name="pointsOfInterestRepository"></param>
     /// <param name="externalSourcesRepository"></param>
-    /// <param name="elevationSetterExecutor"></param>
     /// <param name="osmGeoJsonPreprocessorExecutor"></param>
     /// <param name="wikimediaCommonGateway"></param>
     /// <param name="base64ImageConverter"></param>
@@ -58,7 +56,6 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
     /// <param name="logger"></param>
     public PointsOfInterestProvider(IPointsOfInterestRepository pointsOfInterestRepository,
         IExternalSourcesRepository externalSourcesRepository,
-        IElevationSetterExecutor elevationSetterExecutor,
         IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
         IWikimediaCommonGateway wikimediaCommonGateway,
         IBase64ImageStringToFileConverter base64ImageConverter,
@@ -70,7 +67,6 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
         _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
         _tagsHelper = tagsHelper;
         _clientsFactory = clientsFactory;
-        _elevationSetterExecutor = elevationSetterExecutor;
         _pointsOfInterestRepository = pointsOfInterestRepository;
         _externalSourcesRepository = externalSourcesRepository;
         _wikimediaCommonGateway = wikimediaCommonGateway;
@@ -251,7 +247,6 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
         {
             return null;
         }
-        feature.Geometry = _elevationSetterExecutor.GeometryTo3D(feature.Geometry);
         if (string.IsNullOrWhiteSpace(feature.Attributes[FeatureAttributes.POI_ICON]?.ToString()))
         {
             feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, SEARCH_ICON);

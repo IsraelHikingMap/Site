@@ -26,11 +26,7 @@ public class OsmGeoJsonPreprocessorExecutorTests
     [TestInitialize]
     public void TestInitialize()
     {
-        var options = new ConfigurationData();
-        var elevationGateway = Substitute.For<IElevationGateway>();
-        elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(info => Enumerable.Repeat(1.0, info.Arg<Coordinate[]>().Length).ToArray());
         _preprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), 
-            elevationGateway, 
             new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper());
     }
 

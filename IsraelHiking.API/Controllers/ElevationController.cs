@@ -1,9 +1,6 @@
-﻿using IsraelHiking.Common.Extensions;
-using IsraelHiking.DataAccessInterfaces;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Linq;
-using System.Threading.Tasks;
-using NetTopologySuite.Geometries;
+using System;
 
 namespace IsraelHiking.API.Controllers;
 
@@ -11,17 +8,14 @@ namespace IsraelHiking.API.Controllers;
 /// This controller allows elevation queries
 /// </summary>
 [Route("api/[controller]")]
+[Obsolete("Remove by 1.2026")]
 public class ElevationController : ControllerBase
 {
-    private readonly IElevationGateway _elevationGateway;
-
     /// <summary>
     /// Controller's constructor
     /// </summary>
-    /// <param name="elevationGateway"></param>
-    public ElevationController(IElevationGateway elevationGateway)
+    public ElevationController()
     {
-        _elevationGateway = elevationGateway;
     }
 
     /// <summary>
@@ -30,9 +24,9 @@ public class ElevationController : ControllerBase
     /// <param name="points">The points array - each point should be latitude,longitude and use '|' to separate between points</param>
     /// <returns>An array of elevation values according to given points order</returns>
     [HttpGet]
-    public Task<double[]> GetElevation(string points)
+    public double[] GetElevation(string points)
     {
-        return _elevationGateway.GetElevation(points.Split('|').Select(p => p.ToCoordinate()).ToArray());
+        return points.Split('|').Select(p => { return (double)0; }).ToArray();
     }
         
     /// <summary>
@@ -41,8 +35,8 @@ public class ElevationController : ControllerBase
     /// <param name="points">The points array - each point should be latitude,longitude array</param>
     /// <returns>An array of elevation values according to given points order</returns>
     [HttpPost]
-    public Task<double[]> GetElevation([FromBody] double[][] points)
+    public double[] GetElevation([FromBody] double[][] points)
     {
-        return _elevationGateway.GetElevation(points.Select(p => new Coordinate(p[0], p[1])).ToArray());
+        return points.Select(p => (double)0).ToArray();
     }
 }

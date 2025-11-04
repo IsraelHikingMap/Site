@@ -110,10 +110,6 @@ public class ConfigurationData
     /// </summary>
     public string GpsBabelServerAddress { get; set; }
     /// <summary>
-    /// Elevation server address
-    /// </summary>
-    public string ElevationServerAddress { get; set; }
-    /// <summary>
     /// Image creator server address
     /// </summary>
     public string ImageCreatorServerAddress { get; set; }
@@ -172,7 +168,6 @@ public class ConfigurationData
         GraphhopperServerAddress = "http://localhost:8989/";
         ElasticsearchServerAddress = "http://localhost:9200/";
         GpsBabelServerAddress = "http://localhost:11987/";
-        ElevationServerAddress = "http://localhost:11211/";
         ImageCreatorServerAddress = "http://localhost:11311/";
         OfflineFilesFolder = "./";
         ExternalFilesFolder = "./";

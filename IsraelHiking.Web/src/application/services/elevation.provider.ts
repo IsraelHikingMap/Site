@@ -1,14 +1,10 @@
 import { inject, Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
-import { timeout } from "rxjs/operators";
-import { firstValueFrom } from "rxjs";
 import QuickLRU from "quick-lru";
 
 import { LoggingService } from "./logging.service";
 import { SpatialService } from "./spatial.service";
 import { PmTilesService } from "./pmtiles.service";
-import { Urls } from "../urls";
 import type { ApplicationState, LatLngAlt } from "../models";
 
 @Injectable()
@@ -21,7 +17,6 @@ export class ElevationProvider {
 
     private elevationCache = new QuickLRU<string, Uint8ClampedArray>({ maxSize: 100 });
 
-    private readonly httpClient = inject(HttpClient);
     private readonly loggingService = inject(LoggingService);
     private readonly pmTilesService = inject(PmTilesService);
     private readonly store = inject(Store);
@@ -42,22 +37,14 @@ export class ElevationProvider {
         }
 
         try {
-            const points = missingElevation.map(latlng => [latlng.lng, latlng.lat]);
-            const response = await firstValueFrom(this.httpClient.post<number[]>(Urls.elevation, points).pipe(timeout(1000)));
-            for (let index = 0; index < relevantIndexes.length; index++) {
-                latlngs[relevantIndexes[index]].alt = response[index];
+            await this.populateElevationCache(latlngs);
+            for (const relevantIndex of relevantIndexes) {
+                const latlng = latlngs[relevantIndex];
+                latlng.alt = this.getElevationForLatlng(latlng);
             }
         } catch (ex) {
-            try {
-                await this.populateElevationCache(latlngs);
-                for (const relevantIndexe of relevantIndexes) {
-                    const latlng = latlngs[relevantIndexe];
-                    latlng.alt = this.getElevationForLatlng(latlng);
-                }
-            } catch (ex2) {
-                this.loggingService.warning(`[Elevation] Unable to get elevation data for ${latlngs.length} points. ` +
-                    `${(ex as Error).message}, ${(ex2 as Error).message}`);
-            }
+            this.loggingService.warning(`[Elevation] Unable to get elevation data for ${latlngs.length} points. ` +
+                `${(ex as Error).message}`);
         }
     }
 
