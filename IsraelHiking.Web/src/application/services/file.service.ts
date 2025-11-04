@@ -16,6 +16,7 @@ import { FitBoundsService } from "./fit-bounds.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
+import { ElevationProvider } from "./elevation.provider";
 import { Urls } from "../urls";
 import type { DataContainer } from "../models";
 
@@ -38,6 +39,7 @@ export class FileService {
     private readonly fitBoundsService = inject(FitBoundsService);
     private readonly gpxDataContainerConverterService = inject(GpxDataContainerConverterService);
     private readonly loggingService = inject(LoggingService);
+    private readonly elevationProvider = inject(ElevationProvider);
     private readonly saveAs = inject(SaveAsFactory);
 
     public formats: FormatViewModel[] = [
@@ -227,12 +229,25 @@ export class FileService {
         this.addRoutesFromContainer(dataContainer);
     }
 
-    public openFromUrl(url: string): Promise<DataContainer> {
-        return firstValueFrom(this.httpClient.get<DataContainer>(Urls.files + "?url=" + url));
+    private async addElevationToDataContainer(dataContainer: DataContainer): Promise<void> {
+        const promises = [];
+        for (const route of dataContainer.routes || []) {
+            for (const segment of route.segments || []) {
+                promises.push(this.elevationProvider.updateHeights(segment.latlngs));
+            }
+        }
+        await Promise.all(promises);
+    }
+
+    public async openFromUrl(url: string): Promise<DataContainer> {
+        const container = await firstValueFrom(this.httpClient.get<DataContainer>(Urls.files + "?url=" + url));
+        await this.addElevationToDataContainer(container);
+        return container;
     }
 
     public async addRoutesFromUrl(url: string) {
         const container = await this.openFromUrl(url);
+        await this.addElevationToDataContainer(container);
         this.addRoutesFromContainer(container);
     }
 
