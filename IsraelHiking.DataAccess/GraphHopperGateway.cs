@@ -107,7 +107,7 @@ public class GraphHopperGateway : IGraphHopperGateway
                 _logger.LogWarning($"Problem with routing response: got only one point back from graphhopper...");
                 return LineStringToFeature(new LineString([convertedCoordinates, convertedCoordinates]));
             }
-            var lineString = new LineString(path.Points.Coordinates.Select(c => new Coordinate(c[0], c[1])).ToArray());
+            var lineString = new LineString(path.Points.Coordinates.Select(c => new CoordinateZ(c[0], c[1], c.Count > 2 ? c[2] : 0.0)).ToArray());
             var table = new AttributesTable { { "details", path.Details } };
             return LineStringToFeature(lineString, table);
         }

@@ -45,15 +45,14 @@ export class RoutingProvider {
                 const lng = latlngStart.lng + (latlngEnd.lng - latlngStart.lng) * (i / pointsCount);
                 latlngs.push({ lat, lng });
             }
+            await this.elevationProvider.updateHeights(latlngs);
             return latlngs;
         }
         const address = Urls.routing + "?from=" + latlngStart.lat + "," + latlngStart.lng +
             "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + routinType;
         try {
             const data = await firstValueFrom(this.httpClient.get<GeoJSON.FeatureCollection<GeoJSON.LineString>>(address).pipe(timeout(4500)));
-            const latlngs = data.features[0].geometry.coordinates.map(c => SpatialService.toLatLng(c));
-            await this.elevationProvider.updateHeights(latlngs);
-            return latlngs;
+            return data.features[0].geometry.coordinates.map(c => SpatialService.toLatLng(c));
         } catch (ex) {
             try {
                 return await this.getOffineRoute(latlngStart, latlngEnd, routinType);
@@ -64,7 +63,9 @@ export class RoutingProvider {
                     ? this.resources.routingFailedTryShorterRoute
                     : this.resources.routingFailedBuySubscription
                 );
-                return [latlngStart, latlngEnd];
+                const lngLat = [latlngStart, latlngEnd];
+                this.elevationProvider.updateHeights(lngLat);
+                return lngLat;
             }
         }
     }
@@ -118,7 +119,9 @@ export class RoutingProvider {
             throw new Error("[Routing] No route found... :-(");
         }
 
-        return route.path.map(c => SpatialService.toLatLng(c));
+        const lngLat = route.path.map(c => SpatialService.toLatLng(c));
+        await this.elevationProvider.updateHeights(lngLat);
+        return lngLat;
     }
 
     private async updateCacheAndGetFeatures(
