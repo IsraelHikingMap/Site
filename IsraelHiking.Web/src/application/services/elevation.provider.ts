@@ -1,14 +1,12 @@
 import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
-import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import QuickLRU from "quick-lru";
 
 import { LoggingService } from "./logging.service";
 import { SpatialService } from "./spatial.service";
 import { PmTilesService } from "./pmtiles.service";
-import { Urls } from "../urls";
 import type { ApplicationState, LatLngAlt } from "../models";
 
 @Injectable()
@@ -42,30 +40,20 @@ export class ElevationProvider {
         }
 
         try {
-            const points = missingElevation.map(latlng => [latlng.lng, latlng.lat]);
-            const response = await firstValueFrom(this.httpClient.post<number[]>(Urls.elevation, points).pipe(timeout(1000)));
-            for (let index = 0; index < relevantIndexes.length; index++) {
-                latlngs[relevantIndexes[index]].alt = response[index];
+            await this.populateElevationCache(latlngs);
+            for (const relevantIndex of relevantIndexes) {
+                const latlng = latlngs[relevantIndex];
+                latlng.alt = this.getElevationForLatlng(latlng);
             }
         } catch (ex) {
-            try {
-                await this.populateElevationCache(latlngs);
-                for (const relevantIndexe of relevantIndexes) {
-                    const latlng = latlngs[relevantIndexe];
-                    latlng.alt = this.getElevationForLatlng(latlng);
-                }
-            } catch (ex2) {
-                this.loggingService.warning(`[Elevation] Unable to get elevation data for ${latlngs.length} points. ` +
-                    `${(ex as Error).message}, ${(ex2 as Error).message}`);
-            }
+            this.loggingService.warning(`[Elevation] Unable to get elevation data for ${latlngs.length} points. ` +
+                `${(ex as Error).message}`);
         }
     }
 
     private async populateElevationCache(latlngs: LatLngAlt[]) {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        if (!offlineState.isOfflineAvailable || offlineState.lastModifiedDate == null) {
-            throw new Error("[Elevation] Getting elevation is only supported after downloading offline data");
-        }
+        const useOffline = offlineState.isOfflineAvailable && offlineState.lastModifiedDate != null;
         const zoom = ElevationProvider.MAX_ELEVATION_ZOOM;
         const tiles = latlngs.map(latlng => SpatialService.toTile(latlng, zoom));
         const tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));
@@ -78,8 +66,9 @@ export class ElevationProvider {
                 if (this.elevationCache.has(key)) {
                     continue;
                 }
-
-                const arrayBuffer = await this.pmTilesService.getTile(`custom://TerrainRGB/${zoom}/${tileX}/${tileY}.png`);
+                const arrayBuffer = useOffline 
+                    ? await this.pmTilesService.getTile(`custom://TerrainRGB/${zoom}/${tileX}/${tileY}.png`)
+                    : await firstValueFrom(this.httpClient.get(`https://israelhiking.osm.org.il/vector/data/TerrainRGB/${ElevationProvider.MAX_ELEVATION_ZOOM}/${tileX}/${tileY}.png`, { responseType: "arraybuffer"}));
                 const data = await this.getImageData(arrayBuffer);
                 this.elevationCache.set(key, data);
         }

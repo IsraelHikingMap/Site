@@ -300,7 +300,6 @@ export class RouteEditRouteInteraction {
     private runRouting = async (startLatLng: LatLngAlt, segment: RouteSegmentData): Promise<void> => {
         segment.routePoint = this.getSnappingForRoute(segment.routePoint, []);
         const latLngs =  await this.routingProvider.getRoute(startLatLng, segment.routePoint, segment.routingType);
-        await this.elevationProvider.updateHeights(latLngs);
         segment.latlngs = latLngs as LatLngAltTime[];
         const last = latLngs[latLngs.length - 1];
         segment.routePoint = this.getSnappingForRoute(segment.routePoint, [last]);
