@@ -1,5 +1,7 @@
 import { inject, Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
+import { firstValueFrom } from "rxjs";
 import QuickLRU from "quick-lru";
 
 import { LoggingService } from "./logging.service";
@@ -17,6 +19,7 @@ export class ElevationProvider {
 
     private elevationCache = new QuickLRU<string, Uint8ClampedArray>({ maxSize: 100 });
 
+    private readonly httpClient = inject(HttpClient);
     private readonly loggingService = inject(LoggingService);
     private readonly pmTilesService = inject(PmTilesService);
     private readonly store = inject(Store);
@@ -50,9 +53,7 @@ export class ElevationProvider {
 
     private async populateElevationCache(latlngs: LatLngAlt[]) {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        if (!offlineState.isOfflineAvailable || offlineState.lastModifiedDate == null) {
-            throw new Error("[Elevation] Getting elevation is only supported after downloading offline data");
-        }
+        const useOffline = offlineState.isOfflineAvailable && offlineState.lastModifiedDate != null;
         const zoom = ElevationProvider.MAX_ELEVATION_ZOOM;
         const tiles = latlngs.map(latlng => SpatialService.toTile(latlng, zoom));
         const tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));
@@ -65,8 +66,9 @@ export class ElevationProvider {
                 if (this.elevationCache.has(key)) {
                     continue;
                 }
-
-                const arrayBuffer = await this.pmTilesService.getTile(`custom://TerrainRGB/${zoom}/${tileX}/${tileY}.png`);
+                const arrayBuffer = useOffline 
+                    ? await this.pmTilesService.getTile(`custom://TerrainRGB/${zoom}/${tileX}/${tileY}.png`)
+                    : await firstValueFrom(this.httpClient.get(`https://israelhiking.osm.org.il/vector/data/TerrainRGB/${ElevationProvider.MAX_ELEVATION_ZOOM}/${tileX}/${tileY}.png`, { responseType: "arraybuffer"}));
                 const data = await this.getImageData(arrayBuffer);
                 this.elevationCache.set(key, data);
         }
