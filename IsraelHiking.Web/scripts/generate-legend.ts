@@ -13,7 +13,7 @@ const browser = await puppeteer.launch({headless: false});
 // This is used in the evaluate function in puppeteer to access the map instance, the definition here is to allow TypeScript to recognize the type.
 const map: Map = null;
 
-async function createImages(style: string) {
+async function createImages(style: string, type: string) {
     const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -31,13 +31,13 @@ async function createImages(style: string) {
 <div id="map"></div>
 <script>
     maplibregl.setRTLTextPlugin(
-        'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.2.3/mapbox-gl-rtl-text.min.js',
+        'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/mapbox-gl-rtl-text.min.js',
         true // Lazy load the plugin
     );
 
     const map = new maplibregl.Map({
         container: 'map',
-        style: '${style}',
+        style: ${JSON.stringify(style)},
         center: [0, 0],
         zoom: 1, 
         maplibreLogo: false,
@@ -49,9 +49,10 @@ async function createImages(style: string) {
 </html>
 `;
     const height = 50
-    const page = await browser.newPage();
+    
     try {
         for (const width of [50, 200]) {
+            const page = await browser.newPage();
             // This needs to happen before set content so that the map loading will respect the device scale factor.
             await page.setViewport({
                     width,
@@ -74,7 +75,7 @@ async function createImages(style: string) {
                         return map.once('idle');
                     }, legendItem.latlng, legendItem.zoom);
 
-                    const filename = `./src/content/legend/${style.split("/").pop().replace(".json","")}_${legendItem.key}.png`;
+                    const filename = `./src/content/legend/${type}_${legendItem.key}.png`;
                     await page.screenshot({
                         path: filename,
                         type: 'png',
@@ -88,17 +89,20 @@ async function createImages(style: string) {
                     console.log(`Created ${filename}`);
                 }
             }
+            await page.close();
         }
     } catch (err) {
         console.log(err);
     }
-    
-    await page.close();
 }
-for (let style of ["https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/IHM.json", 
-    "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/ilMTB.json"]) {
+for (let style of ["https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json", 
+    "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-bike.json"]) {
 
-    await createImages(style);
+    const response = await fetch(style);
+    const text = await response.text();
+    const jsonStyle = JSON.parse(text.replace(/name:he/g, `name:en`));
+
+    await createImages(jsonStyle, style.split("/").pop().split("-").pop().split(".")[0]);
 }
 
 

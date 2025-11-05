@@ -57,6 +57,6 @@ export class LegendItemComponent {
     public getImageAddress() {
         // HM TODO: remake legend to be in English
         const styleKey = this.layersService.getSelectedBaseLayer().key;
-        return `content/legend/${styleKey === HIKING_MAP ? "IHM" : "ilMTB"}_${this.item().key}.png`;
+        return `content/legend/${styleKey === HIKING_MAP ? "hike" : "bike"}_${this.item().key}.png`;
     }
 }
