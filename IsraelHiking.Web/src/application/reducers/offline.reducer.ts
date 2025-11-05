@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { OfflineState } from "../models";
+import type { OfflineState, TileMetadataPerFile } from "../models";
 
 export class SetOfflineSubscribedAction {
     public static type = this.prototype.constructor.name;
@@ -12,7 +12,7 @@ export class SetOfflineSubscribedAction {
 
 export class SetOfflineMapsLastModifiedDateAction {
     public static type = this.prototype.constructor.name;
-    constructor(public lastModifiedDate: Date, public tileX: number, public tileY: number) {}
+    constructor(public data: TileMetadataPerFile, public tileX: number, public tileY: number) {}
 }
 
 export class DeleteOfflineMapsTileAction {
@@ -56,7 +56,7 @@ export class OfflineReducer {
             if (lastState.downloadedTiles == null) {
                 lastState.downloadedTiles = {};
             }
-            lastState.downloadedTiles[`${action.tileX}-${action.tileY}`] = action.lastModifiedDate;
+            lastState.downloadedTiles[`${action.tileX}-${action.tileY}`] = action.data;
             return lastState;
         }));
     }

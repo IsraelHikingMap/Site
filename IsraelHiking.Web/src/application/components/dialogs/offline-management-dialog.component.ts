@@ -30,10 +30,9 @@ export class OfflineManagementDialogComponent {
     public selectedTile: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
     public inProgressTile: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
     public downloadedTiles: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
+    public currentLocation: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
     public baseLayerData: EditableLayer;
     public selectedTileXY: {tileX: number; tileY: number} = null;
-
-    private lastSchemeBreak: Date = null;
 
     private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
     private readonly defaultStyleService = inject(DefaultStyleService);
@@ -56,7 +55,18 @@ export class OfflineManagementDialogComponent {
         if (this.baseLayerData.key !== HIKING_MAP && this.baseLayerData.key !== MTB_MAP) {
             this.baseLayerData = {...this.store.selectSnapshot((state: ApplicationState) => state.layersState.baseLayers).find((layer) => layer.key === HIKING_MAP)};
         }
-        
+        const stateLocation = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
+        this.currentLocation = {
+            type: "FeatureCollection",
+            features: [{
+                type: "Feature",
+                properties: {},
+                geometry: {
+                    type: "Point",
+                    coordinates: [stateLocation.longitude, stateLocation.latitude]
+                }
+            }]
+        }
         this.initializeCenterAndZoomFromDownloadingTile();
         this.updateDownloadedTiles();
         this.offlineFilesDownloadService.tilesProgressChanged.subscribe((tileProgress) => {
@@ -64,25 +74,18 @@ export class OfflineManagementDialogComponent {
                 this.updateInProgressTile(tileProgress.progressValue);
             }
         });
-        this.offlineFilesDownloadService.getLastSchemeBreakDate().then((date) => {
-            this.lastSchemeBreak = date;
-            this.updateDownloadedTiles();
-        });
     }
 
     private initializeCenterAndZoomFromDownloadingTile() {
-        const dowloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.offlineState.downloadedTiles);
-        if (dowloadedTiles == null || Object.keys(dowloadedTiles).length === 0) {
-            const location = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
-            this.center = [location.longitude, location.latitude];
-            this.zoom = 5;
-            return;
-        }
+        const dowloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.offlineState.downloadedTiles) ?? {};
+        const location = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
+        const locationTile = SpatialService.toTile({ lat: location.latitude, lng: location.longitude}, TILES_ZOOM);
+        
         let minTileX = Number.MAX_SAFE_INTEGER;
         let maxTileX = Number.MIN_SAFE_INTEGER;
         let minTileY = Number.MAX_SAFE_INTEGER;
         let maxTileY = Number.MIN_SAFE_INTEGER;
-        for (const key of Object.keys(dowloadedTiles)) {
+        for (const key of Object.keys(dowloadedTiles).concat(locationTile.x + "-" + locationTile.y)) {
             const [tileX, tileY] = key.split("-").map(Number);
             if (isNaN(tileX) || isNaN(tileY)) {
                 continue;
@@ -159,12 +162,12 @@ export class OfflineManagementDialogComponent {
                 continue; // Skip the center tile if not downloading
             }
             
-            const downloadedDate = new Date(downloadedTiles[key]);
+            const downloadedDate = this.offlineFilesDownloadService.getLastModifiedDate(downloadedTiles[key]);
             const label = downloadedDate.getFullYear() + "\n" + 
                 (downloadedDate.getMonth() + 1).toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), {minimumIntegerDigits: 2}) + "\n" + 
                 downloadedDate.getDate().toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), {minimumIntegerDigits: 2});
             const feature = this.tileCoordinatesToPolygon(tileXDownloaded, tileYDownloaded, label, 1);
-            feature.properties.color = this.lastSchemeBreak && downloadedDate < this.lastSchemeBreak ? "red" : "blue";
+            feature.properties.color = this.offlineFilesDownloadService.isTileCompatible(downloadedTiles[key]) ? "blue" : "red";
             features.push(feature);
         }
 

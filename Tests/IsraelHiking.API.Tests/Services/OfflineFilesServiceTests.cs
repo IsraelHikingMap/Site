@@ -86,22 +86,4 @@ public class OfflineFilesServiceTests
 
         fileInfo.Received(1).CreateReadStream();
     }
-
-    [TestMethod]
-    public void GetLastSchemeBreakDate_ShouldReturnTheDate()
-    {
-        var fileInfo = Substitute.For<IFileInfo>();
-        _fileProvider.GetFileInfo(Arg.Any<string>()).Returns(fileInfo);
-        var stream = new MemoryStream();
-        var writer = new StreamWriter(stream);
-        var date = DateTime.Now.AddDays(-5);
-        writer.Write(date.ToString("o"));
-        writer.Flush();
-        stream.Position = 0;
-        fileInfo.CreateReadStream().Returns(stream);
-
-        var result = _service.GetLastSchemeBreakDate();
-
-        Assert.AreEqual(date.Date, result.Date);
-    }
 }

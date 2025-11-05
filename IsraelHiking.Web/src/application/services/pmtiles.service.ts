@@ -107,4 +107,10 @@ export class PmTilesService {
         }
         return true;
     }
+
+    public async getVersion(fileName: string): Promise<string> {
+        const source = await this.getSource(fileName);
+        const pmTilesProvider = new PMTiles(source);
+        return (await pmTilesProvider.getMetadata() as {version?: string})?.version;
+    }
 }

@@ -180,15 +180,12 @@ describe("FileService", () => {
         expect(response).toEqual({} as StyleSpecification);
     }));
 
-    it("Should get style json content from local when remote fails", inject([FileService, FileSystemWrapper, HttpTestingController], 
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper, mockBackend: HttpTestingController) => {
+    it("Should get style json content from local for local layers", inject([FileService, FileSystemWrapper], 
+        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
             const spy = jasmine.createSpy();
             fileSystemWrapper.readAsText = spy.and.returnValue(Promise.resolve("{}"));
-            const promise = service.getStyleJsonContent("s.json", true);
+            const response = await service.getStyleJsonContent("s.json", true);
 
-            mockBackend.expectOne("s.json").flush(null, { status: 404, statusText: "Not Found" });
-
-            const response = await promise;
             expect(spy).toHaveBeenCalled();
             expect(response).toEqual({} as StyleSpecification);
     }));

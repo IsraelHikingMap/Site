@@ -22,6 +22,9 @@
         <mgl-geojson-source id="download-tiles"
           [data]="downloadedTiles">
         </mgl-geojson-source>
+        <mgl-geojson-source id="currnet-location"
+          [data]="currentLocation">
+        </mgl-geojson-source>
         <mgl-layer
           id="download-tiles-border"
           type="line"
@@ -65,6 +68,16 @@
           [paint]="{
               'line-color': 'green',
               'line-width': 3
+          }">
+        </mgl-layer>
+        <mgl-layer
+          id="currnet-location-circle"
+          type="circle"
+          source="currnet-location"
+          [paint]="{
+              'circle-radius': 7,
+              'circle-color': 'magenta'
+
           }">
         </mgl-layer>
         <mgl-layer

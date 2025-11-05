@@ -1,8 +1,16 @@
-﻿export type OfflineState = {
+﻿export type FileNameDateVersion = {
+    fileName: string;
+    date: string;
+    version?: string;
+}
+
+export type TileMetadataPerFile = Date | FileNameDateVersion[];
+
+export type OfflineState = {
     /**
      * The downloaded tiles, key is the tile id and value is the date it was downloaded
      */
-    downloadedTiles: Record<string, Date>;
+    downloadedTiles: Record<string, TileMetadataPerFile>;
     /**
      * Shares last modified date
      */

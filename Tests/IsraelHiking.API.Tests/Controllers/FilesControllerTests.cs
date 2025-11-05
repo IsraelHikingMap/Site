@@ -240,16 +240,4 @@ public class FilesControllerTests
 
         Assert.IsTrue(results);
     }
-
-    [TestMethod]
-    public void GetLastSchemeBreakDate_ShouldGetIt()
-    {
-        var date = DateTime.Now;
-        _controller.SetupIdentity();
-        _offlineFilesService.GetLastSchemeBreakDate().Returns(date);
-
-        var results = _controller.GetLastSchemeBreakDate();
-
-        Assert.AreEqual(date, results);
-    }
 }

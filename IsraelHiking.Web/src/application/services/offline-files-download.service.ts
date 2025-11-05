@@ -5,6 +5,8 @@ import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
 import { last } from "lodash-es";
+import { Immutable } from "immer";
+import type { StyleSpecification } from "maplibre-gl";
 
 import { Urls } from "../urls";
 import { OfflineManagementDialogComponent } from "../components/dialogs/offline-management-dialog.component";
@@ -12,8 +14,9 @@ import { FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
+import { PmTilesService } from "./pmtiles.service";
 import { DeleteOfflineMapsTileAction, SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
-import type { ApplicationState } from "../models";
+import type { ApplicationState, FileNameDateVersion, TileMetadataPerFile } from "../models";
 
 @Injectable()
 export class OfflineFilesDownloadService {
@@ -23,8 +26,10 @@ export class OfflineFilesDownloadService {
     private readonly httpClient = inject(HttpClient);
     private readonly matDialog = inject(MatDialog);
     private readonly toastService = inject(ToastService);
+    private readonly pmtilesService = inject(PmTilesService);
     private readonly store = inject(Store);
 
+    private metadata: Record<string, string>;
     private abortController = new AbortController();
     private _currentDownloadedTile: {tileX: number, tileY: number} | null = null;
     public tilesProgressChanged = new EventEmitter<{tileX: number, tileY: number, progressValue: number}>();
@@ -38,22 +43,34 @@ export class OfflineFilesDownloadService {
         if (userState == null || offlineState.isSubscribed === false) {
             return;
         }
-        for (const baseLayerUrl of [Urls.HIKING_TILES_ADDRESS, Urls.MTB_TILES_ADDRESS]) {
-            const style = await firstValueFrom(this.httpClient.get(baseLayerUrl, {responseType: "text"}).pipe(timeout(5000)));
-            await this.fileService.writeStyle(last(baseLayerUrl.split("/")), style);
-        }
-        const lastSchemeBreakDate = await this.getLastSchemeBreakDate();
-        const needToAskToRedownload = Object.values(offlineState.downloadedTiles ?? {}).every(d => d < lastSchemeBreakDate);
-        if (offlineState.downloadedTiles == null || needToAskToRedownload) {
+        try {
+            const styles: {fileName: string, content: string}[] = [];
+            for (const baseLayerUrl of [Urls.HIKING_TILES_ADDRESS, Urls.MTB_TILES_ADDRESS]) {
+                const style = await firstValueFrom(this.httpClient.get(baseLayerUrl, {responseType: "text"}).pipe(timeout(5000)));
+                styles.push({fileName: last(baseLayerUrl.split("/")), content: style});
+            }
+            this.metadata = {};
+            for (const style of styles) {
+                this.metadata = Object.assign(this.metadata, (JSON.parse(style.content) as StyleSpecification).metadata as Record<string, string>);
+            }
+            const needToAskToRedownload = offlineState.downloadedTiles == null || Object.values(offlineState.downloadedTiles).some(dt => !this.isTileCompatible(dt));
+            if (!needToAskToRedownload) {
+                return;
+            }
             this.toastService.confirm({
                 type: "YesNo",
                 message: this.resources.reccomendOfflineDownload,
-                confirmAction: () => {
+                confirmAction: async () => {
+                    for (const styleAndContent of styles) {
+                        await this.fileService.writeStyle(styleAndContent.fileName, styleAndContent.content);
+                    }
                     OfflineManagementDialogComponent.openDialog(this.matDialog);
                 }
-            })
-            return;
+            });
+        } catch {
+            // ignore in case this happens in offline
         }
+        
     }
 
     public async downloadTile(tileX: number, tileY: number): Promise<"up-to-date" | "downloaded" | "error" | "aborted"> {
@@ -76,10 +93,10 @@ export class OfflineFilesDownloadService {
             }
 
             if (fileNamesForTile.length > 0) {
-                this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(this.getNewestFileDateFromFileList(fileNamesForTile), tileX, tileY));
+                this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(await this.getMetadataPerFile(fileNamesForTile), tileX, tileY));
             }
             if (fileNamesForRoot.length > 0) {
-                this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(this.getNewestFileDateFromFileList(fileNamesForRoot), undefined, undefined));
+                this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(await this.getMetadataPerFile(fileNamesForRoot), undefined, undefined));
             }
             return "downloaded";
         } catch (ex) {
@@ -103,23 +120,25 @@ export class OfflineFilesDownloadService {
         }
     }
 
-    private getNewestFileDateFromFileList(fileNames: [string, string][]): Date {
-        let newestFileDate = new Date(0);
+    private async getMetadataPerFile(fileNames: FileNameDateVersion[]): Promise<TileMetadataPerFile> {
+        const metadata: FileNameDateVersion[] = []
         for (const fileNameAndDate of fileNames) {
-            const fileDate = new Date(fileNameAndDate[1]);
-            if (fileDate > newestFileDate) {
-                newestFileDate = fileDate;
+            try {
+                const version = await this.pmtilesService.getVersion(fileNameAndDate.fileName);
+                metadata.push({ fileName: fileNameAndDate.fileName, date: fileNameAndDate.date, version});
+            } catch {
+                // ignore this
             }
         }
-        return newestFileDate;
+        return metadata;
     }
 
-    private async downloadOfflineFilesProgressAction(fileNames: [string, string][], rootFilesCount: number, abortController: AbortController): Promise<void> {
+    private async downloadOfflineFilesProgressAction(fileNames: FileNameDateVersion[], rootFilesCount: number, abortController: AbortController): Promise<void> {
         const { tileX, tileY } = this._currentDownloadedTile!;
         this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${fileNames.length}, tile: ${tileX}-${tileY}`);
         const length = fileNames.length;
         for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
-            const [fileName] = fileNames[fileNameIndex];
+            const {fileName} = fileNames[fileNameIndex];
             if (abortController.signal.aborted) {
                 this.loggingService.info("[Offline Download] Aborted downloading offline files, current file: " + fileName);
                 return;
@@ -151,9 +170,9 @@ export class OfflineFilesDownloadService {
         this.tilesProgressChanged.emit({tileX: this._currentDownloadedTile?.tileX, tileY: this._currentDownloadedTile?.tileY, progressValue});
     }
 
-    private async getFilesToDownload(tileX?: number, tileY?: number): Promise<[string, string][]> {
+    private async getFilesToDownload(tileX?: number, tileY?: number): Promise<FileNameDateVersion[]> {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        const lastModifiedString = offlineState.downloadedTiles ? offlineState.downloadedTiles[`${tileX}-${tileY}`]?.toISOString() : null;
+        const lastModifiedString = offlineState.downloadedTiles ? this.getLastModifiedDate(offlineState.downloadedTiles[`${tileX}-${tileY}`])?.toISOString() : null;
         const params: Record<string, string> = {};
         if (lastModifiedString) {
             params.lastModified = lastModifiedString;
@@ -167,7 +186,7 @@ export class OfflineFilesDownloadService {
         if (Object.keys(fileNames).length === 0) {
             return [];
         }
-        return Object.entries(fileNames).map(([key, value]) => [key, value] as [string, string]);
+        return Object.entries(fileNames).map(([key, value]) => ({fileName: key, date: value}));
     }
 
     public abortCurrentDownload(): void {
@@ -182,17 +201,42 @@ export class OfflineFilesDownloadService {
         // This assumes that the tiles that needs to be downloaded have the same names as the ones that needs to be deleted.
         // It looks for the download date, so there's a need to clean the date before this call, which is done above.
         const files = await this.getFilesToDownload(tileX, tileY);
-        for (const [fileName] of files) {
+        for (const {fileName} of files) {
             await this.fileService.deleteFileInDataDirectory(fileName);
         }
     }
 
-    public async getLastSchemeBreakDate(): Promise<Date> {
-        try {
-            const lastSchemeBreakString = await firstValueFrom(this.httpClient.get<string>(Urls.offlineFilesLastSchemeBreak).pipe(timeout(5000)));
-            return new Date(lastSchemeBreakString);
-        } catch {
-            return new Date(0);
+    public getLastModifiedDate(downloadedTile: Immutable<TileMetadataPerFile>) {
+        if (!downloadedTile) {
+            return null;
         }
+        let lastModified = new Date(0);
+        if (Array.isArray(downloadedTile)) {
+            for (const fileDateVersion of downloadedTile as FileNameDateVersion[]) {
+                const fileUpdateDate = new Date(fileDateVersion.date);
+                if (fileUpdateDate > lastModified) {
+                    lastModified = new Date(fileDateVersion.date)
+                }
+            }
+        } else {
+            lastModified = new Date(downloadedTile as Date);
+        }
+        return lastModified;
+    }
+
+    public isTileCompatible(downloadedTile: Immutable<TileMetadataPerFile>): boolean {
+        if (Array.isArray(downloadedTile)) {
+            for (const fileDateVersion of downloadedTile as FileNameDateVersion[]) {
+                const fileVersion = fileDateVersion.version;
+                const sourceName = fileDateVersion.fileName.split("+")[0];
+                const styleVersion = this.metadata[`sources:${sourceName}:min-version`];
+                if (fileVersion && styleVersion && fileVersion.localeCompare(styleVersion, undefined, { numeric: true, sensitivity: "base" }) === -1) {
+                    return false;
+                }
+            }
+        } else {
+            return false;
+        }
+        return true;
     }
 }

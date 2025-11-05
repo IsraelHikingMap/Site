@@ -114,11 +114,11 @@ export class FileService {
             if (this.runningContextService.isCapacitor && url.startsWith(".")) {
                 return await this.getLocalStyleJson(url);
             }
-            return await firstValueFrom(this.httpClient.get<StyleSpecification>(url).pipe(timeout(5000)));
-        } catch (ex) {
             if (tryLocalStyle) {
                 return await this.getLocalStyleJson(url);
             }
+            return await firstValueFrom(this.httpClient.get<StyleSpecification>(url).pipe(timeout(5000)));
+        } catch (ex) {
             this.loggingService.error(`[Files] Unable to get style file, tryLocalStyle: ${tryLocalStyle}, ${url}, ${(ex as Error).message}`);
             return {
                 version: 8.0,

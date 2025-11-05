@@ -162,16 +162,4 @@ public class FilesController : ControllerBase
     {
         return await _receiptValidationGateway.IsEntitled(User.Identity?.Name);
     }
-
-    /// <summary>
-    /// Get the date of the last scheme break
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet]
-    [Route("lastSchemeBreak")]
-    [Authorize]
-    public DateTime GetLastSchemeBreakDate()
-    {
-        return _offlineFilesService.GetLastSchemeBreakDate();
-    }
 }

@@ -24,11 +24,4 @@ public interface IOfflineFilesService
     /// <param name="tileY">The tile's Y coordinates, null for root</param>
     /// <returns>A list of file names</returns>
     Dictionary<string, DateTime> GetUpdatedFilesList(DateTime lastModifiedDate, long? tileX, long? tileY);
-
-
-    /// <summary>
-    /// Get the date of the last scheme break
-    /// </summary>
-    /// <returns>The date of the last scheme break</returns>
-    DateTime GetLastSchemeBreakDate();
 }
