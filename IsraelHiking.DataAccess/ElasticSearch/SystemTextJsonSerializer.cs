@@ -15,7 +15,6 @@ public class SystemTextJsonSerializer : IElasticsearchSerializer
 
     private IList<JsonConverter> BakedInConverters { get; } = new List<JsonConverter>
     {
-        {new ExceptionConverter()},
         {new DynamicDictionaryConverter()},
         {new DateTimeConverter()}
     };
