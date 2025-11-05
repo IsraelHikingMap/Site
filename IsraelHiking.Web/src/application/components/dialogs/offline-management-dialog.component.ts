@@ -85,7 +85,7 @@ export class OfflineManagementDialogComponent {
         let maxTileX = Number.MIN_SAFE_INTEGER;
         let minTileY = Number.MAX_SAFE_INTEGER;
         let maxTileY = Number.MIN_SAFE_INTEGER;
-        for (const key of Object.keys(dowloadedTiles).concat(locationTile.x + "-" + locationTile.y)) {
+        for (const key of Object.keys(dowloadedTiles).concat((locationTile.x - 1) + "-" + (locationTile.y - 1))) {
             const [tileX, tileY] = key.split("-").map(Number);
             if (isNaN(tileX) || isNaN(tileY)) {
                 continue;
