@@ -104,7 +104,7 @@ export class OfflineManagementDialogComponent {
         const { tileX, tileY } = this.selectedTileXY;
         this.map.flyTo({
             center: SpatialService.toCoordinate(SpatialService.fromTile({x: tileX + 0.5, y: tileY + 0.5}, TILES_ZOOM)),
-            zoom: TILES_ZOOM
+            zoom: TILES_ZOOM - 1
         });
         this.selectedTileXY = null;
         this.updateDownloadedTiles();
@@ -234,7 +234,7 @@ export class OfflineManagementDialogComponent {
         this.updateDownloadedTiles();
         this.map.flyTo({
             center: SpatialService.toCoordinate(SpatialService.fromTile({x: tileX + 0.5, y: tileY + 0.5}, TILES_ZOOM)),
-            zoom: TILES_ZOOM
+            zoom: TILES_ZOOM - 1
         });
     }
 
