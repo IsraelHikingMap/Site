@@ -13,6 +13,7 @@ import { Store } from "@ngxs/store";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { MapService } from "../../services/map.service";
+import { LoggingService } from "../../services/logging.service";
 import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models";
 
 @Component({
@@ -46,6 +47,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     private readonly mapComponent = inject(MapComponent);
     private readonly fileService = inject(FileService);
     private readonly mapService = inject(MapService);
+    private readonly loggingService = inject(LoggingService);
     private readonly store = inject(Store);
 
     constructor() {
@@ -165,8 +167,13 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
                 attributiuonUpdated = true;
             }
 
-            this.mapComponent.mapInstance.addSource(sourceKey, source);
-            this.jsonSourcesIds.push(sourceKey);
+            try {
+                this.mapComponent.mapInstance.addSource(sourceKey, source);
+                this.jsonSourcesIds.push(sourceKey);
+            } catch (ex) {
+                this.loggingService.warning("Failed to add source: " + sourceKey + " " + (ex as any).message);
+            }
+            
         }
         for (const layer of layers) {
             if (!this.isBaselayer() && layer.metadata && !(layer.metadata as any)["IHM:overlay"]) {
@@ -179,8 +186,12 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
                 layer.id = layerData.key + "_" + layer.id;
                 layer.source = layerData.key + "_" + layer.source;
             }
-            this.mapComponent.mapInstance.addLayer(layer, this.before());
-            this.jsonLayersIds.push(layer.id);
+            try {
+                this.mapComponent.mapInstance.addLayer(layer, this.before());
+                this.jsonLayersIds.push(layer.id);
+            } catch (ex) {
+                this.loggingService.warning("Failed to add layer: " + layer.id + " " + (ex as any).message);
+            }
         }
     }
 
