@@ -2,7 +2,7 @@ import { Component, inject } from "@angular/core";
 import { MatDialog, MatDialogActions, MatDialogClose, MatDialogTitle } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
-import { Map, MapMouseEvent, MercatorCoordinate, LngLatLike, StyleSpecification } from "maplibre-gl";
+import { type Map, type MapMouseEvent, MercatorCoordinate, type StyleSpecification } from "maplibre-gl";
 import { MatButton } from "@angular/material/button";
 import { Angulartics2OnModule } from "angulartics2";
 
@@ -25,14 +25,14 @@ import type { ApplicationState, EditableLayer } from "../../models";
 })
 export class OfflineManagementDialogComponent {
     public offlineMapStyle: StyleSpecification;
-    public center: LngLatLike;
-    public zoom: number;
     public selectedTile: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
     public inProgressTile: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
     public downloadedTiles: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
     public currentLocation: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
     public baseLayerData: EditableLayer;
     public selectedTileXY: {tileX: number; tileY: number} = null;
+
+    private map: Map;
 
     private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
     private readonly defaultStyleService = inject(DefaultStyleService);
@@ -67,7 +67,6 @@ export class OfflineManagementDialogComponent {
                 }
             }]
         }
-        this.initializeCenterAndZoomFromDownloadingTile();
         this.updateDownloadedTiles();
         this.offlineFilesDownloadService.tilesProgressChanged.subscribe((tileProgress) => {
             if (this.downloadingTileXY()) {
@@ -95,13 +94,18 @@ export class OfflineManagementDialogComponent {
             minTileY = Math.min(minTileY, tileY);
             maxTileY = Math.max(maxTileY, tileY);
         }
-        this.center = SpatialService.toCoordinate(SpatialService.fromTile({x: (minTileX + maxTileX + 1) / 2, y: (minTileY + maxTileY + 1) / 2}, TILES_ZOOM));
-        this.zoom = Math.max(1, TILES_ZOOM - Math.log2(Math.max(maxTileX - minTileX + 1, maxTileY - minTileY + 1)) - 1);
+        this.map.flyTo({
+            center: SpatialService.toCoordinate(SpatialService.fromTile({x: (minTileX + maxTileX + 1) / 2, y: (minTileY + maxTileY + 1) / 2}, TILES_ZOOM)),
+            zoom: Math.max(1, TILES_ZOOM - Math.log2(Math.max(maxTileX - minTileX + 1, maxTileY - minTileY + 1)) - 1)
+        });
     }
 
     public async downloadSelected() {
         const { tileX, tileY } = this.selectedTileXY;
-        this.center = SpatialService.toCoordinate(SpatialService.fromTile({x: tileX + 0.5, y: tileY + 0.5}, TILES_ZOOM));
+        this.map.flyTo({
+            center: SpatialService.toCoordinate(SpatialService.fromTile({x: tileX + 0.5, y: tileY + 0.5}, TILES_ZOOM)),
+            zoom: TILES_ZOOM
+        });
         this.selectedTileXY = null;
         this.updateDownloadedTiles();
         this.updateSelectedTile();
@@ -228,13 +232,17 @@ export class OfflineManagementDialogComponent {
         this.selectedTileXY = { tileX, tileY };
         this.updateSelectedTile();
         this.updateDownloadedTiles();
-        this.center = SpatialService.toCoordinate(SpatialService.fromTile({x: tileX + 0.5, y: tileY + 0.5}, TILES_ZOOM));
-        this.zoom = TILES_ZOOM;
+        this.map.flyTo({
+            center: SpatialService.toCoordinate(SpatialService.fromTile({x: tileX + 0.5, y: tileY + 0.5}, TILES_ZOOM)),
+            zoom: TILES_ZOOM
+        });
     }
 
     public onMapLoad(map: Map) {
-        map.dragRotate.disable();
-        map.touchZoomRotate.disableRotation();
+        this.map = map;
+        this.map.dragRotate.disable();
+        this.map.touchZoomRotate.disableRotation();
+        this.initializeCenterAndZoomFromDownloadingTile();
     }
 
     public isSelectedAvailableForOffline(): boolean {

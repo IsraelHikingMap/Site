@@ -8,8 +8,6 @@
       <!--[maxZoom]="6"-->
       <mgl-map
         [style]="offlineMapStyle"
-        [zoom]="zoom"
-        [center]="center"
         (mapClick)="onMapClick($event)"
         (mapLoad)="onMapLoad($event)"
         [attributionControl]="false">
