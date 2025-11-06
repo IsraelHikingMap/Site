@@ -40,7 +40,7 @@ import type {
     UpdateablePublicPoiData
 } from "../models";
 
-export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite"
+export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite" | "Bench"
 
 export type PoiSocialLinks = {
     poiLink: string;

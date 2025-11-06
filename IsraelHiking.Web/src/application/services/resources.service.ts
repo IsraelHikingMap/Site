@@ -461,6 +461,7 @@ export class ResourcesService {
     public legendBeach: string;
     public legendCemetery: string;
     public legendQuarry: string;
+    public legendBench: string;
     public legendEmpty: string;
 
     public async initialize() {
@@ -480,7 +481,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1761813596673");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1762444351276");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -943,6 +944,7 @@ export class ResourcesService {
         this.legendCemetery = this.gettextCatalog.getString("Cemetery");
         this.legendQuarry = this.gettextCatalog.getString("Quarry");
         this.legendConstructionSite = this.gettextCatalog.getString("Construction Site");
+        this.legendBench = this.gettextCatalog.getString("Bench");
         this.legendEmpty = this.gettextCatalog.getString("No legend for this map...");
 
         this.setRtl(language.rtl);

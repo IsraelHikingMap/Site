@@ -54,10 +54,16 @@
                 </button>
             </div>
             <div class="w-1/2">
-                <button mat-button matDialogClose class="h-full! w-full" (click)="addComplexPoint()" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add complex point to OSM">
-                    {{resources.more}}
+                <button mat-button matDialogClose class="w-full p-0! h-unset" (click)="addSimplePoint('Bench')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add bench to OSM">
+                    <i class="fa icon-bench" [style.color]="'#734a08'"></i><br />
+                    {{resources.legendBench}}
                 </button>
             </div>
+        </div>
+        <div class="flex flex-row">
+            <button mat-button matDialogClose class="h-full! w-full" (click)="addComplexPoint()" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add complex point to OSM">
+                {{resources.more}}
+            </button>
         </div>
     </div>
 </div>
