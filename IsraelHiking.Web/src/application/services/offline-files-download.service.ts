@@ -225,17 +225,16 @@ export class OfflineFilesDownloadService {
     }
 
     public isTileCompatible(downloadedTile: Immutable<TileMetadataPerFile>): boolean {
-        if (Array.isArray(downloadedTile)) {
-            for (const fileDateVersion of downloadedTile as FileNameDateVersion[]) {
-                const fileVersion = fileDateVersion.version;
-                const sourceName = fileDateVersion.fileName.split("+")[0];
-                const styleVersion = this.metadata[`sources:${sourceName}:min-version`];
-                if (fileVersion && styleVersion && fileVersion.localeCompare(styleVersion, undefined, { numeric: true, sensitivity: "base" }) === -1) {
-                    return false;
-                }
+        if (!Array.isArray(downloadedTile)) {
+            return Object.keys(this.metadata).every(k => !k.includes("min-version"));
+        }
+        for (const fileDateVersion of downloadedTile as FileNameDateVersion[]) {
+            const fileVersion = fileDateVersion.version;
+            const sourceName = fileDateVersion.fileName.split("+")[0];
+            const styleVersion = this.metadata[`sources:${sourceName}:min-version`];
+            if (fileVersion && styleVersion && fileVersion.localeCompare(styleVersion, undefined, { numeric: true, sensitivity: "base" }) === -1) {
+                return false;
             }
-        } else {
-            return false;
         }
         return true;
     }
