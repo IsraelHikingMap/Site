@@ -228,6 +228,7 @@ export class OfflineManagementDialogComponent {
         this.selectedTileXY = { tileX, tileY };
         this.updateSelectedTile();
         this.updateDownloadedTiles();
+        this.center = SpatialService.toCoordinate(SpatialService.fromTile({x: tileX + 0.5, y: tileY + 0.5}, TILES_ZOOM));
     }
 
     public onMapLoad(map: Map) {
