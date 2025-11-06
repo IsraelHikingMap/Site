@@ -122,9 +122,13 @@ export class OfflineManagementDialogComponent {
                 break;
         }
 
-        this.updateInProgressTile(100);
-        this.updateDownloadedTiles();
-        this.updateSelectedTile();
+        // For some reason, sometime it gets to 100% and doesn't clear the download progress, this is a hack to prevent it...
+        setTimeout(() => {
+            this.updateInProgressTile(100);
+            this.updateDownloadedTiles();
+            this.updateSelectedTile();
+        }, 3000)
+        
     }
 
 
