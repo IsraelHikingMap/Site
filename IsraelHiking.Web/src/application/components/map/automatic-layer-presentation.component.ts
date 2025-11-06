@@ -153,6 +153,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     }
 
     private updateSourcesAndLayers(layerData: LayerData, sources: {[_: string]: SourceSpecification}, layers: LayerSpecification[]) {
+        this.loggingService.debug("Updaiting sources and layer, vis: " + this.visible() + ", main: " + this.isMainMap() + " ,sources: " + JSON.stringify(sources) + " ,layers: " + JSON.stringify(layers));
         if (!this.visible()) {
             return;
         }
