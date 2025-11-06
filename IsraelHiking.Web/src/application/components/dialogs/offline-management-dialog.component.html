@@ -5,11 +5,11 @@
   </div>
   <div mat-dialog-content>
     <div class="w-full offline-map-container">
+      <!--[maxZoom]="6"-->
       <mgl-map
         [style]="offlineMapStyle"
         [zoom]="zoom"
         [center]="center"
-        [maxZoom]="6"
         (mapClick)="onMapClick($event)"
         (mapLoad)="onMapLoad($event)"
         [attributionControl]="false">

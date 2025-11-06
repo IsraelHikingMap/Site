@@ -231,8 +231,9 @@ export class OfflineManagementDialogComponent {
     }
 
     public onMapLoad(map: Map) {
-        map.dragRotate.disable();
-        map.touchZoomRotate.disableRotation();
+        // HM TODO: bring this back
+        //map.dragRotate.disable();
+        //map.touchZoomRotate.disableRotation();
     }
 
     public isSelectedAvailableForOffline(): boolean {
