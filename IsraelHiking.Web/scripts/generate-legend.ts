@@ -1,15 +1,20 @@
 import puppeteer from 'puppeteer';
 import legendJson from '../src/content/legend/legend.json' with { type: 'json' };
+import {argv} from 'process';
 import type { Map } from 'maplibre-gl';
 
 /**
  * This script generates images for the legend items.
  * It loads the public styles from GitHub and creates images for each legend item.
- * It uses a headless browser to render the maps using MapLibre.
+ * It uses the browser to render the maps using MapLibre.
  * The images are saved in the src/content/legend folder.
+ * You can run a single image generation by providing the legend key as part of the cmd args.
  */
 const browser = await puppeteer.launch({headless: false});
-
+const specificImage = argv?.[2];
+if (specificImage) {
+    console.log("Running legend generation only for '" + specificImage + "' key.");
+}
 // This is used in the evaluate function in puppeteer to access the map instance, the definition here is to allow TypeScript to recognize the type.
 const map: Map = null;
 
@@ -63,6 +68,9 @@ async function createImages(style: string, type: string) {
             await page.waitForFunction(() => map.loaded());
             for (const legendSection of legendJson) {
                 for (let legendItem of legendSection.items) {
+                    if (specificImage && legendItem.key !== specificImage) {
+                        continue;
+                    }
                     if (width === 50 && legendItem.type !== "POI") {
                         continue;
                     }

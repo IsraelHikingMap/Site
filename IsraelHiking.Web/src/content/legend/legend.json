@@ -1010,6 +1010,17 @@
         "link": "osm-tag-link"
       },
       {
+        "key": "legendBnech",
+        "latlng": {
+          "lat": 32.846986,
+          "lng": 35.114778
+        },
+        "zoom": 18,
+        "type": "POI",
+        "osmTags": [ "amenity=bench" ],
+        "link": "osm-tag-link"
+      },
+      {
         "key": "legendCampsite",
         "latlng": {
           "lat": 30.0526671,
@@ -1018,6 +1029,17 @@
         "zoom": 16,
         "type": "POI",
         "osmTags": [ "tourism=camp_site" ],
+        "link": "osm-tag-link"
+      },
+      {
+        "key": "legendAlpinehut",
+        "latlng": {
+          "lat": 37.929233,
+          "lng": 32.290632
+        },
+        "zoom": 19,
+        "type": "POI",
+        "osmTags": [ "tourism=alpine_hut" ],
         "link": "osm-tag-link"
       },
       {
