@@ -1,5 +1,5 @@
 PODS:
-  - Capacitor (7.4.3):
+  - Capacitor (7.4.4):
     - CapacitorCordova
   - CapacitorApp (7.1.0):
     - Capacitor
@@ -9,7 +9,7 @@ PODS:
     - Capacitor
   - CapacitorCommunityScreenBrightness (7.0.0):
     - Capacitor
-  - CapacitorCordova (7.4.3)
+  - CapacitorCordova (7.4.4)
   - CapacitorDevice (7.0.2):
     - Capacitor
   - CapacitorEmailComposer (7.0.2):
@@ -18,19 +18,19 @@ PODS:
     - Capacitor
   - CapacitorTextZoom (7.0.2):
     - Capacitor
-  - CapawesomeCapacitorAppUpdate (7.0.1):
+  - CapawesomeCapacitorAppUpdate (7.2.0):
     - Capacitor
-  - CapgoBackgroundGeolocation (7.0.14):
+  - CapgoBackgroundGeolocation (7.2.4):
     - Capacitor
-  - CordovaPlugins (7.4.3):
+  - CordovaPlugins (7.4.4):
     - CapacitorCordova
   - CordovaPluginsResources (0.0.105)
-  - PurchasesHybridCommon (17.9.1):
-    - RevenueCat (= 5.41.0)
-  - RevenueCat (5.41.0)
-  - RevenuecatPurchasesCapacitor (11.2.5):
+  - PurchasesHybridCommon (17.16.0):
+    - RevenueCat (= 5.46.1)
+  - RevenueCat (5.46.1)
+  - RevenuecatPurchasesCapacitor (11.2.11):
     - Capacitor
-    - PurchasesHybridCommon (= 17.9.1)
+    - PurchasesHybridCommon (= 17.16.0)
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -87,23 +87,23 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@revenuecat/purchases-capacitor"
 
 SPEC CHECKSUMS:
-  Capacitor: 28d6c01026a9a3f7156529498ec1f389a2a28dbc
+  Capacitor: 358dd1c3fdd71d969547b17e159fd8a7736cb45f
   CapacitorApp: 26587c2ce485d88ddb39adb21cac64f8e481afe3
   CapacitorCamera: f9e54db0a18bb218a8dc360907d63aaefe9209ff
   CapacitorCommunityKeepAwake: 05c75aab989f60e621870cf03b24a144a5544c30
   CapacitorCommunityScreenBrightness: 508f3d0f79024cd8da7d063f456870a4a1932723
-  CapacitorCordova: 435121e81a2df4d0034f0fb11fcefab5104cfdb5
+  CapacitorCordova: bf648a636f3c153f652d312ae145fb508b6ffced
   CapacitorDevice: 81ae78d5d1942707caad79276badd458bf6ec603
   CapacitorEmailComposer: 47e488b85f3a4400e3b616fe56b5b9f65a4aa2f3
   CapacitorShare: be166411fa995ead2d39b104aa0aae56d8615c66
   CapacitorTextZoom: 726ff9338c1e2d2c1e1ee8a9df1189047428f2f2
-  CapawesomeCapacitorAppUpdate: d1f04c1c870388248889908cf2ca960c7fdbf0ef
-  CapgoBackgroundGeolocation: b8e98a6781cbee3f0fea347f1894f4792ba98a83
-  CordovaPlugins: 10f8b507c83a92b9e3f81dcfda2c0da2412aa4a5
+  CapawesomeCapacitorAppUpdate: 9fb16b07faaa1c86468c794e39bfedb822a1a446
+  CapgoBackgroundGeolocation: 119544441aa746d83a79643048957e35da8f4557
+  CordovaPlugins: 72fcc897e27ce47a1c1dcbd75a8d01e1350c5290
   CordovaPluginsResources: da93847212bf7b16ba770e4d6c3e7dba820174c7
-  PurchasesHybridCommon: 8e4f864f140520f14f783a43998c79b00a9f8c46
-  RevenueCat: a094ccf2d12c4778144d3a0560a8b9f6bd3a84aa
-  RevenuecatPurchasesCapacitor: 4ce9898b01d8a9d8e16fdda1c2306a5cc6c8a94f
+  PurchasesHybridCommon: 806c4cb4f287dc125d6e885a1bbf5df326e681b0
+  RevenueCat: 5615e87d418134b3087370429b17ce92eafe2354
+  RevenuecatPurchasesCapacitor: ce2e418a3aa1f78205fff509f55b9f22dd27e18a
 
 PODFILE CHECKSUM: b7071d6c4dcf65718a2f0d291094c225625c57f1
 
