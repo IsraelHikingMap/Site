@@ -82,6 +82,7 @@ export class MainMapComponent {
         setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
         this.mapService.setMap(this.mapComponent().mapInstance);
         this.mapComponent().mapInstance.doubleClickZoom.enable();
+        this.mapComponent().mapInstance._zoomLevelsToOverscale = 4;
         this.store.select((state: ApplicationState) => state.configuration.language.rtl).subscribe((rtl) => {
             const start = rtl ? "right" : "left";
             const end = rtl ? "left" : "right";
