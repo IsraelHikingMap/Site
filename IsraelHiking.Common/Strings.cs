@@ -118,7 +118,7 @@ public static class Branding
 {
     public static string SITE_NAME = "Mapeak";
 
-    public static string DESCRIPTION =  "Whether you are planning your next hike, ride drive or run, this is where you can find everything you'll need in order to plan your next outdoor visit.";
+    public static string DESCRIPTION =  "Whether you are planning your next hike, ride, drive or run, this is where you can find everything you'll need in order to plan your next outdoor visit.";
 
     public const string ROUTE_SHARE_DEFAULT_TITLE = "Mapeak Route Share";
 
