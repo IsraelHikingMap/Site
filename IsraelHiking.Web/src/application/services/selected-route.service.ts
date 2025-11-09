@@ -1,6 +1,7 @@
 import { Injectable, EventEmitter, inject } from "@angular/core";
 import { some } from "lodash-es";
 import { Store } from "@ngxs/store";
+import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
 
 import { RoutesFactory } from "./routes.factory";
@@ -105,9 +106,12 @@ export class SelectedRouteService {
     }
 
     public createRouteName(routeName: string = this.resources.route): string {
-        let index = 1;
-        routeName = routeName.replace(/(.*) \d+/, "$1");
-        let availableRouteName = `${routeName} ${index}`;
+        let availableRouteName = routeName;
+        if (routeName.match(/\d+$/)) {
+            // remove trailing numbers
+            routeName = routeName.replace(/(.*) \d+/, "$1");
+        }
+        let index = 0;
         while (some(this.routes, (route) => route.name === availableRouteName)) {
             index++;
             availableRouteName = `${routeName} ${index}`;
@@ -359,6 +363,9 @@ export class SelectedRouteService {
         if (routes.length === 1 && routes[0].segments.length === 0 && this.routes.length > 0) {
             // this is the case when the layer has markers only
             for (const marker of routes[0].markers) {
+                if (!marker.id) {
+                    marker.id = uuidv4();
+                }
                 this.store.dispatch(new AddPrivatePoiAction(this.selectedRouteId || this.routes[0].id, marker));
             }
             if (this.selectedRouteId == null) {

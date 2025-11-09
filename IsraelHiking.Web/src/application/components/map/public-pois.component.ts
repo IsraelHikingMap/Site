@@ -9,6 +9,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router } from "@angular/router";
 import { GeoJSONSourceComponent, SourceDirective, MarkersForClustersComponent, PointDirective, ClusterPointDirective, PopupComponent, MarkerComponent, LayerComponent } from "@maplibre/ngx-maplibre-gl";
 import { Store } from "@ngxs/store";
+import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
 
 import { CoordinatesComponent } from "../coordinates.component";
@@ -23,7 +24,7 @@ import { NavigateHereService } from "../../services/navigate-here.service";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import { GeoJSONUtils } from "../../services/geojson-utils";
-import type { ApplicationState, LatLngAlt, LinkData } from "../../models";
+import type { ApplicationState, LatLngAlt, LinkData, MarkerData } from "../../models";
 
 @Component({
     selector: "public-pois",
@@ -149,9 +150,10 @@ export class PublicPoisComponent implements OnInit {
         return feature.properties.poiSource === RouteStrings.COORDINATES;
     }
 
-    public addPointToRoute() {
+    public addCoordinatePointToRoute() {
         let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
-        const markerData = {
+        const markerData: MarkerData = {
+            id: uuidv4(),
             latlng: this.getSelectedFeatureLatlng(),
             title: "",
             description: "",

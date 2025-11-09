@@ -4,11 +4,13 @@ import { MatButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MAT_DIALOG_DATA, MatDialog, MatDialogTitle, MatDialogClose, MatDialogContent } from "@angular/material/dialog";
 import { Angulartics2OnModule } from "angulartics2";
+import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../../services/resources.service";
 import { PoiService, SimplePointType} from "../../services/poi.service";
 import { ToastService } from "../../services/toast.service";
 import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
+import { DeletePrivatePoiByIdAction } from "../../reducers/routes.reducer";
 import type { LatLngAlt, LinkData } from "../../models";
 
 export type AddSimplePoiDialogData = {
@@ -17,6 +19,7 @@ export type AddSimplePoiDialogData = {
     title: string;
     description: string;
     markerType: string;
+    id: string;
 };
 
 @Component({
@@ -32,6 +35,7 @@ export class AddSimplePoiDialogComponent {
     private readonly privatePoiUploaderService = inject(PrivatePoiUploaderService);
     private readonly toastService = inject(ToastService);
     private readonly data = inject<AddSimplePoiDialogData>(MAT_DIALOG_DATA);
+    private readonly store = inject(Store);
 
     public static openDialog(dialog: MatDialog, data: AddSimplePoiDialogData) {
         dialog.open(AddSimplePoiDialogComponent, { data });
@@ -39,8 +43,9 @@ export class AddSimplePoiDialogComponent {
 
     public async addSimplePoint(pointType: SimplePointType) {
         try {
-            await this.poiService.addSimplePoint(this.data.latlng, pointType);
+            await this.poiService.addSimplePoint(this.data.latlng, pointType, this.data.id);
             this.toastService.success(this.resources.dataUpdatedSuccessfullyItWillTakeTimeToSeeIt);
+            this.deleteOriginalMarkerIfEmpty();
         } catch (ex) {
             this.toastService.error(ex, this.resources.unableToSaveData);
         }
@@ -48,10 +53,18 @@ export class AddSimplePoiDialogComponent {
 
     public async addComplexPoint() {
         await this.privatePoiUploaderService.uploadPoint(
+            this.data.id,
             this.data.latlng,
             this.data.imageLink,
             this.data.title,
             this.data.description,
             this.data.markerType);
+        this.deleteOriginalMarkerIfEmpty();
+    }
+
+    private deleteOriginalMarkerIfEmpty() {
+        if (this.data.id && !this.data.title && !this.data.description && !this.data.imageLink) {
+            this.store.dispatch(new DeletePrivatePoiByIdAction(this.data.id));
+        }
     }
 }

@@ -14,6 +14,7 @@ import { SpatialService } from "./spatial.service";
 import { PmTilesService } from "./pmtiles.service";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
+import { ElevationProvider } from "./elevation.provider";
 import { Urls } from "../urls";
 import type { ApplicationState, LatLngAlt, RoutingType } from "../models";
 
@@ -27,6 +28,7 @@ export class RoutingProvider {
     private readonly pmTilesService = inject(PmTilesService);
     private readonly loggingService = inject(LoggingService);
     private readonly runningContextService = inject(RunningContextService);
+    private readonly elevationProvider = inject(ElevationProvider);
     private readonly store = inject(Store);
 
     public async getRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {
@@ -39,6 +41,7 @@ export class RoutingProvider {
                 const lng = latlngStart.lng + (latlngEnd.lng - latlngStart.lng) * (i / pointsCount);
                 latlngs.push({ lat, lng });
             }
+            await this.elevationProvider.updateHeights(latlngs);
             return latlngs;
         }
         const address = Urls.routing + "?from=" + latlngStart.lat + "," + latlngStart.lng +
@@ -56,7 +59,9 @@ export class RoutingProvider {
                     ? this.resources.routingFailedTryShorterRoute
                     : this.resources.routingFailedBuySubscription
                 );
-                return [latlngStart, latlngEnd];
+                const lngLat = [latlngStart, latlngEnd];
+                this.elevationProvider.updateHeights(lngLat);
+                return lngLat;
             }
         }
     }
@@ -109,7 +114,9 @@ export class RoutingProvider {
             throw new Error("[Routing] No route found... :-(");
         }
 
-        return route.path.map(c => SpatialService.toLatLng(c));
+        const lngLat = route.path.map(c => SpatialService.toLatLng(c));
+        await this.elevationProvider.updateHeights(lngLat);
+        return lngLat;
     }
 
     private async updateCacheAndGetFeatures(

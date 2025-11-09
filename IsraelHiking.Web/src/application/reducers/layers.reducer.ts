@@ -3,8 +3,8 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 import { orderBy, remove } from "lodash-es";
 
-import { initialState, SPECIAL_LAYERS } from "./initial-state";
-import type { LayersState, EditableLayer, Overlay, CategoriesGroupType, Category } from "../models";
+import { CATEGORIES_GROUPS, initialState, SPECIAL_LAYERS } from "./initial-state";
+import type { LayersState, EditableLayer, Overlay, CategoriesGroupType } from "../models";
 
 export class AddBaseLayerAction {
     public static type = this.prototype.constructor.name;
@@ -51,29 +51,14 @@ export class CollapseGroupAction {
     constructor(public name: string) {}
 }
 
-export class SetCategoriesGroupVisibilityAction {
+export class ToggleCategoriesGroupVisibilityAction {
     public static type = this.prototype.constructor.name;
-    constructor(public groupType: CategoriesGroupType, public visible: boolean) {}
+    constructor(public groupType: CategoriesGroupType) {}
 }
 
-export class AddCategoryAction {
+export class ToggleCategoryVisibilityAction {
     public static type = this.prototype.constructor.name;
-    constructor(public groupType: CategoriesGroupType, public category: Category) {}
-}
-
-export class UpdateCategoryAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public groupType: CategoriesGroupType, public category: Category) {}
-}
-
-export class RemoveCategoryAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public groupType: CategoriesGroupType, public categoryName: string) {}
-}
-
-export class SetCategoryVisibilityAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public name: string, public groupType: CategoriesGroupType, public visible: boolean) {}
+    constructor(public name: string, public groupType: CategoriesGroupType) {}
 }
 
 export class ToggleOfflineAction {
@@ -180,55 +165,30 @@ export class LayersReducer{
         }));
     }
 
-    @Action(AddCategoryAction)
-    public addCategory(ctx: StateContext<LayersState>, action: AddCategoryAction) {
+    @Action(ToggleCategoryVisibilityAction)
+    public setCategoryVisibility(ctx: StateContext<LayersState>, action: ToggleCategoryVisibilityAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
-            const group = lastState.categoriesGroups.find(g => g.type === action.groupType);
-            group.categories.push(action.category);
-            return lastState;
-        }));
-    }
-
-    @Action(UpdateCategoryAction)
-    public updateCategory(ctx: StateContext<LayersState>, action: UpdateCategoryAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            const group = lastState.categoriesGroups.find(g => g.type === action.groupType);
-            const categories = group.categories;
-            const categoryIndex = categories.indexOf(categories.find(c => c.name === action.category.name));
-            categories.splice(categoryIndex, 1, action.category);
-            return lastState;
-        }));
-    }
-
-    @Action(RemoveCategoryAction)
-    public removeCategory(ctx: StateContext<LayersState>, action: RemoveCategoryAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            const group = lastState.categoriesGroups.find(g => g.type === action.groupType);
-            const categoryIndex = group.categories.indexOf(group.categories.find(c => c.name === action.categoryName));
-            group.categories.splice(categoryIndex, 1);
-            return lastState;
-        }));
-    }
-
-    @Action(SetCategoryVisibilityAction)
-    public setCategoryVisibility(ctx: StateContext<LayersState>, action: SetCategoryVisibilityAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            const group = lastState.categoriesGroups.find(g => g.type === action.groupType);
-            const category = group.categories.find(c => c.name === action.name);
-            category.visible = action.visible;
-            group.visible = group.categories.some(c => c.visible);
-            return lastState;
-        }));
-    }
-
-    @Action(SetCategoriesGroupVisibilityAction)
-    public setCategoriesGroupVisibility( ctx: StateContext<LayersState>, action: SetCategoriesGroupVisibilityAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            const group = lastState.categoriesGroups.find(g => g.type === action.groupType);
-            for (const category of group.categories) {
-                category.visible = action.visible;
+            const visiblityItem = lastState.visibleCategories.find(c => c.name === action.name && c.groupType === action.groupType);
+            if (!visiblityItem) {
+                lastState.visibleCategories.push({ name: action.name, groupType: action.groupType });
+                return lastState;
             }
-            group.visible = action.visible;
+            lastState.visibleCategories.splice(lastState.visibleCategories.indexOf(visiblityItem), 1);
+            return lastState;
+        }));
+    }
+
+    @Action(ToggleCategoriesGroupVisibilityAction)
+    public setCategoriesGroupVisibility(ctx: StateContext<LayersState>, action: ToggleCategoriesGroupVisibilityAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            if (lastState.visibleCategories.some(g => g.groupType === action.groupType)) {
+                lastState.visibleCategories = lastState.visibleCategories.filter(c => c.groupType !== action.groupType);
+                return lastState;
+            }
+            const names = CATEGORIES_GROUPS.find(g => g.type === action.groupType).categories.map(c => c.name);
+            for (const name of names) {
+                lastState.visibleCategories.push({ name, groupType: action.groupType });
+            }
             return lastState;
         }));
     }

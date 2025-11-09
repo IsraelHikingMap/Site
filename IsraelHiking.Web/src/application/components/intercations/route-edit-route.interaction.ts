@@ -1,6 +1,7 @@
 import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
 import { MapMouseEvent, Map, GeoJSONSource, type Point } from "maplibre-gl";
 import { Store } from "@ngxs/store";
+import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
 
 import { SelectedRouteService } from "../../services/selected-route.service";
@@ -299,7 +300,6 @@ export class RouteEditRouteInteraction {
     private runRouting = async (startLatLng: LatLngAlt, segment: RouteSegmentData): Promise<void> => {
         segment.routePoint = this.getSnappingForRoute(segment.routePoint, []);
         const latLngs =  await this.routingProvider.getRoute(startLatLng, segment.routePoint, segment.routingType);
-        await this.elevationProvider.updateHeights(latLngs);
         segment.latlngs = latLngs as LatLngAltTime[];
         const last = latLngs[latLngs.length - 1];
         segment.routePoint = this.getSnappingForRoute(segment.routePoint, [last]);
@@ -378,6 +378,7 @@ export class RouteEditRouteInteraction {
         }
         // private POIs + Geo Location + Additional Point:
         const points = additionalLatlngs.map(l => ({
+            id: uuidv4(),
             latlng: l,
             type: "star",
             urls: [],

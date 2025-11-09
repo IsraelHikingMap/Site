@@ -15,6 +15,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { ImageGalleryService } from "../../services/image-gallery.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { ToastService } from "../../services/toast.service";
+import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import type { ApplicationState, MarkerData, LinkData } from "../../models";
 
@@ -49,8 +50,8 @@ export class PrivatePoiShowDialogComponent {
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
     private readonly dialogRef = inject(MatDialogRef);
+    private readonly privatePoiUploaderService = inject(PrivatePoiUploaderService);
     private readonly data = inject<IPrivatePoiShowDialogData>(MAT_DIALOG_DATA);
-
 
     constructor() {
 
@@ -96,14 +97,24 @@ export class PrivatePoiShowDialogComponent {
             this.toastService.warning(this.resources.loginRequired);
             return;
         }
-        AddSimplePoiDialogComponent.openDialog(this.matDialog,
-            {
+        if (this.title || this.description || this.imageLink) {
+            await this.privatePoiUploaderService.uploadPoint(
+                this.marker.id,
+                this.marker.latlng,
+                this.imageLink,
+                this.title,
+                this.description,
+                this.marker.type);
+        } else {
+            AddSimplePoiDialogComponent.openDialog(this.matDialog, {
+                id: this.marker.id,
                 latlng: this.marker.latlng,
                 imageLink: this.imageLink,
                 title: this.title,
                 description: this.description,
                 markerType: this.marker.type
             });
+        }
         this.dialogRef.close();
     }
 

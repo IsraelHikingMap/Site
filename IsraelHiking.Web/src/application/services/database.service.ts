@@ -67,6 +67,7 @@ export class DatabaseService {
             traces: "id",
         });
         if (this.runningContext.isIFrame) {
+            initialState.layersState.visibleCategories = [];
             this.store.reset(initialState);
             return;
         }

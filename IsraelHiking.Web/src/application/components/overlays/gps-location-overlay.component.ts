@@ -8,6 +8,7 @@ import { Share } from "@capacitor/share";
 import { Angulartics2OnModule } from "angulartics2";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
+import { v4 as uuidv4 } from "uuid";
 
 import { CoordinatesComponent } from "../coordinates.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
@@ -20,7 +21,7 @@ import { ToastService } from "../../services/toast.service";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import { ToggleDistanceAction } from "../../reducers/in-memory.reducer";
 import { AddRecordingPoiAction } from "../../reducers/recorded-route.reducer";
-import type { ApplicationState, LatLngAlt, LinkData } from "../../models";
+import type { ApplicationState, LatLngAlt, LinkData, MarkerData } from "../../models";
 
 @Component({
     selector: "gps-location-overlay",
@@ -50,7 +51,8 @@ export class GpsLocationOverlayComponent {
     }
 
     public addPointToRoute() {
-        const markerData = {
+        const markerData: MarkerData = {
+            id: uuidv4(),
             latlng: { ...this.latlng() },
             title: "",
             description: "",
@@ -77,6 +79,7 @@ export class GpsLocationOverlayComponent {
             return;
         }
         AddSimplePoiDialogComponent.openDialog(this.matDialog, {
+            id: uuidv4(),
             latlng: { ...this.latlng() },
             description: "",
             imageLink: null,

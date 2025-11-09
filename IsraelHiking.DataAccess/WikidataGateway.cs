@@ -125,12 +125,11 @@ public class WikidataGateway : IWikidataGateway
                 {FeatureAttributes.ID, b.Place.Value.Split("/").Last()},
                 {FeatureAttributes.NAME, languagesTitlesAndLinks.First().Title},
                 {FeatureAttributes.POI_SOURCE, Sources.WIKIDATA},
-                {FeatureAttributes.POI_CATEGORY, Categories.WIKIPEDIA},
+                {FeatureAttributes.POI_CATEGORY, Categories.OTHER},
                 {FeatureAttributes.POI_LANGUAGE, languagesTitlesAndLinks.First().Language},
                 {FeatureAttributes.POI_LANGUAGES, languagesTitlesAndLinks.Select(l => l.Language).ToArray()},
                 {FeatureAttributes.POI_ICON, "icon-wikipedia-w"},
                 {FeatureAttributes.POI_ICON_COLOR, "black"},
-                {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
                 {FeatureAttributes.POI_SOURCE_IMAGE_URL, WIKIDATA_LOGO}
             }) as IFeature;
             if (!string.IsNullOrWhiteSpace(b.Image?.Value))

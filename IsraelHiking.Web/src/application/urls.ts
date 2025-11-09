@@ -9,7 +9,6 @@ export class Urls {
     public static readonly translations = "translations/";
     public static readonly urls = Urls.apiBase + "urls/";
     public static readonly health = Urls.apiBase + "health/";
-    public static readonly elevation = Urls.apiBase + "elevation";
     public static readonly routing = Urls.apiBase + "routing";
     public static readonly files = Urls.apiBase + "files";
     public static readonly openFile = Urls.files + "/open";
@@ -22,7 +21,6 @@ export class Urls {
     public static readonly tracePicture = Urls.apiBase + "osm/trace/";
     public static readonly userLayers = Urls.apiBase + "userLayers/";
     public static readonly poi = Urls.apiBase + "points/";
-    public static readonly poiCategories = Urls.poi + "categories/";
     public static readonly poiClosest = Urls.poi + "closest/";
     public static readonly poiUpdates = Urls.poi + "updates/";
     public static readonly poiSimple = Urls.poi + "simple/";

@@ -87,7 +87,7 @@ public class PointsOfInterestControllerTests
     [TestMethod]
     public void CreatePointOfInterest_WrongSource_ShouldReturnBadRequest()
     {
-        var poi = new Feature(new Point(0, 0), new AttributesTable { { FeatureAttributes.POI_SOURCE, "wrong source" } });
+        var poi = new Feature(new Point(0, 0), new AttributesTable { { FeatureAttributes.POI_SOURCE, "wrong source" }, {FeatureAttributes.POI_ID, "1"} });
             
         var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as BadRequestObjectResult;
 
@@ -100,7 +100,8 @@ public class PointsOfInterestControllerTests
         var poi = new Feature(new Point(0, 0), new AttributesTable
         {
             { FeatureAttributes.POI_SOURCE, Sources.OSM },
-            { FeatureAttributes.WEBSITE, string.Join("", Enumerable.Repeat("i", 256)) }
+            { FeatureAttributes.WEBSITE, string.Join("", Enumerable.Repeat("i", 256)) },
+            { FeatureAttributes.POI_ID, "1" }
         });
             
         var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as BadRequestObjectResult;
