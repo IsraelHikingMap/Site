@@ -4,6 +4,9 @@ const config: CapacitorConfig = {
   appId: 'com.mapeak',
   appName: 'Mapeak',
   webDir: 'www',
+  server: {
+    errorPath: "/"
+  },
   cordova: {
     preferences: {
       "OAuthScheme": "mapeak"
