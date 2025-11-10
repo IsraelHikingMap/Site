@@ -6,7 +6,8 @@ const config: CapacitorConfig = {
   webDir: 'www',
   server: {
     iosScheme: "ionic",
-    androidScheme: "http"
+    androidScheme: "http",
+    errorPath: "/"
   },
   cordova: {
     preferences: {
