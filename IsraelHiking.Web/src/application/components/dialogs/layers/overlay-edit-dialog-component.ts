@@ -1,6 +1,6 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
-import { MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
+import { MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { MatButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatFormField, MatLabel, MatError } from "@angular/material/form-field";
@@ -27,19 +27,18 @@ import type { LayerData, Overlay } from "../../../models";
 export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
     private backupOverlay: Immutable<Overlay>;
 
+    private readonly data = inject<Immutable<Overlay>>(MAT_DIALOG_DATA);
+
     constructor() {
         super();
         this.title = this.resources.overlayProperties;
         this.isNew = false;
         this.isOverlay = true;
-    }
-
-    public setOverlay(layer: Immutable<Overlay>) {
         this.layerData = {
-            ...layer,
-            opacity: layer.opacity || 1.0
+            ...this.data,
+            opacity: this.data.opacity || 1.0
         };
-        this.backupOverlay = layer;
+        this.backupOverlay = this.data;
     }
 
     public removeLayer() {

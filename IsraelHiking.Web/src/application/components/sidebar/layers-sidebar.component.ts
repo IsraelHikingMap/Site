@@ -79,8 +79,7 @@ export class LayersSidebarComponent {
 
     public editBaseLayer(e: Event, layer: Immutable<EditableLayer>) {
         e.stopPropagation();
-        const dialogRef = this.dialog.open(BaseLayerEditDialogComponent, {width: "480px"});
-        dialogRef.componentInstance.setBaseLayer(layer);
+        this.dialog.open(BaseLayerEditDialogComponent, {width: "480px", data: layer});
     }
 
     public expand(groupName: string) {
@@ -102,8 +101,7 @@ export class LayersSidebarComponent {
 
     public editOverlay(e: Event, layer: Immutable<Overlay>) {
         e.stopPropagation();
-        const dialogRef = this.dialog.open(OverlayEditDialogComponent, {width: "480px"});
-        dialogRef.componentInstance.setOverlay(layer);
+        this.dialog.open(OverlayEditDialogComponent, {width: "480px", data: layer});
     }
 
     public addRoute(event: Event) {
