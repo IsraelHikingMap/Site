@@ -446,4 +446,46 @@ describe("LayersService", () => {
         
         expect(spy.calls.first().args[0]).toBeInstanceOf(RemoveOverlayAction);
     }));
+
+    it("should create url from overlay layer data and parse it", inject([LayersService, Store], (service: LayersService, store: Store) => {
+        const spy = spyOn(store, "dispatch").and.callThrough();
+        const layerData: LayerData = {
+            key: "test",
+            address: "https://example.com",
+            opacity: 1,
+            minZoom: 2,
+            maxZoom: 3,
+        };
+        const layerShareAddress = service.layerDataToAddress(layerData, true);
+        const url = new URL(layerShareAddress);
+        service.addLayerAfterNavigation(Object.fromEntries(url.searchParams.entries()));
+
+        expect(spy.calls.first().args[0]).toBeInstanceOf(AddOverlayAction);
+        expect((spy.calls.first().args[0] as AddOverlayAction).layerData.key).toBe(layerData.key);
+        expect((spy.calls.first().args[0] as AddOverlayAction).layerData.address).toBe(layerData.address);
+        expect((spy.calls.first().args[0] as AddOverlayAction).layerData.minZoom).toBe(layerData.minZoom);
+        expect((spy.calls.first().args[0] as AddOverlayAction).layerData.maxZoom).toBe(layerData.maxZoom);
+        expect((spy.calls.first().args[0] as AddOverlayAction).layerData.opacity).toBe(layerData.opacity);
+    }));
+
+    it("should create url from base layer data and parse it", inject([LayersService, Store], (service: LayersService, store: Store) => {
+        const spy = spyOn(store, "dispatch").and.callThrough();
+        const layerData: LayerData = {
+            key: "test",
+            address: "https://example.com",
+            opacity: 1,
+            minZoom: 2,
+            maxZoom: 3,
+        };
+        const layerShareAddress = service.layerDataToAddress(layerData, false);
+        const url = new URL(layerShareAddress);
+        service.addLayerAfterNavigation(Object.fromEntries(url.searchParams.entries()));
+
+        expect(spy.calls.first().args[0]).toBeInstanceOf(AddBaseLayerAction);
+        expect((spy.calls.first().args[0] as AddBaseLayerAction).layerData.key).toBe(layerData.key);
+        expect((spy.calls.first().args[0] as AddBaseLayerAction).layerData.address).toBe(layerData.address);
+        expect((spy.calls.first().args[0] as AddBaseLayerAction).layerData.minZoom).toBe(layerData.minZoom);
+        expect((spy.calls.first().args[0] as AddBaseLayerAction).layerData.maxZoom).toBe(layerData.maxZoom);
+        expect((spy.calls.first().args[0] as AddBaseLayerAction).layerData.opacity).toBe(layerData.opacity);
+    }));
 });

@@ -9,6 +9,7 @@ import { SidebarService } from "./sidebar.service";
 import { DataContainerService } from "./data-container.service";
 import { FitBoundsService } from "./fit-bounds.service";
 import { ShareUrlsService } from "./share-urls.service";
+import { LayersService } from "./layers.service";
 import { SetFileUrlAndBaseLayerAction, SetShareUrlAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, LatLngAlt } from "../models";
 
@@ -31,6 +32,7 @@ export class RouteStrings {
     public static readonly ROUTE_SHARE = `/${RouteStrings.SHARE}`;
     public static readonly ROUTE_URL = `/${RouteStrings.URL}`;
     public static readonly ROUTE_POI = `/${RouteStrings.POI}`;
+    public static readonly ROUTE_LAYER = `/layer`;
     public static readonly COORDINATES = "Coordinates";
 
     public static readonly LAT = "lat";
@@ -56,6 +58,7 @@ export class HashService {
     private readonly dataContainerService = inject(DataContainerService);
     private readonly fitBoundsService = inject(FitBoundsService);
     private readonly shareUrlsService = inject(ShareUrlsService);
+    private readonly layersService = inject(LayersService);
     private readonly store = inject(Store);
 
     constructor() {
@@ -77,6 +80,10 @@ export class HashService {
                     queryParams[RouteStrings.BASE_LAYER]);
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
                 this.sidebarService.show("public-poi");
+            } else if (this.router.url.startsWith(RouteStrings.ROUTE_LAYER)) {
+                this.layersService.addLayerAfterNavigation(queryParams);
+                this.sidebarService.show('layers');
+                this.resetAddressbar();
             } else if (this.router.url === RouteStrings.ROUTE_ROOT) {
                 this.store.dispatch(new SetFileUrlAndBaseLayerAction(null, null));
                 this.store.dispatch(new SetShareUrlAction(null));

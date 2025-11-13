@@ -1,5 +1,6 @@
 import { inject, Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
+import { Params } from "@angular/router";
 import { firstValueFrom } from "rxjs";
 import { timeout } from "rxjs/operators";
 import { Store } from "@ngxs/store";
@@ -40,8 +41,6 @@ type UserLayer = (EditableLayer | Overlay) & {
 export class LayersService {
     public static readonly MIN_ZOOM = 7;
     public static readonly MAX_NATIVE_ZOOM = 16;
-
-    private static CUSTOM_LAYER = "Custom Layer";
 
     private baseLayers: Immutable<EditableLayer[]> = [];
     private overlays: Immutable<Overlay[]> = [];
@@ -318,5 +317,32 @@ export class LayersService {
 
     private compareKeys(key1: string, key2: string): boolean {
         return key1.trim().toLowerCase() === key2.trim().toLowerCase();
+    }
+
+    public layerDataToAddress(layerData: LayerData, isOverlay: boolean) {
+        const httpParams = new HttpParams()
+            .set("key", layerData.key)
+            .set("address", encodeURIComponent(layerData.address))
+            .set("maxzoom", layerData.maxZoom)
+            .set("minzoom", layerData.minZoom)
+            .set("opacity", layerData.opacity)
+            .set("isoverlay", isOverlay);
+        return Urls.baseAddress + `/layer?` + httpParams.toString();
+    }
+
+    public addLayerAfterNavigation(queryParams: Params) {
+        const layerData: LayerData = {
+            key: queryParams["key"],
+            address: decodeURIComponent(queryParams["address"]),
+            minZoom: +queryParams["minzoom"],
+            maxZoom: +queryParams["maxzoom"],
+            opacity: +queryParams["opacity"],
+        }
+        if (queryParams["isoverlay"].toString() == 'true') {
+            this.addOverlay(layerData);
+        } else {
+            this.addBaseLayer(layerData);
+            this.selectBaseLayer(layerData.key);
+        }
     }
 }

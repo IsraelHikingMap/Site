@@ -58,6 +58,13 @@
   <div mat-dialog-actions>
     <div class="flex flex-row w-full">
       <div class="flex-1">
+        @if (isApp) {
+          <button mat-button class="w-full" matDialogClose type="button" (click)="shareLayer()"><i class="fa fa-lg icon-share-alt"></i></button>
+        } @else {
+          <button mat-button class="w-full" matDialogClose type="button" [cdkCopyToClipboard]="getShareLayerAddress()"><i class="fa fa-lg icon-share-alt"></i></button>
+        }
+      </div>
+      <div class="flex-1">
         @if (!isNew) {
           <button mat-button class="w-full" matDialogClose type="button" (click)="removeLayer()" matTooltip="{{resources.deleteLayer}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
         }
