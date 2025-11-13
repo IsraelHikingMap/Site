@@ -29,7 +29,7 @@ export class OfflineFilesDownloadService {
     private readonly pmtilesService = inject(PmTilesService);
     private readonly store = inject(Store);
 
-    private metadata: Record<string, string>;
+    private metadata: Record<string, string> = {};
     private abortController = new AbortController();
     private _currentDownloadedTile: {tileX: number, tileY: number} | null = null;
     public tilesProgressChanged = new EventEmitter<{tileX: number, tileY: number, progressValue: number}>();
@@ -44,15 +44,7 @@ export class OfflineFilesDownloadService {
             return;
         }
         try {
-            const styles: {fileName: string, content: string}[] = [];
-            for (const baseLayerUrl of [Urls.HIKING_TILES_ADDRESS, Urls.MTB_TILES_ADDRESS]) {
-                const style = await firstValueFrom(this.httpClient.get(baseLayerUrl, {responseType: "text"}).pipe(timeout(5000)));
-                styles.push({fileName: last(baseLayerUrl.split("/")), content: style});
-            }
-            this.metadata = {};
-            for (const style of styles) {
-                this.metadata = Object.assign(this.metadata, (JSON.parse(style.content) as StyleSpecification).metadata as Record<string, string>);
-            }
+            await this.downloadStyleAndUpdateMetadata();
             const needToAskToRedownload = offlineState.downloadedTiles == null || Object.values(offlineState.downloadedTiles).some(dt => !this.isTileCompatible(dt));
             if (!needToAskToRedownload) {
                 return;
@@ -61,22 +53,35 @@ export class OfflineFilesDownloadService {
                 type: "YesNo",
                 message: this.resources.reccomendOfflineDownload,
                 confirmAction: async () => {
-                    for (const styleAndContent of styles) {
-                        await this.fileService.writeStyle(styleAndContent.fileName, styleAndContent.content);
-                    }
                     OfflineManagementDialogComponent.openDialog(this.matDialog);
                 }
             });
         } catch {
             // ignore in case this happens in offline
         }
-        
+    }
+
+    private async downloadStyleAndUpdateMetadata(): Promise<{fileName: string, content: string}[]> {
+        const styles: {fileName: string, content: string}[] = [];
+        for (const baseLayerUrl of [Urls.HIKING_TILES_ADDRESS, Urls.MTB_TILES_ADDRESS]) {
+            const style = await firstValueFrom(this.httpClient.get(baseLayerUrl, {responseType: "text"}).pipe(timeout(5000)));
+            styles.push({fileName: last(baseLayerUrl.split("/")), content: style});
+        }
+        this.metadata = {};
+        for (const style of styles) {
+            this.metadata = Object.assign(this.metadata, (JSON.parse(style.content) as StyleSpecification).metadata as Record<string, string>);
+        }
+        return styles;
     }
 
     public async downloadTile(tileX: number, tileY: number): Promise<"up-to-date" | "downloaded" | "error" | "aborted"> {
         this._currentDownloadedTile = {tileX, tileY};
         this.loggingService.info("[Offline Download] Starting downloading offline files");
         try {
+            const styles = await this.downloadStyleAndUpdateMetadata();
+            for (const styleAndContent of styles) {
+                await this.fileService.writeStyle(styleAndContent.fileName, styleAndContent.content);
+            }
             const fileNamesForRoot = await this.getFilesToDownload();
             const fileNamesForTile = await this.getFilesToDownload(tileX, tileY);
             if (fileNamesForTile.length === 0 && fileNamesForRoot.length === 0) {
