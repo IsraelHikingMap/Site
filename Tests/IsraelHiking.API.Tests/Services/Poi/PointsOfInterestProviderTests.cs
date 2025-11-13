@@ -157,7 +157,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         var feature = GetValidFeature("42", Sources.OSM);
         feature.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
                                                                     "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==");
-        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, _tagsHelper.GetCategoriesByGroup(Categories.POINTS_OF_INTEREST).First().Icon);
+        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon");
         feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "he.wikipedia.org/wiki/%D7%AA%D7%9C_%D7%A9%D7%9C%D7%9D");
         feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + "1", "www.wikidata.org/wiki/Q19401334");
         _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
@@ -180,7 +180,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         var language = Languages.HEBREW;
         gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
         var feature = GetValidFeature("42", Sources.OSM);
-        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, _tagsHelper.GetCategoriesByGroup(Categories.POINTS_OF_INTEREST).First().Icon);
+        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon");
         feature.Attributes.AddOrUpdate(FeatureAttributes.NAME, " a   b  c ");
         feature.Attributes.AddOrUpdate(FeatureAttributes.DESCRIPTION, "  ");
         _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
@@ -202,7 +202,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         var language = Languages.HEBREW;
         gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
         var feature = GetValidFeature("42", Sources.OSM);
-        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, _tagsHelper.GetCategoriesByGroup(Categories.POINTS_OF_INTEREST).First().Icon);
+        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon");
         feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "https://he.m.wikipedia.org/wiki/%D7%96%D7%95%D7%94%D7%A8_(%D7%9E%D7%95%D7%A9%D7%91)");            
             
         var results = _adapter.AddFeature(feature, gateway, language).Result;
