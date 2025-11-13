@@ -51,6 +51,7 @@ export class LayersService {
     private readonly httpClient = inject(HttpClient);
     private readonly loggingService = inject(LoggingService);
     private readonly store = inject(Store);
+    private syncingPromise = Promise.resolve();
 
     constructor() {
         this.store.select((state: ApplicationState) => state.layersState.baseLayers).subscribe(b => this.baseLayers = b);
@@ -58,7 +59,7 @@ export class LayersService {
         this.store.select((state: ApplicationState) => state.layersState.selectedBaseLayerKey).subscribe(k => this.selectedBaseLayerKey = k);
         this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe((userInfo) => {
             this.userInfo = userInfo;
-            this.syncUserLayers();
+            this.syncingPromise = this.syncUserLayers();
         });
     }
 
@@ -330,7 +331,8 @@ export class LayersService {
         return Urls.baseAddress + `/layer?` + httpParams.toString();
     }
 
-    public addLayerAfterNavigation(queryParams: Params) {
+    public async addLayerAfterNavigation(queryParams: Params) {
+        await this.syncingPromise;
         const layerData: LayerData = {
             key: queryParams["key"],
             address: decodeURIComponent(queryParams["address"]),
