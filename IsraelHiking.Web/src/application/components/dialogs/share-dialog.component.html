@@ -30,9 +30,6 @@
           <textarea matInput class="w-full" rows="2" type="text" [(ngModel)]="description"></textarea>
         </mat-form-field>
       </div>
-      <div class="flex flex-row">
-        <mat-checkbox color="primary" [(ngModel)]="shareOverlays">{{resources.shareMapOverlays}}</mat-checkbox>
-      </div>
       @if (showUnhide) {
         <div class="flex flex-row">
           <mat-checkbox color="primary" [(ngModel)]="unhideRoutes">{{resources.unhideHiddenRoutes}}</mat-checkbox>
@@ -50,7 +47,7 @@
       }
       <div class="input-wrapper-spacer"></div>
       <div class="flex flex-row">
-        <button mat-raised-button class="w-full" color="primary" (click)="uploadShareUrl()" [disabled]="isLoading" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share {{updateCurrentShare ? 'update' : 'create'}}{{shareOverlays ? ' with overlays' : ''}}">{{updateCurrentShare ? resources.update : resources.generateUrlToShareWithYourFriends}}</button>
+        <button mat-raised-button class="w-full" color="primary" (click)="uploadShareUrl()" [disabled]="isLoading" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share {{updateCurrentShare ? 'update' : 'create'}}">{{updateCurrentShare ? resources.update : resources.generateUrlToShareWithYourFriends}}</button>
       </div>
     } @else {
       <div class="flex flex-row">

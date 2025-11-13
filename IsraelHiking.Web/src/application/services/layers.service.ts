@@ -302,62 +302,6 @@ export class LayersService {
         }
     }
 
-    public addExternalBaseLayer(layerData: LayerData) {
-        if (layerData == null || (layerData.address === "" && layerData.key === "")) {
-            return;
-        }
-        const baseLayer = this.baseLayers.find((baseLayerToFind) =>
-            baseLayerToFind.address.toLocaleLowerCase() === layerData.address.toLocaleLowerCase() ||
-            this.compareKeys(baseLayerToFind.key, layerData.key));
-        if (baseLayer != null) {
-            this.selectBaseLayer(baseLayer.key);
-            return;
-        }
-        let key = layerData.key;
-        if (key === "") {
-            key = LayersService.CUSTOM_LAYER + " ";
-            let index = 0;
-            let layer: EditableLayer;
-            let customName: string;
-            do {
-                index++;
-                customName = key + index.toString();
-                layer = this.baseLayers.find((baseLayerToFind) => baseLayerToFind.key === customName);
-            } while (layer != null);
-            key = customName;
-            layerData.minZoom = LayersService.MIN_ZOOM;
-            layerData.maxZoom = LayersService.MAX_NATIVE_ZOOM;
-        }
-
-        this.addBaseLayer({
-            key,
-            address: layerData.address,
-            minZoom: layerData.minZoom,
-            maxZoom: layerData.maxZoom,
-            isEditable: true,
-            isOfflineAvailable: false
-        } as EditableLayer);
-    }
-
-    public addExternalOverlays(overlays: Immutable<LayerData[]>) {
-        if (!overlays || overlays.length === 0) {
-            return;
-        }
-        for (const overlay of overlays) {
-            const addedOverlay = this.addOverlay(overlay);
-            if (!addedOverlay.visible) {
-                this.toggleOverlay(addedOverlay);
-            }
-        }
-        // hide overlays that are not part of the share:
-        for (const overlay of this.overlays) {
-            const externalOverlay = overlays.find(o => o.key === overlay.key || o.address === overlay.address);
-            if (externalOverlay == null && overlay.visible) {
-                this.toggleOverlay(overlay);
-            }
-        }
-    }
-
     public getData(): DataContainer {
         const container = {
             baseLayer: null,
