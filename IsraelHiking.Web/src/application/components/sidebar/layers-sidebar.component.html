@@ -27,6 +27,14 @@
           </div>
         </mat-panel-title>
       </mat-expansion-panel-header>
+      @for (baseLayer of defaultBaseLayers; track baseLayer.key) {
+        <div class="flex flex-row">
+          <button mat-button class="row-button flex-1 justify-start!" (click)="selectBaseLayer(baseLayer)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Select base layer {{baseLayer.key}}">
+            <span><i class="fa" [ngClass]="{'icon-eye': isBaseLayerSelected(baseLayer), 'icon-eye-slash': !isBaseLayerSelected(baseLayer)}"></i></span>
+            <span class="break-all">{{resources.translate(baseLayer.key)}}</span>
+          </button>
+        </div>
+      }
       @for (baseLayer of (baseLayers$ | async); track baseLayer.key) {
         <div class="flex flex-row">
           <button mat-button class="row-button flex-1 justify-start!" (click)="selectBaseLayer(baseLayer)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Select base layer {{baseLayer.key}}">

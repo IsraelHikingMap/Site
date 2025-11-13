@@ -14,7 +14,7 @@ import { LayersService } from "../../services/layers.service";
 import { ToastService } from "../../services/toast.service";
 import { TILES_ZOOM } from "../../services/pmtiles.service";
 import { SpatialService } from "../../services/spatial.service";
-import { HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
+import { DEFAULT_BASE_LAYERS, HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import type { ApplicationState, EditableLayer } from "../../models";
 
 @Component({
@@ -53,7 +53,7 @@ export class OfflineManagementDialogComponent {
         this.offlineMapStyle = this.defaultStyleService.getStyleWithPlaceholders();
         this.baseLayerData = this.layersService.getSelectedBaseLayer();
         if (this.baseLayerData.key !== HIKING_MAP && this.baseLayerData.key !== MTB_MAP) {
-            this.baseLayerData = {...this.store.selectSnapshot((state: ApplicationState) => state.layersState.baseLayers).find((layer) => layer.key === HIKING_MAP)};
+            this.baseLayerData = {...DEFAULT_BASE_LAYERS[0]};
         }
         const stateLocation = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
         this.currentLocation = {

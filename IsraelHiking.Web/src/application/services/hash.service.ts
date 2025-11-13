@@ -32,7 +32,7 @@ export class RouteStrings {
     public static readonly ROUTE_SHARE = `/${RouteStrings.SHARE}`;
     public static readonly ROUTE_URL = `/${RouteStrings.URL}`;
     public static readonly ROUTE_POI = `/${RouteStrings.POI}`;
-    public static readonly ROUTE_LAYER = `/layer`;
+    public static readonly ROUTE_LAYER = "/layer";
     public static readonly COORDINATES = "Coordinates";
 
     public static readonly LAT = "lat";
@@ -82,7 +82,7 @@ export class HashService {
                 this.sidebarService.show("public-poi");
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_LAYER)) {
                 this.layersService.addLayerAfterNavigation(queryParams);
-                this.sidebarService.show('layers');
+                this.sidebarService.show("layers");
                 this.resetAddressbar();
             } else if (this.router.url === RouteStrings.ROUTE_ROOT) {
                 this.store.dispatch(new SetFileUrlAndBaseLayerAction(null, null));

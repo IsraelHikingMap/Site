@@ -14,6 +14,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { MapService } from "../../services/map.service";
 import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models";
+import { DEFAULT_BASE_LAYERS } from "application/reducers/initial-state";
 
 @Component({
     selector: "auto-layer",
@@ -131,7 +132,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     }
 
     private async createJsonLayer(layerData: EditableLayer) {
-        const tryLocalStyle = this.isMainMap() && layerData.isOfflineAvailable && this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles != null;
+        const tryLocalStyle = this.isMainMap() && DEFAULT_BASE_LAYERS.some(l => l.key === layerData.key) && this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles != null;
         const response = await this.fileService.getStyleJsonContent(layerData.address, tryLocalStyle);
         const language = this.resources.getCurrentLanguageCodeSimplified();
         const styleJson = JSON.parse(JSON.stringify(response).replace(/name:he/g, `name:${language}`)) as StyleSpecification;

@@ -31,13 +31,12 @@ export abstract class LayerBaseDialogComponent {
 
     protected constructor() {
         this.layerData = {
-            minZoom: LayersService.MIN_ZOOM,
-            maxZoom: LayersService.MAX_NATIVE_ZOOM,
+            minZoom: 1,
+            maxZoom: 16,
             key: "",
             address: "",
             opacity: 1.0,
             isEditable: true,
-            isOfflineAvailable: false
         } as EditableLayer;
         
         this.location$ = this.store.select((state: ApplicationState) => state.locationState);

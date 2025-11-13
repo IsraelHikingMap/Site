@@ -213,6 +213,11 @@ export class DatabaseService {
         const storedState = deepmerge(initialState, dbState, {
             arrayMerge: (destinationArray, sourceArray) => sourceArray == null ? destinationArray : sourceArray
         });
+        if (+dbState.configuration.version < initialState.configuration.version) {
+            storedState.configuration.version = initialState.configuration.version;
+            storedState.layersState.baseLayers = initialState.layersState.baseLayers;
+            storedState.layersState.overlays = initialState.layersState.overlays;
+        }
         storedState.inMemoryState = initialState.inMemoryState;
         if (!this.runningContext.isCapacitor) {
             storedState.routes = initialState.routes;

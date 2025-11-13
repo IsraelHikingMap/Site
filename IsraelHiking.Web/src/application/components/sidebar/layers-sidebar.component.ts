@@ -29,7 +29,7 @@ import { PurchaseService } from "../../services/purchase.service";
 import { ExpandGroupAction, CollapseGroupAction } from "../../reducers/layers.reducer";
 import { ChangeRouteStateAction, BulkReplaceRoutesAction, ToggleAllRoutesAction } from "../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../reducers/route-editing.reducer";
-import { CATEGORIES_GROUPS } from "../../reducers/initial-state";
+import { DEFAULT_BASE_LAYERS, CATEGORIES_GROUPS } from "../../reducers/initial-state";
 import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGroup } from "../../models";
 
 @Component({
@@ -41,6 +41,7 @@ import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGro
 })
 export class LayersSidebarComponent {
 
+    public readonly defaultBaseLayers = DEFAULT_BASE_LAYERS;
     public baseLayers$: Observable<Immutable<EditableLayer[]>>;
     public overlays$: Observable<Immutable<Overlay[]>>;
     public categoriesGroups = CATEGORIES_GROUPS;

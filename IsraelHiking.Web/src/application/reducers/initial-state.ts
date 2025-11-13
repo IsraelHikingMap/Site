@@ -1,5 +1,5 @@
 ﻿import { Urls } from "../urls";
-import type { CategoriesGroup, Language, MutableApplicationState, RouteData, StateWithHistory } from "../models";
+import type { CategoriesGroup, EditableLayer, Language, MutableApplicationState, Overlay, RouteData, StateWithHistory } from "../models";
 
 export const HIKING_MAP = "Hiking Map";
 export const MTB_MAP = "MTB Map";
@@ -7,10 +7,6 @@ export const HIKING_TRAILS = "Hiking Trails";
 export const BICYCLE_TRAILS = "Bicycle Trails";
 export const POPULARITY_HEATMAP = "Popularity Heatmap";
 export const POINTS_OF_INTEREST = "Points of Interest";
-
-export const SPECIAL_BASELAYERS = [HIKING_MAP, MTB_MAP];
-export const SPECIAL_OVERLAYS =  [HIKING_TRAILS, BICYCLE_TRAILS, POPULARITY_HEATMAP];
-export const SPECIAL_LAYERS = [...SPECIAL_BASELAYERS, ...SPECIAL_OVERLAYS];
 
 export const AVAILABLE_LANGUAGES: Language[] = [{
         code: "en-US",
@@ -146,6 +142,26 @@ export const CATEGORIES_GROUPS: CategoriesGroup[] = [{
     }]
 }];
 
+export const DEFAULT_BASE_LAYERS: EditableLayer[] = [{
+    key: HIKING_MAP,
+    address: Urls.HIKING_TILES_ADDRESS,
+    isEditable: false,
+    minZoom: 1,
+    maxZoom: 16,
+    opacity: 1,
+    id: null
+}, {
+    key: MTB_MAP,
+    address: Urls.MTB_TILES_ADDRESS,
+    isEditable: false,
+    minZoom: 1,
+    maxZoom: 16,
+    opacity: 1,
+    id: null
+}];
+
+export const DEFAULT_OVERLAYS: Overlay[] = [];
+
 export const initialState =
     {
         configuration: {
@@ -156,7 +172,7 @@ export const initialState =
             isShowIntro: true,
             isShowKmMarker: false,
             isShowSlope: false,
-            version: "9.20",
+            version: 10,
             language: AVAILABLE_LANGUAGES.find(l => l.code === navigator.language) ?? AVAILABLE_LANGUAGES[0],
         },
         locationState: {
@@ -187,24 +203,7 @@ export const initialState =
             missingParts: null,
         },
         layersState: {
-            baseLayers: [
-                {
-                    key: HIKING_MAP,
-                    address: Urls.HIKING_TILES_ADDRESS,
-                    isEditable: false,
-                    isOfflineAvailable: true,
-                    minZoom: 1,
-                    maxZoom: 16
-                },
-                {
-                    key: MTB_MAP,
-                    address: Urls.MTB_TILES_ADDRESS,
-                    isEditable: false,
-                    isOfflineAvailable: true,
-                    minZoom: 1,
-                    maxZoom: 16
-                }
-            ],
+            baseLayers: [],
             overlays: [],
             selectedBaseLayerKey: HIKING_MAP,
             expanded: ["Base Layers", "Private Routes"],

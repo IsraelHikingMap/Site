@@ -8,8 +8,8 @@ import type { Immutable } from "immer";
 
 import { ResourcesService } from "./resources.service";
 import {
-    SPECIAL_BASELAYERS,
-    SPECIAL_OVERLAYS
+    DEFAULT_BASE_LAYERS,
+    DEFAULT_OVERLAYS
 } from "../reducers/initial-state";
 import {
     AddBaseLayerAction,
@@ -39,11 +39,8 @@ type UserLayer = (EditableLayer | Overlay) & {
 
 @Injectable()
 export class LayersService {
-    public static readonly MIN_ZOOM = 7;
-    public static readonly MAX_NATIVE_ZOOM = 16;
-
-    private baseLayers: Immutable<EditableLayer[]> = [];
-    private overlays: Immutable<Overlay[]> = [];
+    private allBaseLayers: Immutable<EditableLayer[]> = [];
+    private allOverlays: Immutable<Overlay[]> = [];
     private userInfo: Immutable<UserInfo>;
     private selectedBaseLayerKey: Immutable<string>;
 
@@ -54,8 +51,12 @@ export class LayersService {
     private syncingPromise = Promise.resolve();
 
     constructor() {
-        this.store.select((state: ApplicationState) => state.layersState.baseLayers).subscribe(b => this.baseLayers = b);
-        this.store.select((state: ApplicationState) => state.layersState.overlays).subscribe(o => this.overlays = o);
+        this.store.select((state: ApplicationState) => state.layersState.baseLayers).subscribe(userBaseLayers => {
+            this.allBaseLayers = [...DEFAULT_BASE_LAYERS, ...userBaseLayers];
+        });
+        this.store.select((state: ApplicationState) => state.layersState.overlays).subscribe(userOverlays => {
+            this.allOverlays = [...DEFAULT_OVERLAYS, ...userOverlays];
+        });
         this.store.select((state: ApplicationState) => state.layersState.selectedBaseLayerKey).subscribe(k => this.selectedBaseLayerKey = k);
         this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe((userInfo) => {
             this.userInfo = userInfo;
@@ -68,7 +69,7 @@ export class LayersService {
     }
 
     public getSelectedBaseLayer(): EditableLayer {
-        return this.baseLayers.find(bl => this.compareKeys(bl.key, this.selectedBaseLayerKey)) || this.baseLayers[0];
+        return this.allBaseLayers.find(bl => this.compareKeys(bl.key, this.selectedBaseLayerKey)) || this.allBaseLayers[0];
     }
 
     public getSelectedBaseLayerAddressForOSM(): string {
@@ -101,9 +102,11 @@ export class LayersService {
             if (data == null) {
                 return;
             }
+            const userOverlays = this.store.selectSnapshot((state: ApplicationState) => state.layersState.overlays);
+            const userBaselayers = this.store.selectSnapshot((state: ApplicationState) => state.layersState.baseLayers);
             for (const layer of data) {
                 if (layer.isOverlay) {
-                    const existingOverlay = this.overlays.find((overlayToFind) => this.compareKeys(overlayToFind.key, layer.key));
+                    const existingOverlay = userOverlays.find((overlayToFind) => this.compareKeys(overlayToFind.key, layer.key));
                     if (existingOverlay) {
                         this.store.dispatch(new UpdateOverlayAction(layer.key, {
                                 ...existingOverlay,
@@ -114,7 +117,7 @@ export class LayersService {
                     }
                     this.addOverlayFromData(layer, false);
                 } else {
-                    const existingBaselayer = this.baseLayers.find((baseLayerToFind) => this.compareKeys(baseLayerToFind.key, layer.key));
+                    const existingBaselayer = userBaselayers.find((baseLayerToFind) => this.compareKeys(baseLayerToFind.key, layer.key));
                     if (existingBaselayer) {
                         this.store.dispatch(new UpdateBaseLayerAction(layer.key, {
                                 ...existingBaselayer,
@@ -126,23 +129,15 @@ export class LayersService {
                     this.addBaseLayerFromData(layer);
                 }
             }
-            const overlaysToRemove = [];
-            for (const overlay of this.overlays.filter(o => o.isEditable)) {
-                if (data.find(l => l.key === overlay.key) == null) {
-                    overlaysToRemove.push(overlay);
+            for (const overlay of userOverlays) {
+                if (data.find(l => this.compareKeys(l.key, overlay.key)) == null) {
+                    this.store.dispatch(new RemoveOverlayAction(overlay.key));
                 }
             }
-            for (const toRemove of overlaysToRemove) {
-                this.store.dispatch(new RemoveOverlayAction(toRemove.key));
-            }
-            const baselayerToRemove = [];
-            for (const baselayer of this.baseLayers.filter(o => o.isEditable)) {
-                if (data.find(l => l.key === baselayer.key) == null) {
-                    baselayerToRemove.push(baselayer);
+            for (const baselayer of userBaselayers) {
+                if (data.find(l => this.compareKeys(l.key, baselayer.key)) == null) {
+                    this.store.dispatch(new RemoveBaseLayerAction(baselayer.key));
                 }
-            }
-            for (const toRemove of baselayerToRemove) {
-                this.store.dispatch(new RemoveBaseLayerAction(toRemove.key));
             }
         } catch {
             this.loggingService.warning("[Layers] Unable to sync user layer from server - using local layers");
@@ -150,7 +145,7 @@ export class LayersService {
     }
 
     public addBaseLayer(layerData: LayerData) {
-        let layer = this.baseLayers.find((layerToFind) => this.compareKeys(layerToFind.key, layerData.key));
+        let layer = this.allBaseLayers.find((layerToFind) => this.compareKeys(layerToFind.key, layerData.key));
         if (layer != null) {
             return;
         }
@@ -163,14 +158,13 @@ export class LayersService {
         const baseLayer = {
             ...layerData,
             isEditable: true,
-            isOfflineAvailable: false
         } as EditableLayer;
         this.store.dispatch(new AddBaseLayerAction(baseLayer));
         return baseLayer;
     }
 
     private async addBaseLayerToDatabase(layer: Immutable<EditableLayer>) {
-        if (SPECIAL_BASELAYERS.includes(layer.key)) {
+        if (DEFAULT_BASE_LAYERS.some(l => this.compareKeys(l.key, layer.key))) {
             return;
         }
         if (!this.userInfo) {
@@ -204,7 +198,7 @@ export class LayersService {
     }
 
     public addOverlay(layerData: LayerData): Overlay {
-        let overlay = this.overlays.find((overlayToFind) => this.compareKeys(overlayToFind.key, layerData.key));
+        let overlay = this.allOverlays.find((overlayToFind) => this.compareKeys(overlayToFind.key, layerData.key));
         if (overlay != null) {
             return overlay; // overlay exists
         }
@@ -218,14 +212,13 @@ export class LayersService {
             ...layerData,
             visible,
             isEditable: true,
-            isOfflineAvailable: false
         } as Overlay;
         this.store.dispatch(new AddOverlayAction(overlay));
         return overlay;
     }
 
     private async addOverlayToDatabase(layer: Immutable<Overlay>) {
-        if (SPECIAL_OVERLAYS.includes(layer.key)) {
+        if (DEFAULT_OVERLAYS.some(l => this.compareKeys(l.key, layer.key))) {
             return;
         }
         if (!this.userInfo) {
@@ -242,7 +235,7 @@ export class LayersService {
     }
 
     public isNameAvailable(key: string, newName: string, isOverlay: boolean): boolean {
-        const layers: Immutable<EditableLayer[]> = isOverlay ? this.overlays : this.baseLayers;
+        const layers: Immutable<EditableLayer[]> = isOverlay ? this.allOverlays : this.allBaseLayers;
         if (newName === key) {
             return true;
         }
@@ -265,7 +258,7 @@ export class LayersService {
 
     public removeBaseLayer(baseLayer: EditableLayer) {
         if (this.compareKeys(baseLayer.key, this.selectedBaseLayerKey)) {
-            this.store.dispatch(new SelectBaseLayerAction(this.baseLayers[0].key));
+            this.store.dispatch(new SelectBaseLayerAction(this.allBaseLayers[0].key));
         }
         this.store.dispatch(new RemoveBaseLayerAction(baseLayer.key));
         this.deleteUserLayerFromDatabase(baseLayer.id);
@@ -292,11 +285,11 @@ export class LayersService {
     }
 
     public isAllOverlaysHidden() {
-        return this.overlays.filter(o => o.visible).length === 0;
+        return this.allOverlays.filter(o => o.visible).length === 0;
     }
 
     public hideAllOverlays() {
-        const visibleOverlays = this.overlays.filter(o => o.visible);
+        const visibleOverlays = this.allOverlays.filter(o => o.visible);
         for (const overlay of visibleOverlays) {
             this.toggleOverlay(overlay);
         }
@@ -309,7 +302,7 @@ export class LayersService {
         } as DataContainer;
 
         container.baseLayer = this.getSelectedBaseLayer();
-        const visibleOverlays = this.overlays.filter(overlay => overlay.visible);
+        const visibleOverlays = this.allOverlays.filter(overlay => overlay.visible);
         for (const overlay of visibleOverlays) {
             container.overlays.push(overlay);
         }
@@ -328,7 +321,7 @@ export class LayersService {
             .set("minzoom", layerData.minZoom)
             .set("opacity", layerData.opacity)
             .set("isoverlay", isOverlay);
-        return Urls.baseAddress + `/layer?` + httpParams.toString();
+        return Urls.baseAddress + "/layer?" + httpParams.toString();
     }
 
     public async addLayerAfterNavigation(queryParams: Params) {
@@ -340,7 +333,7 @@ export class LayersService {
             maxZoom: +queryParams["maxzoom"],
             opacity: +queryParams["opacity"],
         }
-        if (queryParams["isoverlay"].toString() == 'true') {
+        if (queryParams["isoverlay"].toString() == "true") {
             this.addOverlay(layerData);
         } else {
             this.addBaseLayer(layerData);

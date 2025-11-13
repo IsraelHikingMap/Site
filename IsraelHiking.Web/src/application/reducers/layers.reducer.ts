@@ -1,9 +1,9 @@
 import { State, Action, StateContext } from "@ngxs/store";
 import { Injectable } from "@angular/core";
 import { produce } from "immer";
-import { orderBy, remove } from "lodash-es";
+import { orderBy } from "lodash-es";
 
-import { CATEGORIES_GROUPS, initialState, SPECIAL_LAYERS } from "./initial-state";
+import { CATEGORIES_GROUPS, initialState } from "./initial-state";
 import type { LayersState, EditableLayer, Overlay, CategoriesGroupType } from "../models";
 
 export class AddBaseLayerAction {
@@ -69,10 +69,7 @@ export class ToggleCategoryVisibilityAction {
 export class LayersReducer{
 
     private sort(layers: EditableLayer[]): EditableLayer[] {
-        let ordered = orderBy(layers, l => l.key);
-        const removed = remove(ordered, o => SPECIAL_LAYERS.indexOf(o.key) !== -1);
-        ordered = [...removed, ...ordered];
-        return ordered;
+        return orderBy(layers, l => l.key);
     }
 
     @Action(AddBaseLayerAction)
