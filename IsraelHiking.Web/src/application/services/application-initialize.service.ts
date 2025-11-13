@@ -5,6 +5,7 @@ import { Store } from "@ngxs/store";
 import { UseAppDialogComponent } from "../components/dialogs/use-app-dialog.component";
 import { FacebookWarningDialogComponent } from "../components/dialogs/facebook-warning-dialog.component";
 import { IntroDialogComponent } from "../components/dialogs/intro-dialog.component";
+import { MigrateToMapeakDialogComponent } from "../components/dialogs/migrate-to-mapeak-dialog.component";
 import { LoggingService } from "./logging.service";
 import { ScreenService } from "./screen.service";
 import { DatabaseService } from "./database.service";
@@ -22,13 +23,12 @@ import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { GeoLocationService } from "./geo-location.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
-import { AuthorizationService } from "./authorization.service";
-import { ToastService } from "./toast.service";
 import { ApplicationUpdateService } from "./application-update.service";
 import { LocationService } from "./location.service";
 import { HashService } from "./hash.service";
 import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import type { ApplicationState } from "../models";
+
 
 @Injectable()
 export class ApplicationInitializeService {
@@ -51,11 +51,9 @@ export class ApplicationInitializeService {
     private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
     private readonly geoLocationService = inject(GeoLocationService);
     private readonly overpassTurboService = inject(OverpassTurboService);
-    private readonly authorizationService = inject(AuthorizationService);
     private readonly applicationUpdateService = inject(ApplicationUpdateService);
     private readonly locationService = inject(LocationService);
     private readonly hashService = inject(HashService);
-    private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
     private readonly angulartics = inject(Angulartics2GoogleGlobalSiteTag);
 
@@ -63,8 +61,8 @@ export class ApplicationInitializeService {
         try {
             this.angulartics.startTracking();
             await this.loggingService.initialize();
-            await this.loggingService.info("---------------------------------------");
-            await this.loggingService.info("Starting IHM Application Initialization");
+            this.loggingService.info("---------------------------------------");
+            this.loggingService.info("Starting IHM Application Initialization");
             await this.databaseService.initialize();
             this.overpassTurboService.initialize();
             this.screenService.initialize();
@@ -76,7 +74,9 @@ export class ApplicationInitializeService {
             this.geoLocationService.initialize();
             this.hashService.initialize();
             this.dragAndDropService.initialize();
-            if (this.runningContextService.isMobile
+            if (this.runningContextService.isIos && this.runningContextService.isCapacitor) {
+                MigrateToMapeakDialogComponent.openDialog(this.dialog);
+            } else if (this.runningContextService.isMobile
                 && !this.runningContextService.isCapacitor
                 && !this.runningContextService.isIFrame) {
                     if (this.runningContextService.isFacebook) {

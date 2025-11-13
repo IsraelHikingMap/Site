@@ -253,6 +253,7 @@ export class ResourcesService {
     public noDescriptionAvailableInYourLanguage: string;
     public translatedBy: string;
     public clickToTranslate: string;
+    public endOfLife: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -479,7 +480,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1761813596673");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1763019951061");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -713,6 +714,7 @@ export class ResourcesService {
         this.noDescriptionAvailableInYourLanguage = this.gettextCatalog.getString("No description available in your language");
         this.translatedBy = this.gettextCatalog.getString("Translated by LibreTranslate, click to view original text");
         this.clickToTranslate = this.gettextCatalog.getString("Click to translate");
+        this.endOfLife = this.gettextCatalog.getString("IHM end of life for iOS");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
