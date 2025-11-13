@@ -59,8 +59,8 @@ export class ApplicationInitializeService {
         try {
             this.angulartics.startTracking();
             await this.loggingService.initialize();
-            await this.loggingService.info("---------------------------------------");
-            await this.loggingService.info("Starting Mapeak Application Initialization");
+            this.loggingService.info("---------------------------------------");
+            this.loggingService.info("Starting Mapeak Application Initialization");
             await this.databaseService.initialize();
             this.overpassTurboService.initialize();
             this.screenService.initialize();
