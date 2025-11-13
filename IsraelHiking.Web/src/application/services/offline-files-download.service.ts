@@ -44,9 +44,12 @@ export class OfflineFilesDownloadService {
             return;
         }
         try {
-            await this.downloadStyleAndUpdateMetadata();
+            const styles = await this.downloadStyleAndUpdateMetadata();
             const needToAskToRedownload = offlineState.downloadedTiles == null || Object.values(offlineState.downloadedTiles).some(dt => !this.isTileCompatible(dt));
             if (!needToAskToRedownload) {
+                for (const styleAndContent of styles) {
+                    await this.fileService.writeStyle(styleAndContent.fileName, styleAndContent.content);
+                }
                 return;
             }
             this.toastService.confirm({
