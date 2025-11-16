@@ -41,7 +41,7 @@ export class ProgressDialogComponent {
     constructor() {
         this.isContinue = this.data.showContinueButton;
         const wrappedAction = () => {
-            this.data.action((value, text) => {
+            this.data.action((value, text = "") => {
                 this.progressPersentage = value;
                 this.text = text;
             }).then(
