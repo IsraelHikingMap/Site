@@ -10,8 +10,8 @@ android {
         applicationId "il.org.osm.israelhiking"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 920000
-        versionName "9.20.0"
+        versionCode 921000
+        versionName "9.21.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
