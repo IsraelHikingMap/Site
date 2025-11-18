@@ -4,16 +4,15 @@ import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTabGroup, MatTab } from "@angular/material/tabs";
 import { MatCard, MatCardContent } from "@angular/material/card";
-
 import { MatDivider } from "@angular/material/divider";
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from "@angular/material/expansion";
-import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import { remove } from "lodash-es";
 import { Angulartics2GoogleGlobalSiteTag, Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
 
 import { Urls } from "../../urls";
 import { ILegendItem, LegendItemComponent } from "./legend-item.component";
+import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers.service";
@@ -32,7 +31,7 @@ export type LegendSection = {
     selector: "info-sidebar",
     templateUrl: "./info-sidebar.component.html",
     styleUrls: ["./info-sidebar.component.scss"],
-    imports: [Dir, MatButton, MatTabGroup, MatTab, MatCard, MatCardContent, Angulartics2OnModule, MatDivider, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, ScrollToModule, LegendItemComponent]
+    imports: [Dir, MatButton, MatTabGroup, MatTab, MatCard, MatCardContent, Angulartics2OnModule, MatDivider, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, LegendItemComponent]
 })
 export class InfoSidebarComponent {
     public legendSections: LegendSection[] = [];
@@ -84,6 +83,10 @@ export class InfoSidebarComponent {
 
     public isMobile(): boolean {
         return this.runningContext.isMobile;
+    }
+
+    public scrollTo(sectionKey: string) {
+        ScrollToDirective.scrollTo(sectionKey, 48);
     }
 
     private initalizeLegendSections() {
