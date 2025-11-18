@@ -31,7 +31,7 @@
   <div class="flex flex-row">
     <mat-form-field class="w-full">
       <mat-label>{{resources.descriptionInLanguage}}</mat-label>
-      <textarea id="description" ngxScrollTo="description" [ngxScrollToOffset]="-56" rows="4" maxlength="255" matInput class="w-full" [dir]="resources.getDirection(info().description)" [(ngModel)]="info().description"></textarea>
+      <textarea id="description" scrollToOnClick="description" scrollToOnClickOffset="56" rows="4" maxlength="255" matInput class="w-full" [dir]="resources.getDirection(info().description)" [(ngModel)]="info().description"></textarea>
     </mat-form-field>
   </div>
   @for (url of info().urls; track url; let i = $index) {

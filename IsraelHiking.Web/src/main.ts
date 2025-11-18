@@ -32,7 +32,6 @@ import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { NgxMapLibreGLModule } from "@maplibre/ngx-maplibre-gl";
 import { provideNgIdle } from "@ng-idle/core";
 import { NgxsModule } from "@ngxs/store";
-import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import { InfiniteScrollDirective } from "ngx-infinite-scroll";
 import { progressInterceptor } from "ngx-progressbar/http";
 import { provideLottieOptions } from "ngx-lottie";
@@ -170,7 +169,6 @@ bootstrapApplication(MainMapComponent, {
             NgxMapLibreGLModule,
             InfiniteScrollDirective,
             Angulartics2Module.forRoot(), 
-            ScrollToModule.forRoot(), 
             DragDropModule,
             NgxsModule.forRoot([
                 ConfigurationReducer,
