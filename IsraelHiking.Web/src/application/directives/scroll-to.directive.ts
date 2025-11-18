@@ -1,16 +1,16 @@
-import { Directive, ElementRef, HostListener, Input } from '@angular/core';
+import { Directive, HostListener, Input } from "@angular/core";
 
 @Directive({
-  selector: '[scrollToOnClick]'
+  selector: "[scrollToOnClick]"
 })
 export class ScrollToDirective {
-  @Input('scrollToOnClick') targetId: string | undefined;
-  @Input('scrollToOnClickOffset') offset: number = 0; // New input for the offset
+  @Input("scrollToOnClick") targetId: string | undefined;
+  @Input("scrollToOnClickOffset") offset: number = 0; // New input for the offset
 
-  @HostListener('click') 
+  @HostListener("click") 
   onClick(): void {
     if (!this.targetId) {
-        console.warn(`targetId parameter is missing`);
+        console.warn("targetId parameter is missing");
         return;
     }
     ScrollToDirective.scrollTo(this.targetId, this.offset)
@@ -35,7 +35,7 @@ export class ScrollToDirective {
     const elementPositionTop = targetRect.top - containerRect.top + container.scrollTop;
     const offsetPosition = elementPositionTop - offset;
       
-    container.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+    container.scrollTo({ top: offsetPosition, behavior: "smooth" });
   }
 
   /**
@@ -54,7 +54,7 @@ export class ScrollToDirective {
 
     const overflowRegex: RegExp = /(auto|scroll|overlay)/;
 
-    if (style.position === 'fixed') {
+    if (style.position === "fixed") {
       return null;
     }
 
@@ -63,14 +63,14 @@ export class ScrollToDirective {
       parent = parent.parentElement;
       style = window.getComputedStyle(parent);
 
-      if (style.position === 'absolute'
-        || style.overflow === 'hidden'
-        || style.overflowY === 'hidden') {
+      if (style.position === "absolute"
+        || style.overflow === "hidden"
+        || style.overflowY === "hidden") {
         continue;
       }
 
       if (overflowRegex.test(style.overflow + style.overflowY)
-        || parent.tagName === 'BODY') {
+        || parent.tagName === "BODY") {
         return parent;
       }
     }
