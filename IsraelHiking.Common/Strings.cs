@@ -43,6 +43,7 @@ public static class FeatureAttributes
     public const string ID = "identifier";
     public const string NAME = "name";
     public const string MTB_NAME = "mtb:name";
+    public const string SEARCH_LANGUAGE = "search:language";
     public const string DESCRIPTION = "description";
     public const string IMAGE_URL = "image";
     public const string WEBSITE = "website";

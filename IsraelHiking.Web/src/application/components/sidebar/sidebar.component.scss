@@ -38,3 +38,39 @@
         height: 15vh;
     }
 }
+
+@keyframes sidebar-slide-ltr-in {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes sidebar-slide-ltr-out {
+    from { transform: translateX(0); }
+    to { transform: translateX(100%); }
+}
+
+@keyframes sidebar-slide-rtl-in {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes sidebar-slide-rtl-out {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+}
+
+.sidebar-enter {
+    animation: sidebar-slide-ltr-in 500ms ease-out forwards;
+}
+
+.sidebar-leave {
+    animation: sidebar-slide-ltr-out 500ms ease-out forwards;
+}
+
+.sidebar-enter[dir=rtl]  {
+    animation: sidebar-slide-rtl-in 500ms ease-out forwards;
+}
+
+.sidebar-leave[dir=rtl] {
+    animation: sidebar-slide-rtl-out 500ms ease-out forwards;
+}

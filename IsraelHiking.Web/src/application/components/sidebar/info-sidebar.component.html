@@ -59,8 +59,8 @@
       }
       <mat-accordion>
         @for (section of legendSections; track section) {
-          <mat-expansion-panel [id]="section.key" (opened)="openSection(section)">
-            <mat-expansion-panel-header [ngxScrollTo]="section.key">
+          <mat-expansion-panel [id]="section.key" (opened)="openSection(section)" (afterExpand)="scrollTo(section.key)">
+            <mat-expansion-panel-header>
               {{section.title}}
             </mat-expansion-panel-header>
             @if (isSectionOpen(section)) {

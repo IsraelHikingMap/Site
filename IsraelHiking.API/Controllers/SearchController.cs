@@ -43,7 +43,7 @@ public class SearchController : ControllerBase
             (term.EndsWith("\"") || term.EndsWith("״")))
         {
             var exactFeatures = await _searchRepository.SearchExact(term.Substring(1, term.Length - 2), language);
-            return await Task.WhenAll(exactFeatures.ToList().Select(f => ConvertFromFeature(f, language)));
+            return await Task.WhenAll(exactFeatures.ToList().Select(ConvertFromFeature));
         }
             
         if (term.Count(c => c == ',') == 1)
@@ -51,17 +51,18 @@ public class SearchController : ControllerBase
             var featuresWithinPlaces = await _searchRepository.SearchPlaces(term, language);
             if (featuresWithinPlaces.Count != 0)
             {
-                return await Task.WhenAll(featuresWithinPlaces.ToList().Select(f => ConvertFromFeature(f, language)));
+                return await Task.WhenAll(featuresWithinPlaces.ToList().Select(ConvertFromFeature));
             }
             term = term.Split(",").First().Trim();
         }
 
         var features = await _searchRepository.Search(term, language);
-        return await Task.WhenAll(features.ToList().Select(f => ConvertFromFeature(f, language)));
+        return await Task.WhenAll(features.ToList().Select(ConvertFromFeature));
     }
 
-    private async Task<SearchResultsPointOfInterest> ConvertFromFeature(IFeature feature, string language)
+    private async Task<SearchResultsPointOfInterest> ConvertFromFeature(IFeature feature)
     {
+        string language = feature.Attributes[FeatureAttributes.SEARCH_LANGUAGE].ToString();
         var title = feature.GetTitle(language);
         var geoLocation = feature.GetLocation();
         var latLng = new LatLng(geoLocation.Y,geoLocation.X);

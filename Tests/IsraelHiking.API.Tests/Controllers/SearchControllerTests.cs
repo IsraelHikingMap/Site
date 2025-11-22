@@ -36,6 +36,33 @@ public class SearchControllerTests
         Assert.IsNotNull(results);
         Assert.AreEqual(list.Count, results.Count());
     }
+
+    [TestMethod]
+    public void GetSearchResults_SearchWillReturnedDifferentLanguage_UseIt()
+    {
+        var featureLocation = new Coordinate(0, 0);
+        var feature = new Feature(new Point(featureLocation), new AttributesTable
+        {
+            {FeatureAttributes.NAME, "name"},
+            {FeatureAttributes.NAME + ":ru", "name-russian"},
+            {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
+            {FeatureAttributes.POI_SOURCE, Sources.OSM},
+            {FeatureAttributes.POI_ICON, string.Empty},
+            {FeatureAttributes.POI_ICON_COLOR, "black"},
+            {FeatureAttributes.ID, "id"},
+            {FeatureAttributes.SEARCH_LANGUAGE, Languages.RUSSIAN}
+        });
+        feature.SetLocation(featureLocation);
+        var list = new List<IFeature> {feature};
+        var searchTerm = "searchTerm";
+        _searchRepository.Search(searchTerm, Languages.ENGLISH).Returns(list);
+
+        var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result;
+
+        Assert.IsNotNull(results);
+        Assert.AreEqual(list.Count, results.Count());
+        Assert.AreEqual(results.First().Title, "name-russian");
+    }
         
     [TestMethod]
     public void GetSearchResults_UsingQuotes_ShouldGetExactMatch()
@@ -64,7 +91,8 @@ public class SearchControllerTests
             {FeatureAttributes.POI_SOURCE, Sources.OSM},
             {FeatureAttributes.POI_ICON, string.Empty},
             {FeatureAttributes.POI_ICON_COLOR, "black"},
-            {FeatureAttributes.ID, "id"}
+            {FeatureAttributes.ID, "id"},
+            {FeatureAttributes.SEARCH_LANGUAGE, Languages.ENGLISH}
         });
         featureInPlace.SetLocation(featureLocation);
         var featuresInsidePlace = new List<Feature> { featureInPlace };
@@ -102,7 +130,8 @@ public class SearchControllerTests
             {FeatureAttributes.POI_SOURCE, Sources.OSM},
             {FeatureAttributes.POI_ICON, string.Empty},
             {FeatureAttributes.POI_ICON_COLOR, "black"},
-            {FeatureAttributes.ID, "id"}
+            {FeatureAttributes.ID, "id"},
+            {FeatureAttributes.SEARCH_LANGUAGE, Languages.ENGLISH}
         });
         featureInPlace.SetLocation(featureLocation);
         var featuresInsidePlace = new List<IFeature> { featureInPlace };
@@ -141,7 +170,8 @@ public class SearchControllerTests
                 {FeatureAttributes.POI_SOURCE, Sources.OSM},
                 {FeatureAttributes.POI_ICON, string.Empty},
                 {FeatureAttributes.POI_ICON_COLOR, "black"},
-                {FeatureAttributes.ID, "id"}
+                {FeatureAttributes.ID, "id"},
+                {FeatureAttributes.SEARCH_LANGUAGE, Languages.ENGLISH}
             }
         );
         featureInPlace.SetLocation(featureLocation);
@@ -182,7 +212,8 @@ public class SearchControllerTests
                 {FeatureAttributes.POI_SOURCE, Sources.OSM},
                 {FeatureAttributes.POI_ICON, string.Empty},
                 {FeatureAttributes.POI_ICON_COLOR, "black"},
-                {FeatureAttributes.ID, "id"}
+                {FeatureAttributes.ID, "id"},
+                {FeatureAttributes.SEARCH_LANGUAGE, Languages.ENGLISH}
             }
         );
         featureInPlace.SetLocation(featureLocation);
@@ -209,7 +240,8 @@ public class SearchControllerTests
             {FeatureAttributes.POI_SOURCE, Sources.OSM},
             {FeatureAttributes.POI_ICON, string.Empty},
             {FeatureAttributes.POI_ICON_COLOR, "black"},
-            {FeatureAttributes.ID, "id"}
+            {FeatureAttributes.ID, "id"},
+            {FeatureAttributes.SEARCH_LANGUAGE, Languages.ENGLISH}
         });
         featureInPlace.SetLocation(featureLocation);
         _searchRepository.Search(searchTerm, Languages.ENGLISH).Returns([featureInPlace]);

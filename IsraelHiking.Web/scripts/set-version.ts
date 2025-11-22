@@ -12,12 +12,12 @@ const config: MobileProjectConfig = {
 
 if (process.argv.length < 4) {
     console.error("Usage: npm run set-version -- <version> <build-number>");
-    console.error("Example: npm run set-version -- 9.20.0 920000");
+    console.error("Example: npm run set-version -- 9.21.0 921000");
     process.exit(1);
 }
 
-const version = process.argv[2] || "9.20.0";
-const buildNumber = +process.argv[3] || 920000;
+const version = process.argv[2] || "9.21.0";
+const buildNumber = +process.argv[3] || 921000;
 
 console.log(`Setting version to ${version} and build number to ${buildNumber}`);
 

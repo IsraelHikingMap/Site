@@ -118,19 +118,21 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     
     private IFeature HitToFeature(IHit<PointDocument> d, string language)
     {
-        var searchTermLanguage = GetBestMatchLanguage(d.Explanation, language);
         IFeature feature = new Feature(new Point(d.Source.Location[0], d.Source.Location[1]), new AttributesTable
         {
-            { FeatureAttributes.NAME, d.Source.Name.GetValueOrDefault(searchTermLanguage, d.Source.Name.GetValueOrDefault(Languages.DEFAULT, string.Empty)) },
+            { FeatureAttributes.NAME, d.Source.Name.GetValueOrDefault(Languages.DEFAULT, string.Empty) },
             { FeatureAttributes.POI_SOURCE, d.Source.PoiSource },
             { FeatureAttributes.POI_ICON, d.Source.PoiIcon },
             { FeatureAttributes.POI_CATEGORY, d.Source.PoiCategory },
             { FeatureAttributes.POI_ICON_COLOR, d.Source.PoiIconColor },
-            { FeatureAttributes.DESCRIPTION, d.Source.Description.GetValueOrDefault(searchTermLanguage, d.Source.Description.GetValueOrDefault(Languages.DEFAULT, string.Empty)) },
+            { FeatureAttributes.DESCRIPTION, d.Source.Description.GetValueOrDefault(Languages.DEFAULT, string.Empty) },
             { FeatureAttributes.POI_ID, d.Id },
             { FeatureAttributes.POI_LANGUAGE, Languages.ALL },
             { FeatureAttributes.ID, string.Join("_", d.Id.Split("_").Skip(1)) }
         });
+        var searchTermLanguage = GetBestMatchLanguage(d.Explanation, language);
+        // This is a bit of a hack to store the lagnuage that the search found on the feature itself...
+        feature.Attributes.AddOrUpdate(FeatureAttributes.SEARCH_LANGUAGE, searchTermLanguage);
         foreach (var key in d.Source.Name.Keys.Where(k => k != Languages.DEFAULT))
         {
             feature.Attributes.AddOrUpdate("name:" + key, d.Source.Name[key]);
@@ -201,7 +203,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             .Query(q => DocumentNameSearchQuery(q, searchTerm))
             .Explain()
         );
-        return response.Hits.Select(d=> HitToFeature(d, language)).ToList();
+        return response.Hits.Select(d => HitToFeature(d, language)).ToList();
     }
         
     public async Task<List<IFeature>> SearchExact(string searchTerm, string language)
@@ -223,7 +225,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                 )
             ).Explain()
         );
-        return response.Hits.Select(d=> HitToFeature(d, language)).ToList();
+        return response.Hits.Select(d => HitToFeature(d, language)).ToList();
     }
 
     public async Task<List<IFeature>> SearchPlaces(string searchTerm, string language)

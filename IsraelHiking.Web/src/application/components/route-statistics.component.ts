@@ -1,6 +1,6 @@
-import { Component, ViewEncapsulation, OnInit, ElementRef, ChangeDetectorRef, DestroyRef, inject, viewChild } from "@angular/core";
+import { Component, ViewEncapsulation, OnInit, ElementRef, ChangeDetectorRef, DestroyRef, inject, viewChild, signal } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { NgClass, AsyncPipe, DecimalPipe } from "@angular/common";
+import { NgClass, DecimalPipe } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { MatGridList, MatGridTile } from "@angular/material/grid-list";
 import { MatTooltip } from "@angular/material/tooltip";
@@ -8,8 +8,7 @@ import { MatButton } from "@angular/material/button";
 import { Angulartics2OnModule } from "angulartics2";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { SourceDirective, GeoJSONSourceComponent, LayerComponent } from "@maplibre/ngx-maplibre-gl";
-import { trigger, style, transition, animate } from "@angular/animations";
-import { Observable, interval } from "rxjs";
+import { interval } from "rxjs";
 import { regressionLoess } from "d3-regression";
 import { LineLayerSpecification } from "maplibre-gl";
 import { Store } from "@ngxs/store";
@@ -62,19 +61,7 @@ interface IChartElements {
     templateUrl: "./route-statistics.component.html",
     styleUrls: ["./route-statistics.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    animations: [
-        trigger("animateChart", [
-            transition(":enter", [
-                style({ transform: "scale(0.2)", "transform-origin": "bottom {{start}}" }),
-                animate("200ms", style({ transform: "scale(1)", "transform-origin": "bottom {{start}}" }))
-            ], { params: { start: "right" }}),
-            transition(":leave", [
-                style({ transform: "scale(1)", "transform-origin": "bottom {{start}}" }),
-                animate("200ms", style({ transform: "scale(0.2)", "transform-origin": "bottom {{start}}" }))
-            ], { params: { start: "right" }})
-        ])
-    ],
-    imports: [Dir, NgClass, MatGridList, MatGridTile, MatTooltip, MatButton, Angulartics2OnModule, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, AsyncPipe, DecimalPipe]
+    imports: [Dir, NgClass, MatGridList, MatGridTile, MatTooltip, MatButton, Angulartics2OnModule, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, DecimalPipe]
 })
 export class RouteStatisticsComponent implements OnInit {
     private static readonly HOVER_BOX_WIDTH = 160;
@@ -94,7 +81,7 @@ export class RouteStatisticsComponent implements OnInit {
     public isSlopeOn: boolean = false;
     public isExpanded: boolean = false;
     public isTable: boolean = false;
-    public isOpen: boolean = false;
+    public isOpen = signal(false);
     public isFollowing: boolean = false;
     public kmMarkersSource: GeoJSON.FeatureCollection<GeoJSON.Point> = {
         type: "FeatureCollection",
@@ -110,7 +97,7 @@ export class RouteStatisticsComponent implements OnInit {
     };
     public subRouteRange: IChartSubRouteRange;
     public slopeRoutePaint: LineLayerSpecification["paint"] = {};
-    public statisticsVisible$: Observable<boolean>;
+    public statisticsVisible: boolean;
 
     public lineChartContainer = viewChild<ElementRef>("lineChartContainer");
 
@@ -140,7 +127,6 @@ export class RouteStatisticsComponent implements OnInit {
             this.redrawChart();
         });
         this.selectedRouteService.selectedRouteHover.pipe(takeUntilDestroyed()).subscribe(this.onSelectedRouteHover);
-        this.statisticsVisible$ = this.store.select((state: ApplicationState) => state.uiComponentsState.statisticsVisible);
     }
 
     private setViewStatisticsValues(statistics: RouteStatistics): void {
@@ -233,6 +219,10 @@ export class RouteStatisticsComponent implements OnInit {
             this.isKmMarkersOn = showKmMarkers;
             this.updateKmMarkers();
         });
+        this.store.select((state: ApplicationState) => state.uiComponentsState.statisticsVisible).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(visible => {
+            this.statisticsVisible = visible;
+            this.redrawChart();
+        });
         this.routeChanged();
         interval(1000).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
@@ -276,8 +266,8 @@ export class RouteStatisticsComponent implements OnInit {
     };
 
     public toggle(): void {
-        this.isOpen = !this.isOpen;
-        if (this.isOpen) {
+        this.isOpen.set(!this.isOpen());
+        if (this.isOpen()) {
             this.redrawChart();
         } else {
             this.clearSubRouteSelection();
@@ -294,7 +284,7 @@ export class RouteStatisticsComponent implements OnInit {
         this.updateStatistics();
         this.updateKmMarkers();
         this.updateSlopeRoute();
-        if (!this.getRouteForChart() || !this.isOpen) {
+        if (!this.getRouteForChart() || !(this.isOpen())) {
             return;
         }
         this.clearSubRouteSelection();
@@ -305,7 +295,7 @@ export class RouteStatisticsComponent implements OnInit {
 
     public redrawChart() {
         this.changeDetectorRef.detectChanges();
-        if (!this.isOpen) {
+        if (!this.isOpen()) {
             return;
         }
         if (!(this.lineChartContainer()?.nativeElement)) {
@@ -643,7 +633,7 @@ export class RouteStatisticsComponent implements OnInit {
     }
 
     private setDataToChart(data: [number, number][]) {
-        if (!this.isOpen) {
+        if (!this.isOpen()) {
             return;
         }
         const duration = 1000;
@@ -804,7 +794,7 @@ export class RouteStatisticsComponent implements OnInit {
     }
 
     private onSelectedRouteHover = (latlng: LatLngAlt) => {
-        if (!this.isOpen) {
+        if (!this.isOpen()) {
             return;
         }
         const point = this.getPointFromLatLng(latlng, null);

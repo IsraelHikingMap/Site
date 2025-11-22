@@ -1,5 +1,5 @@
-﻿@if (visible) {
-  <div class="sidebar-wrapper" [dir]="resources.direction" [@animateSidebar]="{value: '', params: {startTransform: resources.direction === 'rtl' ? 'translateX(-100%)' : 'translateX(100%)'} }">
+﻿@if (visible()) {
+  <div class="sidebar-wrapper" [dir]="resources.direction" animate.enter="sidebar-enter" animate.leave="sidebar-leave">
     @switch (viewName) {
       @case ('layers') {
         <layers-sidebar></layers-sidebar>

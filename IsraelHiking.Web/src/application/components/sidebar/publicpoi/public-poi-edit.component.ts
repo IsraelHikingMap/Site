@@ -18,14 +18,15 @@ import { PoiService, SelectableCategory } from "../../../services/poi.service";
 import { ResourcesService } from "../../../services/resources.service";
 import { SidebarService } from "../../../services/sidebar.service";
 import { ToastService } from "../../../services/toast.service";
-import { CATEGORIES_GROUPS } from "application/reducers/initial-state";
+import { ScrollToDirective } from "../../../directives/scroll-to.directive";
+import { CATEGORIES_GROUPS } from "../../../reducers/initial-state";
 import type { EditablePublicPointData, IconColorLabel } from "../../../models";
 
 @Component({
     selector: "public-poi-edit",
     templateUrl: "./public-poi-edit.component.html",
     styleUrls: ["./public-poi-edit.component.scss"],
-    imports: [Dir, MatCard, MatCardHeader, MatCardTitle, NgClass, MatFormField, MatLabel, MatInput, FormsModule, ImageScrollerComponent, MatIconButton, MatSuffix, MatButton, MatSelect, MatOption, MatTooltip, MatCheckbox, MatProgressSpinner]
+    imports: [Dir, MatCard, MatCardHeader, MatCardTitle, NgClass, MatFormField, MatLabel, MatInput, FormsModule, ImageScrollerComponent, MatIconButton, MatSuffix, MatButton, MatSelect, MatOption, MatTooltip, MatCheckbox, MatProgressSpinner, ScrollToDirective]
 })
 export class PublicPointOfInterestEditComponent implements OnInit {
 

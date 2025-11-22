@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@angular/animations": "^20.3.10",
     "@angular/cdk": "^20.2.12",
     "@angular/common": "^20.3.10",
     "@angular/compiler": "^20.3.10",
@@ -30,7 +29,6 @@
     "@maplibre/ngx-maplibre-gl": "^20.0.0",
     "@ng-idle/core": "^16.0.0",
     "@ngxs/store": "^20.1.0",
-    "@nicky-lenaers/ngx-scroll-to": "^14.0.0",
     "@revenuecat/purchases-capacitor": "^11.2.11",
     "@turf/bbox": "7.1.0",
     "@turf/bbox-polygon": "7.1.0",
@@ -158,5 +156,5 @@
     "prepare": "patch-package"
   },
   "type": "module",
-  "version": "9.20.0"
+  "version": "9.21.0"
 }

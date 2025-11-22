@@ -26,13 +26,12 @@
     padding-bottom: 5px !important;
 }
 
-    .search-result-option i {
-        padding: 0 5px 0 0;
-    }
-
-    .search-result-option[dir=rtl] i {
-        padding: 0 0 0 5px;
-    }
+.search-result-option i {
+    padding: 0 5px 0 0;
+}
+.search-result-option[dir=rtl] i {
+    padding: 0 0 0 5px;
+}
 
 @media (width > 550px) {
     .search-input-container {
