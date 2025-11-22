@@ -1,4 +1,4 @@
-﻿@if (statisticsVisible$ | async) {
+﻿@if (statisticsVisible) {
   <div class="control-container side-control maplibregl-ctrl" [dir]="resources.direction" (window:resize)="redrawChart()">
     @if (isOpen) {
       <div [@animateChart]="{value: '', params: {start: resources.start} }" class="chart-control-container" [ngClass]="{'expanded' : isExpanded, 'sidebar': isSidebarVisible() }">
