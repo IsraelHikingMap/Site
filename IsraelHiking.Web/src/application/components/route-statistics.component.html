@@ -170,36 +170,37 @@
            [paint]="{
                 'icon-color': 'black'
             }">
-  <mgl-geojson-source id="km-markers-source" [data]="kmMarkersSource"></mgl-geojson-source>
-  <mgl-layer id="km-markers-cricles"
-    type="circle"
-    source="km-markers-source"
-           [paint]="{
-            'circle-color': 'brown',
-            'circle-radius': 13,
-            'circle-opacity': 0.7
-           }">
-  </mgl-layer>
-  <mgl-layer id="km-markers-cricles-text"
-    type="symbol"
-    source="km-markers-source"
-           [layout]="{
-            'text-field': ['get', 'label'],
-            'text-font': ['Open Sans Regular']
-           }"
-           [paint]="{
-            'text-color': 'white'
-           }">
-  </mgl-layer>
+</mgl-layer>
+<mgl-geojson-source id="km-markers-source" [data]="kmMarkersSource"></mgl-geojson-source>
+<mgl-layer id="km-markers-cricles"
+  type="circle"
+  source="km-markers-source"
+          [paint]="{
+          'circle-color': 'brown',
+          'circle-radius': 13,
+          'circle-opacity': 0.7
+          }">
+</mgl-layer>
+<mgl-layer id="km-markers-cricles-text"
+  type="symbol"
+  source="km-markers-source"
+          [layout]="{
+          'text-field': ['get', 'label'],
+          'text-font': ['Open Sans Regular']
+          }"
+          [paint]="{
+          'text-color': 'white'
+          }">
+</mgl-layer>
 
-  <mgl-geojson-source id="chart-hover" [data]="chartHoverSource"></mgl-geojson-source>
-  <mgl-layer id="chart-hover-layer"
-    type="circle"
-    source="chart-hover"
-           [paint]="{
-            'circle-color': ['get', 'color'],
-            'circle-radius': 7,
-            'circle-stroke-color': 'white',
-            'circle-stroke-width': 3
-           }">
-  </mgl-layer>
+<mgl-geojson-source id="chart-hover" [data]="chartHoverSource"></mgl-geojson-source>
+<mgl-layer id="chart-hover-layer"
+  type="circle"
+  source="chart-hover"
+          [paint]="{
+          'circle-color': ['get', 'color'],
+          'circle-radius': 7,
+          'circle-stroke-color': 'white',
+          'circle-stroke-width': 3
+          }">
+</mgl-layer>
