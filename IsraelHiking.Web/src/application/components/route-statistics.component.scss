@@ -87,3 +87,37 @@ $buttons-margin: 5px;
         padding: 0 !important;
     }
 }
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.2);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes scale-out {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(0.2);
+  }
+}
+
+.chart-animated {
+  transform-origin: bottom left;
+}
+
+[dir=rtl] .chart-animated {
+    transform-origin: bottom right;
+}
+
+.chart-enter {
+  animation: scale-in 200ms ease-out forwards;
+}
+
+.chart-leave {
+  animation: scale-out 200ms ease-out forwards;
+}

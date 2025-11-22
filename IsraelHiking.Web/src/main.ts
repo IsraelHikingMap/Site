@@ -3,7 +3,6 @@ import { enableProdMode, provideAppInitializer, ErrorHandler, importProvidersFro
 import { provideHttpClient, withInterceptors } from "@angular/common/http";
 import { Title, BrowserModule, bootstrapApplication } from "@angular/platform-browser";
 import { CommonModule } from "@angular/common";
-import { provideAnimations } from "@angular/platform-browser/animations";
 import { MatDialogModule } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
 import { MatInputModule } from "@angular/material/input";
@@ -253,7 +252,6 @@ bootstrapApplication(MainMapComponent, {
             withInterceptors([osmTokenInterceptor, progressInterceptor])
         ),
         provideNgIdle(),
-        provideAnimations(),
         provideRouter([{ path: "**", component: MainMapComponent }]),
         provideLottieOptions({ player: () => player })
     ]

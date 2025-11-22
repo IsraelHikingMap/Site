@@ -1,6 +1,4 @@
-import { Component, inject } from "@angular/core";
-import { transition, trigger, style, animate } from "@angular/animations";
-
+import { Component, inject, signal } from "@angular/core";
 
 import { LayersSidebarComponent } from "./layers-sidebar.component";
 import { InfoSidebarComponent } from "./info-sidebar.component";
@@ -12,19 +10,6 @@ import { ResourcesService } from "../../services/resources.service";
     selector: "sidebar",
     templateUrl: "./sidebar.component.html",
     styleUrls: ["./sidebar.component.scss"],
-    animations: [
-        trigger("animateSidebar", [
-            transition(":enter", [
-                style({ transform: "{{startTransform}}" }),
-                animate("500ms", style({ transform: "translateX(0)" }))
-            ], { params: { startTransform: "translateX(-100%)" } }), // Default ltr
-    
-            transition(":leave", [
-                style({ transform: "translateX(0)" }),
-                animate("500ms", style({ transform: "{{startTransform}}" }))
-            ], { params: { startTransform: "translateX(-100%)" } }) // Default ltr
-        ])
-    ],
     imports: [LayersSidebarComponent, InfoSidebarComponent, PublicPoiSidebarComponent]
 })
 export class SidebarComponent {
@@ -33,13 +18,13 @@ export class SidebarComponent {
     
     private readonly sidebarService = inject(SidebarService);
 
-    public visible: boolean = false;
+    public visible = signal(false);
     public viewName: SidebarView = "";
 
     constructor() {
         this.sidebarService.sideBarStateChanged.subscribe(() => {
             this.viewName = this.sidebarService.viewName;
-            this.visible = this.sidebarService.isSidebarOpen();
+            this.visible.set(this.sidebarService.isSidebarOpen());
         });
     }
 }

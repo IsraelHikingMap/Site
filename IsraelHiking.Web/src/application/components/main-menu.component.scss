@@ -23,14 +23,15 @@
 }
 
 .eye-end {
+    float: right;
+    margin-left: 10px;
+}
+
+[dir=rtl] .eye-end {
     float: left;
     margin-right: 10px;
 }
 
-[dir=ltr] .eye-end {
-    float: right;
-    margin-left: 10px;
-}
 .circle {
     position: absolute;
     top: 1px;

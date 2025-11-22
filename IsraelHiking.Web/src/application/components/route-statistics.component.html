@@ -1,7 +1,7 @@
 ﻿@if (statisticsVisible) {
   <div class="control-container side-control maplibregl-ctrl" [dir]="resources.direction" (window:resize)="redrawChart()">
-    @if (isOpen) {
-      <div [@animateChart]="{value: '', params: {start: resources.start} }" class="chart-control-container" [ngClass]="{'expanded' : isExpanded, 'sidebar': isSidebarVisible() }">
+    @if (isOpen()) {
+      <div animate.enter="chart-enter" animate.leave="chart-leave" class="chart-control-container chart-animated" [class.expanded]="isExpanded" [class.sidebar]="isSidebarVisible()">
         @if (isTable) {
           <div class="chart-container">
             <mat-grid-list cols="3" rowHeight="fit" class="chart-table">
@@ -119,7 +119,7 @@
       </div>
     } @else {
       <div class="flex flex-row" (click)="toggle()" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Route statistics open">
-        <button mat-button [class.active]="isOpen" matTooltip="{{resources.routeStatistics}}" matTooltipPosition="above"><i class="fa {{isTable ? 'icon-table' : 'icon-area-chart'}} fa-lg"></i></button>
+        <button mat-button [class.active]="isOpen()" matTooltip="{{resources.routeStatistics}}" matTooltipPosition="above"><i class="fa {{isTable ? 'icon-table' : 'icon-area-chart'}} fa-lg"></i></button>
         @if (!isFollowing) {
           <div matTooltip="{{resources.gain}}" matTooltipPosition="above">
             <span class="control-container-item gutters"><i class="fa icon-arrow-up"></i> {{toShortNumber(gain)}} <span class="units">{{getUnits(gain)}}</span></span>
