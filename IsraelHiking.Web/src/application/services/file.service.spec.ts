@@ -214,6 +214,7 @@ describe("FileService", () => {
 
     it("Should get gpx file from URL", inject([FileService],
         async (service: FileService) => {
+        (Filesystem.readFile as jasmine.Spy).calls.reset();
         (Filesystem.readFile as jasmine.Spy).and.returnValue(Promise.resolve({ data: encode(new ArrayBuffer(0)) }));
 
         const file = await service.getFileFromUrl("some-file.gpx");
@@ -224,6 +225,7 @@ describe("FileService", () => {
 
     it("Should get kml file from URL", inject([FileService],
         async (service: FileService) => {
+        (Filesystem.readFile as jasmine.Spy).calls.reset();
         (Filesystem.readFile as jasmine.Spy).and.returnValue(Promise.resolve({ data: encode(new ArrayBuffer(0)) }));
 
         const file = await service.getFileFromUrl("some-file.kml");
@@ -234,6 +236,7 @@ describe("FileService", () => {
 
     it("Should get jpg file from URL", inject([FileService],
         async (service: FileService) => {
+        (Filesystem.readFile as jasmine.Spy).calls.reset();
         (Filesystem.readFile as jasmine.Spy).and.returnValue(Promise.resolve({ data: encode(new ArrayBuffer(0)) }));
 
         const file = await service.getFileFromUrl("some-file.jpg");
@@ -244,6 +247,7 @@ describe("FileService", () => {
 
     it("Should get file extention type from URL", inject([FileService],
         async (service: FileService) => {
+        (Filesystem.readFile as jasmine.Spy).calls.reset();
         (Filesystem.readFile as jasmine.Spy).and.returnValue(Promise.resolve({ data: encode(new ArrayBuffer(0)) }));
 
         const file = await service.getFileFromUrl("some-file.something");
@@ -386,6 +390,7 @@ describe("FileService", () => {
 
     it("Should get file from cache", inject([FileService],
         async (service: FileService) => {
+        (Filesystem.readFile as jasmine.Spy).calls.reset();
         (Filesystem.readFile as jasmine.Spy).and.returnValue(Promise.resolve({ data: encode(new ArrayBuffer(0)) }));
 
         const result = await service.getFileFromCache("file");
