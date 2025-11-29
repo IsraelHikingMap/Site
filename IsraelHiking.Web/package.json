@@ -9,7 +9,7 @@
     "@angular/platform-browser": "^20.3.10",
     "@angular/platform-browser-dynamic": "^20.3.10",
     "@angular/router": "^20.3.10",
-    "@capacitor-community/generic-oauth2": "^7.0.1",
+    "@capacitor-community/generic-oauth2": "^7.0.0",
     "@capacitor-community/keep-awake": "^7.1.0",
     "@capacitor-community/screen-brightness": "^7.0.0",
     "@capacitor/android": "^7.4.4",
