@@ -1,49 +1,43 @@
-import { inject, Injectable } from "@angular/core";
-import { File as FileSystemWrapper, IFile } from "@awesome-cordova-plugins/file/ngx";
+import { Injectable } from "@angular/core";
+import { Filesystem, Directory } from "@capacitor/filesystem";
+import { decode } from "base64-arraybuffer";
 import { Source, RangeResponse, PMTiles } from "pmtiles";
 
 class CapacitorSource implements Source {
 
-    constructor(private file: IFile) {}
+    constructor(private filePath: string, private directory: Directory) {}
 
-    getBytes(offset: number, length: number): Promise<RangeResponse> {
-        const slice = this.file.slice(offset, offset + length);
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const arrayBuffer = event.target.result as ArrayBuffer;
-                resolve({ data: arrayBuffer });
-            };
-            reader.onerror = () => {
-                reject(new Error("Unable to read file: " + this.file.name));
-            }
-            reader.readAsArrayBuffer(slice);
-        })
+    async getBytes(offset: number, length: number): Promise<RangeResponse> {
+        // Read a chunk of the file using Capacitor Filesystem
+        // Since Capacitor Filesystem doesn't support range reads directly,
+        // we need to read the whole file and slice it (or use a workaround)
+        // For better performance with large files, consider using a native plugin
+        const result = await Filesystem.readFile({
+            path: this.filePath,
+            directory: this.directory
+        });
+
+        const fullBuffer = decode(result.data as string);
+        const slicedBuffer = fullBuffer.slice(offset, offset + length);
+        return { data: slicedBuffer };
     }
 
-    getKey() { return this.file.name }
+    getKey() { return this.filePath; }
 }
 
 @Injectable()
 export class PmTilesService {
 
-    private sourcesCache = new Map<string, CapacitorSource>;
-
-    private readonly fileStsyemWrapper = inject(FileSystemWrapper);
+    private sourcesCache = new Map<string, CapacitorSource>();
 
     private async getSource(filePath: string): Promise<Source> {
         if (this.sourcesCache.has(filePath)) {
             return this.sourcesCache.get(filePath);
         }
-        const dir = await this.fileStsyemWrapper.resolveDirectoryUrl(this.fileStsyemWrapper.dataDirectory);
-        const file = await this.fileStsyemWrapper.getFile(dir, filePath, {create: false});
-        return new Promise((resolve, reject) => {
-            file.file((file) => {
-                const source = new CapacitorSource(file);
-                this.sourcesCache.set(filePath, source);
-                resolve(source);
-            }, reject);
-        });
+
+        const source = new CapacitorSource(filePath, Directory.Data);
+        this.sourcesCache.set(filePath, source);
+        return source;
     }
 
     /**

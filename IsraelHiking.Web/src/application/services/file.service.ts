@@ -1,12 +1,12 @@
 import { inject, Injectable, InjectionToken } from "@angular/core";
 import { HttpClient, HttpEventType } from "@angular/common/http";
 import { StyleSpecification } from "maplibre-gl";
-import { File as FileSystemWrapper, FileEntry } from "@awesome-cordova-plugins/file/ngx";
+import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
 import { firstValueFrom } from "rxjs";
 import { zipSync, strToU8, unzipSync, strFromU8 } from "fflate";
-import { decode } from "base64-arraybuffer";
+import { decode, encode } from "base64-arraybuffer";
 import type { saveAs as saveAsForType } from "file-saver";
 
 import { ImageResizeService } from "./image-resize.service";
@@ -32,7 +32,6 @@ export type FormatViewModel = {
 export class FileService {
 
     private readonly httpClient = inject(HttpClient);
-    private readonly fileSystemWrapper = inject(FileSystemWrapper);
     private readonly runningContextService = inject(RunningContextService);
     private readonly imageResizeService = inject(ImageResizeService);
     private readonly selectedRouteService = inject(SelectedRouteService);
@@ -113,8 +112,12 @@ export class FileService {
         try {
             if (isOffline || (this.runningContextService.isCapacitor && url.startsWith("."))) {
                 const styleFileName = last(url.split("/"));
-                const styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
-                return JSON.parse(styleText) as StyleSpecification;
+                const result = await Filesystem.readFile({
+                    path: styleFileName,
+                    directory: Directory.Data,
+                    encoding: Encoding.UTF8
+                });
+                return JSON.parse(result.data as string) as StyleSpecification;
             }
             return await firstValueFrom(this.httpClient.get<StyleSpecification>(url));
         } catch (ex) {
@@ -143,10 +146,13 @@ export class FileService {
             return;
         }
         fileName = fileName.replace(/[/\\?%*:|"<>]/g, "-");
-        await this.storeFileToCache(fileName, decode(responseData))
-        const entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(this.fileSystemWrapper.cacheDirectory + fileName);
+        await this.storeFileToCache(fileName, decode(responseData));
+        const result = await Filesystem.getUri({
+            path: fileName,
+            directory: Directory.Cache
+        });
         Share.share({
-            files: [entry.nativeURL]
+            files: [result.uri]
         });
     }
 
@@ -157,26 +163,26 @@ export class FileService {
     }
 
     public async getFileFromUrl(url: string, type?: string): Promise<File> {
-        const entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(url) as FileEntry;
-        const file = await new Promise((resolve, reject) => {
-            entry.file((fileContent) => {
-                const reader = new FileReader();
-                reader.onload = (event: any) => {
-                    type = type || this.getTypeFromUrl(url);
-                    const blob = new Blob([event.target.result], { type }) as any;
-                    blob.name = entry.name;
-                    if (blob.name.indexOf(".") === -1) {
-                        blob.name += this.getExtensionFromType(type);
-                    }
-                    resolve(blob);
-                };
-                reader.onerror = () => {
-                    reject(new Error("Unable to read file from url: " + url));
-                }
-                reader.readAsArrayBuffer(fileContent);
-            }, reject);
-        }) as File;
-        return file;
+        // Extract path from URL - handle both file:// URLs and regular paths
+        const path = url.replace(/^file:\/\//, "");
+        const fileName = last(path.split("/")) || "file";
+
+        try {
+            const result = await Filesystem.readFile({
+                path: path
+            });
+
+            type = type || this.getTypeFromUrl(url);
+            const arrayBuffer = decode(result.data as string);
+            const blob = new Blob([arrayBuffer], { type }) as any;
+            blob.name = fileName;
+            if (blob.name.indexOf(".") === -1) {
+                blob.name += this.getExtensionFromType(type);
+            }
+            return blob as File;
+        } catch (error) {
+            throw new Error("Unable to read file from url: " + url);
+        }
     }
 
     private getTypeFromUrl(url: string): string {
@@ -269,8 +275,12 @@ export class FileService {
     }
 
     public async writeStyle(styleFileName: string, styleText: string) {
-        await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, styleFileName, styleText,
-            { append: false, replace: true, truncate: 0 });
+        await Filesystem.writeFile({
+            path: styleFileName,
+            data: styleText,
+            directory: Directory.Data,
+            encoding: Encoding.UTF8
+        });
         this.loggingService.info(`[Files] Write style finished successfully: ${styleFileName}`);
     }
 
@@ -288,10 +298,27 @@ export class FileService {
     }
 
     public async storeFileToCache(fileName: string, content: string | Blob | ArrayBuffer): Promise<string> {
-        await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, content,
-            { replace: true, append: false, truncate: 0 });
-        const entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(this.fileSystemWrapper.cacheDirectory + fileName);
-        return entry.nativeURL.replace("file://", "");
+        let data: string;
+        if (typeof content === "string") {
+            data = content;
+        } else if (content instanceof Blob) {
+            const arrayBuffer = await content.arrayBuffer();
+            data = encode(arrayBuffer);
+        } else {
+            data = encode(content);
+        }
+
+        await Filesystem.writeFile({
+            path: fileName,
+            data: data,
+            directory: Directory.Cache
+        });
+
+        const result = await Filesystem.getUri({
+            path: fileName,
+            directory: Directory.Cache
+        });
+        return result.uri.replace("file://", "");
     }
 
     /**
@@ -326,8 +353,13 @@ export class FileService {
 
     public async getFileFromCache(url: string): Promise<Blob> {
         try {
-            const fileBuffer = await this.fileSystemWrapper.readAsArrayBuffer(this.fileSystemWrapper.cacheDirectory, url.split("/").pop());
-            return new Blob([fileBuffer]);
+            const fileName = url.split("/").pop();
+            const result = await Filesystem.readFile({
+                path: fileName,
+                directory: Directory.Cache
+            });
+            const arrayBuffer = decode(result.data as string);
+            return new Blob([arrayBuffer]);
         } catch {
             return null;
         }
@@ -346,6 +378,7 @@ export class FileService {
                 const reader = response.body.getReader();
                 const contentLength = Number(response.headers.get("Content-Length"));
                 let receivedLength = 0;
+                let isFirstChunk = true;
                 while (true) {
                     const { done, value } = await reader.read();
                     if (abortController.signal.aborted) {
@@ -358,10 +391,20 @@ export class FileService {
                         resolve();
                         break;
                     }
-                    if (receivedLength === 0) {
-                        await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, value.buffer, { append: false, replace: true, truncate: 0 });
+                    const base64Data = encode(value.buffer);
+                    if (isFirstChunk) {
+                        await Filesystem.writeFile({
+                            path: fileName,
+                            data: base64Data,
+                            directory: Directory.Cache
+                        });
+                        isFirstChunk = false;
                     } else {
-                        await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, value.buffer, { append: true });
+                        await Filesystem.appendFile({
+                            path: fileName,
+                            data: base64Data,
+                            directory: Directory.Cache
+                        });
                     }
                     receivedLength += value.length;
                     if (contentLength > 0) {
@@ -377,6 +420,22 @@ export class FileService {
     }
 
     public async moveFileFromCacheToDataDirectory(fileName: string): Promise<void> {
-        await this.fileSystemWrapper.moveFile(this.fileSystemWrapper.cacheDirectory, fileName, this.fileSystemWrapper.dataDirectory, fileName);
+        // First copy the file from cache to data directory
+        const sourceResult = await Filesystem.readFile({
+            path: fileName,
+            directory: Directory.Cache
+        });
+
+        await Filesystem.writeFile({
+            path: fileName,
+            data: sourceResult.data,
+            directory: Directory.Data
+        });
+
+        // Then delete the source file from cache
+        await Filesystem.deleteFile({
+            path: fileName,
+            directory: Directory.Cache
+        });
     }
 }
