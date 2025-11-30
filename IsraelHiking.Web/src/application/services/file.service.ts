@@ -123,7 +123,7 @@ export class FileService {
         } catch (ex) {
             this.loggingService.error(`[Files] Unable to get style file, isOffline: ${isOffline}, ${(ex as Error).message}`);
             return {
-                version: 8.0,
+                version: 8,
                 layers: [],
                 sources: {}
             };
