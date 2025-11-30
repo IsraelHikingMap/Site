@@ -1,7 +1,7 @@
-/// <reference types="cordova-plugin-device-orientation" />
-
 import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
 import { App } from "@capacitor/app";
+import type { PluginListenerHandle } from "@capacitor/core";
+import { CapgoCompass } from "@capgo/capacitor-compass";
 import { Store } from "@ngxs/store";
 
 import { LoggingService } from "./logging.service";
@@ -10,11 +10,10 @@ import type { ApplicationState } from "../models";
 
 @Injectable()
 export class DeviceOrientationService {
-    private static readonly THROTTLE_TIME = 500; // in milliseconds
 
     public orientationChanged = new EventEmitter<number>();
 
-    private watchId = -1;
+    private listenerHandle: PluginListenerHandle | null = null;
 
     private readonly ngZone = inject(NgZone);
     private readonly loggingService = inject(LoggingService);
@@ -32,7 +31,7 @@ export class DeviceOrientationService {
             if (state.isActive) {
                 this.startListening();
             } else {
-                this.stopListeining();
+                this.stopListening();
             }
         });
         if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking !== "disabled") {
@@ -88,24 +87,38 @@ export class DeviceOrientationService {
             return;
         }
         this.loggingService.info("[Orientation] Disabling device orientation service");
-        this.stopListeining();
+        this.stopListening();
     }
 
-    private startListening() {
-        if (this.watchId !== -1) {
-            navigator.compass.clearWatch(this.watchId);
+    private async startListening() {
+        if (this.listenerHandle) {
+            await this.listenerHandle.remove();
         }
+
+        // Check and request compass permissions (required for iOS)
+        const permissionStatus = await CapgoCompass.checkPermissions();
+        if (permissionStatus.compass !== "granted") {
+            this.loggingService.info("[Orientation] Requesting compass permissions");
+            const requestResult = await CapgoCompass.requestPermissions();
+            if (requestResult.compass !== "granted") {
+                this.loggingService.info("[Orientation] Compass permission denied");
+                return;
+            }
+        }
+
         this.loggingService.info("[Orientation] Starting to listen to device orientation events");
-        this.watchId = navigator.compass.watchHeading((d) => {
-            this.fireOrientationChange(d.magneticHeading);
-        }, () => {}, { frequency: DeviceOrientationService.THROTTLE_TIME});
+        this.listenerHandle = await CapgoCompass.addListener("headingChange", (event) => {
+            this.fireOrientationChange(event.value);
+        });
+        await CapgoCompass.startListening();
     }
 
-    private stopListeining() {
+    private async stopListening() {
         this.loggingService.info("[Orientation] Stop listening to device orientation events");
-        if (this.watchId !== -1) {
-            navigator.compass.clearWatch(this.watchId);
-            this.watchId = -1;
+        if (this.listenerHandle) {
+            await CapgoCompass.stopListening();
+            await this.listenerHandle.remove();
+            this.listenerHandle = null;
         }
     }
 }

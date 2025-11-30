@@ -9,14 +9,17 @@ const config: CapacitorConfig = {
     androidScheme: "http",
     errorPath: "/"
   },
-  cordova: {
-    preferences: {
-      "OAuthScheme": "ihm"
-    }
-  },
   plugins: {
     CapacitorSQLite: {
       iosDatabaseLocation: "Library/CapacitorDatabase"
+    },
+    GenericOAuth2: {
+      android: {
+        customScheme: "ihm"
+      },
+      ios: {
+        customScheme: "ihm"
+      }
     }
   },
   ios: {

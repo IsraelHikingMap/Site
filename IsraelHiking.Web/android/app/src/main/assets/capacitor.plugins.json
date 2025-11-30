@@ -1,5 +1,9 @@
 [
 	{
+		"pkg": "@capacitor-community/generic-oauth2",
+		"classpath": "com.byteowls.capacitor.oauth2.OAuth2ClientPlugin"
+	},
+	{
 		"pkg": "@capacitor-community/keep-awake",
 		"classpath": "com.getcapacitor.community.keepawake.KeepAwakePlugin"
 	},
@@ -20,6 +24,10 @@
 		"classpath": "com.capacitorjs.plugins.device.DevicePlugin"
 	},
 	{
+		"pkg": "@capacitor/filesystem",
+		"classpath": "com.capacitorjs.plugins.filesystem.FilesystemPlugin"
+	},
+	{
 		"pkg": "@capacitor/share",
 		"classpath": "com.capacitorjs.plugins.share.SharePlugin"
 	},
@@ -38,6 +46,10 @@
 	{
 		"pkg": "@capgo/background-geolocation",
 		"classpath": "com.capgo.capacitor_background_geolocation.BackgroundGeolocation"
+	},
+	{
+		"pkg": "@capgo/capacitor-compass",
+		"classpath": "ee.nicuz.capacitor.compass.CapgoCompassPlugin"
 	},
 	{
 		"pkg": "@revenuecat/purchases-capacitor",
