@@ -53,7 +53,7 @@ export class DataContainerService {
         this.layersService.addExternalBaseLayer(dataContainer.baseLayer);
 
         if (dataContainer.northEast != null && dataContainer.southWest != null) {
-            this.fitBoundsService.fitBounds({northEast: dataContainer.northEast, southWest: dataContainer.southWest}, true);
+            this.fitBoundsService.fitBounds({ northEast: dataContainer.northEast, southWest: dataContainer.southWest }, true);
         }
     }
 
@@ -85,6 +85,9 @@ export class DataContainerService {
     }
 
     public async setFileUrlAfterNavigation(url: string, baseLayer: string) {
+        if (this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState.fileUrl) === url) {
+            return;
+        }
         try {
             const data = await this.fileService.openFromUrl(url);
             this.store.dispatch(new SetFileUrlAndBaseLayerAction(url, baseLayer));
