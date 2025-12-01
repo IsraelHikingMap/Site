@@ -22,36 +22,50 @@ describe("DataContainerService", () => {
             providers: [
                 DataContainerService,
                 RoutesFactory,
-                { provide: ShareUrlsService, useValue: {
-                    getSelectedShareUrl: () => {},
-                    setShareUrlById: () => {},
-                    setShareUrl: () => {}
-                } },
-                { provide: LayersService, useValue: {
-                    addExternalOverlays: jasmine.createSpy(),
-                    addExternalBaseLayer: jasmine.createSpy(),
-                    getData: () => ({})
-                } },
-                { provide: FileService, useValue: {
-                    openFromUrl: () => {}
-                } },
-                { provide: ResourcesService, useValue: {} },
-                { provide: ToastService, useValue: {
-                    info: () => {},
-                    error: () => {},
-                    warning: () => {}
-                } },
-                { provide: FitBoundsService, useValue: {
-                    fitBounds: jasmine.createSpy()
-                } },
-                { provide: SelectedRouteService, useValue: {
-                    getSelectedRoute: () => null as any
-                } },
-                { provide: MapService, useValue: {
-                    map: {
-                        getBounds: () => ({ getNorthEast: () => ({ lat: 1, lng: 2 }), getSouthWest: () => ({ lat: 3, lng: 4 }) })
+                {
+                    provide: ShareUrlsService, useValue: {
+                        getSelectedShareUrl: () => { },
+                        setShareUrlById: () => { },
+                        setShareUrl: () => { }
                     }
-                } },
+                },
+                {
+                    provide: LayersService, useValue: {
+                        addExternalOverlays: jasmine.createSpy(),
+                        addExternalBaseLayer: jasmine.createSpy(),
+                        getData: () => ({})
+                    }
+                },
+                {
+                    provide: FileService, useValue: {
+                        openFromUrl: () => { }
+                    }
+                },
+                { provide: ResourcesService, useValue: {} },
+                {
+                    provide: ToastService, useValue: {
+                        info: () => { },
+                        error: () => { },
+                        warning: () => { }
+                    }
+                },
+                {
+                    provide: FitBoundsService, useValue: {
+                        fitBounds: jasmine.createSpy()
+                    }
+                },
+                {
+                    provide: SelectedRouteService, useValue: {
+                        getSelectedRoute: () => null as any
+                    }
+                },
+                {
+                    provide: MapService, useValue: {
+                        map: {
+                            getBounds: () => ({ getNorthEast: () => ({ lat: 1, lng: 2 }), getSouthWest: () => ({ lat: 3, lng: 4 }) })
+                        }
+                    }
+                },
                 { provide: RunningContextService, useValue: {} }
             ]
         });
@@ -119,11 +133,13 @@ describe("DataContainerService", () => {
     }));
 
     it("should set share URL and show toast message if not in iframe", inject([DataContainerService, ShareUrlsService, ToastService, RunningContextService, FitBoundsService], async (service: DataContainerService, shareUrlsService: ShareUrlsService, toastService: ToastService, runningContextService: RunningContextService, fitBoundsService: FitBoundsService) => {
-        const shareUrl = { id: "123", dataContainer: {
-            routes: [],
-            northEast: { lat: 1, lng: 2 },
-            southWest: { lat: 3, lng: 4 }
-        }, description: "desc", title: "title" } as ShareUrl;
+        const shareUrl = {
+            id: "123", dataContainer: {
+                routes: [],
+                northEast: { lat: 1, lng: 2 },
+                southWest: { lat: 3, lng: 4 }
+            }, description: "desc", title: "title"
+        } as ShareUrl;
         spyOn(shareUrlsService, "getSelectedShareUrl").and.returnValue(null);
         spyOn(shareUrlsService, "setShareUrlById").and.returnValue(Promise.resolve(shareUrl));
         spyOn(toastService, "info");
@@ -135,35 +151,50 @@ describe("DataContainerService", () => {
         expect(fitBoundsService.fitBounds).toHaveBeenCalled();
     }));
 
-    it("should set file url after navigation", inject([DataContainerService, FileService, ToastService], async (service: DataContainerService, fileService: FileService, toastService: ToastService) => {
+    it("should set file url after navigation", inject([DataContainerService, FileService, ToastService, Store], async (service: DataContainerService, fileService: FileService, toastService: ToastService, store: Store) => {
         spyOn(fileService, "openFromUrl").and.returnValue(Promise.resolve({} as any));
         spyOn(toastService, "warning");
+        store.reset({
+            inMemoryState: {}
+        });
         await service.setFileUrlAfterNavigation("url", "baseLayer");
 
         expect(toastService.warning).toHaveBeenCalled();
     }));
 
-    /*
-    it("should set share URL and not show toast message if in iframe", async () => {
-        runningContextService.isIFrame = true;
-        const shareUrl = { id: "123", dataContainer: {}, description: "desc", title: "title" };
-        shareUrlsService.getSelectedShareUrl.and.returnValue(null);
-        shareUrlsService.setShareUrlById.and.returnValue(Promise.resolve(shareUrl));
+    it("should not set file url after navigation if file url is already set", inject([DataContainerService, FileService, Store], async (service: DataContainerService, fileService: FileService, store: Store) => {
+        spyOn(fileService, "openFromUrl");
+        store.reset({
+            inMemoryState: {
+                fileUrl: "url"
+            }
+        });
+        await service.setFileUrlAfterNavigation("url", "baseLayer");
+
+        expect(fileService.openFromUrl).not.toHaveBeenCalled();
+    }));
+
+    it("should set share URL and not show toast message if in iframe", inject([DataContainerService, ShareUrlsService, ToastService, RunningContextService], async (service: DataContainerService, shareUrlsService: ShareUrlsService, toastService: ToastService, runningContextService: RunningContextService) => {
+        (runningContextService as any).isIFrame = true;
+        const shareUrl = { id: "123", dataContainer: {}, description: "desc", title: "title" } as ShareUrl;
+        spyOn(shareUrlsService, "getSelectedShareUrl").and.returnValue(null);
+        spyOn(shareUrlsService, "setShareUrlById").and.returnValue(Promise.resolve(shareUrl));
+        spyOn(toastService, "info");
 
         await service.setShareUrlAfterNavigation("123");
 
         expect(shareUrlsService.setShareUrlById).toHaveBeenCalledWith("123");
         expect(toastService.info).not.toHaveBeenCalled();
-    });
+    }));
 
-    it("should handle error and show toast error message", async () => {
-        shareUrlsService.getSelectedShareUrl.and.returnValue(null);
-        shareUrlsService.setShareUrlById.and.returnValue(Promise.reject("error"));
+    it("should handle error and show toast error message", inject([DataContainerService, ShareUrlsService, ToastService], async (service: DataContainerService, shareUrlsService: ShareUrlsService, toastService: ToastService) => {
+        spyOn(shareUrlsService, "getSelectedShareUrl").and.returnValue(null);
+        spyOn(shareUrlsService, "setShareUrl");
+        spyOn(toastService, "error");
 
         await service.setShareUrlAfterNavigation("123");
 
         expect(shareUrlsService.setShareUrl).toHaveBeenCalledWith(null);
         expect(toastService.error).toHaveBeenCalled();
-    });
-    */
+    }));
 });

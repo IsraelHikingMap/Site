@@ -17,13 +17,13 @@ import type {
     RoutingType
 } from "../models";
 
-interface Link {
+type Link = {
     $: { href: string };
     text: string;
     type: string;
 }
 
-interface Wpt {
+type Wpt = {
     $: { lat: string; lon: string };
     name?: string;
     ele: string;
@@ -33,43 +33,43 @@ interface Wpt {
     link?: Link[];
 }
 
-interface Rte {
+type Rte = {
     name: string;
     desc: string;
     rtept: Wpt[];
 }
 
-interface TrkSegExtension {
+type TrkSegExtension = {
     RoutingType: { _: string };
 }
 
-interface TrkSeg {
+type TrkSeg = {
     trkpt: Wpt[];
     extensions?: TrkSegExtension;
 }
 
-interface TrkExtension {
+type TrkExtension = {
     Color: { _: string };
     Opacity: { _: string };
     Weight: { _: string };
 }
 
-interface Trk {
+type Trk = {
     name: string;
     desc: string;
     trkseg: TrkSeg[];
     extensions?: TrkExtension;
 }
 
-interface Bounds {
+type Bounds = {
     $: { minlat: string; minlon: string; maxlat: string; maxlon: string };
 }
 
-interface Metadata {
+type Metadata = {
     bounds: Bounds;
 }
 
-interface Gpx {
+type Gpx = {
     trk: Trk[];
     rte: Rte[];
     wpt: Wpt[];
@@ -166,12 +166,12 @@ export class GpxDataContainerConverterService {
                     desc: escape(m.description),
                     type: m.type,
                     link: m.urls.map(u => ({
-                            $: {
-                                href: u.url
-                            },
-                            text: escape(u.text),
-                            type: u.mimeType
-                        } as Link))
+                        $: {
+                            href: u.url
+                        },
+                        text: escape(u.text),
+                        type: u.mimeType
+                    } as Link))
                 } as Wpt;
                 if (m.latlng.alt && !isNaN(m.latlng.alt)) {
                     wpt.ele = m.latlng.alt.toString();
@@ -204,31 +204,31 @@ export class GpxDataContainerConverterService {
                     }
                 },
                 trkseg: route.segments.map(s => ({
-                        trkpt: s.latlngs.map(l => {
-                            const wpt = {
-                                $: {
-                                    lat: l.lat.toString(),
-                                    lon: l.lng.toString()
-                                }
-                            } as Wpt;
-                            if (l.alt && !isNaN(l.alt)) {
-                                wpt.ele = l.alt.toString();
+                    trkpt: s.latlngs.map(l => {
+                        const wpt = {
+                            $: {
+                                lat: l.lat.toString(),
+                                lon: l.lng.toString()
                             }
-                            if (l.timestamp) {
-                                wpt.time = new Date(l.timestamp).toISOString().split(".").shift() + "Z"; // remove milliseconds
-                            }
-
-                            return wpt;
-                        }),
-                        extensions: {
-                            RoutingType: {
-                                $: {
-                                    xmlns: ""
-                                },
-                                _: s.routingType
-                            }
+                        } as Wpt;
+                        if (l.alt && !isNaN(l.alt)) {
+                            wpt.ele = l.alt.toString();
                         }
-                    } as TrkSeg))
+                        if (l.timestamp) {
+                            wpt.time = new Date(l.timestamp).toISOString().split(".").shift() + "Z"; // remove milliseconds
+                        }
+
+                        return wpt;
+                    }),
+                    extensions: {
+                        RoutingType: {
+                            $: {
+                                xmlns: ""
+                            },
+                            _: s.routingType
+                        }
+                    }
+                } as TrkSeg))
             } as Trk);
         }
         if (dataContainer.northEast && dataContainer.southWest) {
@@ -277,17 +277,17 @@ export class GpxDataContainerConverterService {
             urls: p.link.map(l => ({ mimeType: l.type || "text/html", text: l.text, url: l.$.href } as LinkData))
         } as MarkerData));
         if (markers.length > 0) {
-        if (dataContainer.routes.length === 0) {
-            const name = (markers.length === 1 ? markers[0].title : "Markers") || "Markers";
-            dataContainer.routes.push({ name, description: markers[0].description, segments: [] } as RouteData);
-        }
-        dataContainer.routes[0].markers = markers;
+            if (dataContainer.routes.length === 0) {
+                const name = (markers.length === 1 ? markers[0].title : "Markers") || "Markers";
+                dataContainer.routes.push({ name, description: markers[0].description, segments: [] } as RouteData);
+            }
+            dataContainer.routes[0].markers = markers;
         }
 
         dataContainer.northEast = { lat: +gpxJsonObject.metadata.bounds.$.maxlat, lng: +gpxJsonObject.metadata.bounds.$.maxlon };
         dataContainer.southWest = { lat: +gpxJsonObject.metadata.bounds.$.minlat, lng: +gpxJsonObject.metadata.bounds.$.minlon };
 
-        if (gpxJsonObject.$.creator === "IsraelHikingMap") {
+        if (gpxJsonObject.$?.creator === "IsraelHikingMap") {
             return dataContainer;
         }
         for (const route of dataContainer.routes) {
@@ -430,4 +430,4 @@ export class GpxDataContainerConverterService {
         }
         return extensions;
     }
- }
+}
