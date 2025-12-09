@@ -36,6 +36,7 @@ export class TracesComponent {
     };
     public selectedFeatureSource: GeoJSON.FeatureCollection<GeoJSON.LineString>;
     public isConfigOpen: boolean = false;
+    public hideCoordinates: boolean = true;
 
     public readonly resources = inject(ResourcesService);
 

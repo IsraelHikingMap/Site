@@ -49,7 +49,7 @@ export class RoutesComponent implements AfterViewInit {
     private static readonly END_COLOR = "red";
 
     public routePointPopupData: RoutePointViewData;
-    public nonEditRoutePointPopupData: { latlng: LatLngAlt; wazeAddress: string; routeId: string};
+    public nonEditRoutePointPopupData: { latlng: LatLngAlt; wazeAddress: string; routeId: string };
     public editingRouteGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = {
         type: "FeatureCollection",
         features: []
@@ -170,7 +170,7 @@ export class RoutesComponent implements AfterViewInit {
         if (routeCoordinates.length < 2) {
             return features;
         }
-        const properties = {...routeProperties};
+        const properties = { ...routeProperties };
         features.push({
             type: "Feature",
             id: routeProperties.id,
@@ -212,7 +212,7 @@ export class RoutesComponent implements AfterViewInit {
             const markerFeature = {
                 type: "Feature",
                 id: routeProperties.id + "_marker_" + marker.id,
-                properties: {  
+                properties: {
                     color: "transparent",
                     strokeColor: routeProperties.color
                 },
@@ -283,7 +283,7 @@ export class RoutesComponent implements AfterViewInit {
         return segmentIndex === routeData.segments.length - 1;
     }
 
-    public isRouteInEditPoiMode(route: RouteData) {
+    public isRouteInEditPoiMode(route: Immutable<RouteData>) {
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         return selectedRoute != null && selectedRoute.id === route.id && selectedRoute.state === "Poi";
     }
