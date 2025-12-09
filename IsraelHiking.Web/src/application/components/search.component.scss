@@ -1,16 +1,7 @@
 @use '@angular/material' as mat;
 
-.align-next-to-menu {
-    left: 85px
-}
-
-.align-next-to-menu[dir=rtl] {
-    right: 85px;
-    left: unset;
-}
-
 .search-input-container {
-    width: calc(100vw - 178px);
+    //width: calc(100vw - 178px);
     @include mat.all-component-densities(-3);
 }
 
@@ -29,6 +20,7 @@
 .search-result-option i {
     padding: 0 5px 0 0;
 }
+
 .search-result-option[dir=rtl] i {
     padding: 0 0 0 5px;
 }

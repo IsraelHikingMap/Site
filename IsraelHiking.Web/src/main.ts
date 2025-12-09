@@ -101,7 +101,7 @@ import { TranslationService } from "./application/services/translation.service";
 // Components
 import { RouteEditPoiInteraction } from "./application/components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./application/components/intercations/route-edit-route.interaction";
-import { MainMapComponent } from "./application/components/map/main-map.component";
+import { AppRootComponent } from "./application/components/screens/app-root.component";
 // Reducers
 import { ConfigurationReducer } from "./application/reducers/configuration.reducer";
 import { LocationReducer } from "./application/reducers/location.reducer";
@@ -117,15 +117,20 @@ import { InMemoryReducer } from "./application/reducers/in-memory.reducer";
 import { GpsReducer } from "./application/reducers/gps.reducer";
 import { OfflineReducer } from "./application/reducers/offline.reducer";
 import { UIComponentsReducer } from "./application/reducers/ui-components.reducer";
+import { LandingComponent } from "./application/components/screens/landing.component";
+import { MainMapComponent } from "./application/components/map/main-map.component";
+import { PrivacyPolicyComponent } from "./application/components/screens/privacy-policy.component";
+import { FaqComponent } from "./application/components/screens/faq.component";
+import { AttributionComponent } from "./application/components/screens/attribution.component";
 
 // See https://github.com/ionic-team/capacitor/issues/1564
 export class FileReaderFixForCapacitor extends FileReader {
-	constructor() {
-		super();
+    constructor() {
+        super();
         // eslint-disable-next-line
-		const zoneOriginalInstance = (this as any).__zone_symbol__originalInstance;
-		return zoneOriginalInstance || this;
-	}
+        const zoneOriginalInstance = (this as any).__zone_symbol__originalInstance;
+        return zoneOriginalInstance || this;
+    }
 }
 window.FileReader = FileReaderFixForCapacitor;
 
@@ -134,7 +139,7 @@ if (environment.production) {
     enableProdMode();
 }
 
-bootstrapApplication(MainMapComponent, {
+bootstrapApplication(AppRootComponent, {
     providers: [
         provideAppInitializer(async () => {
             await inject(ApplicationInitializeService).initialize();
@@ -167,7 +172,7 @@ bootstrapApplication(MainMapComponent, {
             ClipboardModule,
             NgxMapLibreGLModule,
             InfiniteScrollDirective,
-            Angulartics2Module.forRoot(), 
+            Angulartics2Module.forRoot(),
             DragDropModule,
             NgxsModule.forRoot([
                 ConfigurationReducer,
@@ -252,7 +257,13 @@ bootstrapApplication(MainMapComponent, {
             withInterceptors([osmTokenInterceptor, progressInterceptor])
         ),
         provideNgIdle(),
-        provideRouter([{ path: "**", component: MainMapComponent }]),
+        provideRouter([
+            { path: "", component: LandingComponent },
+            { path: "privacy-policy", component: PrivacyPolicyComponent },
+            { path: "faq", component: FaqComponent },
+            { path: "attribution", component: AttributionComponent },
+            { path: "**", component: MainMapComponent }
+        ]),
         provideLottieOptions({ player: () => player })
     ]
 });

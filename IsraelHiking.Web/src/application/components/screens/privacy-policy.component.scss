@@ -1,0 +1,7 @@
+@media (width > 768px) {
+    .markdown-body {
+        position: absolute;
+        left: 50%;
+        transform: translate(-50%, 0);
+    }
+}

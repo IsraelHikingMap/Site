@@ -37,7 +37,7 @@ import type { ApplicationState, LocationState } from "../../models";
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, LocationComponent, MainMenuComponent, SearchComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, IhmLinkComponent]
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, IhmLinkComponent]
 })
 export class MainMapComponent {
 
@@ -91,7 +91,7 @@ export class MainMapComponent {
             this.addedControls = [];
             for (const c of this.topStartControls()) {
                 const control = new CustomControl(c.nativeElement);
-                this.mapComponent().mapInstance.addControl(control,  "top-" + start as ControlPosition);
+                this.mapComponent().mapInstance.addControl(control, "top-" + start as ControlPosition);
                 this.addedControls.push(control);
             }
             for (const c of this.topEndControls()) {
@@ -99,7 +99,7 @@ export class MainMapComponent {
                 this.mapComponent().mapInstance.addControl(new CustomControl(c.nativeElement), "top-" + end as ControlPosition);
                 this.addedControls.push(control);
             }
-            const control = new ScaleControl({ unit: "meter" as Unit});
+            const control = new ScaleControl({ unit: "meter" as Unit });
             this.mapComponent().mapInstance.addControl(control, "bottom-" + end as ControlPosition);
             this.addedControls.push(control);
 
@@ -173,9 +173,9 @@ export class MainMapComponent {
             // Using offline source
             source = {
                 type: "raster-dem",
-                tiles:["custom://TerrainRGB/{z}/{x}/{y}.png"],
-                maxzoom:12,
-                minzoom:7
+                tiles: ["custom://TerrainRGB/{z}/{x}/{y}.png"],
+                maxzoom: 12,
+                minzoom: 7
             };
         }
         const currentSourceTerrain = this.mapComponent().mapInstance.getSource("terrain");
@@ -185,6 +185,6 @@ export class MainMapComponent {
             this.mapComponent().mapInstance.removeSource("terrain");
             this.mapComponent().mapInstance.addSource("terrain", source);
         }
-        this.mapComponent().mapInstance.setTerrain({source: "terrain", exaggeration: 2});
+        this.mapComponent().mapInstance.setTerrain({ source: "terrain", exaggeration: 2 });
     }
 }

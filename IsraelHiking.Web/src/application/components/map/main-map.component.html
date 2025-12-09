@@ -2,32 +2,25 @@
 <sidebar></sidebar>
 <background-text [dir]="resources.direction"></background-text>
 <div class="flex flex-row h-full w-full" [dir]="resources.direction">
-  <mgl-map [zoom]="[location.zoom]"
-    [center]="[location.longitude, location.latitude]"
-    [style]="initialStyle"
-    (moveEnd)="moveEnd($event)"
-    (mapLoad)="mapLoaded()"
-    (pitchEvt)="pitchChanged()"
-    [doubleClickZoom]="false"
+  <mgl-map [zoom]="[location.zoom]" [center]="[location.longitude, location.latitude]" [style]="initialStyle"
+    (moveEnd)="moveEnd($event)" (mapLoad)="mapLoaded()" (pitchEvt)="pitchChanged()" [doubleClickZoom]="false"
     [attributionControl]="false">
     <layers></layers>
     <public-pois></public-pois>
     <routes></routes>
     <recorded-route></recorded-route>
     <traces></traces>
-    <main-menu #topStartControl></main-menu>
     @if (!isIFrame()) {
-      <search #topStartControl></search>
-      <drawing #topStartControl></drawing>
+    <drawing #topStartControl></drawing>
     }
     <zoom #topEndControl></zoom>
     @if (isMobile() || !isIFrame()) {
-      <location #topEndControl></location>
+    <location #topEndControl></location>
     }
     <route-statistics #bottomStartControl></route-statistics>
     <center-me #bottomStartControl></center-me>
     @if (!isApp()) {
-      <ihm-link #bottomEndControl></ihm-link>
+    <ihm-link #bottomEndControl></ihm-link>
     }
   </mgl-map>
 </div>
