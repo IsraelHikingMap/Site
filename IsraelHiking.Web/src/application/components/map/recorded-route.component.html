@@ -1,5 +1,5 @@
 @if (isRecording()) {
-  @for (recordedReouteSegment of recordedRouteSegments; track trackByIndex(idx, recordedReouteSegment); let idx = $index) {
+  @for (recordedReouteSegment of recordedRouteSegments; track recordedReouteSegment; let idx = $index) {
     <mgl-geojson-source id="{{'recorded-route-segment-geojson-' + idx}}" [data]="recordedReouteSegment"></mgl-geojson-source>
     <mgl-layer id="{{'recorded-route-line-' + idx}}"
       type="line"

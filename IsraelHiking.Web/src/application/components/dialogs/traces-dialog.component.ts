@@ -189,7 +189,7 @@ export class TracesDialogComponent implements OnInit {
         return false;
     }
 
-    public toggleSelectedTrace(trace: Trace) {
+    public toggleSelectedTrace(trace: Immutable<Trace>) {
         if (this.selectedTraceId == null) {
             this.selectedTraceId = trace.id;
         } else if (this.selectedTraceId === trace.id && this.traceInEditMode?.id !== trace.id) {

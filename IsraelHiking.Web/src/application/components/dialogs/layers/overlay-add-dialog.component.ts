@@ -11,6 +11,7 @@ import { MatSlider, MatSliderThumb } from "@angular/material/slider";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { Angulartics2OnModule } from "angulartics2";
+import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 
 import { AutomaticLayerPresentationComponent } from "../../map/automatic-layer-presentation.component";
 import { NameInUseValidatorDirective } from "../../../directives/name-in-use-validator.directive";
@@ -21,7 +22,7 @@ import type { LayerData } from "../../../models";
     selector: "overlay-add-dialog",
     templateUrl: "./layer-properties-dialog.component.html",
     styleUrls: ["./layer-properties-dialog.component.scss"],
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, NameInUseValidatorDirective, MatError, MatSlider, MatSliderThumb, MapComponent, AutomaticLayerPresentationComponent, MatDialogActions, Angulartics2OnModule, MatTooltip, AsyncPipe]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, NameInUseValidatorDirective, MatError, MatSlider, MatSliderThumb, MapComponent, AutomaticLayerPresentationComponent, MatDialogActions, Angulartics2OnModule, MatTooltip, AsyncPipe, CdkCopyToClipboard]
 })
 export class OverlayAddDialogComponent extends LayerBaseDialogComponent {
     constructor() {

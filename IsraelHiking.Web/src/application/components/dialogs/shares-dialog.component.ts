@@ -179,7 +179,7 @@ export class SharesDialogComponent implements OnInit {
         this.shareUrlInEditMode = structuredClone(this.getSelectedShareUrl()) as ShareUrl;
     }
 
-    public toggleSelectedShareUrl(shareUrl: ShareUrl) {
+    public toggleSelectedShareUrl(shareUrl: Immutable<ShareUrl>) {
         if (this.selectedShareUrlId == null) {
             this.selectedShareUrlId = shareUrl.id;
         } else if (this.selectedShareUrlId === shareUrl.id && this.shareUrlInEditMode?.id !== shareUrl.id) {
@@ -198,7 +198,7 @@ export class SharesDialogComponent implements OnInit {
         this.updateFilteredLists(this.searchTerm.value);
     }
 
-    public getImageFromShareId(shareUrl: ShareUrl, width: number, height: number) {
+    public getImageFromShareId(shareUrl: Immutable<ShareUrl>, width: number, height: number) {
         return this.shareUrlsService.getImageUrlFromShareId(shareUrl.id, width, height);
     }
 
