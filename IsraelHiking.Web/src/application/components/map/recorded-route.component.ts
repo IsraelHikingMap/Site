@@ -33,7 +33,7 @@ export class RecordedRouteComponent {
         properties: {}
     };
     public recordedRoute$: Observable<Immutable<RecordedRoute>>;
-    
+
     private currentPosition$: Observable<Immutable<GeolocationPosition>>;
     private lastSplit: number = 0;
 
@@ -59,10 +59,6 @@ export class RecordedRouteComponent {
 
     public markerDragEnd(index: number, event: any) {
         this.routeEditPoiInteraction.handleDragEnd(event.getLngLat(), index);
-    }
-
-    public trackByIndex(_segment: GeoJSON.FeatureCollection<GeoJSON.LineString>, index: number) {
-        return index;
     }
 
     private handleRecordingChanges() {

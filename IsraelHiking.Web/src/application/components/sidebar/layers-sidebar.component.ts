@@ -77,12 +77,12 @@ export class LayersSidebarComponent {
 
     public addBaseLayer(event: Event) {
         event.stopPropagation();
-        this.dialog.open(BaseLayerAddDialogComponent, {width: "480px"});
+        this.dialog.open(BaseLayerAddDialogComponent, { width: "480px" });
     }
 
     public editBaseLayer(e: Event, layer: Immutable<EditableLayer>) {
         e.stopPropagation();
-        const dialogRef = this.dialog.open(BaseLayerEditDialogComponent, {width: "480px"});
+        const dialogRef = this.dialog.open(BaseLayerEditDialogComponent, { width: "480px" });
         dialogRef.componentInstance.setBaseLayer(layer);
     }
 
@@ -105,16 +105,16 @@ export class LayersSidebarComponent {
 
     public editOverlay(e: Event, layer: Immutable<Overlay>) {
         e.stopPropagation();
-        const dialogRef = this.dialog.open(OverlayEditDialogComponent, {width: "480px"});
+        const dialogRef = this.dialog.open(OverlayEditDialogComponent, { width: "480px" });
         dialogRef.componentInstance.setOverlay(layer);
     }
 
     public addRoute(event: Event) {
         event.stopPropagation();
-        this.dialog.open(RouteAddDialogComponent, {width: "480px"});
+        this.dialog.open(RouteAddDialogComponent, { width: "480px" });
     }
 
-    public editRoute(routeData: RouteData, event: Event) {
+    public editRoute(routeData: Immutable<RouteData>, event: Event) {
         event.stopPropagation();
         this.dialog.open(RouteEditDialogComponent, {
             width: "480px",
@@ -153,7 +153,7 @@ export class LayersSidebarComponent {
         return layer.isOfflineAvailable &&
             this.runningContextService.isCapacitor &&
             (offlineState.lastModifiedDate != null ||
-            offlineState.isOfflineAvailable);
+                offlineState.isOfflineAvailable);
     }
 
     public isOfflineDownloadAvailable() {
@@ -197,7 +197,7 @@ export class LayersSidebarComponent {
         this.layersService.toggleOffline(layer, isOverlay);
     }
 
-    public toggleRoute(routeData: RouteData) {
+    public toggleRoute(routeData: Immutable<RouteData>) {
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute != null && routeData.id === selectedRoute.id && routeData.state !== "Hidden") {
             this.store.dispatch(new SetSelectedRouteAction(null));
@@ -221,20 +221,20 @@ export class LayersSidebarComponent {
         return this.store.selectSnapshot((s: ApplicationState) => s.routes).present.find(r => r.state !== "Hidden") == null;
     }
 
-    public isRouteVisible(routeData: RouteData): boolean {
+    public isRouteVisible(routeData: Immutable<RouteData>): boolean {
         return routeData.state !== "Hidden";
     }
 
-    public isRouteSelected(routeData: RouteData): boolean {
+    public isRouteSelected(routeData: Immutable<RouteData>): boolean {
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         return selectedRoute != null && selectedRoute.id === routeData.id;
     }
 
-    public isRouteInEditMode(routeData: RouteData): boolean {
+    public isRouteInEditMode(routeData: Immutable<RouteData>): boolean {
         return routeData.state === "Route" || routeData.state === "Poi";
     }
 
-    public isShowActive(routeData: RouteData): boolean {
+    public isShowActive(routeData: Immutable<RouteData>): boolean {
         return this.isRouteSelected(routeData) && this.store.selectSnapshot((s: ApplicationState) => s.routes).present.length > 1;
     }
 
