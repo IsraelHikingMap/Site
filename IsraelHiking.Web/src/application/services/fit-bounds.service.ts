@@ -33,7 +33,7 @@ export class FitBoundsService {
         if (noPadding) {
             padding = 0;
         }
-        if (!this.sidebarService.isSidebarOpen()) {
+        if (!this.sidebarService.isSidebarOpen() || !window) {
             return padding;
         }
         if (window.innerWidth >= 550) {

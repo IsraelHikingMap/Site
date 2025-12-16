@@ -1,9 +1,9 @@
 import { Component, inject } from "@angular/core";
+import { RouterLink } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { NgClass, AsyncPipe } from "@angular/common";
 import { MatButton } from "@angular/material/button";
 import { MatMenuTrigger, MatMenu, MatMenuContent, MatMenuItem } from "@angular/material/menu";
-import { Dir } from "@angular/cdk/bidi";
 import { MatDialog } from "@angular/material/dialog";
 import { Angulartics2OnModule } from "angulartics2";
 import { timer } from "rxjs";
@@ -34,7 +34,6 @@ import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.com
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 import { FilesSharesDialogComponent } from "./dialogs/files-shares-dialog.component";
 import { SendReportDialogComponent } from "./dialogs/send-report-dialog.component";
-import { SetUIComponentVisibilityAction } from "../reducers/ui-components.reducer";
 import { SetAgreeToTermsAction } from "../reducers/user.reducer";
 import type { UserInfo, ApplicationState } from "../models";
 
@@ -42,13 +41,13 @@ import type { UserInfo, ApplicationState } from "../models";
     selector: "main-menu",
     templateUrl: "./main-menu.component.html",
     styleUrls: ["./main-menu.component.scss"],
-    imports: [MatButton, Angulartics2OnModule, MatMenuTrigger, NgClass, MatMenu, MatMenuContent, Dir, MatMenuItem, AsyncPipe, OfflineImagePipe]
+    //host: { 'ngSkipHydration': 'true' },
+    imports: [MatButton, Angulartics2OnModule, MatMenuTrigger, NgClass, MatMenu, MatMenuContent, MatMenuItem, AsyncPipe, OfflineImagePipe, RouterLink]
 })
 export class MainMenuComponent {
 
     public userInfo: UserInfo = null;
     public drawingVisible: boolean = false;
-    public statisticsVisible: boolean = false;
 
     public readonly resources = inject(ResourcesService);
 
@@ -58,18 +57,15 @@ export class MainMenuComponent {
     private readonly runningContextService = inject(RunningContextService);
     private readonly toastService = inject(ToastService);
     private readonly fileService = inject(FileService);
-    private readonly geoLocationService = inject(GeoLocationService);
     private readonly layersService = inject(LayersService);
     private readonly sidebarService = inject(SidebarService);
     private readonly loggingService = inject(LoggingService);
     private readonly hashService = inject(HashService);
     private readonly purchaseService = inject(PurchaseService);
     private readonly store = inject(Store);
-    
+
     constructor() {
         this.store.select((state: ApplicationState) => state.userState.userInfo).pipe(takeUntilDestroyed()).subscribe(userInfo => this.userInfo = userInfo);
-        this.store.select((state: ApplicationState) => state.uiComponentsState.drawingVisible).pipe(takeUntilDestroyed()).subscribe(v => this.drawingVisible = v);
-        this.store.select((state: ApplicationState) => state.uiComponentsState.statisticsVisible).pipe(takeUntilDestroyed()).subscribe(v => this.statisticsVisible = v);
         if (this.runningContextService.isCapacitor) {
             App.getInfo().then((info) => {
                 this.loggingService.info(`App version: ${info.version}`);
@@ -104,7 +100,7 @@ export class MainMenuComponent {
             return;
         }
         if (!this.store.selectSnapshot((s: ApplicationState) => s.userState).agreedToTheTermsOfService) {
-            const component = this.dialog.open(TermsOfServiceDialogComponent, { width: "480px"});
+            const component = this.dialog.open(TermsOfServiceDialogComponent, { width: "480px" });
             component.afterClosed().subscribe((results: string) => {
                 if (results === "true") {
                     this.store.dispatch(new SetAgreeToTermsAction(true));
@@ -123,21 +119,11 @@ export class MainMenuComponent {
     }
 
     public selectDrawing() {
-        this.store.dispatch(new SetUIComponentVisibilityAction(
-            "drawing",
-            !this.drawingVisible
-        ));
+
     }
 
     public selectStatistics() {
-        this.store.dispatch(new SetUIComponentVisibilityAction(
-            "statistics",
-            !this.statisticsVisible
-        ));
-    }
 
-    public selectLayers() {
-        this.sidebarService.toggle("layers");
     }
 
     public selectSharesAndFiles() {
@@ -153,7 +139,7 @@ export class MainMenuComponent {
         const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
         const baseLayer = this.layersService.getSelectedBaseLayer();
         this.loggingService.info("--- Reporting an issue ---");
-        const subscription  = timer(8000, 8000).subscribe(() => {
+        const subscription = timer(8000, 8000).subscribe(() => {
             this.toastService.info(this.resources.notYet);
         });
         const logs = await this.loggingService.getLog();
@@ -194,7 +180,7 @@ export class MainMenuComponent {
             const logFileUri = await this.fileService.storeFileToCache("log.txt", logs);
             const infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
-            
+
             EmailComposer.open({
                 to: ["israelhiking@osm.org.il"],
                 subject: subject,
@@ -257,7 +243,7 @@ export class MainMenuComponent {
     public isShowOrderButton() {
         return this.runningContextService.isCapacitor &&
             (this.purchaseService.isPurchaseAvailable() ||
-            this.purchaseService.isRenewAvailable());
+                this.purchaseService.isRenewAvailable());
     }
 
     public orderOfflineMaps() {

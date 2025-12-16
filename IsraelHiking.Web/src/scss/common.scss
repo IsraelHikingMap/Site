@@ -23,7 +23,6 @@ $app-background: map.get($app-theme, background);
 @include mat.app-background();
 @include mat.all-component-themes($app-theme);
 
-
 .mat-mdc-snack-bar-container {
     &.success-snackbar {
         --mat-snack-bar-container-color: #32CD6D;
@@ -42,8 +41,6 @@ $app-background: map.get($app-theme, background);
         --mat-snack-bar-button-color: var(--mat-snack-bar-supporting-text-color);
     }
 }
-
-
 
 html {
     height: 100%;

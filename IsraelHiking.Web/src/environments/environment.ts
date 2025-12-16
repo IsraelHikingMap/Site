@@ -5,8 +5,8 @@
 
 export const environment = {
     production: false,
-    baseAddress: window.location.origin,
-    baseApiAddress: window.location.origin + "/api/",
+    baseAddress: typeof window !== 'undefined' ? window.location.origin : "https://israelhiking.osm.org.il",
+    baseApiAddress: typeof window !== 'undefined' ? window.location.origin + "/api/" : "https://israelhiking.osm.org.il/api/",
     baseTilesAddress: "https://israelhiking.osm.org.il",
     isCapacitor: false
 };

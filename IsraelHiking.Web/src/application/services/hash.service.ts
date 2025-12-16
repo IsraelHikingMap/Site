@@ -61,15 +61,17 @@ export class HashService {
     constructor() {
         this.router.events.pipe(
             filter(event => event instanceof NavigationEnd)
-          ).subscribe((event: NavigationEnd) => {
+        ).subscribe((event: NavigationEnd) => {
             const tree = this.router.parseUrl(event.url);
             const segments = tree.root.children.primary?.segments ?? [];
             const queryParams = tree.queryParams;
             if (this.router.url.startsWith(RouteStrings.ROUTE_MAP)) {
-                this.fitBoundsService.flyTo({
-                    lng: +segments[3].path,
-                    lat: +segments[2].path
-                }, +segments[1].path - 1);
+                if (segments.length === 4) {
+                    this.fitBoundsService.flyTo({
+                        lng: +segments[3].path,
+                        lat: +segments[2].path
+                    }, +segments[1].path - 1);
+                }
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_SHARE)) {
                 this.dataContainerService.setShareUrlAfterNavigation(segments[1].path);
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_URL)) {
@@ -149,9 +151,9 @@ export class HashService {
     public getMapAddress() {
         const location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
         const urlTree = this.router.createUrlTree([RouteStrings.MAP,
-            (location.zoom + 1).toFixed(HashService.ZOOM_PERSICION),
-            location.latitude.toFixed(HashService.HIGH_PERSICION),
-            location.longitude.toFixed(HashService.HIGH_PERSICION)]);
+        (location.zoom + 1).toFixed(HashService.ZOOM_PERSICION),
+        location.latitude.toFixed(HashService.HIGH_PERSICION),
+        location.longitude.toFixed(HashService.HIGH_PERSICION)]);
         return Urls.baseAddress + urlTree.toString();
     }
 

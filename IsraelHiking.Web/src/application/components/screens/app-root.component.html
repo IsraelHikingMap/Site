@@ -1,38 +1,8 @@
 <mat-toolbar color="primary" [dir]="resources.direction">
     <img src="content/favicons/favicon-32x32.png" alt="Makeap Logo">
     <span class="max-sm:hidden p-1">MAPEAK</span>
-    <!--<search></search>-->
-    <mat-form-field class="search-input-container" subscriptSizing="dynamic">
-        <input type="text" matInput [formControl]="searchFrom" placeholder="Search here" />
-    </mat-form-field>
+    <search></search>
     <span class="flex flex-1"></span>
-    <button mat-button [matMenuTriggerFor]="myAppMenu"><i class="fa fa-lg fa-bars"></i></button>
-    <mat-menu #myAppMenu="matMenu">
-        <ng-template matMenuContent>
-            <div [dir]="resources.direction">
-                <a mat-menu-item routerLink="/map" angulartics2On="click" angularticsCategory="Root menu"
-                    angularticsAction="plan route">
-                    <span class="flex flex-row justify-center items-center">
-                        <span class="w-1/6 text-center"><i class="fa fa-lg icon-pencil mat-icon"></i></span>
-                        <span class="flex-1 margin-sides">{{resources.routePlanning}}</span>
-                    </span>
-                </a>
-                <a mat-menu-item routerLink="/about" angulartics2On="click" angularticsCategory="Root menu"
-                    angularticsAction="about">
-                    <span class="flex flex-row justify-center items-center">
-                        <span class="w-1/6 text-center"><i class="fa fa-lg icon-info mat-icon"></i></span>
-                        <span class="flex-1 margin-sides">{{resources.about}}</span>
-                    </span>
-                </a>
-                <a mat-menu-item routerLink="/faq" angulartics2On="click" angularticsCategory="Root menu"
-                    angularticsAction="faq">
-                    <span class="flex flex-row justify-center items-center">
-                        <span class="w-1/6 text-center"><i class="fa fa-lg icon-question-circle-o mat-icon"></i></span>
-                        <span class="flex-1 margin-sides">{{resources.infoFAQLink}}</span>
-                    </span>
-                </a>
-            </div>
-        </ng-template>
-    </mat-menu>
+    <main-menu></main-menu>
 </mat-toolbar>
 <router-outlet></router-outlet>

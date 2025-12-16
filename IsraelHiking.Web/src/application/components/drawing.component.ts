@@ -68,10 +68,6 @@ export class DrawingComponent {
         }
     }
 
-    public isShow() {
-        return this.store.selectSnapshot((s: ApplicationState) => s.uiComponentsState).drawingVisible;
-    }
-
     public clearRoute() {
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         this.store.dispatch(new ReplaceSegmentsAction(selectedRoute.id, []));

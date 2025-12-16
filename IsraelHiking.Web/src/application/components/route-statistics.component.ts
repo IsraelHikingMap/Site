@@ -97,7 +97,6 @@ export class RouteStatisticsComponent implements OnInit {
     };
     public subRouteRange: IChartSubRouteRange;
     public slopeRoutePaint: LineLayerSpecification["paint"] = {};
-    public statisticsVisible: boolean;
 
     public lineChartContainer = viewChild<ElementRef>("lineChartContainer");
 
@@ -207,9 +206,9 @@ export class RouteStatisticsComponent implements OnInit {
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.redrawChart();
         });
-        this.store.select((state: ApplicationState) => state.gpsState.currentPosition).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(p => {
-            this.onGeolocationChanged(p);
-        });
+        //this.store.select((state: ApplicationState) => state.gpsState.currentPosition).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(p => {
+        //    this.onGeolocationChanged(p);
+        //});
         this.store.select((state: ApplicationState) => state.configuration.isShowSlope).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(showSlope => {
             this.isSlopeOn = showSlope;
             this.redrawChart();
@@ -219,18 +218,15 @@ export class RouteStatisticsComponent implements OnInit {
             this.isKmMarkersOn = showKmMarkers;
             this.updateKmMarkers();
         });
-        this.store.select((state: ApplicationState) => state.uiComponentsState.statisticsVisible).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(visible => {
-            this.statisticsVisible = visible;
-            this.redrawChart();
-        });
         this.routeChanged();
-        interval(1000).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-            const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
-            if (recordedRouteState.isRecording) {
-                const recordingStartTime = new Date(recordedRouteState.route.latlngs[0].timestamp).getTime();
-                this.updateDurationString((new Date().getTime() - recordingStartTime) / 1000);
-            }
-        });
+        // HM TODO: fix this!
+        //interval(1000).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+        //    const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
+        //    if (recordedRouteState.isRecording) {
+        //        const recordingStartTime = new Date(recordedRouteState.route.latlngs[0].timestamp).getTime();
+        //        this.updateDurationString((new Date().getTime() - recordingStartTime) / 1000);
+        //    }
+        //});
     }
 
     public changeState(state: string) {
@@ -406,6 +402,9 @@ export class RouteStatisticsComponent implements OnInit {
         this.chartElements.margin.right = this.isSlopeOn ? 30 : 10;
         this.chartElements.svg = d3.select(this.lineChartContainer().nativeElement).select("svg");
         this.chartElements.svg.html("");
+        if (typeof window === "undefined") {
+            return;
+        }
         const windowStyle = window.getComputedStyle(this.lineChartContainer().nativeElement);
         const width = +windowStyle.width.replace("px", "");
         const height = +windowStyle.height.replace("px", "");
@@ -884,7 +883,7 @@ export class RouteStatisticsComponent implements OnInit {
         this.setViewStatisticsValues(this.statistics);
     }
 
-    private getRouteForChart(): { latlngs: Immutable<LatLngAltTime[]>; color: string; weight: number} | null {
+    private getRouteForChart(): { latlngs: Immutable<LatLngAltTime[]>; color: string; weight: number } | null {
         const currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
         const currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
         const closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);
@@ -1000,7 +999,7 @@ export class RouteStatisticsComponent implements OnInit {
             b = Math.floor(255 * ratio);
         }
         // eslint-disable-next-line
-        return  "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
 
     private getMouseOrTouchChartXPosition(e: Event): number {

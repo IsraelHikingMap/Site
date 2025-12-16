@@ -47,6 +47,9 @@ export class DatabaseService {
 
     public async initialize() {
         this.stateDatabase = new Dexie(DatabaseService.STATE_DB_NAME);
+        if (!this.stateDatabase) {
+            return;
+        }
         this.stateDatabase.version(1).stores({
             state: "id"
         });
@@ -85,15 +88,15 @@ export class DatabaseService {
         }
 
         this.store.reset(storedState);
-        this.store.select(s => s).pipe(debounceTime(2000)).subscribe((state: ApplicationState) => {
-            this.updateState(state);
-        });
+        //this.store.select(s => s).pipe(debounceTime(2000)).subscribe((state: ApplicationState) => {
+        //    this.updateState(state);
+        //});
     }
 
     private initCustomTileLoadFunction() {
         addProtocol("custom", async (params, _abortController) => {
             const data = await this.pmTilesService.getTile(params.url);
-            return {data};
+            return { data };
         });
     }
 

@@ -36,10 +36,10 @@ export class PurchaseService {
             this.loggingService.info("[Store] Logged in: " + userInfo.id);
             this.initializeStoreConnection(userInfo.id);
 
-            if (await this.isExpired()) {
-                this.loggingService.debug("[Store] Product is expired from server");
-                this.store.dispatch(new SetOfflineAvailableAction(false));
-            }
+            //if (await this.isExpired()) {
+            //    this.loggingService.debug("[Store] Product is expired from server");
+            //    this.store.dispatch(new SetOfflineAvailableAction(false));
+            //}
         });
     }
 
@@ -91,13 +91,13 @@ export class PurchaseService {
         } else {
             this.orderInternal();
         }
-        
+
     }
 
     private async orderInternal() {
         this.loggingService.info("[Store] Ordering product");
         const offerings = await Purchases.getOfferings();
-            
+
         await Purchases.purchasePackage({
             aPackage: offerings.current.annual
         });

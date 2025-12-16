@@ -1,9 +1,5 @@
 @use "@angular/material" as mat;
 
-.high-button {
-    height: 44px;
-}
-
 .space-after {
     margin-left: 5px;
 }
@@ -17,9 +13,9 @@
     margin-right: 10px;
 }
 
-.profile-image { 
-    max-width: 80%; 
-    margin: 20% 10%;
+.profile-image {
+    max-width: 48px;
+    margin: 5px 5px;
 }
 
 .eye-end {

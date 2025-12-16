@@ -1,203 +1,209 @@
-﻿@if (statisticsVisible) {
-  <div class="control-container side-control maplibregl-ctrl" [dir]="resources.direction" (window:resize)="redrawChart()">
-    @if (isOpen()) {
-      <div animate.enter="chart-enter" animate.leave="chart-leave" class="chart-control-container chart-animated" [class.expanded]="isExpanded" [class.sidebar]="isSidebarVisible()">
-        @if (isTable) {
-          <div class="chart-container">
-            <mat-grid-list cols="3" rowHeight="fit" class="chart-table">
-              @if (!isFollowing) {
-                <mat-grid-tile matTooltip="{{resources.gain}}" matTooltipPosition="below">
-                  <div class="flex flex-col items-center">
-                    <i class="fa icon-arrow-up"></i>
-                    <span>{{toShortNumber(gain)}} <span class="units">{{getUnits(gain)}}</span></span>
-                  </div>
-                </mat-grid-tile>
-                <mat-grid-tile matTooltip="{{resources.loss}}" matTooltipPosition="below">
-                  <div class="flex flex-col items-center">
-                    <i class="fa icon-arrow-down"></i>
-                    <span><span dir="ltr">{{toShortNumber(loss)}}</span>&nbsp;<span class="units">{{getUnits(loss)}}</span></span>
-                  </div>
-                </mat-grid-tile>
-                <mat-grid-tile matTooltip="{{resources.length}}" matTooltipPosition="below">
-                  <div class="flex flex-col items-center">
-                    <i class="fa icon-arrow-right"></i>
-                    <span>{{toShortNumber(length)}} <span class="units">{{getUnits(length)}}</span></span>
-                  </div>
-                </mat-grid-tile>
-              } @else {
-                <mat-grid-tile>
-                  <div class="flex flex-col items-center">
-                    ETA
-                    <span><span dir="ltr">{{ETA}}</span></span>
-                  </div>
-                </mat-grid-tile>
-                <mat-grid-tile matTooltip="{{resources.remainingDistance}}" matTooltipPosition="below">
-                  <div class="flex flex-col items-center">
-                    <i class="fa icon-arrow-circle-right"></i>
-                    <span>&nbsp;<span dir="ltr">{{toShortNumber(remainingDistance)}}</span>&nbsp;<span class="units">{{getUnits(remainingDistance)}}</span></span>
-                  </div>
-                </mat-grid-tile>
-                <mat-grid-tile matTooltip="{{resources.traveledDistance}}" matTooltipPosition="below">
-                  <div class="flex flex-col items-center">
-                    <i class="fa icon-arrow-right"></i>
-                    <span>{{toShortNumber(traveledDistance)}} <span class="units">{{getUnits(traveledDistance)}}</span></span>
-                  </div>
-                </mat-grid-tile>
-              }
-              <mat-grid-tile matTooltip="{{resources.duration}}" matTooltipPosition="above">
-                <div class="flex flex-col items-center">
-                  <i class="fa icon-clock-o"></i>
-                  <span>{{duration}} <span class="units">{{durationUnits}}</span></span>
-                </div>
-              </mat-grid-tile>
-              <mat-grid-tile matTooltip="{{resources.averageSpeed}}" matTooltipPosition="above">
-                <div class="flex flex-col items-center">
-                  <i class="fa icon-avg-speed"></i>
-                  @if (averageSpeed) {
-                    <span>{{averageSpeed | number: '1.0-2'}} <span class="units">{{resources.kmPerHourUnit}}</span></span>
-                  } @else {
-                    <span>--</span>
-                  }
-                </div>
-              </mat-grid-tile>
-              <mat-grid-tile matTooltip="{{resources.currentSpeed}}" matTooltipPosition="above">
-                <div class="flex flex-col items-center">
-                  <i class="fa icon-speed"></i>
-                  @if (currentSpeed) {
-                    <span>{{currentSpeed | number: '1.0-2'}} <span class="units">{{resources.kmPerHourUnit}}</span></span>
-                  } @else {
-                    <span>--</span>
-                  }
-                </div>
-              </mat-grid-tile>
-            </mat-grid-list>
+﻿<div class="control-container side-control maplibregl-ctrl" [dir]="resources.direction" (window:resize)="redrawChart()">
+  @if (isOpen()) {
+  <div animate.enter="chart-enter" animate.leave="chart-leave" class="chart-control-container chart-animated"
+    [class.expanded]="isExpanded" [class.sidebar]="isSidebarVisible()">
+    @if (isTable) {
+    <div class="chart-container">
+      <mat-grid-list cols="3" rowHeight="fit" class="chart-table">
+        @if (!isFollowing) {
+        <mat-grid-tile matTooltip="{{resources.gain}}" matTooltipPosition="below">
+          <div class="flex flex-col items-center">
+            <i class="fa icon-arrow-up"></i>
+            <span>{{toShortNumber(gain)}} <span class="units">{{getUnits(gain)}}</span></span>
           </div>
+        </mat-grid-tile>
+        <mat-grid-tile matTooltip="{{resources.loss}}" matTooltipPosition="below">
+          <div class="flex flex-col items-center">
+            <i class="fa icon-arrow-down"></i>
+            <span><span dir="ltr">{{toShortNumber(loss)}}</span>&nbsp;<span
+                class="units">{{getUnits(loss)}}</span></span>
+          </div>
+        </mat-grid-tile>
+        <mat-grid-tile matTooltip="{{resources.length}}" matTooltipPosition="below">
+          <div class="flex flex-col items-center">
+            <i class="fa icon-arrow-right"></i>
+            <span>{{toShortNumber(length)}} <span class="units">{{getUnits(length)}}</span></span>
+          </div>
+        </mat-grid-tile>
         } @else {
-          <div class="chart-container" #lineChartContainer>
-            <svg direction="ltr"></svg>
-            @if (subRouteRange && subRouteRange.xEnd) {
-              <div class="sub-route-statistics-container">
-                <div class="flex flex-row justify-center items-center">
-                  <button mat-button (click)="clearSubRouteSelection()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Clear sub route selection"><i class="fa icon-close fa-lg"></i></button>
-                  <span class="label-margin">
-                    <i class="fa icon-arrow-up"></i> {{toShortNumber(gain)}} <span class="units">{{getUnits(gain)}}</span>
-                  </span>
-                  <span class="label-margin">
-                    <i class="fa icon-arrow-down"></i> <span dir="ltr">{{toShortNumber(loss)}}</span>&nbsp;<span class="units">{{getUnits(loss)}}</span>
-                  </span>
-                  <span class="label-margin">
-                    <i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} <span class="units">{{getUnits(length)}}</span>
-                  </span>
-                </div>
-              </div>
+        <mat-grid-tile>
+          <div class="flex flex-col items-center">
+            ETA
+            <span><span dir="ltr">{{ETA}}</span></span>
+          </div>
+        </mat-grid-tile>
+        <mat-grid-tile matTooltip="{{resources.remainingDistance}}" matTooltipPosition="below">
+          <div class="flex flex-col items-center">
+            <i class="fa icon-arrow-circle-right"></i>
+            <span>&nbsp;<span dir="ltr">{{toShortNumber(remainingDistance)}}</span>&nbsp;<span
+                class="units">{{getUnits(remainingDistance)}}</span></span>
+          </div>
+        </mat-grid-tile>
+        <mat-grid-tile matTooltip="{{resources.traveledDistance}}" matTooltipPosition="below">
+          <div class="flex flex-col items-center">
+            <i class="fa icon-arrow-right"></i>
+            <span>{{toShortNumber(traveledDistance)}} <span class="units">{{getUnits(traveledDistance)}}</span></span>
+          </div>
+        </mat-grid-tile>
+        }
+        <mat-grid-tile matTooltip="{{resources.duration}}" matTooltipPosition="above">
+          <div class="flex flex-col items-center">
+            <i class="fa icon-clock-o"></i>
+            <span>{{duration}} <span class="units">{{durationUnits}}</span></span>
+          </div>
+        </mat-grid-tile>
+        <mat-grid-tile matTooltip="{{resources.averageSpeed}}" matTooltipPosition="above">
+          <div class="flex flex-col items-center">
+            <i class="fa icon-avg-speed"></i>
+            @if (averageSpeed) {
+            <span>{{averageSpeed | number: '1.0-2'}} <span class="units">{{resources.kmPerHourUnit}}</span></span>
+            } @else {
+            <span>--</span>
             }
           </div>
-        }
-        <div class="absolute start-0 bottom-0 flex flex-col m-1">
-          @if (!isExpanded) {
-            <button mat-button (click)="changeState('table')" [class.active]="isTable" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle table view"><i class="fa icon-table fa-lg"></i></button>
-          }
-          <button mat-button (click)="changeState('graph')" [class.active]="!isTable" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle graph view"><i class="fa icon-area-chart fa-lg"></i></button>
-        </div>
-        <div class="absolute top-0 end-0 flex flex-col">
-          <button mat-button class="m-1" (click)="toggle()" angularticsCategory="Route statistics" angularticsAction="Route statistics close"><i class="fa icon-close fa-lg"></i></button>
-          @if (!isTable) {
-            <button mat-button class="m-1 max-sm:hidden!" (click)="toggleExpand()" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle expand view"><i class="fa fa-lg" [ngClass]="{ 'icon-chevron-right' : isExpanded && resources.end === 'left' || !isExpanded && resources.end === 'right', 'icon-chevron-left' : !isExpanded && resources.end === 'left' || isExpanded && resources.end === 'right'}"></i></button>
-          }
-          <mat-menu #appMenu="matMenu" overlapTrigger="false" xPosition="before">
-            <button mat-menu-item (click)="toggleKmMarker()" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle KM markers">
-              <i [class.active]="isKmMarkersOn" class="fa icon-map-marker p-1"></i>
-              <span class="ms-2">{{resources.kmPoi}}</span>
-            </button>
-            <button mat-menu-item (click)="toggleSlope()" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle Slope">
-              <i [class.active]="isSlopeOn" class="fa icon-line-chart p-1"></i>
-              <span class="ms-2">{{resources.showSlopes}}</span>
-            </button>
-          </mat-menu>
-          <button mat-button class="m-1" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="More"><i class="fa icon-ellipsis-v fa-lg"></i></button>
-        </div>
-      </div>
+        </mat-grid-tile>
+        <mat-grid-tile matTooltip="{{resources.currentSpeed}}" matTooltipPosition="above">
+          <div class="flex flex-col items-center">
+            <i class="fa icon-speed"></i>
+            @if (currentSpeed) {
+            <span>{{currentSpeed | number: '1.0-2'}} <span class="units">{{resources.kmPerHourUnit}}</span></span>
+            } @else {
+            <span>--</span>
+            }
+          </div>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </div>
     } @else {
-      <div class="flex flex-row" (click)="toggle()" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Route statistics open">
-        <button mat-button [class.active]="isOpen()" matTooltip="{{resources.routeStatistics}}" matTooltipPosition="above"><i class="fa {{isTable ? 'icon-table' : 'icon-area-chart'}} fa-lg"></i></button>
-        @if (!isFollowing) {
-          <div matTooltip="{{resources.gain}}" matTooltipPosition="above">
-            <span class="control-container-item gutters"><i class="fa icon-arrow-up"></i> {{toShortNumber(gain)}} <span class="units">{{getUnits(gain)}}</span></span>
-          </div>
-          <div matTooltip="{{resources.loss}}" matTooltipPosition="above">
-            <span class="control-container-item gutters"><i class="fa icon-arrow-down"></i>&nbsp;<span dir="ltr">{{toShortNumber(loss)}}</span>&nbsp;<span class="units">{{getUnits(loss)}}</span></span>
-          </div>
-          <div matTooltip="{{resources.length}}" matTooltipPosition="above">
-            <span class="control-container-item gutters"><i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} <span class="units">{{getUnits(length)}}</span></span>
-          </div>
-        } @else {
-          <div>
-            <span class="control-container-item gutters">ETA <span dir="ltr">{{ETA}}</span></span>
-          </div>
-          <div matTooltip="{{resources.remainingDistance}}" matTooltipPosition="above">
-            <span class="control-container-item gutters"><i class="fa icon-arrow-circle-right"></i>&nbsp;<span dir="ltr">{{toShortNumber(remainingDistance)}}</span>&nbsp;<span class="units">{{getUnits(remainingDistance)}}</span></span>
-          </div>
-          <div matTooltip="{{resources.traveledDistance}}" matTooltipPosition="above">
-            <span class="control-container-item gutters"><i class="fa icon-arrow-right"></i> {{toShortNumber(traveledDistance)}} <span class="units">{{getUnits(traveledDistance)}}</span></span>
-          </div>
-        }
+    <div class="chart-container" #lineChartContainer>
+      <svg direction="ltr"></svg>
+      @if (subRouteRange && subRouteRange.xEnd) {
+      <div class="sub-route-statistics-container">
+        <div class="flex flex-row justify-center items-center">
+          <button mat-button (click)="clearSubRouteSelection()" matTooltip="{{resources.clear}}"
+            matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route statistics"
+            angularticsAction="Clear sub route selection"><i class="fa icon-close fa-lg"></i></button>
+          <span class="label-margin">
+            <i class="fa icon-arrow-up"></i> {{toShortNumber(gain)}} <span class="units">{{getUnits(gain)}}</span>
+          </span>
+          <span class="label-margin">
+            <i class="fa icon-arrow-down"></i> <span dir="ltr">{{toShortNumber(loss)}}</span>&nbsp;<span
+              class="units">{{getUnits(loss)}}</span>
+          </span>
+          <span class="label-margin">
+            <i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} <span
+              class="units">{{getUnits(length)}}</span>
+          </span>
+        </div>
       </div>
+      }
+    </div>
+    }
+    <div class="absolute start-0 bottom-0 flex flex-col m-1">
+      @if (!isExpanded) {
+      <button mat-button (click)="changeState('table')" [class.active]="isTable" angulartics2On="click"
+        angularticsCategory="Route statistics" angularticsAction="Toggle table view"><i
+          class="fa icon-table fa-lg"></i></button>
+      }
+      <button mat-button (click)="changeState('graph')" [class.active]="!isTable" angulartics2On="click"
+        angularticsCategory="Route statistics" angularticsAction="Toggle graph view"><i
+          class="fa icon-area-chart fa-lg"></i></button>
+    </div>
+    <div class="absolute top-0 end-0 flex flex-col">
+      <button mat-button class="m-1" (click)="toggle()" angularticsCategory="Route statistics"
+        angularticsAction="Route statistics close"><i class="fa icon-close fa-lg"></i></button>
+      @if (!isTable) {
+      <button mat-button class="m-1 max-sm:hidden!" (click)="toggleExpand()" angulartics2On="click"
+        angularticsCategory="Route statistics" angularticsAction="Toggle expand view"><i class="fa fa-lg"
+          [ngClass]="{ 'icon-chevron-right' : isExpanded && resources.end === 'left' || !isExpanded && resources.end === 'right', 'icon-chevron-left' : !isExpanded && resources.end === 'left' || isExpanded && resources.end === 'right'}"></i></button>
+      }
+      <mat-menu #appMenu="matMenu" overlapTrigger="false" xPosition="before">
+        <button mat-menu-item (click)="toggleKmMarker()" angulartics2On="click" angularticsCategory="Route statistics"
+          angularticsAction="Toggle KM markers">
+          <i [class.active]="isKmMarkersOn" class="fa icon-map-marker p-1"></i>
+          <span class="ms-2">{{resources.kmPoi}}</span>
+        </button>
+        <button mat-menu-item (click)="toggleSlope()" angulartics2On="click" angularticsCategory="Route statistics"
+          angularticsAction="Toggle Slope">
+          <i [class.active]="isSlopeOn" class="fa icon-line-chart p-1"></i>
+          <span class="ms-2">{{resources.showSlopes}}</span>
+        </button>
+      </mat-menu>
+      <button mat-button class="m-1" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}"
+        matTooltipPosition="below" angulartics2On="click" angularticsCategory="Route statistics"
+        angularticsAction="More"><i class="fa icon-ellipsis-v fa-lg"></i></button>
+    </div>
+  </div>
+  } @else {
+  <div class="flex flex-row" (click)="toggle()" angulartics2On="click" angularticsCategory="Route statistics"
+    angularticsAction="Route statistics open">
+    <button mat-button [class.active]="isOpen()" matTooltip="{{resources.routeStatistics}}"
+      matTooltipPosition="above"><i class="fa {{isTable ? 'icon-table' : 'icon-area-chart'}} fa-lg"></i></button>
+    @if (!isFollowing) {
+    <div matTooltip="{{resources.gain}}" matTooltipPosition="above">
+      <span class="control-container-item gutters"><i class="fa icon-arrow-up"></i> {{toShortNumber(gain)}} <span
+          class="units">{{getUnits(gain)}}</span></span>
+    </div>
+    <div matTooltip="{{resources.loss}}" matTooltipPosition="above">
+      <span class="control-container-item gutters"><i class="fa icon-arrow-down"></i>&nbsp;<span
+          dir="ltr">{{toShortNumber(loss)}}</span>&nbsp;<span class="units">{{getUnits(loss)}}</span></span>
+    </div>
+    <div matTooltip="{{resources.length}}" matTooltipPosition="above">
+      <span class="control-container-item gutters"><i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} <span
+          class="units">{{getUnits(length)}}</span></span>
+    </div>
+    } @else {
+    <div>
+      <span class="control-container-item gutters">ETA <span dir="ltr">{{ETA}}</span></span>
+    </div>
+    <div matTooltip="{{resources.remainingDistance}}" matTooltipPosition="above">
+      <span class="control-container-item gutters"><i class="fa icon-arrow-circle-right"></i>&nbsp;<span
+          dir="ltr">{{toShortNumber(remainingDistance)}}</span>&nbsp;<span
+          class="units">{{getUnits(remainingDistance)}}</span></span>
+    </div>
+    <div matTooltip="{{resources.traveledDistance}}" matTooltipPosition="above">
+      <span class="control-container-item gutters"><i class="fa icon-arrow-right"></i>
+        {{toShortNumber(traveledDistance)}} <span class="units">{{getUnits(traveledDistance)}}</span></span>
+    </div>
     }
   </div>
-}
+  }
+</div>
 
 <mgl-geojson-source id="slope-route" [data]="slopeRouteSource" [lineMetrics]="true"></mgl-geojson-source>
-<mgl-layer id="slope-route-layer"
-  type="line"
-  source="slope-route"
-            [layout]="{
+<mgl-layer id="slope-route-layer" type="line" source="slope-route" [layout]="{
                 'line-cap': 'round',
                 'line-join': 'bevel'
-            }"
-  [paint]="slopeRoutePaint">
+            }" [paint]="slopeRoutePaint">
 </mgl-layer>
-<mgl-layer id="slope-route-layer-direction"
-  type="symbol"
-  source="slope-route"
-           [layout]="{
+<mgl-layer id="slope-route-layer-direction" type="symbol" source="slope-route" [layout]="{
                 'symbol-placement': 'line',
                 'symbol-spacing': 150,
                 'icon-image': 'arrow',
                 'icon-size': 0.4,
                 'icon-allow-overlap': true,
                 'icon-ignore-placement': true
-           }"
-           [paint]="{
+           }" [paint]="{
                 'icon-color': 'black'
             }">
 </mgl-layer>
 <mgl-geojson-source id="km-markers-source" [data]="kmMarkersSource"></mgl-geojson-source>
-<mgl-layer id="km-markers-cricles"
-  type="circle"
-  source="km-markers-source"
-          [paint]="{
+<mgl-layer id="km-markers-cricles" type="circle" source="km-markers-source" [paint]="{
           'circle-color': 'brown',
           'circle-radius': 13,
           'circle-opacity': 0.7
           }">
 </mgl-layer>
-<mgl-layer id="km-markers-cricles-text"
-  type="symbol"
-  source="km-markers-source"
-          [layout]="{
+<mgl-layer id="km-markers-cricles-text" type="symbol" source="km-markers-source" [layout]="{
           'text-field': ['get', 'label'],
           'text-font': ['Open Sans Regular']
-          }"
-          [paint]="{
+          }" [paint]="{
           'text-color': 'white'
           }">
 </mgl-layer>
 
 <mgl-geojson-source id="chart-hover" [data]="chartHoverSource"></mgl-geojson-source>
-<mgl-layer id="chart-hover-layer"
-  type="circle"
-  source="chart-hover"
-          [paint]="{
+<mgl-layer id="chart-hover-layer" type="circle" source="chart-hover" [paint]="{
           'circle-color': ['get', 'color'],
           'circle-radius': 7,
           'circle-stroke-color': 'white',

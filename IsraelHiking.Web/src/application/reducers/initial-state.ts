@@ -11,29 +11,29 @@ export const POPULARITY_HEATMAP = "Popularity Heatmap";
 export const POINTS_OF_INTEREST = "Points of Interest";
 
 export const SPECIAL_BASELAYERS = [ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE];
-export const SPECIAL_OVERLAYS =  [HIKING_TRAILS, BICYCLE_TRAILS, POPULARITY_HEATMAP];
+export const SPECIAL_OVERLAYS = [HIKING_TRAILS, BICYCLE_TRAILS, POPULARITY_HEATMAP];
 export const SPECIAL_LAYERS = [...SPECIAL_BASELAYERS, ...SPECIAL_OVERLAYS];
 
 export const AVAILABLE_LANGUAGES: Language[] = [{
-        code: "he",
-        rtl: true,
-        label: "עברית"
-    },
-    {
-        code: "en-US",
-        rtl: false,
-        label: "English"
-    },
-    {
-        code: "ru",
-        rtl: false,
-        label: "Русский"
-    },
-    {
-        code: "ar",
-        rtl: true,
-        label: "العربية"
-    }
+    code: "he",
+    rtl: true,
+    label: "עברית"
+},
+{
+    code: "en-US",
+    rtl: false,
+    label: "English"
+},
+{
+    code: "ru",
+    rtl: false,
+    label: "Русский"
+},
+{
+    code: "ar",
+    rtl: true,
+    label: "العربية"
+}
 ];
 
 export const CATEGORIES_GROUPS: CategoriesGroup[] = [{
@@ -286,9 +286,5 @@ export const initialState =
             shareUrlsLastModifiedDate: null,
             uploadPoiQueue: [],
             isPmtilesDownloaded: false
-        },
-        uiComponentsState: {
-            drawingVisible: false,
-            statisticsVisible: false
         }
     } as MutableApplicationState;

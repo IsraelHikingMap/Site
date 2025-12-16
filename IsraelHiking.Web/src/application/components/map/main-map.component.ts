@@ -23,6 +23,7 @@ import { RouteStatisticsComponent } from "../route-statistics.component";
 import { CenterMeComponent } from "../center-me.component";
 import { IhmLinkComponent } from "../ihm-link.component";
 import { PublicPoisComponent } from "./public-pois.component";
+import { LayersButtonComponent } from "../layers-button.component";
 import { ResourcesService } from "../../services/resources.service";
 import { IHMTitleService } from "../../services/ihm-title.service";
 import { MapService } from "../../services/map.service";
@@ -37,7 +38,7 @@ import type { ApplicationState, LocationState } from "../../models";
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, IhmLinkComponent]
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, IhmLinkComponent, LayersButtonComponent]
 })
 export class MainMapComponent {
 

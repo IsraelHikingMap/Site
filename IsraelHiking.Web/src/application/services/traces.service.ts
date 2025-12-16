@@ -13,7 +13,7 @@ import { BulkReplaceTracesAction, RemoveTraceAction, UpdateTraceAction } from ".
 import { Urls } from "../urls";
 import type { Trace, ApplicationState, DataContainer, RouteData } from "../models";
 
-type OsmTrace = { 
+type OsmTrace = {
     description: string;
     id: number;
     lat: number;
