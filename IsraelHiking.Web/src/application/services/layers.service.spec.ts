@@ -8,8 +8,9 @@ import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { LayersService } from "./layers.service";
 import { SetUserInfoAction, UserInfoReducer } from "../reducers/user.reducer";
-import { AddBaseLayerAction, AddOverlayAction, LayersReducer, RemoveBaseLayerAction, RemoveOverlayAction, SelectBaseLayerAction, ToggleOfflineAction, UpdateBaseLayerAction, UpdateOverlayAction } from "../reducers/layers.reducer";
+import { AddBaseLayerAction, AddOverlayAction, LayersReducer, RemoveBaseLayerAction, RemoveOverlayAction, SelectBaseLayerAction, UpdateBaseLayerAction, UpdateOverlayAction } from "../reducers/layers.reducer";
 import type { EditableLayer, LayerData, Overlay } from "../models";
+import { DEFAULT_BASE_LAYERS } from "application/reducers/initial-state";
 
 describe("LayersService", () => {
     beforeEach(() => {
@@ -113,16 +114,14 @@ describe("LayersService", () => {
     }));
 
     it("should return first base layer when selected layer not found", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const layer1: EditableLayer = { key: "layer1" } as EditableLayer;
-        const layer2: EditableLayer = { key: "layer2" } as EditableLayer;
         store.reset({ 
             layersState: { 
-                baseLayers: [layer1, layer2],
+                baseLayers: [],
                 selectedBaseLayerKey: "nonexistent" 
             } 
         });
         
-        expect(service.getSelectedBaseLayer()).toEqual(layer1);
+        expect(service.getSelectedBaseLayer()).toEqual(DEFAULT_BASE_LAYERS[0]);
     }));
 
     it("should return the base layer address when it contains '{x}'", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -273,117 +272,6 @@ describe("LayersService", () => {
         service.hideAllOverlays();
         
         expect(service.isAllOverlaysHidden()).toBeTrue();
-    }));
-
-    it("should ignore null or empty layer data", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
-        
-        service.addExternalBaseLayer(null);
-        service.addExternalBaseLayer({ address: "", key: "" } as LayerData);
-        
-        expect(spy).not.toHaveBeenCalled();
-    }));
-
-    it("should add external base layer with valid data", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
-        const layerData = { key: "newLayer", address: "https://tiles.server/{z}/{x}/{y}.png" } as LayerData;
-        
-        service.addExternalBaseLayer(layerData);
-        
-        expect(spy.calls.first().args[0]).toBeInstanceOf(AddBaseLayerAction);
-    }));
-    
-    it("should select existing base layer when address matches case insensitively", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
-        const baseLayer: EditableLayer = { 
-            key: "existingLayer", 
-            address: "https://existing.address/tiles" 
-        } as EditableLayer;
-        store.reset({ 
-            layersState: { 
-                baseLayers: [baseLayer]
-            } 
-        });
-        
-        service.addExternalBaseLayer({ 
-            address: "https://EXISTING.address/tiles", 
-            key: "newLayer" 
-        } as LayerData);
-        
-        expect(spy.calls.first().args[0]).toBeInstanceOf(SelectBaseLayerAction);
-    }));
-    
-    it("should generate custom layer name when key is empty", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
-        
-        service.addExternalBaseLayer({ 
-            address: "https://new.address/tiles", 
-            key: "" 
-        } as LayerData);
-        
-        expect(spy.calls.first().args[0]).toBeInstanceOf(AddBaseLayerAction);
-    }));
-    
-    it("should increment custom layer index when custom layers exist", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
-        
-        service.addExternalBaseLayer({ 
-            address: "https://new.address/tiles", 
-            key: "" 
-        } as LayerData);
-        service.addExternalBaseLayer({ 
-            address: "https://new.address/tiles2", 
-            key: "" 
-        } as LayerData);
-        
-        expect(spy.calls.first().args[0]).toBeInstanceOf(AddBaseLayerAction);
-        expect(spy.calls.all()[1].args[0]).toBeInstanceOf(SelectBaseLayerAction);
-        expect((spy.calls.all()[2].args[0] as AddBaseLayerAction).layerData.key).toContain("2");
-    }));
-
-    it("should do nothing if overlays array is null or empty", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
-
-        service.addExternalOverlays(null);
-        service.addExternalOverlays([]);
-
-        expect(spy).not.toHaveBeenCalled();
-    }));
-
-    it("should add external overlays and toggle visibility of hidden ones", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
-        const overlayData1 = { key: "overlay1", address: "https://test.com/1", visible: false } as Overlay;
-        const overlayData2 = { key: "overlay2", address: "https://test.com/2" } as LayerData;
-        const overlays = [overlayData1, overlayData2];
-
-        store.reset({ 
-            layersState: { 
-                overlays: [overlayData1]
-            } 
-        });
-
-        service.addExternalOverlays(overlays);
-
-        expect(spy.calls.all()[0].args[0]).toBeInstanceOf(UpdateOverlayAction);
-        expect(spy.calls.all()[1].args[0]).toBeInstanceOf(AddOverlayAction);
-    }));
-
-    it("should hide overlays that are not part of the share", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const spy = spyOn(store, "dispatch").and.callThrough();
-        const existingOverlay = { key: "existingOverlay", address: "https://existing.com", visible: true } as Overlay;
-        const overlayData = { key: "newOverlay", address: "https://new.com" } as LayerData;
-        const overlays = [overlayData] as LayerData[];
-
-        store.reset({ 
-            layersState: { 
-                overlays: [existingOverlay]
-            } 
-        });
-
-        service.addExternalOverlays(overlays);
-
-        expect(spy.calls.first().args[0]).toBeInstanceOf(AddOverlayAction);
-        expect(spy.calls.all()[1].args[0]).toBeInstanceOf(UpdateOverlayAction);
     }));
 
     it("should get data container with selected layers", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -558,17 +446,45 @@ describe("LayersService", () => {
         expect(spy.calls.first().args[0]).toBeInstanceOf(RemoveOverlayAction);
     }));
 
-    it("should toggle offline", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const overlay = { key: "overlay1", id: "1", isOfflineOn: false } as Overlay;
-        store.reset({ 
-            layersState: { 
-                overlays: [overlay]
-            } 
-        });
+    it("should create url from overlay layer data and parse it", inject([LayersService, Store], async (service: LayersService, store: Store) => {
         const spy = spyOn(store, "dispatch").and.callThrough();
-        
-        service.toggleOffline(overlay, true);
-        
-        expect(spy.calls.first().args[0]).toBeInstanceOf(ToggleOfflineAction);
+        const layerData: LayerData = {
+            key: "test",
+            address: "https://example.com",
+            opacity: 1,
+            minZoom: 2,
+            maxZoom: 3,
+        };
+        const layerShareAddress = service.layerDataToAddress(layerData, true);
+        const url = new URL(layerShareAddress);
+        await service.addLayerAfterNavigation(Object.fromEntries(url.searchParams.entries()));
+
+        expect(spy.calls.first().args[0]).toBeInstanceOf(AddOverlayAction);
+        expect((spy.calls.first().args[0] as AddOverlayAction).layerData.key).toBe(layerData.key);
+        expect((spy.calls.first().args[0] as AddOverlayAction).layerData.address).toBe(layerData.address);
+        expect((spy.calls.first().args[0] as AddOverlayAction).layerData.minZoom).toBe(layerData.minZoom);
+        expect((spy.calls.first().args[0] as AddOverlayAction).layerData.maxZoom).toBe(layerData.maxZoom);
+        expect((spy.calls.first().args[0] as AddOverlayAction).layerData.opacity).toBe(layerData.opacity);
+    }));
+
+    it("should create url from base layer data and parse it", inject([LayersService, Store], async (service: LayersService, store: Store) => {
+        const spy = spyOn(store, "dispatch").and.callThrough();
+        const layerData: LayerData = {
+            key: "test",
+            address: "https://example.com",
+            opacity: 1,
+            minZoom: 2,
+            maxZoom: 3,
+        };
+        const layerShareAddress = service.layerDataToAddress(layerData, false);
+        const url = new URL(layerShareAddress);
+        await service.addLayerAfterNavigation(Object.fromEntries(url.searchParams.entries()));
+
+        expect(spy.calls.first().args[0]).toBeInstanceOf(AddBaseLayerAction);
+        expect((spy.calls.first().args[0] as AddBaseLayerAction).layerData.key).toBe(layerData.key);
+        expect((spy.calls.first().args[0] as AddBaseLayerAction).layerData.address).toBe(layerData.address);
+        expect((spy.calls.first().args[0] as AddBaseLayerAction).layerData.minZoom).toBe(layerData.minZoom);
+        expect((spy.calls.first().args[0] as AddBaseLayerAction).layerData.maxZoom).toBe(layerData.maxZoom);
+        expect((spy.calls.first().args[0] as AddBaseLayerAction).layerData.opacity).toBe(layerData.opacity);
     }));
 });

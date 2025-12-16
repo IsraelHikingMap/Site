@@ -1,57 +1,112 @@
-import { inject, Injectable } from "@angular/core";
+import { EventEmitter, inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { MatDialog } from "@angular/material/dialog";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
+import { last } from "lodash-es";
+import { Immutable } from "immer";
+import type { StyleSpecification } from "maplibre-gl";
 
-import { LayersService } from "./layers.service";
-import { SidebarService } from "./sidebar.service";
+import { Urls } from "../urls";
+import { OfflineManagementDialogComponent } from "../components/dialogs/offline-management-dialog.component";
 import { FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
-import { ToggleOfflineAction } from "../reducers/layers.reducer";
-import { SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
-import { Urls } from "../urls";
-import type { ApplicationState } from "../models";
+import { PmTilesService } from "./pmtiles.service";
+import { DeleteOfflineMapsTileAction, SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
+import type { ApplicationState, FileNameDateVersion, TileMetadataPerFile } from "../models";
 
 @Injectable()
 export class OfflineFilesDownloadService {
-
     private readonly resources = inject(ResourcesService);
-    private readonly sidebarService = inject(SidebarService);
-    private readonly layersService = inject(LayersService);
     private readonly fileService = inject(FileService);
     private readonly loggingService = inject(LoggingService);
     private readonly httpClient = inject(HttpClient);
+    private readonly matDialog = inject(MatDialog);
     private readonly toastService = inject(ToastService);
+    private readonly pmtilesService = inject(PmTilesService);
     private readonly store = inject(Store);
+
+    private metadata: Record<string, string> = {};
+    private abortController = new AbortController();
+    private _currentDownloadedTile: {tileX: number, tileY: number} | null = null;
+    public tilesProgressChanged = new EventEmitter<{tileX: number, tileY: number, progressValue: number}>();
+    public get currentDownloadedTile() {
+        return this._currentDownloadedTile;
+    }
 
     public async initialize(): Promise<void> {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         const userState = this.store.selectSnapshot((s: ApplicationState) => s.userState);
-        if (offlineState.isOfflineAvailable === true &&
-            (offlineState.lastModifiedDate == null || offlineState.isPmtilesDownloaded === false) &&
-            userState.userInfo != null) {
-            // In case the user has purchased the map and never downloaded them, and now starts the app
-            return await this.downloadOfflineMaps(false);
+        if (userState == null || offlineState.isSubscribed === false) {
+            return;
+        }
+        try {
+            const styles = await this.downloadStyleAndUpdateMetadata();
+            const needToAskToRedownload = offlineState.downloadedTiles == null || Object.values(offlineState.downloadedTiles).some(dt => !this.isTileCompatible(dt));
+            if (!needToAskToRedownload) {
+                for (const styleAndContent of styles) {
+                    await this.fileService.writeStyle(styleAndContent.fileName, styleAndContent.content);
+                }
+                return;
+            }
+            this.toastService.confirm({
+                type: "YesNo",
+                message: this.resources.reccomendOfflineDownload,
+                confirmAction: async () => {
+                    OfflineManagementDialogComponent.openDialog(this.matDialog);
+                }
+            });
+        } catch {
+            // ignore in case this happens in offline
         }
     }
 
-    public async downloadOfflineMaps(showMessage = true): Promise<void> {
+    private async downloadStyleAndUpdateMetadata(): Promise<{fileName: string, content: string}[]> {
+        const styles: {fileName: string, content: string}[] = [];
+        for (const baseLayerUrl of [Urls.HIKING_TILES_ADDRESS, Urls.MTB_TILES_ADDRESS]) {
+            const style = await firstValueFrom(this.httpClient.get(baseLayerUrl, {responseType: "text"}).pipe(timeout(5000)));
+            styles.push({fileName: last(baseLayerUrl.split("/")), content: style});
+        }
+        this.metadata = {};
+        for (const style of styles) {
+            this.metadata = Object.assign(this.metadata, (JSON.parse(style.content) as StyleSpecification).metadata as Record<string, string>);
+        }
+        return styles;
+    }
+
+    public async downloadTile(tileX: number, tileY: number): Promise<"up-to-date" | "downloaded" | "error" | "aborted"> {
+        this._currentDownloadedTile = {tileX, tileY};
         this.loggingService.info("[Offline Download] Starting downloading offline files");
         try {
-            const fileNames = await this.getFilesToDownloadDictionary();
-            if (Object.keys(fileNames).length === 0) {
-                this.toastService.success(this.resources.allFilesAreUpToDate + " " + this.resources.useTheCloudIconToGoOffline);
-                return;
+            const styles = await this.downloadStyleAndUpdateMetadata();
+            for (const styleAndContent of styles) {
+                await this.fileService.writeStyle(styleAndContent.fileName, styleAndContent.content);
+            }
+            const fileNamesForRoot = await this.getFilesToDownload();
+            const fileNamesForTile = await this.getFilesToDownload(tileX, tileY);
+            if (fileNamesForTile.length === 0 && fileNamesForRoot.length === 0) {
+                this.loggingService.info("[Offline Download] No files to download, all files are up to date");
+                return "up-to-date";
+            }
+            this.updateInProgressTilesList(0);
+            const fileNames = [...fileNamesForRoot, ...fileNamesForTile];
+            const currentAbortController = this.abortController; // keep a referece to the current abort controller for the case of aborting and then downloading again
+            await this.downloadOfflineFilesProgressAction(fileNames, fileNamesForRoot.length, currentAbortController);
+
+            if (currentAbortController.signal.aborted) {
+                return "aborted";
             }
 
-            this.toastService.progress({
-                action: (progress) => this.downloadOfflineFilesProgressAction(progress, fileNames),
-                showContinueButton: true,
-                continueText: this.resources.largeFilesUseWifi
-            });
+            if (fileNamesForTile.length > 0) {
+                this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(await this.getMetadataPerFile(fileNamesForTile), tileX, tileY));
+            }
+            if (fileNamesForRoot.length > 0) {
+                this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(await this.getMetadataPerFile(fileNamesForRoot), undefined, undefined));
+            }
+            return "downloaded";
         } catch (ex) {
             const typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
             switch (typeAndMessage.type) {
@@ -66,68 +121,129 @@ export class OfflineFilesDownloadService {
                     this.loggingService.error("[Offline Download] Failed to get download files list due to server side error: " +
                         typeAndMessage.message);
             }
-            if (showMessage) {
-                this.toastService.warning(this.resources.unexpectedErrorPleaseTryAgainLater);
-            }
-        }
-    }
-
-    private async downloadOfflineFilesProgressAction(reportProgress: (progressValue: number) => void, fileNames: Record<string, string>):
-        Promise<void> {
-        this.loggingService.info("[Offline Download] Starting downloading offline files, last update: " +
-        this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate);
-        this.sidebarService.hide();
-        let setBackToOffline = false;
-        if (this.layersService.getSelectedBaseLayer().isOfflineOn) {
-            this.store.dispatch(new ToggleOfflineAction(this.layersService.getSelectedBaseLayer().key, false));
-            setBackToOffline = true;
-        }
-        try {
-            let newestFileDate = new Date(0);
-            const length = Object.keys(fileNames).length;
-            for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
-                const fileName = Object.keys(fileNames)[fileNameIndex];
-                const fileDate = new Date(fileNames[fileName]);
-                newestFileDate = fileDate > newestFileDate ? fileDate : newestFileDate;
-                const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
-                if (fileName.endsWith(".pmtiles")) {
-                    await this.fileService.downloadFileToCacheAuthenticated(`${Urls.offlineFiles}/${fileName}`, fileName, token,
-                        (value) => reportProgress((value + fileNameIndex) * 100.0 / length), new AbortController());
-                    await this.fileService.moveFileFromCacheToDataDirectory(fileName);
-                } else {
-                    const fileContent = await this.fileService.getFileContentWithProgress(`${Urls.offlineFiles}/${fileName}`,
-                        (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
-                    await this.fileService.writeStyles(fileContent as Blob);
-                }
-                this.loggingService.info(`[Offline Download] Finished downloading ${fileName}`);
-            }
-            this.loggingService.info("[Offline Download] Finished downloading offline files, update date to: "
-                + newestFileDate.toUTCString());
-            this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(newestFileDate));
-            this.toastService.success(this.resources.downloadFinishedSuccessfully + " " + this.resources.useTheCloudIconToGoOffline);
-            this.sidebarService.show("layers");
+            return "error";
         } finally {
-            if (setBackToOffline) {
-                this.store.dispatch(new ToggleOfflineAction(this.layersService.getSelectedBaseLayer().key, false));
-            }
+            this.abortController = new AbortController();
+            this._currentDownloadedTile = null;
         }
     }
 
-    private async getFilesToDownloadDictionary(): Promise<Record<string, string>> {
-        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        let lastModifiedString = offlineState.lastModifiedDate ? offlineState.lastModifiedDate.toISOString() : null;
-        if (!offlineState.isPmtilesDownloaded) {
-            this.loggingService.info("[Offline Download] This is the first time downloading pmtiles, downloading all files");
-            lastModifiedString = null;
-        }
-        const fileNames = await firstValueFrom(this.httpClient.get<Record<string, string>>(Urls.offlineFiles, {
-            params: { 
-                lastModified: lastModifiedString,
-                pmtiles: true
+    private async getMetadataPerFile(fileNames: FileNameDateVersion[]): Promise<TileMetadataPerFile> {
+        const metadata: FileNameDateVersion[] = []
+        for (const fileNameAndDate of fileNames) {
+            try {
+                const version = await this.pmtilesService.getVersion(fileNameAndDate.fileName);
+                metadata.push({ fileName: fileNameAndDate.fileName, date: fileNameAndDate.date, version});
+            } catch {
+                // ignore this
             }
-        }).pipe(timeout(5000)));
-        this.loggingService.info(
-            `[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
-        return fileNames;
+        }
+        return metadata;
+    }
+
+    private async downloadOfflineFilesProgressAction(fileNames: FileNameDateVersion[], rootFilesCount: number, abortController: AbortController): Promise<void> {
+        const { tileX, tileY } = this._currentDownloadedTile!;
+        this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${fileNames.length}, tile: ${tileX}-${tileY}`);
+        const length = fileNames.length;
+        for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
+            const {fileName} = fileNames[fileNameIndex];
+            if (abortController.signal.aborted) {
+                this.loggingService.info("[Offline Download] Aborted downloading offline files, current file: " + fileName);
+                return;
+            }
+
+            const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
+            let fileDownloadUrl = `${Urls.offlineFiles}/${fileName}`;
+            if (fileName.endsWith(".pmtiles")) {
+                if (fileNameIndex >= rootFilesCount) {
+                    fileDownloadUrl += `?tileX=${tileX}&tileY=${tileY}`;
+                }
+                await this.fileService.downloadFileToCacheAuthenticated(fileDownloadUrl, fileName, token,
+                    (value) => this.updateInProgressTilesList((value + fileNameIndex) * 100.0 / length), abortController);
+                if (abortController.signal.aborted) {
+                    return;
+                }
+                await this.fileService.moveFileFromCacheToDataDirectory(fileName);
+            } else {
+                const fileContent = await this.fileService.getFileContentWithProgress(fileDownloadUrl,
+                    (value) => this.updateInProgressTilesList((value + fileNameIndex) * 100.0 / length));
+                await this.fileService.writeStyle(fileName, await this.fileService.getFileContent(fileContent as File));
+            }
+            this.loggingService.info(`[Offline Download] Finished downloading ${fileName}`);
+        }
+        this.loggingService.info(`[Offline Download] Finished downloading offline files, current tile: ${tileX}-${tileY}`);
+    }
+
+    private updateInProgressTilesList(progressValue: number) {
+        this.tilesProgressChanged.emit({tileX: this._currentDownloadedTile?.tileX, tileY: this._currentDownloadedTile?.tileY, progressValue});
+    }
+
+    private async getFilesToDownload(tileX?: number, tileY?: number): Promise<FileNameDateVersion[]> {
+        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+        const lastModifiedString = offlineState.downloadedTiles ? this.getLastModifiedDate(offlineState.downloadedTiles[`${tileX}-${tileY}`])?.toISOString() : null;
+        const params: Record<string, string> = {};
+        if (lastModifiedString) {
+            params.lastModified = lastModifiedString;
+        };
+        if (tileX != null && tileY != null) {
+            params.tileX = tileX.toString();
+            params.tileY = tileY.toString();
+        }
+        const fileNames = await firstValueFrom(this.httpClient.get<Record<string, string>>(Urls.offlineFiles, {params: params}).pipe(timeout(5000)));
+        this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
+        if (Object.keys(fileNames).length === 0) {
+            return [];
+        }
+        return Object.entries(fileNames).map(([key, value]) => ({fileName: key, date: value}));
+    }
+
+    public abortCurrentDownload(): void {
+        this.loggingService.info("[Offline Download] Aborting current download");
+        this.abortController.abort();
+        this._currentDownloadedTile = null;
+    }
+
+    public async deleteTile(tileX: number, tileY: number): Promise<void> {
+        this.loggingService.info(`[Offline Download] Deleting tile ${tileX}-${tileY}`);
+        this.store.dispatch(new DeleteOfflineMapsTileAction(tileX, tileY));
+        // This assumes that the tiles that needs to be downloaded have the same names as the ones that needs to be deleted.
+        // It looks for the download date, so there's a need to clean the date before this call, which is done above.
+        const files = await this.getFilesToDownload(tileX, tileY);
+        for (const {fileName} of files) {
+            await this.fileService.deleteFileInDataDirectory(fileName);
+        }
+    }
+
+    public getLastModifiedDate(downloadedTile: Immutable<TileMetadataPerFile>) {
+        if (!downloadedTile) {
+            return null;
+        }
+        let lastModified = new Date(0);
+        if (Array.isArray(downloadedTile)) {
+            for (const fileDateVersion of downloadedTile as FileNameDateVersion[]) {
+                const fileUpdateDate = new Date(fileDateVersion.date);
+                if (fileUpdateDate > lastModified) {
+                    lastModified = new Date(fileDateVersion.date)
+                }
+            }
+        } else {
+            lastModified = new Date(downloadedTile as Date);
+        }
+        return lastModified;
+    }
+
+    public isTileCompatible(downloadedTile: Immutable<TileMetadataPerFile>): boolean {
+        if (!Array.isArray(downloadedTile)) {
+            return Object.keys(this.metadata).every(k => !k.includes("min-version"));
+        }
+        for (const fileDateVersion of downloadedTile as FileNameDateVersion[]) {
+            const fileVersion = fileDateVersion.version;
+            const sourceName = fileDateVersion.fileName.split("+")[0];
+            const styleVersion = this.metadata[`sources:${sourceName}:min-version`];
+            if (fileVersion && styleVersion && fileVersion.localeCompare(styleVersion, undefined, { numeric: true, sensitivity: "base" }) === -1) {
+                return false;
+            }
+        }
+        return true;
     }
 }

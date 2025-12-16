@@ -45,7 +45,6 @@ export class ShareDialogComponent {
     public isLoading: boolean = false;
     public canUpdate: boolean = false;
     public updateCurrentShare: boolean = false;
-    public shareOverlays: boolean = false;
     public showUnhide: boolean;
     public unhideRoutes: boolean = false;
     public style: StyleSpecification;
@@ -129,7 +128,6 @@ export class ShareDialogComponent {
     }
 
     private getDataFiltered(): DataContainer {
-        // clone:
         const filteredData = structuredClone(this.dataContainerService.getData(this.unhideRoutes));
         for (let routeIndex = filteredData.routes.length - 1; routeIndex >= 0; routeIndex--) {
             const route = filteredData.routes[routeIndex];
@@ -137,9 +135,7 @@ export class ShareDialogComponent {
                 route.state = "ReadOnly";
             }
         }
-        if (!this.shareOverlays) {
-            filteredData.overlays = [];
-        }
+        filteredData.overlays = [];
         return filteredData;
     }
 

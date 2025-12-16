@@ -20,6 +20,10 @@ import type { ApplicationState, LatLngAlt, RoutingType } from "../models";
 
 @Injectable()
 export class RoutingProvider {
+    private static readonly MAX_ROUTING_ZOOM = 14;
+    private static readonly ROUTING_SCHEMA = "IHM-schema";
+    private static readonly ROUTING_CLASS_PROPERTY_NAME = "ihm_class";
+
     private featuresCache = new QuickLRU<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>({ maxSize: 100 });
 
     private readonly httpClient = inject(HttpClient);
@@ -55,7 +59,7 @@ export class RoutingProvider {
             } catch (ex2) {
                 this.loggingService.error(`[Routing] failed: ${(ex as Error).message}, ${(ex2 as Error).message}`);
                 const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-                this.toastService.warning(offlineState.isOfflineAvailable || !this.runningContextService.isCapacitor
+                this.toastService.warning(offlineState.isSubscribed || !this.runningContextService.isCapacitor
                     ? this.resources.routingFailedTryShorterRoute
                     : this.resources.routingFailedBuySubscription
                 );
@@ -67,11 +71,7 @@ export class RoutingProvider {
     }
 
     private async getOffineRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {
-        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        if (!offlineState.isOfflineAvailable || offlineState.lastModifiedDate == null) {
-            throw new Error("Offline routing is only supported after downloading offline data");
-        }
-        const zoom = 14; // this is the max zoom for these tiles
+        const zoom = RoutingProvider.MAX_ROUTING_ZOOM; // this is the max zoom for these tiles
         const tiles = [latlngStart, latlngEnd].map(latlng => SpatialService.toTile(latlng, zoom));
         let tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));
         const tileXmin = Math.min(...tiles.map(tile => Math.floor(tile.x)));
@@ -79,6 +79,11 @@ export class RoutingProvider {
         const tileYmin = Math.min(...tiles.map(tile => Math.floor(tile.y)));
         if (tileXmax - tileXmin > 2 || tileYmax - tileYmin > 2) {
             throw new Error("Offline routing is only supported for adjecent tiles maximum...");
+        }
+        for (const tile of tiles) {
+            if (!await this.pmTilesService.isOfflineFileAvailable(zoom, tile.x, tile.y, RoutingProvider.ROUTING_SCHEMA)) {
+                throw new Error("Unable to find offline route, some tiles are missing");
+            }
         }
         // increase the chance of getting a route by adding more tiles
         if (tileXmax === tileXmin) {
@@ -137,13 +142,13 @@ export class RoutingProvider {
                     type: "FeatureCollection",
                     features: []
                 } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
-                const arrayBuffer = await this.pmTilesService.getTile(`custom://IHM/${zoom}/${tileX}/${tileY}.pbf`);
+                const arrayBuffer = await this.pmTilesService.getTileByType(zoom, tileX, tileY, RoutingProvider.ROUTING_SCHEMA);
                 const tile = new VectorTile(new Protobuf(arrayBuffer));
                 for (const layerKey of Object.keys(tile.layers)) {
                     const layer = tile.layers[layerKey];
                     for (let featureIndex=0; featureIndex < layer.length; featureIndex++) {
                         const feature = layer.feature(featureIndex);
-                        const isHighway = Object.keys(feature.properties).find(k => k === "ihm_class") != null;
+                        const isHighway = Object.keys(feature.properties).find(k => k === RoutingProvider.ROUTING_CLASS_PROPERTY_NAME) != null;
                         if (!isHighway) {
                             continue;
                         }

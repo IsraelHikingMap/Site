@@ -36,8 +36,7 @@ describe("Poi Service", () => {
         };
         const fileServiceMock = {
             getFileFromCache: () => Promise.resolve(null),
-            deleteFileFromCache: () => Promise.resolve(),
-            downloadFileToCache: () => Promise.resolve()
+            deleteFileFromCache: () => Promise.resolve()
         };
         const databaseServiceMock = {
             getPoisForClustering: () => Promise.resolve([]),

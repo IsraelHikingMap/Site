@@ -289,7 +289,7 @@ public class OsmLineAdderService : IOsmLineAdderService
             Nodes = newWayNodes.Select(n => n.Id.Value).ToArray(),
             Tags = new TagsCollection(tags)
             {
-                {"note", "Added by IHM algorithm - fixing maybe needed"}
+                {"note", "Added by Mapeak algorithm - fixing maybe needed"}
             }
         };
         if (way.Tags.ContainsKey("source") == false)

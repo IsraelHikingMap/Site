@@ -56,6 +56,7 @@ public class SimplePointAdderExecutor(
                 { "access", "yes" }
             },
             SimplePointType.PicnicSite => new TagsCollection { { "tourism", "picnic_site" } },
+            SimplePointType.Bench => new TagsCollection { { "amenity", "bench" } },
             _ => throw new Exception("Invalid point type for finding relevant tags" + pointType),
         };
     }
@@ -71,6 +72,7 @@ public class SimplePointAdderExecutor(
             SimplePointType.ClosedGate => true,
             SimplePointType.OpenGate => true,
             SimplePointType.PicnicSite => false,
+            SimplePointType.Bench => false,
             _ => throw new Exception("Invalid point type for closest line check" + pointType),
         };
     }

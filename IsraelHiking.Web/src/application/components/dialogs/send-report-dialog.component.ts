@@ -24,7 +24,7 @@ export class SendReportDialogComponent {
 
     constructor() {
         const body = encodeURIComponent(this.resources.reportAnIssueInstructions);
-        const to = "israelhiking@osm.org.il";
+        const to = "support@mapeak.com";
         const subject = encodeURIComponent(this.data.subject);
         this.mailToLink = `mailto:${to}?subject=${subject}&body=${body}`;
     }

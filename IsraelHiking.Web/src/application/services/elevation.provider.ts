@@ -1,18 +1,18 @@
 import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Store } from "@ngxs/store";
 import { firstValueFrom } from "rxjs";
 import QuickLRU from "quick-lru";
 
 import { LoggingService } from "./logging.service";
 import { SpatialService } from "./spatial.service";
 import { PmTilesService } from "./pmtiles.service";
-import type { ApplicationState, LatLngAlt } from "../models";
+import type { LatLngAlt } from "../models";
 
 @Injectable()
 export class ElevationProvider {
 
-    static readonly MAX_ELEVATION_ZOOM = 12;
+    static readonly MAX_ELEVATION_ZOOM = 11;
+    static readonly ELEVATION_SCHEMA = "jaxa_terrarium0-11_v2";
 
     private readonly transparentPngUrl =
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=";
@@ -22,7 +22,6 @@ export class ElevationProvider {
     private readonly httpClient = inject(HttpClient);
     private readonly loggingService = inject(LoggingService);
     private readonly pmTilesService = inject(PmTilesService);
-    private readonly store = inject(Store);
 
     public async updateHeights(latlngs: LatLngAlt[]): Promise<void> {
         const relevantIndexes = [] as number[];
@@ -38,7 +37,6 @@ export class ElevationProvider {
         if (relevantIndexes.length === 0) {
             return;
         }
-
         try {
             await this.populateElevationCache(latlngs);
             for (const relevantIndex of relevantIndexes) {
@@ -52,10 +50,7 @@ export class ElevationProvider {
     }
 
     private async populateElevationCache(latlngs: LatLngAlt[]) {
-        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        const useOffline = offlineState.isOfflineAvailable && offlineState.lastModifiedDate != null;
-        const zoom = ElevationProvider.MAX_ELEVATION_ZOOM;
-        const tiles = latlngs.map(latlng => SpatialService.toTile(latlng, zoom));
+        const tiles = latlngs.map(latlng => SpatialService.toTile(latlng, ElevationProvider.MAX_ELEVATION_ZOOM));
         const tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));
         const tileXmin = Math.min(...tiles.map(tile => Math.floor(tile.x)));
         const tileYmax = Math.max(...tiles.map(tile => Math.floor(tile.y)));
@@ -66,9 +61,10 @@ export class ElevationProvider {
                 if (this.elevationCache.has(key)) {
                     continue;
                 }
+                const useOffline = await this.pmTilesService.isOfflineFileAvailable(ElevationProvider.MAX_ELEVATION_ZOOM, tileX, tileY, ElevationProvider.ELEVATION_SCHEMA)
                 const arrayBuffer = useOffline 
-                    ? await this.pmTilesService.getTile(`custom://TerrainRGB/${zoom}/${tileX}/${tileY}.png`)
-                    : await firstValueFrom(this.httpClient.get(`https://israelhiking.osm.org.il/vector/data/TerrainRGB/${ElevationProvider.MAX_ELEVATION_ZOOM}/${tileX}/${tileY}.png`, { responseType: "arraybuffer"}));
+                    ? await this.pmTilesService.getTileByType(ElevationProvider.MAX_ELEVATION_ZOOM, tileX, tileY, ElevationProvider.ELEVATION_SCHEMA)
+                    : await firstValueFrom(this.httpClient.get(`https://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/${ElevationProvider.MAX_ELEVATION_ZOOM}/${tileX}/${tileY}.png`, { responseType: "arraybuffer"}));
                 const data = await this.getImageData(arrayBuffer);
                 this.elevationCache.set(key, data);
         }
@@ -76,7 +72,7 @@ export class ElevationProvider {
     }
 
     private getElevationForLatlng(latlng: LatLngAlt): number {
-        const tileSize = 256;
+        const tileSize = 512;
         const zoom = ElevationProvider.MAX_ELEVATION_ZOOM;
         const tile = SpatialService.toTile(latlng, zoom);
         const tileIndex = { tileX: Math.floor(tile.x), tileY: Math.floor(tile.y) };
@@ -112,7 +108,7 @@ export class ElevationProvider {
         const r = data[index];
         const g = data[index + 1];
         const b = data[index + 2];
-        return -10000 + ((r * 256 * 256 + g * 256 + b) * 0.1);
+        return -32768 + ((r * 256 + g + b / 256.0));
     }
 
     private async getImageData(data: ArrayBuffer): Promise<Uint8ClampedArray> {

@@ -7,7 +7,6 @@
     [style]="initialStyle"
     (moveEnd)="moveEnd($event)"
     (mapLoad)="mapLoaded()"
-    (pitchEvt)="pitchChanged()"
     [doubleClickZoom]="false"
     [attributionControl]="false">
     <layers></layers>
@@ -27,7 +26,7 @@
     <route-statistics #bottomStartControl></route-statistics>
     <center-me #bottomStartControl></center-me>
     @if (!isApp()) {
-      <ihm-link #bottomEndControl></ihm-link>
+      <mapeak-link #bottomEndControl></mapeak-link>
     }
   </mgl-map>
 </div>

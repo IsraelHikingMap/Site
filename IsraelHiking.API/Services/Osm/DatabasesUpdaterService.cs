@@ -22,7 +22,6 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
     private readonly IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
     private readonly IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
     private readonly IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
-    private readonly IElevationSetterExecutor _elevationSetterExecutor;
     private readonly IOverpassTurboGateway _overpassTurboGateway;
     private readonly ILogger _logger;
 
@@ -35,7 +34,6 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
     /// <param name="pointsOfInterestFilesCreatorExecutor"></param>
     /// <param name="imagesUrlsStorageExecutor"></param>
     /// <param name="externalSourceUpdaterExecutor"></param>
-    /// <param name="elevationSetterExecutor"></param>
     /// <param name="overpassTurboGateway"></param>
     /// <param name="logger"></param>
     public DatabasesUpdaterService(IExternalSourcesRepository externalSourcesRepository,
@@ -44,7 +42,6 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
         IPointsOfInterestFilesCreatorExecutor pointsOfInterestFilesCreatorExecutor,
         IImagesUrlsStorageExecutor imagesUrlsStorageExecutor,
         IExternalSourceUpdaterExecutor externalSourceUpdaterExecutor,
-        IElevationSetterExecutor elevationSetterExecutor,
         IOverpassTurboGateway overpassTurboGateway,
         ILogger logger)
     {
@@ -54,7 +51,6 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
         _pointsOfInterestFilesCreatorExecutor = pointsOfInterestFilesCreatorExecutor;
         _imagesUrlsStorageExecutor = imagesUrlsStorageExecutor;
         _externalSourceUpdaterExecutor = externalSourceUpdaterExecutor;
-        _elevationSetterExecutor = elevationSetterExecutor;
         _overpassTurboGateway = overpassTurboGateway;
         _logger = logger;
     }
@@ -155,7 +151,6 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
             }
         }
         _logger.LogInformation($"Starting rebuilding offline files with {externalFeatures.Count} features.");
-        _elevationSetterExecutor.GeometryTo3D(externalFeatures);
         _pointsOfInterestFilesCreatorExecutor.CreateExternalPoisFile(externalFeatures);
         _logger.LogInformation("Finished rebuilding offline pois file.");
     }

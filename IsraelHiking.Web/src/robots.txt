@@ -1,4 +1,4 @@
-# robots.txt for https://israelhiking.osm.org.il/
+# robots.txt for https://mapeak.com/
 
 User-agent: *
 # Virtual directories
@@ -36,4 +36,4 @@ Disallow: *.JPEG
 Disallow: *.GIF
 
 # Sitemap files
-Sitemap: https://israelhiking.osm.org.il/sitemap.xml
+Sitemap: https://mapeak.com/sitemap.xml

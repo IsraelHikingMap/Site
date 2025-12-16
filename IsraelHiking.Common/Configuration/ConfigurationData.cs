@@ -110,14 +110,9 @@ public class ConfigurationData
     /// </summary>
     public string GpsBabelServerAddress { get; set; }
     /// <summary>
-    /// Elevation server address
-    /// </summary>
-    public string ElevationServerAddress { get; set; }
-    /// <summary>
     /// Image creator server address
     /// </summary>
     public string ImageCreatorServerAddress { get; set; }
-
     /// <summary>
     /// A location where offline files are saved in order to allow them to be downloaded
     /// </summary>
@@ -130,6 +125,10 @@ public class ConfigurationData
     /// OSM server base address
     /// </summary>
     public string OsmBaseAddress { get; set; }
+    /// <summary>
+    /// The API address of the share urls - cloud saves
+    /// </summary>
+    public string ShareUrlApiAddress { get; set; }
     /// <summary>
     /// OSM server base address
     /// </summary>
@@ -172,11 +171,11 @@ public class ConfigurationData
         GraphhopperServerAddress = "http://localhost:8989/";
         ElasticsearchServerAddress = "http://localhost:9200/";
         GpsBabelServerAddress = "http://localhost:11987/";
-        ElevationServerAddress = "http://localhost:11211/";
         ImageCreatorServerAddress = "http://localhost:11311/";
         OfflineFilesFolder = "./";
         ExternalFilesFolder = "./";
         OsmBaseAddress = "https://www.openstreetmap.org";
+        ShareUrlApiAddress = "https://israelhiking.osm.org.il/api/urls/";
         ImageUrlsAllowList =
         [
             "wikimedia.org",

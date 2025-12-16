@@ -120,8 +120,7 @@ export class TracesDialogComponent implements OnInit {
     }
 
     public editInOsm() {
-        const baseLayerAddress = this.layersService.getSelectedBaseLayerAddressForOSM();
-        window.open(this.osmAddressesService.getEditOsmGpxAddress(baseLayerAddress, this.selectedTraceId));
+        window.open(this.osmAddressesService.getEditOsmGpxAddress(this.selectedTraceId));
     }
 
     public async findUnmappedRoutes(): Promise<void> {

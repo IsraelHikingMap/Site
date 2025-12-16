@@ -5,7 +5,6 @@ import { Store } from "@ngxs/store";
 import { UseAppDialogComponent } from "../components/dialogs/use-app-dialog.component";
 import { FacebookWarningDialogComponent } from "../components/dialogs/facebook-warning-dialog.component";
 import { IntroDialogComponent } from "../components/dialogs/intro-dialog.component";
-import { MigrateToMapeakDialogComponent } from "../components/dialogs/migrate-to-mapeak-dialog.component";
 import { LoggingService } from "./logging.service";
 import { ScreenService } from "./screen.service";
 import { DatabaseService } from "./database.service";
@@ -28,7 +27,6 @@ import { LocationService } from "./location.service";
 import { HashService } from "./hash.service";
 import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import type { ApplicationState } from "../models";
-
 
 @Injectable()
 export class ApplicationInitializeService {
@@ -62,7 +60,7 @@ export class ApplicationInitializeService {
             this.angulartics.startTracking();
             await this.loggingService.initialize();
             this.loggingService.info("---------------------------------------");
-            this.loggingService.info("Starting IHM Application Initialization");
+            this.loggingService.info("Starting Mapeak Application Initialization");
             await this.databaseService.initialize();
             this.overpassTurboService.initialize();
             this.screenService.initialize();
@@ -74,9 +72,7 @@ export class ApplicationInitializeService {
             this.geoLocationService.initialize();
             this.hashService.initialize();
             this.dragAndDropService.initialize();
-            if (this.runningContextService.isIos && this.runningContextService.isCapacitor) {
-                MigrateToMapeakDialogComponent.openDialog(this.dialog);
-            } else if (this.runningContextService.isMobile
+            if (this.runningContextService.isMobile
                 && !this.runningContextService.isCapacitor
                 && !this.runningContextService.isIFrame) {
                     if (this.runningContextService.isFacebook) {
@@ -95,7 +91,7 @@ export class ApplicationInitializeService {
             this.shareUrlsService.initialize(); // no need to wait for it to complete
             this.offlineFilesDownloadService.initialize(); // no need to wait for it to complete
             this.locationService.initialize();
-            await this.loggingService.info("Finished IHM Application Initialization");
+            await this.loggingService.info("Finished Mapeak Application Initialization");
         } catch (ex) {
             if (this.runningContextService.isIFrame) {
                 return;
@@ -104,10 +100,10 @@ export class ApplicationInitializeService {
                 alert("Sorry, this site does not support running FireFox in private mode...");
             } else {
                 alert("Ooopppss... We have encountered an unexpected failure. Please try again.\n" +
-                      "If that does not help, please take a screenshot and send it to israelhiking@osm.org.il\n" +
+                      "If that does not help, please take a screenshot and send it to support@mapeak.com\n" +
                       `Init failed: ${(ex as Error).message}`);
             }
-            this.loggingService.error(`Failed IHM Application Initialization: ${(ex as Error).message}`);
+            this.loggingService.error(`Failed Mapeak Application Initialization: ${(ex as Error).message}`);
         }
     }
 }

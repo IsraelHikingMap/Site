@@ -114,7 +114,7 @@ public class OsmTracesControllerTests
         var routeData = new RouteData
         {
             Id = "42",
-            Name = "Recorded using IHM at 2000-01-01",
+            Name = "Recorded using Mapeak at 2000-01-01",
             Segments =
             [
                 new RouteSegmentData
@@ -134,7 +134,7 @@ public class OsmTracesControllerTests
             
         _controller.PostUploadRouteData(routeData, Languages.ENGLISH).Wait();
 
-        osmGateWay.Received(1).CreateTrace(Arg.Is<GpxFile>(f => f.Description.Contains("area") && f.Name.Contains("Recorded using IHM")), Arg.Any<Stream>());
+        osmGateWay.Received(1).CreateTrace(Arg.Is<GpxFile>(f => f.Description.Contains("area") && f.Name.Contains("Recorded using Mapeak")), Arg.Any<Stream>());
     }
 
     private IAuthClient SetupOAuthClient()

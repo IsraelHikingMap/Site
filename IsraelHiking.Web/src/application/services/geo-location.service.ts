@@ -128,7 +128,7 @@ export class GeoLocationService {
         try {
             await BackgroundGeolocation.start({
                 backgroundMessage:  this.resources.runningInBackground,
-                backgroundTitle: "Israel Hiking Map",
+                backgroundTitle: "Mapeak",
                 requestPermissions: true,
                 stale: true,
                 distanceFilter: 2

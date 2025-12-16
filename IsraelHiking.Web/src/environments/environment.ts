@@ -7,6 +7,6 @@ export const environment = {
     production: false,
     baseAddress: window.location.origin,
     baseApiAddress: window.location.origin + "/api/",
-    baseTilesAddress: "https://israelhiking.osm.org.il",
+    baseTilesAddress: "https://mapeak.com",
     isCapacitor: false
 };

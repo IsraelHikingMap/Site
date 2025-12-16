@@ -40,7 +40,6 @@ public static class RegisterApi
         services.AddTransient<IExternalSourceUpdaterExecutor, ExternalSourceUpdaterExecutor>();
         services.AddTransient<ISimplePointAdderExecutor, SimplePointAdderExecutor>();
         services.AddTransient<IUnauthorizedImageUrlsRemover, UnauthorizedImageUrlsRemover>();
-        services.AddTransient<IElevationSetterExecutor, ElevationSetterExecutor>();
 
         // registration here is what determines the order of which to merge points:
         services.AddTransient<IPointsOfInterestAdapter, NakebPointsOfInterestAdapter>();
@@ -61,6 +60,5 @@ public static class RegisterApi
         services.AddTransient<IConverterFlowItem, GpxGzToGpxConverterFlow>();
         services.AddTransient<IConverterFlowItem, GpxVersion1ToGpxVersion11ConverterFlow>();
         services.AddTransient<IConverterFlowItem, GpxBz2ToGpxConverterFlow>();
-        services.AddTransient<IConverterFlowItem, JpgToGpxConverterFlow>();
     }
 }

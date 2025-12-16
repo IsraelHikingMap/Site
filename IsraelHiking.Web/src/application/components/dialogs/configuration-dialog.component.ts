@@ -14,6 +14,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { LoggingService } from "../../services/logging.service";
+import { DatabaseService } from "application/services/database.service";
 import { initialState } from "../../reducers/initial-state";
 import {
     SetBatteryOptimizationTypeAction,
@@ -39,6 +40,7 @@ export class ConfigurationDialogComponent {
     private readonly runningContextService = inject(RunningContextService);
     private readonly toastService = inject(ToastService);
     private readonly logginService = inject(LoggingService);
+    private readonly databaseService = inject(DatabaseService);
     private readonly store = inject(Store);
 
     constructor() {
@@ -67,10 +69,14 @@ export class ConfigurationDialogComponent {
         this.toastService.confirm({
             type: "YesNo",
             message: this.resources.areYouSure,
-            confirmAction: () => {
+            confirmAction: async () => {
                 this.logginService.info("************** RESET DATA WAS PRESSED **************");
                 this.store.reset(initialState);
                 this.dialogRef.close();
+                if (!this.runningContextService.isCapacitor) {
+                    await this.databaseService.uninitialize();
+                    window.location.reload();
+                }
             }
         });
 

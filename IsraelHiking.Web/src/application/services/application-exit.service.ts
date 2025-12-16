@@ -74,10 +74,10 @@ export class ApplicationExitService {
 
     private async exitApp() {
         this.toastService.info(this.resources.wrappingThingsUp);
-        this.loggingService.info("Starting IHM Application Exit");
+        this.loggingService.info("Starting Mapeak Application Exit");
         await this.geoLocationService.uninitialize();
         await this.databaseService.uninitialize();
-        this.loggingService.info("Finished IHM Application Exit");
+        this.loggingService.info("Finished Mapeak Application Exit");
         App.exitApp();
     }
 }

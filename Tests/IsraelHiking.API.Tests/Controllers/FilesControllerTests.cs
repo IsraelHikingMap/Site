@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NetTopologySuite.Geometries;
 using NSubstitute;
 using System.Collections.Generic;
 using System.IO;
@@ -31,7 +30,6 @@ public class FilesControllerTests
     private FilesController _controller;
 
     private IGpsBabelGateway _gpsBabelGateway;
-    private IElevationGateway _elevationGateway;
     private IRemoteFileFetcherGateway _remoteFileFetcherGateway;
     private IDataContainerConverterService _dataContainerConverterService;
     private IGpxDataContainerConverter _gpxDataContainerConverter;
@@ -60,8 +58,6 @@ public class FilesControllerTests
     public void TestInitialize()
     {
         _gpsBabelGateway = Substitute.For<IGpsBabelGateway>();
-        _elevationGateway = Substitute.For<IElevationGateway>();
-        _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(info => Enumerable.Repeat(1.0, info.Arg<Coordinate[]>().Length).ToArray());
         _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
         _gpxDataContainerConverter = new GpxDataContainerConverter();
         var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
@@ -69,7 +65,7 @@ public class FilesControllerTests
         _dataContainerConverterService = new DataContainerConverterService(_gpsBabelGateway, _gpxDataContainerConverter, new RouteDataSplitterService(new ItmWgs84MathTransformFactory(), optionsProvider), Array.Empty<IConverterFlowItem>());
         _offlineFilesService = Substitute.For<IOfflineFilesService>();
         _receiptValidationGateway = Substitute.For<IReceiptValidationGateway>();
-        _controller = new FilesController(_elevationGateway, _remoteFileFetcherGateway, _dataContainerConverterService, _offlineFilesService, _receiptValidationGateway, Substitute.For<ILogger>());
+        _controller = new FilesController(_remoteFileFetcherGateway, _dataContainerConverterService, _offlineFilesService, _receiptValidationGateway, Substitute.For<ILogger>());
     }
 
     [TestMethod]
@@ -160,7 +156,6 @@ public class FilesControllerTests
         Assert.AreEqual(6, dataContainer.Routes.First().Segments.First().Latlngs.Count);
         Assert.AreEqual(1, dataContainer.Routes.First().Markers.Count);
         Assert.IsTrue(dataContainer.Routes.SelectMany(r => r.Segments.SelectMany(s => s.Latlngs)).All(l => l.Alt != 0));
-        Assert.AreEqual(1, dataContainer.Routes.SelectMany(r => r.Segments.SelectMany(s => s.Latlngs)).Count(l => l.Alt == 1));
     }
 
     [TestMethod]
@@ -169,7 +164,7 @@ public class FilesControllerTests
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(false);
 
-        var results = _controller.GetOfflineFiles(DateTime.Now).Result as ForbidResult;
+        var results = _controller.GetOfflineFiles(DateTime.Now, 0, 0).Result as ForbidResult;
 
         Assert.IsNotNull(results);
     }
@@ -180,7 +175,7 @@ public class FilesControllerTests
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Throws(new Exception("some text"));
 
-        Assert.ThrowsException<AggregateException>(() => _controller.GetOfflineFiles(DateTime.Now).Result);
+        Assert.ThrowsException<AggregateException>(() => _controller.GetOfflineFiles(DateTime.Now, 0, 0).Result);
     }
 
     [TestMethod]
@@ -188,11 +183,11 @@ public class FilesControllerTests
     {
         _controller.SetupIdentity();
         var dict = new Dictionary<string, DateTime>();
-        _offlineFilesService.GetUpdatedFilesList(Arg.Any<DateTime>())
+        _offlineFilesService.GetUpdatedFilesList(Arg.Any<DateTime>(), 1, 2)
             .Returns(dict);
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
 
-        var results = _controller.GetOfflineFiles(DateTime.Now).Result as OkObjectResult;
+        var results = _controller.GetOfflineFiles(DateTime.Now, 1, 2).Result as OkObjectResult;
 
         Assert.IsNotNull(results);
         var resultDict = results.Value as Dictionary<string, DateTime>;
@@ -206,7 +201,7 @@ public class FilesControllerTests
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(false);
 
-        var results = _controller.GetOfflineFile("file").Result as ForbidResult;
+        var results = _controller.GetOfflineFile("file", 1, 2).Result as ForbidResult;
 
         Assert.IsNotNull(results);
     }
@@ -218,7 +213,19 @@ public class FilesControllerTests
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
         _offlineFilesService.GetFileContent("file").Returns(new MemoryStream());
 
-        var results = _controller.GetOfflineFile("file").Result as FileResult;
+        var results = _controller.GetOfflineFile("file", null, null).Result as FileResult;
+
+        Assert.IsNotNull(results);
+    }
+
+    [TestMethod]
+    public void GetOfflineFile_FileInsideFolder_ShouldGetIt()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+        _offlineFilesService.GetFileContent("7/1/2/file.extension").Returns(new MemoryStream());
+
+        var results = _controller.GetOfflineFile("file.extension", 1, 2).Result as FileResult;
 
         Assert.IsNotNull(results);
     }

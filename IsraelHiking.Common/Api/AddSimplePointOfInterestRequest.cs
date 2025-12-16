@@ -9,7 +9,8 @@ public enum SimplePointType
     OpenGate,
     ClosedGate,
     Block,
-    PicnicSite
+    PicnicSite,
+    Bench
 }
 
 public class AddSimplePointOfInterestRequest

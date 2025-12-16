@@ -15,11 +15,6 @@ public interface ITagsHelper
     /// <param name="icon">The icon</param>
     /// <returns>A list of relevant tags combinations</returns>
     List<List<KeyValuePair<string, string>>> FindTagsForIcon(string icon);
-    /// <summary>
-    /// Returns all the icons grouped by their category for a specific categories' type
-    /// </summary>
-    /// <returns></returns>
-    IEnumerable<Category> GetCategoriesByGroup(string categoriesType);
 
     /// <summary>
     /// Returns the icon color category for the given tags

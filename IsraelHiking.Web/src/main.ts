@@ -58,7 +58,7 @@ import { SnappingService } from "./application/services/snapping.service";
 import { FitBoundsService } from "./application/services/fit-bounds.service";
 import { RouteStatisticsService } from "./application/services/route-statistics.service";
 import { ShareUrlsService } from "./application/services/share-urls.service";
-import { IHMTitleService } from "./application/services/ihm-title.service";
+import { MapeakTitleService } from "./application/services/mapeak-title.service";
 import { ToastService } from "./application/services/toast.service";
 import { ElevationProvider } from "./application/services/elevation.provider";
 import { SearchResultsProvider } from "./application/services/search-results.provider";
@@ -202,7 +202,7 @@ bootstrapApplication(MainMapComponent, {
         RouteStatisticsService,
         ShareUrlsService,
         Title,
-        IHMTitleService,
+        MapeakTitleService,
         ToastService,
         ElevationProvider,
         SearchResultsProvider,

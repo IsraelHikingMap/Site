@@ -4,8 +4,8 @@ import { StyleSpecification } from "maplibre-gl";
 import { File as FileSystemWrapper, FileEntry } from "@awesome-cordova-plugins/file/ngx";
 import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
-import { firstValueFrom } from "rxjs";
-import { zipSync, strToU8, unzipSync, strFromU8 } from "fflate";
+import { firstValueFrom, timeout } from "rxjs";
+import { zipSync, strToU8 } from "fflate";
 import { decode } from "base64-arraybuffer";
 import type { saveAs as saveAsForType } from "file-saver";
 
@@ -109,22 +109,29 @@ export class FileService {
         return (window.origin || window.location.origin) + "/" + relativePath;
     }
 
-    public async getStyleJsonContent(url: string, isOffline: boolean): Promise<StyleSpecification> {
+    public async getStyleJsonContent(url: string, tryLocalStyle: boolean): Promise<StyleSpecification> {
         try {
-            if (isOffline || (this.runningContextService.isCapacitor && url.startsWith("."))) {
-                const styleFileName = last(url.split("/"));
-                const styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
-                return JSON.parse(styleText) as StyleSpecification;
+            if (this.runningContextService.isCapacitor && url.startsWith(".")) {
+                return await this.getLocalStyleJson(url);
             }
-            return await firstValueFrom(this.httpClient.get<StyleSpecification>(url));
+            if (tryLocalStyle) {
+                return await this.getLocalStyleJson(url);
+            }
+            return await firstValueFrom(this.httpClient.get<StyleSpecification>(url).pipe(timeout(5000)));
         } catch (ex) {
-            this.loggingService.error(`[Files] Unable to get style file, isOffline: ${isOffline}, ${(ex as Error).message}`);
+            this.loggingService.error(`[Files] Unable to get style file, tryLocalStyle: ${tryLocalStyle}, ${url}, ${(ex as Error).message}`);
             return {
                 version: 8.0,
                 layers: [],
                 sources: {}
             };
         }
+    }
+
+    private async getLocalStyleJson(url: string): Promise<StyleSpecification> {
+        const styleFileName = last(url.split("/"));
+        const styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
+        return JSON.parse(styleText) as StyleSpecification;
     }
 
     private async base64StringToBlob(base64: string, type = "application/octet-stream"): Promise<Blob> {
@@ -226,6 +233,7 @@ export class FileService {
             (dataContainer.routes[0].markers.length === 0 && dataContainer.routes[0].segments.length === 0)) {
             throw new Error("no geographic information found in file...");
         }
+        await this.addElevationToDataContainer(dataContainer);
         this.addRoutesFromContainer(dataContainer);
     }
 
@@ -254,18 +262,6 @@ export class FileService {
     private addRoutesFromContainer(container: DataContainer) {
         this.selectedRouteService.addRoutes(container.routes);
         this.fitBoundsService.fitBounds(SpatialService.getBounds([container.southWest, container.northEast]));
-    }
-
-    public async writeStyles(blob: Blob) {
-        const zipData = new Uint8Array(await blob.arrayBuffer());
-        const files = unzipSync(zipData, {
-            filter: file => file.name.startsWith("styles/") && file.name.endsWith(".json")
-        });
-
-        for (const styleFileName in files) {
-            const styleText = strFromU8(files[styleFileName]);
-            this.writeStyle(styleFileName.replace("styles/", ""), styleText);
-        }
     }
 
     public async writeStyle(styleFileName: string, styleText: string) {
@@ -378,5 +374,14 @@ export class FileService {
 
     public async moveFileFromCacheToDataDirectory(fileName: string): Promise<void> {
         await this.fileSystemWrapper.moveFile(this.fileSystemWrapper.cacheDirectory, fileName, this.fileSystemWrapper.dataDirectory, fileName);
+    }
+
+    public async deleteFileInDataDirectory(fileName: string): Promise<void> {
+        try {
+            await this.fileSystemWrapper.removeFile(this.fileSystemWrapper.dataDirectory, fileName);
+            this.loggingService.info(`[Files] Deleted file: ${fileName}`);
+        } catch (ex) {
+            this.loggingService.error(`[Files] Failed to delete file: ${fileName}, ${(ex as Error).message}`);
+        }
     }
 }

@@ -24,7 +24,7 @@ platform :android do
       properties: {
         "android.injected.signing.store.file" => ENV["KEYSTORE_PATH"],
         "android.injected.signing.store.password" => ENV["STORE_PASSWORD"],
-        "android.injected.signing.key.alias" => "ihmkey",
+        "android.injected.signing.key.alias" => "mapeakey",
         "android.injected.signing.key.password" => ENV["PASSWORD"],
       }
     )
@@ -38,7 +38,7 @@ platform :android do
       properties: {
         "android.injected.signing.store.file" => ENV["KEYSTORE_PATH"],
         "android.injected.signing.store.password" => ENV["STORE_PASSWORD"],
-        "android.injected.signing.key.alias" => "ihmkey",
+        "android.injected.signing.key.alias" => "mapeakey",
         "android.injected.signing.key.password" => ENV["PASSWORD"],
       }
     )

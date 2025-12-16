@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' ?>
 <resources>
-    <string name="app_name">Israel Hiking Map</string>
+    <string name="app_name">Mapeak</string>
     <string name="title_activity_main">@string/app_name</string>
-    <string name="package_name">il.org.osm.israelhiking</string>
+    <string name="package_name">com.mapeak</string>
     <string name="capacitor_background_geolocation_notification_icon">drawable/bg_notification</string>
 </resources>

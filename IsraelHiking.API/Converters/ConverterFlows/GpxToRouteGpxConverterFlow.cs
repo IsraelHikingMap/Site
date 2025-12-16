@@ -27,7 +27,7 @@ public class GpxToRouteGpxConverterFlow : IConverterFlowItem
         )));
         var routeGpx = new GpxFile
         {
-            Metadata = new GpxMetadata(GpxDataContainerConverter.ISRAEL_HIKING_MAP + "_route")
+            Metadata = new GpxMetadata(GpxDataContainerConverter.MAPEAK + "_route")
         };
         routeGpx.Waypoints.AddRange(gpx.Waypoints);
         routeGpx.Routes.AddRange(routes);

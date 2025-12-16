@@ -7,6 +7,7 @@ import { Angulartics2OnModule } from "angulartics2";
 import { LayersService } from "../../services/layers.service";
 import { ResourcesService } from "../../services/resources.service";
 import { FitBoundsService } from "../../services/fit-bounds.service";
+import { HIKING_MAP } from "../../reducers/initial-state";
 import type { LatLngAlt } from "../../models";
 
 type LegendItemType = "POI" | "Way";
@@ -54,7 +55,8 @@ export class LegendItemComponent {
     }
 
     public getImageAddress() {
-        const styleKey = this.layersService.getSelectedBaseLayer().address.replace(".json", "").split("/").splice(-1)[0];
-        return `content/legend/${styleKey}_${this.item().key}.png`;
+        // HM TODO: remake legend to be in English
+        const styleKey = this.layersService.getSelectedBaseLayer().key;
+        return `content/legend/${styleKey === HIKING_MAP ? "hike" : "bike"}_${this.item().key}.png`;
     }
 }

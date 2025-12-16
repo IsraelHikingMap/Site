@@ -7,7 +7,6 @@ import { MatHint } from "@angular/material/form-field";
 import { MatDialog, MatDialogRef, MatDialogTitle, MatDialogClose, MatDialogContent } from "@angular/material/dialog";
 import { Angulartics2OnModule } from "angulartics2";
 import { every } from "lodash-es";
-import { Store } from "@ngxs/store";
 
 import { ShareDialogComponent } from "./share-dialog.component";
 import { DataContainerService } from "../../services/data-container.service";
@@ -15,7 +14,6 @@ import { FileService, FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { LogReaderService } from "../../services/log-reader.service";
-import { SetOfflineMapsLastModifiedDateAction } from "../../reducers/offline.reducer";
 import type { DataContainer } from "../../models";
 
 @Component({
@@ -37,7 +35,6 @@ export class FilesSharesDialogComponent {
     private readonly fileService = inject(FileService);
     private readonly toastService = inject(ToastService);
     private readonly logReaderService = inject(LogReaderService);
-    private readonly store = inject(Store);
 
     constructor() {
         this.formats = this.fileService.formats;
@@ -58,7 +55,6 @@ export class FilesSharesDialogComponent {
             await this.fileService.storeFileToCache(file.name, file);
             await this.fileService.moveFileFromCacheToDataDirectory(file.name);
             this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
-            this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(new Date(file.lastModified)));
             return;
         }
         if (file.name.endsWith(".json")) {
@@ -117,7 +113,7 @@ export class FilesSharesDialogComponent {
     }
 
     private getName(data: DataContainer): string {
-        let name = "IsraelHikingMap";
+        let name = "Mapeak";
         if (data.routes.length === 1 && data.routes[0].name) {
             name = data.routes[0].name;
         }

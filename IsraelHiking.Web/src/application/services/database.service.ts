@@ -1,6 +1,8 @@
 import { inject, Injectable } from "@angular/core";
+import { HttpClient, HttpResponse } from "@angular/common/http";
 import { Store } from "@ngxs/store";
-import { debounceTime } from "rxjs/operators";
+import { firstValueFrom } from "rxjs";
+import { debounceTime, timeout } from "rxjs/operators";
 import { addProtocol } from "maplibre-gl";
 import Dexie from "dexie";
 import deepmerge from "deepmerge";
@@ -8,7 +10,7 @@ import deepmerge from "deepmerge";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { PmTilesService } from "./pmtiles.service";
-import { POPULARITY_HEATMAP, initialState } from "../reducers/initial-state";
+import { initialState } from "../reducers/initial-state";
 import { ClearHistoryAction } from "../reducers/routes.reducer";
 import { SetSelectedPoiAction } from "../reducers/poi.reducer";
 import type { ApplicationState, MutableApplicationState, ShareUrl, Trace } from "../models";
@@ -43,6 +45,7 @@ export class DatabaseService {
     private readonly loggingService = inject(LoggingService);
     private readonly runningContext = inject(RunningContextService);
     private readonly pmTilesService = inject(PmTilesService);
+    private readonly httpClient = inject(HttpClient);
     private readonly store = inject(Store);
 
     public async initialize() {
@@ -92,8 +95,44 @@ export class DatabaseService {
 
     private initCustomTileLoadFunction() {
         addProtocol("custom", async (params, _abortController) => {
-            const data = await this.pmTilesService.getTile(params.url);
+            const data = await this.pmTilesService.getTileByUrl(params.url);
             return {data};
+        });
+        addProtocol("slice", async (params, _abortController) => {
+            // slice://mapeak.com/vector/data/IHM-schema/{z}/{x}/{y}.mvt
+            const splitUrl = params.url.split("/");
+            const type = splitUrl[splitUrl.length - 4];
+            const z = +splitUrl[splitUrl.length - 3];
+            const x = +splitUrl[splitUrl.length - 2];
+            const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
+            const offlineAvailable = await this.pmTilesService.isOfflineFileAvailable(z, x, y, type);
+            try {
+                this.loggingService.info(`[Database] Fetching ${params.url}`);
+                const response = await firstValueFrom(this.httpClient.get(params.url.replace("slice://", "https://"), { observe: "response", responseType: "arraybuffer" })
+                    .pipe(offlineAvailable ? timeout(2000) : timeout(60000))) as any as HttpResponse<any>;
+                if (!response.ok) {
+                    this.loggingService.debug(`[Database] Failed fetching with error: ${response.status}: ${params.url}`);
+                    throw new Error(`Failed to get ${params.url}: ${response.statusText} (${response.status})`);
+                }
+                const data = response.body;
+                this.loggingService.debug(`[Database] Successfully fetched: ${params.url}`);
+                return {data, cacheControl: response.headers.get("Cache-Control"), expires: response.headers.get("Expires")};
+            } catch (ex) {
+                this.loggingService.debug(`[Database] Failed fetching with error: ${(ex as any).message}: ${params.url}`);
+                // Timeout or other error
+                if (offlineAvailable === false) {
+                    this.loggingService.debug(`[Database] Offline tile is not available for: ${params.url}`);
+                    throw new Error(`Failed to get ${params.url}: ${(ex as Error).message}`);
+                }
+                try {
+                    const data = await this.pmTilesService.getTileByType(z, x, y, type);
+                    this.loggingService.debug(`[Database] got tile from pmtiles for: ${params.url}`);
+                    return { data };
+                } catch (innerEx) {
+                    this.loggingService.debug(`[Database] Failed getting tile from pmtiles, ${(innerEx as any).message}: ${params.url}`);
+                    throw innerEx;
+                }
+            }
         });
     }
 
@@ -174,10 +213,12 @@ export class DatabaseService {
         const storedState = deepmerge(initialState, dbState, {
             arrayMerge: (destinationArray, sourceArray) => sourceArray == null ? destinationArray : sourceArray
         });
-        storedState.inMemoryState = initialState.inMemoryState;
-        if (storedState.layersState.overlays.find(o => o.key === POPULARITY_HEATMAP) == null) {
-            storedState.layersState.overlays.push(initialState.layersState.overlays.find(o => o.key === POPULARITY_HEATMAP));
+        if (+dbState.configuration.version < initialState.configuration.version) {
+            storedState.configuration.version = initialState.configuration.version;
+            storedState.layersState.baseLayers = initialState.layersState.baseLayers;
+            storedState.layersState.overlays = initialState.layersState.overlays;
         }
+        storedState.inMemoryState = initialState.inMemoryState;
         if (!this.runningContext.isCapacitor) {
             storedState.routes = initialState.routes;
             storedState.poiState = initialState.poiState;

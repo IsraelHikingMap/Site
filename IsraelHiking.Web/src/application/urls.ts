@@ -5,7 +5,7 @@ export class Urls {
     public static readonly baseTilesAddress = environment.baseTilesAddress;
     public static readonly apiBase = environment.baseApiAddress;
     public static readonly emptyAuthHtml = Urls.baseAddress + "/empty-for-oauth.html";
-    public static readonly ihmAuthUrl = "ihm://oauth_callback/";
+    public static readonly mapeakAuthUrl = "mapeak://oauth_callback/";
     public static readonly translations = "translations/";
     public static readonly urls = Urls.apiBase + "urls/";
     public static readonly health = Urls.apiBase + "health/";
@@ -36,11 +36,11 @@ export class Urls {
     public static readonly waze = "https://www.waze.com/ul?navigate=yes&zoom=17&ll=";
     public static readonly tranlation = "https://mapeak.com/api/translation/translate";
 
-    public static readonly DEFAULT_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/IHM.json";
-    public static readonly MTB_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/ilMTB.json";
+    public static readonly HIKING_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json";
+    public static readonly MTB_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-bike.json";
     public static readonly HEATMAP_TILES_ADDRESS =
         "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/OSM_traces.json";
 
-    public static readonly ANDROID_APP_URL = "https://play.google.com/store/apps/details?id=il.org.osm.israelhiking";
+    public static readonly ANDROID_APP_URL = "https://play.google.com/store/apps/details?id=com.mapeak";
     public static readonly IOS_APP_URL = "https://apps.apple.com/us/app/mapeak/id6751947875";
 }

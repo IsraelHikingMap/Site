@@ -1,17 +1,15 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'il.org.osm.israelhiking',
-  appName: 'Israel Hiking Map',
+  appId: 'com.mapeak',
+  appName: 'Mapeak',
   webDir: 'www',
   server: {
-    iosScheme: "ionic",
-    androidScheme: "http",
     errorPath: "/"
   },
   cordova: {
     preferences: {
-      "OAuthScheme": "ihm"
+      "OAuthScheme": "mapeak"
     }
   },
   plugins: {

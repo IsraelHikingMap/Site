@@ -196,7 +196,7 @@ export class MainMenuComponent {
             this.toastService.info(this.resources.pleaseFillReport);
             
             EmailComposer.open({
-                to: ["israelhiking@osm.org.il"],
+                to: ["support@mapeak.com"],
                 subject: subject,
                 body: this.resources.reportAnIssueInstructions,
                 attachments: [{
@@ -210,7 +210,7 @@ export class MainMenuComponent {
                 }]
             });
         } catch (ex) {
-            alert("Ooopppss... Any chance you can take a screenshot and send it to israelhiking@osm.org.il?" +
+            alert("Ooopppss... Any chance you can take a screenshot and send it to support@mapeak.com?" +
                 `\nSend issue failed: ${ex.toString()}`);
         } finally {
             subscription.unsubscribe();
@@ -229,14 +229,12 @@ export class MainMenuComponent {
 
     public getOsmAddress() {
         const poiState = this.store.selectSnapshot((s: ApplicationState) => s.poiState);
-        const baseLayerAddress = this.layersService.getSelectedBaseLayerAddressForOSM();
         if (poiState.selectedPointOfInterest != null &&
             poiState.selectedPointOfInterest.properties.poiSource.toLocaleLowerCase() === "osm") {
-            return this.osmAddressesService.getEditElementOsmAddress(baseLayerAddress,
-                poiState.selectedPointOfInterest.properties.identifier);
+            return this.osmAddressesService.getEditElementOsmAddress(poiState.selectedPointOfInterest.properties.identifier);
         }
         const currentLocation = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
-        return this.osmAddressesService.getEditOsmLocationAddress(baseLayerAddress,
+        return this.osmAddressesService.getEditOsmLocationAddress(
             currentLocation.zoom + 1,
             currentLocation.latitude,
             currentLocation.longitude);
@@ -267,6 +265,5 @@ export class MainMenuComponent {
             return;
         }
         this.purchaseService.order();
-        this.sidebarService.show("layers");
     }
 }

@@ -172,8 +172,6 @@ export class SharesDialogComponent implements OnInit {
 
     public async addShareUrlToRoutes() {
         const share = await this.shareUrlsService.getShareUrl(this.selectedShareUrlId);
-        share.dataContainer.overlays = [];
-        share.dataContainer.baseLayer = null;
         this.dataContainerService.setData(share.dataContainer, true);
     }
 

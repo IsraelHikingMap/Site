@@ -1,9 +1,9 @@
 import { State, Action, StateContext } from "@ngxs/store";
 import { Injectable } from "@angular/core";
 import { produce } from "immer";
-import { orderBy, remove } from "lodash-es";
+import { orderBy } from "lodash-es";
 
-import { CATEGORIES_GROUPS, initialState, SPECIAL_LAYERS } from "./initial-state";
+import { CATEGORIES_GROUPS, initialState } from "./initial-state";
 import type { LayersState, EditableLayer, Overlay, CategoriesGroupType } from "../models";
 
 export class AddBaseLayerAction {
@@ -61,10 +61,6 @@ export class ToggleCategoryVisibilityAction {
     constructor(public name: string, public groupType: CategoriesGroupType) {}
 }
 
-export class ToggleOfflineAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public key: string, public isOverlay: boolean) {}
-}
 @State({
     name: "layersState",
     defaults: initialState.layersState
@@ -73,10 +69,7 @@ export class ToggleOfflineAction {
 export class LayersReducer{
 
     private sort(layers: EditableLayer[]): EditableLayer[] {
-        let ordered = orderBy(layers, l => l.key);
-        const removed = remove(ordered, o => SPECIAL_LAYERS.indexOf(o.key) !== -1);
-        ordered = [...removed, ...ordered];
-        return ordered;
+        return orderBy(layers, l => l.key);
     }
 
     @Action(AddBaseLayerAction)
@@ -189,17 +182,6 @@ export class LayersReducer{
             for (const name of names) {
                 lastState.visibleCategories.push({ name, groupType: action.groupType });
             }
-            return lastState;
-        }));
-    }
-
-    @Action(ToggleOfflineAction)
-    public toggleOffline( ctx: StateContext<LayersState>, action: ToggleOfflineAction){
-        ctx.setState(produce(ctx.getState(), lastState => {
-            const layer = action.isOverlay
-                ? lastState.overlays.find(b => b.key === action.key)
-                : lastState.baseLayers.find(b => b.key === action.key);
-            layer.isOfflineOn = !layer.isOfflineOn;
             return lastState;
         }));
     }

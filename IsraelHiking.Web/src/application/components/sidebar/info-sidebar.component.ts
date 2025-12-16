@@ -17,7 +17,7 @@ import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
-import { ISRAEL_MTB_MAP, ISRAEL_HIKING_MAP } from "../../reducers/initial-state";
+import { MTB_MAP, HIKING_MAP } from "../../reducers/initial-state";
 import type { ApplicationState } from "../../models";
 import legendSectionsJson from "../../../content/legend/legend.json";
 
@@ -98,9 +98,9 @@ export class InfoSidebarComponent {
             }
         }
 
-        if (this.layersService.getSelectedBaseLayer().key === ISRAEL_MTB_MAP) {
+        if (this.layersService.getSelectedBaseLayer().key === MTB_MAP) {
             this.removeMtbUnwantedLegend();
-        } else if (this.layersService.getSelectedBaseLayer().key === ISRAEL_HIKING_MAP) {
+        } else if (this.layersService.getSelectedBaseLayer().key === HIKING_MAP) {
             this.removeIhmUnwantedLegend();
         } else {
             this.legendSections = [];

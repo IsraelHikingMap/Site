@@ -1,7 +1,6 @@
 ﻿using System;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.DataAccessInterfaces;
-using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
@@ -19,15 +18,15 @@ public class INaturePointsOfInterestAdapterTests : BasePointsOfInterestAdapterTe
 {
     private INaturePointsOfInterestAdapter _adapter;
     private IINatureGateway _iNatureGateway;
-    private IShareUrlsRepository _repository;
+    private IShareUrlGateway _shareUrlGateway;
 
     [TestInitialize]
     public void TestInitialize()
     {
         InitializeSubstitutes();
         _iNatureGateway = Substitute.For<IINatureGateway>();
-        _repository = Substitute.For<IShareUrlsRepository>();
-        _adapter = new INaturePointsOfInterestAdapter(_dataContainerConverterService, _iNatureGateway, _repository, Substitute.For<ILogger>());
+        _shareUrlGateway = Substitute.For<IShareUrlGateway>();
+        _adapter = new INaturePointsOfInterestAdapter(_dataContainerConverterService, _iNatureGateway, _shareUrlGateway, Substitute.For<ILogger>());
     }
 
     [TestMethod]
@@ -54,7 +53,7 @@ public class INaturePointsOfInterestAdapterTests : BasePointsOfInterestAdapterTe
                 })
         };
         _iNatureGateway.GetAll().Returns(features);
-        _repository.GetUrlById("share-url").Returns(new ShareUrl());
+        _shareUrlGateway.GetUrlById("share-url").Returns(new ShareUrl());
         _dataContainerConverterService.ToAnyFormat(Arg.Any<DataContainerPoco>(), Arg.Any<string>())
             .Returns(new FeatureCollection().ToBytes());
             

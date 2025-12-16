@@ -42,7 +42,9 @@ describe("RoutingProvider", () => {
                 } },
                 { provide: LoggingService, useValue: { error: () => { } } },
                 { provide: RunningContextService, useValue: {} },
-                { provide: PmTilesService, useValue: {} },
+                { provide: PmTilesService, useValue: {
+                    isOfflineFileAvailable: () => Promise.resolve(false),
+                } },
                 { provide: ElevationProvider, useValue: {
                     updateHeights: () => Promise.resolve()
                 } },
@@ -181,8 +183,8 @@ describe("RoutingProvider", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available",
-        inject([RoutingProvider, HttpTestingController, PmTilesService, Store],
-        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, PmTilesService],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -198,14 +200,8 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
-
-            store.reset({
-                offlineState: {
-                    isOfflineAvailable: true,
-                    lastModifiedDate: new Date()
-                }
-            });
+            db.isOfflineFileAvailable = () => Promise.resolve(true);
+            db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
             const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0001 }, "Hike");
 
@@ -216,8 +212,8 @@ describe("RoutingProvider", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available for a multiline string",
-        inject([RoutingProvider, HttpTestingController, PmTilesService, Store],
-        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, PmTilesService],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -236,14 +232,8 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
-
-            store.reset({
-                offlineState: {
-                    isOfflineAvailable: true,
-                    lastModifiedDate: new Date()
-                }
-            });
+            db.isOfflineFileAvailable = () => Promise.resolve(true);
+            db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
             const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Hike");
 
@@ -254,8 +244,8 @@ describe("RoutingProvider", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available only through one line",
-        inject([RoutingProvider, HttpTestingController, PmTilesService, Store],
-        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, PmTilesService],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -280,14 +270,8 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
-
-            store.reset({
-                offlineState: {
-                    isOfflineAvailable: true,
-                    lastModifiedDate: new Date()
-                }
-            });
+            db.isOfflineFileAvailable = () => Promise.resolve(true);
+            db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
             const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike");
 
@@ -315,7 +299,7 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
+            db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
             store.reset({
                 offlineState: {
@@ -333,8 +317,8 @@ describe("RoutingProvider", () => {
     ));
 
     it("Should return a route between two lines when points are not exactly the same",
-        inject([RoutingProvider, HttpTestingController, PmTilesService, Store],
-        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, PmTilesService],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
             const featureCollection = {
                 type: "FeatureCollection",
                 features: [{
@@ -358,14 +342,8 @@ describe("RoutingProvider", () => {
                 }]
             } as GeoJSON.FeatureCollection;
 
-            db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
-
-            store.reset({
-                offlineState: {
-                    isOfflineAvailable: true,
-                    lastModifiedDate: new Date()
-                }
-            });
+            db.isOfflineFileAvailable = () => Promise.resolve(true);
+            db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
             const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike");
 

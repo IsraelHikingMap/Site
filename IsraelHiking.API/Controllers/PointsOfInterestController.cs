@@ -56,19 +56,6 @@ public class PointsOfInterestController : ControllerBase
     }
 
     /// <summary>
-    /// Gets the available categories for the specified type
-    /// </summary>
-    /// <param name="categoriesGroup">The categories' type</param>
-    /// <returns></returns>
-    [Route("categories/{categoriesGroup}")]
-    [HttpGet]
-    [Obsolete("Should be removed by 1.2026")]
-    public IEnumerable<Category> GetCategoriesByGroup(string categoriesGroup)
-    {
-        return _tagsHelper.GetCategoriesByGroup(categoriesGroup);
-    }
-
-    /// <summary>
     /// Get a POI by id and source
     /// </summary>
     /// <param name="source">The source</param>

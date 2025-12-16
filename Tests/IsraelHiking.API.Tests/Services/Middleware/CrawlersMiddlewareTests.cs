@@ -6,7 +6,7 @@ using IsraelHiking.API.Services.Middleware;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
-using IsraelHiking.DataAccessInterfaces.Repositories;
+using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -22,7 +22,7 @@ public class CrawlersMiddlewareTests
 {
     private CrawlersMiddleware _middleware;
     private IServiceProvider _serviceProvider;
-    private IShareUrlsRepository _repository;
+    private IShareUrlGateway _shareUrlGateway;
     private IPointsOfInterestProvider _pointsOfInterestProvider;
     private IHomePageHelper _homePageHelper;
     private RequestDelegate _next;
@@ -32,13 +32,13 @@ public class CrawlersMiddlewareTests
     {
         _next = Substitute.For<RequestDelegate>();
         _serviceProvider = Substitute.For<IServiceProvider>();
-        _repository = Substitute.For<IShareUrlsRepository>();
+        _shareUrlGateway = Substitute.For<IShareUrlGateway>();
         _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
         _homePageHelper = Substitute.For<IHomePageHelper>();
         var config = new ConfigurationData();
         var options = Substitute.For<IOptions<ConfigurationData>>();
         options.Value.Returns(config);
-        _middleware = new CrawlersMiddleware(_next, _homePageHelper, _repository,
+        _middleware = new CrawlersMiddleware(_next, _homePageHelper, _shareUrlGateway,
             _pointsOfInterestProvider);
     }
 
@@ -209,7 +209,7 @@ public class CrawlersMiddlewareTests
         context.Request.QueryString = QueryString.Empty;
         context.Request.PathBase = PathString.Empty;
         context.Request.Scheme = "http";
-        _repository.GetUrlById(id).Returns((ShareUrl)null);
+        _shareUrlGateway.GetUrlById(id).Returns((ShareUrl)null);
         var detectionService = SetupDetectionService();
 
         _middleware.InvokeAsync(context, detectionService).Wait();
@@ -236,7 +236,7 @@ public class CrawlersMiddlewareTests
             Title = "title",
             Description = "desc",
         };
-        _repository.GetUrlById(id).Returns(shareUrl);
+        _shareUrlGateway.GetUrlById(id).Returns(shareUrl);
         var detectionService = SetupDetectionService();
 
         _middleware.InvokeAsync(context, detectionService).Wait();

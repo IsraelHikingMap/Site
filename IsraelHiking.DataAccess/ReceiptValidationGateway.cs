@@ -46,7 +46,8 @@ public class ReceiptValidationGateway(
     {
         var results = await Task.WhenAll([
             ValidateIaptic(userId),
-            ValidateRevenueCat(userId, "proj1b16c0fa")
+            ValidateRevenueCat(userId, "proj1b16c0fa", _options.RevenueCatApiKeyIHM),
+            ValidateRevenueCat(userId, "proj877f8747", _options.RevenueCatApiKey)
         ]);
         return results.Any(r => r);
     }
@@ -69,12 +70,12 @@ public class ReceiptValidationGateway(
         return iapticEntitled;
     }
 
-    private async Task<bool> ValidateRevenueCat(string userId, string projectId)
+    private async Task<bool> ValidateRevenueCat(string userId, string projectId, string privateApiKey)
     {
         var client = httpClientFactory.CreateClient();
 
         //https://api.revenuecat.com/v2/projects/proj1b16c0fa/customers/1257210/active_entitlements
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _options.RevenueCatApiKey);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", privateApiKey);
         var response = await client.GetAsync(REVENUECAT_VALIDATOR_URL + projectId + "/customers/" + userId + "/active_entitlements");
         var responseStr = await response.Content.ReadAsStringAsync();
         if (response.StatusCode == HttpStatusCode.NotFound)

@@ -1,6 +1,5 @@
 ﻿using IsraelHiking.API.Services;
 using IsraelHiking.Common.DataContainer;
-using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -8,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Controllers;
@@ -19,7 +17,6 @@ namespace IsraelHiking.API.Controllers;
 [Route("api/[controller]")]
 public class FilesController : ControllerBase
 {
-    private readonly IElevationGateway _elevationGateway;
     private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
     private readonly IDataContainerConverterService _dataContainerConverterService;
     private readonly IOfflineFilesService _offlineFilesService;
@@ -29,20 +26,17 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Controller's constructor
     /// </summary>
-    /// <param name="elevationGateway"></param>
     /// <param name="remoteFileFetcherGateway"></param>
     /// <param name="dataContainerConverterService"></param>
     /// <param name="offlineFilesService"></param>
     /// <param name="receiptValidationGateway"></param>
     /// <param name="logger"></param>
-    public FilesController(IElevationGateway elevationGateway,
-        IRemoteFileFetcherGateway remoteFileFetcherGateway,
+    public FilesController(IRemoteFileFetcherGateway remoteFileFetcherGateway,
         IDataContainerConverterService dataContainerConverterService,
         IOfflineFilesService offlineFilesService,
         IReceiptValidationGateway receiptValidationGateway,
         ILogger logger)
     {
-        _elevationGateway = elevationGateway;
         _remoteFileFetcherGateway = remoteFileFetcherGateway;
         _dataContainerConverterService = dataContainerConverterService;
         _offlineFilesService = offlineFilesService;
@@ -105,26 +99,20 @@ public class FilesController : ControllerBase
     private async Task<DataContainerPoco> ConvertToDataContainer(byte[] data, string fileName)
     {
         var dataContainer = await _dataContainerConverterService.ToDataContainer(data, fileName);
-        var needUpdate = dataContainer.Routes.SelectMany(routeData => routeData.Segments
-                .SelectMany(routeSegmentData => routeSegmentData.Latlngs))
-            .Where(l => l.Alt.HasValue == false || l.Alt == 0).ToArray();
-        var elevations = await _elevationGateway.GetElevation(needUpdate.Select(l => l.ToCoordinate()).ToArray());
-        for (var index = 0; index < needUpdate.Length; index++)
-        {
-            needUpdate[index].Alt = elevations[index];
-        }
         return dataContainer;
     }
 
     /// <summary>
     /// Get a list of files that need to be downloaded since they are out dated
     /// </summary>
-    /// <param name="lastModified"></param>
+    /// <param name="lastModified">The last time this tile was downloaded</param>
+    /// <param name="tileX">The tile's X coordinates, null for root</param>
+    /// <param name="tileY">The tile's Y coordinates, null for root</param>
     /// <returns></returns>
     [HttpGet]
     [Route("offline")]
     [Authorize]
-    public async Task<IActionResult> GetOfflineFiles([FromQuery] DateTime lastModified)
+    public async Task<IActionResult> GetOfflineFiles([FromQuery] DateTime lastModified, [FromQuery] long? tileX, [FromQuery] long? tileY)
     {
         if (!await _receiptValidationGateway.IsEntitled(User.Identity?.Name))
         {
@@ -132,29 +120,36 @@ public class FilesController : ControllerBase
             return Forbid();
         }
         _logger.LogInformation($"Getting the list of offline files for user: {User.Identity?.Name}, date: {lastModified}");
-        return Ok(_offlineFilesService.GetUpdatedFilesList(lastModified));
+        return Ok(_offlineFilesService.GetUpdatedFilesList(lastModified, tileX, tileY));
     }
 
     /// <summary>
     /// Get a specific file
     /// </summary>
     /// <param name="id"></param>
-    /// <returns></returns>
+    /// <param name="tileX">The tile's X coordinates, null for root</param>
+    /// <param name="tileY">The tile's Y coordinates, null for root</param>
+    /// <returns>A file stream</returns>
     [HttpGet]
     [Route("offline/{id}")]
     [Authorize]
-    public async Task<IActionResult> GetOfflineFile(string id)
+    public async Task<IActionResult> GetOfflineFile(string id, [FromQuery] long? tileX, [FromQuery] long? tileY)
     {
         if (!await _receiptValidationGateway.IsEntitled(User.Identity?.Name))
         {
             _logger.LogInformation($"Unable to get the offline file for user: {User.Identity?.Name} since the user is not entitled, file: {id}");
             return Forbid();
         }
-        _logger.LogInformation($"Getting the offline file for user: {User.Identity?.Name}, file: {id}");
-        var file = _offlineFilesService.GetFileContent(id);
-        return File(file, id.EndsWith("json") ? "application/json" : "application/zip", id);
+
+        _logger.LogInformation($"Getting the offline file for user: {User.Identity?.Name}, file: {id}, tileX: {tileX}, tileY: {tileY}");
+        var fullPath = id;
+        if (tileX.HasValue && tileY.HasValue)
+        {
+            fullPath = $"7/{tileX}/{tileY}/{id}";
+        }
+        var file = _offlineFilesService.GetFileContent(fullPath);
+        return File(file, "application/octet-stream", id);
     }
-    
 
     /// <summary>
     /// Check if user is subscribed

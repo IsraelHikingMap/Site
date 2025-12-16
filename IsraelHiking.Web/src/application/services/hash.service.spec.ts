@@ -10,6 +10,7 @@ import { SidebarService } from "./sidebar.service";
 import { DataContainerService } from "./data-container.service";
 import { FitBoundsService } from "./fit-bounds.service";
 import { ShareUrlsService } from "./share-urls.service";
+import { LayersService } from "./layers.service";
 import { InMemoryReducer } from "../reducers/in-memory.reducer";
 
 describe("HashService", () => {
@@ -29,6 +30,7 @@ describe("HashService", () => {
                 { provide: DataContainerService, useValue: {} },
                 { provide: FitBoundsService, useValue: {} },
                 { provide: ShareUrlsService, useValue: {} },
+                { provide: LayersService, useValue: {} },
                 SidebarService,
                 HashService
             ]

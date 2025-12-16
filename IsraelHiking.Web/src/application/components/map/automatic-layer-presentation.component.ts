@@ -12,9 +12,9 @@ import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
-import { ConnectionService } from "../../services/connection.service";
 import { MapService } from "../../services/map.service";
 import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models";
+import { DEFAULT_BASE_LAYERS } from "application/reducers/initial-state";
 
 @Component({
     selector: "auto-layer",
@@ -38,7 +38,6 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     private subscriptions: OutputRefSubscription[] = [];
     private jsonSourcesIds: string[] = [];
     private jsonLayersIds: string[] = [];
-    private hasInternetAccess: boolean = true;
     private mapLoadedPromise: Promise<void>;
     private currentLanguageCode: LanguageCode;
     private recreateQueue: Subject<() => Promise<void>> = new Subject();
@@ -47,7 +46,6 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     
     private readonly mapComponent = inject(MapComponent);
     private readonly fileService = inject(FileService);
-    private readonly connectionSerive = inject(ConnectionService);
     private readonly mapService = inject(MapService);
     private readonly store = inject(Store);
 
@@ -72,20 +70,6 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
                 this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
             }
             this.currentLanguageCode = language.code;
-        }));
-        this.subscriptions.push(this.connectionSerive.stateChanged.subscribe((online) => {
-            if (online === this.hasInternetAccess) {
-                return;
-            }
-            this.hasInternetAccess = online;
-            if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate == null
-                || this.layerData().isOfflineAvailable === false) {
-                return;
-            }
-            if (this.layerData().isOfflineOn === true) {
-                return;
-            }
-            this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
         }));
     }
 
@@ -148,10 +132,22 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     }
 
     private async createJsonLayer(layerData: EditableLayer) {
-        const getOfflineStyleFile = layerData.isOfflineAvailable && (layerData.isOfflineOn || !this.hasInternetAccess);
-        const response = await this.fileService.getStyleJsonContent(layerData.address, getOfflineStyleFile);
+        const tryLocalStyle = this.isMainMap() && DEFAULT_BASE_LAYERS.some(l => l.key === layerData.key) && this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles != null;
+        const response = await this.fileService.getStyleJsonContent(layerData.address, tryLocalStyle);
         const language = this.resources.getCurrentLanguageCodeSimplified();
         const styleJson = JSON.parse(JSON.stringify(response).replace(/name:he/g, `name:${language}`)) as StyleSpecification;
+        if (tryLocalStyle) {
+            for (const source of Object.values(styleJson.sources)) {
+                if (source.type === "vector") {
+                    delete source.url;
+                    source.tiles[0] = source.tiles[0].replace("https://", "slice://");
+                }
+                if (source.type === "raster-dem" ) {
+                    delete source.url;
+                    source.tiles[0] = source.tiles[0].replace("https://", "slice://");
+                }
+            }
+        }
         this.updateSourcesAndLayers(layerData, styleJson.sources, styleJson.layers);
     }
 
@@ -169,7 +165,6 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
                 source.attribution = attributiuonUpdated === false ? AutomaticLayerPresentationComponent.ATTRIBUTION : "";
                 attributiuonUpdated = true;
             }
-
             this.mapComponent.mapInstance.addSource(sourceKey, source);
             this.jsonSourcesIds.push(sourceKey);
         }

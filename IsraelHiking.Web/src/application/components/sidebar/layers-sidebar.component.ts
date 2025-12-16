@@ -3,7 +3,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag } from "@angular/cdk/drag-drop";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
-import { NgClass, AsyncPipe, DatePipe } from "@angular/common";
+import { NgClass, AsyncPipe } from "@angular/common";
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from "@angular/material/expansion";
 import { MatTooltip } from "@angular/material/tooltip";
 import { Angulartics2OnModule } from "angulartics2";
@@ -18,6 +18,7 @@ import { OverlayAddDialogComponent } from "../dialogs/layers/overlay-add-dialog.
 import { OverlayEditDialogComponent } from "../dialogs/layers/overlay-edit-dialog-component";
 import { RouteAddDialogComponent } from "../dialogs/routes/route-add-dialog.component";
 import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.component";
+import { OfflineManagementDialogComponent } from "../dialogs/offline-management-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers.service";
 import { SidebarService } from "../../services/sidebar.service";
@@ -25,11 +26,10 @@ import { SelectedRouteService } from "../../services/selected-route.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { PurchaseService } from "../../services/purchase.service";
-import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
 import { ExpandGroupAction, CollapseGroupAction } from "../../reducers/layers.reducer";
 import { ChangeRouteStateAction, BulkReplaceRoutesAction, ToggleAllRoutesAction } from "../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../reducers/route-editing.reducer";
-import { CATEGORIES_GROUPS } from "../../reducers/initial-state";
+import { DEFAULT_BASE_LAYERS, CATEGORIES_GROUPS } from "../../reducers/initial-state";
 import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGroup } from "../../models";
 
 @Component({
@@ -37,15 +37,15 @@ import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGro
     templateUrl: "./layers-sidebar.component.html",
     styleUrls: ["./layers-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, Angulartics2OnModule, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatTooltip, CategoriesGroupComponent, CdkDropList, CdkDrag, AsyncPipe, DatePipe]
+    imports: [Dir, MatButton, Angulartics2OnModule, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatTooltip, CategoriesGroupComponent, CdkDropList, CdkDrag, AsyncPipe]
 })
 export class LayersSidebarComponent {
 
+    public readonly defaultBaseLayers = DEFAULT_BASE_LAYERS;
     public baseLayers$: Observable<Immutable<EditableLayer[]>>;
     public overlays$: Observable<Immutable<Overlay[]>>;
     public categoriesGroups = CATEGORIES_GROUPS;
     public routes$: Observable<Immutable<RouteData[]>>;
-    public lastModified$: Observable<Date>;
 
     public manageSubscriptions: string;
 
@@ -58,14 +58,12 @@ export class LayersSidebarComponent {
     private readonly sidebarService = inject(SidebarService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly toastService = inject(ToastService);
-    private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
     private readonly store = inject(Store);
 
     constructor() {
         this.manageSubscriptions = this.runningContextService.isIos
             ? "https://apps.apple.com/account/subscriptions"
             : "https://play.google.com/store/account/subscriptions";
-        this.lastModified$ = this.store.select((state: ApplicationState) => state.offlineState.lastModifiedDate);
         this.baseLayers$ = this.store.select((state: ApplicationState) => state.layersState.baseLayers);
         this.overlays$ = this.store.select((state: ApplicationState) => state.layersState.overlays);
         this.routes$ = this.store.select((state: ApplicationState) => state.routes.present);
@@ -82,8 +80,7 @@ export class LayersSidebarComponent {
 
     public editBaseLayer(e: Event, layer: Immutable<EditableLayer>) {
         e.stopPropagation();
-        const dialogRef = this.dialog.open(BaseLayerEditDialogComponent, { width: "480px" });
-        dialogRef.componentInstance.setBaseLayer(layer);
+        this.dialog.open(BaseLayerEditDialogComponent, { width: "480px", data: layer });
     }
 
     public expand(groupName: string) {
@@ -105,8 +102,7 @@ export class LayersSidebarComponent {
 
     public editOverlay(e: Event, layer: Immutable<Overlay>) {
         e.stopPropagation();
-        const dialogRef = this.dialog.open(OverlayEditDialogComponent, { width: "480px" });
-        dialogRef.componentInstance.setOverlay(layer);
+        this.dialog.open(OverlayEditDialogComponent, { width: "480px", data: layer });
     }
 
     public addRoute(event: Event) {
@@ -148,17 +144,9 @@ export class LayersSidebarComponent {
         this.layersService.hideAllOverlays();
     }
 
-    public showOfflineButton(layer: EditableLayer) {
-        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        return layer.isOfflineAvailable &&
-            this.runningContextService.isCapacitor &&
-            (offlineState.lastModifiedDate != null ||
-                offlineState.isOfflineAvailable);
-    }
-
     public isOfflineDownloadAvailable() {
         return this.runningContextService.isCapacitor &&
-            this.store.selectSnapshot((s: ApplicationState) => s.offlineState).isOfflineAvailable;
+            this.store.selectSnapshot((s: ApplicationState) => s.offlineState).isSubscribed;
     }
 
     public isPurchaseAvailable() {
@@ -185,16 +173,7 @@ export class LayersSidebarComponent {
             return;
         }
 
-        this.offlineFilesDownloadService.downloadOfflineMaps();
-    }
-
-    public toggleOffline(event: Event, layer: EditableLayer, isOverlay: boolean) {
-        event.stopPropagation();
-        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate == null && !layer.isOfflineOn) {
-            this.toastService.warning(this.resources.noOfflineFilesPleaseDownload);
-            return;
-        }
-        this.layersService.toggleOffline(layer, isOverlay);
+        OfflineManagementDialogComponent.openDialog(this.dialog);
     }
 
     public toggleRoute(routeData: Immutable<RouteData>) {
