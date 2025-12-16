@@ -1,8 +1,8 @@
 {
   "dependencies": {
     "@angular/cdk": "^20.2.12",
-    "@angular/common": "^20.3.10",
-    "@angular/compiler": "^20.3.10",
+    "@angular/common": "^20.3.14",
+    "@angular/compiler": "^20.3.15",
     "@angular/core": "^20.3.10",
     "@angular/forms": "^20.3.10",
     "@angular/material": "^20.2.12",
@@ -92,7 +92,7 @@
     "@angular-eslint/schematics": "^20.5.2",
     "@angular-eslint/template-parser": "^20.5.2",
     "@angular/build": "^20.3.9",
-    "@angular/cli": "^20.3.9",
+    "@angular/cli": "^20.3.13",
     "@angular/compiler-cli": "^20.3.10",
     "@angular/language-service": "^20.3.10",
     "@capacitor/cli": "^7.4.4",
