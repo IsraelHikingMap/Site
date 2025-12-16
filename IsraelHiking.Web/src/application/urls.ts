@@ -41,6 +41,6 @@ export class Urls {
     public static readonly HEATMAP_TILES_ADDRESS =
         "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/OSM_traces.json";
 
-    public static readonly ANDROID_APP_URL = "https://play.google.com/store/apps/details?id=il.org.osm.israelhiking&hl=en";
+    public static readonly ANDROID_APP_URL = "https://play.google.com/store/apps/details?id=il.org.osm.israelhiking";
     public static readonly IOS_APP_URL = "https://apps.apple.com/us/app/mapeak/id6751947875";
 }
