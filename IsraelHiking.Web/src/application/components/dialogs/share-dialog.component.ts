@@ -12,12 +12,12 @@ import { MatTooltip } from "@angular/material/tooltip";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { Share } from "@capacitor/share";
-import { Angulartics2OnModule } from "angulartics2";
 import { LngLatLike, Map, StyleSpecification } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 
 import { LayersComponent } from "../map/layers.component";
 import { RoutesComponent } from "../map/routes.component";
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { DataContainerService } from "../../services/data-container.service";

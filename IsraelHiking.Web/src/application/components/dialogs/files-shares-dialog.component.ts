@@ -5,10 +5,10 @@ import { CdkScrollable } from "@angular/cdk/scrolling";
 
 import { MatHint } from "@angular/material/form-field";
 import { MatDialog, MatDialogRef, MatDialogTitle, MatDialogClose, MatDialogContent } from "@angular/material/dialog";
-import { Angulartics2OnModule } from "angulartics2";
 import { every } from "lodash-es";
 
 import { ShareDialogComponent } from "./share-dialog.component";
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { DataContainerService } from "../../services/data-container.service";
 import { FileService, FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";

@@ -2,8 +2,8 @@ import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton, MatAnchor } from "@angular/material/button";
 import { MatDialog, MatDialogTitle, MatDialogClose, MatDialogActions } from "@angular/material/dialog";
-import { Angulartics2OnModule } from "angulartics2";
 
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 
 @Component({

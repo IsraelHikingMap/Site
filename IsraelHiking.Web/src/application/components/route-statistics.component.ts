@@ -5,7 +5,6 @@ import { Dir } from "@angular/cdk/bidi";
 import { MatGridList, MatGridTile } from "@angular/material/grid-list";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatButton } from "@angular/material/button";
-import { Angulartics2OnModule } from "angulartics2";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { SourceDirective, GeoJSONSourceComponent, LayerComponent } from "@maplibre/ngx-maplibre-gl";
 import { interval } from "rxjs";
@@ -16,6 +15,7 @@ import * as d3 from "d3";
 import type { Selection, ScaleContinuousNumeric } from "d3";
 import type { Immutable } from "immer";
 
+import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStatisticsService, RouteStatistics, RouteStatisticsPoint } from "../services/route-statistics.service";
@@ -884,7 +884,7 @@ export class RouteStatisticsComponent implements OnInit {
         this.setViewStatisticsValues(this.statistics);
     }
 
-    private getRouteForChart(): { latlngs: Immutable<LatLngAltTime[]>; color: string; weight: number} | null {
+    private getRouteForChart(): { latlngs: Immutable<LatLngAltTime[]>; color: string; weight: number } | null {
         const currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
         const currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
         const closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);
@@ -1000,7 +1000,7 @@ export class RouteStatisticsComponent implements OnInit {
             b = Math.floor(255 * ratio);
         }
         // eslint-disable-next-line
-        return  "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
 
     private getMouseOrTouchChartXPosition(e: Event): number {

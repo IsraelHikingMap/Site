@@ -6,10 +6,10 @@ import { AsyncPipe } from "@angular/common";
 import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatDialogRef, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
-import { Angulartics2OnModule } from "angulartics2";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";

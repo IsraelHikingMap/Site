@@ -2,8 +2,8 @@ import { Component, inject, input } from "@angular/core";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { MatTooltip } from "@angular/material/tooltip";
-import { Angulartics2OnModule } from "angulartics2";
 
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { LayersService } from "../../services/layers.service";
 import { ResourcesService } from "../../services/resources.service";
 import { FitBoundsService } from "../../services/fit-bounds.service";

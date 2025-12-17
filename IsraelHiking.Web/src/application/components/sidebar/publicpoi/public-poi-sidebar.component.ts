@@ -11,12 +11,12 @@ import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from "@angular/m
 import { FormsModule } from "@angular/forms";
 import { Router, NavigationEnd } from "@angular/router";
 import { Share } from "@capacitor/share";
-import { Angulartics2OnModule } from "angulartics2";
 import { filter, skip } from "rxjs";
 import { Store } from "@ngxs/store";
 
 import { PublicPointOfInterestEditComponent } from "./public-poi-edit.component";
 import { ImageScrollerComponent } from "./image-scroller.component";
+import { Angulartics2OnModule } from "../../../directives/gtag.directive";
 import { ResourcesService } from "../../../services/resources.service";
 import { PoiService, PoiSocialLinks } from "../../../services/poi.service";
 import { MapeakTitleService } from "../../../services/mapeak-title.service";
@@ -94,7 +94,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         this.router.events.pipe(
             takeUntilDestroyed(),
             filter(event => event instanceof NavigationEnd && event.url.startsWith(RouteStrings.ROUTE_POI))
-          ).subscribe(async () => {
+        ).subscribe(async () => {
             this.isLoading = true;
             await this.initOrUpdate();
         });
@@ -122,7 +122,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     }
 
     private async initOrUpdate() {
-        
+
         const routeUrlInfo = this.getRouteUrlInfo();
         await this.fillUiWithData(routeUrlInfo);
         // change this only after we get the full data

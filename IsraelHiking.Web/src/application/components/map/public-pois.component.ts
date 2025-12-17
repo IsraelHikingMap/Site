@@ -3,7 +3,6 @@ import { Component, DestroyRef, inject, OnInit } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
-import { Angulartics2OnModule } from "angulartics2";
 import { MatDialog } from "@angular/material/dialog";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router } from "@angular/router";
@@ -15,6 +14,7 @@ import type { Immutable } from "immer";
 import { CoordinatesComponent } from "../coordinates.component";
 import { ClusterOverlayComponent } from "../overlays/cluster-overlay.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { PoiService } from "../../services/poi.service";
 import { RouteStrings } from "../../services/hash.service";
 import { ResourcesService } from "../../services/resources.service";
@@ -109,7 +109,7 @@ export class PublicPoisComponent implements OnInit {
         features.sort((a, b) => {
             if (GeoJSONUtils.hasExtraData(a, language) !== GeoJSONUtils.hasExtraData(b, language)) {
                 return GeoJSONUtils.hasExtraData(a, language) ? -1 : 1;
-            } 
+            }
             return GeoJSONUtils.getTitle(a, language).localeCompare(GeoJSONUtils.getTitle(b, language));
         });
         this.clusterFeatures = features;

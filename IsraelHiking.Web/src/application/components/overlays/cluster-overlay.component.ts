@@ -3,8 +3,8 @@ import { Router } from "@angular/router";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
 import { MatButton } from "@angular/material/button";
-import { Angulartics2OnModule } from "angulartics2";
 
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { RouteStrings } from "../../services/hash.service";
 import { GeoJSONUtils } from "../../services/geojson-utils";

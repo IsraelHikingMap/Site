@@ -2,9 +2,9 @@ import { Component, inject, input } from "@angular/core";
 import { MatExpansionPanel, MatExpansionPanelHeader } from "@angular/material/expansion";
 import { MatButton } from "@angular/material/button";
 import { NgClass } from "@angular/common";
-import { Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
 
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import {
     CollapseGroupAction,
@@ -26,7 +26,6 @@ export class CategoriesGroupComponent {
     public readonly resources = inject(ResourcesService);
 
     private readonly store = inject(Store);
-        
 
     public expand() {
         this.store.dispatch(new ExpandGroupAction(this.categoriesGroup().type));

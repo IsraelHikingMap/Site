@@ -5,8 +5,8 @@ import { MatButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { FormsModule } from "@angular/forms";
-import { Angulartics2OnModule } from "angulartics2";
 
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { AuthorizationService } from "../../services/authorization.service";
 import { ToastService } from "../../services/toast.service";

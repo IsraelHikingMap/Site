@@ -54,7 +54,7 @@ export class LoggingService {
             .orderBy("date")
             .primaryKeys();
         // keep only last MAX_LOG_LINES - 10% to reduce the need to do it every time.
-        keysToDelete.splice(keysToDelete.length - LoggingService.MAX_LOG_LINES, LoggingService.MAX_LOG_LINES * 0.9);       
+        keysToDelete.splice(keysToDelete.length - LoggingService.MAX_LOG_LINES, LoggingService.MAX_LOG_LINES * 0.9);
         this.deletingLogsInProgress = true;
         try {
             await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).bulkDelete(keysToDelete);
@@ -64,6 +64,9 @@ export class LoggingService {
     }
 
     private writeToStorage(logLine: LogLine): void {
+        if (!this.loggingDatabase) {
+            return;
+        }
         this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).add({
             message: logLine.message,
             date: logLine.date,

@@ -6,9 +6,9 @@ import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
 import { MatButton } from "@angular/material/button";
 import { MatDialog, MatDialogConfig, MatDialogRef, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
 import { AnimationOptions, LottieComponent } from "ngx-lottie";
-import { Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
 
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { StopShowingIntroAction } from "../../reducers/configuration.reducer";
 import { AVAILABLE_LANGUAGES } from "../../reducers/initial-state";
