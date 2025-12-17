@@ -25,7 +25,6 @@ import { OverpassTurboService } from "./overpass-turbo.service";
 import { ApplicationUpdateService } from "./application-update.service";
 import { LocationService } from "./location.service";
 import { HashService } from "./hash.service";
-import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import type { ApplicationState } from "../models";
 
 @Injectable()
@@ -53,11 +52,9 @@ export class ApplicationInitializeService {
     private readonly locationService = inject(LocationService);
     private readonly hashService = inject(HashService);
     private readonly store = inject(Store);
-    private readonly angulartics = inject(Angulartics2GoogleGlobalSiteTag);
 
     public async initialize() {
         try {
-            this.angulartics.startTracking();
             await this.loggingService.initialize();
             this.loggingService.info("---------------------------------------");
             this.loggingService.info("Starting Mapeak Application Initialization");
@@ -75,14 +72,14 @@ export class ApplicationInitializeService {
             if (this.runningContextService.isMobile
                 && !this.runningContextService.isCapacitor
                 && !this.runningContextService.isIFrame) {
-                    if (this.runningContextService.isFacebook) {
-                        FacebookWarningDialogComponent.openDialog(this.dialog);
-                    } else {
-                        UseAppDialogComponent.openDialog(this.dialog);
-                    }
+                if (this.runningContextService.isFacebook) {
+                    FacebookWarningDialogComponent.openDialog(this.dialog);
+                } else {
+                    UseAppDialogComponent.openDialog(this.dialog);
+                }
             } else if (!this.runningContextService.isIFrame
                 && this.store.selectSnapshot((s: ApplicationState) => s.configuration).isShowIntro) {
-                    IntroDialogComponent.openDialog(this.dialog, this.runningContextService);
+                IntroDialogComponent.openDialog(this.dialog, this.runningContextService);
             }
             this.poiService.initialize(); // do not wait for it to complete
             this.recordedRouteService.initialize();
@@ -100,8 +97,8 @@ export class ApplicationInitializeService {
                 alert("Sorry, this site does not support running FireFox in private mode...");
             } else {
                 alert("Ooopppss... We have encountered an unexpected failure. Please try again.\n" +
-                      "If that does not help, please take a screenshot and send it to support@mapeak.com\n" +
-                      `Init failed: ${(ex as Error).message}`);
+                    "If that does not help, please take a screenshot and send it to support@mapeak.com\n" +
+                    `Init failed: ${(ex as Error).message}`);
             }
             this.loggingService.error(`Failed Mapeak Application Initialization: ${(ex as Error).message}`);
         }

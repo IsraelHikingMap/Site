@@ -10,12 +10,12 @@ import { AsyncPipe } from "@angular/common";
 import { MatSlider, MatSliderThumb } from "@angular/material/slider";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
-import { Angulartics2OnModule } from "angulartics2";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 
 import { AutomaticLayerPresentationComponent } from "../../map/automatic-layer-presentation.component";
-import { NameInUseValidatorDirective } from "../../../directives/name-in-use-validator.directive";
 import { LayerBaseDialogComponent } from "./layer-base-dialog.component";
+import { NameInUseValidatorDirective } from "../../../directives/name-in-use-validator.directive";
+import { Angulartics2OnModule } from "../../../directives/gtag.directive";
 import type { LayerData } from "../../../models";
 
 @Component({

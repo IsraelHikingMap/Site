@@ -1,8 +1,7 @@
 import { Component, inject } from "@angular/core";
 import { MatTooltip } from "@angular/material/tooltip";
 
-import { Angulartics2OnModule } from "angulartics2";
-
+import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { HashService } from "../services/hash.service";
 import { ResourcesService } from "../services/resources.service";
 import { RunningContextService } from "../services/running-context.service";

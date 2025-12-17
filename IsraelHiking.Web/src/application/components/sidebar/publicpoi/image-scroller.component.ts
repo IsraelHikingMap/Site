@@ -2,10 +2,10 @@ import { Component, OnChanges, SimpleChanges, input, inject, output } from "@ang
 import { AsyncPipe } from "@angular/common";
 import { MatAnchor, MatButton } from "@angular/material/button";
 import { Dir } from "@angular/cdk/bidi";
-import { Angulartics2OnModule } from "angulartics2";
 import { AnimationOptions, LottieComponent } from "ngx-lottie";
 
 import { ImageCaptureDirective } from "../../../directives/image-capture.directive";
+import { Angulartics2OnModule } from "../../../directives/gtag.directive";
 import { OfflineImagePipe } from "../../../pipes/offline-image.pipe";
 import { ResourcesService } from "../../../services/resources.service";
 import { FileService } from "../../../services/file.service";

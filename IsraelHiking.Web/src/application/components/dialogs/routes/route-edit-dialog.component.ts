@@ -10,9 +10,9 @@ import { MatSlider, MatSliderThumb } from "@angular/material/slider";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MAT_DIALOG_DATA, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
-import { Angulartics2OnModule } from "angulartics2";
 
 import { RouteBaseDialogComponent } from "./route-base-dialog.component";
+import { Angulartics2OnModule } from "../../../directives/gtag.directive";
 import { FileService } from "../../../services/file.service";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
 import { SpatialService } from "../../../services/spatial.service";

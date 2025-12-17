@@ -6,7 +6,6 @@ import { MatButton } from "@angular/material/button";
 import { NgClass, AsyncPipe } from "@angular/common";
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from "@angular/material/expansion";
 import { MatTooltip } from "@angular/material/tooltip";
-import { Angulartics2OnModule } from "angulartics2";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
@@ -19,6 +18,7 @@ import { OverlayEditDialogComponent } from "../dialogs/layers/overlay-edit-dialo
 import { RouteAddDialogComponent } from "../dialogs/routes/route-add-dialog.component";
 import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.component";
 import { OfflineManagementDialogComponent } from "../dialogs/offline-management-dialog.component";
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers.service";
 import { SidebarService } from "../../services/sidebar.service";

@@ -9,7 +9,6 @@ import {
 } from "@angular/core";
 import { Router } from "@angular/router";
 import { MatButton } from "@angular/material/button";
-import { Angulartics2OnModule } from "angulartics2";
 import { MatTooltip } from "@angular/material/tooltip";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
@@ -24,6 +23,7 @@ import { SourceDirective, GeoJSONSourceComponent, FeatureComponent, LayerCompone
 import { Store } from "@ngxs/store";
 
 import { CoordinatesComponent } from "./coordinates.component";
+import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStrings } from "../services/hash.service";
 import { RoutingProvider } from "../services/routing.provider";
@@ -144,7 +144,7 @@ export class SearchComponent {
 
     public focusOnSearchInput() {
         // ChangeDetectionRef doesn't work well for some reason...
-        setTimeout(() => {            
+        setTimeout(() => {
             this.searchFromInput().nativeElement.focus();
             this.searchFromInput().nativeElement.select();
         }, 100);

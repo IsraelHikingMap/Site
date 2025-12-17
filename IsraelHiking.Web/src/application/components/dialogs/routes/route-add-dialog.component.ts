@@ -10,9 +10,9 @@ import { NgStyle } from "@angular/common";
 import { MatSlider, MatSliderThumb } from "@angular/material/slider";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatTooltip } from "@angular/material/tooltip";
-import { Angulartics2OnModule } from "angulartics2";
 
 import { RouteBaseDialogComponent } from "./route-base-dialog.component";
+import { Angulartics2OnModule } from "../../../directives/gtag.directive";
 import { AddRouteAction } from "../../../reducers/routes.reducer";
 
 @Component({

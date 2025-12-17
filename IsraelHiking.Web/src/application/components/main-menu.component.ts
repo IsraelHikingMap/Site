@@ -5,7 +5,6 @@ import { MatButton } from "@angular/material/button";
 import { MatMenuTrigger, MatMenu, MatMenuContent, MatMenuItem } from "@angular/material/menu";
 import { Dir } from "@angular/cdk/bidi";
 import { MatDialog } from "@angular/material/dialog";
-import { Angulartics2OnModule } from "angulartics2";
 import { timer } from "rxjs";
 import { Device } from "@capacitor/device";
 import { App } from "@capacitor/app";
@@ -34,6 +33,7 @@ import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.com
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 import { FilesSharesDialogComponent } from "./dialogs/files-shares-dialog.component";
 import { SendReportDialogComponent } from "./dialogs/send-report-dialog.component";
+import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { SetUIComponentVisibilityAction } from "../reducers/ui-components.reducer";
 import { SetAgreeToTermsAction } from "../reducers/user.reducer";
 import type { UserInfo, ApplicationState } from "../models";
@@ -65,7 +65,7 @@ export class MainMenuComponent {
     private readonly hashService = inject(HashService);
     private readonly purchaseService = inject(PurchaseService);
     private readonly store = inject(Store);
-    
+
     constructor() {
         this.store.select((state: ApplicationState) => state.userState.userInfo).pipe(takeUntilDestroyed()).subscribe(userInfo => this.userInfo = userInfo);
         this.store.select((state: ApplicationState) => state.uiComponentsState.drawingVisible).pipe(takeUntilDestroyed()).subscribe(v => this.drawingVisible = v);
@@ -104,7 +104,7 @@ export class MainMenuComponent {
             return;
         }
         if (!this.store.selectSnapshot((s: ApplicationState) => s.userState).agreedToTheTermsOfService) {
-            const component = this.dialog.open(TermsOfServiceDialogComponent, { width: "480px"});
+            const component = this.dialog.open(TermsOfServiceDialogComponent, { width: "480px" });
             component.afterClosed().subscribe((results: string) => {
                 if (results === "true") {
                     this.store.dispatch(new SetAgreeToTermsAction(true));
@@ -153,7 +153,7 @@ export class MainMenuComponent {
         const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
         const baseLayer = this.layersService.getSelectedBaseLayer();
         this.loggingService.info("--- Reporting an issue ---");
-        const subscription  = timer(8000, 8000).subscribe(() => {
+        const subscription = timer(8000, 8000).subscribe(() => {
             this.toastService.info(this.resources.notYet);
         });
         const logs = await this.loggingService.getLog();
@@ -194,7 +194,7 @@ export class MainMenuComponent {
             const logFileUri = await this.fileService.storeFileToCache("log.txt", logs);
             const infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
-            
+
             EmailComposer.open({
                 to: ["support@mapeak.com"],
                 subject: subject,
@@ -255,7 +255,7 @@ export class MainMenuComponent {
     public isShowOrderButton() {
         return this.runningContextService.isCapacitor &&
             (this.purchaseService.isPurchaseAvailable() ||
-            this.purchaseService.isRenewAvailable());
+                this.purchaseService.isRenewAvailable());
     }
 
     public orderOfflineMaps() {

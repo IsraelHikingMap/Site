@@ -4,10 +4,10 @@ import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
-import { Angulartics2OnModule } from "angulartics2";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
+import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { ResourcesService } from "../services/resources.service";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { ToastService } from "../services/toast.service";

@@ -4,9 +4,9 @@ import { Store } from "@ngxs/store";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { type Map, type MapMouseEvent, MercatorCoordinate, type StyleSpecification } from "maplibre-gl";
 import { MatButton } from "@angular/material/button";
-import { Angulartics2OnModule } from "angulartics2";
 
 import { AutomaticLayerPresentationComponent } from "../map/automatic-layer-presentation.component";
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
 import { DefaultStyleService } from "../../services/default-style.service";
@@ -30,7 +30,7 @@ export class OfflineManagementDialogComponent {
     public downloadedTiles: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
     public currentLocation: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
     public baseLayerData: EditableLayer;
-    public selectedTileXY: {tileX: number; tileY: number} = null;
+    public selectedTileXY: { tileX: number; tileY: number } = null;
 
     private map: Map;
 
@@ -53,7 +53,7 @@ export class OfflineManagementDialogComponent {
         this.offlineMapStyle = this.defaultStyleService.getStyleWithPlaceholders();
         this.baseLayerData = this.layersService.getSelectedBaseLayer();
         if (this.baseLayerData.key !== HIKING_MAP && this.baseLayerData.key !== MTB_MAP) {
-            this.baseLayerData = {...DEFAULT_BASE_LAYERS[0]};
+            this.baseLayerData = { ...DEFAULT_BASE_LAYERS[0] };
         }
         const stateLocation = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
         this.currentLocation = {
@@ -78,8 +78,8 @@ export class OfflineManagementDialogComponent {
     private initializeCenterAndZoomFromDownloadingTile() {
         const dowloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.offlineState.downloadedTiles) ?? {};
         const location = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
-        const locationTile = SpatialService.toTile({ lat: location.latitude, lng: location.longitude}, TILES_ZOOM);
-        
+        const locationTile = SpatialService.toTile({ lat: location.latitude, lng: location.longitude }, TILES_ZOOM);
+
         let minTileX = Number.MAX_SAFE_INTEGER;
         let maxTileX = Number.MIN_SAFE_INTEGER;
         let minTileY = Number.MAX_SAFE_INTEGER;
@@ -95,7 +95,7 @@ export class OfflineManagementDialogComponent {
             maxTileY = Math.max(maxTileY, tileY);
         }
         this.map.flyTo({
-            center: SpatialService.toCoordinate(SpatialService.fromTile({x: (minTileX + maxTileX + 1) / 2, y: (minTileY + maxTileY + 1) / 2}, TILES_ZOOM)),
+            center: SpatialService.toCoordinate(SpatialService.fromTile({ x: (minTileX + maxTileX + 1) / 2, y: (minTileY + maxTileY + 1) / 2 }, TILES_ZOOM)),
             zoom: Math.max(1, TILES_ZOOM - Math.log2(Math.max(maxTileX - minTileX + 1, maxTileY - minTileY + 1)) - 1)
         });
     }
@@ -103,7 +103,7 @@ export class OfflineManagementDialogComponent {
     public async downloadSelected() {
         const { tileX, tileY } = this.selectedTileXY;
         this.map.flyTo({
-            center: SpatialService.toCoordinate(SpatialService.fromTile({x: tileX + 0.5, y: tileY + 0.5}, TILES_ZOOM)),
+            center: SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX + 0.5, y: tileY + 0.5 }, TILES_ZOOM)),
             zoom: TILES_ZOOM - 1
         });
         this.selectedTileXY = null;
@@ -132,7 +132,7 @@ export class OfflineManagementDialogComponent {
             this.updateDownloadedTiles();
             this.updateSelectedTile();
         }, 3000)
-        
+
     }
 
 
@@ -143,11 +143,11 @@ export class OfflineManagementDialogComponent {
                 type: "Polygon",
                 coordinates: [
                     [
-                        SpatialService.toCoordinate(SpatialService.fromTile({x: tileX, y: tileY}, TILES_ZOOM)),
-                        SpatialService.toCoordinate(SpatialService.fromTile({x: tileX + progress, y: tileY}, TILES_ZOOM)),
-                        SpatialService.toCoordinate(SpatialService.fromTile({x: tileX + progress, y: tileY + 1}, TILES_ZOOM)),
-                        SpatialService.toCoordinate(SpatialService.fromTile({x: tileX, y: tileY + 1}, TILES_ZOOM)),
-                        SpatialService.toCoordinate(SpatialService.fromTile({x: tileX, y: tileY}, TILES_ZOOM)),
+                        SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX, y: tileY }, TILES_ZOOM)),
+                        SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX + progress, y: tileY }, TILES_ZOOM)),
+                        SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX + progress, y: tileY + 1 }, TILES_ZOOM)),
+                        SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX, y: tileY + 1 }, TILES_ZOOM)),
+                        SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX, y: tileY }, TILES_ZOOM)),
                     ],
                 ],
             },
@@ -169,11 +169,11 @@ export class OfflineManagementDialogComponent {
             if (this.downloadingTileXY() == null && tileXDownloaded === tileX && tileYDownloaded === tileY) {
                 continue; // Skip the center tile if not downloading
             }
-            
+
             const downloadedDate = this.offlineFilesDownloadService.getLastModifiedDate(downloadedTiles[key]);
-            const label = downloadedDate.getFullYear() + "\n" + 
-                (downloadedDate.getMonth() + 1).toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), {minimumIntegerDigits: 2}) + "\n" + 
-                downloadedDate.getDate().toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), {minimumIntegerDigits: 2});
+            const label = downloadedDate.getFullYear() + "\n" +
+                (downloadedDate.getMonth() + 1).toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 }) + "\n" +
+                downloadedDate.getDate().toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 });
             const feature = this.tileCoordinatesToPolygon(tileXDownloaded, tileYDownloaded, label, 1);
             feature.properties.color = this.offlineFilesDownloadService.isTileCompatible(downloadedTiles[key]) ? "blue" : "red";
             features.push(feature);
@@ -201,7 +201,7 @@ export class OfflineManagementDialogComponent {
         const fillFeature = this.tileCoordinatesToPolygon(
             this.downloadingTileXY().tileX,
             this.downloadingTileXY().tileY,
-            "", 
+            "",
             progress / 100.0,
         );
         fillFeature.properties.fill = "true";
@@ -233,7 +233,7 @@ export class OfflineManagementDialogComponent {
         this.updateSelectedTile();
         this.updateDownloadedTiles();
         this.map.flyTo({
-            center: SpatialService.toCoordinate(SpatialService.fromTile({x: tileX + 0.5, y: tileY + 0.5}, TILES_ZOOM)),
+            center: SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX + 0.5, y: tileY + 0.5 }, TILES_ZOOM)),
             zoom: TILES_ZOOM - 1
         });
     }

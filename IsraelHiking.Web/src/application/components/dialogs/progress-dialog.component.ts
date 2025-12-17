@@ -5,8 +5,8 @@ import { MatProgressBar } from "@angular/material/progress-bar";
 import { DecimalPipe } from "@angular/common";
 import { MatButton } from "@angular/material/button";
 import { MatDialogRef, MatDialog, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions, MatDialogClose } from "@angular/material/dialog";
-import { Angulartics2OnModule } from "angulartics2";
 
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { LoggingService } from "../../services/logging.service";
 

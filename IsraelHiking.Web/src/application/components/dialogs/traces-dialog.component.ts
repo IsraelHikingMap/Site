@@ -12,13 +12,13 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { MatTooltip } from "@angular/material/tooltip";
 import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
-import { Angulartics2OnModule } from "angulartics2";
 import { InfiniteScrollDirective } from "ngx-infinite-scroll";
 import { orderBy, take } from "lodash-es";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { SecuredImageComponent } from "../secured-image.component";
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { OsmAddressesService } from "../../services/osm-addresses.service";
