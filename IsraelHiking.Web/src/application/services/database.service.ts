@@ -90,7 +90,7 @@ export class DatabaseService {
 
         this.store.reset(storedState);
         this.appRef.whenStable().then(() => {
-            this.store.select(s => s).pipe(debounceTime(1600)).subscribe((state: ApplicationState) => {
+            this.store.select(s => s).pipe(debounceTime(2000)).subscribe((state: ApplicationState) => {
                 this.updateState(state);
             });
         });
