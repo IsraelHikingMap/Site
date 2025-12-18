@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildren } from "@angular/core";
+import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildren, ApplicationRef } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { NgStyle } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
@@ -49,6 +49,7 @@ export class MainMapComponent {
 
     public location: LocationState;
     public initialStyle: StyleSpecification;
+    public isStable: boolean = false;
 
     public readonly resources = inject(ResourcesService);
 
@@ -59,6 +60,7 @@ export class MainMapComponent {
     private readonly loggingService = inject(LoggingService);
     private readonly dialog = inject(MatDialog);
     private readonly store = inject(Store);
+    private readonly appRef = inject(ApplicationRef);
 
     private addedControls: IControl[] = [];
 
@@ -66,6 +68,9 @@ export class MainMapComponent {
         this.location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
         this.initialStyle = this.defaultStyleService.getStyleWithPlaceholders();
         this.titleService.clear();
+        this.appRef.whenStable().then(() => {
+            this.isStable = true;
+        });
     }
 
     public moveEnd(e: DragEvent) {
@@ -92,7 +97,7 @@ export class MainMapComponent {
             this.addedControls = [];
             for (const c of this.topStartControls()) {
                 const control = new CustomControl(c.nativeElement);
-                this.mapComponent().mapInstance.addControl(control,  "top-" + start as ControlPosition);
+                this.mapComponent().mapInstance.addControl(control, "top-" + start as ControlPosition);
                 this.addedControls.push(control);
             }
             for (const c of this.topEndControls()) {
@@ -100,7 +105,7 @@ export class MainMapComponent {
                 this.mapComponent().mapInstance.addControl(new CustomControl(c.nativeElement), "top-" + end as ControlPosition);
                 this.addedControls.push(control);
             }
-            const control = new ScaleControl({ unit: "meter" as Unit});
+            const control = new ScaleControl({ unit: "meter" as Unit });
             this.mapComponent().mapInstance.addControl(control, "bottom-" + end as ControlPosition);
             this.addedControls.push(control);
 

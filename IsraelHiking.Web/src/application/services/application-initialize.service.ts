@@ -25,6 +25,7 @@ import { OverpassTurboService } from "./overpass-turbo.service";
 import { ApplicationUpdateService } from "./application-update.service";
 import { LocationService } from "./location.service";
 import { HashService } from "./hash.service";
+import { AnalyticsService } from "./analytics.service";
 import type { ApplicationState } from "../models";
 
 @Injectable()
@@ -51,6 +52,7 @@ export class ApplicationInitializeService {
     private readonly applicationUpdateService = inject(ApplicationUpdateService);
     private readonly locationService = inject(LocationService);
     private readonly hashService = inject(HashService);
+    private readonly analyticsService = inject(AnalyticsService);
     private readonly store = inject(Store);
 
     public async initialize() {
@@ -59,6 +61,7 @@ export class ApplicationInitializeService {
             this.loggingService.info("---------------------------------------");
             this.loggingService.info("Starting Mapeak Application Initialization");
             await this.databaseService.initialize();
+            this.analyticsService.initialize();
             this.overpassTurboService.initialize();
             this.screenService.initialize();
             await this.resources.initialize();
@@ -91,6 +94,9 @@ export class ApplicationInitializeService {
             await this.loggingService.info("Finished Mapeak Application Initialization");
         } catch (ex) {
             if (this.runningContextService.isIFrame) {
+                return;
+            }
+            if (typeof alert === "undefined") {
                 return;
             }
             if ((ex as Error).message.indexOf("A mutation operation was attempted on a database that did not allow mutations") !== -1) {

@@ -17,12 +17,10 @@ import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
+import { AnalyticsService } from "../../services/analytics.service";
 import { MTB_MAP, HIKING_MAP } from "../../reducers/initial-state";
 import type { ApplicationState } from "../../models";
 import legendSectionsJson from "../../../content/legend/legend.json";
-
-declare let gtag: Function;
-
 
 export type LegendSection = {
     key: keyof ResourcesService;
@@ -48,6 +46,7 @@ export class InfoSidebarComponent {
     private readonly sidebarService = inject(SidebarService);
     private readonly layersService = inject(LayersService);
     private readonly runningContext = inject(RunningContextService);
+    private readonly analyticsService = inject(AnalyticsService);
     private readonly store = inject(Store);
 
     constructor() {
@@ -68,7 +67,7 @@ export class InfoSidebarComponent {
         if (tabIndex === 1) {
             this.initalizeLegendSections();
         }
-        gtag("event", (tabIndex === 1 ? "Legend" : "About") + " tab selected", { event_category: "info" });
+        this.analyticsService.trackEvent("info", (tabIndex === 1 ? "Legend" : "About") + " tab selected");
     }
 
     public openSection(section: LegendSection) {

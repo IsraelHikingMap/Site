@@ -5,8 +5,8 @@
 
 export const environment = {
     production: false,
-    baseAddress: window.location.origin,
-    baseApiAddress: window.location.origin + "/api/",
+    baseAddress: typeof window !== "undefined" ? window.location.origin : "http://127.0.0.1:5000",
+    baseApiAddress: typeof window !== "undefined" ? window.location.origin + "/api/" : "http://127.0.0.1:5000" + "/api/",
     baseTilesAddress: "https://mapeak.com",
     isCapacitor: false
 };

@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { ApplicationRef, inject, Injectable } from "@angular/core";
 import { BehaviorSubject, firstValueFrom } from "rxjs";
 import { timeout } from "rxjs/operators";
 import { HttpClient } from "@angular/common/http";
@@ -27,6 +27,7 @@ export class ConnectionService {
 
     private readonly http = inject(HttpClient);
     private readonly loggingService = inject(LoggingService);
+    private readonly appRef = inject(ApplicationRef);
 
     public stateChanged = new BehaviorSubject(true);
 
@@ -34,10 +35,15 @@ export class ConnectionService {
     private intervalId: ReturnType<typeof setInterval>;
 
     constructor() {
+        if (typeof window === "undefined") {
+            return;
+        }
         window.addEventListener("online", () => this.updateInternetAccessAndEmitIfNeeded())
         window.addEventListener("offline", () => this.updateInternetAccessAndEmitIfNeeded())
-        this.initializeDynamicTimer(ConnectionService.HEART_BREAK_INTERVAL);
-        this.updateInternetAccessAndEmitIfNeeded();
+        this.appRef.whenStable().then(() => {
+            this.initializeDynamicTimer(ConnectionService.HEART_BREAK_INTERVAL);
+            this.updateInternetAccessAndEmitIfNeeded();
+        });
     }
 
     private async getInternetStatusNow(): Promise<boolean> {
@@ -73,10 +79,10 @@ export class ConnectionService {
             this.isOnline = currentResponse;
             this.loggingService.info("[Connection] Online state changed, online is: " + this.isOnline);
             this.stateChanged.next(this.isOnline);
-            this.initializeDynamicTimer(this.isOnline 
+            this.initializeDynamicTimer(this.isOnline
                 ? ConnectionService.HEART_BREAK_INTERVAL
                 : ConnectionService.HEART_BREAK_RETRY_INTERVAL);
-            
+
         }
     }
 }

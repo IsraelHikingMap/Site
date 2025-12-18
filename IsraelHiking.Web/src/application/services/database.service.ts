@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Injectable, ApplicationRef } from "@angular/core";
 import { HttpClient, HttpResponse } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { firstValueFrom } from "rxjs";
@@ -46,6 +46,7 @@ export class DatabaseService {
     private readonly runningContext = inject(RunningContextService);
     private readonly pmTilesService = inject(PmTilesService);
     private readonly httpClient = inject(HttpClient);
+    private readonly appRef = inject(ApplicationRef);
     private readonly store = inject(Store);
 
     public async initialize() {
@@ -88,15 +89,17 @@ export class DatabaseService {
         }
 
         this.store.reset(storedState);
-        this.store.select(s => s).pipe(debounceTime(2000)).subscribe((state: ApplicationState) => {
-            this.updateState(state);
+        this.appRef.whenStable().then(() => {
+            this.store.select(s => s).pipe(debounceTime(2000)).subscribe((state: ApplicationState) => {
+                this.updateState(state);
+            });
         });
     }
 
     private initCustomTileLoadFunction() {
         addProtocol("custom", async (params, _abortController) => {
             const data = await this.pmTilesService.getTileByUrl(params.url);
-            return {data};
+            return { data };
         });
         addProtocol("slice", async (params, _abortController) => {
             // slice://mapeak.com/vector/data/IHM-schema/{z}/{x}/{y}.mvt
@@ -116,7 +119,7 @@ export class DatabaseService {
                 }
                 const data = response.body;
                 this.loggingService.debug(`[Database] Successfully fetched: ${params.url}`);
-                return {data, cacheControl: response.headers.get("Cache-Control"), expires: response.headers.get("Expires")};
+                return { data, cacheControl: response.headers.get("Cache-Control"), expires: response.headers.get("Expires") };
             } catch (ex) {
                 this.loggingService.debug(`[Database] Failed fetching with error: ${(ex as any).message}: ${params.url}`);
                 // Timeout or other error

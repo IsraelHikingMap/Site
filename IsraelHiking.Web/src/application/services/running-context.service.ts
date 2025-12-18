@@ -7,14 +7,14 @@ import { ConnectionService } from "./connection.service";
 @Injectable()
 export class RunningContextService {
     public readonly isMobile: boolean = false;
-    public readonly isIFrame = window.self !== window.top;
+    public readonly isIFrame = typeof window !== "undefined" && window.self !== window.top;
     public readonly isCapacitor = environment.isCapacitor;
     public readonly isIos = /^(iPhone|iPad|iPod)/.test(navigator.platform);
     public readonly isProduction = environment.production;
     public readonly isFacebook: boolean;
     public isOnline: boolean = true;
     private readonly connectionService = inject(ConnectionService);
-    
+
     constructor() {
         if (!this.isIos && this.isCapacitor) {
             this.isIos = Capacitor.getPlatform() === "ios";
