@@ -1,0 +1,10 @@
+﻿<a [href]="getHref()" [target]="target" class="cursor-pointer link-container maplibregl-ctrl" matTooltip="{{getTooltipText()}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Mapeak-Link" angularticsAction="Mapeak-Link click">
+  @if (!isIFrameMobile()) {
+    <img src="content/logo.png" height="64" class="logo" />
+  } @else {
+    <div class="flex flex-col items-center open-in-app">
+      <img src="content/open-in-app.png" height="128"/>
+      <span>{{resources.openInApp}}</span>
+    </div>
+  }
+</a>

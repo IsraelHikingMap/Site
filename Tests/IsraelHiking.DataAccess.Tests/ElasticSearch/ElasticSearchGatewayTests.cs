@@ -97,18 +97,6 @@ public class ElasticSearchGatewayTests
         Assert.IsNull(results);
     }
 
-        
-        
-    [TestMethod]
-    [Ignore]
-    public void SetIndex_ShouldReturnResults()
-    {
-        _gateway.AddUrl(new ShareUrl {Id = "123", OsmUserId = "789"});
-        _ = _gateway.GetUrlsByUser("789").Result;
-        _ = _gateway.GetUrlById("123").Result;
-        _gateway.Delete(new ShareUrl {Id = "123", OsmUserId = "456"});
-    }
-
     [TestMethod]
     [Ignore]
     public void GetContainerName_MultipleCoordinates_ShouldGetOne()
@@ -183,15 +171,6 @@ public class ElasticSearchGatewayTests
                 AllExternalSources = true,
             }
         }).Wait();
-    }
-
-    [TestMethod]
-    [Ignore]
-    public void GetUrlTimestampById_ShouldSGetIt()
-    {
-        var results = _gateway.GetUrlTimestampById("mXgPc5nohX").Result;
-
-        Assert.IsTrue(results > DateTime.MinValue);
     }
         
     [TestMethod]

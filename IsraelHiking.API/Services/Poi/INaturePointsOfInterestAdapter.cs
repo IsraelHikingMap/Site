@@ -2,7 +2,6 @@
 using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -19,7 +18,7 @@ namespace IsraelHiking.API.Services.Poi;
 public class INaturePointsOfInterestAdapter : IPointsOfInterestAdapter
 {
     private readonly IINatureGateway _iNatureGateway;
-    private readonly IShareUrlsRepository _repository;
+    private readonly IShareUrlGateway _shareUrlGateway;
     private readonly IDataContainerConverterService _dataContainerConverterService;
     private readonly ILogger _logger;
 
@@ -28,15 +27,15 @@ public class INaturePointsOfInterestAdapter : IPointsOfInterestAdapter
     /// </summary>
     /// <param name="dataContainerConverterService"></param>
     /// <param name="iNatureGateway"></param>
-    /// <param name="repository"></param>
+    /// <param name="shareUrlGateway"></param>
     /// <param name="logger"></param>
     public INaturePointsOfInterestAdapter(IDataContainerConverterService dataContainerConverterService,
         IINatureGateway iNatureGateway,
-        IShareUrlsRepository repository,
+        IShareUrlGateway shareUrlGateway,
         ILogger logger) 
     {
         _iNatureGateway = iNatureGateway;
-        _repository = repository;
+        _shareUrlGateway = shareUrlGateway;
         _dataContainerConverterService = dataContainerConverterService;
         _logger = logger;
     }
@@ -63,7 +62,7 @@ public class INaturePointsOfInterestAdapter : IPointsOfInterestAdapter
         {
             return;
         }
-        var share = await _repository.GetUrlById(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString());
+        var share = await _shareUrlGateway.GetUrlById(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString());
         if (share == null)
         {
             return;

@@ -68,7 +68,7 @@ public class GpxGeoJsonConverter : IGpxGeoJsonConverter
         var gpx = new GpxFile
         {
             Metadata = new GpxMetadata(collection.FirstOrDefault(f => f.Attributes.Exists(CREATOR))
-                ?.Attributes[CREATOR]?.ToString() ?? GpxDataContainerConverter.ISRAEL_HIKING_MAP + "_geojson")
+                ?.Attributes[CREATOR]?.ToString() ?? GpxDataContainerConverter.MAPEAK + "_geojson")
         };
         gpx.Waypoints.AddRange(collection.Where(f => f.Geometry is Point)
             .Select(CreateWaypoint)

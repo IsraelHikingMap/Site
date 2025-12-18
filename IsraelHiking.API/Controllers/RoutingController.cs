@@ -53,7 +53,7 @@ public class RoutingController : ControllerBase
                 Profile = profile,
             });
         feature.Attributes.AddOrUpdate("Name", $"Routing from {@from} to {to} profile type: {profile}");
-        feature.Attributes.AddOrUpdate("Creator", "IsraelHikingMap");
+        feature.Attributes.AddOrUpdate("Creator", "Mapeak");
         return Ok(new FeatureCollection{ feature });
     }
 

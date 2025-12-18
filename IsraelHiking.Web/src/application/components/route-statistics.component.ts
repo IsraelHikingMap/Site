@@ -5,10 +5,9 @@ import { Dir } from "@angular/cdk/bidi";
 import { MatGridList, MatGridTile } from "@angular/material/grid-list";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatButton } from "@angular/material/button";
-import { Angulartics2OnModule } from "angulartics2";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { SourceDirective, GeoJSONSourceComponent, LayerComponent } from "@maplibre/ngx-maplibre-gl";
-import { interval } from "rxjs";
+import { interval, switchMap, distinctUntilChanged, EMPTY } from "rxjs";
 import { regressionLoess } from "d3-regression";
 import { LineLayerSpecification } from "maplibre-gl";
 import { Store } from "@ngxs/store";
@@ -16,6 +15,7 @@ import * as d3 from "d3";
 import type { Selection, ScaleContinuousNumeric } from "d3";
 import type { Immutable } from "immer";
 
+import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStatisticsService, RouteStatistics, RouteStatisticsPoint } from "../services/route-statistics.service";
@@ -219,14 +219,15 @@ export class RouteStatisticsComponent implements OnInit {
             this.updateKmMarkers();
         });
         this.routeChanged();
-        // HM TODO: fix this!
-        //interval(1000).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-        //    const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
-        //    if (recordedRouteState.isRecording) {
-        //        const recordingStartTime = new Date(recordedRouteState.route.latlngs[0].timestamp).getTime();
-        //        this.updateDurationString((new Date().getTime() - recordingStartTime) / 1000);
-        //    }
-        //});
+        this.store.select((s: ApplicationState) => s.recordedRouteState.isRecording).pipe(
+            distinctUntilChanged(),
+            switchMap(isRecording => isRecording ? interval(1000) : EMPTY),
+            takeUntilDestroyed(this.destroyRef)
+        ).subscribe(() => {
+            const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
+            const recordingStartTime = new Date(recordedRouteState.route.latlngs[0].timestamp).getTime();
+            this.updateDurationString((new Date().getTime() - recordingStartTime) / 1000);
+        });
     }
 
     public changeState(state: string) {

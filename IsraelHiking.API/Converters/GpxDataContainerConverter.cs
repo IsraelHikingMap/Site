@@ -19,7 +19,7 @@ public class GpxDataContainerConverter : IGpxDataContainerConverter
     /// <summary>
     /// Gpx creator name
     /// </summary>
-    public const string ISRAEL_HIKING_MAP = "IsraelHikingMap";
+    public const string MAPEAK = "Mapeak";
 
     ///<inheritdoc />
     public GpxFile ToGpx(DataContainerPoco container)
@@ -28,7 +28,7 @@ public class GpxDataContainerConverter : IGpxDataContainerConverter
         var nonEmptyRoutes = containerRoutes.Where(r => r.Segments.SelectMany(s => s.Latlngs).Any());
         var gpx = new GpxFile
         {
-            Metadata = new GpxMetadata(ISRAEL_HIKING_MAP),
+            Metadata = new GpxMetadata(MAPEAK),
         };
         gpx.Waypoints.AddRange(containerRoutes.SelectMany(r => r.Markers).Select(ToGpxWaypoint));
         gpx.Tracks.AddRange(nonEmptyRoutes.Select(r => new GpxTrack()

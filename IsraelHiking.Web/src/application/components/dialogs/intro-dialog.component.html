@@ -28,6 +28,7 @@
         <ng-lottie class="img-responsive" [options]="lottiePlan"></ng-lottie>
       </div>
     }
+    <!-- HM TODO: bring this back
     @case (3) {
       <h2>{{resources.andSoMuchMore}}</h2>
       <p>{{resources.introAndSoMuchMoreDescription}}</p>
@@ -35,6 +36,7 @@
         <ng-lottie class="img-responsive" [options]="lottieMore"></ng-lottie>
       </div>
     }
+    -->
   }
   </div>
   <div mat-dialog-actions>
@@ -44,7 +46,7 @@
           <button mat-button class="w-full" (click)="step = step - 1" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro back">{{resources.back}}</button>
         }
       </div>
-      @if (step !== 3) {
+      @if (step !== 2) {
         <div class="flex-1">
           <button mat-raised-button color="primary" class="w-full" (click)="step = step + 1" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro next">{{resources.next}}</button>
         </div>

@@ -5,11 +5,11 @@ import { MatTooltip } from "@angular/material/tooltip";
 
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { MapComponent, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent } from "@maplibre/ngx-maplibre-gl";
-import { Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
 import { BatteryOptimization } from "@capawesome-team/capacitor-android-battery-optimization";
 
 import { GpsLocationOverlayComponent } from "./overlays/gps-location-overlay.component";
+import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { ResourcesService } from "../services/resources.service";
 import { ToastService } from "../services/toast.service";
 import { SelectedRouteService } from "../services/selected-route.service";
@@ -104,7 +104,7 @@ export class LocationComponent {
     public toggleKeepNorthUp() {
         this.store.dispatch(new ToggleKeepNorthUpAction());
         if (this.isKeepNorthUp()) {
-           this.mapComponent.mapInstance.rotateTo(0);
+            this.mapComponent.mapInstance.rotateTo(0);
         }
     }
 

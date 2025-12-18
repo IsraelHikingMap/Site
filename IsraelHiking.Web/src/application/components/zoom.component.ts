@@ -1,9 +1,9 @@
 import { Component, inject } from "@angular/core";
 import { MatButton } from "@angular/material/button";
-import { Angulartics2OnModule } from "angulartics2";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 
+import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { ResourcesService } from "../services/resources.service";
 
 @Component({

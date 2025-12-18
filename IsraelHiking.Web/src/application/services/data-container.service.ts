@@ -49,8 +49,6 @@ export class DataContainerService {
         if (selectedRouteId) {
             this.store.dispatch(new SetSelectedRouteAction(selectedRouteId));
         }
-        this.layersService.addExternalOverlays(dataContainer.overlays);
-        this.layersService.addExternalBaseLayer(dataContainer.baseLayer);
 
         if (dataContainer.northEast != null && dataContainer.southWest != null) {
             this.fitBoundsService.fitBounds({ northEast: dataContainer.northEast, southWest: dataContainer.southWest }, true);

@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "il.org.osm.israelhiking"
+    namespace "com.mapeak"
     compileSdk rootProject.ext.compileSdkVersion
     packagingOptions {
         exclude 'build-data.properties'
     }
     defaultConfig {
-        applicationId "il.org.osm.israelhiking"
+        applicationId "com.mapeak"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 921000

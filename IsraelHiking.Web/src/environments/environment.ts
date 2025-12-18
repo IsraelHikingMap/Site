@@ -5,8 +5,8 @@
 
 export const environment = {
     production: false,
-    baseAddress: typeof window !== 'undefined' ? window.location.origin : "https://israelhiking.osm.org.il",
-    baseApiAddress: typeof window !== 'undefined' ? window.location.origin + "/api/" : "https://israelhiking.osm.org.il/api/",
-    baseTilesAddress: "https://israelhiking.osm.org.il",
+    baseAddress: typeof window !== "undefined" ? window.location.origin : "http://127.0.0.1:5000",
+    baseApiAddress: typeof window !== "undefined" ? window.location.origin + "/api/" : "http://127.0.0.1:5000" + "/api/",
+    baseTilesAddress: "https://mapeak.com",
     isCapacitor: false
 };

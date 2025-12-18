@@ -5,12 +5,12 @@ import { MatButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
-import { Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
 
 import { CoordinatesComponent } from "../coordinates.component";
 import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
 import { PrivatePoiEditDialogComponent } from "./private-poi-edit-dialog.component";
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { ImageGalleryService } from "../../services/image-gallery.service";
 import { SelectedRouteService } from "../../services/selected-route.service";

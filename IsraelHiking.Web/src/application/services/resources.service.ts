@@ -86,8 +86,8 @@ export class ResourcesService {
     public slope: string;
     public convertToRoute: string;
     public addPointToRoute: string;
-    public israelMTBMap: string;
-    public israelHikingMap: string;
+    public mtbMap: string;
+    public hikingMap: string;
     public satelliteImagery: string;
     public hikingTrails: string;
     public popularityHeatmap: string;
@@ -251,9 +251,11 @@ export class ResourcesService {
     public imageUploadWaiver: string;
     public subscriptionDetails: string;
     public noDescriptionAvailableInYourLanguage: string;
+    public manageOfflineMaps: string;
+    public clickTheMapToSelectATile: string;
+    public clickBelow: string;
     public translatedBy: string;
     public clickToTranslate: string;
-    public endOfLife: string;
     public minimize: string;
     public restore: string;
     // Toasts: Errors/Warnings/Success
@@ -302,12 +304,11 @@ export class ResourcesService {
     public areYouSureYouWantToStopRecording: string;
     public youNeedToLoginToSeeYourTraces: string;
     public downloadFinishedSuccessfully: string;
-    public noOfflineFilesPleaseDownload: string;
+    public reccomendOfflineDownload: string;
     public allFilesAreUpToDate: string;
     public databaseUpgrade: string;
     public cantEditWhileOffline: string;
     public downloadingPoisForOfflineUsage: string;
-    public useTheCloudIconToGoOffline: string;
     public largeFilesUseWifi: string;
     public thisWillDeteleAllCurrentRoutesAreYouSure: string;
     public pleaseFillReport: string;
@@ -326,7 +327,6 @@ export class ResourcesService {
     public infoHelpfulLinks: string;
     public infoFacebookLink: string;
     public infoGithubLink: string;
-    public infoOsmWikiLink: string;
     public infoFAQLink: string;
     public infoDownloadMapForOfflineUse: string;
     public infoDownloadOldMapsForOfflineUse: string;
@@ -463,6 +463,8 @@ export class ResourcesService {
     public legendBeach: string;
     public legendCemetery: string;
     public legendQuarry: string;
+    public legendBench: string;
+    public legendAlpinehut: string;
     public legendEmpty: string;
 
     public async initialize() {
@@ -544,8 +546,8 @@ export class ResourcesService {
         this.slope = this.gettextCatalog.getString("Slope");
         this.convertToRoute = this.gettextCatalog.getString("Convert to Route");
         this.addPointToRoute = this.gettextCatalog.getString("Add Point to Route");
-        this.israelMTBMap = this.gettextCatalog.getString("Israel MTB Map");
-        this.israelHikingMap = this.gettextCatalog.getString("Israel Hiking Map");
+        this.mtbMap = this.gettextCatalog.getString("MTB Map");
+        this.hikingMap = this.gettextCatalog.getString("Hiking Map");
         this.hikingTrails = this.gettextCatalog.getString("Hiking Trails");
         this.popularityHeatmap = this.gettextCatalog.getString("Popularity Heatmap");
         this.route = this.gettextCatalog.getString("Route");
@@ -711,12 +713,14 @@ export class ResourcesService {
         this.imageBy = this.gettextCatalog.getString("Image by");
         this.notYet = this.gettextCatalog.getString("Not yet...");
         this.imageUploadWaiver = this.gettextCatalog.getString("The pictures I will upload are my own work, and they can be used without any restrictions.");
-        this.subscriptionDetails = this.gettextCatalog.getString("Offline Maps Subscription: - Allows using maps when there's no reception. - Only 99₪ per year. - Paid once a year.")
+        this.subscriptionDetails = this.gettextCatalog.getString("Offline Maps Subscription: - Allows using maps when there's no reception. - Only 29.99$ per year. - Paid once a year.")
             .replace(/ - /g, "\n - ");
         this.noDescriptionAvailableInYourLanguage = this.gettextCatalog.getString("No description available in your language");
+        this.manageOfflineMaps = this.gettextCatalog.getString("Manage Offline Maps");
+        this.clickTheMapToSelectATile = this.gettextCatalog.getString("Click the map to select a tile");
+        this.clickBelow = this.gettextCatalog.getString("Click below");
         this.translatedBy = this.gettextCatalog.getString("Translated by LibreTranslate, click to view original text");
         this.clickToTranslate = this.gettextCatalog.getString("Click to translate");
-        this.endOfLife = this.gettextCatalog.getString("IHM end of life for iOS");
         this.minimize = this.gettextCatalog.getString("Minimize");
         this.restore = this.gettextCatalog.getString("Restore");
         // Toasts: Errors/Warnings/Success
@@ -775,14 +779,13 @@ export class ResourcesService {
         this.youNeedToLoginToSeeYourTraces = this.gettextCatalog.getString("You need to login in order to see your traces, " +
             "click the frowning face at the top");
         this.downloadFinishedSuccessfully = this.gettextCatalog.getString("Download finished successfully!");
-        this.noOfflineFilesPleaseDownload = this.gettextCatalog
-            .getString("No offline files available, please press the download button below.");
+        this.reccomendOfflineDownload = this.gettextCatalog
+            .getString("We recommend you to download offline files, would you like to do that now?");
         this.allFilesAreUpToDate = this.gettextCatalog.getString("All files are up-to-date :-)");
         this.thereSoMuchMoreYouCanDoWithOurApp = this.gettextCatalog.getString("There's so much more you can do with our app");
         this.databaseUpgrade = this.gettextCatalog.getString("The offline database has been upgraded...");
         this.cantEditWhileOffline = this.gettextCatalog.getString("You can't edit while offline...");
         this.downloadingPoisForOfflineUsage = this.gettextCatalog.getString("Downloading points of interest for offline usage...");
-        this.useTheCloudIconToGoOffline = this.gettextCatalog.getString("Use the cloud icon to go offline");
         this.largeFilesUseWifi = this.gettextCatalog
             .getString("You are about to download large files, you can change to wifi before clicking continue...");
         this.thisWillDeteleAllCurrentRoutesAreYouSure = this.gettextCatalog
@@ -811,12 +814,10 @@ export class ResourcesService {
         this.infoFacebookLink = this.gettextCatalog.getString("Interact with other users in our Facebook group");
         this.infoGithubLink = this.gettextCatalog
             .getString("Request features and report bugs on our Github project page");
-        this.infoOsmWikiLink = this.gettextCatalog
-            .getString("Learn Israel-specific mapping rules at the Israel OSM Wiki Project");
         this.infoFAQLink = this.gettextCatalog.getString("F.A.Q");
         this.infoDownloadMapForOfflineUse = this.gettextCatalog.getString("Download Map for Offline Use");
         this.infoFooterThanks = this.gettextCatalog.getString("Thank you for your support!");
-        this.infoFooterAuthors = this.gettextCatalog.getString("Harel, Zeev and Guy");
+        this.infoFooterAuthors = this.gettextCatalog.getString("Harel and Zeev");
         this.infoPrivacyPolicyTermsOfService = this.gettextCatalog.getString("Privacy Policy and Terms of Service");
         // Legend
         this.legendMarkedTrails = this.gettextCatalog.getString("Marked Trails");
@@ -948,6 +949,8 @@ export class ResourcesService {
         this.legendCemetery = this.gettextCatalog.getString("Cemetery");
         this.legendQuarry = this.gettextCatalog.getString("Quarry");
         this.legendConstructionSite = this.gettextCatalog.getString("Construction Site");
+        this.legendBench = this.gettextCatalog.getString("Bench");
+        this.legendAlpinehut = this.gettextCatalog.getString("Alpine Hut");
         this.legendEmpty = this.gettextCatalog.getString("No legend for this map...");
 
         this.setRtl(language.rtl);

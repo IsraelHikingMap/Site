@@ -40,7 +40,7 @@ import type {
     UpdateablePublicPoiData
 } from "../models";
 
-export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite"
+export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite" | "Bench"
 
 export type PoiSocialLinks = {
     poiLink: string;
@@ -130,10 +130,10 @@ export class PoiService {
             }, this.resources.endOfBaseLayer);
         }
 
-        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState.lastModifiedDate) != null) {
+        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState.downloadedTiles) != null) {
             this.mapService.map.addSource(`${PoiService.POIS_SOURCE_ID}-offline`, {
                 type: "vector",
-                tiles: [`custom://${PoiService.POIS_SOURCE_ADDRESS.split("/").pop().replace(".json", "")}/{z}/{x}/{y}.pbf`],
+                tiles: [PoiService.POIS_SOURCE_ADDRESS.replace(".json", "/{z}/{x}/{y}.pbf").replace("http://", "slice://")],
                 minzoom: 10,
                 maxzoom: 14
             });

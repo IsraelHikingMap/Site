@@ -103,7 +103,7 @@ public class WikimediaCommonGateway : IWikimediaCommonGateway
                "=={{int:license-header}}==" + Environment.NewLine +
                "{{PD-self}}" + Environment.NewLine + Environment.NewLine +
                $"{{{{Location|1={location.Y}|2={location.X}}}}}" + Environment.NewLine + Environment.NewLine +
-               "[[Category:Israel Hiking Map]]";
+               "[[Category:Mapeak]]";
     }
 
     public async Task<string> GetImageUrl(string pageName)
@@ -122,7 +122,7 @@ public class WikimediaCommonGateway : IWikimediaCommonGateway
     private string GetNonExistingFilePageName(string fileName)
     {
         fileName = fileName.Replace(".jpg", ".jpeg");
-        var wikiFileName = $"IHM_{GetWikiName(fileName)}";
+        var wikiFileName = $"Mapeak_{GetWikiName(fileName)}";
         var wikiNameWithoutExtension = Path.GetFileNameWithoutExtension(wikiFileName);
         var countingFileName = wikiNameWithoutExtension.Substring(0, Math.Min(170, wikiNameWithoutExtension.Length));
         var extension = Path.GetExtension(wikiFileName);

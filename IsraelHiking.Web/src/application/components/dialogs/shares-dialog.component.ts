@@ -13,7 +13,6 @@ import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { MatDialog, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
 import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { Share } from "@capacitor/share";
-import { Angulartics2OnModule } from "angulartics2";
 import { InfiniteScrollDirective } from "ngx-infinite-scroll";
 import { take, orderBy } from "lodash-es";
 import { Observable } from "rxjs";
@@ -21,6 +20,7 @@ import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { ShareDialogComponent } from "./share-dialog.component";
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
@@ -172,8 +172,6 @@ export class SharesDialogComponent implements OnInit {
 
     public async addShareUrlToRoutes() {
         const share = await this.shareUrlsService.getShareUrl(this.selectedShareUrlId);
-        share.dataContainer.overlays = [];
-        share.dataContainer.baseLayer = null;
         this.dataContainerService.setData(share.dataContainer, true);
     }
 

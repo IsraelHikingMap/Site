@@ -4,12 +4,12 @@ import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Angulartics2OnModule } from "angulartics2";
 import { SourceDirective, GeoJSONSourceComponent, LayerComponent, MarkerComponent, PopupComponent } from "@maplibre/ngx-maplibre-gl";
 import { Store } from "@ngxs/store";
 
 import { CoordinatesComponent } from "../coordinates.component";
 import { MissingPartOverlayComponent } from "../overlays/missing-part-overlay.component";
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { SpatialService } from "../../services/spatial.service";
 import { RoutesFactory } from "../../services/routes.factory";

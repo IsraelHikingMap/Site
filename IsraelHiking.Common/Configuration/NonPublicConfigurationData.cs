@@ -11,15 +11,15 @@ public class NonPublicConfigurationData
     /// </summary>
     public string WikiMediaPassword { get; set; }
     /// <summary>
-    /// Imgur client ID for private images upload, mainly for private routes
-    /// </summary>
-    public string ImgurClientId { get; set; }
-    /// <summary>
     /// Fovea API Key for server side receipt validation
     /// </summary>
     public string FoveaApiKey { get; set; }
     /// <summary>
-    /// RevenueCat API key for server side validation
+    /// RevenueCat API key for server side validation for IHM
+    /// </summary>
+    public string RevenueCatApiKeyIHM { get; set; }
+    /// <summary>
+    /// RevenueCat API key for server side validation for Mapeak
     /// </summary>
     public string RevenueCatApiKey { get; set; }
 }

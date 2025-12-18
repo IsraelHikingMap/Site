@@ -21,10 +21,8 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     IInitializable,
     IPointsOfInterestRepository,
     ISearchRepository,
-    IUserLayersRepository,
     IImagesRepository,
-    IExternalSourcesRepository,
-    IShareUrlsRepository
+    IExternalSourcesRepository
 {
     private readonly ConfigurationData _options = options.Value;
     
@@ -32,8 +30,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     private const int NUMBER_OF_RESULTS = 20;
     
     private const string PROPERTIES = "properties";
-    private const string SHARES = "shares";
-    private const string CUSTOM_USER_LAYERS = "custom_user_layers";
     private const string EXTERNAL_POIS = "external_pois";
     private const string IMAGES = "images";
     private const string REBUILD_LOG = "rebuild_log";
@@ -52,14 +48,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                 (_, _) => new SystemTextJsonSerializer(GeoJsonExtensions.GeoJsonWritableFactory))
             .PrettyJson();
         _elasticClient = new ElasticClient(connectionString);
-        if ((await _elasticClient.Indices.ExistsAsync(SHARES)).Exists == false)
-        {
-            await CreateSharesIndex();
-        }
-        if ((await _elasticClient.Indices.ExistsAsync(CUSTOM_USER_LAYERS)).Exists == false)
-        {
-            await _elasticClient.Indices.CreateAsync(CUSTOM_USER_LAYERS);
-        }
         if ((await _elasticClient.Indices.ExistsAsync(IMAGES)).Exists == false)
         {
             await CreateImagesIndex();
@@ -451,93 +439,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                 )
             )
         );
-    }
-
-    private Task CreateSharesIndex()
-    {
-        return _elasticClient.Indices.CreateAsync(SHARES,
-            c => c.Map<ShareUrl>(m => m.AutoMap<ShareUrl>())
-        );
-    }
-
-    public Task AddUrl(ShareUrl shareUrl)
-    {
-        return _elasticClient.IndexAsync(shareUrl, r => r.Index(SHARES).Id(shareUrl.Id));
-    }
-
-    public async Task<ShareUrl> GetUrlById(string id)
-    {
-        var response = await _elasticClient.GetAsync<ShareUrl>(id, r => r.Index(SHARES));
-        return response.Source;
-    }
-    public async Task<DateTime> GetUrlTimestampById(string id)
-    {
-        var response = await _elasticClient.GetAsync<ShareUrl>(id, r => r.Index(SHARES).SourceIncludes(e => e.LastModifiedDate, e=> e.CreationDate));
-        if (response.Source == null) {
-            return DateTime.MinValue;
-        }
-        response.Source.FixModifiedDate();
-        return response.Source.LastModifiedDate;
-    }
-
-    public async Task<List<ShareUrl>> GetUrlsByUser(string osmUserId)
-    {
-        var response = await _elasticClient.SearchAsync<ShareUrl>(s => s.Index(SHARES)
-            .Size(5000)
-            .Query(q => q.Term(t => t.OsmUserId, osmUserId))
-            .Source(src => src
-                .IncludeAll()
-                .Excludes(e => e.Fields(p => p.DataContainer, p => p.Base64Preview))
-            )
-        );
-        return response.Documents.ToList();
-
-    }
-
-    public Task Delete(ShareUrl shareUrl)
-    {
-        return _elasticClient.DeleteAsync<ShareUrl>(shareUrl.Id, d => d.Index(SHARES));
-    }
-
-    public Task Update(ShareUrl shareUrl)
-    {
-        return AddUrl(shareUrl);
-    }
-
-    public async Task<List<MapLayerData>> GetUserLayers(string osmUserId)
-    {
-        var response = await _elasticClient.SearchAsync<MapLayerData>(s => s.Index(CUSTOM_USER_LAYERS).Size(1000)
-            .Query(q => q.Term(t => t.OsmUserId, osmUserId)));
-        var layers = response.Documents.ToList();
-        return response.Hits.Select((h, i) =>
-        {
-            layers[i].Id = h.Id;
-            return layers[i];
-        }).ToList();
-    }
-
-    public async Task<MapLayerData> GetUserLayerById(string id)
-    {
-        var response = await _elasticClient.GetAsync<MapLayerData>(id, r => r.Index(CUSTOM_USER_LAYERS));
-        response.Source.Id = id;
-        return response.Source;
-    }
-
-    public async Task<MapLayerData> AddUserLayer(MapLayerData layerData)
-    {
-        var response = await _elasticClient.IndexAsync(layerData, r => r.Index(CUSTOM_USER_LAYERS));
-        layerData.Id = response.Id;
-        return layerData;
-    }
-
-    public Task UpdateUserLayer(MapLayerData layerData)
-    {
-        return _elasticClient.IndexAsync(layerData, r => r.Index(CUSTOM_USER_LAYERS).Id(layerData.Id));
-    }
-
-    public Task DeleteUserLayer(MapLayerData layerData)
-    {
-        return _elasticClient.DeleteAsync<MapLayerData>(layerData.Id, d => d.Index(CUSTOM_USER_LAYERS));
     }
 
     public async Task<ImageItem> GetImageByUrl(string url)

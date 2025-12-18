@@ -11,7 +11,7 @@ namespace IsraelHiking.API.Tests.Services;
 [TestClass]
 public class HomePageHelperTests
 {
-    const string HOME_PAGE_SAMPLE_CONTENT = @"<html><!-- IHM START -->foo<!-- IHM END --></html>";
+    const string HOME_PAGE_SAMPLE_CONTENT = @"<html><!-- MAPEAK START -->foo<!-- MAPEAK END --></html>";
     private HomePageHelper _homePageHelper;
 
     [TestInitialize]

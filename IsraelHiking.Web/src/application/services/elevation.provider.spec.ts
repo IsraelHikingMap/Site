@@ -1,7 +1,7 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { NgxsModule } from "@ngxs/store";
 
 import { ElevationProvider } from "./elevation.provider";
 import { LoggingService } from "./logging.service";
@@ -12,9 +12,9 @@ describe("ElevationProvider", () => {
     async function getArrayBufferOfNonEmptyTile(): Promise<ArrayBuffer> {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
-        canvas.width = 256;
-        canvas.height = 256;
-        ctx.fillStyle = "blue";
+        canvas.width = 512;
+        canvas.height = 512;
+        ctx.fillStyle = "red";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.save();
         const url = canvas.toDataURL("image/png");
@@ -30,7 +30,9 @@ describe("ElevationProvider", () => {
             ],
             providers: [
                 { provide: LoggingService, useValue: { warning: () => { } } },
-                { provide: PmTilesService, useValue: {} },
+                { provide: PmTilesService, useValue: {
+                    isOfflineFileAvailable: () => Promise.resolve(false),
+                } },
                 ElevationProvider,
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting()
@@ -38,13 +40,9 @@ describe("ElevationProvider", () => {
         });
     });
 
-    it("Should update height data", inject([ElevationProvider, HttpTestingController, Store],
-        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, store: Store) => {
-            store.reset({
-                offlineState: {
-                    isOfflineAvailable: false,
-                }
-            });
+    it("Should update height data", inject([ElevationProvider, HttpTestingController],
+        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
+
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
             const promise = elevationProvider.updateHeights(latlngs);
@@ -52,7 +50,7 @@ describe("ElevationProvider", () => {
 
             mockBackend.match(() => true)[0].flush(await getArrayBufferOfNonEmptyTile());
             await promise;
-            expect(latlngs[0].alt).toBe(-9974.5);
+            expect(latlngs[0].alt).toBe(32512);
         }
     ));
 
@@ -68,13 +66,8 @@ describe("ElevationProvider", () => {
     ));
 
     it("Should not update elevation when getting an error from server and offline is not available",
-        inject([ElevationProvider, HttpTestingController, Store],
-        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, store: Store) => {
-            store.reset({
-                offlineState: {
-                    isOfflineAvailable: false,
-                }
-            });
+        inject([ElevationProvider, HttpTestingController],
+        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
 
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
@@ -89,18 +82,12 @@ describe("ElevationProvider", () => {
     ));
 
     it("Should update elevation when offline is available",
-        inject([ElevationProvider, HttpTestingController, PmTilesService, Store],
-        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
+        inject([ElevationProvider, PmTilesService],
+        async (elevationProvider: ElevationProvider, db: PmTilesService) => {
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
-            store.reset({
-                offlineState: {
-                    isOfflineAvailable: true,
-                    lastModifiedDate: new Date()
-                }
-            });
-
-            db.getTile = () => getArrayBufferOfNonEmptyTile();
+            db.isOfflineFileAvailable = () => Promise.resolve(true);
+            db.getTileByType = getArrayBufferOfNonEmptyTile;
 
             const promise = elevationProvider.updateHeights(latlngs);
 

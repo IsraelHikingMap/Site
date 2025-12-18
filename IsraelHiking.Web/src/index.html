@@ -5,27 +5,24 @@
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
     <meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible" />
-    <meta property="og:site_name" content="israelhiking.osm.org.il" />
-    <meta property="og:url" content="https://israelhiking.osm.org.il/" />
+    <meta property="og:site_name" content="mapeak.com" />
+    <meta property="og:url" content="https://mapeak.com/" />
     <meta property="og:type" content="website" />
-    <!-- IHM START -->
-    <meta property="og:title" content="Israel Hiking Map" />
-    <meta property="og:image" content="https://israelhiking.osm.org.il/content/favicons/android-chrome-192x192.png" />
-    <meta property="og:image:url"
-        content="https://israelhiking.osm.org.il/content/favicons/android-chrome-192x192.png" />
-    <meta property="og:image:secure_url"
-        content="https://israelhiking.osm.org.il/content/favicons/android-chrome-192x192.png" />
+    <!-- MAPEAK START -->
+    <meta property="og:title" content="Mapeak" />
+    <meta property="og:image" content="https://mapeak.com/content/favicons/android-chrome-192x192.png" />
+    <meta property="og:image:url" content="https://mapeak.com/content/favicons/android-chrome-192x192.png" />
+    <meta property="og:image:secure_url" content="https://mapeak.com/content/favicons/android-chrome-192x192.png" />
     <meta property="og:image:width" content="192" />
     <meta property="og:image:height" content="192" />
     <meta property="og:description"
-        content="בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע." />
-    <meta name="title" content="Israel Hiking Map" />
+        content="Whether you are planning your next hike, ride, drive or run, this is where you can find everything you'll need in order to plan your next outdoor visit." />
+    <meta name="title" content="Mapeak" />
     <meta name="description"
-        content="בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע." />
-    <title>Israel Hiking Map</title>
-    <!-- IHM END -->
-    <meta name="keyword"
-        content="hike,bike,outdoor,israel hiking,map,navigation,route planning,nominatim,סימון שבילים,אופניים,מפה,ניווט,שטח,טיול,מטיבי לכת,ג'יפים,רכיבה,הליכה,טבע" />
+        content="Whether you are planning your next hike, ride, drive or run, this is where you can find everything you'll need in order to plan your next outdoor visit." />
+    <title>Mapeak</title>
+    <!-- MAPEAK END -->
+    <meta name="keyword" content="hike,bike,run,cycle,outdoor,map,navigation,route planning" />
     <meta name="robot" content="index,follow" />
     <meta name="msapplication-TileColor" content="#2b5797">
     <meta name="msapplication-TileImage" content="content/favicons/mstile-144x144.png">
@@ -47,16 +44,6 @@
     <meta name="theme-color" content="#ffffff">
 
     <link rel="text/html" href="fonts/icomoon.ttf">
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XBWCGLDFDR"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() {
-            dataLayer.push(arguments);
-        }
-        gtag('js', new Date());
-
-        gtag('config', 'G-XBWCGLDFDR');
-    </script>
     <style>
         .preloader {
             position: absolute;
@@ -143,26 +130,6 @@
 </head>
 
 <body>
-    <script>
-        function isWebglSupported() {
-            if (!!window.WebGLRenderingContext) {
-                var canvas = document.createElement("canvas");
-                try {
-                    var context = canvas.getContext("webgl2") || canvas.getContext("webgl");
-                    if (context && typeof context.getParameter == "function") {
-                        return true;
-                    }
-                } catch (e) { }
-                // WebGL is supported, but disabled
-                return false;
-            }
-            // WebGL not supported
-            return false;
-        }
-        if (!isWebglSupported()) {
-            alert("נראה שיש בעיה... אנא נסו לעדכן את גרסת הכרום ו/או גרסת Android System Webview, למידע נוסף בקרו ב- https://get.webgl.org/webgl2/");
-        }
-    </script>
     <app-root>
         <div class="preloader">
             <img src="content/logo.png" height="256px" />

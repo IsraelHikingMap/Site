@@ -27,7 +27,15 @@
           </div>
         </mat-panel-title>
       </mat-expansion-panel-header>
-      @for (baseLayer of (baseLayers$ | async); track baseLayer) {
+      @for (baseLayer of defaultBaseLayers; track baseLayer.key) {
+        <div class="flex flex-row">
+          <button mat-button class="row-button flex-1 justify-start!" (click)="selectBaseLayer(baseLayer)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Select base layer {{baseLayer.key}}">
+            <span><i class="fa" [ngClass]="{'icon-eye': isBaseLayerSelected(baseLayer), 'icon-eye-slash': !isBaseLayerSelected(baseLayer)}"></i></span>
+            <span class="break-all">{{resources.translate(baseLayer.key)}}</span>
+          </button>
+        </div>
+      }
+      @for (baseLayer of (baseLayers$ | async); track baseLayer.key) {
         <div class="flex flex-row">
           <button mat-button class="row-button flex-1 justify-start!" (click)="selectBaseLayer(baseLayer)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Select base layer {{baseLayer.key}}">
             <span><i class="fa" [ngClass]="{'icon-eye': isBaseLayerSelected(baseLayer), 'icon-eye-slash': !isBaseLayerSelected(baseLayer)}"></i></span>
@@ -36,11 +44,6 @@
           @if (baseLayer.isEditable) {
             <div class="w-1/12">
               <button mat-button class="w-full short-button" (click)="editBaseLayer($event, baseLayer)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit base layer"><i class="fa icon-ellipsis-v"></i></button>
-            </div>
-          }
-          @if (showOfflineButton(baseLayer)) {
-            <div class="w-1/12">
-              <button mat-button class="w-full short-button" [class.active]="baseLayer.isOfflineOn" (click)="toggleOffline($event, baseLayer, false)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle base layer offline"><i class="fa icon-{{baseLayer.isOfflineOn ? 'offline' : 'online'}}"></i></button>
             </div>
           }
         </div>
@@ -67,11 +70,6 @@
           @if (overlay.isEditable) {
             <div class="w-1/12">
               <button mat-button class="w-full short-button" (click)="editOverlay($event, overlay)" matTooltip="{{resources.overlayProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit overlay"><i class="fa icon-ellipsis-v"></i></button>
-            </div>
-          }
-          @if (showOfflineButton(overlay)) {
-            <div class="w-1/12">
-              <button mat-button class="w-full short-button" [class.active]="overlay.isOfflineOn" (click)="toggleOffline($event, overlay, true)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle overlay offline"><i class="fa icon-{{overlay.isOfflineOn ? 'offline' : 'online'}}"></i></button>
             </div>
           }
         </div>
@@ -110,11 +108,6 @@
       <button mat-button (click)="addRoute($event)" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add route"><i class="fa fa-lg icon-plus"></i> {{resources.addRoute}}</button>
     </mat-expansion-panel>
   </mat-accordion>
-  @if (isOfflineDownloadAvailable() && (lastModified$ | async)) {
-    <div class="flex flex-row">
-      <div class="w-full ms-2">{{resources.lastUpdatedOn}} {{lastModified$ | async | date:'dd/MM/yyyy'}}</div>
-    </div>
-  }
   @if (isOfflineDownloadAvailable()) {
     <p class="ms-2">
       {{resources.offlinePurchaseGraditude}}<br/>

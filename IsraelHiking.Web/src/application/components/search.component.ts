@@ -8,7 +8,6 @@ import {
     viewChildren
 } from "@angular/core";
 import { Router } from "@angular/router";
-import { Angulartics2OnModule } from "angulartics2";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { MatFormField } from "@angular/material/form-field";
@@ -19,6 +18,7 @@ import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { debounceTime, filter, tap, map } from "rxjs/operators";
 import { remove } from "lodash-es";
 
+import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStrings } from "../services/hash.service";
 import { ToastService } from "../services/toast.service";

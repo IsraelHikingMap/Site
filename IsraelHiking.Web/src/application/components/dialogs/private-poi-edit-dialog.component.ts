@@ -10,13 +10,13 @@ import { MatTooltip } from "@angular/material/tooltip";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatDialogRef, MatDialog, MAT_DIALOG_DATA, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
 import { Share } from "@capacitor/share";
-import { Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { CoordinatesComponent } from "../coordinates.component";
-import { ImageCaptureDirective } from "../../directives/image-capture.directive";
 import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
+import { ImageCaptureDirective } from "../../directives/image-capture.directive";
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { ImageResizeService } from "../../services/image-resize.service";
@@ -210,7 +210,7 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
                 markerType: this.markerType
             });
         }
-        
+
         this.dialogRef.close();
     }
 

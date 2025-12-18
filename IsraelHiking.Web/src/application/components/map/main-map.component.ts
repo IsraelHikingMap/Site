@@ -1,8 +1,8 @@
-import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildren } from "@angular/core";
+import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildren, ApplicationRef } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { NgStyle } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
-import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike, IControl, ControlPosition } from "maplibre-gl";
+import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, PointLike, IControl, ControlPosition } from "maplibre-gl";
 import { NgProgressbar } from "ngx-progressbar";
 import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";
@@ -21,16 +21,16 @@ import { SearchComponent } from "../search.component";
 import { DrawingComponent } from "../drawing.component";
 import { RouteStatisticsComponent } from "../route-statistics.component";
 import { CenterMeComponent } from "../center-me.component";
-import { IhmLinkComponent } from "../ihm-link.component";
+import { MapeakLinkComponent } from "../mapeak-link.component";
 import { PublicPoisComponent } from "./public-pois.component";
 import { LayersButtonComponent } from "../layers-button.component";
+import { MapeakTitleService } from "../../services/mapeak-title.service";
 import { ResourcesService } from "../../services/resources.service";
-import { IHMTitleService } from "../../services/ihm-title.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
+import { LoggingService } from "../../services/logging.service";
 import { SetLocationAction } from "../../reducers/location.reducer";
-import { environment } from "../../../environments/environment";
 import type { ApplicationState, LocationState } from "../../models";
 
 @Component({
@@ -38,7 +38,7 @@ import type { ApplicationState, LocationState } from "../../models";
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, IhmLinkComponent, LayersButtonComponent]
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent]
 })
 export class MainMapComponent {
 
@@ -50,16 +50,18 @@ export class MainMapComponent {
 
     public location: LocationState;
     public initialStyle: StyleSpecification;
-    private isTerrainOn: boolean = false;
+    public isStable: boolean = false;
 
     public readonly resources = inject(ResourcesService);
 
-    private readonly titleService = inject(IHMTitleService);
+    private readonly titleService = inject(MapeakTitleService);
     private readonly mapService = inject(MapService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly defaultStyleService = inject(DefaultStyleService);
+    private readonly loggingService = inject(LoggingService);
     private readonly dialog = inject(MatDialog);
     private readonly store = inject(Store);
+    private readonly appRef = inject(ApplicationRef);
 
     private addedControls: IControl[] = [];
 
@@ -67,6 +69,9 @@ export class MainMapComponent {
         this.location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
         this.initialStyle = this.defaultStyleService.getStyleWithPlaceholders();
         this.titleService.clear();
+        this.appRef.whenStable().then(() => {
+            this.isStable = true;
+        });
     }
 
     public moveEnd(e: DragEvent) {
@@ -74,12 +79,13 @@ export class MainMapComponent {
             return;
         }
         const centerLatLon = this.mapComponent().mapInstance.getCenter();
-        this.store.dispatch(new SetLocationAction(centerLatLon.lng, centerLatLon.lat, this.mapComponent().mapInstance.getZoom()));
+        const zoom = this.mapComponent().mapInstance.getZoom();
+        this.loggingService.debug(`[Map] Move end to zoom: ${zoom}, lng, lat: (${centerLatLon.lng}, ${centerLatLon.lat})`);
+        this.store.dispatch(new SetLocationAction(centerLatLon.lng, centerLatLon.lat, zoom));
     }
 
     public mapLoaded() {
         setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
-
         this.mapService.setMap(this.mapComponent().mapInstance);
         this.mapComponent().mapInstance.doubleClickZoom.enable();
         this.mapComponent().mapInstance._zoomLevelsToOverscale = 4;
@@ -138,54 +144,5 @@ export class MainMapComponent {
 
     public isApp() {
         return this.runningContextService.isCapacitor;
-    }
-
-    public pitchChanged() {
-        if (this.runningContextService.isMobile) {
-            return;
-        }
-        const pitch = this.mapComponent().mapInstance.getPitch();
-        if (pitch <= 10 && !this.isTerrainOn) {
-            // Terrain is off and pitch is low, nothing to do.
-            return;
-        }
-
-        if (pitch > 10 && this.isTerrainOn) {
-            // Terrain is on and pitch is high, nothing to do.
-            return;
-        }
-
-        if (pitch <= 10 && this.isTerrainOn) {
-            // Terrain is on and pitch is low, turning off.
-            this.isTerrainOn = false;
-            this.mapComponent().mapInstance.setTerrain(null);
-            return;
-        }
-
-        // Terrain is off and pitch is high, turning on.
-        this.isTerrainOn = true;
-        // HM TODO: change this for global terrain
-        let source: RasterDEMSourceSpecification = {
-            type: "raster-dem",
-            url: environment.baseTilesAddress + "/vector/data/TerrainRGB.json",
-            tileSize: 256
-        };
-        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate != null) {
-            // Using offline source
-            source = {
-                type: "raster-dem",
-                tiles: ["custom://TerrainRGB/{z}/{x}/{y}.png"],
-                maxzoom: 12,
-                minzoom: 7
-            };
-        }
-        const currentSourceTerrain = this.mapComponent().mapInstance.getSource("terrain");
-        if (!currentSourceTerrain) {
-            this.mapComponent().mapInstance.addSource("terrain", source);
-        } else if (currentSourceTerrain && currentSourceTerrain.serialize().url !== source.url) {
-            this.mapComponent().mapInstance.removeSource("terrain");
-            this.mapComponent().mapInstance.addSource("terrain", source);
-        }
-        this.mapComponent().mapInstance.setTerrain({ source: "terrain", exaggeration: 2 });
     }
 }

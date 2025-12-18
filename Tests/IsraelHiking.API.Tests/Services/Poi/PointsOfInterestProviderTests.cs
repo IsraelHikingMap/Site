@@ -44,7 +44,6 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         _clientsFactory = Substitute.For<IClientsFactory>();
         _tagsHelper = new TagsHelper();
         _osmGeoJsonPreprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(),
-            _elevationGateway,
             new OsmGeoJsonConverter(new GeometryFactory()), _tagsHelper);
         _pointsOfInterestRepository = Substitute.For<IPointsOfInterestRepository>();
         _externalSourcesRepository = Substitute.For<IExternalSourcesRepository>();
@@ -52,7 +51,6 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
         _adapter = new PointsOfInterestProvider(_pointsOfInterestRepository,
             _externalSourcesRepository,
-            new ElevationSetterExecutor(_elevationGateway),
             _osmGeoJsonPreprocessorExecutor,
             _wikimediaCommonGateway,
             new Base64ImageStringToFileConverter(),
@@ -117,7 +115,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         
         
     [TestMethod]
-    public void GetFeatureById_NonOsmWithNoElevation_ShouldAddElevation()
+    public void GetFeatureById_NonOsmWithNoElevation_ShouldNotAddElevation()
     {
         var someId = "some-id";
         var featureStr =
@@ -145,7 +143,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         var result = _adapter.GetFeatureById(Sources.INATURE, someId).Result;
 
         Assert.IsNotNull(result);
-        Assert.AreEqual(1, result.Geometry.Coordinates.First().Z);
+        Assert.AreEqual(double.NaN, result.Geometry.Coordinates.First().Z);
     }
 
     [TestMethod]
@@ -159,7 +157,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         var feature = GetValidFeature("42", Sources.OSM);
         feature.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
                                                                     "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==");
-        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, _tagsHelper.GetCategoriesByGroup(Categories.POINTS_OF_INTEREST).First().Icon);
+        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon");
         feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "he.wikipedia.org/wiki/%D7%AA%D7%9C_%D7%A9%D7%9C%D7%9D");
         feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + "1", "www.wikidata.org/wiki/Q19401334");
         _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
@@ -182,7 +180,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         var language = Languages.HEBREW;
         gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
         var feature = GetValidFeature("42", Sources.OSM);
-        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, _tagsHelper.GetCategoriesByGroup(Categories.POINTS_OF_INTEREST).First().Icon);
+        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon");
         feature.Attributes.AddOrUpdate(FeatureAttributes.NAME, " a   b  c ");
         feature.Attributes.AddOrUpdate(FeatureAttributes.DESCRIPTION, "  ");
         _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
@@ -204,7 +202,7 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         var language = Languages.HEBREW;
         gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
         var feature = GetValidFeature("42", Sources.OSM);
-        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, _tagsHelper.GetCategoriesByGroup(Categories.POINTS_OF_INTEREST).First().Icon);
+        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon");
         feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "https://he.m.wikipedia.org/wiki/%D7%96%D7%95%D7%94%D7%A8_(%D7%9E%D7%95%D7%A9%D7%91)");            
             
         var results = _adapter.AddFeature(feature, gateway, language).Result;

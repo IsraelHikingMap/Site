@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Israel Hiking Map</string>
+	<string>Mapeak</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -67,7 +67,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>ihm</string>
+				<string>mapeak</string>
 			</array>
 		</dict>
 	</array>

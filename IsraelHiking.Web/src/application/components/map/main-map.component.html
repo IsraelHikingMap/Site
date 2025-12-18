@@ -4,6 +4,7 @@
 <div
   class="flex flex-row w-full h-[calc(100vh-var(--mat-toolbar-mobile-height))] md:h-[calc(100vh-var(--mat-toolbar-standard-height))]"
   [dir]="resources.direction">
+  @if (isStable) {
   <mgl-map [zoom]="[location.zoom]" [center]="[location.longitude, location.latitude]" [style]="initialStyle"
     (moveEnd)="moveEnd($event)" (mapLoad)="mapLoaded()" (pitchEvt)="pitchChanged()" [doubleClickZoom]="false"
     [attributionControl]="false">
@@ -23,7 +24,8 @@
     <route-statistics #bottomStartControl></route-statistics>
     <center-me #bottomStartControl></center-me>
     @if (!isApp()) {
-    <ihm-link #bottomEndControl></ihm-link>
+    <mapeak-link #bottomEndControl></mapeak-link>
     }
   </mgl-map>
+  }
 </div>

@@ -4,6 +4,7 @@
 <dict>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
+		<string>applinks:mapeak.com</string>
 		<string>applinks:israelhiking.osm.org.il</string>
 		<string>applinks:oauth_callback</string>
 	</array>

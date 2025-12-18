@@ -94,7 +94,7 @@ export class RecordedRouteService {
         const date = new Date();
         const dateString = date.toISOString().split("T")[0] +
             ` ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
-        const name = "Recorded using IHM at " + dateString;
+        const name = "Recorded using Mapeak at " + dateString;
         const routeData = this.routesFactory.createRouteData(name);
         const routingType = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
         routeData.markers = structuredClone(route.markers) as MarkerData[];

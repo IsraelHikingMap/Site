@@ -7,9 +7,9 @@ import { FormsModule } from "@angular/forms";
 
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatDialog, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
-import { Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
 
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { AVAILABLE_LANGUAGES } from "../../reducers/initial-state";
 import { ApplicationState, LanguageCode } from "../../models";

@@ -2,17 +2,20 @@ import { inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable, firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
+import { Share } from "@capacitor/share";
 import type { Immutable } from "immer";
 
 import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
 import { LayersService } from "../../../services/layers.service";
+import { RunningContextService } from "../../../services/running-context.service";
 import type { LayerData, ApplicationState, EditableLayer, LocationState } from "../../../models";
 
 export abstract class LayerBaseDialogComponent {
     public title: string;
     public isNew: boolean;
+    public isApp: boolean;
     public isOverlay: boolean;
     public layerData: EditableLayer;
     public location$: Observable<Immutable<LocationState>>;
@@ -22,22 +25,22 @@ export abstract class LayerBaseDialogComponent {
     protected readonly mapService = inject(MapService);
     protected readonly layersService = inject(LayersService);
     protected readonly toastService = inject(ToastService);
+    private readonly runningContextService = inject(RunningContextService);
     private readonly http = inject(HttpClient);
     private readonly store = inject(Store);
 
     protected constructor() {
         this.layerData = {
-            minZoom: LayersService.MIN_ZOOM,
-            maxZoom: LayersService.MAX_NATIVE_ZOOM,
+            minZoom: 1,
+            maxZoom: 16,
             key: "",
             address: "",
             opacity: 1.0,
             isEditable: true,
-            isOfflineAvailable: false,
-            isOfflineOn: true
         } as EditableLayer;
         
         this.location$ = this.store.select((state: ApplicationState) => state.locationState);
+        this.isApp = this.runningContextService.isCapacitor;
     }
 
     public onAddressChanged(address: string) {
@@ -80,5 +83,13 @@ export abstract class LayerBaseDialogComponent {
         } catch {
             // ignore error
         }
+    }
+
+    public shareLayer() {
+        Share.share({url: this.getShareLayerAddress()});
+    }
+
+    public getShareLayerAddress() {
+        return this.layersService.layerDataToAddress(this.layerData, this.isOverlay);
     }
 }

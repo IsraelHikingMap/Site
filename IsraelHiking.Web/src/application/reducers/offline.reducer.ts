@@ -3,16 +3,21 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { OfflineState } from "../models";
+import type { OfflineState, TileMetadataPerFile } from "../models";
 
-export class SetOfflineAvailableAction {
+export class SetOfflineSubscribedAction {
     public static type = this.prototype.constructor.name;
-    constructor(public isAvailble: boolean) {}
+    constructor(public isSubscribed: boolean) {}
 }
 
 export class SetOfflineMapsLastModifiedDateAction {
     public static type = this.prototype.constructor.name;
-    constructor(public lastModifiedDate: Date) {}
+    constructor(public data: TileMetadataPerFile, public tileX: number, public tileY: number) {}
+}
+
+export class DeleteOfflineMapsTileAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public tileX: number, public tileY: number) {}
 }
 
 export class SetShareUrlsLastModifiedDateAction {
@@ -37,10 +42,10 @@ export class RemoveFromPoiQueueAction {
 @Injectable()
 export class OfflineReducer {
 
-    @Action(SetOfflineAvailableAction)
-    public setOfflineAvailable(ctx: StateContext<OfflineState>, action: SetOfflineAvailableAction) {
+    @Action(SetOfflineSubscribedAction)
+    public setOfflineSubscribed(ctx: StateContext<OfflineState>, action: SetOfflineSubscribedAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.isOfflineAvailable = action.isAvailble;
+            lastState.isSubscribed = action.isSubscribed;
             return lastState;
         }));
     }
@@ -48,8 +53,21 @@ export class OfflineReducer {
     @Action(SetOfflineMapsLastModifiedDateAction)
     public setOfflineMpasLastModifiedDate(ctx: StateContext<OfflineState>, action: SetOfflineMapsLastModifiedDateAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.lastModifiedDate = action.lastModifiedDate;
-            lastState.isPmtilesDownloaded = true;
+            if (lastState.downloadedTiles == null) {
+                lastState.downloadedTiles = {};
+            }
+            lastState.downloadedTiles[`${action.tileX}-${action.tileY}`] = action.data;
+            return lastState;
+        }));
+    }
+
+    @Action(DeleteOfflineMapsTileAction)
+    public deleteOfflineMapsTile(ctx: StateContext<OfflineState>, action: DeleteOfflineMapsTileAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            if (lastState.downloadedTiles == null) {
+                return lastState;
+            }
+            delete lastState.downloadedTiles[`${action.tileX}-${action.tileY}`];
             return lastState;
         }));
     }

@@ -1,7 +1,7 @@
 export const environment = {
     production: false,
-    baseAddress: "https://israelhiking.osm.org.il",
-    baseApiAddress: "https://israelhiking.osm.org.il/api/",
-    baseTilesAddress: "https://israelhiking.osm.org.il",
+    baseAddress: "https://mapeak.com",
+    baseApiAddress: "https://mapeak.com/api/",
+    baseTilesAddress: "https://mapeak.com",
     isCapacitor: true
 };

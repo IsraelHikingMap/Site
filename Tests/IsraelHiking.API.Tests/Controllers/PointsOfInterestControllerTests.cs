@@ -53,16 +53,6 @@ public class PointsOfInterestControllerTests
     }
 
     [TestMethod]
-    public void GetCategoriesByType_ShouldGetThemFromTagHelper()
-    {
-        var category = "category";
-
-        _controller.GetCategoriesByGroup(category);
-
-        _tagHelper.Received(1).GetCategoriesByGroup(category);
-    }
-
-    [TestMethod]
     public void GetPointOfInterest_WrongSource_ShouldReturnBadRequest()
     {
         _pointsOfInterestProvider.GetFeatureById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);

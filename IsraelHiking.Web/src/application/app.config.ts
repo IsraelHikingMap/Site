@@ -33,7 +33,6 @@ import { NgxsModule } from "@ngxs/store";
 import { InfiniteScrollDirective } from "ngx-infinite-scroll";
 import { progressInterceptor } from "ngx-progressbar/http";
 import { provideLottieOptions } from "ngx-lottie";
-import { Angulartics2Module } from "angulartics2";
 import { saveAs } from "file-saver-es";
 import player from "lottie-web";
 // Services
@@ -55,7 +54,7 @@ import { SnappingService } from "./services/snapping.service";
 import { FitBoundsService } from "./services/fit-bounds.service";
 import { RouteStatisticsService } from "./services/route-statistics.service";
 import { ShareUrlsService } from "./services/share-urls.service";
-import { IHMTitleService } from "./services/ihm-title.service";
+import { MapeakTitleService } from "./services/mapeak-title.service";
 import { ToastService } from "./services/toast.service";
 import { ElevationProvider } from "./services/elevation.provider";
 import { SearchResultsProvider } from "./services/search-results.provider";
@@ -95,9 +94,12 @@ import { OsmAddressesService } from "./services/osm-addresses.service";
 import { LocationService } from "./services/location.service";
 import { LogReaderService } from "./services/log-reader.service";
 import { TranslationService } from "./services/translation.service";
+import { AnalyticsService } from "./services/analytics.service";
 // Components
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
+// Directives
+import { Angulartics2OnModule } from "./directives/gtag.directive";
 // Reducers
 import { ConfigurationReducer } from "./reducers/configuration.reducer";
 import { LocationReducer } from "./reducers/location.reducer";
@@ -147,7 +149,7 @@ export const appConfig: ApplicationConfig = {
             ClipboardModule,
             NgxMapLibreGLModule,
             InfiniteScrollDirective,
-            Angulartics2Module.forRoot(),
+            Angulartics2OnModule,
             DragDropModule,
             NgxsModule.forRoot([
                 ConfigurationReducer,
@@ -181,7 +183,7 @@ export const appConfig: ApplicationConfig = {
         RouteStatisticsService,
         ShareUrlsService,
         Title,
-        IHMTitleService,
+        MapeakTitleService,
         ToastService,
         ElevationProvider,
         SearchResultsProvider,
@@ -222,6 +224,7 @@ export const appConfig: ApplicationConfig = {
         LocationService,
         LogReaderService,
         TranslationService,
+        AnalyticsService,
         FileSystemWrapper,
         RouteEditPoiInteraction,
         RouteEditRouteInteraction,

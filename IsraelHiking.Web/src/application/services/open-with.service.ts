@@ -30,7 +30,7 @@ export class OpenWithService {
             if (!data || !data.url) {
                 return;
             }
-            if (data.url.startsWith("ihm://")) {
+            if (data.url.startsWith("mapeak://")) {
                 // no need to do anything as this is part of the login flow
                 return;
             }
@@ -48,16 +48,16 @@ export class OpenWithService {
         });
     }
 
-    private handleIHMUrl(url: URL) {
+    private handleMapeakUrl(url: URL) {
         this.logAndCloseDialogs(url);
         const pathname = url.pathname;
-        if (pathname.startsWith("/share")) {
-            const shareId = pathname.replace("/share/", "");
+        if (pathname.startsWith(RouteStrings.ROUTE_SHARE)) {
+            const shareId = pathname.replace(RouteStrings.ROUTE_SHARE + "/", "");
             this.ngZone.run(() => {
                 this.router.navigate([RouteStrings.ROUTE_SHARE, shareId]);
             });
-        } else if (pathname.startsWith("/poi")) {
-            const sourceAndId = pathname.replace("/poi/", "");
+        } else if (pathname.startsWith(RouteStrings.ROUTE_POI)) {
+            const sourceAndId = pathname.replace(RouteStrings.ROUTE_POI + "/", "");
             const source = sourceAndId.split("/")[0];
             const id = sourceAndId.split("/")[1];
             const language = new URLSearchParams(url.search).get("language");
@@ -65,20 +65,24 @@ export class OpenWithService {
                 this.router.navigate([RouteStrings.ROUTE_POI, source, id],
                     { queryParams: { language } });
             });
-        } else if (pathname.startsWith("/url")) {
-            const urlData = pathname.replace("/url/", "");
+        } else if (pathname.startsWith(RouteStrings.ROUTE_URL)) {
+            const urlData = pathname.replace(RouteStrings.ROUTE_URL + "/", "");
             const baseLayer = new URLSearchParams(url.search).get("baselayer");
             this.ngZone.run(() => {
                 this.router.navigate([RouteStrings.ROUTE_URL, urlData],
                     { queryParams: { baseLayer } });
             });
-        } else if (pathname.startsWith("/map")) {
-            const mapLocation = pathname.replace("/map/", "");
+        } else if (pathname.startsWith(RouteStrings.ROUTE_MAP)) {
+            const mapLocation = pathname.replace(RouteStrings.ROUTE_MAP + "/", "");
             const zoom = mapLocation.split("/")[0];
             const lat = mapLocation.split("/")[1];
             const lng = mapLocation.split("/")[2];
             this.ngZone.run(() => {
                 this.router.navigate([RouteStrings.ROUTE_MAP, zoom, lat, lng]);
+            });
+        } else if (pathname.startsWith(RouteStrings.ROUTE_LAYER)) {
+            this.ngZone.run(() => {
+                this.router.navigate([RouteStrings.ROUTE_LAYER], { queryParams: Object.fromEntries(url.searchParams.entries())});
             });
         } else {
             this.ngZone.run(() => {
@@ -101,8 +105,10 @@ export class OpenWithService {
 
     private handleHttpUrl(href: string) {
         const url = new URL(href);
-        if (url.host.toLocaleLowerCase() === "israelhiking.osm.org.il") {
-            this.handleIHMUrl(url);
+        if (url.host.toLocaleLowerCase() === "www.mapeak.com" || 
+            url.host.toLocaleLowerCase() === "mapeak.com" ||
+            url.host.toLocaleLowerCase() === "israelhiking.osm.org.il") {
+            this.handleMapeakUrl(url);
             return;
         }
         this.loggingService.info("[OpenWith] Opening an external url: " + href);

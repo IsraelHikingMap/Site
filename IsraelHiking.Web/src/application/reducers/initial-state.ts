@@ -1,25 +1,14 @@
 ﻿import { Urls } from "../urls";
-import { environment } from "../../environments/environment";
-import type { CategoriesGroup, Language, MutableApplicationState, RouteData, StateWithHistory } from "../models";
+import type { CategoriesGroup, EditableLayer, Language, MutableApplicationState, Overlay, RouteData, StateWithHistory } from "../models";
 
-export const ISRAEL_HIKING_MAP = "Israel Hiking Map";
-export const ISRAEL_MTB_MAP = "Israel MTB Map";
-export const SATELLITE = "Satellite Imagery";
+export const HIKING_MAP = "Hiking Map";
+export const MTB_MAP = "MTB Map";
 export const HIKING_TRAILS = "Hiking Trails";
 export const BICYCLE_TRAILS = "Bicycle Trails";
 export const POPULARITY_HEATMAP = "Popularity Heatmap";
 export const POINTS_OF_INTEREST = "Points of Interest";
 
-export const SPECIAL_BASELAYERS = [ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE];
-export const SPECIAL_OVERLAYS = [HIKING_TRAILS, BICYCLE_TRAILS, POPULARITY_HEATMAP];
-export const SPECIAL_LAYERS = [...SPECIAL_BASELAYERS, ...SPECIAL_OVERLAYS];
-
 export const AVAILABLE_LANGUAGES: Language[] = [{
-    code: "he",
-    rtl: true,
-    label: "עברית"
-},
-{
     code: "en-US",
     rtl: false,
     label: "English"
@@ -30,11 +19,15 @@ export const AVAILABLE_LANGUAGES: Language[] = [{
     label: "Русский"
 },
 {
+    code: "he",
+    rtl: true,
+    label: "עברית"
+},
+{
     code: "ar",
     rtl: true,
     label: "العربية"
-}
-];
+}];
 
 export const CATEGORIES_GROUPS: CategoriesGroup[] = [{
     type: POINTS_OF_INTEREST,
@@ -149,6 +142,26 @@ export const CATEGORIES_GROUPS: CategoriesGroup[] = [{
     }]
 }];
 
+export const DEFAULT_BASE_LAYERS: EditableLayer[] = [{
+    key: HIKING_MAP,
+    address: Urls.HIKING_TILES_ADDRESS,
+    isEditable: false,
+    minZoom: 1,
+    maxZoom: 16,
+    opacity: 1,
+    id: null
+}, {
+    key: MTB_MAP,
+    address: Urls.MTB_TILES_ADDRESS,
+    isEditable: false,
+    minZoom: 1,
+    maxZoom: 16,
+    opacity: 1,
+    id: null
+}];
+
+export const DEFAULT_OVERLAYS: Overlay[] = [];
+
 export const initialState =
     {
         configuration: {
@@ -159,13 +172,13 @@ export const initialState =
             isShowIntro: true,
             isShowKmMarker: false,
             isShowSlope: false,
-            version: "9.20",
+            version: 10,
             language: AVAILABLE_LANGUAGES.find(l => l.code === navigator.language) ?? AVAILABLE_LANGUAGES[0],
         },
         locationState: {
-            longitude: 35.12,
-            latitude: 31.773,
-            zoom: 13
+            longitude: 0,
+            latitude: 0,
+            zoom: 1
         },
         routes: {
             past: [],
@@ -190,70 +203,10 @@ export const initialState =
             missingParts: null,
         },
         layersState: {
-            baseLayers: [
-                {
-                    key: ISRAEL_HIKING_MAP,
-                    address: Urls.DEFAULT_TILES_ADDRESS,
-                    isEditable: false,
-                    isOfflineAvailable: true,
-                    isOfflineOn: false,
-                    minZoom: 7,
-                    maxZoom: 16
-                },
-                {
-                    key: ISRAEL_MTB_MAP,
-                    address: Urls.MTB_TILES_ADDRESS,
-                    isEditable: false,
-                    isOfflineAvailable: true,
-                    isOfflineOn: false,
-                    minZoom: 7,
-                    maxZoom: 16
-                },
-                {
-                    key: SATELLITE,
-                    address: environment.baseTilesAddress + "/Ortho/{z}/{y}/{x}.jpg",
-                    isEditable: false,
-                    isOfflineAvailable: false,
-                    isOfflineOn: false,
-                    minZoom: 7,
-                    maxZoom: 16
-                }
-            ],
-            overlays: [
-                {
-                    key: HIKING_TRAILS,
-                    address: Urls.DEFAULT_TILES_ADDRESS,
-                    minZoom: 7,
-                    maxZoom: 16,
-                    isOfflineAvailable: true,
-                    isOfflineOn: false,
-                    visible: false,
-                    isEditable: false
-                },
-                {
-                    key: BICYCLE_TRAILS,
-                    address: Urls.MTB_TILES_ADDRESS,
-                    minZoom: 7,
-                    maxZoom: 16,
-                    isOfflineAvailable: true,
-                    isOfflineOn: false,
-                    visible: false,
-                    isEditable: false
-                },
-                {
-                    key: POPULARITY_HEATMAP,
-                    address: Urls.HEATMAP_TILES_ADDRESS,
-                    minZoom: 7,
-                    maxZoom: 16,
-                    isOfflineAvailable: true,
-                    isOfflineOn: false,
-                    visible: false,
-                    isEditable: false
-                }
-
-            ],
-            selectedBaseLayerKey: ISRAEL_HIKING_MAP,
-            expanded: ["Base Layers", "Overlays", "Private Routes"],
+            baseLayers: [],
+            overlays: [],
+            selectedBaseLayerKey: HIKING_MAP,
+            expanded: ["Base Layers", "Private Routes"],
             visibleCategories: CATEGORIES_GROUPS.map(cg => cg.categories.map(c => ({ groupType: cg.type, name: c.name }))).flat()
         },
         shareUrlsState: {
@@ -281,10 +234,9 @@ export const initialState =
             currentPosition: null
         },
         offlineState: {
-            isOfflineAvailable: false,
-            lastModifiedDate: null,
+            isSubscribed: false,
+            downloadedTiles: null,
             shareUrlsLastModifiedDate: null,
-            uploadPoiQueue: [],
-            isPmtilesDownloaded: false
+            uploadPoiQueue: []
         }
     } as MutableApplicationState;

@@ -1,5 +1,4 @@
 ﻿using IsraelHiking.API.Controllers;
-using IsraelHiking.API.Executors;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.DataContainer;
 using IsraelHiking.DataAccessInterfaces;

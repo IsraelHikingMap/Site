@@ -3,8 +3,8 @@ import { Dir } from "@angular/cdk/bidi";
 import { MatButton, MatAnchor } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatDialog, MAT_DIALOG_DATA, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
-import { Angulartics2OnModule } from "angulartics2";
 
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 
 export type SendReportDialogData = {
@@ -24,7 +24,7 @@ export class SendReportDialogComponent {
 
     constructor() {
         const body = encodeURIComponent(this.resources.reportAnIssueInstructions);
-        const to = "israelhiking@osm.org.il";
+        const to = "support@mapeak.com";
         const subject = encodeURIComponent(this.data.subject);
         this.mailToLink = `mailto:${to}?subject=${subject}&body=${body}`;
     }

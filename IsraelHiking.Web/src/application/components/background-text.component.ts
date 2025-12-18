@@ -20,18 +20,16 @@ export class BackgroundTextComponent {
     private readonly store = inject(Store);
 
     constructor() {
-        this.store.select((state: ApplicationState) => state.offlineState.isOfflineAvailable).pipe(takeUntilDestroyed()).subscribe(() => this.updateText());
-        this.store.select((state: ApplicationState) => state.offlineState.lastModifiedDate).pipe(takeUntilDestroyed()).subscribe(() => this.updateText());
+        this.store.select((state: ApplicationState) => state.offlineState.isSubscribed).pipe(takeUntilDestroyed()).subscribe(() => this.updateText());
+        this.store.select((state: ApplicationState) => state.offlineState.downloadedTiles).pipe(takeUntilDestroyed()).subscribe(() => this.updateText());
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed()).subscribe(() => this.updateText());
     }
 
     private updateText() {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        if (offlineState.lastModifiedDate != null) {
-            this.text = this.resources.youNeedToToggleOfflineMaps;
-        } else if (offlineState.isOfflineAvailable && offlineState.lastModifiedDate == null) {
+        if (offlineState.isSubscribed && offlineState.downloadedTiles == null) {
             this.text = this.resources.youNeedToDownloadOfflineMaps;
-        } else if (!offlineState.isOfflineAvailable) {
+        } else if (!offlineState.isSubscribed) {
             this.text = this.resources.youNeedToPurchaseOfflineMaps;
         }
     }

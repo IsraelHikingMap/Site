@@ -7,17 +7,18 @@ import { MatCard, MatCardContent } from "@angular/material/card";
 import { MatDivider } from "@angular/material/divider";
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from "@angular/material/expansion";
 import { remove } from "lodash-es";
-import { Angulartics2GoogleGlobalSiteTag, Angulartics2OnModule } from "angulartics2";
 import { Store } from "@ngxs/store";
 
 import { Urls } from "../../urls";
 import { ILegendItem, LegendItemComponent } from "./legend-item.component";
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
-import { ISRAEL_MTB_MAP, ISRAEL_HIKING_MAP } from "../../reducers/initial-state";
+import { AnalyticsService } from "../../services/analytics.service";
+import { MTB_MAP, HIKING_MAP } from "../../reducers/initial-state";
 import type { ApplicationState } from "../../models";
 import legendSectionsJson from "../../../content/legend/legend.json";
 
@@ -42,10 +43,10 @@ export class InfoSidebarComponent {
 
     public readonly resources = inject(ResourcesService);
 
-    private readonly angulartics = inject(Angulartics2GoogleGlobalSiteTag);
     private readonly sidebarService = inject(SidebarService);
     private readonly layersService = inject(LayersService);
     private readonly runningContext = inject(RunningContextService);
+    private readonly analyticsService = inject(AnalyticsService);
     private readonly store = inject(Store);
 
     constructor() {
@@ -66,7 +67,7 @@ export class InfoSidebarComponent {
         if (tabIndex === 1) {
             this.initalizeLegendSections();
         }
-        this.angulartics.eventTrack((tabIndex === 1 ? "Legend" : "About") + " tab selected", { category: "Info" });
+        this.analyticsService.trackEvent("info", (tabIndex === 1 ? "Legend" : "About") + " tab selected");
     }
 
     public openSection(section: LegendSection) {
@@ -98,9 +99,9 @@ export class InfoSidebarComponent {
             }
         }
 
-        if (this.layersService.getSelectedBaseLayer().key === ISRAEL_MTB_MAP) {
+        if (this.layersService.getSelectedBaseLayer().key === MTB_MAP) {
             this.removeMtbUnwantedLegend();
-        } else if (this.layersService.getSelectedBaseLayer().key === ISRAEL_HIKING_MAP) {
+        } else if (this.layersService.getSelectedBaseLayer().key === HIKING_MAP) {
             this.removeIhmUnwantedLegend();
         } else {
             this.legendSections = [];

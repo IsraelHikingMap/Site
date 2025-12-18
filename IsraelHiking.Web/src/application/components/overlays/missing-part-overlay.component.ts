@@ -4,10 +4,10 @@ import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { NgClass } from "@angular/common";
 import { MatTooltip } from "@angular/material/tooltip";
-import { Angulartics2OnModule } from "angulartics2";
 import { firstValueFrom } from "rxjs";
 
 import { CoordinatesComponent } from "../coordinates.component";
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { Urls } from "../../urls";

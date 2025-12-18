@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common.Extensions;
-using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,17 +17,14 @@ public class ExternalSourceUpdaterExecutorTests
 {
     private ExternalSourceUpdaterExecutor _executor;
     private IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
-    private IElevationGateway _elevationGateway;
     private IExternalSourcesRepository _externalSourcesRepository;
         
     [TestInitialize]
     public void TestInitialize()
     {
         _pointsOfInterestAdapterFactory = Substitute.For<IPointsOfInterestAdapterFactory>();
-        _elevationGateway = Substitute.For<IElevationGateway>();
         _externalSourcesRepository = Substitute.For<IExternalSourcesRepository>();
-        _executor = new ExternalSourceUpdaterExecutor(_pointsOfInterestAdapterFactory, 
-            _elevationGateway,
+        _executor = new ExternalSourceUpdaterExecutor(_pointsOfInterestAdapterFactory,
             _externalSourcesRepository, 
             Substitute.For<ILogger>());
     }
@@ -71,7 +67,6 @@ public class ExternalSourceUpdaterExecutorTests
         var feature = new Feature(new Point(0, 0), new AttributesTable());
         feature.SetLocation(new Coordinate(0,0));
         adapter.GetAll().Returns([feature]);
-        _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns([0.0]);
         _pointsOfInterestAdapterFactory.GetBySource(sourceName).Returns(adapter);
 
         _executor.RebuildSource(sourceName).Wait();

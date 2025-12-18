@@ -11,7 +11,7 @@ namespace IsraelHiking.API.Services;
 /// </summary>
 public class HomePageHelper : IHomePageHelper
 {
-    const string SPLIT_PATTERN = @"<!-- IHM \w+ -->";
+    const string SPLIT_PATTERN = @"<!-- MAPEAK \w+ -->";
 
     private readonly string _fileHeader;
     private readonly string _fileFooter;

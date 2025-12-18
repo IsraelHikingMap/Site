@@ -1,14 +1,14 @@
 import { inject, Injectable } from "@angular/core";
-import { Store } from "@ngxs/store";
-import { Purchases } from "@revenuecat/purchases-capacitor";
 import { HttpClient } from "@angular/common/http";
+import { Store } from "@ngxs/store";
 import { firstValueFrom, timeout } from "rxjs";
+import { Purchases } from "@revenuecat/purchases-capacitor";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
-import { SetOfflineAvailableAction } from "../reducers/offline.reducer";
+import { SetOfflineSubscribedAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState } from "../models";
 
@@ -36,10 +36,14 @@ export class PurchaseService {
             this.loggingService.info("[Store] Logged in: " + userInfo.id);
             this.initializeStoreConnection(userInfo.id);
 
-            //if (await this.isExpired()) {
-            //    this.loggingService.debug("[Store] Product is expired from server");
-            //    this.store.dispatch(new SetOfflineAvailableAction(false));
-            //}
+            if (await this.isExpired()) {
+                this.loggingService.debug("[Store] Product is expired from server");
+                this.store.dispatch(new SetOfflineSubscribedAction(false));
+            } else {
+                // HM TODO: remove this after setup puchase from the stores
+                this.loggingService.debug("[Store] Product is valid from server");
+                this.store.dispatch(new SetOfflineSubscribedAction(true));
+            }
         });
     }
 
@@ -55,13 +59,13 @@ export class PurchaseService {
         const customerInfo = await Purchases.getCustomerInfo();
         if (customerInfo.customerInfo.entitlements.active[OFFLINE_MAPS_SUBSCRIPTION]?.isActive) {
             this.loggingService.info("[Store] Product owned! Last modified: " + customerInfo.customerInfo.entitlements.active[OFFLINE_MAPS_SUBSCRIPTION]?.latestPurchaseDate);
-            this.store.dispatch(new SetOfflineAvailableAction(true));
+            this.store.dispatch(new SetOfflineSubscribedAction(true));
         }
     }
 
     private async initializeStoreConnection(userId: string) {
         try {
-            const apiKey = this.runningContextService.isIos ? "appl_dYhzcYSUYYFWbXBeHYPMsDmraQp" : "goog_WFtGQuaZOimKuqvxOLUYNoekMbQ";
+            const apiKey = this.runningContextService.isIos ? "appl_OKCoIjEkNVfloKjpNfNaAdgGOwO" : "goog_NEtHVocOwpDpmIcHEETTdUdrtpd";
             const isConfigured = (await Purchases.isConfigured()).isConfigured;
             if (!isConfigured && userId) {
                 await Purchases.configure({
@@ -107,14 +111,14 @@ export class PurchaseService {
     public isPurchaseAvailable(): boolean {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         return this.runningContextService.isCapacitor &&
-            !offlineState.isOfflineAvailable &&
-            offlineState.lastModifiedDate == null;
+            !offlineState.isSubscribed &&
+            offlineState.downloadedTiles == null;
     }
 
     public isRenewAvailable() {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         return this.runningContextService.isCapacitor &&
-            !offlineState.isOfflineAvailable &&
-            offlineState.lastModifiedDate != null;
+            !offlineState.isSubscribed &&
+            offlineState.downloadedTiles != null;
     }
 }
