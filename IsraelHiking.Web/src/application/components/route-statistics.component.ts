@@ -206,9 +206,9 @@ export class RouteStatisticsComponent implements OnInit {
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.redrawChart();
         });
-        //this.store.select((state: ApplicationState) => state.gpsState.currentPosition).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(p => {
-        //    this.onGeolocationChanged(p);
-        //});
+        this.store.select((state: ApplicationState) => state.gpsState.currentPosition).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(p => {
+            this.onGeolocationChanged(p);
+        });
         this.store.select((state: ApplicationState) => state.configuration.isShowSlope).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(showSlope => {
             this.isSlopeOn = showSlope;
             this.redrawChart();

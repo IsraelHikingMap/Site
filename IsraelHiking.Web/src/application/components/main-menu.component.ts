@@ -40,7 +40,6 @@ import type { UserInfo, ApplicationState } from "../models";
     selector: "main-menu",
     templateUrl: "./main-menu.component.html",
     styleUrls: ["./main-menu.component.scss"],
-    //host: { 'ngSkipHydration': 'true' },
     imports: [MatButton, Angulartics2OnModule, MatMenuTrigger, NgClass, MatMenu, MatMenuContent, MatMenuItem, AsyncPipe, OfflineImagePipe, RouterLink]
 })
 export class MainMenuComponent {

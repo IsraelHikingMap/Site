@@ -18,7 +18,6 @@ import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { debounceTime, filter, tap, map } from "rxjs/operators";
 import { remove } from "lodash-es";
 
-import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStrings } from "../services/hash.service";
 import { ToastService } from "../services/toast.service";
@@ -40,7 +39,7 @@ type SearchRequestQueueItem = {
     templateUrl: "./search.component.html",
     styleUrls: ["./search.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Angulartics2OnModule, NgClass, Dir, MatFormField, MatInput, FormsModule, MatAutocompleteTrigger, MatAutocomplete, ReactiveFormsModule, MatOption]
+    imports: [NgClass, Dir, MatFormField, MatInput, FormsModule, MatAutocompleteTrigger, MatAutocomplete, ReactiveFormsModule, MatOption]
 })
 export class SearchComponent {
 

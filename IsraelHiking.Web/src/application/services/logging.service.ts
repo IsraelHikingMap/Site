@@ -46,9 +46,6 @@ export class LoggingService {
         if (this.deletingLogsInProgress) {
             return;
         }
-        if (!this.loggingDatabase) {
-            return;
-        }
         const lines = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).count();
         if (lines <= LoggingService.MAX_LOG_LINES) {
             return;

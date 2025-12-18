@@ -51,9 +51,6 @@ export class DatabaseService {
 
     public async initialize() {
         this.stateDatabase = new Dexie(DatabaseService.STATE_DB_NAME);
-        if (!this.stateDatabase) {
-            return;
-        }
         this.stateDatabase.version(1).stores({
             state: "id"
         });

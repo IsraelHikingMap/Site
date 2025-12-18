@@ -6,8 +6,7 @@
   [dir]="resources.direction">
   @if (isStable) {
   <mgl-map [zoom]="[location.zoom]" [center]="[location.longitude, location.latitude]" [style]="initialStyle"
-    (moveEnd)="moveEnd($event)" (mapLoad)="mapLoaded()" (pitchEvt)="pitchChanged()" [doubleClickZoom]="false"
-    [attributionControl]="false">
+    (moveEnd)="moveEnd($event)" (mapLoad)="mapLoaded()" [doubleClickZoom]="false" [attributionControl]="false">
     <layers></layers>
     <public-pois></public-pois>
     <routes></routes>
