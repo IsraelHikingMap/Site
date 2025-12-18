@@ -230,10 +230,8 @@ export class RouteStatisticsComponent implements OnInit {
             takeUntilDestroyed(this.destroyRef)
         ).subscribe(() => {
             const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
-            if (recordedRouteState.isRecording) {
-                const recordingStartTime = new Date(recordedRouteState.route.latlngs[0].timestamp).getTime();
-                this.updateDurationString((new Date().getTime() - recordingStartTime) / 1000);
-            }
+            const recordingStartTime = new Date(recordedRouteState.route.latlngs[0].timestamp).getTime();
+            this.updateDurationString((new Date().getTime() - recordingStartTime) / 1000);
         });
     }
 
