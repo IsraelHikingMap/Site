@@ -3,12 +3,12 @@ import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { MatTooltip } from "@angular/material/tooltip";
 
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
-import { LayersService } from "../../services/layers.service";
-import { ResourcesService } from "../../services/resources.service";
-import { FitBoundsService } from "../../services/fit-bounds.service";
-import { HIKING_MAP } from "../../reducers/initial-state";
-import type { LatLngAlt } from "../../models";
+import { Angulartics2OnModule } from "../directives/gtag.directive";
+import { LayersService } from "../services/layers.service";
+import { ResourcesService } from "../services/resources.service";
+import { FitBoundsService } from "../services/fit-bounds.service";
+import { HIKING_MAP } from "../reducers/initial-state";
+import type { LatLngAlt } from "../models";
 
 type LegendItemType = "POI" | "Way";
 

@@ -1,26 +1,17 @@
 import { Component, inject } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Dir } from "@angular/cdk/bidi";
-import { MatButton } from "@angular/material/button";
-import { MatTabGroup, MatTab } from "@angular/material/tabs";
-import { MatCard, MatCardContent } from "@angular/material/card";
-import { MatDivider } from "@angular/material/divider";
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from "@angular/material/expansion";
-import { remove } from "lodash-es";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Store } from "@ngxs/store";
+import { remove } from "lodash-es";
 
-import { Urls } from "../../urls";
 import { ILegendItem, LegendItemComponent } from "./legend-item.component";
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
-import { ScrollToDirective } from "../../directives/scroll-to.directive";
-import { SidebarService } from "../../services/sidebar.service";
-import { ResourcesService } from "../../services/resources.service";
-import { LayersService } from "../../services/layers.service";
-import { RunningContextService } from "../../services/running-context.service";
-import { AnalyticsService } from "../../services/analytics.service";
-import { MTB_MAP, HIKING_MAP } from "../../reducers/initial-state";
-import type { ApplicationState } from "../../models";
-import legendSectionsJson from "../../../content/legend/legend.json";
+import { ScrollToDirective } from "../directives/scroll-to.directive";
+import { ResourcesService } from "../services/resources.service";
+import { LayersService } from "../services/layers.service";
+import { HIKING_MAP, MTB_MAP } from "../reducers/initial-state";
+import type { ApplicationState } from "../models";
+import legendSectionsJson from "../../content/legend/legend.json";
+
 
 export type LegendSection = {
     key: keyof ResourcesService;
@@ -29,45 +20,23 @@ export type LegendSection = {
 };
 
 @Component({
-    selector: "info-sidebar",
-    templateUrl: "./info-sidebar.component.html",
-    styleUrls: ["./info-sidebar.component.scss"],
-    imports: [Dir, MatButton, MatTabGroup, MatTab, MatCard, MatCardContent, Angulartics2OnModule, MatDivider, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, LegendItemComponent]
+    selector: "legend",
+    templateUrl: "./legend.component.html",
+    styleUrls: ["./legend.component.scss"],
+    imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, LegendItemComponent]
 })
-export class InfoSidebarComponent {
-    public legendSections: LegendSection[] = [];
-    public selectedTabIndex: number = 0;
-    public androidAppUrl: string = Urls.ANDROID_APP_URL;
-    public iosAppUrl: string = Urls.IOS_APP_URL;
-    private selectedSection: LegendSection = null;
-
+export class LegendComponent {
     public readonly resources = inject(ResourcesService);
-
-    private readonly sidebarService = inject(SidebarService);
     private readonly layersService = inject(LayersService);
-    private readonly runningContext = inject(RunningContextService);
-    private readonly analyticsService = inject(AnalyticsService);
     private readonly store = inject(Store);
+
+    public legendSections: LegendSection[] = [];
+    private selectedSection: LegendSection = null;
 
     constructor() {
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed()).subscribe(() => {
             this.initalizeLegendSections();
         });
-    }
-
-    public close() {
-        this.sidebarService.hide();
-    }
-
-    public isActive(): boolean {
-        return this.sidebarService.viewName === "info";
-    }
-
-    public selectedTabChanged(tabIndex: number) {
-        if (tabIndex === 1) {
-            this.initalizeLegendSections();
-        }
-        this.analyticsService.trackEvent("info", (tabIndex === 1 ? "Legend" : "About") + " tab selected");
     }
 
     public openSection(section: LegendSection) {
@@ -76,14 +45,6 @@ export class InfoSidebarComponent {
 
     public isSectionOpen(section: LegendSection) {
         return this.selectedSection != null && this.selectedSection.key === section.key;
-    }
-
-    public isApp(): boolean {
-        return this.runningContext.isCapacitor;
-    }
-
-    public isMobile(): boolean {
-        return this.runningContext.isMobile;
     }
 
     public scrollTo(sectionKey: string) {

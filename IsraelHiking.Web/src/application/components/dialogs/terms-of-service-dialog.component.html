@@ -9,7 +9,8 @@
                 <p class="w-full">{{resources.termsOfServiceElaborated}}</p>
             </div>
             <div class="flex flex-row">
-                <a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" target="_blank">{{resources.osmTermsOfService}}</a>
+                <a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy"
+                    target="_blank">{{resources.osmTermsOfService}}</a>
             </div>
             <div class="flex flex-row">
                 <a [href]="wikimediaTermsOfServiceUrl" target="_blank">{{resources.wikimediaTermsOfService}}</a>
@@ -18,7 +19,8 @@
                 <a href="https://imgur.com/tos" target="_blank">{{resources.imgurTermsOfService}}</a>
             </div>
             <div class="flex flex-row">
-                <a href="https://mapeak.com/terms-of-service-and-privacy-policy.html" target="_blank">{{resources.infoPrivacyPolicyTermsOfService}}</a>
+                <a href="https://mapeak.com/privacy-policy"
+                    target="_blank">{{resources.infoPrivacyPolicyTermsOfService}}</a>
             </div>
             <div class="flex flex-row">
                 <mat-checkbox color="primary" [(ngModel)]="iAgree">{{resources.iHaveReadAndAgree}}</mat-checkbox>
@@ -27,6 +29,8 @@
         </div>
     </div>
     <div mat-dialog-actions>
-        <button matDialogClose="true" mat-raised-button color="primary" [disabled]="iAgree === false" (click)="submit()" angulartics2On="click" angularticsCategory="Terms Of Service" angularticsAction="Sumbit">{{resources.submit}}</button>
+        <button matDialogClose="true" mat-raised-button color="primary" [disabled]="iAgree === false" (click)="submit()"
+            angulartics2On="click" angularticsCategory="Terms Of Service"
+            angularticsAction="Sumbit">{{resources.submit}}</button>
     </div>
 </div>

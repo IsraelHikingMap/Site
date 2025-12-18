@@ -116,20 +116,8 @@ export class MainMenuComponent {
         this.authorizationService.logout();
     }
 
-    public selectDrawing() {
-
-    }
-
-    public selectStatistics() {
-
-    }
-
     public selectSharesAndFiles() {
         this.dialog.open(FilesSharesDialogComponent);
-    }
-
-    public selectLegendAndAbout() {
-        this.sidebarService.toggle("info");
     }
 
     public async reportAnIssue() {
