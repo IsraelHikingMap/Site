@@ -7,7 +7,7 @@ import { MatTooltip } from "@angular/material/tooltip";
 import { MatButton } from "@angular/material/button";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { SourceDirective, GeoJSONSourceComponent, LayerComponent } from "@maplibre/ngx-maplibre-gl";
-import { interval } from "rxjs";
+import { interval, switchMap, distinctUntilChanged, EMPTY } from "rxjs";
 import { regressionLoess } from "d3-regression";
 import { LineLayerSpecification } from "maplibre-gl";
 import { Store } from "@ngxs/store";
@@ -224,7 +224,11 @@ export class RouteStatisticsComponent implements OnInit {
             this.redrawChart();
         });
         this.routeChanged();
-        interval(1000).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+        this.store.select((s: ApplicationState) => s.recordedRouteState.isRecording).pipe(
+            distinctUntilChanged(),
+            switchMap(isRecording => isRecording ? interval(1000) : EMPTY),
+            takeUntilDestroyed(this.destroyRef)
+        ).subscribe(() => {
             const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
             if (recordedRouteState.isRecording) {
                 const recordingStartTime = new Date(recordedRouteState.route.latlngs[0].timestamp).getTime();

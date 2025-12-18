@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head prefix="og: http://ogp.me/ns#">
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
@@ -14,9 +15,11 @@
     <meta property="og:image:secure_url" content="https://mapeak.com/content/favicons/android-chrome-192x192.png" />
     <meta property="og:image:width" content="192" />
     <meta property="og:image:height" content="192" />
-    <meta property="og:description" content="Whether you are planning your next hike, ride, drive or run, this is where you can find everything you'll need in order to plan your next outdoor visit." />
+    <meta property="og:description"
+        content="Whether you are planning your next hike, ride, drive or run, this is where you can find everything you'll need in order to plan your next outdoor visit." />
     <meta name="title" content="Mapeak" />
-    <meta name="description" content="Whether you are planning your next hike, ride, drive or run, this is where you can find everything you'll need in order to plan your next outdoor visit." />
+    <meta name="description"
+        content="Whether you are planning your next hike, ride, drive or run, this is where you can find everything you'll need in order to plan your next outdoor visit." />
     <title>Mapeak</title>
     <!-- MAPEAK END -->
     <meta name="keyword" content="hike,bike,run,cycle,outdoor,map,navigation,route planning" />
@@ -25,7 +28,8 @@
     <meta name="msapplication-TileImage" content="content/favicons/mstile-144x144.png">
     <meta name="msapplication-config" content="content/favicons/browserconfig.xml">
     <meta name="theme-color" content="#0a42bb">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 
     <base href="/">
     <!-- Favicons courtesy of http://realfavicongenerator.net/ -->
@@ -40,16 +44,6 @@
     <meta name="theme-color" content="#ffffff">
 
     <link rel="text/html" href="fonts/icomoon.ttf">
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-H495KRZ5CD"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { 
-            dataLayer.push(arguments);
-        }
-        gtag('js', new Date());
-
-        gtag('config', 'G-H495KRZ5CD');
-    </script>
     <style>
         .preloader {
             position: absolute;
@@ -73,35 +67,35 @@
             height: 32px;
         }
 
-            .lds-ellipsis div {
-                position: absolute;
-                top: 14px;
-                width: 11px;
-                height: 11px;
-                border-radius: 50%;
-                background: #32CD6D;
-                animation-timing-function: cubic-bezier(0, 1, 1, 0);
-            }
+        .lds-ellipsis div {
+            position: absolute;
+            top: 14px;
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: #32CD6D;
+            animation-timing-function: cubic-bezier(0, 1, 1, 0);
+        }
 
-                .lds-ellipsis div:nth-child(1) {
-                    left: 6px;
-                    animation: lds-ellipsis1 0.6s infinite;
-                }
+        .lds-ellipsis div:nth-child(1) {
+            left: 6px;
+            animation: lds-ellipsis1 0.6s infinite;
+        }
 
-                .lds-ellipsis div:nth-child(2) {
-                    left: 6px;
-                    animation: lds-ellipsis2 0.6s infinite;
-                }
+        .lds-ellipsis div:nth-child(2) {
+            left: 6px;
+            animation: lds-ellipsis2 0.6s infinite;
+        }
 
-                .lds-ellipsis div:nth-child(3) {
-                    left: 26px;
-                    animation: lds-ellipsis2 0.6s infinite;
-                }
+        .lds-ellipsis div:nth-child(3) {
+            left: 26px;
+            animation: lds-ellipsis2 0.6s infinite;
+        }
 
-                .lds-ellipsis div:nth-child(4) {
-                    left: 45px;
-                    animation: lds-ellipsis3 0.6s infinite;
-                }
+        .lds-ellipsis div:nth-child(4) {
+            left: 45px;
+            animation: lds-ellipsis3 0.6s infinite;
+        }
 
         @keyframes lds-ellipsis1 {
             0% {
@@ -134,31 +128,17 @@
         }
     </style>
 </head>
+
 <body>
-    <script>
-        function isWebglSupported() {
-            if (!!window.WebGLRenderingContext) {
-                var canvas = document.createElement("canvas");
-                try {
-                    var context = canvas.getContext("webgl2") || canvas.getContext("webgl");
-                    if (context && typeof context.getParameter == "function") {
-                        return true;
-                    }
-                } catch(e) {}
-                // WebGL is supported, but disabled
-                return false;
-            }
-            // WebGL not supported
-            return false;
-        }
-        if (!isWebglSupported()) {
-            alert("נראה שיש בעיה... אנא נסו לעדכן את גרסת הכרום ו/או גרסת Android System Webview, למידע נוסף בקרו ב- https://get.webgl.org/webgl2/");
-        }
-    </script>
-    <div class="preloader">
-        <img src="content/logo.png" height="256px" />
-        <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+    <img src="content/logo.png" height="256px" />
+    <div class="lds-ellipsis">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
     </div>
     <main-map></main-map>
 </body>
+
 </html>

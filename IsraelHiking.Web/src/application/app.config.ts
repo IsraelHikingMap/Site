@@ -94,6 +94,7 @@ import { OsmAddressesService } from "./services/osm-addresses.service";
 import { LocationService } from "./services/location.service";
 import { LogReaderService } from "./services/log-reader.service";
 import { TranslationService } from "./services/translation.service";
+import { AnalyticsService } from "./services/analytics.service";
 // Components
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
@@ -225,6 +226,7 @@ export const appConfig: ApplicationConfig = {
         LocationService,
         LogReaderService,
         TranslationService,
+        AnalyticsService,
         FileSystemWrapper,
         RouteEditPoiInteraction,
         RouteEditRouteInteraction,

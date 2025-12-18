@@ -4,15 +4,15 @@ import {
     AfterViewInit,
     ElementRef,
     input,
-    inject,
-    NgZone
+    inject
 } from "@angular/core";
 
-declare let gtag: Function;
+import { AnalyticsService } from "application/services/analytics.service";
 
 @Directive({
     selector: "[angulartics2On]"
 })
+// HM TODO: rename this!
 export class Angulartics2OnModule implements AfterViewInit {
     angulartics2On = input<string>()
     angularticsAction = input.required<string>()
@@ -20,21 +20,11 @@ export class Angulartics2OnModule implements AfterViewInit {
 
     private readonly renderer = inject(Renderer2);
     private readonly el = inject(ElementRef);
-    private readonly ngZone = inject(NgZone);
-
-    constructor() { }
+    private readonly analyticsService = inject(AnalyticsService);
 
     ngAfterViewInit() {
         this.renderer.listen(this.el.nativeElement, this.angulartics2On(), () => {
-            this.ngZone.runOutsideAngular(() => {
-                try {
-                    gtag("event", this.angularticsAction(), {
-                        event_category: this.angularticsCategory(),
-                    });
-                } catch {
-                    // ignore
-                }
-            });
+            this.analyticsService.trackEvent(this.angularticsCategory(), this.angularticsAction());
         });
 
     }
