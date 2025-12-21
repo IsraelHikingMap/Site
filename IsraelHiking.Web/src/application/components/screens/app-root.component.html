@@ -1,4 +1,4 @@
-<mat-toolbar color="primary" [dir]="resources.direction">
+<mat-toolbar color="primary" [dir]="resources.direction" class="fixed z-50">
     <a routerLink="/" class="p-2 flex flex-col items-center"><img src="content/favicons/mstile-144x144.png"
             alt="Makeap Logo" height="32"></a>
     <div class="flex flex-grow">
@@ -6,4 +6,6 @@
     </div>
     <main-menu></main-menu>
 </mat-toolbar>
-<router-outlet></router-outlet>
+<div class="page-margin">
+    <router-outlet></router-outlet>
+</div>

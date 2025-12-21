@@ -1,0 +1,9 @@
+.page-margin {
+    margin-top: var(--mat-toolbar-mobile-height);
+}
+
+@media (width >=600px) {
+    .page-margin {
+        margin-top: var(--mat-toolbar-standard-height);
+    }
+}
