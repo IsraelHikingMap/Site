@@ -1,5 +1,12 @@
-﻿@if (!isIFrame() && !isLoggedIn()) {
-<button mat-button (click)="login()">Sign in!</button>
+﻿<button mat-button routerLink="/map" angulartics2On="click" angularticsCategory="Menu"
+  angularticsAction="Plan & Explore" class="max-md:hidden!">
+  <span class="flex flex-row justify-center items-center">
+    <span class="w-1/12 text-center"><i class="fa fa-lg icon-map-o mat-icon"></i></span>
+    <span class="flex-1 margin-sides">{{resources.planAndExplore}}</span>
+  </span>
+</button>
+@if (!isIFrame() && !isLoggedIn()) {
+<button mat-button (click)="login()">{{resources.signIn}}</button>
 }
 <button mat-button [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Menu"
   angularticsAction="Toggle main menu" class="!h-[56px]">
@@ -37,11 +44,10 @@
       <hr />
       }
       <button mat-menu-item routerLink="/map" angulartics2On="click" angularticsCategory="Menu"
-        angularticsAction="Plan & Explore">
+        angularticsAction="Plan & Explore" class="block md:hidden!">
         <span class="flex flex-row justify-center items-center">
           <span class="w-1/12 text-center"><i class="fa fa-lg icon-map-o mat-icon"></i></span>
-          <!-- HM TODO: translate-->
-          <span class="flex-1 margin-sides">Plan & Explore</span>
+          <span class="flex-1 margin-sides">{{resources.planAndExplore}}</span>
         </span>
       </button>
       <button mat-menu-item (click)="selectSharesAndFiles()" angulartics2On="click" angularticsCategory="Menu"
