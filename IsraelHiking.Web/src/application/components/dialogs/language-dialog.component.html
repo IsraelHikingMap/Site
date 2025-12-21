@@ -4,15 +4,24 @@
     <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
   </div>
   <div mat-dialog-content>
-    <mat-radio-group [(ngModel)]="selectedLanguageCode" class="flex flex-col">
-      @for (language of availableLanguages; track language) {
-        <mat-radio-button [value]="language.code" color="primary" angulartics2On="click" angularticsCategory="Language" angularticsAction="Select language {{language.code}}">{{language.label}}</mat-radio-button>
-      }
-    </mat-radio-group>
-  </div>
-  <div mat-dialog-actions>
-    <div class="flex flex-row w-full">
-      <button class="w-full" matDialogClose mat-button (click)="saveLanguage()" angulartics2On="click" angularticsCategory="Language" angularticsAction="Save language {{selectedLanguageCode}}" matTooltip="{{resources.save}}" matTooltipPosition="above"><i class="fa icon-check"></i></button>
+    <div class="flex flex-row">
+      <div class="flex-1">
+        <mat-radio-group [(ngModel)]="selectedLanguageCode" class="flex flex-col">
+          @for (language of availableLanguages; track language) {
+          <mat-radio-button [value]="language.code" color="primary" angulartics2On="click"
+            angularticsCategory="Language"
+            angularticsAction="Select language {{language.code}}">{{language.label}}</mat-radio-button>
+          }
+        </mat-radio-group>
+      </div>
+      <ng-lottie style="padding-right: 13px; max-height: 280px;" [options]="lottieLanguage"></ng-lottie>
+    </div>
+
+    <div mat-dialog-actions>
+      <div class="flex flex-row w-full">
+        <button class="w-full" matDialogClose mat-button (click)="saveLanguage()" angulartics2On="click"
+          angularticsCategory="Language" angularticsAction="Save language {{selectedLanguageCode}}"
+          matTooltip="{{resources.save}}" matTooltipPosition="above"><i class="fa icon-check"></i></button>
+      </div>
     </div>
   </div>
-</div>

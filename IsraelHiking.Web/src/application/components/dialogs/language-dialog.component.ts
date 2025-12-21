@@ -4,7 +4,7 @@ import { MatButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
 import { FormsModule } from "@angular/forms";
-
+import { AnimationOptions, LottieComponent } from "ngx-lottie";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatDialog, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
@@ -13,15 +13,17 @@ import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { AVAILABLE_LANGUAGES } from "../../reducers/initial-state";
 import { ApplicationState, LanguageCode } from "../../models";
+import languageAnimationData from "../../../content/lottie/dialog-language.json";
 
 @Component({
     selector: "language-dialog",
     templateUrl: "./language-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, FormsModule, MatRadioButton, Angulartics2OnModule, MatDialogActions, MatTooltip]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, FormsModule, MatRadioButton, Angulartics2OnModule, MatDialogActions, MatTooltip, LottieComponent]
 })
 export class LanguageDialogComponent {
     public selectedLanguageCode: LanguageCode;
     public availableLanguages = AVAILABLE_LANGUAGES;
+    lottieLanguage: AnimationOptions = { animationData: languageAnimationData };
 
     public readonly resources = inject(ResourcesService);
 

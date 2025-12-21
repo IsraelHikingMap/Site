@@ -1,5 +1,9 @@
+.page-content {
+    margin: 20px;
+}
+
 @media (width > 768px) {
-    .markdown-body {
+    .page-content {
         position: absolute;
         left: 50%;
         transform: translate(-50%, 0);
