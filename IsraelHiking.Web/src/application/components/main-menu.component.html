@@ -80,8 +80,8 @@
         </span>
       </button>
       @if (!isIFrame()) {
-      <button mat-menu-item routerLink="/contact-us" angulartics2On="click" angularticsCategory="Menu"
-        angularticsAction="Contact us">
+      <button mat-menu-item (click)="reportAnIssue()" angulartics2On="click" angularticsCategory="Menu"
+        angularticsAction="Report an issue">
         <span class="flex flex-row justify-center items-center">
           <span class="w-1/12 text-center"><i class="fa fa-lg icon-envelope mat-icon"></i></span>
           <span class="flex-1 margin-sides">{{resources.reportAnIssue}}</span>
