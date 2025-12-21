@@ -21,29 +21,4 @@ if (environment.production) {
     enableProdMode();
 }
 
-bootstrapApplication(AppRootComponent, appConfig)
-
-    .then(moduleInstance => {
-        // Ensure Angular destroys itself on hot reloads.
-        //if (window["ngRef"]) {
-        //    window["ngRef"].destroy();
-        //}
-        //window["ngRef"] = moduleInstance;
-
-        const ngZone = moduleInstance.injector.get(NgZone);
-        setInterval(() => {
-            var taskTrackingZone = (<any>ngZone)._inner.getZoneWith("TaskTrackingZone");
-            if (!taskTrackingZone) {
-                throw new Error("'TaskTrackingZone' zone not found! Have you loaded 'node_modules/zone.js/dist/task-tracking.js'?");
-            }
-            var tasks: any[] = taskTrackingZone._properties.TaskTrackingZone.getTasksFor("macroTask");
-            tasks = clone(tasks);
-            if (size(tasks) > 0) {
-                console.log("ZONE pending tasks=", tasks);
-            }
-        }, 200);
-
-        // Otherwise, log the boot error
-    })
-    .catch(err => console.error(err));
-
+bootstrapApplication(AppRootComponent, appConfig);

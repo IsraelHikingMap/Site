@@ -1,6 +1,6 @@
 import { provideAppInitializer, ErrorHandler, importProvidersFrom, inject, ApplicationConfig } from "@angular/core";
 import { provideHttpClient, withInterceptors } from "@angular/common/http";
-import { Title, BrowserModule, provideClientHydration, withEventReplay } from "@angular/platform-browser";
+import { Title, BrowserModule } from "@angular/platform-browser";
 import { CommonModule } from "@angular/common";
 import { MatDialogModule } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
@@ -234,6 +234,5 @@ export const appConfig: ApplicationConfig = {
         provideNgIdle(),
         provideRouter(routes),
         provideLottieOptions({ player: () => player }),
-        provideClientHydration(withEventReplay())
     ]
 }
