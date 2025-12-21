@@ -1,4 +1,4 @@
-﻿<mat-form-field class="search-input-container" subscriptSizing="dynamic">
+﻿<mat-form-field class="search-input-container" [class.logged-in]="isLoggedIn()" subscriptSizing="dynamic">
   <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom"
     [matAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}"
     [dir]="resources.getDirection(fromContext.searchTerm)" (focus)="focusOnSearchInput()">

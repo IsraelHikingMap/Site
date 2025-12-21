@@ -1,8 +1,9 @@
 <mat-toolbar color="primary" [dir]="resources.direction">
     <a routerLink="/" class="p-2 flex flex-col items-center"><img src="content/favicons/mstile-144x144.png"
             alt="Makeap Logo" height="32"></a>
-    <search></search>
-    <span class="flex flex-1"></span>
+    <div class="flex flex-grow">
+        <search></search>
+    </div>
     <main-menu></main-menu>
 </mat-toolbar>
 <router-outlet></router-outlet>

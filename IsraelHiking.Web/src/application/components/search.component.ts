@@ -17,12 +17,13 @@ import { MatAutocompleteTrigger, MatAutocomplete } from "@angular/material/autoc
 import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { debounceTime, filter, tap, map } from "rxjs/operators";
 import { remove } from "lodash-es";
+import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../services/resources.service";
 import { RouteStrings } from "../services/hash.service";
 import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider } from "../services/search-results.provider";
-import type { SearchResultsPointOfInterest } from "../models";
+import type { ApplicationState, SearchResultsPointOfInterest } from "../models";
 
 export type SearchContext = {
     searchTerm: string;
@@ -60,9 +61,14 @@ export class SearchComponent {
     private readonly searchResultsProvider = inject(SearchResultsProvider);
     private readonly toastService = inject(ToastService);
     private readonly router = inject(Router);
+    private readonly store = inject(Store);
 
     constructor() {
         this.configureInputFormControl(this.searchFrom, this.fromContext);
+    }
+
+    public isLoggedIn(): boolean {
+        return this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo) != null;
     }
 
     private configureInputFormControl(input: FormControl<string | SearchResultsPointOfInterest>, context: SearchContext) {

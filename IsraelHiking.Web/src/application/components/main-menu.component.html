@@ -6,7 +6,7 @@
   </span>
 </button>
 @if (!isIFrame() && !isLoggedIn()) {
-<button mat-button (click)="login()">{{resources.signIn}}</button>
+<button mat-raised-button (click)="login()">{{resources.signIn}}</button>
 }
 <button mat-button [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Menu"
   angularticsAction="Toggle main menu" class="!h-[56px]">
