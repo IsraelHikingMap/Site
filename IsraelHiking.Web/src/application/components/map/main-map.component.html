@@ -4,9 +4,9 @@
 <div
   class="flex flex-row w-full h-[calc(100vh-var(--mat-toolbar-mobile-height))] md:h-[calc(100vh-var(--mat-toolbar-standard-height))]"
   [dir]="resources.direction">
-  @if (isStable) {
-  <mgl-map [zoom]="[location.zoom]" [center]="[location.longitude, location.latitude]" [style]="initialStyle"
-    (moveEnd)="moveEnd($event)" (mapLoad)="mapLoaded()" [doubleClickZoom]="false" [attributionControl]="false">
+  <mgl-map ngSkipHydration="true" [zoom]="[location.zoom]" [center]="[location.longitude, location.latitude]"
+    [style]="initialStyle" (moveEnd)="moveEnd($event)" (mapLoad)="mapLoaded()" [doubleClickZoom]="false"
+    [attributionControl]="false">
     <layers></layers>
     <public-pois></public-pois>
     <routes></routes>
@@ -26,5 +26,4 @@
     <mapeak-link #bottomEndControl></mapeak-link>
     }
   </mgl-map>
-  }
 </div>

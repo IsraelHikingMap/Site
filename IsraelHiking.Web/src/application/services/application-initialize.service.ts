@@ -26,6 +26,7 @@ import { ApplicationUpdateService } from "./application-update.service";
 import { LocationService } from "./location.service";
 import { HashService } from "./hash.service";
 import { AnalyticsService } from "./analytics.service";
+import { MapService } from "./map.service";
 import type { ApplicationState } from "../models";
 
 @Injectable()
@@ -53,6 +54,7 @@ export class ApplicationInitializeService {
     private readonly locationService = inject(LocationService);
     private readonly hashService = inject(HashService);
     private readonly analyticsService = inject(AnalyticsService);
+    private readonly mapService = inject(MapService);
     private readonly store = inject(Store);
 
     public async initialize() {
@@ -72,6 +74,7 @@ export class ApplicationInitializeService {
             this.geoLocationService.initialize();
             this.hashService.initialize();
             this.dragAndDropService.initialize();
+            this.mapService.initialize();
             if (this.runningContextService.isMobile
                 && !this.runningContextService.isCapacitor
                 && !this.runningContextService.isIFrame) {

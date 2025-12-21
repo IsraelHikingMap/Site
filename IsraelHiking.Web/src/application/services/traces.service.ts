@@ -55,9 +55,6 @@ export class TracesService {
         if (!state.configuration.isAutomaticRecordingUpload) {
             return;
         }
-        if (!this.runningContextService.isOnline) {
-            return;
-        }
         if (state.userState.userInfo == null) {
             return;
         }

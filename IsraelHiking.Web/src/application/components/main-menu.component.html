@@ -6,7 +6,7 @@
   <span class="flex flex-row justify-center items-center">
     @if (isLoggedIn()) {
     @if (userInfo?.imageUrl) {
-    <img [src]="userInfo.imageUrl | offlineImage:true | async" alt="" class="max-h-[48px] me-4 rounded-full" />
+    <img [src]="userInfo.imageUrl" alt="" class="max-h-[48px] me-4 rounded-full" />
     } @else {
     <i class="fa icon-user-circle fa-lg"></i>
     }
@@ -14,10 +14,6 @@
     <i class="fa fa-lg icon-bars"></i>
   </span>
 </button>
-<span class="circle" [ngClass]="{'offline': isOffline(), 'online': !isOffline()}">{{getQueueText()}}</span>
-@if (isOffline()) {
-<span class="circle-line"></span>
-}
 <mat-menu #appMenu="matMenu" xPosition="before">
   <ng-template matMenuContent>
     <div>
@@ -41,7 +37,7 @@
       <hr />
       }
       <button mat-menu-item routerLink="/map" angulartics2On="click" angularticsCategory="Menu"
-        angularticsAction="About">
+        angularticsAction="Plan & Explore">
         <span class="flex flex-row justify-center items-center">
           <span class="w-1/12 text-center"><i class="fa fa-lg icon-map-o mat-icon"></i></span>
           <!-- HM TODO: translate-->
@@ -71,8 +67,7 @@
           <span class="flex-1 margin-sides">Language</span>
         </span>
       </button>
-      <button mat-menu-item routerLink="/about" angulartics2On="click" angularticsCategory="Menu"
-        angularticsAction="About">
+      <button mat-menu-item routerLink="/" angulartics2On="click" angularticsCategory="Menu" angularticsAction="About">
         <span class="flex flex-row justify-center items-center">
           <span class="w-1/12 text-center"><i class="fa fa-lg icon-info mat-icon"></i></span>
           <span class="flex-1 margin-sides">{{resources.about}}</span>

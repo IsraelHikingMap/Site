@@ -69,11 +69,11 @@ export class HashService {
             const segments = tree.root.children.primary?.segments ?? [];
             const queryParams = tree.queryParams;
             if (this.router.url.startsWith(RouteStrings.ROUTE_MAP)) {
-                if (segments.length === 4) {
+                if (segments.length > 4) {
                     this.fitBoundsService.flyTo({
-                        lng: +segments[3].path,
-                        lat: +segments[2].path
-                    }, +segments[1].path - 1);
+                        lng: +segments[segments.length - 1].path,
+                        lat: +segments[segments.length - 2].path
+                    }, +segments[segments.length - 3].path - 1);
                 }
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_SHARE)) {
                 this.dataContainerService.setShareUrlAfterNavigation(segments[1].path);

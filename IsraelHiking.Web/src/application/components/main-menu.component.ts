@@ -1,7 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { RouterLink } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { NgClass, AsyncPipe } from "@angular/common";
 import { MatButton } from "@angular/material/button";
 import { MatMenuTrigger, MatMenu, MatMenuContent, MatMenuItem } from "@angular/material/menu";
 import { MatDialog } from "@angular/material/dialog";
@@ -13,7 +12,6 @@ import { Store } from "@ngxs/store";
 import { EmailComposer } from "capacitor-email-composer"
 import platform from "platform";
 
-import { OfflineImagePipe } from "../pipes/offline-image.pipe";
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
 import { RunningContextService } from "../services/running-context.service";
@@ -21,7 +19,6 @@ import { LoggingService } from "../services/logging.service";
 import { ToastService } from "../services/toast.service";
 import { FileService } from "../services/file.service";
 import { LayersService } from "../services/layers.service";
-import { SidebarService } from "../services/sidebar.service";
 import { HashService } from "../services/hash.service";
 import { PurchaseService } from "../services/purchase.service";
 import { OsmAddressesService } from "../services/osm-addresses.service";
@@ -40,7 +37,7 @@ import type { UserInfo, ApplicationState } from "../models";
     selector: "main-menu",
     templateUrl: "./main-menu.component.html",
     styleUrls: ["./main-menu.component.scss"],
-    imports: [MatButton, Angulartics2OnModule, MatMenuTrigger, NgClass, MatMenu, MatMenuContent, MatMenuItem, AsyncPipe, OfflineImagePipe, RouterLink]
+    imports: [MatButton, Angulartics2OnModule, MatMenuTrigger, MatMenu, MatMenuContent, MatMenuItem, RouterLink]
 })
 export class MainMenuComponent {
 
@@ -56,7 +53,6 @@ export class MainMenuComponent {
     private readonly toastService = inject(ToastService);
     private readonly fileService = inject(FileService);
     private readonly layersService = inject(LayersService);
-    private readonly sidebarService = inject(SidebarService);
     private readonly loggingService = inject(LoggingService);
     private readonly hashService = inject(HashService);
     private readonly purchaseService = inject(PurchaseService);
@@ -75,10 +71,6 @@ export class MainMenuComponent {
         return this.userInfo != null;
     }
 
-    public isOffline() {
-        return !this.runningContextService.isOnline;
-    }
-
     public isApp() {
         return this.runningContextService.isCapacitor;
     }
@@ -87,16 +79,7 @@ export class MainMenuComponent {
         return this.runningContextService.isIFrame;
     }
 
-    public getQueueText(): string {
-        const queueLength = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).uploadPoiQueue.length;
-        return queueLength > 0 ? queueLength.toString() : "";
-    }
-
     public login() {
-        if (!this.runningContextService.isOnline) {
-            this.toastService.warning(this.resources.unableToLogin);
-            return;
-        }
         if (!this.store.selectSnapshot((s: ApplicationState) => s.userState).agreedToTheTermsOfService) {
             const component = this.dialog.open(TermsOfServiceDialogComponent, { width: "480px" });
             component.afterClosed().subscribe((results: string) => {

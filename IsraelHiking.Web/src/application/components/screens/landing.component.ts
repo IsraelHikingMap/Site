@@ -3,6 +3,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { MatCard, MatCardContent } from "@angular/material/card";
 import { MatDivider } from "@angular/material/divider";
 import { RouterLink } from "@angular/router";
+import { Dir } from "@angular/cdk/bidi";
 
 import { RunningContextService } from "../../services/running-context.service";
 import { Urls } from "../../urls";
@@ -11,7 +12,7 @@ import { Urls } from "../../urls";
     selector: "landing",
     templateUrl: "./landing.component.html",
     styleUrls: ["./landing.component.scss"],
-    imports: [MatCard, MatCardContent, MatDivider, RouterLink]
+    imports: [MatCard, MatCardContent, MatDivider, RouterLink, Dir]
 })
 export class LandingComponent {
     public androidAppUrl: string = Urls.ANDROID_APP_URL;

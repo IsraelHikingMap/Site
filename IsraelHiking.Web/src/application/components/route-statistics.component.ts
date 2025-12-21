@@ -802,8 +802,13 @@ export class RouteStatisticsComponent implements OnInit {
     };
 
     private onGeolocationChanged(position: GeolocationPosition) {
-        this.currentSpeed = (position == null) ? null : position.coords.speed * 3.6;
-        this.heading = (position == null) || position.coords.speed === 0 ? null : position.coords.heading;
+        if (position == null) {
+            this.currentSpeed = null;
+            this.heading = null;
+            return;
+        }
+        this.currentSpeed = position.coords.speed * 3.6;
+        this.heading = position.coords.heading;
         this.cancelableTimeoutService.setTimeoutByName(() => {
             // if there are no location updates reset speed.
             this.currentSpeed = null;

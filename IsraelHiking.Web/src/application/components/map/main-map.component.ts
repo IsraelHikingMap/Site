@@ -1,8 +1,8 @@
-import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildren, ApplicationRef } from "@angular/core";
+import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildren } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { NgStyle } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
-import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, PointLike, IControl, ControlPosition } from "maplibre-gl";
+import { StyleSpecification, ScaleControl, Unit, PointLike, IControl, ControlPosition } from "maplibre-gl";
 import { NgProgressbar } from "ngx-progressbar";
 import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";
@@ -16,8 +16,6 @@ import { RecordedRouteComponent } from "./recorded-route.component";
 import { TracesComponent } from "./traces.component";
 import { ZoomComponent } from "../zoom.component";
 import { LocationComponent } from "../location.component";
-import { MainMenuComponent } from "../main-menu.component";
-import { SearchComponent } from "../search.component";
 import { DrawingComponent } from "../drawing.component";
 import { RouteStatisticsComponent } from "../route-statistics.component";
 import { CenterMeComponent } from "../center-me.component";
@@ -50,7 +48,6 @@ export class MainMapComponent {
 
     public location: LocationState;
     public initialStyle: StyleSpecification;
-    public isStable: boolean = false;
 
     public readonly resources = inject(ResourcesService);
 
@@ -61,7 +58,6 @@ export class MainMapComponent {
     private readonly loggingService = inject(LoggingService);
     private readonly dialog = inject(MatDialog);
     private readonly store = inject(Store);
-    private readonly appRef = inject(ApplicationRef);
 
     private addedControls: IControl[] = [];
 
@@ -69,9 +65,6 @@ export class MainMapComponent {
         this.location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
         this.initialStyle = this.defaultStyleService.getStyleWithPlaceholders();
         this.titleService.clear();
-        this.appRef.whenStable().then(() => {
-            this.isStable = true;
-        });
     }
 
     public moveEnd(e: DragEvent) {
@@ -85,7 +78,6 @@ export class MainMapComponent {
     }
 
     public mapLoaded() {
-        setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
         this.mapService.setMap(this.mapComponent().mapInstance);
         this.mapComponent().mapInstance.doubleClickZoom.enable();
         this.mapComponent().mapInstance._zoomLevelsToOverscale = 4;
