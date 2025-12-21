@@ -1,12 +1,12 @@
 @use '@angular/material' as mat;
 
 .search-input-container {
-    width: calc(100vw - 236px);
+    width: calc(100vw - 196px);
     @include mat.all-component-densities(-3);
 }
 
 .search-input-container.logged-in {
-    width: calc(100vw - 186px);
+    width: calc(100vw - 146px);
 }
 
 .search-result-option {
