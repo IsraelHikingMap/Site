@@ -12,7 +12,7 @@ import type { Immutable } from "immer";
 
 import { CategoriesGroupComponent } from "./categories-group.component";
 import { LayerPropertiesDialogComponent } from "../dialogs/layer-properties-dialog.component";
-import { RoutePropertiesDialogComponent } from "../dialogs/route-properties-dialog.component";
+import { RoutePropertiesDialogComponent, RoutePropertiesDialogData } from "../dialogs/route-properties-dialog.component";
 import { OfflineManagementDialogComponent } from "../dialogs/offline-management-dialog.component";
 import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
@@ -107,7 +107,7 @@ export class LayersSidebarComponent {
         event.stopPropagation();
         const routeData = this.routesFactory.createRouteData(this.selectedRouteService.createRouteName(),
             this.selectedRouteService.getLeastUsedColor());
-        this.dialog.open(RoutePropertiesDialogComponent, {
+        this.dialog.open<RoutePropertiesDialogComponent, RoutePropertiesDialogData>(RoutePropertiesDialogComponent, {
             width: "480px",
             data: {
                 isNew: true,
@@ -118,11 +118,11 @@ export class LayersSidebarComponent {
 
     public editRoute(routeData: Immutable<RouteData>, event: Event) {
         event.stopPropagation();
-        this.dialog.open(RoutePropertiesDialogComponent, {
+        this.dialog.open<RoutePropertiesDialogComponent, RoutePropertiesDialogData>(RoutePropertiesDialogComponent, {
             width: "480px",
             data: {
                 isNew: false,
-                routeData: structuredClone(routeData)
+                routeData: structuredClone(routeData) as RouteData
             }
         });
     }
