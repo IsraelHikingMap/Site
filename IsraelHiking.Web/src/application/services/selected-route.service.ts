@@ -44,7 +44,7 @@ export class SelectedRouteService {
     private readonly routesFactory = inject(RoutesFactory);
     private readonly routingProvider = inject(RoutingProvider);
     private readonly store = inject(Store);
-    
+
     constructor() {
         this.store.select((state: ApplicationState) => state.routes.present).subscribe((r) => {
             this.routes = r;
@@ -267,16 +267,16 @@ export class SelectedRouteService {
         if (SpatialService.getDistanceInMeters(closestRouteLatLngToCheck, latLngToCheck) < SelectedRouteService.MERGE_THRESHOLD) {
             closestRoute = this.reverseRouteInternal(closestRoute);
         }
-        const firstPart = structuredClone(isSelectedRouteSecond ? closestRoute.segments : selectedRoute.segments) as RouteSegmentData[]; 
+        const firstPart = structuredClone(isSelectedRouteSecond ? closestRoute.segments : selectedRoute.segments) as RouteSegmentData[];
         const secondPart = structuredClone(isSelectedRouteSecond ? selectedRoute.segments : closestRoute.segments) as RouteSegmentData[];
 
         // remove first segment (which is a signle point):
         secondPart.splice(0, 1);
         const lastSegmentLatlngs = firstPart[firstPart.length - 1].latlngs;
         const lastLatlngOfFirstPart = lastSegmentLatlngs[lastSegmentLatlngs.length - 1];
-        if (lastLatlngOfFirstPart.lat !== secondPart[0].latlngs[0].lat && 
+        if (lastLatlngOfFirstPart.lat !== secondPart[0].latlngs[0].lat &&
             lastLatlngOfFirstPart.lng !== secondPart[0].latlngs[0].lng) {
-                secondPart[0].latlngs.splice(0, 0, lastLatlngOfFirstPart);
+            secondPart[0].latlngs.splice(0, 0, lastLatlngOfFirstPart);
         }
         mergedRoute.segments = firstPart.concat(secondPart);
         this.store.dispatch(new MergeRoutesAction(selectedRoute.id, closestRoute.id, mergedRoute));
@@ -284,6 +284,9 @@ export class SelectedRouteService {
 
     private reverseRouteInternal(route: Immutable<RouteData>): RouteData {
         let segments = [];
+        if (route.segments.length === 0) {
+            return structuredClone(route) as RouteData;
+        }
         for (let segmentIndex = 0; segmentIndex < route.segments.length - 1; segmentIndex++) {
             const currentSegment = { ...route.segments[segmentIndex] };
             const nextSegment = { ...route.segments[segmentIndex + 1] };
@@ -326,7 +329,7 @@ export class SelectedRouteService {
                 ...selectedRoute.segments[segmentIndex + 1],
                 latlngs
             } as RouteSegmentData;
-            this.store.dispatch(new UpdateSegmentsAction(selectedRoute.id, [segmentIndex, segmentIndex + 1],[updatedSegment]));
+            this.store.dispatch(new UpdateSegmentsAction(selectedRoute.id, [segmentIndex, segmentIndex + 1], [updatedSegment]));
         }
     }
 

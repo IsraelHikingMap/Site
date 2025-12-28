@@ -83,7 +83,7 @@ describe("Selected Route Service", () => {
 
     it("Should select the first route if selected route it null and there are routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{id: "42"} as any]);
+            setupRoutes(store, [{ id: "42" } as any]);
             setupSelectedRoute(store, null);
 
             const selectedRoute = selectedRouteService.getOrCreateSelectedRoute();
@@ -123,7 +123,7 @@ describe("Selected Route Service", () => {
 
     it("Should not return empty routes where there are routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{id: "42"} as  any]);
+            setupRoutes(store, [{ id: "42" } as any]);
 
             expect(selectedRouteService.areRoutesEmpty()).toBeFalsy();
         }
@@ -167,7 +167,7 @@ describe("Selected Route Service", () => {
     it("Should create route name when there's a route with that name", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             const routeName = selectedRouteService.createRouteName();
-            setupRoutes(store, [{id: "42", name: routeName} as any]);
+            setupRoutes(store, [{ id: "42", name: routeName } as any]);
 
             expect(selectedRouteService.createRouteName()).not.toBe(routeName);
             expect(selectedRouteService.isNameAvailable(routeName)).toBeFalsy();
@@ -182,8 +182,8 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "name",
                 segments: [{
-                    latlngs: [{lat: 1, lng: 1, timestamp: new Date()}],
-                    routePoint: {lat: 1, lng: 1},
+                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date() }],
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -203,8 +203,8 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "name",
                 segments: [{
-                    latlngs: [{lat: 1, lng: 1, timestamp: new Date()}],
-                    routePoint: {lat: 1, lng: 1},
+                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date() }],
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -214,8 +214,8 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "name",
                 segments: [{
-                    latlngs: [{lat: 1.00001, lng: 1.00001, timestamp: new Date()}],
-                    routePoint: {lat: 1, lng: 1},
+                    latlngs: [{ lat: 1.00001, lng: 1.00001, timestamp: new Date() }],
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -235,8 +235,8 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "name",
                 segments: [{
-                    latlngs: [{lat: 1, lng: 1, timestamp: new Date()}],
-                    routePoint: {lat: 1, lng: 1},
+                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date() }],
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -246,8 +246,8 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "clost but not the closest",
                 segments: [{
-                    latlngs: [{lat: 1.00001, lng: 1.00001, timestamp: new Date()}],
-                    routePoint: {lat: 1, lng: 1},
+                    latlngs: [{ lat: 1.00001, lng: 1.00001, timestamp: new Date() }],
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -257,8 +257,8 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "closest",
                 segments: [{
-                    latlngs: [{lat: 1.00001, lng: 1, timestamp: new Date()}],
-                    routePoint: {lat: 1, lng: 1},
+                    latlngs: [{ lat: 1.00001, lng: 1, timestamp: new Date() }],
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -273,51 +273,51 @@ describe("Selected Route Service", () => {
 
     it("Should get closet route to selected route when there are other routes and it is near the end of the route",
         inject([SelectedRouteService, Store],
-        (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [{lat: 1, lng: 1, timestamp: new Date()}],
-                    routePoint: {lat: 1, lng: 1},
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }, {
-                id: "2",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [{lat: 2, lng: 2, timestamp: new Date()}],
-                    routePoint: {lat: 2, lng: 2},
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            },
-            {
-                id: "3",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [
-                        {lat: 2, lng: 2, timestamp: new Date()},
-                        {lat: 1, lng: 1, timestamp: new Date()}
-                    ],
-                    routePoint: {lat: 2, lng: 2},
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }]);
-            setupSelectedRoute(store, "1");
+            (selectedRouteService: SelectedRouteService, store: Store) => {
+                setupRoutes(store, [{
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [{
+                        latlngs: [{ lat: 1, lng: 1, timestamp: new Date() }],
+                        routePoint: { lat: 1, lng: 1 },
+                        routingType: "Hike"
+                    }],
+                    state: "ReadOnly",
+                }, {
+                    id: "2",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [{
+                        latlngs: [{ lat: 2, lng: 2, timestamp: new Date() }],
+                        routePoint: { lat: 2, lng: 2 },
+                        routingType: "Hike"
+                    }],
+                    state: "ReadOnly",
+                },
+                {
+                    id: "3",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [{
+                        latlngs: [
+                            { lat: 2, lng: 2, timestamp: new Date() },
+                            { lat: 1, lng: 1, timestamp: new Date() }
+                        ],
+                        routePoint: { lat: 2, lng: 2 },
+                        routingType: "Hike"
+                    }],
+                    state: "ReadOnly",
+                }]);
+                setupSelectedRoute(store, "1");
 
-            const closetRoute = selectedRouteService.getClosestRouteToSelected(false);
-            expect(closetRoute.id).toBe("3");
-        }
-    ));
+                const closetRoute = selectedRouteService.getClosestRouteToSelected(false);
+                expect(closetRoute.id).toBe("3");
+            }
+        ));
 
     it("Should not get closet route to GPS when there's no location", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
@@ -332,7 +332,7 @@ describe("Selected Route Service", () => {
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, []);
 
-            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date()}, 0);
+            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date() }, 0);
             expect(closetRoute).toBeNull();
         }
     ));
@@ -345,14 +345,14 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "name",
                 segments: [{
-                    latlngs: [{lat: 1, lng: 1, timestamp: new Date()}],
-                    routePoint: {lat: 1, lng: 1},
+                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date() }],
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
                 state: "Hidden",
             }]);
 
-            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date()}, 0);
+            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date() }, 0);
             expect(closetRoute).toBeNull();
         }
     ));
@@ -365,15 +365,15 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "name",
                 segments: [{
-                    latlngs: [{lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 2, lng: 2, timestamp: new Date()}],
-                    routePoint: {lat: 1, lng: 1},
+                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date() },
+                    { lat: 2, lng: 2, timestamp: new Date() }],
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
             }]);
 
-            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date()}, 0);
+            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date() }, 0);
             expect(closetRoute.id).toBe("1");
         }
     ));
@@ -386,14 +386,14 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "name",
                 segments: [{
-                    latlngs: [{lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 1, lng: 0, timestamp: new Date()}],
-                    routePoint: {lat: 1, lng: 1},
+                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date() },
+                    { lat: 1, lng: 0, timestamp: new Date() }],
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
             }]);
-            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1.0001, lng: 1, timestamp: new Date()}, 90);
+            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1.0001, lng: 1, timestamp: new Date() }, 90);
             expect(closetRoute.id).toBe("1");
         }
     ));
@@ -407,24 +407,24 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 1, lng: 1, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 1, lng: 1, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 1, lng: 1},
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 2, lng: 2, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 2, lng: 2, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 2, lng: 2},
+                    routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 2, lng: 2, timestamp: new Date()},
-                        {lat: 3, lng: 3, timestamp: new Date()}
+                        { lat: 2, lng: 2, timestamp: new Date() },
+                        { lat: 3, lng: 3, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 3, lng: 3},
+                    routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -448,7 +448,7 @@ describe("Selected Route Service", () => {
             expect(action.splitRouteData.segments[0].latlngs[0].lat).toBe(2);
             expect(action.splitRouteData.segments[0].latlngs[1].lat).toBe(2);
             expect(action.splitRouteData.segments[1].latlngs[1].lat).toBe(3);
-    }));
+        }));
 
     it("Should split a route at the middle and add not split word", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
@@ -459,24 +459,24 @@ describe("Selected Route Service", () => {
                 name: "name split 1",
                 segments: [{
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 1, lng: 1, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 1, lng: 1, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 1, lng: 1},
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 2, lng: 2, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 2, lng: 2, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 2, lng: 2},
+                    routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 2, lng: 2, timestamp: new Date()},
-                        {lat: 3, lng: 3, timestamp: new Date()}
+                        { lat: 2, lng: 2, timestamp: new Date() },
+                        { lat: 3, lng: 3, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 3, lng: 3},
+                    routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -491,7 +491,7 @@ describe("Selected Route Service", () => {
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(SplitRouteAction);
             const action = spy.calls.all()[0].args[0] as SplitRouteAction;
             expect(action.splitRouteData.name).toBe("name split 2");
-    }));
+        }));
 
     it("Should merge routes with the same direction", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
@@ -502,17 +502,17 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 1, lng: 1, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 1, lng: 1, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 1, lng: 1},
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 2, lng: 2, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 2, lng: 2, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 2, lng: 2},
+                    routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -523,17 +523,17 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        {lat: 2, lng: 2, timestamp: new Date()},
-                        {lat: 2, lng: 2, timestamp: new Date()}
+                        { lat: 2, lng: 2, timestamp: new Date() },
+                        { lat: 2, lng: 2, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 2, lng: 2},
+                    routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 2, lng: 2, timestamp: new Date()},
-                        {lat: 3, lng: 3, timestamp: new Date()}
+                        { lat: 2, lng: 2, timestamp: new Date() },
+                        { lat: 3, lng: 3, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 3, lng: 3},
+                    routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -549,7 +549,7 @@ describe("Selected Route Service", () => {
             expect(spy.calls.all()[0].args[0].mergedRouteData.segments.length).toBe(3);
             expect(spy.calls.all()[0].args[0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
             expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
-    }));
+        }));
 
     it("Should merge routes with the same direction when selected route is second", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
@@ -560,17 +560,17 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 1, lng: 1, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 1, lng: 1, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 1, lng: 1},
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 2, lng: 2, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 2, lng: 2, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 2, lng: 2},
+                    routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -581,17 +581,17 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        {lat: 2, lng: 2, timestamp: new Date()},
-                        {lat: 2, lng: 2, timestamp: new Date()}
+                        { lat: 2, lng: 2, timestamp: new Date() },
+                        { lat: 2, lng: 2, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 2, lng: 2},
+                    routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 2, lng: 2, timestamp: new Date()},
-                        {lat: 3, lng: 3, timestamp: new Date()}
+                        { lat: 2, lng: 2, timestamp: new Date() },
+                        { lat: 3, lng: 3, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 3, lng: 3},
+                    routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -607,7 +607,7 @@ describe("Selected Route Service", () => {
             expect(spy.calls.all()[0].args[0].mergedRouteData.segments.length).toBe(3);
             expect(spy.calls.all()[0].args[0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
             expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
-    }));
+        }));
 
     it("Should merge routes with oposite direction", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
@@ -618,17 +618,17 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 1, lng: 1, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 1, lng: 1, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 1, lng: 1},
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 2, lng: 2, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 2, lng: 2, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 2, lng: 2},
+                    routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -639,17 +639,17 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        {lat: 3, lng: 3, timestamp: new Date()},
-                        {lat: 3, lng: 3, timestamp: new Date()}
+                        { lat: 3, lng: 3, timestamp: new Date() },
+                        { lat: 3, lng: 3, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 3, lng: 3},
+                    routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 3, lng: 3, timestamp: new Date()},
-                        {lat: 2, lng: 2, timestamp: new Date()}
+                        { lat: 3, lng: 3, timestamp: new Date() },
+                        { lat: 2, lng: 2, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 2, lng: 2},
+                    routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -665,7 +665,7 @@ describe("Selected Route Service", () => {
             expect(spy.calls.all()[0].args[0].mergedRouteData.segments.length).toBe(3);
             expect(spy.calls.all()[0].args[0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
             expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
-    }));
+        }));
 
     it("Should merge routes with a gap and remove the gap", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
@@ -676,17 +676,17 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 1, lng: 1, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 1, lng: 1, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 1, lng: 1},
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 2, lng: 2, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 2, lng: 2, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 2, lng: 2},
+                    routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -697,17 +697,17 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        {lat: 2.0001, lng: 2.0001, timestamp: new Date()},
-                        {lat: 2.0001, lng: 2.0001, timestamp: new Date()}
+                        { lat: 2.0001, lng: 2.0001, timestamp: new Date() },
+                        { lat: 2.0001, lng: 2.0001, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 2.0001, lng: 2.0001},
+                    routePoint: { lat: 2.0001, lng: 2.0001 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 2.0001, lng: 2.0001, timestamp: new Date()},
-                        {lat: 3, lng: 3, timestamp: new Date()}
+                        { lat: 2.0001, lng: 2.0001, timestamp: new Date() },
+                        { lat: 3, lng: 3, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 3, lng: 3},
+                    routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -726,7 +726,30 @@ describe("Selected Route Service", () => {
             expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[0].lat).toBe(2);
             expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[1].lat).toBe(2.0001);
             expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[2].lat).toBe(3);
-    }));
+        }));
+
+    it("Should revese an empty route", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
+                id: "1",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [],
+                state: "ReadOnly",
+            }]);
+            setupSelectedRoute(store, "1");
+
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+
+            selectedRouteService.reverseRoute("1");
+
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ReplaceRouteAction);
+            const action = spy.calls.all()[0].args[0] as ReplaceRouteAction;
+            expect(action.routeId).toBe("1");
+            expect(action.routeData.segments.length).toBe(0);
+        }));
 
     it("Should revese a route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
@@ -737,24 +760,24 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 1, lng: 1, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 1, lng: 1, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 1, lng: 1},
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 2, lng: 2, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 2, lng: 2, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 2, lng: 2},
+                    routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 2, lng: 2, timestamp: new Date()},
-                        {lat: 3, lng: 3, timestamp: new Date()}
+                        { lat: 2, lng: 2, timestamp: new Date() },
+                        { lat: 3, lng: 3, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 3, lng: 3},
+                    routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -774,7 +797,7 @@ describe("Selected Route Service", () => {
             expect(action.routeData.segments[0].latlngs[1].lng).toBe(3);
             expect(action.routeData.segments[2].latlngs[0].lat).toBe(2);
             expect(action.routeData.segments[2].latlngs[1].lng).toBe(1);
-    }));
+        }));
 
     it("Should remove the first segement", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
@@ -785,24 +808,24 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 1, lng: 1, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 1, lng: 1, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 1, lng: 1},
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 2, lng: 2, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 2, lng: 2, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 2, lng: 2},
+                    routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 2, lng: 2, timestamp: new Date()},
-                        {lat: 3, lng: 3, timestamp: new Date()}
+                        { lat: 2, lng: 2, timestamp: new Date() },
+                        { lat: 3, lng: 3, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 3, lng: 3},
+                    routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -820,7 +843,7 @@ describe("Selected Route Service", () => {
             expect(action.indices).toEqual([0, 1]);
             expect(action.segmentsData[0].latlngs[0].lat).toBe(2);
             expect(action.segmentsData[0].latlngs[1].lng).toBe(2);
-    }));
+        }));
 
     it("Should remove the last segement", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
@@ -831,24 +854,24 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 1, lng: 1, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 1, lng: 1, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 1, lng: 1},
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 2, lng: 2, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 2, lng: 2, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 2, lng: 2},
+                    routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 2, lng: 2, timestamp: new Date()},
-                        {lat: 3, lng: 3, timestamp: new Date()}
+                        { lat: 2, lng: 2, timestamp: new Date() },
+                        { lat: 3, lng: 3, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 3, lng: 3},
+                    routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -864,7 +887,7 @@ describe("Selected Route Service", () => {
             const action = spy.calls.all()[0].args[0] as DeleteSegmentAction;
             expect(action.routeId).toBe("1");
             expect(action.index).toBe(2);
-    }));
+        }));
 
     it("Should remove a middle segement", inject([SelectedRouteService, Store],
         async (selectedRouteService: SelectedRouteService, store: Store) => {
@@ -875,24 +898,24 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 1, lng: 1, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 1, lng: 1, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 1, lng: 1},
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 2, lng: 2, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 2, lng: 2, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 2, lng: 2},
+                    routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 2, lng: 2, timestamp: new Date()},
-                        {lat: 3, lng: 3, timestamp: new Date()}
+                        { lat: 2, lng: 2, timestamp: new Date() },
+                        { lat: 3, lng: 3, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 3, lng: 3},
+                    routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -909,7 +932,7 @@ describe("Selected Route Service", () => {
             expect(action.routeId).toBe("1");
             expect(action.indices).toEqual([1, 2]);
             expect(action.segmentsData[0].routePoint.lat).toBe(3);
-    }));
+        }));
 
     it("Should make all points editable for not exiting route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
@@ -919,7 +942,7 @@ describe("Selected Route Service", () => {
             selectedRouteService.makeAllPointsEditable("1");
 
             expect(spy).not.toHaveBeenCalled();
-    }));
+        }));
 
     it("Should make all points editable", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
@@ -930,18 +953,18 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 1, lng: 1, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 1, lng: 1, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 1, lng: 1},
+                    routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date()},
-                        {lat: 2, lng: 2, timestamp: new Date()},
-                        {lat: 3, lng: 3, timestamp: new Date()}
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 2, lng: 2, timestamp: new Date() },
+                        { lat: 3, lng: 3, timestamp: new Date() }
                     ],
-                    routePoint: {lat: 3, lng: 3},
+                    routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
@@ -962,7 +985,7 @@ describe("Selected Route Service", () => {
             expect(action.segmentsData[1].latlngs[1].lat).toBe(2);
             expect(action.segmentsData[2].latlngs[0].lat).toBe(2);
             expect(action.segmentsData[2].latlngs[1].lat).toBe(3);
-    }));
+        }));
 
     it("Add external empty route should not fail", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
@@ -972,7 +995,7 @@ describe("Selected Route Service", () => {
             selectedRouteService.addRoutes([]);
 
             expect(spy).not.toHaveBeenCalled();
-    }));
+        }));
 
     it("Add external route with only markers to first route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
@@ -989,13 +1012,13 @@ describe("Selected Route Service", () => {
             const spy = jasmine.createSpy();
             store.dispatch = spy;
 
-            selectedRouteService.addRoutes([{ segments: [], markers: [{ title: "title"}]} as RouteData]);
+            selectedRouteService.addRoutes([{ segments: [], markers: [{ title: "title" }] } as RouteData]);
 
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddPrivatePoiAction);
             const action = spy.calls.all()[0].args[0] as AddPrivatePoiAction;
             expect(action.routeId).toBe("1");
             expect(action.markerData.title).toBe("title");
-    }));
+        }));
 
     it("Add external route to routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
@@ -1012,10 +1035,10 @@ describe("Selected Route Service", () => {
             const spy = jasmine.createSpy();
             store.dispatch = spy;
 
-            selectedRouteService.addRoutes([{ name: "name", segments: [{}], markers: [{ title: "title"}]} as RouteData]);
+            selectedRouteService.addRoutes([{ name: "name", segments: [{}], markers: [{ title: "title" }] } as RouteData]);
 
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddRouteAction);
             const action = spy.calls.all()[0].args[0] as AddRouteAction;
             expect(action.routeData.name).toBe("name 1");
-    }));
+        }));
 });
