@@ -60,11 +60,17 @@
     <div class="flex flex-row w-full">
       <div class="flex-1">
         @if (isApp) {
-        <button mat-button class="w-full" matDialogClose type="button" (click)="shareLayer()"><i
-            class="fa fa-lg icon-share-alt"></i></button>
+        <button mat-button class="w-full" matDialogClose type="button" (click)="shareLayer()"
+          [matTooltip]="resources.share" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers"
+          angularticsAction="Share layer from app">
+          <i class="fa fa-lg icon-share-alt"></i>
+        </button>
         } @else {
-        <button mat-button class="w-full" matDialogClose type="button" [cdkCopyToClipboard]="getShareLayerAddress()"><i
-            class="fa fa-lg icon-share-alt"></i></button>
+        <button mat-button class="w-full" matDialogClose type="button" [cdkCopyToClipboard]="getShareLayerAddress()"
+          [matTooltip]="resources.copyUrl" matTooltipPosition="above" angulartics2On="click"
+          angularticsCategory="Layers" angularticsAction="Share layer from web">
+          <i class="fa fa-lg icon-clipboard"></i>
+        </button>
         }
       </div>
       <div class="flex-1">
