@@ -149,9 +149,18 @@ export class GeoLocationService {
                     this.handlePositionChange(this.lastReceivedPosition);
                     return;
                 }
-                if (error && error.code !== "2") { // "2" is location unaavailable in the browser, ignore it.
+                if (error) {
                     this.loggingService.error(`[GeoLocation] Failed to start background tracking: ${error.message} code: ${error.code}`);
                     this.disable();
+                    if (error.code === "3") {
+                        // Location timeout in the browser, don't do anything...
+                        return;
+                    }
+                    if (error.code === "1" || error.code === "2") {
+                        // brwoser permission denied or location unavailable
+                        this.toastService.warning(this.resources.pleaseAllowLocationTracking);
+                        return;
+                    }
                     this.toastService.confirm({
                         message: this.resources.noLocationPermissionOpenAppSettings,
                         type: "OkCancel",
