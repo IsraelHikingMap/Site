@@ -11,12 +11,8 @@ import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { CategoriesGroupComponent } from "./categories-group.component";
-import { BaseLayerAddDialogComponent } from "../dialogs/layers/base-layer-add-dialog.component";
-import { BaseLayerEditDialogComponent } from "../dialogs/layers/base-layer-edit-dialog.component";
-import { OverlayAddDialogComponent } from "../dialogs/layers/overlay-add-dialog.component";
-import { OverlayEditDialogComponent } from "../dialogs/layers/overlay-edit-dialog-component";
-import { RouteAddDialogComponent } from "../dialogs/routes/route-add-dialog.component";
-import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.component";
+import { LayerPropertiesDialogComponent } from "../dialogs/layer-properties-dialog.component";
+import { RoutePropertiesDialogComponent, RoutePropertiesDialogData } from "../dialogs/route-properties-dialog.component";
 import { OfflineManagementDialogComponent } from "../dialogs/offline-management-dialog.component";
 import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
@@ -26,6 +22,7 @@ import { SelectedRouteService } from "../../services/selected-route.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { PurchaseService } from "../../services/purchase.service";
+import { RoutesFactory } from "../../services/routes.factory";
 import { ExpandGroupAction, CollapseGroupAction } from "../../reducers/layers.reducer";
 import { ChangeRouteStateAction, BulkReplaceRoutesAction, ToggleAllRoutesAction } from "../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../reducers/route-editing.reducer";
@@ -58,6 +55,7 @@ export class LayersSidebarComponent {
     private readonly sidebarService = inject(SidebarService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly toastService = inject(ToastService);
+    private readonly routesFactory = inject(RoutesFactory);
     private readonly store = inject(Store);
 
     constructor() {
@@ -75,12 +73,12 @@ export class LayersSidebarComponent {
 
     public addBaseLayer(event: Event) {
         event.stopPropagation();
-        this.dialog.open(BaseLayerAddDialogComponent, { width: "480px" });
+        LayerPropertiesDialogComponent.openDialog(this.dialog, null, "add-baseLayer");
     }
 
     public editBaseLayer(e: Event, layer: Immutable<EditableLayer>) {
         e.stopPropagation();
-        this.dialog.open(BaseLayerEditDialogComponent, { width: "480px", data: layer });
+        LayerPropertiesDialogComponent.openDialog(this.dialog, layer, "edit-baseLayer");
     }
 
     public expand(groupName: string) {
@@ -97,25 +95,34 @@ export class LayersSidebarComponent {
 
     public addOverlay(event: Event) {
         event.stopPropagation();
-        this.dialog.open(OverlayAddDialogComponent);
+        LayerPropertiesDialogComponent.openDialog(this.dialog, null, "add-overlay");
     }
 
     public editOverlay(e: Event, layer: Immutable<Overlay>) {
         e.stopPropagation();
-        this.dialog.open(OverlayEditDialogComponent, { width: "480px", data: layer });
+        LayerPropertiesDialogComponent.openDialog(this.dialog, layer, "edit-overlay");
     }
 
     public addRoute(event: Event) {
         event.stopPropagation();
-        this.dialog.open(RouteAddDialogComponent, { width: "480px" });
+        const routeData = this.routesFactory.createRouteData(this.selectedRouteService.createRouteName(),
+            this.selectedRouteService.getLeastUsedColor());
+        this.dialog.open<RoutePropertiesDialogComponent, RoutePropertiesDialogData>(RoutePropertiesDialogComponent, {
+            width: "480px",
+            data: {
+                isNew: true,
+                routeData
+            }
+        });
     }
 
     public editRoute(routeData: Immutable<RouteData>, event: Event) {
         event.stopPropagation();
-        this.dialog.open(RouteEditDialogComponent, {
+        this.dialog.open<RoutePropertiesDialogComponent, RoutePropertiesDialogData>(RoutePropertiesDialogComponent, {
             width: "480px",
             data: {
-                ...routeData
+                isNew: false,
+                routeData: structuredClone(routeData) as RouteData
             }
         });
     }

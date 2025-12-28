@@ -51,6 +51,7 @@ export class ShareDialogComponent {
     public center: LngLatLike;
     public baseLayerData: EditableLayer;
     public imageUrl: string;
+    public copiedToClipboard: boolean = false;
 
     public readonly resources = inject(ResourcesService);
 
