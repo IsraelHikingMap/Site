@@ -17,13 +17,13 @@ import { Store } from "@ngxs/store";
 import { Share } from "@capacitor/share";
 import type { Immutable } from "immer";
 
-import { AutomaticLayerPresentationComponent } from "../../map/automatic-layer-presentation.component";
-import { NameInUseValidatorDirective } from "../../../directives/name-in-use-validator.directive";
-import { Angulartics2OnModule } from "../../../directives/gtag.directive";
-import { ResourcesService } from "../../../services/resources.service";
-import { LayersService } from "../../../services/layers.service";
-import { RunningContextService } from "../../../services/running-context.service";
-import type { LayerData, ApplicationState, EditableLayer, LocationState, Overlay } from "../../../models";
+import { AutomaticLayerPresentationComponent } from "../map/automatic-layer-presentation.component";
+import { NameInUseValidatorDirective } from "../../directives/name-in-use-validator.directive";
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
+import { ResourcesService } from "../../services/resources.service";
+import { LayersService } from "../../services/layers.service";
+import { RunningContextService } from "../../services/running-context.service";
+import type { LayerData, ApplicationState, EditableLayer, LocationState, Overlay } from "../../models";
 
 export type LayerPropertiesDialogType = "addOverlay" | "addBaseLayer" | "editOverlay" | "editBaseLayer";
 

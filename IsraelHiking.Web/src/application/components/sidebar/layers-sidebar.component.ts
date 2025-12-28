@@ -11,7 +11,7 @@ import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { CategoriesGroupComponent } from "./categories-group.component";
-import { LayerPropertiesDialogComponent } from "../dialogs/layers/layer-properties-dialog.component";
+import { LayerPropertiesDialogComponent } from "../dialogs/layer-properties-dialog.component";
 import { RouteAddDialogComponent } from "../dialogs/routes/route-add-dialog.component";
 import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.component";
 import { OfflineManagementDialogComponent } from "../dialogs/offline-management-dialog.component";
