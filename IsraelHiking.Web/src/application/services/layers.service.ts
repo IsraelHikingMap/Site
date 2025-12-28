@@ -109,10 +109,9 @@ export class LayersService {
                     const existingOverlay = userOverlays.find((overlayToFind) => this.compareKeys(overlayToFind.key, layer.key));
                     if (existingOverlay) {
                         this.store.dispatch(new UpdateOverlayAction(layer.key, {
-                                ...existingOverlay,
-                                ...layer // override
-                            }
-                        ));
+                            ...existingOverlay,
+                            ...layer // override
+                        }));
                         continue;
                     }
                     this.addOverlayFromData(layer, false);
@@ -120,10 +119,9 @@ export class LayersService {
                     const existingBaselayer = userBaselayers.find((baseLayerToFind) => this.compareKeys(baseLayerToFind.key, layer.key));
                     if (existingBaselayer) {
                         this.store.dispatch(new UpdateBaseLayerAction(layer.key, {
-                                ...existingBaselayer,
-                                ...layer // override
-                            }
-                        ));
+                            ...existingBaselayer,
+                            ...layer // override
+                        }));
                         continue;
                     }
                     this.addBaseLayerFromData(layer);
@@ -236,12 +234,6 @@ export class LayersService {
 
     public isNameAvailable(key: string, newName: string, isOverlay: boolean): boolean {
         const layers: Immutable<EditableLayer[]> = isOverlay ? this.allOverlays : this.allBaseLayers;
-        if (newName === key) {
-            return true;
-        }
-        if (!newName) {
-            return false;
-        }
         return layers.find(l => this.compareKeys(l.key, newName)) == null;
     }
 
@@ -278,10 +270,9 @@ export class LayersService {
         const newVisibility = !overlay.visible;
         this.loggingService.info(`[Layers] Changing visibility of ${overlay.key} to ${newVisibility ? "visible" : "hidden"}`);
         this.store.dispatch(new UpdateOverlayAction(overlay.key, {
-                ...overlay,
-                visible: newVisibility
-            }
-        ));
+            ...overlay,
+            visible: newVisibility
+        }));
     }
 
     public isAllOverlaysHidden() {
