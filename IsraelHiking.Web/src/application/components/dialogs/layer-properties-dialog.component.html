@@ -66,10 +66,13 @@
           <i class="fa fa-lg icon-share-alt"></i>
         </button>
         } @else {
-        <button mat-button class="w-full" matDialogClose type="button" [cdkCopyToClipboard]="getShareLayerAddress()"
-          [matTooltip]="resources.copyUrl" matTooltipPosition="above" angulartics2On="click"
-          angularticsCategory="Layers" angularticsAction="Share layer from web">
+        <button mat-button class="w-full" type="button" [cdkCopyToClipboard]="getShareLayerAddress()"
+          (click)="copiedToClipboard = true" [matTooltip]="resources.copyUrl" matTooltipPosition="above"
+          angulartics2On="click" angularticsCategory="Layers" angularticsAction="Share layer from web">
           <i class="fa fa-lg icon-clipboard"></i>
+          @if (copiedToClipboard) {
+          <i class="fa fa-lg icon-check-circle" [style.color]="'green'"></i>
+          }
         </button>
         }
       </div>

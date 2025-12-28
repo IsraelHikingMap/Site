@@ -44,6 +44,7 @@ export class LayerPropertiesDialogComponent {
     public isOverlay: boolean;
     public layerData: EditableLayer;
     public location$: Observable<Immutable<LocationState>>;
+    public copiedToClipboard: boolean = false;
 
     public readonly resources = inject(ResourcesService);
 
