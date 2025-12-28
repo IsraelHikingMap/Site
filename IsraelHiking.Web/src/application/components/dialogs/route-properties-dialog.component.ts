@@ -13,18 +13,18 @@ import { MAT_DIALOG_DATA, MatDialogTitle, MatDialogClose, MatDialogContent, MatD
 import invert from "invert-color";
 import { Store } from "@ngxs/store";
 
-import { NameInUseValidatorDirective } from "../../../directives/name-in-use-validator.directive";
-import { Angulartics2OnModule } from "../../../directives/gtag.directive";
-import { ResourcesService } from "../../../services/resources.service";
-import { ToastService } from "../../../services/toast.service";
-import { RoutesFactory } from "../../../services/routes.factory";
-import { SelectedRouteService } from "../../../services/selected-route.service";
-import { FileService } from "../../../services/file.service";
-import { FitBoundsService } from "../../../services/fit-bounds.service";
-import { SpatialService } from "../../../services/spatial.service";
-import { SetOpacityAndWeightAction, SetSelectedRouteAction } from "../../../reducers/route-editing.reducer";
-import { AddRouteAction, ChangeRoutePropertiesAction, DeleteRouteAction } from "../../../reducers/routes.reducer";
-import type { DataContainer, LatLngAlt, RouteData } from "../../../models";
+import { NameInUseValidatorDirective } from "../../directives/name-in-use-validator.directive";
+import { Angulartics2OnModule } from "../../directives/gtag.directive";
+import { ResourcesService } from "../../services/resources.service";
+import { ToastService } from "../../services/toast.service";
+import { RoutesFactory } from "../../services/routes.factory";
+import { SelectedRouteService } from "../../services/selected-route.service";
+import { FileService } from "../../services/file.service";
+import { FitBoundsService } from "../../services/fit-bounds.service";
+import { SpatialService } from "../../services/spatial.service";
+import { SetOpacityAndWeightAction, SetSelectedRouteAction } from "../../reducers/route-editing.reducer";
+import { AddRouteAction, ChangeRoutePropertiesAction, DeleteRouteAction } from "../../reducers/routes.reducer";
+import type { DataContainer, LatLngAlt, RouteData } from "../../models";
 
 export type RoutePropertiesDialogData = {
     routeData: RouteData;

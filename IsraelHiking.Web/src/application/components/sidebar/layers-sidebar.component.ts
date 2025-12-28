@@ -12,7 +12,7 @@ import type { Immutable } from "immer";
 
 import { CategoriesGroupComponent } from "./categories-group.component";
 import { LayerPropertiesDialogComponent } from "../dialogs/layer-properties-dialog.component";
-import { RoutePropertiesDialogComponent } from "../dialogs/routes/route-properties-dialog.component";
+import { RoutePropertiesDialogComponent } from "../dialogs/route-properties-dialog.component";
 import { OfflineManagementDialogComponent } from "../dialogs/offline-management-dialog.component";
 import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
