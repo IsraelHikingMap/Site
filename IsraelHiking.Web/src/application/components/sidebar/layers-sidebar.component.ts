@@ -73,12 +73,12 @@ export class LayersSidebarComponent {
 
     public addBaseLayer(event: Event) {
         event.stopPropagation();
-        this.dialog.open(LayerPropertiesDialogComponent, { width: "480px", data: { dialogType: "addBaseLayer" } });
+        LayerPropertiesDialogComponent.openDialog(this.dialog, null, "add-baseLayer");
     }
 
     public editBaseLayer(e: Event, layer: Immutable<EditableLayer>) {
         e.stopPropagation();
-        this.dialog.open(LayerPropertiesDialogComponent, { width: "480px", data: { dialogType: "editBaseLayer", layerData: layer } });
+        LayerPropertiesDialogComponent.openDialog(this.dialog, layer, "edit-baseLayer");
     }
 
     public expand(groupName: string) {
@@ -95,12 +95,12 @@ export class LayersSidebarComponent {
 
     public addOverlay(event: Event) {
         event.stopPropagation();
-        this.dialog.open(LayerPropertiesDialogComponent, { data: { dialogType: "addOverlay" } });
+        LayerPropertiesDialogComponent.openDialog(this.dialog, null, "add-overlay");
     }
 
     public editOverlay(e: Event, layer: Immutable<Overlay>) {
         e.stopPropagation();
-        this.dialog.open(LayerPropertiesDialogComponent, { width: "480px", data: { dialogType: "editOverlay", layerData: layer } });
+        LayerPropertiesDialogComponent.openDialog(this.dialog, layer, "edit-overlay");
     }
 
     public addRoute(event: Event) {

@@ -1,6 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
-import { MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions, MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions, MAT_DIALOG_DATA, MatDialog } from "@angular/material/dialog";
 import { MatButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatFormField, MatLabel, MatError } from "@angular/material/form-field";
@@ -25,7 +25,7 @@ import { LayersService } from "../../services/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
 import type { LayerData, ApplicationState, EditableLayer, LocationState, Overlay } from "../../models";
 
-export type LayerPropertiesDialogType = "addOverlay" | "addBaseLayer" | "editOverlay" | "editBaseLayer";
+export type LayerPropertiesDialogType = "add-overlay" | "add-baseLayer" | "edit-overlay" | "edit-baseLayer";
 
 export type LayerPropertiesDialogComponentData = {
     dialogType: LayerPropertiesDialogType;
@@ -56,6 +56,10 @@ export class LayerPropertiesDialogComponent {
     private backupLayer: EditableLayer;
     private readonly data = inject<LayerPropertiesDialogComponentData>(MAT_DIALOG_DATA);
 
+    public static openDialog(dialog: MatDialog, layerData: EditableLayer, dialogType: LayerPropertiesDialogType) {
+        dialog.open<LayerPropertiesDialogComponent, LayerPropertiesDialogComponentData>(LayerPropertiesDialogComponent, { width: "480px", data: { dialogType, layerData } });
+    }
+
     constructor() {
         this.layerData = {
             minZoom: 1,
@@ -70,24 +74,24 @@ export class LayerPropertiesDialogComponent {
         this.isApp = this.runningContextService.isCapacitor;
 
         switch (this.data.dialogType) {
-            case "addBaseLayer":
+            case "add-baseLayer":
                 this.title = this.resources.addBaseLayer;
                 this.isNew = true;
                 this.isOverlay = false;
                 break;
-            case "editBaseLayer":
+            case "edit-baseLayer":
                 this.title = this.resources.baseLayerProperties;
                 this.isNew = false;
                 this.isOverlay = false;
                 this.layerData = { ...this.data.layerData };
                 this.backupLayer = this.data.layerData;
                 break;
-            case "addOverlay":
+            case "add-overlay":
                 this.title = this.resources.addOverlay;
                 this.isNew = true;
                 this.isOverlay = true;
                 break;
-            case "editOverlay":
+            case "edit-overlay":
                 this.title = this.resources.overlayProperties;
                 this.isNew = false;
                 this.isOverlay = true;
@@ -124,10 +128,10 @@ export class LayerPropertiesDialogComponent {
 
     private internalSave(layerData: LayerData) {
         switch (this.data.dialogType) {
-            case "addBaseLayer":
+            case "add-baseLayer":
                 this.layersService.addBaseLayer(layerData);
                 break;
-            case "editBaseLayer":
+            case "edit-baseLayer":
                 const baseLayer = {
                     ...layerData,
                     id: this.backupLayer.id,
@@ -135,10 +139,10 @@ export class LayerPropertiesDialogComponent {
                 } as EditableLayer;
                 this.layersService.updateBaseLayer(this.backupLayer, baseLayer);
                 break;
-            case "addOverlay":
+            case "add-overlay":
                 this.layersService.addOverlay(layerData);
                 break;
-            case "editOverlay":
+            case "edit-overlay":
                 const overlay = {
                     ...layerData,
                     id: this.layerData.id,
@@ -152,14 +156,14 @@ export class LayerPropertiesDialogComponent {
 
     public removeLayer() {
         switch (this.data.dialogType) {
-            case "addBaseLayer":
+            case "add-baseLayer":
                 break;
-            case "editBaseLayer":
+            case "edit-baseLayer":
                 this.layersService.removeBaseLayer(this.backupLayer);
                 break;
-            case "addOverlay":
+            case "add-overlay":
                 break;
-            case "editOverlay":
+            case "edit-overlay":
                 this.layersService.removeOverlay(this.backupLayer as Overlay);
                 break;
         }
