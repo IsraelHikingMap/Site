@@ -11,10 +11,7 @@ import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { CategoriesGroupComponent } from "./categories-group.component";
-import { BaseLayerAddDialogComponent } from "../dialogs/layers/base-layer-add-dialog.component";
-import { BaseLayerEditDialogComponent } from "../dialogs/layers/base-layer-edit-dialog.component";
-import { OverlayAddDialogComponent } from "../dialogs/layers/overlay-add-dialog.component";
-import { OverlayEditDialogComponent } from "../dialogs/layers/overlay-edit-dialog-component";
+import { LayerPropertiesDialogComponent } from "../dialogs/layers/layer-properties-dialog.component";
 import { RouteAddDialogComponent } from "../dialogs/routes/route-add-dialog.component";
 import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.component";
 import { OfflineManagementDialogComponent } from "../dialogs/offline-management-dialog.component";
@@ -75,12 +72,12 @@ export class LayersSidebarComponent {
 
     public addBaseLayer(event: Event) {
         event.stopPropagation();
-        this.dialog.open(BaseLayerAddDialogComponent, { width: "480px" });
+        this.dialog.open(LayerPropertiesDialogComponent, { width: "480px", data: { dialogType: "addBaseLayer" } });
     }
 
     public editBaseLayer(e: Event, layer: Immutable<EditableLayer>) {
         e.stopPropagation();
-        this.dialog.open(BaseLayerEditDialogComponent, { width: "480px", data: layer });
+        this.dialog.open(LayerPropertiesDialogComponent, { width: "480px", data: { dialogType: "editBaseLayer", layerData: layer } });
     }
 
     public expand(groupName: string) {
@@ -97,12 +94,12 @@ export class LayersSidebarComponent {
 
     public addOverlay(event: Event) {
         event.stopPropagation();
-        this.dialog.open(OverlayAddDialogComponent);
+        this.dialog.open(LayerPropertiesDialogComponent, { data: { dialogType: "addOverlay" } });
     }
 
     public editOverlay(e: Event, layer: Immutable<Overlay>) {
         e.stopPropagation();
-        this.dialog.open(OverlayEditDialogComponent, { width: "480px", data: layer });
+        this.dialog.open(LayerPropertiesDialogComponent, { width: "480px", data: { dialogType: "editOverlay", layerData: layer } });
     }
 
     public addRoute(event: Event) {
