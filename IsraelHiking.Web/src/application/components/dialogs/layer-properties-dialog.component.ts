@@ -132,24 +132,22 @@ export class LayerPropertiesDialogComponent {
                 this.layersService.addBaseLayer(layerData);
                 break;
             case "edit-baseLayer":
-                const baseLayer = {
+                this.layersService.updateBaseLayer(this.backupLayer, {
                     ...layerData,
                     id: this.backupLayer.id,
                     isEditable: true
-                } as EditableLayer;
-                this.layersService.updateBaseLayer(this.backupLayer, baseLayer);
+                } as EditableLayer);
                 break;
             case "add-overlay":
                 this.layersService.addOverlay(layerData);
                 break;
             case "edit-overlay":
-                const overlay = {
+                this.layersService.updateOverlay(this.backupLayer as Overlay, {
                     ...layerData,
                     id: this.layerData.id,
                     isEditable: true,
                     visible: true
-                } as Overlay;
-                this.layersService.updateOverlay(this.backupLayer as Overlay, overlay);
+                } as Overlay);
                 break;
         }
     }
