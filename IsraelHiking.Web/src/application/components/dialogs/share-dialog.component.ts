@@ -104,6 +104,14 @@ export class ShareDialogComponent {
         });
     }
 
+    /**
+     * Allow uploading only when the map is loaded
+     * @returns true if the map is loaded
+     */
+    public canUpload(): boolean {
+        return this.map != null;
+    }
+
     public async uploadShareUrl() {
         this.isLoading = true;
         const shareUrlToSend = this.createShareUrlObject();
