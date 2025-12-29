@@ -49,7 +49,6 @@ export class MainMapComponent {
 
     public location: LocationState;
     public initialStyle: StyleSpecification;
-    public isStable: boolean = false;
 
     public readonly resources = inject(ResourcesService);
 
@@ -60,7 +59,6 @@ export class MainMapComponent {
     private readonly loggingService = inject(LoggingService);
     private readonly dialog = inject(MatDialog);
     private readonly store = inject(Store);
-    private readonly appRef = inject(ApplicationRef);
 
     private addedControls: IControl[] = [];
 
@@ -68,9 +66,6 @@ export class MainMapComponent {
         this.location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
         this.initialStyle = this.defaultStyleService.getStyleWithPlaceholders();
         this.titleService.clear();
-        this.appRef.whenStable().then(() => {
-            this.isStable = true;
-        });
     }
 
     public moveEnd(e: DragEvent) {

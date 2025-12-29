@@ -40,10 +40,8 @@ export class ConnectionService {
         }
         window.addEventListener("online", () => this.updateInternetAccessAndEmitIfNeeded())
         window.addEventListener("offline", () => this.updateInternetAccessAndEmitIfNeeded())
-        this.appRef.whenStable().then(() => {
-            this.initializeDynamicTimer(ConnectionService.HEART_BREAK_INTERVAL);
-            this.updateInternetAccessAndEmitIfNeeded();
-        });
+        this.initializeDynamicTimer(ConnectionService.HEART_BREAK_INTERVAL);
+        this.updateInternetAccessAndEmitIfNeeded();
     }
 
     private async getInternetStatusNow(): Promise<boolean> {

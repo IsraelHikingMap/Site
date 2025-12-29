@@ -89,10 +89,9 @@ export class DatabaseService {
         }
 
         this.store.reset(storedState);
-        this.appRef.whenStable().then(() => {
-            this.store.select(s => s).pipe(debounceTime(2000)).subscribe((state: ApplicationState) => {
-                this.updateState(state);
-            });
+        // HM TODO: need to find a way around this.
+        this.store.select(s => s).pipe(debounceTime(2000)).subscribe((state: ApplicationState) => {
+            this.updateState(state);
         });
     }
 

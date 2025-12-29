@@ -2,7 +2,6 @@
 <sidebar></sidebar>
 <background-text [dir]="resources.direction"></background-text>
 <div class="flex flex-row h-full w-full" [dir]="resources.direction">
-  @if (isStable) {
   <mgl-map [zoom]="[location.zoom]" [center]="[location.longitude, location.latitude]" [style]="initialStyle"
     (moveEnd)="moveEnd($event)" (mapLoad)="mapLoaded()" [doubleClickZoom]="false" [attributionControl]="false">
     <layers></layers>
@@ -25,5 +24,4 @@
     <mapeak-link #bottomEndControl></mapeak-link>
     }
   </mgl-map>
-  }
 </div>
