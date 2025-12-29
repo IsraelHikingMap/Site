@@ -1,17 +1,18 @@
 import { Component, inject } from "@angular/core";
+import { MatButton } from "@angular/material/button";
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from "@angular/material/expansion";
+import { MatDialogClose, MatDialogContent, MatDialogTitle } from "@angular/material/dialog";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Store } from "@ngxs/store";
 import { remove } from "lodash-es";
 
-import { ILegendItem, LegendItemComponent } from "./legend-item.component";
-import { ScrollToDirective } from "../directives/scroll-to.directive";
-import { ResourcesService } from "../services/resources.service";
-import { LayersService } from "../services/layers.service";
-import { HIKING_MAP, MTB_MAP } from "../reducers/initial-state";
-import type { ApplicationState } from "../models";
-import legendSectionsJson from "../../content/legend/legend.json";
-
+import { ILegendItem, LegendItemComponent } from "../legend-item.component";
+import { ScrollToDirective } from "../../directives/scroll-to.directive";
+import { ResourcesService } from "../../services/resources.service";
+import { LayersService } from "../../services/layers.service";
+import { HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
+import type { ApplicationState } from "../../models";
+import legendSectionsJson from "../../../content/legend/legend.json";
 
 export type LegendSection = {
     key: keyof ResourcesService;
@@ -20,12 +21,12 @@ export type LegendSection = {
 };
 
 @Component({
-    selector: "legend",
-    templateUrl: "./legend.component.html",
-    styleUrls: ["./legend.component.scss"],
-    imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, LegendItemComponent]
+    selector: "legend-dialog",
+    templateUrl: "./legend-dialog.component.html",
+    styleUrls: ["./legend-dialog.component.scss"],
+    imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, LegendItemComponent, MatDialogTitle, MatDialogClose, MatDialogContent, MatButton]
 })
-export class LegendComponent {
+export class LegendDialogComponent {
     public readonly resources = inject(ResourcesService);
     private readonly layersService = inject(LayersService);
     private readonly store = inject(Store);
@@ -48,7 +49,7 @@ export class LegendComponent {
     }
 
     public scrollTo(sectionKey: string) {
-        ScrollToDirective.scrollTo(sectionKey, 48);
+        ScrollToDirective.scrollTo(sectionKey);
     }
 
     private initalizeLegendSections() {

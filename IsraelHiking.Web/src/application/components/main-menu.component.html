@@ -23,7 +23,7 @@
 </button>
 <mat-menu #appMenu="matMenu" xPosition="before">
   <ng-template matMenuContent>
-    <div>
+    <div [dir]="resources.direction">
       @if (isLoggedIn()) {
       <button mat-menu-item (click)="openTraces()" angulartics2On="click" angularticsCategory="User Menu"
         angularticsAction="User traces open">

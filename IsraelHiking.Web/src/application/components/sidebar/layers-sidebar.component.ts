@@ -14,6 +14,7 @@ import { CategoriesGroupComponent } from "./categories-group.component";
 import { LayerPropertiesDialogComponent } from "../dialogs/layer-properties-dialog.component";
 import { RoutePropertiesDialogComponent, RoutePropertiesDialogData } from "../dialogs/route-properties-dialog.component";
 import { OfflineManagementDialogComponent } from "../dialogs/offline-management-dialog.component";
+import { LegendDialogComponent } from "../dialogs/legend-dialog.component";
 import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers.service";
@@ -232,5 +233,9 @@ export class LayersSidebarComponent {
 
     public trackByGroupType(_: number, group: CategoriesGroup) {
         return group.type;
+    }
+
+    public openLegend() {
+        this.dialog.open(LegendDialogComponent, { width: "480px" });
     }
 }
