@@ -324,6 +324,7 @@ export class ResourcesService {
     public newVersionAvailable: string;
     public routesDeleted: string;
     public uploadingDataFromExternalSourceIsNotAllowed: string;
+    public pleaseAllowLocationTracking: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -486,7 +487,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1766307912749");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1766927813224");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -809,6 +810,7 @@ export class ResourcesService {
         this.newVersionAvailable = this.gettextCatalog.getString("New version available, do you want to update?");
         this.routesDeleted = this.gettextCatalog.getString("Routes deleted");
         this.uploadingDataFromExternalSourceIsNotAllowed = this.gettextCatalog.getString("Uploading data from external source is not allowed...");
+        this.pleaseAllowLocationTracking = this.gettextCatalog.getString("Please allow location tracking");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog

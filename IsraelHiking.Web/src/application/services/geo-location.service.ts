@@ -53,7 +53,7 @@ export class GeoLocationService {
             }
             const route = this.selectedRouteService.getSelectedRoute();
             const routePoints = route?.segments.map(segment => segment.latlngs.map(l => ([l.lng, l.lat] as [number, number]))).flat(1) || [];
-            BackgroundGeolocation.setPlannedRoute({route: routePoints, soundFile: "content/uh-oh.mp3", distance: 50});
+            BackgroundGeolocation.setPlannedRoute({ route: routePoints, soundFile: "content/uh-oh.mp3", distance: 50 });
         });
 
         if (!this.runningContextService.isCapacitor) {
@@ -61,13 +61,13 @@ export class GeoLocationService {
         }
 
         App.addListener("appStateChange", (state) => {
+            this.isBackground = !state.isActive;
+            this.loggingService.info(`[GeoLocation] Now in ${this.isBackground ? "back" : "fore"}ground`);
             if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "disabled") {
                 return;
             }
-            this.isBackground = !state.isActive;
-            this.loggingService.debug(`[GeoLocation] Now in ${this.isBackground ? "back" : "fore"}ground`);
-            if (this.isBackground && 
-                !this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording && 
+            if (this.isBackground &&
+                !this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording &&
                 !this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings &&
                 this.wasInitialized) {
                 BackgroundGeolocation.stop();
@@ -127,7 +127,7 @@ export class GeoLocationService {
         this.loggingService.info("[GeoLocation] Starting background tracking");
         try {
             await BackgroundGeolocation.start({
-                backgroundMessage:  this.resources.runningInBackground,
+                backgroundMessage: this.resources.runningInBackground,
                 backgroundTitle: "Mapeak",
                 requestPermissions: true,
                 stale: true,
@@ -149,9 +149,18 @@ export class GeoLocationService {
                     this.handlePositionChange(this.lastReceivedPosition);
                     return;
                 }
-                if (error && error.code !== "2") { // "2" is location unaavailable in the browser, ignore it.
+                if (error) {
                     this.loggingService.error(`[GeoLocation] Failed to start background tracking: ${error.message} code: ${error.code}`);
                     this.disable();
+                    if (error.code === "3") {
+                        // Location timeout in the browser, don't do anything...
+                        return;
+                    }
+                    if (error.code === "1" || error.code === "2") {
+                        // brwoser permission denied or location unavailable
+                        this.toastService.warning(this.resources.pleaseAllowLocationTracking);
+                        return;
+                    }
                     this.toastService.confirm({
                         message: this.resources.noLocationPermissionOpenAppSettings,
                         type: "OkCancel",
@@ -161,7 +170,7 @@ export class GeoLocationService {
                 }
             });
             this.wasInitialized = true;
-        } catch { 
+        } catch {
             // ignore errors.
         }
     }
