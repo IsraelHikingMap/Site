@@ -5,22 +5,21 @@
 	"server": {
 		"errorPath": "/"
 	},
-	"cordova": {
-		"preferences": {
-			"OAuthScheme": "mapeak"
-		}
-	},
 	"plugins": {
-		"CapacitorSQLite": {
-			"iosDatabaseLocation": "Library/CapacitorDatabase"
+		"SocialLogin": {
+			"providers": {
+				"google": false,
+				"facebook": false,
+				"apple": false,
+				"twitter": false,
+				"oauth2": true
+			}
 		}
 	},
 	"ios": {
 		"preferredContentMode": "mobile"
 	},
-	"android": {
-		"adjustMarginsForEdgeToEdge": "auto"
-	},
+	"android": {},
 	"packageClassList": [
 		"KeepAwakePlugin",
 		"ScreenBrightnessPlugin",
@@ -31,6 +30,7 @@
 		"TextZoomPlugin",
 		"AppUpdatePlugin",
 		"BackgroundGeolocation",
+		"SocialLoginPlugin",
 		"PurchasesPlugin",
 		"EmailComposerPlugin",
 		"CDVPlugin"

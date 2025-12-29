@@ -11,10 +11,5 @@
     <param name="onload" value="true"/>
   </feature>
 
-  <feature name="OAuth">
-    <param name="android-package" value="com.ayogo.cordova.oauth.OAuthPlugin"/>
-  </feature>
-
   
-  <preference name="OAuthScheme" value="mapeak" />
 </widget>

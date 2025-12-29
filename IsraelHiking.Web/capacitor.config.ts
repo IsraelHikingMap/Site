@@ -7,22 +7,21 @@ const config: CapacitorConfig = {
   server: {
     errorPath: "/"
   },
-  cordova: {
-    preferences: {
-      "OAuthScheme": "mapeak"
-    }
-  },
   plugins: {
-    CapacitorSQLite: {
-      iosDatabaseLocation: "Library/CapacitorDatabase"
+    SocialLogin: {
+      providers: {
+        google: false,
+        facebook: false,
+        apple: false,
+        twitter: false,
+        oauth2: true
+      }
     }
   },
   ios: {
     preferredContentMode: "mobile"
   },
-  android: {
-    adjustMarginsForEdgeToEdge: 'auto'
-  }
+  android: {}
 };
 
 export default config;

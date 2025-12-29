@@ -11,11 +11,5 @@
     <param name="onload" value="true"/>
   </feature>
 
-  <feature name="OAuth">
-    <param name="ios-package" value="CDVOAuthPlugin"/>
-    <param name="onload" value="true"/>
-  </feature>
-
   
-  <preference name="OAuthScheme" value="mapeak" />
 </widget>
