@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildren, ApplicationRef } from "@angular/core";
+import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildren } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { NgStyle } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
