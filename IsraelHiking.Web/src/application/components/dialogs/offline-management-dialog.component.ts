@@ -101,6 +101,7 @@ export class OfflineManagementDialogComponent {
     }
 
     public async downloadSelected() {
+        this.toastService.info(this.resources.dontSwitchApps);
         const { tileX, tileY } = this.selectedTileXY;
         this.map.flyTo({
             center: SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX + 0.5, y: tileY + 0.5 }, TILES_ZOOM)),
