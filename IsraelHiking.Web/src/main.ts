@@ -1,10 +1,8 @@
-import { enableProdMode, NgZone } from "@angular/core";
+import { enableProdMode, provideZoneChangeDetection } from "@angular/core";
 import { environment } from "./environments/environment";
 import { bootstrapApplication } from "@angular/platform-browser";
 import { appConfig } from "./application/app.config";
 import { AppRootComponent } from "./application/components/screens/app-root.component";
-import "../node_modules/zone.js/fesm2015/task-tracking";
-import { clone, size } from "lodash";
 
 // See https://github.com/ionic-team/capacitor/issues/1564
 export class FileReaderFixForCapacitor extends FileReader {
@@ -21,4 +19,4 @@ if (environment.production) {
     enableProdMode();
 }
 
-bootstrapApplication(AppRootComponent, appConfig);
+bootstrapApplication(AppRootComponent, { ...appConfig, providers: [provideZoneChangeDetection(), ...appConfig.providers] });
