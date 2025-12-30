@@ -107,8 +107,8 @@ jobs:
         if: ${{ github.secret_source == 'Actions' }}
         run: |
           cd IsraelHiking.Web/android
-          fastlane build_aab
-          fastlane build_apk
+          bundle exec fastlane build_aab
+          bundle exec fastlane build_apk
         env:
           STORE_PASSWORD: ${{ secrets.MAPEAK_STORE_PASSWORD }}
           PASSWORD: ${{ secrets.MAPEAK_PASSWORD }}
@@ -133,7 +133,7 @@ jobs:
           cd IsraelHiking.Web/android
           echo "ראו https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/android/iw-IL/changelogs/default.txt
           echo "See https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/android/en-US/changelogs/default.txt
-          fastlane upload
+          bundle exec fastlane upload
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
 
@@ -141,7 +141,7 @@ jobs:
         if: ${{ github.event.inputs.publishandroid == 'true' && github.event.inputs.production == 'true' }}
         run: |
           cd IsraelHiking.Web/android
-          fastlane promote
+          bundle exec fastlane promote
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
 
@@ -210,7 +210,7 @@ jobs:
         if: ${{ github.secret_source == 'Actions' }}
         run: |
           cd IsraelHiking.Web/ios/App
-          fastlane build_ios
+          bundle exec fastlane build_ios
         env:
           MATCH_PASSWORD: ${{ secrets.PASSWORD }}
       - name: Upload artifacts
@@ -223,7 +223,7 @@ jobs:
         if: ${{ github.event.inputs.publishios == 'true' && github.event.inputs.production == 'false' }}
         run: |
           cd IsraelHiking.Web/ios/App
-          fastlane upload_to_testers
+          bundle exec fastlane upload_to_testers
         env:
           APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
       - name: Upload and send for review
@@ -232,7 +232,7 @@ jobs:
           cd IsraelHiking.Web/ios/App
           echo "ראו https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/he/release_notes.txt
           echo "See https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/en-US/release_notes.txt
-          fastlane upload_to_production
+          bundle exec fastlane upload_to_production
         env:
           APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
 
