@@ -1,3 +1,3 @@
 .offline-map-container {
-    height: calc(100vh - 73px - 53px);
+    height: calc(100vh - 73px - 53px - env(safe-area-inset-bottom, 0));
 }
