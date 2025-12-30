@@ -7,6 +7,8 @@ PODS:
     - Capacitor
   - CapacitorCommunityKeepAwake (8.0.0):
     - Capacitor
+  - CapacitorCommunitySafeArea (8.0.1):
+    - Capacitor
   - CapacitorCommunityScreenBrightness (8.0.0):
     - Capacitor
   - CapacitorCordova (8.0.0)
@@ -37,6 +39,7 @@ DEPENDENCIES:
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorCamera (from `../../node_modules/@capacitor/camera`)"
   - "CapacitorCommunityKeepAwake (from `../../node_modules/@capacitor-community/keep-awake`)"
+  - "CapacitorCommunitySafeArea (from `../../node_modules/@capacitor-community/safe-area`)"
   - "CapacitorCommunityScreenBrightness (from `../../node_modules/@capacitor-community/screen-brightness`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
@@ -63,6 +66,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/camera"
   CapacitorCommunityKeepAwake:
     :path: "../../node_modules/@capacitor-community/keep-awake"
+  CapacitorCommunitySafeArea:
+    :path: "../../node_modules/@capacitor-community/safe-area"
   CapacitorCommunityScreenBrightness:
     :path: "../../node_modules/@capacitor-community/screen-brightness"
   CapacitorCordova:
@@ -91,6 +96,7 @@ SPEC CHECKSUMS:
   CapacitorApp: 3963a84197280757b84f126afd1520a85ae3b092
   CapacitorCamera: 592acb7ab9fb748e2d8571eb03af30ec4e1ace12
   CapacitorCommunityKeepAwake: 332bf035bbdf0b1c244fd492b35a8a06c8802111
+  CapacitorCommunitySafeArea: 91738f4ae7f47d2d94e06e429e16fb73cd8fdc48
   CapacitorCommunityScreenBrightness: e4075e1181f7e88259edb8b1e3b9a209e1144d45
   CapacitorCordova: 5dc3912d25ef770a3fe0f431bb65c9fbfa2e92f9
   CapacitorDevice: 9a16fb36a19ff391bf75afbe3cf16f883b3b3aa0
@@ -105,6 +111,6 @@ SPEC CHECKSUMS:
   RevenueCat: eab035bbab271faccfef5c36eaff2a1ffef14dc0
   RevenuecatPurchasesCapacitor: dabd704d01e9c703745936082140408c75219198
 
-PODFILE CHECKSUM: 49ee6fc2bd72226d3d9526d44f319c2ea09221e2
+PODFILE CHECKSUM: 569629496812df32308323199c4b4ce929516802
 
 COCOAPODS: 1.16.2

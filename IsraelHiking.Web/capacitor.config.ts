@@ -13,15 +13,9 @@ const config: CapacitorConfig = {
     }
   },
   plugins: {
-    CapacitorSQLite: {
-      iosDatabaseLocation: "Library/CapacitorDatabase"
-    }
   },
   ios: {
     preferredContentMode: "mobile"
-  },
-  android: {
-    adjustMarginsForEdgeToEdge: 'auto'
   }
 };
 

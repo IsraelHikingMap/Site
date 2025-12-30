@@ -373,6 +373,7 @@
     "This name is already in use": "هذا الاسم قيد الاستخدام بالفعل",
     "This will delete all current routes. Are you sure?": "سيؤدي ذلك إلى حذف جميع المسارات الحالية. هل أنت متأكد؟",
     "Title": "عنوان",
+    "To prevent download errors, please don't switch apps or lock your screen until the download is finished": "لمنع أخطاء التحميل، يرجى عدم التبديل بين التطبيقات أو تثبيت الشاشة حتى يتم الانتهاء من التحميل",
     "Toilettes": "مرافق صحية",
     "Traces are only saved locally. You can change that in the configuration settings": "تُحفظ الأثر فقط محليًا، يمكنك تغيير ذلك في إعدادات التكوين.",
     "Trails": "مسارات",

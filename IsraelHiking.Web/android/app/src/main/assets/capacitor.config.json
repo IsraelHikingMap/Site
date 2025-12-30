@@ -10,15 +10,8 @@
 			"OAuthScheme": "mapeak"
 		}
 	},
-	"plugins": {
-		"CapacitorSQLite": {
-			"iosDatabaseLocation": "Library/CapacitorDatabase"
-		}
-	},
+	"plugins": {},
 	"ios": {
 		"preferredContentMode": "mobile"
-	},
-	"android": {
-		"adjustMarginsForEdgeToEdge": "auto"
 	}
 }

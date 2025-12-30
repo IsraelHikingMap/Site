@@ -31,8 +31,10 @@ export class OfflineFilesDownloadService {
 
     private metadata: Record<string, string> = {};
     private abortController = new AbortController();
-    private _currentDownloadedTile: {tileX: number, tileY: number} | null = null;
-    public tilesProgressChanged = new EventEmitter<{tileX: number, tileY: number, progressValue: number}>();
+    private downloadedFilesInCurrentSession: string[] = [];
+    private _currentDownloadedTile: { tileX: number, tileY: number } | null = null;
+
+    public tilesProgressChanged = new EventEmitter<{ tileX: number, tileY: number, progressValue: number }>();
     public get currentDownloadedTile() {
         return this._currentDownloadedTile;
     }
@@ -64,11 +66,11 @@ export class OfflineFilesDownloadService {
         }
     }
 
-    private async downloadStyleAndUpdateMetadata(): Promise<{fileName: string, content: string}[]> {
-        const styles: {fileName: string, content: string}[] = [];
+    private async downloadStyleAndUpdateMetadata(): Promise<{ fileName: string, content: string }[]> {
+        const styles: { fileName: string, content: string }[] = [];
         for (const baseLayerUrl of [Urls.HIKING_TILES_ADDRESS, Urls.MTB_TILES_ADDRESS]) {
-            const style = await firstValueFrom(this.httpClient.get(baseLayerUrl, {responseType: "text"}).pipe(timeout(5000)));
-            styles.push({fileName: last(baseLayerUrl.split("/")), content: style});
+            const style = await firstValueFrom(this.httpClient.get(baseLayerUrl, { responseType: "text" }).pipe(timeout(5000)));
+            styles.push({ fileName: last(baseLayerUrl.split("/")), content: style });
         }
         this.metadata = {};
         for (const style of styles) {
@@ -78,7 +80,7 @@ export class OfflineFilesDownloadService {
     }
 
     public async downloadTile(tileX: number, tileY: number): Promise<"up-to-date" | "downloaded" | "error" | "aborted"> {
-        this._currentDownloadedTile = {tileX, tileY};
+        this._currentDownloadedTile = { tileX, tileY };
         this.loggingService.info("[Offline Download] Starting downloading offline files");
         try {
             const styles = await this.downloadStyleAndUpdateMetadata();
@@ -133,7 +135,7 @@ export class OfflineFilesDownloadService {
         for (const fileNameAndDate of fileNames) {
             try {
                 const version = await this.pmtilesService.getVersion(fileNameAndDate.fileName);
-                metadata.push({ fileName: fileNameAndDate.fileName, date: fileNameAndDate.date, version});
+                metadata.push({ fileName: fileNameAndDate.fileName, date: fileNameAndDate.date, version });
             } catch {
                 // ignore this
             }
@@ -146,12 +148,16 @@ export class OfflineFilesDownloadService {
         this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${fileNames.length}, tile: ${tileX}-${tileY}`);
         const length = fileNames.length;
         for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
-            const {fileName} = fileNames[fileNameIndex];
+            const { fileName } = fileNames[fileNameIndex];
             if (abortController.signal.aborted) {
                 this.loggingService.info("[Offline Download] Aborted downloading offline files, current file: " + fileName);
                 return;
             }
-
+            if (this.downloadedFilesInCurrentSession.includes(fileName)) {
+                this.loggingService.info("[Offline Download] File already downloaded recently, skipping: " + fileName);
+                this.updateInProgressTilesList((fileNameIndex + 1) * 100.0 / length);
+                continue;
+            }
             const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
             let fileDownloadUrl = `${Urls.offlineFiles}/${fileName}`;
             if (fileName.endsWith(".pmtiles")) {
@@ -164,6 +170,7 @@ export class OfflineFilesDownloadService {
                     return;
                 }
                 await this.fileService.moveFileFromCacheToDataDirectory(fileName);
+                this.downloadedFilesInCurrentSession.push(fileName);
             } else {
                 const fileContent = await this.fileService.getFileContentWithProgress(fileDownloadUrl,
                     (value) => this.updateInProgressTilesList((value + fileNameIndex) * 100.0 / length));
@@ -171,11 +178,12 @@ export class OfflineFilesDownloadService {
             }
             this.loggingService.info(`[Offline Download] Finished downloading ${fileName}`);
         }
+        this.downloadedFilesInCurrentSession = [];
         this.loggingService.info(`[Offline Download] Finished downloading offline files, current tile: ${tileX}-${tileY}`);
     }
 
     private updateInProgressTilesList(progressValue: number) {
-        this.tilesProgressChanged.emit({tileX: this._currentDownloadedTile?.tileX, tileY: this._currentDownloadedTile?.tileY, progressValue});
+        this.tilesProgressChanged.emit({ tileX: this._currentDownloadedTile?.tileX, tileY: this._currentDownloadedTile?.tileY, progressValue });
     }
 
     private async getFilesToDownload(tileX?: number, tileY?: number): Promise<FileNameDateVersion[]> {
@@ -189,12 +197,12 @@ export class OfflineFilesDownloadService {
             params.tileX = tileX.toString();
             params.tileY = tileY.toString();
         }
-        const fileNames = await firstValueFrom(this.httpClient.get<Record<string, string>>(Urls.offlineFiles, {params: params}).pipe(timeout(5000)));
+        const fileNames = await firstValueFrom(this.httpClient.get<Record<string, string>>(Urls.offlineFiles, { params: params }).pipe(timeout(5000)));
         this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
         if (Object.keys(fileNames).length === 0) {
             return [];
         }
-        return Object.entries(fileNames).map(([key, value]) => ({fileName: key, date: value}));
+        return Object.entries(fileNames).map(([key, value]) => ({ fileName: key, date: value }));
     }
 
     public abortCurrentDownload(): void {
@@ -209,7 +217,7 @@ export class OfflineFilesDownloadService {
         // This assumes that the tiles that needs to be downloaded have the same names as the ones that needs to be deleted.
         // It looks for the download date, so there's a need to clean the date before this call, which is done above.
         const files = await this.getFilesToDownload(tileX, tileY);
-        for (const {fileName} of files) {
+        for (const { fileName } of files) {
             await this.fileService.deleteFileInDataDirectory(fileName);
         }
     }
