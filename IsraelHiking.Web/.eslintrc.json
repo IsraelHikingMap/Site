@@ -15,10 +15,14 @@
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
-        "quotes": ["error", "double"],
+        "quotes": [
+          "error",
+          "double"
+        ],
         "@angular-eslint/component-selector": [
           "error",
           {
+            "prefix": "",
             "type": "element",
             "style": "kebab-case"
           }
@@ -26,6 +30,7 @@
         "@angular-eslint/directive-selector": [
           "error",
           {
+            "prefix": "",
             "type": "attribute",
             "style": "camelCase"
           }
@@ -34,11 +39,10 @@
         "@typescript-eslint/no-empty-function": "off",
         "@typescript-eslint/no-unused-vars": [
           "error",
-          { 
+          {
             "argsIgnorePattern": "^_"
           }
         ]
-        
       }
     },
     {

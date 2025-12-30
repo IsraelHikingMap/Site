@@ -49,7 +49,7 @@
       <div class="w-full h-[138px]">
         <mgl-map [zoom]="[(layerData.minZoom + layerData.maxZoom) / 2]"
           [center]="[(location$ | async)?.longitude, (location$ | async)?.latitude]"
-          [style]='{"version": 8, "sources": {}, "layers": [] }' [attributionControl]="false">
+          [mapStyle]='{"version": 8, "sources": {}, "layers": [] }' [attributionControl]="false">
           <auto-layer [layerData]="layerData" [visible]="true" [isBaselayer]="!isOverlay" [isMainMap]="false">
           </auto-layer>
         </mgl-map>

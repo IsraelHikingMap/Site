@@ -5,7 +5,7 @@
   </div>
   <div mat-dialog-content>
     <div class="w-full offline-map-container">
-      <mgl-map [style]="offlineMapStyle" (mapClick)="onMapClick($event)" (mapLoad)="onMapLoad($event)"
+      <mgl-map [mapStyle]="offlineMapStyle" (mapClick)="onMapClick($event)" (mapLoad)="onMapLoad($event)"
         [attributionControl]="false">
         <auto-layer [layerData]="baseLayerData" [visible]="true" [isBaselayer]="true" [isMainMap]="false"
           [before]="resources.endOfBaseLayer">

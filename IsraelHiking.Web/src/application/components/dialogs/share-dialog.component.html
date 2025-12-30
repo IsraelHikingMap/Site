@@ -7,7 +7,7 @@
     @if (!shareAddress) {
     <div class="flex flex-row justify-center">
       <div style="width: 256px; height: 256px">
-        <mgl-map [interactive]="false" [style]="style" [attributionControl]="false"
+        <mgl-map [interactive]="false" [mapStyle]="style" [attributionControl]="false"
           [canvasContextAttributes]="{ preserveDrawingBuffer: true }" (mapLoad)="mapLoaded($event)">
           <layers></layers>
           <routes></routes>
