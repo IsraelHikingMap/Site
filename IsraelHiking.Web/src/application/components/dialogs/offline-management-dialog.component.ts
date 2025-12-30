@@ -44,7 +44,7 @@ export class OfflineManagementDialogComponent {
     public static openDialog(matDialog: MatDialog) {
         return matDialog.open(OfflineManagementDialogComponent, {
             width: "100vw",
-            height: "calc(100vh-env(safe-area-inset-bottom, 0))",
+            height: "calc(100vh-env(safe-area-inset-bottom, 0)-env(safe-area-inset-top, 0))",
             maxWidth: "100vw",
         });
     }
