@@ -95,7 +95,13 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-  
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.1'
+          bundler-cache: true
+
       - name: Build UI and set version
         run: |
           cd IsraelHiking.Web
