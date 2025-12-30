@@ -24,6 +24,8 @@ $app-background: map.get($app-theme, background);
 @include mat.all-component-themes($app-theme);
 
 .mat-mdc-snack-bar-container {
+    margin-bottom: env(safe-area-inset-bottom, 0) !important;
+
     &.success-snackbar {
         --mat-snack-bar-container-color: #32CD6D;
     }

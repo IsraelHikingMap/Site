@@ -43,8 +43,8 @@
     }
     <div class="input-wrapper-spacer"></div>
     <div class="flex flex-row">
-      <button mat-raised-button class="w-full" color="primary" (click)="uploadShareUrl()" [disabled]="isLoading"
-        angulartics2On="click" angularticsCategory="Share"
+      <button mat-raised-button class="w-full" color="primary" (click)="uploadShareUrl()"
+        [disabled]="isLoading || !canUpload()" angulartics2On="click" angularticsCategory="Share"
         angularticsAction="Share {{updateCurrentShare ? 'update' : 'create'}}">{{updateCurrentShare ? resources.update :
         resources.generateUrlToShareWithYourFriends}}</button>
     </div>
