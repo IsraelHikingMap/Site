@@ -44,7 +44,7 @@ export class OfflineManagementDialogComponent {
     public static openDialog(matDialog: MatDialog) {
         return matDialog.open(OfflineManagementDialogComponent, {
             width: "100vw",
-            height: "100vh",
+            height: "calc(100vh-env(safe-area-inset-bottom, 0)-env(safe-area-inset-top, 0))",
             maxWidth: "100vw",
         });
     }
@@ -101,6 +101,7 @@ export class OfflineManagementDialogComponent {
     }
 
     public async downloadSelected() {
+        this.toastService.info(this.resources.dontSwitchApps);
         const { tileX, tileY } = this.selectedTileXY;
         this.map.flyTo({
             center: SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX + 0.5, y: tileY + 0.5 }, TILES_ZOOM)),

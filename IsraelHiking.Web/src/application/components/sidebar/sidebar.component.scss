@@ -6,7 +6,7 @@
 .sidebar-wrapper {
     position: fixed;
     top: env(safe-area-inset-top, 0);
-    bottom: 0;
+    bottom: env(safe-area-inset-bottom, 0);
     right: 0;
     width: v.$app-sidebar-width;
     line-height: 24px;
@@ -24,15 +24,17 @@
 }
 
 
-@media (width <= 550px) {
+@media (width <=550px) {
     .sidebar-wrapper {
         width: 100vw;
         box-sizing: border-box;
     }
+
     .sidebar-wrapper:has(public-poi-sidebar) {
         top: 40vh;
         height: 60vh;
     }
+
     .sidebar-wrapper:has(public-poi-sidebar .minimized) {
         top: 85vh;
         height: 15vh;
@@ -40,23 +42,43 @@
 }
 
 @keyframes sidebar-slide-ltr-in {
-    from { transform: translateX(100%); }
-    to { transform: translateX(0); }
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
 }
 
 @keyframes sidebar-slide-ltr-out {
-    from { transform: translateX(0); }
-    to { transform: translateX(100%); }
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(100%);
+    }
 }
 
 @keyframes sidebar-slide-rtl-in {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(0); }
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
 }
 
 @keyframes sidebar-slide-rtl-out {
-    from { transform: translateX(0); }
-    to { transform: translateX(-100%); }
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-100%);
+    }
 }
 
 .sidebar-enter {
@@ -67,7 +89,7 @@
     animation: sidebar-slide-ltr-out 500ms ease-out forwards;
 }
 
-.sidebar-enter[dir=rtl]  {
+.sidebar-enter[dir=rtl] {
     animation: sidebar-slide-rtl-in 500ms ease-out forwards;
 }
 

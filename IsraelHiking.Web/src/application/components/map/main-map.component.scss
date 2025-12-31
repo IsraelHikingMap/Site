@@ -10,10 +10,12 @@
 
 .maplibregl-ctrl-bottom-right {
     z-index: v.$app-left-z-index - 30 !important;
+    margin-bottom: env(safe-area-inset-bottom, 0) !important;
 }
 
 .maplibregl-ctrl-bottom-left {
     z-index: v.$app-left-z-index - 20 !important;
+    margin-bottom: env(safe-area-inset-bottom, 0) !important;
 }
 
 [dir=rtl] .maplibregl-ctrl-bottom-right {

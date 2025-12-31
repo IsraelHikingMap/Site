@@ -10,15 +10,13 @@
 $app-primary: mat.m2-define-palette(mat.$m2-green-palette, 600);
 $app-accent: mat.m2-define-palette(mat.$m2-yellow-palette);
 $app-warm: mat.m2-define-palette(mat.$m2-red-palette);
-$app-theme: mat.m2-define-light-theme((
- color: (
-   primary: $app-primary,
-   accent: $app-accent,
-   warn: $app-warm,
- ),
- typography: mat.m2-define-typography-config(),
- density: 0,
-));
+$app-theme: mat.m2-define-light-theme((color: (primary: $app-primary,
+                accent: $app-accent,
+                warn: $app-warm,
+            ),
+            typography: mat.m2-define-typography-config(),
+            density: 0,
+        ));
 $app-background: map.get($app-theme, background);
 
 @include mat.elevation-classes();
@@ -27,20 +25,25 @@ $app-background: map.get($app-theme, background);
 
 
 .mat-mdc-snack-bar-container {
+    margin-bottom: env(safe-area-inset-bottom, 0) !important;
+
     &.success-snackbar {
         --mat-snack-bar-container-color: #32CD6D;
     }
+
     &.warn-snackbar {
         --mat-snack-bar-container-color: #{mat.m2-get-color-from-palette($app-accent)};
         --mat-snack-bar-supporting-text-color: ##000;
     }
+
     &.error-snackbar {
         --mat-snack-bar-container-color: #{mat.m2-get-color-from-palette($app-warm)};
     }
+
     &.confirm-snackbar {
         --mat-snack-bar-button-color: var(--mat-snack-bar-supporting-text-color);
     }
-  }
+}
 
 
 
@@ -66,9 +69,10 @@ body {
     clear: both;
     background-color: white;
     margin: 0 !important;
-    border: 2px solid rgba(0,0,0,.2);
+    border: 2px solid rgba(0, 0, 0, .2);
 
-    & button, a {
+    & button,
+    a {
         min-width: unset !important;
         padding: 0 !important;
         display: block;
@@ -86,7 +90,7 @@ body {
     margin-bottom: 1rem;
 }
 
-@media (width <= 550px) {
+@media (width <=550px) {
     .route-statistics-control-container {
         margin-bottom: 0 !important;
         margin-right: 0 !important;
@@ -96,13 +100,16 @@ body {
 .active {
     outline: 3px solid #32CD6D !important;
 }
+
 // photoswipe, used for placing overlay at the right z-index
 overlay.overlay-shown {
     z-index: 2000 !important;
 }
+
 .cdk-overlay-container {
     z-index: 1500 !important;
 }
+
 // end photoswipe
 
 
@@ -214,9 +221,11 @@ overlay.overlay-shown {
 .ng-meteor {
     box-shadow: 0 0 10px #32CD6D, 0 0 5px #32CD6D !important
 }
+
 /* Progressbar override */
 
 @media print {
+
     .mat-mdc-tooltip,
     .side-control {
         display: none !important;
