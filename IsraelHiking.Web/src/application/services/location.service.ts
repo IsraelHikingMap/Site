@@ -1,5 +1,6 @@
 import { EventEmitter, inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
+import { throttleTime } from "rxjs";
 
 import { GeoLocationService } from "./geo-location.service";
 import { DeviceOrientationService } from "./device-orientation.service";
@@ -12,9 +13,9 @@ import { SelectedRouteService } from "./selected-route.service";
 import { SetFollowingAction, SetPannedAction, ToggleDistanceAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, LatLngAlt } from "../models";
 
-export type LocationWithBearing = { 
-    center: LatLngAlt; 
-    bearing: number; 
+export type LocationWithBearing = {
+    center: LatLngAlt;
+    bearing: number;
     accuracy: number;
 };
 
@@ -38,7 +39,7 @@ export class LocationService {
 
     public async initialize() {
         await this.mapService.initializationPromise;
-        this.deviceOrientationService.orientationChanged.subscribe((bearing: number) => {
+        this.deviceOrientationService.orientationChanged.pipe(throttleTime(200)).subscribe((bearing: number) => {
             if (!this.isActive() || this.locationWithBearing == null) {
                 return;
             }
@@ -87,9 +88,9 @@ export class LocationService {
         });
     }
 
-    public disable() {
-        this.geoLocationService.disable();
-        this.deviceOrientationService.disable();
+    public async disable() {
+        await this.geoLocationService.disable();
+        await this.deviceOrientationService.disable();
         this.locationWithBearing = null;
         this.changed.next(this.locationWithBearing);
     }
@@ -152,5 +153,10 @@ export class LocationService {
         if (!this.mapService.map.isMoving() && this.isFollowing()) {
             this.moveMapToGpsPosition();
         }
+    }
+
+    public async uninitialize() {
+        await this.geoLocationService.uninitialize();
+        await this.deviceOrientationService.disable();
     }
 }

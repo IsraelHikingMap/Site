@@ -24,6 +24,8 @@ PODS:
     - Capacitor
   - CapgoBackgroundGeolocation (8.0.4):
     - Capacitor
+  - CapgoCapacitorCompass (8.1.2):
+    - Capacitor
   - CordovaPlugins (8.0.0):
     - CapacitorCordova
   - CordovaPluginsResources (0.0.105)
@@ -48,6 +50,7 @@ DEPENDENCIES:
   - "CapacitorTextZoom (from `../../node_modules/@capacitor/text-zoom`)"
   - "CapawesomeCapacitorAppUpdate (from `../../node_modules/@capawesome/capacitor-app-update`)"
   - "CapgoBackgroundGeolocation (from `../../node_modules/@capgo/background-geolocation`)"
+  - "CapgoCapacitorCompass (from `../../node_modules/@capgo/capacitor-compass`)"
   - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
   - CordovaPluginsResources (from `../capacitor-cordova-ios-plugins`)
   - "RevenuecatPurchasesCapacitor (from `../../node_modules/@revenuecat/purchases-capacitor`)"
@@ -84,6 +87,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capawesome/capacitor-app-update"
   CapgoBackgroundGeolocation:
     :path: "../../node_modules/@capgo/background-geolocation"
+  CapgoCapacitorCompass:
+    :path: "../../node_modules/@capgo/capacitor-compass"
   CordovaPlugins:
     :path: "../capacitor-cordova-ios-plugins"
   CordovaPluginsResources:
@@ -105,12 +110,13 @@ SPEC CHECKSUMS:
   CapacitorTextZoom: bceaf076f134e188f8fd36ff74ef18a7d2bdb160
   CapawesomeCapacitorAppUpdate: d62dfb474a41faac83aaa3b82da7bfbff3a22f2b
   CapgoBackgroundGeolocation: a8653893156d2a42e5da50f792510ceb6bac6c16
-  CordovaPlugins: 54820660bc6a13b3c07a3432df56a8c5a1410931
+  CapgoCapacitorCompass: a8f20d67031b069b544056d9b83c388f54bc9f6f
+  CordovaPlugins: f557708c6f61223224194c8e01192f1b41784858
   CordovaPluginsResources: da93847212bf7b16ba770e4d6c3e7dba820174c7
   PurchasesHybridCommon: 6a79a873ab52f777bfa36e9516f3fcd84d3b3428
   RevenueCat: eab035bbab271faccfef5c36eaff2a1ffef14dc0
   RevenuecatPurchasesCapacitor: dabd704d01e9c703745936082140408c75219198
 
-PODFILE CHECKSUM: 569629496812df32308323199c4b4ce929516802
+PODFILE CHECKSUM: 05de24813d2af09ad3e6b506154900c07fd601fe
 
 COCOAPODS: 1.16.2

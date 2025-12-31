@@ -44,6 +44,10 @@
 		"classpath": "com.capgo.capacitor_background_geolocation.BackgroundGeolocation"
 	},
 	{
+		"pkg": "@capgo/capacitor-compass",
+		"classpath": "app.capgo.capacitor.compass.CapgoCompassPlugin"
+	},
+	{
 		"pkg": "@revenuecat/purchases-capacitor",
 		"classpath": "com.revenuecat.purchases.capacitor.PurchasesPlugin"
 	},
