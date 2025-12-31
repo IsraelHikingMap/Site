@@ -25,6 +25,7 @@
 		"TextZoomPlugin",
 		"AppUpdatePlugin",
 		"BackgroundGeolocation",
+		"CapgoCompassPlugin",
 		"PurchasesPlugin",
 		"EmailComposerPlugin",
 		"CDVPlugin"

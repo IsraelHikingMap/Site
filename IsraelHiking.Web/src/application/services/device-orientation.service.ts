@@ -1,8 +1,7 @@
-/// <reference types="cordova-plugin-device-orientation" />
-
 import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
 import { App } from "@capacitor/app";
 import { Store } from "@ngxs/store";
+import { CapgoCompass } from "@capgo/capacitor-compass";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
@@ -10,11 +9,9 @@ import type { ApplicationState } from "../models";
 
 @Injectable()
 export class DeviceOrientationService {
-    private static readonly THROTTLE_TIME = 500; // in milliseconds
-
     public orientationChanged = new EventEmitter<number>();
 
-    private watchId = -1;
+    private eventHandler: { remove: () => Promise<void> } = null;
 
     private readonly ngZone = inject(NgZone);
     private readonly loggingService = inject(LoggingService);
@@ -40,41 +37,6 @@ export class DeviceOrientationService {
         }
     }
 
-    private fireOrientationChange(heading: number) {
-        this.ngZone.run(() => {
-            if (heading < 0) {
-                heading += 360;
-            }
-            if (this.getDeviceOrientation() === "landscape-primary") {
-                heading += 90;
-                if (heading > 360) {
-                    heading -= 360;
-                }
-            } else if (this.getDeviceOrientation() === "landscape-secondary") {
-                heading -= 90;
-                if (heading < 0) {
-                    heading += 360;
-                }
-            }
-            this.orientationChanged.next(heading);
-        });
-    }
-
-    private getDeviceOrientation(): OrientationType {
-        if (window.screen.orientation) {
-          return window.screen.orientation.type;
-        }
-
-        // iOS/safari
-        switch (+window.orientation) {
-            case 0: return "portrait-primary";
-            case 90: return "landscape-primary";
-            case 180: return "portrait-secondary";
-            case -90: return "landscape-secondary";
-            default: return "portrait-primary";
-      }
-    }
-
     public enable() {
         if (!this.runningContextService.isCapacitor) {
             return;
@@ -83,29 +45,31 @@ export class DeviceOrientationService {
         this.startListening();
     }
 
-    public disable() {
+    public async disable() {
         if (!this.runningContextService.isCapacitor) {
             return;
         }
         this.loggingService.info("[Orientation] Disabling device orientation service");
-        this.stopListeining();
+        await this.stopListeining();
     }
 
-    private startListening() {
-        if (this.watchId !== -1) {
-            navigator.compass.clearWatch(this.watchId);
+    private async startListening() {
+        if (this.eventHandler) {
+            this.eventHandler.remove();
+            this.eventHandler = null;
         }
         this.loggingService.info("[Orientation] Starting to listen to device orientation events");
-        this.watchId = navigator.compass.watchHeading((d) => {
-            this.fireOrientationChange(d.magneticHeading);
-        }, () => {}, { frequency: DeviceOrientationService.THROTTLE_TIME});
+        this.eventHandler = await CapgoCompass.addListener("headingChange", (event) => {
+            this.orientationChanged.next(event.value);
+        });
+        await CapgoCompass.startListening();
+        this.loggingService.info("[Orientation] Starting to listen to device orientation events");
     }
 
-    private stopListeining() {
+    private async stopListeining() {
         this.loggingService.info("[Orientation] Stop listening to device orientation events");
-        if (this.watchId !== -1) {
-            navigator.compass.clearWatch(this.watchId);
-            this.watchId = -1;
-        }
+        await this.eventHandler.remove();
+        this.eventHandler = null;
+        await CapgoCompass.stopListening();
     }
 }

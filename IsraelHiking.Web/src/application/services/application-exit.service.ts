@@ -1,6 +1,5 @@
 import { inject, Injectable, NgZone } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
-import { Store } from "@ngxs/store";
 import { App } from "@capacitor/app";
 
 import { RunningContextService } from "./running-context.service";
@@ -9,7 +8,7 @@ import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
 import { ToastService } from "./toast.service";
 import { SidebarService } from "./sidebar.service";
-import { GeoLocationService } from "./geo-location.service";
+import { LocationService } from "./location.service";
 import { RecordedRouteService } from "./recorded-route.service";
 import { ImageGalleryService } from "./image-gallery.service";
 
@@ -25,9 +24,8 @@ export class ApplicationExitService {
     private readonly databaseService = inject(DatabaseService);
     private readonly runningContext = inject(RunningContextService);
     private readonly recordingRouteService = inject(RecordedRouteService);
-    private readonly geoLocationService = inject(GeoLocationService);
+    private readonly locationService = inject(LocationService);
     private readonly imageGalleryService = inject(ImageGalleryService);
-    private readonly store = inject(Store);
     private readonly loggingService = inject(LoggingService);
     private readonly toastService = inject(ToastService);
 
@@ -75,7 +73,7 @@ export class ApplicationExitService {
     private async exitApp() {
         this.toastService.info(this.resources.wrappingThingsUp);
         this.loggingService.info("Starting Mapeak Application Exit");
-        await this.geoLocationService.uninitialize();
+        await this.locationService.uninitialize();
         await this.databaseService.uninitialize();
         this.loggingService.info("Finished Mapeak Application Exit");
         App.exitApp();
