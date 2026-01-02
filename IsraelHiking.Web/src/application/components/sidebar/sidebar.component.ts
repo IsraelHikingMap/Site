@@ -1,7 +1,8 @@
 import { Component, inject, signal } from "@angular/core";
 
-import { LayersSidebarComponent } from "./layers-sidebar.component";
+import { LayersSidebarComponent } from "./layers/layers-sidebar.component";
 import { PublicPoiSidebarComponent } from "./publicpoi/public-poi-sidebar.component";
+import { PrivateRoutesSidebarComponent } from "./privateroutes/private-routes-sidebar.component";
 import { SidebarService, SidebarView } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 
@@ -9,7 +10,7 @@ import { ResourcesService } from "../../services/resources.service";
     selector: "sidebar",
     templateUrl: "./sidebar.component.html",
     styleUrls: ["./sidebar.component.scss"],
-    imports: [LayersSidebarComponent, PublicPoiSidebarComponent]
+    imports: [LayersSidebarComponent, PublicPoiSidebarComponent, PrivateRoutesSidebarComponent]
 })
 export class SidebarComponent {
 

@@ -15,6 +15,7 @@ import * as d3 from "d3";
 import type { Selection, ScaleContinuousNumeric } from "d3";
 import type { Immutable } from "immer";
 
+import { DistancePipe } from "../pipes/distance.pipe";
 import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { ResourcesService } from "../services/resources.service";
@@ -61,7 +62,7 @@ interface IChartElements {
     templateUrl: "./route-statistics.component.html",
     styleUrls: ["./route-statistics.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, NgClass, MatGridList, MatGridTile, MatTooltip, MatButton, Angulartics2OnModule, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, DecimalPipe]
+    imports: [Dir, NgClass, MatGridList, MatGridTile, MatTooltip, MatButton, Angulartics2OnModule, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, DecimalPipe, DistancePipe]
 })
 export class RouteStatisticsComponent implements OnInit {
     private static readonly HOVER_BOX_WIDTH = 160;
@@ -252,15 +253,6 @@ export class RouteStatisticsComponent implements OnInit {
     public isSidebarVisible() {
         return this.sidebarService.isSidebarOpen();
     }
-
-    public getUnits = (value: number): string => Math.abs(value) > 1000 ? this.resources.kmUnit : this.resources.meterUnit;
-
-    public toShortNumber = (value: number): string => {
-        if (value == null) {
-            return "0";
-        }
-        return Math.abs(value) > 1000 ? (value / 1000.0).toFixed(2) : value.toFixed(0);
-    };
 
     public toggle(): void {
         this.isOpen.set(!this.isOpen());

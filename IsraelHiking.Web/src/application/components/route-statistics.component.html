@@ -9,20 +9,19 @@
         <mat-grid-tile matTooltip="{{resources.gain}}" matTooltipPosition="below">
           <div class="flex flex-col items-center">
             <i class="fa icon-arrow-up"></i>
-            <span>{{toShortNumber(gain)}} <span class="units">{{getUnits(gain)}}</span></span>
+            <span class="mx-1">{{gain | distance}}</span>
           </div>
         </mat-grid-tile>
         <mat-grid-tile matTooltip="{{resources.loss}}" matTooltipPosition="below">
           <div class="flex flex-col items-center">
             <i class="fa icon-arrow-down"></i>
-            <span><span dir="ltr">{{toShortNumber(loss)}}</span>&nbsp;<span
-                class="units">{{getUnits(loss)}}</span></span>
+            <span class="mx-1">{{loss | distance}}</span>
           </div>
         </mat-grid-tile>
         <mat-grid-tile matTooltip="{{resources.length}}" matTooltipPosition="below">
           <div class="flex flex-col items-center">
             <i class="fa icon-arrow-right"></i>
-            <span>{{toShortNumber(length)}} <span class="units">{{getUnits(length)}}</span></span>
+            <span class="mx-1">{{length | distance}}</span>
           </div>
         </mat-grid-tile>
         } @else {
@@ -35,14 +34,13 @@
         <mat-grid-tile matTooltip="{{resources.remainingDistance}}" matTooltipPosition="below">
           <div class="flex flex-col items-center">
             <i class="fa icon-arrow-circle-right"></i>
-            <span>&nbsp;<span dir="ltr">{{toShortNumber(remainingDistance)}}</span>&nbsp;<span
-                class="units">{{getUnits(remainingDistance)}}</span></span>
+            <span class="mx-1">{{remainingDistance | distance}}</span>
           </div>
         </mat-grid-tile>
         <mat-grid-tile matTooltip="{{resources.traveledDistance}}" matTooltipPosition="below">
           <div class="flex flex-col items-center">
             <i class="fa icon-arrow-right"></i>
-            <span>{{toShortNumber(traveledDistance)}} <span class="units">{{getUnits(traveledDistance)}}</span></span>
+            <span class="mx-1">{{traveledDistance | distance}}</span>
           </div>
         </mat-grid-tile>
         }
@@ -84,15 +82,16 @@
             matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route statistics"
             angularticsAction="Clear sub route selection"><i class="fa icon-close fa-lg"></i></button>
           <span class="label-margin">
-            <i class="fa icon-arrow-up"></i> {{toShortNumber(gain)}} <span class="units">{{getUnits(gain)}}</span>
+            <i class="fa icon-arrow-up"></i>
+            <span class="mx-1">{{gain | distance}}</span>
           </span>
           <span class="label-margin">
-            <i class="fa icon-arrow-down"></i> <span dir="ltr">{{toShortNumber(loss)}}</span>&nbsp;<span
-              class="units">{{getUnits(loss)}}</span>
+            <i class="fa icon-arrow-down"></i>
+            <span class="mx-1">{{loss | distance}}</span>
           </span>
           <span class="label-margin">
-            <i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} <span
-              class="units">{{getUnits(length)}}</span>
+            <i class="fa icon-arrow-right"></i>
+            <span class="mx-1">{{length | distance}}</span>
           </span>
         </div>
       </div>
@@ -141,29 +140,38 @@
       matTooltipPosition="above"><i class="fa {{isTable ? 'icon-table' : 'icon-area-chart'}} fa-lg"></i></button>
     @if (!isFollowing) {
     <div matTooltip="{{resources.gain}}" matTooltipPosition="above">
-      <span class="control-container-item gutters"><i class="fa icon-arrow-up"></i> {{toShortNumber(gain)}} <span
-          class="units">{{getUnits(gain)}}</span></span>
+      <span class="control-container-item gutters">
+        <i class="fa icon-arrow-up"></i>
+        <span class="mx-1">{{gain | distance}}</span>
+      </span>
     </div>
     <div matTooltip="{{resources.loss}}" matTooltipPosition="above">
-      <span class="control-container-item gutters"><i class="fa icon-arrow-down"></i>&nbsp;<span
-          dir="ltr">{{toShortNumber(loss)}}</span>&nbsp;<span class="units">{{getUnits(loss)}}</span></span>
+      <span class="control-container-item gutters">
+        <i class="fa icon-arrow-down"></i>
+        <span class="mx-1">{{loss | distance}}</span>
+      </span>
     </div>
     <div matTooltip="{{resources.length}}" matTooltipPosition="above">
-      <span class="control-container-item gutters"><i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} <span
-          class="units">{{getUnits(length)}}</span></span>
+      <span class="control-container-item gutters">
+        <i class="fa icon-arrow-right"></i>
+        <span class="mx-1">{{length | distance}}</span>
+      </span>
     </div>
     } @else {
     <div>
       <span class="control-container-item gutters">ETA <span dir="ltr">{{ETA}}</span></span>
     </div>
     <div matTooltip="{{resources.remainingDistance}}" matTooltipPosition="above">
-      <span class="control-container-item gutters"><i class="fa icon-arrow-circle-right"></i>&nbsp;<span
-          dir="ltr">{{toShortNumber(remainingDistance)}}</span>&nbsp;<span
-          class="units">{{getUnits(remainingDistance)}}</span></span>
+      <span class="control-container-item gutters">
+        <i class="fa icon-arrow-circle-right"></i>
+        <span class="mx-1">{{remainingDistance | distance}}</span>
+      </span>
     </div>
     <div matTooltip="{{resources.traveledDistance}}" matTooltipPosition="above">
-      <span class="control-container-item gutters"><i class="fa icon-arrow-right"></i>
-        {{toShortNumber(traveledDistance)}} <span class="units">{{getUnits(traveledDistance)}}</span></span>
+      <span class="control-container-item gutters">
+        <i class="fa icon-arrow-right"></i>
+        <span class="mx-1">{{traveledDistance | distance}}</span>
+      </span>
     </div>
     }
   </div>

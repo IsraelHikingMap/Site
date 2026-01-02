@@ -4,15 +4,15 @@ import { MatButton } from "@angular/material/button";
 import { NgClass } from "@angular/common";
 import { Store } from "@ngxs/store";
 
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
-import { ResourcesService } from "../../services/resources.service";
+import { Angulartics2OnModule } from "../../../directives/gtag.directive";
+import { ResourcesService } from "../../../services/resources.service";
 import {
     CollapseGroupAction,
     ExpandGroupAction,
     ToggleCategoriesGroupVisibilityAction,
     ToggleCategoryVisibilityAction
-} from "../../reducers/layers.reducer";
-import type { ApplicationState, CategoriesGroup, Category } from "../../models";
+} from "../../../reducers/layers.reducer";
+import type { ApplicationState, CategoriesGroup, Category } from "../../../models";
 
 @Component({
     selector: "categories-group",

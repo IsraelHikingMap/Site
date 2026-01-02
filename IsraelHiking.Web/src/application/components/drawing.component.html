@@ -1,4 +1,7 @@
 ﻿<div class="side-control maplibregl-ctrl" [dir]="resources.direction">
+  <button mat-button (click)="togglePrivateRoutes()" matTooltip="{{resources.privateRoutes}}" matTooltipPosition="left"
+    angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Private routes"><i
+      class="fa icon-list-ul fa-lg"></i></button>
   <button mat-button (click)="toggleEditPoi()" [ngClass]="{active : isPoiEditActive()}"
     [ngStyle]="{'color': getRouteColor()}" matTooltip="{{resources.editPoi}}" matTooltipPosition="left"
     angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Draw POI toggle"><i

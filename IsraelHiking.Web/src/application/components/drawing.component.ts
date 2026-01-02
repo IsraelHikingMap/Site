@@ -11,6 +11,7 @@ import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { ResourcesService } from "../services/resources.service";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { ToastService } from "../services/toast.service";
+import { SidebarService } from "../services/sidebar.service";
 import {
     ReplaceSegmentsAction,
     ClearPoisAction,
@@ -39,6 +40,7 @@ export class DrawingComponent {
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
+    private readonly sidebarService = inject(SidebarService);
 
     constructor() {
         this.undoQueueLength$ = this.store.select((state: ApplicationState) => state.routes.past.length);
@@ -186,5 +188,9 @@ export class DrawingComponent {
 
     public canDeleteAllRoutes() {
         return this.store.selectSnapshot((s: ApplicationState) => s.routes).present.length > 0;
+    }
+
+    public togglePrivateRoutes() {
+        this.sidebarService.toggle("private-routes");
     }
 }

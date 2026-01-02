@@ -109,45 +109,6 @@
     @for (categoriesGroup of categoriesGroups; track trackByGroupType($index, categoriesGroup)) {
     <categories-group [categoriesGroup]="categoriesGroup"></categories-group>
     }
-    <mat-expansion-panel [expanded]="getExpandState('Private Routes')" (opened)="expand('Private Routes')"
-      (closed)="collapse('Private Routes')">
-      <mat-expansion-panel-header>
-        <div class="flex flex-row w-full">
-          <div class="w-4/5">
-            <p class="w-full">{{resources.privateRoutes}}</p>
-          </div>
-          <div class="w-1/5">
-            <button mat-button class="w-full h-full!" (click)="toggleAllRoutes($event)" angulartics2On="click"
-              angularticsCategory="Layers" angularticsAction="Toggle all routes"><i class="fa fa-lg"
-                [ngClass]="isAllRoutesHidden() ? 'icon-eye-slash' : 'icon-eye'"></i></button>
-          </div>
-        </div>
-      </mat-expansion-panel-header>
-      <div cdkDropList (cdkDropListDropped)="dropRoute($event)">
-        @for (route of (routes$ | async); track route; let i = $index) {
-        <div cdkDrag>
-          <div class="flex flex-row" [class.active]="isShowActive(route)" matTooltip="{{route.description}}"
-            matTooltipPosition="below">
-            <button mat-button class="row-button flex-1 justify-start!" [style.color]="route.color"
-              (click)="toggleRoute(route)" angulartics2On="click" angularticsCategory="Layers"
-              angularticsAction="Toggle route visibility">
-              <span><i class="fa"
-                  [ngClass]="{ 'icon-pencil': isRouteInEditMode(route), 'icon-eye': isRouteVisible(route) && !isRouteInEditMode(route), 'icon-eye-slash': !isRouteVisible(route) }"></i></span>
-              <span class="break-all cursor-move">{{route.name}}</span>
-            </button>
-            <div class="w-1/12">
-              <button mat-button class="w-full short-button" (click)="editRoute(route, $event)"
-                matTooltip="{{resources.routeProperties}}" matTooltipPosition="before" angulartics2On="click"
-                angularticsCategory="Route" angularticsAction="Edit route"><i class="fa icon-ellipsis-v"></i></button>
-            </div>
-          </div>
-        </div>
-        }
-      </div>
-      <button mat-button (click)="addRoute($event)" matTooltipPosition="below" angulartics2On="click"
-        angularticsCategory="Layers" angularticsAction="Add route"><i class="fa fa-lg icon-plus"></i>
-        {{resources.addRoute}}</button>
-    </mat-expansion-panel>
   </mat-accordion>
   @if (isOfflineDownloadAvailable()) {
   <p class="ms-2">
