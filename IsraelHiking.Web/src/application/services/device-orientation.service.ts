@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
+import { Injectable, EventEmitter, inject } from "@angular/core";
 import { App } from "@capacitor/app";
 import { Store } from "@ngxs/store";
 import { CapgoCompass } from "@capgo/capacitor-compass";
@@ -13,7 +13,6 @@ export class DeviceOrientationService {
 
     private eventHandler: { remove: () => Promise<void> } = null;
 
-    private readonly ngZone = inject(NgZone);
     private readonly loggingService = inject(LoggingService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly store = inject(Store);
@@ -67,6 +66,9 @@ export class DeviceOrientationService {
     }
 
     private async stopListeining() {
+        if (!this.eventHandler) {
+            return;
+        }
         this.loggingService.info("[Orientation] Stop listening to device orientation events");
         await this.eventHandler.remove();
         this.eventHandler = null;
