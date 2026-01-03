@@ -67,7 +67,6 @@ export class ApplicationInitializeService {
             this.screenService.initialize();
             await this.resources.initialize();
             this.applicationExitService.initialize();
-            await this.applicationUpdateService.initialize();
             this.openWithService.initialize();
             await this.purchaseService.initialize();
             this.geoLocationService.initialize();
@@ -88,9 +87,10 @@ export class ApplicationInitializeService {
             this.deviceOrientationService.initialize();
             this.tracesService.initialize(); // no need to wait for it to complete
             this.shareUrlsService.initialize(); // no need to wait for it to complete
-            this.offlineFilesDownloadService.initialize(); // no need to wait for it to complete
+            await this.offlineFilesDownloadService.initialize();
             this.locationService.initialize();
-            await this.loggingService.info("Finished Mapeak Application Initialization");
+            await this.applicationUpdateService.initialize(); // Needs to be last to make sure app gets updated
+            this.loggingService.info("Finished Mapeak Application Initialization");
         } catch (ex) {
             if (this.runningContextService.isIFrame) {
                 return;
