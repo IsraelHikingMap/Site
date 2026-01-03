@@ -78,6 +78,8 @@ export class PrivateRoutesSidebarComponent {
         const routeData = this.routesFactory.createRouteData(this.selectedRouteService.createRouteName(),
             this.selectedRouteService.getLeastUsedColor());
 
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
+        routeData.state = selectedRoute != null && selectedRoute.state !== "Hidden" ? selectedRoute.state : "ReadOnly";
         this.store.dispatch(new AddRouteAction(routeData));
         this.selectedRouteService.setSelectedRoute(routeData.id);
     }
@@ -97,10 +99,13 @@ export class PrivateRoutesSidebarComponent {
 
     public selectRoute(event: Event, routeData: Immutable<RouteData>) {
         event.stopPropagation();
-        if (routeData.state === "Hidden") {
-            this.store.dispatch(new ChangeRouteStateAction(routeData.id, "ReadOnly"));
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (selectedRoute?.id === routeData.id) {
+            return;
         }
-        this.store.dispatch(new SetSelectedRouteAction(routeData.id));
+        const newRouteState = selectedRoute != null && selectedRoute.state !== "Hidden" ? selectedRoute.state : "ReadOnly";
+        this.store.dispatch(new ChangeRouteStateAction(routeData.id, newRouteState));
+        this.selectedRouteService.setSelectedRoute(routeData.id);
     }
 
     public toggleAllRoutes(event: Event) {
