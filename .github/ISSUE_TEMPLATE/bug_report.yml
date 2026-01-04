@@ -35,11 +35,20 @@ body:
       required: true
   - type: checkboxes
     attributes:
+      label: Product
+      description: Where do you experience this bug?
+      options:
+        - label: Mapeak
+        - label: Israel Hiking
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
       label: Platform
       description: Where do you experience this bug?
       options:
-        - label: Israel Hiking Map app
-        - label: Israel Hiking Map site in a browser
+        - label: The mobile appplication
+        - label: The website in a browser
     validations:
       required: true
   - type: input
