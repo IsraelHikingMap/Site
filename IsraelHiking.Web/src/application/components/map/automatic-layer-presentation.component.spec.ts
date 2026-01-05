@@ -9,7 +9,8 @@ import { FileService } from "../../services/file.service";
 import { MapService } from "../../services/map.service";
 import { ResourcesService } from "../../services/resources.service";
 import { OfflineReducer } from "../../reducers/offline.reducer";
-import { HIKING_MAP } from "../../reducers/initial-state";
+import { ConfigurationReducer } from "../../reducers/configuration.reducer";
+import { HIKING_MAP, AVAILABLE_LANGUAGES } from "../../reducers/initial-state";
 import type { EditableLayer } from "../../models";
 
 describe("AutomaticLayerPresentationComponent", () => {
@@ -40,7 +41,7 @@ describe("AutomaticLayerPresentationComponent", () => {
         await TestBed.configureTestingModule({
             imports: [
                 AutomaticLayerPresentationComponent,
-                NgxsModule.forRoot([OfflineReducer])
+                NgxsModule.forRoot([OfflineReducer, ConfigurationReducer])
             ],
             providers: [
                 { provide: FileService, useValue: fileService },
@@ -108,6 +109,17 @@ describe("AutomaticLayerPresentationComponent", () => {
                     isSubscribed: true,
                     shareUrlsLastModifiedDate: new Date(),
                     uploadPoiQueue: []
+                },
+                configuration: {
+                    batteryOptimizationType: "screen-on",
+                    isAutomaticRecordingUpload: true,
+                    isGotLostWarnings: false,
+                    isShowBatteryConfirmation: true,
+                    isShowIntro: true,
+                    isShowKmMarker: false,
+                    isShowSlope: false,
+                    version: 10,
+                    language: AVAILABLE_LANGUAGES[0]
                 }
             });
 
@@ -136,6 +148,17 @@ describe("AutomaticLayerPresentationComponent", () => {
                     isSubscribed: true,
                     shareUrlsLastModifiedDate: new Date(),
                     uploadPoiQueue: []
+                },
+                configuration: {
+                    batteryOptimizationType: "screen-on",
+                    isAutomaticRecordingUpload: true,
+                    isGotLostWarnings: false,
+                    isShowBatteryConfirmation: true,
+                    isShowIntro: true,
+                    isShowKmMarker: false,
+                    isShowSlope: false,
+                    version: 10,
+                    language: AVAILABLE_LANGUAGES[0]
                 }
             });
 
@@ -160,6 +183,17 @@ describe("AutomaticLayerPresentationComponent", () => {
                     isSubscribed: true,
                     shareUrlsLastModifiedDate: new Date(),
                     uploadPoiQueue: []
+                },
+                configuration: {
+                    batteryOptimizationType: "screen-on",
+                    isAutomaticRecordingUpload: true,
+                    isGotLostWarnings: false,
+                    isShowBatteryConfirmation: true,
+                    isShowIntro: true,
+                    isShowKmMarker: false,
+                    isShowSlope: false,
+                    version: 10,
+                    language: AVAILABLE_LANGUAGES[0]
                 }
             });
 
@@ -184,6 +218,17 @@ describe("AutomaticLayerPresentationComponent", () => {
                     isSubscribed: true,
                     shareUrlsLastModifiedDate: new Date(),
                     uploadPoiQueue: []
+                },
+                configuration: {
+                    batteryOptimizationType: "screen-on",
+                    isAutomaticRecordingUpload: true,
+                    isGotLostWarnings: false,
+                    isShowBatteryConfirmation: true,
+                    isShowIntro: true,
+                    isShowKmMarker: false,
+                    isShowSlope: false,
+                    version: 10,
+                    language: AVAILABLE_LANGUAGES[0]
                 }
             });
 
@@ -208,6 +253,17 @@ describe("AutomaticLayerPresentationComponent", () => {
                     isSubscribed: true,
                     shareUrlsLastModifiedDate: new Date(),
                     uploadPoiQueue: []
+                },
+                configuration: {
+                    batteryOptimizationType: "screen-on",
+                    isAutomaticRecordingUpload: true,
+                    isGotLostWarnings: false,
+                    isShowBatteryConfirmation: true,
+                    isShowIntro: true,
+                    isShowKmMarker: false,
+                    isShowSlope: false,
+                    version: 10,
+                    language: AVAILABLE_LANGUAGES[0]
                 }
             });
 
@@ -243,6 +299,17 @@ describe("AutomaticLayerPresentationComponent", () => {
                     isSubscribed: true,
                     shareUrlsLastModifiedDate: new Date(),
                     uploadPoiQueue: []
+                },
+                configuration: {
+                    batteryOptimizationType: "screen-on",
+                    isAutomaticRecordingUpload: true,
+                    isGotLostWarnings: false,
+                    isShowBatteryConfirmation: true,
+                    isShowIntro: true,
+                    isShowKmMarker: false,
+                    isShowSlope: false,
+                    version: 10,
+                    language: AVAILABLE_LANGUAGES[0]
                 }
             });
 
