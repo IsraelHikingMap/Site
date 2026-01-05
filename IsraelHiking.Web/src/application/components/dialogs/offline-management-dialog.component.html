@@ -7,7 +7,7 @@
     <div class="w-full offline-map-container">
       <mgl-map [mapStyle]="offlineMapStyle" (mapClick)="onMapClick($event)" (mapLoad)="onMapLoad($event)"
         [attributionControl]="false">
-        <auto-layer [layerData]="baseLayerData" [visible]="true" [isBaselayer]="true" [isMainMap]="false"
+        <auto-layer [layerData]="baseLayerData" [visible]="true" [isBaselayer]="true" [isMainMap]="false" [useOfflineTiles]="true"
           [before]="resources.endOfBaseLayer">
         </auto-layer>
         <mgl-geojson-source id="download-tiles" [data]="downloadedTiles">

@@ -31,6 +31,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     public isBaselayer = input<boolean>();
     public layerData = input<EditableLayer>();
     public isMainMap = input<boolean>();
+    public useOfflineTiles = input<boolean>(false);
     public isSameBaselayerOn = input<boolean>(false);
 
     private rasterSourceId: string;
@@ -132,7 +133,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     }
 
     private async createJsonLayer(layerData: EditableLayer) {
-        const tryLocalStyle = this.isMainMap() && DEFAULT_BASE_LAYERS.some(l => l.key === layerData.key) && this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles != null;
+        const tryLocalStyle = (this.isMainMap() || this.useOfflineTiles()) && DEFAULT_BASE_LAYERS.some(l => l.key === layerData.key) && this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles != null;
         const response = await this.fileService.getStyleJsonContent(layerData.address, tryLocalStyle);
         const language = this.resources.getCurrentLanguageCodeSimplified();
         const styleJson = JSON.parse(JSON.stringify(response).replace(/name:he/g, `name:${language}`)) as StyleSpecification;
