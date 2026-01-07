@@ -16,6 +16,7 @@ import { Immutable } from "immer";
 import invert from "invert-color";
 
 import { ShareDialogComponent } from "../../../components/dialogs/share-dialog.component";
+import { FileSaveDialogComponent } from "application/components/dialogs/file-save-dialog.component";
 import { DistancePipe } from "../../../pipes/distance.pipe";
 import { Angulartics2OnModule } from "../../../directives/gtag.directive";
 import { NameInUseValidatorDirective } from "../../../directives/name-in-use-validator.directive";
@@ -31,7 +32,7 @@ import { LogReaderService } from "../../../services/log-reader.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { ChangeRouteStateAction, ToggleAllRoutesAction, DeleteAllRoutesAction, AddRouteAction, ChangeRoutePropertiesAction, DeleteRouteAction } from "../../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../../reducers/route-editing.reducer";
-import type { ApplicationState, DataContainer, LatLngAlt, RouteData } from "../../../models";
+import type { ApplicationState, LatLngAlt, RouteData } from "../../../models";
 
 
 @Component({
@@ -213,19 +214,13 @@ export class PrivateRoutesSidebarComponent {
     }
 
     public async saveRouteToFile(routeData: Immutable<RouteData>) {
-        const latLngs = this.getLatlngs(routeData);
-        if (latLngs.length === 0) {
-            this.toastService.error(new Error("Route data is empty"), this.resources.pleaseAddPointsToRoute);
+        if (routeData.segments.length === 0 && routeData.markers.length === 0) {
+            this.toastService.warning(this.resources.unableToSaveAnEmptyRoute);
             return;
         }
-        const data = {
-            routes: [routeData]
-        } as DataContainer;
-        try {
-            await this.fileService.saveToFile(routeData.name + ".gpx", "gpx", data);
-        } catch (ex) {
-            this.toastService.error(ex, this.resources.unableToSaveToFile);
-        }
+        this.dialog.open<FileSaveDialogComponent, RouteData>(FileSaveDialogComponent, {
+            data: structuredClone(routeData) as RouteData
+        });
     }
 
     public moveToRoute(routeData: Immutable<RouteData>) {

@@ -72,11 +72,6 @@ export class FileService {
             label: "Naviguide binary route file (.twl)",
             extension: "twl",
             outputFormat: "twl",
-        },
-        {
-            label: "All routes to a single Track GPX (.gpx)",
-            extension: "gpx",
-            outputFormat: "all_gpx_single_track"
         }
     ];
 

@@ -88,29 +88,6 @@ describe("DataContainerService", () => {
         expect(dataContainer.routes.length).toBe(2);
     }));
 
-    it("should return all routes for file export when no route is selected", inject([DataContainerService, Store], (service: DataContainerService, store: Store) => {
-        store.reset({
-            routes: {
-                present: [{
-                    state: "Hidden",
-                    segments: [{}]
-                }, {
-                    state: "Poi",
-                    markers: [{}],
-                    segments: []
-                }]
-            }
-        });
-        const dataContainer = service.getDataForFileExport();
-        expect(dataContainer.routes.length).toBe(1);
-    }));
-
-    it("should return all routes for file export when no route is selected", inject([DataContainerService, SelectedRouteService], (service: DataContainerService, selectedRouteService: SelectedRouteService) => {
-        selectedRouteService.getSelectedRoute = () => ({ segments: [{}] } as any);
-        const dataContainer = service.getDataForFileExport();
-        expect(dataContainer.routes.length).toBe(1);
-    }));
-
     it("should return true if there are hidden routes in the store", inject([DataContainerService, Store], (service: DataContainerService, store: Store) => {
         store.reset({
             routes: {
