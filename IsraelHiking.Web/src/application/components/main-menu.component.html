@@ -1,9 +1,7 @@
 ﻿<button mat-button routerLink="/map" angulartics2On="click" angularticsCategory="Menu"
   angularticsAction="Plan & Explore" class="max-md:hidden!">
-  <span class="flex flex-row justify-center items-center">
-    <span class="w-1/12 text-center"><i class="fa fa-lg icon-map-o mat-icon"></i></span>
-    <span class="flex-1 margin-sides">{{resources.planAndExplore}}</span>
-  </span>
+  <i class="fa fa-lg icon-map-o mat-icon"></i>
+  <span class="mx-1">{{resources.planAndExplore}}</span>
 </button>
 @if (!isIFrame() && !isLoggedIn()) {
 <button mat-raised-button (click)="login()">{{resources.signIn}}</button>
@@ -45,41 +43,31 @@
       }
       <button mat-menu-item routerLink="/map" angulartics2On="click" angularticsCategory="Menu"
         angularticsAction="Plan & Explore" class="block md:hidden!">
-        <span class="flex flex-row justify-center items-center">
-          <span class="w-1/12 text-center"><i class="fa fa-lg icon-map-o mat-icon"></i></span>
-          <span class="flex-1 margin-sides">{{resources.planAndExplore}}</span>
-        </span>
+        <i class="fa fa-lg icon-map-o mat-icon"></i>
+        <span class="mx-1">{{resources.planAndExplore}}</span>
       </button>
       @if (isShowOrderButton()) {
       <button mat-menu-item (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu"
         angularticsAction="Order">
-        <span class="flex flex-row justify-center items-center primary-text">
-          <span class="w-1/12 text-center"><i class="fa fa-lg icon-dollar mat-icon"></i></span>
-          <span class="flex-1 margin-sides">{{resources.purchaseOfflineMapsShort}}</span>
-        </span>
+        <i class="fa fa-lg icon-dollar mat-icon"></i>
+        <span class="mx-1">{{resources.purchaseOfflineMapsShort}}</span>
       </button>
       }
       <button mat-menu-item (click)="openLanguage()" angulartics2On="click" angularticsCategory="Menu"
         angularticsAction="Open language selection">
-        <span class="flex flex-row justify-center items-center">
-          <span class="w-1/12 text-center"><i class="fa fa-lg icon-language mat-icon"></i></span>
-          <span class="flex-1 margin-sides">Language</span>
-        </span>
+        <i class="fa fa-lg icon-language mat-icon"></i>
+        <span class="mx-1">Language</span>
       </button>
       <button mat-menu-item routerLink="/about" angulartics2On="click" angularticsCategory="Menu"
         angularticsAction="About">
-        <span class="flex flex-row justify-center items-center">
-          <span class="w-1/12 text-center"><i class="fa fa-lg icon-info mat-icon"></i></span>
-          <span class="flex-1 margin-sides">{{resources.about}}</span>
-        </span>
+        <i class="fa fa-lg icon-info mat-icon"></i>
+        <span class="mx-1">{{resources.about}}</span>
       </button>
       @if (!isIFrame()) {
       <button mat-menu-item (click)="reportAnIssue()" angulartics2On="click" angularticsCategory="Menu"
         angularticsAction="Report an issue">
-        <span class="flex flex-row justify-center items-center">
-          <span class="w-1/12 text-center"><i class="fa fa-lg icon-envelope mat-icon"></i></span>
-          <span class="flex-1 margin-sides">{{resources.reportAnIssue}}</span>
-        </span>
+        <i class="fa fa-lg icon-envelope mat-icon"></i>
+        <span class="mx-1">{{resources.reportAnIssue}}</span>
       </button>
       }
     </div>
