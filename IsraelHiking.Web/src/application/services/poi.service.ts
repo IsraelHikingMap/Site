@@ -123,7 +123,7 @@ export class PoiService {
         if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState.downloadedTiles) != null) {
             this.mapService.map.addSource(`${PoiService.POIS_SOURCE_ID}-offline`, {
                 type: "vector",
-                tiles: [PoiService.POIS_SOURCE_ADDRESS.replace(".json", "/{z}/{x}/{y}.pbf").replace("http://", "slice://")],
+                tiles: [PoiService.POIS_SOURCE_ADDRESS.replace(".json", "/{z}/{x}/{y}.mvt").replace("https://", "slice://")],
                 minzoom: 10,
                 maxzoom: 14
             });
