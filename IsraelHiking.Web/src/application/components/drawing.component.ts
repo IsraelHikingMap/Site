@@ -4,6 +4,7 @@ import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
+import { MatDialog } from "@angular/material/dialog";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
@@ -25,6 +26,7 @@ import {
 import { SetRoutingTypeAction, SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import type { RoutingType, ApplicationState, RouteData } from "../models";
+import { ShareDialogComponent } from "./dialogs/share-dialog.component";
 
 @Component({
     selector: "drawing",
@@ -41,6 +43,7 @@ export class DrawingComponent {
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
     private readonly sidebarService = inject(SidebarService);
+    private readonly dialog = inject(MatDialog);
 
     constructor() {
         this.undoQueueLength$ = this.store.select((state: ApplicationState) => state.routes.past.length);
@@ -192,5 +195,11 @@ export class DrawingComponent {
 
     public togglePrivateRoutes() {
         this.sidebarService.toggle("private-routes");
+    }
+
+    public share() {
+        const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
+        this.selectedRouteService.changeRouteEditState(selectedRoute.id, "ReadOnly");
+        this.dialog.open(ShareDialogComponent, { width: "480px" });
     }
 }
