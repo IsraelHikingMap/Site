@@ -27,7 +27,6 @@ import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
 import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
 import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.component";
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
-import { FilesSharesDialogComponent } from "./dialogs/files-shares-dialog.component";
 import { SendReportDialogComponent } from "./dialogs/send-report-dialog.component";
 import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { SetAgreeToTermsAction } from "../reducers/user.reducer";
@@ -97,10 +96,6 @@ export class MainMenuComponent {
 
     public logout() {
         this.authorizationService.logout();
-    }
-
-    public selectSharesAndFiles() {
-        this.dialog.open(FilesSharesDialogComponent);
     }
 
     public async reportAnIssue() {

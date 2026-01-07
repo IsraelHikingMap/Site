@@ -27,6 +27,7 @@ import { ToastService } from "../../../services/toast.service";
 import { RouteStatistics, RouteStatisticsService } from "../../../services/route-statistics.service";
 import { SpatialService } from "../../../services/spatial.service";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
+import { LogReaderService } from "../../../services/log-reader.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { ChangeRouteStateAction, ToggleAllRoutesAction, DeleteAllRoutesAction, AddRouteAction, ChangeRoutePropertiesAction, DeleteRouteAction } from "../../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../../reducers/route-editing.reducer";
@@ -57,6 +58,7 @@ export class PrivateRoutesSidebarComponent {
     private readonly toastService = inject(ToastService);
     private readonly routeStatisticsService = inject(RouteStatisticsService);
     private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly logReaderService = inject(LogReaderService);
 
     constructor() {
         this.colors = this.routesFactory.colors;
@@ -141,6 +143,25 @@ export class PrivateRoutesSidebarComponent {
     public async openFile(event: Event) {
         const file = this.fileService.getFileFromEvent(event);
         if (!file) {
+            return;
+        }
+        if (file.name.endsWith(".pmtiles")) {
+            this.toastService.info(this.resources.openingAFilePleaseWait);
+            await this.fileService.storeFileToCache(file.name, file);
+            await this.fileService.moveFileFromCacheToDataDirectory(file.name);
+            this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
+            return;
+        }
+        if (file.name.endsWith(".json")) {
+            this.toastService.info(this.resources.openingAFilePleaseWait);
+            await this.fileService.writeStyle(file.name, await this.fileService.getFileContent(file));
+            this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
+            return;
+        }
+        if (file.name.endsWith(".txt") && file.name.includes("log")) {
+            this.toastService.info(this.resources.openingAFilePleaseWait);
+            const fileContent = await this.fileService.getFileContent(file);
+            this.logReaderService.readLogFile(fileContent);
             return;
         }
         try {
