@@ -11,7 +11,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
   workflow_dispatch:
     inputs:
       publishandroid:
@@ -34,10 +33,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
@@ -83,15 +82,15 @@ jobs:
     needs: version
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5.1.0
         with:
           distribution: 'temurin'
           java-version: '21'
@@ -158,7 +157,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.1
 
       - name: Login to GitHub Container Registry
         if: ${{ github.secret_source == 'Actions' }}
@@ -185,10 +184,10 @@ jobs:
     needs: version
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
@@ -256,7 +255,7 @@ jobs:
     needs: [version, ios, android]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.1
       - name: Tag commit and push
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2
