@@ -86,7 +86,6 @@ jobs:
         run: |
           cd IsraelHiking.Web/android
           bundle exec fastlane build_aab
-          bundle exec fastlane build_apk
         env:
           STORE_PASSWORD: ${{ secrets.MAPEAK_STORE_PASSWORD }}
           PASSWORD: ${{ secrets.MAPEAK_PASSWORD }}
@@ -100,7 +99,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build . -t ghcr.io/israelhikingmap/website-mapeak --build-arg
+          docker build . -t ghcr.io/israelhikingmap/website-mapeak
 
   build-ios:
     runs-on: macos-latest
