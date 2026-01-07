@@ -7,21 +7,29 @@
 <div [dir]="resources.direction">
     <div class="flex flex-row w-full">
         <div class="flex-1">
-            <button mat-button class="w-full" (click)="addRoute($event)" matTooltipPosition="below"
-                angulartics2On="click" angularticsCategory="Private Routes" angularticsAction="Add route">
+            <button mat-button class="w-full" (click)="addRoute($event)" matTooltip="{{resources.addRoute}}"
+                matTooltipPosition="below" angulartics2On="click" angularticsCategory="Private Routes"
+                angularticsAction="Add route">
                 <i class="fa fa-lg icon-plus"></i>
             </button>
         </div>
         <div class="flex-1">
-            <button mat-button class="w-full" (click)="toggleAllRoutes($event)" angulartics2On="click"
-                angularticsCategory="Private Routes" angularticsAction="Toggle all routes">
+            <button mat-button class="w-full" (click)="share()" matTooltip="{{resources.share}}"
+                matTooltipPosition="below" angulartics2On="click" angularticsCategory="Private Routes"
+                angularticsAction="Share">
+                <i class="fa fa-lg icon-share-alt"></i>
+            </button>
+        </div>
+        <div class="flex-1">
+            <button mat-button class="w-full" (click)="toggleAllRoutes($event)" matTooltipPosition="below"
+                angulartics2On="click" angularticsCategory="Private Routes" angularticsAction="Toggle all routes">
                 <i class="fa fa-lg" [ngClass]="isAllRoutesHidden() ? 'icon-eye-slash' : 'icon-eye'"></i>
             </button>
         </div>
         <div class="flex-1">
             <label>
-                <a mat-button class="w-full" angulartics2On="click" angularticsCategory="Private Routes"
-                    angularticsAction="Open file">
+                <a mat-button class="w-full" angulartics2On="click" matTooltip="{{resources.openAFile}}"
+                    matTooltipPosition="below" angularticsCategory="Private Routes" angularticsAction="Open file">
                     <i class="fa fa-lg icon-folder-open"></i>
                 </a>
                 <input type="file" name="file" id="openFile" #openFile (change)="openFile($event)"
@@ -29,7 +37,8 @@
             </label>
         </div>
         <div class="flex-1">
-            <button mat-button class="w-full" (click)="deleteAllRoutes($event)" angulartics2On="click"
+            <button mat-button class="w-full" (click)="deleteAllRoutes($event)"
+                matTooltip="{{resources.deleteAllRoutes}}" matTooltipPosition="below" angulartics2On="click"
                 angularticsCategory="Private Routes" angularticsAction="Delete all routes">
                 <i class="fa fa-lg icon-trash"></i>
             </button>
