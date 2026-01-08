@@ -34,7 +34,7 @@ export class FileSaveDialogComponent {
     }
 
     public async saveAs(format: FormatViewModel) {
-        let outputFormat = format.outputFormat;
+        const outputFormat = format.outputFormat;
         const data = {
             routes: [this.data]
         } as DataContainer;

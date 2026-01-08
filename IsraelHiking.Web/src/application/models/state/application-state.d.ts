@@ -14,7 +14,6 @@ import type {
     InMemoryState,
     GpsState,
     OfflineState,
-    UICompoentsState,
     StateWithHistory
 } from "..";
 

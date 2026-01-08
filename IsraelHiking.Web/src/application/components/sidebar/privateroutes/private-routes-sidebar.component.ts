@@ -1,7 +1,7 @@
 import { Component, inject } from "@angular/core";
 import { MatButton, MatMiniFabButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
-import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from "@angular/material/expansion";
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from "@angular/material/expansion";
 import { NgClass, NgStyle } from "@angular/common";
 import { MatDialog } from "@angular/material/dialog";
 import { Dir } from "@angular/cdk/bidi";
@@ -36,9 +36,9 @@ import type { ApplicationState, LatLngAlt, RouteData } from "../../../models";
 
 
 @Component({
-    selector: 'private-routes-sidebar',
-    templateUrl: './private-routes-sidebar.component.html',
-    styleUrls: ['./private-routes-sidebar.component.scss'],
+    selector: "private-routes-sidebar",
+    templateUrl: "./private-routes-sidebar.component.html",
+    styleUrls: ["./private-routes-sidebar.component.scss"],
     imports: [Dir, MatButton, Angulartics2OnModule, MatTooltip, NgClass, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgStyle, MatFormFieldModule, MatInput, FormsModule, MatSlider, MatError, NameInUseValidatorDirective, MatSliderThumb, MatMiniFabButton, MatRadioButton, DistancePipe, MatMenu, MatMenuItem, MatMenuTrigger]
 })
 export class PrivateRoutesSidebarComponent {

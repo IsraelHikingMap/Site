@@ -7,7 +7,6 @@ import type { Immutable } from "immer";
 
 import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
-import { RunningContextService } from "./running-context.service";
 import { DatabaseService } from "./database.service";
 import { BulkReplaceTracesAction, RemoveTraceAction, UpdateTraceAction } from "../reducers/traces.reducer";
 import { Urls } from "../urls";
@@ -37,7 +36,6 @@ export class TracesService {
     private readonly resources = inject(ResourcesService);
     private readonly httpClient = inject(HttpClient);
     private readonly loggingService = inject(LoggingService);
-    private readonly runningContextService = inject(RunningContextService);
     private readonly databaseService = inject(DatabaseService);
     private readonly store = inject(Store);
 

@@ -6,7 +6,6 @@ import { NgxsModule, Store } from "@ngxs/store";
 import { TracesService } from "./traces.service";
 import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
-import { RunningContextService } from "./running-context.service";
 import { DatabaseService } from "./database.service";
 import { Urls } from "../urls";
 import { BulkReplaceTracesAction, RemoveTraceAction, UpdateTraceAction } from "../reducers/traces.reducer";
@@ -29,7 +28,6 @@ describe("Traces Service", () => {
                     }
                 },
                 { provide: LoggingService, useValue: loggignMock },
-                { provide: RunningContextService, useValue: {} },
                 {
                     provide: DatabaseService, useValue: {
                         deleteTraceById: () => { }
@@ -69,8 +67,8 @@ describe("Traces Service", () => {
         }
     ));
 
-    it("Should not upload local traces if user is logged out", inject([TracesService, HttpTestingController, Store, RunningContextService],
-        async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store, runningContextService: RunningContextService) => {
+    it("Should not upload local traces if user is logged out", inject([TracesService, HttpTestingController, Store],
+        async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store) => {
             store.reset({
                 configuration: {
                     isAutomaticRecordingUpload: true
@@ -85,8 +83,8 @@ describe("Traces Service", () => {
         }
     ));
 
-    it("Should not upload local traces if there are no local traces", inject([TracesService, HttpTestingController, Store, RunningContextService],
-        async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store, runningContextService: RunningContextService) => {
+    it("Should not upload local traces if there are no local traces", inject([TracesService, HttpTestingController, Store],
+        async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store) => {
             store.reset({
                 configuration: {
                     isAutomaticRecordingUpload: true
@@ -104,8 +102,8 @@ describe("Traces Service", () => {
         }
     ));
 
-    it("Should upload local traces and run sync with no traces", inject([TracesService, HttpTestingController, Store, RunningContextService],
-        async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store, runningContextService: RunningContextService) => {
+    it("Should upload local traces and run sync with no traces", inject([TracesService, HttpTestingController, Store],
+        async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store) => {
             const spy = jasmine.createSpy();
             store.dispatch = spy;
             store.reset({
@@ -139,8 +137,8 @@ describe("Traces Service", () => {
         }
     ));
 
-    it("Should upload local traces and run sync with traces", inject([TracesService, HttpTestingController, Store, RunningContextService],
-        async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store, runningContextService: RunningContextService) => {
+    it("Should upload local traces and run sync with traces", inject([TracesService, HttpTestingController, Store],
+        async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store) => {
             const spy = jasmine.createSpy();
             store.dispatch = spy;
             store.reset({
