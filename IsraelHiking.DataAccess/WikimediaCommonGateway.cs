@@ -17,30 +17,12 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace IsraelHiking.DataAccess;
 
-internal class LoginAgainAccountAssertionFailureHandler : IAccountAssertionFailureHandler
-{
-
-    private readonly NonPublicConfigurationData _options;
-
-    public LoginAgainAccountAssertionFailureHandler(NonPublicConfigurationData options)
-    {
-        _options = options;
-    }
-
-    public async Task<bool> Login(WikiSite site)
-    {
-        await site.LoginAsync(_options.WikiMediaUserName, _options.WikiMediaPassword);
-        return true;
-    }
-}
-
 public class WikimediaCommonGateway : IWikimediaCommonGateway
 {
     private const string BASE_API_ADDRESS = "https://commons.wikimedia.org/w/api.php";
 
     private readonly ILogger _logger;
     private readonly NonPublicConfigurationData _options;
-    private WikiSite _site;
 
     public WikimediaCommonGateway(IOptions<NonPublicConfigurationData> options,
         ILogger logger)
@@ -53,7 +35,7 @@ public class WikimediaCommonGateway : IWikimediaCommonGateway
         }
     }
 
-    public async Task Initialize()
+    private async Task<WikiSite> CreateClient()
     {
         var wikiClient = new WikiClient
         {
@@ -61,20 +43,21 @@ public class WikimediaCommonGateway : IWikimediaCommonGateway
             Timeout = new TimeSpan(0, 5, 0) // allow large images upload
         };
 
-        _site = new WikiSite(wikiClient, new SiteOptions(BASE_API_ADDRESS));
-        await _site.Initialization;
-        await _site.LoginAsync(_options.WikiMediaUserName, _options.WikiMediaPassword);
-        _site.AccountAssertionFailureHandler = new LoginAgainAccountAssertionFailureHandler(_options);
-        _logger.LogInformation("Finished initializing Wikimedia common service");
+        var site = new WikiSite(wikiClient, new SiteOptions(BASE_API_ADDRESS));
+        await site.Initialization;
+        await site.LoginAsync(_options.WikiMediaUserName, _options.WikiMediaPassword);
+        return site;
     }
 
     public async Task<string> UploadImage(string fileName, string description, string author, Stream contentStream, Coordinate location)
     {
         _logger.LogInformation($"Upload an image to wikimedia common. File name: {fileName}, Location: {location.Y}, {location.X}");
-        var wikiFileName = GetNonExistingFilePageName(fileName);
+        var site = await CreateClient();
+        var wikiFileName = GetNonExistingFilePageName(fileName, site);
         var comment = CreateWikipediaComment(location, description, author);
-        await _site.GetTokenAsync("edit", true);
-        var results = await _site.UploadAsync(wikiFileName, new StreamUploadSource(contentStream), comment, true).ConfigureAwait(false);
+        
+        await site.GetTokenAsync("edit", true);
+        var results = await site.UploadAsync(wikiFileName, new StreamUploadSource(contentStream), comment, true).ConfigureAwait(false);
         if (results.ResultCode != UploadResultCode.Success)
         {
             throw new Exception("Unable to upload the file\n" + string.Join("\n", results.Warnings.Select(kvp => kvp.Key + ": " + kvp.Value)));
@@ -86,7 +69,8 @@ public class WikimediaCommonGateway : IWikimediaCommonGateway
             wikiFileName = "File:" + correctWikiFileName;
         }
         _logger.LogInformation($"Finished uploading image successfully. FileName: {fileName}, wikipage: {wikiFileName}");
-        return wikiFileName;
+        var imageUrl = await GetImageUrl(wikiFileName, site);
+        return imageUrl;
     }
 
     private string CreateWikipediaComment(Coordinate location, string description, string author)
@@ -106,9 +90,9 @@ public class WikimediaCommonGateway : IWikimediaCommonGateway
                "[[Category:Mapeak]]";
     }
 
-    public async Task<string> GetImageUrl(string pageName)
+    private async Task<string> GetImageUrl(string pageName, WikiSite site)
     {
-        var imagePage = new WikiPage(_site, pageName);
+        var imagePage = new WikiPage(site, pageName);
         await imagePage.RefreshAsync(PageQueryOptions.None);
         return Uri.UnescapeDataString(imagePage.LastFileRevision?.Url);
     }
@@ -119,7 +103,7 @@ public class WikimediaCommonGateway : IWikimediaCommonGateway
         return invalidCharacterRegularExpression.Replace(name, "_");
     }
 
-    private string GetNonExistingFilePageName(string fileName)
+    private string GetNonExistingFilePageName(string fileName, WikiSite site)
     {
         fileName = fileName.Replace(".jpg", ".jpeg");
         var wikiFileName = $"Mapeak_{GetWikiName(fileName)}";
@@ -134,7 +118,7 @@ public class WikimediaCommonGateway : IWikimediaCommonGateway
             results = Parallel.For(loopIndex, loopIndex + loopRange, (index, options) =>
             {
                 var pageNameToTest = GetWikiPageFileNameFromIndex(index, countingFileName, extension);
-                var pageToTest = new WikiPage(_site, pageNameToTest);
+                var pageToTest = new WikiPage(site, pageNameToTest);
                 pageToTest.RefreshAsync(PageQueryOptions.None).Wait();
                 if (!pageToTest.Exists)
                 {

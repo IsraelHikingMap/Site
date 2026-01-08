@@ -457,9 +457,8 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
 
         await using var memoryStream = new MemoryStream(file.Content);
         var nonEmptyDescription = GetNonEmptyDescription(feature.GetDescription(language), nonEmptyTitle);
-        var imageName = await _wikimediaCommonGateway.UploadImage(file.FileName, nonEmptyDescription, userDisplayName, memoryStream, feature.GetLocation());
-        imageUrl = await _wikimediaCommonGateway.GetImageUrl(imageName);
-        await _imageUrlStoreExecutor.StoreImage(md5, file.Content, imageUrl);
-        return imageUrl;
+        var wikiImageUrl = await _wikimediaCommonGateway.UploadImage(file.FileName, nonEmptyDescription, userDisplayName, memoryStream, feature.GetLocation());
+        await _imageUrlStoreExecutor.StoreImage(md5, file.Content, wikiImageUrl);
+        return wikiImageUrl;
     }
 }

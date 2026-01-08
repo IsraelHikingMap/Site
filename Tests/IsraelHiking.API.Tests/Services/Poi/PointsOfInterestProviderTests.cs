@@ -411,7 +411,6 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
         _wikimediaCommonGateway.Received(1).UploadImage("name.png", "description", user.DisplayName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
-        _wikimediaCommonGateway.Received(1).GetImageUrl(Arg.Any<string>());
         _imagesUrlsStorageExecutor.Received(1).StoreImage(Arg.Any<MD5>(), Arg.Any<byte[]>(), Arg.Any<string>());
     }
         
@@ -438,7 +437,6 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
         _wikimediaCommonGateway.Received(1).UploadImage("name.1.png", "description", user.DisplayName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
-        _wikimediaCommonGateway.Received(1).GetImageUrl(Arg.Any<string>());
         _imagesUrlsStorageExecutor.Received(1).StoreImage(Arg.Any<MD5>(), Arg.Any<byte[]>(), Arg.Any<string>());
     }
         
@@ -465,7 +463,6 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
         _wikimediaCommonGateway.Received(1).UploadImage("tint.png", "tint", user.DisplayName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
-        _wikimediaCommonGateway.Received(1).GetImageUrl(Arg.Any<string>());
         _imagesUrlsStorageExecutor.Received(1).StoreImage(Arg.Any<MD5>(), Arg.Any<byte[]>(), Arg.Any<string>());
     }
 
@@ -489,7 +486,6 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
         _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
-        _wikimediaCommonGateway.DidNotReceive().GetImageUrl(Arg.Any<string>());
         gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o => o.Tags.Any(t => t.Key == "image")));
     }
 
@@ -514,7 +510,6 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
         _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
-        _wikimediaCommonGateway.DidNotReceive().GetImageUrl(Arg.Any<string>());
         gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o => o.Tags.Any(t =>
                 t.Key == "description:he" && t.Value == "new description") &&
             o.Tags.Any(t => t.Key == "name:he" && t.Value == "new name") &&
@@ -541,7 +536,6 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
         _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
-        _wikimediaCommonGateway.DidNotReceive().GetImageUrl(Arg.Any<string>());
         gateway.DidNotReceive().UpdateElement(Arg.Any<long>(), Arg.Any<ICompleteOsmGeo>());
     }
 
