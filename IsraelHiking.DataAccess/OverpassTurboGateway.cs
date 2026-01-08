@@ -23,7 +23,7 @@ public class OverpassTurboGateway(
     IOptions<ConfigurationData> configurationData,
     ILogger logger) : IOverpassTurboGateway
 {
-    private async Task<string> GetQueryResponse(String queryString)
+    private async Task<string> GetQueryResponse(string queryString)
     {
         var client = httpClientFactory.CreateClient();
         var content = new StringContent(queryString);
@@ -38,12 +38,12 @@ public class OverpassTurboGateway(
         }
         if (response is { IsSuccessStatusCode: false })
         {
-            throw new Exception(await response.Content.ReadAsStringAsync());
+            throw new Exception($"Problem with overpass query: {queryString}\n Error: {await response.Content.ReadAsStringAsync()}");
         }
         throw new Exception("No overpass addresses provided");
     }
-    
-    public async Task<Dictionary<string,List<string>>> GetExternalReferences()
+
+    public async Task<Dictionary<string, List<string>>> GetExternalReferences()
     {
         var dictionary = new Dictionary<string, List<string>>
         {
@@ -75,7 +75,7 @@ public class OverpassTurboGateway(
 
         using MemoryStream memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(response));
         var source = new XmlOsmStreamSource(memoryStream);
-        
+
         var db = new MemorySnapshotDb().CreateSnapshotDb();
         var list = source.ToList();
         db.AddOrUpdate(list);
@@ -89,5 +89,5 @@ public class OverpassTurboGateway(
             .Select(s => s.Trim().TrimStart('"').TrimEnd('"').Replace("\"\"", "\"")).ToList(); // CSV " cleaning
         return images;
     }
-        
+
 }
