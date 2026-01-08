@@ -30,7 +30,6 @@ public static class RegisterDataAccess
         // Initializables
         services.AddSingleton<IInitializable>(x => x.GetService<ElasticSearchGateway>());
         services.AddSingleton<IInitializable>(x => x.GetService<IINatureGateway>());
-        services.AddSingleton<IInitializable>(x => x.GetService<IWikimediaCommonGateway>());
 
         return services;
     }

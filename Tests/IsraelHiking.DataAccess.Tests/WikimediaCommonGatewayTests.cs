@@ -29,28 +29,8 @@ public class WikimediaCommonGatewayTests
 
     [TestMethod]
     [Ignore]
-    public void GetImageUrl()
-    {
-        try
-        {
-            _gateway.Initialize().Wait();
-        }
-        catch
-        {
-            // login will fail but we still want to proceed...
-        }
-
-        var results = _gateway.GetImageUrl("File:Israel_Hiking_Map_עין_מחוללים.jpeg").Result;
-
-        Assert.IsNotNull(results);
-    }
-
-    [TestMethod]
-    [Ignore]
     public void UploadImage()
     {
-        _gateway.Initialize().Wait();
-
         var results = _gateway.UploadImage("file", "description", "me", new MemoryStream(),
             new Coordinate(0, 0)).Result;
 

@@ -260,6 +260,7 @@ export class ResourcesService {
     public restore: string;
     public planAndExplore: string;
     public signIn: string;
+    public artwork: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -488,7 +489,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1767082436082");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1767859168840");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -729,6 +730,7 @@ export class ResourcesService {
         this.restore = this.gettextCatalog.getString("Restore");
         this.planAndExplore = this.gettextCatalog.getString("Plan & Explore");
         this.signIn = this.gettextCatalog.getString("Sign in!");
+        this.artwork = this.gettextCatalog.getString("Artwork");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

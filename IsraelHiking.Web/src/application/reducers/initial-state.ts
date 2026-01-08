@@ -120,6 +120,10 @@ export const CATEGORIES_GROUPS: CategoriesGroup[] = [{
             color: "#ffb800",
             icon: "icon-star",
             label: "Attraction"
+        }, {
+            color: "#ffb800",
+            icon: "icon-artwork",
+            label: "Artwork"
         }]
     }],
 }, {
