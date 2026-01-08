@@ -4,6 +4,7 @@ import { Store } from "@ngxs/store";
 
 import { UseAppDialogComponent } from "../components/dialogs/use-app-dialog.component";
 import { FacebookWarningDialogComponent } from "../components/dialogs/facebook-warning-dialog.component";
+import { IntroDialogComponent } from "../components/dialogs/intro-dialog.component";
 import { LoggingService } from "./logging.service";
 import { ScreenService } from "./screen.service";
 import { DatabaseService } from "./database.service";
@@ -81,6 +82,9 @@ export class ApplicationInitializeService {
                 } else {
                     UseAppDialogComponent.openDialog(this.dialog);
                 }
+            } else if (this.runningContextService.isCapacitor
+                && this.store.selectSnapshot((s: ApplicationState) => s.configuration).isShowIntro) {
+                IntroDialogComponent.openDialog(this.dialog, this.runningContextService);
             }
             this.poiService.initialize(); // do not wait for it to complete
             this.recordedRouteService.initialize();
