@@ -242,9 +242,5 @@ export const initialState =
             downloadedTiles: null,
             shareUrlsLastModifiedDate: null,
             uploadPoiQueue: []
-        },
-        uiComponentsState: {
-            drawingVisible: false,
-            statisticsVisible: false
         }
     } as MutableApplicationState;

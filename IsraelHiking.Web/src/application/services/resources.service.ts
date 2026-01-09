@@ -258,6 +258,8 @@ export class ResourcesService {
     public clickToTranslate: string;
     public minimize: string;
     public restore: string;
+    public planAndExplore: string;
+    public signIn: string;
     public artwork: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
@@ -726,6 +728,8 @@ export class ResourcesService {
         this.clickToTranslate = this.gettextCatalog.getString("Click to translate");
         this.minimize = this.gettextCatalog.getString("Minimize");
         this.restore = this.gettextCatalog.getString("Restore");
+        this.planAndExplore = this.gettextCatalog.getString("Plan & Explore");
+        this.signIn = this.gettextCatalog.getString("Sign in!");
         this.artwork = this.gettextCatalog.getString("Artwork");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");

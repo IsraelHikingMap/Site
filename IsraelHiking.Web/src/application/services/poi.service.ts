@@ -13,12 +13,10 @@ import { ResourcesService } from "./resources.service";
 import { HashService, PoiRouteUrlInfo, RouteStrings } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { DatabaseService } from "./database.service";
-import { RunningContextService } from "./running-context.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { MapService } from "./map.service";
-import { ConnectionService } from "./connection.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
 import { GeoJSONUtils } from "./geojson-utils";
 import { INatureService } from "./inature.service";
@@ -77,11 +75,9 @@ export class PoiService {
     private readonly whatsappService = inject(WhatsAppService);
     private readonly hashService = inject(HashService);
     private readonly databaseService = inject(DatabaseService);
-    private readonly runningContextService = inject(RunningContextService);
     private readonly geoJsonParser = inject(GeoJsonParser);
     private readonly loggingService = inject(LoggingService);
     private readonly mapService = inject(MapService);
-    private readonly connectionService = inject(ConnectionService);
     private readonly iNatureService = inject(INatureService);
     private readonly wikidataService = inject(WikidataService);
     private readonly overpassTurboService = inject(OverpassTurboService);
@@ -104,12 +100,6 @@ export class PoiService {
         });
         await this.mapService.initializationPromise;
         this.store.select((state: ApplicationState) => state.offlineState.uploadPoiQueue).subscribe((items: Immutable<string[]>) => this.handleUploadQueueChanges(items));
-        this.connectionService.stateChanged.subscribe(online => {
-            this.loggingService.info(`[POIs] Connection status changed to: ${online}`);
-            if (online && this.offlineState.uploadPoiQueue.length > 0) {
-                this.handleUploadQueueChanges(this.offlineState.uploadPoiQueue);
-            }
-        });
         this.initializePois();
     }
 

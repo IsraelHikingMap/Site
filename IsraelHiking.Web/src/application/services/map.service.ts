@@ -1,5 +1,5 @@
 import { inject, Injectable } from "@angular/core";
-import { Map } from "maplibre-gl";
+import { Map, setRTLTextPlugin } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
@@ -19,6 +19,10 @@ export class MapService {
     public map: Map;
     public initializationPromise = new Promise<void>((resolve) => { this.resolve = resolve; });
 
+    public initialize() {
+        setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
+    }
+
     public setMap(map: Map) {
         this.map = map;
         this.resolve();
@@ -35,7 +39,7 @@ export class MapService {
             this.store.dispatch(new SetPannedAction(new Date()));
         });
 
-        this.map.on("styleimagemissing", async (e: {id: string}) => {
+        this.map.on("styleimagemissing", async (e: { id: string }) => {
             if (!/^http/.test(e.id)) {
                 return;
             }

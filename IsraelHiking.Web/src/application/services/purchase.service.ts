@@ -95,13 +95,13 @@ export class PurchaseService {
         } else {
             this.orderInternal();
         }
-        
+
     }
 
     private async orderInternal() {
         this.loggingService.info("[Store] Ordering product");
         const offerings = await Purchases.getOfferings();
-            
+
         await Purchases.purchasePackage({
             aPackage: offerings.current.annual
         });

@@ -1,4 +1,4 @@
-﻿import {Immutable} from "immer"
+﻿import { Immutable } from "immer"
 
 import type {
     RouteData,
@@ -14,7 +14,6 @@ import type {
     InMemoryState,
     GpsState,
     OfflineState,
-    UICompoentsState,
     StateWithHistory
 } from "..";
 
@@ -34,5 +33,4 @@ export type MutableApplicationState = {
     inMemoryState: InMemoryState;
     gpsState: GpsState;
     offlineState: OfflineState;
-    uiComponentsState: UICompoentsState;
 }

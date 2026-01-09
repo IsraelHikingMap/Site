@@ -1,0 +1,23 @@
+<div [dir]="resources.direction">
+    <div matDialogTitle>
+        <div>{{resources.legend}}</div>
+        <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+    </div>
+    <div mat-dialog-content>
+        <mat-accordion>
+            @for (section of legendSections; track section) {
+            <mat-expansion-panel [id]="section.key" (opened)="openSection(section)"
+                (afterExpand)="scrollTo(section.key)">
+                <mat-expansion-panel-header>
+                    {{section.title}}
+                </mat-expansion-panel-header>
+                @if (isSectionOpen(section)) {
+                @for (item of section.items; track item) {
+                <legend-item [item]="item"></legend-item>
+                }
+                }
+            </mat-expansion-panel>
+            }
+        </mat-accordion>
+    </div>
+</div>

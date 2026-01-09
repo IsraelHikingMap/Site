@@ -1,5 +1,15 @@
 @use "variables" as v;
 
+.map-height {
+    height: calc(100vh - var(--mat-toolbar-mobile-height) - env(safe-area-inset-top, 0));
+}
+
+@media (width >=600px) {
+    .map-height {
+        height: calc(100vh - var(--mat-toolbar-standard-height) - env(safe-area-inset-top, 0));
+    }
+}
+
 .maplibregl-ctrl-top-left {
     z-index: v.$app-left-z-index !important;
 }

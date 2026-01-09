@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildr
 import { MatDialog } from "@angular/material/dialog";
 import { NgStyle } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
-import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, PointLike, IControl, ControlPosition } from "maplibre-gl";
+import { StyleSpecification, ScaleControl, Unit, PointLike, IControl, ControlPosition } from "maplibre-gl";
 import { NgProgressbar } from "ngx-progressbar";
 import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";
@@ -16,13 +16,13 @@ import { RecordedRouteComponent } from "./recorded-route.component";
 import { TracesComponent } from "./traces.component";
 import { ZoomComponent } from "../zoom.component";
 import { LocationComponent } from "../location.component";
-import { MainMenuComponent } from "../main-menu.component";
-import { SearchComponent } from "../search.component";
 import { DrawingComponent } from "../drawing.component";
 import { RouteStatisticsComponent } from "../route-statistics.component";
 import { CenterMeComponent } from "../center-me.component";
 import { MapeakLinkComponent } from "../mapeak-link.component";
 import { PublicPoisComponent } from "./public-pois.component";
+import { LayersButtonComponent } from "../layers-button.component";
+import { OsmAttributionComponent } from "../osm-attribution.component";
 import { MapeakTitleService } from "../../services/mapeak-title.service";
 import { ResourcesService } from "../../services/resources.service";
 import { MapService } from "../../services/map.service";
@@ -37,7 +37,7 @@ import type { ApplicationState, LocationState } from "../../models";
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, LocationComponent, MainMenuComponent, SearchComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent]
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent]
 })
 export class MainMapComponent {
 
@@ -79,7 +79,6 @@ export class MainMapComponent {
     }
 
     public mapLoaded() {
-        setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
         this.mapService.setMap(this.mapComponent().mapInstance);
         this.mapComponent().mapInstance.doubleClickZoom.enable();
         this.mapComponent().mapInstance._zoomLevelsToOverscale = 4;

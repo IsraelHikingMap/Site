@@ -1,12 +1,10 @@
 import { Component, OnChanges, SimpleChanges, input, inject, output } from "@angular/core";
-import { AsyncPipe } from "@angular/common";
 import { MatAnchor, MatButton } from "@angular/material/button";
 import { Dir } from "@angular/cdk/bidi";
 import { AnimationOptions, LottieComponent } from "ngx-lottie";
 
 import { ImageCaptureDirective } from "../../../directives/image-capture.directive";
 import { Angulartics2OnModule } from "../../../directives/gtag.directive";
-import { OfflineImagePipe } from "../../../pipes/offline-image.pipe";
 import { ResourcesService } from "../../../services/resources.service";
 import { FileService } from "../../../services/file.service";
 import { ImageGalleryService } from "../../../services/image-gallery.service";
@@ -18,7 +16,7 @@ import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.j
 @Component({
     selector: "image-scroller",
     templateUrl: "./image-scroller.component.html",
-    imports: [LottieComponent, MatAnchor, ImageCaptureDirective, Angulartics2OnModule, MatButton, Dir, AsyncPipe, OfflineImagePipe]
+    imports: [LottieComponent, MatAnchor, ImageCaptureDirective, Angulartics2OnModule, MatButton, Dir]
 })
 export class ImageScrollerComponent implements OnChanges {
     lottiePOI: AnimationOptions = {
@@ -106,9 +104,7 @@ export class ImageScrollerComponent implements OnChanges {
         if (imageUrl == null) {
             return null;
         }
-        return this.runningContextService.isOnline
-            ? this.resources.getResizedImageUrl(imageUrl, 800)
-            : imageUrl;
+        return this.resources.getResizedImageUrl(imageUrl, 800)
     }
 
     private async updateCurrentImageAttribution(): Promise<void> {
@@ -121,9 +117,6 @@ export class ImageScrollerComponent implements OnChanges {
     }
 
     public showImage() {
-        if (!this.runningContextService.isOnline) {
-            return;
-        }
         const imagesUrls = [];
         for (const imageUrl of this.images()) {
             const imageUrlToPush = this.resources.getResizedImageUrl(imageUrl, 1600);

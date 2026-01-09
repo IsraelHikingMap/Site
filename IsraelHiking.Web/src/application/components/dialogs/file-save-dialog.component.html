@@ -1,0 +1,21 @@
+<div [dir]="resources.direction">
+    <div matDialogTitle>
+        <div>{{resources.export}}</div>
+        <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+    </div>
+    <div mat-dialog-content>
+        @for (format of formats; track format) {
+        <div class="flex flex-row">
+            <button mat-button (click)="saveAs(format)" matDialogClose angulartics2On="click"
+                angularticsCategory="Files" angularticsAction="Save as format {{format.label}}">
+                <span class="text-sm" dir="ltr">{{format.label}}</span>
+            </button>
+        </div>
+        }
+        @if (showHiddenWarning) {
+        <div class="flex flex-row">
+            <mat-hint class="text-sm">⚠️ {{resources.hiddenRoutesWillNotBeSaved}}</mat-hint>
+        </div>
+        }
+    </div>
+</div>

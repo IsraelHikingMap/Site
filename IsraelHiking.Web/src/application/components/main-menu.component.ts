@@ -1,9 +1,8 @@
 import { Component, inject } from "@angular/core";
+import { RouterLink } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { NgClass, AsyncPipe } from "@angular/common";
 import { MatButton } from "@angular/material/button";
 import { MatMenuTrigger, MatMenu, MatMenuContent, MatMenuItem } from "@angular/material/menu";
-import { Dir } from "@angular/cdk/bidi";
 import { MatDialog } from "@angular/material/dialog";
 import { timer } from "rxjs";
 import { Device } from "@capacitor/device";
@@ -13,16 +12,13 @@ import { Store } from "@ngxs/store";
 import { EmailComposer } from "capacitor-email-composer"
 import platform from "platform";
 
-import { OfflineImagePipe } from "../pipes/offline-image.pipe";
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
 import { RunningContextService } from "../services/running-context.service";
 import { LoggingService } from "../services/logging.service";
 import { ToastService } from "../services/toast.service";
 import { FileService } from "../services/file.service";
-import { GeoLocationService } from "../services/geo-location.service";
 import { LayersService } from "../services/layers.service";
-import { SidebarService } from "../services/sidebar.service";
 import { HashService } from "../services/hash.service";
 import { PurchaseService } from "../services/purchase.service";
 import { OsmAddressesService } from "../services/osm-addresses.service";
@@ -31,10 +27,8 @@ import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
 import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
 import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.component";
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
-import { FilesSharesDialogComponent } from "./dialogs/files-shares-dialog.component";
 import { SendReportDialogComponent } from "./dialogs/send-report-dialog.component";
 import { Angulartics2OnModule } from "../directives/gtag.directive";
-import { SetUIComponentVisibilityAction } from "../reducers/ui-components.reducer";
 import { SetAgreeToTermsAction } from "../reducers/user.reducer";
 import type { UserInfo, ApplicationState } from "../models";
 
@@ -42,13 +36,12 @@ import type { UserInfo, ApplicationState } from "../models";
     selector: "main-menu",
     templateUrl: "./main-menu.component.html",
     styleUrls: ["./main-menu.component.scss"],
-    imports: [MatButton, Angulartics2OnModule, MatMenuTrigger, NgClass, MatMenu, MatMenuContent, Dir, MatMenuItem, AsyncPipe, OfflineImagePipe]
+    imports: [MatButton, Angulartics2OnModule, MatMenuTrigger, MatMenu, MatMenuContent, MatMenuItem, RouterLink]
 })
 export class MainMenuComponent {
 
     public userInfo: UserInfo = null;
     public drawingVisible: boolean = false;
-    public statisticsVisible: boolean = false;
 
     public readonly resources = inject(ResourcesService);
 
@@ -58,9 +51,7 @@ export class MainMenuComponent {
     private readonly runningContextService = inject(RunningContextService);
     private readonly toastService = inject(ToastService);
     private readonly fileService = inject(FileService);
-    private readonly geoLocationService = inject(GeoLocationService);
     private readonly layersService = inject(LayersService);
-    private readonly sidebarService = inject(SidebarService);
     private readonly loggingService = inject(LoggingService);
     private readonly hashService = inject(HashService);
     private readonly purchaseService = inject(PurchaseService);
@@ -68,8 +59,6 @@ export class MainMenuComponent {
 
     constructor() {
         this.store.select((state: ApplicationState) => state.userState.userInfo).pipe(takeUntilDestroyed()).subscribe(userInfo => this.userInfo = userInfo);
-        this.store.select((state: ApplicationState) => state.uiComponentsState.drawingVisible).pipe(takeUntilDestroyed()).subscribe(v => this.drawingVisible = v);
-        this.store.select((state: ApplicationState) => state.uiComponentsState.statisticsVisible).pipe(takeUntilDestroyed()).subscribe(v => this.statisticsVisible = v);
         if (this.runningContextService.isCapacitor) {
             App.getInfo().then((info) => {
                 this.loggingService.info(`App version: ${info.version}`);
@@ -81,10 +70,6 @@ export class MainMenuComponent {
         return this.userInfo != null;
     }
 
-    public isOffline() {
-        return !this.runningContextService.isOnline;
-    }
-
     public isApp() {
         return this.runningContextService.isCapacitor;
     }
@@ -93,16 +78,7 @@ export class MainMenuComponent {
         return this.runningContextService.isIFrame;
     }
 
-    public getQueueText(): string {
-        const queueLength = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).uploadPoiQueue.length;
-        return queueLength > 0 ? queueLength.toString() : "";
-    }
-
     public login() {
-        if (!this.runningContextService.isOnline) {
-            this.toastService.warning(this.resources.unableToLogin);
-            return;
-        }
         if (!this.store.selectSnapshot((s: ApplicationState) => s.userState).agreedToTheTermsOfService) {
             const component = this.dialog.open(TermsOfServiceDialogComponent, { width: "480px" });
             component.afterClosed().subscribe((results: string) => {
@@ -120,32 +96,6 @@ export class MainMenuComponent {
 
     public logout() {
         this.authorizationService.logout();
-    }
-
-    public selectDrawing() {
-        this.store.dispatch(new SetUIComponentVisibilityAction(
-            "drawing",
-            !this.drawingVisible
-        ));
-    }
-
-    public selectStatistics() {
-        this.store.dispatch(new SetUIComponentVisibilityAction(
-            "statistics",
-            !this.statisticsVisible
-        ));
-    }
-
-    public selectLayers() {
-        this.sidebarService.toggle("layers");
-    }
-
-    public selectSharesAndFiles() {
-        this.dialog.open(FilesSharesDialogComponent);
-    }
-
-    public selectLegendAndAbout() {
-        this.sidebarService.toggle("info");
     }
 
     public async reportAnIssue() {
@@ -219,25 +169,6 @@ export class MainMenuComponent {
 
     public openLanguage() {
         LanguageDialogComponent.openDialog(this.dialog);
-    }
-
-    public isShowEditOsmButton() {
-        return !this.runningContextService.isCapacitor &&
-            !this.runningContextService.isMobile &&
-            !this.runningContextService.isIFrame;
-    }
-
-    public getOsmAddress() {
-        const poiState = this.store.selectSnapshot((s: ApplicationState) => s.poiState);
-        if (poiState.selectedPointOfInterest != null &&
-            poiState.selectedPointOfInterest.properties.poiSource.toLocaleLowerCase() === "osm") {
-            return this.osmAddressesService.getEditElementOsmAddress(poiState.selectedPointOfInterest.properties.identifier);
-        }
-        const currentLocation = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
-        return this.osmAddressesService.getEditOsmLocationAddress(
-            currentLocation.zoom + 1,
-            currentLocation.latitude,
-            currentLocation.longitude);
     }
 
     public openTraces() {
