@@ -22,6 +22,7 @@ import { CenterMeComponent } from "../center-me.component";
 import { MapeakLinkComponent } from "../mapeak-link.component";
 import { PublicPoisComponent } from "./public-pois.component";
 import { LayersButtonComponent } from "../layers-button.component";
+import { OsmAttributionComponent } from "../osm-attribution.component";
 import { MapeakTitleService } from "../../services/mapeak-title.service";
 import { ResourcesService } from "../../services/resources.service";
 import { MapService } from "../../services/map.service";
@@ -36,7 +37,7 @@ import type { ApplicationState, LocationState } from "../../models";
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent]
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent]
 })
 export class MainMapComponent {
 
