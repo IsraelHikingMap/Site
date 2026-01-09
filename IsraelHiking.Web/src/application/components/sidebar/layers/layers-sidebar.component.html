@@ -45,9 +45,10 @@
           <span class="break-all">{{resources.translate(baseLayer.key)}}</span>
         </button>
         <div class="w-1/12">
-          <button mat-button class="w-full short-button" (click)="openLegend()" matTooltip="{{resources.legend}}"
-            matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers"
-            angularticsAction="Open legend {{baseLayer.key}}"><i class="fa icon-info"></i></button>
+          <button mat-button class="w-full short-button" (click)="openLegend(baseLayer)"
+            matTooltip="{{resources.legend}}" matTooltipPosition="before" angulartics2On="click"
+            angularticsCategory="Layers" angularticsAction="Open legend {{baseLayer.key}}"><i
+              class="fa icon-info"></i></button>
         </div>
       </div>
       }

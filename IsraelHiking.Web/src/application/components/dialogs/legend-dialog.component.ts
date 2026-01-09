@@ -1,7 +1,7 @@
 import { Component, inject } from "@angular/core";
 import { MatButton } from "@angular/material/button";
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from "@angular/material/expansion";
-import { MatDialogClose, MatDialogContent, MatDialogTitle } from "@angular/material/dialog";
+import { MAT_DIALOG_DATA, MatDialogClose, MatDialogContent, MatDialogTitle } from "@angular/material/dialog";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Store } from "@ngxs/store";
 import { remove } from "lodash-es";
@@ -9,7 +9,6 @@ import { remove } from "lodash-es";
 import { ILegendItem, LegendItemComponent } from "../legend-item.component";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { ResourcesService } from "../../services/resources.service";
-import { LayersService } from "../../services/layers.service";
 import { HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import type { ApplicationState } from "../../models";
 import legendSectionsJson from "../../../content/legend/legend.json";
@@ -28,8 +27,8 @@ export type LegendSection = {
 })
 export class LegendDialogComponent {
     public readonly resources = inject(ResourcesService);
-    private readonly layersService = inject(LayersService);
     private readonly store = inject(Store);
+    private readonly data = inject<string>(MAT_DIALOG_DATA);
 
     public legendSections: LegendSection[] = [];
     private selectedSection: LegendSection = null;
@@ -61,9 +60,9 @@ export class LegendDialogComponent {
             }
         }
 
-        if (this.layersService.getSelectedBaseLayer().key === MTB_MAP) {
+        if (this.data === MTB_MAP) {
             this.removeMtbUnwantedLegend();
-        } else if (this.layersService.getSelectedBaseLayer().key === HIKING_MAP) {
+        } else if (this.data === HIKING_MAP) {
             this.removeIhmUnwantedLegend();
         } else {
             this.legendSections = [];

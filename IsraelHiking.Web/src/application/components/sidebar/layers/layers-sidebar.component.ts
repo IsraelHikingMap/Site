@@ -157,7 +157,7 @@ export class LayersSidebarComponent {
         return group.type;
     }
 
-    public openLegend() {
-        this.dialog.open(LegendDialogComponent, { width: "480px" });
+    public openLegend(layer: Immutable<EditableLayer>) {
+        this.dialog.open<LegendDialogComponent, string>(LegendDialogComponent, { width: "480px", data: layer.key });
     }
 }
