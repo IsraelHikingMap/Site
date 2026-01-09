@@ -171,25 +171,6 @@ export class MainMenuComponent {
         LanguageDialogComponent.openDialog(this.dialog);
     }
 
-    public isShowEditOsmButton() {
-        return !this.runningContextService.isCapacitor &&
-            !this.runningContextService.isMobile &&
-            !this.runningContextService.isIFrame;
-    }
-
-    public getOsmAddress() {
-        const poiState = this.store.selectSnapshot((s: ApplicationState) => s.poiState);
-        if (poiState.selectedPointOfInterest != null &&
-            poiState.selectedPointOfInterest.properties.poiSource.toLocaleLowerCase() === "osm") {
-            return this.osmAddressesService.getEditElementOsmAddress(poiState.selectedPointOfInterest.properties.identifier);
-        }
-        const currentLocation = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
-        return this.osmAddressesService.getEditOsmLocationAddress(
-            currentLocation.zoom + 1,
-            currentLocation.latitude,
-            currentLocation.longitude);
-    }
-
     public openTraces() {
         this.dialog.open(TracesDialogComponent, { width: "480px", data: [] });
     }
