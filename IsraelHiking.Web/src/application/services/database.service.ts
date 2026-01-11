@@ -83,6 +83,7 @@ export class DatabaseService {
         } else {
             // initial load ever:
             if (this.runningContext.isMobile) {
+                initialState.locationState.zoom = 10;
                 initialState.gpsState.tracking = "tracking";
             }
             this.updateState(initialState);
