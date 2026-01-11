@@ -20,21 +20,21 @@ PODS:
     - Capacitor
   - CapacitorTextZoom (8.0.0):
     - Capacitor
-  - CapawesomeCapacitorAppUpdate (8.0.0):
+  - CapawesomeCapacitorAppUpdate (8.0.1):
     - Capacitor
-  - CapgoBackgroundGeolocation (8.0.7):
+  - CapgoBackgroundGeolocation (8.0.8):
     - Capacitor
   - CapgoCapacitorCompass (8.1.2):
     - Capacitor
   - CordovaPlugins (8.0.0):
     - CapacitorCordova
   - CordovaPluginsResources (0.0.105)
-  - PurchasesHybridCommon (17.25.0):
-    - RevenueCat (= 5.51.1)
-  - RevenueCat (5.51.1)
-  - RevenuecatPurchasesCapacitor (12.0.0):
+  - PurchasesHybridCommon (17.26.1):
+    - RevenueCat (= 5.52.1)
+  - RevenueCat (5.52.1)
+  - RevenuecatPurchasesCapacitor (12.0.2):
     - Capacitor
-    - PurchasesHybridCommon (= 17.25.0)
+    - PurchasesHybridCommon (= 17.26.1)
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -108,14 +108,14 @@ SPEC CHECKSUMS:
   CapacitorEmailComposer: 47e488b85f3a4400e3b616fe56b5b9f65a4aa2f3
   CapacitorShare: 12f1d192170cbcf9f108fd675ac8e343761a4638
   CapacitorTextZoom: bceaf076f134e188f8fd36ff74ef18a7d2bdb160
-  CapawesomeCapacitorAppUpdate: d62dfb474a41faac83aaa3b82da7bfbff3a22f2b
-  CapgoBackgroundGeolocation: e58f91caa86717e5fed7bd056be70dd7dd17af30
+  CapawesomeCapacitorAppUpdate: b51cf29f28f664ef942feb12a76116d87eee62f0
+  CapgoBackgroundGeolocation: 75d9fbe24151b06f0c6486d994dbef5e5d7fa6b1
   CapgoCapacitorCompass: a8f20d67031b069b544056d9b83c388f54bc9f6f
   CordovaPlugins: f557708c6f61223224194c8e01192f1b41784858
   CordovaPluginsResources: da93847212bf7b16ba770e4d6c3e7dba820174c7
-  PurchasesHybridCommon: 6a79a873ab52f777bfa36e9516f3fcd84d3b3428
-  RevenueCat: eab035bbab271faccfef5c36eaff2a1ffef14dc0
-  RevenuecatPurchasesCapacitor: dabd704d01e9c703745936082140408c75219198
+  PurchasesHybridCommon: a0923adc952779f2174ff699bfdf275f4af13aa5
+  RevenueCat: c3d07077a0cc70b7c90a5a6072d60f9905d2dbc0
+  RevenuecatPurchasesCapacitor: 29b929cec112f7327e25feb6a3178f8c89dc6978
 
 PODFILE CHECKSUM: 05de24813d2af09ad3e6b506154900c07fd601fe
 
