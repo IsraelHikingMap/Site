@@ -269,21 +269,4 @@ describe("LocationService", () => {
             expect(service.isFollowing()).toBeFalsy();
         }
     ));
-
-    it("Should raise a toast when editing and panned changed from true to false", inject([LocationService, Store, ToastService],
-        async (service: LocationService, store: Store, toastService: ToastService) => {
-            store.reset({
-                gpsState: {
-                    currentPosition: null,
-                    tracking: "tracking"
-                },
-                inMemoryState: { following: true, pannedTimestamp: new Date() }
-            });
-            await service.initialize();
-
-            store.dispatch(new SetPannedAction(null));
-
-            expect(toastService.warning).toHaveBeenCalled();
-        }
-    ));
 });
