@@ -3,6 +3,8 @@ import { NgxsModule, Store } from "@ngxs/store";
 
 import { SelectedRouteService } from "./selected-route.service";
 import { ResourcesService } from "./resources.service";
+import { ToastService } from "./toast.service";
+import { SidebarService } from "./sidebar.service";
 import { RoutingProvider } from "./routing.provider";
 import { RoutesFactory } from "./routes.factory";
 import { SetSelectedRouteAction, RouteEditingReducer } from "../reducers/route-editing.reducer";
@@ -28,6 +30,9 @@ describe("Selected Route Service", () => {
         const routingProviderMock = {
             getRoute: () => Promise.resolve([])
         };
+        const toastServiceMock = {
+            confirm: (options: any) => options.declineAction()
+        };
         TestBed.configureTestingModule({
             imports: [
                 NgxsModule.forRoot([RoutesReducer, RouteEditingReducer])
@@ -35,11 +40,19 @@ describe("Selected Route Service", () => {
             providers: [
                 { provide: ResourcesService, useValue: resourceService },
                 { provide: RoutingProvider, useValue: routingProviderMock },
+                { provide: ToastService, useValue: toastServiceMock },
+                { provide: SidebarService, useValue: { show: jasmine.createSpy() } },
                 RoutesFactory,
                 SelectedRouteService,
             ]
         });
     });
+
+    it("Should issue a toast if there are too many routes, and show the sidebar when user declines", inject([SelectedRouteService, Store, SidebarService], (selectedRouteService: SelectedRouteService, store: Store, sidebarService: SidebarService) => {
+        setupRoutes(store, Array.from({ length: 100 }, (_, i) => ({ id: i.toString() } as any)));
+        selectedRouteService.initialize();
+        expect(sidebarService.show).toHaveBeenCalled();
+    }));
 
     it("Should get undefined selected route when there're no routes", inject([SelectedRouteService],
         (selectedRouteService: SelectedRouteService) => {

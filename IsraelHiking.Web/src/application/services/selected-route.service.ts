@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter, inject } from "@angular/core";
-import { initial, some } from "lodash-es";
+import { some } from "lodash-es";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
