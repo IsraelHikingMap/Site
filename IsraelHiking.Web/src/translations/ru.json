@@ -146,7 +146,7 @@
     "Generate markers for all route points": "Создать маркеры для всех точек маршрута",
     "Golan Trail": "Голанский путь",
     "Got lost warnings": "Предупреждения о потерянной связи",
-    "GPS tracking is enabled while editing, in order to avoid map centering to current location please click the cross icon on the top left corner": "Включено GPS-отслеживание во время редактирования. Чтобы избежать автоматического центрирования карты на текущее местоположение, нажмите на значок крестика в правом верхнем углу.",
+    "GPS tracking is disabled while editing.": "GPS трекинг отключен при редактировании.",
     "Grass": "Трава",
     "Green Marked Trail": "Зеленая отмеченная тропа",
     "Guidepost": "Указатель",

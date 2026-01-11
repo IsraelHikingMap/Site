@@ -110,6 +110,7 @@ export class DrawingComponent {
                 break;
             default:
                 this.selectedRouteService.changeRouteEditState(selectedRoute.id, "Route");
+                this.checkTrackingAndIssueWarningIfNeeded();
                 break;
         }
     }
@@ -122,6 +123,7 @@ export class DrawingComponent {
                 break;
             default:
                 this.selectedRouteService.changeRouteEditState(selectedRoute.id, "Poi");
+                this.checkTrackingAndIssueWarningIfNeeded();
                 break;
         }
     }
@@ -201,5 +203,13 @@ export class DrawingComponent {
         const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         this.selectedRouteService.changeRouteEditState(selectedRoute.id, "ReadOnly");
         this.dialog.open(ShareDialogComponent, { width: "480px" });
+    }
+
+    private checkTrackingAndIssueWarningIfNeeded() {
+        const inMemeoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
+        const tracking = this.store.selectSnapshot((s: ApplicationState) => s.gpsState.tracking);
+        if (inMemeoryState.pannedTimestamp == null && inMemeoryState.following && tracking === "tracking") {
+            this.toastService.warning(this.resources.trackingIsDisabledWhileEditing);
+        }
     }
 }

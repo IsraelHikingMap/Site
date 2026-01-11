@@ -395,4 +395,9 @@ export class SelectedRouteService {
     public getLatlngs(route: Immutable<RouteData>): LatLngAltTime[] {
         return route ? route.segments.map(s => s.latlngs).flat() : null;
     }
+
+    public isEditingRoute(): boolean {
+        const selectedRoute = this.getSelectedRoute();
+        return selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route");
+    }
 }

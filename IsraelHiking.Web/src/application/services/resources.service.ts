@@ -319,7 +319,7 @@ export class ResourcesService {
     public noLocationPermissionOpenAppSettings: string;
     public tracesAreOnlySavedLocally: string;
     public unexpectedErrorPleaseTryAgainLater: string;
-    public editingRouteWhileTracking: string;
+    public trackingIsDisabledWhileEditing: string;
     public loginTokenExpiredPleaseLoginAgain: string;
     public jammedPositionReceived: string;
     public newVersionAvailable: string;
@@ -489,7 +489,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1767859168840");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1768165773228");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -806,8 +806,7 @@ export class ResourcesService {
         this.tracesAreOnlySavedLocally = this.gettextCatalog.getString("Traces are only saved locally. " +
             "You can change that in the configuration settings");
         this.unexpectedErrorPleaseTryAgainLater = this.gettextCatalog.getString("Oops, something went wrong. Please try again later");
-        this.editingRouteWhileTracking = this.gettextCatalog.getString("GPS tracking is enabled while editing, " +
-            "in order to avoid map centering to current location please click the cross icon on the top left corner");
+        this.trackingIsDisabledWhileEditing = this.gettextCatalog.getString("GPS tracking is disabled while editing.");
         this.loginTokenExpiredPleaseLoginAgain = this.gettextCatalog.getString("Login token expired, please login again");
         this.jammedPositionReceived = this.gettextCatalog.getString("Jammed position received...");
         this.newVersionAvailable = this.gettextCatalog.getString("New version available, do you want to update?");

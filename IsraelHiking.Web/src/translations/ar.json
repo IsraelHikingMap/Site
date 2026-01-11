@@ -146,7 +146,7 @@
     "Generate markers for all route points": "توليد علامات لجميع نقاط المسار",
     "Golan Trail": "مسار الجولان",
     "Got lost warnings": "تحذيرات الضياع",
-    "GPS tracking is enabled while editing, in order to avoid map centering to current location please click the cross icon on the top left corner": "تم تمكين تتبع GPS أثناء التحرير، لتجنب تمركز الخريطة على الموقع الحالي، يرجى النقر على أيقونة الصليب في الزاوية اليمنى العليا",
+    "GPS tracking is disabled while editing.": "تم تعطيل تتبع GPS أثناء التحرير.",
     "Grass": "عشب",
     "Green Marked Trail": "مسار مُعنون بالأخضر",
     "Guidepost": "علامة إرشادية",

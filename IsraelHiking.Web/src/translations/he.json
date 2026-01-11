@@ -146,7 +146,7 @@
     "Generate markers for all route points": "צור סמנים עבור כל הנקודות במסלול",
     "Golan Trail": "שביל הגולן",
     "Got lost warnings": "התראות סטייה",
-    "GPS tracking is enabled while editing, in order to avoid map centering to current location please click the cross icon on the top left corner": "העקיבה מופעלת בזמן עריכה, לטובת ביטול מרכוז המפה למיקום הנוכחי יש ללחוץ בפינה השמאלית עליונה על סמליל הכוונת",
+    "GPS tracking is disabled while editing.": "העקיבה מופסקת בזמן עריכת מסלול",
     "Grass": "דשא",
     "Green Marked Trail": "שביל ירוק",
     "Guidepost": "שלט הכוון",

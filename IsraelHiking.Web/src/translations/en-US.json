@@ -146,7 +146,7 @@
     "Generate markers for all route points": "Generate markers for all route's points",
     "Golan Trail": "Golan Trail",
     "Got lost warnings": "Got lost warnings",
-    "GPS tracking is enabled while editing, in order to avoid map centering to current location please click the cross icon on the top left corner": "GPS tracking is enabled while editing, in order to avoid map centering to current location please click the cross icon on the top right corner",
+    "GPS tracking is disabled while editing.": "GPS tracking is disabled while editing.",
     "Grass": "Grass",
     "Green Marked Trail": "Green Marked Trail",
     "Guidepost": "Guidepost",
