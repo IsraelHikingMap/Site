@@ -30,15 +30,29 @@ public class OverpassTurboGateway(
         HttpResponseMessage response = null;
         foreach (var address in configurationData.Value.OverpassAddresses)
         {
-            response = await client.PostAsync(address, content);
-            if (response.IsSuccessStatusCode)
+            for (int iRetry = 0; iRetry < 3; iRetry++)
             {
-                return await response.Content.ReadAsStringAsync();
+                try
+                {
+                    response = await client.PostAsync(address, content);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return await response.Content.ReadAsStringAsync();
+                    } 
+                    else
+                    {
+                        await Task.Delay(1000);
+                    }
+                }
+                catch
+                {
+                    await Task.Delay(1000);
+                }
             }
         }
         if (response is { IsSuccessStatusCode: false })
         {
-            throw new Exception($"Problem with overpass query: {queryString}\n Error: {await response.Content.ReadAsStringAsync()}");
+            throw new Exception($"Problem with overpass query: {queryString}\n\n Error after 3 retries: {await response.Content.ReadAsStringAsync()}");
         }
         throw new Exception("No overpass addresses provided");
     }
