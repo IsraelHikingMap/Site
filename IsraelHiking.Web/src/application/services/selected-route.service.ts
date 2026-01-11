@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter, inject } from "@angular/core";
-import { some } from "lodash-es";
+import { initial, some } from "lodash-es";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
@@ -7,6 +7,8 @@ import type { Immutable } from "immer";
 import { RoutesFactory } from "./routes.factory";
 import { ResourcesService } from "./resources.service";
 import { SpatialService } from "./spatial.service";
+import { ToastService } from "./toast.service";
+import { SidebarService } from "./sidebar.service";
 import { RoutingProvider } from "./routing.provider";
 import { MINIMAL_ANGLE, MINIMAL_DISTANCE } from "./route-statistics.service";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
@@ -43,6 +45,8 @@ export class SelectedRouteService {
     private readonly resources = inject(ResourcesService);
     private readonly routesFactory = inject(RoutesFactory);
     private readonly routingProvider = inject(RoutingProvider);
+    private readonly toastService = inject(ToastService);
+    private readonly sidebarService = inject(SidebarService);
     private readonly store = inject(Store);
 
     constructor() {
@@ -52,6 +56,21 @@ export class SelectedRouteService {
         this.store.select((state: ApplicationState) => state.routeEditingState.selectedRouteId).subscribe((id) => {
             this.selectedRouteId = id;
         });
+    }
+
+    public initialize() {
+        if (this.routes.length > 10) {
+            this.toastService.confirm({
+                message: this.resources.tooManyRoutes,
+                type: "Custom",
+                customConfirmText: this.resources.ok,
+                customDeclineText: this.resources.openRoutesPanel,
+                confirmAction: () => { },
+                declineAction: () => {
+                    this.sidebarService.show("private-routes");
+                }
+            });
+        }
     }
 
     public getSelectedRoute(): Immutable<RouteData> {

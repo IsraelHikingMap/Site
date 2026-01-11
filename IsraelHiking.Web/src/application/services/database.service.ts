@@ -1,4 +1,4 @@
-import { inject, Injectable, ApplicationRef } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { HttpClient, HttpResponse } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { firstValueFrom } from "rxjs";
@@ -46,7 +46,6 @@ export class DatabaseService {
     private readonly runningContext = inject(RunningContextService);
     private readonly pmTilesService = inject(PmTilesService);
     private readonly httpClient = inject(HttpClient);
-    private readonly appRef = inject(ApplicationRef);
     private readonly store = inject(Store);
 
     public async initialize() {
