@@ -19,97 +19,97 @@ export class ClearHistoryAction {
 
 export class RestoreHistoryAction {
     public static type = this.prototype.constructor.name;
-    constructor(public history: RouteData[][]) {}
+    constructor(public history: RouteData[][]) { }
 }
 
 export class AddRouteAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routeData: RouteData) {}
+    constructor(public routeData: RouteData) { }
 }
 
 export class DeleteRouteAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routeId: string) {}
+    constructor(public routeId: string) { }
 }
 
 export class ChangeRoutePropertiesAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routeId: string, public routeData: RouteData) {}
+    constructor(public routeId: string, public routeData: RouteData) { }
 }
 
 export class AddPrivatePoiAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routeId: string, public markerData: MarkerData) {}
+    constructor(public routeId: string, public markerData: MarkerData) { }
 }
 
 export class UpdatePrivatePoiAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routeId: string, public index: number, public markerData: MarkerData) {}
+    constructor(public routeId: string, public index: number, public markerData: MarkerData) { }
 }
 
 export class DeletePrivatePoiAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routeId: string, public index: number) {}
+    constructor(public routeId: string, public index: number) { }
 }
 
 export class DeletePrivatePoiByIdAction {
     public static type = this.prototype.constructor.name;
-    constructor(public id: string) {}
+    constructor(public id: string) { }
 }
 
 export class AddSegmentAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routeId: string, public segmentData: RouteSegmentData) {}
+    constructor(public routeId: string, public segmentData: RouteSegmentData) { }
 }
 
 export class UpdateSegmentsAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routeId: string, public indices: number[], public segmentsData: RouteSegmentData[]) {}
+    constructor(public routeId: string, public indices: number[], public segmentsData: RouteSegmentData[]) { }
 }
 
 export class ReplaceSegmentsAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routeId: string, public segmentsData: RouteSegmentData[]) {}
+    constructor(public routeId: string, public segmentsData: RouteSegmentData[]) { }
 }
 
 export class DeleteSegmentAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routeId: string, public index: number) {}
+    constructor(public routeId: string, public index: number) { }
 }
 
 export class ChangeRouteStateAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routeId: string, public state: RouteEditStateType) {}
+    constructor(public routeId: string, public state: RouteEditStateType) { }
 }
 
 export class ReplaceRouteAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routeId: string, public routeData: RouteData) {}
+    constructor(public routeId: string, public routeData: RouteData) { }
 }
 
 export class SplitRouteAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routeId: string, public routeData: RouteData, public splitRouteData: RouteData) {}
+    constructor(public routeId: string, public routeData: RouteData, public splitRouteData: RouteData) { }
 }
 
 export class MergeRoutesAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routeId: string, public secondaryRouteId: string, public mergedRouteData: RouteData) {}
+    constructor(public routeId: string, public secondaryRouteId: string, public mergedRouteData: RouteData) { }
 }
 
 export class BulkReplaceRoutesAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routesData: RouteData[]) {}
+    constructor(public routesData: RouteData[]) { }
 }
 
 export class ClearPoisAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routeId: string) {}
-    }
+    constructor(public routeId: string) { }
+}
 
 export class ClearPoisAndRouteAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routeId: string) {}
+    constructor(public routeId: string) { }
 }
 
 export class DeleteAllRoutesAction {
@@ -141,11 +141,11 @@ export class RoutesReducer {
     @Action(UndoAction)
     public undo(ctx: StateContext<StateWithHistory<RouteData[]>>) {
         ctx.setState(produce((lastState: StateWithHistory<RouteData[]>) => {
-        if (lastState.past.length > 0) {
-            lastState.future.push(lastState.present);
-            const top = lastState.past.pop() as RouteData[];
-            lastState.present = top;
-        }
+            if (lastState.past.length > 0) {
+                lastState.future.push(lastState.present);
+                const top = lastState.past.pop() as RouteData[];
+                lastState.present = top;
+            }
         }));
     }
 
@@ -178,7 +178,7 @@ export class RoutesReducer {
     @Action(AddRouteAction)
     public addRoute(ctx: StateContext<StateWithHistory<RouteData[]>>, action: AddRouteAction) {
         this.changeState(ctx, (lastState) => {
-            lastState.push(action.routeData);
+            lastState.unshift(action.routeData);
             return lastState;
         });
     }
@@ -199,7 +199,7 @@ export class RoutesReducer {
             route.name = action.routeData.name;
             route.opacity = action.routeData.opacity == null ? route.opacity : action.routeData.opacity;
             route.weight = action.routeData.weight || route.weight;
-            route.color =  action.routeData.color || route.color;
+            route.color = action.routeData.color || route.color;
             route.description = action.routeData.description || route.description;
             return lastState;
         });
