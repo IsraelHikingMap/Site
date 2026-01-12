@@ -208,7 +208,7 @@ export class DrawingComponent {
     private checkTrackingAndIssueWarningIfNeeded() {
         const inMemeoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
         const tracking = this.store.selectSnapshot((s: ApplicationState) => s.gpsState.tracking);
-        if (inMemeoryState.pannedTimestamp == null && inMemeoryState.following && tracking === "tracking") {
+        if (inMemeoryState.following && tracking === "tracking") {
             this.toastService.warning(this.resources.trackingIsDisabledWhileEditing);
         }
     }

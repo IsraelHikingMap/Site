@@ -71,9 +71,6 @@ export class LocationService {
             if (this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState).distance) {
                 this.store.dispatch(new ToggleDistanceAction());
             }
-            if (this.selectedRouteService.isEditingRoute()) {
-                return;
-            }
             if (this.isFollowing()) {
                 this.moveMapToGpsPosition();
             }
@@ -109,7 +106,7 @@ export class LocationService {
     }
 
     public isFollowing(): boolean {
-        return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).following && !this.isPanned;
+        return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).following && !this.isPanned && !this.selectedRouteService.isEditingRoute();
     }
 
     public moveMapToGpsPosition() {

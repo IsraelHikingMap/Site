@@ -53,7 +53,12 @@ describe("LocationService", () => {
                 { provide: LoggingService, useValue: { warning: () => { } } },
                 { provide: ToastService, useValue: toastService },
                 { provide: ResourcesService, useValue: {} },
-                { provide: SelectedRouteService, useValue: { getSelectedRoute: jasmine.createSpy().and.returnValue({ state: "Poi" }) } },
+                {
+                    provide: SelectedRouteService, useValue: {
+                        getSelectedRoute: jasmine.createSpy().and.returnValue({ state: "Poi" }),
+                        isEditingRoute: () => false
+                    },
+                },
                 LocationService
             ]
         });
@@ -266,6 +271,21 @@ describe("LocationService", () => {
             await service.initialize();
             expect(service.isFollowing()).toBeTruthy();
             store.dispatch(new SetPannedAction(new Date()));
+            expect(service.isFollowing()).toBeFalsy();
+        }
+    ));
+
+    it("Should not be following when editing route", inject([LocationService, Store, SelectedRouteService],
+        async (service: LocationService, store: Store, selectedRouteService: SelectedRouteService) => {
+            store.reset({
+                gpsState: {
+                    currentPosition: null,
+                    tracking: "tracking"
+                },
+                inMemoryState: { following: true, distance: true }
+            });
+            await service.initialize();
+            selectedRouteService.isEditingRoute = () => true;
             expect(service.isFollowing()).toBeFalsy();
         }
     ));
