@@ -2,6 +2,7 @@ import { Injectable, EventEmitter, inject } from "@angular/core";
 import { some } from "lodash-es";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
+import invert from "invert-color";
 import type { Immutable } from "immer";
 
 import { RoutesFactory } from "./routes.factory";
@@ -32,6 +33,21 @@ import type {
     LatLngAlt,
     RouteEditStateType
 } from "../models";
+
+export type RouteViewProperties = {
+    color: string;
+    iconColor: string;
+    iconSize: number;
+    weight: number;
+    opacity: number;
+    name?: string;
+    id?: string;
+};
+
+export const SEGMENT = "_segment_";
+export const SEGMENT_POINT = "_segmentpoint_";
+const START_COLOR = "#43a047";
+const END_COLOR = "red";
 
 @Injectable()
 export class SelectedRouteService {
@@ -418,5 +434,137 @@ export class SelectedRouteService {
     public isEditingRoute(): boolean {
         const selectedRoute = this.getSelectedRoute();
         return selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route");
+    }
+
+    public createSegmentId(route: Immutable<RouteData>, index: number) {
+        return route.id + SEGMENT + index;
+    }
+
+    public createSegmentPointId(route: Immutable<RouteData>, index: number) {
+        return route.id + SEGMENT_POINT + index;
+    }
+
+    public createFeaturesForEditingRoute(route: Immutable<RouteData>): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
+        const features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
+        const routeProperties = this.routeToProperties(route);
+        for (let segmentIndex = 0; segmentIndex < route.segments.length; segmentIndex++) {
+            const segmentFeature = {
+                type: "Feature",
+                id: this.createSegmentId(route, segmentIndex),
+                properties: {
+                    ...routeProperties,
+                    id: this.createSegmentId(route, segmentIndex)
+                },
+                geometry: {
+                    type: "LineString",
+                    coordinates: route.segments[segmentIndex].latlngs.map(l => SpatialService.toCoordinate(l))
+                }
+            } as GeoJSON.Feature<GeoJSON.LineString>;
+            features.push(segmentFeature);
+            const segmentPointFeature = {
+                type: "Feature",
+                id: this.createSegmentPointId(route, segmentIndex),
+                properties: {
+                    ...routeProperties,
+                    id: this.createSegmentPointId(route, segmentIndex)
+                },
+                geometry: {
+                    type: "Point",
+                    coordinates: SpatialService.toCoordinate(route.segments[segmentIndex].routePoint)
+                }
+            } as GeoJSON.Feature<GeoJSON.Point>;
+            if (segmentIndex === 0) {
+                segmentPointFeature.properties.color = START_COLOR;
+            } else if (segmentIndex === route.segments.length - 1) {
+                segmentPointFeature.properties.color = END_COLOR;
+            }
+            features.push(segmentPointFeature);
+        }
+        return features;
+    }
+
+    public createFeaturesForRoute(
+        route: Immutable<RouteData>): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
+        const features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
+        const routeCoordinates = route.segments.map(s => s.latlngs).flat().map(l => SpatialService.toCoordinate(l));
+        if (routeCoordinates.length < 2) {
+            return features;
+        }
+        const routeProperties = this.routeToProperties(route);
+        features.push({
+            type: "Feature",
+            id: routeProperties.id,
+            properties: routeProperties,
+            geometry: {
+                type: "LineString",
+                coordinates: routeCoordinates
+            }
+        });
+        features.push({
+            type: "Feature",
+            id: routeProperties.id + "_start",
+            properties: {
+                ...routeProperties,
+                color: START_COLOR,
+                strokeColor: "white",
+                id: routeProperties.id + "_start"
+            },
+            geometry: {
+                type: "Point",
+                coordinates: routeCoordinates[0]
+            }
+        });
+        features.push({
+            type: "Feature",
+            id: routeProperties.id + "_end",
+            properties: {
+                ...routeProperties,
+                color: END_COLOR,
+                strokeColor: "white",
+                id: routeProperties.id + "_end"
+            },
+            geometry: {
+                type: "Point",
+                coordinates: routeCoordinates[routeCoordinates.length - 1]
+            }
+        });
+        for (const marker of route.markers) {
+            const markerFeature = {
+                type: "Feature",
+                id: routeProperties.id + "_marker_" + marker.id,
+                properties: {
+                    color: "transparent",
+                    strokeColor: routeProperties.color,
+                    id: routeProperties.id + "_marker_" + marker.id,
+                },
+                geometry: {
+                    type: "Point",
+                    coordinates: SpatialService.toCoordinate(marker.latlng)
+                }
+            } as GeoJSON.Feature<GeoJSON.Point>;
+            features.push(markerFeature);
+        }
+        return features;
+    }
+
+    private routeToProperties(route: Immutable<RouteData>): RouteViewProperties {
+        const color = route.color;
+        const opacity = route.opacity == null ? 1.0 : route.opacity;
+        const width = route.weight;
+        const iconColor = opacity > 0.5 ? invert(color, true) : color;
+        const iconSize = width < 10 ? 0.5 : 0.5 * width / 10.0;
+        return {
+            color,
+            iconColor,
+            iconSize,
+            weight: width,
+            opacity,
+            name: route.name,
+            id: route.id
+        };
+    }
+
+    public hasHiddenRoutes(): boolean {
+        return this.routes.filter(r => r.state === "Hidden").length > 0;
     }
 }

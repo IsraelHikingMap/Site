@@ -1,6 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
-import { MatDialogTitle, MatDialogClose, MatDialogContent } from "@angular/material/dialog";
+import { MatDialogTitle, MatDialogClose, MatDialogContent, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { MatButton, MatAnchor } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { NgClass } from "@angular/common";
@@ -10,13 +10,13 @@ import { FormsModule } from "@angular/forms";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatTooltip } from "@angular/material/tooltip";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
-import { MapComponent } from "@maplibre/ngx-maplibre-gl";
+import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { Share } from "@capacitor/share";
 import { LngLatLike, Map, StyleSpecification } from "maplibre-gl";
 import { Store } from "@ngxs/store";
+import { Immutable } from "immer";
 
 import { LayersComponent } from "../map/layers.component";
-import { RoutesComponent } from "../map/routes.component";
 import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
@@ -27,12 +27,17 @@ import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
 import { MapService } from "../../services/map.service";
-import type { ApplicationState, DataContainer, EditableLayer, ShareUrl } from "../../models";
+import { FileService } from "../../services/file.service";
+import type { ApplicationState, EditableLayer, RouteData, ShareUrl } from "../../models";
+
+export type ShareDialogComponentData = {
+    mode: "current" | "all"
+};
 
 @Component({
     selector: "share-dialog",
     templateUrl: "./share-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, Angulartics2OnModule, NgClass, MatAnchor, MatTooltip, CdkCopyToClipboard, MapComponent, LayersComponent, RoutesComponent]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, Angulartics2OnModule, NgClass, MatAnchor, MatTooltip, CdkCopyToClipboard, MapComponent, LayersComponent, LayerComponent, GeoJSONSourceComponent]
 })
 export class ShareDialogComponent {
 
@@ -45,13 +50,13 @@ export class ShareDialogComponent {
     public isLoading: boolean = false;
     public canUpdate: boolean = false;
     public updateCurrentShare: boolean = false;
-    public showUnhide: boolean;
-    public unhideRoutes: boolean = false;
+    public hasHiddenRoutes: boolean = false;
     public style: StyleSpecification;
     public center: LngLatLike;
     public baseLayerData: EditableLayer;
     public imageUrl: string;
     public copiedToClipboard: boolean = false;
+    public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
 
     public readonly resources = inject(ResourcesService);
 
@@ -65,7 +70,9 @@ export class ShareDialogComponent {
     private readonly defaultStyleService = inject(DefaultStyleService);
     private readonly layersService = inject(LayersService);
     private readonly mapService = inject(MapService);
+    private readonly fileService = inject(FileService);
     private readonly store = inject(Store);
+    private readonly data = inject<ShareDialogComponentData>(MAT_DIALOG_DATA);
 
     constructor() {
         const shareUrl = this.shareUrlsService.getSelectedShareUrl();
@@ -85,12 +92,20 @@ export class ShareDialogComponent {
                 this.description = selectedRoute.description;
             }
         }
-        this.showUnhide = this.dataContainerService.hasHiddenRoutes();
+        this.hasHiddenRoutes = this.data.mode === "all" && this.selectedRouteService.hasHiddenRoutes();
+        const geojson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = { type: "FeatureCollection", features: [] };
+        for (const route of this.getRoutes()) {
+            geojson.features = geojson.features.concat(this.selectedRouteService.createFeaturesForRoute(route));
+        }
+        this.routesGeoJson = geojson;
     }
 
-    public mapLoaded(map: Map) {
+    public async mapLoaded(map: Map) {
         this.map = map;
         this.map.fitBounds(this.mapService.map.getBounds(), { duration: 0 });
+        const fullUrl = this.fileService.getFullUrl("content/arrow.png");
+        const image = await this.map.loadImage(fullUrl);
+        await this.map.addImage("arrow", image.data, { sdf: true });
     }
 
 
@@ -136,18 +151,6 @@ export class ShareDialogComponent {
         }
     }
 
-    private getDataFiltered(): DataContainer {
-        const filteredData = structuredClone(this.dataContainerService.getData(this.unhideRoutes));
-        for (let routeIndex = filteredData.routes.length - 1; routeIndex >= 0; routeIndex--) {
-            const route = filteredData.routes[routeIndex];
-            if (route.state === "Hidden") {
-                route.state = "ReadOnly";
-            }
-        }
-        filteredData.overlays = [];
-        return filteredData;
-    }
-
     private createShareUrlObject(): ShareUrl {
         const selectedShare = this.shareUrlsService.getSelectedShareUrl();
         const id = selectedShare ? selectedShare.id : "";
@@ -156,10 +159,19 @@ export class ShareDialogComponent {
             id,
             title: this.title,
             description: this.description,
-            dataContainer: this.getDataFiltered(),
+            dataContainer: this.dataContainerService.getContainerForRoutes(this.getRoutes()),
             osmUserId: osmUserId,
             base64Preview: this.map.getCanvas().toDataURL("image/png"),
         } as ShareUrl;
         return shareUrl;
+    }
+
+    private getRoutes(): Immutable<RouteData>[] {
+        if (this.data.mode === "current") {
+            return [this.selectedRouteService.getSelectedRoute()];
+        }
+        return this.store.selectSnapshot((state: ApplicationState) => state.routes.present)
+            .filter(r => r.state !== "Hidden")
+            .filter(r => r.segments.length > 0 || r.markers.length > 0);
     }
 }

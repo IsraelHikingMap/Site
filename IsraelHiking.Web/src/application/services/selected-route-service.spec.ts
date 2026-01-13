@@ -1,7 +1,8 @@
 import { inject, TestBed } from "@angular/core/testing";
 import { NgxsModule, Store } from "@ngxs/store";
+import type { Immutable } from "immer";
 
-import { SelectedRouteService } from "./selected-route.service";
+import { SEGMENT, SEGMENT_POINT, SelectedRouteService } from "./selected-route.service";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { SidebarService } from "./sidebar.service";
@@ -1012,7 +1013,7 @@ describe("Selected Route Service", () => {
             expect(action.segmentsData[2].latlngs[1].lat).toBe(3);
         }));
 
-    it("Add external empty route should not fail", inject([SelectedRouteService, Store],
+    it("Should add external empty route should not fail", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             const spy = jasmine.createSpy();
             store.dispatch = spy;
@@ -1023,7 +1024,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Add external route with only markers to first route", inject([SelectedRouteService, Store],
+    it("Should add external route with only markers to first route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [{
                 id: "1",
@@ -1047,7 +1048,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Add external route to routes", inject([SelectedRouteService, Store],
+    it("Should add external route to routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [{
                 id: "1",
@@ -1069,4 +1070,98 @@ describe("Selected Route Service", () => {
             expect(action.routeData.name).toBe("name 1");
         }
     ));
+
+    it("Should return empty features list from empty route", inject([SelectedRouteService],
+        (selectedRouteService: SelectedRouteService) => {
+            const route: Immutable<RouteData> = {
+                id: "1",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [],
+                state: "ReadOnly",
+            };
+
+            const features = selectedRouteService.createFeaturesForRoute(route);
+
+            expect(features.length).toBe(0);
+        }
+    ));
+
+    it("Should return features list from route", inject([SelectedRouteService],
+        (selectedRouteService: SelectedRouteService) => {
+            const route: Immutable<RouteData> = {
+                id: "1",
+                description: "",
+                markers: [{
+                    id: "1",
+                    title: "title",
+                    latlng: { lat: 1, lng: 1 },
+                    description: "description",
+                    type: "type",
+                    urls: [],
+                }],
+                name: "name",
+                segments: [{
+                    latlngs: [
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 2, lng: 2, timestamp: new Date() },
+                        { lat: 3, lng: 3, timestamp: new Date() },
+                    ],
+                    routePoint: { lat: 1, lng: 1 },
+                    routingType: "Hike",
+                }],
+                state: "ReadOnly",
+                color: "#ff0000",
+            };
+
+            const features = selectedRouteService.createFeaturesForRoute(route);
+            expect(features.some(f => f.properties.id.toString().includes("start"))).toBeTruthy();
+            expect(features.some(f => f.properties.id.toString().includes("end"))).toBeTruthy();
+            expect(features.some(f => f.properties.id.toString().includes("marker"))).toBeTruthy();
+            expect(features.every(f => f.properties.id.toString() === f.id)).toBeTruthy();
+        }
+    ));
+
+    it("Should return features list from route for editing", inject([SelectedRouteService],
+        (selectedRouteService: SelectedRouteService) => {
+            const route: Immutable<RouteData> = {
+                id: "1",
+                description: "",
+                markers: [{
+                    id: "1",
+                    title: "title",
+                    latlng: { lat: 1, lng: 1 },
+                    description: "description",
+                    type: "type",
+                    urls: [],
+                }],
+                name: "name",
+                segments: [{
+                    latlngs: [
+                        { lat: 1, lng: 1, timestamp: new Date() },
+                        { lat: 2, lng: 2, timestamp: new Date() },
+                        { lat: 3, lng: 3, timestamp: new Date() },
+                    ],
+                    routePoint: { lat: 1, lng: 1 },
+                    routingType: "Hike",
+                }],
+                state: "ReadOnly",
+                color: "#ff0000",
+            };
+
+            const features = selectedRouteService.createFeaturesForEditingRoute(route);
+            expect(features.some(f => f.properties.id.toString().includes(SEGMENT))).toBeTruthy();
+            expect(features.some(f => f.properties.id.toString().includes(SEGMENT_POINT))).toBeTruthy();
+            expect(features.every(f => f.properties.id.toString() === f.id)).toBeTruthy();
+        }
+    ));
+
+    it("should return true if there are hidden routes in the store", inject([SelectedRouteService, Store], (service: SelectedRouteService, store: Store) => {
+        setupRoutes(store, [
+            { id: "1", state: "Hidden" } as RouteData,
+            { id: "2", state: "Poi" } as RouteData
+        ]);
+        expect(service.hasHiddenRoutes()).toBeTruthy();
+    }));
 });

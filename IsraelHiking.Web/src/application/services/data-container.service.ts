@@ -55,13 +55,10 @@ export class DataContainerService {
         }
     }
 
-    public getData(withHidden: boolean): DataContainer {
+    public getContainerForRoutes(routes: Immutable<RouteData>[]): DataContainer {
         const layersContainer = this.layersService.getData();
 
         const bounds = SpatialService.getMapBounds(this.mapService.map);
-        const routes = this.store.selectSnapshot((s: ApplicationState) => s.routes).present
-            .filter(r => r.state !== "Hidden" || withHidden)
-            .filter(r => r.segments.length > 0 || r.markers.length > 0);
         const container: DataContainer = {
             routes: structuredClone(routes) as RouteData[],
             baseLayer: layersContainer.baseLayer,
@@ -117,9 +114,5 @@ export class DataContainerService {
             key: addressOrKey.split("_").join(" "),
             address: ""
         } as LayerData;
-    }
-
-    public hasHiddenRoutes(): boolean {
-        return this.store.selectSnapshot((s: ApplicationState) => s.routes).present.filter(r => r.state === "Hidden").length > 0;
     }
 }

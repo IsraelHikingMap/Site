@@ -7,29 +7,17 @@ import { MatTooltip } from "@angular/material/tooltip";
 import { MapComponent, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, MarkerComponent } from "@maplibre/ngx-maplibre-gl";
 import { MapLayerMouseEvent } from "maplibre-gl";
 import { Store } from "@ngxs/store";
-import invert from "invert-color";
 import type { Immutable } from "immer";
 
 import { RoutePointOverlayComponent } from "../overlays/route-point-overlay.component";
 import { PrivatePoiOverlayComponent } from "../overlays/private-poi-overlay.component";
 import { SelectedRouteService } from "../../services/selected-route.service";
-import { SpatialService } from "../../services/spatial.service";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "../intercations/route-edit-route.interaction";
 import { Urls } from "../../urls";
-import type { LatLngAlt, ApplicationState, RouteData, MarkerData } from "../../models";
-
-type RouteViewProperties = {
-    color: string;
-    iconColor: string;
-    iconSize: number;
-    weight: number;
-    opacity: number;
-    name?: string;
-    id?: string;
-};
+import type { LatLngAlt, ApplicationState, RouteData } from "../../models";
 
 interface RoutePointViewData {
     latlng: LatLngAlt;
@@ -44,9 +32,6 @@ interface RoutePointViewData {
     imports: [SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, RoutePointOverlayComponent, Dir, MatAnchor, MatTooltip, MatButton, MarkerComponent, PrivatePoiOverlayComponent]
 })
 export class RoutesComponent implements AfterViewInit {
-
-    private static readonly START_COLOR = "#43a047";
-    private static readonly END_COLOR = "red";
 
     public routePointPopupData: RoutePointViewData;
     public nonEditRoutePointPopupData: { latlng: LatLngAlt; wazeAddress: string; routeId: string };
@@ -90,11 +75,10 @@ export class RoutesComponent implements AfterViewInit {
                 continue;
             }
             if (route.state === "Route") {
-                editingFeatures = this.createFeaturesForEditingRoute(route);
+                editingFeatures = this.selectedRouteService.createFeaturesForEditingRoute(route);
                 continue;
             }
-            const latlngs = this.selectedRouteService.getLatlngs(route);
-            features = features.concat(this.createFeaturesForRoute(latlngs, route.markers, this.routeToProperties(route)));
+            features = features.concat(this.selectedRouteService.createFeaturesForRoute(route));
         }
         this.routesGeoJson = {
             type: "FeatureCollection",
@@ -104,7 +88,6 @@ export class RoutesComponent implements AfterViewInit {
             type: "FeatureCollection",
             features: editingFeatures
         };
-        this.routeEditRouteInteraction.setData(this.editingRouteGeoJson);
     }
 
     private handleRoutePointClick = (pointIndex: number) => {
@@ -127,121 +110,6 @@ export class RoutesComponent implements AfterViewInit {
         this.routePointPopupData = null;
     }
 
-    private createFeaturesForEditingRoute(route: Immutable<RouteData>): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
-        const features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
-        for (let segmentIndex = 0; segmentIndex < route.segments.length; segmentIndex++) {
-            const segmentFeature = {
-                type: "Feature",
-                id: RouteEditRouteInteraction.createSegmentId(route, segmentIndex),
-                properties: this.routeToProperties(route),
-                geometry: {
-                    type: "LineString",
-                    coordinates: route.segments[segmentIndex].latlngs.map(l => SpatialService.toCoordinate(l))
-                }
-            } as GeoJSON.Feature<GeoJSON.LineString>;
-            segmentFeature.properties.id = RouteEditRouteInteraction.createSegmentId(route, segmentIndex);
-            features.push(segmentFeature);
-            const segmentPointFeature = {
-                type: "Feature",
-                id: RouteEditRouteInteraction.createSegmentPointId(route, segmentIndex),
-                properties: this.routeToProperties(route),
-                geometry: {
-                    type: "Point",
-                    coordinates: SpatialService.toCoordinate(route.segments[segmentIndex].routePoint)
-                }
-            } as GeoJSON.Feature<GeoJSON.Point>;
-            segmentPointFeature.properties.id = RouteEditRouteInteraction.createSegmentPointId(route, segmentIndex);
-            if (segmentIndex === 0) {
-                segmentPointFeature.properties.color = RoutesComponent.START_COLOR;
-            } else if (segmentIndex === route.segments.length - 1) {
-                segmentPointFeature.properties.color = RoutesComponent.END_COLOR;
-            }
-            features.push(segmentPointFeature);
-        }
-        return features;
-    }
-
-    private createFeaturesForRoute(
-        latlngs: LatLngAlt[],
-        markers: Immutable<MarkerData[]>,
-        routeProperties: RouteViewProperties): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
-        const features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
-        const routeCoordinates = latlngs.map(l => SpatialService.toCoordinate(l));
-        if (routeCoordinates.length < 2) {
-            return features;
-        }
-        const properties = { ...routeProperties };
-        features.push({
-            type: "Feature",
-            id: routeProperties.id,
-            properties,
-            geometry: {
-                type: "LineString",
-                coordinates: routeCoordinates
-            }
-        });
-        features.push({
-            type: "Feature",
-            id: properties.id,
-            properties: {
-                ...routeProperties,
-                color: RoutesComponent.START_COLOR,
-                strokeColor: "white",
-                id: routeProperties.id + "_start"
-            },
-            geometry: {
-                type: "Point",
-                coordinates: routeCoordinates[0]
-            }
-        });
-        features.push({
-            type: "Feature",
-            id: properties.id,
-            properties: {
-                ...routeProperties,
-                color: RoutesComponent.END_COLOR,
-                strokeColor: "white",
-                id: routeProperties.id + "_end"
-            },
-            geometry: {
-                type: "Point",
-                coordinates: routeCoordinates[routeCoordinates.length - 1]
-            }
-        });
-        for (const marker of markers) {
-            const markerFeature = {
-                type: "Feature",
-                id: routeProperties.id + "_marker_" + marker.id,
-                properties: {
-                    color: "transparent",
-                    strokeColor: routeProperties.color
-                },
-                geometry: {
-                    type: "Point",
-                    coordinates: SpatialService.toCoordinate(marker.latlng)
-                }
-            } as GeoJSON.Feature<GeoJSON.Point>;
-            features.push(markerFeature);
-        }
-        return features;
-    }
-
-    private routeToProperties(route: Immutable<RouteData>): RouteViewProperties {
-        const color = route.color;
-        const opacity = route.opacity == null ? 1.0 : route.opacity;
-        const width = route.weight;
-        const iconColor = opacity > 0.5 ? invert(color, true) : color;
-        const iconSize = width < 10 ? 0.5 : 0.5 * width / 10.0;
-        return {
-            color,
-            iconColor,
-            iconSize,
-            weight: width,
-            opacity,
-            name: route.name,
-            id: route.id
-        };
-    }
 
     private setInteractionAccordingToState() {
         if (this.mapComponent.mapInstance == null) {

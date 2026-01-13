@@ -26,7 +26,7 @@ import {
 import { SetRoutingTypeAction, SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import type { RoutingType, ApplicationState, RouteData } from "../models";
-import { ShareDialogComponent } from "./dialogs/share-dialog.component";
+import { ShareDialogComponent, ShareDialogComponentData } from "./dialogs/share-dialog.component";
 
 @Component({
     selector: "drawing",
@@ -202,7 +202,7 @@ export class DrawingComponent {
     public share() {
         const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         this.selectedRouteService.changeRouteEditState(selectedRoute.id, "ReadOnly");
-        this.dialog.open(ShareDialogComponent, { width: "480px" });
+        this.dialog.open<ShareDialogComponent, ShareDialogComponentData>(ShareDialogComponent, { width: "480px", data: { mode: "current" } });
     }
 
     private checkTrackingAndIssueWarningIfNeeded() {

@@ -6,7 +6,6 @@ import { MatHint } from "@angular/material/form-field";
 import { MatDialogTitle, MatDialogClose, MatDialogContent, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
 import { Angulartics2OnModule } from "../../directives/gtag.directive";
-import { DataContainerService } from "../../services/data-container.service";
 import { FileService, FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
@@ -18,20 +17,13 @@ import type { DataContainer, RouteData } from "../../models";
     imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, Angulartics2OnModule, MatAnchor, MatHint]
 })
 export class FileSaveDialogComponent {
-    public showHiddenWarning: boolean;
-
     public readonly resources = inject(ResourcesService);
 
-    private readonly dataContainerService = inject(DataContainerService);
     private readonly fileService = inject(FileService);
     private readonly toastService = inject(ToastService);
     private data = inject<RouteData>(MAT_DIALOG_DATA)
 
     public formats: FormatViewModel[] = this.fileService.formats;
-
-    constructor() {
-        this.showHiddenWarning = this.dataContainerService.hasHiddenRoutes();
-    }
 
     public async saveAs(format: FormatViewModel) {
         const outputFormat = format.outputFormat;

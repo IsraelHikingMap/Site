@@ -15,7 +15,7 @@ import { Store } from "@ngxs/store";
 import { Immutable } from "immer";
 import invert from "invert-color";
 
-import { ShareDialogComponent } from "../../../components/dialogs/share-dialog.component";
+import { ShareDialogComponent, ShareDialogComponentData } from "../../../components/dialogs/share-dialog.component";
 import { FileSaveDialogComponent } from "application/components/dialogs/file-save-dialog.component";
 import { DistancePipe } from "../../../pipes/distance.pipe";
 import { Angulartics2OnModule } from "../../../directives/gtag.directive";
@@ -237,7 +237,7 @@ export class PrivateRoutesSidebarComponent {
     }
 
     public share() {
-        this.dialog.open(ShareDialogComponent, { width: "480px" });
+        this.dialog.open<ShareDialogComponent, ShareDialogComponentData>(ShareDialogComponent, { width: "480px", data: { mode: "all" } });
     }
 
     public deleteRoute(event: Event, routeData: Immutable<RouteData>) {

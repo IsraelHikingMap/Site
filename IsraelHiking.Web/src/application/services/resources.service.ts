@@ -23,6 +23,7 @@ export class ResourcesService {
     public endOfRoutes = "end-of-routes";
     public editRoutePoints = "editing-route-layer-points";
     public editRouteLines = "editing-route-layer-lines";
+    public editRouteSource = "editing-route-source";
     public locationIcon = "location-icon-layer";
     public readonly recordedRouteColor = "#FF6600";
     // All the text in the app //

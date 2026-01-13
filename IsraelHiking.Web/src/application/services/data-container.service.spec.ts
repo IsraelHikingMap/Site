@@ -13,7 +13,7 @@ import { SelectedRouteService } from "./selected-route.service";
 import { RoutesFactory } from "./routes.factory";
 import { MapService } from "./map.service";
 import { RunningContextService } from "./running-context.service";
-import type { ShareUrl } from "../models";
+import type { RouteData, ShareUrl } from "../models";
 
 describe("DataContainerService", () => {
     beforeEach(() => {
@@ -71,33 +71,28 @@ describe("DataContainerService", () => {
         });
     });
 
-    it("should get data", inject([DataContainerService, Store], (service: DataContainerService, store: Store) => {
-        store.reset({
-            routes: {
-                present: [{
-                    state: "Hidden",
-                    segments: [{}]
-                }, {
-                    state: "Poi",
-                    markers: [{}],
-                    segments: []
-                }]
-            }
-        });
-        const dataContainer = service.getData(true);
+    it("should get data", inject([DataContainerService], (service: DataContainerService) => {
+        const routes: RouteData[] = [{
+            state: "Hidden",
+            id: "1",
+            name: "name",
+            description: "description",
+            markers: [],
+            segments: [{
+                latlngs: [],
+                routePoint: { lat: 1, lng: 2 },
+                routingType: "Hike"
+            }]
+        }, {
+            state: "Poi",
+            id: "2",
+            name: "name2",
+            description: "description2",
+            markers: [{} as any],
+            segments: []
+        }];
+        const dataContainer = service.getContainerForRoutes(routes);
         expect(dataContainer.routes.length).toBe(2);
-    }));
-
-    it("should return true if there are hidden routes in the store", inject([DataContainerService, Store], (service: DataContainerService, store: Store) => {
-        store.reset({
-            routes: {
-                present: [
-                    { id: "1", state: "Hidden" },
-                    { id: "2", state: "Poi" }
-                ]
-            }
-        })
-        expect(service.hasHiddenRoutes()).toBeTruthy();
     }));
 
     it("should return if the share URL is already selected", inject([DataContainerService, ShareUrlsService], async (service: DataContainerService, shareUrlsService: ShareUrlsService) => {
