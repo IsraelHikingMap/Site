@@ -3,6 +3,7 @@ import { Map, setRTLTextPlugin } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
+import { LoggingService } from "./logging.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState } from "../models";
 
@@ -14,6 +15,7 @@ export class MapService {
     private missingImagesArray: string[] = [];
 
     private readonly cancelableTimeoutService = inject(CancelableTimeoutService);
+    private readonly loggingService = inject(LoggingService);
     private readonly store = inject(Store);
 
     public map: Map;
@@ -49,6 +51,10 @@ export class MapService {
             this.missingImagesArray.push(e.id);
             const image = await this.map.loadImage(e.id);
             this.map.addImage(e.id, image.data);
+        });
+
+        this.map.on("error", (e) => {
+            this.loggingService.error("[Map] Error: " + e.message);
         });
     }
 }

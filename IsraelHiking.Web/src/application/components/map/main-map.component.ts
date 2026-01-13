@@ -28,7 +28,6 @@ import { ResourcesService } from "../../services/resources.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
-import { LoggingService } from "../../services/logging.service";
 import { SetLocationAction } from "../../reducers/location.reducer";
 import type { ApplicationState, LocationState } from "../../models";
 
@@ -56,7 +55,6 @@ export class MainMapComponent {
     private readonly mapService = inject(MapService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly defaultStyleService = inject(DefaultStyleService);
-    private readonly loggingService = inject(LoggingService);
     private readonly dialog = inject(MatDialog);
     private readonly store = inject(Store);
 
@@ -74,7 +72,6 @@ export class MainMapComponent {
         }
         const centerLatLon = this.mapComponent().mapInstance.getCenter();
         const zoom = this.mapComponent().mapInstance.getZoom();
-        this.loggingService.debug(`[Map] Move end to zoom: ${zoom}, lng, lat: (${centerLatLon.lng}, ${centerLatLon.lat})`);
         this.store.dispatch(new SetLocationAction(centerLatLon.lng, centerLatLon.lat, zoom));
     }
 

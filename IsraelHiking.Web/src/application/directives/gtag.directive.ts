@@ -7,7 +7,7 @@ import {
     inject
 } from "@angular/core";
 
-import { AnalyticsService } from "application/services/analytics.service";
+import { AnalyticsService } from "../services/analytics.service";
 
 @Directive({
     selector: "[angulartics2On]"

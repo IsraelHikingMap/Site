@@ -16,7 +16,7 @@ import { Immutable } from "immer";
 import invert from "invert-color";
 
 import { ShareDialogComponent, ShareDialogComponentData } from "../../../components/dialogs/share-dialog.component";
-import { FileSaveDialogComponent } from "application/components/dialogs/file-save-dialog.component";
+import { FileSaveDialogComponent } from "../../../components/dialogs/file-save-dialog.component";
 import { DistancePipe } from "../../../pipes/distance.pipe";
 import { Angulartics2OnModule } from "../../../directives/gtag.directive";
 import { NameInUseValidatorDirective } from "../../../directives/name-in-use-validator.directive";
