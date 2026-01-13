@@ -54,7 +54,7 @@ export class MapService {
         });
 
         this.map.on("error", (e) => {
-            this.loggingService.error("[Map] Error: " + e.message);
+            this.loggingService.error("[Map] Error: " + e?.error?.message);
         });
     }
 }
