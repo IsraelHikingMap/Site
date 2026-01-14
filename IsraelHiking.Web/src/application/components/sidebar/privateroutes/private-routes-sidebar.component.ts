@@ -44,7 +44,6 @@ import type { ApplicationState, LatLngAlt, RouteData } from "../../../models";
 export class PrivateRoutesSidebarComponent {
     public routes: Immutable<RouteData[]>;
     public colors: string[];
-    public currentRouteData: RouteData | null;
 
     public readonly resources = inject(ResourcesService);
 
@@ -191,20 +190,6 @@ export class PrivateRoutesSidebarComponent {
 
     public getCheckIconColor(color: string) {
         return invert(color, true);
-    }
-
-    public setCurrentRoute(routeData: Immutable<RouteData>) {
-        if (this.currentRouteData != null) {
-            this.store.dispatch(new ChangeRoutePropertiesAction(this.currentRouteData.id, this.currentRouteData));
-        }
-        this.currentRouteData = structuredClone(routeData) as RouteData;
-    }
-
-    public saveOnClose(routeData: Immutable<RouteData>) {
-        if (routeData.id === this.currentRouteData?.id) {
-            this.store.dispatch(new ChangeRoutePropertiesAction(routeData.id, this.currentRouteData));
-            this.currentRouteData = null;
-        }
     }
 
     public updateProperty(routeData: Immutable<RouteData>, property: any, value: any) {
