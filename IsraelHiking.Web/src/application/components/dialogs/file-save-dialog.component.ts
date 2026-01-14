@@ -14,7 +14,7 @@ import type { DataContainer, RouteData } from "../../models";
 @Component({
     selector: "file-save-dialog",
     templateUrl: "./file-save-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, Angulartics2OnModule, MatAnchor, MatHint]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, Angulartics2OnModule, MatAnchor]
 })
 export class FileSaveDialogComponent {
     public readonly resources = inject(ResourcesService);
