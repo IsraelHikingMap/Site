@@ -2,7 +2,6 @@ import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton, MatAnchor } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
-import { MatHint } from "@angular/material/form-field";
 import { MatDialogTitle, MatDialogClose, MatDialogContent, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
 import { Angulartics2OnModule } from "../../directives/gtag.directive";
