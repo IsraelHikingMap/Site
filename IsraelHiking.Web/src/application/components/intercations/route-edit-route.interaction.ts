@@ -34,6 +34,7 @@ export class RouteEditRouteInteraction {
 
     private selectedRoutePoint: GeoJSON.Feature<GeoJSON.Point> = null;
     private selectedRouteSegments: GeoJSON.Feature<GeoJSON.LineString>[] = [];
+    private routeFeatures: globalThis.Map<string, GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>> = new globalThis.Map();
     private map: Map;
 
     private readonly resources = inject(ResourcesService);
@@ -66,6 +67,13 @@ export class RouteEditRouteInteraction {
         return id;
     }
 
+    public setData(data: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>) {
+        this.routeFeatures = new globalThis.Map();
+        for (const feature of data.features) {
+            this.routeFeatures.set(feature.properties.id, feature);
+        }
+    }
+
     private updateData(features: GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[]) {
         this.map.getSource<GeoJSONSource>(this.resources.editRouteSource).updateData({
             update: features.map(feature => ({
@@ -81,8 +89,8 @@ export class RouteEditRouteInteraction {
         });
     }
 
-    private getFeatureById<TGeometry extends GeoJSON.Geometry>(id: string, data: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>): GeoJSON.Feature<TGeometry> {
-        return data.features.find(f => f.id === id) as GeoJSON.Feature<TGeometry>;
+    private getFeatureById<TGeometry extends GeoJSON.Geometry>(id: string): GeoJSON.Feature<TGeometry> {
+        return this.routeFeatures.get(id) as unknown as GeoJSON.Feature<TGeometry>;
     }
 
     public setActive(active: boolean, map: Map) {
@@ -114,7 +122,7 @@ export class RouteEditRouteInteraction {
         this.state = "canceled";
     };
 
-    private handleDown = async (event: MapMouseEvent) => {
+    private handleDown = (event: MapMouseEvent) => {
         this.mouseDownPoint = event.point;
         if (this.isTouchesBiggerThan(event.originalEvent, 1)) {
             this.cancelInteraction();
@@ -128,18 +136,15 @@ export class RouteEditRouteInteraction {
             {
                 layers: [this.resources.editRoutePoints],
             });
-        const data = await this.map.getSource<GeoJSONSource>(this.resources.editRouteSource).getData() as GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
-        this.selectedRoutePoint = routePoints.length > 0 ? this.getFeatureById(routePoints[0].properties.id, data) : null;
+        this.selectedRoutePoint = routePoints.length > 0 ? this.getFeatureById(routePoints[0].properties.id) : null;
         if (this.selectedRoutePoint != null) {
             const pointIndex = this.getPointIndex();
             const selectedRoute = this.selectedRouteService.getSelectedRoute();
             const segmentStart = this.getFeatureById<GeoJSON.LineString>(
-                this.selectedRouteService.createSegmentId(selectedRoute, pointIndex),
-                data
+                this.selectedRouteService.createSegmentId(selectedRoute, pointIndex)
             );
             const segmentEnd = this.getFeatureById<GeoJSON.LineString>(
-                this.selectedRouteService.createSegmentId(selectedRoute, pointIndex + 1),
-                data
+                this.selectedRouteService.createSegmentId(selectedRoute, pointIndex + 1)
             );
             this.selectedRouteSegments = segmentEnd != null ? [segmentEnd, segmentStart] : [segmentStart];
         } else {
@@ -148,7 +153,7 @@ export class RouteEditRouteInteraction {
                     layers: [this.resources.editRouteLines]
                 });
             if (queryFeatures.length > 0) {
-                this.selectedRouteSegments = [this.getFeatureById(queryFeatures[0].properties.id, data)];
+                this.selectedRouteSegments = [this.getFeatureById(queryFeatures[0].properties.id)];
             } else {
                 this.selectedRouteSegments = [];
             }
@@ -201,7 +206,7 @@ export class RouteEditRouteInteraction {
                 segmentStart.geometry.coordinates = [start, coordinate];
                 featuresToUpdate.push(segmentStart);
             }
-        } else if (this.selectedRouteSegments.length === 1) {
+        } else if (this.selectedRouteSegments.length === 1 && index > 0) {
             const segmentStart = this.selectedRouteSegments[0];
             const start = segmentStart.geometry.coordinates[0];
             segmentStart.geometry.coordinates = [start, coordinate];
@@ -301,7 +306,12 @@ export class RouteEditRouteInteraction {
         const routeData = this.selectedRouteService.getSelectedRoute();
         const routingType = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
         const segment = structuredClone(routeData.segments[index]) as RouteSegmentData;
-        if (index === 0) {
+        if (routeData.segments.length === 1) {
+            segment.latlngs = [latlng as LatLngAltTime, latlng as LatLngAltTime];
+            segment.routePoint = latlng;
+            segment.routingType = routingType;
+            this.store.dispatch(new UpdateSegmentsAction(routeData.id, [index], [segment]));
+        } else if (index === 0) {
             const nextSegment = structuredClone(routeData.segments[index + 1]) as RouteSegmentData;
             nextSegment.routingType = routingType;
             await this.runRouting(latlng, nextSegment);
@@ -310,7 +320,6 @@ export class RouteEditRouteInteraction {
             segment.latlngs = [snappedLatLng, snappedLatLng];
             segment.routePoint = snappedLatLng;
             segment.routingType = routingType;
-
             this.store.dispatch(new UpdateSegmentsAction(routeData.id, [index, index + 1], [segment, nextSegment]));
         } else if (index === routeData.segments.length - 1) {
             segment.routePoint = latlng;
@@ -337,7 +346,6 @@ export class RouteEditRouteInteraction {
         const middleSegment = this.createRouteSegment(latlng, []);
         await this.runRouting(segment.latlngs[0], middleSegment);
         await this.runRouting(middleSegment.routePoint, segment);
-
         this.store.dispatch(new UpdateSegmentsAction(routeData.id, [index], [middleSegment, segment]));
     }
 
