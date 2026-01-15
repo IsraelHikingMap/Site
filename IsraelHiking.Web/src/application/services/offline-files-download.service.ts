@@ -208,6 +208,7 @@ export class OfflineFilesDownloadService {
     public abortCurrentDownload(): void {
         this.loggingService.info("[Offline Download] Aborting current download");
         this.abortController.abort();
+        this.abortController = new AbortController(); // in case finally is never called due to download stuck.
         this._currentDownloadedTile = null;
     }
 
