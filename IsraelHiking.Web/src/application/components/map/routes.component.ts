@@ -88,6 +88,7 @@ export class RoutesComponent implements AfterViewInit {
             type: "FeatureCollection",
             features: editingFeatures
         };
+        this.routeEditRouteInteraction.setData(this.editingRouteGeoJson);
     }
 
     private handleRoutePointClick = (pointIndex: number) => {

@@ -235,8 +235,8 @@ export class OfflineFilesDownloadService {
         for (const { fileName } of files) {
             await this.fileService.deleteFileInDataDirectory(fileName);
         }
-        if (Object.keys(this.store.selectSnapshot((s: ApplicationState) => s.offlineState.downloadedTiles)).length === 1) {
-            // deleteing root tile in case it is the only tile left
+        const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.offlineState.downloadedTiles);
+        if (downloadedTiles && Object.keys(downloadedTiles).length === 1) {
             this.deleteTile(undefined, undefined);
         }
     }
