@@ -182,6 +182,7 @@ export class OfflineFilesDownloadService {
         if (abortController.signal.aborted) {
             return;
         }
+        await this.fileService.moveFileFromCacheToDataDirectory(fileName);
         this.downloadedFilesInCurrentSession.push(fileName);
         this.loggingService.info(`[Offline Download] Finished downloading ${fileName}`);
     }
