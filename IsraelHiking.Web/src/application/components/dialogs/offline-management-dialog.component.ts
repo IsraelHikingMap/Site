@@ -169,6 +169,9 @@ export class OfflineManagementDialogComponent {
         const downloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.offlineState.downloadedTiles);
         for (const key of Object.keys(downloadedTiles || {})) {
             const [tileXDownloaded, tileYDownloaded] = key.split("-").map(Number);
+            if (isNaN(tileXDownloaded) || isNaN(tileYDownloaded)) {
+                continue;
+            }
             if (this.downloadingTileXY()?.tileX === tileXDownloaded && this.downloadingTileXY()?.tileY === tileYDownloaded) {
                 continue; // Skip tiles that are in progress
             }
