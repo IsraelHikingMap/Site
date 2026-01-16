@@ -57,7 +57,7 @@ export class PoiService {
 
     private static readonly POIS_SOURCE_LAYER_NAMES = ["global_points", "external"];
     private static readonly POIS_SOURCE_ID = "points-of-interest";
-    private static readonly POIS_SOURCE_ADDRESS = environment.baseTilesAddress + "/vector/data/global_points.json";
+    private static readonly POIS_SOURCE_TILES_ADDRESS = environment.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt";
 
     private poisCache: GeoJSON.Feature[] = [];
     private queueIsProcessing: boolean = false;
@@ -106,7 +106,9 @@ export class PoiService {
     private initializePois() {
         this.mapService.map.addSource(PoiService.POIS_SOURCE_ID, {
             type: "vector",
-            url: PoiService.POIS_SOURCE_ADDRESS
+            tiles: [PoiService.POIS_SOURCE_TILES_ADDRESS],
+            minzoom: 10,
+            maxzoom: 14
         });
         for (const sourceLayerName of PoiService.POIS_SOURCE_LAYER_NAMES) {
             this.mapService.map.addLayer({
@@ -120,25 +122,6 @@ export class PoiService {
             }, this.resources.endOfBaseLayer);
         }
 
-        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState.downloadedTiles) != null) {
-            this.mapService.map.addSource(`${PoiService.POIS_SOURCE_ID}-offline`, {
-                type: "vector",
-                tiles: [PoiService.POIS_SOURCE_ADDRESS.replace(".json", "/{z}/{x}/{y}.mvt").replace("https://", "slice://")],
-                minzoom: 10,
-                maxzoom: 14
-            });
-            for (const sourceLayerName of PoiService.POIS_SOURCE_LAYER_NAMES) {
-                this.mapService.map.addLayer({
-                    id: `${sourceLayerName}-offline-layer`,
-                    type: "circle",
-                    source: `${PoiService.POIS_SOURCE_ID}-offline`,
-                    "source-layer": sourceLayerName,
-                    paint: {
-                        "circle-color": "transparent",
-                    }
-                }, this.resources.endOfBaseLayer);
-            }
-        }
         this.mapService.map.on("sourcedata", (e) => {
             if (PoiService.POIS_SOURCE_ID === e.sourceId) {
                 this.ngZone.run(() => {
@@ -274,11 +257,6 @@ export class PoiService {
         let features: GeoJSONFeature[] = [];
         for (const sourceLayer of PoiService.POIS_SOURCE_LAYER_NAMES) {
             features = features.concat(this.mapService.map.querySourceFeatures(PoiService.POIS_SOURCE_ID, { sourceLayer }));
-        }
-        if (features.length === 0) {
-            for (const sourceLayer of PoiService.POIS_SOURCE_LAYER_NAMES) {
-                features = features.concat(this.mapService.map.querySourceFeatures(`${PoiService.POIS_SOURCE_ID}-offline`, { sourceLayer }));
-            }
         }
         return features;
     }
