@@ -97,7 +97,7 @@ export class ResourcesService {
     public moveToRoute: string;
     public myTraces: string;
     public noTraces: string;
-    public myShares: string;
+    public mySavesInTheCloud: string;
     public noShares: string;
     public title: string;
     public titlePlaceHolder: string;
@@ -262,6 +262,8 @@ export class ResourcesService {
     public planAndExplore: string;
     public signIn: string;
     public artwork: string;
+    public currentRoute: string;
+    public allXRoutes: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -492,7 +494,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1768167327377");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1768564997501");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -563,7 +565,7 @@ export class ResourcesService {
         this.moveToRoute = this.gettextCatalog.getString("Move to Route");
         this.myTraces = this.gettextCatalog.getString("My Traces");
         this.noTraces = this.gettextCatalog.getString("No traces, you should really upload some to OSM.");
-        this.myShares = this.gettextCatalog.getString("My Shares");
+        this.mySavesInTheCloud = this.gettextCatalog.getString("My Saves in the Cloud");
         this.noShares = this.gettextCatalog.getString("No shares, now is the time to start sharing your work!");
         this.title = this.gettextCatalog.getString("Title");
         this.titlePlaceHolder = this.gettextCatalog.getString("The title for your share.");
@@ -734,6 +736,8 @@ export class ResourcesService {
         this.planAndExplore = this.gettextCatalog.getString("Plan & Explore");
         this.signIn = this.gettextCatalog.getString("Sign in!");
         this.artwork = this.gettextCatalog.getString("Artwork");
+        this.currentRoute = this.gettextCatalog.getString("Current Route");
+        this.allXRoutes = this.gettextCatalog.getString("All {{count}} Routes");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -779,7 +783,7 @@ export class ResourcesService {
         this.makeSureBatteryOptimizationIsOff = this.gettextCatalog
             .getString("Please make sure the battery optimization is turned off for this application. Go to application setting to do so.");
         this.dontShowThisMessageAgain = this.gettextCatalog.getString("Don't show this message again");
-        this.areYouSureYouWantToDeleteAllRoutes = this.gettextCatalog.getString("Are you sure you want to delete all routes?");
+        this.areYouSureYouWantToDeleteAllRoutes = this.gettextCatalog.getString("Are you sure you want to delete all {{count}} routes?");
         this.clickBackAgainToCloseTheApp = this.gettextCatalog.getString("Click back again to close the app");
         this.wrappingThingsUp = this.gettextCatalog.getString("Wrapping things up, please wait a few seconds...");
         this.unableToDeleteShare = this.gettextCatalog.getString("Unable to delete the share...");

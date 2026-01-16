@@ -56,6 +56,20 @@
         <textarea matInput class="w-full" rows="2" type="text" [(ngModel)]="description"></textarea>
       </mat-form-field>
     </div>
+    @if (showMutliSelection()) {
+    <div class="flex flex-row">
+      <mat-radio-group (change)=setMode($event.value) [value]="mode">
+        <div>
+          <mat-radio-button value="current" color="primary" angulartics2On="click" angularticsCategory="Share"
+            angularticsAction="Set share mode current">{{resources.currentRoute}}</mat-radio-button>
+        </div>
+        <div>
+          <mat-radio-button value="all" color="primary" angulartics2On="click" angularticsCategory="Share"
+            angularticsAction="Set share mode all">{{allXRoutesText}}</mat-radio-button>
+        </div>
+      </mat-radio-group>
+    </div>
+    }
     @if (hasHiddenRoutes) {
     <div class="flex flex-row">
       <mat-hint class="text-sm">⚠️ {{resources.hiddenRoutesWillNotBeSaved}}</mat-hint>

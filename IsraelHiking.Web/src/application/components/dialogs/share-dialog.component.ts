@@ -10,6 +10,7 @@ import { FormsModule } from "@angular/forms";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatTooltip } from "@angular/material/tooltip";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
+import { MatRadioButton, MatRadioGroup } from "@angular/material/radio";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { Share } from "@capacitor/share";
 import { LngLatLike, Map, StyleSpecification } from "maplibre-gl";
@@ -30,6 +31,7 @@ import { MapService } from "../../services/map.service";
 import { FileService } from "../../services/file.service";
 import type { ApplicationState, EditableLayer, RouteData, ShareUrl } from "../../models";
 
+
 export type ShareDialogComponentData = {
     mode: "current" | "all"
 };
@@ -37,7 +39,7 @@ export type ShareDialogComponentData = {
 @Component({
     selector: "share-dialog",
     templateUrl: "./share-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, Angulartics2OnModule, NgClass, MatAnchor, MatTooltip, CdkCopyToClipboard, MapComponent, LayersComponent, LayerComponent, GeoJSONSourceComponent]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, Angulartics2OnModule, NgClass, MatAnchor, MatTooltip, CdkCopyToClipboard, MapComponent, LayersComponent, LayerComponent, GeoJSONSourceComponent, MatRadioGroup, MatRadioButton]
 })
 export class ShareDialogComponent {
 
@@ -57,10 +59,13 @@ export class ShareDialogComponent {
     public imageUrl: string;
     public copiedToClipboard: boolean = false;
     public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
+    public mode: "current" | "all" = "all";
+    public allXRoutesText: string = "";
 
     public readonly resources = inject(ResourcesService);
 
     private map: Map;
+    private availableRoutesCount: number = 0;
 
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly dataContainerService = inject(DataContainerService);
@@ -92,12 +97,7 @@ export class ShareDialogComponent {
                 this.description = selectedRoute.description;
             }
         }
-        this.hasHiddenRoutes = this.data.mode === "all" && this.selectedRouteService.hasHiddenRoutes();
-        const geojson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = { type: "FeatureCollection", features: [] };
-        for (const route of this.getRoutes()) {
-            geojson.features = geojson.features.concat(this.selectedRouteService.createFeaturesForRoute(route));
-        }
-        this.routesGeoJson = geojson;
+        this.setMode(this.data.mode);
     }
 
     public async mapLoaded(map: Map) {
@@ -167,11 +167,34 @@ export class ShareDialogComponent {
     }
 
     private getRoutes(): Immutable<RouteData>[] {
-        if (this.data.mode === "current") {
-            return [this.selectedRouteService.getSelectedRoute()];
+        const availableRoutes = this.getAvailableRoutes();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
+        // This is checked to make sure the selected route is not "empty".
+        if (this.mode === "current" && availableRoutes.find(r => r.id === selectedRoute?.id)) {
+            return [selectedRoute];
         }
+        return availableRoutes;
+    }
+
+    public setMode(mode: "current" | "all") {
+        this.mode = mode;
+        this.hasHiddenRoutes = mode === "all" && this.selectedRouteService.hasHiddenRoutes();
+        const geojson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = { type: "FeatureCollection", features: [] };
+        for (const route of this.getRoutes()) {
+            geojson.features = geojson.features.concat(this.selectedRouteService.createFeaturesForRoute(route));
+        }
+        this.routesGeoJson = geojson;
+        this.availableRoutesCount = this.getAvailableRoutes().length;
+        this.allXRoutesText = this.resources.allXRoutes.replace("{{count}}", this.availableRoutesCount.toString());
+    }
+
+    private getAvailableRoutes(): Immutable<RouteData>[] {
         return this.store.selectSnapshot((state: ApplicationState) => state.routes.present)
             .filter(r => r.state !== "Hidden")
             .filter(r => r.segments.length > 0 || r.markers.length > 0);
+    }
+
+    public showMutliSelection(): boolean {
+        return this.availableRoutesCount > 1;
     }
 }
