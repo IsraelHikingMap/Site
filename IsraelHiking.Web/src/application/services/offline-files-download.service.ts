@@ -177,7 +177,7 @@ export class OfflineFilesDownloadService {
     }
 
     private async downloadAndMove(fileName: string, fileDownloadUrl: string, token: string, abortController: AbortController, fileNameIndex: number, length: number) {
-        await this.fileService.downloadFileAuthenticated(fileDownloadUrl, fileName, token,
+        await this.fileService.downloadFileToCacheAuthenticated(fileDownloadUrl, fileName, token,
             (value) => this.updateInProgressTilesList(value, fileNameIndex, length), abortController);
         if (abortController.signal.aborted) {
             return;

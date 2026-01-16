@@ -360,7 +360,7 @@ describe("FileService", () => {
 
             const fetchSpy = spyOn(window, "fetch").and.returnValue(Promise.resolve(mockResponse as any));
 
-            await expectAsync(service.downloadFileAuthenticated(url, url.split("/").pop(), null, progressSpy, new AbortController())).toBeRejected();
+            await expectAsync(service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, new AbortController())).toBeRejected();
 
             expect(fetchSpy).toHaveBeenCalledTimes(1);
             expect(progressSpy).not.toHaveBeenCalled();
@@ -393,7 +393,7 @@ describe("FileService", () => {
             const fetchSpy = spyOn(window, "fetch").and.returnValue(Promise.resolve(mockResponse as any));
 
 
-            await service.downloadFileAuthenticated(url, url.split("/").pop(), null, progressSpy, new AbortController());
+            await service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, new AbortController());
 
             expect(fetchSpy).toHaveBeenCalledTimes(1);
             expect(mockReader.read).toHaveBeenCalledTimes(3);
@@ -427,7 +427,7 @@ describe("FileService", () => {
             const fetchSpy = spyOn(window, "fetch").and.returnValue(Promise.resolve(mockResponse as any));
 
             const abortController = new AbortController();
-            const promise = service.downloadFileAuthenticated(url, url.split("/").pop(), null, progressSpy, abortController);
+            const promise = service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, abortController);
 
             await new Promise(resolve => setTimeout(resolve, 50));
             abortController.abort();

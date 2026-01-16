@@ -324,7 +324,7 @@ export class FileService {
         }
     }
 
-    public downloadFileAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void, abortController: AbortController): Promise<void> {
+    public downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void, abortController: AbortController): Promise<void> {
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
         let previousPercentage = 0;
         return new Promise<void>((resolve, reject) => {
