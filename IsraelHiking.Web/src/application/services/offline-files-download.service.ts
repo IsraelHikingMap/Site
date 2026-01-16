@@ -140,8 +140,8 @@ export class OfflineFilesDownloadService {
             try {
                 const version = await this.pmtilesService.getVersion(fileNameAndDate.fileName);
                 metadata.push({ fileName: fileNameAndDate.fileName, date: fileNameAndDate.date, version });
-            } catch {
-                // ignore this
+            } catch (ex) {
+                this.loggingService.error(`[Offline Download] Failed to get version for file: ${fileNameAndDate.fileName}, error: ${ex}`);
             }
         }
         return metadata;
