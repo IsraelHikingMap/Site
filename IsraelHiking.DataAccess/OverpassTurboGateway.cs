@@ -84,7 +84,7 @@ public class OverpassTurboGateway(
 
     public async Task<List<CompleteWay>> GetHighways(Coordinate northEast, Coordinate southWest)
     {
-        var query = $"[out:xml];\nway[\"highway\"][!\"construction\"]({southWest.Y},{southWest.X},{northEast.Y},{northEast.X});\nout meta;\n(._;>;);\nout;";
+        var query = $"[out:xml];\nway[\"highway\"][!\"construction\"]({southWest.Y},{southWest.X},{northEast.Y},{northEast.X});\nout meta;\n>;\nout;";
         var response = await GetQueryResponse(query);
 
         using MemoryStream memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(response));
