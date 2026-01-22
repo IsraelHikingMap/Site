@@ -8,7 +8,7 @@ import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
-import { SetOfflineSubscribedAction } from "../reducers/offline.reducer";
+import { SetOfflineSubscribedAction, SetPurchasesSyncedAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState } from "../models";
 
@@ -75,9 +75,14 @@ export class PurchaseService {
             } else if (isConfigured) {
                 await Purchases.logIn({ appUserID: `${userId}` });
             }
+            if (userId && !this.store.selectSnapshot((state: ApplicationState) => state.offlineState.purchasesSynced)) {
+                this.loggingService.info("[Store] Running sync purchases");
+                await Purchases.syncPurchases();
+                this.store.dispatch(new SetPurchasesSyncedAction(true));
+            }
             this.checkAndUpdateOfflineAvailability();
         } catch (error) {
-            this.loggingService.error("[Store] Failed to get customer info: " + (error as any).message);
+            this.loggingService.error("[Store] Failed to initialize purchases connection: " + (error as any).message);
         }
     }
 

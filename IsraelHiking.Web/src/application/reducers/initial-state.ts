@@ -241,6 +241,7 @@ export const initialState =
             isSubscribed: false,
             downloadedTiles: null,
             shareUrlsLastModifiedDate: null,
-            uploadPoiQueue: []
+            uploadPoiQueue: [],
+            purchasesSynced: false
         }
     } as MutableApplicationState;

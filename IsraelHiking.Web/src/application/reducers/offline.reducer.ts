@@ -35,6 +35,11 @@ export class RemoveFromPoiQueueAction {
     constructor(public featureId: string) { }
 }
 
+export class SetPurchasesSyncedAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public purchasesSynced: boolean) { }
+}
+
 @State<OfflineState>({
     name: "offlineState",
     defaults: initialState.offlineState
@@ -95,6 +100,14 @@ export class OfflineReducer {
     public removeFromPoiQueue(ctx: StateContext<OfflineState>, action: RemoveFromPoiQueueAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.uploadPoiQueue = lastState.uploadPoiQueue.filter(f => f !== action.featureId);
+            return lastState;
+        }));
+    }
+
+    @Action(SetPurchasesSyncedAction)
+    public setSyncedPurchases(ctx: StateContext<OfflineState>, action: SetPurchasesSyncedAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.purchasesSynced = action.purchasesSynced;
             return lastState;
         }));
     }
