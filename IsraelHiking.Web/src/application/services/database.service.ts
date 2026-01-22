@@ -109,7 +109,7 @@ export class DatabaseService {
             const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
             const offlineAvailable = await this.pmTilesService.isOfflineFileAvailable(z, x, y, type);
             try {
-                this.loggingService.info(`[Database] Fetching ${params.url}, offlineAvailable: ${offlineAvailable}`);
+                this.loggingService.debug(`[Database] Fetching ${params.url}, offlineAvailable: ${offlineAvailable}`);
                 const response = await firstValueFrom(this.httpClient.get(params.url.replace("slice://", "https://"), { observe: "response", responseType: "arraybuffer" })
                     .pipe(offlineAvailable ? timeout(2000) : timeout(60000))) as any as HttpResponse<any>;
                 if (!response.ok) {
