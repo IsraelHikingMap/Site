@@ -317,21 +317,6 @@ export class FileService {
         });
     }
 
-
-    public async getFileFromCache(url: string): Promise<Blob> {
-        try {
-            const fileName = url.split("/").pop();
-            const fileResponse = await Filesystem.readFile({
-                path: fileName,
-                directory: Directory.Cache
-            });
-            const fileBuffer = decode(fileResponse.data as string);
-            return new Blob([fileBuffer]);
-        } catch {
-            return null;
-        }
-    }
-
     public downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void, abortController: AbortController): Promise<void> {
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
         let previousPercentage = 0;
@@ -367,14 +352,12 @@ export class FileService {
                             path: fileName,
                             directory: Directory.Cache,
                             data: encode(value.buffer),
-                            encoding: Encoding.UTF8
                         });
                     } else {
                         await Filesystem.appendFile({
                             path: fileName,
                             directory: Directory.Cache,
                             data: encode(value.buffer),
-                            encoding: Encoding.UTF8
                         });
                     }
                     receivedLength += value.length;
