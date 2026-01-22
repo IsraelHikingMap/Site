@@ -61,7 +61,6 @@ export class LocationService {
         });
 
         this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
-            const wasPanned = this.isPanned;
             this.isPanned = pannedTimestamp != null;
             if (this.isPanned) {
                 return;
@@ -74,10 +73,6 @@ export class LocationService {
             }
             if (this.isFollowing()) {
                 this.moveMapToGpsPosition();
-                const selectedRoute = this.selectedRouteService.getSelectedRoute();
-                if (wasPanned && selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
-                    this.toastService.warning(this.resources.editingRouteWhileTracking);
-                }
             }
         });
 
@@ -111,7 +106,7 @@ export class LocationService {
     }
 
     public isFollowing(): boolean {
-        return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).following && !this.isPanned;
+        return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).following && !this.isPanned && !this.selectedRouteService.isEditingRoute();
     }
 
     public moveMapToGpsPosition() {

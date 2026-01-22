@@ -25,22 +25,22 @@ describe("SidebarService", () => {
     }));
 
     it("Should show when toggled", inject([SidebarService], (service: SidebarService) => {
-        service.toggle("info");
+        service.toggle("layers");
 
         expect(service.isSidebarOpen()).toBeTruthy();
-        expect(service.viewName).toBe("info");
+        expect(service.viewName).toBe("layers");
     }));
 
     it("Should hide when double toggled", inject([SidebarService], (service: SidebarService) => {
-        service.toggle("info");
-        service.toggle("info");
+        service.toggle("layers");
+        service.toggle("layers");
 
         expect(service.isSidebarOpen()).toBeFalsy();
         expect(service.viewName).toBe("");
     }));
 
     it("Should hide when toggled and then hide", inject([SidebarService], (service: SidebarService) => {
-        service.toggle("info");
+        service.toggle("layers");
         service.hide();
 
         expect(service.isSidebarOpen()).toBeFalsy();
@@ -48,7 +48,7 @@ describe("SidebarService", () => {
     }));
 
     it("Should switch views when toggled with two different views", inject([SidebarService], (service: SidebarService) => {
-        service.toggle("info");
+        service.toggle("public-poi");
         service.toggle("layers");
 
         expect(service.isSidebarOpen()).toBeTruthy();
@@ -56,7 +56,7 @@ describe("SidebarService", () => {
     }));
 
     it("Should hide when toggled with two different views, last view twice", inject([SidebarService], (service: SidebarService) => {
-        service.toggle("info");
+        service.toggle("public-poi");
         service.toggle("layers");
         service.toggle("layers");
 

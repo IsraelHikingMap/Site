@@ -13,6 +13,9 @@ const config: CapacitorConfig = {
     }
   },
   plugins: {
+    SystemBars: {
+      insetsHandling: "disable"
+    }
   },
   ios: {
     preferredContentMode: "mobile"

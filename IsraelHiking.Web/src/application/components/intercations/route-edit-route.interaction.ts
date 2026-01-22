@@ -4,7 +4,7 @@ import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
 
-import { SelectedRouteService } from "../../services/selected-route.service";
+import { SEGMENT, SEGMENT_POINT, SelectedRouteService } from "../../services/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
 import { RoutingProvider } from "../../services/routing.provider";
 import { ElevationProvider } from "../../services/elevation.provider";
@@ -14,15 +14,12 @@ import { ResourcesService } from "../../services/resources.service";
 import { AddSegmentAction, UpdateSegmentsAction } from "../../reducers/routes.reducer";
 import type {
     ApplicationState,
-    RouteData,
     LatLngAlt,
     RouteSegmentData,
     LatLngAltTime,
     MarkerData
 } from "../../models";
 
-const SEGMENT = "_segment_";
-const SEGMENT_POINT = "_segmentpoint_";
 const DRAG_PIXEL_TOLERANCE = 3;
 
 declare type EditMouseState = "none" | "down" | "dragging" | "canceled";
@@ -37,7 +34,7 @@ export class RouteEditRouteInteraction {
 
     private selectedRoutePoint: GeoJSON.Feature<GeoJSON.Point> = null;
     private selectedRouteSegments: GeoJSON.Feature<GeoJSON.LineString>[] = [];
-    private geoJsonData: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = null;
+    private routeFeatures: globalThis.Map<string, GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>> = new globalThis.Map();
     private map: Map;
 
     private readonly resources = inject(ResourcesService);
@@ -47,14 +44,6 @@ export class RouteEditRouteInteraction {
     private readonly snappingService = inject(SnappingService);
     private readonly ngZone = inject(NgZone);
     private readonly store = inject(Store);
-
-    public static createSegmentId(route: Immutable<RouteData>, index: number) {
-        return route.id + SEGMENT + index;
-    }
-
-    public static createSegmentPointId(route: Immutable<RouteData>, index: number) {
-        return route.id + SEGMENT_POINT + index;
-    }
 
     private addEndOfRouteProgress(start: LatLngAlt, end: LatLngAlt): string {
         const id = "end-of-route-progress-line";
@@ -74,28 +63,34 @@ export class RouteEditRouteInteraction {
                 iconSize: 0.5
             }
         } as GeoJSON.Feature<GeoJSON.LineString>;
-        this.updateData(newPointProgress);
+        this.updateData([newPointProgress]);
         return id;
     }
 
-    public setData(geojsonData: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>) {
-        this.geoJsonData = geojsonData;
+    public setData(data: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>) {
+        this.routeFeatures = new globalThis.Map();
+        for (const feature of data.features) {
+            this.routeFeatures.set(feature.properties.id, feature);
+        }
     }
 
-    private updateData(feature: GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>) {
-        const features = this.geoJsonData.features.filter(f => f.id !== feature.id);
-        features.push(feature);
-        this.geoJsonData.features = features;
-        (this.map.getSource("editing-route-source") as GeoJSONSource).setData(this.geoJsonData);
+    private updateData(features: GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[]) {
+        this.map.getSource<GeoJSONSource>(this.resources.editRouteSource).updateData({
+            update: features.map(feature => ({
+                id: feature.id,
+                newGeometry: feature.geometry
+            }))
+        });
     }
 
     private removeFeatureFromData(id: string) {
-        this.geoJsonData.features = this.geoJsonData.features.filter(f => f.id !== id);
-        (this.map.getSource("editing-route-source") as GeoJSONSource).setData(this.geoJsonData);
+        this.map.getSource<GeoJSONSource>(this.resources.editRouteSource).updateData({
+            remove: [id]
+        });
     }
 
     private getFeatureById<TGeometry extends GeoJSON.Geometry>(id: string): GeoJSON.Feature<TGeometry> {
-        return this.geoJsonData.features.find(f => f.id === id) as any as GeoJSON.Feature<TGeometry>;
+        return this.routeFeatures.get(id) as unknown as GeoJSON.Feature<TGeometry>;
     }
 
     public setActive(active: boolean, map: Map) {
@@ -146,10 +141,10 @@ export class RouteEditRouteInteraction {
             const pointIndex = this.getPointIndex();
             const selectedRoute = this.selectedRouteService.getSelectedRoute();
             const segmentStart = this.getFeatureById<GeoJSON.LineString>(
-                RouteEditRouteInteraction.createSegmentId(selectedRoute, pointIndex)
+                this.selectedRouteService.createSegmentId(selectedRoute, pointIndex)
             );
             const segmentEnd = this.getFeatureById<GeoJSON.LineString>(
-                RouteEditRouteInteraction.createSegmentId(selectedRoute, pointIndex + 1)
+                this.selectedRouteService.createSegmentId(selectedRoute, pointIndex + 1)
             );
             this.selectedRouteSegments = segmentEnd != null ? [segmentEnd, segmentStart] : [segmentStart];
         } else {
@@ -197,25 +192,27 @@ export class RouteEditRouteInteraction {
     private handleRoutePointDrag(event: MapMouseEvent) {
         const coordinate = SpatialService.toCoordinate(event.lngLat);
         this.selectedRoutePoint.geometry.coordinates = coordinate;
-        this.updateData(this.selectedRoutePoint);
+        const featuresToUpdate: GeoJSON.Feature<GeoJSON.Point | GeoJSON.LineString>[] = [this.selectedRoutePoint];
+
         const index = this.getPointIndex();
         if (this.selectedRouteSegments.length === 2) {
             const segmentEnd = this.selectedRouteSegments[0];
             const coordinates = segmentEnd.geometry.coordinates;
             segmentEnd.geometry.coordinates = [coordinate, coordinates[coordinates.length - 1]];
-            this.updateData(segmentEnd);
+            featuresToUpdate.push(segmentEnd);
             if (index !== 0) {
                 const segmentStart = this.selectedRouteSegments[1];
                 const start = segmentStart.geometry.coordinates[0];
                 segmentStart.geometry.coordinates = [start, coordinate];
-                this.updateData(segmentStart);
+                featuresToUpdate.push(segmentStart);
             }
-        } else if (this.selectedRouteSegments.length === 1) {
+        } else if (this.selectedRouteSegments.length === 1 && index > 0) {
             const segmentStart = this.selectedRouteSegments[0];
             const start = segmentStart.geometry.coordinates[0];
             segmentStart.geometry.coordinates = [start, coordinate];
-            this.updateData(segmentStart);
+            featuresToUpdate.push(segmentStart);
         }
+        this.updateData(featuresToUpdate);
     }
 
     private handleRouteMiddleSegmentDrag(event: MapMouseEvent) {
@@ -223,8 +220,7 @@ export class RouteEditRouteInteraction {
         const segment = this.selectedRouteSegments[0];
         const coordinates = segment.geometry.coordinates;
         segment.geometry.coordinates = [coordinates[0], coordinate, coordinates[coordinates.length - 1]];
-        this.updateData(segment);
-
+        this.updateData([segment]);
     }
 
     private isUpdating() {
@@ -299,7 +295,7 @@ export class RouteEditRouteInteraction {
 
     private runRouting = async (startLatLng: LatLngAlt, segment: RouteSegmentData): Promise<void> => {
         segment.routePoint = this.getSnappingForRoute(segment.routePoint, []);
-        const latLngs =  await this.routingProvider.getRoute(startLatLng, segment.routePoint, segment.routingType);
+        const latLngs = await this.routingProvider.getRoute(startLatLng, segment.routePoint, segment.routingType);
         segment.latlngs = latLngs as LatLngAltTime[];
         const last = latLngs[latLngs.length - 1];
         segment.routePoint = this.getSnappingForRoute(segment.routePoint, [last]);
@@ -310,7 +306,12 @@ export class RouteEditRouteInteraction {
         const routeData = this.selectedRouteService.getSelectedRoute();
         const routingType = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
         const segment = structuredClone(routeData.segments[index]) as RouteSegmentData;
-        if (index === 0) {
+        if (routeData.segments.length === 1) {
+            segment.latlngs = [latlng as LatLngAltTime, latlng as LatLngAltTime];
+            segment.routePoint = latlng;
+            segment.routingType = routingType;
+            this.store.dispatch(new UpdateSegmentsAction(routeData.id, [index], [segment]));
+        } else if (index === 0) {
             const nextSegment = structuredClone(routeData.segments[index + 1]) as RouteSegmentData;
             nextSegment.routingType = routingType;
             await this.runRouting(latlng, nextSegment);
@@ -319,7 +320,6 @@ export class RouteEditRouteInteraction {
             segment.latlngs = [snappedLatLng, snappedLatLng];
             segment.routePoint = snappedLatLng;
             segment.routingType = routingType;
-
             this.store.dispatch(new UpdateSegmentsAction(routeData.id, [index, index + 1], [segment, nextSegment]));
         } else if (index === routeData.segments.length - 1) {
             segment.routePoint = latlng;
@@ -346,7 +346,6 @@ export class RouteEditRouteInteraction {
         const middleSegment = this.createRouteSegment(latlng, []);
         await this.runRouting(segment.latlngs[0], middleSegment);
         await this.runRouting(middleSegment.routePoint, segment);
-
         this.store.dispatch(new UpdateSegmentsAction(routeData.id, [index], [middleSegment, segment]));
     }
 
@@ -366,7 +365,7 @@ export class RouteEditRouteInteraction {
     }
 
     private getSegmentIndex(segment: GeoJSON.Feature<GeoJSON.LineString>) {
-        const splitStr = segment.id.toString().split(SEGMENT);
+        const splitStr = segment.properties.id.toString().split(SEGMENT);
         return +splitStr[1];
     }
 

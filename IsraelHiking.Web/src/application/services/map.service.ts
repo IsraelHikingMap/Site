@@ -1,8 +1,9 @@
 import { inject, Injectable } from "@angular/core";
-import { Map } from "maplibre-gl";
+import { Map, setRTLTextPlugin } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
+import { LoggingService } from "./logging.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState } from "../models";
 
@@ -14,10 +15,15 @@ export class MapService {
     private missingImagesArray: string[] = [];
 
     private readonly cancelableTimeoutService = inject(CancelableTimeoutService);
+    private readonly loggingService = inject(LoggingService);
     private readonly store = inject(Store);
 
     public map: Map;
     public initializationPromise = new Promise<void>((resolve) => { this.resolve = resolve; });
+
+    public initialize() {
+        setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
+    }
 
     public setMap(map: Map) {
         this.map = map;
@@ -35,7 +41,7 @@ export class MapService {
             this.store.dispatch(new SetPannedAction(new Date()));
         });
 
-        this.map.on("styleimagemissing", async (e: {id: string}) => {
+        this.map.on("styleimagemissing", async (e: { id: string }) => {
             if (!/^http/.test(e.id)) {
                 return;
             }
@@ -45,6 +51,10 @@ export class MapService {
             this.missingImagesArray.push(e.id);
             const image = await this.map.loadImage(e.id);
             this.map.addImage(e.id, image.data);
+        });
+
+        this.map.on("error", (e) => {
+            this.loggingService.error("[Map] Error: " + e?.error?.message);
         });
     }
 }

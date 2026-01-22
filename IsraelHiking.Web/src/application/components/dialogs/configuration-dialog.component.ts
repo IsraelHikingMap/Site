@@ -14,7 +14,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { LoggingService } from "../../services/logging.service";
-import { DatabaseService } from "application/services/database.service";
+import { DatabaseService } from "../../services/database.service";
 import { initialState } from "../../reducers/initial-state";
 import {
     SetBatteryOptimizationTypeAction,

@@ -3,6 +3,7 @@ import { File as FileSystemWrapper, IFile } from "@awesome-cordova-plugins/file/
 import { NgxsModule, Store } from "@ngxs/store";
 
 import { PmTilesService } from "./pmtiles.service";
+import { LoggingService } from "./logging.service";
 
 describe("PmTilesService", () => {
     beforeEach(async () => {
@@ -12,15 +13,18 @@ describe("PmTilesService", () => {
             imports: [NgxsModule.forRoot([])],
             providers: [
                 PmTilesService,
-                { provide: FileSystemWrapper, useValue: {
-                    resolveDirectoryUrl: () => {},
-                    getFile: () => ({ file: (cb: (f: IFile) => void) => { cb(pmTilesBlob)} }),
-                } }
+                { provide: LoggingService, useValue: {} },
+                {
+                    provide: FileSystemWrapper, useValue: {
+                        resolveDirectoryUrl: () => { },
+                        getFile: () => ({ file: (cb: (f: IFile) => void) => { cb(pmTilesBlob) } }),
+                    }
+                }
             ]
         });
     });
 
-    it("Should get a tile", inject([PmTilesService, ], async (service: PmTilesService) => {
+    it("Should get a tile", inject([PmTilesService,], async (service: PmTilesService) => {
         const results = await service.getTileByUrl("custom://filename-without-pmtiles-extention/0/0/0.png");
         expect(results).toBeDefined();
     }));
@@ -31,13 +35,13 @@ describe("PmTilesService", () => {
         expect(results).toBeDefined();
     }));
 
-    it("Should get a tile above zoom", inject([PmTilesService, ], async (service: PmTilesService) => {
+    it("Should get a tile above zoom", inject([PmTilesService,], async (service: PmTilesService) => {
         const results = await service.getTileByType(0, 0, 0, "filename-without-pmtiles-extention");
         expect(results).toBeDefined();
     }));
 
     it("Should check if offline file is available without subscription", inject([PmTilesService, Store], async (service: PmTilesService, store: Store) => {
-         store.reset({
+        store.reset({
             offlineState: {
                 isSubscribed: false,
             }

@@ -24,12 +24,8 @@
     <!-- MAPEAK END -->
     <meta name="keyword" content="hike,bike,run,cycle,outdoor,map,navigation,route planning" />
     <meta name="robot" content="index,follow" />
-    <meta name="msapplication-TileColor" content="#2b5797">
-    <meta name="msapplication-TileImage" content="content/favicons/mstile-144x144.png">
-    <meta name="msapplication-config" content="content/favicons/browserconfig.xml">
-    <meta name="theme-color" content="#0a42bb">
     <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=auto" />
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 
     <base href="/">
     <!-- Favicons courtesy of http://realfavicongenerator.net/ -->
@@ -39,9 +35,10 @@
     <link rel="manifest" href="content/favicons/site.webmanifest">
     <link rel="mask-icon" href="content/favicons/safari-pinned-tab.svg" color="#32cd6d">
     <link rel="shortcut icon" href="content/favicons/favicon.ico">
-    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileColor" content="#32CD6D">
     <meta name="msapplication-config" content="content/favicons/browserconfig.xml">
-    <meta name="theme-color" content="#ffffff">
+    <meta name="msapplication-TileImage" content="content/favicons/mstile-144x144.png">
+    <meta name="theme-color" content="#32CD6D">
 
     <link rel="text/html" href="fonts/icomoon.ttf">
     <style>
@@ -130,16 +127,17 @@
 </head>
 
 <body>
-    <div class="preloader">
-        <img src="content/logo.png" height="256px" />
-        <div class="lds-ellipsis">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
+    <app-root>
+        <div class="preloader">
+            <img src="content/logo.png" height="256px" />
+            <div class="lds-ellipsis">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
         </div>
-    </div>
-    <main-map></main-map>
+    </app-root>
 </body>
 
 </html>

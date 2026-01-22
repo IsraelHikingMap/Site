@@ -10,13 +10,16 @@
 			"OAuthScheme": "mapeak"
 		}
 	},
-	"plugins": {},
+	"plugins": {
+		"SystemBars": {
+			"insetsHandling": "disable"
+		}
+	},
 	"ios": {
 		"preferredContentMode": "mobile"
 	},
 	"packageClassList": [
 		"KeepAwakePlugin",
-		"SafeAreaPlugin",
 		"ScreenBrightnessPlugin",
 		"AppPlugin",
 		"CAPCameraPlugin",

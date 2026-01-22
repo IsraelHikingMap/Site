@@ -9,8 +9,8 @@ import { LoggingService } from "./logging.service";
 import { LayersService } from "./layers.service";
 import { SetUserInfoAction, UserInfoReducer } from "../reducers/user.reducer";
 import { AddBaseLayerAction, AddOverlayAction, LayersReducer, RemoveBaseLayerAction, RemoveOverlayAction, SelectBaseLayerAction, UpdateBaseLayerAction, UpdateOverlayAction } from "../reducers/layers.reducer";
+import { DEFAULT_BASE_LAYERS } from "../reducers/initial-state";
 import type { EditableLayer, LayerData, Overlay } from "../models";
-import { DEFAULT_BASE_LAYERS } from "application/reducers/initial-state";
 
 describe("LayersService", () => {
     beforeEach(() => {

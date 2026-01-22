@@ -1,17 +1,12 @@
 @use '@angular/material' as mat;
 
-.align-next-to-menu {
-    left: 85px
-}
-
-.align-next-to-menu[dir=rtl] {
-    right: 85px;
-    left: unset;
-}
-
 .search-input-container {
-    width: calc(100vw - 178px);
+    width: calc(100vw - 196px);
     @include mat.all-component-densities(-3);
+}
+
+.search-input-container.logged-in {
+    width: calc(100vw - 146px);
 }
 
 .search-result-option {
@@ -29,12 +24,17 @@
 .search-result-option i {
     padding: 0 5px 0 0;
 }
+
 .search-result-option[dir=rtl] i {
     padding: 0 0 0 5px;
 }
 
-@media (width > 550px) {
+@media (width > 600px) {
     .search-input-container {
+        width: 350px;
+    }
+
+    .search-input-container.logged-in {
         width: 350px;
     }
 }

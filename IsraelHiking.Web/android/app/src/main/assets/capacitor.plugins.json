@@ -4,10 +4,6 @@
 		"classpath": "com.getcapacitor.community.keepawake.KeepAwakePlugin"
 	},
 	{
-		"pkg": "@capacitor-community/safe-area",
-		"classpath": "com.getcapacitor.community.safearea.SafeAreaPlugin"
-	},
-	{
 		"pkg": "@capacitor-community/screen-brightness",
 		"classpath": "com.elylucas.capscreenbrightness.ScreenBrightnessPlugin"
 	},
@@ -34,6 +30,10 @@
 	{
 		"pkg": "@capawesome-team/capacitor-android-battery-optimization",
 		"classpath": "io.capawesome.capacitorjs.plugins.batteryoptimization.BatteryOptimizationPlugin"
+	},
+	{
+		"pkg": "@capawesome/capacitor-android-edge-to-edge-support",
+		"classpath": "io.capawesome.capacitorjs.plugins.androidedgetoedgesupport.EdgeToEdgePlugin"
 	},
 	{
 		"pkg": "@capawesome/capacitor-app-update",

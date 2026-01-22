@@ -55,31 +55,18 @@ export class DataContainerService {
         }
     }
 
-    public getData(withHidden: boolean): DataContainer {
+    public getContainerForRoutes(routes: Immutable<RouteData>[]): DataContainer {
         const layersContainer = this.layersService.getData();
 
         const bounds = SpatialService.getMapBounds(this.mapService.map);
-        const routes = this.store.selectSnapshot((s: ApplicationState) => s.routes).present
-            .filter(r => r.state !== "Hidden" || withHidden)
-            .filter(r => r.segments.length > 0 || r.markers.length > 0);
-        const container = {
-            routes,
+        const container: DataContainer = {
+            routes: structuredClone(routes) as RouteData[],
             baseLayer: layersContainer.baseLayer,
             overlays: layersContainer.overlays,
             northEast: bounds.northEast,
             southWest: bounds.southWest
-        } as DataContainer;
+        };
         return container;
-    }
-
-    public getDataForFileExport(): DataContainer {
-        const selectedRoute = this.selectedRouteService.getSelectedRoute();
-        if (selectedRoute == null) {
-            return this.getData(false);
-        }
-        return {
-            routes: [selectedRoute]
-        } as DataContainer;
     }
 
     public async setFileUrlAfterNavigation(url: string, baseLayer: string) {
@@ -127,9 +114,5 @@ export class DataContainerService {
             key: addressOrKey.split("_").join(" "),
             address: ""
         } as LayerData;
-    }
-
-    public hasHiddenRoutes(): boolean {
-        return this.store.selectSnapshot((s: ApplicationState) => s.routes).present.filter(r => r.state === "Hidden").length > 0;
     }
 }

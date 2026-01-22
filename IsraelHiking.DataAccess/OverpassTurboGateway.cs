@@ -23,27 +23,41 @@ public class OverpassTurboGateway(
     IOptions<ConfigurationData> configurationData,
     ILogger logger) : IOverpassTurboGateway
 {
-    private async Task<string> GetQueryResponse(String queryString)
+    private async Task<string> GetQueryResponse(string queryString)
     {
         var client = httpClientFactory.CreateClient();
         var content = new StringContent(queryString);
         HttpResponseMessage response = null;
         foreach (var address in configurationData.Value.OverpassAddresses)
         {
-            response = await client.PostAsync(address, content);
-            if (response.IsSuccessStatusCode)
+            for (int iRetry = 0; iRetry < 3; iRetry++)
             {
-                return await response.Content.ReadAsStringAsync();
+                try
+                {
+                    response = await client.PostAsync(address, content);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return await response.Content.ReadAsStringAsync();
+                    } 
+                    else
+                    {
+                        await Task.Delay(1000);
+                    }
+                }
+                catch
+                {
+                    await Task.Delay(1000);
+                }
             }
         }
         if (response is { IsSuccessStatusCode: false })
         {
-            throw new Exception(await response.Content.ReadAsStringAsync());
+            throw new Exception($"Problem with overpass query: {queryString}\n\n Error after 3 retries: {await response.Content.ReadAsStringAsync()}");
         }
         throw new Exception("No overpass addresses provided");
     }
-    
-    public async Task<Dictionary<string,List<string>>> GetExternalReferences()
+
+    public async Task<Dictionary<string, List<string>>> GetExternalReferences()
     {
         var dictionary = new Dictionary<string, List<string>>
         {
@@ -70,12 +84,12 @@ public class OverpassTurboGateway(
 
     public async Task<List<CompleteWay>> GetHighways(Coordinate northEast, Coordinate southWest)
     {
-        var query = $"[out:xml];\nway[\"highway\"][!\"construction\"]({southWest.Y},{southWest.X},{northEast.Y},{northEast.X});\nout meta;\n(._;>;);\nout;";
+        var query = $"[out:xml];\nway[\"highway\"][!\"construction\"]({southWest.Y},{southWest.X},{northEast.Y},{northEast.X});\nout meta;\n>;\nout;";
         var response = await GetQueryResponse(query);
 
         using MemoryStream memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(response));
         var source = new XmlOsmStreamSource(memoryStream);
-        
+
         var db = new MemorySnapshotDb().CreateSnapshotDb();
         var list = source.ToList();
         db.AddOrUpdate(list);
@@ -89,5 +103,5 @@ public class OverpassTurboGateway(
             .Select(s => s.Trim().TrimStart('"').TrimEnd('"').Replace("\"\"", "\"")).ToList(); // CSV " cleaning
         return images;
     }
-        
+
 }

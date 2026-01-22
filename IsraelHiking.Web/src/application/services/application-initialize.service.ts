@@ -26,6 +26,8 @@ import { ApplicationUpdateService } from "./application-update.service";
 import { LocationService } from "./location.service";
 import { HashService } from "./hash.service";
 import { AnalyticsService } from "./analytics.service";
+import { MapService } from "./map.service";
+import { SelectedRouteService } from "./selected-route.service";
 import type { ApplicationState } from "../models";
 
 @Injectable()
@@ -53,6 +55,8 @@ export class ApplicationInitializeService {
     private readonly locationService = inject(LocationService);
     private readonly hashService = inject(HashService);
     private readonly analyticsService = inject(AnalyticsService);
+    private readonly mapService = inject(MapService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly store = inject(Store);
 
     public async initialize() {
@@ -66,12 +70,12 @@ export class ApplicationInitializeService {
             this.screenService.initialize();
             await this.resources.initialize();
             this.applicationExitService.initialize();
-            await this.applicationUpdateService.initialize();
             this.openWithService.initialize();
             await this.purchaseService.initialize();
             this.geoLocationService.initialize();
             this.hashService.initialize();
             this.dragAndDropService.initialize();
+            this.mapService.initialize();
             if (this.runningContextService.isMobile
                 && !this.runningContextService.isCapacitor
                 && !this.runningContextService.isIFrame) {
@@ -80,18 +84,20 @@ export class ApplicationInitializeService {
                 } else {
                     UseAppDialogComponent.openDialog(this.dialog);
                 }
-            } else if (!this.runningContextService.isIFrame
+            } else if (this.runningContextService.isCapacitor
                 && this.store.selectSnapshot((s: ApplicationState) => s.configuration).isShowIntro) {
                 IntroDialogComponent.openDialog(this.dialog, this.runningContextService);
             }
+            this.selectedRouteService.initialize();
             this.poiService.initialize(); // do not wait for it to complete
             this.recordedRouteService.initialize();
             this.deviceOrientationService.initialize();
             this.tracesService.initialize(); // no need to wait for it to complete
             this.shareUrlsService.initialize(); // no need to wait for it to complete
-            this.offlineFilesDownloadService.initialize(); // no need to wait for it to complete
+            await this.offlineFilesDownloadService.initialize();
             this.locationService.initialize();
-            await this.loggingService.info("Finished Mapeak Application Initialization");
+            await this.applicationUpdateService.initialize(); // Needs to be last to make sure app gets updated
+            this.loggingService.info("Finished Mapeak Application Initialization");
         } catch (ex) {
             if (this.runningContextService.isIFrame) {
                 return;

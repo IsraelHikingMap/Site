@@ -23,6 +23,7 @@ export class ResourcesService {
     public endOfRoutes = "end-of-routes";
     public editRoutePoints = "editing-route-layer-points";
     public editRouteLines = "editing-route-layer-lines";
+    public editRouteSource = "editing-route-source";
     public locationIcon = "location-icon-layer";
     public readonly recordedRouteColor = "#FF6600";
     // All the text in the app //
@@ -96,7 +97,7 @@ export class ResourcesService {
     public moveToRoute: string;
     public myTraces: string;
     public noTraces: string;
-    public myShares: string;
+    public mySavesInTheCloud: string;
     public noShares: string;
     public title: string;
     public titlePlaceHolder: string;
@@ -258,6 +259,11 @@ export class ResourcesService {
     public clickToTranslate: string;
     public minimize: string;
     public restore: string;
+    public planAndExplore: string;
+    public signIn: string;
+    public artwork: string;
+    public currentRoute: string;
+    public allXRoutes: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -316,7 +322,7 @@ export class ResourcesService {
     public noLocationPermissionOpenAppSettings: string;
     public tracesAreOnlySavedLocally: string;
     public unexpectedErrorPleaseTryAgainLater: string;
-    public editingRouteWhileTracking: string;
+    public trackingIsDisabledWhileEditing: string;
     public loginTokenExpiredPleaseLoginAgain: string;
     public jammedPositionReceived: string;
     public newVersionAvailable: string;
@@ -324,6 +330,8 @@ export class ResourcesService {
     public uploadingDataFromExternalSourceIsNotAllowed: string;
     public pleaseAllowLocationTracking: string;
     public dontSwitchApps: string;
+    public tooManyRoutes: string;
+    public openRoutesPanel: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -486,7 +494,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1767082436082");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1768564997501");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -557,7 +565,7 @@ export class ResourcesService {
         this.moveToRoute = this.gettextCatalog.getString("Move to Route");
         this.myTraces = this.gettextCatalog.getString("My Traces");
         this.noTraces = this.gettextCatalog.getString("No traces, you should really upload some to OSM.");
-        this.myShares = this.gettextCatalog.getString("My Shares");
+        this.mySavesInTheCloud = this.gettextCatalog.getString("My Saves in the Cloud");
         this.noShares = this.gettextCatalog.getString("No shares, now is the time to start sharing your work!");
         this.title = this.gettextCatalog.getString("Title");
         this.titlePlaceHolder = this.gettextCatalog.getString("The title for your share.");
@@ -725,6 +733,11 @@ export class ResourcesService {
         this.clickToTranslate = this.gettextCatalog.getString("Click to translate");
         this.minimize = this.gettextCatalog.getString("Minimize");
         this.restore = this.gettextCatalog.getString("Restore");
+        this.planAndExplore = this.gettextCatalog.getString("Plan & Explore");
+        this.signIn = this.gettextCatalog.getString("Sign in!");
+        this.artwork = this.gettextCatalog.getString("Artwork");
+        this.currentRoute = this.gettextCatalog.getString("Current Route");
+        this.allXRoutes = this.gettextCatalog.getString("All {{count}} Routes");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -770,7 +783,7 @@ export class ResourcesService {
         this.makeSureBatteryOptimizationIsOff = this.gettextCatalog
             .getString("Please make sure the battery optimization is turned off for this application. Go to application setting to do so.");
         this.dontShowThisMessageAgain = this.gettextCatalog.getString("Don't show this message again");
-        this.areYouSureYouWantToDeleteAllRoutes = this.gettextCatalog.getString("Are you sure you want to delete all routes?");
+        this.areYouSureYouWantToDeleteAllRoutes = this.gettextCatalog.getString("Are you sure you want to delete all {{count}} routes?");
         this.clickBackAgainToCloseTheApp = this.gettextCatalog.getString("Click back again to close the app");
         this.wrappingThingsUp = this.gettextCatalog.getString("Wrapping things up, please wait a few seconds...");
         this.unableToDeleteShare = this.gettextCatalog.getString("Unable to delete the share...");
@@ -800,8 +813,7 @@ export class ResourcesService {
         this.tracesAreOnlySavedLocally = this.gettextCatalog.getString("Traces are only saved locally. " +
             "You can change that in the configuration settings");
         this.unexpectedErrorPleaseTryAgainLater = this.gettextCatalog.getString("Oops, something went wrong. Please try again later");
-        this.editingRouteWhileTracking = this.gettextCatalog.getString("GPS tracking is enabled while editing, " +
-            "in order to avoid map centering to current location please click the cross icon on the top left corner");
+        this.trackingIsDisabledWhileEditing = this.gettextCatalog.getString("GPS tracking is disabled while editing.");
         this.loginTokenExpiredPleaseLoginAgain = this.gettextCatalog.getString("Login token expired, please login again");
         this.jammedPositionReceived = this.gettextCatalog.getString("Jammed position received...");
         this.newVersionAvailable = this.gettextCatalog.getString("New version available, do you want to update?");
@@ -809,6 +821,8 @@ export class ResourcesService {
         this.uploadingDataFromExternalSourceIsNotAllowed = this.gettextCatalog.getString("Uploading data from external source is not allowed...");
         this.pleaseAllowLocationTracking = this.gettextCatalog.getString("Please allow location tracking");
         this.dontSwitchApps = this.gettextCatalog.getString("To prevent download errors, please don't switch apps or lock your screen until the download is finished");
+        this.tooManyRoutes = this.gettextCatalog.getString("You have more than 10 routes which can cause performance issues.");
+        this.openRoutesPanel = this.gettextCatalog.getString("Open routes panel");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog

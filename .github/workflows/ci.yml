@@ -16,15 +16,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5.0.1
         with:
           dotnet-version: '9.0'
 
@@ -38,7 +38,7 @@ jobs:
           npx ng lint
       - name: Codecov upload
         if: always()
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5.5.2
         with:
           files: ./Tests/IsraelHiking.API.Tests/coverage.info,./IsraelHiking.Web/coverage/lcov.info
         env:
@@ -50,4 +50,99 @@ jobs:
           paths: |
             ./**/test-result.xml
             ./**/TESTS-*.xml
-          
+  
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6.0.1
+
+      - name: Setup node
+        uses: actions/setup-node@v6.1.0
+        with:
+          node-version-file: IsraelHiking.Web/.nvmrc
+
+      - name: Setup Java
+        uses: actions/setup-java@v5.1.0
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.1'
+          working-directory: IsraelHiking.Web/android
+          bundler-cache: true
+
+      - name: Build UI and set version
+        run: |
+          cd IsraelHiking.Web
+          npm ci
+          npm run build:mobile -- --no-progress
+          npx cap sync android
+      - name: Build Android Release
+        if: ${{ github.secret_source == 'Actions' }}
+        run: |
+          cd IsraelHiking.Web/android
+          bundle exec fastlane build_aab
+        env:
+          STORE_PASSWORD: ${{ secrets.MAPEAK_STORE_PASSWORD }}
+          PASSWORD: ${{ secrets.MAPEAK_PASSWORD }}
+          KEYSTORE_PATH: ${{ github.workspace }}/IsraelHiking.Web/android/app/Mapeak.jks
+
+  build-docker: 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6.0.1
+
+      - name: Build Docker image
+        run: |
+          docker build . -t ghcr.io/israelhikingmap/website-mapeak
+
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6.0.1
+
+      - name: Setup node
+        uses: actions/setup-node@v6.1.0
+        with:
+          node-version-file: IsraelHiking.Web/.nvmrc
+
+      - name: Setup xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: 16.4
+
+      - name: setup-cocoapods
+        uses: maxim-lobanov/setup-cocoapods@v1
+        with:
+          podfile-path: IsraelHiking.Web/ios/App/Podfile.lock
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.1'
+          working-directory: IsraelHiking.Web/ios/App
+          bundler-cache: true
+
+      - name: Set up Git to use PAT for private match repo
+        run: |
+          git config --global url."https://x-access-token:${{ secrets.FASTLANE_MATCH_PAT }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Build UI
+        run: |
+          cd IsraelHiking.Web
+          npm ci
+          npm run build:mobile -- --no-progress
+          npx cap sync ios
+      - name: Build iOS with signing
+        if: ${{ github.secret_source == 'Actions' }}
+        run: |
+          cd IsraelHiking.Web/ios/App
+          bundle exec fastlane build_ios
+        env:
+          MATCH_PASSWORD: ${{ secrets.PASSWORD }}

@@ -53,7 +53,12 @@ describe("LocationService", () => {
                 { provide: LoggingService, useValue: { warning: () => { } } },
                 { provide: ToastService, useValue: toastService },
                 { provide: ResourcesService, useValue: {} },
-                { provide: SelectedRouteService, useValue: { getSelectedRoute: jasmine.createSpy().and.returnValue({ state: "Poi" }) } },
+                {
+                    provide: SelectedRouteService, useValue: {
+                        getSelectedRoute: jasmine.createSpy().and.returnValue({ state: "Poi" }),
+                        isEditingRoute: () => false
+                    },
+                },
                 LocationService
             ]
         });
@@ -270,20 +275,18 @@ describe("LocationService", () => {
         }
     ));
 
-    it("Should raise a toast when editing and panned changed from true to false", inject([LocationService, Store, ToastService],
-        async (service: LocationService, store: Store, toastService: ToastService) => {
+    it("Should not be following when editing route", inject([LocationService, Store, SelectedRouteService],
+        async (service: LocationService, store: Store, selectedRouteService: SelectedRouteService) => {
             store.reset({
                 gpsState: {
                     currentPosition: null,
                     tracking: "tracking"
                 },
-                inMemoryState: { following: true, pannedTimestamp: new Date() }
+                inMemoryState: { following: true, distance: true }
             });
             await service.initialize();
-
-            store.dispatch(new SetPannedAction(null));
-
-            expect(toastService.warning).toHaveBeenCalled();
+            selectedRouteService.isEditingRoute = () => true;
+            expect(service.isFollowing()).toBeFalsy();
         }
     ));
 });

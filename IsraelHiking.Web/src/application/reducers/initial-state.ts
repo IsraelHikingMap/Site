@@ -9,25 +9,25 @@ export const POPULARITY_HEATMAP = "Popularity Heatmap";
 export const POINTS_OF_INTEREST = "Points of Interest";
 
 export const AVAILABLE_LANGUAGES: Language[] = [{
-        code: "en-US",
-        rtl: false,
-        label: "English"
-    },
-    {
-        code: "ru",
-        rtl: false,
-        label: "Русский"
-    },
-    {
-        code: "he",
-        rtl: true,
-        label: "עברית"
-    },
-    {
-        code: "ar",
-        rtl: true,
-        label: "العربية"
-    }];
+    code: "en-US",
+    rtl: false,
+    label: "English"
+},
+{
+    code: "ru",
+    rtl: false,
+    label: "Русский"
+},
+{
+    code: "he",
+    rtl: true,
+    label: "עברית"
+},
+{
+    code: "ar",
+    rtl: true,
+    label: "العربية"
+}];
 
 export const CATEGORIES_GROUPS: CategoriesGroup[] = [{
     type: POINTS_OF_INTEREST,
@@ -120,6 +120,10 @@ export const CATEGORIES_GROUPS: CategoriesGroup[] = [{
             color: "#ffb800",
             icon: "icon-star",
             label: "Attraction"
+        }, {
+            color: "#ffb800",
+            icon: "icon-artwork",
+            label: "Artwork"
         }]
     }],
 }, {
@@ -237,10 +241,7 @@ export const initialState =
             isSubscribed: false,
             downloadedTiles: null,
             shareUrlsLastModifiedDate: null,
-            uploadPoiQueue: []
-        },
-        uiComponentsState: {
-            drawingVisible: false,
-            statisticsVisible: false
+            uploadPoiQueue: [],
+            purchasesSynced: false
         }
     } as MutableApplicationState;

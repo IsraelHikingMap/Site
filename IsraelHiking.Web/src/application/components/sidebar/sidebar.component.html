@@ -1,15 +1,15 @@
 ﻿@if (visible()) {
-  <div class="sidebar-wrapper" [dir]="resources.direction" animate.enter="sidebar-enter" animate.leave="sidebar-leave">
-    @switch (viewName) {
-      @case ('layers') {
-        <layers-sidebar></layers-sidebar>
-      }
-      @case ('info') {
-        <info-sidebar></info-sidebar>
-      }
-      @case ('public-poi') {
-        <public-poi-sidebar></public-poi-sidebar>
-      }
-    }
-  </div>
+<div class="sidebar-wrapper" [dir]="resources.direction" animate.enter="sidebar-enter" animate.leave="sidebar-leave">
+  @switch (viewName) {
+  @case ('layers') {
+  <layers-sidebar></layers-sidebar>
+  }
+  @case ('public-poi') {
+  <public-poi-sidebar></public-poi-sidebar>
+  }
+  @case ('private-routes') {
+  <private-routes-sidebar></private-routes-sidebar>
+  }
+  }
+</div>
 }

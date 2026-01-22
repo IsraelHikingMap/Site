@@ -7,8 +7,6 @@ PODS:
     - Capacitor
   - CapacitorCommunityKeepAwake (8.0.0):
     - Capacitor
-  - CapacitorCommunitySafeArea (8.0.1):
-    - Capacitor
   - CapacitorCommunityScreenBrightness (8.0.0):
     - Capacitor
   - CapacitorCordova (8.0.0)
@@ -20,28 +18,27 @@ PODS:
     - Capacitor
   - CapacitorTextZoom (8.0.0):
     - Capacitor
-  - CapawesomeCapacitorAppUpdate (8.0.0):
+  - CapawesomeCapacitorAppUpdate (8.0.1):
     - Capacitor
-  - CapgoBackgroundGeolocation (8.0.4):
+  - CapgoBackgroundGeolocation (8.0.8):
     - Capacitor
   - CapgoCapacitorCompass (8.1.2):
     - Capacitor
   - CordovaPlugins (8.0.0):
     - CapacitorCordova
   - CordovaPluginsResources (0.0.105)
-  - PurchasesHybridCommon (17.25.0):
-    - RevenueCat (= 5.51.1)
-  - RevenueCat (5.51.1)
-  - RevenuecatPurchasesCapacitor (12.0.0):
+  - PurchasesHybridCommon (17.26.1):
+    - RevenueCat (= 5.52.1)
+  - RevenueCat (5.52.1)
+  - RevenuecatPurchasesCapacitor (12.0.2):
     - Capacitor
-    - PurchasesHybridCommon (= 17.25.0)
+    - PurchasesHybridCommon (= 17.26.1)
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorCamera (from `../../node_modules/@capacitor/camera`)"
   - "CapacitorCommunityKeepAwake (from `../../node_modules/@capacitor-community/keep-awake`)"
-  - "CapacitorCommunitySafeArea (from `../../node_modules/@capacitor-community/safe-area`)"
   - "CapacitorCommunityScreenBrightness (from `../../node_modules/@capacitor-community/screen-brightness`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
@@ -69,8 +66,6 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/camera"
   CapacitorCommunityKeepAwake:
     :path: "../../node_modules/@capacitor-community/keep-awake"
-  CapacitorCommunitySafeArea:
-    :path: "../../node_modules/@capacitor-community/safe-area"
   CapacitorCommunityScreenBrightness:
     :path: "../../node_modules/@capacitor-community/screen-brightness"
   CapacitorCordova:
@@ -101,22 +96,21 @@ SPEC CHECKSUMS:
   CapacitorApp: 3963a84197280757b84f126afd1520a85ae3b092
   CapacitorCamera: 592acb7ab9fb748e2d8571eb03af30ec4e1ace12
   CapacitorCommunityKeepAwake: 332bf035bbdf0b1c244fd492b35a8a06c8802111
-  CapacitorCommunitySafeArea: 91738f4ae7f47d2d94e06e429e16fb73cd8fdc48
   CapacitorCommunityScreenBrightness: e4075e1181f7e88259edb8b1e3b9a209e1144d45
   CapacitorCordova: 5dc3912d25ef770a3fe0f431bb65c9fbfa2e92f9
   CapacitorDevice: 9a16fb36a19ff391bf75afbe3cf16f883b3b3aa0
   CapacitorEmailComposer: 47e488b85f3a4400e3b616fe56b5b9f65a4aa2f3
   CapacitorShare: 12f1d192170cbcf9f108fd675ac8e343761a4638
   CapacitorTextZoom: bceaf076f134e188f8fd36ff74ef18a7d2bdb160
-  CapawesomeCapacitorAppUpdate: d62dfb474a41faac83aaa3b82da7bfbff3a22f2b
-  CapgoBackgroundGeolocation: a8653893156d2a42e5da50f792510ceb6bac6c16
+  CapawesomeCapacitorAppUpdate: b51cf29f28f664ef942feb12a76116d87eee62f0
+  CapgoBackgroundGeolocation: 75d9fbe24151b06f0c6486d994dbef5e5d7fa6b1
   CapgoCapacitorCompass: a8f20d67031b069b544056d9b83c388f54bc9f6f
   CordovaPlugins: f557708c6f61223224194c8e01192f1b41784858
   CordovaPluginsResources: da93847212bf7b16ba770e4d6c3e7dba820174c7
-  PurchasesHybridCommon: 6a79a873ab52f777bfa36e9516f3fcd84d3b3428
-  RevenueCat: eab035bbab271faccfef5c36eaff2a1ffef14dc0
-  RevenuecatPurchasesCapacitor: dabd704d01e9c703745936082140408c75219198
+  PurchasesHybridCommon: a0923adc952779f2174ff699bfdf275f4af13aa5
+  RevenueCat: c3d07077a0cc70b7c90a5a6072d60f9905d2dbc0
+  RevenuecatPurchasesCapacitor: 29b929cec112f7327e25feb6a3178f8c89dc6978
 
-PODFILE CHECKSUM: 05de24813d2af09ad3e6b506154900c07fd601fe
+PODFILE CHECKSUM: 33a81c596dd685e1d6ac3cb4f1f4c820092ee7b1
 
 COCOAPODS: 1.16.2

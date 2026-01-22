@@ -12,7 +12,6 @@ import { RoutesFactory } from "./routes.factory";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { RunningContextService } from "./running-context.service";
-import { ConnectionService } from "./connection.service";
 import { StopRecordingAction, RecordedRouteReducer, ClearPendingProcessingRoutePointsAction, AddRecordingRoutePointsAction } from "../reducers/recorded-route.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
 import { SetCurrentPositionAction, GpsReducer } from "../reducers/gps.reducer";
@@ -47,7 +46,6 @@ describe("Recorded Route Service", () => {
                 { provide: LoggingService, useValue: loggingServiceMock },
                 { provide: TracesService, useValue: tracesServiceMock },
                 { provide: RunningContextService, useValue: runnningContextServiceMock },
-                { provide: ConnectionService, useValue: { stateChanged: { subscribe: () => { } } } },
                 {
                     provide: GeoLocationService, useValue: {
                         positionWhileInBackground: new EventEmitter(),

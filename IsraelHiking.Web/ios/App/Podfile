@@ -12,7 +12,6 @@ def capacitor_pods
   pod 'Capacitor', :path => '../../node_modules/@capacitor/ios'
   pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
   pod 'CapacitorCommunityKeepAwake', :path => '../../node_modules/@capacitor-community/keep-awake'
-  pod 'CapacitorCommunitySafeArea', :path => '../../node_modules/@capacitor-community/safe-area'
   pod 'CapacitorCommunityScreenBrightness', :path => '../../node_modules/@capacitor-community/screen-brightness'
   pod 'CapacitorApp', :path => '../../node_modules/@capacitor/app'
   pod 'CapacitorCamera', :path => '../../node_modules/@capacitor/camera'

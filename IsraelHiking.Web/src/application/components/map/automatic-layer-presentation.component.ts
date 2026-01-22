@@ -13,8 +13,8 @@ import { Store } from "@ngxs/store";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { MapService } from "../../services/map.service";
+import { DEFAULT_BASE_LAYERS } from "../../reducers/initial-state";
 import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models";
-import { DEFAULT_BASE_LAYERS } from "application/reducers/initial-state";
 
 @Component({
     selector: "auto-layer",
@@ -43,7 +43,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     private recreateQueue: Subject<() => Promise<void>> = new Subject();
 
     public readonly resources = inject(ResourcesService);
-    
+
     private readonly mapComponent = inject(MapComponent);
     private readonly fileService = inject(FileService);
     private readonly mapService = inject(MapService);
@@ -142,7 +142,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
                     delete source.url;
                     source.tiles[0] = source.tiles[0].replace("https://", "slice://");
                 }
-                if (source.type === "raster-dem" ) {
+                if (source.type === "raster-dem") {
                     delete source.url;
                     source.tiles[0] = source.tiles[0].replace("https://", "slice://");
                 }
@@ -151,7 +151,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
         this.updateSourcesAndLayers(layerData, styleJson.sources, styleJson.layers);
     }
 
-    private updateSourcesAndLayers(layerData: LayerData, sources: {[_: string]: SourceSpecification}, layers: LayerSpecification[]) {
+    private updateSourcesAndLayers(layerData: LayerData, sources: { [_: string]: SourceSpecification }, layers: LayerSpecification[]) {
         if (!this.visible()) {
             return;
         }

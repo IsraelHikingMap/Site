@@ -1,124 +1,75 @@
-﻿<div class="side-control maplibregl-ctrl" [dir]="resources.direction">
-  <div class="control-container">
-    <div class="flex flex-row relative">
-      <button mat-button class="high-button" [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Toggle main menu"><i class="fa fa-lg icon-bars"></i></button>
+﻿<button mat-button routerLink="/map" angulartics2On="click" angularticsCategory="Menu"
+  angularticsAction="Plan & Explore" class="max-md:hidden!">
+  <i class="fa fa-lg icon-map-o mat-icon"></i>
+  <span class="mx-1">{{resources.planAndExplore}}</span>
+</button>
+@if (!isIFrame() && !isLoggedIn()) {
+<button mat-raised-button (click)="login()">{{resources.signIn}}</button>
+}
+<button mat-button [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Menu"
+  angularticsAction="Toggle main menu" class="!h-[56px]">
+  <span class="flex flex-row justify-center items-center">
+    @if (isLoggedIn()) {
+    @if (userInfo?.imageUrl) {
+    <img [src]="userInfo.imageUrl" alt="" class="max-h-[48px] me-4 rounded-full" />
+    } @else {
+    <i class="fa icon-user-circle fa-lg me-4"></i>
+    }
+    }
+    <i class="fa fa-lg icon-bars"></i>
+  </span>
+</button>
+<mat-menu #appMenu="matMenu" xPosition="before">
+  <ng-template matMenuContent>
+    <div [dir]="resources.direction">
       @if (isLoggedIn()) {
-        <button mat-button class="high-button" [matMenuTriggerFor]="userMenu" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Toggle user menu">
-          @if (userInfo?.imageUrl) {
-            <img class="space-after profile-image" [src]="userInfo.imageUrl | offlineImage:true | async" alt=""/>
-          } @else {
-            <i class="fa icon-user fa-lg"></i>
-          }
-        </button>
+      <button mat-menu-item (click)="openTraces()" angulartics2On="click" angularticsCategory="User Menu"
+        angularticsAction="User traces open">
+        <span><i class="fa fa-lg icon-recordings"></i> {{resources.myTraces}}</span>
+      </button>
+      <button mat-menu-item (click)="openShares()" angulartics2On="click" angularticsCategory="User Menu"
+        angularticsAction="User shares open">
+        <span><i class="fa fa-lg icon-mixcloud"></i> {{resources.mySavesInTheCloud}}</span>
+      </button>
+      <button mat-menu-item (click)="openConfigurationDialog()" angulartics2On="click" angularticsCategory="User Menu"
+        angularticsAction="Advanced settings open">
+        <span><i class="fa fa-lg icon-cogs"></i> {{resources.advancedSettings}}</span>
+      </button>
+      <button mat-menu-item (click)="logout()" angulartics2On="click" angularticsCategory="User Menu"
+        angularticsAction="Logout">
+        <span><i class="fa fa-lg icon-sign-out"></i> {{resources.logout}}</span>
+      </button>
+      <hr />
       }
-      @if (!isLoggedIn() && !isIFrame()) {
-        <button mat-button class="high-button" (click)="login()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Login">
-          <i class="fa icon-frown-o fa-lg"></i>
-        </button>
+      <button mat-menu-item routerLink="/map" angulartics2On="click" angularticsCategory="Menu"
+        angularticsAction="Plan & Explore" class="block md:hidden!">
+        <i class="fa fa-lg icon-map-o mat-icon"></i>
+        <span class="mx-1">{{resources.planAndExplore}}</span>
+      </button>
+      @if (isShowOrderButton()) {
+      <button mat-menu-item (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu"
+        angularticsAction="Order">
+        <i class="fa fa-lg icon-dollar mat-icon"></i>
+        <span class="mx-1">{{resources.purchaseOfflineMapsShort}}</span>
+      </button>
       }
-      <span class="circle" [ngClass]="{'offline': isOffline(), 'online': !isOffline()}">{{getQueueText()}}</span>
-      @if (isOffline()) {
-        <span class="circle-line"></span>
+      <button mat-menu-item (click)="openLanguage()" angulartics2On="click" angularticsCategory="Menu"
+        angularticsAction="Open language selection">
+        <i class="fa fa-lg icon-language mat-icon"></i>
+        <span class="mx-1">Language</span>
+      </button>
+      <button mat-menu-item routerLink="/about" angulartics2On="click" angularticsCategory="Menu"
+        angularticsAction="About">
+        <i class="fa fa-lg icon-info mat-icon"></i>
+        <span class="mx-1">{{resources.about}}</span>
+      </button>
+      @if (!isIFrame()) {
+      <button mat-menu-item (click)="reportAnIssue()" angulartics2On="click" angularticsCategory="Menu"
+        angularticsAction="Report an issue">
+        <i class="fa fa-lg icon-envelope mat-icon"></i>
+        <span class="mx-1">{{resources.reportAnIssue}}</span>
+      </button>
       }
     </div>
-    <mat-menu #appMenu="matMenu" xPosition="before">
-      <ng-template matMenuContent>
-        <div>
-          @if (!isIFrame()) {
-            <button mat-menu-item (click)="selectDrawing()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show drawing buttons">
-              <span class="flex flex-row justify-center items-center">
-                <span class="w-1/12 text-center"><i class="fa fa-lg icon-pencil mat-icon"></i></span>
-                <span class="flex-1 margin-sides">{{resources.routePlanning}}</span>
-                <span class="w-1/12 text-center"><i class="fa fa-lg icon-eye mat-icon" [ngClass]="{ 'icon-eye' : drawingVisible, 'icon-eye-slash': !drawingVisible}"></i></span>
-              </span>
-            </button>
-          }
-          <button mat-menu-item (click)="selectStatistics()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show statistics buttons">
-            <span class="flex flex-row justify-center items-center">
-              <span class="w-1/12 text-center"><i class="fa fa-lg icon-area-chart mat-icon"></i></span>
-              <span class="flex-1 margin-sides">{{resources.statisticsAndHeightChart}}</span>
-              <span class="w-1/12 text-center"><i class="fa fa-lg icon-eye mat-icon" [ngClass]="{ 'icon-eye' : statisticsVisible, 'icon-eye-slash': !statisticsVisible}"></i></span>
-            </span>
-          </button>
-          <button mat-menu-item (click)="selectLayers()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show layers">
-            <span class="flex flex-row justify-center items-center">
-              <span class="w-1/12 text-center"><i class="fa fa-lg icon-layers mat-icon"></i></span>
-              <span class="flex-1 margin-sides">{{resources.layers}}</span>
-            </span>
-          </button>
-          <button mat-menu-item (click)="selectSharesAndFiles()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Open share and files">
-            <span class="flex flex-row justify-center items-center">
-              <span class="w-1/12 text-center"><i class="fa fa-lg icon-share-alt mat-icon"></i></span>
-              <span class="flex-1 margin-sides">{{resources.save}} - {{resources.share}} - {{resources.files}}</span>
-            </span>
-          </button>
-          @if (!isLoggedIn() && !isIFrame()) {
-            <button mat-menu-item (click)="login()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Login">
-              <span class="flex flex-row justify-center items-center">
-                <span class="w-1/12 text-center"><i class="fa fa-lg icon-sign-in mat-icon"></i></span>
-                <span class="flex-1 margin-sides">{{resources.login}}</span>
-              </span>
-            </button>
-          }
-          @if (isShowOrderButton()) {
-            <button mat-menu-item (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Order">
-              <span class="flex flex-row justify-center items-center primary-text">
-                <span class="w-1/12 text-center"><i class="fa fa-lg icon-dollar mat-icon"></i></span>
-                <span class="flex-1 margin-sides">{{resources.purchaseOfflineMapsShort}}</span>
-              </span>
-            </button>
-          }
-          <button mat-menu-item (click)="openLanguage()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Open language selection">
-            <span class="flex flex-row justify-center items-center">
-              <span class="w-1/12 text-center"><i class="fa fa-lg icon-language mat-icon"></i></span>
-              <span class="flex-1 margin-sides">Language</span>
-            </span>
-          </button>
-          <button mat-menu-item (click)="selectLegendAndAbout()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show legend and info">
-            <span class="flex flex-row justify-center items-center">
-              <span class="w-1/12 text-center"><i class="fa fa-lg icon-info mat-icon"></i></span>
-              <span class="flex-1 margin-sides">{{resources.about}} - {{resources.legend}}</span>
-            </span>
-          </button>
-          @if (!isIFrame()) {
-            <button mat-menu-item (click)="reportAnIssue()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Report an issue">
-              <span class="flex flex-row justify-center items-center">
-                <span class="w-1/12 text-center"><i class="fa fa-lg icon-envelope mat-icon"></i></span>
-                <span class="flex-1 margin-sides">{{resources.reportAnIssue}}</span>
-              </span>
-            </button>
-          }
-          @if (isShowEditOsmButton()) {
-            <a mat-menu-item [href]="getOsmAddress()" [target]="'_blank'" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Edit in OSM">
-              <span class="flex flex-row justify-center items-center">
-                <span class="w-1/12 text-center"><i class="fa icon-map-editing fa-lg mat-icon"></i></span>
-                <span class="flex-1 margin-sides">{{resources.editThisMapUsingOsm}}</span>
-              </span>
-            </a>
-          }
-        </div>
-      </ng-template>
-    </mat-menu>
-    <mat-menu #userMenu="matMenu" xPosition="before">
-      <ng-template matMenuContent>
-        <div>
-          <div class="flex flex-row margin-sides">
-            <span class="text-xl">{{userInfo?.displayName}}</span>
-          </div>
-          <button mat-menu-item (click)="openTraces()" angulartics2On="click" angularticsCategory="User Menu" angularticsAction="User traces open">
-            <span><i class="fa fa-lg icon-recordings"></i> {{resources.myTraces}}</span>
-          </button>
-          <button mat-menu-item (click)="openShares()" angulartics2On="click" angularticsCategory="User Menu" angularticsAction="User shares open">
-            <span><i class="fa fa-lg icon-mixcloud"></i> {{resources.myShares}}</span>
-          </button>
-          <button mat-menu-item (click)="openConfigurationDialog()" angulartics2On="click" angularticsCategory="User Menu" angularticsAction="Advanced settings open">
-            <span><i class="fa fa-lg icon-cogs"></i> {{resources.advancedSettings}}</span>
-          </button>
-          <button mat-menu-item (click)="logout()" angulartics2On="click" angularticsCategory="User Menu" angularticsAction="Logout">
-            <span><i class="fa fa-lg icon-sign-out"></i> {{resources.logout}}</span>
-          </button>
-        </div>
-      </ng-template>
-    </mat-menu>
-  </div>
-</div>
+  </ng-template>
+</mat-menu>

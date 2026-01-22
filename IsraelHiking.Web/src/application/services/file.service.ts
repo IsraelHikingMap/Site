@@ -71,11 +71,6 @@ export class FileService {
             label: "Naviguide binary route file (.twl)",
             extension: "twl",
             outputFormat: "twl",
-        },
-        {
-            label: "All routes to a single Track GPX (.gpx)",
-            extension: "gpx",
-            outputFormat: "all_gpx_single_track"
         }
     ];
 
@@ -343,7 +338,12 @@ export class FileService {
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
         let previousPercentage = 0;
         return new Promise<void>((resolve, reject) => {
-            fetch(url, { headers: { Authorization: `Bearer ${token}` } }).then(async (response) => {
+            fetch(url, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                signal: abortController.signal
+            }).then(async (response) => {
                 if (!response.ok) {
                     this.loggingService.error(`[Files] Failed to download file: ${fileName}, status: ${response.statusText}`);
                     reject(new Error(`Failed to download file: ${fileName}, status: ${response.statusText}`));

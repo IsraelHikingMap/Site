@@ -20,7 +20,7 @@ export class FitBoundsService {
         await this.mapService.initializationPromise;
         const maxZoom = Math.max(this.mapService.map.getZoom(), 16);
         const mbBounds = SpatialService.boundsToMBBounds(bounds);
-        
+
         this.store.dispatch(new SetPannedAction(new Date()));
         this.mapService.map.fitBounds(mbBounds, {
             maxZoom,
