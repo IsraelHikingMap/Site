@@ -1,7 +1,8 @@
 import { inject, Injectable } from "@angular/core";
-import { File as FileSystemWrapper, IFile } from "@awesome-cordova-plugins/file/ngx";
+import { Directory, Filesystem } from "@capacitor/filesystem";
 import { Source, RangeResponse, PMTiles } from "pmtiles";
 import { Store } from "@ngxs/store";
+import { decode } from "base64-arraybuffer";
 
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
@@ -11,24 +12,20 @@ export const TILES_ZOOM = 7;
 
 class CapacitorSource implements Source {
 
-    constructor(private file: IFile) { }
+    constructor(private path: string) { }
 
-    getBytes(offset: number, length: number): Promise<RangeResponse> {
-        const slice = this.file.slice(offset, offset + length);
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const arrayBuffer = event.target.result as ArrayBuffer;
-                resolve({ data: arrayBuffer });
-            };
-            reader.onerror = () => {
-                reject(new Error("Unable to read file: " + this.file.name));
-            }
-            reader.readAsArrayBuffer(slice);
-        })
+    async getBytes(offset: number, length: number): Promise<RangeResponse> {
+        const content = await Filesystem.readFile({
+            path: this.path,
+            directory: Directory.Data,
+            offset: offset,
+            length: length
+        });
+        const data = decode(content.data as string);
+        return { data };
     }
 
-    getKey() { return this.file.name }
+    getKey() { return this.path }
 }
 
 @Injectable()
@@ -36,7 +33,6 @@ export class PmTilesService {
 
     private sourcesCache = new Map<string, CapacitorSource>;
 
-    private readonly fileStsyemWrapper = inject(FileSystemWrapper);
     private readonly loggingService = inject(LoggingService);
     private readonly store = inject(Store);
 
@@ -44,15 +40,9 @@ export class PmTilesService {
         if (this.sourcesCache.has(filePath)) {
             return this.sourcesCache.get(filePath);
         }
-        const dir = await this.fileStsyemWrapper.resolveDirectoryUrl(this.fileStsyemWrapper.dataDirectory);
-        const file = await this.fileStsyemWrapper.getFile(dir, filePath, { create: false });
-        return new Promise((resolve, reject) => {
-            file.file((file) => {
-                const source = new CapacitorSource(file);
-                this.sourcesCache.set(filePath, source);
-                resolve(source);
-            }, reject);
-        });
+        const source = new CapacitorSource(filePath);
+        this.sourcesCache.set(filePath, source);
+        return source;
     }
 
     /**

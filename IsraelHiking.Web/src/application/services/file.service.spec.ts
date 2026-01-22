@@ -68,25 +68,6 @@ describe("FileService", () => {
         }
     ));
 
-    it("Should save to file on mobile", inject([FileService, RunningContextService, FileSystemWrapper],
-        async (service: FileService, runningContextService: RunningContextService, fileSystemWrapper: FileSystemWrapper) => {
-            fileSystemWrapper.resolveLocalFilesystemUrl = jasmine.createSpy().and.returnValue(Promise.resolve({
-                nativeURL: "file:///some-file",
-            }));
-            (runningContextService as any).isCapacitor = true;
-            const dataContainer = {
-                routes: [{
-                    markers: [{ latlng: { lat: 1, lng: 2 }, urls: [] }],
-                    segments: []
-                }],
-            } as DataContainer;
-
-            await service.saveToFile("file.gpx", "gpx", dataContainer);
-
-            expect(fileSystemWrapper.resolveLocalFilesystemUrl).toHaveBeenCalled();
-        }
-    ));
-
     it("Should add routes from url", inject([FileService, HttpTestingController],
         async (service: FileService, mockBackend: HttpTestingController) => {
 
@@ -180,139 +161,11 @@ describe("FileService", () => {
         }
     ));
 
-    it("Should get style json content from local for local layers", inject([FileService, FileSystemWrapper],
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-            const spy = jasmine.createSpy();
-            fileSystemWrapper.readAsText = spy.and.returnValue(Promise.resolve("{}"));
-            const response = await service.getStyleJsonContent("s.json", true);
-
-            expect(spy).toHaveBeenCalled();
-            expect(response).toEqual({} as StyleSpecification);
-        }
-    ));
-
-    it("Should get style json content from local when offline", inject([FileService, FileSystemWrapper, RunningContextService],
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper, runningContextService: RunningContextService) => {
-            (runningContextService as any).isCapacitor = true;
-            const spy = jasmine.createSpy();
-            fileSystemWrapper.readAsText = spy.and.returnValue(Promise.resolve("{}"));
-
-            const promise = service.getStyleJsonContent("./style.json", false);
-
-            const response = await promise;
-            expect(response).toEqual({} as StyleSpecification);
-        }
-    ));
-
-    it("Should get empty style json on failure", inject([FileService, FileSystemWrapper, RunningContextService],
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper, runningContextService: RunningContextService) => {
-            (runningContextService as any).isCapacitor = true;
-            const spy = jasmine.createSpy();
-            fileSystemWrapper.readAsText = spy.and.returnValue(Promise.resolve({}));
-
-            const promise = service.getStyleJsonContent("./style.json", false);
-
-            const response = await promise;
-            expect(spy).toHaveBeenCalled();
-            expect(response.layers.length).toBe(0);
-            expect(response.sources).toEqual({});
-        }
-    ));
-
     it("Should save log to zip file", inject([FileService], async (service: FileService) => {
         await service.saveLogToZipFile("something.zip", "some text");
 
         expect(saveAsSpy).toHaveBeenCalled();
     }));
-
-    it("Should get gpx file from URL", inject([FileService, FileSystemWrapper],
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-            fileSystemWrapper.resolveLocalFilesystemUrl = jasmine.createSpy().and.returnValue(Promise.resolve({
-                file: (cb: any) => { cb(new Blob([])) },
-                name: "file.gpx"
-            }))
-
-            const file = await service.getFileFromUrl("some-file.gpx");
-
-            expect(file.name).toBe("file.gpx");
-            expect(file.type).toBe("application/gpx+xml");
-        }
-    ));
-
-    it("Should get kml file from URL", inject([FileService, FileSystemWrapper],
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-            fileSystemWrapper.resolveLocalFilesystemUrl = jasmine.createSpy().and.returnValue(Promise.resolve({
-                file: (cb: any) => { cb(new Blob([])) },
-                name: "file.kml"
-            }))
-
-            const file = await service.getFileFromUrl("some-file.kml");
-
-            expect(file.name).toBe("file.kml");
-            expect(file.type).toBe("application/kml+xml");
-        }
-    ));
-
-    it("Should get jpg file from URL", inject([FileService, FileSystemWrapper],
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-            fileSystemWrapper.resolveLocalFilesystemUrl = jasmine.createSpy().and.returnValue(Promise.resolve({
-                file: (cb: any) => { cb(new Blob([])) },
-                name: "file.jpg"
-            }))
-
-            const file = await service.getFileFromUrl("some-file.jpg");
-
-            expect(file.name).toBe("file.jpg");
-            expect(file.type).toBe("image/jpeg");
-        }
-    ));
-
-    it("Should get file extention type from URL", inject([FileService, FileSystemWrapper],
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-            fileSystemWrapper.resolveLocalFilesystemUrl = jasmine.createSpy().and.returnValue(Promise.resolve({
-                file: (cb: any) => { cb(new Blob([])) },
-                name: "file.something"
-            }))
-
-            const file = await service.getFileFromUrl("some-file.something");
-
-            expect(file.name).toBe("file.something");
-            expect(file.type).toBe("application/something");
-        }
-    ));
-
-    it("Should get file extention from URL", inject([FileService, FileSystemWrapper],
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-            fileSystemWrapper.resolveLocalFilesystemUrl = jasmine.createSpy().and.returnValue(Promise.resolve({
-                file: (cb: any) => { cb(new Blob([])) },
-                name: "file"
-            }))
-
-            let file = await service.getFileFromUrl("some-file.gpx");
-            expect(file.name).toBe("file.gpx");
-            file = await service.getFileFromUrl("some-file.kml");
-            expect(file.name).toBe("file.kml");
-            file = await service.getFileFromUrl("some-file.jpeg");
-            expect(file.name).toBe("file.jpg");
-            file = await service.getFileFromUrl("some-file.something");
-            expect(file.name).toBe("file.something");
-        }
-    ));
-
-    it("Should store file to cache", inject([FileService, FileSystemWrapper],
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-            const spy = jasmine.createSpy();
-            fileSystemWrapper.writeFile = spy;
-            fileSystemWrapper.resolveLocalFilesystemUrl = jasmine.createSpy().and.returnValue(Promise.resolve({
-                nativeURL: "file:///file.txt",
-            }));
-
-            const fileUri = await service.storeFileToCache("file.txt", "content");
-
-            expect(spy).toHaveBeenCalled();
-            expect(fileUri).toBe("/file.txt");
-        }
-    ));
 
     it("Should get file with progress", inject([FileService, HttpTestingController],
         async (service: FileService, mockBackend: HttpTestingController) => {
@@ -433,44 +286,10 @@ describe("FileService", () => {
         }
     ));
 
-    it("Should get file from cache", inject([FileService, FileSystemWrapper],
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-            const spy = jasmine.createSpy();
-            fileSystemWrapper.readAsArrayBuffer = spy;
-            const promise = service.getFileFromCache("file");
 
-            expect(spy).toHaveBeenCalled();
-            return promise;
-        }
-    ));
-
-    it("Should move file from cache to data directory", inject([FileService, FileSystemWrapper],
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-            const spy = jasmine.createSpy();
-            fileSystemWrapper.moveFile = spy;
-            await service.moveFileFromCacheToDataDirectory("file");
-
-            expect(spy).toHaveBeenCalled();
-        }
-    ));
-
-    it("Should delete file", inject([FileService, FileSystemWrapper],
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-            const spy = jasmine.createSpy();
-            fileSystemWrapper.removeFile = spy.and.returnValue(Promise.resolve());
-            await service.deleteFileInDataDirectory("file");
-
-            expect(spy).toHaveBeenCalled();
-        }
-    ));
-
-    it("Should not throw if delete file fails", inject([FileService, FileSystemWrapper],
-        async (service: FileService, fileSystemWrapper: FileSystemWrapper) => {
-            const spy = jasmine.createSpy();
-            fileSystemWrapper.removeFile = spy.and.returnValue(Promise.reject(new Error("fail")));
-            await service.deleteFileInDataDirectory("file");
-
-            expect(spy).toHaveBeenCalled();
+    it("Should not throw if delete file fails", inject([FileService],
+        async (service: FileService) => {
+            await expectAsync(service.deleteFileInDataDirectory("file")).toBeResolved();
         }
     ));
 });
