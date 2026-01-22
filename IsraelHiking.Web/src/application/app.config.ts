@@ -222,7 +222,6 @@ export const appConfig: ApplicationConfig = {
         LogReaderService,
         TranslationService,
         AnalyticsService,
-        FileSystemWrapper,
         RouteEditPoiInteraction,
         RouteEditRouteInteraction,
         { provide: ErrorHandler, useClass: GlobalErrorHandler },
