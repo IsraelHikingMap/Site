@@ -260,6 +260,7 @@ export class FileService {
             path: styleFileName,
             data: styleText,
             directory: Directory.Data,
+            encoding: Encoding.UTF8
         });
         this.loggingService.info(`[Files] Write style finished successfully: ${styleFileName}`);
     }
@@ -278,16 +279,13 @@ export class FileService {
     }
 
     public async storeFileToCache(fileName: string, content: string): Promise<string> {
-        await Filesystem.writeFile({
+        const results = await Filesystem.writeFile({
             path: fileName,
             data: content,
             directory: Directory.Cache,
+            encoding: Encoding.UTF8
         });
-        const entry = await Filesystem.getUri({
-            path: fileName,
-            directory: Directory.Cache,
-        });
-        return entry.uri;
+        return results.uri.replace("file://", "");
     }
 
     /**
@@ -368,13 +366,15 @@ export class FileService {
                         await Filesystem.writeFile({
                             path: fileName,
                             directory: Directory.Cache,
-                            data: encode(value.buffer)
+                            data: encode(value.buffer),
+                            encoding: Encoding.UTF8
                         });
                     } else {
                         await Filesystem.appendFile({
                             path: fileName,
                             directory: Directory.Cache,
-                            data: encode(value.buffer)
+                            data: encode(value.buffer),
+                            encoding: Encoding.UTF8
                         });
                     }
                     receivedLength += value.length;

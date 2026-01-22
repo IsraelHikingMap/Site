@@ -22,7 +22,7 @@
     "@capacitor/text-zoom": "^8.0.0",
     "@capawesome-team/capacitor-android-battery-optimization": "^8.0.0",
     "@capawesome/capacitor-android-edge-to-edge-support": "^8.0.2",
-    "@capawesome/capacitor-app-update": "^8.0.1",
+    "@capawesome/capacitor-app-update": "https://pkg.pr.new/capawesome-team/capacitor-plugins/@capawesome/capacitor-app-update@745",
     "@capgo/background-geolocation": "^8.0.8",
     "@capgo/capacitor-compass": "^8.1.2",
     "@mapbox/mapbox-gl-rtl-text": "^0.3.0",
