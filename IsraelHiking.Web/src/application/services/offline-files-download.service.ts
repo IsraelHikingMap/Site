@@ -6,6 +6,7 @@ import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
 import { last } from "lodash-es";
 import { Immutable } from "immer";
+import pLimit from "p-limit";
 import type { StyleSpecification } from "maplibre-gl";
 
 import { Urls } from "../urls";
@@ -152,6 +153,7 @@ export class OfflineFilesDownloadService {
         this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${fileNames.length}, tile: ${tileX}-${tileY}`);
         const length = fileNames.length;
         const fileDownloadPromises: Promise<void>[] = [];
+        const limit = pLimit(3);
         for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
             const { fileName } = fileNames[fileNameIndex];
             if (abortController.signal.aborted) {
@@ -169,7 +171,7 @@ export class OfflineFilesDownloadService {
                 fileDownloadUrl += `?tileX=${tileX}&tileY=${tileY}`;
             }
 
-            fileDownloadPromises.push(this.downloadAndMove(fileName, fileDownloadUrl, token, abortController, fileNameIndex, length));
+            fileDownloadPromises.push(limit(() => this.downloadAndMove(fileName, fileDownloadUrl, token, abortController, fileNameIndex, length)));
         }
         await Promise.all(fileDownloadPromises);
         this.downloadedFilesInCurrentSession = [];

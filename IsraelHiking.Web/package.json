@@ -72,6 +72,7 @@
     "ngx-lottie": "^20.0.0",
     "ngx-progressbar": "^14.0.0",
     "osm2geojson-lite": "^1.2.0",
+    "p-limit": "^7.2.0",
     "pbf": "^4.0.1",
     "photoswipe": "^5.4.4",
     "piexif-ts": "^2.1.0",
