@@ -285,7 +285,7 @@ export class FileService {
             directory: Directory.Cache,
             encoding: Encoding.UTF8
         });
-        return results.uri.replace("file://", "");
+        return results.uri;
     }
 
     /**

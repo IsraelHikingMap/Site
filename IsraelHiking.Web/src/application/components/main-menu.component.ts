@@ -154,7 +154,7 @@ export class MainMenuComponent {
                 attachments: [{
                     type: "absolute",
                     name: "log.txt",
-                    path: logFileUri
+                    path: logFileUri.replace("file://", "")
                 }, {
                     type: "base64",
                     name: `info-${userInfo.id}.txt`,
