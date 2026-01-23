@@ -143,7 +143,7 @@ export class MainMenuComponent {
                 `Has Subscription: ${!this.isShowOrderButton()}`,
                 downloadedTiles == null ? "" : `Downloaded Tiles: ${Object.keys(downloadedTiles)}`
             ].join("\n");
-            const logFileUri = await this.fileService.storeFileToCache("log.txt", logs);
+            const logFileUri = await this.fileService.storeFileToCache("log.txt", logs, false);
             const infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
 

@@ -147,13 +147,13 @@ export class PrivateRoutesSidebarComponent {
         }
         if (file.name.endsWith(".json")) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
-            await this.fileService.writeStyle(file.name, await this.fileService.getFileContent(file));
+            await this.fileService.writeStyle(file.name, await file.text());
             this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             return;
         }
         if (file.name.endsWith(".txt") && file.name.includes("log")) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
-            const fileContent = await this.fileService.getFileContent(file);
+            const fileContent = await file.text();
             this.logReaderService.readLogFile(fileContent);
             return;
         }

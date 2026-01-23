@@ -149,7 +149,7 @@ export class FileService {
             return;
         }
         fileName = fileName.replace(/[/\\?%*:|"<>]/g, "-");
-        const fileUrl = await this.storeFileToCache(fileName, responseData);
+        const fileUrl = await this.storeFileToCache(fileName, responseData, true);
         Share.share({
             files: [fileUrl]
         });
@@ -169,7 +169,7 @@ export class FileService {
             path: url,
         });
         type = type || this.getTypeFromUrl(url);
-        const blob = new Blob([decode(fileResponse.data as string)], { type }) as any;
+        const blob = await this.base64StringToBlob(fileResponse.data as string, type) as any;
         blob.name = statResponse.name;
         if (blob.name.indexOf(".") === -1) {
             blob.name += this.getExtensionFromType(type);
@@ -178,7 +178,11 @@ export class FileService {
     }
 
     private getTypeFromUrl(url: string): string {
-        const fileExtension = url.split("/").pop().split(".").pop().toLocaleLowerCase();
+        const fileName = url.split("/").pop();
+        if (!fileName || !fileName.includes(".")) {
+            return "application/octet-stream";
+        }
+        const fileExtension = fileName.split(".").pop().toLocaleLowerCase();
         if (fileExtension === "gpx") {
             return "application/gpx+xml";
         }
@@ -209,8 +213,8 @@ export class FileService {
         if (file.type === ImageResizeService.JPEG) {
             dataContainer = await this.imageResizeService.resizeImageAndConvert(file);
         } else {
-            const fileConent = await this.getFileContent(file);
-            this.loggingService.info(`[Files] Finished reading file: ${file.name}`);
+            const fileConent = await file.text();
+            this.loggingService.info(`[Files] Finished reading file: ${file.name}, fileConent: ${fileConent}`);
             if (this.gpxDataContainerConverterService.canConvert(fileConent)) {
                 dataContainer = await this.gpxDataContainerConverterService.toDataContainer(fileConent);
             } else {
@@ -265,25 +269,12 @@ export class FileService {
         this.loggingService.info(`[Files] Write style finished successfully: ${styleFileName}`);
     }
 
-    public getFileContent(file: File): Promise<string> {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (event: any) => {
-                resolve(event.target.result);
-            };
-            reader.onerror = () => {
-                reject(new Error("Unable to read the contect of the text file: " + file.name));
-            }
-            reader.readAsText(file);
-        });
-    }
-
-    public async storeFileToCache(fileName: string, content: string): Promise<string> {
+    public async storeFileToCache(fileName: string, content: string, isBase64: boolean): Promise<string> {
         const results = await Filesystem.writeFile({
             path: fileName,
             data: content,
             directory: Directory.Cache,
-            encoding: Encoding.UTF8
+            encoding: isBase64 ? undefined : Encoding.UTF8
         });
         return results.uri;
     }
