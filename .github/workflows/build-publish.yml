@@ -134,7 +134,6 @@ jobs:
         if: ${{ github.event.inputs.publishandroid == 'true' }}
         run: |
           cd IsraelHiking.Web/android
-          echo "ראו https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/android/iw-IL/changelogs/default.txt
           echo "See https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/android/en-US/changelogs/default.txt
           bundle exec fastlane upload
         env:
