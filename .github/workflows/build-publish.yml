@@ -8,9 +8,6 @@ name: Build and Publish
 # 5. github-release - Tags the commit and creates a Github release with the apps' binaries (if requested)
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       publishandroid:
@@ -226,7 +223,7 @@ jobs:
           bundle exec fastlane build_ios
         env:
           MATCH_PASSWORD: ${{ secrets.PASSWORD }}
-      - name: Upload artifacts
+      - name: Upload ipa artifacts
         if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
         with:
