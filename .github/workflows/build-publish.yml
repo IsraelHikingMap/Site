@@ -239,7 +239,6 @@ jobs:
         if: ${{ github.event.inputs.publishios == 'true' && github.event.inputs.production == 'true' }}
         run: |
           cd IsraelHiking.Web/ios/App
-          echo "ראו https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/he/release_notes.txt
           echo "See https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/en-US/release_notes.txt
           bundle exec fastlane upload_to_production
         env:
