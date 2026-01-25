@@ -3,5 +3,4 @@
   <access origin="*" />
   
   
-  <preference name="OAuthScheme" value="mapeak" />
 </widget>

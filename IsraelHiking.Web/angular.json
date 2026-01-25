@@ -59,7 +59,6 @@
               "linear-interpolator",
               "piexifjs",
               "deepmerge",
-              "cordova-plugin-purchase",
               "xml-beautify",
               "d3-regression",
               "platform",
