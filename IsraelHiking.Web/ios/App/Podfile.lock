@@ -14,11 +14,14 @@ PODS:
     - Capacitor
   - CapacitorEmailComposer (7.0.2):
     - Capacitor
+  - CapacitorFilesystem (8.1.0):
+    - Capacitor
+    - IONFilesystemLib (~> 1.1.0)
   - CapacitorShare (8.0.0):
     - Capacitor
   - CapacitorTextZoom (8.0.0):
     - Capacitor
-  - CapawesomeCapacitorAppUpdate (8.0.1):
+  - CapawesomeCapacitorAppUpdate (8.0.2):
     - Capacitor
   - CapgoBackgroundGeolocation (8.0.8):
     - Capacitor
@@ -26,7 +29,7 @@ PODS:
     - Capacitor
   - CordovaPlugins (8.0.0):
     - CapacitorCordova
-  - CordovaPluginsResources (0.0.105)
+  - IONFilesystemLib (1.1.0)
   - PurchasesHybridCommon (17.26.1):
     - RevenueCat (= 5.52.1)
   - RevenueCat (5.52.1)
@@ -43,17 +46,18 @@ DEPENDENCIES:
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
   - CapacitorEmailComposer (from `../../node_modules/capacitor-email-composer`)
+  - "CapacitorFilesystem (from `../../node_modules/@capacitor/filesystem`)"
   - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
   - "CapacitorTextZoom (from `../../node_modules/@capacitor/text-zoom`)"
   - "CapawesomeCapacitorAppUpdate (from `../../node_modules/@capawesome/capacitor-app-update`)"
   - "CapgoBackgroundGeolocation (from `../../node_modules/@capgo/background-geolocation`)"
   - "CapgoCapacitorCompass (from `../../node_modules/@capgo/capacitor-compass`)"
   - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
-  - CordovaPluginsResources (from `../capacitor-cordova-ios-plugins`)
   - "RevenuecatPurchasesCapacitor (from `../../node_modules/@revenuecat/purchases-capacitor`)"
 
 SPEC REPOS:
   trunk:
+    - IONFilesystemLib
     - PurchasesHybridCommon
     - RevenueCat
 
@@ -74,6 +78,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/device"
   CapacitorEmailComposer:
     :path: "../../node_modules/capacitor-email-composer"
+  CapacitorFilesystem:
+    :path: "../../node_modules/@capacitor/filesystem"
   CapacitorShare:
     :path: "../../node_modules/@capacitor/share"
   CapacitorTextZoom:
@@ -85,8 +91,6 @@ EXTERNAL SOURCES:
   CapgoCapacitorCompass:
     :path: "../../node_modules/@capgo/capacitor-compass"
   CordovaPlugins:
-    :path: "../capacitor-cordova-ios-plugins"
-  CordovaPluginsResources:
     :path: "../capacitor-cordova-ios-plugins"
   RevenuecatPurchasesCapacitor:
     :path: "../../node_modules/@revenuecat/purchases-capacitor"
@@ -100,17 +104,18 @@ SPEC CHECKSUMS:
   CapacitorCordova: 5dc3912d25ef770a3fe0f431bb65c9fbfa2e92f9
   CapacitorDevice: 9a16fb36a19ff391bf75afbe3cf16f883b3b3aa0
   CapacitorEmailComposer: 47e488b85f3a4400e3b616fe56b5b9f65a4aa2f3
+  CapacitorFilesystem: a957d4a4b6860844c4eba5bf441607a5166f92a7
   CapacitorShare: 12f1d192170cbcf9f108fd675ac8e343761a4638
   CapacitorTextZoom: bceaf076f134e188f8fd36ff74ef18a7d2bdb160
-  CapawesomeCapacitorAppUpdate: b51cf29f28f664ef942feb12a76116d87eee62f0
+  CapawesomeCapacitorAppUpdate: 02d66677e9ae97d851a358207f7e7df40b22aa72
   CapgoBackgroundGeolocation: 75d9fbe24151b06f0c6486d994dbef5e5d7fa6b1
   CapgoCapacitorCompass: a8f20d67031b069b544056d9b83c388f54bc9f6f
-  CordovaPlugins: f557708c6f61223224194c8e01192f1b41784858
-  CordovaPluginsResources: da93847212bf7b16ba770e4d6c3e7dba820174c7
+  CordovaPlugins: 8ae5e036c9a3de87709ec2a925d69b2630d6d093
+  IONFilesystemLib: 50b9a0f3052a9b40b9bedb43f328a8fe222f9f87
   PurchasesHybridCommon: a0923adc952779f2174ff699bfdf275f4af13aa5
   RevenueCat: c3d07077a0cc70b7c90a5a6072d60f9905d2dbc0
   RevenuecatPurchasesCapacitor: 29b929cec112f7327e25feb6a3178f8c89dc6978
 
-PODFILE CHECKSUM: 33a81c596dd685e1d6ac3cb4f1f4c820092ee7b1
+PODFILE CHECKSUM: 25ce798b439ce138006b2d9a207d69f8d933c0d6
 
 COCOAPODS: 1.16.2

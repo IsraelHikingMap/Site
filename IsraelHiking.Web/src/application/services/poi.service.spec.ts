@@ -34,7 +34,6 @@ describe("Poi Service", () => {
             getFullUrlFromPoiId: (s: PoiRouteUrlInfo) => s.source + "/" + s.id,
         };
         const fileServiceMock = {
-            getFileFromCache: () => Promise.resolve(null),
             deleteFileFromCache: () => Promise.resolve()
         };
         const databaseServiceMock = {

@@ -3,7 +3,6 @@ import { provideHttpClientTesting } from "@angular/common/http/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { TestBed, inject } from "@angular/core/testing";
 import { NgxsModule, Store } from "@ngxs/store";
-import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 
 import { RecordedRouteService } from "./recorded-route.service";
 import { GeoLocationService } from "./geo-location.service";
@@ -47,7 +46,6 @@ describe("Recorded Route Service", () => {
                 { provide: LoggingService, useValue: loggingServiceMock },
                 { provide: TracesService, useValue: tracesServiceMock },
                 { provide: RunningContextService, useValue: runnningContextServiceMock },
-                { provide: FileSystemWrapper, useValue: {} },
                 {
                     provide: GeoLocationService, useValue: {
                         positionWhileInBackground: new EventEmitter(),
