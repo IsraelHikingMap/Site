@@ -6,7 +6,7 @@ import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
 import { firstValueFrom, timeout } from "rxjs";
 import { zipSync, strToU8 } from "fflate";
-import { decode, encode } from "base64-arraybuffer";
+import { encode } from "base64-arraybuffer";
 import type { saveAs as saveAsForType } from "file-saver";
 
 import { ImageResizeService } from "./image-resize.service";
