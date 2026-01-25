@@ -24,6 +24,7 @@
 		"AppPlugin",
 		"CAPCameraPlugin",
 		"DevicePlugin",
+		"FilesystemPlugin",
 		"SharePlugin",
 		"TextZoomPlugin",
 		"AppUpdatePlugin",

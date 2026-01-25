@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
-import {load, dump, insert, GPSHelper, TagValues, type IExif} from "piexif-ts";
+import { load, dump, insert, GPSHelper, TagValues, type IExif } from "piexif-ts";
+import { encode } from "base64-arraybuffer";
 import { v4 as uuidv4 } from "uuid";
 
 import type { LatLngAlt, DataContainer, RouteSegmentData, MarkerData, RouteData } from "../models";
@@ -16,29 +17,31 @@ export class ImageResizeService {
         return this.resizeImageAndConvertToAny<DataContainer>(file, this.createDataContainerFromBinaryString, throwIfNoLocation);
     }
 
-    private resizeImageAndConvertToAny<TReturn>(file: File,
-                                                convertMethod: (data: string, name: string, geoLocation: LatLngAlt) => TReturn,
-                                                throwIfNoLocation = true): Promise<TReturn> {
+    private async resizeImageAndConvertToAny<TReturn>(file: File,
+        convertMethod: (data: string, name: string, geoLocation: LatLngAlt) => TReturn,
+        throwIfNoLocation = true): Promise<TReturn> {
+
+        const arrayBuffer = await file.arrayBuffer();
+        const base64 = "data:" + file.type + ";base64," + encode(arrayBuffer);
+        let exifData: IExif = null;
+        if (file.type === ImageResizeService.JPEG) {
+            exifData = load(base64);
+        }
+        const latLng = this.getGeoLocation(exifData);
+        if (latLng == null && throwIfNoLocation) {
+            throw new Error("Image does not contain geolocation information");
+        }
+        const image = new Image();
         return new Promise<TReturn>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (event: any) => {
-                let exifData: IExif = null;
-                if (file.type === ImageResizeService.JPEG) {
-                    exifData = load(event.target.result);
-                }
-                const latLng = this.getGeoLocation(exifData);
-                if (latLng == null && throwIfNoLocation) {
-                    reject(new Error("Image does not contain geolocation information"));
-                }
-                const image = new Image();
-                image.onload = () => {
-                    const binaryStringData = this.resizeImageWithExif(image, exifData);
-                    const data = convertMethod(binaryStringData, file.name, latLng);
-                    resolve(data);
-                };
-                image.src = event.target.result;
+            image.onload = () => {
+                const binaryStringData = this.resizeImageWithExif(image, exifData);
+                const data = convertMethod(binaryStringData, file.name, latLng);
+                resolve(data);
             };
-            reader.readAsDataURL(file);
+            image.onerror = () => {
+                reject(new Error("Failed to load image"));
+            };
+            image.src = base64;
         });
     }
 
