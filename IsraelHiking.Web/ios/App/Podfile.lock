@@ -21,7 +21,7 @@ PODS:
     - Capacitor
   - CapacitorTextZoom (8.0.0):
     - Capacitor
-  - CapawesomeCapacitorAppUpdate (8.0.1):
+  - CapawesomeCapacitorAppUpdate (8.0.2):
     - Capacitor
   - CapgoBackgroundGeolocation (8.0.8):
     - Capacitor
@@ -107,7 +107,7 @@ SPEC CHECKSUMS:
   CapacitorFilesystem: a957d4a4b6860844c4eba5bf441607a5166f92a7
   CapacitorShare: 12f1d192170cbcf9f108fd675ac8e343761a4638
   CapacitorTextZoom: bceaf076f134e188f8fd36ff74ef18a7d2bdb160
-  CapawesomeCapacitorAppUpdate: b51cf29f28f664ef942feb12a76116d87eee62f0
+  CapawesomeCapacitorAppUpdate: 02d66677e9ae97d851a358207f7e7df40b22aa72
   CapgoBackgroundGeolocation: 75d9fbe24151b06f0c6486d994dbef5e5d7fa6b1
   CapgoCapacitorCompass: a8f20d67031b069b544056d9b83c388f54bc9f6f
   CordovaPlugins: 8ae5e036c9a3de87709ec2a925d69b2630d6d093
