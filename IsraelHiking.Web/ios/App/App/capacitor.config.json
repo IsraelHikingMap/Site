@@ -30,7 +30,6 @@
 		"BackgroundGeolocation",
 		"CapgoCompassPlugin",
 		"PurchasesPlugin",
-		"EmailComposerPlugin",
-		"CDVPlugin"
+		"EmailComposerPlugin"
 	]
 }

@@ -24,9 +24,6 @@ PODS:
     - Capacitor
   - CapgoCapacitorCompass (8.1.2):
     - Capacitor
-  - CordovaPlugins (8.0.0):
-    - CapacitorCordova
-  - CordovaPluginsResources (0.0.105)
   - PurchasesHybridCommon (17.26.1):
     - RevenueCat (= 5.52.1)
   - RevenueCat (5.52.1)
@@ -48,8 +45,6 @@ DEPENDENCIES:
   - "CapawesomeCapacitorAppUpdate (from `../../node_modules/@capawesome/capacitor-app-update`)"
   - "CapgoBackgroundGeolocation (from `../../node_modules/@capgo/background-geolocation`)"
   - "CapgoCapacitorCompass (from `../../node_modules/@capgo/capacitor-compass`)"
-  - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
-  - CordovaPluginsResources (from `../capacitor-cordova-ios-plugins`)
   - "RevenuecatPurchasesCapacitor (from `../../node_modules/@revenuecat/purchases-capacitor`)"
 
 SPEC REPOS:
@@ -84,10 +79,6 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capgo/background-geolocation"
   CapgoCapacitorCompass:
     :path: "../../node_modules/@capgo/capacitor-compass"
-  CordovaPlugins:
-    :path: "../capacitor-cordova-ios-plugins"
-  CordovaPluginsResources:
-    :path: "../capacitor-cordova-ios-plugins"
   RevenuecatPurchasesCapacitor:
     :path: "../../node_modules/@revenuecat/purchases-capacitor"
 
@@ -105,12 +96,10 @@ SPEC CHECKSUMS:
   CapawesomeCapacitorAppUpdate: b51cf29f28f664ef942feb12a76116d87eee62f0
   CapgoBackgroundGeolocation: 75d9fbe24151b06f0c6486d994dbef5e5d7fa6b1
   CapgoCapacitorCompass: a8f20d67031b069b544056d9b83c388f54bc9f6f
-  CordovaPlugins: f557708c6f61223224194c8e01192f1b41784858
-  CordovaPluginsResources: da93847212bf7b16ba770e4d6c3e7dba820174c7
   PurchasesHybridCommon: a0923adc952779f2174ff699bfdf275f4af13aa5
   RevenueCat: c3d07077a0cc70b7c90a5a6072d60f9905d2dbc0
   RevenuecatPurchasesCapacitor: 29b929cec112f7327e25feb6a3178f8c89dc6978
 
-PODFILE CHECKSUM: 33a81c596dd685e1d6ac3cb4f1f4c820092ee7b1
+PODFILE CHECKSUM: e43ec5ddbf3999ab5396877d6a105275ba5f5dd9
 
 COCOAPODS: 1.16.2
