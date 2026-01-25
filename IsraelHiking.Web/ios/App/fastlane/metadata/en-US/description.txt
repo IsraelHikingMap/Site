@@ -1,42 +1,57 @@
-Mapeak is a powerful, yet simple to use, navigation and route-planning tool for the outdoors.
-Geared towards hikers, bikers and off-road drivers it keeps you oriented in the Israeli backcountry even with no cellular reception.Use crisp topographic maps to navigate, familiarize with nearby points of interest, plan, import and share routes, synchronize effortlessly with our trip-planning site and much more.
+Mapeak is a modern off-road running, riding, and hiking navigation and route-planning app built for people who love outdoor recreation. 
 
-Here’s what you get for free:
-Maps
-- Vector maps with unlimited zoom with no loss of quality
-- A hiking map, complete with blazed trails
-- A biking map, compete with single tracks marked for difficulty and marked bike routes
-- Hebrew and English versions of all maps
-- Text labels that orient to the viewers’ perspective
-- A satellite image
-- Transparent map overlays to show topography and trails over the satellite image
-Depth perception
-- High resolution contour lines based on spatial data from NASA
-- Dynamic hill-shading which changes as the map rotates for accurate depth perception at a glance
-- 3D models of many buildings in urban areas
+Whether you’re exploring remote hiking trails, discovering new mtb trails, planning a running route in nature, or biking off road, Mapeak helps you stay oriented with confidence. Even when there’s no internet.
+ 
+Designed as a reliable hiking and bike trails app, Mapeak combines beautiful topographic maps, powerful trail finder tools, and accurate GPS hiking navigation free of clutter. From casual runs to serious backcountry adventures, it’s your trusted outdoor companion.
 
-Navigation
-- Show your position and direction
-- Orient the map north or in your direction of movement
-- Record your path as you travel
-- Analyze your speed and distance traveled
+FREE OFFROAD TRAILS AND GPS MAPS
+Navigate the land with clarity using detailed high-performance trail maps for hiking, running, or offroad riding:
+• Crisp vector topographic maps with unlimited zoom
+• Dedicated trail maps for hiking, biking, and off-road trails 
+• Clear road maps combined with nature trails
+• Multilingual map support
+• Smart labels that rotate with your view
+• High-quality GPS satellite map imagery
+• Transparent overlays over the satellite image for trails, terrain, and elevation
 
-Routes
-- Search for nearby routes for walking, driving and biking
-- Plan your own routes – they would automatically follow the roads and paths on the map
-- Manipulate routes – reverse, split or merge them at will
-- Handle several routes at once
-- Effortlessly synchronize with the routes you plan on our website
-- Share routes or save them on your phone
-- Analyze the height profile of routes
+Even more, you can download and have GPS offline maps in your pocket, even where there is no internet or cellphone coverage.
 
-Points of Interest
-- An extensive list of historical sites, tourist attractions, campsites, springs and viewpoints to visit
-- Easy access to geo-located articles from Wikipedia and iNature
-- Easily add your own POIs to the map
+UNDERSTAND THE TERRAIN WITH DEPTH PERCEPTION
+See elevation and terrain clearly—ideal for hiking, offroad, and long-distance planning:
+· High-resolution contour lines
+· Dynamic hill shading for instant depth perception
+· 3D building models in urban areas
+· Accurate map coordinates offline for precise navigation
 
+OFFLINE GPS NAVIGATION
+Mapeak works as a true GPS without internet solution* with:
+- Live position and direction tracking
+- North-up or movement-based orientation
+- Full GPS offline support
+- Reliable hike GPS and GPS hiking tracker tools
+- Record your journey with an accurate trail tracker
+- Track speed, distance, and movement over time
 
-Offline Map Purchase:
-You can buy a yearly subscription to our offline maps. Use them when you are out of reception or want to save your battery. The maps are continuously updated.
+Plan Routes for Hiking, Biking, Running & Walking
+From trail exploration to fitness planning, Mapeak’s route planner adapts to your activity. Ideal for hikers, trail runners, cyclists, and anyone exploring off-road terrain:
+► Find nearby trails with an intuitive trail finder
+► Plan routes that follow real paths and roads
+► Create MTB, hiking, running, and mountain biking routes
+► Edit routes easily—split, reverse, or merge
+► Use it as a walk route tracker or hike tracker
+► Analyze elevation and distance
+► Sync routes seamlessly across devices
 
-For EULA see: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Discover More Along the Way
+Enhance every adventure with meaningful locations and local knowledge.
++ Points of interest, including viewpoints, campsites, springs, and landmarks
++ Geo-located articles for deeper context
++ Add your own markers and notes for future trips
+
+Mapeak is more than a navigation app—it’s your trusted companion for exploring deeper, planning smarter, and experiencing the outdoors with confidence.Wherever the trail leads, Mapeak helps you stay connected to the journey.
+
+■ Try Mapeak now to explore freely and navigate confidently.
+___________
+
+* An additional purchase is required for full access to offline maps. 
+Purchase a yearly subscription to download offline maps and navigate confidently without reception—while saving battery life. Offline maps are continuously updated, so the latest data always backs your adventures.

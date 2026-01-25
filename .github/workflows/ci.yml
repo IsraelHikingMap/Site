@@ -90,6 +90,12 @@ jobs:
           STORE_PASSWORD: ${{ secrets.MAPEAK_STORE_PASSWORD }}
           PASSWORD: ${{ secrets.MAPEAK_PASSWORD }}
           KEYSTORE_PATH: ${{ github.workspace }}/IsraelHiking.Web/android/app/Mapeak.jks
+      - name: Upload aab artifacts
+        if: ${{ github.secret_source == 'Actions' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mapeak_signed_${{ needs.version.outputs.version_string }}.aab
+          path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
 
   build-docker: 
     runs-on: ubuntu-latest
@@ -146,3 +152,9 @@ jobs:
           bundle exec fastlane build_ios
         env:
           MATCH_PASSWORD: ${{ secrets.PASSWORD }}
+      - name: Upload ipa artifacts
+        if: ${{ github.secret_source == 'Actions' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mapeak_signed_${{ needs.version.outputs.version_string }}.ipa
+          path: IsraelHiking.Web/ios/App/App.ipa
