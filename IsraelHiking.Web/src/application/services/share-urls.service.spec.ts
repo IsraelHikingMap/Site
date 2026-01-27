@@ -10,8 +10,7 @@ import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
 import { MapService } from "./map.service";
-import { AddShareUrlAction, RemoveShareUrlAction, ShareUrlsReducer, UpdateShareUrlAction } from "../reducers/share-urls.reducer";
-import { SetShareUrlsLastModifiedDateAction } from "../reducers/offline.reducer";
+import { AddShareUrlAction, RemoveShareUrlAction, ShareUrlsReducer, UpdateShareUrlAction, SetShareUrlsLastModifiedDateAction } from "../reducers/share-urls.reducer";
 import { Urls } from "../urls";
 import type { ShareUrl } from "../models";
 
@@ -70,10 +69,8 @@ describe("Share Urls Service", () => {
                 userState: {
                     userInfo: {}
                 },
-                offlineState: {
-                    shareUrlsLastModifiedDate: null
-                },
                 shareUrlsState: {
+                    shareUrlsLastModifiedDate: null,
                     shareUrls: [{
                         id: "1"
                     }, {

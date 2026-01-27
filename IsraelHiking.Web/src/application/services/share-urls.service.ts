@@ -12,8 +12,7 @@ import { WhatsAppService } from "./whatsapp.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
-import { UpdateShareUrlAction, RemoveShareUrlAction, AddShareUrlAction } from "../reducers/share-urls.reducer";
-import { SetShareUrlsLastModifiedDateAction } from "../reducers/offline.reducer";
+import { UpdateShareUrlAction, RemoveShareUrlAction, AddShareUrlAction, SetShareUrlsLastModifiedDateAction } from "../reducers/share-urls.reducer";
 import { Urls } from "../urls";
 import type { ShareUrl, ApplicationState } from "../models";
 
@@ -100,7 +99,7 @@ export class ShareUrlsService {
         }
         this.syncing = true;
         try {
-            const sharesLastSuccessfullSync = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).shareUrlsLastModifiedDate;
+            const sharesLastSuccessfullSync = this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState).shareUrlsLastModifiedDate;
             const operationStartTimeStamp = new Date();
             let sharesToGetFromServer = [] as ShareUrl[];
             this.loggingService.info("[Shares] Starting shares sync, last modified: " +

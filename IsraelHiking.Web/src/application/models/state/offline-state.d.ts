@@ -12,10 +12,6 @@ export type OfflineState = {
      */
     downloadedTiles: Record<string, TileMetadataPerFile>;
     /**
-     * Shares last modified date
-     */
-    shareUrlsLastModifiedDate: Date;
-    /**
      * `true` after a user made a purchase of the subscription 
      */
     isSubscribed: boolean;
