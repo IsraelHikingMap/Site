@@ -20,11 +20,6 @@ export class DeleteOfflineMapsTileAction {
     constructor(public tileX: number, public tileY: number) { }
 }
 
-export class SetShareUrlsLastModifiedDateAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public lastModifiedDate: Date) { }
-}
-
 export class AddToPoiQueueAction {
     public static type = this.prototype.constructor.name;
     constructor(public featureId: string) { }
@@ -76,14 +71,6 @@ export class OfflineReducer {
             if (Object.keys(lastState.downloadedTiles).length === 0) {
                 lastState.downloadedTiles = undefined;
             }
-            return lastState;
-        }));
-    }
-
-    @Action(SetShareUrlsLastModifiedDateAction)
-    public setShareUrlsLastModifiedDate(ctx: StateContext<OfflineState>, action: SetShareUrlsLastModifiedDateAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.shareUrlsLastModifiedDate = action.lastModifiedDate;
             return lastState;
         }));
     }

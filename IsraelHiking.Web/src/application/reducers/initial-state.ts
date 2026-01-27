@@ -214,7 +214,8 @@ export const initialState =
             visibleCategories: CATEGORIES_GROUPS.map(cg => cg.categories.map(c => ({ groupType: cg.type, name: c.name }))).flat()
         },
         shareUrlsState: {
-            shareUrls: []
+            shareUrls: [],
+            shareUrlsLastModifiedDate: null
         },
         userState: {
             userInfo: null,
@@ -240,7 +241,6 @@ export const initialState =
         offlineState: {
             isSubscribed: false,
             downloadedTiles: null,
-            shareUrlsLastModifiedDate: null,
             uploadPoiQueue: [],
             purchasesSynced: false
         }
