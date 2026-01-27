@@ -65,7 +65,9 @@ export class ConfigurationDialogComponent {
         this.store.dispatch(new ToggleGotLostWarningsAction());
     }
 
-    public syncPurchases() { }
+    public async syncPurchases() {
+        await this.purchaseService.syncPurchases();
+    }
 
     public clearData() {
         this.toastService.confirm({
