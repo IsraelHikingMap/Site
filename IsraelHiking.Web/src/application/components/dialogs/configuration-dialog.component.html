@@ -37,6 +37,11 @@
           <span class="text-sm">{{resources.gotLostWarningsHint}}</span>
         </div>
       </div>
+      <div class="flex flex-row">
+        <div class="flex-1">
+          <button mat-raised-button class="w-full" (click)="syncPurchases()" color="primary" angulartics2On="click" angularticsCategory="Configuration" angularticsAction="Sync purchases">{{resources.syncPurchases}}</button>
+        </div>
+      </div>
     }
     <br />
   </div>

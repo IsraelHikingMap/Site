@@ -256,6 +256,7 @@ export class ResourcesService {
     public endOfLife: string;
     public minimize: string;
     public restore: string;
+    public syncPurchases: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -482,7 +483,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1765267811038");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1769516529391");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -719,6 +720,7 @@ export class ResourcesService {
         this.endOfLife = this.gettextCatalog.getString("IHM end of life for iOS");
         this.minimize = this.gettextCatalog.getString("Minimize");
         this.restore = this.gettextCatalog.getString("Restore");
+        this.syncPurchases = this.gettextCatalog.getString("Sync purchases");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

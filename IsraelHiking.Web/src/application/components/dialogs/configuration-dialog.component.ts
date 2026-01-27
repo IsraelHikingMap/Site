@@ -14,6 +14,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { LoggingService } from "../../services/logging.service";
+import { PurchaseService } from "../../services/purchase.service";
 import { initialState } from "../../reducers/initial-state";
 import {
     SetBatteryOptimizationTypeAction,
@@ -40,6 +41,7 @@ export class ConfigurationDialogComponent {
     private readonly toastService = inject(ToastService);
     private readonly logginService = inject(LoggingService);
     private readonly store = inject(Store);
+    private readonly purchaseService = inject(PurchaseService);
 
     constructor() {
         this.batteryOptimizationType$ = this.store.select((state: ApplicationState) => state.configuration.batteryOptimizationType);
@@ -63,6 +65,8 @@ export class ConfigurationDialogComponent {
         this.store.dispatch(new ToggleGotLostWarningsAction());
     }
 
+    public syncPurchases() { }
+
     public clearData() {
         this.toastService.confirm({
             type: "YesNo",
@@ -73,6 +77,5 @@ export class ConfigurationDialogComponent {
                 this.dialogRef.close();
             }
         });
-
     }
 }

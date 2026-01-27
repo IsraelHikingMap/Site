@@ -91,13 +91,13 @@ export class PurchaseService {
         } else {
             this.orderInternal();
         }
-        
+
     }
 
     private async orderInternal() {
         this.loggingService.info("[Store] Ordering product");
         const offerings = await Purchases.getOfferings();
-            
+
         await Purchases.purchasePackage({
             aPackage: offerings.current.annual
         });
@@ -116,5 +116,10 @@ export class PurchaseService {
         return this.runningContextService.isCapacitor &&
             !offlineState.isOfflineAvailable &&
             offlineState.lastModifiedDate != null;
+    }
+
+    public syncPurchases() {
+        Purchases.syncPurchases();
+        this.checkAndUpdateOfflineAvailability();
     }
 }
