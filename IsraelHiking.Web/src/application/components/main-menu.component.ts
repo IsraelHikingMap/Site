@@ -197,6 +197,6 @@ export class MainMenuComponent {
             this.toastService.warning(this.resources.loginRequired);
             return;
         }
-        this.purchaseService.order();
+        this.purchaseService.showPaywall();
     }
 }

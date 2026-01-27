@@ -23,6 +23,7 @@ dependencies {
     implementation project(':capgo-background-geolocation')
     implementation project(':capgo-capacitor-compass')
     implementation project(':revenuecat-purchases-capacitor')
+    implementation project(':revenuecat-purchases-capacitor-ui')
     implementation project(':capacitor-email-composer')
     implementation "androidx.browser:browser:1.3.0"
 }

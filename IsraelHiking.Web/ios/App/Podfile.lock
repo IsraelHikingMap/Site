@@ -23,7 +23,7 @@ PODS:
     - Capacitor
   - CapawesomeCapacitorAppUpdate (8.0.2):
     - Capacitor
-  - CapgoBackgroundGeolocation (8.0.14):
+  - CapgoBackgroundGeolocation (8.0.15):
     - Capacitor
   - CapgoCapacitorCompass (8.1.4):
     - Capacitor
@@ -32,10 +32,18 @@ PODS:
   - IONFilesystemLib (1.1.0)
   - PurchasesHybridCommon (17.28.1):
     - RevenueCat (= 5.55.2)
+  - PurchasesHybridCommonUI (17.28.1):
+    - PurchasesHybridCommon (= 17.28.1)
+    - RevenueCatUI (= 5.55.2)
   - RevenueCat (5.55.2)
   - RevenuecatPurchasesCapacitor (12.0.5):
     - Capacitor
     - PurchasesHybridCommon (= 17.28.1)
+  - RevenuecatPurchasesCapacitorUi (12.0.5):
+    - Capacitor
+    - PurchasesHybridCommonUI (= 17.28.1)
+  - RevenueCatUI (5.55.2):
+    - RevenueCat (= 5.55.2)
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -54,12 +62,15 @@ DEPENDENCIES:
   - "CapgoCapacitorCompass (from `../../node_modules/@capgo/capacitor-compass`)"
   - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
   - "RevenuecatPurchasesCapacitor (from `../../node_modules/@revenuecat/purchases-capacitor`)"
+  - "RevenuecatPurchasesCapacitorUi (from `../../node_modules/@revenuecat/purchases-capacitor-ui`)"
 
 SPEC REPOS:
   trunk:
     - IONFilesystemLib
     - PurchasesHybridCommon
+    - PurchasesHybridCommonUI
     - RevenueCat
+    - RevenueCatUI
 
 EXTERNAL SOURCES:
   Capacitor:
@@ -94,6 +105,8 @@ EXTERNAL SOURCES:
     :path: "../capacitor-cordova-ios-plugins"
   RevenuecatPurchasesCapacitor:
     :path: "../../node_modules/@revenuecat/purchases-capacitor"
+  RevenuecatPurchasesCapacitorUi:
+    :path: "../../node_modules/@revenuecat/purchases-capacitor-ui"
 
 SPEC CHECKSUMS:
   Capacitor: ff35b0f66370b84aa238251b35b91886a3207c16
@@ -108,14 +121,17 @@ SPEC CHECKSUMS:
   CapacitorShare: 12f1d192170cbcf9f108fd675ac8e343761a4638
   CapacitorTextZoom: bceaf076f134e188f8fd36ff74ef18a7d2bdb160
   CapawesomeCapacitorAppUpdate: 02d66677e9ae97d851a358207f7e7df40b22aa72
-  CapgoBackgroundGeolocation: 00f62ad5b003a783e5d555ee4c3cca8325a94640
+  CapgoBackgroundGeolocation: ee305c8cda9f054f2190117be4aadddbe4c4c40a
   CapgoCapacitorCompass: c901b8aaf7fd692f998820dd7d0da7eb45dbea12
   CordovaPlugins: e5c130b81ae103c6d51284b6fbd074bd99be6a5d
   IONFilesystemLib: 50b9a0f3052a9b40b9bedb43f328a8fe222f9f87
   PurchasesHybridCommon: 57e9e2fd474a726c41f61d5359f1bc05d89d9be8
+  PurchasesHybridCommonUI: ad685a661cc19fb45f1d7448f5890b399e177e14
   RevenueCat: b5605778017c179315e60b8921ed158b3428688c
   RevenuecatPurchasesCapacitor: 175dd55bdd04b2f6ac477a105a1de8822b4c5fd4
+  RevenuecatPurchasesCapacitorUi: 16c9d4cfaf6c3fcd7e0015aea4169a74e866d2cf
+  RevenueCatUI: ee8109669a5abf52df099788a0f961abdd2b5b09
 
-PODFILE CHECKSUM: 25ce798b439ce138006b2d9a207d69f8d933c0d6
+PODFILE CHECKSUM: 2e13f77d6e0ea7b8dd0d66f2bff0d8f79f893909
 
 COCOAPODS: 1.16.2

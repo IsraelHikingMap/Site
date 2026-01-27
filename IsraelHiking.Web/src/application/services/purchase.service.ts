@@ -2,12 +2,11 @@ import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { firstValueFrom, timeout } from "rxjs";
-import { Purchases } from "@revenuecat/purchases-capacitor";
+import { PAYWALL_RESULT, Purchases } from "@revenuecat/purchases-capacitor";
+import { RevenueCatUI } from '@revenuecat/purchases-capacitor-ui';
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
-import { ToastService } from "./toast.service";
-import { ResourcesService } from "./resources.service";
 import { SetOfflineSubscribedAction, SetPurchasesSyncedAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState } from "../models";
@@ -20,8 +19,6 @@ export class PurchaseService {
     private readonly runningContextService = inject(RunningContextService);
     private readonly loggingService = inject(LoggingService);
     private readonly httpClient = inject(HttpClient);
-    private readonly toastService = inject(ToastService);
-    private readonly resources = inject(ResourcesService);
     private readonly store = inject(Store);
 
     public async initialize() {
@@ -86,21 +83,13 @@ export class PurchaseService {
         }
     }
 
-    public order() {
-        if (this.runningContextService.isIos) {
-            this.toastService.confirm({
-                message: this.resources.subscriptionDetails,
-                type: "Custom",
-                customConfirmText: this.resources.continue,
-                customDeclineText: this.resources.cancel,
-                confirmAction: () => {
-                    this.orderInternal()
-                },
-            });
-        } else {
+    public async showPaywall() {
+        this.loggingService.info("[Store] Presenting paywall");
+        const { result } = await RevenueCatUI.presentPaywall();
+        this.loggingService.info("[Store] Paywall result: " + result);
+        if (result === PAYWALL_RESULT.PURCHASED) {
             this.orderInternal();
         }
-
     }
 
     private async orderInternal() {

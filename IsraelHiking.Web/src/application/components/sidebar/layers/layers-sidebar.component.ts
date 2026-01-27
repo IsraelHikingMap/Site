@@ -140,7 +140,7 @@ export class LayersSidebarComponent {
             this.toastService.warning(this.resources.loginRequired);
             return;
         }
-        this.purchaseService.order();
+        this.purchaseService.showPaywall();
     }
 
     public async downloadOfflineMaps() {
