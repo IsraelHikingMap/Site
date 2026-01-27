@@ -118,8 +118,9 @@ export class PurchaseService {
             offlineState.lastModifiedDate != null;
     }
 
-    public syncPurchases() {
-        Purchases.syncPurchases();
-        this.checkAndUpdateOfflineAvailability();
+    public async syncPurchases() {
+        this.loggingService.info("[Store] Initiating sync purchases");
+        await Purchases.syncPurchases();
+        await this.checkAndUpdateOfflineAvailability();
     }
 }
