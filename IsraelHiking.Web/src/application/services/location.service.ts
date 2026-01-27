@@ -1,6 +1,5 @@
 import { EventEmitter, inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
-import { throttleTime } from "rxjs";
 
 import { GeoLocationService } from "./geo-location.service";
 import { DeviceOrientationService } from "./device-orientation.service";
@@ -39,7 +38,7 @@ export class LocationService {
 
     public async initialize() {
         await this.mapService.initializationPromise;
-        this.deviceOrientationService.orientationChanged.pipe(throttleTime(200)).subscribe((bearing: number) => {
+        this.deviceOrientationService.orientationChanged.subscribe((bearing: number) => {
             if (!this.isActive() || this.locationWithBearing == null) {
                 return;
             }
