@@ -7,7 +7,8 @@ import { RevenueCatUI } from '@revenuecat/purchases-capacitor-ui';
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
-import { SetOfflineSubscribedAction, SetPurchasesSyncedAction } from "../reducers/offline.reducer";
+import { SetOfflineSubscribedAction } from "../reducers/offline.reducer";
+import { IncrementAppLaunchesSinceLastPaywallShown, SetLastPaywallShownDate } from "../reducers/paywall.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState } from "../models";
 
@@ -25,13 +26,13 @@ export class PurchaseService {
         if (!this.runningContextService.isCapacitor) {
             return;
         }
-
+        this.store.dispatch(new IncrementAppLaunchesSinceLastPaywallShown());
         this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe(async (userInfo) => {
             if (userInfo == null) {
                 return;
             }
             this.loggingService.info("[Store] Logged in: " + userInfo.id);
-            this.initializeStoreConnection(userInfo.id);
+            await this.initializeStoreConnection(userInfo.id);
 
             if (await this.isExpired()) {
                 this.loggingService.debug("[Store] Product is expired from server");
@@ -40,6 +41,10 @@ export class PurchaseService {
                 // HM TODO: remove this after setup puchase from the stores
                 this.loggingService.debug("[Store] Product is valid from server");
                 this.store.dispatch(new SetOfflineSubscribedAction(true));
+            }
+
+            if (this.shouldShowPaywall()) {
+                this.showPaywall();
             }
         });
     }
@@ -72,11 +77,6 @@ export class PurchaseService {
             } else if (isConfigured) {
                 await Purchases.logIn({ appUserID: `${userId}` });
             }
-            if (userId && !this.store.selectSnapshot((state: ApplicationState) => state.offlineState.purchasesSynced)) {
-                this.loggingService.info("[Store] Running sync purchases");
-                await Purchases.syncPurchases();
-                this.store.dispatch(new SetPurchasesSyncedAction(true));
-            }
             this.checkAndUpdateOfflineAvailability();
         } catch (error) {
             this.loggingService.error("[Store] Failed to initialize purchases connection: " + (error as any).message);
@@ -85,6 +85,7 @@ export class PurchaseService {
 
     public async showPaywall() {
         this.loggingService.info("[Store] Presenting paywall");
+        this.store.dispatch(new SetLastPaywallShownDate(new Date()));
         const { result } = await RevenueCatUI.presentPaywall();
         this.loggingService.info("[Store] Paywall result: " + result);
         if (result === PAYWALL_RESULT.PURCHASED) {
@@ -114,5 +115,44 @@ export class PurchaseService {
         return this.runningContextService.isCapacitor &&
             !offlineState.isSubscribed &&
             offlineState.downloadedTiles != null;
+    }
+
+    private shouldShowPaywall(): boolean {
+        const paywallState = this.store.selectSnapshot((s: ApplicationState) => s.paywallState);
+        if (!this.runningContextService.isCapacitor) {
+            return false;
+        }
+
+        if (this.store.selectSnapshot((s: ApplicationState) => s.userState.userInfo) == null) {
+            return false;
+        }
+
+        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)) {
+            return false;
+        }
+
+        if (paywallState.lastPaywallShownDate == null) {
+            return true;
+        }
+
+        const daysSinceLastPaywallShown = (new Date().getTime() - new Date(paywallState.lastPaywallShownDate).getTime()) / (1000 * 60 * 60 * 24);
+
+        if (daysSinceLastPaywallShown > 90) {
+            return true;
+        }
+
+        if (daysSinceLastPaywallShown > 30 && paywallState.appLaunchesSinceLastPaywallShown > 4) {
+            return true;
+        }
+
+        if (daysSinceLastPaywallShown > 7 && paywallState.appLaunchesSinceLastPaywallShown > 7) {
+            return true;
+        }
+
+        if (new Date(paywallState.lastOfflineDetectedDate) > new Date(paywallState.lastPaywallShownDate)) {
+            return true;
+        }
+
+        return false;
     }
 }

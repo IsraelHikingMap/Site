@@ -13,6 +13,7 @@ import { PmTilesService } from "./pmtiles.service";
 import { initialState } from "../reducers/initial-state";
 import { ClearHistoryAction } from "../reducers/routes.reducer";
 import { SetSelectedPoiAction } from "../reducers/poi.reducer";
+import { SetLastOfflineDetectedDate } from "../reducers/offline.reducer";
 import type { ApplicationState, MutableApplicationState, ShareUrl, Trace } from "../models";
 
 export type ImageUrlAndData = {
@@ -122,6 +123,9 @@ export class DatabaseService {
                 // Timeout or other error
                 if (offlineAvailable === false) {
                     this.loggingService.debug(`[Database] Failed to fetch and offline tile is not available for: ${params.url}, ${(ex as Error).message}`);
+                    if (!this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)) {
+                        this.store.dispatch(new SetLastOfflineDetectedDate(new Date()));
+                    }
                     throw new Error(`Failed to get ${params.url}: ${(ex as Error).message}`);
                 }
                 try {

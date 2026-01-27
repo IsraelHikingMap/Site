@@ -14,7 +14,8 @@ import type {
     InMemoryState,
     GpsState,
     OfflineState,
-    StateWithHistory
+    StateWithHistory,
+    PaywallState
 } from "..";
 
 export type ApplicationState = Immutable<MutableApplicationState>;
@@ -33,4 +34,5 @@ export type MutableApplicationState = {
     inMemoryState: InMemoryState;
     gpsState: GpsState;
     offlineState: OfflineState;
+    paywallState: PaywallState;
 }

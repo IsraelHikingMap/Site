@@ -20,7 +20,7 @@ export type OfflineState = {
      */
     uploadPoiQueue: string[];
     /**
-     * Purchases sync ran and the purchase status was updated
+     * The last time the app detected that the user is offline
      */
-    purchasesSynced: boolean;
+    lastOfflineDetectedDate: Date | null;
 };

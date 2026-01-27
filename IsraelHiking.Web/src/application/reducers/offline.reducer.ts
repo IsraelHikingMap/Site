@@ -30,9 +30,9 @@ export class RemoveFromPoiQueueAction {
     constructor(public featureId: string) { }
 }
 
-export class SetPurchasesSyncedAction {
+export class SetLastOfflineDetectedDate {
     public static type = this.prototype.constructor.name;
-    constructor(public purchasesSynced: boolean) { }
+    constructor(public lastOfflineDetectedDate: Date | null) { }
 }
 
 @State<OfflineState>({
@@ -91,11 +91,10 @@ export class OfflineReducer {
         }));
     }
 
-    @Action(SetPurchasesSyncedAction)
-    public setSyncedPurchases(ctx: StateContext<OfflineState>, action: SetPurchasesSyncedAction) {
+    @Action(SetLastOfflineDetectedDate)
+    setLastOfflineDetectedDate(ctx: StateContext<OfflineState>, action: SetLastOfflineDetectedDate) {
         ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.purchasesSynced = action.purchasesSynced;
-            return lastState;
+            lastState.lastOfflineDetectedDate = action.lastOfflineDetectedDate;
         }));
     }
 }
