@@ -97,10 +97,16 @@ export class PurchaseService {
         this.loggingService.info("[Store] Ordering product");
         const offerings = await Purchases.getOfferings();
 
-        await Purchases.purchasePackage({
-            aPackage: offerings.current.annual
-        });
-        await this.checkAndUpdateOfflineAvailability();
+        try {
+            await Purchases.purchasePackage({
+                aPackage: offerings.current.annual
+            });
+            await this.checkAndUpdateOfflineAvailability();
+        } catch (error) {
+            this.loggingService.error("[Store] Failed to purchase product: " + (error as any).message);
+            await Purchases.syncPurchases();
+            await this.checkAndUpdateOfflineAvailability();
+        }
     }
 
     public isPurchaseAvailable(): boolean {
