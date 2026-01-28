@@ -168,6 +168,7 @@
     "I have read and agree to the terms": "Я прочитал и согласен с условиями",
     "Image by": "Изображение предоставлено",
     "Imgur terms of service": "Условия использования Imgur",
+    "In order to do that you'd need to login first": "Чтобы сделать это, вам нужно сначала войти в систему",
     "Information Center": "Информационный центр",
     "Installation Instructions": "Инструкции по установке",
     "Interact with other users in our Facebook group": "Взаимодействуйте с другими пользователями в нашей группе Facebook",
@@ -438,7 +439,6 @@
     "You can't edit while offline...": "Вы не можете редактировать в офлайне...",
     "You have more than 10 routes which can cause performance issues.": "У вас есть более 10 маршрутов, что может вызвать проблемы с производительностью.",
     "You need to login in order to see your traces, click the frowning face at the top": "Вам нужно войти в систему, чтобы увидеть свои следы, нажмите на лицо, которое хмурится, вверху",
-    "You need to login to OSM first, please use the button in the upper right corner to login.": "Сначала вам нужно войти в OSM. Пожалуйста, нажмите на кнопку с грустным смайликом в левом верхнем углу главного экрана.",
     "You should add your description here! Click the edit button above.": "Вы должны добавить здесь ваше описание! Нажмите кнопку редактирования выше.",
     "Zoom In": "Увеличить",
     "Zoom Out": "Уменьшить"
