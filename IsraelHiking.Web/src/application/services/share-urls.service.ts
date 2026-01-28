@@ -12,15 +12,13 @@ import { WhatsAppService } from "./whatsapp.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
-import { UpdateShareUrlAction, RemoveShareUrlAction, AddShareUrlAction } from "../reducers/share-urls.reducer";
-import { SetShareUrlsLastModifiedDateAction } from "../reducers/offline.reducer";
+import { UpdateShareUrlAction, RemoveShareUrlAction, AddShareUrlAction, SetShareUrlsLastModifiedDateAction } from "../reducers/share-urls.reducer";
 import { Urls } from "../urls";
 import type { ShareUrl, ApplicationState } from "../models";
 
 interface IShareUrlSocialLinks {
     facebook: string;
     whatsapp: string;
-    nakeb: string;
     app: string;
 }
 
@@ -52,7 +50,6 @@ export class ShareUrlsService {
                 app: "",
                 facebook: "",
                 whatsapp: "",
-                nakeb: ""
             };
         }
         const app = this.getFullUrlFromShareId(shareUrl.id);
@@ -60,8 +57,7 @@ export class ShareUrlsService {
         return {
             app: app,
             facebook: `${Urls.facebook}${escaped}`,
-            whatsapp: this.whatsAppService.getUrl(this.getShareUrlDisplayName(shareUrl), escaped) as string,
-            nakeb: `https://www.nakeb.co.il/add_new_hike?ihm_link=${shareUrl.id}`
+            whatsapp: this.whatsAppService.getUrl(this.getShareUrlDisplayName(shareUrl), escaped) as string
         };
     }
 
@@ -100,7 +96,7 @@ export class ShareUrlsService {
         }
         this.syncing = true;
         try {
-            const sharesLastSuccessfullSync = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).shareUrlsLastModifiedDate;
+            const sharesLastSuccessfullSync = this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState).shareUrlsLastModifiedDate;
             const operationStartTimeStamp = new Date();
             let sharesToGetFromServer = [] as ShareUrl[];
             this.loggingService.info("[Shares] Starting shares sync, last modified: " +

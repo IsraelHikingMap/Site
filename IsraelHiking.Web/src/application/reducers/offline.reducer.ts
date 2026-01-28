@@ -7,32 +7,32 @@ import type { OfflineState, TileMetadataPerFile } from "../models";
 
 export class SetOfflineSubscribedAction {
     public static type = this.prototype.constructor.name;
-    constructor(public isSubscribed: boolean) {}
+    constructor(public isSubscribed: boolean) { }
 }
 
 export class SetOfflineMapsLastModifiedDateAction {
     public static type = this.prototype.constructor.name;
-    constructor(public data: TileMetadataPerFile, public tileX: number, public tileY: number) {}
+    constructor(public data: TileMetadataPerFile, public tileX: number, public tileY: number) { }
 }
 
 export class DeleteOfflineMapsTileAction {
     public static type = this.prototype.constructor.name;
-    constructor(public tileX: number, public tileY: number) {}
-}
-
-export class SetShareUrlsLastModifiedDateAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public lastModifiedDate: Date) {}
+    constructor(public tileX: number, public tileY: number) { }
 }
 
 export class AddToPoiQueueAction {
     public static type = this.prototype.constructor.name;
-    constructor(public featureId: string) {}
+    constructor(public featureId: string) { }
 }
 
 export class RemoveFromPoiQueueAction {
     public static type = this.prototype.constructor.name;
-    constructor(public featureId: string) {}
+    constructor(public featureId: string) { }
+}
+
+export class SetPurchasesSyncedAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public purchasesSynced: boolean) { }
 }
 
 @State<OfflineState>({
@@ -68,14 +68,9 @@ export class OfflineReducer {
                 return lastState;
             }
             delete lastState.downloadedTiles[`${action.tileX}-${action.tileY}`];
-            return lastState;
-        }));
-    }
-
-    @Action(SetShareUrlsLastModifiedDateAction)
-    public setShareUrlsLastModifiedDate(ctx: StateContext<OfflineState>, action: SetShareUrlsLastModifiedDateAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.shareUrlsLastModifiedDate = action.lastModifiedDate;
+            if (Object.keys(lastState.downloadedTiles).length === 0) {
+                lastState.downloadedTiles = undefined;
+            }
             return lastState;
         }));
     }
@@ -92,6 +87,14 @@ export class OfflineReducer {
     public removeFromPoiQueue(ctx: StateContext<OfflineState>, action: RemoveFromPoiQueueAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.uploadPoiQueue = lastState.uploadPoiQueue.filter(f => f !== action.featureId);
+            return lastState;
+        }));
+    }
+
+    @Action(SetPurchasesSyncedAction)
+    public setSyncedPurchases(ctx: StateContext<OfflineState>, action: SetPurchasesSyncedAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.purchasesSynced = action.purchasesSynced;
             return lastState;
         }));
     }

@@ -16,6 +16,7 @@
     "Advanced": "متقدم",
     "Advanced Settings": "إعدادات متقدمة",
     "Aerialway": "تلفريك",
+    "All {{count}} Routes": "كل {{count}} المسارات",
     "All files are up-to-date :-)": "جميع الملفات محدثة 😊",
     "All Vehicles": "جميع المركبات",
     "Allow turning off the screen": "السماح بإيقاف تشغيل الشاشة",
@@ -26,12 +27,13 @@
     "Antenna": "هوائي",
     "Application": "تطبيق",
     "Archaeological Site": "موقع أثري",
-    "Are you sure you want to delete all routes?": "هل أنت متأكد أنك تريد حذف جميع المسارات الـ {{count}}؟",
+    "Are you sure you want to delete all {{count}} routes?": "هل أنت متأكد أنك تريد حذف جميع المسارات الـ {{count}}؟",
     "Are you sure you want to stop the current recording?": "هل أنت متأكد أنك تريد إيقاف التسجيل الحالي؟",
     "Are you sure?": "هل أنت متأكد؟",
     "Area A": "المنطقة A",
     "Area B": "المنطقة B",
     "Areas": "مناطق",
+    "Artwork": "عمل فني",
     "Asks you to classify missing routes on the map after you upload a recording": "يطلب منك تصنيف المسارات المفقودة بعد تسجيل جديد.",
     "Attraction": "معلم سياحي",
     "Attribution": "نسبة ملكية",
@@ -89,9 +91,9 @@
     "Convenience Store": "متجر خدمات",
     "Convert to Route": "تحويل إلى مسار",
     "Copy Link": "نسخ الرابط",
-    "Create new hike in Nakeb": "إنشاء مسار جديد في نكِب",
     "Create Share": "حفظ في السحابة",
     "Crop": "قص",
+    "Current Route": "المسار الحالي",
     "Current speed": "السرعة الحالية",
     "Darken the screen": "تعتيم الشاشة",
     "Delete": "حذف",
@@ -145,7 +147,7 @@
     "Generate markers for all route points": "توليد علامات لجميع نقاط المسار",
     "Golan Trail": "مسار الجولان",
     "Got lost warnings": "تحذيرات الضياع",
-    "GPS tracking is enabled while editing, in order to avoid map centering to current location please click the cross icon on the top left corner": "تم تمكين تتبع GPS أثناء التحرير، لتجنب تمركز الخريطة على الموقع الحالي، يرجى النقر على أيقونة الصليب في الزاوية اليمنى العليا",
+    "GPS tracking is disabled while editing.": "تم تعطيل تتبع GPS أثناء التحرير.",
     "Grass": "عشب",
     "Green Marked Trail": "مسار مُعنون بالأخضر",
     "Guidepost": "علامة إرشادية",
@@ -165,6 +167,7 @@
     "I have read and agree to the terms": "لقد قرأت وأوافق على الشروط",
     "Image by": "صورة بواسطة",
     "Imgur terms of service": "شروط خدمة Imgur",
+    "In order to do that you'd need to login first": "لكي تفعل ذلك، عليك أولاً تسجيل الدخول",
     "Information Center": "مركز المعلومات",
     "Installation Instructions": "تعليمات التثبيت",
     "Interact with other users in our Facebook group": "تفاعل مع مستخدمين آخرين في مجموعة الفيسبوك لدينا",
@@ -224,7 +227,7 @@
     "Motorway": "الطريق السريع",
     "Move to Route": "انتقل إلى المسار",
     "MTB Map": "خريطة الدراجات الجبلية",
-    "My Shares": "مشاركتي في السحابة",
+    "My Saves in the Cloud": "مشاركتي في السحابة",
     "My Traces": "آثاري",
     "Name": "اسم",
     "Name in {{translation language}}": "الاسم باللغة العربية",
@@ -253,6 +256,7 @@
     "Open a File": "فتح ملف",
     "Open in a new window": "فتح في نافذة جديدة",
     "Open in App": "فتح في التطبيق",
+    "Open routes panel": "فتح لوحة المسارات",
     "Opening file, this might take a while, please don't close the app...": "فتح الملف، قد يستغرق بعض الوقت، يرجى عدم إغلاق التطبيق...",
     "Orange Regional Trail": "مسار إقليمي برتقالي",
     "Orchard": "بستان",
@@ -265,6 +269,7 @@
     "Paved Road": "طريق معبد",
     "Peak": "قمة",
     "Picnic Area": "منطقة نزهة",
+    "Plan & Explore": "تخطيط واستكشاف",
     "Playground": "ملعب ألعاب",
     "Please add points to route...": "يرجى إضافة نقاط إلى المسار...",
     "Please allow location tracking": "يرجى السماح بتمكين تتبع الموقع",
@@ -337,6 +342,7 @@
     "Show Coordinates": "عرض الإحداثيات",
     "Show Me Where I am": "أرني أين أنا",
     "Show Slopes": "عرض المنحدرات",
+    "Sign in!": "تسجيل الدخول!",
     "Singles": "أحادي",
     "Slope": "منحدر",
     "Split": "انقسام",
@@ -430,8 +436,8 @@
     "Yes": "نعم",
     "You are about to download large files, you can change to wifi before clicking continue...": "أنت على وشك تحميل ملفات كبيرة، يمكنك التبديل إلى الواي فاي قبل الضغط على متابعة...",
     "You can't edit while offline...": "لا يمكنك التعديل أثناء عدم الاتصال...",
+    "You have more than 10 routes which can cause performance issues.": "يوجد أكثر من 10 مسار. يرجى حذف بعضهم.",
     "You need to login in order to see your traces, click the frowning face at the top": "تحتاج لتسجيل الدخول لرؤية آثارك. انقر على الوجه الحزين بالأعلى",
-    "You need to login to OSM first, please use the button in the upper right corner to login.": "تحتاج لتسجيل الدخول إلى OSM أولًا، يُرجى استخدام الزر في الزاوية العلوية اليمنى لتسجيل الدخول.",
     "You should add your description here! Click the edit button above.": "ينبغي عليك إضافة وصفك هنا! اضغط على زر التعديل بالأعلى.",
     "Zoom In": "تكبير",
     "Zoom Out": "تصغير"

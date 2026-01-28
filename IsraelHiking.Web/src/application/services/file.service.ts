@@ -1,12 +1,12 @@
 import { inject, Injectable, InjectionToken } from "@angular/core";
 import { HttpClient, HttpEventType } from "@angular/common/http";
 import { StyleSpecification } from "maplibre-gl";
-import { File as FileSystemWrapper, FileEntry } from "@awesome-cordova-plugins/file/ngx";
+import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
 import { firstValueFrom, timeout } from "rxjs";
 import { zipSync, strToU8 } from "fflate";
-import { decode } from "base64-arraybuffer";
+import { encode } from "base64-arraybuffer";
 import type { saveAs as saveAsForType } from "file-saver";
 
 import { ImageResizeService } from "./image-resize.service";
@@ -32,7 +32,6 @@ export type FormatViewModel = {
 export class FileService {
 
     private readonly httpClient = inject(HttpClient);
-    private readonly fileSystemWrapper = inject(FileSystemWrapper);
     private readonly runningContextService = inject(RunningContextService);
     private readonly imageResizeService = inject(ImageResizeService);
     private readonly selectedRouteService = inject(SelectedRouteService);
@@ -72,11 +71,6 @@ export class FileService {
             label: "Naviguide binary route file (.twl)",
             extension: "twl",
             outputFormat: "twl",
-        },
-        {
-            label: "All routes to a single Track GPX (.gpx)",
-            extension: "gpx",
-            outputFormat: "all_gpx_single_track"
         }
     ];
 
@@ -130,7 +124,12 @@ export class FileService {
 
     private async getLocalStyleJson(url: string): Promise<StyleSpecification> {
         const styleFileName = last(url.split("/"));
-        const styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
+        const file = await Filesystem.readFile({
+            path: styleFileName,
+            directory: Directory.Data,
+            encoding: Encoding.UTF8
+        });
+        const styleText = file.data as string;
         return JSON.parse(styleText) as StyleSpecification;
     }
 
@@ -150,10 +149,9 @@ export class FileService {
             return;
         }
         fileName = fileName.replace(/[/\\?%*:|"<>]/g, "-");
-        await this.storeFileToCache(fileName, decode(responseData))
-        const entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(this.fileSystemWrapper.cacheDirectory + fileName);
+        const fileUrl = await this.storeFileToCache(fileName, responseData, true);
         Share.share({
-            files: [entry.nativeURL]
+            files: [fileUrl]
         });
     }
 
@@ -164,30 +162,27 @@ export class FileService {
     }
 
     public async getFileFromUrl(url: string, type?: string): Promise<File> {
-        const entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(url) as FileEntry;
-        const file = await new Promise((resolve, reject) => {
-            entry.file((fileContent) => {
-                const reader = new FileReader();
-                reader.onload = (event: any) => {
-                    type = type || this.getTypeFromUrl(url);
-                    const blob = new Blob([event.target.result], { type }) as any;
-                    blob.name = entry.name;
-                    if (blob.name.indexOf(".") === -1) {
-                        blob.name += this.getExtensionFromType(type);
-                    }
-                    resolve(blob);
-                };
-                reader.onerror = () => {
-                    reject(new Error("Unable to read file from url: " + url));
-                }
-                reader.readAsArrayBuffer(fileContent);
-            }, reject);
-        }) as File;
-        return file;
+        const fileResponse = await Filesystem.readFile({
+            path: url,
+        });
+        const statResponse = await Filesystem.stat({
+            path: url,
+        });
+        type = type || this.getTypeFromUrl(url);
+        const blob = await this.base64StringToBlob(fileResponse.data as string, type) as any;
+        blob.name = statResponse.name;
+        if (blob.name.indexOf(".") === -1) {
+            blob.name += this.getExtensionFromType(type);
+        }
+        return blob;
     }
 
     private getTypeFromUrl(url: string): string {
-        const fileExtension = url.split("/").pop().split(".").pop().toLocaleLowerCase();
+        const fileName = url.split("/").pop();
+        if (!fileName || !fileName.includes(".")) {
+            return "application/octet-stream";
+        }
+        const fileExtension = fileName.split(".").pop().toLocaleLowerCase();
         if (fileExtension === "gpx") {
             return "application/gpx+xml";
         }
@@ -218,8 +213,8 @@ export class FileService {
         if (file.type === ImageResizeService.JPEG) {
             dataContainer = await this.imageResizeService.resizeImageAndConvert(file);
         } else {
-            const fileConent = await this.getFileContent(file);
-            this.loggingService.info(`[Files] Finished reading file: ${file.name}`);
+            const fileConent = await file.text();
+            this.loggingService.info(`[Files] Finished reading file: ${file.name}, fileConent: ${fileConent}`);
             if (this.gpxDataContainerConverterService.canConvert(fileConent)) {
                 dataContainer = await this.gpxDataContainerConverterService.toDataContainer(fileConent);
             } else {
@@ -265,29 +260,23 @@ export class FileService {
     }
 
     public async writeStyle(styleFileName: string, styleText: string) {
-        await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, styleFileName, styleText,
-            { append: false, replace: true, truncate: 0 });
+        await Filesystem.writeFile({
+            path: styleFileName,
+            data: styleText,
+            directory: Directory.Data,
+            encoding: Encoding.UTF8
+        });
         this.loggingService.info(`[Files] Write style finished successfully: ${styleFileName}`);
     }
 
-    public getFileContent(file: File): Promise<string> {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (event: any) => {
-                resolve(event.target.result);
-            };
-            reader.onerror = () => {
-                reject(new Error("Unable to read the contect of the text file: " + file.name));
-            }
-            reader.readAsText(file);
+    public async storeFileToCache(fileName: string, content: string, isBase64: boolean): Promise<string> {
+        const results = await Filesystem.writeFile({
+            path: fileName,
+            data: content,
+            directory: Directory.Cache,
+            encoding: isBase64 ? undefined : Encoding.UTF8
         });
-    }
-
-    public async storeFileToCache(fileName: string, content: string | Blob | ArrayBuffer): Promise<string> {
-        await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, content,
-            { replace: true, append: false, truncate: 0 });
-        const entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(this.fileSystemWrapper.cacheDirectory + fileName);
-        return entry.nativeURL.replace("file://", "");
+        return results.uri;
     }
 
     /**
@@ -319,21 +308,16 @@ export class FileService {
         });
     }
 
-
-    public async getFileFromCache(url: string): Promise<Blob> {
-        try {
-            const fileBuffer = await this.fileSystemWrapper.readAsArrayBuffer(this.fileSystemWrapper.cacheDirectory, url.split("/").pop());
-            return new Blob([fileBuffer]);
-        } catch {
-            return null;
-        }
-    }
-
     public downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void, abortController: AbortController): Promise<void> {
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
         let previousPercentage = 0;
         return new Promise<void>((resolve, reject) => {
-            fetch(url, { headers: { Authorization: `Bearer ${token}` } }).then(async (response) => {
+            fetch(url, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                signal: abortController.signal
+            }).then(async (response) => {
                 if (!response.ok) {
                     this.loggingService.error(`[Files] Failed to download file: ${fileName}, status: ${response.statusText}`);
                     reject(new Error(`Failed to download file: ${fileName}, status: ${response.statusText}`));
@@ -355,9 +339,17 @@ export class FileService {
                         break;
                     }
                     if (receivedLength === 0) {
-                        await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, value.buffer, { append: false, replace: true, truncate: 0 });
+                        await Filesystem.writeFile({
+                            path: fileName,
+                            directory: Directory.Cache,
+                            data: encode(value.buffer),
+                        });
                     } else {
-                        await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, value.buffer, { append: true });
+                        await Filesystem.appendFile({
+                            path: fileName,
+                            directory: Directory.Cache,
+                            data: encode(value.buffer),
+                        });
                     }
                     receivedLength += value.length;
                     if (contentLength > 0) {
@@ -373,12 +365,20 @@ export class FileService {
     }
 
     public async moveFileFromCacheToDataDirectory(fileName: string): Promise<void> {
-        await this.fileSystemWrapper.moveFile(this.fileSystemWrapper.cacheDirectory, fileName, this.fileSystemWrapper.dataDirectory, fileName);
+        await Filesystem.rename({
+            from: fileName,
+            to: fileName,
+            directory: Directory.Cache,
+            toDirectory: Directory.Data
+        })
     }
 
     public async deleteFileInDataDirectory(fileName: string): Promise<void> {
         try {
-            await this.fileSystemWrapper.removeFile(this.fileSystemWrapper.dataDirectory, fileName);
+            await Filesystem.deleteFile({
+                path: fileName,
+                directory: Directory.Data
+            });
             this.loggingService.info(`[Files] Deleted file: ${fileName}`);
         } catch (ex) {
             this.loggingService.error(`[Files] Failed to delete file: ${fileName}, ${(ex as Error).message}`);

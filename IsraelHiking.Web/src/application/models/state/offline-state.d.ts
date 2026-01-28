@@ -12,10 +12,6 @@ export type OfflineState = {
      */
     downloadedTiles: Record<string, TileMetadataPerFile>;
     /**
-     * Shares last modified date
-     */
-    shareUrlsLastModifiedDate: Date;
-    /**
      * `true` after a user made a purchase of the subscription 
      */
     isSubscribed: boolean;
@@ -23,4 +19,8 @@ export type OfflineState = {
      * A Queue to represent the IDs of items waiting to be uploaded to the server
      */
     uploadPoiQueue: string[];
+    /**
+     * Purchases sync ran and the purchase status was updated
+     */
+    purchasesSynced: boolean;
 };

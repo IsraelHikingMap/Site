@@ -5,6 +5,7 @@ import { Store } from "@ngxs/store";
 
 import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { ResourcesService } from "../services/resources.service";
+import { SelectedRouteService } from "../services/selected-route.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState } from "../models";
 
@@ -18,12 +19,13 @@ export class CenterMeComponent {
 
     public readonly resources = inject(ResourcesService);
 
+    private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly store = inject(Store);
 
     public showButton() {
         const inMemeoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
         const tracking = this.store.selectSnapshot((s: ApplicationState) => s.gpsState.tracking);
-        return inMemeoryState.pannedTimestamp != null && inMemeoryState.following && tracking === "tracking";
+        return inMemeoryState.pannedTimestamp != null && inMemeoryState.following && tracking === "tracking" && !this.selectedRouteService.isEditingRoute();
     }
 
     public centerMe() {

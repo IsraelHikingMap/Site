@@ -1,24 +1,25 @@
 ﻿<ng-progress ngProgressHttp [ngStyle]="{'z-index':1500}"></ng-progress>
 <sidebar></sidebar>
 <background-text [dir]="resources.direction"></background-text>
-<div class="flex flex-row h-full w-full" [dir]="resources.direction">
-  <mgl-map [zoom]="[location.zoom]" [center]="[location.longitude, location.latitude]" [mapStyle]="initialStyle"
-    (moveEnd)="moveEnd($event)" (mapLoad)="mapLoaded()" [doubleClickZoom]="false" [attributionControl]="false">
+<div class="flex flex-row w-full map-height" [dir]="resources.direction">
+  <mgl-map ngSkipHydration="true" [zoom]="[location.zoom]" [center]="[location.longitude, location.latitude]"
+    [mapStyle]="initialStyle" (moveEnd)="moveEnd($event)" (mapLoad)="mapLoaded()" [doubleClickZoom]="false"
+    [attributionControl]="false">
     <layers></layers>
     <public-pois></public-pois>
     <routes></routes>
     <recorded-route></recorded-route>
     <traces></traces>
-    <main-menu #topStartControl></main-menu>
     @if (!isIFrame()) {
-    <search #topStartControl></search>
     <drawing #topStartControl></drawing>
     }
     <zoom #topEndControl></zoom>
     @if (isMobile() || !isIFrame()) {
     <location #topEndControl></location>
     }
+    <layers-button #topEndControl></layers-button>
     <route-statistics #bottomStartControl></route-statistics>
+    <osm-attribution #bottomStartControl></osm-attribution>
     <center-me #bottomStartControl></center-me>
     @if (!isApp()) {
     <mapeak-link #bottomEndControl></mapeak-link>

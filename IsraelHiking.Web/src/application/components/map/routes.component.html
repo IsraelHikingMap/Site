@@ -1,92 +1,60 @@
 ﻿<mgl-geojson-source id="routes-geojson" [data]="routesGeoJson"></mgl-geojson-source>
-<mgl-layer id="route-line"
-  type="line"
-  source="routes-geojson"
-  [before]="resources.endOfRoutes"
-  [filter]="['==', '$type', 'LineString']"
-           [layout]="{
+<mgl-layer id="route-line" type="line" source="routes-geojson" [before]="resources.endOfRoutes"
+  [filter]="['==', '$type', 'LineString']" [layout]="{
                 'line-cap': 'butt',
                 'line-join': 'bevel'
-           }"
-           [paint]="{
+           }" [paint]="{
                 'line-color': ['get', 'color'],
                 'line-width': ['get', 'weight'],
                 'line-opacity': ['get', 'opacity']
-            }"
-  (layerMouseEnter)="routeLineMouseEnter($event)"
-  (layerMouseMove)="routeLineMouseOver($event)"
-  (layerMouseLeave)="routeLineMouseLeave()"
-  (layerClick)="routeLineClick($event)">
+            }" (layerMouseEnter)="routeLineMouseEnter($event)" (layerMouseMove)="routeLineMouseOver($event)"
+  (layerMouseLeave)="routeLineMouseLeave()" (layerClick)="routeLineClick($event)">
 </mgl-layer>
-<mgl-layer id="route-line-direction"
-  type="symbol"
-  source="routes-geojson"
-  [before]="resources.endOfRoutes"
-  [filter]="['==', '$type', 'LineString']"
-           [layout]="{
+<mgl-layer id="route-line-direction" type="symbol" source="routes-geojson" [before]="resources.endOfRoutes"
+  [filter]="['==', '$type', 'LineString']" [layout]="{
                 'symbol-placement': 'line',
                 'symbol-spacing': 40,
                 'icon-image': 'arrow',
                 'icon-size': ['get', 'iconSize'],
                 'icon-allow-overlap': true,
                 'icon-ignore-placement': true
-           }"
-           [paint]="{
+           }" [paint]="{
                 'icon-color': ['get', 'iconColor']
             }">
 </mgl-layer>
-<mgl-layer id="route-points"
-  type="circle"
-  source="routes-geojson"
-  [before]="resources.endOfRoutes"
-  [filter]="['==', '$type', 'Point']"
-           [paint]="{
+<mgl-layer id="route-points" type="circle" source="routes-geojson" [before]="resources.endOfRoutes"
+  [filter]="['==', '$type', 'Point']" [paint]="{
                 'circle-color': ['get', 'color'],
                 'circle-radius': 7,
                 'circle-stroke-color': ['get', 'strokeColor'],
                 'circle-stroke-width': 3
-            }"
-  (layerClick)="nonEditRoutePointClick($event)">
+            }" (layerClick)="nonEditRoutePointClick($event)">
 </mgl-layer>
-<mgl-geojson-source id="editing-route-source" [data]="editingRouteGeoJson"></mgl-geojson-source>
-<mgl-layer id="{{resources.editRouteLines}}"
-  type="line"
-  source="editing-route-source"
-  [filter]="['==', '$type', 'LineString']"
-  [before]="resources.endOfRoutes"
-           [layout]="{
+<mgl-geojson-source [id]="resources.editRouteSource" [data]="editingRouteGeoJson"></mgl-geojson-source>
+<mgl-layer [id]="resources.editRouteLines" type="line" [source]="resources.editRouteSource"
+  [filter]="['==', '$type', 'LineString']" [before]="resources.endOfRoutes" [layout]="{
                 'line-cap': 'butt',
                 'line-join': 'bevel'
-            }"
-           [paint]="{
+            }" [paint]="{
                    'line-color': ['get', 'color'],
                    'line-width': ['get', 'weight'],
                    'line-opacity': ['get', 'opacity']
             }">
 </mgl-layer>
-<mgl-layer id="edit-route-line-direction"
-  type="symbol"
-  source="editing-route-source"
-  [before]="resources.endOfRoutes"
-  [filter]="['==', '$type', 'LineString']"
-           [layout]="{
+<mgl-layer id="edit-route-line-direction" type="symbol" [source]="resources.editRouteSource"
+  [before]="resources.endOfRoutes" [filter]="['==', '$type', 'LineString']" [layout]="{
                 'symbol-placement': 'line',
                 'symbol-spacing': 40,
                 'icon-image': 'arrow',
                 'icon-size': ['get', 'iconSize'],
                 'icon-allow-overlap': true,
                 'icon-ignore-placement': true
-           }"
-           [paint]="{
+           }" [paint]="{
                 'icon-color': ['get', 'iconColor']
             }">
 </mgl-layer>
-<mgl-layer id="{{resources.editRoutePoints}}"
-  type="circle"
-  source="editing-route-source"
-  [filter]="['==', '$type', 'Point']"
-  [before]="resources.endOfRoutes"
-           [paint]="{
+<mgl-layer [id]="resources.editRoutePoints" type="circle" [source]="resources.editRouteSource"
+  [filter]="['==', '$type', 'Point']" [before]="resources.endOfRoutes" [paint]="{
                    'circle-color': ['get', 'color'],
                    'circle-radius': 7,
                    'circle-stroke-color': 'white',
@@ -95,41 +63,39 @@
 </mgl-layer>
 
 @if (routePointPopupData) {
-  <mgl-popup
-    [lngLat]="[routePointPopupData.latlng.lng, routePointPopupData.latlng.lat]"
-    (popupClose)="closeRoutePointPopup()">
-    <route-point-overlay [latlng]="routePointPopupData.latlng" [segmentIndex]="routePointPopupData.segmentIndex" (closed)="closeRoutePointPopup()"></route-point-overlay>
-  </mgl-popup>
+<mgl-popup [lngLat]="[routePointPopupData.latlng.lng, routePointPopupData.latlng.lat]"
+  (popupClose)="closeRoutePointPopup()">
+  <route-point-overlay [latlng]="routePointPopupData.latlng" [segmentIndex]="routePointPopupData.segmentIndex"
+    (closed)="closeRoutePointPopup()"></route-point-overlay>
+</mgl-popup>
 }
 
 @if (nonEditRoutePointPopupData) {
-  <mgl-popup
-    [lngLat]="[nonEditRoutePointPopupData.latlng.lng, nonEditRoutePointPopupData.latlng.lat]"
-    (popupClose)="nonEditRoutePointPopupData = null">
-    <div [dir]="resources.direction">
-      <div class="flex flex-row">
-        <div class="w-1/2">
-          <a mat-button class="w-full" [href]="nonEditRoutePointPopupData.wazeAddress" target="_blank" matTooltip="{{resources.navigateWithWaze}}" matTooltipPosition="above"><i class="fa icon-waze"></i></a>
-        </div>
-        <div class="w-1/2">
-          <button mat-button class="w-full" (click)="switchToEditMode(nonEditRoutePointPopupData.routeId)" matTooltip="{{resources.edit}}" matTooltipPosition="above"><i class="fa icon-pencil"></i></button>
-        </div>
+<mgl-popup [lngLat]="[nonEditRoutePointPopupData.latlng.lng, nonEditRoutePointPopupData.latlng.lat]"
+  (popupClose)="nonEditRoutePointPopupData = null">
+  <div [dir]="resources.direction">
+    <div class="flex flex-row">
+      <div class="w-1/2">
+        <a mat-button class="w-full" [href]="nonEditRoutePointPopupData.wazeAddress" target="_blank"
+          matTooltip="{{resources.navigateWithWaze}}" matTooltipPosition="above"><i class="fa icon-waze"></i></a>
+      </div>
+      <div class="w-1/2">
+        <button mat-button class="w-full" (click)="switchToEditMode(nonEditRoutePointPopupData.routeId)"
+          matTooltip="{{resources.edit}}" matTooltipPosition="above"><i class="fa icon-pencil"></i></button>
       </div>
     </div>
-  </mgl-popup>
+  </div>
+</mgl-popup>
 }
 
 
 @for (route of routes; track route) {
-  @if (route.state !== 'Hidden') {
-    @for (marker of route.markers; track marker; let idx = $index) {
-      <mgl-marker anchor="bottom"
-        [draggable]="isRouteInEditPoiMode(route)"
-        [lngLat]="marker.latlng"
-        (markerDragEnd)="markerDragEnd(idx, $event)">
-        <private-poi-overlay [marker]="marker" [routeId]="route.id" [index]="idx" [color]="route.color"></private-poi-overlay>
-      </mgl-marker>
-    }
-  }
+@if (route.state !== 'Hidden') {
+@for (marker of route.markers; track marker; let idx = $index) {
+<mgl-marker anchor="bottom" [draggable]="isRouteInEditPoiMode(route)" [lngLat]="marker.latlng"
+  (markerDragEnd)="markerDragEnd(idx, $event)">
+  <private-poi-overlay [marker]="marker" [routeId]="route.id" [index]="idx" [color]="route.color"></private-poi-overlay>
+</mgl-marker>
 }
-
+}
+}

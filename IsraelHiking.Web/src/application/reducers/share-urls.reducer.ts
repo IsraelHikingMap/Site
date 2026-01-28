@@ -7,18 +7,24 @@ import type { ShareUrl, ShareUrlsState } from "../models";
 
 export class AddShareUrlAction {
     public static type = this.prototype.constructor.name;
-    constructor(public shareUrl: ShareUrl) {}
+    constructor(public shareUrl: ShareUrl) { }
 }
 
 export class RemoveShareUrlAction {
     public static type = this.prototype.constructor.name;
-    constructor(public shareUrlId: string) {}
+    constructor(public shareUrlId: string) { }
 }
 
 export class UpdateShareUrlAction {
     public static type = this.prototype.constructor.name;
-    constructor(public shareUrl: ShareUrl) {}
+    constructor(public shareUrl: ShareUrl) { }
 }
+
+export class SetShareUrlsLastModifiedDateAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public lastModifiedDate: Date) { }
+}
+
 @State<ShareUrlsState>({
     name: "shareUrlsState",
     defaults: initialState.shareUrlsState
@@ -47,6 +53,14 @@ export class ShareUrlsReducer {
         ctx.setState(produce(ctx.getState(), lastState => {
             const shareUrlIndex = lastState.shareUrls.findIndex(s => s.id === action.shareUrl.id);
             lastState.shareUrls.splice(shareUrlIndex, 1, action.shareUrl);
+            return lastState;
+        }));
+    }
+
+    @Action(SetShareUrlsLastModifiedDateAction)
+    public setShareUrlsLastModifiedDate(ctx: StateContext<ShareUrlsState>, action: SetShareUrlsLastModifiedDateAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.shareUrlsLastModifiedDate = action.lastModifiedDate;
             return lastState;
         }));
     }

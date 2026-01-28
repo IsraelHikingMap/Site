@@ -1,7 +1,18 @@
 @use "variables" as v;
 
+.map-height {
+    height: calc(100vh - var(--mat-toolbar-mobile-height) - env(safe-area-inset-top, 0));
+}
+
+@media (width >=600px) {
+    .map-height {
+        height: calc(100vh - var(--mat-toolbar-standard-height) - env(safe-area-inset-top, 0));
+    }
+}
+
 .maplibregl-ctrl-top-left {
     z-index: v.$app-left-z-index !important;
+    margin-left: env(safe-area-inset-left, 0) !important;
 }
 
 .maplibregl-ctrl-top-right {
@@ -16,6 +27,7 @@
 .maplibregl-ctrl-bottom-left {
     z-index: v.$app-left-z-index - 20 !important;
     margin-bottom: env(safe-area-inset-bottom, 0) !important;
+    margin-left: env(safe-area-inset-left, 0) !important;
 }
 
 [dir=rtl] .maplibregl-ctrl-bottom-right {

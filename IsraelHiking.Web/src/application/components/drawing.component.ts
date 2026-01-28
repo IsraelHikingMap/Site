@@ -4,6 +4,7 @@ import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
+import { MatDialog } from "@angular/material/dialog";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
@@ -11,6 +12,7 @@ import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { ResourcesService } from "../services/resources.service";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { ToastService } from "../services/toast.service";
+import { SidebarService } from "../services/sidebar.service";
 import {
     ReplaceSegmentsAction,
     ClearPoisAction,
@@ -24,6 +26,7 @@ import {
 import { SetRoutingTypeAction, SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import type { RoutingType, ApplicationState, RouteData } from "../models";
+import { ShareDialogComponent, ShareDialogComponentData } from "./dialogs/share-dialog.component";
 
 @Component({
     selector: "drawing",
@@ -39,6 +42,8 @@ export class DrawingComponent {
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
+    private readonly sidebarService = inject(SidebarService);
+    private readonly dialog = inject(MatDialog);
 
     constructor() {
         this.undoQueueLength$ = this.store.select((state: ApplicationState) => state.routes.past.length);
@@ -66,10 +71,6 @@ export class DrawingComponent {
                 this.toggleEditRoute();
             }
         }
-    }
-
-    public isShow() {
-        return this.store.selectSnapshot((s: ApplicationState) => s.uiComponentsState).drawingVisible;
     }
 
     public clearRoute() {
@@ -109,6 +110,7 @@ export class DrawingComponent {
                 break;
             default:
                 this.selectedRouteService.changeRouteEditState(selectedRoute.id, "Route");
+                this.checkTrackingAndIssueWarningIfNeeded();
                 break;
         }
     }
@@ -121,6 +123,7 @@ export class DrawingComponent {
                 break;
             default:
                 this.selectedRouteService.changeRouteEditState(selectedRoute.id, "Poi");
+                this.checkTrackingAndIssueWarningIfNeeded();
                 break;
         }
     }
@@ -190,5 +193,27 @@ export class DrawingComponent {
 
     public canDeleteAllRoutes() {
         return this.store.selectSnapshot((s: ApplicationState) => s.routes).present.length > 0;
+    }
+
+    public togglePrivateRoutes() {
+        this.sidebarService.toggle("private-routes");
+    }
+
+    public share() {
+        if (this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo == null) {
+            this.toastService.warning(this.resources.loginRequired);
+            return;
+        }
+        const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
+        this.selectedRouteService.changeRouteEditState(selectedRoute.id, "ReadOnly");
+        this.dialog.open<ShareDialogComponent, ShareDialogComponentData>(ShareDialogComponent, { width: "480px", data: { mode: "current" } });
+    }
+
+    private checkTrackingAndIssueWarningIfNeeded() {
+        const inMemeoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
+        const tracking = this.store.selectSnapshot((s: ApplicationState) => s.gpsState.tracking);
+        if (inMemeoryState.following && tracking === "tracking") {
+            this.toastService.warning(this.resources.trackingIsDisabledWhileEditing);
+        }
     }
 }

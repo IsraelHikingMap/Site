@@ -46,7 +46,7 @@ export type RouteStatistics = {
     /**
      * The distnace in meters traveled
      */
-     traveledDistance: number;
+    traveledDistance: number;
 };
 
 @Injectable()
@@ -144,15 +144,13 @@ export class RouteStatisticsService {
             paddedInterpolatedCoordinates.push(interpolatedCoordinates[0]);
         }
         paddedInterpolatedCoordinates = paddedInterpolatedCoordinates.concat(interpolatedCoordinates);
-        for (let i = 0; i < halfMedianFilter; i++)
-            {paddedInterpolatedCoordinates.push(interpolatedCoordinates[interpolatedCoordinates.length - 1]);}
+        for (let i = 0; i < halfMedianFilter; i++) { paddedInterpolatedCoordinates.push(interpolatedCoordinates[interpolatedCoordinates.length - 1]); }
 
         // apply moving median filter to remove outliers
         const filteredCoordinates = [] as [number, number][];
-        for (let i = halfMedianFilter; i < paddedInterpolatedCoordinates.length-halfMedianFilter; i++)
-        {
-            const window = paddedInterpolatedCoordinates.slice(i - halfMedianFilter, i+halfMedianFilter + 1);
-            filteredCoordinates.push([paddedInterpolatedCoordinates[i][0], this.median(window.map(x => x[1]))]);
+        for (let i = halfMedianFilter; i < paddedInterpolatedCoordinates.length - halfMedianFilter; i++) {
+            const sliceWindow = paddedInterpolatedCoordinates.slice(i - halfMedianFilter, i + halfMedianFilter + 1);
+            filteredCoordinates.push([paddedInterpolatedCoordinates[i][0], this.median(sliceWindow.map(x => x[1]))]);
         }
 
         // compute total route gain & loss
@@ -178,7 +176,7 @@ export class RouteStatisticsService {
         closestRouteToRecordingLatlngs: LatLngAltTime[],
         currentLatlng: LatLngAltTime,
         heading: number
-        ): RouteStatistics {
+    ): RouteStatistics {
         const closestRouteStatistics = this.getStatisticsByRange(closestRouteToRecordingLatlngs, null, null);
         closestRouteStatistics.traveledDistance = (this.findDistanceForLatLngInKM(closestRouteStatistics, currentLatlng, heading) * 1000);
         closestRouteStatistics.remainingDistance = closestRouteStatistics.length - closestRouteStatistics.traveledDistance;
@@ -230,7 +228,7 @@ export class RouteStatisticsService {
             }
             const ratio = (x - previousPoint.coordinate[0]) / (currentPoint.coordinate[0] - previousPoint.coordinate[0]);
             const alt = SpatialService.getInterpolatedValue(previousPoint.coordinate[1], currentPoint.coordinate[1], ratio);
-            const point: RouteStatisticsPoint = { 
+            const point: RouteStatisticsPoint = {
                 coordinate: [x, alt],
                 slope: SpatialService.getInterpolatedValue(previousPoint.slope, currentPoint.slope, ratio),
                 latlng: SpatialService.getLatlngInterpolatedValue(previousPoint.latlng, currentPoint.latlng, ratio)
@@ -249,7 +247,7 @@ export class RouteStatisticsService {
         if (bestPoint == null && heading != null) {
             bestPoint = this.findDistanceForLatLngInKMInternal(statistics, latLng, null);
         }
-        return bestPoint 
+        return bestPoint
             ? bestPoint.coordinate[0] + SpatialService.getDistanceInMeters(bestPoint.latlng, latLng) / 1000
             : 0;
     }

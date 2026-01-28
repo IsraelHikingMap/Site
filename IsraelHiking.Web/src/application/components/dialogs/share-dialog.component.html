@@ -3,17 +3,61 @@
     <div>{{title}}</div>
     <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
   </div>
+  @if (!shareAddress) {
   <div mat-dialog-content>
-    @if (!shareAddress) {
     <div class="flex flex-row justify-center">
       <div style="width: 256px; height: 256px">
         <mgl-map [interactive]="false" [mapStyle]="style" [attributionControl]="false"
           [canvasContextAttributes]="{ preserveDrawingBuffer: true }" (mapLoad)="mapLoaded($event)">
           <layers></layers>
-          <routes></routes>
+          <mgl-geojson-source id="share-routes-geojson" [data]="routesGeoJson"></mgl-geojson-source>
+          <mgl-layer id="share-route-line" type="line" source="share-routes-geojson" [before]="resources.endOfRoutes"
+            [filter]="['==', '$type', 'LineString']" [layout]="{
+                'line-cap': 'butt',
+                'line-join': 'bevel'
+           }" [paint]="{
+                'line-color': ['get', 'color'],
+                'line-width': ['get', 'weight'],
+                'line-opacity': ['get', 'opacity']
+            }">
+          </mgl-layer>
+          <mgl-layer id="share-route-line-direction" type="symbol" source="share-routes-geojson"
+            [before]="resources.endOfRoutes" [filter]="['==', '$type', 'LineString']" [layout]="{
+                'symbol-placement': 'line',
+                'symbol-spacing': 40,
+                'icon-image': 'arrow',
+                'icon-size': ['get', 'iconSize'],
+                'icon-allow-overlap': true,
+                'icon-ignore-placement': true
+           }" [paint]="{
+                'icon-color': ['get', 'iconColor']
+            }">
+          </mgl-layer>
+          <mgl-layer id="share-route-points" type="circle" source="share-routes-geojson"
+            [before]="resources.endOfRoutes" [filter]="['==', '$type', 'Point']" [paint]="{
+                'circle-color': ['get', 'color'],
+                'circle-radius': 7,
+                'circle-stroke-color': ['get', 'strokeColor'],
+                'circle-stroke-width': 3
+            }">
+          </mgl-layer>
         </mgl-map>
       </div>
     </div>
+    @if (showMutliSelection()) {
+    <div class="flex flex-row">
+      <mat-radio-group (change)=setMode($event.value) [value]="mode">
+        <div>
+          <mat-radio-button value="current" color="primary" angulartics2On="click" angularticsCategory="Share"
+            angularticsAction="Set share mode current">{{resources.currentRoute}}</mat-radio-button>
+        </div>
+        <div>
+          <mat-radio-button value="all" color="primary" angulartics2On="click" angularticsCategory="Share"
+            angularticsAction="Set share mode all">{{allXRoutesText}}</mat-radio-button>
+        </div>
+      </mat-radio-group>
+    </div>
+    }
     <div class="flex flex-row">
       <mat-form-field class="w-full" hintLabel="{{resources.titlePlaceHolder}}">
         <mat-label>{{resources.title}}</mat-label>
@@ -26,12 +70,7 @@
         <textarea matInput class="w-full" rows="2" type="text" [(ngModel)]="description"></textarea>
       </mat-form-field>
     </div>
-    @if (showUnhide) {
-    <div class="flex flex-row">
-      <mat-checkbox color="primary" [(ngModel)]="unhideRoutes">{{resources.unhideHiddenRoutes}}</mat-checkbox>
-    </div>
-    }
-    @if (showUnhide && !unhideRoutes) {
+    @if (hasHiddenRoutes) {
     <div class="flex flex-row">
       <mat-hint class="text-sm">⚠️ {{resources.hiddenRoutesWillNotBeSaved}}</mat-hint>
     </div>
@@ -41,29 +80,22 @@
       <mat-checkbox color="primary" [(ngModel)]="updateCurrentShare">{{resources.updateCurrentShare}}</mat-checkbox>
     </div>
     }
-    <div class="input-wrapper-spacer"></div>
-    <div class="flex flex-row">
+  </div>
+  <div mat-dialog-actions>
+    <div class="flex flex-row w-full">
       <button mat-raised-button class="w-full" color="primary" (click)="uploadShareUrl()"
         [disabled]="isLoading || !canUpload()" angulartics2On="click" angularticsCategory="Share"
         angularticsAction="Share {{updateCurrentShare ? 'update' : 'create'}}">{{updateCurrentShare ? resources.update :
         resources.generateUrlToShareWithYourFriends}}</button>
     </div>
-    } @else {
+  </div>
+  } @else {
+  <div mat-dialog-content>
     <div class="flex flex-row">
       <div class="img-container-small">
         <img [src]="imageUrl" class="img-responsive-full img-center" />
       </div>
     </div>
-    @if (isApp()) {
-    <div class="flex flex-row" class="break-lines">
-      <span class="w-full" [ngClass]="resources.getTextAlignment(description)"
-        [dir]="resources.getDirection(description)">{{description}}</span>
-    </div>
-    <div class="flex flex-row">
-      <button mat-button class="w-full" (click)="share()" angulartics2On="click" angularticsCategory="Share"
-        angularticsAction="Share mobile button"><i class="fa fa-lg icon-share-alt"></i></button>
-    </div>
-    } @else {
     <div class="flex flex-row" class="break-lines">
       <span class="w-full" [ngClass]="resources.getTextAlignment(description)"
         [dir]="resources.getDirection(description)">{{description}}</span>
@@ -72,7 +104,14 @@
       <a [href]="shareAddress" class="text-left chrome-wordwrap-fix w-full" [target]="'_blank'" angulartics2On="click"
         angularticsCategory="Share" angularticsAction="Share text address">{{shareAddress}}</a>
     </div>
-    <div class="input-wrapper-spacer"></div>
+  </div>
+  <div mat-dialog-actions>
+    @if (isApp()) {
+    <div class="flex flex-row w-full">
+      <button mat-button class="w-full" (click)="share()" angulartics2On="click" angularticsCategory="Share"
+        angularticsAction="Share mobile button"><i class="fa fa-lg icon-share-alt"></i></button>
+    </div>
+    } @else {
     <div class="flex flex-row w-full">
       <div class="flex-1">
         <a mat-button class="w-full" [href]="facebookShareAddress" [target]="'_blank'"
@@ -94,13 +133,8 @@
           }
         </button>
       </div>
-      <div class="flex-1">
-        <a mat-button class="w-full" [href]="nakebCreateHikeAddress" [target]="'_blank'"
-          matTooltip="{{resources.createNakebHike}}" matTooltipPosition="above" angulartics2On="click"
-          angularticsCategory="Share" angularticsAction="Share nakeb"><i class="fa icon-nakeb fa-lg"></i></a>
-      </div>
     </div>
     }
-    }
   </div>
+  }
 </div>

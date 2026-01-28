@@ -1,8 +1,7 @@
-import { inject, Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { Capacitor } from "@capacitor/core";
 
 import { environment } from "../../environments/environment";
-import { ConnectionService } from "./connection.service";
 
 @Injectable()
 export class RunningContextService {
@@ -12,8 +11,6 @@ export class RunningContextService {
     public readonly isIos = /^(iPhone|iPad|iPod)/.test(navigator.platform);
     public readonly isProduction = environment.production;
     public readonly isFacebook: boolean;
-    public isOnline: boolean = true;
-    private readonly connectionService = inject(ConnectionService);
 
     constructor() {
         if (!this.isIos && this.isCapacitor) {
@@ -31,6 +28,5 @@ export class RunningContextService {
         }
         /* eslint-enable */
         this.isFacebook = agent.indexOf("FBAN") !== -1 || agent.indexOf("FBAV") !== -1;
-        this.connectionService.stateChanged.subscribe(online => this.isOnline = online);
     }
 }

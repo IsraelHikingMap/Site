@@ -76,15 +76,21 @@ export class OfflineManagementDialogComponent {
     }
 
     private initializeCenterAndZoomFromDownloadingTile() {
-        const dowloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.offlineState.downloadedTiles) ?? {};
-        const location = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
-        const locationTile = SpatialService.toTile({ lat: location.latitude, lng: location.longitude }, TILES_ZOOM);
+        const dowloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.offlineState.downloadedTiles);
+        if (!dowloadedTiles) {
+            const mapCenter = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
+            this.map.flyTo({
+                center: [mapCenter.longitude, mapCenter.latitude],
+                zoom: TILES_ZOOM
+            });
+            return;
+        }
 
         let minTileX = Number.MAX_SAFE_INTEGER;
         let maxTileX = Number.MIN_SAFE_INTEGER;
         let minTileY = Number.MAX_SAFE_INTEGER;
         let maxTileY = Number.MIN_SAFE_INTEGER;
-        for (const key of Object.keys(dowloadedTiles).concat((locationTile.x - 1) + "-" + (locationTile.y - 1))) {
+        for (const key of Object.keys(dowloadedTiles)) {
             const [tileX, tileY] = key.split("-").map(Number);
             if (isNaN(tileX) || isNaN(tileY)) {
                 continue;
@@ -163,6 +169,9 @@ export class OfflineManagementDialogComponent {
         const downloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.offlineState.downloadedTiles);
         for (const key of Object.keys(downloadedTiles || {})) {
             const [tileXDownloaded, tileYDownloaded] = key.split("-").map(Number);
+            if (isNaN(tileXDownloaded) || isNaN(tileYDownloaded)) {
+                continue;
+            }
             if (this.downloadingTileXY()?.tileX === tileXDownloaded && this.downloadingTileXY()?.tileY === tileYDownloaded) {
                 continue; // Skip tiles that are in progress
             }

@@ -1,1 +1,1 @@
-hike,bike,run,outdoor,hiking,map,navigation,route planning
+utv,mtb,ride,finder,4x4,walking,route,path,maker,biking,mount,tracker,running,planner,topographic

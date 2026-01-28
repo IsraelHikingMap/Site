@@ -1,0 +1,54 @@
+<div [dir]="resources.direction" class="page-content">
+    <h2>{{resources.maps}}</h2>
+    <p>{{resources.introMapsDescription}}</p>
+    <ng-lottie class="img-responsive" [options]="lottieMaps"></ng-lottie>
+
+    <h2>{{resources.routesAndPoints}}</h2>
+    <p>{{resources.introRoutesAndPointsDescription}}</p>
+    <ng-lottie class="img-responsive" [options]="lottiePlan"></ng-lottie>
+
+    @if (!isApp()) {
+    <div class="flex flex-row justify-center items-center">
+        <a [href]="androidAppUrl" target="_blank" angulartics2On="click" angularticsCategory="Info"
+            angularticsAction="Download from google play store">
+            <img src="content/google-play-badge.png" width="200" />
+        </a>
+    </div>
+    <div class="flex flex-row justify-center items-center">
+        <a [href]="iosAppUrl" target="_blank" angulartics2On="click" angularticsCategory="Info"
+            angularticsAction="Download from app store">
+            <img src="content/app-store-badge.png" width="200" />
+        </a>
+    </div>
+    }
+    @if (isMobile()) {
+    <div class="flex flex-row items-center">
+        <i class="fa icon-question-circle-o p-2"></i>
+        {{resources.longPressHint}}
+    </div>
+    }
+    <h4>{{resources.infoHelpfulLinks}}</h4>
+    <div class="flex flex-row">
+        <a class="w-full link" routerLink="/privacy-policy" angulartics2On="click" angularticsCategory="Info"
+            angularticsAction="Terms of service">
+            <i class="fa icon-edit"></i>
+            {{resources.infoPrivacyPolicyTermsOfService}}
+
+        </a>
+    </div>
+    <div class="flex flex-row">
+        <a class="w-full link" routerLink="/attribution" angulartics2On="click" angularticsCategory="Info"
+            angularticsAction="Attribution">
+            <i class="fa icon-layers"></i>
+            {{resources.attribution}}
+
+        </a>
+    </div>
+    <br />
+    <p>
+        <i>
+            {{resources.infoFooterThanks}}<br />
+            {{resources.infoFooterAuthors}}<br />
+        </i>
+    </p>
+</div>

@@ -8,10 +8,6 @@ name: Build and Publish
 # 5. github-release - Tags the commit and creates a Github release with the apps' binaries (if requested)
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
   workflow_dispatch:
     inputs:
       publishandroid:
@@ -34,10 +30,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
@@ -83,15 +79,15 @@ jobs:
     needs: version
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5.1.0
         with:
           distribution: 'temurin'
           java-version: '21'
@@ -138,7 +134,6 @@ jobs:
         if: ${{ github.event.inputs.publishandroid == 'true' }}
         run: |
           cd IsraelHiking.Web/android
-          echo "ראו https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/android/iw-IL/changelogs/default.txt
           echo "See https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/android/en-US/changelogs/default.txt
           bundle exec fastlane upload
         env:
@@ -158,7 +153,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.1
 
       - name: Login to GitHub Container Registry
         if: ${{ github.secret_source == 'Actions' }}
@@ -185,10 +180,10 @@ jobs:
     needs: version
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
@@ -227,7 +222,7 @@ jobs:
           bundle exec fastlane build_ios
         env:
           MATCH_PASSWORD: ${{ secrets.PASSWORD }}
-      - name: Upload artifacts
+      - name: Upload ipa artifacts
         if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v4
         with:
@@ -244,7 +239,6 @@ jobs:
         if: ${{ github.event.inputs.publishios == 'true' && github.event.inputs.production == 'true' }}
         run: |
           cd IsraelHiking.Web/ios/App
-          echo "ראו https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/he/release_notes.txt
           echo "See https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/en-US/release_notes.txt
           bundle exec fastlane upload_to_production
         env:
@@ -256,7 +250,7 @@ jobs:
     needs: [version, ios, android]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.1
       - name: Tag commit and push
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2

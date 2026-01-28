@@ -12,9 +12,9 @@ import { SelectedRouteService } from "./selected-route.service";
 import { SetFollowingAction, SetPannedAction, ToggleDistanceAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, LatLngAlt } from "../models";
 
-export type LocationWithBearing = { 
-    center: LatLngAlt; 
-    bearing: number; 
+export type LocationWithBearing = {
+    center: LatLngAlt;
+    bearing: number;
     accuracy: number;
 };
 
@@ -60,7 +60,6 @@ export class LocationService {
         });
 
         this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
-            const wasPanned = this.isPanned;
             this.isPanned = pannedTimestamp != null;
             if (this.isPanned) {
                 return;
@@ -73,10 +72,6 @@ export class LocationService {
             }
             if (this.isFollowing()) {
                 this.moveMapToGpsPosition();
-                const selectedRoute = this.selectedRouteService.getSelectedRoute();
-                if (wasPanned && selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
-                    this.toastService.warning(this.resources.editingRouteWhileTracking);
-                }
             }
         });
 
@@ -87,9 +82,9 @@ export class LocationService {
         });
     }
 
-    public disable() {
-        this.geoLocationService.disable();
-        this.deviceOrientationService.disable();
+    public async disable() {
+        await this.geoLocationService.disable();
+        await this.deviceOrientationService.disable();
         this.locationWithBearing = null;
         this.changed.next(this.locationWithBearing);
     }
@@ -110,7 +105,7 @@ export class LocationService {
     }
 
     public isFollowing(): boolean {
-        return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).following && !this.isPanned;
+        return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).following && !this.isPanned && !this.selectedRouteService.isEditingRoute();
     }
 
     public moveMapToGpsPosition() {
@@ -152,5 +147,10 @@ export class LocationService {
         if (!this.mapService.map.isMoving() && this.isFollowing()) {
             this.moveMapToGpsPosition();
         }
+    }
+
+    public async uninitialize() {
+        await this.geoLocationService.uninitialize();
+        await this.deviceOrientationService.disable();
     }
 }

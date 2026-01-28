@@ -1,0 +1,15 @@
+.toolbar {
+    position: fixed;
+    top: env(safe-area-inset-top, 0);
+    z-index: 50;
+}
+
+.page-margin {
+    margin-top: var(--mat-toolbar-mobile-height);
+}
+
+@media (width >=600px) {
+    .page-margin {
+        margin-top: var(--mat-toolbar-standard-height);
+    }
+}

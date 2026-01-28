@@ -26,11 +26,10 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { ClipboardModule } from "@angular/cdk/clipboard";
 import { provideRouter } from "@angular/router";
 import { DragDropModule } from "@angular/cdk/drag-drop";
-import { InfiniteScrollDirective } from "ngx-infinite-scroll";
-import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { NgxMapLibreGLModule } from "@maplibre/ngx-maplibre-gl";
 import { provideNgIdle } from "@ng-idle/core";
 import { NgxsModule } from "@ngxs/store";
+import { InfiniteScrollDirective } from "ngx-infinite-scroll";
 import { progressInterceptor } from "ngx-progressbar/http";
 import { provideLottieOptions } from "ngx-lottie";
 import { saveAs } from "file-saver-es";
@@ -75,7 +74,6 @@ import { LoggingService } from "./services/logging.service";
 import { DefaultStyleService } from "./services/default-style.service";
 import { DatabaseService } from "./services/database.service";
 import { ApplicationExitService } from "./services/application-exit.service";
-import { ConnectionService } from "./services/connection.service";
 import { ScreenService } from "./services/screen.service";
 import { PurchaseService } from "./services/purchase.service";
 import { DeviceOrientationService } from "./services/device-orientation.service";
@@ -114,7 +112,6 @@ import { PointsOfInterestReducer } from "./reducers/poi.reducer";
 import { InMemoryReducer } from "./reducers/in-memory.reducer";
 import { GpsReducer } from "./reducers/gps.reducer";
 import { OfflineReducer } from "./reducers/offline.reducer";
-import { UIComponentsReducer } from "./reducers/ui-components.reducer";
 import { routes } from "./app.routes";
 
 export const appConfig: ApplicationConfig = {
@@ -166,7 +163,6 @@ export const appConfig: ApplicationConfig = {
                 InMemoryReducer,
                 GpsReducer,
                 OfflineReducer,
-                UIComponentsReducer
             ])
         ),
         AuthorizationService,
@@ -206,7 +202,6 @@ export const appConfig: ApplicationConfig = {
         DefaultStyleService,
         DatabaseService,
         ApplicationExitService,
-        ConnectionService,
         ScreenService,
         PurchaseService,
         ApplicationInitializeService,
@@ -227,7 +222,6 @@ export const appConfig: ApplicationConfig = {
         LogReaderService,
         TranslationService,
         AnalyticsService,
-        FileSystemWrapper,
         RouteEditPoiInteraction,
         RouteEditRouteInteraction,
         { provide: ErrorHandler, useClass: GlobalErrorHandler },
@@ -237,6 +231,6 @@ export const appConfig: ApplicationConfig = {
         ),
         provideNgIdle(),
         provideRouter(routes),
-        provideLottieOptions({ player: () => player })
+        provideLottieOptions({ player: () => player }),
     ]
 }

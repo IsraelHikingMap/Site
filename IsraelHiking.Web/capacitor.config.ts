@@ -16,6 +16,9 @@ const config: CapacitorConfig = {
         twitter: false,
         oauth2: true
       }
+    },
+    SystemBars: {
+      insetsHandling: "disable"
     }
   },
   ios: {

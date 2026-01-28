@@ -1,6 +1,6 @@
 import { Injectable, EventEmitter } from "@angular/core";
 
-export type SidebarView = "info" | "layers" | "public-poi" | "";
+export type SidebarView = "layers" | "public-poi" | "private-routes" | "";
 
 @Injectable()
 export class SidebarService {

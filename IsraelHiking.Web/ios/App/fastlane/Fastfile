@@ -45,7 +45,7 @@ platform :ios do
     )
     deliver(
       force: true,  # Skip HTML report verification
-      skip_screenshots: true,  # Set to true to skip screenshots if unchanged
+      skip_screenshots: false,  # Set to true to skip screenshots if unchanged
       skip_metadata: false, # This is needed to publish the release notes, those are updated through the CI
       submit_for_review: true,  # Automatically submits the build for review
       run_precheck_before_submit: false,  # Precheck cannot check In-app purchases with the App Store Connect API Key (yet)

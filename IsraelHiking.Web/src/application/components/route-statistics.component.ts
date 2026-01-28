@@ -15,6 +15,7 @@ import * as d3 from "d3";
 import type { Selection, ScaleContinuousNumeric } from "d3";
 import type { Immutable } from "immer";
 
+import { DistancePipe } from "../pipes/distance.pipe";
 import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { ResourcesService } from "../services/resources.service";
@@ -61,7 +62,7 @@ interface IChartElements {
     templateUrl: "./route-statistics.component.html",
     styleUrls: ["./route-statistics.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, NgClass, MatGridList, MatGridTile, MatTooltip, MatButton, Angulartics2OnModule, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, DecimalPipe]
+    imports: [Dir, NgClass, MatGridList, MatGridTile, MatTooltip, MatButton, Angulartics2OnModule, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, DecimalPipe, DistancePipe]
 })
 export class RouteStatisticsComponent implements OnInit {
     private static readonly HOVER_BOX_WIDTH = 160;
@@ -97,7 +98,6 @@ export class RouteStatisticsComponent implements OnInit {
     };
     public subRouteRange: IChartSubRouteRange;
     public slopeRoutePaint: LineLayerSpecification["paint"] = {};
-    public statisticsVisible: boolean;
 
     public lineChartContainer = viewChild<ElementRef>("lineChartContainer");
 
@@ -219,10 +219,6 @@ export class RouteStatisticsComponent implements OnInit {
             this.isKmMarkersOn = showKmMarkers;
             this.updateKmMarkers();
         });
-        this.store.select((state: ApplicationState) => state.uiComponentsState.statisticsVisible).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(visible => {
-            this.statisticsVisible = visible;
-            this.redrawChart();
-        });
         this.routeChanged();
         this.store.select((s: ApplicationState) => s.recordedRouteState.isRecording).pipe(
             distinctUntilChanged(),
@@ -257,15 +253,6 @@ export class RouteStatisticsComponent implements OnInit {
     public isSidebarVisible() {
         return this.sidebarService.isSidebarOpen();
     }
-
-    public getUnits = (value: number): string => Math.abs(value) > 1000 ? this.resources.kmUnit : this.resources.meterUnit;
-
-    public toShortNumber = (value: number): string => {
-        if (value == null) {
-            return "0";
-        }
-        return Math.abs(value) > 1000 ? (value / 1000.0).toFixed(2) : value.toFixed(0);
-    };
 
     public toggle(): void {
         this.isOpen.set(!this.isOpen());
@@ -408,6 +395,9 @@ export class RouteStatisticsComponent implements OnInit {
         this.chartElements.margin.right = this.isSlopeOn ? 30 : 10;
         this.chartElements.svg = d3.select(this.lineChartContainer().nativeElement).select("svg");
         this.chartElements.svg.html("");
+        if (typeof window === "undefined") {
+            return;
+        }
         const windowStyle = window.getComputedStyle(this.lineChartContainer().nativeElement);
         const width = +windowStyle.width.replace("px", "");
         const height = +windowStyle.height.replace("px", "");
@@ -804,8 +794,13 @@ export class RouteStatisticsComponent implements OnInit {
     };
 
     private onGeolocationChanged(position: GeolocationPosition) {
-        this.currentSpeed = (position == null) ? null : position.coords.speed * 3.6;
-        this.heading = (position == null) || position.coords.speed === 0 ? null : position.coords.heading;
+        if (position == null) {
+            this.currentSpeed = null;
+            this.heading = null;
+            return;
+        }
+        this.currentSpeed = position.coords.speed * 3.6;
+        this.heading = position.coords.heading;
         this.cancelableTimeoutService.setTimeoutByName(() => {
             // if there are no location updates reset speed.
             this.currentSpeed = null;

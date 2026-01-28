@@ -23,7 +23,6 @@ $app-background: map.get($app-theme, background);
 @include mat.app-background();
 @include mat.all-component-themes($app-theme);
 
-
 .mat-mdc-snack-bar-container {
     margin-bottom: env(safe-area-inset-bottom, 0) !important;
 
@@ -45,8 +44,6 @@ $app-background: map.get($app-theme, background);
     }
 }
 
-
-
 html {
     height: 100%;
 }
@@ -59,7 +56,6 @@ body {
     left: 0;
     margin: 0;
     font-family: Roboto, sans-serif;
-    overflow: hidden;
     padding-top: env(safe-area-inset-top, 0);
 }
 
@@ -83,6 +79,10 @@ body {
             vertical-align: middle !important;
         }
     }
+}
+
+.side-control.maplibregl-ctrl button:last-of-type {
+    overflow: hidden;
 }
 
 .input-wrapper-spacer {

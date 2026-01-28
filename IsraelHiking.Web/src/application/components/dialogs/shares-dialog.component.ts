@@ -19,7 +19,7 @@ import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
-import { ShareDialogComponent } from "./share-dialog.component";
+import { ShareDialogComponent, ShareDialogComponentData } from "./share-dialog.component";
 import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
@@ -90,7 +90,7 @@ export class SharesDialogComponent implements OnInit {
     }
 
     public createShare() {
-        this.dialog.open(ShareDialogComponent, { width: "480px" });
+        this.dialog.open<ShareDialogComponent, ShareDialogComponentData>(ShareDialogComponent, { width: "480px", data: { mode: "all" } });
     }
 
     private updateFilteredLists(searchTerm: string) {
