@@ -3,8 +3,8 @@
     <div>{{title}}</div>
     <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
   </div>
+  @if (!shareAddress) {
   <div mat-dialog-content>
-    @if (!shareAddress) {
     <div class="flex flex-row justify-center">
       <div style="width: 256px; height: 256px">
         <mgl-map [interactive]="false" [mapStyle]="style" [attributionControl]="false"
@@ -44,18 +44,6 @@
         </mgl-map>
       </div>
     </div>
-    <div class="flex flex-row">
-      <mat-form-field class="w-full" hintLabel="{{resources.titlePlaceHolder}}">
-        <mat-label>{{resources.title}}</mat-label>
-        <input matInput class="w-full" type="text" [(ngModel)]="title" />
-      </mat-form-field>
-    </div>
-    <div class="flex flex-row">
-      <mat-form-field class="w-full" hintLabel="{{resources.descriptionPlaceHolder}}">
-        <mat-label>{{resources.description}}</mat-label>
-        <textarea matInput class="w-full" rows="2" type="text" [(ngModel)]="description"></textarea>
-      </mat-form-field>
-    </div>
     @if (showMutliSelection()) {
     <div class="flex flex-row">
       <mat-radio-group (change)=setMode($event.value) [value]="mode">
@@ -70,6 +58,18 @@
       </mat-radio-group>
     </div>
     }
+    <div class="flex flex-row">
+      <mat-form-field class="w-full" hintLabel="{{resources.titlePlaceHolder}}">
+        <mat-label>{{resources.title}}</mat-label>
+        <input matInput class="w-full" type="text" [(ngModel)]="title" />
+      </mat-form-field>
+    </div>
+    <div class="flex flex-row">
+      <mat-form-field class="w-full" hintLabel="{{resources.descriptionPlaceHolder}}">
+        <mat-label>{{resources.description}}</mat-label>
+        <textarea matInput class="w-full" rows="2" type="text" [(ngModel)]="description"></textarea>
+      </mat-form-field>
+    </div>
     @if (hasHiddenRoutes) {
     <div class="flex flex-row">
       <mat-hint class="text-sm">⚠️ {{resources.hiddenRoutesWillNotBeSaved}}</mat-hint>
@@ -80,29 +80,22 @@
       <mat-checkbox color="primary" [(ngModel)]="updateCurrentShare">{{resources.updateCurrentShare}}</mat-checkbox>
     </div>
     }
-    <div class="input-wrapper-spacer"></div>
-    <div class="flex flex-row">
+  </div>
+  <div mat-dialog-actions>
+    <div class="flex flex-row w-full">
       <button mat-raised-button class="w-full" color="primary" (click)="uploadShareUrl()"
         [disabled]="isLoading || !canUpload()" angulartics2On="click" angularticsCategory="Share"
         angularticsAction="Share {{updateCurrentShare ? 'update' : 'create'}}">{{updateCurrentShare ? resources.update :
         resources.generateUrlToShareWithYourFriends}}</button>
     </div>
-    } @else {
+  </div>
+  } @else {
+  <div mat-dialog-content>
     <div class="flex flex-row">
       <div class="img-container-small">
         <img [src]="imageUrl" class="img-responsive-full img-center" />
       </div>
     </div>
-    @if (isApp()) {
-    <div class="flex flex-row" class="break-lines">
-      <span class="w-full" [ngClass]="resources.getTextAlignment(description)"
-        [dir]="resources.getDirection(description)">{{description}}</span>
-    </div>
-    <div class="flex flex-row">
-      <button mat-button class="w-full" (click)="share()" angulartics2On="click" angularticsCategory="Share"
-        angularticsAction="Share mobile button"><i class="fa fa-lg icon-share-alt"></i></button>
-    </div>
-    } @else {
     <div class="flex flex-row" class="break-lines">
       <span class="w-full" [ngClass]="resources.getTextAlignment(description)"
         [dir]="resources.getDirection(description)">{{description}}</span>
@@ -111,7 +104,14 @@
       <a [href]="shareAddress" class="text-left chrome-wordwrap-fix w-full" [target]="'_blank'" angulartics2On="click"
         angularticsCategory="Share" angularticsAction="Share text address">{{shareAddress}}</a>
     </div>
-    <div class="input-wrapper-spacer"></div>
+  </div>
+  <div mat-dialog-actions>
+    @if (isApp()) {
+    <div class="flex flex-row w-full">
+      <button mat-button class="w-full" (click)="share()" angulartics2On="click" angularticsCategory="Share"
+        angularticsAction="Share mobile button"><i class="fa fa-lg icon-share-alt"></i></button>
+    </div>
+    } @else {
     <div class="flex flex-row w-full">
       <div class="flex-1">
         <a mat-button class="w-full" [href]="facebookShareAddress" [target]="'_blank'"
@@ -133,13 +133,8 @@
           }
         </button>
       </div>
-      <div class="flex-1">
-        <a mat-button class="w-full" [href]="nakebCreateHikeAddress" [target]="'_blank'"
-          matTooltip="{{resources.createNakebHike}}" matTooltipPosition="above" angulartics2On="click"
-          angularticsCategory="Share" angularticsAction="Share nakeb"><i class="fa icon-nakeb fa-lg"></i></a>
-      </div>
     </div>
     }
-    }
   </div>
+  }
 </div>

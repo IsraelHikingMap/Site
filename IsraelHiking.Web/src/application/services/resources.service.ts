@@ -155,7 +155,6 @@ export class ResourcesService {
     public imgurTermsOfService: string;
     public iHaveReadAndAgree: string;
     public submit: string;
-    public createNakebHike: string;
     public updateCurrentShare: string;
     public generateMarkersForAllPoints: string;
     public yes: string;
@@ -494,7 +493,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1769581544646");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1769582659179");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -625,7 +624,6 @@ export class ResourcesService {
         this.iHaveReadAndAgree = this.gettextCatalog.getString("I have read and agree to the terms");
         this.submit = this.gettextCatalog.getString("Submit");
         this.satelliteImagery = this.gettextCatalog.getString("Satellite Imagery");
-        this.createNakebHike = this.gettextCatalog.getString("Create new hike in Nakeb");
         this.flowers = this.gettextCatalog.getString("Flowers");
         this.updateCurrentShare = this.gettextCatalog.getString("Update current share");
         this.generateMarkersForAllPoints = this.gettextCatalog.getString("Generate markers for all route points");

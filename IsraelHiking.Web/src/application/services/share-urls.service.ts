@@ -19,7 +19,6 @@ import type { ShareUrl, ApplicationState } from "../models";
 interface IShareUrlSocialLinks {
     facebook: string;
     whatsapp: string;
-    nakeb: string;
     app: string;
 }
 
@@ -51,7 +50,6 @@ export class ShareUrlsService {
                 app: "",
                 facebook: "",
                 whatsapp: "",
-                nakeb: ""
             };
         }
         const app = this.getFullUrlFromShareId(shareUrl.id);
@@ -59,8 +57,7 @@ export class ShareUrlsService {
         return {
             app: app,
             facebook: `${Urls.facebook}${escaped}`,
-            whatsapp: this.whatsAppService.getUrl(this.getShareUrlDisplayName(shareUrl), escaped) as string,
-            nakeb: `https://www.nakeb.co.il/add_new_hike?ihm_link=${shareUrl.id}`
+            whatsapp: this.whatsAppService.getUrl(this.getShareUrlDisplayName(shareUrl), escaped) as string
         };
     }
 
