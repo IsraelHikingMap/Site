@@ -86,7 +86,7 @@ export class PurchaseService {
     public async showPaywall() {
         this.loggingService.info("[Store] Presenting paywall");
         this.store.dispatch(new SetLastPaywallShownDate(new Date()));
-        const { result } = await RevenueCatUI.presentPaywall();
+        const { result } = await RevenueCatUI.presentPaywall({ displayCloseButton: true });
         this.loggingService.info("[Store] Paywall result: " + result);
         if (result === PAYWALL_RESULT.PURCHASED) {
             this.orderInternal();
@@ -143,11 +143,7 @@ export class PurchaseService {
 
         const daysSinceLastPaywallShown = (new Date().getTime() - new Date(paywallState.lastPaywallShownDate).getTime()) / (1000 * 60 * 60 * 24);
 
-        if (daysSinceLastPaywallShown > 90) {
-            return true;
-        }
-
-        if (daysSinceLastPaywallShown > 30 && paywallState.appLaunchesSinceLastPaywallShown > 4) {
+        if (daysSinceLastPaywallShown > 14) {
             return true;
         }
 
