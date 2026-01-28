@@ -1,6 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
-import { MatDialogTitle, MatDialogClose, MatDialogContent, MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { MatDialogTitle, MatDialogClose, MatDialogContent, MAT_DIALOG_DATA, MatDialogActions } from "@angular/material/dialog";
 import { MatButton, MatAnchor } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { NgClass } from "@angular/common";
@@ -39,7 +39,7 @@ export type ShareDialogComponentData = {
 @Component({
     selector: "share-dialog",
     templateUrl: "./share-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, Angulartics2OnModule, NgClass, MatAnchor, MatTooltip, CdkCopyToClipboard, MapComponent, LayersComponent, LayerComponent, GeoJSONSourceComponent, MatRadioGroup, MatRadioButton]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, Angulartics2OnModule, NgClass, MatAnchor, MatTooltip, CdkCopyToClipboard, MapComponent, LayersComponent, LayerComponent, GeoJSONSourceComponent, MatRadioGroup, MatRadioButton, MatDialogActions]
 })
 export class ShareDialogComponent {
 
@@ -48,7 +48,6 @@ export class ShareDialogComponent {
     public shareAddress: string = "";
     public whatsappShareAddress: string = "";
     public facebookShareAddress: string = "";
-    public nakebCreateHikeAddress: string = "";
     public isLoading: boolean = false;
     public canUpdate: boolean = false;
     public updateCurrentShare: boolean = false;
@@ -143,7 +142,6 @@ export class ShareDialogComponent {
             this.imageUrl = this.shareUrlsService.getImageUrlFromShareId(shareUrl.id);
             this.whatsappShareAddress = links.whatsapp;
             this.facebookShareAddress = links.facebook;
-            this.nakebCreateHikeAddress = links.nakeb;
         } catch (ex) {
             this.toastService.error(ex, this.resources.unableToGenerateUrl);
         } finally {

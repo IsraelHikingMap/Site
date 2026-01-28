@@ -91,7 +91,6 @@
     "Convenience Store": "متجر خدمات",
     "Convert to Route": "تحويل إلى مسار",
     "Copy Link": "نسخ الرابط",
-    "Create new hike in Nakeb": "إنشاء مسار جديد في نكِب",
     "Create Share": "حفظ في السحابة",
     "Crop": "قص",
     "Current Route": "المسار الحالي",
@@ -168,6 +167,7 @@
     "I have read and agree to the terms": "لقد قرأت وأوافق على الشروط",
     "Image by": "صورة بواسطة",
     "Imgur terms of service": "شروط خدمة Imgur",
+    "In order to do that you'd need to login first": "لكي تفعل ذلك، عليك أولاً تسجيل الدخول",
     "Information Center": "مركز المعلومات",
     "Installation Instructions": "تعليمات التثبيت",
     "Interact with other users in our Facebook group": "تفاعل مع مستخدمين آخرين في مجموعة الفيسبوك لدينا",
@@ -438,7 +438,6 @@
     "You can't edit while offline...": "لا يمكنك التعديل أثناء عدم الاتصال...",
     "You have more than 10 routes which can cause performance issues.": "يوجد أكثر من 10 مسار. يرجى حذف بعضهم.",
     "You need to login in order to see your traces, click the frowning face at the top": "تحتاج لتسجيل الدخول لرؤية آثارك. انقر على الوجه الحزين بالأعلى",
-    "You need to login to OSM first, please use the button in the upper right corner to login.": "تحتاج لتسجيل الدخول إلى OSM أولًا، يُرجى استخدام الزر في الزاوية العلوية اليمنى لتسجيل الدخول.",
     "You should add your description here! Click the edit button above.": "ينبغي عليك إضافة وصفك هنا! اضغط على زر التعديل بالأعلى.",
     "Zoom In": "تكبير",
     "Zoom Out": "تصغير"

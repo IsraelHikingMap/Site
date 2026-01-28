@@ -200,6 +200,10 @@ export class DrawingComponent {
     }
 
     public share() {
+        if (this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo == null) {
+            this.toastService.warning(this.resources.loginRequired);
+            return;
+        }
         const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         this.selectedRouteService.changeRouteEditState(selectedRoute.id, "ReadOnly");
         this.dialog.open<ShareDialogComponent, ShareDialogComponentData>(ShareDialogComponent, { width: "480px", data: { mode: "current" } });

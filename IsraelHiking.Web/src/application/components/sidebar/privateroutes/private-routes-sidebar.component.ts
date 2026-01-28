@@ -215,6 +215,10 @@ export class PrivateRoutesSidebarComponent {
     }
 
     public share() {
+        if (this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo == null) {
+            this.toastService.warning(this.resources.loginRequired);
+            return;
+        }
         this.dialog.open<ShareDialogComponent, ShareDialogComponentData>(ShareDialogComponent, { width: "480px", data: { mode: "all" } });
     }
 
