@@ -25,7 +25,7 @@
     "@capawesome/capacitor-app-update": "^8.0.2",
     "@capgo/background-geolocation": "^8.0.15",
     "@capgo/capacitor-compass": "^8.1.4",
-    "@capgo/capacitor-social-login": "^8.2.16",
+    "@capgo/capacitor-social-login": "file:../../capacitor-social-login/capgo-capacitor-social-login-8.2.16.tgz",
     "@mapbox/mapbox-gl-rtl-text": "^0.3.0",
     "@mapbox/vector-tile": "^2.0.4",
     "@maplibre/ngx-maplibre-gl": "^21.0.2",

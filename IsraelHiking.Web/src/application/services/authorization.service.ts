@@ -22,21 +22,7 @@ export class AuthorizationService {
     private readonly redirectUrl = this.runningContextService.isCapacitor ? Urls.mapeakAuthUrl : Urls.emptyAuthHtml;
 
     public initialize() {
-        SocialLogin.initialize({
-            oauth2: {
-                osm: {
-                    appId: "jqxu2hhG-gUa-XUxiepzkQPZQf7iQguMC0sTVSRpaKE",
-                    redirectUrl: this.redirectUrl,
-                    scope: "read_prefs write_api read_gpx write_gpx",
-                    authorizationBaseUrl: Urls.osmAuth + "/authorize",
-                    accessTokenEndpoint: Urls.osmAuth + "/token",
-                    responseType: "code",
-                    logsEnabled: true, // HM TODO: remove this?
-                    pkceEnabled: false
-                }
-            },
 
-        });
     }
 
     public isLoggedIn(): boolean {
@@ -45,10 +31,6 @@ export class AuthorizationService {
     }
 
     public logout() {
-        SocialLogin.logout({
-            provider: "oauth2",
-            providerId: "osm"
-        });
         this.store.dispatch(new SetUserInfoAction(null));
         this.store.dispatch(new SetTokenAction(null));
     }
@@ -58,14 +40,35 @@ export class AuthorizationService {
             return;
         }
         this.loggingService.info("[Authorization] User initiated login");
-        const result = await SocialLogin.login({
-            provider: "oauth2",
-            options: {
-                providerId: "osm"
-            }
+        const params = new URLSearchParams({
+            client_id: "jqxu2hhG-gUa-XUxiepzkQPZQf7iQguMC0sTVSRpaKE",
+            redirect_uri: this.redirectUrl,
+            response_type: "code",
+            scope: "read_prefs write_api read_gpx write_gpx"
         });
-        this.store.dispatch(new SetTokenAction(result.result.accessToken.token));
+        const result = await SocialLogin.openSecureWindow({
+            authEndpoint: Urls.osmAuth + "/authorize?" + params.toString(),
+            broadcastChannelName: "osm-oauth2"
+        });
+        const redirectedUrl = new URL(result.redirectedUri);
+        const code = redirectedUrl.searchParams.get(AuthorizationService.OAUTH_CODE);
+        const accessToken = await this.getAccessToken(code);
+        this.store.dispatch(new SetTokenAction(accessToken));
         await this.updateUserDetails();
+    }
+
+    private async getAccessToken(oauthCode: string): Promise<string> {
+        const accessTokenUrl = Urls.osmAuth + "/token";
+        const response = await firstValueFrom(this.httpClient.post<{ access_token: string }>(accessTokenUrl, null, {
+            params: {
+                client_id: "jqxu2hhG-gUa-XUxiepzkQPZQf7iQguMC0sTVSRpaKE",
+                grant_type: "authorization_code",
+                code: oauthCode,
+                redirect_uri: this.redirectUrl,
+            },
+            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        }));
+        return response.access_token;
     }
 
     private updateUserDetails = async () => {
