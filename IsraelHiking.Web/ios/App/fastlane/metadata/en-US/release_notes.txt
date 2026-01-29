@@ -1,1 +1,5 @@
-See https://github.com/IsraelHikingMap/Site/milestone/87?closed=1
+- UI main menu redesign.
+- Handling of too many routes.
+- Allow uploading artwork to OSM.
+- Better handling of editing and planning.
+- New layer sharing ability.

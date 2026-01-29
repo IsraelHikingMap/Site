@@ -80,7 +80,7 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
-	<string>We need the camera in order to take a picture</string>
+	<string>We need the camera in order to take a picture, these pictures can then be uploaded to describe a point of interest or as a private photo in a route</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>We need to access your location in order to be able to show it on the map while navigating</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
