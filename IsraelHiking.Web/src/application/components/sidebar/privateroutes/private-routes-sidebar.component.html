@@ -32,8 +32,7 @@
                     matTooltipPosition="below" angularticsCategory="Private Routes" angularticsAction="Open file">
                     <i class="fa fa-lg icon-folder-open"></i>
                 </a>
-                <input type="file" name="file" id="openFile" #openFile (change)="openFile($event)"
-                    [style.display]="'none'" />
+                <input type="file" name="file" (change)="openFile($event)" [style.display]="'none'" />
             </label>
         </div>
         <div class="flex-1">
