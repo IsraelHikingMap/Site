@@ -48,6 +48,7 @@ export class AuthorizationService {
         });
         const result = await SocialLogin.openSecureWindow({
             authEndpoint: Urls.osmAuth + "/authorize?" + params.toString(),
+            redirectUri: this.redirectUrl,
             broadcastChannelName: "osm-oauth2"
         });
         const redirectedUrl = new URL(result.redirectedUri);
