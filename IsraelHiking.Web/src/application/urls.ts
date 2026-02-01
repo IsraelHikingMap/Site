@@ -32,6 +32,8 @@ export class Urls {
     public static readonly osmBase = "https://www.openstreetmap.org";
     public static readonly osmAuth = Urls.osmBase + "/oauth2";
 
+    public static readonly overpassApi = "https://overpass-api.de/api/interpreter";
+
     public static readonly facebook = "https://www.facebook.com/sharer/sharer.php?u=";
     public static readonly waze = "https://www.waze.com/ul?navigate=yes&zoom=17&ll=";
     public static readonly tranlation = "https://mapeak.com/api/translation/translate";

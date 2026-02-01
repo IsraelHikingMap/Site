@@ -66,7 +66,7 @@ export class RouteEditPoiInteraction {
         }
     }
 
-    private async addPrivatePoi(latlng: LatLngAlt) {
+    private addPrivatePoi(latlng: LatLngAlt) {
         let markerData: MarkerData = {
             id: uuidv4(),
             latlng,
@@ -80,7 +80,7 @@ export class RouteEditPoiInteraction {
             return;
         }
 
-        const snapping = await this.getSnappingForPoint(latlng);
+        const snapping = this.getSnappingForPoint(latlng);
         if (snapping.markerData != null) {
             markerData = structuredClone(snapping.markerData) as MarkerData;
         }
@@ -107,25 +107,26 @@ export class RouteEditPoiInteraction {
         PrivatePoiEditDialogComponent.openDialog(this.matDialog, markerData, index);
     }
 
-    private async getSnappingForPoint(latlng: LatLngAlt): Promise<SnappingPointResponse> {
+    private getSnappingForPoint(latlng: LatLngAlt): SnappingPointResponse {
         const gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
-        if (gpsState.tracking === "tracking") {
-            const currentLocation = GeoLocationService.positionToLatLngTime(gpsState.currentPosition);
-            const snappingPointResponse = this.snappingService.snapToPoint(latlng,
-                [{
-                    id: uuidv4(),
-                    latlng: currentLocation,
-                    type: "star",
-                    urls: [],
-                    title: "",
-                    description: "",
-                }]);
-            if (snappingPointResponse.markerData != null) {
-                return snappingPointResponse;
+        if (gpsState.tracking !== "tracking") {
+            return {
+                latlng,
+                markerData: null,
             }
         }
 
-        const markerData = await this.poiService.getClosestPoint(latlng, "", this.resources.getCurrentLanguageCodeSimplified());
-        return this.snappingService.snapToPoint(latlng, markerData ? [markerData] : []);
+
+        const currentLocation = GeoLocationService.positionToLatLngTime(gpsState.currentPosition);
+        const snappingPointResponse = this.snappingService.snapToPoint(latlng,
+            [{
+                id: uuidv4(),
+                latlng: currentLocation,
+                type: "star",
+                urls: [],
+                title: "",
+                description: "",
+            }]);
+        return snappingPointResponse;
     }
 }

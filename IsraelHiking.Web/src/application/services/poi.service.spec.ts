@@ -861,34 +861,43 @@ describe("Poi Service", () => {
         )
     );
 
-    it("should get closest point from server", (inject([PoiService, HttpTestingController],
-        async (poiService: PoiService, mockBackend: HttpTestingController) => {
+    it("should get closest point from overpass", (inject([PoiService, OverpassTurboService],
+        async (poiService: PoiService, overpass: OverpassTurboService) => {
 
-            const promise = poiService.getClosestPoint({ lat: 0, lng: 0 }, "", "");
+            overpass.getPointsInArea = () => {
+                return Promise.resolve({
+                    type: "FeatureCollection" as const,
+                    features: [{
+                        type: "Feature" as const,
+                        id: "node/1",
+                        properties: {
+                            "name:he": "name",
+                            "tourism": "viewpoint"
+                        },
+                        geometry: {
+                            type: "Point",
+                            coordinates: [1.5, 1.5]
+                        }
+                    },
+                    {
+                        type: "Feature" as const,
+                        id: "node/2",
+                        properties: {
+                            "name:he": "name2",
+                            "natural": "cave_entrance"
+                        },
+                        geometry: {
+                            type: "Point",
+                            coordinates: [1, 1]
+                        }
+                    }]
+                })
+            }
 
-            mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes(Urls.poiClosest))
-                .flush({
-                    type: "Feature",
-                    properties: { "name:he": "name" },
-                    geometry: { type: "Point", coordinates: [1, 1] },
-                } as GeoJSON.Feature);
+            const data = await poiService.getClosestPoint({ lat: 0, lng: 0 }, "");
 
-            const data = await promise;
-            expect(data.latlng.lat).toBe(1);
-            expect(data.latlng.lng).toBe(1);
-        })
-    ));
-
-    it("should not get closest point from server when there's a server error", (inject([PoiService, HttpTestingController],
-        async (poiService: PoiService, mockBackend: HttpTestingController) => {
-
-            const promise = poiService.getClosestPoint({ lat: 0, lng: 0 }, "", "");
-
-            mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes(Urls.poiClosest))
-                .flush("Invalid", { status: 400, statusText: "Bad Request" });
-
-            const data = await promise;
-            expect(data).toBeNull();
+            expect(data.id).toBe("node_2");
+            expect(data.type).toBe("cave");
         })
     ));
 

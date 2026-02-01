@@ -31,7 +31,7 @@ describe("OverpassTurboService", () => {
             }, {
                 id: 3,
                 type: "way",
-                nodes: [1,2]
+                nodes: [1, 2]
             }]
         };
         const promise = service.getFeature("way", "42");
@@ -48,31 +48,31 @@ describe("OverpassTurboService", () => {
                 members: [{
                     type: "way",
                     ref: 2,
-                    geometry: [{lat: 1, lon: 2}, {lat: 3, lon: 4}]
+                    geometry: [{ lat: 1, lon: 2 }, { lat: 3, lon: 4 }]
                 }, {
                     type: "way",
                     ref: 3,
                     geometry: [
-                        {lat: 1, lon: 2}, {lat: 31.5954429, lon: 34.5619778},{lat: 31.5954049, lon: 34.5618109}, {lat: 1, lon: 2}
+                        { lat: 1, lon: 2 }, { lat: 31.5954429, lon: 34.5619778 }, { lat: 31.5954049, lon: 34.5618109 }, { lat: 1, lon: 2 }
                     ]
                 }, {
                     type: "way",
                     ref: 4,
-                    geometry: [{lat: 5, lon: 6}, {lat: 1, lon: 2}]
+                    geometry: [{ lat: 5, lon: 6 }, { lat: 1, lon: 2 }]
                 }, {
                     type: "way",
                     ref: 5,
-                    geometry: [{lat: 3, lon: 4}, {lat: 7, lon: 8}]
+                    geometry: [{ lat: 3, lon: 4 }, { lat: 7, lon: 8 }]
                 }, {
                     type: "way",
                     ref: 6,
                     geometry: [
-                        {lat: 7, lon: 8}, {lat: 31.5979193, lon: 34.5545826}, {lat: 31.5978981, lon: 34.5542436}, {lat: 7, lon: 8}
+                        { lat: 7, lon: 8 }, { lat: 31.5979193, lon: 34.5545826 }, { lat: 31.5978981, lon: 34.5542436 }, { lat: 7, lon: 8 }
                     ]
                 }, {
                     type: "way",
                     ref: 7,
-                    geometry: [{lat: 31.6001179, lon: 34.5571696}, {lat: 5, lon: 6}]
+                    geometry: [{ lat: 31.6001179, lon: 34.5571696 }, { lat: 5, lon: 6 }]
                 }]
             }]
         };
@@ -91,17 +91,17 @@ describe("OverpassTurboService", () => {
                     role: "forward",
                     type: "way",
                     ref: 2,
-                    geometry: [{lat: 3, lon: 4}, {lat: 5, lon: 6}]
+                    geometry: [{ lat: 3, lon: 4 }, { lat: 5, lon: 6 }]
                 }, {
                     role: "backward",
                     type: "way",
                     ref: 3,
-                    geometry: [{lat: 1, lon: 2}, {lat: 3, lon: 4}]
+                    geometry: [{ lat: 1, lon: 2 }, { lat: 3, lon: 4 }]
                 }, {
                     role: "backward",
                     type: "way",
                     ref: 4,
-                    geometry: [{lat: 5, lon: 6}, {lat: 7, lon: 8}]
+                    geometry: [{ lat: 5, lon: 6 }, { lat: 7, lon: 8 }]
                 }]
             }]
         };
@@ -166,13 +166,13 @@ describe("OverpassTurboService", () => {
             }, {
                 id: 4,
                 type: "way",
-                tags: { waterway: "dock"},
+                tags: { waterway: "dock" },
                 nodes: [1, 2, 3, 1]
             }, {
                 id: 5,
                 type: "way",
                 nodes: [1, 2]
-            }, ]
+            },]
         };
         const promise = service.getLongWay("id", "name", false, false);
         mockBackend.expectOne("https://overpass-api.de/api/interpreter").flush(response);
@@ -272,9 +272,9 @@ describe("OverpassTurboService", () => {
                 type: "way",
                 id: 3,
                 nodes: [1, 2],
-                geometry: [{lat: 1, lon: 2}, {lat: 3, lon: 4}]
+                geometry: [{ lat: 1, lon: 2 }, { lat: 3, lon: 4 }]
             }
-        ]
+            ]
         };
         const promise = service.getFeature("relation", "1");
         mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/1/full.json").flush(response1);
@@ -293,13 +293,13 @@ describe("OverpassTurboService", () => {
                     type: "relation",
                     ref: 2,
                 }]
-            },{
+            }, {
                 type: "relation",
                 id: 2,
                 members: [{
                     type: "relation",
                     ref: 1,
-                },{
+                }, {
                     type: "way",
                     ref: 3,
                 }]
@@ -317,7 +317,7 @@ describe("OverpassTurboService", () => {
                 type: "way",
                 id: 3,
                 nodes: [1, 2],
-                geometry: [{lat: 1, lon: 2}, {lat: 3, lon: 4}]
+                geometry: [{ lat: 1, lon: 2 }, { lat: 3, lon: 4 }]
             }]
         };
         const promise = service.getFeature("relation", "1");
@@ -326,6 +326,26 @@ describe("OverpassTurboService", () => {
         mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/2/full.json").flush(response2);
         const results = await promise;
         expect(results).toBeUndefined();
+    }));
+
+    it("Should get points in area", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
+        const response = {
+            elements: [{
+                type: "node",
+                id: 1,
+                lat: 1,
+                lon: 2,
+            }, {
+                type: "node",
+                id: 2,
+                lat: 3,
+                lon: 4,
+            }]
+        };
+        const promise = service.getPointsInArea({ lat: 0, lng: 0 });
+        mockBackend.expectOne(r => r.url.startsWith(Urls.overpassApi)).flush(response);
+        const results = await promise;
+        expect(results.features.length).toBe(2);
     }));
 });
 

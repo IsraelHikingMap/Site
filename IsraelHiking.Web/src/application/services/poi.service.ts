@@ -540,24 +540,36 @@ export class PoiService {
         } as NorthEast;
     }
 
-    public async getClosestPoint(location: LatLngAlt, source: string, language: string): Promise<MarkerData> {
-        let feature = null;
+    public async getClosestPoint(location: LatLngAlt, language: string): Promise<{ type: string, id: string, title: string } | null> {
         try {
-            const feature$ = this.httpClient.get<GeoJSON.Feature<GeoJSON.Point>>(Urls.poiClosest, {
-                params: {
-                    location: location.lat + "," + location.lng,
-                    source,
-                    language
+            const features = await this.overpassTurboService.getPointsInArea(location);
+            let closestFeature: GeoJSON.Feature<GeoJSON.Point, PoiProperties> | null = null;
+            let closestDistance = Number.MAX_VALUE;
+            for (const feature of features.features) {
+                const poi: GeoJSON.Feature<GeoJSON.Point, PoiProperties> = {
+                    type: "Feature",
+                    geometry: feature.geometry,
+                    properties: JSON.parse(JSON.stringify(feature.properties)) || {}
+                };
+                OsmTagsService.setIconColorCategory(feature, poi);
+                if (poi.properties.poiIcon === "icon-search") {
+                    continue;
                 }
-            }).pipe(timeout(1000));
-            feature = await firstValueFrom(feature$);
+                poi.properties.poiId = (feature.id as string).replace("node/", "node_");
+                const distance = SpatialService.getDistance(location, SpatialService.toLatLng(feature.geometry.coordinates));
+                if (distance < closestDistance) {
+                    closestFeature = poi;
+                    closestDistance = distance;
+                }
+            }
+            if (closestFeature !== null) {
+                const title = GeoJSONUtils.getTitle(closestFeature, language);
+                return { type: closestFeature.properties.poiIcon.replace("icon-", ""), id: closestFeature.properties.poiId, title };
+            }
         } catch (ex) {
             this.loggingService.warning(`[POIs] Unable to get closest POI: ${(ex as Error).message}`);
         }
-        if (feature == null) {
-            return null;
-        }
-        return this.geoJsonParser.toMarkerData(feature, this.resources.getCurrentLanguageCodeSimplified());
+        return null;
     }
 
     public addSimplePoint(latlng: LatLngAlt, pointType: SimplePointType, id: string): Promise<any> {
