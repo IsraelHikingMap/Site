@@ -15,6 +15,7 @@ using OsmSharp;
 using OsmSharp.Complete;
 using OsmSharp.Db.Impl;
 using OsmSharp.Streams;
+using System.Text.Json.Nodes;
 
 namespace IsraelHiking.DataAccess;
 
@@ -38,7 +39,7 @@ public class OverpassTurboGateway(
                     if (response.IsSuccessStatusCode)
                     {
                         return await response.Content.ReadAsStringAsync();
-                    } 
+                    }
                     else
                     {
                         await Task.Delay(1000);
@@ -102,6 +103,19 @@ public class OverpassTurboGateway(
         var images = responseString.Split("\n", StringSplitOptions.RemoveEmptyEntries)
             .Select(s => s.Trim().TrimStart('"').TrimEnd('"').Replace("\"\"", "\"")).ToList(); // CSV " cleaning
         return images;
+    }
+
+    public async Task<long> GetClosestBarrierId(Coordinate center, double distance)
+    {
+        var query = $"[out:json];\nnode[\"barrier\"](around:{distance}, {center.Y}, {center.X});\nout ids 1;";
+        var response = await GetQueryResponse(query);
+        var jsonNode = JsonNode.Parse(response);
+        var elements = jsonNode["elements"].AsArray();
+        if (elements.Count <= 0)
+        {
+            return -1;
+        }
+        return (long)elements[0]["id"];
     }
 
 }

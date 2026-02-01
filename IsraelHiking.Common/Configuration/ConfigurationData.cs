@@ -98,6 +98,10 @@ public class ConfigurationData
     /// </summary>
     public double ClosestNodeForGates { get; set; }
     /// <summary>
+    /// This distance to the closest node to search for an existing gate in meters
+    /// </summary>
+    public double ClosestNodeWithGate { get; set; }
+    /// <summary>
     /// GraphHopper server address
     /// </summary>
     public string GraphhopperServerAddress { get; set; }
@@ -137,7 +141,7 @@ public class ConfigurationData
     /// A list of allowed image sites
     /// </summary>
     public List<string> ImageUrlsAllowList { get; set; }
-        
+
     /// <summary>
     /// A list of external sources - address and file name
     /// </summary>
@@ -167,7 +171,8 @@ public class ConfigurationData
         MergeExternalPointsOfInterestThreshold = 1 / 60.0; // 1 minute
         ClosestPointsOfInterestThreshold = 0.001; // around 100m
         ClosestHighwayForGates = 0.0003; // around 30m
-        ClosestNodeForGates = 0.00005; // around 5m
+        ClosestNodeForGates = 0.0001; // around 10m
+        ClosestNodeWithGate = 30;
         GraphhopperServerAddress = "http://localhost:8989/";
         ElasticsearchServerAddress = "http://localhost:9200/";
         GpsBabelServerAddress = "http://localhost:11987/";

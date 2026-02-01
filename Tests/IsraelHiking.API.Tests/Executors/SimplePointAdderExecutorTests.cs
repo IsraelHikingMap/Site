@@ -35,7 +35,7 @@ public class SimplePointAdderExecutorTests
         {
             var osmCompleteWay = new CompleteWay
             {
-                Id = id++, 
+                Id = id++,
                 Tags = new TagsCollection { { "highway", "something" } },
                 Version = 1,
                 Nodes = coordinates.Select(coordinate =>
@@ -49,10 +49,10 @@ public class SimplePointAdderExecutorTests
             }
             return osmCompleteWay;
         }).ToList();
-        
+
         _overpassTurboGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(ways);
     }
-    
+
     [TestInitialize]
     public void TestInitialize()
     {
@@ -61,9 +61,9 @@ public class SimplePointAdderExecutorTests
         var options = Substitute.For<IOptions<ConfigurationData>>();
         options.Value.Returns(configurationDate);
         _overpassTurboGateway = Substitute.For<IOverpassTurboGateway>();
-        
-        _executor = new SimplePointAdderExecutor(options, 
-            _overpassTurboGateway, new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper()), 
+
+        _executor = new SimplePointAdderExecutor(options,
+            _overpassTurboGateway, new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper()),
             Substitute.For<ILogger>());
     }
 
@@ -76,7 +76,7 @@ public class SimplePointAdderExecutorTests
             PointType = SimplePointType.None
         }).Wait());
     }
-        
+
     [TestMethod]
     public void AddDrinkingWater_ShouldSucceed()
     {
@@ -88,7 +88,7 @@ public class SimplePointAdderExecutorTests
 
         _authClient.Received().UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(c => c.Create.Length == 1));
     }
-        
+
     [TestMethod]
     public void AddPicnicSite_ShouldSucceed()
     {
@@ -100,7 +100,7 @@ public class SimplePointAdderExecutorTests
 
         _authClient.Received().UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(c => c.Create.Length == 1));
     }
-        
+
     [TestMethod]
     public void AddParking_ShouldSucceed()
     {
@@ -117,15 +117,37 @@ public class SimplePointAdderExecutorTests
     public void AddGate_NearNoWhere_ShouldSucceed()
     {
         _overpassTurboGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([]);
-            
+
         _executor.Add(_authClient, new AddSimplePointOfInterestRequest
         {
             LatLng = new LatLng(1, 0),
             PointType = SimplePointType.CattleGrid
         });
-            
+
         _authClient.Received().UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(c => c.Create.Length == 1));
 
+    }
+
+    [TestMethod]
+    public void AddGate_NearAnExistingGate_ShouldUpdateExistingGate()
+    {
+        var id = 1;
+        var node = new Node { Id = id, Latitude = 0, Longitude = 0, Tags = new TagsCollection { { "barrier", "gate" } } };
+        _authClient.GetNode(node.Id!.Value).Returns(node);
+
+        _overpassTurboGateway.GetClosestBarrierId(Arg.Any<Coordinate>(), Arg.Any<double>()).Returns(1);
+
+        _executor.Add(_authClient, new AddSimplePointOfInterestRequest
+        {
+            LatLng = new LatLng(0, 1),
+            PointType = SimplePointType.Block
+        }).Wait();
+
+        _authClient.Received().UploadChangeset(Arg.Any<long>(),
+            Arg.Is<OsmChange>(c => c.Modify.Length == 1 &&
+                                   c.Modify.First().Id == id &&
+                                   c.Modify.First().Tags.Contains("barrier", "yes") &&
+                                   c.Create == null));
     }
 
     [TestMethod]
@@ -134,7 +156,8 @@ public class SimplePointAdderExecutorTests
         var id = 1;
         var osmCompleteWay = new CompleteWay
         {
-            Id = id++, Tags = new TagsCollection { { "highway", "something" } },
+            Id = id++,
+            Tags = new TagsCollection { { "highway", "something" } },
             Version = 1,
             Nodes = new[] {
                 new Coordinate(0,0),
@@ -143,16 +166,16 @@ public class SimplePointAdderExecutorTests
             }.Select(coordinate =>
                 new Node { Id = id++, Latitude = coordinate.Y, Longitude = coordinate.X }).ToArray()
         };
-        osmCompleteWay.Nodes[1].Tags = new TagsCollection{{"tourism", "viewpoint"}};
+        osmCompleteWay.Nodes[1].Tags = new TagsCollection { { "tourism", "viewpoint" } };
         _authClient.GetCompleteWay(osmCompleteWay.Id).Returns(osmCompleteWay);
         _authClient.GetWay(osmCompleteWay.Id).Returns(osmCompleteWay.ToSimple() as Way);
         foreach (var node in osmCompleteWay.Nodes)
         {
             _authClient.GetNode(node.Id!.Value).Returns(node);
         }
-        
+
         _overpassTurboGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([osmCompleteWay]);
-        
+
         _executor.Add(_authClient, new AddSimplePointOfInterestRequest
         {
             LatLng = new LatLng(0, 1),
@@ -168,7 +191,7 @@ public class SimplePointAdderExecutorTests
     [TestMethod]
     public void AddGate_NearAWayAndVeryCloseToExistingNode_ShouldUpdateExistingNodeWithNullTags()
     {
-        SetupHighways( [[
+        SetupHighways([[
             new Coordinate(0,0),
             new Coordinate(1.00001,0),
             new Coordinate(2,0)
@@ -182,11 +205,11 @@ public class SimplePointAdderExecutorTests
 
         _authClient.Received().UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(c => c.Modify.Length == 1 && c.Create == null));
     }
-    
+
     [TestMethod]
     public void AddGate_ABitAfterTheEndOfTheHighway_ShouldProlongTheHighway()
     {
-        SetupHighways( [[new Coordinate(0,0), new Coordinate(1,0), new Coordinate(2,0)]]);
+        SetupHighways([[new Coordinate(0, 0), new Coordinate(1, 0), new Coordinate(2, 0)]]);
 
         _executor.Add(_authClient, new AddSimplePointOfInterestRequest
         {
@@ -202,12 +225,12 @@ public class SimplePointAdderExecutorTests
     [TestMethod]
     public void AddGate_NearAWay_ShouldAddItInTheRightPlace()
     {
-        SetupHighways( [[
+        SetupHighways([[
             new Coordinate(0,0),
             new Coordinate(1.001,0),
             new Coordinate(2,0)
         ]]);
-        
+
         _executor.Add(_authClient, new AddSimplePointOfInterestRequest
         {
             LatLng = new LatLng(0, 1),
@@ -222,7 +245,7 @@ public class SimplePointAdderExecutorTests
     [TestMethod]
     public void AddGate_NearAWay_ShouldAddItOnTheWayItselfPerpendicularToItsLocation()
     {
-        SetupHighways( [[
+        SetupHighways([[
             new Coordinate(0,0),
             new Coordinate(1,0),
             new Coordinate(2,0)
@@ -248,7 +271,7 @@ public class SimplePointAdderExecutorTests
         var nodes = new[] {
             new Coordinate(0,0),
             new Coordinate(1,0),
-            new Coordinate(2,0), 
+            new Coordinate(2,0),
             new Coordinate(1,1),
             new Coordinate(1,-1)
         }.Select(coordinate =>
@@ -259,16 +282,18 @@ public class SimplePointAdderExecutorTests
         }
         var osmCompleteWay1 = new CompleteWay
         {
-            Id = id++, Tags = new TagsCollection { { "highway", "something" } },
+            Id = id++,
+            Tags = new TagsCollection { { "highway", "something" } },
             Version = 1,
             Nodes = [nodes[0], nodes[1], nodes[2]]
         };
         _authClient.GetCompleteWay(osmCompleteWay1.Id).Returns(osmCompleteWay1);
         _authClient.GetWay(osmCompleteWay1.Id).Returns(osmCompleteWay1.ToSimple() as Way);
-        
+
         var osmCompleteWay2 = new CompleteWay
         {
-            Id = id++, Tags = new TagsCollection { { "highway", "something" } },
+            Id = id++,
+            Tags = new TagsCollection { { "highway", "something" } },
             Version = 1,
             Nodes = [nodes[3], nodes[1], nodes[4]]
         };
@@ -335,24 +360,26 @@ public class SimplePointAdderExecutorTests
             new Coordinate(0, 1),
         }.Select(coordinate =>
             new Node { Id = id++, Latitude = coordinate.Y, Longitude = coordinate.X }).ToArray();
-        
+
         foreach (var node in nodes)
         {
             _authClient.GetNode(node.Id!.Value).Returns(node);
         }
-        
+
         var osmCompleteWay1 = new CompleteWay
         {
-            Id = id++, Tags = new TagsCollection { { "highway", "something" } },
+            Id = id++,
+            Tags = new TagsCollection { { "highway", "something" } },
             Version = 1,
             Nodes = [nodes[0], nodes[2]]
         };
         _authClient.GetCompleteWay(osmCompleteWay1.Id).Returns(osmCompleteWay1);
         _authClient.GetWay(osmCompleteWay1.Id).Returns(osmCompleteWay1.ToSimple() as Way);
-        
+
         var osmCompleteWay2 = new CompleteWay
         {
-            Id = id++, Tags = new TagsCollection { { "highway", "roundabout" } },
+            Id = id++,
+            Tags = new TagsCollection { { "highway", "roundabout" } },
             Version = 1,
             Nodes = [nodes[0], nodes[1], nodes[2], nodes[2], nodes[0]]
         };
@@ -384,7 +411,7 @@ public class SimplePointAdderExecutorTests
             new Coordinate(2,0)
         }.Select(coordinate =>
             new Node { Id = id++, Latitude = coordinate.Y, Longitude = coordinate.X }).ToArray();
-        
+
         foreach (var node in nodes)
         {
             _authClient.GetNode(node.Id!.Value).Returns(node);
@@ -399,14 +426,14 @@ public class SimplePointAdderExecutorTests
         _overpassTurboGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([osmCompleteWay]);
         var osmUpdatedWay = new CompleteWay
         {
-            Id = osmCompleteWay.Id, 
+            Id = osmCompleteWay.Id,
             Tags = osmCompleteWay.Tags,
             Version = 2,
             Nodes = nodes
         };
         _authClient.GetWay(osmUpdatedWay.Id).Returns(osmUpdatedWay.ToSimple() as Way);
         _authClient.GetCompleteWay(osmUpdatedWay.Id).Returns(osmUpdatedWay);
-        
+
         _executor.Add(_authClient, new AddSimplePointOfInterestRequest
         {
             LatLng = new LatLng(0, 1),
@@ -414,7 +441,7 @@ public class SimplePointAdderExecutorTests
         }).Wait();
 
         _authClient.Received().UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(c =>
-            c.Create.Length == 1 && 
+            c.Create.Length == 1 &&
             c.Modify.Length == 1 &&
             c.Modify.OfType<Way>().First().Nodes[2] == -1
         ));
