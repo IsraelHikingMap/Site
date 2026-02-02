@@ -76,7 +76,9 @@ export class HashService {
                     }, +segments[segments.length - 3].path - 1);
                 }
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_SHARE)) {
-                this.dataContainerService.setShareUrlAfterNavigation(segments[1].path);
+                if (segments.length >= 2) {
+                    this.dataContainerService.setShareUrlAfterNavigation(segments[1].path);
+                }
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_URL)) {
                 this.dataContainerService.setFileUrlAfterNavigation(segments[1].path,
                     queryParams[RouteStrings.BASE_LAYER]);

@@ -1,0 +1,61 @@
+<div class="flex flex-row map-height" [dir]="resources.direction">
+    <div class="max-md:hidden w-2/3">
+        <div class="w-full h-full">
+            <mgl-map [mapStyle]="mapStyle" [attributionControl]="false">
+                <auto-layer [layerData]="baseLayerData" [visible]="true" [isBaselayer]="true" [isMainMap]="false"
+                    [before]="resources.endOfBaseLayer">
+                </auto-layer>
+            </mgl-map>
+        </div>
+    </div>
+    <div class="max-md:w-full w-1/3 overflow-y-auto">
+        <div class="flex flex-row sticky top-0 z-10 bg-white">
+            <mat-form-field subscriptSizing="dynamic">
+                <mat-label>{{resources.sort}}</mat-label>
+                <mat-select>
+                    <mat-option value="distance">{{resources.length}}</mat-option>
+                    <mat-option value="name">{{resources.name}}</mat-option>
+                    <mat-option value="date">{{resources.date}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <button mat-button class="!h-[56px] ms-2">
+                <i class="fa icon-sliders mx-2"></i>
+                {{resources.filter}}
+            </button>
+        </div>
+        @for (shareUrl of shareUrls$ | async; track shareUrl.id ) {
+        <div class="overflow-hidden mb-2">
+            <img [src]="getImageFromShareId(shareUrl, 256, 256)" alt=""
+                class="float-end w-1/3 h-auto object-cover block ps-2 rounded-2xl">
+            <h4 class="m-2">
+                <button mat-button>
+                    <i class="fa icon-ellipsis-v"></i>
+                </button>
+                {{shareUrl.title}}
+            </h4>
+            <div class="flex flex-row">
+                <div matTooltip="{{resources.gain}}" matTooltipPosition="above" class="mx-2">
+                    <i class="fa icon-arrow-up"></i>
+                    <span class="mx-1">{{173 | distance}}</span>
+                </div>
+                <div matTooltip="{{resources.loss}}" matTooltipPosition="above" class="mx-2">
+                    <i class="fa icon-arrow-down"></i>
+                    <span class="mx-1">{{-212 | distance}}</span>
+                </div>
+                <div matTooltip="{{resources.length}}" matTooltipPosition="above" class="mx-2">
+                    <i class="fa icon-arrow-right"></i>
+                    <span class="mx-1">{{12001 | distance}}</span>
+                </div>
+            </div>
+            <div class="mx-2">
+                {{resources.date}}: {{shareUrl.creationDate | date:'dd/MM/yyyy'}}
+            </div>
+            <br />
+            <div class="mx-2">
+                {{shareUrl.description}}
+            </div>
+
+        </div>
+        }
+    </div>
+</div>
