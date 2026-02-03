@@ -1,11 +1,11 @@
-.page-content {
-    margin: 20px;
+.green-text {
+    color: #32CD6D;
 }
 
-@media (width > 768px) {
-    .page-content {
-        position: absolute;
-        left: 50%;
-        transform: translate(-50%, 0);
-    }
+.green-border {
+    border-color: #32CD6D;
+}
+
+.green-bg {
+    background-color: #32CD6D;
 }
