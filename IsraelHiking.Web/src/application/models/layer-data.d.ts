@@ -10,7 +10,3 @@ export type EditableLayer = LayerData & {
     isEditable: boolean;
     id: string;
 };
-
-export type Overlay = EditableLayer & {
-    visible: boolean;
-};

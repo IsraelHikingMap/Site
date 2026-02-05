@@ -91,7 +91,7 @@ export class ResourcesService {
     public hikingMap: string;
     public satelliteImagery: string;
     public hikingTrails: string;
-    public popularityHeatmap: string;
+    public openHeatmap: string;
     public route: string;
     public directionalSearch: string;
     public moveToRoute: string;
@@ -493,7 +493,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1769582659179");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1770296416284");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -558,7 +558,7 @@ export class ResourcesService {
         this.mtbMap = this.gettextCatalog.getString("MTB Map");
         this.hikingMap = this.gettextCatalog.getString("Hiking Map");
         this.hikingTrails = this.gettextCatalog.getString("Hiking Trails");
-        this.popularityHeatmap = this.gettextCatalog.getString("Popularity Heatmap");
+        this.openHeatmap = this.gettextCatalog.getString("Open Heatmap");
         this.route = this.gettextCatalog.getString("Route");
         this.directionalSearch = this.gettextCatalog.getString("Directional Search");
         this.moveToRoute = this.gettextCatalog.getString("Move to Route");

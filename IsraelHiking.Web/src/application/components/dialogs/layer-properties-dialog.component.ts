@@ -23,7 +23,7 @@ import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
-import type { LayerData, ApplicationState, EditableLayer, LocationState, Overlay } from "../../models";
+import type { LayerData, ApplicationState, EditableLayer, LocationState } from "../../models";
 
 export type LayerPropertiesDialogType = "add-overlay" | "add-baseLayer" | "edit-overlay" | "edit-baseLayer";
 
@@ -142,12 +142,11 @@ export class LayerPropertiesDialogComponent {
                 this.layersService.addOverlay(layerData);
                 break;
             case "edit-overlay":
-                this.layersService.updateOverlay(this.backupLayer as Overlay, {
+                this.layersService.updateOverlay(this.backupLayer, {
                     ...layerData,
                     id: this.layerData.id,
-                    isEditable: true,
-                    visible: true
-                } as Overlay);
+                    isEditable: true
+                });
                 break;
         }
     }
@@ -162,7 +161,7 @@ export class LayerPropertiesDialogComponent {
             case "add-overlay":
                 break;
             case "edit-overlay":
-                this.layersService.removeOverlay(this.backupLayer as Overlay);
+                this.layersService.removeOverlay(this.backupLayer);
                 break;
         }
     }

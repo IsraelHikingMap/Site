@@ -116,7 +116,7 @@ export class MainMenuComponent {
             `Username: ${userInfo.displayName}`,
             `Map Location: ${this.hashService.getMapAddress()}`,
             `Baselayer: ${baseLayer.key}, ${baseLayer.address}`,
-            `Visible overlays: ${JSON.stringify(layersState.overlays.filter(o => o.visible))}`,
+            `Visible overlays: ${JSON.stringify(this.layersService.getAllOverlays().filter(o => this.layersService.isOverlayVisible(o)))}`,
             ""
         ].join("\n");
         const subject = "Issue reported by " + userInfo.displayName;
