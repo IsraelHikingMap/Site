@@ -27,7 +27,7 @@ export class AppRootComponent {
     });
   }
 
-  @HostListener('window:scroll', [])
+  @HostListener("window:scroll", [])
   onWindowScroll() {
     this.isScrolled = window.scrollY > 50;
   }
