@@ -7,7 +7,7 @@
 <button mat-raised-button (click)="login()">{{resources.signIn}}</button>
 }
 <button mat-button [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Menu"
-  angularticsAction="Toggle main menu" class="!h-[56px]">
+  angularticsAction="Toggle main menu" class="!h-[56px] text-white!">
   <span class="flex flex-row justify-center items-center">
     @if (isLoggedIn()) {
     @if (userInfo?.imageUrl) {
