@@ -189,7 +189,7 @@ jobs:
       - name: Setup xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: 16.4
+          xcode-version: 26.1
 
       - name: setup-cocoapods
         uses: maxim-lobanov/setup-cocoapods@v1
