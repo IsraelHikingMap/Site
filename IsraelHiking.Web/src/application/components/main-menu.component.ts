@@ -100,7 +100,6 @@ export class MainMenuComponent {
 
     public async reportAnIssue() {
         this.toastService.info(this.resources.preparingDataForIssueReport);
-        const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
         const baseLayer = this.layersService.getSelectedBaseLayer();
         this.loggingService.info("--- Reporting an issue ---");
         const subscription = timer(8000, 8000).subscribe(() => {
