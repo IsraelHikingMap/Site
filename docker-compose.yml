@@ -65,6 +65,7 @@ services:
       - IMGUR_CLIENT_ID=1234567890
   nginx:
     image: nginxinc/nginx-unprivileged
+    container_name: nginx
     ports:
       - "5001:80"
     volumes:
