@@ -14,7 +14,7 @@ const config: CapacitorConfig = {
         facebook: false,
         apple: false,
         twitter: false,
-        oauth2: true
+        oauth2: false
       }
     },
     SystemBars: {
