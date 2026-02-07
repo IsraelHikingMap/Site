@@ -115,7 +115,7 @@ export class DatabaseService {
                 if (!response.ok) {
                     throw new Error(`Failed to get ${params.url}: ${response.statusText} (${response.status})`);
                 }
-                const data = response.body;
+                const data = response.body ?? new ArrayBuffer(0);
                 this.loggingService.debug(`[Database] Successfully fetched: ${params.url}`);
                 return { data, cacheControl: response.headers.get("Cache-Control"), expires: response.headers.get("Expires") };
             } catch (ex) {
