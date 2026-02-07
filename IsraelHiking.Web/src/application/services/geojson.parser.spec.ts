@@ -7,23 +7,6 @@ describe("GeoJsonParser", () => {
         geoJsonParser = new GeoJsonParser();
     });
 
-    it("Should convert geoJson point to marker data", () => {
-        const feature = {
-            type: "Feature",
-            properties: {
-                name: "point"
-            },
-            geometry: {
-                type: "Point",
-                coordinates: [1, 2]
-            } as GeoJSON.Point
-        } as GeoJSON.Feature<GeoJSON.Point>;
-
-        const data = geoJsonParser.toMarkerData(feature);
-        expect(data.latlng.lng).toBe(1);
-        expect(data.latlng.lat).toBe(2);
-    });
-
     it("Should convert linestring to route", () => {
         const feature = {
             type: "Feature",
@@ -65,7 +48,7 @@ describe("GeoJsonParser", () => {
             },
             geometry: {
                 type: "MultiLineString",
-                coordinates: [[[1,1], [2,2]], [[3,3], [4,4]]]
+                coordinates: [[[1, 1], [2, 2]], [[3, 3], [4, 4]]]
             } as GeoJSON.MultiLineString
         } as GeoJSON.Feature<GeoJSON.MultiLineString>;
 

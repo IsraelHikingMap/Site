@@ -471,7 +471,7 @@ export class RouteStatisticsComponent implements OnInit {
             this.chartElements.chartArea.append<SVGPathElement>("line")
                 .attr("class", "slope-zero-axis")
                 .attr("stroke-width", 1)
-                .attr("stroke", "grey")
+                .attr("stroke", "gray")
                 .attr("stroke-dasharray", "10,5")
                 .attr("x1", 0)
                 .attr("x2", this.chartElements.width)

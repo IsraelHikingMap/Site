@@ -82,7 +82,7 @@ public class PointsOfInterestController : ControllerBase
     [Route("")]
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> CreatePointOfInterest([FromBody]IFeature feature,
+    public async Task<IActionResult> CreatePointOfInterest([FromBody] IFeature feature,
         [FromQuery] string language)
     {
         _logger.LogInformation("Processing create point of interest request, " + feature.GetId());
@@ -107,7 +107,7 @@ public class PointsOfInterestController : ControllerBase
             return BadRequest("Feature creation was already requested, ignoring request.");
         }
         _persistentCache.SetString(feature.GetId(), "In process", new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
-            
+
         var osmGateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
         var newFeature = await _pointsOfInterestProvider.AddFeature(feature, osmGateway, language);
         return Ok(newFeature);
@@ -123,7 +123,7 @@ public class PointsOfInterestController : ControllerBase
     [Route("{id}")]
     [HttpPut]
     [Authorize]
-    public async Task<IActionResult> UpdatePointOfInterest(string id, [FromBody]IFeature feature,
+    public async Task<IActionResult> UpdatePointOfInterest(string id, [FromBody] IFeature feature,
         [FromQuery] string language)
     {
         _logger.LogInformation("Processing update point of interest request, " + id);
@@ -133,15 +133,16 @@ public class PointsOfInterestController : ControllerBase
             _logger.LogWarning("Update request validation failed: " + validationResults);
             return BadRequest(validationResults);
         }
-        if (feature.GetId() != id) {
+        if (feature.GetId() != id)
+        {
             return BadRequest("Feature ID and supplied id do not match...");
         }
-            
+
         var osmGateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
         return Ok(await _pointsOfInterestProvider.UpdateFeature(feature, osmGateway, language));
     }
 
-    private string ValidateFeature(IFeature feature, string language) 
+    private string ValidateFeature(IFeature feature, string language)
     {
         if (!feature.Attributes[FeatureAttributes.POI_SOURCE].ToString().Equals(Sources.OSM, StringComparison.InvariantCultureIgnoreCase))
         {
@@ -180,6 +181,7 @@ public class PointsOfInterestController : ControllerBase
     /// <returns></returns>
     [HttpGet]
     [Route("closest")]
+    [Obsolete("This is no longer in use, remove by 3.2026")]
     public Task<IFeature> GetClosestPoint(string location, string source, string language)
     {
         return _pointsOfInterestProvider.GetClosestPoint(location.ToCoordinate(), source, language);
@@ -192,7 +194,8 @@ public class PointsOfInterestController : ControllerBase
     /// <returns></returns>
     private async Task AddSimplePoint(AddSimplePointOfInterestRequest request)
     {
-        if (!string.IsNullOrEmpty(_persistentCache.GetString(request.Guid))) {
+        if (!string.IsNullOrEmpty(_persistentCache.GetString(request.Guid)))
+        {
             return;
         }
         _persistentCache.SetString(request.Guid, "In process", new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });

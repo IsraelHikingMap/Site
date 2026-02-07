@@ -1,15 +1,8 @@
-﻿<auto-layer [layerData]="getBaseLayer()"
-  [visible]="true"
-  [before]="resources.endOfBaseLayer"
-  [isBaselayer]="true"
+﻿<auto-layer [layerData]="getBaseLayer()" [visible]="true" [before]="resources.endOfBaseLayer" [isBaselayer]="true"
   [isMainMap]="true">
 </auto-layer>
-@for (overlay of (overlays$ | async); track trackByKey($index, overlay)) {
-  <auto-layer [layerData]="overlay"
-    [visible]="overlay.visible"
-    [before]="resources.endOfOverlays"
-    [isBaselayer]="false"
-    [isMainMap]="true"
-    [isSameBaselayerOn]="isSameBaselayerOn(overlay)">
-  </auto-layer>
+@for (overlay of getAllOverlays(); track overlay.key) {
+<auto-layer [layerData]="overlay" [visible]="isOverlayVisible(overlay)" [before]="resources.endOfOverlays"
+  [isBaselayer]="false" [isMainMap]="true">
+</auto-layer>
 }

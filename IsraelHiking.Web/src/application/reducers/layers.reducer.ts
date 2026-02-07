@@ -4,61 +4,70 @@ import { produce } from "immer";
 import { orderBy } from "lodash-es";
 
 import { CATEGORIES_GROUPS, initialState } from "./initial-state";
-import type { LayersState, EditableLayer, Overlay, CategoriesGroupType } from "../models";
+import type { LayersState, EditableLayer, CategoriesGroupType } from "../models";
 
 export class AddBaseLayerAction {
     public static type = this.prototype.constructor.name;
-    constructor(public layerData: EditableLayer) {}
+    constructor(public layerData: EditableLayer) { }
 }
 
 export class AddOverlayAction {
     public static type = this.prototype.constructor.name;
-    constructor(public layerData: Overlay) {}
+    constructor(public layerData: EditableLayer) { }
 }
 
 export class RemoveBaseLayerAction {
     public static type = this.prototype.constructor.name;
-    constructor(public key: string) {}
+    constructor(public key: string) { }
 }
 
 export class RemoveOverlayAction {
     public static type = this.prototype.constructor.name;
-    constructor(public key: string) {}
+    constructor(public key: string) { }
 }
 
 export class UpdateBaseLayerAction {
     public static type = this.prototype.constructor.name;
-    constructor(public key: string, public layerData: EditableLayer) {}
+    constructor(public key: string, public layerData: EditableLayer) { }
 }
 
 export class UpdateOverlayAction {
     public static type = this.prototype.constructor.name;
-    constructor(public key: string, public layerData: Overlay) {}
+    constructor(public key: string, public layerData: EditableLayer) { }
 }
 
 export class SelectBaseLayerAction {
     public static type = this.prototype.constructor.name;
-    constructor(public key: string) {}
+    constructor(public key: string) { }
+}
+
+export class SetOverlaysVisibilityAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public key: string, public visible: boolean) { }
+}
+
+export class HideAllOverlaysAction {
+    public static type = this.prototype.constructor.name;
 }
 
 export class ExpandGroupAction {
     public static type = this.prototype.constructor.name;
-    constructor(public name: string) {}
+    constructor(public name: string) { }
 }
 
 export class CollapseGroupAction {
     public static type = this.prototype.constructor.name;
-    constructor(public name: string) {}
+    constructor(public name: string) { }
 }
 
 export class ToggleCategoriesGroupVisibilityAction {
     public static type = this.prototype.constructor.name;
-    constructor(public groupType: CategoriesGroupType) {}
+    constructor(public groupType: CategoriesGroupType) { }
 }
 
 export class ToggleCategoryVisibilityAction {
     public static type = this.prototype.constructor.name;
-    constructor(public name: string, public groupType: CategoriesGroupType) {}
+    constructor(public name: string, public groupType: CategoriesGroupType) { }
 }
 
 @State({
@@ -66,7 +75,7 @@ export class ToggleCategoryVisibilityAction {
     defaults: initialState.layersState
 })
 @Injectable()
-export class LayersReducer{
+export class LayersReducer {
 
     private sort(layers: EditableLayer[]): EditableLayer[] {
         return orderBy(layers, l => l.key);
@@ -85,7 +94,7 @@ export class LayersReducer{
     public addOverlay(ctx: StateContext<LayersState>, action: AddOverlayAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.overlays.push(action.layerData);
-            lastState.overlays = this.sort(lastState.overlays) as Overlay[];
+            lastState.overlays = this.sort(lastState.overlays) as EditableLayer[];
             return lastState;
         }));
     }
@@ -123,7 +132,7 @@ export class LayersReducer{
         ctx.setState(produce(ctx.getState(), lastState => {
             const overlays = lastState.overlays;
             overlays.splice(overlays.indexOf(overlays.find(o => o.key === action.key)), 1, action.layerData);
-            lastState.overlays = this.sort(overlays) as Overlay[];
+            lastState.overlays = this.sort(overlays) as EditableLayer[];
             return lastState;
         }));
     }
@@ -132,6 +141,27 @@ export class LayersReducer{
     public selectBaseLayer(ctx: StateContext<LayersState>, action: SelectBaseLayerAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.selectedBaseLayerKey = action.key;
+            return lastState;
+        }));
+    }
+
+    @Action(SetOverlaysVisibilityAction)
+    public setOverlaysVisibility(ctx: StateContext<LayersState>, action: SetOverlaysVisibilityAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            const itemVisibile = lastState.visibleOverlays.find(n => n === action.key);
+            if (itemVisibile == null && action.visible) {
+                lastState.visibleOverlays.push(action.key);
+            } else if (itemVisibile != null && !action.visible) {
+                lastState.visibleOverlays.splice(lastState.visibleOverlays.indexOf(action.key), 1);
+            }
+            return lastState;
+        }));
+    }
+
+    @Action(HideAllOverlaysAction)
+    public hideAllOverlays(ctx: StateContext<LayersState>) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.visibleOverlays = [];
             return lastState;
         }));
     }

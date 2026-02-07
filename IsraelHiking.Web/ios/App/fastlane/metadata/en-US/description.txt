@@ -55,3 +55,5 @@ ___________
 
 * An additional purchase is required for full access to offline maps. 
 Purchase a yearly subscription to download offline maps and navigate confidently without reception—while saving battery life. Offline maps are continuously updated, so the latest data always backs your adventures.
+
+For EULA see: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
