@@ -1,7 +1,7 @@
 ﻿export type { Bounds } from "./bounds";
 export type { DataContainer } from "./data-container";
 export type { LatLngAlt, LatLngAltTime } from "./lat-lng";
-export type { LayerData, EditableLayer, Overlay } from "./layer-data";
+export type { LayerData, EditableLayer } from "./layer-data";
 export type { LinkData } from "./link-data";
 export type { MarkerData } from "./marker-data";
 export type { RouteData, RouteEditStateType } from "./route-data";

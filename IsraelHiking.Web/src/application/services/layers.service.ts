@@ -18,13 +18,14 @@ import {
     SelectBaseLayerAction,
     RemoveOverlayAction,
     RemoveBaseLayerAction,
-    AddOverlayAction
+    AddOverlayAction,
+    SetOverlaysVisibilityAction,
+    HideAllOverlaysAction
 } from "../reducers/layers.reducer";
 import type {
     DataContainer,
     LayerData,
     EditableLayer,
-    Overlay,
     ApplicationState,
     UserInfo,
 } from "../models";
@@ -32,7 +33,7 @@ import { Urls } from "../urls";
 import { LoggingService } from "./logging.service";
 
 
-type UserLayer = (EditableLayer | Overlay) & {
+type UserLayer = EditableLayer & {
     isOverlay: boolean;
     osmUserId: string;
 }
@@ -40,7 +41,7 @@ type UserLayer = (EditableLayer | Overlay) & {
 @Injectable()
 export class LayersService {
     private allBaseLayers: Immutable<EditableLayer[]> = [];
-    private allOverlays: Immutable<Overlay[]> = [];
+    private allOverlays: Immutable<EditableLayer[]> = [];
     private userInfo: Immutable<UserInfo>;
     private selectedBaseLayerKey: Immutable<string>;
 
@@ -70,6 +71,10 @@ export class LayersService {
 
     public getSelectedBaseLayer(): EditableLayer {
         return this.allBaseLayers.find(bl => this.compareKeys(bl.key, this.selectedBaseLayerKey)) || this.allBaseLayers[0];
+    }
+
+    public getAllOverlays(): Immutable<EditableLayer[]> {
+        return this.allOverlays;
     }
 
     public getSelectedBaseLayerAddressForOSM(): string {
@@ -195,7 +200,7 @@ export class LayersService {
         }
     }
 
-    public addOverlay(layerData: LayerData): Overlay {
+    public addOverlay(layerData: LayerData): EditableLayer {
         let overlay = this.allOverlays.find((overlayToFind) => this.compareKeys(overlayToFind.key, layerData.key));
         if (overlay != null) {
             return overlay; // overlay exists
@@ -205,17 +210,17 @@ export class LayersService {
         return overlay;
     }
 
-    private addOverlayFromData(layerData: LayerData, visible: boolean): Immutable<Overlay> {
+    private addOverlayFromData(layerData: LayerData, visible: boolean): Immutable<EditableLayer> {
         const overlay = {
             ...layerData,
-            visible,
             isEditable: true,
-        } as Overlay;
+        } as EditableLayer;
         this.store.dispatch(new AddOverlayAction(overlay));
+        this.store.dispatch(new SetOverlaysVisibilityAction(overlay.key, visible));
         return overlay;
     }
 
-    private async addOverlayToDatabase(layer: Immutable<Overlay>) {
+    private async addOverlayToDatabase(layer: Immutable<EditableLayer>) {
         if (DEFAULT_OVERLAYS.some(l => this.compareKeys(l.key, layer.key))) {
             return;
         }
@@ -243,7 +248,7 @@ export class LayersService {
         this.updateUserLayerInDatabase(false, newLayer);
     }
 
-    public updateOverlay(oldLayer: Immutable<Overlay>, newLayer: Overlay): void {
+    public updateOverlay(oldLayer: Immutable<EditableLayer>, newLayer: EditableLayer): void {
         this.store.dispatch(new UpdateOverlayAction(oldLayer.key, newLayer));
         this.updateUserLayerInDatabase(true, newLayer);
     }
@@ -256,7 +261,7 @@ export class LayersService {
         this.deleteUserLayerFromDatabase(baseLayer.id);
     }
 
-    public removeOverlay(overlay: Overlay) {
+    public removeOverlay(overlay: EditableLayer) {
         this.store.dispatch(new RemoveOverlayAction(overlay.key));
         this.deleteUserLayerFromDatabase(overlay.id);
     }
@@ -266,24 +271,23 @@ export class LayersService {
         this.store.dispatch(new SelectBaseLayerAction(key));
     }
 
-    public toggleOverlay(overlay: Overlay) {
-        const newVisibility = !overlay.visible;
-        this.loggingService.info(`[Layers] Changing visibility of ${overlay.key} to ${newVisibility ? "visible" : "hidden"}`);
-        this.store.dispatch(new UpdateOverlayAction(overlay.key, {
-            ...overlay,
-            visible: newVisibility
-        }));
+    public toggleOverlay(overlay: EditableLayer) {
+        const visibleOverlays = this.store.selectSnapshot((state: ApplicationState) => state.layersState.visibleOverlays);
+        const isLayerVisible = visibleOverlays.includes(overlay.key);
+        this.loggingService.info(`[Layers] Changing visibility of ${overlay.key} to ${!isLayerVisible ? "visible" : "hidden"}`);
+        this.store.dispatch(new SetOverlaysVisibilityAction(overlay.key, !isLayerVisible));
+    }
+
+    public isOverlayVisible(overlay: EditableLayer): boolean {
+        return this.store.selectSnapshot((state: ApplicationState) => state.layersState.visibleOverlays).includes(overlay.key);
     }
 
     public isAllOverlaysHidden() {
-        return this.allOverlays.filter(o => o.visible).length === 0;
+        return this.store.selectSnapshot((state: ApplicationState) => state.layersState.visibleOverlays).length === 0;
     }
 
     public hideAllOverlays() {
-        const visibleOverlays = this.allOverlays.filter(o => o.visible);
-        for (const overlay of visibleOverlays) {
-            this.toggleOverlay(overlay);
-        }
+        this.store.dispatch(new HideAllOverlaysAction());
     }
 
     public getData(): DataContainer {
@@ -293,9 +297,8 @@ export class LayersService {
         } as DataContainer;
 
         container.baseLayer = this.getSelectedBaseLayer();
-        const visibleOverlays = this.allOverlays.filter(overlay => overlay.visible);
-        for (const overlay of visibleOverlays) {
-            container.overlays.push(overlay);
+        for (const overlayKey of this.store.selectSnapshot((state: ApplicationState) => state.layersState.visibleOverlays)) {
+            container.overlays.push(this.allOverlays.find(o => this.compareKeys(o.key, overlayKey)));
         }
         return container;
     }

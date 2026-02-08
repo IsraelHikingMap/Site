@@ -1,9 +1,10 @@
-<mat-toolbar [style.background-color]="'#528CFA'" [dir]="resources.direction" class="toolbar">
+<mat-toolbar [dir]="resources.direction" class="toolbar fixed z-50"
+    [class]="isScrolled && isHome ? 'transition-all duration-300' : isHome ? 'transition-all duration-300 bg-transparent!' : ''">
     <div class="flex flex-grow">
         <search></search>
     </div>
     <main-menu></main-menu>
 </mat-toolbar>
-<div class="page-margin">
+<div [class]="isHome ? '' : 'page-margin'">
     <router-outlet></router-outlet>
 </div>

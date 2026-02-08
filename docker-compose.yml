@@ -54,6 +54,23 @@ services:
     ports:
       - 5432:5000
     restart: always
+  user-data:
+    image: ghcr.io/mapeak-com/user-data
+    container_name: user-data
+    ports:
+      - 3000:3000
+    restart: always
+    environment:
+      - ES_URL=http://elasticsearch:9200
+      - IMGUR_CLIENT_ID=1234567890
+  nginx:
+    image: nginxinc/nginx-unprivileged
+    container_name: nginx
+    ports:
+      - "5001:80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d:ro
+    restart: unless-stopped
 volumes:
   esdata:
     driver: local
