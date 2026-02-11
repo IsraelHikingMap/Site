@@ -145,7 +145,7 @@
     "build:mobile": "npm run generate-user-data-types && ng build -c mobile",
     "build:mobile-watch": "ng build -c mobile-debug --watch",
     "test": "ng test",
-    "test-ci": "ng test --code-coverage --watch=false",
+    "test-ci": "npm run generate-user-data-types && ng test --code-coverage --watch=false",
     "lint": "ng lint --fix",
     "extract": "tsx ./scripts/extract-strings.ts",
     "generate-legend": "tsx ./scripts/generate-legend.ts",
