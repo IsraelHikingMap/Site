@@ -68,17 +68,17 @@
       <mat-checkbox color="primary" [(ngModel)]="updateCurrentShare">{{resources.updateCurrentShare}}</mat-checkbox>
     </div>
     }
+    @if (canPublishPublic) {
     <div class="flex flex-row items-center">
       <mat-radio-group [(ngModel)]="shareUrl.public" color="primary">
         <mat-radio-button [value]="false">{{resources.private}}</mat-radio-button>
         <mat-radio-button [value]="true" [disabled]="!canPublishPublic">{{resources.public}}</mat-radio-button>
       </mat-radio-group>
-      @if (!canPublishPublic) {
       <span class="m-2">
-        <i class="fa icon-info-circle" matTooltip="In order to publish a public route you need to contact us"></i>
+        <i class="fa icon-info-circle" [matTooltip]="resources.contactUsToPublishAPublicRoute"></i>
       </span>
-      }
     </div>
+    }
     <div class="flex flex-row">
       <mat-label>{{resources.routeType}}</mat-label>
     </div>

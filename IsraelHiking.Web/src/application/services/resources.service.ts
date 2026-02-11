@@ -272,6 +272,7 @@ export class ResourcesService {
     public moderate: string;
     public hard: string;
     public unknown: string;
+    public contactUsToPublishAPublicRoute: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -502,7 +503,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1770711438736");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1770811217041");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -754,6 +755,7 @@ export class ResourcesService {
         this.moderate = this.gettextCatalog.getString("Moderate");
         this.hard = this.gettextCatalog.getString("Hard");
         this.unknown = this.gettextCatalog.getString("Unknown");
+        this.contactUsToPublishAPublicRoute = this.gettextCatalog.getString("Contact us to publish a public route");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
