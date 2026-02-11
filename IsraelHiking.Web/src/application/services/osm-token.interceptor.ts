@@ -15,7 +15,7 @@ export function osmTokenInterceptor(request: HttpRequest<any>, next: HttpHandler
         // store is not ready yet
     }
 
-    if (token && (request.url.includes(Urls.apiBase) || request.url.includes(Urls.osmApi))) {
+    if (token && (request.url.includes(Urls.apiBase) || request.url.includes(Urls.osmApi) || request.url.includes(Urls.userApiBase))) {
         request = request.clone({
             setHeaders: {
                 Authorization: `Bearer ${token}`
