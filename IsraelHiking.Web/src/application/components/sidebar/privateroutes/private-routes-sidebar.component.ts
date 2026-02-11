@@ -224,8 +224,9 @@ export class PrivateRoutesSidebarComponent {
         this.dialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, {
             width: "480px",
             data: {
-                mode: "all",
-                shareData: structuredClone(this.shareUrlsService.getSelectedShareUrl()) as ShareUrl
+                shareData: structuredClone(this.shareUrlsService.getSelectedShareUrl()) as ShareUrl,
+                routes: this.routes.filter(r => r.state !== "Hidden"),
+                hasHiddenRoutes: this.routes.some(r => r.state === "Hidden"),
             }
         });
     }

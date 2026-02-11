@@ -25,17 +25,15 @@ import { SelectedRouteService } from "../../services/selected-route.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
-import { FileService } from "../../services/file.service";
 import { RouteStatisticsService } from "../../services/route-statistics.service";
 import { ImageResizeService } from "../../services/image-resize.service";
 import { MapService } from "../../services/map.service";
-import type { ApplicationState, RouteData, ShareUrl } from "../../models";
-
-type ShareEditDialogMode = "current" | "all" | "edit";
+import type { ApplicationState, RouteDataWithoutState, ShareUrl } from "../../models";
 
 export type ShareEditDialogComponentData = {
-    mode: ShareEditDialogMode,
-    shareData?: ShareUrl
+    shareData: ShareUrl
+    routes: Immutable<RouteDataWithoutState[]>
+    hasHiddenRoutes: boolean
 };
 
 @Component({
@@ -55,14 +53,11 @@ export class ShareEditDialogComponent {
     public center: LngLatLike;
     public copiedToClipboard: boolean = false;
     public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = { type: "FeatureCollection", features: [] };
-    public mode: ShareEditDialogMode = "all";
-    public allXRoutesText: string = "";
     public canPublishPublic: boolean = false;
 
     public readonly resources = inject(ResourcesService);
 
     private map: Map;
-    private availableRoutesCount: number = 0;
 
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly dataContainerService = inject(DataContainerService);
@@ -70,7 +65,6 @@ export class ShareEditDialogComponent {
     private readonly toastService = inject(ToastService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly defaultStyleService = inject(DefaultStyleService);
-    private readonly fileService = inject(FileService);
     private readonly store = inject(Store);
     private readonly matDialog = inject(MatDialog);
     private readonly matDialogRef = inject(MatDialogRef);
@@ -86,6 +80,7 @@ export class ShareEditDialogComponent {
         this.style.zoom = locationState.zoom;
         this.style.center = [locationState.longitude, locationState.latitude];
         const userInfo = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo);
+        this.hasHiddenRoutes = this.data.hasHiddenRoutes;
         if (this.shareUrl != null) {
             this.shareUrl.public = this.shareUrl.public ?? false;
             this.shareUrl.type = this.shareUrl.type || "Unknown";
@@ -94,19 +89,23 @@ export class ShareEditDialogComponent {
             this.canUpdate = userInfo &&
                 this.shareUrl.osmUserId.toString() === userInfo.id.toString();
         } else {
-            const selectedRoute = this.selectedRouteService.getSelectedRoute();
             this.shareUrl = {
                 id: "",
                 osmUserId: userInfo?.id ?? "",
-                title: selectedRoute?.name ?? "",
-                description: selectedRoute?.description ?? "",
+                title: this.data.routes[0]?.name ?? "",
+                description: this.data.routes[0]?.description ?? "",
                 type: "Unknown",
                 difficulty: "Unknown",
                 public: false,
                 base64Preview: null
             };
         }
-        this.setMode(this.data.mode);
+        this.updateDataContainerAndStatisticsFromRoutes();
+        const geojson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = { type: "FeatureCollection", features: [] };
+        for (const route of this.data.routes) {
+            geojson.features = geojson.features.concat(this.selectedRouteService.createFeaturesForRoute(route));
+        }
+        this.routesGeoJson = geojson;
         this.shareUrlsService.getUserPermissions().then((permissions) => {
             this.canPublishPublic = permissions.canPublishPublic;
         });
@@ -156,8 +155,8 @@ export class ShareEditDialogComponent {
         }
     }
 
-    private updateDataContainerAndStatistics() {
-        const dataContainer = this.dataContainerService.getContainerForRoutes(this.getRoutes());
+    private updateDataContainerAndStatisticsFromRoutes() {
+        const dataContainer = this.dataContainerService.getContainerForRoutes(this.data.routes);
         const latlngs = this.selectedRouteService.getLatlngs(dataContainer.routes[0]);
         const statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
         for (let routeIndex = 1; routeIndex < dataContainer.routes.length; routeIndex++) {
@@ -171,42 +170,6 @@ export class ShareEditDialogComponent {
         this.shareUrl.gain = statistics.gain;
         this.shareUrl.loss = statistics.loss;
         this.shareUrl.length = statistics.length;
-    }
-
-    private getRoutes(): Immutable<RouteData>[] {
-        const availableRoutes = this.getAvailableRoutes();
-        const selectedRoute = this.selectedRouteService.getSelectedRoute();
-        // This is checked to make sure the selected route is not "empty".
-        if (this.mode === "current" && availableRoutes.find(r => r.id === selectedRoute?.id)) {
-            return [selectedRoute];
-        }
-        return availableRoutes;
-    }
-
-    public setMode(mode: ShareEditDialogMode) {
-        this.mode = mode;
-        if (this.mode === "edit") {
-            return;
-        }
-        this.hasHiddenRoutes = mode === "all" && this.selectedRouteService.hasHiddenRoutes();
-        const geojson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = { type: "FeatureCollection", features: [] };
-        for (const route of this.getRoutes()) {
-            geojson.features = geojson.features.concat(this.selectedRouteService.createFeaturesForRoute(route));
-        }
-        this.routesGeoJson = geojson;
-        this.availableRoutesCount = this.getAvailableRoutes().length;
-        this.allXRoutesText = this.resources.allXRoutes.replace("{{count}}", this.availableRoutesCount.toString());
-        this.updateDataContainerAndStatistics();
-    }
-
-    private getAvailableRoutes(): Immutable<RouteData>[] {
-        return this.store.selectSnapshot((state: ApplicationState) => state.routes.present)
-            .filter(r => r.state !== "Hidden")
-            .filter(r => r.segments.length > 0 || r.markers.length > 0);
-    }
-
-    public showMutliSelection(): boolean {
-        return this.availableRoutesCount > 1 && this.mode !== "edit";
     }
 
     public async addImage(event: Event) {

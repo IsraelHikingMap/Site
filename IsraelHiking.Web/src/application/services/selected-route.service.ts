@@ -32,7 +32,7 @@ import type {
     LatLngAltTime,
     RouteEditStateType,
     MarkerData,
-    RouteDataWithoutSate
+    RouteDataWithoutState
 } from "../models";
 
 export type RouteViewProperties = {
@@ -395,7 +395,7 @@ export class SelectedRouteService {
         this.store.dispatch(new ReplaceSegmentsAction(routeId, segments));
     }
 
-    public addRoutes(routes: RouteDataWithoutSate[]) {
+    public addRoutes(routes: RouteDataWithoutState[]) {
         if (routes.length === 0) {
             return;
         }
@@ -429,7 +429,7 @@ export class SelectedRouteService {
         this.selectedRouteHover.emit(latLng);
     }
 
-    public getLatlngs(route: Immutable<RouteDataWithoutSate>): LatLngAltTime[] {
+    public getLatlngs(route: Immutable<RouteDataWithoutState>): LatLngAltTime[] {
         return route ? route.segments.map(s => s.latlngs).flat() : null;
     }
 
@@ -486,7 +486,7 @@ export class SelectedRouteService {
     }
 
     public createFeaturesForRoute(
-        route: Immutable<RouteDataWithoutSate>): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
+        route: Immutable<RouteDataWithoutState>): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
         const features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
         const routeCoordinates = route.segments.map(s => s.latlngs).flat().map(l => SpatialService.toCoordinate(l));
         if (routeCoordinates.length < 2) {
@@ -547,7 +547,7 @@ export class SelectedRouteService {
         return features;
     }
 
-    private routeToProperties(route: Immutable<RouteDataWithoutSate>): RouteViewProperties {
+    private routeToProperties(route: Immutable<RouteDataWithoutState>): RouteViewProperties {
         const color = route.color;
         const opacity = route.opacity == null ? 1.0 : route.opacity;
         const width = route.weight;

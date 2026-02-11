@@ -201,18 +201,20 @@ export class DrawingComponent {
         this.sidebarService.toggle("private-routes");
     }
 
-    public share() {
+    public share(mode: "current" | "all") {
         if (this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo == null) {
             this.toastService.warning(this.resources.loginRequired);
             return;
         }
         const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         this.selectedRouteService.changeRouteEditState(selectedRoute.id, "ReadOnly");
+        const allRoutes = this.store.selectSnapshot((s: ApplicationState) => s.routes).present;
         this.dialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, {
             width: "480px",
             data: {
-                mode: "current",
-                shareData: structuredClone(this.shareUrlsService.getSelectedShareUrl()) as ShareUrl
+                shareData: structuredClone(this.shareUrlsService.getSelectedShareUrl()) as ShareUrl,
+                routes: mode === "current" ? [selectedRoute] : allRoutes.filter(r => r.state !== "Hidden"),
+                hasHiddenRoutes: allRoutes.some(r => r.state === "Hidden")
             }
         });
     }
@@ -223,5 +225,13 @@ export class DrawingComponent {
         if (inMemeoryState.following && tracking === "tracking") {
             this.toastService.warning(this.resources.trackingIsDisabledWhileEditing);
         }
+    }
+
+    public hasMultipleRoutes() {
+        return this.store.selectSnapshot((s: ApplicationState) => s.routes).present.length > 1;
+    }
+
+    public allXRoutesText() {
+        return this.resources.allXRoutes.replace("{{count}}", this.store.selectSnapshot((s: ApplicationState) => s.routes).present.length.toString());
     }
 }

@@ -10,7 +10,7 @@ import { ResourcesService } from "./resources.service";
 import { DatabaseService } from "./database.service";
 import { BulkReplaceTracesAction, RemoveTraceAction, UpdateTraceAction } from "../reducers/traces.reducer";
 import { Urls } from "../urls";
-import type { Trace, ApplicationState, DataContainer, RouteDataWithoutSate } from "../models";
+import type { Trace, ApplicationState, DataContainer, RouteDataWithoutState } from "../models";
 
 type OsmTrace = {
     description: string;
@@ -153,7 +153,7 @@ export class TracesService {
         return firstValueFrom(this.httpClient.post(Urls.osmGpx, formData).pipe(timeout(3 * 60 * 1000)));
     }
 
-    public async uploadRouteAsTrace(route: Immutable<RouteDataWithoutSate>): Promise<void> {
+    public async uploadRouteAsTrace(route: Immutable<RouteDataWithoutState>): Promise<void> {
         this.loggingService.info(`[Traces] Uploading a route as trace with name ${route.name}`);
         await firstValueFrom(this.httpClient.post(Urls.uploadDataContainer, route, {
             params: { language: this.resources.getCurrentLanguageCodeSimplified() }

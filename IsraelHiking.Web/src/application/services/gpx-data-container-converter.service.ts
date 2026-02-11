@@ -8,7 +8,7 @@ import type { Immutable } from "immer";
 
 import type {
     DataContainer,
-    RouteDataWithoutSate,
+    RouteDataWithoutState,
     RouteSegmentData,
     LatLngAltTime,
     MarkerData,
@@ -278,7 +278,7 @@ export class GpxDataContainerConverterService {
         if (markers.length > 0) {
             if (dataContainer.routes.length === 0) {
                 const name = (markers.length === 1 ? markers[0].title : "Markers") || "Markers";
-                dataContainer.routes.push({ name, description: markers[0].description, segments: [] } as RouteDataWithoutSate);
+                dataContainer.routes.push({ name, description: markers[0].description, segments: [] } as RouteDataWithoutState);
             }
             dataContainer.routes[0].markers = markers;
         }
@@ -375,7 +375,7 @@ export class GpxDataContainerConverterService {
         };
     }
 
-    private convertRoutesToRoutesData(routes: Rte[]): RouteDataWithoutSate[] {
+    private convertRoutesToRoutesData(routes: Rte[]): RouteDataWithoutState[] {
         return routes.filter(r => r.rtept != null && r.rtept.length > 0).map(r => ({
             name: r.name,
             description: r.desc,
@@ -384,10 +384,10 @@ export class GpxDataContainerConverterService {
                 routePoint: last(r.rtept.map(p => ({ lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele })))
             }],
             markers: []
-        } as RouteDataWithoutSate));
+        } as RouteDataWithoutState));
     }
 
-    private convertTracksToRouteData(trks: Trk[]): RouteDataWithoutSate[] {
+    private convertTracksToRouteData(trks: Trk[]): RouteDataWithoutState[] {
         return trks.filter(t => t.trkseg != null && t.trkseg.length > 0).map(t => {
             const extensions = this.convertExtensionAfterXmlnsRemoval(t.extensions, {
                 Color: { _: null },
@@ -416,7 +416,7 @@ export class GpxDataContainerConverterService {
                     })))
                 })),
                 markers: []
-            } as RouteDataWithoutSate;
+            } as RouteDataWithoutState;
         });
     }
 

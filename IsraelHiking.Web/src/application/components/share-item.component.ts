@@ -46,8 +46,9 @@ export class ShareItemComponent {
     public edit() {
         this.matDialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, {
             data: {
-                mode: "edit",
-                shareData: structuredClone(this.shareUrl()) as ShareUrl
+                shareData: structuredClone(this.shareUrl()) as ShareUrl,
+                routes: this.shareUrl().dataContainer.routes,
+                hasHiddenRoutes: false
             }
         });
     }

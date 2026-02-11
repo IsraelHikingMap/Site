@@ -50,7 +50,6 @@ export class SharesDialogComponent implements OnInit {
 
     public readonly resources = inject(ResourcesService);
 
-
     private readonly dialog = inject(MatDialog);
     private readonly toastService = inject(ToastService);
     private readonly shareUrlsService = inject(ShareUrlsService);
@@ -87,10 +86,6 @@ export class SharesDialogComponent implements OnInit {
         Share.share({
             url: this.getShareSocialLinks().app
         });
-    }
-
-    public createShare() {
-        this.dialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, { width: "480px", data: { mode: "all" } });
     }
 
     private updateFilteredLists(searchTerm: string) {
@@ -168,12 +163,14 @@ export class SharesDialogComponent implements OnInit {
         this.dataContainerService.setData(share.dataContainer, true);
     }
 
-    public openEditShareUrlDialog() {
+    public async openEditShareUrlDialog() {
+        const shareUrl = await this.shareUrlsService.getShareUrl(this.selectedShareUrlId);
         this.dialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, {
             width: "480px",
             data: {
-                mode: "edit",
-                shareData: structuredClone(this.getSelectedShareUrl()) as ShareUrl
+                shareData: shareUrl,
+                routes: shareUrl.dataContainer.routes,
+                hasHiddenRoutes: false
             }
         });
     }

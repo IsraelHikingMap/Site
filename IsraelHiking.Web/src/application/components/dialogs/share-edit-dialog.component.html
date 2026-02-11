@@ -32,20 +32,6 @@
         }
       </div>
     </div>
-    @if (showMutliSelection()) {
-    <div class="flex flex-row">
-      <mat-radio-group (change)=setMode($event.value) [value]="mode">
-        <div>
-          <mat-radio-button value="current" color="primary" angulartics2On="click" angularticsCategory="Share"
-            angularticsAction="Set share mode current">{{resources.currentRoute}}</mat-radio-button>
-        </div>
-        <div>
-          <mat-radio-button value="all" color="primary" angulartics2On="click" angularticsCategory="Share"
-            angularticsAction="Set share mode all">{{allXRoutesText}}</mat-radio-button>
-        </div>
-      </mat-radio-group>
-    </div>
-    }
     <div class="flex flex-row">
       <mat-form-field class="w-full" hintLabel="{{resources.titlePlaceHolder}}">
         <mat-label>{{resources.title}}</mat-label>

@@ -11,7 +11,7 @@ import { RoutesFactory } from "./routes.factory";
 import { SetSelectedRouteAction, RouteEditingReducer } from "../reducers/route-editing.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
 import { AddRouteAction, ChangeRouteStateAction, BulkReplaceRoutesAction, RoutesReducer, MergeRoutesAction, SplitRouteAction, ReplaceRouteAction, UpdateSegmentsAction, DeleteSegmentAction, ReplaceSegmentsAction, AddPrivatePoiAction } from "../reducers/routes.reducer";
-import type { RouteDataWithoutSate, RouteData } from "../models";
+import type { RouteDataWithoutState, RouteData } from "../models";
 
 
 describe("Selected Route Service", () => {
@@ -1039,7 +1039,7 @@ describe("Selected Route Service", () => {
             const spy = jasmine.createSpy();
             store.dispatch = spy;
 
-            selectedRouteService.addRoutes([{ segments: [], markers: [{ title: "title" }] } as RouteDataWithoutSate]);
+            selectedRouteService.addRoutes([{ segments: [], markers: [{ title: "title" }] } as RouteDataWithoutState]);
 
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddPrivatePoiAction);
             const action = spy.calls.all()[0].args[0] as AddPrivatePoiAction;
@@ -1063,7 +1063,7 @@ describe("Selected Route Service", () => {
             const spy = jasmine.createSpy();
             store.dispatch = spy;
 
-            selectedRouteService.addRoutes([{ name: "name", segments: [{}], markers: [{ title: "title" }] } as RouteDataWithoutSate]);
+            selectedRouteService.addRoutes([{ name: "name", segments: [{}], markers: [{ title: "title" }] } as RouteDataWithoutState]);
 
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddRouteAction);
             const action = spy.calls.all()[0].args[0] as AddRouteAction;
