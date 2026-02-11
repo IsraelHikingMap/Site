@@ -30,6 +30,7 @@ import { SpatialService } from "../../../services/spatial.service";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
 import { LogReaderService } from "../../../services/log-reader.service";
 import { ShareUrlsService } from "../../../services/share-urls.service";
+import { DataContainerService } from "../../../services/data-container.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { ChangeRouteStateAction, ToggleAllRoutesAction, DeleteAllRoutesAction, AddRouteAction, ChangeRoutePropertiesAction, DeleteRouteAction } from "../../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../../reducers/route-editing.reducer";
@@ -61,6 +62,7 @@ export class PrivateRoutesSidebarComponent {
     private readonly fitBoundsService = inject(FitBoundsService);
     private readonly logReaderService = inject(LogReaderService);
     private readonly shareUrlsService = inject(ShareUrlsService);
+    private readonly dataContainerService = inject(DataContainerService);
 
     constructor() {
         this.colors = this.routesFactory.colors;
@@ -221,11 +223,12 @@ export class PrivateRoutesSidebarComponent {
             this.toastService.warning(this.resources.loginRequired);
             return;
         }
+        const dataContainer = this.dataContainerService.getContainerForRoutes(this.routes.filter(r => r.state !== "Hidden"));
         this.dialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, {
             width: "480px",
             data: {
-                shareData: structuredClone(this.shareUrlsService.getSelectedShareUrl()) as ShareUrl,
-                routes: this.routes.filter(r => r.state !== "Hidden"),
+                fullShareUrl: structuredClone(this.shareUrlsService.getSelectedShareUrl()) as ShareUrl,
+                dataContainer,
                 hasHiddenRoutes: this.routes.some(r => r.state === "Hidden"),
             }
         });

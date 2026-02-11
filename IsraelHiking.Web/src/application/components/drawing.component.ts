@@ -14,6 +14,8 @@ import { ResourcesService } from "../services/resources.service";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { ToastService } from "../services/toast.service";
 import { SidebarService } from "../services/sidebar.service";
+import { ShareUrlsService } from "../services/share-urls.service";
+import { DataContainerService } from "../services/data-container.service";
 import {
     ReplaceSegmentsAction,
     ClearPoisAction,
@@ -26,7 +28,6 @@ import {
 } from "../reducers/routes.reducer";
 import { SetRoutingTypeAction, SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
-import { ShareUrlsService } from "../services/share-urls.service";
 import type { RoutingType, ApplicationState, RouteData, ShareUrl } from "../models";
 
 @Component({
@@ -46,6 +47,7 @@ export class DrawingComponent {
     private readonly sidebarService = inject(SidebarService);
     private readonly dialog = inject(MatDialog);
     private readonly shareUrlsService = inject(ShareUrlsService);
+    private readonly dataContainerService = inject(DataContainerService);
 
     constructor() {
         this.undoQueueLength$ = this.store.select((state: ApplicationState) => state.routes.past.length);
@@ -209,12 +211,14 @@ export class DrawingComponent {
         const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         this.selectedRouteService.changeRouteEditState(selectedRoute.id, "ReadOnly");
         const allRoutes = this.store.selectSnapshot((s: ApplicationState) => s.routes).present;
+        const relevantRoutes = mode === "current" ? [selectedRoute] : allRoutes.filter(r => r.state !== "Hidden");
+        const dataContainer = this.dataContainerService.getContainerForRoutes(relevantRoutes);
         this.dialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, {
             width: "480px",
             data: {
-                shareData: structuredClone(this.shareUrlsService.getSelectedShareUrl()) as ShareUrl,
-                routes: mode === "current" ? [selectedRoute] : allRoutes.filter(r => r.state !== "Hidden"),
-                hasHiddenRoutes: allRoutes.some(r => r.state === "Hidden")
+                fullShareUrl: structuredClone(this.shareUrlsService.getSelectedShareUrl()) as ShareUrl,
+                dataContainer: dataContainer,
+                hasHiddenRoutes: relevantRoutes.some(r => r.state === "Hidden")
             }
         });
     }

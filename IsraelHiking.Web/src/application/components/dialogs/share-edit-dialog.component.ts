@@ -10,17 +10,17 @@ import { MatCheckbox } from "@angular/material/checkbox";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatRadioButton, MatRadioGroup } from "@angular/material/radio";
 import { MapComponent, ControlComponent } from "@maplibre/ngx-maplibre-gl";
-import { LngLatLike, Map, StyleSpecification } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 import { Immutable } from "immer";
+import type { Map, StyleSpecification } from "maplibre-gl";
 
 import { LayersComponent } from "../map/layers.component";
 import { ShareShowDialogComponent } from "./share-show-dialog.component";
 import { RoutesPathComponent } from "../map/routes-path.component";
+import { DistancePipe } from "../../pipes/distance.pipe";
 import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
-import { DataContainerService } from "../../services/data-container.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
 import { RunningContextService } from "../../services/running-context.service";
@@ -28,11 +28,15 @@ import { DefaultStyleService } from "../../services/default-style.service";
 import { RouteStatisticsService } from "../../services/route-statistics.service";
 import { ImageResizeService } from "../../services/image-resize.service";
 import { MapService } from "../../services/map.service";
-import type { ApplicationState, RouteDataWithoutState, ShareUrl } from "../../models";
+import type { ApplicationState, DataContainer, ShareUrl } from "../../models";
 
 export type ShareEditDialogComponentData = {
-    shareData: ShareUrl
-    routes: Immutable<RouteDataWithoutState[]>
+    fullShareUrl: ShareUrl,
+    /**
+     * The possible data continer to update the share with,
+     * `null` in case of editing an existing share
+     */
+    dataContainer: DataContainer,
     hasHiddenRoutes: boolean
 };
 
@@ -40,7 +44,7 @@ export type ShareEditDialogComponentData = {
     selector: "share-edit-dialog",
     templateUrl: "./share-edit-dialog.component.html",
     styleUrls: ["./share-edit-dialog.component.scss"],
-    imports: [Dir, MatDialogTitle, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, Angulartics2OnModule, MatAnchor, MapComponent, LayersComponent, MatRadioGroup, MatRadioButton, MatDialogActions, MatFormField, ControlComponent, MatButtonModule, MatTooltip, RoutesPathComponent]
+    imports: [Dir, MatDialogTitle, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, Angulartics2OnModule, MatAnchor, MapComponent, LayersComponent, MatRadioGroup, MatRadioButton, MatDialogActions, MatFormField, ControlComponent, MatButtonModule, MatTooltip, RoutesPathComponent, DistancePipe]
 })
 export class ShareEditDialogComponent {
     public shareUrl: ShareUrl;
@@ -50,7 +54,6 @@ export class ShareEditDialogComponent {
     public updateCurrentShare: boolean = false;
     public hasHiddenRoutes: boolean = false;
     public style: StyleSpecification;
-    public center: LngLatLike;
     public copiedToClipboard: boolean = false;
     public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = { type: "FeatureCollection", features: [] };
     public canPublishPublic: boolean = false;
@@ -60,7 +63,6 @@ export class ShareEditDialogComponent {
     private map: Map;
 
     private readonly selectedRouteService = inject(SelectedRouteService);
-    private readonly dataContainerService = inject(DataContainerService);
     private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly toastService = inject(ToastService);
     private readonly runningContextService = inject(RunningContextService);
@@ -74,13 +76,13 @@ export class ShareEditDialogComponent {
     private readonly data = inject<ShareEditDialogComponentData>(MAT_DIALOG_DATA);
 
     constructor() {
-        this.shareUrl = this.data.shareData;
         const locationState = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
         this.style = this.defaultStyleService.getStyleWithPlaceholders();
         this.style.zoom = locationState.zoom;
         this.style.center = [locationState.longitude, locationState.latitude];
         const userInfo = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo);
         this.hasHiddenRoutes = this.data.hasHiddenRoutes;
+        this.shareUrl = this.data.fullShareUrl;
         if (this.shareUrl != null) {
             this.shareUrl.public = this.shareUrl.public ?? false;
             this.shareUrl.type = this.shareUrl.type || "Unknown";
@@ -88,24 +90,26 @@ export class ShareEditDialogComponent {
             this.shareUrl.base64Preview = this.shareUrlsService.getImageUrlFromShareId(this.shareUrl.id);
             this.canUpdate = userInfo &&
                 this.shareUrl.osmUserId.toString() === userInfo.id.toString();
+            this.shareUrl.dataContainer = this.data.dataContainer ?? this.shareUrl.dataContainer;
         } else {
             this.shareUrl = {
                 id: "",
                 osmUserId: userInfo?.id ?? "",
-                title: this.data.routes[0]?.name ?? "",
-                description: this.data.routes[0]?.description ?? "",
+                title: this.data.dataContainer.routes[0]?.name ?? "",
+                description: this.data.dataContainer.routes[0]?.description ?? "",
                 type: "Unknown",
                 difficulty: "Unknown",
                 public: false,
-                base64Preview: null
+                base64Preview: null,
+                dataContainer: this.data.dataContainer
             };
         }
-        this.updateDataContainerAndStatisticsFromRoutes();
         const geojson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = { type: "FeatureCollection", features: [] };
-        for (const route of this.data.routes) {
+        for (const route of this.shareUrl.dataContainer.routes) {
             geojson.features = geojson.features.concat(this.selectedRouteService.createFeaturesForRoute(route));
         }
         this.routesGeoJson = geojson;
+        this.updateStatistics();
         this.shareUrlsService.getUserPermissions().then((permissions) => {
             this.canPublishPublic = permissions.canPublishPublic;
         });
@@ -155,18 +159,16 @@ export class ShareEditDialogComponent {
         }
     }
 
-    private updateDataContainerAndStatisticsFromRoutes() {
-        const dataContainer = this.dataContainerService.getContainerForRoutes(this.data.routes);
-        const latlngs = this.selectedRouteService.getLatlngs(dataContainer.routes[0]);
+    private updateStatistics() {
+        const latlngs = this.selectedRouteService.getLatlngs(this.shareUrl.dataContainer.routes[0]);
         const statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
-        for (let routeIndex = 1; routeIndex < dataContainer.routes.length; routeIndex++) {
-            const latlngs = this.selectedRouteService.getLatlngs(dataContainer.routes[routeIndex]);
+        for (let routeIndex = 1; routeIndex < this.shareUrl.dataContainer.routes.length; routeIndex++) {
+            const latlngs = this.selectedRouteService.getLatlngs(this.shareUrl.dataContainer.routes[routeIndex]);
             const statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
             statistics.gain += statistics.gain;
             statistics.loss += statistics.loss;
             statistics.length += statistics.length;
         }
-        this.shareUrl.dataContainer = dataContainer;
         this.shareUrl.gain = statistics.gain;
         this.shareUrl.loss = statistics.loss;
         this.shareUrl.length = statistics.length;

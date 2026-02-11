@@ -168,8 +168,8 @@ export class SharesDialogComponent implements OnInit {
         this.dialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, {
             width: "480px",
             data: {
-                shareData: shareUrl,
-                routes: shareUrl.dataContainer.routes,
+                fullShareUrl: shareUrl,
+                dataContainer: null,
                 hasHiddenRoutes: false
             }
         });

@@ -97,6 +97,20 @@
         <input matInput type="text" dir="ltr" [(ngModel)]="shareUrl.website" />
       </mat-form-field>
     </div>
+    <div class="inline-flex flex-row gap-1 text-sm mx-2">
+      <div matTooltip="{{resources.gain}}" matTooltipPosition="above">
+        <i class="fa icon-arrow-up"></i>
+        <span class="mx-1">{{shareUrl.gain | distance}}</span>
+      </div>
+      <div matTooltip="{{resources.loss}}" matTooltipPosition="above">
+        <i class="fa icon-arrow-down"></i>
+        <span class="mx-1">{{shareUrl.loss | distance}}</span>
+      </div>
+      <div matTooltip="{{resources.length}}" matTooltipPosition="above">
+        <i class="fa icon-arrow-right"></i>
+        <span class="mx-1">{{shareUrl.length | distance}}</span>
+      </div>
+    </div>
   </div>
   <div mat-dialog-actions>
     <div class="flex flex-row w-full">

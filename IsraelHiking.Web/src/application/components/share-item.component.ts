@@ -43,11 +43,12 @@ export class ShareItemComponent {
         this.shareUrlsService.deleteShareUrl(this.shareUrl().id);
     }
 
-    public edit() {
+    public async edit() {
+        const shareUrl = await this.shareUrlsService.getShareUrl(this.shareUrl().id);
         this.matDialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, {
             data: {
-                shareData: structuredClone(this.shareUrl()) as ShareUrl,
-                routes: this.shareUrl().dataContainer.routes,
+                fullShareUrl: shareUrl,
+                dataContainer: null,
                 hasHiddenRoutes: false
             }
         });
