@@ -120,7 +120,7 @@ describe("Share Urls Service", () => {
     it("Should get share url from database when already cached and don't refresh it if it's not newer", inject([ShareUrlsService, HttpTestingController, DatabaseService],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
 
-            databaseService.getShareUrlById = () => Promise.resolve({ lastModifiedDate: new Date() } as ShareUrl);
+            databaseService.getShareUrlById = () => Promise.resolve({ lastModifiedDate: new Date().toISOString() } as ShareUrl);
 
             const promise = shareUrlsService.getShareUrl("5");
 
@@ -153,7 +153,7 @@ describe("Share Urls Service", () => {
     it("Should get share url from database when already cached and try to refresh it since it's newer", inject([ShareUrlsService, HttpTestingController, DatabaseService],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
 
-            databaseService.getShareUrlById = () => Promise.resolve({ lastModifiedDate: new Date(100) } as ShareUrl);
+            databaseService.getShareUrlById = () => Promise.resolve({ lastModifiedDate: new Date(100).toISOString() } as ShareUrl);
 
             const promise = shareUrlsService.getShareUrl("7");
 
@@ -171,7 +171,7 @@ describe("Share Urls Service", () => {
     it("Should get share url from database when already cached and try to refresh twice it since it's newer and first fast refresh failed", inject([ShareUrlsService, HttpTestingController, DatabaseService],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
 
-            databaseService.getShareUrlById = () => Promise.resolve({ lastModifiedDate: new Date(100) } as ShareUrl);
+            databaseService.getShareUrlById = () => Promise.resolve({ lastModifiedDate: new Date(100).toISOString() } as ShareUrl);
 
             const promise = shareUrlsService.getShareUrl("7");
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await

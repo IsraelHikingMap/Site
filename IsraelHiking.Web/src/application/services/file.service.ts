@@ -99,10 +99,6 @@ export class FileService {
         return filesToReturn;
     }
 
-    public getFullUrl(relativePath: string): string {
-        return (window.origin || window.location.origin) + "/" + relativePath;
-    }
-
     public async getStyleJsonContent(url: string, tryLocalStyle: boolean): Promise<StyleSpecification> {
         try {
             if (this.runningContextService.isCapacitor && url.startsWith(".")) {

@@ -8,12 +8,12 @@ import { LayersService } from "../services/layers.service";
 import { ResourcesService } from "../services/resources.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
 import { HIKING_MAP } from "../reducers/initial-state";
-import type { LatLngAlt } from "../models";
+import type { LatLngAltTime } from "../models";
 
 type LegendItemType = "POI" | "Way";
 
 export interface ILegendItem {
-    latlng: LatLngAlt;
+    latlng: LatLngAltTime;
     zoom: number;
     title: string;
     type: LegendItemType;

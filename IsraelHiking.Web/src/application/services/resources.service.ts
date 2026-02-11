@@ -266,6 +266,12 @@ export class ResourcesService {
     public filter: string;
     public sort: string;
     public date: string;
+    public difficulty: string;
+    public routeType: string;
+    public easy: string;
+    public moderate: string;
+    public hard: string;
+    public unknown: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -496,7 +502,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1770296416284");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1770711438736");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -742,6 +748,12 @@ export class ResourcesService {
         this.filter = this.gettextCatalog.getString("Filter");
         this.sort = this.gettextCatalog.getString("Sort");
         this.date = this.gettextCatalog.getString("Date");
+        this.difficulty = this.gettextCatalog.getString("Difficulty");
+        this.routeType = this.gettextCatalog.getString("Route Type");
+        this.easy = this.gettextCatalog.getString("Easy");
+        this.moderate = this.gettextCatalog.getString("Moderate");
+        this.hard = this.gettextCatalog.getString("Hard");
+        this.unknown = this.gettextCatalog.getString("Unknown");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

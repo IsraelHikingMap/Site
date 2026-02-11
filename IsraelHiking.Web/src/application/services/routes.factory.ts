@@ -3,7 +3,7 @@ import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
 
-import type { RouteData, ApplicationState } from "../models";
+import type { RouteDataWithoutSate, ApplicationState, RouteData } from "../models";
 
 @Injectable()
 export class RoutesFactory {
@@ -45,7 +45,7 @@ export class RoutesFactory {
         return route;
     }
 
-    public createRouteDataAddMissingFields(routeData: Immutable<RouteData>, color: string): RouteData {
+    public createRouteDataAddMissingFields(routeData: Immutable<RouteDataWithoutSate>, color: string): RouteData {
         const routeEditingState = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState);
         const route = structuredClone(routeData) as RouteData;
         route.color = route.color || color;

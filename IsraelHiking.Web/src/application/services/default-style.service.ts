@@ -1,14 +1,14 @@
 import { inject, Injectable } from "@angular/core";
 import { StyleSpecification } from "maplibre-gl";
 
-import { FileService } from "./file.service";
+import { MapService } from "./map.service";
 import { ResourcesService } from "./resources.service";
 
 @Injectable()
 export class DefaultStyleService {
     public style: StyleSpecification;
 
-    private readonly fileService = inject(FileService);
+    private readonly mapService = inject(MapService);
     private readonly resources = inject(ResourcesService);
 
     constructor() {
@@ -16,13 +16,13 @@ export class DefaultStyleService {
             version: 8,
             sources: {},
             layers: [],
-            glyphs: this.fileService.getFullUrl("fonts/glyphs/{fontstack}/{range}.pbf"),
-            sprite: this.fileService.getFullUrl("content/sprite/sprite")
+            glyphs: this.mapService.getFullUrl("fonts/glyphs/{fontstack}/{range}.pbf"),
+            sprite: this.mapService.getFullUrl("content/sprite/sprite")
         };
     }
 
     public getStyleWithPlaceholders(): StyleSpecification {
-        const styleWithPlaceholder = {...this.style};
+        const styleWithPlaceholder = { ...this.style };
         styleWithPlaceholder.sources = {
             dummy: {
                 type: "geojson",

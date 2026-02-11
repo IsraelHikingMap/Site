@@ -1,6 +1,6 @@
 import { Immutable } from "immer";
 
-import { LatLngAlt } from "../models";
+import { LatLngAltTime } from "../models";
 
 export class GeoJSONUtils {
     public static setPropertyUnique(feature: GeoJSON.Feature, key: string, value: string) {
@@ -22,18 +22,18 @@ export class GeoJSONUtils {
         feature.properties[key + index] = value;
         return `${index}`;
     }
-    
-    public static setLocation(feature: GeoJSON.Feature, value: LatLngAlt) {
+
+    public static setLocation(feature: GeoJSON.Feature, value: LatLngAltTime) {
         feature.properties.poiGeolocation = {
             lat: value.lat,
             lon: value.lng
         };
     }
-    
+
     public static setDescription(feature: GeoJSON.Feature, value: string, language: string) {
         feature.properties["description:" + language] = value;
     }
-    
+
     public static setTitle(feature: GeoJSON.Feature, value: string, language: string) {
         feature.properties["name:" + language] = value;
     }
@@ -48,8 +48,8 @@ export class GeoJSONUtils {
         if (feature.properties.name) {
             return feature.properties.name;
         }
-        if (feature.properties["mtb:name:"+ language]) {
-            return feature.properties["mtb:name:"+ language];
+        if (feature.properties["mtb:name:" + language]) {
+            return feature.properties["mtb:name:" + language];
         }
         if (feature.properties["mtb:name:en"]) {
             return feature.properties["mtb:name:en"];
@@ -64,7 +64,7 @@ export class GeoJSONUtils {
         return feature.properties["description:" + language] || feature.properties.description;
     }
 
-    public static getLocation(feature: Immutable<GeoJSON.Feature>): LatLngAlt {
+    public static getLocation(feature: Immutable<GeoJSON.Feature>): LatLngAltTime {
         return {
             lat: feature.properties.poiGeolocation.lat,
             lng: feature.properties.poiGeolocation.lon,
@@ -92,14 +92,13 @@ export class GeoJSONUtils {
         if (url.startsWith("data:image")) {
             return true;
         }
-        if (url.includes("wikimedia.org") && 
-            !url.includes("Building_no_free_image_yet") && 
+        if (url.includes("wikimedia.org") &&
+            !url.includes("Building_no_free_image_yet") &&
             !url.endsWith("svg.png") &&
             !url.endsWith("svg")) {
             return true;
         }
-        if (url.includes("inature.info"))
-        {
+        if (url.includes("inature.info")) {
             return true;
         }
         if (url.includes("nakeb.co.il")) {

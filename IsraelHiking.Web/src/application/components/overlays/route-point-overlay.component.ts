@@ -7,7 +7,7 @@ import { MatTooltip } from "@angular/material/tooltip";
 import { CoordinatesComponent } from "../coordinates.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
-import type { LatLngAlt } from "../../models";
+import type { LatLngAltTime } from "../../models";
 
 @Component({
     selector: "route-point-overlay",
@@ -18,7 +18,7 @@ export class RoutePointOverlayComponent implements OnChanges {
     public canMerge: boolean = false;
     public isMiddle: boolean = false;
 
-    public latlng = input<LatLngAlt>();
+    public latlng = input<LatLngAltTime>();
 
     public segmentIndex = input<number>();
 

@@ -40,8 +40,7 @@ import { GeoJSONUtils } from "../../../services/geojson-utils";
 import type {
     LinkData,
     ApplicationState,
-    EditablePublicPointData,
-    LatLngAltTime
+    EditablePublicPointData
 } from "../../../models";
 
 export type SourceImageUrlPair = {
@@ -284,7 +283,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             }
             await this.elevationProvider.updateHeights(route.latlngs);
             newRoute.description = this.description;
-            newRoute.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs as LatLngAltTime[], "Hike");
+            newRoute.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs, "Hike");
             this.store.dispatch(new AddRouteAction(newRoute));
             this.selectedRouteService.setSelectedRoute(newRoute.id);
         }

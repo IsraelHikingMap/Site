@@ -8,12 +8,11 @@ import type { Immutable } from "immer";
 
 import type {
     DataContainer,
-    RouteData,
+    RouteDataWithoutSate,
     RouteSegmentData,
     LatLngAltTime,
     MarkerData,
     LinkData,
-    LatLngAlt,
     RoutingType
 } from "../models";
 
@@ -279,7 +278,7 @@ export class GpxDataContainerConverterService {
         if (markers.length > 0) {
             if (dataContainer.routes.length === 0) {
                 const name = (markers.length === 1 ? markers[0].title : "Markers") || "Markers";
-                dataContainer.routes.push({ name, description: markers[0].description, segments: [] } as RouteData);
+                dataContainer.routes.push({ name, description: markers[0].description, segments: [] } as RouteDataWithoutSate);
             }
             dataContainer.routes[0].markers = markers;
         }
@@ -297,7 +296,7 @@ export class GpxDataContainerConverterService {
             const firstLatlng = route.segments[0].latlngs[0];
             route.segments.splice(0, 0, {
                 latlngs: [firstLatlng, firstLatlng],
-                routePoint: firstLatlng as LatLngAlt,
+                routePoint: firstLatlng,
                 routingType: "Hike"
             } as RouteSegmentData);
             route.segments = GpxDataContainerConverterService.splitRouteSegments(route.segments);
@@ -376,7 +375,7 @@ export class GpxDataContainerConverterService {
         };
     }
 
-    private convertRoutesToRoutesData(routes: Rte[]): RouteData[] {
+    private convertRoutesToRoutesData(routes: Rte[]): RouteDataWithoutSate[] {
         return routes.filter(r => r.rtept != null && r.rtept.length > 0).map(r => ({
             name: r.name,
             description: r.desc,
@@ -385,10 +384,10 @@ export class GpxDataContainerConverterService {
                 routePoint: last(r.rtept.map(p => ({ lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele })))
             }],
             markers: []
-        } as RouteData));
+        } as RouteDataWithoutSate));
     }
 
-    private convertTracksToRouteData(trks: Trk[]): RouteData[] {
+    private convertTracksToRouteData(trks: Trk[]): RouteDataWithoutSate[] {
         return trks.filter(t => t.trkseg != null && t.trkseg.length > 0).map(t => {
             const extensions = this.convertExtensionAfterXmlnsRemoval(t.extensions, {
                 Color: { _: null },
@@ -406,18 +405,18 @@ export class GpxDataContainerConverterService {
                         alt: +p.ele,
                         lat: +p.$.lat,
                         lng: +p.$.lon,
-                        timestamp: p.time ? new Date(p.time) : undefined
-                    } as LatLngAltTime)),
+                        timestamp: p.time ? new Date(p.time).toISOString() : undefined
+                    })),
                     routingType: this.convertExtensionAfterXmlnsRemoval(s.extensions, { RoutingType: { _: "Hike" } }).RoutingType._,
                     routePoint: last(s.trkpt.map(p => ({
                         alt: +p.ele,
                         lat: +p.$.lat,
                         lng: +p.$.lon,
-                        timestamp: p.time ? new Date(p.time) : undefined
-                    } as LatLngAltTime)))
-                } as RouteSegmentData)),
+                        timestamp: p.time ? new Date(p.time).toISOString() : undefined
+                    })))
+                })),
                 markers: []
-            } as RouteData;
+            } as RouteDataWithoutSate;
         });
     }
 

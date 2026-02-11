@@ -1,8 +1,8 @@
-import { Component, ViewEncapsulation, ElementRef, inject, viewChild, viewChildren } from "@angular/core";
+import { Component, ViewEncapsulation, ElementRef, inject, viewChildren } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { NgStyle } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
-import { StyleSpecification, ScaleControl, Unit, PointLike, IControl, ControlPosition } from "maplibre-gl";
+import { type StyleSpecification, type Map, ScaleControl, Unit, PointLike, IControl, ControlPosition } from "maplibre-gl";
 import { NgProgressbar } from "ngx-progressbar";
 import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";
@@ -40,7 +40,6 @@ import type { ApplicationState, LocationState } from "../../models";
 })
 export class MainMapComponent {
 
-    public mapComponent = viewChild(MapComponent);
     public topStartControls = viewChildren("topStartControl", { read: ElementRef });
     public topEndControls = viewChildren("topEndControl", { read: ElementRef });
     public bottomEndControls = viewChildren("bottomEndControl", { read: ElementRef });
@@ -59,6 +58,7 @@ export class MainMapComponent {
     private readonly store = inject(Store);
 
     private addedControls: IControl[] = [];
+    private map: Map;
 
     constructor() {
         this.location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
@@ -70,55 +70,57 @@ export class MainMapComponent {
         if (!e) {
             return;
         }
-        const centerLatLon = this.mapComponent().mapInstance.getCenter();
-        const zoom = this.mapComponent().mapInstance.getZoom();
+        const centerLatLon = this.map.getCenter();
+        const zoom = this.map.getZoom();
         this.store.dispatch(new SetLocationAction(centerLatLon.lng, centerLatLon.lat, zoom));
     }
 
-    public mapLoaded() {
-        this.mapService.setMap(this.mapComponent().mapInstance);
-        this.mapComponent().mapInstance.doubleClickZoom.enable();
-        this.mapComponent().mapInstance._zoomLevelsToOverscale = 4;
+    public mapLoaded(map: Map) {
+        this.map = map;
+        this.mapService.setMap(this.map);
+        this.mapService.addArrowToMap(this.map);
+        this.map.doubleClickZoom.enable();
+        this.map._zoomLevelsToOverscale = 4;
         this.store.select((state: ApplicationState) => state.configuration.language.rtl).subscribe((rtl) => {
             const start = rtl ? "right" : "left";
             const end = rtl ? "left" : "right";
             for (const control of this.addedControls) {
-                this.mapComponent().mapInstance.removeControl(control);
+                this.map.removeControl(control);
             }
             this.addedControls = [];
             for (const c of this.topStartControls()) {
                 const control = new CustomControl(c.nativeElement);
-                this.mapComponent().mapInstance.addControl(control, "top-" + start as ControlPosition);
+                this.map.addControl(control, "top-" + start as ControlPosition);
                 this.addedControls.push(control);
             }
             for (const c of this.topEndControls()) {
                 const control = new CustomControl(c.nativeElement);
-                this.mapComponent().mapInstance.addControl(new CustomControl(c.nativeElement), "top-" + end as ControlPosition);
+                this.map.addControl(new CustomControl(c.nativeElement), "top-" + end as ControlPosition);
                 this.addedControls.push(control);
             }
             const control = new ScaleControl({ unit: "meter" as Unit });
-            this.mapComponent().mapInstance.addControl(control, "bottom-" + end as ControlPosition);
+            this.map.addControl(control, "bottom-" + end as ControlPosition);
             this.addedControls.push(control);
 
             for (const c of this.bottomEndControls()) {
                 const control = new CustomControl(c.nativeElement);
-                this.mapComponent().mapInstance.addControl(control, "bottom-" + end as ControlPosition);
+                this.map.addControl(control, "bottom-" + end as ControlPosition);
                 this.addedControls.push(control);
             }
             for (const c of this.bottomStartControls()) {
                 const control = new CustomControl(c.nativeElement);
-                this.mapComponent().mapInstance.addControl(control, "bottom-" + start as ControlPosition);
+                this.map.addControl(control, "bottom-" + start as ControlPosition);
                 this.addedControls.push(control);
             }
         });
 
-        this.mapComponent().mapInstance.on("click", (e) => {
+        this.map.on("click", (e) => {
             // This is used for the personal heatmap, assuming there's a layer there called "record_lines".
             const bbox = [
                 [e.point.x - 5, e.point.y - 5],
                 [e.point.x + 5, e.point.y + 5]
             ] as [PointLike, PointLike];
-            const features = this.mapComponent().mapInstance.queryRenderedFeatures(bbox).filter(f => f.sourceLayer === "record_lines");
+            const features = this.map.queryRenderedFeatures(bbox).filter(f => f.sourceLayer === "record_lines");
             if (features.length <= 0) { return; }
             this.dialog.open(TracesDialogComponent, { width: "480px", data: features.map(f => f.properties.trace_id) });
         });

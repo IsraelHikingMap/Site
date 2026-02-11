@@ -1,7 +1,7 @@
 <div [dir]="resources.direction">
-    <div matDialogTitle>
+    <div mat-dialog-title>
         <div>{{resources.reportAnIssue}}</div>
-        <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+        <button mat-button type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-content>
         <p class="break-lines">
@@ -13,7 +13,9 @@
     </div>
     <div mat-dialog-actions>
         <div>
-            <a mat-raised-button [href]="mailToLink" color="primary" angulartics2On="click" angularticsCategory="Report an issue" angularticsAction="Mailto"><i class="fa icon-envelope"></i> {{resources.reportAnIssue}}</a>
+            <a mat-raised-button [href]="mailToLink" color="primary" angulartics2On="click"
+                angularticsCategory="Report an issue" angularticsAction="Mailto"><i class="fa icon-envelope"></i>
+                {{resources.reportAnIssue}}</a>
         </div>
     </div>
 </div>

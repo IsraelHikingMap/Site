@@ -8,6 +8,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
+import { ShareEditDialogComponent, ShareEditDialogComponentData } from "./dialogs/share-edit-dialog.component";
 import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { ResourcesService } from "../services/resources.service";
 import { SelectedRouteService } from "../services/selected-route.service";
@@ -25,8 +26,8 @@ import {
 } from "../reducers/routes.reducer";
 import { SetRoutingTypeAction, SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
-import type { RoutingType, ApplicationState, RouteData } from "../models";
-import { ShareDialogComponent, ShareDialogComponentData } from "./dialogs/share-dialog.component";
+import { ShareUrlsService } from "../services/share-urls.service";
+import type { RoutingType, ApplicationState, RouteData, ShareUrl } from "../models";
 
 @Component({
     selector: "drawing",
@@ -44,6 +45,7 @@ export class DrawingComponent {
     private readonly store = inject(Store);
     private readonly sidebarService = inject(SidebarService);
     private readonly dialog = inject(MatDialog);
+    private readonly shareUrlsService = inject(ShareUrlsService);
 
     constructor() {
         this.undoQueueLength$ = this.store.select((state: ApplicationState) => state.routes.past.length);
@@ -206,7 +208,13 @@ export class DrawingComponent {
         }
         const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         this.selectedRouteService.changeRouteEditState(selectedRoute.id, "ReadOnly");
-        this.dialog.open<ShareDialogComponent, ShareDialogComponentData>(ShareDialogComponent, { width: "480px", data: { mode: "current" } });
+        this.dialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, {
+            width: "480px",
+            data: {
+                mode: "current",
+                shareData: structuredClone(this.shareUrlsService.getSelectedShareUrl()) as ShareUrl
+            }
+        });
     }
 
     private checkTrackingAndIssueWarningIfNeeded() {

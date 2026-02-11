@@ -1,61 +1,75 @@
 <div class="flex flex-row map-height" [dir]="resources.direction">
-    <div class="max-md:hidden w-2/3">
-        <div class="w-full h-full">
-            <mgl-map [mapStyle]="mapStyle" [attributionControl]="false">
-                <auto-layer [layerData]="baseLayerData" [visible]="true" [isBaselayer]="true" [isMainMap]="false"
-                    [before]="resources.endOfBaseLayer">
-                </auto-layer>
-            </mgl-map>
-        </div>
-    </div>
     <div class="max-md:w-full w-1/3 overflow-y-auto">
         <div class="flex flex-row sticky top-0 z-10 bg-white">
             <mat-form-field subscriptSizing="dynamic">
                 <mat-label>{{resources.sort}}</mat-label>
-                <mat-select>
-                    <mat-option value="distance">{{resources.length}}</mat-option>
-                    <mat-option value="name">{{resources.name}}</mat-option>
-                    <mat-option value="date">{{resources.date}}</mat-option>
+                <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()">
+                    <mat-option value="lastModifiedDate">{{resources.date}}</mat-option>
+                    <mat-option value="difficulty">{{resources.difficulty}}</mat-option>
+                    <mat-option value="type">{{resources.routeType}}</mat-option>
+                    <mat-option value="length">{{resources.length}}</mat-option>
+                    <mat-option value="title">{{resources.name}}</mat-option>
                 </mat-select>
             </mat-form-field>
-            <button mat-button class="!h-[56px] ms-2">
+            <button mat-button class="!h-[56px] ms-2" (click)="onSortDirectionChange()">
+                <i class="fa icon-sort mx-2"></i>
+            </button>
+            <button mat-button class="!h-[56px] ms-2" [matMenuTriggerFor]="filterMenu">
                 <i class="fa icon-sliders mx-2"></i>
                 {{resources.filter}}
             </button>
+            <mat-menu #filterMenu="matMenu">
+                <div mat-menu-item>
+                    <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Hard')"
+                        [checked]="filter.difficulty.includes('Hard')">{{resources.hard}}</mat-checkbox>
+                </div>
+                <div mat-menu-item>
+                    <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Moderate')"
+                        [checked]="filter.difficulty.includes('Moderate')">{{resources.moderate}}</mat-checkbox>
+                </div>
+                <div mat-menu-item>
+                    <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Easy')"
+                        [checked]="filter.difficulty.includes('Easy')">{{resources.easy}}</mat-checkbox>
+                </div>
+                <div mat-menu-item>
+                    <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Unknown')"
+                        [checked]="filter.difficulty.includes('Unknown')">{{resources.unknown}}</mat-checkbox>
+                </div>
+            </mat-menu>
         </div>
-        @for (shareUrl of shareUrls$ | async; track shareUrl.id ) {
-        <div class="overflow-hidden mb-2">
-            <img [src]="getImageFromShareId(shareUrl, 256, 256)" alt=""
-                class="float-end w-1/3 h-auto object-cover block ps-2 rounded-2xl">
-            <h4 class="m-2">
-                <button mat-button>
-                    <i class="fa icon-ellipsis-v"></i>
-                </button>
-                {{shareUrl.title}}
-            </h4>
-            <div class="flex flex-row">
-                <div matTooltip="{{resources.gain}}" matTooltipPosition="above" class="mx-2">
-                    <i class="fa icon-arrow-up"></i>
-                    <span class="mx-1">{{173 | distance}}</span>
-                </div>
-                <div matTooltip="{{resources.loss}}" matTooltipPosition="above" class="mx-2">
-                    <i class="fa icon-arrow-down"></i>
-                    <span class="mx-1">{{-212 | distance}}</span>
-                </div>
-                <div matTooltip="{{resources.length}}" matTooltipPosition="above" class="mx-2">
-                    <i class="fa icon-arrow-right"></i>
-                    <span class="mx-1">{{12001 | distance}}</span>
-                </div>
-            </div>
-            <div class="mx-2">
-                {{resources.date}}: {{shareUrl.creationDate | date:'dd/MM/yyyy'}}
-            </div>
-            <br />
-            <div class="mx-2">
-                {{shareUrl.description}}
-            </div>
-
-        </div>
+        @for (shareUrl of filteredShareUrls; track shareUrl.id ) {
+        <share-item [shareUrl]="shareUrl" [showMenu]="true"></share-item>
         }
+    </div>
+    <div class="max-md:hidden w-2/3">
+        <div class="w-full h-full">
+            <mgl-map [mapStyle]="mapStyle" [attributionControl]="false" (mapLoad)="mapLoaded($event)">
+                <layers [isMainMap]="false"></layers>
+                <routes-path [routesGeoJson]="routesGeoJson"></routes-path>
+                @for (shareUrl of filteredShareUrls; track shareUrl.id ) {
+                <mgl-marker [lngLat]="shareUrl.dataContainer.routes[0].segments[0].latlngs[0]">
+                    <span class="fa-stack fa-lg cursor-pointer selected-marker-icon"
+                        (click)="onStartPointClick(shareUrl)">
+                        <i class="fa icon-map-marker-rect fa-stack-2x"
+                            style="color: white; text-shadow: 3px 3px 3px #000;"></i>
+                        <i class="fa {{getIconFromType(shareUrl)}} fa-stack-1x stack-icon-top stack-icon-large"></i>
+                    </span>
+                </mgl-marker>
+                }
+                @if (selectedShareUrl) {
+                <mgl-popup [lngLat]="selectedShareUrl.dataContainer.routes[0].segments[0].latlngs[0]"
+                    [closeOnClick]="false" [closeButton]="false" [offset]="[0, -15]">
+                    <div class="flex flex-row">
+                        {{selectedShareUrl.title}}
+                    </div>
+                    <div class="flex flex-row">
+                        <button mat-button class="flex-1 w-full">
+                            <i class="fa icon-trash"></i>
+                        </button>
+                    </div>
+                </mgl-popup>
+                }
+            </mgl-map>
+        </div>
     </div>
 </div>

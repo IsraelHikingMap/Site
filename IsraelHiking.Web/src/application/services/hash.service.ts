@@ -11,7 +11,7 @@ import { FitBoundsService } from "./fit-bounds.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { LayersService } from "./layers.service";
 import { SetFileUrlAndBaseLayerAction, SetShareUrlAction } from "../reducers/in-memory.reducer";
-import type { ApplicationState, LatLngAlt } from "../models";
+import type { ApplicationState, LatLngAltTime } from "../models";
 
 export type PoiRouteUrlInfo = {
     source: string;
@@ -20,7 +20,7 @@ export type PoiRouteUrlInfo = {
     editMode: boolean;
 };
 
-export const getIdFromLatLng = (latLng: LatLngAlt): string => latLng.lat.toFixed(6) + "_" + latLng.lng.toFixed(6);
+export const getIdFromLatLng = (latLng: LatLngAltTime): string => latLng.lat.toFixed(6) + "_" + latLng.lng.toFixed(6);
 
 export class RouteStrings {
     public static readonly MAP = "map";
@@ -166,7 +166,7 @@ export class HashService {
         return Urls.baseAddress + urlTree.toString();
     }
 
-    public getFullUrlFromLatLng(latlng: LatLngAlt) {
+    public getFullUrlFromLatLng(latlng: LatLngAltTime) {
         return this.getFullUrlFromPoiId({
             id: getIdFromLatLng(latlng),
             source: RouteStrings.COORDINATES,

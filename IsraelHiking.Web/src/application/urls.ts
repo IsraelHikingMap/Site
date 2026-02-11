@@ -21,6 +21,7 @@ export class Urls {
     public static readonly tracePicture = Urls.apiBase + "osm/trace/";
     public static readonly userLayers = Urls.apiBase + "userLayers/";
     public static readonly poi = Urls.apiBase + "points/";
+    public static readonly permissions = Urls.apiBase + "user/permissions";
     public static readonly poiClosest = Urls.poi + "closest/";
     public static readonly poiUpdates = Urls.poi + "updates/";
     public static readonly poiSimple = Urls.poi + "simple/";

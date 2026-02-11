@@ -25,7 +25,7 @@ import { Urls } from "../urls";
 import { LayersReducer } from "../reducers/layers.reducer";
 import { AddToPoiQueueAction, OfflineReducer } from "../reducers/offline.reducer";
 import { ConfigurationReducer, SetLanguageAction } from "../reducers/configuration.reducer";
-import type { ApplicationState, LatLngAlt } from "../models";
+import type { ApplicationState, LatLngAltTime } from "../models";
 
 describe("Poi Service", () => {
 
@@ -553,7 +553,7 @@ describe("Poi Service", () => {
                     canEditTitle: true,
                     originalFeature: null,
                     showLocationUpdate: false,
-                    location: { lat: 0, lng: 0 } as LatLngAlt
+                    location: { lat: 0, lng: 0 } as LatLngAltTime
                 });
 
                 expect(store.dispatch).toHaveBeenCalled();
@@ -590,7 +590,7 @@ describe("Poi Service", () => {
                     urls: ["some-new-url"],
                     canEditTitle: true,
                     showLocationUpdate: true,
-                    location: { lat: 1, lng: 2 } as LatLngAlt,
+                    location: { lat: 1, lng: 2 } as LatLngAltTime,
                     originalFeature: {
                         properties: {
                             poiSource: "OSM",
@@ -651,7 +651,7 @@ describe("Poi Service", () => {
                     urls: ["some-url"],
                     canEditTitle: true,
                     showLocationUpdate: false,
-                    location: { lat: 0, lng: 0 } as LatLngAlt,
+                    location: { lat: 0, lng: 0 } as LatLngAltTime,
                     originalFeature: {
                         properties: {
                             poiSource: "OSM",
@@ -712,7 +712,7 @@ describe("Poi Service", () => {
                     urls: ["some-url"],
                     canEditTitle: true,
                     showLocationUpdate: false,
-                    location: { lat: 0, lng: 0 } as LatLngAlt,
+                    location: { lat: 0, lng: 0 } as LatLngAltTime,
                     originalFeature: {
                         properties: {
                             poiSource: "OSM",

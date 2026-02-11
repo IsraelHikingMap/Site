@@ -28,7 +28,7 @@ import { SetSelectedPoiAction, SetUploadMarkerDataAction } from "../reducers/poi
 import { Urls } from "../urls";
 import type {
     MarkerData,
-    LatLngAlt,
+    LatLngAltTime,
     ApplicationState,
     Category,
     IconColorLabel,
@@ -467,7 +467,7 @@ export class PoiService {
         return feature;
     }
 
-    public getLatLngFromId(id: string): LatLngAlt {
+    public getLatLngFromId(id: string): LatLngAltTime {
         const split = id.split("_");
         return { lat: +split[0], lng: +split[1] };
     }
@@ -540,7 +540,7 @@ export class PoiService {
         } as NorthEast;
     }
 
-    public async getClosestPoint(location: LatLngAlt, language: string): Promise<{ type: string, id: string, title: string } | null> {
+    public async getClosestPoint(location: LatLngAltTime, language: string): Promise<{ type: string, id: string, title: string } | null> {
         try {
             const features = await this.overpassTurboService.getPointsInArea(location);
             let closestFeature: GeoJSON.Feature<GeoJSON.Point, PoiProperties> | null = null;
@@ -572,7 +572,7 @@ export class PoiService {
         return null;
     }
 
-    public addSimplePoint(latlng: LatLngAlt, pointType: SimplePointType, id: string): Promise<any> {
+    public addSimplePoint(latlng: LatLngAltTime, pointType: SimplePointType, id: string): Promise<any> {
         const feature = {
             id,
             type: "Feature",

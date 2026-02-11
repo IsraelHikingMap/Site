@@ -22,7 +22,7 @@ export class ApplicationExitService {
     private readonly sidebarService = inject(SidebarService);
     private readonly ngZone = inject(NgZone);
     private readonly databaseService = inject(DatabaseService);
-    private readonly runningContext = inject(RunningContextService);
+    private readonly runningContextService = inject(RunningContextService);
     private readonly recordingRouteService = inject(RecordedRouteService);
     private readonly locationService = inject(LocationService);
     private readonly imageGalleryService = inject(ImageGalleryService);
@@ -30,7 +30,7 @@ export class ApplicationExitService {
     private readonly toastService = inject(ToastService);
 
     public initialize() {
-        if (!this.runningContext.isCapacitor) {
+        if (!this.runningContextService.isCapacitor) {
             return;
         }
         App.addListener("backButton", async () => {

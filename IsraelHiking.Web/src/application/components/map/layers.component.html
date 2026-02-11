@@ -1,8 +1,8 @@
 ﻿<auto-layer [layerData]="getBaseLayer()" [visible]="true" [before]="resources.endOfBaseLayer" [isBaselayer]="true"
-  [isMainMap]="true">
+  [isMainMap]="isMainMap()">
 </auto-layer>
 @for (overlay of getAllOverlays(); track overlay.key) {
 <auto-layer [layerData]="overlay" [visible]="isOverlayVisible(overlay)" [before]="resources.endOfOverlays"
-  [isBaselayer]="false" [isMainMap]="true">
+  [isBaselayer]="false" [isMainMap]="isMainMap()">
 </auto-layer>
 }

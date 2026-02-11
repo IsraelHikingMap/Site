@@ -6,7 +6,7 @@ import QuickLRU from "quick-lru";
 import { LoggingService } from "./logging.service";
 import { SpatialService } from "./spatial.service";
 import { PmTilesService } from "./pmtiles.service";
-import type { LatLngAlt } from "../models";
+import type { LatLngAltTime } from "../models";
 
 @Injectable()
 export class ElevationProvider {
@@ -23,9 +23,9 @@ export class ElevationProvider {
     private readonly loggingService = inject(LoggingService);
     private readonly pmTilesService = inject(PmTilesService);
 
-    public async updateHeights(latlngs: LatLngAlt[]): Promise<void> {
-        const relevantIndexes = [] as number[];
-        const missingElevation = [] as LatLngAlt[]
+    public async updateHeights(latlngs: LatLngAltTime[]): Promise<void> {
+        const relevantIndexes: number[] = [];
+        const missingElevation: LatLngAltTime[] = []
         for (let i = 0; i < latlngs.length; i++) {
             const latlng = latlngs[i];
             if (latlng.alt) {
@@ -49,7 +49,7 @@ export class ElevationProvider {
         }
     }
 
-    private async populateElevationCache(latlngs: LatLngAlt[]) {
+    private async populateElevationCache(latlngs: LatLngAltTime[]) {
         const tiles = latlngs.map(latlng => SpatialService.toTile(latlng, ElevationProvider.MAX_ELEVATION_ZOOM));
         const tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));
         const tileXmin = Math.min(...tiles.map(tile => Math.floor(tile.x)));
@@ -62,16 +62,16 @@ export class ElevationProvider {
                     continue;
                 }
                 const useOffline = await this.pmTilesService.isOfflineFileAvailable(ElevationProvider.MAX_ELEVATION_ZOOM, tileX, tileY, ElevationProvider.ELEVATION_SCHEMA)
-                const arrayBuffer = useOffline 
+                const arrayBuffer = useOffline
                     ? await this.pmTilesService.getTileByType(ElevationProvider.MAX_ELEVATION_ZOOM, tileX, tileY, ElevationProvider.ELEVATION_SCHEMA)
-                    : await firstValueFrom(this.httpClient.get(`https://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/${ElevationProvider.MAX_ELEVATION_ZOOM}/${tileX}/${tileY}.png`, { responseType: "arraybuffer"}));
+                    : await firstValueFrom(this.httpClient.get(`https://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/${ElevationProvider.MAX_ELEVATION_ZOOM}/${tileX}/${tileY}.png`, { responseType: "arraybuffer" }));
                 const data = await this.getImageData(arrayBuffer);
                 this.elevationCache.set(key, data);
+            }
         }
-      }
     }
 
-    private getElevationForLatlng(latlng: LatLngAlt): number {
+    private getElevationForLatlng(latlng: LatLngAltTime): number {
         const tileSize = 512;
         const zoom = ElevationProvider.MAX_ELEVATION_ZOOM;
         const tile = SpatialService.toTile(latlng, zoom);
@@ -113,7 +113,7 @@ export class ElevationProvider {
 
     private async getImageData(data: ArrayBuffer): Promise<Uint8ClampedArray> {
         const imageBitmapSupported = typeof createImageBitmap === "function";
-        const blob: Blob = new Blob([new Uint8Array(data)], {type: "image/png"});
+        const blob: Blob = new Blob([new Uint8Array(data)], { type: "image/png" });
         const img = imageBitmapSupported
             ? await createImageBitmap(blob)
             : await this.arrayBufferToImage(blob);
