@@ -292,7 +292,7 @@ describe("Poi Service", () => {
         expect(data.id).toBe(id);
     }));
 
-    it("Should return null when trying to create data for non OSM points", inject([PoiService, Store], async (poiService: PoiService, store: Store) => {
+    it("Should return null when trying to create data for non OSM points", inject([PoiService], async (poiService: PoiService) => {
         const data = await poiService.createEditableDataAndMerge({
             type: "Feature",
             geometry: {
