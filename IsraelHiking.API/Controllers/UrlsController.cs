@@ -79,10 +79,6 @@ public class UrlsController : ControllerBase
         {
             return BadRequest();
         }
-        shareUrl.LastViewed = DateTime.Now;
-        shareUrl.ViewsCount++;
-        shareUrl.FixModifiedDate();
-        await _repository.Update(shareUrl);
         if (string.IsNullOrWhiteSpace(format))
         {
             return Ok(shareUrl);
