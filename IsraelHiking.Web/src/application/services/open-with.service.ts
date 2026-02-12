@@ -35,6 +35,7 @@ export class OpenWithService {
                 return;
             }
             if (data.url.startsWith("geo")) {
+                this.loggingService.info(`[OpenWith] Opening a geo url: ${data.url}`);
                 const coordsRegExp = /:(-?\d+\.\d+),(-?\d+\.\d+)/;
                 const coords = coordsRegExp.exec(data.url);
                 this.moveToCoordinates(coords);
@@ -82,7 +83,7 @@ export class OpenWithService {
             });
         } else if (pathname.startsWith(RouteStrings.ROUTE_LAYER)) {
             this.ngZone.run(() => {
-                this.router.navigate([RouteStrings.ROUTE_LAYER], { queryParams: Object.fromEntries(url.searchParams.entries())});
+                this.router.navigate([RouteStrings.ROUTE_LAYER], { queryParams: Object.fromEntries(url.searchParams.entries()) });
             });
         } else {
             this.ngZone.run(() => {
@@ -105,7 +106,7 @@ export class OpenWithService {
 
     private handleHttpUrl(href: string) {
         const url = new URL(href);
-        if (url.host.toLocaleLowerCase() === "www.mapeak.com" || 
+        if (url.host.toLocaleLowerCase() === "www.mapeak.com" ||
             url.host.toLocaleLowerCase() === "mapeak.com" ||
             url.host.toLocaleLowerCase() === "israelhiking.osm.org.il") {
             this.handleMapeakUrl(url);
