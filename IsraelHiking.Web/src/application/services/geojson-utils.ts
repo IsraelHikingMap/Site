@@ -107,6 +107,12 @@ export class GeoJSONUtils {
         if (url.includes("jeepolog.com")) {
             return true;
         }
+        if (url.includes("israelhiking.osm.org.il")) {
+            return true;
+        }
+        if (url.includes("mapeak.com")) {
+            return true;
+        }
         return false;
     }
 

@@ -68,7 +68,6 @@ export class SharesComponent {
     }
 
     public onFilterChange(key: string, value: string) {
-        console.log(key, value);
         if (this.filter[key].includes(value)) {
             this.filter[key] = this.filter[key].filter((x) => x !== value);
         } else {

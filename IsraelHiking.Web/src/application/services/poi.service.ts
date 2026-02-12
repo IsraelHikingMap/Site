@@ -15,7 +15,6 @@ import { WhatsAppService } from "./whatsapp.service";
 import { DatabaseService } from "./database.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
-import { GeoJsonParser } from "./geojson.parser";
 import { MapService } from "./map.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
 import { GeoJSONUtils } from "./geojson-utils";
@@ -23,6 +22,7 @@ import { INatureService } from "./inature.service";
 import { WikidataService } from "./wikidata.service";
 import { ImageAttributionService } from "./image-attribution.service";
 import { LatLon, OsmTagsService, PoiProperties } from "./osm-tags.service";
+import { ShareUrlsService } from "./share-urls.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction } from "../reducers/offline.reducer";
 import { SetSelectedPoiAction, SetUploadMarkerDataAction } from "../reducers/poi.reducer";
 import { Urls } from "../urls";
@@ -35,7 +35,8 @@ import type {
     NorthEast,
     EditablePublicPointData,
     OfflineState,
-    UpdateablePublicPoiData
+    UpdateablePublicPoiData,
+    ShareUrl
 } from "../models";
 
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite" | "Bench"
@@ -75,13 +76,13 @@ export class PoiService {
     private readonly whatsappService = inject(WhatsAppService);
     private readonly hashService = inject(HashService);
     private readonly databaseService = inject(DatabaseService);
-    private readonly geoJsonParser = inject(GeoJsonParser);
     private readonly loggingService = inject(LoggingService);
     private readonly mapService = inject(MapService);
     private readonly iNatureService = inject(INatureService);
     private readonly wikidataService = inject(WikidataService);
     private readonly overpassTurboService = inject(OverpassTurboService);
     private readonly imageAttributinoService = inject(ImageAttributionService);
+    private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly store = inject(Store);
 
     constructor() {
@@ -408,6 +409,14 @@ export class PoiService {
                     this.store.dispatch(new SetSelectedPoiAction(clone));
                     return clone;
                 }
+                case "Users": {
+                    const shareUrl = await this.shareUrlsService.getShareUrl(id);
+                    const poi = this.convertShareUrlOrPoi(shareUrl);
+                    this.poisCache.splice(0, 0, poi);
+                    const clone = cloneDeep(poi);
+                    this.store.dispatch(new SetSelectedPoiAction(clone));
+                    return clone;
+                }
                 default: {
                     const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
                     const poi = await firstValueFrom(this.httpClient.get<GeoJSON.Feature>(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000)));
@@ -426,6 +435,43 @@ export class PoiService {
             }
             return this.convertFeatureToPoi(feature, id);
         }
+    }
+
+    private convertShareUrlOrPoi(shareUrl: ShareUrl) {
+        let geometry: GeoJSON.LineString | GeoJSON.MultiLineString;
+        const geoLocation = shareUrl.start ? { lat: shareUrl.start.lat, lon: shareUrl.start.lng } : { lat: shareUrl.dataContainer.routes[0].segments[0].latlngs[0].lat, lon: shareUrl.dataContainer.routes[0].segments[0].latlngs[0].lng };
+        if (shareUrl.dataContainer.routes.length > 1) {
+            geometry = {
+                type: "MultiLineString",
+                coordinates: shareUrl.dataContainer.routes.map(r => r.segments.map(s => s.latlngs).flat().map(l => [l.lng, l.lat]))
+            };
+        } else {
+            geometry = {
+                type: "LineString",
+                coordinates: shareUrl.dataContainer.routes[0].segments.map(s => s.latlngs).flat().map(l => [l.lng, l.lat])
+            };
+        }
+        const poi: GeoJSON.Feature = {
+            type: "Feature" as const,
+            geometry,
+            properties: {
+                poiCategory: shareUrl.type,
+                poiSource: "Users",
+                poiIcon: shareUrl.type === "Hiking" ? "icon-hike" : shareUrl.type === "Biking" ? "icon-bike" : shareUrl.type === "4x4" ? "icon-four-by-four" : "icon-question",
+                poiIconColor: "black",
+                poiDifficulty: shareUrl.difficulty,
+                poiGeolocation: geoLocation,
+                poiId: "Users_" + shareUrl.id,
+                identifier: shareUrl.id,
+                name: shareUrl.title,
+                description: shareUrl.description,
+                image: this.shareUrlsService.getImageUrlFromShareId(shareUrl.id)
+            }
+        }
+        if (shareUrl.website) {
+            poi.properties.website = shareUrl.website;
+        }
+        return poi;
     }
 
     public async updateExtendedInfo(feature: GeoJSON.Feature, language?: string): Promise<GeoJSON.Feature> {
@@ -691,6 +737,9 @@ export class PoiService {
     }
 
     public async createEditableDataAndMerge(feature: GeoJSON.Feature): Promise<EditablePublicPointData> {
+        if (feature.properties.poiSource !== "OSM") {
+            return null;
+        }
         const originalFeature = structuredClone(feature);
         const markerData = this.store.selectSnapshot((s: ApplicationState) => s.poiState).uploadMarkerData;
         if (markerData != null) {

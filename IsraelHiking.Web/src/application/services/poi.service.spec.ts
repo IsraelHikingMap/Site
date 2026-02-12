@@ -19,6 +19,7 @@ import { OverpassTurboService } from "./overpass-turbo.service";
 import { INatureService } from "./inature.service";
 import { WikidataService } from "./wikidata.service";
 import { ImageAttributionService } from "./image-attribution.service";
+import { ShareUrlsService } from "./share-urls.service";
 import { GeoJSONUtils } from "./geojson-utils";
 import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
@@ -78,6 +79,11 @@ describe("Poi Service", () => {
                 { provide: DatabaseService, useValue: databaseServiceMock },
                 { provide: MapService, useValue: mapServiceMock },
                 { provide: LoggingService, useValue: loggingService },
+                {
+                    provide: ShareUrlsService, useValue: {
+                        getImageUrlFromShareId: () => Promise.resolve("image-url")
+                    }
+                },
                 {
                     provide: OverpassTurboService, useValue: {
                         getLongWay: () => Promise.resolve(null),
@@ -286,6 +292,18 @@ describe("Poi Service", () => {
         expect(data.id).toBe(id);
     }));
 
+    it("Should return null when trying to create data for non OSM points", inject([PoiService, Store], async (poiService: PoiService, store: Store) => {
+        const data = await poiService.createEditableDataAndMerge({
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates: [1, 2]
+            },
+            properties: {}
+        });
+        expect(data).toBeNull();
+    }));
+
     it("Should create data for updating a point from private marker by merging it, for an existing point", inject([PoiService, Store], async (poiService: PoiService, store: Store) => {
         const markerData = {
             description: "description",
@@ -308,7 +326,8 @@ describe("Poi Service", () => {
                 coordinates: [3, 4]
             },
             properties: {
-                poiId: "poi-42"
+                poiId: "poi-42",
+                poiSource: "OSM"
             }
         }
 
@@ -361,6 +380,67 @@ describe("Poi Service", () => {
             const feature = await poiService.getBasicInfo(id, source);
             expect(feature).not.toBeNull();
             expect(store.dispatch).toHaveBeenCalled();
+        }
+    )));
+
+    it("Should get a line by id and source from Users share", (inject([PoiService, Store, ShareUrlsService],
+        async (poiService: PoiService, store: Store, shareUrlsService: ShareUrlsService) => {
+            store.dispatch = jasmine.createSpy();
+            const id = "42";
+            const source = "Users";
+
+            shareUrlsService.getShareUrl = () => Promise.resolve({
+                title: "title",
+                description: "description",
+                type: "Hiking",
+                start: {
+                    lat: 1,
+                    lng: 2
+                },
+                dataContainer: {
+                    routes: [{
+                        segments: [],
+                        markers: []
+                    }]
+                }
+            });
+
+            const feature = await poiService.getBasicInfo(id, source);
+            expect(feature).not.toBeNull();
+            expect(store.dispatch).toHaveBeenCalled();
+            expect(feature.geometry.type).toBe("LineString");
+        }
+    )));
+
+    it("Should get a multi line by id and source from Users share when there are more than one route", (inject([PoiService, Store, ShareUrlsService],
+        async (poiService: PoiService, store: Store, shareUrlsService: ShareUrlsService) => {
+            store.dispatch = jasmine.createSpy();
+            const id = "42";
+            const source = "Users";
+
+            shareUrlsService.getShareUrl = () => Promise.resolve({
+                title: "title",
+                description: "description",
+                type: "Hiking",
+                start: {
+                    lat: 1,
+                    lng: 2
+                },
+                dataContainer: {
+                    routes: [{
+                        segments: [],
+                        markers: []
+                    }, {
+                        segments: [],
+                        markers: []
+                    }]
+                }
+            });
+
+            const feature = await poiService.getBasicInfo(id, source);
+            expect(feature).not.toBeNull();
+            expect(store.dispatch).toHaveBeenCalled();
+            expect(feature.geometry.type).toBe("MultiLineString");
         }
     )));
 
