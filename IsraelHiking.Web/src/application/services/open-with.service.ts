@@ -26,14 +26,19 @@ export class OpenWithService {
         if (!this.runningContextService.isCapacitor) {
             return;
         }
-        App.addListener("appUrlOpen", (data) => {
+        App.addListener("appUrlOpen", async (data) => {
             if (!data || !data.url) {
                 return;
             }
+
             if (data.url.startsWith("mapeak://")) {
                 // no need to do anything as this is part of the login flow
                 return;
             }
+
+            // this is to prevent a race condition between the app start and the url redirect.
+            await new Promise<void>((resolve => setTimeout(() => { resolve() }, 500)));
+
             if (data.url.startsWith("geo")) {
                 this.loggingService.info(`[OpenWith] Opening a geo url: ${data.url}`);
                 const coordsRegExp = /:(-?\d+\.\d+),(-?\d+\.\d+)/;
