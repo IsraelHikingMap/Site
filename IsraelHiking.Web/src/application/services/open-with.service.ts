@@ -35,7 +35,7 @@ export class OpenWithService {
                 return;
             }
             if (data.url.startsWith("geo")) {
-                this.loggingService.info("[OpenWith] Opening a geo url: " + data.url);
+                this.loggingService.info(`[OpenWith] Opening a geo url: ${data.url}`);
                 const coordsRegExp = /:(-?\d+\.\d+),(-?\d+\.\d+)/;
                 const coords = coordsRegExp.exec(data.url);
                 this.moveToCoordinates(coords);
