@@ -2,7 +2,7 @@ import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
-import { SocialLogin } from "@capgo/capacitor-social-login";
+import { InAppBrowser } from "@capgo/inappbrowser";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
@@ -46,7 +46,7 @@ export class AuthorizationService {
             response_type: "code",
             scope: "read_prefs write_api read_gpx write_gpx"
         });
-        const result = await SocialLogin.openSecureWindow({
+        const result = await InAppBrowser.openSecureWindow({
             authEndpoint: Urls.osmAuth + "/authorize?" + params.toString(),
             redirectUri: this.redirectUrl,
             broadcastChannelName: "osm-oauth2"

@@ -22,7 +22,7 @@ dependencies {
     implementation project(':capawesome-capacitor-app-update')
     implementation project(':capgo-background-geolocation')
     implementation project(':capgo-capacitor-compass')
-    implementation project(':capgo-capacitor-social-login')
+    implementation project(':capgo-inappbrowser')
     implementation project(':revenuecat-purchases-capacitor')
     implementation project(':capacitor-email-composer')
 

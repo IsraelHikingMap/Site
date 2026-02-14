@@ -27,7 +27,7 @@ PODS:
     - Capacitor
   - CapgoCapacitorCompass (8.1.4):
     - Capacitor
-  - CapgoCapacitorSocialLogin (8.2.23):
+  - CapgoInappbrowser (8.1.15):
     - Capacitor
   - IONFilesystemLib (1.1.0)
   - PurchasesHybridCommon (17.28.1):
@@ -52,7 +52,7 @@ DEPENDENCIES:
   - "CapawesomeCapacitorAppUpdate (from `../../node_modules/@capawesome/capacitor-app-update`)"
   - "CapgoBackgroundGeolocation (from `../../node_modules/@capgo/background-geolocation`)"
   - "CapgoCapacitorCompass (from `../../node_modules/@capgo/capacitor-compass`)"
-  - "CapgoCapacitorSocialLogin (from `../../node_modules/@capgo/capacitor-social-login`)"
+  - "CapgoInappbrowser (from `../../node_modules/@capgo/inappbrowser`)"
   - "RevenuecatPurchasesCapacitor (from `../../node_modules/@revenuecat/purchases-capacitor`)"
 
 SPEC REPOS:
@@ -90,8 +90,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capgo/background-geolocation"
   CapgoCapacitorCompass:
     :path: "../../node_modules/@capgo/capacitor-compass"
-  CapgoCapacitorSocialLogin:
-    :path: "../../node_modules/@capgo/capacitor-social-login"
+  CapgoInappbrowser:
+    :path: "../../node_modules/@capgo/inappbrowser"
   RevenuecatPurchasesCapacitor:
     :path: "../../node_modules/@revenuecat/purchases-capacitor"
 
@@ -110,12 +110,12 @@ SPEC CHECKSUMS:
   CapawesomeCapacitorAppUpdate: 02d66677e9ae97d851a358207f7e7df40b22aa72
   CapgoBackgroundGeolocation: ee305c8cda9f054f2190117be4aadddbe4c4c40a
   CapgoCapacitorCompass: c901b8aaf7fd692f998820dd7d0da7eb45dbea12
-  CapgoCapacitorSocialLogin: eb623a8d9d8b67763baa978b13395275af534f38
+  CapgoInappbrowser: 18f8aaa785c1dd8d5d55710e750f5363dc6e7c4c
   IONFilesystemLib: 50b9a0f3052a9b40b9bedb43f328a8fe222f9f87
   PurchasesHybridCommon: 57e9e2fd474a726c41f61d5359f1bc05d89d9be8
   RevenueCat: b5605778017c179315e60b8921ed158b3428688c
   RevenuecatPurchasesCapacitor: 175dd55bdd04b2f6ac477a105a1de8822b4c5fd4
 
-PODFILE CHECKSUM: 578ce7c0ebe8255234a16e8b326e627b8f4039fb
+PODFILE CHECKSUM: c3ee17bca888dab4022b691eac1bd2d7cffc0509
 
 COCOAPODS: 1.16.2

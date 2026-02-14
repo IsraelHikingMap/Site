@@ -52,8 +52,8 @@
 		"classpath": "app.capgo.capacitor.compass.CapgoCompassPlugin"
 	},
 	{
-		"pkg": "@capgo/capacitor-social-login",
-		"classpath": "ee.forgr.capacitor.social.login.SocialLoginPlugin"
+		"pkg": "@capgo/inappbrowser",
+		"classpath": "ee.forgr.capacitor_inappbrowser.InAppBrowserPlugin"
 	},
 	{
 		"pkg": "@revenuecat/purchases-capacitor",

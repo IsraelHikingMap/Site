@@ -22,7 +22,7 @@ def capacitor_pods
   pod 'CapawesomeCapacitorAppUpdate', :path => '../../node_modules/@capawesome/capacitor-app-update'
   pod 'CapgoBackgroundGeolocation', :path => '../../node_modules/@capgo/background-geolocation'
   pod 'CapgoCapacitorCompass', :path => '../../node_modules/@capgo/capacitor-compass'
-  pod 'CapgoCapacitorSocialLogin', :path => '../../node_modules/@capgo/capacitor-social-login'
+  pod 'CapgoInappbrowser', :path => '../../node_modules/@capgo/inappbrowser'
   pod 'RevenuecatPurchasesCapacitor', :path => '../../node_modules/@revenuecat/purchases-capacitor'
   pod 'CapacitorEmailComposer', :path => '../../node_modules/capacitor-email-composer'
 end

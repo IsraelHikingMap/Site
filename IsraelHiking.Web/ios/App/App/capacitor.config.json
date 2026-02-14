@@ -6,15 +6,6 @@
 		"errorPath": "/"
 	},
 	"plugins": {
-		"SocialLogin": {
-			"providers": {
-				"google": false,
-				"facebook": false,
-				"apple": false,
-				"twitter": false,
-				"oauth2": false
-			}
-		},
 		"SystemBars": {
 			"insetsHandling": "disable"
 		}
@@ -35,7 +26,7 @@
 		"AppUpdatePlugin",
 		"BackgroundGeolocation",
 		"CapgoCompassPlugin",
-		"SocialLoginPlugin",
+		"InAppBrowserPlugin",
 		"PurchasesPlugin",
 		"EmailComposerPlugin"
 	]

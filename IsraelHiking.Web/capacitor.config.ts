@@ -8,15 +8,6 @@ const config: CapacitorConfig = {
     errorPath: "/"
   },
   plugins: {
-    SocialLogin: {
-      providers: {
-        google: false,
-        facebook: false,
-        apple: false,
-        twitter: false,
-        oauth2: false
-      }
-    },
     SystemBars: {
       insetsHandling: "disable"
     }
