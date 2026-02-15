@@ -36,9 +36,6 @@ export class OpenWithService {
                 return;
             }
 
-            // this is to prevent a race condition between the app start and the url redirect.
-            await new Promise<void>((resolve => setTimeout(() => { resolve() }, 500)));
-
             if (data.url.startsWith("geo")) {
                 this.loggingService.info(`[OpenWith] Opening a geo url: ${data.url}`);
                 const coordsRegExp = /:(-?\d+\.\d+),(-?\d+\.\d+)/;
@@ -142,7 +139,9 @@ export class OpenWithService {
 
     private moveToCoordinates(coords: string[]) {
         const latLng = SpatialService.toLatLng([+coords[2], +coords[1]]);
-        this.router.navigate([RouteStrings.ROUTE_POI, RouteStrings.COORDINATES, getIdFromLatLng(latLng)],
-            { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+        this.ngZone.run(() => {
+            this.router.navigate([RouteStrings.ROUTE_POI, RouteStrings.COORDINATES, getIdFromLatLng(latLng)],
+                { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+        });
     }
 }
