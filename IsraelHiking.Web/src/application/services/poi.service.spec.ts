@@ -393,6 +393,7 @@ describe("Poi Service", () => {
                 title: "title",
                 description: "description",
                 type: "Hiking",
+                website: "website",
                 start: {
                     lat: 1,
                     lng: 2
@@ -409,6 +410,7 @@ describe("Poi Service", () => {
             expect(feature).not.toBeNull();
             expect(store.dispatch).toHaveBeenCalled();
             expect(feature.geometry.type).toBe("LineString");
+            expect(feature.properties.website).toBeDefined();
         }
     )));
 
