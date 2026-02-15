@@ -411,7 +411,7 @@ export class PoiService {
                 }
                 case "Users": {
                     const shareUrl = await this.shareUrlsService.getShareUrl(id);
-                    const poi = this.convertShareUrlOrPoi(shareUrl);
+                    const poi = this.convertShareUrlToPoi(shareUrl);
                     this.poisCache.splice(0, 0, poi);
                     const clone = cloneDeep(poi);
                     this.store.dispatch(new SetSelectedPoiAction(clone));
@@ -437,7 +437,7 @@ export class PoiService {
         }
     }
 
-    private convertShareUrlOrPoi(shareUrl: ShareUrl) {
+    private convertShareUrlToPoi(shareUrl: ShareUrl): GeoJSON.Feature {
         let geometry: GeoJSON.LineString | GeoJSON.MultiLineString;
         const geoLocation = shareUrl.start ? { lat: shareUrl.start.lat, lon: shareUrl.start.lng } : { lat: shareUrl.dataContainer.routes[0].segments[0].latlngs[0].lat, lon: shareUrl.dataContainer.routes[0].segments[0].latlngs[0].lng };
         if (shareUrl.dataContainer.routes.length > 1) {
