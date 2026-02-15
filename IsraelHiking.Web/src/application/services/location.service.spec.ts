@@ -38,9 +38,6 @@ describe("LocationService", () => {
             },
             initializationPromise: Promise.resolve()
         };
-        const toastService = {
-            warning: jasmine.createSpy()
-        }
         TestBed.configureTestingModule({
             imports: [NgxsModule.forRoot([InMemoryReducer, GpsReducer])],
             providers: [
