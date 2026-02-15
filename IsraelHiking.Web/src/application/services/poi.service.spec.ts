@@ -400,7 +400,7 @@ describe("Poi Service", () => {
                 },
                 dataContainer: {
                     routes: [{
-                        segments: [],
+                        segments: [{ latlngs: [{ lat: 1, lng: 2 }, { lat: 3, lng: 4 }] }],
                         markers: []
                     }]
                 }
@@ -430,10 +430,10 @@ describe("Poi Service", () => {
                 },
                 dataContainer: {
                     routes: [{
-                        segments: [],
+                        segments: [{ latlngs: [{ lat: 1, lng: 2 }, { lat: 3, lng: 4 }] }],
                         markers: []
                     }, {
-                        segments: [],
+                        segments: [{ latlngs: [{ lat: 5, lng: 6 }, { lat: 7, lng: 8 }] }],
                         markers: []
                     }]
                 }
