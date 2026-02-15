@@ -234,4 +234,20 @@ describe("Share Urls Service", () => {
 
         expect(imageUrl).toContain("42");
     }));
+
+    it("Should get hike icon from hiking type", inject([ShareUrlsService], (shareUrlsService: ShareUrlsService) => {
+        expect(shareUrlsService.getIconFromType("Hiking")).toBe("icon-hike");
+    }));
+
+    it("Should get bike icon from hiking type", inject([ShareUrlsService], (shareUrlsService: ShareUrlsService) => {
+        expect(shareUrlsService.getIconFromType("Biking")).toBe("icon-bike");
+    }));
+
+    it("Should get 4x4 icon from hiking type", inject([ShareUrlsService], (shareUrlsService: ShareUrlsService) => {
+        expect(shareUrlsService.getIconFromType("4x4")).toBe("icon-four-by-four");
+    }));
+
+    it("Should get unknown icon from unknown type", inject([ShareUrlsService], (shareUrlsService: ShareUrlsService) => {
+        expect(shareUrlsService.getIconFromType("Unknown")).toBe("icon-question");
+    }));
 });
