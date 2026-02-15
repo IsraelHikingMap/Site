@@ -8,8 +8,6 @@ import { DeviceOrientationService } from "./device-orientation.service";
 import { FitBoundsService } from "./fit-bounds.service";
 import { MapService } from "./map.service";
 import { LoggingService } from "./logging.service";
-import { ToastService } from "./toast.service";
-import { ResourcesService } from "./resources.service";
 import { SelectedRouteService } from "./selected-route.service";
 import { GpsReducer, SetCurrentPositionAction } from "../reducers/gps.reducer";
 import { InMemoryReducer, SetPannedAction } from "../reducers/in-memory.reducer";
@@ -51,8 +49,6 @@ describe("LocationService", () => {
                 { provide: FitBoundsService, useValue: fitBoundsService },
                 { provide: MapService, useValue: mapService },
                 { provide: LoggingService, useValue: { warning: () => { } } },
-                { provide: ToastService, useValue: toastService },
-                { provide: ResourcesService, useValue: {} },
                 {
                     provide: SelectedRouteService, useValue: {
                         getSelectedRoute: jasmine.createSpy().and.returnValue({ state: "Poi" }),
@@ -275,8 +271,8 @@ describe("LocationService", () => {
         }
     ));
 
-    it("Should not be following when editing route", inject([LocationService, Store, SelectedRouteService],
-        async (service: LocationService, store: Store, selectedRouteService: SelectedRouteService) => {
+    it("Should not move to gps position when editing route", inject([LocationService, Store, SelectedRouteService, FitBoundsService, DeviceOrientationService],
+        async (service: LocationService, store: Store, selectedRouteService: SelectedRouteService, fitBoundsService: FitBoundsService, deviceOrientationService: DeviceOrientationService) => {
             store.reset({
                 gpsState: {
                     currentPosition: null,
@@ -286,7 +282,12 @@ describe("LocationService", () => {
             });
             await service.initialize();
             selectedRouteService.isEditingRoute = () => true;
-            expect(service.isFollowing()).toBeFalsy();
+            fitBoundsService.moveTo = jasmine.createSpy();
+
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 4 } } as any));
+            deviceOrientationService.orientationChanged.emit(1);
+
+            expect(fitBoundsService.moveTo).not.toHaveBeenCalled();
         }
     ));
 });
