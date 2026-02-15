@@ -18,17 +18,14 @@ export class Urls {
     public static readonly uploadDataContainer = Urls.apiBase + "osm/trace/route/";
     public static readonly traceAsDataContainer = Urls.apiBase + "osm/trace/";
     public static readonly tracePicture = Urls.apiBase + "osm/trace/";
-    public static readonly userLayers = Urls.apiBase + "userLayers/";
     public static readonly poi = Urls.apiBase + "points/";
     public static readonly poiClosest = Urls.poi + "closest/";
     public static readonly poiUpdates = Urls.poi + "updates/";
     public static readonly poiSimple = Urls.poi + "simple/";
 
-    // HM TODO: revert this before merge
-    public static readonly userApiBase = "https://israelhiking.osm.org.il/user-api";
-    //public static readonly userApiBase = Urls.baseAddress + "/user-api"; //environment.baseApiAddress;
-    public static readonly urls = Urls.userApiBase + "/urls/";
-    public static readonly permissions = Urls.userApiBase + "/user/permissions";
+    public static readonly urls = Urls.apiBase + "urls/";
+    public static readonly userLayers = Urls.apiBase + "userLayers/";
+    public static readonly permissions = Urls.apiBase + "user/permissions";
 
     public static readonly osmApi = "https://api.openstreetmap.org/api/0.6/";
     public static readonly osmUser = Urls.osmApi + "user/details.json";
