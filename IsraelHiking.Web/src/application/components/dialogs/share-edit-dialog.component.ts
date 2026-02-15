@@ -104,6 +104,10 @@ export class ShareEditDialogComponent {
                 dataContainer: this.data.dataContainer
             };
         }
+        if (this.canUpdate && this.data.dataContainer == null) {
+            // In case of editing the a route from the routes menu - the defualt should be to update.
+            this.updateCurrentShare = true;
+        }
         const geojson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = { type: "FeatureCollection", features: [] };
         for (const route of this.shareUrl.dataContainer.routes) {
             geojson.features = geojson.features.concat(this.selectedRouteService.createFeaturesForRoute(route));
