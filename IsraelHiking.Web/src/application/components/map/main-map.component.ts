@@ -9,7 +9,6 @@ import { Store } from "@ngxs/store";
 
 import { TracesDialogComponent } from "../dialogs/traces-dialog.component";
 import { SidebarComponent } from "../sidebar/sidebar.component";
-import { BackgroundTextComponent } from "../background-text.component";
 import { LayersComponent } from "./layers.component";
 import { RoutesComponent } from "./routes.component";
 import { RecordedRouteComponent } from "./recorded-route.component";
@@ -36,7 +35,7 @@ import type { ApplicationState, LocationState } from "../../models";
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, BackgroundTextComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent]
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent]
 })
 export class MainMapComponent {
 
