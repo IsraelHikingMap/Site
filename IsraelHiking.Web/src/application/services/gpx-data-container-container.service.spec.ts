@@ -20,7 +20,7 @@ describe("GpxDataContainerConverterService", () => {
                 northEast: { lat: 0, lng: 0 },
                 southWest: { lat: 0, lng: 0 },
                 overlays: [],
-                routes: [{ id: "id", description: "", markers: [], name: "name", segments: [], state: "ReadOnly" }]
+                routes: [{ id: "id", description: "", markers: [], name: "name", segments: [] }]
             });
             const dataContainer = await service.toDataContainer(await new Response(decode(gpxBase64String)).text());
             expect(dataContainer.routes.length).toBe(0);
@@ -37,9 +37,8 @@ describe("GpxDataContainerConverterService", () => {
                     id: "id",
                     description: "description",
                     name: "name",
-                    segments: [], state: "ReadOnly",
+                    segments: [],
                     markers: [{
-                        id: "markerId",
                         description: "desc",
                         title: "title",
                         type: "type",
@@ -74,29 +73,28 @@ describe("GpxDataContainerConverterService", () => {
                         name: "name",
                         segments: [{
                             latlngs: [
-                                { lat: 0, lng: 0, timestamp: new Date() },
-                                { lat: 1, lng: 1, timestamp: new Date() }
+                                { lat: 0, lng: 0, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
                             routingType: "Hike"
                         }, {
                             latlngs: [
-                                { lat: 1, lng: 1, timestamp: new Date() },
-                                { lat: 2, lng: 2, timestamp: new Date() }
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 2, lng: 2 },
                             routingType: "Hike"
                         },
                         {
                             latlngs: [
-                                { lat: 2, lng: 2, timestamp: new Date() },
-                                { lat: 3, lng: 3, timestamp: new Date() }
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 3, lng: 3 },
                             routingType: "Hike"
                         }
                         ],
-                        state: "ReadOnly",
                         color: "color",
                         opacity: 1,
                         weight: 10
@@ -125,21 +123,20 @@ describe("GpxDataContainerConverterService", () => {
                         name: "name",
                         segments: [{
                             latlngs: [
-                                { lat: 0, lng: 0, timestamp: new Date() },
-                                { lat: 1, lng: 1, timestamp: new Date() },
-                                { lat: 2, lng: 2, timestamp: new Date() },
-                                { lat: 3, lng: 3, timestamp: new Date() },
-                                { lat: 4, lng: 4, timestamp: new Date() },
-                                { lat: 5, lng: 5, timestamp: new Date() },
-                                { lat: 6, lng: 6, timestamp: new Date() },
-                                { lat: 7, lng: 7, timestamp: new Date() },
-                                { lat: 8, lng: 8, timestamp: new Date() },
-                                { lat: 9, lng: 9, timestamp: new Date() },
+                                { lat: 0, lng: 0, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                                { lat: 4, lng: 4, timestamp: new Date().toISOString() },
+                                { lat: 5, lng: 5, timestamp: new Date().toISOString() },
+                                { lat: 6, lng: 6, timestamp: new Date().toISOString() },
+                                { lat: 7, lng: 7, timestamp: new Date().toISOString() },
+                                { lat: 8, lng: 8, timestamp: new Date().toISOString() },
+                                { lat: 9, lng: 9, timestamp: new Date().toISOString() },
                             ],
                             routePoint: { lat: 9, lng: 9 },
                             routingType: "Hike"
                         }],
-                        state: "ReadOnly",
                         color: "color",
                         opacity: 1,
                         weight: 10
@@ -198,9 +195,9 @@ describe("GpxDataContainerConverterService", () => {
 
     it("Should split a short route", () => {
         const latlngs = [
-            { lat: 1, lng: 1, timestamp: new Date(1) },
-            { lat: 2, lng: 2, timestamp: new Date(2) },
-            { lat: 3, lng: 3, timestamp: new Date(3) }
+            { lat: 1, lng: 1, timestamp: new Date(1).toISOString() },
+            { lat: 2, lng: 2, timestamp: new Date(2).toISOString() },
+            { lat: 3, lng: 3, timestamp: new Date(3).toISOString() }
         ];
         const segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(latlngs, "Hike");
         expect(segments.length).toBe(2);

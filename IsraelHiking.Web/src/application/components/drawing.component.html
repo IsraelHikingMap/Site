@@ -39,7 +39,12 @@
     matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Draw undo">
     <i class="fa icon-mail-reply fa-lg"></i>
   </button>
-  <mat-menu #appMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
+  @if (isEditActive()) {
+  <button mat-button [matMenuTriggerFor]="clearMenu" matTooltip="{{resources.clear}}" matTooltipPosition="left"
+    angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Draw clear">
+    <i class="fa icon-trash fa-lg"></i>
+  </button>
+  <mat-menu #clearMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
     <button mat-menu-item (click)="clearRoute()" angulartics2On="click" angularticsCategory="Drawing"
       angularticsAction="Clear route"><i class="fa icon-recordings"></i>
       <span class="mx-1">{{resources.clearRoute}}</span>
@@ -60,15 +65,27 @@
       <span class="mx-1">{{resources.deleteAllRoutes}}</span>
     </button>
   </mat-menu>
-  @if (isEditActive()) {
-  <button mat-button [matMenuTriggerFor]="appMenu" matTooltip="{{resources.clear}}" matTooltipPosition="left"
-    angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Draw clear">
-    <i class="fa icon-trash fa-lg"></i>
-  </button>
-  <button mat-button matTooltip="{{resources.share}}" (click)="share()" matTooltipPosition="left" angulartics2On="click"
-    angularticsCategory="Drawing" angularticsAction="Share">
+  @if (hasMultipleRoutes()) {
+  <button mat-button matTooltip="{{resources.share}}" [matMenuTriggerFor]="shareMenu" matTooltipPosition="left"
+    angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Share">
     <i class="fa icon-share-alt fa-lg"></i>
   </button>
+  <mat-menu #shareMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
+    <button mat-menu-item (click)="share('current')" angulartics2On="click" angularticsCategory="Drawing"
+      angularticsAction="Share current route"><i class="fa icon-share-alt"></i>
+      <span class="mx-1">{{resources.currentRoute}}</span>
+    </button>
+    <button mat-menu-item (click)="share('all')" angulartics2On="click" angularticsCategory="Drawing"
+      angularticsAction="Share all routes"><i class="fa icon-share-alt"></i>
+      <span class="mx-1">{{allXRoutesText()}}</span>
+    </button>
+  </mat-menu>
+  } @else {
+  <button mat-button matTooltip="{{resources.share}}" (click)="share('current')" matTooltipPosition="left"
+    angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Share">
+    <i class="fa icon-share-alt fa-lg"></i>
+  </button>
+  }
   } @else {
   <button mat-button (click)="deleteAllRoutes()" [disabled]="!canDeleteAllRoutes()"
     matTooltip="{{resources.deleteAllRoutes}}" matTooltipPosition="left" angulartics2On="click"

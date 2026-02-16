@@ -16,7 +16,7 @@ import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
 import { Urls } from "../urls";
-import type { ApplicationState, LatLngAlt, RoutingType } from "../models";
+import type { ApplicationState, LatLngAltTime, RoutingType } from "../models";
 
 @Injectable()
 export class RoutingProvider {
@@ -35,7 +35,7 @@ export class RoutingProvider {
     private readonly elevationProvider = inject(ElevationProvider);
     private readonly store = inject(Store);
 
-    public async getRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {
+    public async getRoute(latlngStart: LatLngAltTime, latlngEnd: LatLngAltTime, routinType: RoutingType): Promise<LatLngAltTime[]> {
         if (routinType === "None") {
             const distance = SpatialService.getDistanceInMeters(latlngStart, latlngEnd);
             const pointsCount = Math.min(100, Math.ceil(distance / 100));
@@ -70,7 +70,7 @@ export class RoutingProvider {
         }
     }
 
-    private async getOffineRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {
+    private async getOffineRoute(latlngStart: LatLngAltTime, latlngEnd: LatLngAltTime, routinType: RoutingType): Promise<LatLngAltTime[]> {
         const zoom = RoutingProvider.MAX_ROUTING_ZOOM; // this is the max zoom for these tiles
         const tiles = [latlngStart, latlngEnd].map(latlng => SpatialService.toTile(latlng, zoom));
         let tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));

@@ -37,7 +37,7 @@ export class GeoLocationService {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
             alt: position.coords.altitude,
-            timestamp: new Date(position.timestamp)
+            timestamp: new Date(position.timestamp).toISOString()
         };
     }
 

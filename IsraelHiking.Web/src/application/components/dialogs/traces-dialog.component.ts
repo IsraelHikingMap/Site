@@ -260,8 +260,4 @@ export class TracesDialogComponent implements OnInit {
                 throw new Error(`invalid visibility value: ${visibility}`);
         }
     }
-
-    public trackById(_: number, trace: Immutable<Trace>) {
-        return trace.id;
-    }
 }

@@ -25,7 +25,7 @@ import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
 import { GeoLocationService } from "../services/geo-location.service";
 import { ToggleIsShowKmMarkersAction, ToggleIsShowSlopeAction } from "../reducers/configuration.reducer";
-import type { LatLngAlt, ApplicationState, LatLngAltTime } from "../models";
+import type { LatLngAltTime, ApplicationState } from "../models";
 
 declare type DragState = "start" | "drag" | "none";
 
@@ -711,7 +711,7 @@ export class RouteStatisticsComponent implements OnInit {
         };
     }
 
-    private getKmPoints(latlngs: Immutable<LatLngAlt[]>): LatLngAlt[] {
+    private getKmPoints(latlngs: Immutable<LatLngAltTime[]>): LatLngAltTime[] {
         let length = 0;
         const markersDistance = this.getMarkerDistance() * 1000;
         const start = latlngs[0];
@@ -785,7 +785,7 @@ export class RouteStatisticsComponent implements OnInit {
         this.setViewStatisticsValues(this.statistics);
     }
 
-    private onSelectedRouteHover = (latlng: LatLngAlt) => {
+    private onSelectedRouteHover = (latlng: LatLngAltTime) => {
         if (!this.isOpen()) {
             return;
         }
@@ -835,7 +835,7 @@ export class RouteStatisticsComponent implements OnInit {
         }
     }
 
-    private getPointFromLatLng(latlng: LatLngAlt, heading: number): RouteStatisticsPoint {
+    private getPointFromLatLng(latlng: LatLngAltTime, heading: number): RouteStatisticsPoint {
         if (latlng == null) {
             return null;
         }

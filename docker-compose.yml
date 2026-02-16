@@ -63,6 +63,8 @@ services:
     environment:
       - ES_URL=http://elasticsearch:9200
       - IMGUR_CLIENT_ID=1234567890
+    volumes:
+      - ./partners.json:/app/partners.json
   nginx:
     image: nginxinc/nginx-unprivileged
     container_name: nginx

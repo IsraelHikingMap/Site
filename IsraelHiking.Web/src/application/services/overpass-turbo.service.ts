@@ -6,7 +6,7 @@ import osmtogeojson from "osm2geojson-lite";
 
 import { SpatialService } from "./spatial.service";
 import { Urls } from "../urls";
-import type { LatLngAlt } from "../models";
+import type { LatLngAltTime } from "../models";
 
 type OsmResponse = {
     elements: { type: string, id: string }[];
@@ -134,7 +134,7 @@ export class OverpassTurboService {
         return await this.getFeatureFromQuery(query);
     }
 
-    public async getPointsInArea(latLng: LatLngAlt): Promise<GeoJSON.FeatureCollection<GeoJSON.Point>> {
+    public async getPointsInArea(latLng: LatLngAltTime): Promise<GeoJSON.FeatureCollection<GeoJSON.Point>> {
         const distanceInDegrees = 0.00045; // about 50 meters
         const query = `
         [out:json];

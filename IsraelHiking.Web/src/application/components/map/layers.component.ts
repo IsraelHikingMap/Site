@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, input } from "@angular/core";
 
 import { AutomaticLayerPresentationComponent } from "./automatic-layer-presentation.component";
 import { LayersService } from "../../services/layers.service";
@@ -11,6 +11,8 @@ import type { EditableLayer } from "../../models";
     imports: [AutomaticLayerPresentationComponent]
 })
 export class LayersComponent {
+
+    public readonly isMainMap = input<boolean>(true);
 
     public readonly resources = inject(ResourcesService);
 

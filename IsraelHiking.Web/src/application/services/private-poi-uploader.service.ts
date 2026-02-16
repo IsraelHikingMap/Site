@@ -10,7 +10,7 @@ import { ToastService } from "./toast.service";
 import { RouteStrings } from "./hash.service";
 import { SetUploadMarkerDataAction } from "../reducers/poi.reducer";
 import { CATEGORIES_GROUPS } from "../reducers/initial-state";
-import type { LinkData, LatLngAlt, MarkerData } from "../models";
+import type { LinkData, LatLngAltTime, MarkerData } from "../models";
 
 @Injectable()
 export class PrivatePoiUploaderService {
@@ -23,7 +23,7 @@ export class PrivatePoiUploaderService {
 
     public async uploadPoint(
         id: string,
-        latLng: LatLngAlt,
+        latLng: LatLngAltTime,
         imageLink: LinkData,
         title: string,
         description: string,

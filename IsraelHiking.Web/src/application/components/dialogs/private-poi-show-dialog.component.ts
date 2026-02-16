@@ -17,7 +17,7 @@ import { SelectedRouteService } from "../../services/selected-route.service";
 import { ToastService } from "../../services/toast.service";
 import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
-import type { ApplicationState, MarkerData, LinkData } from "../../models";
+import type { ApplicationState, MarkerDataWithoutId, LinkData, MarkerData } from "../../models";
 
 interface IPrivatePoiShowDialogData {
     marker: MarkerData;
@@ -64,7 +64,7 @@ export class PrivatePoiShowDialogComponent {
         this.url = this.marker.urls.find(u => !u.mimeType.startsWith("image"));
     }
 
-    public static openDialog(dialog: MatDialog, marker: MarkerData, routeId: string, index: number) {
+    public static openDialog(dialog: MatDialog, marker: MarkerDataWithoutId, routeId: string, index: number) {
         setTimeout(() => {
             // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
             dialog.open(PrivatePoiShowDialogComponent,

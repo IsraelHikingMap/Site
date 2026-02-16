@@ -8,10 +8,10 @@ import { MapService } from "./map.service";
 import { LoggingService } from "./logging.service";
 import { SelectedRouteService } from "./selected-route.service";
 import { SetFollowingAction, SetPannedAction, ToggleDistanceAction } from "../reducers/in-memory.reducer";
-import type { ApplicationState, LatLngAlt } from "../models";
+import type { ApplicationState, LatLngAltTime } from "../models";
 
 export type LocationWithBearing = {
-    center: LatLngAlt;
+    center: LatLngAltTime;
     bearing: number;
     accuracy: number;
 };
@@ -96,7 +96,7 @@ export class LocationService {
         return this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "tracking";
     }
 
-    public getLocationCenter(): LatLngAlt | null {
+    public getLocationCenter(): LatLngAltTime | null {
         return this.locationWithBearing?.center;
     }
 

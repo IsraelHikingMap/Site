@@ -97,4 +97,10 @@ describe("MapService", () => {
             expect(addImageSpy).toHaveBeenCalledTimes(1);
         }
     ));
+
+    it("Should get full URL", inject([MapService], (service: MapService) => {
+        const url = service.getFullUrl("123");
+
+        expect(url).toContain("/123");
+    }));
 });

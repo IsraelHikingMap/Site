@@ -15,7 +15,7 @@ import { Store } from "@ngxs/store";
 import { Immutable } from "immer";
 import invert from "invert-color";
 
-import { ShareDialogComponent, ShareDialogComponentData } from "../../../components/dialogs/share-dialog.component";
+import { ShareEditDialogComponent, ShareEditDialogComponentData } from "../../dialogs/share-edit-dialog.component";
 import { FileSaveDialogComponent } from "../../../components/dialogs/file-save-dialog.component";
 import { DistancePipe } from "../../../pipes/distance.pipe";
 import { Angulartics2OnModule } from "../../../directives/gtag.directive";
@@ -29,10 +29,12 @@ import { RouteStatistics, RouteStatisticsService } from "../../../services/route
 import { SpatialService } from "../../../services/spatial.service";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
 import { LogReaderService } from "../../../services/log-reader.service";
+import { ShareUrlsService } from "../../../services/share-urls.service";
+import { DataContainerService } from "../../../services/data-container.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { ChangeRouteStateAction, ToggleAllRoutesAction, DeleteAllRoutesAction, AddRouteAction, ChangeRoutePropertiesAction, DeleteRouteAction } from "../../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../../reducers/route-editing.reducer";
-import type { ApplicationState, LatLngAlt, RouteData } from "../../../models";
+import type { ApplicationState, LatLngAltTime, RouteData, ShareUrl } from "../../../models";
 
 
 @Component({
@@ -59,10 +61,12 @@ export class PrivateRoutesSidebarComponent {
     private readonly routeStatisticsService = inject(RouteStatisticsService);
     private readonly fitBoundsService = inject(FitBoundsService);
     private readonly logReaderService = inject(LogReaderService);
+    private readonly shareUrlsService = inject(ShareUrlsService);
+    private readonly dataContainerService = inject(DataContainerService);
 
     constructor() {
         this.colors = this.routesFactory.colors;
-        this.store.select((state: ApplicationState) => state.routes.present).subscribe((routes: Immutable<RouteData[]>) => {
+        this.store.select((state: ApplicationState) => state.routes.present).subscribe(routes => {
             this.routes = routes;
             this.routeStatistics = {};
             for (const route of routes) {
@@ -219,7 +223,15 @@ export class PrivateRoutesSidebarComponent {
             this.toastService.warning(this.resources.loginRequired);
             return;
         }
-        this.dialog.open<ShareDialogComponent, ShareDialogComponentData>(ShareDialogComponent, { width: "480px", data: { mode: "all" } });
+        const dataContainer = this.dataContainerService.getContainerForRoutes(this.routes.filter(r => r.state !== "Hidden"));
+        this.dialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, {
+            width: "480px",
+            data: {
+                fullShareUrl: structuredClone(this.shareUrlsService.getSelectedShareUrl()) as ShareUrl,
+                dataContainer,
+                hasHiddenRoutes: this.routes.some(r => r.state === "Hidden"),
+            }
+        });
     }
 
     public deleteRoute(event: Event, routeData: Immutable<RouteData>) {
@@ -248,8 +260,8 @@ export class PrivateRoutesSidebarComponent {
         this.toastService.info(this.resources.dataUpdatedSuccessfully);
     }
 
-    private getLatlngs(routeData: Immutable<RouteData>): LatLngAlt[] {
-        let latLngs: LatLngAlt[] = [];
+    private getLatlngs(routeData: Immutable<RouteData>): LatLngAltTime[] {
+        let latLngs: LatLngAltTime[] = [];
         for (const segment of routeData.segments) {
             latLngs = latLngs.concat(segment.latlngs);
         }

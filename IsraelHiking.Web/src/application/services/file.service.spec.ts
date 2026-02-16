@@ -144,12 +144,6 @@ describe("FileService", () => {
         expect(event.target.value).toBe("");
     }));
 
-    it("Should get full URL", inject([FileService], (service: FileService) => {
-        const url = service.getFullUrl("123");
-
-        expect(url).toContain("/123");
-    }));
-
     it("Should get style json content from remote source", inject([FileService, HttpTestingController],
         async (service: FileService, mockBackend: HttpTestingController) => {
             const promise = service.getStyleJsonContent("s.json", false);

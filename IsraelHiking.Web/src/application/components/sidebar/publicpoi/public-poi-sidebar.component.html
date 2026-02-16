@@ -1,119 +1,152 @@
 ﻿@if (isEditMode()) {
-  <div [dir]="resources.direction">
-    <public-poi-edit [info]="osmEditableInfo"></public-poi-edit>
-  </div>
+<div [dir]="resources.direction">
+  <public-poi-edit [info]="osmEditableInfo"></public-poi-edit>
+</div>
 } @else {
-  <div [dir]="resources.direction" [class.minimized]="isMinimized">
-    <div class="flex flex-row sticky top-0 z-10 bg-white">
-      @if (!isHideEditMode()) {
-        <div class="flex-1">
-          <button mat-button class="w-full min-w-unset p-0!" (click)="setEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Edit POI"><i class="fa icon-pencil"></i></button>
-        </div>
-      }
-      <div class="flex-1">
-        <button mat-button class="w-full min-w-unset p-0!" (click)="navigateHere()" matTooltip="{{resources.navigateHere}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Navigate here"><i class="fa icon-recordings"></i></button>
-      </div>
-      @if (isRoute()) {
-        <div class="flex-1">
-          <button mat-button class="w-full min-w-unset p-0!" (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to route"><i class="fa icon-plus"></i></button>
-        </div>
-      } @else {
-        <div class="flex-1">
-          <button mat-button class="w-full min-w-unset p-0!" (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to point"><i class="fa icon-plus"></i></button>
-        </div>
-      }
-      @if (shareLinks.poiLink) {
-        <div class="flex-1">
-          <mat-menu #appMenu="matMenu">
-            <div mat-menu-item disableRipple="true">
-              <div class="flex flex-row">
-                <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks.waze" [target]="'_blank'" matTooltip="{{resources.navigateWithWaze}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Navigate with waze"><i class="fa icon-waze"></i></a></div>
-                @if (isApp()) {
-                  <div class="flex-1"><button mat-button class="w-full" (click)=share() matTooltip="{{resources.share}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share with os capabilities"><i class="fa icon-ellipsis-v"></i></button></div>
-                } @else {
-                  <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks.facebook" [target]="'_blank'" matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook poi"><i class="fa icon-facebook"></i></a></div>
-                  <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks.whatsapp" [target]="'_blank'" matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatsapp poi"><i class="fa icon-whatsapp"></i></a></div>
-                  <div class="flex-1"><button mat-button class="w-full" [cdkCopyToClipboard]="shareLinks.poiLink" matTooltip="{{resources.copyUrl}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard poi"><i class="fa icon-clipboard"></i></button></div>
-                }
-              </div>
-            </div>
-          </mat-menu>
-          <button mat-button class="w-full min-w-unset p-0!" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="below"><i class="fa icon-share-alt"></i></button>
-        </div>
-      }
-      @if (!isMinimized && isApp()) {
-        <div class="flex-1">
-          <button mat-button class="w-full min-w-unset p-0!" (click)="isMinimized = !isMinimized" matTooltip="{{resources.minimize}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Minimize POI window"><i class="fa icon-chevron-down"></i></button>
-        </div>
-      }
-      @if (isMinimized && isApp()) {
-        <div class="flex-1">
-          <button mat-button class="w-full min-w-unset p-0!" (click)="isMinimized = !isMinimized" matTooltip="{{resources.restore}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Restore POI window"><i class="fa icon-chevron-up"></i></button>
-        </div>
-      }
-      <div class="flex-1">
-        <button mat-button class="w-full min-w-unset p-0!" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below">
-          @if (isLoading) {
-            <mat-spinner diameter="24"></mat-spinner>
-          } @else {
-            <i class="fa icon-close"></i>
-          }          
-        </button>
-      </div>
+<div [dir]="resources.direction" [class.minimized]="isMinimized">
+  <div class="flex flex-row sticky top-0 z-10 bg-white">
+    @if (!isHideEditMode()) {
+    <div class="flex-1">
+      <button mat-button class="w-full min-w-unset p-0!" (click)="setEditMode()" matTooltip="{{resources.edit}}"
+        matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Edit POI"><i
+          class="fa icon-pencil"></i></button>
     </div>
-    <mat-card appearance="outlined" class="mat-elevation-z0">
-      <mat-card-header>
-        <mat-card-title [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)">
-          @if (hasUrl()) {
-            <a [href]="getUrl()" [target]="'_blank'" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site from title">
-              <span class="text-xl">{{title}}</span>
-            </a>
-          } @else {
-            <span class="text-xl">{{title}}</span>
-          }
-        </mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <image-scroller [images]="imagesUrls" [canEdit]="false"></image-scroller>
-        @if (lengthInKm && isRoute()) {
-          <p class="text-center">{{resources.length}}: {{lengthInKm | number : '1.2-2'}} {{resources.kmUnit}}</p>
-        }
-        <div class="flex flex-row">
-          <p class="w-full break-lines" [ngClass]="resources.getTextAlignment(description)" [dir]="resources.getDirection(description)">
-            {{description}}
-          </p>
-        </div>
-        @if (showToggleTranslation()) {
-          <div class="flex flex-row cursor-pointer" (click)="toggleTranslation()" angulartics2On="click" angularticsCategory="POI" angularticsAction="Toggle translation">
-            <span class="w-full text-sm text-center">
-              {{showingTranslated ? resources.translatedBy : resources.clickToTranslate}}
-            </span>
+    }
+    <div class="flex-1">
+      <button mat-button class="w-full min-w-unset p-0!" (click)="navigateHere()"
+        matTooltip="{{resources.navigateHere}}" matTooltipPosition="below" angulartics2On="click"
+        angularticsCategory="POI" angularticsAction="Navigate here"><i class="fa icon-recordings"></i></button>
+    </div>
+    @if (isRoute()) {
+    <div class="flex-1">
+      <button mat-button class="w-full min-w-unset p-0!" (click)="convertToRoute()"
+        matTooltip="{{resources.convertToRoute}}" matTooltipPosition="below" angulartics2On="click"
+        angularticsCategory="POI" angularticsAction="Convert POI to route"><i class="fa icon-plus"></i></button>
+    </div>
+    } @else {
+    <div class="flex-1">
+      <button mat-button class="w-full min-w-unset p-0!" (click)="addPointToRoute()"
+        matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="below" angulartics2On="click"
+        angularticsCategory="POI" angularticsAction="Convert POI to point"><i class="fa icon-plus"></i></button>
+    </div>
+    }
+    @if (shareLinks.poiLink) {
+    <div class="flex-1">
+      <mat-menu #appMenu="matMenu">
+        <div mat-menu-item disableRipple="true">
+          <div class="flex flex-row">
+            <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks.waze" [target]="'_blank'"
+                matTooltip="{{resources.navigateWithWaze}}" matTooltipPosition="below" angulartics2On="click"
+                angularticsCategory="Share" angularticsAction="Navigate with waze"><i class="fa icon-waze"></i></a>
+            </div>
+            @if (isApp()) {
+            <div class="flex-1"><button mat-button class="w-full" (click)=share() matTooltip="{{resources.share}}"
+                matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share"
+                angularticsAction="Share with os capabilities"><i class="fa icon-ellipsis-v"></i></button></div>
+            } @else {
+            <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks.facebook" [target]="'_blank'"
+                matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="below" angulartics2On="click"
+                angularticsCategory="Share" angularticsAction="Share facebook poi"><i class="fa icon-facebook"></i></a>
+            </div>
+            <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks.whatsapp" [target]="'_blank'"
+                matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="below" angulartics2On="click"
+                angularticsCategory="Share" angularticsAction="Share whatsapp poi"><i class="fa icon-whatsapp"></i></a>
+            </div>
+            <div class="flex-1"><button mat-button class="w-full" [cdkCopyToClipboard]="shareLinks.poiLink"
+                matTooltip="{{resources.copyUrl}}" matTooltipPosition="below" angulartics2On="click"
+                angularticsCategory="Share" angularticsAction="Share copy to clipboard poi"><i
+                  class="fa icon-clipboard"></i></button></div>
+            }
           </div>
-        }
-        @if (isShowSeeAlso()) {
-          <div class="flex flex-row max-sm:hidden">
-            <h4>{{resources.seeAlso}}</h4>
-          </div>
-        }
-        <div class="flex flex-row">
-          @if (getElementOsmAddress()) {
-            <a [href]="getElementOsmAddress()" [target]="'_blank'" class="me-2" angulartics2On="click" angularticsCategory="OSM" angularticsAction="View element in OSM">
-              <img src="content/openstreetmap-logo.png" height="32" width="32" />
-            </a>
-          }
-          @for (urlPair of sourceImageUrls; track urlPair) {
-            <a [href]="urlPair.url" [target]="'_blank'" class="me-2" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site">
-              @if (!urlPair.imageUrl) {
-                <div style="width: 32px; height: 32px">
-                  <i class="fa fa-2x icon-external-link"></i>
-                </div>
-              } @else {
-                <img [src]="urlPair.imageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(title)" />
-              }
-            </a>
-          }
         </div>
-      </mat-card-content>
-    </mat-card>
+      </mat-menu>
+      <button mat-button class="w-full min-w-unset p-0!" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}"
+        matTooltipPosition="below"><i class="fa icon-share-alt"></i></button>
+    </div>
+    }
+    @if (!isMinimized && isApp()) {
+    <div class="flex-1">
+      <button mat-button class="w-full min-w-unset p-0!" (click)="isMinimized = !isMinimized"
+        matTooltip="{{resources.minimize}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI"
+        angularticsAction="Minimize POI window"><i class="fa icon-chevron-down"></i></button>
+    </div>
+    }
+    @if (isMinimized && isApp()) {
+    <div class="flex-1">
+      <button mat-button class="w-full min-w-unset p-0!" (click)="isMinimized = !isMinimized"
+        matTooltip="{{resources.restore}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI"
+        angularticsAction="Restore POI window"><i class="fa icon-chevron-up"></i></button>
+    </div>
+    }
+    <div class="flex-1">
+      <button mat-button class="w-full min-w-unset p-0!" (click)="close()" matTooltip="{{resources.close}}"
+        matTooltipPosition="below">
+        @if (isLoading) {
+        <mat-spinner diameter="24"></mat-spinner>
+        } @else {
+        <i class="fa icon-close"></i>
+        }
+      </button>
+    </div>
   </div>
+  <mat-card appearance="outlined" class="mat-elevation-z0">
+    <mat-card-header>
+      <mat-card-title [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)">
+        @if (hasUrl()) {
+        <a [href]="getUrl()" [target]="'_blank'" angulartics2On="click" angularticsCategory="POI"
+          angularticsAction="View extended POI data outside site from title">
+          <span class="text-xl">{{title}}</span>
+        </a>
+        } @else {
+        <span class="text-xl">{{title}}</span>
+        }
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <image-scroller [images]="imagesUrls" [canEdit]="false"></image-scroller>
+      @if (lengthInKm && isRoute()) {
+      <p class="text-center">{{resources.length}}: {{lengthInKm | number : '1.2-2'}} {{resources.kmUnit}}</p>
+      }
+      <div class="flex flex-row">
+        <p class="w-full break-lines" [ngClass]="resources.getTextAlignment(description)"
+          [dir]="resources.getDirection(description)">
+          {{description}}
+        </p>
+      </div>
+      @if (showToggleTranslation) {
+      <div class="flex flex-row cursor-pointer" (click)="toggleTranslation()" angulartics2On="click"
+        angularticsCategory="POI" angularticsAction="Toggle translation">
+        <span class="w-full text-sm text-center">
+          {{showingTranslated ? resources.translatedBy : resources.clickToTranslate}}
+        </span>
+      </div>
+      }
+      @if (isShowSeeAlso()) {
+      <div class="flex flex-row max-sm:hidden">
+        <h4>{{resources.seeAlso}}</h4>
+      </div>
+      }
+      <div class="flex flex-row">
+        @if (getElementOsmAddress()) {
+        <a [href]="getElementOsmAddress()" [target]="'_blank'" class="me-2" angulartics2On="click"
+          angularticsCategory="OSM" angularticsAction="View element in OSM">
+          <img src="content/openstreetmap-logo.png" height="32" width="32" />
+        </a>
+        }
+        @for (urlPair of sourceImageUrls; track urlPair) {
+        <a [href]="urlPair.url" [target]="'_blank'" class="me-2" angulartics2On="click" angularticsCategory="POI"
+          angularticsAction="View extended POI data outside site">
+          @if (!urlPair.imageUrl) {
+          <div style="width: 32px; height: 32px">
+            <i class="fa fa-2x icon-external-link"></i>
+          </div>
+          } @else {
+          <img [src]="urlPair.imageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(title)" />
+          }
+        </a>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
 }

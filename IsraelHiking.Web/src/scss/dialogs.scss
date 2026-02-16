@@ -1,4 +1,4 @@
-[matDialogTitle] [matDialogClose] {
+[mat-dialog-title] [mat-dialog-close] {
     position: absolute;
     min-width: 0;
     min-height: 0;
@@ -8,7 +8,7 @@
     right: 5px;
 }
 
-[dir=rtl] [matDialogTitle] [matDialogClose] {
+[dir=rtl] [mat-dialog-title] [mat-dialog-close] {
     right: unset;
     left: 5px;
 }
@@ -34,7 +34,7 @@
     height: 64px;
 }
 
-@media (width <= 768px) {
+@media (width <=768px) {
     .mat-mdc-dialog-container {
         margin: 0 auto;
         max-height: 90vh;
@@ -53,8 +53,8 @@
 }
 
 
-@media(height <= 550px){
+@media(height <=550px) {
     .mat-mdc-dialog-content {
-       max-height: calc(100vh - 170px) !important;
-   }
+        max-height: calc(100vh - 170px) !important;
+    }
 }

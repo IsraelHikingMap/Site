@@ -8,11 +8,14 @@ import { MatDialog } from "@angular/material/dialog";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
+import { ShareEditDialogComponent, ShareEditDialogComponentData } from "./dialogs/share-edit-dialog.component";
 import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { ResourcesService } from "../services/resources.service";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { ToastService } from "../services/toast.service";
 import { SidebarService } from "../services/sidebar.service";
+import { ShareUrlsService } from "../services/share-urls.service";
+import { DataContainerService } from "../services/data-container.service";
 import {
     ReplaceSegmentsAction,
     ClearPoisAction,
@@ -25,8 +28,7 @@ import {
 } from "../reducers/routes.reducer";
 import { SetRoutingTypeAction, SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
-import type { RoutingType, ApplicationState, RouteData } from "../models";
-import { ShareDialogComponent, ShareDialogComponentData } from "./dialogs/share-dialog.component";
+import type { RoutingType, ApplicationState, RouteData, ShareUrl } from "../models";
 
 @Component({
     selector: "drawing",
@@ -44,6 +46,8 @@ export class DrawingComponent {
     private readonly store = inject(Store);
     private readonly sidebarService = inject(SidebarService);
     private readonly dialog = inject(MatDialog);
+    private readonly shareUrlsService = inject(ShareUrlsService);
+    private readonly dataContainerService = inject(DataContainerService);
 
     constructor() {
         this.undoQueueLength$ = this.store.select((state: ApplicationState) => state.routes.past.length);
@@ -199,14 +203,24 @@ export class DrawingComponent {
         this.sidebarService.toggle("private-routes");
     }
 
-    public share() {
+    public share(mode: "current" | "all") {
         if (this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo == null) {
             this.toastService.warning(this.resources.loginRequired);
             return;
         }
         const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         this.selectedRouteService.changeRouteEditState(selectedRoute.id, "ReadOnly");
-        this.dialog.open<ShareDialogComponent, ShareDialogComponentData>(ShareDialogComponent, { width: "480px", data: { mode: "current" } });
+        const allRoutes = this.store.selectSnapshot((s: ApplicationState) => s.routes).present;
+        const relevantRoutes = mode === "current" ? [selectedRoute] : allRoutes.filter(r => r.state !== "Hidden");
+        const dataContainer = this.dataContainerService.getContainerForRoutes(relevantRoutes);
+        this.dialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, {
+            width: "480px",
+            data: {
+                fullShareUrl: structuredClone(this.shareUrlsService.getSelectedShareUrl()) as ShareUrl,
+                dataContainer: dataContainer,
+                hasHiddenRoutes: relevantRoutes.some(r => r.state === "Hidden")
+            }
+        });
     }
 
     private checkTrackingAndIssueWarningIfNeeded() {
@@ -215,5 +229,13 @@ export class DrawingComponent {
         if (inMemeoryState.following && tracking === "tracking") {
             this.toastService.warning(this.resources.trackingIsDisabledWhileEditing);
         }
+    }
+
+    public hasMultipleRoutes() {
+        return this.store.selectSnapshot((s: ApplicationState) => s.routes).present.length > 1;
+    }
+
+    public allXRoutesText() {
+        return this.resources.allXRoutes.replace("{{count}}", this.store.selectSnapshot((s: ApplicationState) => s.routes).present.length.toString());
     }
 }

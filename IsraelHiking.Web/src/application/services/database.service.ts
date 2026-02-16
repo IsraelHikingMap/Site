@@ -43,7 +43,7 @@ export class DatabaseService {
     private updating = false;
 
     private readonly loggingService = inject(LoggingService);
-    private readonly runningContext = inject(RunningContextService);
+    private readonly runningContextService = inject(RunningContextService);
     private readonly pmTilesService = inject(PmTilesService);
     private readonly httpClient = inject(HttpClient);
     private readonly store = inject(Store);
@@ -69,7 +69,7 @@ export class DatabaseService {
         this.tracesDatabase.version(1).stores({
             traces: "id",
         });
-        if (this.runningContext.isIFrame) {
+        if (this.runningContextService.isIFrame) {
             initialState.layersState.visibleCategories = [];
             this.store.reset(initialState);
             return;
@@ -81,7 +81,7 @@ export class DatabaseService {
             storedState = this.initialStateUpgrade(dbState.state);
         } else {
             // initial load ever:
-            if (this.runningContext.isMobile) {
+            if (this.runningContextService.isMobile) {
                 initialState.locationState.zoom = 10;
                 initialState.gpsState.tracking = "tracking";
             }
@@ -219,7 +219,7 @@ export class DatabaseService {
             storedState.layersState.overlays = initialState.layersState.overlays;
         }
         storedState.inMemoryState = initialState.inMemoryState;
-        if (!this.runningContext.isCapacitor) {
+        if (!this.runningContextService.isCapacitor) {
             storedState.routes = initialState.routes;
             storedState.poiState = initialState.poiState;
             storedState.gpsState = initialState.gpsState;

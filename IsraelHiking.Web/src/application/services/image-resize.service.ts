@@ -3,14 +3,20 @@ import { load, dump, insert, GPSHelper, TagValues, type IExif } from "piexif-ts"
 import { encode } from "base64-arraybuffer";
 import { v4 as uuidv4 } from "uuid";
 
-import type { LatLngAlt, DataContainer, RouteSegmentData, MarkerData, RouteData } from "../models";
+import type { LatLngAltTime, DataContainer, RouteSegmentData, MarkerData, RouteData } from "../models";
 
 @Injectable()
 export class ImageResizeService {
     public static readonly JPEG = "image/jpeg";
 
-    public resizeImage(file: File): Promise<string> {
-        return this.resizeImageAndConvertToAny<string>(file, data => data, false);
+    /**
+     * Resizes an image to a maximum size while preserving EXIF data.
+     * @param file - The file to resize.
+     * @param maxSize - The maximum size of the image.
+     * @returns The resized image as a base64 string.
+     */
+    public resizeImage(file: File, maxSize = 1600): Promise<string> {
+        return this.resizeImageAndConvertToAny<string>(file, data => data, false, maxSize);
     }
 
     public resizeImageAndConvert(file: File, throwIfNoLocation = true): Promise<DataContainer> {
@@ -18,8 +24,9 @@ export class ImageResizeService {
     }
 
     private async resizeImageAndConvertToAny<TReturn>(file: File,
-        convertMethod: (data: string, name: string, geoLocation: LatLngAlt) => TReturn,
-        throwIfNoLocation = true): Promise<TReturn> {
+        convertMethod: (data: string, name: string, geoLocation: LatLngAltTime) => TReturn,
+        throwIfNoLocation = true,
+        maxSize = 1600): Promise<TReturn> {
 
         const arrayBuffer = await file.arrayBuffer();
         const base64 = "data:" + file.type + ";base64," + encode(arrayBuffer);
@@ -34,7 +41,7 @@ export class ImageResizeService {
         const image = new Image();
         return new Promise<TReturn>((resolve, reject) => {
             image.onload = () => {
-                const binaryStringData = this.resizeImageWithExif(image, exifData);
+                const binaryStringData = this.resizeImageWithExif(image, exifData, maxSize);
                 const data = convertMethod(binaryStringData, file.name, latLng);
                 resolve(data);
             };
@@ -45,7 +52,7 @@ export class ImageResizeService {
         });
     }
 
-    private getGeoLocation(exifData: IExif): LatLngAlt {
+    private getGeoLocation(exifData: IExif): LatLngAltTime {
         try {
             const lat = GPSHelper.dmsRationalToDeg(exifData.GPS[TagValues.GPSIFD.GPSLatitude],
                 exifData.GPS[TagValues.GPSIFD.GPSLatitudeRef]);
@@ -60,10 +67,16 @@ export class ImageResizeService {
         }
     }
 
-    private resizeImageWithExif(image: HTMLImageElement, exifData: IExif): string {
+    /**
+     * Resizes an image to a maximum size while preserving EXIF data.
+     * @param image - The HTML image to resize.
+     * @param exifData - The EXIF data of the image.
+     * @param maxSize - The maximum size of the image.
+     * @returns The resized image as a base64 string.
+     */
+    private resizeImageWithExif(image: HTMLImageElement, exifData: IExif, maxSize: number): string {
         const canvas = document.createElement("canvas") as HTMLCanvasElement;
 
-        const maxSize = 1600; // in px for both height and width maximal size
         const width = image.naturalWidth;
         const height = image.naturalHeight;
         let ratio = maxSize / Math.max(width, height);
@@ -84,7 +97,7 @@ export class ImageResizeService {
         return dataUrl;
     }
 
-    private createDataContainerFromBinaryString(binaryStringData: string, name: string, latLng: LatLngAlt) {
+    private createDataContainerFromBinaryString(binaryStringData: string, name: string, latLng: LatLngAltTime) {
         return {
             northEast: latLng,
             southWest: latLng,

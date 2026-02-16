@@ -5,7 +5,7 @@ import { SidebarService } from "./sidebar.service";
 import { MapService } from "./map.service";
 import { SpatialService } from "./spatial.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
-import type { Bounds, LatLngAlt } from "../models";
+import type { Bounds, LatLngAltTime } from "../models";
 
 @Injectable()
 export class FitBoundsService {
@@ -42,7 +42,7 @@ export class FitBoundsService {
         return { top: 50, left: 50, bottom: window.innerHeight / 2, right: 50 }
     }
 
-    public async flyTo(latLng: LatLngAlt, zoom: number) {
+    public async flyTo(latLng: LatLngAltTime, zoom: number) {
         await this.mapService.initializationPromise;
         if (SpatialService.getDistance(this.mapService.map.getCenter(), latLng) < 0.0001 &&
             Math.abs(zoom - this.mapService.map.getZoom()) < 0.01) {
@@ -54,7 +54,7 @@ export class FitBoundsService {
         this.mapService.map.flyTo({ center: latLng, zoom });
     }
 
-    public async moveTo(center: LatLngAlt, zoom: number, bearing: number) {
+    public async moveTo(center: LatLngAltTime, zoom: number, bearing: number) {
         await this.mapService.initializationPromise;
         this.mapService.map.easeTo({
             bearing,

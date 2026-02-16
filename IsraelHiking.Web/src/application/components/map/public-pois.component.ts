@@ -24,7 +24,7 @@ import { NavigateHereService } from "../../services/navigate-here.service";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import { GeoJSONUtils } from "../../services/geojson-utils";
-import type { ApplicationState, LatLngAlt, LinkData, MarkerData } from "../../models";
+import type { ApplicationState, LatLngAltTime, LinkData, MarkerData } from "../../models";
 
 @Component({
     selector: "public-pois",
@@ -172,7 +172,7 @@ export class PublicPoisComponent implements OnInit {
         this.hoverFeature = null;
     }
 
-    public getSelectedFeatureLatlng(): LatLngAlt {
+    public getSelectedFeatureLatlng(): LatLngAltTime {
         return SpatialService.toLatLng(this.selectedPoiFeature.geometry.coordinates as [number, number]);
     }
 

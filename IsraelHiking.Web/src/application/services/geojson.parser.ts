@@ -1,11 +1,11 @@
 import { Injectable } from "@angular/core";
 
 import { SpatialService } from "./spatial.service";
-import type { LatLngAlt } from "../models";
+import type { LatLngAltTime } from "../models";
 
 @Injectable()
 export class GeoJsonParser {
-    public toRoutes(feature: GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString>, language?: string): { latlngs: LatLngAlt[]; name: string }[] {
+    public toRoutes(feature: GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString>, language?: string): { latlngs: LatLngAltTime[]; name: string }[] {
         const name = this.getPropertyValue(feature.properties, "name", language);
         const routes = [];
         if (feature.geometry.type === "LineString") {

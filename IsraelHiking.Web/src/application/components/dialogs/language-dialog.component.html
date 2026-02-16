@@ -1,7 +1,7 @@
 ﻿<div [dir]="resources.direction">
-  <div matDialogTitle>
+  <div mat-dialog-title>
     <div>{{resources.language}}</div>
-    <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+    <button mat-button type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
   </div>
   <div mat-dialog-content>
     <div class="flex flex-row">
@@ -19,7 +19,7 @@
 
     <div mat-dialog-actions>
       <div class="flex flex-row w-full">
-        <button class="w-full" matDialogClose mat-button (click)="saveLanguage()" angulartics2On="click"
+        <button class="w-full" mat-dialog-close mat-button (click)="saveLanguage()" angulartics2On="click"
           angularticsCategory="Language" angularticsAction="Save language {{selectedLanguageCode}}"
           matTooltip="{{resources.save}}" matTooltipPosition="above"><i class="fa icon-check"></i></button>
       </div>

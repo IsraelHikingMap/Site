@@ -194,8 +194,6 @@ ModelManifest.xml
 /.vs/config
 *.DS_Store
 /IsraelHiking.Web/wwwroot/**/*.*
-/IsraelHiking.Web/src/translations/*.po
-/IsraelHiking.Web/src/translations/*.pot
 /IsraelHiking.Web/coverage
 /IsraelHiking.Web/TESTS-*
 /IsraelHiking.Web/www
@@ -204,5 +202,6 @@ ModelManifest.xml
 /IsraelHiking.Web/Cache
 /IsraelHiking.Web/scripts/input
 /IsraelHiking.Web/dist
+/IsraelHiking.Web/src/**/*.g.d.ts
 *.swp
 elevation-cache

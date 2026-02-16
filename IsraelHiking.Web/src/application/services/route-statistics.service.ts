@@ -3,7 +3,7 @@ import linearInterpolator from "linear-interpolator";
 import type { Immutable } from "immer";
 
 import { SpatialService } from "./spatial.service";
-import type { LatLngAlt, LatLngAltTime } from "../models";
+import type { LatLngAltTime } from "../models";
 
 export const MINIMAL_DISTANCE = 50;
 export const MINIMAL_ANGLE = 30;
@@ -13,7 +13,7 @@ export type RouteStatisticsPoint = {
      * x - distance in KM, y - altitude in meters
      */
     coordinate: [number, number];
-    latlng: LatLngAlt;
+    latlng: LatLngAltTime;
     slope: number;
 };
 
@@ -239,7 +239,7 @@ export class RouteStatisticsService {
         return previousPoint;
     }
 
-    public findDistanceForLatLngInKM(statistics: RouteStatistics, latLng: LatLngAlt, heading: number): number {
+    public findDistanceForLatLngInKM(statistics: RouteStatistics, latLng: LatLngAltTime, heading: number): number {
         if (statistics.points.length < 2) {
             return 0;
         }
@@ -252,7 +252,7 @@ export class RouteStatisticsService {
             : 0;
     }
 
-    private findDistanceForLatLngInKMInternal(statistics: RouteStatistics, latLng: LatLngAlt, heading: number): RouteStatisticsPoint {
+    private findDistanceForLatLngInKMInternal(statistics: RouteStatistics, latLng: LatLngAltTime, heading: number): RouteStatisticsPoint {
         let bestPoint = null;
         let minimalWeight = MINIMAL_DISTANCE;
         if (heading != null) {
