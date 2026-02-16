@@ -14,9 +14,9 @@
             </button>
         </div>
         <div class="flex-1">
-            <button mat-button class="w-full" (click)="share()" matTooltip="{{resources.share}}"
-                matTooltipPosition="below" angulartics2On="click" angularticsCategory="Private Routes"
-                angularticsAction="Share">
+            <button mat-button class="w-full" [disabled]="routes.length === 0" (click)="share()"
+                matTooltip="{{resources.share}}" matTooltipPosition="below" angulartics2On="click"
+                angularticsCategory="Private Routes" angularticsAction="Share">
                 <i class="fa fa-lg icon-share-alt"></i>
                 <span class="mx-1">({{routes.length}})</span>
             </button>
