@@ -1,7 +1,7 @@
 import { Component, inject } from "@angular/core";
 
 import { OsmAddressesService } from "../services/osm-addresses.service";
-import { RunningContextService } from "application/services/running-context.service";
+import { RunningContextService } from "../services/running-context.service";
 
 @Component({
     selector: "osm-attribution",
