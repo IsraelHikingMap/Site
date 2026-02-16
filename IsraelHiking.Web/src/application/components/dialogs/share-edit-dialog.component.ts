@@ -83,13 +83,12 @@ export class ShareEditDialogComponent {
         const userInfo = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo);
         this.hasHiddenRoutes = this.data.hasHiddenRoutes;
         this.shareUrl = this.data.fullShareUrl;
-        if (this.shareUrl != null) {
+        if (this.shareUrl != null && userInfo && this.shareUrl.osmUserId.toString() === userInfo.id.toString()) {
             this.shareUrl.public = this.shareUrl.public ?? false;
             this.shareUrl.type = this.shareUrl.type || "Unknown";
             this.shareUrl.difficulty = this.shareUrl.difficulty || "Unknown";
             this.shareUrl.base64Preview = this.shareUrlsService.getImageUrlFromShareId(this.shareUrl.id);
-            this.canUpdate = userInfo &&
-                this.shareUrl.osmUserId.toString() === userInfo.id.toString();
+            this.canUpdate = true;
             this.shareUrl.dataContainer = this.data.dataContainer ?? this.shareUrl.dataContainer;
         } else {
             this.shareUrl = {
