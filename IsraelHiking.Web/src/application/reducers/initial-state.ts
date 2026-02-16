@@ -251,6 +251,10 @@ export const initialState =
             isSubscribed: false,
             downloadedTiles: null,
             uploadPoiQueue: [],
-            purchasesSynced: false
+            lastOfflineDetectedDate: null,
+        },
+        paywallState: {
+            lastPaywallShownDate: null,
+            appLaunchesSinceLastPaywallShown: 0
         }
     } as MutableApplicationState;

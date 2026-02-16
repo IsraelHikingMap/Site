@@ -13,6 +13,7 @@ import { PmTilesService } from "./pmtiles.service";
 import { initialState } from "../reducers/initial-state";
 import { ClearHistoryAction } from "../reducers/routes.reducer";
 import { SetSelectedPoiAction } from "../reducers/poi.reducer";
+import { SetLastOfflineDetectedDate } from "../reducers/offline.reducer";
 import type { ApplicationState, MutableApplicationState, ShareUrl, Trace } from "../models";
 
 export type ImageUrlAndData = {
@@ -119,14 +120,13 @@ export class DatabaseService {
             } catch (ex) {
                 // Timeout or other error
                 if (offlineAvailable === false) {
+                    if (!this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)) {
+                        this.store.dispatch(new SetLastOfflineDetectedDate(new Date()));
+                    }
                     throw new Error(`Failed to get ${params.url}: ${(ex as Error).message}`);
                 }
-                try {
-                    const data = await this.pmTilesService.getTileByType(z, x, y, type);
-                    return { data };
-                } catch (innerEx) {
-                    throw innerEx;
-                }
+                const data = await this.pmTilesService.getTileByType(z, x, y, type);
+                return { data };
             }
         });
     }
