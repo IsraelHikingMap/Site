@@ -103,8 +103,8 @@ export class RoutingProvider {
         } else if (routinType === "Bike") {
             features = features.filter(
                 f => f.properties.ihm_class !== "footway" &&
-                f.properties.ihm_class !== "pedestrian" &&
-                f.properties.ihm_class !== "steps");
+                    f.properties.ihm_class !== "pedestrian" &&
+                    f.properties.ihm_class !== "steps");
         }
         const startFeature = SpatialService.insertProjectedPointToClosestLineAndReplaceIt(latlngStart, features);
         const endFeature = SpatialService.insertProjectedPointToClosestLineAndReplaceIt(latlngEnd, features);
@@ -113,15 +113,15 @@ export class RoutingProvider {
             type: "FeatureCollection",
             features
         } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
-        const pathFinder = new PathFinder(collection, {tolerance: 2e-5});
+        const pathFinder = new PathFinder(collection, { tolerance: 2e-5 });
         const route = pathFinder.findPath(startFeature, endFeature);
         if (!route) {
             throw new Error("[Routing] No route found... :-(");
         }
 
-        const lngLat = route.path.map(c => SpatialService.toLatLng(c));
-        await this.elevationProvider.updateHeights(lngLat);
-        return lngLat;
+        const lnglats = route.path.map(c => SpatialService.toLatLng(c));
+        await this.elevationProvider.updateHeights(lnglats);
+        return lnglats;
     }
 
     private async updateCacheAndGetFeatures(
@@ -146,7 +146,7 @@ export class RoutingProvider {
                 const tile = new VectorTile(new Protobuf(arrayBuffer));
                 for (const layerKey of Object.keys(tile.layers)) {
                     const layer = tile.layers[layerKey];
-                    for (let featureIndex=0; featureIndex < layer.length; featureIndex++) {
+                    for (let featureIndex = 0; featureIndex < layer.length; featureIndex++) {
                         const feature = layer.feature(featureIndex);
                         const isHighway = Object.keys(feature.properties).find(k => k === RoutingProvider.ROUTING_CLASS_PROPERTY_NAME) != null;
                         if (!isHighway) {
@@ -162,13 +162,13 @@ export class RoutingProvider {
                                     type: "LineString",
                                     coordinates
                                 },
-                                properties: {...geojsonFeature.properties}
+                                properties: { ...geojsonFeature.properties }
                             } as GeoJSON.Feature<GeoJSON.LineString>));
                             collection.features.push(...multiLines);
                         }
                     }
                 }
-                collection.features = SpatialService.clipLinesToTileBoundary(collection.features, { x: tileX, y: tileY}, zoom);
+                collection.features = SpatialService.clipLinesToTileBoundary(collection.features, { x: tileX, y: tileY }, zoom);
                 SpatialService.addMissinIntersectionPoints(collection.features);
                 this.featuresCache.set(key, collection);
                 allCollection.push(collection);
