@@ -11,10 +11,10 @@ import { PoiService, SimplePointType } from "../../services/poi.service";
 import { ToastService } from "../../services/toast.service";
 import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
 import { DeletePrivatePoiByIdAction } from "../../reducers/routes.reducer";
-import type { LatLngAlt, LinkData } from "../../models";
+import type { LatLngAltTime, LinkData } from "../../models";
 
 export type AddSimplePoiDialogData = {
-    latlng: LatLngAlt;
+    latlng: LatLngAltTime;
     imageLink: LinkData;
     title: string;
     description: string;

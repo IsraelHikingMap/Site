@@ -13,6 +13,7 @@ import { PmTilesService } from "./pmtiles.service";
 import { initialState } from "../reducers/initial-state";
 import { ClearHistoryAction } from "../reducers/routes.reducer";
 import { SetSelectedPoiAction } from "../reducers/poi.reducer";
+import { SetLastOfflineDetectedDate } from "../reducers/offline.reducer";
 import type { ApplicationState, MutableApplicationState, ShareUrl, Trace } from "../models";
 
 export type ImageUrlAndData = {
@@ -43,7 +44,7 @@ export class DatabaseService {
     private updating = false;
 
     private readonly loggingService = inject(LoggingService);
-    private readonly runningContext = inject(RunningContextService);
+    private readonly runningContextService = inject(RunningContextService);
     private readonly pmTilesService = inject(PmTilesService);
     private readonly httpClient = inject(HttpClient);
     private readonly store = inject(Store);
@@ -69,7 +70,7 @@ export class DatabaseService {
         this.tracesDatabase.version(1).stores({
             traces: "id",
         });
-        if (this.runningContext.isIFrame) {
+        if (this.runningContextService.isIFrame) {
             initialState.layersState.visibleCategories = [];
             this.store.reset(initialState);
             return;
@@ -81,7 +82,7 @@ export class DatabaseService {
             storedState = this.initialStateUpgrade(dbState.state);
         } else {
             // initial load ever:
-            if (this.runningContext.isMobile) {
+            if (this.runningContextService.isMobile) {
                 initialState.locationState.zoom = 10;
                 initialState.gpsState.tracking = "tracking";
             }
@@ -109,29 +110,23 @@ export class DatabaseService {
             const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
             const offlineAvailable = await this.pmTilesService.isOfflineFileAvailable(z, x, y, type);
             try {
-                this.loggingService.debug(`[Database] Fetching ${params.url}, offlineAvailable: ${offlineAvailable}`);
                 const response = await firstValueFrom(this.httpClient.get(params.url.replace("slice://", "https://"), { observe: "response", responseType: "arraybuffer" })
                     .pipe(offlineAvailable ? timeout(2000) : timeout(60000))) as any as HttpResponse<any>;
                 if (!response.ok) {
-                    throw new Error(`Failed to get ${params.url}: ${response.statusText} (${response.status})`);
+                    throw new Error(`Failed to get ${params.url}: ${response.status}`);
                 }
-                const data = response.body;
-                this.loggingService.debug(`[Database] Successfully fetched: ${params.url}`);
+                const data = response.body ?? new ArrayBuffer(0);
                 return { data, cacheControl: response.headers.get("Cache-Control"), expires: response.headers.get("Expires") };
             } catch (ex) {
                 // Timeout or other error
                 if (offlineAvailable === false) {
-                    this.loggingService.debug(`[Database] Failed to fetch and offline tile is not available for: ${params.url}, ${(ex as Error).message}`);
+                    if (!this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)) {
+                        this.store.dispatch(new SetLastOfflineDetectedDate(new Date()));
+                    }
                     throw new Error(`Failed to get ${params.url}: ${(ex as Error).message}`);
                 }
-                try {
-                    const data = await this.pmTilesService.getTileByType(z, x, y, type);
-                    this.loggingService.debug(`[Database] got tile from pmtiles for: ${params.url}`);
-                    return { data };
-                } catch (innerEx) {
-                    this.loggingService.debug(`[Database] Failed getting tile from pmtiles, ${(innerEx as any).message}: ${params.url}`);
-                    throw innerEx;
-                }
+                const data = await this.pmTilesService.getTileByType(z, x, y, type);
+                return { data };
             }
         });
     }
@@ -219,7 +214,7 @@ export class DatabaseService {
             storedState.layersState.overlays = initialState.layersState.overlays;
         }
         storedState.inMemoryState = initialState.inMemoryState;
-        if (!this.runningContext.isCapacitor) {
+        if (!this.runningContextService.isCapacitor) {
             storedState.routes = initialState.routes;
             storedState.poiState = initialState.poiState;
             storedState.gpsState = initialState.gpsState;

@@ -24,6 +24,7 @@ def capacitor_pods
   pod 'CapgoCapacitorCompass', :path => '../../node_modules/@capgo/capacitor-compass'
   pod 'CapgoInappbrowser', :path => '../../node_modules/@capgo/inappbrowser'
   pod 'RevenuecatPurchasesCapacitor', :path => '../../node_modules/@revenuecat/purchases-capacitor'
+  pod 'RevenuecatPurchasesCapacitorUi', :path => '../../node_modules/@revenuecat/purchases-capacitor-ui'
   pod 'CapacitorEmailComposer', :path => '../../node_modules/capacitor-email-composer'
 end
 

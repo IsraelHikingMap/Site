@@ -20,7 +20,7 @@ export class TranslationService {
         const description = feature.properties["description:" + language] ||
             feature.properties["poiExternalDescription:" + language];
         const isNeeded = description ? false : true;
-        const isPossible = feature.properties.description != null || 
+        const isPossible = feature.properties.description != null ||
             feature.properties["description:en"] != null ||
             Object.keys(feature.properties).filter(key => key.startsWith("poiExternalDescription:")).length > 0;
         return isNeeded && isPossible;
@@ -33,7 +33,7 @@ export class TranslationService {
         return feature.properties["description:" + language] ||
             feature.properties["poiExternalDescription:" + language] ||
             feature.properties.description ||
-            feature.properties["description:en"] || 
+            feature.properties["description:en"] ||
             (keys.length > 0 ? feature.properties[keys[0]] : "");
     }
 
@@ -43,9 +43,13 @@ export class TranslationService {
         if (this.translationCache.has(cacheKey)) {
             return this.translationCache.get(cacheKey);
         }
+        const description = this.getBestDescription(feature);
+        if (description.length === 0) {
+            return "";
+        }
         try {
             const translatedResponse = await firstValueFrom(this.httpClient.post<TranslationResponse>(Urls.tranlation, {
-                q: this.getBestDescription(feature),
+                q: description,
                 source: "auto",
                 target: language,
                 format: "text"
@@ -56,6 +60,5 @@ export class TranslationService {
         catch {
             return "";
         }
-        
     }
 }

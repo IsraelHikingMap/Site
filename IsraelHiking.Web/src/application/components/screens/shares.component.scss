@@ -1,0 +1,15 @@
+.map-height {
+    height: calc(100vh - var(--mat-toolbar-mobile-height) - env(safe-area-inset-top, 0));
+}
+
+@media (width >=600px) {
+    .map-height {
+        height: calc(100vh - var(--mat-toolbar-standard-height) - env(safe-area-inset-top, 0));
+    }
+}
+
+mgl-map {
+    height: 100% !important;
+    width: 100% !important;
+    object-fit: cover;
+}

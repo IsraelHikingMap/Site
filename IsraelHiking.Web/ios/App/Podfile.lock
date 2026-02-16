@@ -27,15 +27,23 @@ PODS:
     - Capacitor
   - CapgoCapacitorCompass (8.1.4):
     - Capacitor
-  - CapgoInappbrowser (8.1.15):
+  - CapgoInappbrowser (8.1.20):
     - Capacitor
   - IONFilesystemLib (1.1.0)
   - PurchasesHybridCommon (17.28.1):
     - RevenueCat (= 5.55.2)
+  - PurchasesHybridCommonUI (17.28.1):
+    - PurchasesHybridCommon (= 17.28.1)
+    - RevenueCatUI (= 5.55.2)
   - RevenueCat (5.55.2)
   - RevenuecatPurchasesCapacitor (12.0.5):
     - Capacitor
     - PurchasesHybridCommon (= 17.28.1)
+  - RevenuecatPurchasesCapacitorUi (12.0.5):
+    - Capacitor
+    - PurchasesHybridCommonUI (= 17.28.1)
+  - RevenueCatUI (5.55.2):
+    - RevenueCat (= 5.55.2)
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -54,12 +62,15 @@ DEPENDENCIES:
   - "CapgoCapacitorCompass (from `../../node_modules/@capgo/capacitor-compass`)"
   - "CapgoInappbrowser (from `../../node_modules/@capgo/inappbrowser`)"
   - "RevenuecatPurchasesCapacitor (from `../../node_modules/@revenuecat/purchases-capacitor`)"
+  - "RevenuecatPurchasesCapacitorUi (from `../../node_modules/@revenuecat/purchases-capacitor-ui`)"
 
 SPEC REPOS:
   trunk:
     - IONFilesystemLib
     - PurchasesHybridCommon
+    - PurchasesHybridCommonUI
     - RevenueCat
+    - RevenueCatUI
 
 EXTERNAL SOURCES:
   Capacitor:
@@ -94,6 +105,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capgo/inappbrowser"
   RevenuecatPurchasesCapacitor:
     :path: "../../node_modules/@revenuecat/purchases-capacitor"
+  RevenuecatPurchasesCapacitorUi:
+    :path: "../../node_modules/@revenuecat/purchases-capacitor-ui"
 
 SPEC CHECKSUMS:
   Capacitor: ff35b0f66370b84aa238251b35b91886a3207c16
@@ -110,12 +123,15 @@ SPEC CHECKSUMS:
   CapawesomeCapacitorAppUpdate: 02d66677e9ae97d851a358207f7e7df40b22aa72
   CapgoBackgroundGeolocation: ee305c8cda9f054f2190117be4aadddbe4c4c40a
   CapgoCapacitorCompass: c901b8aaf7fd692f998820dd7d0da7eb45dbea12
-  CapgoInappbrowser: 18f8aaa785c1dd8d5d55710e750f5363dc6e7c4c
+  CapgoInappbrowser: f221b1213b7f1c4a6b374242f66399ec6504a887
   IONFilesystemLib: 50b9a0f3052a9b40b9bedb43f328a8fe222f9f87
   PurchasesHybridCommon: 57e9e2fd474a726c41f61d5359f1bc05d89d9be8
+  PurchasesHybridCommonUI: ad685a661cc19fb45f1d7448f5890b399e177e14
   RevenueCat: b5605778017c179315e60b8921ed158b3428688c
   RevenuecatPurchasesCapacitor: 175dd55bdd04b2f6ac477a105a1de8822b4c5fd4
+  RevenuecatPurchasesCapacitorUi: 16c9d4cfaf6c3fcd7e0015aea4169a74e866d2cf
+  RevenueCatUI: ee8109669a5abf52df099788a0f961abdd2b5b09
 
-PODFILE CHECKSUM: c3ee17bca888dab4022b691eac1bd2d7cffc0509
+PODFILE CHECKSUM: 4100186683d9b9f68e127c62eacebf293150ad41
 
 COCOAPODS: 1.16.2

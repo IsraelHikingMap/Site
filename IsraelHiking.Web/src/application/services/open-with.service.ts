@@ -26,15 +26,18 @@ export class OpenWithService {
         if (!this.runningContextService.isCapacitor) {
             return;
         }
-        App.addListener("appUrlOpen", (data) => {
+        App.addListener("appUrlOpen", async (data) => {
             if (!data || !data.url) {
                 return;
             }
+
             if (data.url.startsWith("mapeak://")) {
                 // no need to do anything as this is part of the login flow
                 return;
             }
+
             if (data.url.startsWith("geo")) {
+                this.loggingService.info(`[OpenWith] Opening a geo url: ${data.url}`);
                 const coordsRegExp = /:(-?\d+\.\d+),(-?\d+\.\d+)/;
                 const coords = coordsRegExp.exec(data.url);
                 this.moveToCoordinates(coords);
@@ -82,7 +85,7 @@ export class OpenWithService {
             });
         } else if (pathname.startsWith(RouteStrings.ROUTE_LAYER)) {
             this.ngZone.run(() => {
-                this.router.navigate([RouteStrings.ROUTE_LAYER], { queryParams: Object.fromEntries(url.searchParams.entries())});
+                this.router.navigate([RouteStrings.ROUTE_LAYER], { queryParams: Object.fromEntries(url.searchParams.entries()) });
             });
         } else {
             this.ngZone.run(() => {
@@ -105,7 +108,7 @@ export class OpenWithService {
 
     private handleHttpUrl(href: string) {
         const url = new URL(href);
-        if (url.host.toLocaleLowerCase() === "www.mapeak.com" || 
+        if (url.host.toLocaleLowerCase() === "www.mapeak.com" ||
             url.host.toLocaleLowerCase() === "mapeak.com" ||
             url.host.toLocaleLowerCase() === "israelhiking.osm.org.il") {
             this.handleMapeakUrl(url);
@@ -136,7 +139,9 @@ export class OpenWithService {
 
     private moveToCoordinates(coords: string[]) {
         const latLng = SpatialService.toLatLng([+coords[2], +coords[1]]);
-        this.router.navigate([RouteStrings.ROUTE_POI, RouteStrings.COORDINATES, getIdFromLatLng(latLng)],
-            { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+        this.ngZone.run(() => {
+            this.router.navigate([RouteStrings.ROUTE_POI, RouteStrings.COORDINATES, getIdFromLatLng(latLng)],
+                { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+        });
     }
 }

@@ -60,6 +60,10 @@
 		"classpath": "com.revenuecat.purchases.capacitor.PurchasesPlugin"
 	},
 	{
+		"pkg": "@revenuecat/purchases-capacitor-ui",
+		"classpath": "com.revenuecat.purchases.capacitor.ui.RevenueCatUIPlugin"
+	},
+	{
 		"pkg": "capacitor-email-composer",
 		"classpath": "de.einfachhans.emailcomposer.EmailComposerPlugin"
 	}

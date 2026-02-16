@@ -5,7 +5,7 @@ import { Dir } from "@angular/cdk/bidi";
 import { ResourcesService } from "../services/resources.service";
 import { ElevationProvider } from "../services/elevation.provider";
 import { CoordinatesService } from "../services/coordinates.service";
-import type { LatLngAlt, NorthEast } from "../models";
+import type { LatLngAltTime, NorthEast } from "../models";
 
 @Component({
     selector: "coordinates",
@@ -14,7 +14,7 @@ import type { LatLngAlt, NorthEast } from "../models";
 })
 export class CoordinatesComponent implements OnInit {
 
-    public latlng = input<LatLngAlt>();
+    public latlng = input<LatLngAltTime>();
 
     public itmCoordinates: NorthEast;
 

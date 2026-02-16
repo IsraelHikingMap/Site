@@ -1,7 +1,7 @@
 ﻿﻿<div [dir]="resources.direction">
-    <div matDialogTitle>
+    <div mat-dialog-title>
         <div>{{resources.termsOfService}}</div>
-        <button mat-button type="button" matDialogClose="false" tabindex="-1"><i class="fa icon-close"></i></button>
+        <button mat-button type="button" mat-dialog-close="false" tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-content>
         <div>
@@ -29,7 +29,7 @@
         </div>
     </div>
     <div mat-dialog-actions>
-        <button matDialogClose="true" mat-raised-button color="primary" [disabled]="iAgree === false" (click)="submit()"
+        <button mat-dialog-close mat-raised-button color="primary" [disabled]="iAgree === false" (click)="submit()"
             angulartics2On="click" angularticsCategory="Terms Of Service"
             angularticsAction="Sumbit">{{resources.submit}}</button>
     </div>

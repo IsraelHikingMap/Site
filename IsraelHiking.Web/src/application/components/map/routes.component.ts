@@ -11,16 +11,17 @@ import type { Immutable } from "immer";
 
 import { RoutePointOverlayComponent } from "../overlays/route-point-overlay.component";
 import { PrivatePoiOverlayComponent } from "../overlays/private-poi-overlay.component";
+import { RoutesPathComponent } from "./routes-path.component";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "../intercations/route-edit-route.interaction";
 import { Urls } from "../../urls";
-import type { LatLngAlt, ApplicationState, RouteData } from "../../models";
+import type { LatLngAltTime, ApplicationState, RouteData } from "../../models";
 
 interface RoutePointViewData {
-    latlng: LatLngAlt;
+    latlng: LatLngAltTime;
     segmentIndex: number;
 }
 
@@ -29,12 +30,12 @@ interface RoutePointViewData {
     templateUrl: "./routes.component.html",
     styleUrls: ["./routes.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, RoutePointOverlayComponent, Dir, MatAnchor, MatTooltip, MatButton, MarkerComponent, PrivatePoiOverlayComponent]
+    imports: [SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, RoutePointOverlayComponent, Dir, MatAnchor, MatTooltip, MatButton, MarkerComponent, PrivatePoiOverlayComponent, RoutesPathComponent]
 })
 export class RoutesComponent implements AfterViewInit {
 
     public routePointPopupData: RoutePointViewData;
-    public nonEditRoutePointPopupData: { latlng: LatLngAlt; wazeAddress: string; routeId: string };
+    public nonEditRoutePointPopupData: { latlng: LatLngAltTime; wazeAddress: string; routeId: string };
     public editingRouteGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = {
         type: "FeatureCollection",
         features: []
@@ -137,19 +138,12 @@ export class RoutesComponent implements AfterViewInit {
     public ngAfterViewInit(): void {
         this.mapComponent.mapLoad.subscribe(async () => {
             this.setInteractionAccordingToState();
-            const fullUrl = this.fileService.getFullUrl("content/arrow.png");
-            const image = await this.mapComponent.mapInstance.loadImage(fullUrl);
-            await this.mapComponent.mapInstance.addImage("arrow", image.data, { sdf: true });
         });
     }
 
     private isEditMode(): boolean {
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         return selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route");
-    }
-
-    public isLast(segmentIndex: number, routeData: RouteData) {
-        return segmentIndex === routeData.segments.length - 1;
     }
 
     public isRouteInEditPoiMode(route: Immutable<RouteData>) {

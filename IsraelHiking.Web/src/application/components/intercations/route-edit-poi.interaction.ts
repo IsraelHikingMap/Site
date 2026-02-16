@@ -8,11 +8,10 @@ import { SelectedRouteService } from "../../services/selected-route.service";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { GeoLocationService } from "../../services/geo-location.service";
 import { SnappingService, SnappingPointResponse } from "../../services/snapping.service";
-import { PoiService } from "../../services/poi.service";
 import { ResourcesService } from "../../services/resources.service";
 import { AddPrivatePoiAction, UpdatePrivatePoiAction } from "../../reducers/routes.reducer";
 import { AddRecordingPoiAction, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
-import type { ApplicationState, MarkerData, LatLngAlt } from "../../models";
+import type { ApplicationState, MarkerData, LatLngAltTime } from "../../models";
 
 @Injectable()
 export class RouteEditPoiInteraction {
@@ -21,7 +20,6 @@ export class RouteEditPoiInteraction {
     private readonly ngZone = inject(NgZone);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly snappingService = inject(SnappingService);
-    private readonly poiService = inject(PoiService);
     private readonly resources = inject(ResourcesService);
     private readonly store = inject(Store);
 
@@ -52,10 +50,11 @@ export class RouteEditPoiInteraction {
         });
     };
 
-    public handleDragEnd(latlng: LatLngAlt, index: number) {
+    public handleDragEnd(latlng: LatLngAltTime, index: number) {
         const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
         if (recordedRouteState.isAddingPoi) {
             const markerData = structuredClone(recordedRouteState.route.markers[index]) as MarkerData;
+            markerData.id = uuidv4();
             markerData.latlng = latlng;
             this.store.dispatch(new UpdateRecordingPoiAction(index, markerData));
         } else {
@@ -66,7 +65,7 @@ export class RouteEditPoiInteraction {
         }
     }
 
-    private addPrivatePoi(latlng: LatLngAlt) {
+    private addPrivatePoi(latlng: LatLngAltTime) {
         let markerData: MarkerData = {
             id: uuidv4(),
             latlng,
@@ -107,7 +106,7 @@ export class RouteEditPoiInteraction {
         PrivatePoiEditDialogComponent.openDialog(this.matDialog, markerData, index);
     }
 
-    private getSnappingForPoint(latlng: LatLngAlt): SnappingPointResponse {
+    private getSnappingForPoint(latlng: LatLngAltTime): SnappingPointResponse {
         const gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
         if (gpsState.tracking !== "tracking") {
             return {

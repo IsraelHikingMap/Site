@@ -1,0 +1,126 @@
+﻿<div [dir]="resources.direction">
+  <div mat-dialog-title>
+    <div>{{shareUrl.title}}</div>
+    <button mat-button type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
+  </div>
+  <div mat-dialog-content>
+    <div class="flex flex-row justify-center">
+      <div class="w-[256px] h-[256px]">
+        @if (!shareUrl.base64Preview) {
+        <mgl-map [interactive]="false" [mapStyle]="style" [attributionControl]="false"
+          [canvasContextAttributes]="{ preserveDrawingBuffer: true }" (mapLoad)="mapLoaded($event)">
+          <layers [isMainMap]="false"></layers>
+          <routes-path [routesGeoJson]="routesGeoJson"></routes-path>
+          <mgl-control [position]="resources.direction === 'rtl' ? 'top-left' : 'top-right'">
+            <label>
+              <a matMiniFab color="" (changed)="addImage($event)" angulartics2On="click" angularticsCategory="Share"
+                angularticsAction="Upload image">
+                <i class="fa icon-image fa-2x pt-1"></i>
+              </a>
+              <input type="file" (change)="addImage($event)" [style.display]="'none'" />
+            </label>
+          </mgl-control>
+        </mgl-map>
+        } @else {
+        <div class="img-container-small">
+          <img [src]="shareUrl.base64Preview" class="img-responsive-full img-center" (error)="removeImage()" />
+          <button matMiniFab color="" class="absolute! top-2 end-2" (click)="removeImage()" angulartics2On="click"
+            angularticsCategory="Share" angularticsAction="Remove image">
+            <i class="fa icon-trash fa-2x pt-1"></i>
+          </button>
+        </div>
+        }
+      </div>
+    </div>
+    <div class="flex flex-row">
+      <mat-form-field class="w-full" hintLabel="{{resources.titlePlaceHolder}}">
+        <mat-label>{{resources.title}}</mat-label>
+        <input matInput class="w-full" type="text" [(ngModel)]="shareUrl.title" />
+      </mat-form-field>
+    </div>
+    <div class="flex flex-row">
+      <mat-form-field class="w-full" hintLabel="{{resources.descriptionPlaceHolder}}">
+        <mat-label>{{resources.description}}</mat-label>
+        <textarea matInput class="w-full" rows="2" type="text" [(ngModel)]="shareUrl.description"></textarea>
+      </mat-form-field>
+    </div>
+    @if (hasHiddenRoutes) {
+    <div class="flex flex-row">
+      <mat-hint class="text-sm">⚠️ {{resources.hiddenRoutesWillNotBeSaved}}</mat-hint>
+    </div>
+    }
+    @if (canUpdate) {
+    <div class="flex flex-row">
+      <mat-checkbox color="primary" [(ngModel)]="updateCurrentShare">{{resources.updateCurrentShare}}</mat-checkbox>
+    </div>
+    }
+    <!-- HM TODO: remove this when the feature is matured -->
+    @if (canPublishPublic) {
+    <div class="flex flex-row items-center">
+      <mat-radio-group [(ngModel)]="shareUrl.public" color="primary">
+        <mat-radio-button [value]="false">{{resources.private}}</mat-radio-button>
+        <mat-radio-button [value]="true" [disabled]="!canPublishPublic">{{resources.public}}</mat-radio-button>
+      </mat-radio-group>
+      @if (!canPublishPublic) {
+      <span class="m-2">
+        <i class="fa icon-info-circle" [matTooltip]="resources.contactUsToPublishAPublicRoute"></i>
+      </span>
+      }
+    </div>
+    }
+    <div class="flex flex-row">
+      <mat-label>{{resources.routeType}}</mat-label>
+    </div>
+    <div class="flex flex-row">
+      <mat-radio-group [(ngModel)]="shareUrl.type" color="primary">
+        <mat-radio-button value="Hiking"><i class="fa icon-hike"></i></mat-radio-button>
+        <mat-radio-button value="Biking"><i class="fa icon-bike"></i></mat-radio-button>
+        <mat-radio-button value="4x4"><i class="fa icon-four-by-four"></i></mat-radio-button>
+        <mat-radio-button value="Unknown"><i class="fa icon-question"></i></mat-radio-button>
+      </mat-radio-group>
+    </div>
+    <div class="flex flex-row">
+      <mat-label>{{resources.difficulty}}</mat-label>
+    </div>
+    <div class="flex flex-row">
+      <mat-radio-group [(ngModel)]="shareUrl.difficulty" color="primary">
+        <mat-radio-button value="Easy"><span
+            class="rounded-full bg-green-500 p-2">{{resources.easy}}</span></mat-radio-button>
+        <mat-radio-button value="Moderate"><span
+            class="rounded-full bg-yellow-500 p-2">{{resources.moderate}}</span></mat-radio-button>
+        <mat-radio-button value="Hard"><span
+            class="rounded-full bg-red-500 p-2 text-white">{{resources.hard}}</span></mat-radio-button>
+        <mat-radio-button value="Unknown"><span
+            class="rounded-full bg-gray-300 p-2">{{resources.unknown}}</span></mat-radio-button>
+      </mat-radio-group>
+    </div>
+    <div class="flex flex-row">
+      <mat-form-field class="w-full">
+        <mat-label>{{resources.website}}</mat-label>
+        <input matInput type="text" dir="ltr" [(ngModel)]="shareUrl.website" />
+      </mat-form-field>
+    </div>
+    <div class="inline-flex flex-row gap-1 text-sm mx-2">
+      <div matTooltip="{{resources.gain}}" matTooltipPosition="above">
+        <i class="fa icon-arrow-up"></i>
+        <span class="mx-1">{{shareUrl.gain | distance}}</span>
+      </div>
+      <div matTooltip="{{resources.loss}}" matTooltipPosition="above">
+        <i class="fa icon-arrow-down"></i>
+        <span class="mx-1">{{shareUrl.loss | distance}}</span>
+      </div>
+      <div matTooltip="{{resources.length}}" matTooltipPosition="above">
+        <i class="fa icon-arrow-right"></i>
+        <span class="mx-1">{{shareUrl.length | distance}}</span>
+      </div>
+    </div>
+  </div>
+  <div mat-dialog-actions>
+    <div class="flex flex-row w-full">
+      <button mat-raised-button class="w-full" color="primary" (click)="uploadShareUrl()"
+        [disabled]="isLoading || !canUpload()" angulartics2On="click" angularticsCategory="Share"
+        angularticsAction="Share {{updateCurrentShare ? 'update' : 'create'}}">{{updateCurrentShare ? resources.update :
+        resources.generateUrlToShareWithYourFriends}}</button>
+    </div>
+  </div>
+</div>

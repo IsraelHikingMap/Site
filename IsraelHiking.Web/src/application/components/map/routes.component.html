@@ -1,35 +1,6 @@
-﻿<mgl-geojson-source id="routes-geojson" [data]="routesGeoJson"></mgl-geojson-source>
-<mgl-layer id="route-line" type="line" source="routes-geojson" [before]="resources.endOfRoutes"
-  [filter]="['==', '$type', 'LineString']" [layout]="{
-                'line-cap': 'butt',
-                'line-join': 'bevel'
-           }" [paint]="{
-                'line-color': ['get', 'color'],
-                'line-width': ['get', 'weight'],
-                'line-opacity': ['get', 'opacity']
-            }" (layerMouseEnter)="routeLineMouseEnter($event)" (layerMouseMove)="routeLineMouseOver($event)"
-  (layerMouseLeave)="routeLineMouseLeave()" (layerClick)="routeLineClick($event)">
-</mgl-layer>
-<mgl-layer id="route-line-direction" type="symbol" source="routes-geojson" [before]="resources.endOfRoutes"
-  [filter]="['==', '$type', 'LineString']" [layout]="{
-                'symbol-placement': 'line',
-                'symbol-spacing': 40,
-                'icon-image': 'arrow',
-                'icon-size': ['get', 'iconSize'],
-                'icon-allow-overlap': true,
-                'icon-ignore-placement': true
-           }" [paint]="{
-                'icon-color': ['get', 'iconColor']
-            }">
-</mgl-layer>
-<mgl-layer id="route-points" type="circle" source="routes-geojson" [before]="resources.endOfRoutes"
-  [filter]="['==', '$type', 'Point']" [paint]="{
-                'circle-color': ['get', 'color'],
-                'circle-radius': 7,
-                'circle-stroke-color': ['get', 'strokeColor'],
-                'circle-stroke-width': 3
-            }" (layerClick)="nonEditRoutePointClick($event)">
-</mgl-layer>
+﻿<routes-path [routesGeoJson]="routesGeoJson" (lineLayerMouseEnter)="routeLineMouseEnter($event)"
+  (lineLayerMouseMove)="routeLineMouseOver($event)" (lineLayerMouseLeave)="routeLineMouseLeave()"
+  (lineLayerClick)="routeLineClick($event)" (pointsLayerClick)="nonEditRoutePointClick($event)"></routes-path>
 <mgl-geojson-source [id]="resources.editRouteSource" [data]="editingRouteGeoJson"></mgl-geojson-source>
 <mgl-layer [id]="resources.editRouteLines" type="line" [source]="resources.editRouteSource"
   [filter]="['==', '$type', 'LineString']" [before]="resources.endOfRoutes" [layout]="{

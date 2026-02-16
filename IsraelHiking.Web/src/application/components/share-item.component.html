@@ -1,0 +1,73 @@
+<div class="overflow-hidden my-2 text-black">
+    <img #shareImage [src]="getImageFromShareId(256, 256)" (error)="shareImage.src='content/logo.png'" alt=""
+        class="float-end w-1/3 h-auto object-cover block ps-2 rounded-2xl">
+    <h4 class="m-2">
+        @if (showMenu()) {
+        <button mat-button [matMenuTriggerFor]="shareMenu">
+            <i class="fa icon-ellipsis-v"></i>
+        </button>
+        <mat-menu #shareMenu="matMenu">
+            <button mat-menu-item (click)="edit()">
+                <i class="fa icon-pencil"></i>
+                {{resources.edit}}
+            </button>
+            <button mat-menu-item (click)="editRoute()">
+                <i class="fa icon-recordings"></i>
+                {{resources.editRoute}}
+            </button>
+            <button mat-menu-item (click)="delete()">
+                <i class="fa icon-trash"></i>
+                {{resources.delete}}
+            </button>
+        </mat-menu>
+        }
+        {{shareUrl().title}}
+    </h4>
+    <div class="m-2">
+        @switch (shareUrl().difficulty) {
+        @case ("Easy") {
+        <span class="rounded-full bg-green-500 p-2">
+            <i class="fa {{getIconFromType()}}"></i>
+            {{resources.easy}}
+        </span>
+        }
+        @case ("Moderate") {
+        <span class="rounded-full bg-yellow-500 p-2">
+            <i class="fa {{getIconFromType()}}"></i>
+            {{resources.legendModerate}}
+        </span>
+        }
+        @case ("Hard") {
+        <span class="rounded-full bg-red-500 p-2 text-white">
+            <i class="fa {{getIconFromType()}}"></i>
+            {{resources.legendAdvanced}}
+        </span>
+        }
+        }
+    </div>
+    <div class="mx-2">
+        {{shareUrl().description}}
+    </div>
+    @if (shareUrl().length > 0) {
+    <div class="inline-flex flex-row gap-1 text-sm mx-2">
+        <div matTooltip="{{resources.gain}}" matTooltipPosition="above">
+            <i class="fa icon-arrow-up"></i>
+            <span class="mx-1 whitespace-nowrap">{{shareUrl().gain | distance}}</span>
+        </div>
+        <div matTooltip="{{resources.loss}}" matTooltipPosition="above">
+            <i class="fa icon-arrow-down"></i>
+            <span class="mx-1 whitespace-nowrap">{{shareUrl().loss | distance}}</span>
+        </div>
+        <div matTooltip="{{resources.length}}" matTooltipPosition="above">
+            <i class="fa icon-arrow-right"></i>
+            <span class="mx-1 whitespace-nowrap">{{shareUrl().length | distance}}</span>
+        </div>
+    </div>
+    }
+    <div class="mx-2">
+        @if (shareUrl().public) {
+        <span class="mx-1">{{resources.public}}, </span>
+        }
+        <span>{{resources.date}}: {{shareUrl().lastModifiedDate | date:'dd/MM/yyyy'}}</span>
+    </div>
+</div>

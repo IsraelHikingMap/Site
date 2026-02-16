@@ -18,15 +18,15 @@ export class LandingComponent {
 
     public readonly resources = inject(ResourcesService);
 
-    private readonly runningContext = inject(RunningContextService);
+    private readonly runningContextService = inject(RunningContextService);
     private readonly purchaseService = inject(PurchaseService);
 
     public isMobile(): boolean {
-        return this.runningContext.isMobile;
+        return this.runningContextService.isMobile;
     }
 
     public isApp(): boolean {
-        return this.runningContext.isCapacitor;
+        return this.runningContextService.isCapacitor;
     }
 
     public isShowPurchaseButton(): boolean {
@@ -34,6 +34,6 @@ export class LandingComponent {
     }
 
     public order(): void {
-        this.purchaseService.order();
+        this.purchaseService.showPaywall();
     }
 }

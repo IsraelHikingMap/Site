@@ -28,14 +28,14 @@ import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.s
 import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducers/routes.reducer";
 import { DeleteRecordingPoiAction, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
 import { Urls } from "../../urls";
-import type { LinkData, MarkerData, ApplicationState } from "../../models";
+import type { LinkData, MarkerDataWithoutId, ApplicationState, MarkerData } from "../../models";
 
 interface IIconsGroup {
     icons: string[];
 }
 
 interface PrivatePoiEditDialogData {
-    marker: Immutable<MarkerData>;
+    marker: Immutable<MarkerDataWithoutId>;
     routeId?: string;
     index: number;
 }
@@ -114,7 +114,7 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
      * @param index the index of the marker in the markers' array
      * @param routeId [optinal] - in case of null this dialog will edit recorded route markers, otherwise the id of the planned route
      */
-    public static openDialog(matDialog: MatDialog, marker: Immutable<MarkerData>, index: number, routeId?: string) {
+    public static openDialog(matDialog: MatDialog, marker: Immutable<MarkerDataWithoutId>, index: number, routeId?: string) {
         setTimeout(() => {
             // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
             matDialog.open(PrivatePoiEditDialogComponent, {

@@ -12,9 +12,10 @@ export class DistancePipe implements PipeTransform {
         if (value == null) {
             return "0";
         }
+        // \u200E is for negative numbers to prevent RTL issues.
         if (Math.abs(value) > 1000) {
-            return (value / 1000.0).toFixed(2) + " " + this.resources.kmUnit;
+            return `\u200E${(value / 1000.0).toFixed(2)} ${this.resources.kmUnit}`;
         }
-        return `\u200E${value.toFixed(0)} ${this.resources.meterUnit}`; // \u200E is for negative numbers to prevent RTL issues.
+        return `\u200E${value.toFixed(0)} ${this.resources.meterUnit}`;
     }
 }

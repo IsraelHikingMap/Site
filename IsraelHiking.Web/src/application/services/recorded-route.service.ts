@@ -1,5 +1,6 @@
 import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
+import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
 
 import { LoggingService } from "./logging.service";
@@ -98,6 +99,9 @@ export class RecordedRouteService {
         const routeData = this.routesFactory.createRouteData(name);
         const routingType = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
         routeData.markers = structuredClone(route.markers) as MarkerData[];
+        for (const marker of routeData.markers) {
+            marker.id = uuidv4();
+        }
         routeData.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs, routingType);
         return routeData;
     }

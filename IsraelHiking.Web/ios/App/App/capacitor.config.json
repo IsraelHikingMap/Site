@@ -28,6 +28,7 @@
 		"CapgoCompassPlugin",
 		"InAppBrowserPlugin",
 		"PurchasesPlugin",
+		"RevenueCatUIPlugin",
 		"EmailComposerPlugin"
 	]
 }

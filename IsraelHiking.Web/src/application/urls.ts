@@ -7,7 +7,6 @@ export class Urls {
     public static readonly emptyAuthHtml = Urls.baseAddress + "/empty-for-oauth.html";
     public static readonly mapeakAuthUrl = "mapeak://oauth_callback/";
     public static readonly translations = "translations/";
-    public static readonly urls = Urls.apiBase + "urls/";
     public static readonly health = Urls.apiBase + "health/";
     public static readonly routing = Urls.apiBase + "routing";
     public static readonly files = Urls.apiBase + "files";
@@ -19,11 +18,14 @@ export class Urls {
     public static readonly uploadDataContainer = Urls.apiBase + "osm/trace/route/";
     public static readonly traceAsDataContainer = Urls.apiBase + "osm/trace/";
     public static readonly tracePicture = Urls.apiBase + "osm/trace/";
-    public static readonly userLayers = Urls.apiBase + "userLayers/";
     public static readonly poi = Urls.apiBase + "points/";
     public static readonly poiClosest = Urls.poi + "closest/";
     public static readonly poiUpdates = Urls.poi + "updates/";
     public static readonly poiSimple = Urls.poi + "simple/";
+
+    public static readonly urls = Urls.apiBase + "urls/";
+    public static readonly userLayers = Urls.apiBase + "userLayers/";
+    public static readonly permissions = Urls.apiBase + "user/permissions";
 
     public static readonly osmApi = "https://api.openstreetmap.org/api/0.6/";
     public static readonly osmUser = Urls.osmApi + "user/details.json";

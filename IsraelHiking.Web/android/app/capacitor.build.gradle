@@ -24,6 +24,7 @@ dependencies {
     implementation project(':capgo-capacitor-compass')
     implementation project(':capgo-inappbrowser')
     implementation project(':revenuecat-purchases-capacitor')
+    implementation project(':revenuecat-purchases-capacitor-ui')
     implementation project(':capacitor-email-composer')
 
 }

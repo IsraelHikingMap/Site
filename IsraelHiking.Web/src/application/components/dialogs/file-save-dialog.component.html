@@ -1,12 +1,12 @@
 <div [dir]="resources.direction">
-    <div matDialogTitle>
+    <div mat-dialog-title>
         <div>{{resources.export}}</div>
-        <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+        <button mat-button type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-content>
         @for (format of formats; track format) {
         <div class="flex flex-row">
-            <button mat-button (click)="saveAs(format)" matDialogClose angulartics2On="click"
+            <button mat-button (click)="saveAs(format)" mat-dialog-close angulartics2On="click"
                 angularticsCategory="Files" angularticsAction="Save as format {{format.label}}">
                 <span class="text-sm" dir="ltr">{{format.label}}</span>
             </button>

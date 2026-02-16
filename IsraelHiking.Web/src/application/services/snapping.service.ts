@@ -3,10 +3,10 @@ import type { Immutable } from "immer";
 
 import { SpatialService } from "./spatial.service";
 import { MapService } from "./map.service";
-import type { LatLngAlt, MarkerData } from "../models";
+import type { LatLngAltTime, MarkerData } from "../models";
 
 export type SnappingPointResponse = {
-    latlng: LatLngAlt;
+    latlng: LatLngAltTime;
     markerData: Immutable<MarkerData>;
 };
 
@@ -19,7 +19,7 @@ export class SnappingService {
     /**
      * This method will snap to the nearest point. markerData will be null in case there were no points near by.
      */
-    public snapToPoint(latlng: LatLngAlt, points: Immutable<MarkerData[]>): SnappingPointResponse {
+    public snapToPoint(latlng: LatLngAltTime, points: Immutable<MarkerData[]>): SnappingPointResponse {
         const response = {
             latlng,
             markerData: null,

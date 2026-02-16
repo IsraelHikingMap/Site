@@ -14,9 +14,8 @@ import { ResourcesService } from "../../services/resources.service";
 import { AddSegmentAction, UpdateSegmentsAction } from "../../reducers/routes.reducer";
 import type {
     ApplicationState,
-    LatLngAlt,
-    RouteSegmentData,
     LatLngAltTime,
+    RouteSegmentData,
     MarkerData
 } from "../../models";
 
@@ -45,7 +44,7 @@ export class RouteEditRouteInteraction {
     private readonly ngZone = inject(NgZone);
     private readonly store = inject(Store);
 
-    private addEndOfRouteProgress(start: LatLngAlt, end: LatLngAlt): string {
+    private addEndOfRouteProgress(start: LatLngAltTime, end: LatLngAltTime): string {
         const id = "end-of-route-progress-line";
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         const newPointProgress = {
@@ -269,7 +268,7 @@ export class RouteEditRouteInteraction {
         }
     };
 
-    private addPointToEndOfRoute = async (latlng: LatLngAlt) => {
+    private addPointToEndOfRoute = async (latlng: LatLngAltTime) => {
         const newSegment = this.createRouteSegment(latlng, [latlng, latlng]);
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute.segments.length === 0) {
@@ -284,30 +283,30 @@ export class RouteEditRouteInteraction {
         this.store.dispatch(new AddSegmentAction(selectedRoute.id, newSegment));
     };
 
-    private createRouteSegment = (latlng: LatLngAlt, latlngs: LatLngAlt[]): RouteSegmentData => {
+    private createRouteSegment = (latlng: LatLngAltTime, latlngs: LatLngAltTime[]): RouteSegmentData => {
         const routeSegment = {
             routePoint: latlng,
-            latlngs: latlngs as LatLngAltTime[],
+            latlngs: latlngs,
             routingType: this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType
         };
         return routeSegment;
     };
 
-    private runRouting = async (startLatLng: LatLngAlt, segment: RouteSegmentData): Promise<void> => {
+    private runRouting = async (startLatLng: LatLngAltTime, segment: RouteSegmentData): Promise<void> => {
         segment.routePoint = this.getSnappingForRoute(segment.routePoint, []);
         const latLngs = await this.routingProvider.getRoute(startLatLng, segment.routePoint, segment.routingType);
-        segment.latlngs = latLngs as LatLngAltTime[];
+        segment.latlngs = latLngs;
         const last = latLngs[latLngs.length - 1];
         segment.routePoint = this.getSnappingForRoute(segment.routePoint, [last]);
     };
 
-    private async updateRoutePoint(latlng: LatLngAlt) {
+    private async updateRoutePoint(latlng: LatLngAltTime) {
         const index = this.getPointIndex();
         const routeData = this.selectedRouteService.getSelectedRoute();
         const routingType = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
         const segment = structuredClone(routeData.segments[index]) as RouteSegmentData;
         if (routeData.segments.length === 1) {
-            segment.latlngs = [latlng as LatLngAltTime, latlng as LatLngAltTime];
+            segment.latlngs = [latlng, latlng];
             segment.routePoint = latlng;
             segment.routingType = routingType;
             this.store.dispatch(new UpdateSegmentsAction(routeData.id, [index], [segment]));
@@ -315,7 +314,7 @@ export class RouteEditRouteInteraction {
             const nextSegment = structuredClone(routeData.segments[index + 1]) as RouteSegmentData;
             nextSegment.routingType = routingType;
             await this.runRouting(latlng, nextSegment);
-            const snappedLatLng = this.getSnappingForRoute(latlng, [nextSegment.latlngs[0]]) as LatLngAltTime;
+            const snappedLatLng = this.getSnappingForRoute(latlng, [nextSegment.latlngs[0]]);
             await this.elevationProvider.updateHeights([snappedLatLng]);
             segment.latlngs = [snappedLatLng, snappedLatLng];
             segment.routePoint = snappedLatLng;
@@ -339,7 +338,7 @@ export class RouteEditRouteInteraction {
         }
     }
 
-    private async updateRouteSegment(latlng: LatLngAlt) {
+    private async updateRouteSegment(latlng: LatLngAltTime) {
         const index = this.getSegmentIndex(this.selectedRouteSegments[0]);
         const routeData = this.selectedRouteService.getSelectedRoute();
         const segment = structuredClone(routeData.segments[index]) as RouteSegmentData;
@@ -349,7 +348,7 @@ export class RouteEditRouteInteraction {
         this.store.dispatch(new UpdateSegmentsAction(routeData.id, [index], [middleSegment, segment]));
     }
 
-    private splitRouteSegment(latlng: LatLngAlt) {
+    private splitRouteSegment(latlng: LatLngAltTime) {
         const index = this.getSegmentIndex(this.selectedRouteSegments[0]);
         const routeData = this.selectedRouteService.getSelectedRoute();
         const segment = structuredClone(routeData.segments[index]) as RouteSegmentData;
@@ -369,7 +368,7 @@ export class RouteEditRouteInteraction {
         return +splitStr[1];
     }
 
-    private getSnappingForRoute(latlng: LatLngAlt, additionalLatlngs: LatLngAlt[]): LatLngAlt {
+    private getSnappingForRoute(latlng: LatLngAltTime, additionalLatlngs: LatLngAltTime[]): LatLngAltTime {
         const gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
         if (gpsState.tracking === "tracking") {
             const currentLocation = GeoLocationService.positionToLatLngTime(gpsState.currentPosition);

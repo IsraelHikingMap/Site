@@ -19,12 +19,12 @@ export class ToggleAddRecordingPoiAction {
 
 export class AddRecordingRoutePointsAction {
     public static type = this.prototype.constructor.name;
-    constructor(public latlngs: LatLngAltTime[]) {}
+    constructor(public latlngs: LatLngAltTime[]) { }
 }
 
 export class AddPendingProcessingRoutePointAction {
     public static type = this.prototype.constructor.name;
-    constructor(public position: GeolocationPosition) {}
+    constructor(public position: GeolocationPosition) { }
 }
 
 export class ClearPendingProcessingRoutePointsAction {
@@ -33,17 +33,17 @@ export class ClearPendingProcessingRoutePointsAction {
 
 export class AddRecordingPoiAction {
     public static type = this.prototype.constructor.name;
-    constructor(public markerData: MarkerData) {}
+    constructor(public markerData: MarkerData) { }
 }
 
 export class UpdateRecordingPoiAction {
     public static type = this.prototype.constructor.name;
-    constructor(public index: number, public markerData: MarkerData) {}
+    constructor(public index: number, public markerData: MarkerData) { }
 }
 
 export class DeleteRecordingPoiAction {
     public static type = this.prototype.constructor.name;
-    constructor(public index: number) {}
+    constructor(public index: number) { }
 }
 
 @State<RecordedRouteState>({

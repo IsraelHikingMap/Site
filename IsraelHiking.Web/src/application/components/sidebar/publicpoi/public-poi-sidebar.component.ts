@@ -32,6 +32,7 @@ import { NavigateHereService } from "../../../services/navigate-here.service";
 import { GpxDataContainerConverterService } from "../../../services/gpx-data-container-converter.service";
 import { OsmAddressesService } from "../../../services/osm-addresses.service";
 import { TranslationService } from "../../../services/translation.service";
+import { ShareUrlsService } from "../../../services/share-urls.service";
 import { ElevationProvider } from "../../../services/elevation.provider";
 import { GeoJsonParser } from "../../../services/geojson.parser";
 import { AddRouteAction, AddPrivatePoiAction } from "../../../reducers/routes.reducer";
@@ -40,8 +41,7 @@ import { GeoJSONUtils } from "../../../services/geojson-utils";
 import type {
     LinkData,
     ApplicationState,
-    EditablePublicPointData,
-    LatLngAltTime
+    EditablePublicPointData
 } from "../../../models";
 
 export type SourceImageUrlPair = {
@@ -68,6 +68,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     public imagesUrls: string[] = [];
     public urls: string[] = [];
     public osmEditableInfo: EditablePublicPointData;
+    public showToggleTranslation: boolean = false;
 
     private editMode: boolean;
     private fullFeature: GeoJSON.Feature;
@@ -88,6 +89,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     private readonly geoJsonParser = inject(GeoJsonParser);
     private readonly elevationProvider = inject(ElevationProvider);
     private readonly translationService = inject(TranslationService);
+    private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly store = inject(Store);
 
     constructor() {
@@ -177,6 +179,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         this.imagesUrls = await this.poiService.getImagesThatHaveAttribution(feature);
         this.urls = GeoJSONUtils.getUrls(feature);
         this.description = await this.getDescription();
+        this.showToggleTranslation = this.translationService.isTranslationPossibleAndNeeded(feature) && this.description != this.translationService.getBestDescription(feature);
         this.lengthInKm = this.poiService.getLengthInKm(feature);
         const language = this.resources.getCurrentLanguageCodeSimplified();
         this.titleService.set(GeoJSONUtils.getTitle(feature, language));
@@ -273,6 +276,16 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     }
 
     public async convertToRoute() {
+        if (this.fullFeature.properties.poiSource === "Users") {
+            const shareUrl = await this.shareUrlsService.getShareUrl(this.fullFeature.properties.identifier);
+            for (const route of shareUrl.dataContainer.routes) {
+                const newRoute = this.routesFactory.createRouteDataAddMissingFields(route, this.selectedRouteService.getLeastUsedColor());
+                this.store.dispatch(new AddRouteAction(newRoute));
+                this.selectedRouteService.setSelectedRoute(newRoute.id);
+            }
+            this.close();
+            return;
+        }
         const routes = this.geoJsonParser.toRoutes(this.fullFeature as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString>);
         const featureColor = GeoJSONUtils.getFeatureColor(this.fullFeature);
         for (let i = 0; i < routes.length; i++) {
@@ -284,7 +297,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             }
             await this.elevationProvider.updateHeights(route.latlngs);
             newRoute.description = this.description;
-            newRoute.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs as LatLngAltTime[], "Hike");
+            newRoute.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs, "Hike");
             this.store.dispatch(new AddRouteAction(newRoute));
             this.selectedRouteService.setSelectedRoute(newRoute.id);
         }
@@ -368,10 +381,6 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     private isBadWikipediaUrl(url: string) {
         const language = this.resources.getCurrentLanguageCodeSimplified();
         return url == null || (url.includes("wikipedia") && !url.includes(language + ".wikipedia"));
-    }
-
-    public showToggleTranslation(): boolean {
-        return this.fullFeature && this.translationService.isTranslationPossibleAndNeeded(this.fullFeature);
     }
 
     public async toggleTranslation(): Promise<void> {

@@ -8,12 +8,12 @@ import type { PointsOfInterestState, MarkerData } from "../models";
 
 export class SetSelectedPoiAction {
     public static type = this.prototype.constructor.name;
-    constructor(public poi: GeoJSON.Feature) {}
+    constructor(public poi: GeoJSON.Feature) { }
 }
 
 export class SetUploadMarkerDataAction {
     public static type = this.prototype.constructor.name;
-    constructor(public markerData: MarkerData) {}
+    constructor(public markerData: MarkerData) { }
 }
 
 @State<PointsOfInterestState>({

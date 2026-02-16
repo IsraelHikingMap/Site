@@ -1,18 +1,20 @@
 ﻿﻿<div [dir]="resources.direction">
-    <div matDialogTitle>
+    <div mat-dialog-title>
         <div>{{resources.uploadPoint}}</div>
-        <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+        <button mat-button type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-content>
         <div class="flex flex-row">
             <div class="w-1/2">
-                <button mat-button matDialogClose class="w-full p-0! h-unset" (click)="addSimplePoint('Tap')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add cattle grid to OSM">
+                <button mat-button mat-dialog-close class="w-full p-0! h-unset" (click)="addSimplePoint('Tap')"
+                    angulartics2On="click" angularticsCategory="POI" angularticsAction="Add cattle grid to OSM">
                     <i class="fa icon-tap" [style.color]="'blue'"></i><br />
                     {{resources.legendDrinkingWater}}
                 </button>
             </div>
             <div class="w-1/2">
-                <button mat-button matDialogClose class="w-full p-0! h-unset" (click)="addSimplePoint('CattleGrid')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add cattle grid to OSM">
+                <button mat-button mat-dialog-close class="w-full p-0! h-unset" (click)="addSimplePoint('CattleGrid')"
+                    angulartics2On="click" angularticsCategory="POI" angularticsAction="Add cattle grid to OSM">
                     <i class="fa fa-lg icon-cattle-grid"></i><br />
                     {{resources.legendCattleGrid}}
                 </button>
@@ -20,13 +22,15 @@
         </div>
         <div class="flex flex-row">
             <div class="w-1/2">
-                <button mat-button matDialogClose class="w-full p-0! h-unset" (click)="addSimplePoint('Parking')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add parking to OSM">
+                <button mat-button mat-dialog-close class="w-full p-0! h-unset" (click)="addSimplePoint('Parking')"
+                    angulartics2On="click" angularticsCategory="POI" angularticsAction="Add parking to OSM">
                     <i class="fa icon-parking" [style.color]="'blue'"></i><br />
                     {{resources.legendParking}}
                 </button>
             </div>
             <div class="w-1/2">
-                <button mat-button matDialogClose class="w-full p-0! h-unset" (click)="addSimplePoint('OpenGate')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add open gate to OSM">
+                <button mat-button mat-dialog-close class="w-full p-0! h-unset" (click)="addSimplePoint('OpenGate')"
+                    angulartics2On="click" angularticsCategory="POI" angularticsAction="Add open gate to OSM">
                     <i class="fa icon-gate"></i><br />
                     {{resources.legendGate}}
                 </button>
@@ -34,13 +38,15 @@
         </div>
         <div class="flex flex-row">
             <div class="w-1/2">
-                <button mat-button matDialogClose class="w-full p-0! h-unset" (click)="addSimplePoint('ClosedGate')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add closed gate to OSM">
+                <button mat-button mat-dialog-close class="w-full p-0! h-unset" (click)="addSimplePoint('ClosedGate')"
+                    angulartics2On="click" angularticsCategory="POI" angularticsAction="Add closed gate to OSM">
                     <i class="fa icon-gate" [style.color]="'red'"></i><br />
                     {{resources.legendClosedGate}}
                 </button>
             </div>
             <div class="w-1/2">
-                <button mat-button matDialogClose class="w-full p-0! h-unset" (click)="addSimplePoint('Block')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add block to OSM">
+                <button mat-button mat-dialog-close class="w-full p-0! h-unset" (click)="addSimplePoint('Block')"
+                    angulartics2On="click" angularticsCategory="POI" angularticsAction="Add block to OSM">
                     <i class="fa icon-bollards"></i><br />
                     {{resources.legendBlock}}
                 </button>
@@ -48,20 +54,23 @@
         </div>
         <div class="flex flex-row">
             <div class="w-1/2">
-                <button mat-button matDialogClose class="w-full p-0! h-unset" (click)="addSimplePoint('PicnicSite')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add picnic site to OSM">
+                <button mat-button mat-dialog-close class="w-full p-0! h-unset" (click)="addSimplePoint('PicnicSite')"
+                    angulartics2On="click" angularticsCategory="POI" angularticsAction="Add picnic site to OSM">
                     <i class="fa icon-picnic" [style.color]="'#734a08'"></i><br />
                     {{resources.legendPicnicArea}}
                 </button>
             </div>
             <div class="w-1/2">
-                <button mat-button matDialogClose class="w-full p-0! h-unset" (click)="addSimplePoint('Bench')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add bench to OSM">
+                <button mat-button mat-dialog-close class="w-full p-0! h-unset" (click)="addSimplePoint('Bench')"
+                    angulartics2On="click" angularticsCategory="POI" angularticsAction="Add bench to OSM">
                     <i class="fa icon-bench" [style.color]="'#734a08'"></i><br />
                     {{resources.legendBench}}
                 </button>
             </div>
         </div>
         <div class="flex flex-row">
-            <button mat-button matDialogClose class="h-full! w-full" (click)="addComplexPoint()" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add complex point to OSM">
+            <button mat-button mat-dialog-close class="h-full! w-full" (click)="addComplexPoint()"
+                angulartics2On="click" angularticsCategory="POI" angularticsAction="Add complex point to OSM">
                 {{resources.more}}
             </button>
         </div>
