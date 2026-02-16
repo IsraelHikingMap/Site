@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import Proj from "proj4";
 
-import { LatLngAlt, NorthEast } from "../models";
+import { LatLngAltTime, NorthEast } from "../models";
 
 const DECIMAL_DEGREES_REGEX_STRING = "([-+]?\\d{1,3}(?:\\.\\d+)?)°?";
 const DELIMITER_REGEX_STRING = "(?:\\s*[,/\\s]\\s*)";
@@ -30,25 +30,25 @@ export class CoordinatesService {
     static readonly DEGREES_MINUTES_SECONDS_LAT_LON = new RegExp("^" +
         NORTH_SOUTH_REGEX_STRING + DELIMITER_REGEX_STRING + EAST_WEST_REGEX_STRING + "$");
     static readonly REVERSE_DEGREES_MINUTES_SECONDS_LAT_LON = new RegExp("^" +
-        EAST_WEST_REGEX_STRING+ DELIMITER_REGEX_STRING + NORTH_SOUTH_REGEX_STRING + "$");
+        EAST_WEST_REGEX_STRING + DELIMITER_REGEX_STRING + NORTH_SOUTH_REGEX_STRING + "$");
     static readonly ITM_ICS_COORDINATES = new RegExp("^(\\d{6})" + DELIMITER_REGEX_STRING + "(\\d{6,7})$");
     static readonly SIX_NUMBERS_COORDINATES = new RegExp("^\\s*" + INTEGER_NUMBER_STRING + "[\\s°]\\s*" +
-                                                            INTEGER_NUMBER_STRING + "[" + MINUTES_SYMBOLS_STRING + "\\s:]\\s*" +
-                                                            DECIMAL_NUMBER_STRING + "[" + SECONDS_SYMBOL_STRING + "]?\\s*" +
-                                                            DELIMITER_REGEX_STRING +
-                                                            INTEGER_NUMBER_STRING + "[\\s°]\\s*" +
-                                                            INTEGER_NUMBER_STRING + "[" + MINUTES_SYMBOLS_STRING + "\\s:]\\s*" +
-                                                            DECIMAL_NUMBER_STRING + "[" + SECONDS_SYMBOL_STRING + "]?\\s*$");
+        INTEGER_NUMBER_STRING + "[" + MINUTES_SYMBOLS_STRING + "\\s:]\\s*" +
+        DECIMAL_NUMBER_STRING + "[" + SECONDS_SYMBOL_STRING + "]?\\s*" +
+        DELIMITER_REGEX_STRING +
+        INTEGER_NUMBER_STRING + "[\\s°]\\s*" +
+        INTEGER_NUMBER_STRING + "[" + MINUTES_SYMBOLS_STRING + "\\s:]\\s*" +
+        DECIMAL_NUMBER_STRING + "[" + SECONDS_SYMBOL_STRING + "]?\\s*$");
 
     static readonly DECIMAL_DEGREES = new RegExp("^" + DECIMAL_DEGREES_REGEX_STRING + "$");
     static readonly DEGREES_MINUTES_SECONDS = new RegExp("^\\s*(\\d{1,3})(?:[:°\\s]\\s*)(\\d{1,2})(?:[:" +
-                    MINUTES_SYMBOLS_STRING + "\\s]\\s*)(\\d{1,2}(?:\\.\\d+)?)[:" +
-                    SECONDS_SYMBOL_STRING + "]?\\s*$");
+        MINUTES_SYMBOLS_STRING + "\\s]\\s*)(\\d{1,2}(?:\\.\\d+)?)[:" +
+        SECONDS_SYMBOL_STRING + "]?\\s*$");
     static readonly DEGREES_MINUTES = new RegExp("^\\s*(\\d{1,3})(?:[:°\\s]\\s*)(\\d{1,2}(?:\\.\\d+)?)[:" +
-                    MINUTES_SYMBOLS_STRING + "]?\\s*$");
+        MINUTES_SYMBOLS_STRING + "]?\\s*$");
 
     private itmConverter = Proj(CoordinatesService.ITM_WKT);
-    private coordinatesParserMap: {matcher: RegExp; parser: (match: RegExpMatchArray) => LatLngAlt}[];
+    private coordinatesParserMap: { matcher: RegExp; parser: (match: RegExpMatchArray) => LatLngAltTime }[];
 
     constructor() {
         this.coordinatesParserMap = [
@@ -75,7 +75,7 @@ export class CoordinatesService {
         ];
     }
 
-    public toItm(latLng: LatLngAlt): NorthEast {
+    public toItm(latLng: LatLngAltTime): NorthEast {
         const coords = this.itmConverter.forward([latLng.lng, latLng.lat]);
         return {
             north: coords[1],
@@ -83,7 +83,7 @@ export class CoordinatesService {
         };
     }
 
-    public fromItm(northEast: NorthEast): LatLngAlt {
+    public fromItm(northEast: NorthEast): LatLngAltTime {
         const coords = this.itmConverter.inverse([northEast.east, northEast.north]);
         return {
             lat: coords[1],
@@ -91,7 +91,7 @@ export class CoordinatesService {
         };
     }
 
-    public parseCoordinates(term: string): LatLngAlt {
+    public parseCoordinates(term: string): LatLngAltTime {
         for (const item of this.coordinatesParserMap) {
             const matchArray = term.trim().match(item.matcher);
             if (matchArray && matchArray.length > 0) {
@@ -101,31 +101,27 @@ export class CoordinatesService {
         return null;
     }
 
-    private parseItmIcsCoordinates(match: RegExpMatchArray): LatLngAlt {
+    private parseItmIcsCoordinates(match: RegExpMatchArray): LatLngAltTime {
         let east = parseInt(match[1], 10);
         let north = parseInt(match[2], 10);
-        if (north >= 1350000)
-        {
+        if (north >= 1350000) {
             return null;
         }
-        if (north < 350000)
-        {
+        if (north < 350000) {
             east = east + 50000;
             north = north + 500000;
         }
-        else if (north > 850000)
-        {
+        else if (north > 850000) {
             east = east + 50000;
             north = north - 500000;
         }
-        if (east >= 100000 && east <= 300000)
-        {
-            return this.fromItm({east, north});
+        if (east >= 100000 && east <= 300000) {
+            return this.fromItm({ east, north });
         }
         return null;
     }
 
-    private parseSixNumbers(match: RegExpMatchArray): LatLngAlt {
+    private parseSixNumbers(match: RegExpMatchArray): LatLngAltTime {
         const latitudeDegrees = parseFloat(match[1]);
         const latitudeMinutes = parseFloat(match[2]);
         const latitudeSeconds = parseFloat(match[3]);
@@ -139,71 +135,61 @@ export class CoordinatesService {
         };
     }
 
-    private parseReverseDegreesMinutesSeconds(match: RegExpMatchArray): LatLngAlt {
+    private parseReverseDegreesMinutesSeconds(match: RegExpMatchArray): LatLngAltTime {
         return this.parseDegreesMinutesSeconds([match[0], match[3], match[4], match[1], match[2]]);
     }
 
-    private parseDegreesMinutesSeconds(match: RegExpMatchArray): LatLngAlt {
+    private parseDegreesMinutesSeconds(match: RegExpMatchArray): LatLngAltTime {
         let lat = this.getDegreesFromString(match[1].trim());
         let lng = this.getDegreesFromString(match[3].trim());
-        if (isNaN(lat) || isNaN(lng))
-        {
+        if (isNaN(lat) || isNaN(lng)) {
             return null;
         }
-        if (lat <= 90 && lng <= 180)
-        {
-            if (match[2] === "S")
-            {
+        if (lat <= 90 && lng <= 180) {
+            if (match[2] === "S") {
                 lat = -lat;
             }
-            if (match[4] === "W")
-            {
+            if (match[4] === "W") {
                 lng = -lng;
             }
-            return {lng, lat};
+            return { lng, lat };
         }
         return null;
     }
 
     private getDegreesFromString(degreesString: string): number {
         const decDegMatch = degreesString.match(CoordinatesService.DECIMAL_DEGREES);
-        if (decDegMatch)
-        {
+        if (decDegMatch) {
             return parseFloat(decDegMatch[1]);
         }
 
         const degMinMatch = degreesString.match(CoordinatesService.DEGREES_MINUTES);
-        if (degMinMatch)
-        {
+        if (degMinMatch) {
             const deg = parseFloat(degMinMatch[1]);
             const min = parseFloat(degMinMatch[2]);
-            if (min < 60)
-            {
+            if (min < 60) {
                 return min / 60.0 + deg;
             }
             return NaN;
         }
 
         const degMinSecMatch = degreesString.match(CoordinatesService.DEGREES_MINUTES_SECONDS);
-        if (degMinSecMatch)
-        {
+        if (degMinSecMatch) {
             const deg = parseFloat(degMinSecMatch[1]);
             const min = parseFloat(degMinSecMatch[2]);
             const sec = parseFloat(degMinSecMatch[3]);
-            if (min < 60 && sec < 60)
-            {
+            if (min < 60 && sec < 60) {
                 return (sec / 60.0 + min) / 60.0 + deg;
             }
         }
         return NaN;
     }
 
-    private parseDecimalLatLng(match: RegExpMatchArray): LatLngAlt {
+    private parseDecimalLatLng(match: RegExpMatchArray): LatLngAltTime {
         const lat = parseFloat(match[1]);
         const lng = parseFloat(match[2]);
-        if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180)
-        {
-            return {lng, lat};
+        if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+            return { lng, lat };
         }
         return null;
     }

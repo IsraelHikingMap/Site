@@ -109,7 +109,8 @@ public class SimplePointAdderExecutor(
         // The highway in the database is not up-to-date, need to fetch it from OSM.
         var completeWay = await osmGateway.GetCompleteWay(closestHighway.GetOsmId());
         var firstHighway = osmGeoJsonPreprocessorExecutor.Preprocess([completeWay]).FirstOrDefault();
-        if (firstHighway == null) {
+        if (firstHighway == null)
+        {
             // This is a rate case where the next version of the highway doesn't contain any tags, 
             // and it was a highway when the highways database wes built
             return (null, []);
@@ -170,6 +171,12 @@ public class SimplePointAdderExecutor(
                 Create = [newNode]
             };
         }
+        // Special handling for nearby barriers first, to update them if possible.
+        var closestBarrierNodeId = await overpassTurboGateway.GetClosestBarrierId(new Coordinate(request.LatLng.Lng, request.LatLng.Lat), options.Value.ClosestNodeWithGate);
+        if (closestBarrierNodeId > 0)
+        {
+            return await UpdateNode(closestBarrierNodeId, newNode, osmGateway);
+        }
 
         var (way, closestHighways) = await GetClosestHighways(osmGateway, request.LatLng);
         if (!closestHighways.Any())
@@ -188,6 +195,11 @@ public class SimplePointAdderExecutor(
             return CreateUpdateWayChangeFromData(way, indexToInsert, newNode, closestHighways.First());
         }
         // Close enough to a node and not a junction -> updating this node
+        return await UpdateNode(nodeId, newNode, osmGateway);
+    }
+
+    private async Task<OsmChange> UpdateNode(long nodeId, Node newNode, IAuthClient osmGateway)
+    {
         var nodeToUpdate = await osmGateway.GetNode(nodeId);
         if (nodeToUpdate.Tags == null)
         {

@@ -6,6 +6,7 @@ import { MatTooltip } from "@angular/material/tooltip";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { SourceDirective, GeoJSONSourceComponent, LayerComponent, MarkerComponent, PopupComponent } from "@maplibre/ngx-maplibre-gl";
 import { Store } from "@ngxs/store";
+import { v4 as uuidv4 } from "uuid";
 
 import { CoordinatesComponent } from "../coordinates.component";
 import { MissingPartOverlayComponent } from "../overlays/missing-part-overlay.component";
@@ -16,7 +17,7 @@ import { RoutesFactory } from "../../services/routes.factory";
 import { TracesService } from "../../services/traces.service";
 import { AddRouteAction } from "../../reducers/routes.reducer";
 import { RemoveMissingPartAction, SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
-import type { ApplicationState, LatLngAlt } from "../../models";
+import type { ApplicationState, LatLngAltTime } from "../../models";
 
 @Component({
     selector: "traces",
@@ -27,9 +28,9 @@ export class TracesComponent {
 
     public visibleTraceName: string = "";
     public selectedTrace: GeoJSON.FeatureCollection<GeoJSON.Geometry> = null;
-    public selectedTraceStart: LatLngAlt = null;
+    public selectedTraceStart: LatLngAltTime = null;
     public selectedFeature: GeoJSON.Feature<GeoJSON.LineString>;
-    public missingCoordinates: LatLngAlt = null;
+    public missingCoordinates: LatLngAltTime = null;
     public missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString> = {
         type: "FeatureCollection",
         features: []
@@ -137,7 +138,12 @@ export class TracesComponent {
         for (const route of trace.dataContainer.routes) {
             const routeToAdd = this.routesFactory.createRouteData(route.name);
             routeToAdd.segments = route.segments;
-            routeToAdd.markers = route.markers;
+            routeToAdd.markers = route.markers.map(m => {
+                return {
+                    ...m,
+                    id: uuidv4()
+                };
+            });
             this.store.dispatch(new AddRouteAction(routeToAdd));
         }
         this.clearTrace();

@@ -57,4 +57,14 @@ export class MapService {
             this.loggingService.error("[Map] Error: " + e?.error?.message);
         });
     }
+
+    public async addArrowToMap(map: Map) {
+        const fullUrl = this.getFullUrl("content/arrow.png");
+        const image = await map.loadImage(fullUrl);
+        map.addImage("arrow", image.data, { sdf: true });
+    }
+
+    public getFullUrl(relativePath: string): string {
+        return (window.origin || window.location.origin) + "/" + relativePath;
+    }
 }

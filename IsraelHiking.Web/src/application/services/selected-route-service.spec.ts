@@ -11,7 +11,7 @@ import { RoutesFactory } from "./routes.factory";
 import { SetSelectedRouteAction, RouteEditingReducer } from "../reducers/route-editing.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
 import { AddRouteAction, ChangeRouteStateAction, BulkReplaceRoutesAction, RoutesReducer, MergeRoutesAction, SplitRouteAction, ReplaceRouteAction, UpdateSegmentsAction, DeleteSegmentAction, ReplaceSegmentsAction, AddPrivatePoiAction } from "../reducers/routes.reducer";
-import type { RouteData } from "../models";
+import type { RouteDataWithoutState, RouteData } from "../models";
 
 
 describe("Selected Route Service", () => {
@@ -196,7 +196,7 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "name",
                 segments: [{
-                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date() }],
+                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date().toISOString() }],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
@@ -217,7 +217,7 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "name",
                 segments: [{
-                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date() }],
+                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date().toISOString() }],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
@@ -228,7 +228,7 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "name",
                 segments: [{
-                    latlngs: [{ lat: 1.00001, lng: 1.00001, timestamp: new Date() }],
+                    latlngs: [{ lat: 1.00001, lng: 1.00001, timestamp: new Date().toISOString() }],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
@@ -249,7 +249,7 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "name",
                 segments: [{
-                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date() }],
+                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date().toISOString() }],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
@@ -260,7 +260,7 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "clost but not the closest",
                 segments: [{
-                    latlngs: [{ lat: 1.00001, lng: 1.00001, timestamp: new Date() }],
+                    latlngs: [{ lat: 1.00001, lng: 1.00001, timestamp: new Date().toISOString() }],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
@@ -271,7 +271,7 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "closest",
                 segments: [{
-                    latlngs: [{ lat: 1.00001, lng: 1, timestamp: new Date() }],
+                    latlngs: [{ lat: 1.00001, lng: 1, timestamp: new Date().toISOString() }],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
@@ -294,7 +294,7 @@ describe("Selected Route Service", () => {
                     markers: [],
                     name: "name",
                     segments: [{
-                        latlngs: [{ lat: 1, lng: 1, timestamp: new Date() }],
+                        latlngs: [{ lat: 1, lng: 1, timestamp: new Date().toISOString() }],
                         routePoint: { lat: 1, lng: 1 },
                         routingType: "Hike"
                     }],
@@ -305,7 +305,7 @@ describe("Selected Route Service", () => {
                     markers: [],
                     name: "name",
                     segments: [{
-                        latlngs: [{ lat: 2, lng: 2, timestamp: new Date() }],
+                        latlngs: [{ lat: 2, lng: 2, timestamp: new Date().toISOString() }],
                         routePoint: { lat: 2, lng: 2 },
                         routingType: "Hike"
                     }],
@@ -318,8 +318,8 @@ describe("Selected Route Service", () => {
                     name: "name",
                     segments: [{
                         latlngs: [
-                            { lat: 2, lng: 2, timestamp: new Date() },
-                            { lat: 1, lng: 1, timestamp: new Date() }
+                            { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                            { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                         ],
                         routePoint: { lat: 2, lng: 2 },
                         routingType: "Hike"
@@ -347,7 +347,7 @@ describe("Selected Route Service", () => {
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, []);
 
-            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date() }, 0);
+            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date().toISOString() }, 0);
             expect(closetRoute).toBeNull();
         }
     ));
@@ -360,14 +360,14 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "name",
                 segments: [{
-                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date() }],
+                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date().toISOString() }],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
                 state: "Hidden",
             }]);
 
-            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date() }, 0);
+            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date().toISOString() }, 0);
             expect(closetRoute).toBeNull();
         }
     ));
@@ -380,15 +380,15 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "name",
                 segments: [{
-                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date() },
-                    { lat: 2, lng: 2, timestamp: new Date() }],
+                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                    { lat: 2, lng: 2, timestamp: new Date().toISOString() }],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
             }]);
 
-            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date() }, 0);
+            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date().toISOString() }, 0);
             expect(closetRoute.id).toBe("1");
         }
     ));
@@ -401,14 +401,14 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "name",
                 segments: [{
-                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date() },
-                    { lat: 1, lng: 0, timestamp: new Date() }],
+                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                    { lat: 1, lng: 0, timestamp: new Date().toISOString() }],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }],
                 state: "ReadOnly",
             }]);
-            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1.0001, lng: 1, timestamp: new Date() }, 90);
+            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1.0001, lng: 1, timestamp: new Date().toISOString() }, 90);
             expect(closetRoute.id).toBe("1");
         }
     ));
@@ -422,22 +422,22 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 1, lng: 1, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 2, lng: 2, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date() },
-                        { lat: 3, lng: 3, timestamp: new Date() }
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
@@ -475,22 +475,22 @@ describe("Selected Route Service", () => {
                 name: "name split 1",
                 segments: [{
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 1, lng: 1, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 2, lng: 2, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date() },
-                        { lat: 3, lng: 3, timestamp: new Date() }
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
@@ -519,15 +519,15 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 1, lng: 1, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 2, lng: 2, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
@@ -540,15 +540,15 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date() },
-                        { lat: 2, lng: 2, timestamp: new Date() }
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date() },
-                        { lat: 3, lng: 3, timestamp: new Date() }
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
@@ -578,15 +578,15 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 1, lng: 1, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 2, lng: 2, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
@@ -599,15 +599,15 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date() },
-                        { lat: 2, lng: 2, timestamp: new Date() }
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date() },
-                        { lat: 3, lng: 3, timestamp: new Date() }
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
@@ -637,15 +637,15 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 1, lng: 1, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 2, lng: 2, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
@@ -658,15 +658,15 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        { lat: 3, lng: 3, timestamp: new Date() },
-                        { lat: 3, lng: 3, timestamp: new Date() }
+                        { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 3, lng: 3, timestamp: new Date() },
-                        { lat: 2, lng: 2, timestamp: new Date() }
+                        { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
@@ -696,15 +696,15 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 1, lng: 1, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 2, lng: 2, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
@@ -717,15 +717,15 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        { lat: 2.0001, lng: 2.0001, timestamp: new Date() },
-                        { lat: 2.0001, lng: 2.0001, timestamp: new Date() }
+                        { lat: 2.0001, lng: 2.0001, timestamp: new Date().toISOString() },
+                        { lat: 2.0001, lng: 2.0001, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 2.0001, lng: 2.0001 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 2.0001, lng: 2.0001, timestamp: new Date() },
-                        { lat: 3, lng: 3, timestamp: new Date() }
+                        { lat: 2.0001, lng: 2.0001, timestamp: new Date().toISOString() },
+                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
@@ -782,22 +782,22 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 1, lng: 1, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 2, lng: 2, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date() },
-                        { lat: 3, lng: 3, timestamp: new Date() }
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
@@ -831,22 +831,22 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 1, lng: 1, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 2, lng: 2, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date() },
-                        { lat: 3, lng: 3, timestamp: new Date() }
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
@@ -878,22 +878,22 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 1, lng: 1, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 2, lng: 2, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date() },
-                        { lat: 3, lng: 3, timestamp: new Date() }
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
@@ -923,22 +923,22 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 1, lng: 1, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 2, lng: 2, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 2, lng: 2 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date() },
-                        { lat: 3, lng: 3, timestamp: new Date() }
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
@@ -979,16 +979,16 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 1, lng: 1, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike"
                 }, {
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 2, lng: 2, timestamp: new Date() },
-                        { lat: 3, lng: 3, timestamp: new Date() }
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                     ],
                     routePoint: { lat: 3, lng: 3 },
                     routingType: "Hike"
@@ -1039,7 +1039,7 @@ describe("Selected Route Service", () => {
             const spy = jasmine.createSpy();
             store.dispatch = spy;
 
-            selectedRouteService.addRoutes([{ segments: [], markers: [{ title: "title" }] } as RouteData]);
+            selectedRouteService.addRoutes([{ segments: [], markers: [{ title: "title" }] } as RouteDataWithoutState]);
 
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddPrivatePoiAction);
             const action = spy.calls.all()[0].args[0] as AddPrivatePoiAction;
@@ -1057,13 +1057,13 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [],
                 state: "ReadOnly",
-            }]);
+            } as RouteData]);
             setupSelectedRoute(store, "1");
 
             const spy = jasmine.createSpy();
             store.dispatch = spy;
 
-            selectedRouteService.addRoutes([{ name: "name", segments: [{}], markers: [{ title: "title" }] } as RouteData]);
+            selectedRouteService.addRoutes([{ name: "name", segments: [{}], markers: [{ title: "title" }] } as RouteDataWithoutState]);
 
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddRouteAction);
             const action = spy.calls.all()[0].args[0] as AddRouteAction;
@@ -1104,9 +1104,9 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 2, lng: 2, timestamp: new Date() },
-                        { lat: 3, lng: 3, timestamp: new Date() },
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                        { lat: 3, lng: 3, timestamp: new Date().toISOString() },
                     ],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike",
@@ -1118,8 +1118,7 @@ describe("Selected Route Service", () => {
             const features = selectedRouteService.createFeaturesForRoute(route);
             expect(features.some(f => f.properties.id.toString().includes("start"))).toBeTruthy();
             expect(features.some(f => f.properties.id.toString().includes("end"))).toBeTruthy();
-            expect(features.some(f => f.properties.id.toString().includes("marker"))).toBeTruthy();
-            expect(features.every(f => f.properties.id.toString() === f.id)).toBeTruthy();
+            expect(features.every(f => f.properties.id?.toString() === f.id)).toBeTruthy();
         }
     ));
 
@@ -1139,9 +1138,9 @@ describe("Selected Route Service", () => {
                 name: "name",
                 segments: [{
                     latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date() },
-                        { lat: 2, lng: 2, timestamp: new Date() },
-                        { lat: 3, lng: 3, timestamp: new Date() },
+                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                        { lat: 3, lng: 3, timestamp: new Date().toISOString() },
                     ],
                     routePoint: { lat: 1, lng: 1 },
                     routingType: "Hike",

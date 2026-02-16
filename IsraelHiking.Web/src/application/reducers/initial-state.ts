@@ -1,11 +1,11 @@
 ﻿import { Urls } from "../urls";
-import type { CategoriesGroup, EditableLayer, Language, MutableApplicationState, Overlay, RouteData, StateWithHistory } from "../models";
+import type { CategoriesGroup, EditableLayer, Language, MutableApplicationState, RouteData, StateWithHistory } from "../models";
 
 export const HIKING_MAP = "Hiking Map";
 export const MTB_MAP = "MTB Map";
 export const HIKING_TRAILS = "Hiking Trails";
 export const BICYCLE_TRAILS = "Bicycle Trails";
-export const POPULARITY_HEATMAP = "Popularity Heatmap";
+export const OPEN_HEATMAP = "Open Heatmap";
 export const POINTS_OF_INTEREST = "Points of Interest";
 
 export const AVAILABLE_LANGUAGES: Language[] = [{
@@ -148,7 +148,7 @@ export const CATEGORIES_GROUPS: CategoriesGroup[] = [{
 
 export const DEFAULT_BASE_LAYERS: EditableLayer[] = [{
     key: HIKING_MAP,
-    address: Urls.HIKING_TILES_ADDRESS,
+    address: Urls.HIKING_STYLE_ADDRESS,
     isEditable: false,
     minZoom: 1,
     maxZoom: 16,
@@ -156,7 +156,7 @@ export const DEFAULT_BASE_LAYERS: EditableLayer[] = [{
     id: null
 }, {
     key: MTB_MAP,
-    address: Urls.MTB_TILES_ADDRESS,
+    address: Urls.MTB_STYLE_ADDRESS,
     isEditable: false,
     minZoom: 1,
     maxZoom: 16,
@@ -164,7 +164,15 @@ export const DEFAULT_BASE_LAYERS: EditableLayer[] = [{
     id: null
 }];
 
-export const DEFAULT_OVERLAYS: Overlay[] = [];
+export const DEFAULT_OVERLAYS: EditableLayer[] = [{
+    key: OPEN_HEATMAP,
+    address: Urls.HEATMAP_STYLE_ADDRESS,
+    isEditable: false,
+    minZoom: 1,
+    maxZoom: 16,
+    opacity: 1,
+    id: null,
+}];
 
 export const initialState =
     {
@@ -211,7 +219,8 @@ export const initialState =
             overlays: [],
             selectedBaseLayerKey: HIKING_MAP,
             expanded: ["Base Layers", "Private Routes"],
-            visibleCategories: CATEGORIES_GROUPS.map(cg => cg.categories.map(c => ({ groupType: cg.type, name: c.name }))).flat()
+            visibleCategories: CATEGORIES_GROUPS.map(cg => cg.categories.map(c => ({ groupType: cg.type, name: c.name }))).flat(),
+            visibleOverlays: []
         },
         shareUrlsState: {
             shareUrls: [],

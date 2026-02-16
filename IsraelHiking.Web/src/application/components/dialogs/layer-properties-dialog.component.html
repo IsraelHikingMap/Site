@@ -1,7 +1,7 @@
 ﻿<div [dir]="resources.direction">
-  <div matDialogTitle>
+  <div mat-dialog-title>
     <div>{{title}}</div>
-    <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+    <button mat-button type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
   </div>
   <div mat-dialog-content>
     <div class="flex flex-row">
@@ -60,7 +60,7 @@
     <div class="flex flex-row w-full">
       <div class="flex-1">
         @if (isApp) {
-        <button mat-button class="w-full" matDialogClose type="button" (click)="shareLayer()"
+        <button mat-button class="w-full" mat-dialog-close type="button" (click)="shareLayer()"
           [matTooltip]="resources.share" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers"
           angularticsAction="Share layer from app">
           <i class="fa fa-lg icon-share-alt"></i>
@@ -78,13 +78,13 @@
       </div>
       <div class="flex-1">
         @if (!isNew) {
-        <button mat-button class="w-full" matDialogClose type="button" (click)="removeLayer()"
+        <button mat-button class="w-full" mat-dialog-close type="button" (click)="removeLayer()"
           matTooltip="{{resources.deleteLayer}}" matTooltipPosition="above" angulartics2On="click"
           angularticsCategory="Layers" angularticsAction="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
         }
       </div>
       <div class="flex-1">
-        <button mat-button class="w-full" matDialogClose type="button" (click)="saveLayer()"
+        <button mat-button class="w-full" mat-dialog-close type="button" (click)="saveLayer()"
           [disabled]="keyInput.errors !== null" matTooltip="{{resources.save}}" matTooltipPosition="above"
           angulartics2On="click" angularticsCategory="Layers" angularticsAction="Save layer"><i
             class="fa icon-check"></i></button>

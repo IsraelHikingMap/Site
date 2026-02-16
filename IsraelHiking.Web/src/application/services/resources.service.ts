@@ -91,7 +91,7 @@ export class ResourcesService {
     public hikingMap: string;
     public satelliteImagery: string;
     public hikingTrails: string;
-    public popularityHeatmap: string;
+    public openHeatmap: string;
     public route: string;
     public directionalSearch: string;
     public moveToRoute: string;
@@ -263,6 +263,16 @@ export class ResourcesService {
     public artwork: string;
     public currentRoute: string;
     public allXRoutes: string;
+    public filter: string;
+    public sort: string;
+    public date: string;
+    public difficulty: string;
+    public routeType: string;
+    public easy: string;
+    public moderate: string;
+    public hard: string;
+    public unknown: string;
+    public contactUsToPublishAPublicRoute: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -493,7 +503,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1769582659179");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1770811217041");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -558,7 +568,7 @@ export class ResourcesService {
         this.mtbMap = this.gettextCatalog.getString("MTB Map");
         this.hikingMap = this.gettextCatalog.getString("Hiking Map");
         this.hikingTrails = this.gettextCatalog.getString("Hiking Trails");
-        this.popularityHeatmap = this.gettextCatalog.getString("Popularity Heatmap");
+        this.openHeatmap = this.gettextCatalog.getString("Open Heatmap");
         this.route = this.gettextCatalog.getString("Route");
         this.directionalSearch = this.gettextCatalog.getString("Directional Search");
         this.moveToRoute = this.gettextCatalog.getString("Move to Route");
@@ -736,6 +746,16 @@ export class ResourcesService {
         this.artwork = this.gettextCatalog.getString("Artwork");
         this.currentRoute = this.gettextCatalog.getString("Current Route");
         this.allXRoutes = this.gettextCatalog.getString("All {{count}} Routes");
+        this.filter = this.gettextCatalog.getString("Filter");
+        this.sort = this.gettextCatalog.getString("Sort");
+        this.date = this.gettextCatalog.getString("Date");
+        this.difficulty = this.gettextCatalog.getString("Difficulty");
+        this.routeType = this.gettextCatalog.getString("Route Type");
+        this.easy = this.gettextCatalog.getString("Easy");
+        this.moderate = this.gettextCatalog.getString("Moderate");
+        this.hard = this.gettextCatalog.getString("Hard");
+        this.unknown = this.gettextCatalog.getString("Unknown");
+        this.contactUsToPublishAPublicRoute = this.gettextCatalog.getString("Contact us to publish a public route");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

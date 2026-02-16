@@ -13,7 +13,7 @@ import lineIntersect from "@turf/line-intersect";
 import booleanWithin from "@turf/boolean-within";
 import type { Immutable } from "immer";
 
-import type { LatLngAlt, Bounds, LatLngAltTime } from "../models";
+import type { LatLngAltTime, Bounds } from "../models";
 
 export class SpatialService {
 
@@ -39,7 +39,7 @@ export class SpatialService {
         return totalDistance;
     }
 
-    public static getDistanceInMeters(latlng1: LatLngAlt, latlng2: LatLngAlt) {
+    public static getDistanceInMeters(latlng1: LatLngAltTime, latlng2: LatLngAltTime) {
         return distance(SpatialService.toCoordinate(latlng1),
             SpatialService.toCoordinate(latlng2), { units: "meters" });
     }
@@ -52,7 +52,7 @@ export class SpatialService {
         return simplified.geometry.coordinates as [number, number][];
     }
 
-    public static getDistance(latlng1: LatLngAlt, latlng2: LatLngAlt) {
+    public static getDistance(latlng1: LatLngAltTime, latlng2: LatLngAltTime) {
         return distance(SpatialService.toCoordinate(latlng1),
             SpatialService.toCoordinate(latlng2), { units: "degrees" });
     }
@@ -61,7 +61,7 @@ export class SpatialService {
         return Math.sqrt(Math.pow(coordinate1[0] - coordinate2[0], 2) + Math.pow(coordinate1[1] - coordinate2[1], 2));
     }
 
-    public static getDistanceFromPointToLine(latlng: LatLngAlt, line: LatLngAlt[]): number {
+    public static getDistanceFromPointToLine(latlng: LatLngAltTime, line: LatLngAltTime[]): number {
         return pointToLineDistance(SpatialService.toCoordinate(latlng), SpatialService.getLineString(line), { units: "meters" });
     }
 
@@ -75,7 +75,7 @@ export class SpatialService {
      * @returns the projected point
      */
     public static insertProjectedPointToClosestLineAndReplaceIt(
-        latlng: LatLngAlt,
+        latlng: LatLngAltTime,
         lines: GeoJSON.Feature<GeoJSON.LineString>[]): GeoJSON.Feature<GeoJSON.Point> {
         let closetLine = null;
         let nearestPoint = null;
@@ -97,12 +97,12 @@ export class SpatialService {
     }
 
     public static clipLinesToTileBoundary(lines: GeoJSON.Feature<GeoJSON.LineString>[],
-        tile: { x: number; y: number},
+        tile: { x: number; y: number },
         zoom: number): GeoJSON.Feature<GeoJSON.LineString>[] {
         const roundedTileX = Math.floor(tile.x);
         const roundedTileY = Math.floor(tile.y);
-        const northEast = SpatialService.fromTile({x: roundedTileX, y: roundedTileY}, zoom);
-        const southWest = SpatialService.fromTile({x: roundedTileX + 1, y: roundedTileY + 1}, zoom);
+        const northEast = SpatialService.fromTile({ x: roundedTileX, y: roundedTileY }, zoom);
+        const southWest = SpatialService.fromTile({ x: roundedTileX + 1, y: roundedTileY + 1 }, zoom);
         const tilePolygon = bboxPolygon([northEast.lng, southWest.lat, southWest.lng, northEast.lat]);
         // This is to overcome accuracy issues...
         const tilePolygonTest = bboxPolygon([northEast.lng - 1e-6, southWest.lat - 1e-6, southWest.lng + 1e-6, northEast.lat + 1e-6]);
@@ -157,8 +157,8 @@ export class SpatialService {
         }
     }
 
-    public static splitLine(newLatlng: LatLngAlt, line: LatLngAltTime[]): { start: LatLngAltTime[]; end: LatLngAltTime[] } {
-        if (line.length < 2 ) {
+    public static splitLine(newLatlng: LatLngAltTime, line: LatLngAltTime[]): { start: LatLngAltTime[]; end: LatLngAltTime[] } {
+        if (line.length < 2) {
             throw new Error("Line length should be at least 2");
         }
         const closestSegmentIndex = SpatialService.getClosestSegmentIndex(newLatlng, line);
@@ -182,7 +182,7 @@ export class SpatialService {
         return { start: [...start, projected.latlng], end: [projected.latlng, ...end] };
     }
 
-    private static getClosestSegmentIndex(newLatlng: LatLngAlt, line: LatLngAlt[]): number {
+    private static getClosestSegmentIndex(newLatlng: LatLngAltTime, line: LatLngAltTime[]): number {
         let closestSegmentIndex = 0;
         let minimalDistance = Infinity;
         for (let segmentIndex = 0; segmentIndex <= line.length - 2; segmentIndex++) {
@@ -196,25 +196,25 @@ export class SpatialService {
         return closestSegmentIndex;
     }
 
-    private static project(p: LatLngAlt, a: LatLngAltTime, b: LatLngAltTime): { latlng: LatLngAltTime; projectionFactor: number } {
+    private static project(p: LatLngAltTime, a: LatLngAltTime, b: LatLngAltTime): { latlng: LatLngAltTime; projectionFactor: number } {
 
-        const atob = { 
-            x: b.lng - a.lng, 
-            y: b.lat - a.lat, 
+        const atob = {
+            x: b.lng - a.lng,
+            y: b.lat - a.lat,
             z: (a.alt != null && b.alt != null) ? b.alt - a.alt : null,
             t: (a.timestamp != null && b.timestamp != null) ? new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime() : null
         };
         const atop = { x: p.lng - a.lng, y: p.lat - a.lat };
         const len = atob.x * atob.x + atob.y * atob.y;
         const dot = atop.x * atob.x + atop.y * atob.y;
-        const projectionFactor = Math.min(1, Math.max(0, dot / len ));
+        const projectionFactor = Math.min(1, Math.max(0, dot / len));
 
         return {
             latlng: {
                 lng: a.lng + atob.x * projectionFactor,
                 lat: a.lat + atob.y * projectionFactor,
                 alt: atob.z != null ? a.alt + atob.z * projectionFactor : null,
-                timestamp: atob.t != null ? new Date(new Date(a.timestamp).getTime() + atob.t * projectionFactor) : null
+                timestamp: atob.t != null ? new Date(new Date(a.timestamp).getTime() + atob.t * projectionFactor).toISOString() : null
             },
             projectionFactor
         };
@@ -224,14 +224,14 @@ export class SpatialService {
         return (value2 - value1) * ratio + value1;
     }
 
-    public static getLatlngInterpolatedValue(latlng1: LatLngAlt, latlng2: LatLngAlt, ratio: number): LatLngAlt {
+    public static getLatlngInterpolatedValue(latlng1: LatLngAltTime, latlng2: LatLngAltTime, ratio: number): LatLngAltTime {
         return {
             lat: SpatialService.getInterpolatedValue(latlng1.lat, latlng2.lat, ratio),
             lng: SpatialService.getInterpolatedValue(latlng1.lng, latlng2.lng, ratio)
         };
     }
 
-    public static getBounds(latlngs: LatLngAlt[]): Bounds {
+    public static getBounds(latlngs: LatLngAltTime[]): Bounds {
         if (latlngs.length === 1) {
             return {
                 northEast: latlngs[0],
@@ -243,7 +243,7 @@ export class SpatialService {
         return SpatialService.bboxToBounds(boundingBox);
     }
 
-    public static getCenter(latlngs: LatLngAlt[]): LatLngAlt {
+    public static getCenter(latlngs: LatLngAltTime[]): LatLngAltTime {
         if (latlngs.length === 1) {
             return latlngs[0];
         }
@@ -253,11 +253,11 @@ export class SpatialService {
 
     }
 
-    public static toCoordinate(latlng: LatLngAlt): [number, number] {
+    public static toCoordinate(latlng: LatLngAltTime): [number, number] {
         return [latlng.lng, latlng.lat];
     }
 
-    public static toLatLng(coordinate: [number, number] | [number, number, number] | GeoJSON.Position): LatLngAlt {
+    public static toLatLng(coordinate: [number, number] | [number, number, number] | GeoJSON.Position): LatLngAltTime {
         if (coordinate.length === 3) {
             return {
                 lat: coordinate[1],
@@ -282,8 +282,8 @@ export class SpatialService {
         };
     }
 
-    public static getBoundsForFeatureCollection(feature: GeoJSON.FeatureCollection): Bounds {
-        return SpatialService.bboxToBounds(bbox(feature));
+    public static getBoundsForFeatureCollection(featureCollection: GeoJSON.FeatureCollection): Bounds {
+        return SpatialService.bboxToBounds(bbox(featureCollection));
     }
 
     public static getBoundsForFeature(feature: GeoJSON.Feature<GeoJSON.Geometry>): Bounds {
@@ -303,12 +303,12 @@ export class SpatialService {
         };
     }
 
-    public static getLineString(latlngs: LatLngAlt[]): GeoJSON.Feature<GeoJSON.LineString> {
+    public static getLineString(latlngs: LatLngAltTime[]): GeoJSON.Feature<GeoJSON.LineString> {
         const coordinates = latlngs.map(l => SpatialService.toCoordinate(l));
         return lineString(coordinates);
     }
 
-    public static getPointFeature(latlng: LatLngAlt): GeoJSON.Feature<GeoJSON.Point> {
+    public static getPointFeature(latlng: LatLngAltTime): GeoJSON.Feature<GeoJSON.Point> {
         return point(SpatialService.toCoordinate(latlng));
     }
 
@@ -317,24 +317,24 @@ export class SpatialService {
         return SpatialService.mBBoundsToBounds(bounds);
     }
 
-    public static getCirclePolygonFeature(centerPoint: LatLngAlt, radius: number):
-        GeoJSON.Feature<GeoJSON.Polygon> & { properties: { radius: number }} {
+    public static getCirclePolygonFeature(centerPoint: LatLngAltTime, radius: number):
+        GeoJSON.Feature<GeoJSON.Polygon> & { properties: { radius: number } } {
         const options = { steps: 64, units: "meters" as Units, properties: { radius } };
         return circle(SpatialService.toCoordinate(centerPoint), radius, options);
     }
 
-    public static getLineBearingInDegrees(latlng1: LatLngAlt, latlng2: LatLngAlt): number {
+    public static getLineBearingInDegrees(latlng1: LatLngAltTime, latlng2: LatLngAltTime): number {
         const lat1Radians = latlng1.lat * Math.PI / 180;
         const lat2Radians = latlng2.lat * Math.PI / 180;
         const lngDiffRadians = (latlng2.lng - latlng1.lng) * Math.PI / 180;
         const y = Math.sin(lngDiffRadians) * Math.cos(lat2Radians);
         const x = Math.cos(lat1Radians) * Math.sin(lat2Radians) -
-                Math.sin(lat1Radians) * Math.cos(lat2Radians) * Math.cos(lngDiffRadians);
+            Math.sin(lat1Radians) * Math.cos(lat2Radians) * Math.cos(lngDiffRadians);
         const bearingRadians = Math.atan2(y, x);
         return (bearingRadians * 180 / Math.PI + 360) % 360; // in degrees
     }
 
-    public static toTile(latlng: LatLngAlt, zoom: number) {
+    public static toTile(latlng: LatLngAltTime, zoom: number) {
         return {
             x: (latlng.lng + 180) / 360 * Math.pow(2, zoom),
             y: (1 - Math.log(Math.tan(latlng.lat * Math.PI / 180) + 1 / Math.cos(latlng.lat * Math.PI / 180)) / Math.PI) /
@@ -342,14 +342,14 @@ export class SpatialService {
         };
     }
 
-    public static fromTile(tile: {x: number; y: number}, zoom: number): LatLngAlt {
+    public static fromTile(tile: { x: number; y: number }, zoom: number): LatLngAltTime {
         const n = Math.pow(2, zoom);
         const lng = tile.x / n * 360 - 180;
         const lat = Math.atan(Math.sinh(Math.PI * (1 - 2 * tile.y / n))) * 180 / Math.PI;
-        return {lat, lng};
+        return { lat, lng };
     }
 
-    public static getParentZoomTileCoordinates(tile: {x: number; y: number}, zoom: number, targetZoom: number): {tileX: number; tileY: number} {
+    public static getParentZoomTileCoordinates(tile: { x: number; y: number }, zoom: number, targetZoom: number): { tileX: number; tileY: number } {
         const scale = Math.pow(2, zoom - targetZoom);
         return {
             tileX: Math.floor(tile.x / scale),
@@ -357,7 +357,7 @@ export class SpatialService {
         };
     }
 
-    public static toRelativePixelCenter(latlng: LatLngAlt, zoom: number, tileSize: number) {
+    public static toRelativePixelCenter(latlng: LatLngAltTime, zoom: number, tileSize: number) {
         const tile = SpatialService.toTile(latlng, zoom);
         return {
             pixelX: Math.max(0, (tile.x - Math.floor(tile.x)) * tileSize - 0.5),
@@ -454,7 +454,7 @@ export class SpatialService {
         };
     }
 
-    public static isJammingTarget(latlng: LatLngAlt): boolean {
+    public static isJammingTarget(latlng: LatLngAltTime): boolean {
         const position = SpatialService.toCoordinate(latlng);
         return SpatialService.insideBbox(position, [35.48, 33.811, 35.50, 33.823]) ||
             SpatialService.insideBbox(position, [31.350, 30.0817, 31.355, 30.0860]) ||

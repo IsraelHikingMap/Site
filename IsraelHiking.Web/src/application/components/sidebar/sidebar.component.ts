@@ -1,4 +1,5 @@
 import { Component, inject, signal } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 import { LayersSidebarComponent } from "./layers/layers-sidebar.component";
 import { PublicPoiSidebarComponent } from "./publicpoi/public-poi-sidebar.component";
@@ -22,9 +23,11 @@ export class SidebarComponent {
     public viewName: SidebarView = "";
 
     constructor() {
-        this.sidebarService.sideBarStateChanged.subscribe(() => {
+        this.sidebarService.sideBarStateChanged.pipe(takeUntilDestroyed()).subscribe(() => {
             this.viewName = this.sidebarService.viewName;
             this.visible.set(this.sidebarService.isSidebarOpen());
         });
+        this.viewName = this.sidebarService.viewName;
+        this.visible.set(this.sidebarService.isSidebarOpen());
     }
 }

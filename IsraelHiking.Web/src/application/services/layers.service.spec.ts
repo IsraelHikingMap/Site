@@ -8,9 +8,9 @@ import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { LayersService } from "./layers.service";
 import { SetUserInfoAction, UserInfoReducer } from "../reducers/user.reducer";
-import { AddBaseLayerAction, AddOverlayAction, LayersReducer, RemoveBaseLayerAction, RemoveOverlayAction, SelectBaseLayerAction, UpdateBaseLayerAction, UpdateOverlayAction } from "../reducers/layers.reducer";
+import { AddBaseLayerAction, AddOverlayAction, LayersReducer, RemoveBaseLayerAction, RemoveOverlayAction, SelectBaseLayerAction, SetOverlaysVisibilityAction, UpdateBaseLayerAction, UpdateOverlayAction } from "../reducers/layers.reducer";
 import { DEFAULT_BASE_LAYERS } from "../reducers/initial-state";
-import type { EditableLayer, LayerData, Overlay } from "../models";
+import type { EditableLayer, LayerData } from "../models";
 
 describe("LayersService", () => {
     beforeEach(() => {
@@ -52,7 +52,7 @@ describe("LayersService", () => {
         expect(true).toBeTrue();
     }));
 
-    it("should sync user layers when user logs in with data that needs addintion, update and removal", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
+    it("should sync user layers when user logs in with data that needs addition, update and removal", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
         const spy = spyOn(store, "dispatch").and.callThrough();
 
         store.reset({
@@ -65,9 +65,10 @@ describe("LayersService", () => {
                     { key: "layer2", address: "https://layer2" } as EditableLayer
                 ],
                 overlays: [
-                    { key: "overlay1", isEditable: true } as Overlay,
-                    { key: "overlay2", address: "https://overlay2" } as Overlay
-                ]
+                    { key: "overlay1", isEditable: true } as EditableLayer,
+                    { key: "overlay2", address: "https://overlay2" } as EditableLayer
+                ],
+                visibleOverlays: []
             }
         })
 
@@ -86,8 +87,9 @@ describe("LayersService", () => {
         expect(spy.calls.all()[2].args[0]).toBeInstanceOf(AddBaseLayerAction);
         expect(spy.calls.all()[3].args[0]).toBeInstanceOf(UpdateOverlayAction);
         expect(spy.calls.all()[4].args[0]).toBeInstanceOf(AddOverlayAction);
-        expect(spy.calls.all()[5].args[0]).toBeInstanceOf(RemoveOverlayAction);
-        expect(spy.calls.all()[6].args[0]).toBeInstanceOf(RemoveBaseLayerAction);
+        expect(spy.calls.all()[5].args[0]).toBeInstanceOf(SetOverlaysVisibilityAction);
+        expect(spy.calls.all()[6].args[0]).toBeInstanceOf(RemoveOverlayAction);
+        expect(spy.calls.all()[7].args[0]).toBeInstanceOf(RemoveBaseLayerAction);
     }));
 
     it("should check if base layer is selected", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -208,11 +210,12 @@ describe("LayersService", () => {
     it("should check if name is available", inject([LayersService, Store], (service: LayersService, store: Store) => {
         const layer1: EditableLayer = { key: "layer1" } as EditableLayer;
         const layer2: EditableLayer = { key: "layer2" } as EditableLayer;
-        const overlay1: Overlay = { key: "overlay1", visible: true } as Overlay;
+        const overlay1: EditableLayer = { key: "overlay1" } as EditableLayer;
         store.reset({
             layersState: {
                 baseLayers: [layer1, layer2],
-                overlays: [overlay1]
+                overlays: [overlay1],
+                visibleOverlays: [overlay1.key]
             }
         });
 
@@ -226,7 +229,6 @@ describe("LayersService", () => {
 
     it("should select base layer", inject([LayersService, Store], (service: LayersService, store: Store) => {
         const spy = spyOn(store, "dispatch").and.callThrough();
-
         service.selectBaseLayer("newLayer");
 
         expect(spy.calls.first().args[0]).toBeInstanceOf(SelectBaseLayerAction);
@@ -234,34 +236,43 @@ describe("LayersService", () => {
 
     it("should toggle overlay", inject([LayersService, Store], (service: LayersService, store: Store) => {
         const spy = spyOn(store, "dispatch").and.callThrough();
-        const overlay: Overlay = { key: "overlay1", visible: false } as Overlay;
+        store.reset({
+            layersState: {
+                visibleOverlays: []
+            }
+        });
+        const overlay: EditableLayer = { key: "overlay1" } as EditableLayer;
 
         service.toggleOverlay(overlay);
 
-        expect(spy.calls.first().args[0]).toBeInstanceOf(UpdateOverlayAction);
+        expect(spy.calls.first().args[0]).toBeInstanceOf(SetOverlaysVisibilityAction);
     }));
 
     it("should check if all overlays are hidden", inject([LayersService, Store], (service: LayersService, store: Store) => {
-        const overlay1: Overlay = { key: "overlay1", visible: false } as Overlay;
-        const overlay2: Overlay = { key: "overlay2", visible: false } as Overlay;
+        const overlay1: EditableLayer = { key: "overlay1" } as EditableLayer;
+        const overlay2: EditableLayer = { key: "overlay2" } as EditableLayer;
         store.reset({
             layersState: {
-                overlays: [overlay1, overlay2]
+                overlays: [overlay1, overlay2],
+                visibleOverlays: []
             }
         });
 
         expect(service.isAllOverlaysHidden()).toBeTrue();
         service.toggleOverlay(overlay1);
         expect(service.isAllOverlaysHidden()).toBeFalse();
+        expect(service.isOverlayVisible(overlay1)).toBeTrue();
+        expect(service.isOverlayVisible(overlay2)).toBeFalse();
     }));
 
     it("should hide all overlays", inject([LayersService, Store], (service: LayersService, store: Store) => {
         spyOn(store, "dispatch").and.callThrough();
-        const overlay1: Overlay = { key: "overlay1", visible: true } as Overlay;
-        const overlay2: Overlay = { key: "overlay2", visible: true } as Overlay;
+        const overlay1: EditableLayer = { key: "overlay1" } as EditableLayer;
+        const overlay2: EditableLayer = { key: "overlay2" } as EditableLayer;
         store.reset({
             layersState: {
-                overlays: [overlay1, overlay2]
+                overlays: [overlay1, overlay2],
+                visibleOverlays: [overlay1.key, overlay2.key]
             }
         });
 
@@ -272,13 +283,14 @@ describe("LayersService", () => {
 
     it("should get data container with selected layers", inject([LayersService, Store], (service: LayersService, store: Store) => {
         const baseLayer: EditableLayer = { key: "base" } as EditableLayer;
-        const overlay1: Overlay = { key: "overlay1", visible: true } as Overlay;
-        const overlay2: Overlay = { key: "overlay2", visible: false } as Overlay;
+        const overlay1: EditableLayer = { key: "overlay1" } as EditableLayer;
+        const overlay2: EditableLayer = { key: "overlay2" } as EditableLayer;
         store.reset({
             layersState: {
                 baseLayers: [baseLayer],
                 overlays: [overlay1, overlay2],
-                selectedBaseLayerKey: "base"
+                selectedBaseLayerKey: "base",
+                visibleOverlays: [overlay1.key]
             }
         });
 
@@ -337,6 +349,12 @@ describe("LayersService", () => {
     }));
 
     it("should add overlay for non logged-in user", inject([LayersService, Store], (service: LayersService, store: Store) => {
+        store.reset({
+            layersState: {
+                overlays: [],
+                visibleOverlays: []
+            }
+        });
         const spy = spyOn(store, "dispatch").and.callThrough();
         const overlayData = { key: "newOverlay", address: "https://test.com" } as LayerData;
 
@@ -351,7 +369,8 @@ describe("LayersService", () => {
                 userInfo: {}
             },
             layersState: {
-                overlays: []
+                overlays: [],
+                visibleOverlays: []
             }
         });
         backend.expectOne(u => u.method == "GET" && u.url.startsWith(Urls.userLayers)).flush(null);
@@ -364,16 +383,18 @@ describe("LayersService", () => {
 
         await new Promise(resolve => setTimeout(resolve, 10));
 
-        expect(spy.calls.first().args[0]).toBeInstanceOf(AddOverlayAction);
-        expect(spy.calls.all()[1].args[0]).toBeInstanceOf(UpdateOverlayAction);
+        expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddOverlayAction);
+        expect(spy.calls.all()[1].args[0]).toBeInstanceOf(SetOverlaysVisibilityAction);
+        expect(spy.calls.all()[2].args[0]).toBeInstanceOf(UpdateOverlayAction);
     }));
 
     it("should not add overlay if it already exists", inject([LayersService, Store], (service: LayersService, store: Store) => {
         spyOn(store, "dispatch").and.callThrough();
-        const existingOverlay = { key: "existingOverlay" } as Overlay;
+        const existingOverlay = { key: "existingOverlay" } as EditableLayer;
         store.reset({
             layersState: {
-                overlays: [existingOverlay]
+                overlays: [existingOverlay],
+                visibleOverlays: []
             }
         });
 
@@ -404,11 +425,12 @@ describe("LayersService", () => {
                 userInfo: {}
             },
             layersState: {
-                overlays: []
+                overlays: [],
+                visibleOverlays: []
             }
         })
         const spy = spyOn(store, "dispatch").and.callThrough();
-        const layer = { key: "layer1", id: "1" } as Overlay;
+        const layer = { key: "layer1", id: "1" } as EditableLayer;
 
         service.updateOverlay(layer, layer);
 
@@ -434,8 +456,14 @@ describe("LayersService", () => {
     }));
 
     it("should remove overlay for non registered user", inject([LayersService, Store], (service: LayersService, store: Store) => {
+        store.reset({
+            layersState: {
+                overlays: [],
+                visibleOverlays: []
+            }
+        });
         const spy = spyOn(store, "dispatch").and.callThrough();
-        const overlay = { key: "overlay1", id: "1" } as Overlay;
+        const overlay = { key: "overlay1", id: "1" } as EditableLayer;
 
         service.removeOverlay(overlay);
 
@@ -444,6 +472,12 @@ describe("LayersService", () => {
 
     it("should create url from overlay layer data and parse it", inject([LayersService, Store], async (service: LayersService, store: Store) => {
         const spy = spyOn(store, "dispatch").and.callThrough();
+        store.reset({
+            layersState: {
+                overlays: [],
+                visibleOverlays: []
+            }
+        });
         const layerData: LayerData = {
             key: "test",
             address: "https://example.com",

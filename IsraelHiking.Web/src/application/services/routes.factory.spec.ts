@@ -49,7 +49,7 @@ describe("RoutesFactory", () => {
             routeEditingState
         });
 
-        let route = {} as  RouteData;
+        let route = {} as RouteData;
         route = factory.createRouteDataAddMissingFields(route, "blue");
         expect(route.id).toBeDefined();
         expect(route.color).toBe("blue");
@@ -65,13 +65,13 @@ describe("RoutesFactory", () => {
     }));
 
     it("Should do nothing if the list does not have duplicate ids", inject([RoutesFactory], (factory: RoutesFactory) => {
-        const routes = [{id: "1"}, {id: "2"}] as RouteData[];
+        const routes = [{ id: "1" }, { id: "2" }] as RouteData[];
         factory.regenerateDuplicateIds(routes);
-        expect(routes).toEqual([{id: "1"}, {id: "2"}] as RouteData[]);
+        expect(routes).toEqual([{ id: "1" }, { id: "2" }] as RouteData[]);
     }));
 
     it("Should do regenerate id if the list has duplicate ids", inject([RoutesFactory], (factory: RoutesFactory) => {
-        const routes = [{id: "1"}, {id: "2"}, {id: "1"}] as RouteData[];
+        const routes = [{ id: "1" }, { id: "2" }, { id: "1" }] as RouteData[];
         factory.regenerateDuplicateIds(routes);
         expect(routes[2].id).not.toBe("1");
     }));

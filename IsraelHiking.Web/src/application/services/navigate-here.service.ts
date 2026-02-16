@@ -9,11 +9,11 @@ import { RoutingProvider } from "./routing.provider";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { RoutesFactory } from "./routes.factory";
 import { AddRouteAction } from "../reducers/routes.reducer";
-import type { ApplicationState, LatLngAlt, LatLngAltTime } from "../models";
+import type { ApplicationState, LatLngAltTime } from "../models";
 
 @Injectable()
 export class NavigateHereService {
-    
+
     private readonly resources = inject(ResourcesService);
     private readonly toastService = inject(ToastService);
     private readonly selectedRouteService = inject(SelectedRouteService);
@@ -21,7 +21,7 @@ export class NavigateHereService {
     private readonly routesFactory = inject(RoutesFactory);
     private readonly store = inject(Store);
 
-    public async addNavigationSegment(latlng: LatLngAlt, title?: string) {
+    public async addNavigationSegment(latlng: LatLngAltTime, title?: string) {
         const currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
         if (currentPosition == null) {
             this.toastService.warning(this.resources.unableToFindYourLocation);
@@ -35,7 +35,7 @@ export class NavigateHereService {
             name = this.selectedRouteService.createRouteName(name);
         }
         const data = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
-        data.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(latlngs as LatLngAltTime[], routingType);
+        data.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(latlngs, routingType);
         this.store.dispatch(new AddRouteAction(data));
 
         this.selectedRouteService.setSelectedRoute(data.id);

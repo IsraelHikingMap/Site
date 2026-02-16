@@ -22,8 +22,8 @@ import { ToastService } from "../../../services/toast.service";
 import { PurchaseService } from "../../../services/purchase.service";
 
 import { ExpandGroupAction, CollapseGroupAction } from "../../../reducers/layers.reducer";
-import { DEFAULT_BASE_LAYERS, CATEGORIES_GROUPS } from "../../../reducers/initial-state";
-import type { ApplicationState, EditableLayer, Overlay, CategoriesGroup } from "../../../models";
+import { DEFAULT_BASE_LAYERS, CATEGORIES_GROUPS, DEFAULT_OVERLAYS } from "../../../reducers/initial-state";
+import type { ApplicationState, EditableLayer, CategoriesGroup } from "../../../models";
 
 @Component({
     selector: "layers-sidebar",
@@ -35,8 +35,9 @@ import type { ApplicationState, EditableLayer, Overlay, CategoriesGroup } from "
 export class LayersSidebarComponent {
 
     public readonly defaultBaseLayers = DEFAULT_BASE_LAYERS;
+    public readonly defaultOverlays = DEFAULT_OVERLAYS;
     public baseLayers$: Observable<Immutable<EditableLayer[]>>;
-    public overlays$: Observable<Immutable<Overlay[]>>;
+    public overlays$: Observable<Immutable<EditableLayer[]>>;
     public categoriesGroups = CATEGORIES_GROUPS;
 
     public manageSubscriptions: string;
@@ -92,7 +93,7 @@ export class LayersSidebarComponent {
         LayerPropertiesDialogComponent.openDialog(this.dialog, null, "add-overlay");
     }
 
-    public editOverlay(e: Event, layer: Immutable<Overlay>) {
+    public editOverlay(e: Event, layer: Immutable<EditableLayer>) {
         e.stopPropagation();
         LayerPropertiesDialogComponent.openDialog(this.dialog, layer, "edit-overlay");
     }
@@ -105,8 +106,12 @@ export class LayersSidebarComponent {
         this.layersService.selectBaseLayer(baseLayer.key);
     }
 
-    public toggleVisibility(overlay: Overlay) {
+    public toggleVisibility(overlay: EditableLayer) {
         this.layersService.toggleOverlay(overlay);
+    }
+
+    public isOverlayVisible(overlay: EditableLayer): boolean {
+        return this.layersService.isOverlayVisible(overlay);
     }
 
     public isAllOverlaysHidden(): boolean {

@@ -140,35 +140,35 @@
       matTooltipPosition="above"><i class="fa {{isTable ? 'icon-table' : 'icon-area-chart'}} fa-lg"></i></button>
     @if (!isFollowing) {
     <div matTooltip="{{resources.gain}}" matTooltipPosition="above">
-      <span class="control-container-item gutters">
+      <span class="control-container-item">
         <i class="fa icon-arrow-up"></i>
         <span class="mx-1">{{gain | distance}}</span>
       </span>
     </div>
     <div matTooltip="{{resources.loss}}" matTooltipPosition="above">
-      <span class="control-container-item gutters">
+      <span class="control-container-item">
         <i class="fa icon-arrow-down"></i>
         <span class="mx-1">{{loss | distance}}</span>
       </span>
     </div>
     <div matTooltip="{{resources.length}}" matTooltipPosition="above">
-      <span class="control-container-item gutters">
+      <span class="control-container-item">
         <i class="fa icon-arrow-right"></i>
         <span class="mx-1">{{length | distance}}</span>
       </span>
     </div>
     } @else {
     <div>
-      <span class="control-container-item gutters">ETA <span dir="ltr">{{ETA}}</span></span>
+      <span class="control-container-item">ETA <span dir="ltr">{{ETA}}</span></span>
     </div>
     <div matTooltip="{{resources.remainingDistance}}" matTooltipPosition="above">
-      <span class="control-container-item gutters">
+      <span class="control-container-item">
         <i class="fa icon-arrow-circle-right"></i>
         <span class="mx-1">{{remainingDistance | distance}}</span>
       </span>
     </div>
     <div matTooltip="{{resources.traveledDistance}}" matTooltipPosition="above">
-      <span class="control-container-item gutters">
+      <span class="control-container-item">
         <i class="fa icon-arrow-right"></i>
         <span class="mx-1">{{traveledDistance | distance}}</span>
       </span>

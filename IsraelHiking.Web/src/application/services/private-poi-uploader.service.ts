@@ -10,7 +10,7 @@ import { ToastService } from "./toast.service";
 import { RouteStrings } from "./hash.service";
 import { SetUploadMarkerDataAction } from "../reducers/poi.reducer";
 import { CATEGORIES_GROUPS } from "../reducers/initial-state";
-import type { LinkData, LatLngAlt, MarkerData } from "../models";
+import type { LinkData, LatLngAltTime, MarkerData } from "../models";
 
 @Injectable()
 export class PrivatePoiUploaderService {
@@ -23,7 +23,7 @@ export class PrivatePoiUploaderService {
 
     public async uploadPoint(
         id: string,
-        latLng: LatLngAlt,
+        latLng: LatLngAltTime,
         imageLink: LinkData,
         title: string,
         description: string,
@@ -51,14 +51,14 @@ export class PrivatePoiUploaderService {
         )) {
             // id is of an existing OSM POI:
             this.router.navigate([RouteStrings.ROUTE_POI, "OSM", id],
-                    { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
+                { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
             return;
         } else if (id && !validate(id)) {
             this.toastService.warning(this.resources.uploadingDataFromExternalSourceIsNotAllowed);
             return;
         }
 
-        const results = await this.poiService.getClosestPoint(latLng, "OSM", this.resources.getCurrentLanguageCodeSimplified());
+        const results = await this.poiService.getClosestPoint(latLng, this.resources.getCurrentLanguageCodeSimplified());
 
         if (results == null) {
             this.router.navigate([RouteStrings.ROUTE_POI, "new", ""],
@@ -81,6 +81,16 @@ export class PrivatePoiUploaderService {
             message,
             type: "YesNo",
             confirmAction: () => {
+                const updateMarkerData: MarkerData = {
+                    id: results.id,
+                    description: description ? description.substring(0, 255) : "",
+                    title,
+                    latlng: latLng,
+                    type: markerType,
+                    urls
+                };
+
+                this.store.dispatch(new SetUploadMarkerDataAction(updateMarkerData));
                 this.router.navigate([RouteStrings.ROUTE_POI, "OSM", results.id],
                     { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
             },

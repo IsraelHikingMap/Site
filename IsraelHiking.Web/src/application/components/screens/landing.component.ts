@@ -1,37 +1,39 @@
 import { Component, inject } from "@angular/core";
-import { ResourcesService } from "../../services/resources.service";
 import { RouterLink } from "@angular/router";
-import { Dir } from "@angular/cdk/bidi";
-import mapsAnimationData from "../../../content/lottie/dialog-maps.json";
-import planAnimationData from "../../../content/lottie/dialog-plan.json";
-import moreAnimationData from "../../../content/lottie/dialog-more.json";
 
+import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
+import { PurchaseService } from "../../services/purchase.service";
 import { Urls } from "../../urls";
-import { AnimationOptions, LottieComponent } from "ngx-lottie";
 
 @Component({
     selector: "landing",
     templateUrl: "./landing.component.html",
     styleUrls: ["./landing.component.scss"],
-    imports: [RouterLink, Dir, LottieComponent]
+    imports: [RouterLink]
 })
 export class LandingComponent {
     public androidAppUrl: string = Urls.ANDROID_APP_URL;
     public iosAppUrl: string = Urls.IOS_APP_URL;
-    lottieMaps: AnimationOptions = { animationData: mapsAnimationData };
-    lottiePlan: AnimationOptions = { animationData: planAnimationData };
-    lottieMore: AnimationOptions = { animationData: moreAnimationData };
 
     public readonly resources = inject(ResourcesService);
 
-    private readonly runningContext = inject(RunningContextService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly purchaseService = inject(PurchaseService);
 
     public isMobile(): boolean {
-        return this.runningContext.isMobile;
+        return this.runningContextService.isMobile;
     }
 
     public isApp(): boolean {
-        return this.runningContext.isCapacitor;
+        return this.runningContextService.isCapacitor;
+    }
+
+    public isShowPurchaseButton(): boolean {
+        return this.purchaseService.isPurchaseAvailable() || this.purchaseService.isRenewAvailable();
+    }
+
+    public order(): void {
+        this.purchaseService.order();
     }
 }

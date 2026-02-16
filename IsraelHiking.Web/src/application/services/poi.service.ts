@@ -15,7 +15,6 @@ import { WhatsAppService } from "./whatsapp.service";
 import { DatabaseService } from "./database.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
-import { GeoJsonParser } from "./geojson.parser";
 import { MapService } from "./map.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
 import { GeoJSONUtils } from "./geojson-utils";
@@ -23,19 +22,21 @@ import { INatureService } from "./inature.service";
 import { WikidataService } from "./wikidata.service";
 import { ImageAttributionService } from "./image-attribution.service";
 import { LatLon, OsmTagsService, PoiProperties } from "./osm-tags.service";
+import { ShareUrlsService } from "./share-urls.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction } from "../reducers/offline.reducer";
 import { SetSelectedPoiAction, SetUploadMarkerDataAction } from "../reducers/poi.reducer";
 import { Urls } from "../urls";
 import type {
     MarkerData,
-    LatLngAlt,
+    LatLngAltTime,
     ApplicationState,
     Category,
     IconColorLabel,
     NorthEast,
     EditablePublicPointData,
     OfflineState,
-    UpdateablePublicPoiData
+    UpdateablePublicPoiData,
+    ShareUrl
 } from "../models";
 
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite" | "Bench"
@@ -75,13 +76,13 @@ export class PoiService {
     private readonly whatsappService = inject(WhatsAppService);
     private readonly hashService = inject(HashService);
     private readonly databaseService = inject(DatabaseService);
-    private readonly geoJsonParser = inject(GeoJsonParser);
     private readonly loggingService = inject(LoggingService);
     private readonly mapService = inject(MapService);
     private readonly iNatureService = inject(INatureService);
     private readonly wikidataService = inject(WikidataService);
     private readonly overpassTurboService = inject(OverpassTurboService);
     private readonly imageAttributinoService = inject(ImageAttributionService);
+    private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly store = inject(Store);
 
     constructor() {
@@ -408,6 +409,14 @@ export class PoiService {
                     this.store.dispatch(new SetSelectedPoiAction(clone));
                     return clone;
                 }
+                case "Users": {
+                    const shareUrl = await this.shareUrlsService.getShareUrl(id);
+                    const poi = this.convertShareUrlToPoi(shareUrl);
+                    this.poisCache.splice(0, 0, poi);
+                    const clone = cloneDeep(poi);
+                    this.store.dispatch(new SetSelectedPoiAction(clone));
+                    return clone;
+                }
                 default: {
                     const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
                     const poi = await firstValueFrom(this.httpClient.get<GeoJSON.Feature>(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000)));
@@ -426,6 +435,43 @@ export class PoiService {
             }
             return this.convertFeatureToPoi(feature, id);
         }
+    }
+
+    private convertShareUrlToPoi(shareUrl: ShareUrl): GeoJSON.Feature {
+        let geometry: GeoJSON.LineString | GeoJSON.MultiLineString;
+        const geoLocation = shareUrl.start ? { lat: shareUrl.start.lat, lon: shareUrl.start.lng } : { lat: shareUrl.dataContainer.routes[0].segments[0].latlngs[0].lat, lon: shareUrl.dataContainer.routes[0].segments[0].latlngs[0].lng };
+        if (shareUrl.dataContainer.routes.length > 1) {
+            geometry = {
+                type: "MultiLineString",
+                coordinates: shareUrl.dataContainer.routes.map(r => r.segments.map(s => s.latlngs).flat().map(l => [l.lng, l.lat]))
+            };
+        } else {
+            geometry = {
+                type: "LineString",
+                coordinates: shareUrl.dataContainer.routes[0].segments.map(s => s.latlngs).flat().map(l => [l.lng, l.lat])
+            };
+        }
+        const poi: GeoJSON.Feature = {
+            type: "Feature" as const,
+            geometry,
+            properties: {
+                poiCategory: shareUrl.type,
+                poiSource: "Users",
+                poiIcon: shareUrl.type === "Hiking" ? "icon-hike" : shareUrl.type === "Biking" ? "icon-bike" : shareUrl.type === "4x4" ? "icon-four-by-four" : "icon-question",
+                poiIconColor: "black",
+                poiDifficulty: shareUrl.difficulty,
+                poiGeolocation: geoLocation,
+                poiId: "Users_" + shareUrl.id,
+                identifier: shareUrl.id,
+                name: shareUrl.title,
+                description: shareUrl.description,
+                image: this.shareUrlsService.getImageUrlFromShareId(shareUrl.id)
+            }
+        }
+        if (shareUrl.website) {
+            poi.properties.website = shareUrl.website;
+        }
+        return poi;
     }
 
     public async updateExtendedInfo(feature: GeoJSON.Feature, language?: string): Promise<GeoJSON.Feature> {
@@ -467,7 +513,7 @@ export class PoiService {
         return feature;
     }
 
-    public getLatLngFromId(id: string): LatLngAlt {
+    public getLatLngFromId(id: string): LatLngAltTime {
         const split = id.split("_");
         return { lat: +split[0], lng: +split[1] };
     }
@@ -540,27 +586,39 @@ export class PoiService {
         } as NorthEast;
     }
 
-    public async getClosestPoint(location: LatLngAlt, source: string, language: string): Promise<MarkerData> {
-        let feature = null;
+    public async getClosestPoint(location: LatLngAltTime, language: string): Promise<{ type: string, id: string, title: string } | null> {
         try {
-            const feature$ = this.httpClient.get<GeoJSON.Feature<GeoJSON.Point>>(Urls.poiClosest, {
-                params: {
-                    location: location.lat + "," + location.lng,
-                    source,
-                    language
+            const features = await this.overpassTurboService.getPointsInArea(location);
+            let closestFeature: GeoJSON.Feature<GeoJSON.Point, PoiProperties> | null = null;
+            let closestDistance = Number.MAX_VALUE;
+            for (const feature of features.features) {
+                const poi: GeoJSON.Feature<GeoJSON.Point, PoiProperties> = {
+                    type: "Feature",
+                    geometry: feature.geometry,
+                    properties: JSON.parse(JSON.stringify(feature.properties)) || {}
+                };
+                OsmTagsService.setIconColorCategory(feature, poi);
+                if (poi.properties.poiIcon === "icon-search") {
+                    continue;
                 }
-            }).pipe(timeout(1000));
-            feature = await firstValueFrom(feature$);
+                poi.properties.poiId = (feature.id as string).replace("node/", "node_");
+                const distance = SpatialService.getDistance(location, SpatialService.toLatLng(feature.geometry.coordinates));
+                if (distance < closestDistance) {
+                    closestFeature = poi;
+                    closestDistance = distance;
+                }
+            }
+            if (closestFeature !== null) {
+                const title = GeoJSONUtils.getTitle(closestFeature, language);
+                return { type: closestFeature.properties.poiIcon.replace("icon-", ""), id: closestFeature.properties.poiId, title };
+            }
         } catch (ex) {
             this.loggingService.warning(`[POIs] Unable to get closest POI: ${(ex as Error).message}`);
         }
-        if (feature == null) {
-            return null;
-        }
-        return this.geoJsonParser.toMarkerData(feature, this.resources.getCurrentLanguageCodeSimplified());
+        return null;
     }
 
-    public addSimplePoint(latlng: LatLngAlt, pointType: SimplePointType, id: string): Promise<any> {
+    public addSimplePoint(latlng: LatLngAltTime, pointType: SimplePointType, id: string): Promise<any> {
         const feature = {
             id,
             type: "Feature",
@@ -679,6 +737,9 @@ export class PoiService {
     }
 
     public async createEditableDataAndMerge(feature: GeoJSON.Feature): Promise<EditablePublicPointData> {
+        if (feature.properties.poiSource !== "OSM") {
+            return null;
+        }
         const originalFeature = structuredClone(feature);
         const markerData = this.store.selectSnapshot((s: ApplicationState) => s.poiState).uploadMarkerData;
         if (markerData != null) {

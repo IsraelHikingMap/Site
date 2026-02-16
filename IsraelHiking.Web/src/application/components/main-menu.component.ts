@@ -100,7 +100,6 @@ export class MainMenuComponent {
 
     public async reportAnIssue() {
         this.toastService.info(this.resources.preparingDataForIssueReport);
-        const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
         const baseLayer = this.layersService.getSelectedBaseLayer();
         this.loggingService.info("--- Reporting an issue ---");
         const subscription = timer(8000, 8000).subscribe(() => {
@@ -116,7 +115,7 @@ export class MainMenuComponent {
             `Username: ${userInfo.displayName}`,
             `Map Location: ${this.hashService.getMapAddress()}`,
             `Baselayer: ${baseLayer.key}, ${baseLayer.address}`,
-            `Visible overlays: ${JSON.stringify(layersState.overlays.filter(o => o.visible))}`,
+            `Visible overlays: ${JSON.stringify(this.layersService.getAllOverlays().filter(o => this.layersService.isOverlayVisible(o)))}`,
             ""
         ].join("\n");
         const subject = "Issue reported by " + userInfo.displayName;

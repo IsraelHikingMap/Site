@@ -16,13 +16,13 @@ import { SelectedRouteService } from "../services/selected-route.service";
 import { SpatialService } from "../services/spatial.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
 import { LocationService } from "../services/location.service";
-import { FileService } from "../services/file.service";
+import { MapService } from "../services/map.service";
 import { RunningContextService } from "../services/running-context.service";
 import { ToggleDistanceAction, SetPannedAction, SetFollowingAction, ToggleKeepNorthUpAction } from "../reducers/in-memory.reducer";
 import { StopShowingBatteryConfirmationAction } from "../reducers/configuration.reducer";
 import { ChangeRouteStateAction } from "../reducers/routes.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
-import type { LatLngAlt, ApplicationState } from "../models";
+import type { LatLngAltTime, ApplicationState } from "../models";
 
 @Component({
     selector: "location",
@@ -33,7 +33,7 @@ import type { LatLngAlt, ApplicationState } from "../models";
 export class LocationComponent {
     public locationFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     public distanceFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
-    public locationLatLng: LatLngAlt = null;
+    public locationLatLng: LatLngAltTime = null;
     public showDistance: boolean = false;
 
     public readonly resources = inject(ResourcesService);
@@ -41,7 +41,7 @@ export class LocationComponent {
     private readonly locationSerivce = inject(LocationService);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly recordedRouteService = inject(RecordedRouteService);
-    private readonly fileService = inject(FileService);
+    private readonly mapService = inject(MapService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly store = inject(Store);
     private readonly mapComponent = inject(MapComponent);
@@ -63,7 +63,7 @@ export class LocationComponent {
         });
 
         this.mapComponent.mapLoad.subscribe(async () => {
-            const fullUrl = this.fileService.getFullUrl("content/gps-arrow.png");
+            const fullUrl = this.mapService.getFullUrl("content/gps-arrow.png");
             const image = await this.mapComponent.mapInstance.loadImage(fullUrl);
             this.mapComponent.mapInstance.addImage("gps-arrow", image.data);
             this.mapComponent.mapInstance.on("move", () => {
@@ -223,7 +223,7 @@ export class LocationComponent {
         this.clearDistanceFeatureCollection();
     }
 
-    private updateLocationFeatureCollection(center: LatLngAlt, radius: number, heading: number) {
+    private updateLocationFeatureCollection(center: LatLngAltTime, radius: number, heading: number) {
         const features: GeoJSON.Feature<GeoJSON.Geometry>[] = [{
             type: "Feature",
             properties: { heading },

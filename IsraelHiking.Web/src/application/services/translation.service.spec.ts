@@ -11,9 +11,11 @@ describe("TranslationService", () => {
         TestBed.configureTestingModule({
             providers: [
                 TranslationService,
-                { provide: ResourcesService, useValue: {
-                    getCurrentLanguageCodeSimplified: () => "he",
-                } },
+                {
+                    provide: ResourcesService, useValue: {
+                        getCurrentLanguageCodeSimplified: () => "he",
+                    }
+                },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting()
             ]
@@ -197,6 +199,25 @@ describe("TranslationService", () => {
         };
         const bestDescription = service.getBestDescription(feature);
         expect(bestDescription).toBe("");
+    }));
+
+    it("should return empty string if description is empty", inject([TranslationService, HttpTestingController], async (service: TranslationService, backend: HttpTestingController) => {
+        const feature: GeoJSON.Feature = {
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates: [0, 0]
+            },
+            properties: {
+                "description:en": ""
+            },
+        };
+        const promise = service.getTranslatedDescription(feature);
+
+        backend.expectNone(req => req.method === "POST" && req.url === Urls.tranlation);
+
+        const translation = await promise;
+        expect(translation).toBe("");
     }));
 
     it("should get a description translation", inject([TranslationService, HttpTestingController], async (service: TranslationService, backend: HttpTestingController) => {

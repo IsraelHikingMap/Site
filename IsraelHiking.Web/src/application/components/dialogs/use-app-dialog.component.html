@@ -1,11 +1,13 @@
 ﻿﻿<div [dir]="resources.direction">
-    <div matDialogTitle>
+    <div mat-dialog-title>
         <div>{{resources.thereSoMuchMoreYouCanDoWithOurApp}}</div>
-        <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+        <button mat-button type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-actions>
         <div class="flex flex-row w-full">
-            <a mat-raised-button [href]="appAddress" class="w-full" color="primary" mat-dialog-close angulartics2On="click" angularticsCategory="Application" angularticsAction="Got to application store"><i class="fa fa-lg icon-mobile"></i> {{resources.startDownload}}</a>
+            <a mat-raised-button [href]="appAddress" class="w-full" color="primary" mat-dialog-close
+                angulartics2On="click" angularticsCategory="Application" angularticsAction="Got to application store"><i
+                    class="fa fa-lg icon-mobile"></i> {{resources.startDownload}}</a>
         </div>
     </div>
 </div>

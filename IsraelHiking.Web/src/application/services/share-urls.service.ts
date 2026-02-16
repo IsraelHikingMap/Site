@@ -14,7 +14,7 @@ import { DatabaseService } from "./database.service";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import { UpdateShareUrlAction, RemoveShareUrlAction, AddShareUrlAction, SetShareUrlsLastModifiedDateAction } from "../reducers/share-urls.reducer";
 import { Urls } from "../urls";
-import type { ShareUrl, ApplicationState } from "../models";
+import type { ShareUrl, ApplicationState, UserPermissions } from "../models";
 
 interface IShareUrlSocialLinks {
     facebook: string;
@@ -76,7 +76,7 @@ export class ShareUrlsService {
         // Refresh it in the background if needed...
         try {
             const timestamp = await firstValueFrom(this.httpClient.get<string>(Urls.urls + shareUrlId + "/timestamp").pipe(timeout(2000)));
-            if (new Date(timestamp) < new Date(shareUrl.lastModifiedDate)) {
+            if (new Date(timestamp) <= new Date(shareUrl.lastModifiedDate)) {
                 return shareUrl;
             }
             this.loggingService.warning(`[Shares] Cached share is outdated ${shareUrlId}, fetching it again...`);
@@ -105,13 +105,12 @@ export class ShareUrlsService {
             this.loggingService.info("[Shares] Got the list of shares, starting to compare against exiting list");
             const exitingShareUrls = this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState).shareUrls;
             for (const shareUrl of shareUrls) {
-                shareUrl.lastModifiedDate = new Date(shareUrl.lastModifiedDate);
                 if (exitingShareUrls.find(s => s.id === shareUrl.id) != null) {
                     this.store.dispatch(new UpdateShareUrlAction(shareUrl));
                 } else {
                     this.store.dispatch(new AddShareUrlAction(shareUrl));
                 }
-                if (sharesLastSuccessfullSync == null || shareUrl.lastModifiedDate > sharesLastSuccessfullSync) {
+                if (sharesLastSuccessfullSync == null || new Date(shareUrl.lastModifiedDate) > sharesLastSuccessfullSync) {
                     sharesToGetFromServer.push(shareUrl);
                 }
             }
@@ -124,7 +123,7 @@ export class ShareUrlsService {
             sharesToGetFromServer = orderBy(sharesToGetFromServer, s => s.lastModifiedDate, "asc");
             for (const shareToGet of sharesToGetFromServer) {
                 await this.getShareFromServerAndCacheIt(shareToGet.id);
-                this.store.dispatch(new SetShareUrlsLastModifiedDateAction(shareToGet.lastModifiedDate));
+                this.store.dispatch(new SetShareUrlsLastModifiedDateAction(new Date(shareToGet.lastModifiedDate)));
             }
             this.store.dispatch(new SetShareUrlsLastModifiedDateAction(operationStartTimeStamp));
             this.loggingService.info(`[Shares] Finished shares sync, last modified: ${operationStartTimeStamp.toUTCString()}`);
@@ -138,7 +137,6 @@ export class ShareUrlsService {
     public async createShareUrl(shareUrl: ShareUrl): Promise<Immutable<ShareUrl>> {
         this.loggingService.info(`[Shares] Creating share with title: ${shareUrl.title}`);
         const createdShareUrl = await firstValueFrom(this.httpClient.post<ShareUrl>(Urls.urls, shareUrl));
-        createdShareUrl.lastModifiedDate = new Date(createdShareUrl.lastModifiedDate);
         this.store.dispatch(new AddShareUrlAction(createdShareUrl));
         return createdShareUrl;
     }
@@ -146,7 +144,6 @@ export class ShareUrlsService {
     public async updateShareUrl(shareUrl: ShareUrl): Promise<Immutable<ShareUrl>> {
         this.loggingService.info(`[Shares] Updating share with id: ${shareUrl.id}`);
         const updatedShareUrl = await firstValueFrom(this.httpClient.put<ShareUrl>(Urls.urls + shareUrl.id, shareUrl));
-        updatedShareUrl.lastModifiedDate = new Date(updatedShareUrl.lastModifiedDate);
         this.store.dispatch(new UpdateShareUrlAction(updatedShareUrl));
         return updatedShareUrl;
     }
@@ -183,5 +180,23 @@ export class ShareUrlsService {
     public getFullUrlFromShareId(id: string) {
         const urlTree = this.router.createUrlTree([RouteStrings.SHARE, id]);
         return Urls.baseAddress + urlTree.toString();
+    }
+
+    public async getUserPermissions(): Promise<UserPermissions> {
+        return await firstValueFrom(this.httpClient.get<UserPermissions>(Urls.permissions));
+    }
+
+    public getIconFromType(type: ShareUrl["type"]) {
+        switch (type) {
+            case "Hiking":
+                return "icon-hike";
+            case "Biking":
+                return "icon-bike";
+            case "4x4":
+                return "icon-four-by-four";
+            case "Unknown":
+            default:
+                return "icon-question";
+        }
     }
 }

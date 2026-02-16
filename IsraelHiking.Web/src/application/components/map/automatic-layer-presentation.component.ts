@@ -31,7 +31,6 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     public isBaselayer = input<boolean>();
     public layerData = input<EditableLayer>();
     public isMainMap = input<boolean>();
-    public isSameBaselayerOn = input<boolean>(false);
 
     private rasterSourceId: string;
     private rasterLayerId: string;
@@ -226,7 +225,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             if (oldLayer != null) {
                 this.removeLayer(oldLayer);
             }
-            if (newLayer != null && !this.isSameBaselayerOn()) {
+            if (newLayer != null) {
                 await this.createLayer(newLayer);
             }
         });

@@ -8,11 +8,10 @@ import { SelectedRouteService } from "../../services/selected-route.service";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { GeoLocationService } from "../../services/geo-location.service";
 import { SnappingService, SnappingPointResponse } from "../../services/snapping.service";
-import { PoiService } from "../../services/poi.service";
 import { ResourcesService } from "../../services/resources.service";
 import { AddPrivatePoiAction, UpdatePrivatePoiAction } from "../../reducers/routes.reducer";
 import { AddRecordingPoiAction, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
-import type { ApplicationState, MarkerData, LatLngAlt } from "../../models";
+import type { ApplicationState, MarkerData, LatLngAltTime } from "../../models";
 
 @Injectable()
 export class RouteEditPoiInteraction {
@@ -21,7 +20,6 @@ export class RouteEditPoiInteraction {
     private readonly ngZone = inject(NgZone);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly snappingService = inject(SnappingService);
-    private readonly poiService = inject(PoiService);
     private readonly resources = inject(ResourcesService);
     private readonly store = inject(Store);
 
@@ -52,10 +50,11 @@ export class RouteEditPoiInteraction {
         });
     };
 
-    public handleDragEnd(latlng: LatLngAlt, index: number) {
+    public handleDragEnd(latlng: LatLngAltTime, index: number) {
         const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
         if (recordedRouteState.isAddingPoi) {
             const markerData = structuredClone(recordedRouteState.route.markers[index]) as MarkerData;
+            markerData.id = uuidv4();
             markerData.latlng = latlng;
             this.store.dispatch(new UpdateRecordingPoiAction(index, markerData));
         } else {
@@ -66,7 +65,7 @@ export class RouteEditPoiInteraction {
         }
     }
 
-    private async addPrivatePoi(latlng: LatLngAlt) {
+    private addPrivatePoi(latlng: LatLngAltTime) {
         let markerData: MarkerData = {
             id: uuidv4(),
             latlng,
@@ -80,7 +79,7 @@ export class RouteEditPoiInteraction {
             return;
         }
 
-        const snapping = await this.getSnappingForPoint(latlng);
+        const snapping = this.getSnappingForPoint(latlng);
         if (snapping.markerData != null) {
             markerData = structuredClone(snapping.markerData) as MarkerData;
         }
@@ -107,25 +106,26 @@ export class RouteEditPoiInteraction {
         PrivatePoiEditDialogComponent.openDialog(this.matDialog, markerData, index);
     }
 
-    private async getSnappingForPoint(latlng: LatLngAlt): Promise<SnappingPointResponse> {
+    private getSnappingForPoint(latlng: LatLngAltTime): SnappingPointResponse {
         const gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
-        if (gpsState.tracking === "tracking") {
-            const currentLocation = GeoLocationService.positionToLatLngTime(gpsState.currentPosition);
-            const snappingPointResponse = this.snappingService.snapToPoint(latlng,
-                [{
-                    id: uuidv4(),
-                    latlng: currentLocation,
-                    type: "star",
-                    urls: [],
-                    title: "",
-                    description: "",
-                }]);
-            if (snappingPointResponse.markerData != null) {
-                return snappingPointResponse;
+        if (gpsState.tracking !== "tracking") {
+            return {
+                latlng,
+                markerData: null,
             }
         }
 
-        const markerData = await this.poiService.getClosestPoint(latlng, "", this.resources.getCurrentLanguageCodeSimplified());
-        return this.snappingService.snapToPoint(latlng, markerData ? [markerData] : []);
+
+        const currentLocation = GeoLocationService.positionToLatLngTime(gpsState.currentPosition);
+        const snappingPointResponse = this.snappingService.snapToPoint(latlng,
+            [{
+                id: uuidv4(),
+                latlng: currentLocation,
+                type: "star",
+                urls: [],
+                title: "",
+                description: "",
+            }]);
+        return snappingPointResponse;
     }
 }

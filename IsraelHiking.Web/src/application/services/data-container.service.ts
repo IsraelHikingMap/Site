@@ -16,7 +16,7 @@ import { RunningContextService } from "./running-context.service";
 import { BulkReplaceRoutesAction } from "../reducers/routes.reducer";
 import { SetFileUrlAndBaseLayerAction } from "../reducers/in-memory.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
-import type { DataContainer, ApplicationState, LayerData, RouteData } from "../models";
+import type { DataContainer, ApplicationState, LayerData, RouteData, RouteDataWithoutState } from "../models";
 
 @Injectable()
 export class DataContainerService {
@@ -55,12 +55,12 @@ export class DataContainerService {
         }
     }
 
-    public getContainerForRoutes(routes: Immutable<RouteData>[]): DataContainer {
+    public getContainerForRoutes(routes: Immutable<RouteDataWithoutState[]>): DataContainer {
         const layersContainer = this.layersService.getData();
 
         const bounds = SpatialService.getMapBounds(this.mapService.map);
         const container: DataContainer = {
-            routes: structuredClone(routes) as RouteData[],
+            routes: structuredClone(routes) as RouteDataWithoutState[],
             baseLayer: layersContainer.baseLayer,
             overlays: layersContainer.overlays,
             northEast: bounds.northEast,

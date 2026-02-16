@@ -1,40 +1,32 @@
-import { Component, inject } from "@angular/core";
-import { AsyncPipe } from "@angular/common";
-import { Observable } from "rxjs";
-import { Store } from "@ngxs/store";
-import type { Immutable } from "immer";
+import { Component, inject, input } from "@angular/core";
 
 import { AutomaticLayerPresentationComponent } from "./automatic-layer-presentation.component";
 import { LayersService } from "../../services/layers.service";
 import { ResourcesService } from "../../services/resources.service";
-import type { ApplicationState, Overlay } from "../../models";
+import type { EditableLayer } from "../../models";
 
 @Component({
     selector: "layers",
     templateUrl: "layers.component.html",
-    imports: [AutomaticLayerPresentationComponent, AsyncPipe]
+    imports: [AutomaticLayerPresentationComponent]
 })
 export class LayersComponent {
-    public overlays$: Observable<Immutable<Overlay[]>>;
+
+    public readonly isMainMap = input<boolean>(true);
 
     public readonly resources = inject(ResourcesService);
 
     private readonly layersService = inject(LayersService);
-    private readonly store = inject(Store);
-
-    constructor() {
-        this.overlays$ = this.store.select((state: ApplicationState) => state.layersState.overlays);
-    }
 
     public getBaseLayer() {
         return this.layersService.getSelectedBaseLayer();
     }
 
-    public trackByKey(_: number, el: Overlay) {
-        return el.key;
+    public isOverlayVisible(overlay: EditableLayer) {
+        return this.layersService.isOverlayVisible(overlay);
     }
 
-    public isSameBaselayerOn(overlay: Overlay) {
-        return overlay.address === this.getBaseLayer()?.address;
+    public getAllOverlays() {
+        return this.layersService.getAllOverlays();
     }
 }

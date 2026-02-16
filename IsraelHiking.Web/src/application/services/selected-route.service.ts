@@ -30,8 +30,9 @@ import type {
     ApplicationState,
     RouteSegmentData,
     LatLngAltTime,
-    LatLngAlt,
-    RouteEditStateType
+    RouteEditStateType,
+    MarkerData,
+    RouteDataWithoutState
 } from "../models";
 
 export type RouteViewProperties = {
@@ -56,7 +57,7 @@ export class SelectedRouteService {
     private routes: Immutable<RouteData[]> = [];
     private selectedRouteId: string;
 
-    public selectedRouteHover = new EventEmitter<LatLngAlt>;
+    public selectedRouteHover = new EventEmitter<LatLngAltTime>();
 
     private readonly resources = inject(ResourcesService);
     private readonly routesFactory = inject(RoutesFactory);
@@ -394,17 +395,18 @@ export class SelectedRouteService {
         this.store.dispatch(new ReplaceSegmentsAction(routeId, segments));
     }
 
-    public addRoutes(routes: RouteData[]) {
+    public addRoutes(routes: RouteDataWithoutState[]) {
         if (routes.length === 0) {
             return;
         }
         if (routes.length === 1 && routes[0].segments.length === 0 && this.routes.length > 0) {
             // this is the case when the layer has markers only
             for (const marker of routes[0].markers) {
-                if (!marker.id) {
-                    marker.id = uuidv4();
+                const markerWithId = marker as MarkerData;
+                if (!markerWithId.id) {
+                    markerWithId.id = uuidv4();
                 }
-                this.store.dispatch(new AddPrivatePoiAction(this.selectedRouteId || this.routes[0].id, marker));
+                this.store.dispatch(new AddPrivatePoiAction(this.selectedRouteId || this.routes[0].id, markerWithId));
             }
             if (this.selectedRouteId == null) {
                 this.store.dispatch(new SetSelectedRouteAction(this.routes[0].id));
@@ -423,11 +425,11 @@ export class SelectedRouteService {
         }
     }
 
-    public raiseHoverSelectedRoute(latLng: LatLngAlt) {
+    public raiseHoverSelectedRoute(latLng: LatLngAltTime) {
         this.selectedRouteHover.emit(latLng);
     }
 
-    public getLatlngs(route: Immutable<RouteData>): LatLngAltTime[] {
+    public getLatlngs(route: Immutable<RouteDataWithoutState>): LatLngAltTime[] {
         return route ? route.segments.map(s => s.latlngs).flat() : null;
     }
 
@@ -484,7 +486,7 @@ export class SelectedRouteService {
     }
 
     public createFeaturesForRoute(
-        route: Immutable<RouteData>): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
+        route: Immutable<RouteDataWithoutState>): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
         const features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
         const routeCoordinates = route.segments.map(s => s.latlngs).flat().map(l => SpatialService.toCoordinate(l));
         if (routeCoordinates.length < 2) {
@@ -531,11 +533,9 @@ export class SelectedRouteService {
         for (const marker of route.markers) {
             const markerFeature = {
                 type: "Feature",
-                id: routeProperties.id + "_marker_" + marker.id,
                 properties: {
                     color: "transparent",
                     strokeColor: routeProperties.color,
-                    id: routeProperties.id + "_marker_" + marker.id,
                 },
                 geometry: {
                     type: "Point",
@@ -547,7 +547,7 @@ export class SelectedRouteService {
         return features;
     }
 
-    private routeToProperties(route: Immutable<RouteData>): RouteViewProperties {
+    private routeToProperties(route: Immutable<RouteDataWithoutState>): RouteViewProperties {
         const color = route.color;
         const opacity = route.opacity == null ? 1.0 : route.opacity;
         const width = route.weight;

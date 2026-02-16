@@ -21,7 +21,7 @@ import { ToastService } from "../../services/toast.service";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import { ToggleDistanceAction } from "../../reducers/in-memory.reducer";
 import { AddRecordingPoiAction } from "../../reducers/recorded-route.reducer";
-import type { ApplicationState, LatLngAlt, LinkData, MarkerData } from "../../models";
+import type { ApplicationState, LatLngAltTime, LinkData, MarkerData } from "../../models";
 
 @Component({
     selector: "gps-location-overlay",
@@ -30,7 +30,7 @@ import type { ApplicationState, LatLngAlt, LinkData, MarkerData } from "../../mo
 })
 export class GpsLocationOverlayComponent {
 
-    public latlng = input<LatLngAlt>();
+    public latlng = input<LatLngAltTime>();
 
     public closed = output();
 

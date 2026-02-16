@@ -11,7 +11,7 @@ import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { Urls } from "../../urls";
-import type { LatLngAlt } from "../../models";
+import type { LatLngAltTime } from "../../models";
 
 @Component({
     selector: "missing-part-overlay",
@@ -22,7 +22,7 @@ import type { LatLngAlt } from "../../models";
 })
 export class MissingPartOverlayComponent {
 
-    public latlng = input<LatLngAlt>();
+    public latlng = input<LatLngAltTime>();
 
     public feature = input<GeoJSON.Feature<GeoJSON.LineString>>();
 
