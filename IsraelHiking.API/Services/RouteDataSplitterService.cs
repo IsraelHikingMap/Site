@@ -50,6 +50,7 @@ public class RouteDataSplitterService : IRouteDataSplitterService
             [
                 new RouteSegmentData
                 {
+                    RoutingType = RoutingType.HIKE,
                     RoutePoint = allRoutePoints.First(),
                     Latlngs = [allRoutePoints.First(), allRoutePoints.First()]
                 }
@@ -66,6 +67,7 @@ public class RouteDataSplitterService : IRouteDataSplitterService
             allRoutePoints = allRoutePoints.Skip(currentIndex).ToList();
             manipulatedRouteData.Segments.Add(new RouteSegmentData
             {
+                RoutingType = RoutingType.HIKE,
                 Latlngs = latLngs,
                 RoutePoint = latLngs.Last()
             });
