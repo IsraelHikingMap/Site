@@ -109,27 +109,22 @@ export class DatabaseService {
             const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
             const offlineAvailable = await this.pmTilesService.isOfflineFileAvailable(z, x, y, type);
             try {
-                this.loggingService.debug(`[Database] Fetching ${params.url}, offlineAvailable: ${offlineAvailable}`);
                 const response = await firstValueFrom(this.httpClient.get(params.url.replace("slice://", "https://"), { observe: "response", responseType: "arraybuffer" })
                     .pipe(offlineAvailable ? timeout(2000) : timeout(60000))) as any as HttpResponse<any>;
                 if (!response.ok) {
-                    throw new Error(`Failed to get ${params.url}: ${response.statusText} (${response.status})`);
+                    throw new Error(`Failed to get ${params.url}: ${response.status}`);
                 }
                 const data = response.body ?? new ArrayBuffer(0);
-                this.loggingService.debug(`[Database] Successfully fetched: ${params.url}`);
                 return { data, cacheControl: response.headers.get("Cache-Control"), expires: response.headers.get("Expires") };
             } catch (ex) {
                 // Timeout or other error
                 if (offlineAvailable === false) {
-                    this.loggingService.debug(`[Database] Failed to fetch and offline tile is not available for: ${params.url}, ${(ex as Error).message}`);
                     throw new Error(`Failed to get ${params.url}: ${(ex as Error).message}`);
                 }
                 try {
                     const data = await this.pmTilesService.getTileByType(z, x, y, type);
-                    this.loggingService.debug(`[Database] got tile from pmtiles for: ${params.url}`);
                     return { data };
                 } catch (innerEx) {
-                    this.loggingService.debug(`[Database] Failed getting tile from pmtiles, ${(innerEx as any).message}: ${params.url}`);
                     throw innerEx;
                 }
             }
