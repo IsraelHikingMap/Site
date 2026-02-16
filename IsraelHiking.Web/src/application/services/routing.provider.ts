@@ -119,9 +119,9 @@ export class RoutingProvider {
             throw new Error("[Routing] No route found... :-(");
         }
 
-        const lngLat = route.path.map(c => SpatialService.toLatLng(c));
-        await this.elevationProvider.updateHeights(lngLat);
-        return lngLat;
+        const lnglats = route.path.map(c => SpatialService.toLatLng(c));
+        await this.elevationProvider.updateHeights(lnglats);
+        return lnglats;
     }
 
     private async updateCacheAndGetFeatures(
