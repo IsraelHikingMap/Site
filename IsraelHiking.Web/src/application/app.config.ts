@@ -112,6 +112,7 @@ import { PointsOfInterestReducer } from "./reducers/poi.reducer";
 import { InMemoryReducer } from "./reducers/in-memory.reducer";
 import { GpsReducer } from "./reducers/gps.reducer";
 import { OfflineReducer } from "./reducers/offline.reducer";
+import { PaywallReducer } from "./reducers/paywall.reducer";
 import { routes } from "./app.routes";
 
 export const appConfig: ApplicationConfig = {
@@ -163,6 +164,7 @@ export const appConfig: ApplicationConfig = {
                 InMemoryReducer,
                 GpsReducer,
                 OfflineReducer,
+                PaywallReducer,
             ])
         ),
         AuthorizationService,

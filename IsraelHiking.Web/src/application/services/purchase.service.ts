@@ -87,10 +87,13 @@ export class PurchaseService {
     public async showPaywall() {
         this.loggingService.info("[Store] Presenting paywall");
         this.store.dispatch(new SetLastPaywallShownDate(new Date()));
-        const { result } = await RevenueCatUI.presentPaywall({ displayCloseButton: true });
+        const { result } = await RevenueCatUI.presentPaywall();
         this.loggingService.info("[Store] Paywall result: " + result);
         if (result === PAYWALL_RESULT.PURCHASED) {
             this.orderInternal();
+        } else if (result === PAYWALL_RESULT.RESTORED) {
+            await Purchases.syncPurchases();
+            await this.checkAndUpdateOfflineAvailability();
         }
     }
 
