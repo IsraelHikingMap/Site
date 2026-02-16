@@ -34,6 +34,6 @@ export class LandingComponent {
     }
 
     public order(): void {
-        this.purchaseService.order();
+        this.purchaseService.showPaywall();
     }
 }

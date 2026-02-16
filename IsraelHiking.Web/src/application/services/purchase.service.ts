@@ -3,7 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { firstValueFrom, timeout } from "rxjs";
 import { PAYWALL_RESULT, Purchases } from "@revenuecat/purchases-capacitor";
-import { RevenueCatUI } from '@revenuecat/purchases-capacitor-ui';
+import { RevenueCatUI } from "@revenuecat/purchases-capacitor-ui";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
@@ -29,6 +29,7 @@ export class PurchaseService {
         this.store.dispatch(new IncrementAppLaunchesSinceLastPaywallShown());
         this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe(async (userInfo) => {
             if (userInfo == null) {
+                this.store.dispatch(new SetOfflineSubscribedAction(false));
                 return;
             }
             this.loggingService.info("[Store] Logged in: " + userInfo.id);
@@ -125,6 +126,7 @@ export class PurchaseService {
 
     private shouldShowPaywall(): boolean {
         const paywallState = this.store.selectSnapshot((s: ApplicationState) => s.paywallState);
+        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         if (!this.runningContextService.isCapacitor) {
             return false;
         }
@@ -151,7 +153,7 @@ export class PurchaseService {
             return true;
         }
 
-        if (new Date(paywallState.lastOfflineDetectedDate) > new Date(paywallState.lastPaywallShownDate)) {
+        if (new Date(offlineState.lastOfflineDetectedDate) > new Date(paywallState.lastPaywallShownDate)) {
             return true;
         }
 

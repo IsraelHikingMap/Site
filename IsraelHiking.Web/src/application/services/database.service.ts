@@ -125,12 +125,8 @@ export class DatabaseService {
                     }
                     throw new Error(`Failed to get ${params.url}: ${(ex as Error).message}`);
                 }
-                try {
-                    const data = await this.pmTilesService.getTileByType(z, x, y, type);
-                    return { data };
-                } catch (innerEx) {
-                    throw innerEx;
-                }
+                const data = await this.pmTilesService.getTileByType(z, x, y, type);
+                return { data };
             }
         });
     }

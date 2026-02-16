@@ -255,6 +255,6 @@ export const initialState =
         },
         paywallState: {
             lastPaywallShownDate: null,
-            appLaunchesSinceLastPaywallShown: 0,
+            appLaunchesSinceLastPaywallShown: 0
         }
     } as MutableApplicationState;
