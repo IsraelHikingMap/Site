@@ -153,7 +153,6 @@
     "generate-sprite": "tsx ./scripts/generate-sprite.ts",
     "generate-user-data-types": "openapi-typescript https://raw.githubusercontent.com/Mapeak-com/user-data/refs/heads/main/user-data.openapi.yml -o ./src/application/models/user-data.g.d.ts",
     "set-version": "tsx ./scripts/set-version.ts",
-    "white-label-me": "tsx ./scripts/white-label-me.ts",
     "prepare": "patch-package"
   },
   "type": "module",
