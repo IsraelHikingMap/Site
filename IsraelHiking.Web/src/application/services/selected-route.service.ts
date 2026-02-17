@@ -21,7 +21,6 @@ import {
     MergeRoutesAction,
     UpdateSegmentsAction,
     DeleteSegmentAction,
-    ReplaceSegmentsAction,
     AddPrivatePoiAction,
     ChangeRouteStateAction
 } from "../reducers/routes.reducer";
