@@ -12,6 +12,7 @@ import { Store } from "@ngxs/store";
 import { EmailComposer } from "capacitor-email-composer"
 import platform from "platform";
 
+import { OfflineManagementDialogComponent } from "./dialogs/offline-management-dialog.component";
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
 import { RunningContextService } from "../services/running-context.service";
@@ -139,7 +140,7 @@ export class MainMenuComponent {
                 `Platform: ${info.platform}`,
                 `OS version: ${info.osVersion}`,
                 `App version: ${(await App.getInfo()).version}`,
-                `Has Subscription: ${!this.isShowOrderButton()}`,
+                `Has Subscription: ${this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)}`,
                 downloadedTiles == null ? "" : `Downloaded Tiles: ${Object.keys(downloadedTiles)}`
             ].join("\n");
             const logFileUri = await this.fileService.storeFileToCache("log.txt", logs, false);
@@ -184,10 +185,23 @@ export class MainMenuComponent {
         this.dialog.open(ConfigurationDialogComponent, { width: "480px" });
     }
 
-    public isShowOrderButton() {
+    public isOfflineDownloadAvailable() {
         return this.runningContextService.isCapacitor &&
-            (this.purchaseService.isPurchaseAvailable() ||
-                this.purchaseService.isRenewAvailable());
+            this.store.selectSnapshot((s: ApplicationState) => s.offlineState).isSubscribed;
+    }
+
+    public isPurchaseAvailable() {
+        if (!this.isLoggedIn() && this.runningContextService.isIos) {
+            return false;
+        }
+        return this.purchaseService.isPurchaseAvailable();
+    }
+
+    public isRenewAvailable() {
+        if (!this.isLoggedIn() && this.runningContextService.isIos) {
+            return false;
+        }
+        return this.purchaseService.isRenewAvailable();
     }
 
     public orderOfflineMaps() {
@@ -197,5 +211,9 @@ export class MainMenuComponent {
             return;
         }
         this.purchaseService.showPaywall();
+    }
+
+    public async downloadOfflineMaps() {
+        OfflineManagementDialogComponent.openDialog(this.dialog);
     }
 }

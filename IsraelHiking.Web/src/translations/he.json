@@ -379,6 +379,7 @@
     "The route's name was altered since it is in use...": "שם המסלול שונה מאחר והוא כבר בשימוש...",
     "The title for your share.": "הכותרת לשמירה הזו בענן.",
     "There's no description :-(. To add one you'll need to login to OSM first, please use the button in the upper right corner to login.": "אין תיאור 😞\n להוספת תיאור, יש להתחבר לחשבון ה- OSM. מתחברים ע\"י לחיצה על כפתור הפרצוף העצוב בפינה הימנית העליונה של המסך הראשי.",
+    "There's no permission to use your location.": "אין הרשאה להשתמש במיקום שלך.",
     "There's no permission to use your location. Would you like to open the app settings?": "אין הרשאה להציג את מיקומך. האם ברצונך לפתוח את הגדרות האפליקציה?",
     "There's so much more you can do with our app": "אפשר לעשות עוד כל כך הרבה בעזרת האפליקציה שלנו",
     "This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.": "המפה הזו נוצרה בעזרת מידע מ- {{link}}Open Street Map (OSM){{linkend}} והוא פתוח לשימוש ועריכה של כולם.",

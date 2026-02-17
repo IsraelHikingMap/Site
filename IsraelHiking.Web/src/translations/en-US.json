@@ -379,6 +379,7 @@
     "The route's name was altered since it is in use...": "The route's name was altered since it is in use...",
     "The title for your share.": "The title for your saved work.",
     "There's no description :-(. To add one you'll need to login to OSM first, please use the button in the upper right corner to login.": "There's no description 😞. To add one you'll need to login to OSM first. Please click on the sad face button in the upper left corner of the main screen.",
+    "There's no permission to use your location.": "There's no permission to use your location.",
     "There's no permission to use your location. Would you like to open the app settings?": "There's no permission to use your location. Would you like to open the app settings?",
     "There's so much more you can do with our app": "There's so much more you can do with our app",
     "This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.": "This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is open for all to use and edit.",

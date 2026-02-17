@@ -152,6 +152,12 @@ export class GeoLocationService {
                 if (error) {
                     this.loggingService.error(`[GeoLocation] Failed to start background tracking: ${error.message} code: ${error.code}`);
                     this.disable();
+                    if (this.runningContextService.isIos) {
+                        // Apple do not allow opening the app when the app starts,
+                        // to avoid complexity, this simply tells the user there's no permissions...
+                        this.toastService.warning(this.resources.noLocationPermission);
+                        return;
+                    }
                     if (error.code === "3") {
                         // Location timeout in the browser, don't do anything...
                         return;

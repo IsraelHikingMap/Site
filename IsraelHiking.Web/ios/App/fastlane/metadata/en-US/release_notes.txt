@@ -1,3 +1,8 @@
-- Global heatmap
-- More properties when creating a cloud save
-- Offline maps banners
+- UI main menu redesign.
+- Handling of too many routes.
+- Allow uploading artwork to OSM.
+- Better handling of editing and planning.
+- New layer sharing ability.
+- Global heat-map.
+- More properties when creating a cloud save.
+- Offline maps banners.
