@@ -4,9 +4,8 @@
 
 <body>
   <script>
-    const searchParams = new URLSearchParams(location.search)
-    if (searchParams.has("code")) {
-      new BroadcastChannel("osm-oauth2").postMessage(location.href);
+    if (new URLSearchParams(location.search).has("code")) {
+      new BroadcastChannel("osm-api-auth-complete").postMessage(location.href);
       window.close();
     }
   </script>

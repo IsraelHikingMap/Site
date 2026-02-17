@@ -45,7 +45,7 @@ export class AuthorizationService {
         const result = await InAppBrowser.openSecureWindow({
             authEndpoint: Urls.osmAuth + "/authorize?" + params.toString(),
             redirectUri: this.redirectUrl,
-            broadcastChannelName: "osm-oauth2"
+            broadcastChannelName: "osm-api-auth-complete"
         });
         const redirectedUrl = new URL(result.redirectedUri);
         const code = redirectedUrl.searchParams.get(AuthorizationService.OAUTH_CODE);
