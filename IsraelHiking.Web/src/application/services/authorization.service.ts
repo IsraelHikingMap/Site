@@ -21,10 +21,6 @@ export class AuthorizationService {
     private readonly store = inject(Store);
     private readonly redirectUrl = this.runningContextService.isCapacitor ? Urls.mapeakAuthUrl : Urls.emptyAuthHtml;
 
-    public initialize() {
-
-    }
-
     public isLoggedIn(): boolean {
         const userState = this.store.selectSnapshot((s: ApplicationState) => s.userState);
         return userState.userInfo != null;

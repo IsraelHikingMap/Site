@@ -28,7 +28,6 @@ import { HashService } from "./hash.service";
 import { AnalyticsService } from "./analytics.service";
 import { MapService } from "./map.service";
 import { SelectedRouteService } from "./selected-route.service";
-import { AuthorizationService } from "./authorization.service";
 import type { ApplicationState } from "../models";
 
 @Injectable()
@@ -56,7 +55,6 @@ export class ApplicationInitializeService {
     private readonly locationService = inject(LocationService);
     private readonly hashService = inject(HashService);
     private readonly analyticsService = inject(AnalyticsService);
-    private readonly authorizationService = inject(AuthorizationService);
     private readonly mapService = inject(MapService);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly store = inject(Store);
@@ -68,7 +66,6 @@ export class ApplicationInitializeService {
             this.loggingService.info("Starting Mapeak Application Initialization");
             await this.databaseService.initialize();
             this.analyticsService.initialize();
-            this.authorizationService.initialize();
             this.overpassTurboService.initialize();
             this.screenService.initialize();
             await this.resources.initialize();
