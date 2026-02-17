@@ -171,10 +171,10 @@ export class ShareEditDialogComponent {
             this.shareUrl.start = this.data.dataContainer.routes[0].markers[0].latlng;
             return;
         }
-        const statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
+        let statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
         for (let routeIndex = 1; routeIndex < this.shareUrl.dataContainer.routes.length; routeIndex++) {
             const latlngs = this.selectedRouteService.getLatlngs(this.shareUrl.dataContainer.routes[routeIndex]);
-            const statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
+            statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
             statistics.gain += statistics.gain;
             statistics.loss += statistics.loss;
             statistics.length += statistics.length;
