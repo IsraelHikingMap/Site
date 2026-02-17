@@ -124,7 +124,6 @@
     "karma-jasmine-html-reporter": "^2.1.0",
     "karma-junit-reporter": "^2.0.1",
     "openapi-typescript": "^7.10.1",
-    "patch-package": "^8.0.1",
     "postcss": "^8.5.6",
     "puppeteer": "^24.36.0",
     "replace-in-file": "^8.4.0",
@@ -152,8 +151,7 @@
     "generate-legend": "tsx ./scripts/generate-legend.ts",
     "generate-sprite": "tsx ./scripts/generate-sprite.ts",
     "generate-user-data-types": "openapi-typescript https://raw.githubusercontent.com/Mapeak-com/user-data/refs/heads/main/user-data.openapi.yml -o ./src/application/models/user-data.g.d.ts",
-    "set-version": "tsx ./scripts/set-version.ts",
-    "prepare": "patch-package"
+    "set-version": "tsx ./scripts/set-version.ts"
   },
   "type": "module",
   "version": "9.21.0"
