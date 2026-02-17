@@ -27,8 +27,8 @@ PODS:
     - Capacitor
   - CapgoCapacitorCompass (8.1.4):
     - Capacitor
-  - CordovaPlugins (8.0.1):
-    - CapacitorCordova
+  - CapgoInappbrowser (8.1.21):
+    - Capacitor
   - IONFilesystemLib (1.1.0)
   - PurchasesHybridCommon (17.28.1):
     - RevenueCat (= 5.55.2)
@@ -60,7 +60,7 @@ DEPENDENCIES:
   - "CapawesomeCapacitorAppUpdate (from `../../node_modules/@capawesome/capacitor-app-update`)"
   - "CapgoBackgroundGeolocation (from `../../node_modules/@capgo/background-geolocation`)"
   - "CapgoCapacitorCompass (from `../../node_modules/@capgo/capacitor-compass`)"
-  - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
+  - "CapgoInappbrowser (from `../../node_modules/@capgo/inappbrowser`)"
   - "RevenuecatPurchasesCapacitor (from `../../node_modules/@revenuecat/purchases-capacitor`)"
   - "RevenuecatPurchasesCapacitorUi (from `../../node_modules/@revenuecat/purchases-capacitor-ui`)"
 
@@ -101,8 +101,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capgo/background-geolocation"
   CapgoCapacitorCompass:
     :path: "../../node_modules/@capgo/capacitor-compass"
-  CordovaPlugins:
-    :path: "../capacitor-cordova-ios-plugins"
+  CapgoInappbrowser:
+    :path: "../../node_modules/@capgo/inappbrowser"
   RevenuecatPurchasesCapacitor:
     :path: "../../node_modules/@revenuecat/purchases-capacitor"
   RevenuecatPurchasesCapacitorUi:
@@ -123,7 +123,7 @@ SPEC CHECKSUMS:
   CapawesomeCapacitorAppUpdate: 02d66677e9ae97d851a358207f7e7df40b22aa72
   CapgoBackgroundGeolocation: ee305c8cda9f054f2190117be4aadddbe4c4c40a
   CapgoCapacitorCompass: c901b8aaf7fd692f998820dd7d0da7eb45dbea12
-  CordovaPlugins: e5c130b81ae103c6d51284b6fbd074bd99be6a5d
+  CapgoInappbrowser: 25d3633e2664a7d2d308c3c1e8656db47d8ffb03
   IONFilesystemLib: 50b9a0f3052a9b40b9bedb43f328a8fe222f9f87
   PurchasesHybridCommon: 57e9e2fd474a726c41f61d5359f1bc05d89d9be8
   PurchasesHybridCommonUI: ad685a661cc19fb45f1d7448f5890b399e177e14
@@ -132,6 +132,6 @@ SPEC CHECKSUMS:
   RevenuecatPurchasesCapacitorUi: 16c9d4cfaf6c3fcd7e0015aea4169a74e866d2cf
   RevenueCatUI: ee8109669a5abf52df099788a0f961abdd2b5b09
 
-PODFILE CHECKSUM: 2e13f77d6e0ea7b8dd0d66f2bff0d8f79f893909
+PODFILE CHECKSUM: 4100186683d9b9f68e127c62eacebf293150ad41
 
 COCOAPODS: 1.16.2

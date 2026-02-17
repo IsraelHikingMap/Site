@@ -7,11 +7,6 @@ const config: CapacitorConfig = {
   server: {
     errorPath: "/"
   },
-  cordova: {
-    preferences: {
-      "OAuthScheme": "mapeak"
-    }
-  },
   plugins: {
     SystemBars: {
       insetsHandling: "disable"
@@ -19,7 +14,8 @@ const config: CapacitorConfig = {
   },
   ios: {
     preferredContentMode: "mobile"
-  }
+  },
+  android: {}
 };
 
 export default config;
