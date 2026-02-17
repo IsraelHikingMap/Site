@@ -27,7 +27,7 @@ PODS:
     - Capacitor
   - CapgoCapacitorCompass (8.1.4):
     - Capacitor
-  - CapgoInappbrowser (8.1.20):
+  - CapgoInappbrowser (8.1.21):
     - Capacitor
   - IONFilesystemLib (1.1.0)
   - PurchasesHybridCommon (17.28.1):
@@ -123,7 +123,7 @@ SPEC CHECKSUMS:
   CapawesomeCapacitorAppUpdate: 02d66677e9ae97d851a358207f7e7df40b22aa72
   CapgoBackgroundGeolocation: ee305c8cda9f054f2190117be4aadddbe4c4c40a
   CapgoCapacitorCompass: c901b8aaf7fd692f998820dd7d0da7eb45dbea12
-  CapgoInappbrowser: f221b1213b7f1c4a6b374242f66399ec6504a887
+  CapgoInappbrowser: 25d3633e2664a7d2d308c3c1e8656db47d8ffb03
   IONFilesystemLib: 50b9a0f3052a9b40b9bedb43f328a8fe222f9f87
   PurchasesHybridCommon: 57e9e2fd474a726c41f61d5359f1bc05d89d9be8
   PurchasesHybridCommonUI: ad685a661cc19fb45f1d7448f5890b399e177e14
