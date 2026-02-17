@@ -33,6 +33,7 @@ export class ConfigurationDialogComponent {
     public batteryOptimizationType$: Observable<BatteryOptimizationType>;
     public isAutomaticRecordingUpload$: Observable<boolean>;
     public isGotLostWarnings$: Observable<boolean>;
+    public manageSubscriptions: string;
 
     public readonly resources = inject(ResourcesService);
 
@@ -47,6 +48,9 @@ export class ConfigurationDialogComponent {
         this.batteryOptimizationType$ = this.store.select((state: ApplicationState) => state.configuration.batteryOptimizationType);
         this.isAutomaticRecordingUpload$ = this.store.select((state: ApplicationState) => state.configuration.isAutomaticRecordingUpload);
         this.isGotLostWarnings$ = this.store.select((state: ApplicationState) => state.configuration.isGotLostWarnings);
+        this.manageSubscriptions = this.runningContextService.isIos
+            ? "https://apps.apple.com/account/subscriptions"
+            : "https://play.google.com/store/account/subscriptions";
     }
 
     public isApp() {

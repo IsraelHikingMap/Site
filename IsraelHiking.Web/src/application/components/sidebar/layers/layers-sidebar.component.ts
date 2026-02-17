@@ -11,19 +11,15 @@ import type { Immutable } from "immer";
 
 import { CategoriesGroupComponent } from "./categories-group.component";
 import { LayerPropertiesDialogComponent } from "../../dialogs/layer-properties-dialog.component";
-import { OfflineManagementDialogComponent } from "../../dialogs/offline-management-dialog.component";
 import { LegendDialogComponent } from "../../dialogs/legend-dialog.component";
 import { Angulartics2OnModule } from "../../../directives/gtag.directive";
 import { ResourcesService } from "../../../services/resources.service";
 import { LayersService } from "../../../services/layers.service";
 import { SidebarService } from "../../../services/sidebar.service";
-import { RunningContextService } from "../../../services/running-context.service";
-import { ToastService } from "../../../services/toast.service";
-import { PurchaseService } from "../../../services/purchase.service";
 
 import { ExpandGroupAction, CollapseGroupAction } from "../../../reducers/layers.reducer";
 import { DEFAULT_BASE_LAYERS, CATEGORIES_GROUPS, DEFAULT_OVERLAYS } from "../../../reducers/initial-state";
-import type { ApplicationState, EditableLayer, CategoriesGroup } from "../../../models";
+import type { ApplicationState, EditableLayer } from "../../../models";
 
 @Component({
     selector: "layers-sidebar",
@@ -40,24 +36,16 @@ export class LayersSidebarComponent {
     public overlays$: Observable<Immutable<EditableLayer[]>>;
     public categoriesGroups = CATEGORIES_GROUPS;
 
-    public manageSubscriptions: string;
-
     public readonly resources = inject(ResourcesService);
 
     private readonly dialog = inject(MatDialog);
-    private readonly purchaseService = inject(PurchaseService);
     private readonly layersService = inject(LayersService);
 
     private readonly sidebarService = inject(SidebarService);
-    private readonly runningContextService = inject(RunningContextService);
-    private readonly toastService = inject(ToastService);
 
     private readonly store = inject(Store);
 
     constructor() {
-        this.manageSubscriptions = this.runningContextService.isIos
-            ? "https://apps.apple.com/account/subscriptions"
-            : "https://play.google.com/store/account/subscriptions";
         this.baseLayers$ = this.store.select((state: ApplicationState) => state.layersState.baseLayers);
         this.overlays$ = this.store.select((state: ApplicationState) => state.layersState.overlays);
     }
@@ -124,42 +112,6 @@ export class LayersSidebarComponent {
             return;
         }
         this.layersService.hideAllOverlays();
-    }
-
-    public isOfflineDownloadAvailable() {
-        return this.runningContextService.isCapacitor &&
-            this.store.selectSnapshot((s: ApplicationState) => s.offlineState).isSubscribed;
-    }
-
-    public isPurchaseAvailable() {
-        return this.purchaseService.isPurchaseAvailable();
-    }
-
-    public isRenewAvailable() {
-        return this.purchaseService.isRenewAvailable();
-    }
-
-    public orderOfflineMaps() {
-        const userInfo = this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo;
-        if (userInfo == null || !userInfo.id) {
-            this.toastService.warning(this.resources.loginRequired);
-            return;
-        }
-        this.purchaseService.showPaywall();
-    }
-
-    public async downloadOfflineMaps() {
-        const userInfo = this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo;
-        if (userInfo == null || !userInfo.id) {
-            this.toastService.warning(this.resources.loginRequired);
-            return;
-        }
-
-        OfflineManagementDialogComponent.openDialog(this.dialog);
-    }
-
-    public trackByGroupType(_: number, group: CategoriesGroup) {
-        return group.type;
     }
 
     public openLegend(layer: Immutable<EditableLayer>) {

@@ -212,6 +212,7 @@
     "Manage Offline Maps": "إدارة الخرائط غير المتصلة",
     "Manage subscriptions": "إدارة الاشتراكات",
     "Map": "خريطة",
+    "Mapeak Pro": "Mapeak Pro",
     "Maps": "خرائط",
     "Marked Trails": "مسارات محددة",
     "Max Zoom": "أقصى زوم",
@@ -292,8 +293,6 @@
     "Private": "خاص",
     "Private Routes": "مسارات خاصة",
     "Public": "عام",
-    "Purchase Maps": "شراء الخرائط",
-    "Purchase maps for offline use": "شراء الخرائط للاستخدام غير المتصل",
     "Purple Regional Trail": "مسار إقليمي بنفسجي",
     "Quarry": "محجر",
     "Railway": "سكك حديدية",
@@ -303,7 +302,7 @@
     "Regional Trail": "مسار إقليمي",
     "Regional Trails": "مسارات إقليمية",
     "Remaining distance": "المسافة المتبقية",
-    "Renew offline maps subscription": "تجديد اشتراك الخرائط غير المتصلة",
+    "Renew subscription": "تجديد الاشتراك",
     "Report an issue": "الإبلاغ عن مشكلة",
     "Report an issue instructions": "يرجى وصف المشكلة بأفضل ما يمكن وإرفاق لقطات الشاشة التي توضحها.",
     "Report an issue site instructions": "تم تنزيل ملف الدعم للتو.\nنحن بحاجة إلى هذا الملف لفهم المشكلة بشكل أفضل.\nفي الأسفل يوجد زر يسمح بإرسال بريد إلكتروني إلى support@mapeak.com.\nبعد الضغط على الزر، يُرجى إرفاق الملف الذي تم تنزيله.\nيمكنكم أيضًا فتح تطبيق البريد الإلكتروني المفضل لديكم دون استخدام الزر في الأسفل.\nشكرًا!",
@@ -378,6 +377,7 @@
     "The route's name was altered since it is in use...": "تغير اسم المسار لكونه قيد الاستخدام...",
     "The title for your share.": "عنوان لمشاركتك.",
     "There's no description :-(. To add one you'll need to login to OSM first, please use the button in the upper right corner to login.": "لا يوجد وصف 😞. لإضافة وصف، يجب عليك أولاً تسجيل الدخول إلى OSM.",
+    "There's no permission to use your location.": "لا يوجد إذن لاستخدام موقعك.",
     "There's no permission to use your location. Would you like to open the app settings?": "لا يوجد إذن لاستخدام موقعك. هل ترغب في فتح إعدادات التطبيق؟",
     "There's so much more you can do with our app": "يمكنك القيام بالكثير مع تطبيقنا",
     "This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.": "تم إنشاء هذه الخريطة من بيانات {{link}}Open Street Map (OSM){{linkend}}، المتاحة للجميع للاستخدام والتحرير.",

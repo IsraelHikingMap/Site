@@ -202,9 +202,8 @@ export class ResourcesService {
     public gotLostWarningsHint: string;
     public navigateWithWaze: string;
     public offlinePurchaseGraditude: string;
-    public purchaseOfflineMaps: string;
-    public purchaseOfflineMapsShort: string;
-    public renewOfflineMaps: string;
+    public purchaseSubscription: string;
+    public renewSubscription: string;
     public lastUpdatedOn: string;
     public remainingDistance: string;
     public traveledDistance: string;
@@ -328,6 +327,7 @@ export class ResourcesService {
     public pleaseFillReport: string;
     public hiddenRoutesWillNotBeSaved: string;
     public noLocationPermissionOpenAppSettings: string;
+    public noLocationPermission: string;
     public tracesAreOnlySavedLocally: string;
     public unexpectedErrorPleaseTryAgainLater: string;
     public trackingIsDisabledWhileEditing: string;
@@ -684,9 +684,8 @@ export class ResourcesService {
             "is more than 50 meters from your current position");
         this.navigateWithWaze = this.gettextCatalog.getString("Navigate with Waze");
         this.offlinePurchaseGraditude = this.gettextCatalog.getString("Thanks for purchasing! download instructions here...");
-        this.purchaseOfflineMaps = this.gettextCatalog.getString("Purchase maps for offline use");
-        this.purchaseOfflineMapsShort = this.gettextCatalog.getString("Purchase Maps");
-        this.renewOfflineMaps = this.gettextCatalog.getString("Renew offline maps subscription");
+        this.purchaseSubscription = this.gettextCatalog.getString("Mapeak Pro");
+        this.renewSubscription = this.gettextCatalog.getString("Renew subscription");
         this.lastUpdatedOn = this.gettextCatalog.getString("Last updated on");
         this.remainingDistance = this.gettextCatalog.getString("Remaining distance");
         this.traveledDistance = this.gettextCatalog.getString("Traveled distance");
@@ -826,6 +825,7 @@ export class ResourcesService {
         this.hiddenRoutesWillNotBeSaved = this.gettextCatalog.getString("Hidden routes will not be saved...");
         this.noLocationPermissionOpenAppSettings = this.gettextCatalog.getString("There's no permission to use your location. " +
             "Would you like to open the app settings?");
+        this.noLocationPermission = this.gettextCatalog.getString("There's no permission to use your location.");
         this.tracesAreOnlySavedLocally = this.gettextCatalog.getString("Traces are only saved locally. " +
             "You can change that in the configuration settings");
         this.unexpectedErrorPleaseTryAgainLater = this.gettextCatalog.getString("Oops, something went wrong. Please try again later");
