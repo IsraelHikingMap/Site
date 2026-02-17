@@ -156,7 +156,6 @@ export class ResourcesService {
     public iHaveReadAndAgree: string;
     public submit: string;
     public updateCurrentShare: string;
-    public generateMarkersForAllPoints: string;
     public yes: string;
     public no: string;
     public ok: string;
@@ -503,7 +502,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1771356366366");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1771357987201");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -636,7 +635,6 @@ export class ResourcesService {
         this.satelliteImagery = this.gettextCatalog.getString("Satellite Imagery");
         this.flowers = this.gettextCatalog.getString("Flowers");
         this.updateCurrentShare = this.gettextCatalog.getString("Update current share");
-        this.generateMarkersForAllPoints = this.gettextCatalog.getString("Generate markers for all route points");
         this.yes = this.gettextCatalog.getString("Yes");
         this.no = this.gettextCatalog.getString("No");
         this.ok = this.gettextCatalog.getString("OK");

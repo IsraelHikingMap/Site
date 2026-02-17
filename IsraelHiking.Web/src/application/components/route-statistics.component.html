@@ -1,4 +1,5 @@
-﻿<div class="control-container side-control maplibregl-ctrl" [dir]="resources.direction" (window:resize)="redrawChart()">
+﻿@if (isVisible) {
+<div class="control-container side-control maplibregl-ctrl" [dir]="resources.direction" (window:resize)="redrawChart()">
   @if (isOpen()) {
   <div animate.enter="chart-enter" animate.leave="chart-leave" class="chart-control-container chart-animated"
     [class.expanded]="isExpanded" [class.sidebar]="isSidebarVisible()">
@@ -218,3 +219,4 @@
           'circle-stroke-width': 3
           }">
 </mgl-layer>
+}

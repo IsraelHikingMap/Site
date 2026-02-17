@@ -21,7 +21,6 @@ import {
     MergeRoutesAction,
     UpdateSegmentsAction,
     DeleteSegmentAction,
-    ReplaceSegmentsAction,
     AddPrivatePoiAction,
     ChangeRouteStateAction
 } from "../reducers/routes.reducer";
@@ -367,32 +366,6 @@ export class SelectedRouteService {
             } as RouteSegmentData;
             this.store.dispatch(new UpdateSegmentsAction(selectedRoute.id, [segmentIndex, segmentIndex + 1], [updatedSegment]));
         }
-    }
-
-    public makeAllPointsEditable(routeId: string) {
-        const route = this.getRouteById(routeId);
-        if (!route || route.segments.length === 0) {
-            return;
-        }
-        const segments = [structuredClone(route.segments[0]) as RouteSegmentData];
-        for (const segment of route.segments) {
-            if (segment.latlngs.length === 0) {
-                continue;
-            }
-            let previousPoint = segment.latlngs[0];
-            for (const latLng of segment.latlngs) {
-                if (previousPoint.lat === latLng.lat && previousPoint.lng === latLng.lng) {
-                    continue;
-                }
-                segments.push({
-                    latlngs: [previousPoint, latLng],
-                    routingType: segment.routingType,
-                    routePoint: latLng
-                } as RouteSegmentData);
-                previousPoint = latLng;
-            }
-        }
-        this.store.dispatch(new ReplaceSegmentsAction(routeId, segments));
     }
 
     public addRoutes(routes: RouteDataWithoutState[]) {

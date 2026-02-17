@@ -7,7 +7,7 @@ import { MatTooltip } from "@angular/material/tooltip";
 import { MatButton } from "@angular/material/button";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { SourceDirective, GeoJSONSourceComponent, LayerComponent } from "@maplibre/ngx-maplibre-gl";
-import { interval, switchMap, distinctUntilChanged, EMPTY } from "rxjs";
+import { interval, switchMap, distinctUntilChanged, EMPTY, combineLatest, map } from "rxjs";
 import { regressionLoess } from "d3-regression";
 import { LineLayerSpecification } from "maplibre-gl";
 import { Store } from "@ngxs/store";
@@ -84,6 +84,7 @@ export class RouteStatisticsComponent implements OnInit {
     public isTable: boolean = false;
     public isOpen = signal(false);
     public isFollowing: boolean = false;
+    public isVisible: boolean = false;
     public kmMarkersSource: GeoJSON.FeatureCollection<GeoJSON.Point> = {
         type: "FeatureCollection",
         features: []
@@ -218,6 +219,12 @@ export class RouteStatisticsComponent implements OnInit {
         this.store.select((state: ApplicationState) => state.configuration.isShowKmMarker).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(showKmMarkers => {
             this.isKmMarkersOn = showKmMarkers;
             this.updateKmMarkers();
+        });
+        combineLatest([this.store.select((s: ApplicationState) => s.recordedRouteState.isRecording), this.store.select((state: ApplicationState) => state.routes.present)]).pipe(
+            map(([isRecording, routes]) => isRecording || routes.length > 0),
+            takeUntilDestroyed(this.destroyRef)
+        ).subscribe((isVisible) => {
+            this.isVisible = isVisible;
         });
         this.routeChanged();
         this.store.select((s: ApplicationState) => s.recordedRouteState.isRecording).pipe(
