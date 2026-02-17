@@ -960,59 +960,6 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should make all points editable for not exiting route", inject([SelectedRouteService, Store],
-        (selectedRouteService: SelectedRouteService, store: Store) => {
-            const spy = jasmine.createSpy();
-            store.dispatch = spy;
-
-            selectedRouteService.makeAllPointsEditable("1");
-
-            expect(spy).not.toHaveBeenCalled();
-        }));
-
-    it("Should make all points editable", inject([SelectedRouteService, Store],
-        (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 3, lng: 3 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }]);
-            setupSelectedRoute(store, "1");
-
-            const spy = jasmine.createSpy();
-            store.dispatch = spy;
-
-            selectedRouteService.makeAllPointsEditable("1");
-
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ReplaceSegmentsAction);
-            const action = spy.calls.all()[0].args[0] as ReplaceSegmentsAction;
-            expect(action.routeId).toBe("1");
-            expect(action.segmentsData.length).toBe(3);
-            expect(action.segmentsData[0].latlngs[0].lat).toBe(1);
-            expect(action.segmentsData[1].latlngs[0].lat).toBe(1);
-            expect(action.segmentsData[1].latlngs[1].lat).toBe(2);
-            expect(action.segmentsData[2].latlngs[0].lat).toBe(2);
-            expect(action.segmentsData[2].latlngs[1].lat).toBe(3);
-        }));
-
     it("Should add external empty route should not fail", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             const spy = jasmine.createSpy();

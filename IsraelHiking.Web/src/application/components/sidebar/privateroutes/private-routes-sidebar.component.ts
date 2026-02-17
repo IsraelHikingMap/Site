@@ -250,11 +250,6 @@ export class PrivateRoutesSidebarComponent {
         });
     }
 
-    public makeAllPointsEditable(routeData: Immutable<RouteData>) {
-        this.selectedRouteService.makeAllPointsEditable(routeData.id);
-        this.toastService.info(this.resources.dataUpdatedSuccessfully);
-    }
-
     public reverseRoute(routeData: Immutable<RouteData>) {
         this.selectedRouteService.reverseRoute(routeData.id);
         this.toastService.info(this.resources.dataUpdatedSuccessfully);

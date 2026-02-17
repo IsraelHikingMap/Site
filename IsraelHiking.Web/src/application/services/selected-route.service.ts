@@ -369,32 +369,6 @@ export class SelectedRouteService {
         }
     }
 
-    public makeAllPointsEditable(routeId: string) {
-        const route = this.getRouteById(routeId);
-        if (!route || route.segments.length === 0) {
-            return;
-        }
-        const segments = [structuredClone(route.segments[0]) as RouteSegmentData];
-        for (const segment of route.segments) {
-            if (segment.latlngs.length === 0) {
-                continue;
-            }
-            let previousPoint = segment.latlngs[0];
-            for (const latLng of segment.latlngs) {
-                if (previousPoint.lat === latLng.lat && previousPoint.lng === latLng.lng) {
-                    continue;
-                }
-                segments.push({
-                    latlngs: [previousPoint, latLng],
-                    routingType: segment.routingType,
-                    routePoint: latLng
-                } as RouteSegmentData);
-                previousPoint = latLng;
-            }
-        }
-        this.store.dispatch(new ReplaceSegmentsAction(routeId, segments));
-    }
-
     public addRoutes(routes: RouteDataWithoutState[]) {
         if (routes.length === 0) {
             return;
