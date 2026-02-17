@@ -12,7 +12,7 @@ import type { saveAs as saveAsForType } from "file-saver";
 import { ImageResizeService } from "./image-resize.service";
 import { RunningContextService } from "./running-context.service";
 import { SelectedRouteService } from "./selected-route.service";
-import { FitBoundsService } from "./fit-bounds.service";
+import { MapService } from "./map.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
@@ -35,7 +35,7 @@ export class FileService {
     private readonly runningContextService = inject(RunningContextService);
     private readonly imageResizeService = inject(ImageResizeService);
     private readonly selectedRouteService = inject(SelectedRouteService);
-    private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly mapService = inject(MapService);
     private readonly gpxDataContainerConverterService = inject(GpxDataContainerConverterService);
     private readonly loggingService = inject(LoggingService);
     private readonly elevationProvider = inject(ElevationProvider);
@@ -252,7 +252,7 @@ export class FileService {
 
     private addRoutesFromContainer(container: DataContainer) {
         this.selectedRouteService.addRoutes(container.routes);
-        this.fitBoundsService.fitBounds(SpatialService.getBounds([container.southWest, container.northEast]));
+        this.mapService.fitBounds(SpatialService.getBounds([container.southWest, container.northEast]));
     }
 
     public async writeStyle(styleFileName: string, styleText: string) {

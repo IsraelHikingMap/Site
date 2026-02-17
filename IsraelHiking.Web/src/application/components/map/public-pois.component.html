@@ -1,116 +1,113 @@
-<mgl-geojson-source #clusterSource
-  id="poi-cluster-source"
-  [data]="poiGeoJsonData"
-  [cluster]="true"
-  [clusterMaxZoom]="17"
-  [clusterRadius]="100">
+<mgl-vector-source id="points-of-interest" [tiles]="poisVectorTileAddress" [maxzoom]="14"
+  [minzoom]="10"></mgl-vector-source>
+<mgl-layer id="global-points-layer" source="points-of-interest" type="circle" sourceLayer="global_points"
+  [paint]="{'circle-color': 'transparent'}" [before]="resources.endOfBaseLayer"></mgl-layer>
+<mgl-layer id="external-layer" source="points-of-interest" type="circle" sourceLayer="external"
+  [paint]="{'circle-color': 'transparent'}" [before]="resources.endOfBaseLayer"></mgl-layer>
+<mgl-geojson-source #clusterSource id="poi-cluster-source" [data]="poiGeoJsonData" [cluster]="true"
+  [clusterMaxZoom]="17" [clusterRadius]="100">
 </mgl-geojson-source>
 <mgl-markers-for-clusters source="poi-cluster-source">
   <ng-template mglPoint let-feature>
-    <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="openPoi(feature, $event)" (mouseover)="setHoverFeature(feature)" (mouseout)="hoverFeature = null" angulartics2On="click" angularticsCategory="POI" angularticsAction="Open POI sidebar from map">
+    <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="openPoi(feature, $event)"
+      (mouseover)="setHoverFeature(feature)" (mouseout)="hoverFeature = null" angulartics2On="click"
+      angularticsCategory="POI" angularticsAction="Open POI sidebar from map">
       @if (hasExtraData(feature)) {
-        <span class="has-extra-data" [style.background]="feature.properties.poiIconColor"></span>
+      <span class="has-extra-data" [style.background]="feature.properties.poiIconColor"></span>
       }
       <i class="fa icon-map-marker-rect fa-stack-2x" style="color: white; text-shadow: 3px 3px 3px #000;"></i>
-      <i class="fa {{feature.properties.poiIcon}} fa-stack-1x stack-icon-top stack-icon-large" [style.color]="feature.properties.poiIconColor"></i>
+      <i class="fa {{feature.properties.poiIcon}} fa-stack-1x stack-icon-top stack-icon-large"
+        [style.color]="feature.properties.poiIconColor"></i>
     </span>
   </ng-template>
   <ng-template mglClusterPoint let-feature>
-    <div class="marker-cluster" (click)="toggleClusterPopup($event, feature, clusterSource)" angulartics2On="click" angularticsCategory="POI" angularticsAction="Toggle POIs cluster menu">
+    <div class="marker-cluster" (click)="toggleClusterPopup($event, feature, clusterSource)" angulartics2On="click"
+      angularticsCategory="POI" angularticsAction="Toggle POIs cluster menu">
       {{ feature.properties?.point_count }}
     </div>
   </ng-template>
 </mgl-markers-for-clusters>
 @if (selectedCluster) {
-  <mgl-popup [lngLat]="selectedCluster.geometry.coordinates" (popupClose)="clearSelectedClusterPopup()" [closeOnClick]="true">
-    <cluster-overlay [features]="clusterFeatures" (closed)="clearSelectedClusterPopup()"></cluster-overlay>
-  </mgl-popup>
+<mgl-popup [lngLat]="selectedCluster.geometry.coordinates" (popupClose)="clearSelectedClusterPopup()"
+  [closeOnClick]="true">
+  <cluster-overlay [features]="clusterFeatures" (closed)="clearSelectedClusterPopup()"></cluster-overlay>
+</mgl-popup>
 }
 @if (hoverFeature && !isCoordinatesFeature(hoverFeature)) {
-  <mgl-popup [lngLat]="hoverFeature.geometry.coordinates" [closeButton]="false" [offset]="[0, -30]" class="text-right">
-    <div [dir]="resources.getDirection(getTitle(hoverFeature))">{{getTitle(hoverFeature)}}</div>
-  </mgl-popup>
+<mgl-popup [lngLat]="hoverFeature.geometry.coordinates" [closeButton]="false" [offset]="[0, -30]" class="text-right">
+  <div [dir]="resources.getDirection(getTitle(hoverFeature))">{{getTitle(hoverFeature)}}</div>
+</mgl-popup>
 }
 @if (isShowCoordinatesPopup && selectedPoiFeature && isCoordinatesFeature(selectedPoiFeature)) {
-  <mgl-popup [lngLat]="selectedPoiFeature.geometry.coordinates" [offset]="[0, -30]" (popupClose)="isShowCoordinatesPopup = false">
-    <div class="flex flex-row">
-      <div class="w-1/3">
-        <button mat-button class="w-full" (click)="navigateHere()" matTooltip="{{resources.navigateHere}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Navigate to search coordinate"><i class="fa icon-recordings"></i></button>
-      </div>
-      <div class="w-1/3">
-        <button mat-button class="w-full" (click)="addCoordinatePointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add coordinate search to route"><i class="fa icon-plus"></i></button>
-      </div>
-      <div class="w-1/3">
-        <button mat-button class="w-full" (click)="clearSelected()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Clear coordinate search"><i class="fa icon-eye-slash"></i></button>
-      </div>
+<mgl-popup [lngLat]="selectedPoiFeature.geometry.coordinates" [offset]="[0, -30]"
+  (popupClose)="isShowCoordinatesPopup = false">
+  <div class="flex flex-row">
+    <div class="w-1/3">
+      <button mat-button class="w-full" (click)="navigateHere()" matTooltip="{{resources.navigateHere}}"
+        matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI"
+        angularticsAction="Navigate to search coordinate"><i class="fa icon-recordings"></i></button>
     </div>
-    <div class="flex flex-row" [dir]="resources.direction">
-      <coordinates [latlng]="getSelectedFeatureLatlng()"></coordinates>
+    <div class="w-1/3">
+      <button mat-button class="w-full" (click)="addCoordinatePointToRoute()" matTooltip="{{resources.addPointToRoute}}"
+        matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI"
+        angularticsAction="Add coordinate search to route"><i class="fa icon-plus"></i></button>
     </div>
-  </mgl-popup>
+    <div class="w-1/3">
+      <button mat-button class="w-full" (click)="clearSelected()" matTooltip="{{resources.clear}}"
+        matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI"
+        angularticsAction="Clear coordinate search"><i class="fa icon-eye-slash"></i></button>
+    </div>
+  </div>
+  <div class="flex flex-row" [dir]="resources.direction">
+    <coordinates [latlng]="getSelectedFeatureLatlng()"></coordinates>
+  </div>
+</mgl-popup>
 }
 @if (selectedPoiFeature) {
-  <mgl-marker [lngLat]="selectedPoiFeature.geometry.coordinates" anchor="bottom">
-    <span class="fa-stack fa-lg cursor-pointer selected-marker-icon" (click)="openPoi(selectedPoiFeature, $event)" (mouseover)="setHoverFeature(selectedPoiFeature)" (mouseout)="hoverFeature = null">
-      @if (hasExtraData(selectedPoiFeature)) {
-        <span class="has-extra-data" [style.background]="selectedPoiFeature.properties.poiIconColor"></span>
-      }
-      <i class="fa icon-map-marker-rect fa-stack-2x" style="color: white; text-shadow: 3px 3px 3px #000;"></i>
-      <i class="fa {{selectedPoiFeature.properties.poiIcon}} fa-stack-1x stack-icon-top stack-icon-large" [style.color]="selectedPoiFeature.properties.poiIconColor"></i>
-    </span>
-  </mgl-marker>
+<mgl-marker [lngLat]="selectedPoiFeature.geometry.coordinates" anchor="bottom">
+  <span class="fa-stack fa-lg cursor-pointer selected-marker-icon" (click)="openPoi(selectedPoiFeature, $event)"
+    (mouseover)="setHoverFeature(selectedPoiFeature)" (mouseout)="hoverFeature = null">
+    @if (hasExtraData(selectedPoiFeature)) {
+    <span class="has-extra-data" [style.background]="selectedPoiFeature.properties.poiIconColor"></span>
+    }
+    <i class="fa icon-map-marker-rect fa-stack-2x" style="color: white; text-shadow: 3px 3px 3px #000;"></i>
+    <i class="fa {{selectedPoiFeature.properties.poiIcon}} fa-stack-1x stack-icon-top stack-icon-large"
+      [style.color]="selectedPoiFeature.properties.poiIconColor"></i>
+  </span>
+</mgl-marker>
 }
 <mgl-geojson-source id="selected-poi" [data]="selectedPoiGeoJson"></mgl-geojson-source>
-<mgl-layer id="selected-poi-fill"
-  source="selected-poi"
-  type="fill"
-            [paint]="{ 
+<mgl-layer id="selected-poi-fill" source="selected-poi" type="fill" [paint]="{ 
                 'fill-color': 'rgba(19, 106, 224, 0.2)'
-            }" 
-  [filter]="['==', '$type', 'Polygon']">
+            }" [filter]="['==', '$type', 'Polygon']">
 </mgl-layer>
-<mgl-layer id="selected-poi-fill-line"
-  source="selected-poi"
-  type="line"
-            [paint]="{ 
+<mgl-layer id="selected-poi-fill-line" source="selected-poi" type="line" [paint]="{ 
                 'line-color': 'blue', 
                 'line-width': 2 
-            }"
-  [filter]="['==', '$type', 'Polygon']">
+            }" [filter]="['==', '$type', 'Polygon']">
 </mgl-layer>
-<mgl-layer id="selected-poi-left"
-  type="line"
-  source="selected-poi"
-            [paint]="{
+<mgl-layer id="selected-poi-left" type="line" source="selected-poi" [paint]="{
                 'line-color': 'magenta',
                 'line-offset': -5,
                 'line-opacity': 0.5,
                 'line-width': 2
             }">
 </mgl-layer>
-<mgl-layer id="selected-poi-right"
-  type="line"
-  source="selected-poi"
-            [paint]="{
+<mgl-layer id="selected-poi-right" type="line" source="selected-poi" [paint]="{
                 'line-color': 'magenta',
                 'line-offset': 5,
                 'line-opacity': 0.5,
                 'line-width': 2
             }">
 </mgl-layer>
-<mgl-layer id="selected-poi-arrows"
-  type="symbol"
-  source="selected-poi"
-            [layout]="{
+<mgl-layer id="selected-poi-arrows" type="symbol" source="selected-poi" [layout]="{
                 'symbol-placement': 'line',
                 'symbol-spacing': 40,
                 'icon-image': 'arrow',
                 'icon-size': 0.75,
                 'icon-allow-overlap': true,
                 'icon-ignore-placement': true
-            }"
-            [paint]="{
+            }" [paint]="{
                 'icon-color': 'magenta'
-            }"
-  [filter]="['==', '$type', 'LineString']">
+            }" [filter]="['==', '$type', 'LineString']">
 </mgl-layer>

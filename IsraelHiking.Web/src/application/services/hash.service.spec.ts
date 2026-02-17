@@ -8,7 +8,6 @@ import { MapService } from "./map.service";
 import { HashService, RouteStrings } from "./hash.service";
 import { SidebarService } from "./sidebar.service";
 import { DataContainerService } from "./data-container.service";
-import { FitBoundsService } from "./fit-bounds.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { LayersService } from "./layers.service";
 import { InMemoryReducer } from "../reducers/in-memory.reducer";
@@ -28,7 +27,6 @@ describe("HashService", () => {
                 { provide: Router, useValue: routerMock },
                 { provide: MapService, useValue: {} },
                 { provide: DataContainerService, useValue: {} },
-                { provide: FitBoundsService, useValue: {} },
                 { provide: ShareUrlsService, useValue: {} },
                 { provide: LayersService, useValue: {} },
                 SidebarService,
@@ -111,7 +109,7 @@ describe("HashService", () => {
             const spy = jasmine.createSpy();
             routerMock.navigate = spy;
             service.initialize();
-            mapService.map = { isMoving: () => true } as any;
+            mapService = { isMoving: () => true } as any;
             store.reset({
                 poiState: {},
                 inMemoryState: {},
@@ -130,7 +128,7 @@ describe("HashService", () => {
         (service: HashService, routerMock: Router, store: Store, mapService: MapService) => {
             const spy = jasmine.createSpy();
             routerMock.navigate = spy;
-            mapService.map = { isMoving: () => false } as any;
+            mapService.isMoving = () => false;
             service.initialize();
             store.reset({
                 poiState: {},
@@ -198,13 +196,13 @@ describe("HashService", () => {
         }
         ));
 
-    it("Should flyTo in case of map url", inject([HashService, Router, FitBoundsService],
-        (service: HashService, routerMock: Router, fitBoundService: FitBoundsService) => {
-            fitBoundService.flyTo = jasmine.createSpy();
+    it("Should flyTo in case of map url", inject([HashService, Router, MapService],
+        (service: HashService, routerMock: Router, mapService: MapService) => {
+            mapService.flyTo = jasmine.createSpy();
             (routerMock as any).url = RouteStrings.ROUTE_MAP + "/2.00/2.000000/3.000000";
             (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
 
-            expect(fitBoundService.flyTo).toHaveBeenCalled();
+            expect(mapService.flyTo).toHaveBeenCalled();
 
         }
     ));

@@ -27,7 +27,7 @@ import { FileService } from "../../../services/file.service";
 import { ToastService } from "../../../services/toast.service";
 import { RouteStatistics, RouteStatisticsService } from "../../../services/route-statistics.service";
 import { SpatialService } from "../../../services/spatial.service";
-import { FitBoundsService } from "../../../services/fit-bounds.service";
+import { MapService } from "../../../services/map.service";
 import { LogReaderService } from "../../../services/log-reader.service";
 import { ShareUrlsService } from "../../../services/share-urls.service";
 import { DataContainerService } from "../../../services/data-container.service";
@@ -59,7 +59,7 @@ export class PrivateRoutesSidebarComponent {
     private readonly fileService = inject(FileService);
     private readonly toastService = inject(ToastService);
     private readonly routeStatisticsService = inject(RouteStatisticsService);
-    private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly mapService = inject(MapService);
     private readonly logReaderService = inject(LogReaderService);
     private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly dataContainerService = inject(DataContainerService);
@@ -215,7 +215,7 @@ export class PrivateRoutesSidebarComponent {
         if (routeData.state === "Hidden") {
             this.toastService.warning(this.resources.routeIsHidden);
         }
-        this.fitBoundsService.fitBounds(bounds);
+        this.mapService.fitBounds(bounds);
     }
 
     public share() {

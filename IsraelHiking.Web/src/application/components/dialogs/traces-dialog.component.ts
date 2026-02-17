@@ -22,9 +22,8 @@ import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { OsmAddressesService } from "../../services/osm-addresses.service";
-import { FitBoundsService } from "../../services/fit-bounds.service";
+import { MapService } from "../../services/map.service";
 import { ToastService } from "../../services/toast.service";
-import { LayersService } from "../../services/layers.service";
 import { TracesService } from "../../services/traces.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { SpatialService } from "../../services/spatial.service";
@@ -56,8 +55,7 @@ export class TracesDialogComponent implements OnInit {
 
     private readonly matDialogRef = inject(MatDialogRef);
     private readonly fileService = inject(FileService);
-    private readonly layersService = inject(LayersService);
-    private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly mapService = inject(MapService);
     private readonly toastService = inject(ToastService);
     private readonly osmAddressesService = inject(OsmAddressesService);
     private readonly tracesService = inject(TracesService);
@@ -134,7 +132,7 @@ export class TracesDialogComponent implements OnInit {
             this.store.dispatch(new SetVisibleTraceAction(trace.id));
             this.store.dispatch(new SetMissingPartsAction(geoJson));
             const bounds = SpatialService.getBoundsForFeatureCollection(geoJson);
-            this.fitBoundsService.fitBounds(bounds);
+            this.mapService.fitBounds(bounds);
             this.matDialogRef.close();
         } catch (ex) {
             this.toastService.error(ex, this.resources.unexpectedErrorPleaseTryAgainLater);

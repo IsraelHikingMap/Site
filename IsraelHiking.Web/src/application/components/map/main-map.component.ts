@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, ElementRef, inject, viewChildren } from "@angular/core";
+import { Component, ViewEncapsulation, ElementRef, inject, viewChildren, DestroyRef } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { NgStyle } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
@@ -55,6 +55,7 @@ export class MainMapComponent {
     private readonly defaultStyleService = inject(DefaultStyleService);
     private readonly dialog = inject(MatDialog);
     private readonly store = inject(Store);
+    private readonly destroyRef = inject(DestroyRef);
 
     private addedControls: IControl[] = [];
     private map: Map;
@@ -63,6 +64,9 @@ export class MainMapComponent {
         this.location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
         this.initialStyle = this.defaultStyleService.getStyleWithPlaceholders();
         this.titleService.clear();
+        this.destroyRef.onDestroy(() => {
+            this.mapService.unsetMap();
+        });
     }
 
     public moveEnd(e: DragEvent) {

@@ -7,7 +7,7 @@ import { FileService, SaveAsFactory } from "./file.service";
 import { ImageResizeService } from "./image-resize.service";
 import { RunningContextService } from "./running-context.service";
 import { SelectedRouteService } from "./selected-route.service";
-import { FitBoundsService } from "./fit-bounds.service";
+import { MapService } from "./map.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { LoggingService } from "./logging.service";
 import { ElevationProvider } from "./elevation.provider";
@@ -16,26 +16,23 @@ import type { DataContainer, MarkerData, RouteData } from "../models";
 
 describe("FileService", () => {
 
-    let imageResizeService: ImageResizeService;
-    let selectedRouteService: SelectedRouteService;
-    let fitBoundsService: FitBoundsService;
     let saveAsSpy: jasmine.Spy;
 
     beforeEach(() => {
         saveAsSpy = jasmine.createSpy();
-        imageResizeService = {
+        let imageResizeService = {
             resizeImageAndConvert: () => Promise.resolve({
                 northEast: { lat: 0, lng: 0 },
                 southWest: { lat: 1, lng: 1 },
                 routes: [{ markers: [{} as MarkerData] }] as RouteData[]
             } as DataContainer)
         } as any as ImageResizeService;
-        selectedRouteService = {
+        let selectedRouteService = {
             addRoutes: jasmine.createSpy("addRoutes")
         } as any as SelectedRouteService;
-        fitBoundsService = {
+        let mapService = {
             fitBounds: jasmine.createSpy("fitBounds")
-        } as any as FitBoundsService;
+        } as any as MapService;
         const loggingServiceMock = {
             info: () => { },
             error: () => { },
@@ -45,7 +42,7 @@ describe("FileService", () => {
                 RunningContextService,
                 GpxDataContainerConverterService,
                 { provide: LoggingService, useValue: loggingServiceMock },
-                { provide: FitBoundsService, useValue: fitBoundsService },
+                { provide: MapService, useValue: mapService },
                 { provide: SelectedRouteService, useValue: selectedRouteService },
                 { provide: ImageResizeService, useValue: imageResizeService },
                 { provide: ElevationProvider, useValue: {} },
@@ -68,8 +65,8 @@ describe("FileService", () => {
         }
     ));
 
-    it("Should add routes from url", inject([FileService, HttpTestingController],
-        async (service: FileService, mockBackend: HttpTestingController) => {
+    it("Should add routes from url", inject([FileService, HttpTestingController, SelectedRouteService],
+        async (service: FileService, mockBackend: HttpTestingController, selectedRouteService: SelectedRouteService) => {
 
             const promise = service.addRoutesFromUrl("someurl");
 
@@ -81,8 +78,8 @@ describe("FileService", () => {
         }
     ));
 
-    it("Should open from url by uploading", inject([FileService, HttpTestingController],
-        async (service: FileService, mockBackend: HttpTestingController) => {
+    it("Should open from url by uploading", inject([FileService, HttpTestingController, SelectedRouteService],
+        async (service: FileService, mockBackend: HttpTestingController, selectedRouteService: SelectedRouteService) => {
 
             const promise = service.addRoutesFromFile(new Blob([""]) as File);
 
@@ -101,8 +98,8 @@ describe("FileService", () => {
         }
     ));
 
-    it("Should open jpeg file and resize it", inject([FileService, HttpTestingController],
-        async (service: FileService) => {
+    it("Should open jpeg file and resize it", inject([FileService, SelectedRouteService],
+        async (service: FileService, selectedRouteService: SelectedRouteService) => {
             const file = new Blob([""], { type: ImageResizeService.JPEG }) as File;
             await service.addRoutesFromFile(file);
             expect(selectedRouteService.addRoutes).toHaveBeenCalled();

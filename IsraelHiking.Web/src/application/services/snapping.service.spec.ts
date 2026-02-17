@@ -8,9 +8,7 @@ describe("SnappingService", () => {
 
     beforeEach(() => {
         const mapServiceMock = {
-            map: {
-                project: (lngLat: LatLngAltTime) => ({ x: lngLat.lng, y: lngLat.lat })
-            }
+            project: (lngLat: LatLngAltTime) => ({ x: lngLat.lng, y: lngLat.lat })
         };
         TestBed.configureTestingModule({
             providers: [

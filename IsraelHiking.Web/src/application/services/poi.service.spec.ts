@@ -2,8 +2,8 @@ import { TestBed, inject } from "@angular/core/testing";
 import { HttpRequest, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
-import { LngLatBounds } from "maplibre-gl";
 import { v4 as uuidv4 } from "uuid";
+import type { GeoJSONFeature } from "maplibre-gl";
 
 import { ResourcesService } from "./resources.service";
 import { WhatsAppService } from "./whatsapp.service";
@@ -46,16 +46,7 @@ describe("Poi Service", () => {
             storeImages: jasmine.createSpy().and.returnValue(Promise.resolve())
         } as any;
         const mapServiceMock = {
-            map: {
-                on: () => { },
-                off: () => { },
-                getCenter: () => ({ lat: 0, lng: 0 }),
-                getZoom: () => 11,
-                getBounds: () => new LngLatBounds([1, 1, 2, 2]),
-                addSource: () => { },
-                addLayer: () => { },
-                querySourceFeatures: () => [] as any[]
-            },
+            getFeaturesFromTiles: () => [] as GeoJSONFeature[],
             initializationPromise: Promise.resolve()
         };
         const loggingService = {
@@ -116,23 +107,20 @@ describe("Poi Service", () => {
         async (poiService: PoiService, store: Store) => {
 
             store.reset({
-                layersState: {},
+                layersState: {
+                    visibleCategories: []
+                },
                 offlineState: {
                     uploadPoiQueue: []
                 }
             });
-            let changed = false;
-            poiService.poisChanged.subscribe(() => changed = true);
-            const promise = poiService.initialize();
+            poiService.initialize();
 
-            await promise;
-
-            expect(changed).toBeFalse();
-            expect(poiService.poiGeojsonFiltered.features.length).toBe(0);
+            expect(poiService.getPoisGeoJson().features.length).toBe(0);
         }
     )));
 
-    it("Should initialize and show poi tiles, and update when changing language", (inject([PoiService, Store, RunningContextService, MapService],
+    it("Should get POIs from tiles", (inject([PoiService, Store, RunningContextService, MapService],
         async (poiService: PoiService, store: Store, runningContextService: RunningContextService, mapServiceMock: MapService) => {
 
             store.reset({
@@ -146,8 +134,7 @@ describe("Poi Service", () => {
             });
 
             (runningContextService as any).isIFrame = false;
-            mapServiceMock.map.on = ((type: string, f: () => void) => { if (type === "moveend") f(); }) as any;
-            mapServiceMock.map.querySourceFeatures = () => [
+            mapServiceMock.getFeaturesFromTiles = () => [
                 {
                     id: "11",
                     geometry: {
@@ -171,13 +158,28 @@ describe("Poi Service", () => {
                     }
                 }
             ] as any;
-            const promise = poiService.initialize();
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+            expect(poiService.getPoisGeoJson().features.length).toBe(1);
+        }
+    )));
 
-            expect(poiService.poiGeojsonFiltered.features.length).toBe(1);
+    it("Should get POIs from tiles based on language", (inject([PoiService, Store, RunningContextService, MapService],
+        async (poiService: PoiService, store: Store, runningContextService: RunningContextService, mapServiceMock: MapService) => {
 
-            mapServiceMock.map.querySourceFeatures = () => [
+            store.reset({
+                layersState: {
+                    visibleCategories: [{ groupType: "Water", name: "Water" }]
+                },
+                configuration: {
+                    language: "he"
+                },
+                offlineState: {
+                    uploadPoiQueue: []
+                }
+            });
+
+            (runningContextService as any).isIFrame = false;
+            mapServiceMock.getFeaturesFromTiles = () => [
                 {
                     id: "11",
                     geometry: {
@@ -204,15 +206,10 @@ describe("Poi Service", () => {
                 }
             ] as any;
 
-            store.dispatch(new SetLanguageAction({ code: "he", rtl: false, label: "עברית" }));
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            expect(poiService.poiGeojsonFiltered.features.length).toBe(2);
-            expect(poiService.poiGeojsonFiltered.features.every(f => f.geometry.type === "Point")).toBeTruthy();
-            expect(poiService.poiGeojsonFiltered.features[1].geometry.coordinates).toEqual([1.1, 1.1]);
-
-            return promise;
+            expect(poiService.getPoisGeoJson().features.length).toBe(2);
+            expect(poiService.getPoisGeoJson().features.every(f => f.geometry.type === "Point")).toBeTruthy();
+            expect(poiService.getPoisGeoJson().features[1].geometry.coordinates).toEqual([1.1, 1.1]);
         }
     )));
 
@@ -519,7 +516,7 @@ describe("Poi Service", () => {
 
                 const id = "node_42";
                 const source = "source";
-                const spy = spyOn(mapServiceMock.map, "querySourceFeatures").and.returnValue([{ id: "421", properties: {}, geometry: { type: "Point", coordinates: [0, 0] } } as any]);
+                const spy = spyOn(mapServiceMock, "getFeaturesFromTiles").and.returnValue([{ id: "421", properties: {}, geometry: { type: "Point", coordinates: [0, 0] } } as any]);
 
                 const promise = poiService.getBasicInfo(id, source);
 
@@ -539,7 +536,6 @@ describe("Poi Service", () => {
 
                 const id = "node_42";
                 const source = "source";
-                mapServiceMock.map = null;
 
                 const promise = poiService.getBasicInfo(id, source);
 
@@ -557,7 +553,7 @@ describe("Poi Service", () => {
 
                 const id = "42";
                 const source = "source";
-                const spy = spyOn(mapServiceMock.map, "querySourceFeatures").and.returnValue([]);
+                const spy = spyOn(mapServiceMock, "getFeaturesFromTiles").and.returnValue([]);
 
                 const promise = poiService.getBasicInfo(id, source);
 

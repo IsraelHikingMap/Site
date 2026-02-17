@@ -19,7 +19,7 @@ export class LogReaderService {
                 foundEndOfRecording = true;
                 continue;
             }
-             if (line.includes("[Record] Starting recording")) {
+            if (line.includes("[Record] Starting recording")) {
                 break;
             }
             if (line.includes("[Record]") || line.includes("[GeoLocation]")) {
@@ -56,7 +56,7 @@ export class LogReaderService {
                         color: foreground ? "#00FF00" : "#0000FF",
                     }
                 });
-                accuracyGeojson.features.push(SpatialService.getCirclePolygonFeature({lng, lat}, accuracy));
+                accuracyGeojson.features.push(SpatialService.getCirclePolygonFeature({ lng, lat }, accuracy));
                 continue;
             }
             if (line.includes("[Record] Rejecting position")) {
@@ -69,6 +69,7 @@ export class LogReaderService {
             }
         }
 
+        /* HM TODO: think about this
         this.mapService.map.addSource("log-points-geojson", {
             type: "geojson",
             data: pointsGeojson,
@@ -148,5 +149,6 @@ export class LogReaderService {
             }
         });
         this.mapService.map.fitBounds(SpatialService.boundsToMBBounds(SpatialService.getBoundsForFeatureCollection(pointsGeojson)));
+        */
     }
 }

@@ -1,5 +1,4 @@
 import { lineString } from "@turf/helpers";
-import { LngLatBounds } from "maplibre-gl";
 
 import { SpatialService } from "./spatial.service";
 import { Bounds } from "../models";
@@ -258,16 +257,6 @@ describe("Spatial service", () => {
         const mBounds = SpatialService.boundsToMBBounds(bounds);
         expect(mBounds[0]).toEqual(latlng);
         expect(mBounds[1]).toEqual(latlng);
-    });
-
-    it("Should convert to bounds", () => {
-        const latlng = { lat: 1, lng: 2 };
-        const mbBounds = new LngLatBounds([latlng, latlng]);
-        const bounds = SpatialService.mBBoundsToBounds(mbBounds);
-        const mapBounds = SpatialService.getMapBounds({ getBounds: () => mbBounds } as any);
-        expect(bounds.northEast.lat).toBe(latlng.lat);
-        expect(bounds.southWest.lng).toBe(latlng.lng);
-        expect(bounds).toEqual(mapBounds);
     });
 
     it("Should calculate bounds from a feature", () => {

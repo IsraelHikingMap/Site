@@ -8,7 +8,6 @@ import { LayersService } from "./layers.service";
 import { FileService } from "./file.service";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
-import { FitBoundsService } from "./fit-bounds.service";
 import { SelectedRouteService } from "./selected-route.service";
 import { RoutesFactory } from "./routes.factory";
 import { MapService } from "./map.service";
@@ -50,20 +49,14 @@ describe("DataContainerService", () => {
                     }
                 },
                 {
-                    provide: FitBoundsService, useValue: {
-                        fitBounds: jasmine.createSpy()
-                    }
-                },
-                {
                     provide: SelectedRouteService, useValue: {
                         getSelectedRoute: () => null as any
                     }
                 },
                 {
                     provide: MapService, useValue: {
-                        map: {
-                            getBounds: () => ({ getNorthEast: () => ({ lat: 1, lng: 2 }), getSouthWest: () => ({ lat: 3, lng: 4 }) })
-                        }
+                        getMapBounds: () => ({ getNorthEast: () => ({ lat: 1, lng: 2 }), getSouthWest: () => ({ lat: 3, lng: 4 }) }),
+                        fitBounds: jasmine.createSpy()
                     }
                 },
                 { provide: RunningContextService, useValue: {} }
@@ -104,7 +97,7 @@ describe("DataContainerService", () => {
         expect(shareUrlsService.setShareUrlById).not.toHaveBeenCalled();
     }));
 
-    it("should set share URL and show toast message if not in iframe", inject([DataContainerService, ShareUrlsService, ToastService, RunningContextService, FitBoundsService], async (service: DataContainerService, shareUrlsService: ShareUrlsService, toastService: ToastService, runningContextService: RunningContextService, fitBoundsService: FitBoundsService) => {
+    it("should set share URL and show toast message if not in iframe", inject([DataContainerService, ShareUrlsService, ToastService, RunningContextService, MapService], async (service: DataContainerService, shareUrlsService: ShareUrlsService, toastService: ToastService, runningContextService: RunningContextService, mapService: MapService) => {
         const shareUrl = {
             id: "123", dataContainer: {
                 routes: [],
@@ -120,7 +113,7 @@ describe("DataContainerService", () => {
 
         expect(shareUrlsService.setShareUrlById).toHaveBeenCalledWith("42");
         expect(toastService.info).toHaveBeenCalledWith("desc", "title");
-        expect(fitBoundsService.fitBounds).toHaveBeenCalled();
+        expect(mapService.fitBounds).toHaveBeenCalled();
     }));
 
     it("should set file url after navigation", inject([DataContainerService, FileService, ToastService, Store], async (service: DataContainerService, fileService: FileService, toastService: ToastService, store: Store) => {
