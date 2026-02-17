@@ -6,7 +6,7 @@ import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatFormField, MatLabel, MatHint } from "@angular/material/form-field";
 import { MatInput } from "@angular/material/input";
 import { FormsModule } from "@angular/forms";
-import { MatCheckbox } from "@angular/material/checkbox";
+import { MatCheckbox, MatCheckboxChange } from "@angular/material/checkbox";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatRadioButton, MatRadioGroup } from "@angular/material/radio";
 import { MapComponent, ControlComponent } from "@maplibre/ngx-maplibre-gl";
@@ -87,7 +87,7 @@ export class ShareEditDialogComponent {
             this.shareUrl.public = this.shareUrl.public ?? false;
             this.shareUrl.type = this.shareUrl.type || "Unknown";
             this.shareUrl.difficulty = this.shareUrl.difficulty || "Unknown";
-            this.shareUrl.base64Preview = this.shareUrlsService.getImageUrlFromShareId(this.shareUrl.id);
+            this.shareUrl.base64Preview = null;
             this.canUpdate = true;
             this.shareUrl.dataContainer = this.data.dataContainer ?? this.shareUrl.dataContainer;
         } else {
@@ -106,6 +106,7 @@ export class ShareEditDialogComponent {
         if (this.canUpdate && this.data.dataContainer == null) {
             // In case of editing the a route from the routes menu - the defualt should be to update.
             this.updateCurrentShare = true;
+            this.shareUrl.base64Preview = this.shareUrlsService.getImageUrlFromShareId(this.shareUrl.id);
         }
         const geojson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = { type: "FeatureCollection", features: [] };
         for (const route of this.shareUrl.dataContainer.routes) {
@@ -163,7 +164,7 @@ export class ShareEditDialogComponent {
     }
 
     private updateStatistics() {
-        const latlngs = this.selectedRouteService.getLatlngs(this.shareUrl.dataContainer.routes[0]);
+        let latlngs = this.selectedRouteService.getLatlngs(this.shareUrl.dataContainer.routes[0]);
         if (latlngs == null || latlngs.length == 0) {
             this.shareUrl.gain = 0;
             this.shareUrl.loss = 0;
@@ -171,10 +172,11 @@ export class ShareEditDialogComponent {
             this.shareUrl.start = this.data.dataContainer.routes[0].markers[0].latlng;
             return;
         }
-        const statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
+        this.shareUrl.start = latlngs[0];
+        let statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
         for (let routeIndex = 1; routeIndex < this.shareUrl.dataContainer.routes.length; routeIndex++) {
-            const latlngs = this.selectedRouteService.getLatlngs(this.shareUrl.dataContainer.routes[routeIndex]);
-            const statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
+            latlngs = this.selectedRouteService.getLatlngs(this.shareUrl.dataContainer.routes[routeIndex]);
+            statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
             statistics.gain += statistics.gain;
             statistics.loss += statistics.loss;
             statistics.length += statistics.length;
@@ -182,7 +184,6 @@ export class ShareEditDialogComponent {
         this.shareUrl.gain = statistics.gain;
         this.shareUrl.loss = statistics.loss;
         this.shareUrl.length = statistics.length;
-        this.shareUrl.start = latlngs[0];
     }
 
     public async addImage(event: Event) {
@@ -196,5 +197,13 @@ export class ShareEditDialogComponent {
 
     public removeImage() {
         this.shareUrl.base64Preview = null;
+    }
+
+    public updateCurrentShareChanged(event: MatCheckboxChange) {
+        if (event.checked) {
+            this.shareUrl.base64Preview = this.shareUrlsService.getImageUrlFromShareId(this.shareUrl.id);
+        } else {
+            this.removeImage();
+        }
     }
 }

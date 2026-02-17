@@ -51,7 +51,8 @@
     }
     @if (canUpdate) {
     <div class="flex flex-row">
-      <mat-checkbox color="primary" [(ngModel)]="updateCurrentShare">{{resources.updateCurrentShare}}</mat-checkbox>
+      <mat-checkbox color="primary" [(ngModel)]="updateCurrentShare"
+        (change)="updateCurrentShareChanged($event)">{{resources.updateCurrentShare}}</mat-checkbox>
     </div>
     }
     <!-- HM TODO: remove this when the feature is matured -->
