@@ -163,7 +163,7 @@ export class ShareEditDialogComponent {
     }
 
     private updateStatistics() {
-        const latlngs = this.selectedRouteService.getLatlngs(this.shareUrl.dataContainer.routes[0]);
+        let latlngs = this.selectedRouteService.getLatlngs(this.shareUrl.dataContainer.routes[0]);
         if (latlngs == null || latlngs.length == 0) {
             this.shareUrl.gain = 0;
             this.shareUrl.loss = 0;
@@ -171,9 +171,10 @@ export class ShareEditDialogComponent {
             this.shareUrl.start = this.data.dataContainer.routes[0].markers[0].latlng;
             return;
         }
+        this.shareUrl.start = latlngs[0];
         let statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
         for (let routeIndex = 1; routeIndex < this.shareUrl.dataContainer.routes.length; routeIndex++) {
-            const latlngs = this.selectedRouteService.getLatlngs(this.shareUrl.dataContainer.routes[routeIndex]);
+            latlngs = this.selectedRouteService.getLatlngs(this.shareUrl.dataContainer.routes[routeIndex]);
             statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
             statistics.gain += statistics.gain;
             statistics.loss += statistics.loss;
@@ -182,7 +183,6 @@ export class ShareEditDialogComponent {
         this.shareUrl.gain = statistics.gain;
         this.shareUrl.loss = statistics.loss;
         this.shareUrl.length = statistics.length;
-        this.shareUrl.start = latlngs[0];
     }
 
     public async addImage(event: Event) {
