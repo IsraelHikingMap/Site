@@ -81,6 +81,9 @@ export class MapService {
     }
 
     private onError = (e: ErrorEvent) => {
+        if (e.error.message.includes("418")) {
+            return;
+        }
         this.loggingService.error("[Map] Error: " + e?.error?.message);
     }
 
