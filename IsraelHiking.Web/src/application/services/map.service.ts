@@ -1,4 +1,4 @@
-import { EventEmitter, inject, Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { type ErrorEvent, GeoJSONFeature, type Map, type Point, setRTLTextPlugin } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 

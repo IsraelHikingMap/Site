@@ -25,7 +25,7 @@ import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
 import { LayersReducer } from "../reducers/layers.reducer";
 import { AddToPoiQueueAction, OfflineReducer } from "../reducers/offline.reducer";
-import { ConfigurationReducer, SetLanguageAction } from "../reducers/configuration.reducer";
+import { ConfigurationReducer } from "../reducers/configuration.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models";
 
 describe("Poi Service", () => {
@@ -532,7 +532,7 @@ describe("Poi Service", () => {
 
     it("Should not fail on map not initialized when trying to get a point by id and source from the tiles in case the server is not available",
         (inject([PoiService, HttpTestingController, MapService],
-            async (poiService: PoiService, mockBackend: HttpTestingController, mapServiceMock: MapService) => {
+            async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
                 const id = "node_42";
                 const source = "source";

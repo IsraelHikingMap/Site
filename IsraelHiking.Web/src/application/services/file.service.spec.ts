@@ -20,17 +20,17 @@ describe("FileService", () => {
 
     beforeEach(() => {
         saveAsSpy = jasmine.createSpy();
-        let imageResizeService = {
+        const imageResizeService = {
             resizeImageAndConvert: () => Promise.resolve({
                 northEast: { lat: 0, lng: 0 },
                 southWest: { lat: 1, lng: 1 },
                 routes: [{ markers: [{} as MarkerData] }] as RouteData[]
             } as DataContainer)
         } as any as ImageResizeService;
-        let selectedRouteService = {
+        const selectedRouteService = {
             addRoutes: jasmine.createSpy("addRoutes")
         } as any as SelectedRouteService;
-        let mapService = {
+        const mapService = {
             fitBounds: jasmine.createSpy("fitBounds")
         } as any as MapService;
         const loggingServiceMock = {

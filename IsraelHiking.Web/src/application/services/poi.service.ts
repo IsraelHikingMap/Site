@@ -1,8 +1,8 @@
-import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { cloneDeep } from "lodash-es";
 import { firstValueFrom } from "rxjs";
-import { timeout, skip } from "rxjs/operators";
+import { timeout } from "rxjs/operators";
 import { validate as validateUuid } from "uuid";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
@@ -33,7 +33,6 @@ import type {
     IconColorLabel,
     NorthEast,
     EditablePublicPointData,
-    OfflineState,
     UpdateablePublicPoiData,
     ShareUrl
 } from "../models";

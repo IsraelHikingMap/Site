@@ -109,7 +109,7 @@ describe("HashService", () => {
             const spy = jasmine.createSpy();
             routerMock.navigate = spy;
             service.initialize();
-            mapService = { isMoving: () => true } as any;
+            mapService.isMoving = () => true;
             store.reset({
                 poiState: {},
                 inMemoryState: {},
