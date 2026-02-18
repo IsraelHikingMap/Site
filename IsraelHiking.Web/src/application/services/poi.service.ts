@@ -1,14 +1,13 @@
-import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { cloneDeep } from "lodash-es";
 import { firstValueFrom } from "rxjs";
-import { timeout, skip } from "rxjs/operators";
+import { timeout } from "rxjs/operators";
 import { validate as validateUuid } from "uuid";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 import type { GeoJSONFeature } from "maplibre-gl";
 
-import { environment } from "../../environments/environment";
 import { ResourcesService } from "./resources.service";
 import { HashService, PoiRouteUrlInfo, RouteStrings } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
@@ -34,7 +33,6 @@ import type {
     IconColorLabel,
     NorthEast,
     EditablePublicPointData,
-    OfflineState,
     UpdateablePublicPoiData,
     ShareUrl
 } from "../models";
@@ -57,22 +55,13 @@ export type SelectableCategory = Category & {
 export class PoiService {
 
     private static readonly POIS_SOURCE_LAYER_NAMES = ["global_points", "external"];
-    private static readonly POIS_SOURCE_ID = "points-of-interest";
-    private static readonly POIS_SOURCE_TILES_ADDRESS = environment.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt";
+    public static readonly POIS_SOURCE_ID = "points-of-interest";
 
     private poisCache: GeoJSON.Feature[] = [];
     private queueIsProcessing: boolean = false;
-    private offlineState: Immutable<OfflineState>;
-
-    public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> = {
-        type: "FeatureCollection",
-        features: []
-    };
-    public poisChanged = new EventEmitter<void>;
 
     private readonly resources = inject(ResourcesService);
     private readonly httpClient = inject(HttpClient);
-    private readonly ngZone = inject(NgZone);
     private readonly whatsappService = inject(WhatsAppService);
     private readonly hashService = inject(HashService);
     private readonly databaseService = inject(DatabaseService);
@@ -85,56 +74,8 @@ export class PoiService {
     private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly store = inject(Store);
 
-    constructor() {
-        this.store.select((s: ApplicationState) => s.offlineState).subscribe(offlineState => this.offlineState = offlineState);
-    }
-
-    public async initialize() {
-        this.store.select((state: ApplicationState) => state.configuration.language).pipe(skip(1)).subscribe(() => {
-            this.poisCache = [];
-            this.loggingService.info("[POIs] Language changed, updating pois");
-            this.updatePois();
-        });
-        this.store.select((state: ApplicationState) => state.layersState.visibleCategories).pipe(skip(1)).subscribe(() => {
-            this.loggingService.info("[POIs] Categories changed, updating pois");
-            this.updatePois();
-        });
-        await this.mapService.initializationPromise;
+    public initialize() {
         this.store.select((state: ApplicationState) => state.offlineState.uploadPoiQueue).subscribe((items: Immutable<string[]>) => this.handleUploadQueueChanges(items));
-        this.initializePois();
-    }
-
-    private initializePois() {
-        this.mapService.map.addSource(PoiService.POIS_SOURCE_ID, {
-            type: "vector",
-            tiles: [PoiService.POIS_SOURCE_TILES_ADDRESS],
-            minzoom: 10,
-            maxzoom: 14
-        });
-        for (const sourceLayerName of PoiService.POIS_SOURCE_LAYER_NAMES) {
-            this.mapService.map.addLayer({
-                id: sourceLayerName + "-layer",
-                type: "circle",
-                source: PoiService.POIS_SOURCE_ID,
-                "source-layer": sourceLayerName,
-                paint: {
-                    "circle-color": "transparent",
-                }
-            }, this.resources.endOfBaseLayer);
-        }
-
-        this.mapService.map.on("sourcedata", (e) => {
-            if (PoiService.POIS_SOURCE_ID === e.sourceId) {
-                this.ngZone.run(() => {
-                    this.updatePois();
-                });
-            }
-        });
-        this.mapService.map.on("moveend", () => {
-            this.ngZone.run(() => {
-                this.updatePois();
-            });
-        });
     }
 
     private async handleUploadQueueChanges(items: Immutable<string[]>) {
@@ -170,7 +111,6 @@ export class PoiService {
             } else {
                 this.loggingService.info("[POIs] Uploaded successfully a feature with id:" +
                     `${this.getFeatureId(poi) ?? firstItemId}, removing from upload queue`);
-                this.updatePois();
             }
             this.databaseService.removePoiFromUploadQueue(firstItemId);
             this.queueIsProcessing = false;
@@ -251,15 +191,7 @@ export class PoiService {
     }
 
     private getFeaturesFromTiles(): GeoJSONFeature[] {
-        if (this.mapService.map == null) {
-            // Map is not ready yet
-            return [];
-        }
-        let features: GeoJSONFeature[] = [];
-        for (const sourceLayer of PoiService.POIS_SOURCE_LAYER_NAMES) {
-            features = features.concat(this.mapService.map.querySourceFeatures(PoiService.POIS_SOURCE_ID, { sourceLayer }));
-        }
-        return features;
+        return this.mapService.getFeaturesFromTiles(PoiService.POIS_SOURCE_LAYER_NAMES, PoiService.POIS_SOURCE_ID);
     }
 
     private getPoisFromTiles(): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
@@ -337,25 +269,21 @@ export class PoiService {
     }
 
     private getVisibleCategories(): string[] {
-        return this.store.selectSnapshot((s: ApplicationState) => s.layersState).visibleCategories.map(c => c.name);
+        return this.store.selectSnapshot((s: ApplicationState) => s.layersState.visibleCategories).map(c => c.name);
     }
 
-    private async updatePois() {
-        await this.mapService.initializationPromise;
+    public getPoisGeoJson(): GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> {
         if (this.getVisibleCategories().length === 0) {
-            this.poiGeojsonFiltered = {
+            return {
                 type: "FeatureCollection",
                 features: []
             };
-            this.poisChanged.next();
-            return;
         }
         const visibleFeatures = this.getPoisFromTiles();
-        this.poiGeojsonFiltered = {
+        return {
             type: "FeatureCollection",
             features: visibleFeatures
         };
-        this.poisChanged.next();
     }
 
     public async getBasicInfo(id: string, source: string, language?: string): Promise<GeoJSON.Feature> {
@@ -667,8 +595,8 @@ export class PoiService {
             } as any
         } as GeoJSON.Feature;
 
-        if (this.offlineState.uploadPoiQueue.indexOf(originalId) !== -1) {
-            // this is the case where there was a previous update request but this hs not been uploaded to the server yet...
+        if (this.store.selectSnapshot((state: ApplicationState) => state.offlineState.uploadPoiQueue).indexOf(originalId) !== -1) {
+            // this is the case where there was a previous update request but this has not been uploaded to the server yet...
             const featureFromDatabase = await this.databaseService.getPoiFromUploadQueue(originalId);
             if (featureFromDatabase != null) {
                 featureContainingOnlyChanges = featureFromDatabase;

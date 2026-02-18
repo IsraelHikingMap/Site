@@ -1,4 +1,4 @@
-import { Map, LngLatBounds, LngLatLike } from "maplibre-gl";
+import { LngLatBounds, LngLatLike } from "maplibre-gl";
 import { lineString, featureCollection, point, Units } from "@turf/helpers";
 import simplify from "@turf/simplify";
 import distance from "@turf/distance";
@@ -310,11 +310,6 @@ export class SpatialService {
 
     public static getPointFeature(latlng: LatLngAltTime): GeoJSON.Feature<GeoJSON.Point> {
         return point(SpatialService.toCoordinate(latlng));
-    }
-
-    public static getMapBounds(map: Map): Bounds {
-        const bounds = map.getBounds();
-        return SpatialService.mBBoundsToBounds(bounds);
     }
 
     public static getCirclePolygonFeature(centerPoint: LatLngAltTime, radius: number):

@@ -19,7 +19,7 @@ export class LogReaderService {
                 foundEndOfRecording = true;
                 continue;
             }
-             if (line.includes("[Record] Starting recording")) {
+            if (line.includes("[Record] Starting recording")) {
                 break;
             }
             if (line.includes("[Record]") || line.includes("[GeoLocation]")) {
@@ -56,7 +56,7 @@ export class LogReaderService {
                         color: foreground ? "#00FF00" : "#0000FF",
                     }
                 });
-                accuracyGeojson.features.push(SpatialService.getCirclePolygonFeature({lng, lat}, accuracy));
+                accuracyGeojson.features.push(SpatialService.getCirclePolygonFeature({ lng, lat }, accuracy));
                 continue;
             }
             if (line.includes("[Record] Rejecting position")) {
@@ -69,17 +69,17 @@ export class LogReaderService {
             }
         }
 
-        this.mapService.map.addSource("log-points-geojson", {
+        this.mapService.addSource("log-points-geojson", {
             type: "geojson",
             data: pointsGeojson,
         });
 
-        this.mapService.map.addSource("log-accuracy-geojson", {
+        this.mapService.addSource("log-accuracy-geojson", {
             type: "geojson",
             data: accuracyGeojson,
         });
 
-        this.mapService.map.addSource("log-record-line-geojson", {
+        this.mapService.addSource("log-record-line-geojson", {
             type: "geojson",
             data: {
                 type: "FeatureCollection",
@@ -99,7 +99,7 @@ export class LogReaderService {
             }
         });
 
-        this.mapService.map.addLayer({
+        this.mapService.addLayer({
             id: "log-accuracy-geojson-layer",
             type: "fill",
             source: "log-accuracy-geojson",
@@ -109,7 +109,7 @@ export class LogReaderService {
             }
         });
 
-        this.mapService.map.addLayer({
+        this.mapService.addLayer({
             id: "log-points-geojson-layer",
             type: "circle",
             source: "log-points-geojson",
@@ -121,7 +121,7 @@ export class LogReaderService {
                 "circle-stroke-color": "white"
             }
         });
-        this.mapService.map.addLayer({
+        this.mapService.addLayer({
             id: "log-points-geojson-labels",
             type: "symbol",
             source: "log-points-geojson",
@@ -137,7 +137,7 @@ export class LogReaderService {
                 "text-opacity": 0.8
             }
         });
-        this.mapService.map.addLayer({
+        this.mapService.addLayer({
             id: "log-record-line-geojson-layer",
             type: "line",
             source: "log-record-line-geojson",
@@ -147,6 +147,6 @@ export class LogReaderService {
                 "line-opacity": 0.8
             }
         });
-        this.mapService.map.fitBounds(SpatialService.boundsToMBBounds(SpatialService.getBoundsForFeatureCollection(pointsGeojson)));
+        this.mapService.fitBounds(SpatialService.getBoundsForFeatureCollection(pointsGeojson));
     }
 }

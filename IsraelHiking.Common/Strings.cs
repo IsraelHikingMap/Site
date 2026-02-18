@@ -37,7 +37,7 @@ public static class Categories
         ROUTE_4X4
     ];
 }
-    
+
 public static class FeatureAttributes
 {
     public const string ID = "identifier";
@@ -76,7 +76,7 @@ public static class FeatureAttributes
     public const string POI_ADDED_IMAGES = POI_PREFIX + "AddedImages";
     public const string POI_REMOVED_IMAGES = POI_PREFIX + "RemovedImages";
     public const string POI_MERGED = POI_PREFIX + "Merged";
-        
+
     public static readonly string[] POI_DESCRIPTION_KEYS =
     [
         POI_EXTERNAL_DESCRIPTION,
@@ -112,18 +112,17 @@ public static class Languages
         RUSSIAN,
         ARABIC
     ];
-    public static readonly string[] ArrayWithDefault = new [] { DEFAULT }.Concat(Array).ToArray();
+    public static readonly string[] ArrayWithDefault = new[] { DEFAULT }.Concat(Array).ToArray();
 }
 
 public static class Branding
 {
     public static string SITE_NAME = "Mapeak";
 
-    public static string DESCRIPTION =  "Whether you are planning your next hike, ride, drive or run, this is where you can find everything you'll need in order to plan your next outdoor visit.";
+    public static string DESCRIPTION = "Whether you are planning your next hike, ride, drive or run, this is where you can find everything you'll need in order to plan your next outdoor visit.";
 
     public const string ROUTE_SHARE_DEFAULT_TITLE = "Mapeak Route Share";
 
-    // HM TODO: decide what to do with this
     public const string USER_AGENT =
         "Mapeak/5.x bot (https://mapeak.com; support@mapeak.com)";
 

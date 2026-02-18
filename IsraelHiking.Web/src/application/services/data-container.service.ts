@@ -7,8 +7,6 @@ import { ToastService } from "./toast.service";
 import { FileService } from "./file.service";
 import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
-import { SpatialService } from "./spatial.service";
-import { FitBoundsService } from "./fit-bounds.service";
 import { SelectedRouteService } from "./selected-route.service";
 import { MapService } from "./map.service";
 import { RoutesFactory } from "./routes.factory";
@@ -26,7 +24,6 @@ export class DataContainerService {
     private readonly fileService = inject(FileService);
     private readonly resources = inject(ResourcesService);
     private readonly toastService = inject(ToastService);
-    private readonly fitBoundsService = inject(FitBoundsService);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly routesFactory = inject(RoutesFactory);
     private readonly mapService = inject(MapService);
@@ -51,14 +48,14 @@ export class DataContainerService {
         }
 
         if (dataContainer.northEast != null && dataContainer.southWest != null) {
-            this.fitBoundsService.fitBounds({ northEast: dataContainer.northEast, southWest: dataContainer.southWest }, true);
+            this.mapService.fitBounds({ northEast: dataContainer.northEast, southWest: dataContainer.southWest }, true);
         }
     }
 
     public getContainerForRoutes(routes: Immutable<RouteDataWithoutState[]>): DataContainer {
         const layersContainer = this.layersService.getData();
 
-        const bounds = SpatialService.getMapBounds(this.mapService.map);
+        const bounds = this.mapService.getMapBounds();
         const container: DataContainer = {
             routes: structuredClone(routes) as RouteDataWithoutState[],
             baseLayer: layersContainer.baseLayer,

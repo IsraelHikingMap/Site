@@ -25,9 +25,9 @@ export class SnappingService {
             markerData: null,
             id: null
         } as SnappingPointResponse;
-        const pointOnScreen = this.mapService.map.project(latlng);
+        const pointOnScreen = this.mapService.project(latlng);
         for (const markerData of points) {
-            const markerPointOnScreen = this.mapService.map.project(markerData.latlng);
+            const markerPointOnScreen = this.mapService.project(markerData.latlng);
             if (SpatialService.getDistanceForCoordinates([markerPointOnScreen.x, markerPointOnScreen.y],
                 [pointOnScreen.x, pointOnScreen.y]) < SnappingService.SENSITIVITY &&
                 response.markerData == null) {

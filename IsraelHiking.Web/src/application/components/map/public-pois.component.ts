@@ -6,7 +6,7 @@ import { MatTooltip } from "@angular/material/tooltip";
 import { MatDialog } from "@angular/material/dialog";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router } from "@angular/router";
-import { GeoJSONSourceComponent, SourceDirective, MarkersForClustersComponent, PointDirective, ClusterPointDirective, PopupComponent, MarkerComponent, LayerComponent } from "@maplibre/ngx-maplibre-gl";
+import { GeoJSONSourceComponent, SourceDirective, MarkersForClustersComponent, PointDirective, ClusterPointDirective, PopupComponent, MarkerComponent, LayerComponent, VectorSourceComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
@@ -24,16 +24,20 @@ import { NavigateHereService } from "../../services/navigate-here.service";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import { GeoJSONUtils } from "../../services/geojson-utils";
+import { Urls } from "../../urls";
 import type { ApplicationState, LatLngAltTime, LinkData, MarkerData } from "../../models";
+import { skip } from "rxjs";
 
 @Component({
     selector: "public-pois",
     templateUrl: "public-pois.component.html",
     styleUrls: ["public-pois.component.scss"],
-    imports: [SourceDirective, GeoJSONSourceComponent, MarkersForClustersComponent, PointDirective, Angulartics2OnModule, ClusterPointDirective, PopupComponent, ClusterOverlayComponent, Dir, MatButton, MatTooltip, CoordinatesComponent, MarkerComponent, LayerComponent]
+    imports: [SourceDirective, GeoJSONSourceComponent, MarkersForClustersComponent, PointDirective, Angulartics2OnModule, ClusterPointDirective, PopupComponent, ClusterOverlayComponent, Dir, MatButton, MatTooltip, CoordinatesComponent, MarkerComponent, LayerComponent, VectorSourceComponent]
 })
 export class PublicPoisComponent implements OnInit {
     private static readonly MAX_MENU_POINTS_IN_CLUSTER = 50;
+
+    public poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
 
     public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public selectedPoiFeature: GeoJSON.Feature<GeoJSON.Point> = null;
@@ -55,12 +59,25 @@ export class PublicPoisComponent implements OnInit {
     private readonly navigateHereService = inject(NavigateHereService);
     private readonly store = inject(Store);
     private readonly destroyRef = inject(DestroyRef);
+    private readonly mapComponent = inject(MapComponent);
 
     public ngOnInit() {
-        this.poiGeoJsonData = this.poiService.poiGeojsonFiltered;
-        this.poiService.poisChanged.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-            this.poiGeoJsonData = this.poiService.poiGeojsonFiltered;
+        this.poiGeoJsonData = this.poiService.getPoisGeoJson();
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(this.destroyRef), skip(1)).subscribe(() => {
+            this.poiGeoJsonData = this.poiService.getPoisGeoJson();
         });
+        this.store.select((state: ApplicationState) => state.layersState.visibleCategories).pipe(takeUntilDestroyed(this.destroyRef), skip(1)).subscribe(() => {
+            this.poiGeoJsonData = this.poiService.getPoisGeoJson();
+        });
+        this.mapComponent.sourceData.subscribe((sourceData) => {
+            if (sourceData.sourceId === PoiService.POIS_SOURCE_ID) {
+                this.poiGeoJsonData = this.poiService.getPoisGeoJson();
+            }
+        });
+        this.mapComponent.moveEnd.subscribe(() => {
+            this.poiGeoJsonData = this.poiService.getPoisGeoJson();
+        });
+
         this.store.select((state: ApplicationState) => state.poiState.selectedPointOfInterest).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(poi => this.onSelectedPoiChanged(poi));
     }
 

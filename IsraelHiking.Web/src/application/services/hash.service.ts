@@ -7,7 +7,6 @@ import { Urls } from "../urls";
 import { MapService } from "./map.service";
 import { SidebarService } from "./sidebar.service";
 import { DataContainerService } from "./data-container.service";
-import { FitBoundsService } from "./fit-bounds.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { LayersService } from "./layers.service";
 import { SetFileUrlAndBaseLayerAction, SetShareUrlAction } from "../reducers/in-memory.reducer";
@@ -56,7 +55,6 @@ export class HashService {
     private readonly mapService = inject(MapService);
     private readonly sidebarService = inject(SidebarService);
     private readonly dataContainerService = inject(DataContainerService);
-    private readonly fitBoundsService = inject(FitBoundsService);
     private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly layersService = inject(LayersService);
     private readonly store = inject(Store);
@@ -70,7 +68,7 @@ export class HashService {
             const queryParams = tree.queryParams;
             if (this.router.url.startsWith(RouteStrings.ROUTE_MAP)) {
                 if (segments.length >= 4) {
-                    this.fitBoundsService.flyTo({
+                    this.mapService.flyTo({
                         lng: +segments[segments.length - 1].path,
                         lat: +segments[segments.length - 2].path
                     }, +segments[segments.length - 3].path - 1);
@@ -129,7 +127,7 @@ export class HashService {
                 { queryParams, replaceUrl: true });
             return;
         }
-        if (this.mapService.map && this.mapService.map.isMoving()) {
+        if (this.mapService.isMoving()) {
             return;
         }
         const location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);

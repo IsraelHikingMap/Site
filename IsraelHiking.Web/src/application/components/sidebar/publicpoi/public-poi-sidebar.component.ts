@@ -24,7 +24,7 @@ import { ToastService } from "../../../services/toast.service";
 import { RouteStrings, PoiRouteUrlInfo } from "../../../services/hash.service";
 import { SelectedRouteService } from "../../../services/selected-route.service";
 import { RoutesFactory } from "../../../services/routes.factory";
-import { FitBoundsService } from "../../../services/fit-bounds.service";
+import { MapService } from "../../../services/map.service";
 import { SpatialService } from "../../../services/spatial.service";
 import { RunningContextService } from "../../../services/running-context.service";
 import { SidebarService } from "../../../services/sidebar.service";
@@ -82,7 +82,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly routesFactory = inject(RoutesFactory);
     private readonly toastService = inject(ToastService);
-    private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly mapService = inject(MapService);
     private readonly sidebarService = inject(SidebarService);
     private readonly runningContextSerivce = inject(RunningContextService);
     private readonly navigateHereService = inject(NavigateHereService);
@@ -159,7 +159,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
                 await this.initFromFeature(feature);
             }
             const bounds = SpatialService.getBoundsForFeature(feature);
-            this.fitBoundsService.fitBounds(bounds);
+            this.mapService.fitBounds(bounds);
             if (data.source === RouteStrings.COORDINATES) {
                 this.fullFeature = null;
                 this.close();

@@ -50,7 +50,6 @@ import { DataContainerService } from "./services/data-container.service";
 import { RoutesFactory } from "./services/routes.factory";
 import { RoutingProvider } from "./services/routing.provider";
 import { SnappingService } from "./services/snapping.service";
-import { FitBoundsService } from "./services/fit-bounds.service";
 import { RouteStatisticsService } from "./services/route-statistics.service";
 import { ShareUrlsService } from "./services/share-urls.service";
 import { MapeakTitleService } from "./services/mapeak-title.service";
@@ -179,7 +178,6 @@ export const appConfig: ApplicationConfig = {
         RoutesFactory,
         RoutingProvider,
         SnappingService,
-        FitBoundsService,
         RouteStatisticsService,
         ShareUrlsService,
         Title,

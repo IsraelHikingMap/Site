@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewEncapsulation, inject } from "@angular/core";
+import { Router } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
 import { MatFormField, MatLabel } from "@angular/material/form-field";
@@ -22,13 +23,13 @@ import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { OsmAddressesService } from "../../services/osm-addresses.service";
-import { FitBoundsService } from "../../services/fit-bounds.service";
+import { MapService } from "../../services/map.service";
 import { ToastService } from "../../services/toast.service";
-import { LayersService } from "../../services/layers.service";
 import { TracesService } from "../../services/traces.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { SpatialService } from "../../services/spatial.service";
 import { DataContainerService } from "../../services/data-container.service";
+import { RouteStrings } from "../../services/hash.service";
 import { SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
 import type { ApplicationState, Trace, TraceVisibility } from "../../models";
 
@@ -56,13 +57,13 @@ export class TracesDialogComponent implements OnInit {
 
     private readonly matDialogRef = inject(MatDialogRef);
     private readonly fileService = inject(FileService);
-    private readonly layersService = inject(LayersService);
-    private readonly fitBoundsService = inject(FitBoundsService);
+    private readonly mapService = inject(MapService);
     private readonly toastService = inject(ToastService);
     private readonly osmAddressesService = inject(OsmAddressesService);
     private readonly tracesService = inject(TracesService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly dataContainerService = inject(DataContainerService);
+    private readonly router = inject(Router);
     private readonly store = inject(Store);
     private readonly data = inject<string[]>(MAT_DIALOG_DATA);
 
@@ -92,6 +93,7 @@ export class TracesDialogComponent implements OnInit {
             trace.dataContainer.routes[0].name = this.getTraceDisplayName(trace) || trace.name;
             trace.dataContainer.routes[0].description = trace.name;
         }
+        this.router.navigate([RouteStrings.MAP]);
         this.dataContainerService.setData(trace.dataContainer, true);
     }
 
@@ -134,7 +136,7 @@ export class TracesDialogComponent implements OnInit {
             this.store.dispatch(new SetVisibleTraceAction(trace.id));
             this.store.dispatch(new SetMissingPartsAction(geoJson));
             const bounds = SpatialService.getBoundsForFeatureCollection(geoJson);
-            this.fitBoundsService.fitBounds(bounds);
+            this.mapService.fitBounds(bounds);
             this.matDialogRef.close();
         } catch (ex) {
             this.toastService.error(ex, this.resources.unexpectedErrorPleaseTryAgainLater);

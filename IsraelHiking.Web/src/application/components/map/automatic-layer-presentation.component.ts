@@ -12,7 +12,6 @@ import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
-import { MapService } from "../../services/map.service";
 import { DEFAULT_BASE_LAYERS } from "../../reducers/initial-state";
 import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models";
 
@@ -45,7 +44,6 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
 
     private readonly mapComponent = inject(MapComponent);
     private readonly fileService = inject(FileService);
-    private readonly mapService = inject(MapService);
     private readonly store = inject(Store);
 
     constructor() {
@@ -221,7 +219,9 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
      */
     private addLayerRecreationQuqueItem(oldLayer: LayerData, newLayer: EditableLayer) {
         this.recreateQueue.next(async () => {
-            await (this.isMainMap() ? this.mapService.initializationPromise : this.mapLoadedPromise);
+            if (!this.mapComponent.mapInstance?.loaded()) {
+                await this.mapLoadedPromise;
+            }
             if (oldLayer != null) {
                 this.removeLayer(oldLayer);
             }

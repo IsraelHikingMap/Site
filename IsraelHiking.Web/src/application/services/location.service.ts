@@ -3,7 +3,6 @@ import { Store } from "@ngxs/store";
 
 import { GeoLocationService } from "./geo-location.service";
 import { DeviceOrientationService } from "./device-orientation.service";
-import { FitBoundsService } from "./fit-bounds.service";
 import { MapService } from "./map.service";
 import { LoggingService } from "./logging.service";
 import { SelectedRouteService } from "./selected-route.service";
@@ -20,7 +19,6 @@ export type LocationWithBearing = {
 export class LocationService {
     private readonly geoLocationService = inject(GeoLocationService);
     private readonly deviceOrientationService = inject(DeviceOrientationService);
-    private readonly fitBoundsService = inject(FitBoundsService);
     private readonly mapService = inject(MapService);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly loggingService = inject(LoggingService);
@@ -44,7 +42,7 @@ export class LocationService {
             this.lastSpeed = null;
             this.locationWithBearing.bearing = bearing;
             this.changed.next(this.locationWithBearing);
-            if (!this.mapService.map.isMoving() && this.isFollowing() && !this.selectedRouteService.isEditingRoute()) {
+            if (!this.mapService.isMoving() && this.isFollowing() && !this.selectedRouteService.isEditingRoute()) {
                 this.moveMapToGpsPosition();
             }
         });
@@ -112,7 +110,7 @@ export class LocationService {
         const bearing = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).keepNorthUp
             ? 0
             : this.locationWithBearing.bearing;
-        this.fitBoundsService.moveTo(center, this.mapService.map.getZoom(), bearing);
+        this.mapService.moveToWithCurrentZoom(center, bearing);
     }
 
     private handlePositionChange(position: GeolocationPosition) {
@@ -140,7 +138,7 @@ export class LocationService {
             accuracy: position.coords.accuracy
         };
         this.changed.next(this.locationWithBearing);
-        if (!this.mapService.map.isMoving() && this.isFollowing() && !this.selectedRouteService.isEditingRoute()) {
+        if (!this.mapService.isMoving() && this.isFollowing() && !this.selectedRouteService.isEditingRoute()) {
             this.moveMapToGpsPosition();
         }
     }

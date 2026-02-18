@@ -5,7 +5,6 @@ import { NgxsModule, Store } from "@ngxs/store";
 import { LocationService } from "./location.service";
 import { GeoLocationService } from "./geo-location.service";
 import { DeviceOrientationService } from "./device-orientation.service";
-import { FitBoundsService } from "./fit-bounds.service";
 import { MapService } from "./map.service";
 import { LoggingService } from "./logging.service";
 import { SelectedRouteService } from "./selected-route.service";
@@ -28,22 +27,16 @@ describe("LocationService", () => {
             enable: jasmine.createSpy("enable"),
             disable: jasmine.createSpy("disable")
         };
-        const fitBoundsService = {
-            moveTo: jasmine.createSpy("moveTo")
-        };
         const mapService = {
-            map: {
-                isMoving: () => false,
-                getZoom: () => 0
-            },
-            initializationPromise: Promise.resolve()
+            isMoving: () => false,
+            initializationPromise: Promise.resolve(),
+            moveToWithCurrentZoom: jasmine.createSpy("moveToWithCurrentZoom")
         };
         TestBed.configureTestingModule({
             imports: [NgxsModule.forRoot([InMemoryReducer, GpsReducer])],
             providers: [
                 { provide: GeoLocationService, useValue: geoLocationService },
                 { provide: DeviceOrientationService, useValue: deviceOrientationService },
-                { provide: FitBoundsService, useValue: fitBoundsService },
                 { provide: MapService, useValue: mapService },
                 { provide: LoggingService, useValue: { warning: () => { } } },
                 {
@@ -79,14 +72,14 @@ describe("LocationService", () => {
         }
     ));
 
-    it("Should not move to gps position if position is not defined", inject([LocationService, FitBoundsService], (service: LocationService, fitBoundsService: FitBoundsService) => {
+    it("Should not move to gps position if position is not defined", inject([LocationService, MapService], (service: LocationService, mapService: MapService) => {
         service.moveMapToGpsPosition();
 
-        expect(fitBoundsService.moveTo).not.toHaveBeenCalled();
+        expect(mapService.moveToWithCurrentZoom).not.toHaveBeenCalled();
     }));
 
-    it("Should move to gps position if a new valid position is received", inject([LocationService, FitBoundsService, Store],
-        async (service: LocationService, fitBoundsService: FitBoundsService, store: Store) => {
+    it("Should move to gps position if a new valid position is received", inject([LocationService, MapService, Store],
+        async (service: LocationService, mapService: MapService, store: Store) => {
             store.reset({
                 gpsState: { currentPosition: null },
                 inMemoryState: { following: false }
@@ -98,12 +91,12 @@ describe("LocationService", () => {
             store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3 } } as any));
 
             expect(eventSpy).toHaveBeenCalled();
-            expect(fitBoundsService.moveTo).toHaveBeenCalled();
+            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalled();
         }
     ));
 
-    it("Should move to gps position with heading from gps", inject([LocationService, FitBoundsService, Store],
-        async (service: LocationService, fitBoundsService: FitBoundsService, store: Store) => {
+    it("Should move to gps position with heading from gps", inject([LocationService, MapService, Store],
+        async (service: LocationService, mapService: MapService, store: Store) => {
             store.reset({
                 gpsState: { currentPosition: null },
                 inMemoryState: { following: false }
@@ -115,12 +108,12 @@ describe("LocationService", () => {
             store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 3, heading: 4 } } as any));
 
             expect(eventSpy).toHaveBeenCalled();
-            expect(fitBoundsService.moveTo).toHaveBeenCalledWith({ lat: 2, lng: 3, alt: undefined }, 0, 4);
+            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledWith({ lat: 2, lng: 3, alt: undefined }, 4);
         }
     ));
 
-    it("Should move to gps position with heading 0 when keep north up", inject([LocationService, FitBoundsService, Store],
-        async (service: LocationService, fitBoundsService: FitBoundsService, store: Store) => {
+    it("Should move to gps position with heading 0 when keep north up", inject([LocationService, MapService, Store],
+        async (service: LocationService, mapService: MapService, store: Store) => {
             store.reset({
                 gpsState: { currentPosition: null },
                 inMemoryState: { following: false, keepNorthUp: true }
@@ -132,12 +125,12 @@ describe("LocationService", () => {
             store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 3, heading: 4 } } as any));
 
             expect(eventSpy).toHaveBeenCalled();
-            expect(fitBoundsService.moveTo).toHaveBeenCalledWith({ lat: 2, lng: 3, alt: undefined }, 0, 0);
+            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledWith({ lat: 2, lng: 3, alt: undefined }, 0);
         }
     ));
 
-    it("Should not move to gps position when given invalid location", inject([LocationService, FitBoundsService, Store],
-        async (service: LocationService, fitBoundsService: FitBoundsService, store: Store) => {
+    it("Should not move to gps position when given invalid location", inject([LocationService, MapService, Store],
+        async (service: LocationService, mapService: MapService, store: Store) => {
             store.reset({
                 gpsState: { currentPosition: null },
                 inMemoryState: { following: false }
@@ -148,7 +141,7 @@ describe("LocationService", () => {
             store.dispatch(new SetCurrentPositionAction({ coords: { latitude: NaN, longitude: NaN } } as any));
 
             expect(eventSpy).not.toHaveBeenCalled();
-            expect(fitBoundsService.moveTo).not.toHaveBeenCalled();
+            expect(mapService.moveToWithCurrentZoom).not.toHaveBeenCalled();
         }
     ));
 
@@ -220,8 +213,8 @@ describe("LocationService", () => {
         }
     ));
 
-    it("Should move to gps position after returning from background", inject([LocationService, GeoLocationService, FitBoundsService, Store],
-        async (service: LocationService, geolocationService: GeoLocationService, fitBoundsService: FitBoundsService, store: Store) => {
+    it("Should move to gps position after returning from background", inject([LocationService, GeoLocationService, MapService, Store],
+        async (service: LocationService, geolocationService: GeoLocationService, mapService: MapService, store: Store) => {
             store.reset({
                 gpsState: {
                     currentPosition: null,
@@ -233,7 +226,7 @@ describe("LocationService", () => {
             store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3 } } as any));
             geolocationService.backToForeground.emit();
 
-            expect(fitBoundsService.moveTo).toHaveBeenCalled();
+            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalled();
             expect(service.getLocationCenter()).toEqual({ lat: 2, lng: 3, alt: undefined });
         }));
 
@@ -268,8 +261,8 @@ describe("LocationService", () => {
         }
     ));
 
-    it("Should not move to gps position when editing route", inject([LocationService, Store, SelectedRouteService, FitBoundsService, DeviceOrientationService],
-        async (service: LocationService, store: Store, selectedRouteService: SelectedRouteService, fitBoundsService: FitBoundsService, deviceOrientationService: DeviceOrientationService) => {
+    it("Should not move to gps position when editing route", inject([LocationService, Store, SelectedRouteService, MapService, DeviceOrientationService],
+        async (service: LocationService, store: Store, selectedRouteService: SelectedRouteService, mapService: MapService, deviceOrientationService: DeviceOrientationService) => {
             store.reset({
                 gpsState: {
                     currentPosition: null,
@@ -279,12 +272,12 @@ describe("LocationService", () => {
             });
             await service.initialize();
             selectedRouteService.isEditingRoute = () => true;
-            fitBoundsService.moveTo = jasmine.createSpy();
+            mapService.moveToWithCurrentZoom = jasmine.createSpy();
 
             store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 4 } } as any));
             deviceOrientationService.orientationChanged.emit(1);
 
-            expect(fitBoundsService.moveTo).not.toHaveBeenCalled();
+            expect(mapService.moveToWithCurrentZoom).not.toHaveBeenCalled();
         }
     ));
 });
