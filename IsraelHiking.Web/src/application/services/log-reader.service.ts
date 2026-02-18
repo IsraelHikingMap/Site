@@ -69,18 +69,17 @@ export class LogReaderService {
             }
         }
 
-        /* HM TODO: think about this
-        this.mapService.map.addSource("log-points-geojson", {
+        this.mapService.addSource("log-points-geojson", {
             type: "geojson",
             data: pointsGeojson,
         });
 
-        this.mapService.map.addSource("log-accuracy-geojson", {
+        this.mapService.addSource("log-accuracy-geojson", {
             type: "geojson",
             data: accuracyGeojson,
         });
 
-        this.mapService.map.addSource("log-record-line-geojson", {
+        this.mapService.addSource("log-record-line-geojson", {
             type: "geojson",
             data: {
                 type: "FeatureCollection",
@@ -100,7 +99,7 @@ export class LogReaderService {
             }
         });
 
-        this.mapService.map.addLayer({
+        this.mapService.addLayer({
             id: "log-accuracy-geojson-layer",
             type: "fill",
             source: "log-accuracy-geojson",
@@ -110,7 +109,7 @@ export class LogReaderService {
             }
         });
 
-        this.mapService.map.addLayer({
+        this.mapService.addLayer({
             id: "log-points-geojson-layer",
             type: "circle",
             source: "log-points-geojson",
@@ -122,7 +121,7 @@ export class LogReaderService {
                 "circle-stroke-color": "white"
             }
         });
-        this.mapService.map.addLayer({
+        this.mapService.addLayer({
             id: "log-points-geojson-labels",
             type: "symbol",
             source: "log-points-geojson",
@@ -138,7 +137,7 @@ export class LogReaderService {
                 "text-opacity": 0.8
             }
         });
-        this.mapService.map.addLayer({
+        this.mapService.addLayer({
             id: "log-record-line-geojson-layer",
             type: "line",
             source: "log-record-line-geojson",
@@ -148,7 +147,6 @@ export class LogReaderService {
                 "line-opacity": 0.8
             }
         });
-        this.mapService.map.fitBounds(SpatialService.boundsToMBBounds(SpatialService.getBoundsForFeatureCollection(pointsGeojson)));
-        */
+        this.mapService.fitBounds(SpatialService.getBoundsForFeatureCollection(pointsGeojson));
     }
 }

@@ -1,5 +1,5 @@
 import { inject, Injectable } from "@angular/core";
-import { type ErrorEvent, GeoJSONFeature, type Map, type Point, setRTLTextPlugin } from "maplibre-gl";
+import { type ErrorEvent, type GeoJSONFeature, type LayerSpecification, type Map, type Point, setRTLTextPlugin, type SourceSpecification } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
@@ -164,5 +164,13 @@ export class MapService {
             easing: (x) => x,
             offset: [0, 100]
         });
+    }
+
+    public addSource(sourceId: string, source: SourceSpecification) {
+        this.currentMap.addSource(sourceId, source);
+    }
+
+    public addLayer(layer: LayerSpecification) {
+        this.currentMap.addLayer(layer);
     }
 }
