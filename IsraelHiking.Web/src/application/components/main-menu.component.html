@@ -31,6 +31,13 @@
         angularticsAction="User shares open">
         <span><i class="fa fa-lg icon-mixcloud"></i> {{resources.mySavesInTheCloud}}</span>
       </button>
+      @if (isOfflineDownloadAvailable()) {
+      <button mat-menu-item (click)="downloadOfflineMaps()" angulartics2On="click" angularticsCategory="User Menu"
+        angularticsAction="Download">
+        <i class="fa fa-lg icon-download mat-icon"></i>
+        <span class="mx-1">{{resources.infoDownloadMapForOfflineUse}}</span>
+      </button>
+      }
       <button mat-menu-item (click)="openConfigurationDialog()" angulartics2On="click" angularticsCategory="User Menu"
         angularticsAction="Advanced settings open">
         <span><i class="fa fa-lg icon-cogs"></i> {{resources.advancedSettings}}</span>
@@ -41,18 +48,25 @@
       </button>
       <hr />
       }
+      @if (isPurchaseAvailable()) {
+      <button mat-menu-item (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu"
+        angularticsAction="Order">
+        <i class="text-green-600 fa fa-lg icon-dollar mat-icon"></i>
+        <span class="mx-1 text-green-600">{{resources.purchaseSubscription}}</span>
+      </button>
+      }
+      @if (isRenewAvailable()) {
+      <button mat-menu-item (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu"
+        angularticsAction="Renew">
+        <i class="text-green-600 fa fa-lg icon-dollar mat-icon"></i>
+        <span class="text-green-600 mx-1">{{resources.renewSubscription}}</span>
+      </button>
+      }
       <button mat-menu-item routerLink="/map" angulartics2On="click" angularticsCategory="Menu"
         angularticsAction="Plan & Explore" class="block md:hidden!">
         <i class="fa fa-lg icon-map-o mat-icon"></i>
         <span class="mx-1">{{resources.planAndExplore}}</span>
       </button>
-      @if (isShowOrderButton()) {
-      <button mat-menu-item (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu"
-        angularticsAction="Order">
-        <i class="fa fa-lg icon-dollar mat-icon"></i>
-        <span class="mx-1">{{resources.purchaseOfflineMapsShort}}</span>
-      </button>
-      }
       <button mat-menu-item (click)="openLanguage()" angulartics2On="click" angularticsCategory="Menu"
         angularticsAction="Open language selection">
         <i class="fa fa-lg icon-language mat-icon"></i>
