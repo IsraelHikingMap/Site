@@ -171,6 +171,14 @@ describe("MapService", () => {
         expect(features.length).toEqual(4);
     }));
 
+    it("should return is moving when the map is moving", inject([MapService], async (service: MapService) => {
+        service.setMap({
+            on: () => { },
+            isMoving: () => true
+        } as any as Map);
+        expect(service.isMoving()).toEqual(true);
+    }));
+
     it("Should fit bounds when sidebar serive is open with padding on large screen", inject([MapService, SidebarService],
         async (service: MapService, sidebarService: SidebarService) => {
             sidebarService.isSidebarOpen = () => true;
