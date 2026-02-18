@@ -187,7 +187,8 @@ describe("MapService", () => {
             (window as any).innerWidth = 1500;
             await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } });
             expect(spy.calls.all()[0].args[1].padding.left).toBe(400);
-        }));
+        }
+    ));
 
     it("Should fit bounds when sidebar serive is open with padding on small screen", inject([MapService, SidebarService],
         async (service: MapService, sidebarService: SidebarService) => {
@@ -197,7 +198,8 @@ describe("MapService", () => {
             (window as any).innerWidth = 500;
             await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } });
             expect(spy.calls.all()[0].args[1].padding.bottom).toBe(window.innerHeight / 2);
-        }));
+        }
+    ));
 
     it("Should fit bounds when sidebar serive is closed without padding", inject([MapService, SidebarService],
         async (service: MapService, sidebarService: SidebarService) => {
@@ -206,7 +208,8 @@ describe("MapService", () => {
             service.setMap({ fitBounds: spy, on: () => { }, getZoom: () => 1 } as any as Map);
             await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } }, true);
             expect(spy.calls.all()[0].args[1].padding).toBe(0);
-        }));
+        }
+    ));
 
     it("Should not fly to on small changes", inject([MapService],
         async (service: MapService) => {
@@ -214,7 +217,8 @@ describe("MapService", () => {
             const spy = jasmine.createSpy();
             await service.flyTo({ lng: 1, lat: 1 }, 1);
             expect(spy).not.toHaveBeenCalled();
-        }));
+        }
+    ));
 
     it("Should fly to on large changes", inject([MapService],
         async (service: MapService) => {
@@ -222,7 +226,8 @@ describe("MapService", () => {
             service.setMap({ getCenter: () => { return { lat: 1, lng: 1 } }, flyTo: spy, on: () => { } } as any as Map);
             await service.flyTo({ lng: 2, lat: 2 }, 1);
             expect(spy).toHaveBeenCalled();
-        }));
+        }
+    ));
 
     it("Should move to with current zoom", inject([MapService],
         async (service: MapService) => {
@@ -231,5 +236,26 @@ describe("MapService", () => {
             await service.moveToWithCurrentZoom({ lng: 2, lat: 2 }, 1);
             expect(spy).toHaveBeenCalled();
             expect(spy.calls.all()[0].args[0].zoom).toBe(1);
-        }));
+        }
+    ));
+
+    it("should call map's add layer", inject([MapService], async (service: MapService) => {
+        const spy = jasmine.createSpy();
+        service.setMap({
+            on: () => { },
+            addLayer: spy
+        } as any as Map);
+        service.addLayer({ id: "layer1" } as any);
+        expect(spy).toHaveBeenCalled();
+    }));
+
+    it("should call map's add source", inject([MapService], async (service: MapService) => {
+        const spy = jasmine.createSpy();
+        service.setMap({
+            on: () => { },
+            addSource: spy
+        } as any as Map);
+        service.addSource("source1", {} as any);
+        expect(spy).toHaveBeenCalled();
+    }));
 });
