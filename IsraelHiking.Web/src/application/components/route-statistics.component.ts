@@ -12,7 +12,7 @@ import { regressionLoess } from "d3-regression";
 import { LineLayerSpecification } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 import * as d3 from "d3";
-import type { Selection, ScaleContinuousNumeric } from "d3";
+import type { Selection, ScaleContinuousNumeric, ZoomTransform } from "d3";
 import type { Immutable } from "immer";
 
 import { DistancePipe } from "../pipes/distance.pipe";
@@ -42,15 +42,18 @@ interface IChartSubRouteRange {
 }
 
 interface IChartElements {
-    svg?: Selection<any, any, null, undefined>;
+    svg?: Selection<SVGSVGElement, any, null, undefined>;
     chartArea?: Selection<SVGGElement, any, null, undefined>;
+    chartClipArea?: Selection<SVGSVGElement, any, null, undefined>;
     path?: Selection<SVGPathElement, any, null, undefined>;
     hoverGroup?: Selection<SVGGElement, any, null, undefined>;
-    dragRect?: Selection<SVGRectElement, any, null, undefined>;
+    dragSelectionRect?: Selection<SVGRectElement, any, null, undefined>;
     locationGroup?: Selection<SVGGElement, any, null, undefined>;
     xScale?: ScaleContinuousNumeric<number, number>;
+    xScaleOriginal?: ScaleContinuousNumeric<number, number>;
     yScale?: ScaleContinuousNumeric<number, number>;
-    yScaleSlope?: ScaleContinuousNumeric<number, number>;
+    slopeLinearGradient?: Selection<SVGLinearGradientElement, any, null, undefined>;
+    zoomTransform?: ZoomTransform;
     margin: IMargin;
     width?: number;
     height?: number;
@@ -105,6 +108,7 @@ export class RouteStatisticsComponent implements OnInit {
     private statistics: RouteStatistics;
     private chartElements: IChartElements = {
         margin: { top: 10, right: 10, bottom: 40, left: 40 },
+        zoomTransform: d3.zoomIdentity
     };
     private zoom: number = 7;
     private routeColor: string;
@@ -399,7 +403,7 @@ export class RouteStatisticsComponent implements OnInit {
     }
 
     private initChart() {
-        this.chartElements.margin.right = this.isSlopeOn ? 30 : 10;
+        this.chartElements.margin.right = 10;
         this.chartElements.svg = d3.select(this.lineChartContainer().nativeElement).select("svg");
         this.chartElements.svg.html("");
         if (typeof window === "undefined") {
@@ -415,10 +419,16 @@ export class RouteStatisticsComponent implements OnInit {
         this.chartElements.chartArea = this.chartElements.svg.append<SVGGElement>("g")
             .attr("class", "chart-area")
             .attr("transform", `translate(${this.chartElements.margin.left},${this.chartElements.margin.top})`);
+        this.chartElements.chartClipArea = this.chartElements.chartArea.append("svg")
+            .attr("class", "chart-clip-viewport")
+            .attr("width", this.chartElements.width)
+            .attr("height", this.chartElements.height)
+            .attr("overflow", "hidden");
         this.chartElements.xScale = d3.scaleLinear().range([0, this.chartElements.width]);
-        this.chartElements.yScale = d3.scaleLinear().range([this.chartElements.height, 0]);
-        this.chartElements.yScaleSlope = d3.scaleLinear().range([this.chartElements.height, 0]);
+        this.chartElements.xScaleOriginal = d3.scaleLinear().range([0, this.chartElements.width]);
+        this.chartElements.yScale = d3.scaleLinear().range([this.chartElements.height, 5]);
         this.chartElements.dragState = "none";
+        this.chartElements.zoomTransform = d3.zoomIdentity;
     }
 
     private createChartAxis() {
@@ -444,54 +454,33 @@ export class RouteStatisticsComponent implements OnInit {
             .attr("text-anchor", "middle")
             .attr("dir", this.resources.direction)
             .text(this.resources.heightInMeters);
-
-        if (this.isSlopeOn) {
-            this.chartElements.chartArea.append("g")
-                .attr("class", "y-axis-slope")
-                .attr("transform", `translate(${this.chartElements.width}, 0)`)
-                .call(d3.axisRight(this.chartElements.yScaleSlope).ticks(5))
-                .append("text")
-                .attr("fill", "#000")
-                .attr("transform", `translate(25, ${this.chartElements.height / 2}) rotate(-90)`)
-                .attr("text-anchor", "middle")
-                .attr("dir", this.resources.direction)
-                .text(this.resources.slope);
-        }
     }
 
     private addChartPath() {
-        this.chartElements.path = this.chartElements.chartArea.append<SVGPathElement>("path")
+        this.chartElements.slopeLinearGradient = this.chartElements.chartClipArea.append("defs")
+            .append("linearGradient")
+            .attr("id", "slope-gradient")
+            .attr("gradientUnits", "userSpaceOnUse")
+            .attr("x1", 0).attr("x2", this.chartElements.width)
+            .attr("y1", 0).attr("y2", 0);
+
+        this.chartElements.chartClipArea.append<SVGPathElement>("path")
+            .attr("class", "slope-area")
+            .attr("stroke", "none");
+
+        this.chartElements.path = this.chartElements.chartClipArea.append<SVGPathElement>("path")
             .attr("class", "line")
             .attr("fill", "none")
             .attr("stroke-linejoin", "round")
             .attr("stroke-linecap", "round")
             .attr("stroke-width", 2);
-
-        if (this.isSlopeOn) {
-            this.chartElements.chartArea.append<SVGPathElement>("path")
-                .attr("class", "slope-line")
-                .attr("fill", "none")
-                .attr("stroke-linejoin", "round")
-                .attr("stroke-linecap", "round")
-                .attr("stroke-width", 1)
-                .attr("stroke", "black");
-            this.chartElements.chartArea.append<SVGPathElement>("line")
-                .attr("class", "slope-zero-axis")
-                .attr("stroke-width", 1)
-                .attr("stroke", "gray")
-                .attr("stroke-dasharray", "10,5")
-                .attr("x1", 0)
-                .attr("x2", this.chartElements.width)
-                .attr("y1", this.chartElements.height / 2)
-                .attr("y2", this.chartElements.height / 2);
-        }
     }
 
     private addChartDragGroup() {
-        const dragGroup = this.chartElements.chartArea.append("g")
-            .attr("class", "drag-group");
+        const dragSelectionGroup = this.chartElements.chartClipArea.append("g")
+            .attr("class", "drag-selection-group");
 
-        this.chartElements.dragRect = dragGroup.append("rect")
+        this.chartElements.dragSelectionRect = dragSelectionGroup.append("rect")
             .attr("height", this.chartElements.height)
             .attr("width", 0)
             .attr("x", 0)
@@ -563,19 +552,46 @@ export class RouteStatisticsComponent implements OnInit {
             .attr("fill-opacity", "0.9");
     }
 
+    private createZoomBehavior(): d3.ZoomBehavior<SVGRectElement, unknown> {
+        return d3.zoom<SVGRectElement, unknown>()
+            .scaleExtent([1, 50])
+            .translateExtent([[0, 0], [this.chartElements.width, this.chartElements.height]])
+            .extent([[0, 0], [this.chartElements.width, this.chartElements.height]])
+            .filter((event: Event) => {
+                if (event.type === "wheel") { return true; }
+                if (event.type === "touchstart" || event.type === "touchmove") {
+                    return (event as TouchEvent).touches.length === 2;
+                }
+                return false;
+            })
+            .on("zoom", (event: d3.D3ZoomEvent<SVGRectElement, unknown>) => {
+                this.chartElements.zoomTransform = event.transform;
+                const data = this.getDataFromStatistics();
+                this.setDataToChart(data, 0);
+
+                this.refreshLocationGroup();
+                this.updateSubRouteSelectionOnChart();
+                this.hideChartHover();
+            });
+    }
+
     private addEventsSupport() {
-        // responsive background
         this.chartElements.chartArea.append("rect")
+            .attr("class", "event-capture")
             .attr("width", this.chartElements.width)
             .attr("height", this.chartElements.height)
             .style("fill", "none")
             .style("stroke", "none")
             .style("-moz-user-select", "none")
             .style("pointer-events", "all")
-            .on("mousedown touchstart", (e) => {
+            .on("mousedown touchstart", (e: Event) => {
+                // Only start drag selection for single touch / mouse
+                if (e.type === "touchstart" && (e as TouchEvent).touches.length !== 1) { return; }
                 this.onMouseDown(e);
             })
-            .on("mousemove touchmove", (e) => {
+            .on("mousemove touchmove", (e: Event) => {
+                // Only handle hover/drag for single touch / mouse
+                if (e.type === "touchmove" && (e as TouchEvent).touches.length !== 1) { return; }
                 this.onMouseMove(e);
             })
             .on("mouseup touchend", () => {
@@ -583,7 +599,8 @@ export class RouteStatisticsComponent implements OnInit {
             })
             .on("mouseout", () => {
                 this.hideChartHover();
-            });
+            })
+            .call(this.createZoomBehavior());
     }
 
     private buildAllTextInHoverBox(point: RouteStatisticsPoint) {
@@ -631,13 +648,17 @@ export class RouteStatisticsComponent implements OnInit {
         this.chartElements.hoverGroup.select(".circle-point-aura").attr("stroke", this.routeColor);
     }
 
-    private setDataToChart(data: [number, number][]) {
+    private setDataToChart(data: [number, number][], duration: number = 1000) {
         if (!this.isOpen()) {
             return;
         }
-        const duration = 1000;
         const chartTransition = this.chartElements.chartArea.transition();
-        this.chartElements.xScale.domain([d3.min(data, d => d[0]), d3.max(data, d => d[0])]);
+
+        this.chartElements.xScaleOriginal.domain([d3.min(data, d => d[0]), d3.max(data, d => d[0])]);
+        this.chartElements.xScale = this.chartElements.zoomTransform
+            ? this.chartElements.zoomTransform.rescaleX(this.chartElements.xScaleOriginal)
+            : this.chartElements.xScaleOriginal;
+
         this.chartElements.yScale.domain([d3.min(data, d => d[1]), d3.max(data, d => d[1])]);
         const line = d3.line()
             .curve(d3.curveCatmullRom)
@@ -651,29 +672,41 @@ export class RouteStatisticsComponent implements OnInit {
             .call(d3.axisLeft(this.chartElements.yScale).ticks(5) as any)
             .duration(duration);
         let slopeData = [] as [number, number][];
-        if (this.isSlopeOn && data.length > 0) {
+        if (data.length > 0) {
             // smoothing the slope data for the chart
             slopeData = regressionLoess()
                 .x((d: RouteStatisticsPoint) => d.coordinate[0])
                 .y((d: RouteStatisticsPoint) => d.slope)
                 .bandwidth(0.03)(this.statistics.points);
         }
-        const maxAbsSlope = (slopeData.length === 0)
-            ? RouteStatisticsComponent.MAX_SLOPE
-            : Math.max(...slopeData.map(p => Math.abs(p[1])), RouteStatisticsComponent.MAX_SLOPE);
+        if (slopeData.length > 1) {
+            const xMin = slopeData[0][0];
+            const xMax = slopeData[slopeData.length - 1][0];
+            this.chartElements.slopeLinearGradient.selectAll("stop").remove();
+            this.chartElements.slopeLinearGradient
+                .attr("x1", this.chartElements.xScale(xMin))
+                .attr("x2", this.chartElements.xScale(xMax));
 
-        // making the slope chart be symetric around zero
-        this.chartElements.yScaleSlope.domain([-maxAbsSlope, maxAbsSlope]);
-        const slopeLine = d3.line()
-            .curve(d3.curveCatmullRom)
-            .x(d => this.chartElements.xScale(d[0]))
-            .y(d => this.chartElements.yScaleSlope(d[1]));
-        chartTransition.select(".slope-line").duration(duration).attr("d", slopeLine(slopeData));
-        chartTransition.select(".y-axis-slope")
-            .call(d3.axisRight(this.chartElements.yScaleSlope).ticks(5) as any)
-            .duration(duration);
-        const zeroAxisY = this.chartElements.yScaleSlope(0) || this.chartElements.height / 2;
-        chartTransition.select(".slope-zero-axis").attr("y1", zeroAxisY).attr("y2", zeroAxisY);
+            for (const slopePoint of slopeData) {
+                const offset = (slopePoint[0] - xMin) / (xMax - xMin);
+                this.chartElements.slopeLinearGradient.append("stop")
+                    .attr("offset", `${offset * 100}%`)
+                    .attr("stop-color", this.routeSlopeToColor(slopePoint[1]))
+                    .attr("stop-opacity", 0.6);
+            }
+
+            // Area generator: top edge follows elevation, bottom is chart floor
+            const area = d3.area<[number, number]>()
+                .curve(d3.curveCatmullRom)
+                .x(d => this.chartElements.xScale(d[0]))
+                .y0(this.chartElements.height)
+                .y1(d => this.chartElements.yScale(d[1]));
+
+            chartTransition.select(".slope-area")
+                .duration(duration)
+                .attr("fill", "url(#slope-gradient)")
+                .attr("d", area(data));
+        }
     }
 
     public toggleKmMarker() {
@@ -775,7 +808,7 @@ export class RouteStatisticsComponent implements OnInit {
         }
         const xStart = this.chartElements.xScale(Math.min(this.subRouteRange.xStart, this.subRouteRange.xEnd));
         const xEnd = this.chartElements.xScale(Math.max(this.subRouteRange.xStart, this.subRouteRange.xEnd));
-        this.chartElements.dragRect.style("display", null)
+        this.chartElements.dragSelectionRect.style("display", null)
             .attr("width", xEnd - xStart)
             .attr("x", xStart);
 
@@ -787,7 +820,7 @@ export class RouteStatisticsComponent implements OnInit {
     }
 
     public clearSubRouteSelection() {
-        this.chartElements.dragRect.style("display", "none");
+        this.chartElements.dragSelectionRect.style("display", "none");
         this.subRouteRange = null;
         this.setViewStatisticsValues(this.statistics);
     }
