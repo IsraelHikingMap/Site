@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewEncapsulation, inject } from "@angular/core";
+import { Router } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
 import { MatFormField, MatLabel } from "@angular/material/form-field";
@@ -28,6 +29,7 @@ import { TracesService } from "../../services/traces.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { SpatialService } from "../../services/spatial.service";
 import { DataContainerService } from "../../services/data-container.service";
+import { RouteStrings } from "../../services/hash.service";
 import { SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
 import type { ApplicationState, Trace, TraceVisibility } from "../../models";
 
@@ -61,6 +63,7 @@ export class TracesDialogComponent implements OnInit {
     private readonly tracesService = inject(TracesService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly dataContainerService = inject(DataContainerService);
+    private readonly router = inject(Router);
     private readonly store = inject(Store);
     private readonly data = inject<string[]>(MAT_DIALOG_DATA);
 
@@ -90,6 +93,7 @@ export class TracesDialogComponent implements OnInit {
             trace.dataContainer.routes[0].name = this.getTraceDisplayName(trace) || trace.name;
             trace.dataContainer.routes[0].description = trace.name;
         }
+        this.router.navigate([RouteStrings.MAP]);
         this.dataContainerService.setData(trace.dataContainer, true);
     }
 

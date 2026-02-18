@@ -70,7 +70,7 @@ export class MainMapComponent {
     }
 
     public moveEnd(e: DragEvent) {
-        if (!e) {
+        if (!e || !this.map) {
             return;
         }
         const centerLatLon = this.map.getCenter();
