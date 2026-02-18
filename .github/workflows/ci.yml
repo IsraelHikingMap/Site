@@ -35,7 +35,8 @@ jobs:
           cd IsraelHiking.Web
           npm ci
           npm run test-ci
-          npx ng lint
+      - name: Run lint
+        run: npx ng lint
       - name: Codecov upload
         if: always()
         uses: codecov/codecov-action@v5.5.2
