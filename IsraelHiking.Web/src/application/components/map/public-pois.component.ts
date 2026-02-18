@@ -70,7 +70,7 @@ export class PublicPoisComponent implements OnInit {
             this.poiGeoJsonData = this.poiService.getPoisGeoJson();
         });
         this.mapComponent.sourceData.subscribe((sourceData) => {
-            if (sourceData.sourceId === "points-of-interest") {
+            if (sourceData.sourceId === PoiService.POIS_SOURCE_ID) {
                 this.poiGeoJsonData = this.poiService.getPoisGeoJson();
             }
         });
