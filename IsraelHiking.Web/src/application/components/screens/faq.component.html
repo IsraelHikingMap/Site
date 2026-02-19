@@ -1,2 +1,24 @@
-<h1>{{resources.infoFAQLink}}</h1>
-<p>FAQs and instruction videos goes here</p>
+<div [dir]="resources.direction" class="min-h-screen bg-gray-50">
+
+    <div class="bg-white border-b border-gray-200 p-1 text-center">
+        <h1 class="text-3xl font-bold text-gray-900">{{ resources.infoFAQLink }}</h1>
+    </div>
+
+    <div class="max-w-3xl mx-auto px-4 flex pt-1 flex-col">
+        <mat-accordion [multi]="false">
+
+            @for (item of sections; track item.id) {
+            <mat-expansion-panel [id]="item.id" (opened)="onPanelOpened(item.id)">
+                <mat-expansion-panel-header>
+                    <mat-panel-title class="font-semibold text-gray-800 flex items-center justify-between gap-4">
+                        {{ item.question }}
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+                <p class="text-gray-600 leading-relaxed mt-1">{{ item.answer }}</p>
+            </mat-expansion-panel>
+            }
+
+        </mat-accordion>
+    </div>
+
+</div>

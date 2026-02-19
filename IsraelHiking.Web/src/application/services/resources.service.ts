@@ -272,6 +272,7 @@ export class ResourcesService {
     public unknown: string;
     public contactUsToPublishAPublicRoute: string;
     public activityType: string;
+    public faqContent: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -503,7 +504,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1771488174043");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1771496328311");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -755,6 +756,7 @@ export class ResourcesService {
         this.unknown = this.gettextCatalog.getString("Unknown");
         this.contactUsToPublishAPublicRoute = this.gettextCatalog.getString("Contact us to publish a public route");
         this.activityType = this.gettextCatalog.getString("Activity Type");
+        this.faqContent = this.gettextCatalog.getString("All FAQ content goes here");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
