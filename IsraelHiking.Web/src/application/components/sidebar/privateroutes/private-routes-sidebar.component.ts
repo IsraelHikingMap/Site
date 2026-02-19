@@ -5,6 +5,7 @@ import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } fr
 import { NgClass, NgStyle } from "@angular/common";
 import { MatDialog } from "@angular/material/dialog";
 import { Dir } from "@angular/cdk/bidi";
+import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from "@angular/cdk/drag-drop";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatError, MatInput } from "@angular/material/input";
 import { MatSlider, MatSliderThumb } from "@angular/material/slider";
@@ -32,7 +33,7 @@ import { LogReaderService } from "../../../services/log-reader.service";
 import { ShareUrlsService } from "../../../services/share-urls.service";
 import { DataContainerService } from "../../../services/data-container.service";
 import { RoutesFactory } from "../../../services/routes.factory";
-import { ChangeRouteStateAction, ToggleAllRoutesAction, DeleteAllRoutesAction, AddRouteAction, ChangeRoutePropertiesAction, DeleteRouteAction } from "../../../reducers/routes.reducer";
+import { ChangeRouteStateAction, ToggleAllRoutesAction, DeleteAllRoutesAction, AddRouteAction, ChangeRoutePropertiesAction, DeleteRouteAction, BulkReplaceRoutesAction } from "../../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../../reducers/route-editing.reducer";
 import type { ApplicationState, LatLngAltTime, RouteData, ShareUrl } from "../../../models";
 
@@ -41,7 +42,7 @@ import type { ApplicationState, LatLngAltTime, RouteData, ShareUrl } from "../..
     selector: "private-routes-sidebar",
     templateUrl: "./private-routes-sidebar.component.html",
     styleUrls: ["./private-routes-sidebar.component.scss"],
-    imports: [Dir, MatButton, Angulartics2OnModule, MatTooltip, NgClass, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgStyle, MatFormFieldModule, MatInput, FormsModule, MatSlider, MatError, NameInUseValidatorDirective, MatSliderThumb, MatMiniFabButton, MatRadioButton, DistancePipe, MatMenu, MatMenuItem, MatMenuTrigger]
+    imports: [Dir, MatButton, Angulartics2OnModule, MatTooltip, NgClass, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgStyle, MatFormFieldModule, MatInput, FormsModule, MatSlider, MatError, NameInUseValidatorDirective, MatSliderThumb, MatMiniFabButton, MatRadioButton, DistancePipe, MatMenu, MatMenuItem, MatMenuTrigger, CdkDrag, CdkDropList]
 })
 export class PrivateRoutesSidebarComponent {
     public routes: Immutable<RouteData[]>;
@@ -264,5 +265,11 @@ export class PrivateRoutesSidebarComponent {
             latLngs.push(markers.latlng);
         }
         return latLngs;
+    }
+
+    public drop(event: CdkDragDrop<string[]>) {
+        const currentRoutes = [...this.store.selectSnapshot((s: ApplicationState) => s.routes).present] as RouteData[];
+        moveItemInArray(currentRoutes, event.previousIndex, event.currentIndex);
+        this.store.dispatch(new BulkReplaceRoutesAction(currentRoutes));
     }
 }

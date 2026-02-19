@@ -44,134 +44,143 @@
             </button>
         </div>
     </div>
-
-    @for (route of routes; track route.id; let i = $index) {
-    <div class="flex flex-col w-full">
-        <mat-radio-button [checked]="isRouteSelected(route)" color="primary" (click)="selectRoute($event, route)">
-            <h3 [style.color]="route.color">{{route.name}}</h3>
-        </mat-radio-button>
-        <div class="w-full">
-            <div class="flex flex-row w-full">
-                <div matTooltip="{{resources.gain}}" matTooltipPosition="above" class="mx-2">
-                    <i class="fa icon-arrow-up"></i>
-                    <span class="mx-1">{{getStatistics(route).gain | distance}}</span>
-                </div>
-                <div matTooltip="{{resources.loss}}" matTooltipPosition="above" class="mx-2">
-                    <i class="fa icon-arrow-down"></i>
-                    <span class="mx-1">{{getStatistics(route).loss | distance}}</span>
-                </div>
-                <div matTooltip="{{resources.length}}" matTooltipPosition="above" class="mx-2">
-                    <i class="fa icon-arrow-right"></i>
-                    <span class="mx-1">{{getStatistics(route).length | distance}}</span>
+    <div cdkDropList (cdkDropListDropped)="drop($event)">
+        @for (route of routes; track route.id; let i = $index) {
+        <div cdkDrag
+            class="bg-white [&.cdk-drag-animating]:transition-transform [&.cdk-drag-animating]:duration-300 [&.cdk-drag-placeholder]:opacity-0">
+            <div class="flex flex-col w-full bg-white">
+                <mat-radio-button [checked]="isRouteSelected(route)" color="primary"
+                    (click)="selectRoute($event, route)">
+                    <h3 [style.color]="route.color">{{route.name}}</h3>
+                </mat-radio-button>
+                <div class="w-full">
+                    <div class="flex flex-row w-full">
+                        <div matTooltip="{{resources.gain}}" matTooltipPosition="above" class="mx-2">
+                            <i class="fa icon-arrow-up"></i>
+                            <span class="mx-1">{{getStatistics(route).gain | distance}}</span>
+                        </div>
+                        <div matTooltip="{{resources.loss}}" matTooltipPosition="above" class="mx-2">
+                            <i class="fa icon-arrow-down"></i>
+                            <span class="mx-1">{{getStatistics(route).loss | distance}}</span>
+                        </div>
+                        <div matTooltip="{{resources.length}}" matTooltipPosition="above" class="mx-2">
+                            <i class="fa icon-arrow-right"></i>
+                            <span class="mx-1">{{getStatistics(route).length | distance}}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <mat-expansion-panel>
-        <mat-expansion-panel-header>
-            <mat-panel-title>
-                <div class="flex flex-row w-full">
-                    <mat-menu #appMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
-                        <button mat-menu-item (click)="saveRouteToFile(route)" angulartics2On="click"
-                            angularticsCategory="Route" angularticsAction="Save route to file">
-                            <i class="fa fa-lg icon-external-link-square"></i>
-                            <span class="ms-2">{{resources.saveRouteToFile}}</span>
-                        </button>
-                        <button mat-menu-item (click)="moveToRoute(route)" angulartics2On="click"
-                            angularticsCategory="Route" angularticsAction="Move to route">
-                            <i class="fa fa-lg icon-crosshairs"></i>
-                            <span class="ms-2">{{resources.moveToRoute}}</span>
-                        </button>
-                        <button mat-menu-item (click)="reverseRoute(route)" angulartics2On="click"
-                            angularticsCategory="Route" angularticsAction="Reverse route">
-                            <i class="fa fa-lg icon-arrows-h"></i>
-                            <span class="ms-2">{{resources.reverseRoute}}</span>
-                        </button>
-                    </mat-menu>
-                    <button mat-button class="flex-1" (click)="deleteRoute($event, route)" angulartics2On="click"
-                        angularticsCategory="Private Routes" angularticsAction="Delete route">
-                        <i class="fa icon-trash"></i>
-                    </button>
-                    <button mat-button class="flex-1" (click)="toggleRouteVisibility($event, route)"
-                        angulartics2On="click" angularticsCategory="Private Routes"
-                        angularticsAction="Toggle route visibility">
-                        <i class="fa" [ngClass]="isRouteVisible(route) ? 'icon-eye' : 'icon-eye-slash'"></i>
-                    </button>
-                    <button mat-button class="flex-1" [matMenuTriggerFor]="appMenu" (click)="$event.stopPropagation()">
-                        <i class="fa icon-ellipsis-v"></i>
-                    </button>
-                </div>
-            </mat-panel-title>
-        </mat-expansion-panel-header>
-        <mat-form-field class="w-full">
-            <mat-label>{{resources.name}}</mat-label>
-            <input matInput #nameInput="ngModel" type="text" class="w-full" [ngModel]="route.name"
-                (ngModelChange)="updateProperty(route, 'name', $event)" required="" [nameInUse]="route.name"
-                [isRoute]="true" />
-            @if (nameInput.errors && nameInput.errors.nameInUse) {
-            <mat-error>{{resources.nameIsAlreadyInUse}}</mat-error>
-            }
-        </mat-form-field>
-        <mat-form-field class="w-full">
-            <mat-label>{{resources.description}}</mat-label>
-            <textarea matInput rows="2" type="text" class="w-full" [dir]="resources.getDirection(route.description)"
-                [ngModel]="route.description" (ngModelChange)="updateProperty(route, 'description', $event)"></textarea>
-        </mat-form-field>
-
-        <div class="flex flex-row flex-wrap justify-between items-stretch">
-            <div class="sm:w-1/2 w-full">
-                <div class="flex flex-col gap-1">
-                    @for (rowIndex of [0,1,2]; track rowIndex) {
-                    <div class="button-row">
-                        <div class="flex flex-row gap-1">
-                            @for (currentColor of colors; track currentColor; let i = $index) {
-                            <div class="flex-1" [hidden]="i % 3 !== rowIndex">
-                                <button mat-mini-fab color="primary" class="w-full" type="button"
-                                    [style.backgroundColor]="currentColor"
-                                    (click)="updateProperty(route, 'color', currentColor)">
-                                    @if (currentColor === route.color) {
-                                    <i class="fa icon-check" [style.color]="getCheckIconColor(currentColor)"></i>
-                                    }
+            <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        <div class="flex flex-row w-full">
+                            <mat-menu #appMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
+                                <button mat-menu-item (click)="saveRouteToFile(route)" angulartics2On="click"
+                                    angularticsCategory="Route" angularticsAction="Save route to file">
+                                    <i class="fa fa-lg icon-external-link-square"></i>
+                                    <span class="ms-2">{{resources.saveRouteToFile}}</span>
                                 </button>
+                                <button mat-menu-item (click)="moveToRoute(route)" angulartics2On="click"
+                                    angularticsCategory="Route" angularticsAction="Move to route">
+                                    <i class="fa fa-lg icon-crosshairs"></i>
+                                    <span class="ms-2">{{resources.moveToRoute}}</span>
+                                </button>
+                                <button mat-menu-item (click)="reverseRoute(route)" angulartics2On="click"
+                                    angularticsCategory="Route" angularticsAction="Reverse route">
+                                    <i class="fa fa-lg icon-arrows-h"></i>
+                                    <span class="ms-2">{{resources.reverseRoute}}</span>
+                                </button>
+                            </mat-menu>
+                            <button mat-button class="flex-1" (click)="deleteRoute($event, route)"
+                                angulartics2On="click" angularticsCategory="Private Routes"
+                                angularticsAction="Delete route">
+                                <i class="fa icon-trash"></i>
+                            </button>
+                            <button mat-button class="flex-1" (click)="toggleRouteVisibility($event, route)"
+                                angulartics2On="click" angularticsCategory="Private Routes"
+                                angularticsAction="Toggle route visibility">
+                                <i class="fa" [ngClass]="isRouteVisible(route) ? 'icon-eye' : 'icon-eye-slash'"></i>
+                            </button>
+                            <button mat-button class="flex-1" [matMenuTriggerFor]="appMenu"
+                                (click)="$event.stopPropagation()">
+                                <i class="fa icon-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+                <mat-form-field class="w-full">
+                    <mat-label>{{resources.name}}</mat-label>
+                    <input matInput #nameInput="ngModel" type="text" class="w-full" [ngModel]="route.name"
+                        (ngModelChange)="updateProperty(route, 'name', $event)" required="" [nameInUse]="route.name"
+                        [isRoute]="true" />
+                    @if (nameInput.errors && nameInput.errors.nameInUse) {
+                    <mat-error>{{resources.nameIsAlreadyInUse}}</mat-error>
+                    }
+                </mat-form-field>
+                <mat-form-field class="w-full">
+                    <mat-label>{{resources.description}}</mat-label>
+                    <textarea matInput rows="2" type="text" class="w-full"
+                        [dir]="resources.getDirection(route.description)" [ngModel]="route.description"
+                        (ngModelChange)="updateProperty(route, 'description', $event)"></textarea>
+                </mat-form-field>
+
+                <div class="flex flex-row flex-wrap justify-between items-stretch">
+                    <div class="sm:w-1/2 w-full">
+                        <div class="flex flex-col gap-1">
+                            @for (rowIndex of [0,1,2]; track rowIndex) {
+                            <div class="button-row">
+                                <div class="flex flex-row gap-1">
+                                    @for (currentColor of colors; track currentColor; let i = $index) {
+                                    <div class="flex-1" [hidden]="i % 3 !== rowIndex">
+                                        <button mat-mini-fab color="primary" class="w-full" type="button"
+                                            [style.backgroundColor]="currentColor"
+                                            (click)="updateProperty(route, 'color', currentColor)">
+                                            @if (currentColor === route.color) {
+                                            <i class="fa icon-check"
+                                                [style.color]="getCheckIconColor(currentColor)"></i>
+                                            }
+                                        </button>
+                                    </div>
+                                    }
+                                </div>
                             </div>
                             }
                         </div>
                     </div>
-                    }
+                    <div class="sm:w-1/2 w-full">
+                        <div class="flex flex-row w-full">
+                            <label>{{resources.width}}</label>
+                        </div>
+                        <div class="flex flex-row w-full" dir="ltr">
+                            <mat-slider class="w-full!" min="4" max="20" step="2" color="primary">
+                                <input [ngModel]="route.weight"
+                                    (ngModelChange)="updateProperty(route, 'weight', $event)" matSliderThumb />
+                            </mat-slider>
+                        </div>
+                        <div class="flex flex-row w-full">
+                            <label>{{resources.opacity}}</label>
+                        </div>
+                        <div class="flex flex-row w-full" dir="ltr">
+                            <mat-slider class="w-full!" min="0" max="1.0" step="0.1" color="primary">
+                                <input [ngModel]="route.opacity"
+                                    (ngModelChange)="updateProperty(route, 'opacity', $event)" matSliderThumb />
+                            </mat-slider>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="sm:w-1/2 w-full">
-                <div class="flex flex-row w-full">
-                    <label>{{resources.width}}</label>
-                </div>
-                <div class="flex flex-row w-full" dir="ltr">
-                    <mat-slider class="w-full!" min="4" max="20" step="2" color="primary">
-                        <input [ngModel]="route.weight" (ngModelChange)="updateProperty(route, 'weight', $event)"
-                            matSliderThumb />
-                    </mat-slider>
-                </div>
-                <div class="flex flex-row w-full">
-                    <label>{{resources.opacity}}</label>
-                </div>
-                <div class="flex flex-row w-full" dir="ltr">
-                    <mat-slider class="w-full!" min="0" max="1.0" step="0.1" color="primary">
-                        <input [ngModel]="route.opacity" (ngModelChange)="updateProperty(route, 'opacity', $event)"
-                            matSliderThumb />
-                    </mat-slider>
-                </div>
-            </div>
-        </div>
-        <div class="flex flex-row" style="position: relative">
-            <img width="100%" height="50px" src="content/legend/hike_legendLight4WDVehicles.png">
-            <hr class="preview-line" [ngStyle]="{
+                <div class="flex flex-row" style="position: relative">
+                    <img width="100%" height="50px" src="content/legend/hike_legendLight4WDVehicles.png">
+                    <hr class="w-100 border-0 border-solid absolute" [ngStyle]="{
                     'height': route.weight + 'px', 
                     'background-color': route.color, 
                     'opacity': route.opacity,
                     'margin-top': (17 - (route.weight / 2)) + 'px'
                 }" />
+                </div>
+            </mat-expansion-panel>
         </div>
-    </mat-expansion-panel>
-    <br />
-    }
+        <br />
+        }
+    </div>
 </div>
