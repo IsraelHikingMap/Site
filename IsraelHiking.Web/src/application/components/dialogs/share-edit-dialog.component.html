@@ -73,7 +73,7 @@
       <mat-label>{{resources.routeType}}</mat-label>
     </div>
     <div class="flex flex-row">
-      <mat-radio-group [(ngModel)]="shareUrl.type" color="primary">
+      <mat-radio-group [value]="shareUrl.type" (change)="setActivityType($event.value)" color="primary">
         <mat-radio-button value="Hiking"><i class="fa icon-hike"></i></mat-radio-button>
         <mat-radio-button value="Biking"><i class="fa icon-bike"></i></mat-radio-button>
         <mat-radio-button value="4x4"><i class="fa icon-four-by-four"></i></mat-radio-button>

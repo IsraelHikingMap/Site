@@ -1,7 +1,7 @@
 import { Component, inject } from "@angular/core";
+import { MatLabel } from "@angular/material/input";
 import { Dir } from "@angular/cdk/bidi";
 import { CdkScrollable } from "@angular/cdk/scrolling";
-
 import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
 import { MatButton } from "@angular/material/button";
 import { MatDialog, MatDialogConfig, MatDialogRef, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
@@ -11,8 +11,12 @@ import { Store } from "@ngxs/store";
 import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { StopShowingIntroAction } from "../../reducers/configuration.reducer";
-import { AVAILABLE_LANGUAGES } from "../../reducers/initial-state";
+import { AVAILABLE_LANGUAGES, HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import { RunningContextService } from "../../services/running-context.service";
+import { SetActivityTypeAction } from "../../reducers/user.reducer";
+import { SelectBaseLayerAction } from "../../reducers/layers.reducer";
+import type { ActivityType } from "../../models";
+
 import languageAnimationData from "../../../content/lottie/dialog-language.json";
 import mapsAnimationData from "../../../content/lottie/dialog-maps.json";
 import planAnimationData from "../../../content/lottie/dialog-plan.json";
@@ -22,15 +26,16 @@ import moreAnimationData from "../../../content/lottie/dialog-more.json";
     selector: "intro-dialog",
     templateUrl: "./intro-dialog.component.html",
     styleUrls: ["./intro-dialog.component.scss"],
-    imports: [Dir, CdkScrollable, MatDialogContent, MatRadioGroup, MatRadioButton, Angulartics2OnModule, LottieComponent, MatDialogActions, MatButton]
+    imports: [Dir, CdkScrollable, MatDialogContent, MatRadioGroup, MatRadioButton, Angulartics2OnModule, LottieComponent, MatDialogActions, MatButton, MatLabel]
 })
 export class IntroDialogComponent {
 
-    lottieLanguage: AnimationOptions = { animationData: languageAnimationData };
-    lottieMaps: AnimationOptions = { animationData: mapsAnimationData };
-    lottiePlan: AnimationOptions = { animationData: planAnimationData };
-    lottieMore: AnimationOptions = { animationData: moreAnimationData };
+    public lottieLanguage: AnimationOptions = { animationData: languageAnimationData };
+    public lottieMaps: AnimationOptions = { animationData: mapsAnimationData };
+    public lottiePlan: AnimationOptions = { animationData: planAnimationData };
+    public lottieMore: AnimationOptions = { animationData: moreAnimationData };
 
+    public activityType: ActivityType = "Hiking";
     public step: number = 0;
     public availableLanguages = AVAILABLE_LANGUAGES;
 
@@ -65,5 +70,15 @@ export class IntroDialogComponent {
 
     public getLanuguageCode(): string {
         return this.store.selectSnapshot((s) => s.configuration.language.code);
+    }
+
+    public setActivityType(activityType: ActivityType) {
+        this.activityType = activityType;
+        this.store.dispatch(new SetActivityTypeAction(activityType));
+        if (this.activityType === "Biking") {
+            this.store.dispatch(new SelectBaseLayerAction(MTB_MAP))
+        } else {
+            this.store.dispatch(new SelectBaseLayerAction(HIKING_MAP))
+        }
     }
 }

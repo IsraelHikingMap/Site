@@ -28,7 +28,8 @@ import { DefaultStyleService } from "../../services/default-style.service";
 import { RouteStatisticsService } from "../../services/route-statistics.service";
 import { ImageResizeService } from "../../services/image-resize.service";
 import { MapService } from "../../services/map.service";
-import type { ApplicationState, DataContainer, ShareUrl } from "../../models";
+import { SetActivityTypeAction } from "../../reducers/user.reducer";
+import type { ActivityType, ApplicationState, DataContainer, ShareUrl } from "../../models";
 
 export type ShareEditDialogComponentData = {
     fullShareUrl: ShareUrl,
@@ -81,11 +82,12 @@ export class ShareEditDialogComponent {
         this.style.zoom = locationState.zoom;
         this.style.center = [locationState.longitude, locationState.latitude];
         const userInfo = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo);
+        const activityType = this.store.selectSnapshot((state: ApplicationState) => state.userState.prefferedActivityType) ?? "Unknown";
         this.hasHiddenRoutes = this.data.hasHiddenRoutes;
         this.shareUrl = this.data.fullShareUrl;
         if (this.shareUrl != null && userInfo && this.shareUrl.osmUserId.toString() === userInfo.id.toString()) {
             this.shareUrl.public = this.shareUrl.public ?? false;
-            this.shareUrl.type = this.shareUrl.type || "Unknown";
+            this.shareUrl.type = this.shareUrl.type || activityType;
             this.shareUrl.difficulty = this.shareUrl.difficulty || "Unknown";
             this.shareUrl.base64Preview = null;
             this.canUpdate = true;
@@ -96,7 +98,7 @@ export class ShareEditDialogComponent {
                 osmUserId: userInfo?.id ?? "",
                 title: this.data.dataContainer.routes[0]?.name ?? "",
                 description: this.data.dataContainer.routes[0]?.description ?? "",
-                type: "Unknown",
+                type: activityType,
                 difficulty: "Unknown",
                 public: false,
                 base64Preview: null,
@@ -205,5 +207,10 @@ export class ShareEditDialogComponent {
         } else {
             this.removeImage();
         }
+    }
+
+    public setActivityType(activityType: ActivityType) {
+        this.shareUrl.type = activityType;
+        this.store.dispatch(new SetActivityTypeAction(activityType));
     }
 }

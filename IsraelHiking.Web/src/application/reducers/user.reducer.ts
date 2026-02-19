@@ -3,22 +3,28 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { UserInfo, UserState } from "../models";
+import type { ActivityType, UserInfo, UserState } from "../models";
 
 export class SetUserInfoAction {
     public static type = this.prototype.constructor.name;
-    constructor(public userInfo: UserInfo) {}
+    constructor(public userInfo: UserInfo) { }
 }
 
 export class SetTokenAction {
     public static type = this.prototype.constructor.name;
-    constructor(public token: string) {}
+    constructor(public token: string) { }
 }
 
 export class SetAgreeToTermsAction {
     public static type = this.prototype.constructor.name;
-    constructor(public agree: boolean) {}
+    constructor(public agree: boolean) { }
 }
+
+export class SetActivityTypeAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public activityType: ActivityType) { }
+}
+
 @State<UserState>({
     name: "userState",
     defaults: initialState.userState
@@ -46,6 +52,14 @@ export class UserInfoReducer {
     public setAgreeToTerms(ctx: StateContext<UserState>, action: SetAgreeToTermsAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.agreedToTheTermsOfService = action.agree;
+            return lastState;
+        }));
+    }
+
+    @Action(SetActivityTypeAction)
+    public setActivityType(ctx: StateContext<UserState>, action: SetActivityTypeAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.prefferedActivityType = action.activityType;
             return lastState;
         }));
     }

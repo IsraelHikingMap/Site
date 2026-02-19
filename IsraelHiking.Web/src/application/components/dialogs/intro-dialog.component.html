@@ -1,16 +1,35 @@
-<div [dir]="resources.direction" class="safe-top">
+<div [dir]="resources.direction" class="safe-top overflow-hidden">
     <div mat-dialog-content>
         @switch (step) {
         @case (0) {
-        <mat-radio-group (change)=resources.setLanguage($event.value) [value]="getLanuguageCode()">
-            @for (language of availableLanguages; track language) {
-            <div>
-                <mat-radio-button [value]="language.code" color="primary" angulartics2On="click"
-                    angularticsCategory="Intro"
-                    angularticsAction="Select language {{language.code}}">{{language.label}}</mat-radio-button>
+        <div class="flex flex-row">
+            <div class="flex-1">
+                <div class="flex flex-row">
+                    <mat-label>{{resources.language}}</mat-label>
+                </div>
+                <mat-radio-group (change)=resources.setLanguage($event.value) [value]="getLanuguageCode()">
+                    @for (language of availableLanguages; track language) {
+                    <div>
+                        <mat-radio-button [value]="language.code" color="primary" angulartics2On="click"
+                            angularticsCategory="Intro"
+                            angularticsAction="Select language {{language.code}}">{{language.label}}</mat-radio-button>
+                    </div>
+                    }
+                </mat-radio-group>
             </div>
-            }
-        </mat-radio-group>
+            <div class="flex-1">
+                <div class="flex flex-row">
+                    <mat-label>{{resources.activityType}}</mat-label>
+                </div>
+                <div class="flex flex-row">
+                    <mat-radio-group (change)=setActivityType($event.value) [value]="activityType" color="primary">
+                        <mat-radio-button value="Hiking"><i class="fa icon-hike"></i></mat-radio-button>
+                        <mat-radio-button value="Biking"><i class="fa icon-bike"></i></mat-radio-button>
+                        <mat-radio-button value="4x4"><i class="fa icon-four-by-four"></i></mat-radio-button>
+                    </mat-radio-group>
+                </div>
+            </div>
+        </div>
         <br />
         <div class="square-container">
             <ng-lottie class="img-responsive" style="padding-right: 13px;" [options]="lottieLanguage"></ng-lottie>

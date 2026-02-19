@@ -12,6 +12,7 @@ export type RouteSegmentData = components["schemas"]["RouteSegmentData"];
 export type RoutingType = components["schemas"]["RoutingType"];
 export type DataContainer = components["schemas"]["DataContainer"];
 export type UserPermissions = components["schemas"]["UserPermissions"];
+export type ActivityType = ShareUrl["type"];
 
 export type RouteEditStateType = "Poi" | "Route" | "ReadOnly" | "Hidden";
 export type { Bounds } from "./bounds";
