@@ -1,8 +1,10 @@
-﻿<button mat-button routerLink="/map" angulartics2On="click" angularticsCategory="Menu"
+﻿@if (!isIFrame()) {
+<button mat-button routerLink="/map" angulartics2On="click" angularticsCategory="Menu"
   angularticsAction="Plan & Explore" class="max-md:hidden! text-white!">
   <i class="fa fa-lg icon-map-o mat-icon"></i>
   <span class="mx-1">{{resources.planAndExplore}}</span>
 </button>
+}
 @if (!isIFrame() && !isLoggedIn()) {
 <button mat-raised-button (click)="login()">{{resources.signIn}}</button>
 }
@@ -62,22 +64,24 @@
         <span class="text-green-600 mx-1">{{resources.renewSubscription}}</span>
       </button>
       }
+      @if (!isIFrame()) {
       <button mat-menu-item routerLink="/map" angulartics2On="click" angularticsCategory="Menu"
         angularticsAction="Plan & Explore" class="block md:hidden!">
         <i class="fa fa-lg icon-map-o mat-icon"></i>
         <span class="mx-1">{{resources.planAndExplore}}</span>
       </button>
+      }
       <button mat-menu-item (click)="openLanguage()" angulartics2On="click" angularticsCategory="Menu"
         angularticsAction="Open language selection">
         <i class="fa fa-lg icon-language mat-icon"></i>
         <span class="mx-1">Language</span>
       </button>
+      @if (!isIFrame()) {
       <button mat-menu-item routerLink="/about" angulartics2On="click" angularticsCategory="Menu"
         angularticsAction="About">
         <i class="fa fa-lg icon-info mat-icon"></i>
         <span class="mx-1">{{resources.about}}</span>
       </button>
-      @if (!isIFrame()) {
       <button mat-menu-item (click)="reportAnIssue()" angulartics2On="click" angularticsCategory="Menu"
         angularticsAction="Report an issue">
         <i class="fa fa-lg icon-envelope mat-icon"></i>

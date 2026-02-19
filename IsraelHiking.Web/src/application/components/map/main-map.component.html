@@ -5,18 +5,22 @@
     [mapStyle]="initialStyle" (moveEnd)="moveEnd($event)" (mapLoad)="mapLoaded($event)" [doubleClickZoom]="false"
     [attributionControl]="false">
     <layers [isMainMap]="true"></layers>
+    @if (!isIFrame()) {
     <public-pois></public-pois>
+    }
     <routes></routes>
+    @if (!isIFrame()) {
     <recorded-route></recorded-route>
     <traces></traces>
-    @if (!isIFrame()) {
     <drawing #topStartControl></drawing>
     }
     <zoom #topEndControl></zoom>
     @if (isMobile() || !isIFrame()) {
     <location #topEndControl></location>
     }
+    @if (!isIFrame()) {
     <layers-button #topEndControl></layers-button>
+    }
     <route-statistics #bottomStartControl></route-statistics>
     <osm-attribution #bottomStartControl></osm-attribution>
     <center-me #bottomStartControl></center-me>

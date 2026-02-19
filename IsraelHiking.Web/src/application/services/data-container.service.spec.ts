@@ -32,7 +32,8 @@ describe("DataContainerService", () => {
                     provide: LayersService, useValue: {
                         addExternalOverlays: jasmine.createSpy(),
                         addExternalBaseLayer: jasmine.createSpy(),
-                        getData: () => ({})
+                        getData: () => ({}),
+                        selectBaseLayer: () => { }
                     }
                 },
                 {
@@ -139,17 +140,19 @@ describe("DataContainerService", () => {
         expect(fileService.openFromUrl).not.toHaveBeenCalled();
     }));
 
-    it("should set share URL and not show toast message if in iframe", inject([DataContainerService, ShareUrlsService, ToastService, RunningContextService], async (service: DataContainerService, shareUrlsService: ShareUrlsService, toastService: ToastService, runningContextService: RunningContextService) => {
+    it("should set share URL and not show toast message if in iframe and select base layer", inject([DataContainerService, ShareUrlsService, ToastService, RunningContextService, LayersService], async (service: DataContainerService, shareUrlsService: ShareUrlsService, toastService: ToastService, runningContextService: RunningContextService, layerService: LayersService) => {
         (runningContextService as any).isIFrame = true;
-        const shareUrl = { id: "123", dataContainer: {}, description: "desc", title: "title" } as ShareUrl;
+        const shareUrl = { id: "123", dataContainer: { baseLayer: "baseLayer", routes: [] }, description: "desc", title: "title" } as ShareUrl;
         spyOn(shareUrlsService, "getSelectedShareUrl").and.returnValue(null);
         spyOn(shareUrlsService, "setShareUrlById").and.returnValue(Promise.resolve(shareUrl));
         spyOn(toastService, "info");
+        spyOn(layerService, "selectBaseLayer");
 
         await service.setShareUrlAfterNavigation("123");
 
         expect(shareUrlsService.setShareUrlById).toHaveBeenCalledWith("123");
         expect(toastService.info).not.toHaveBeenCalled();
+        expect(layerService.selectBaseLayer).toHaveBeenCalled();
     }));
 
     it("should handle error and show toast error message", inject([DataContainerService, ShareUrlsService, ToastService], async (service: DataContainerService, shareUrlsService: ShareUrlsService, toastService: ToastService) => {

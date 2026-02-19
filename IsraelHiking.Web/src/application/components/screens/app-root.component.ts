@@ -5,6 +5,7 @@ import { NavigationEnd, Router, RouterOutlet } from "@angular/router";
 import { MainMenuComponent } from "../main-menu.component";
 import { SearchComponent } from "../search.component";
 import { ResourcesService } from "../../services/resources.service";
+import { RunningContextService } from "../../services/running-context.service";
 
 @Component({
   selector: "app-root",
@@ -17,6 +18,7 @@ export class AppRootComponent {
   public isScrolled = false;
 
   public readonly resources = inject(ResourcesService);
+  private readonly runningContextService = inject(RunningContextService)
   private readonly router = inject(Router);
 
   constructor() {
@@ -30,6 +32,10 @@ export class AppRootComponent {
   @HostListener("window:scroll", [])
   onWindowScroll() {
     this.isScrolled = window.scrollY > 50;
+  }
+
+  public isIFrame() {
+    return this.runningContextService.isIFrame;
   }
 
 }

@@ -90,6 +90,8 @@ export class DataContainerService {
             this.setData(shareUrl.dataContainer, this.runningContextService.isCapacitor);
             if (!this.runningContextService.isIFrame) {
                 this.toastService.info(shareUrl.description, shareUrl.title);
+            } else {
+                this.layersService.selectBaseLayer(shareUrl.dataContainer.baseLayer.key);
             }
         } catch (ex) {
             this.shareUrlsService.setShareUrl(null);
