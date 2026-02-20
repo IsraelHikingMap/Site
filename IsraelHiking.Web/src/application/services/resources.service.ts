@@ -504,7 +504,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1771496328311");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1771573975514");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -550,7 +550,7 @@ export class ResourcesService {
         this.length = this.gettextCatalog.getString("Length");
         this.gain = this.gettextCatalog.getString("Gain");
         this.loss = this.gettextCatalog.getString("Loss");
-        this.kmPoi = this.gettextCatalog.getString("Km POIs");
+        this.kmPoi = this.gettextCatalog.getString("Km markers");
         this.meterUnit = this.gettextCatalog.getString("m");
         this.kmUnit = this.gettextCatalog.getString("Km");
         this.distance = this.gettextCatalog.getString("Distance");
