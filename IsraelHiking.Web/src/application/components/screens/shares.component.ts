@@ -1,4 +1,6 @@
-import { Component, inject } from "@angular/core";
+import { Component, DestroyRef, inject } from "@angular/core";
+import { Router } from "@angular/router";
+import { MatDialog } from "@angular/material/dialog";
 import { FormsModule } from "@angular/forms";
 import { MatButton } from "@angular/material/button";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
@@ -14,12 +16,18 @@ import type { StyleSpecification, Map } from "maplibre-gl";
 import { ShareItemComponent } from "../share-item.component";
 import { LayersComponent } from "../map/layers.component";
 import { RoutesPathComponent } from "../map/routes-path.component";
+import { ShareEditDialogComponent, ShareEditDialogComponentData } from "../dialogs/share-edit-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { MapService } from "../../services/map.service";
+import { SpatialService } from "../../services/spatial.service";
+import { ToastService } from "../../services/toast.service";
+import { DataContainerService } from "../../services/data-container.service";
+import { RouteStrings } from "application/services/hash.service";
 import type { ApplicationState, ShareUrl } from "../../models";
+import { ScrollToDirective } from "application/directives/scroll-to.directive";
 
 @Component({
     selector: "shares",
@@ -40,10 +48,15 @@ export class SharesComponent {
 
     public readonly resources = inject(ResourcesService);
 
+    private readonly dialog = inject(MatDialog);
     private readonly defaultStyleService = inject(DefaultStyleService);
     private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly mapService = inject(MapService);
+    private readonly destroyRef = inject(DestroyRef);
+    private readonly toastService = inject(ToastService);
+    private readonly dataContainerService = inject(DataContainerService);
+    private readonly router = inject(Router);
     private readonly store = inject(Store);
 
     constructor() {
@@ -52,9 +65,13 @@ export class SharesComponent {
         this.mapStyle.zoom = locationState.zoom;
         this.mapStyle.center = [locationState.longitude, locationState.latitude];
         this.runFilter();
+        this.destroyRef.onDestroy(() => {
+            this.mapService.unsetMap();
+        });
     }
 
     public mapLoaded(map: Map) {
+        this.mapService.setMap(map);
         this.mapService.addArrowToMap(map);
     }
 
@@ -129,15 +146,74 @@ export class SharesComponent {
             this.routesGeoJson = { type: "FeatureCollection", features: [] };
             return;
         }
+        this.moveToShare(shareUrl);
+        ScrollToDirective.scrollTo(`share-url-${shareUrl.id}`, 60);
+    }
+
+    public moveToShare(shareUrl: Immutable<ShareUrl>) {
         this.selectedShareUrl = shareUrl;
         const features: GeoJSON.Feature[] = [];
         for (const route of shareUrl.dataContainer.routes) {
             features.push(...this.selectedRouteService.createFeaturesForRoute(route));
         }
         this.routesGeoJson = { type: "FeatureCollection", features };
+        const bounds = SpatialService.getBoundsForFeatureCollection(this.routesGeoJson);
+        this.mapService.fitBounds(bounds);
     }
 
     public getIconFromType(shareUrl: Immutable<ShareUrl>) {
         return this.shareUrlsService.getIconFromType(shareUrl.type);
+    }
+
+    public deleteShareUrl(shareUrl: Immutable<ShareUrl>) {
+        const displayName = this.shareUrlsService.getShareUrlDisplayName(shareUrl);
+        const message = `${this.resources.deletionOf} ${displayName}, ${this.resources.areYouSure}`;
+        this.toastService.confirm({
+            message,
+            confirmAction: async () => {
+                try {
+                    await this.shareUrlsService.deleteShareUrl(shareUrl);
+                    this.runFilter();
+                } catch (ex) {
+                    this.toastService.error(ex, this.resources.unableToDeleteShare);
+                }
+
+            },
+            type: "YesNo"
+        });
+    }
+
+    public async showShareUrl(shareUrl: Immutable<ShareUrl>) {
+        if (this.selectedRouteService.areRoutesEmpty()) {
+            const share = await this.shareUrlsService.setShareUrlById(shareUrl.id);
+            this.dataContainerService.setData(share.dataContainer, false);
+            return;
+        }
+        this.toastService.confirm({
+            message: this.resources.thisWillDeteleAllCurrentRoutesAreYouSure,
+            confirmAction: async () => {
+                const share = await this.shareUrlsService.setShareUrlById(shareUrl.id);
+                this.dataContainerService.setData(share.dataContainer, false);
+            },
+            type: "YesNo"
+        });
+    }
+
+    public async addShareUrlToRoutes(shareUrl: Immutable<ShareUrl>) {
+        const share = await this.shareUrlsService.getShareUrl(shareUrl.id);
+        this.router.navigate([RouteStrings.MAP]);
+        this.dataContainerService.setData(share.dataContainer, true);
+    }
+
+    public async openEditShareUrlDialog(shareUrl: Immutable<ShareUrl>) {
+        const share = await this.shareUrlsService.getShareUrl(shareUrl.id);
+        this.dialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, {
+            width: "480px",
+            data: {
+                fullShareUrl: share,
+                dataContainer: null,
+                hasHiddenRoutes: false
+            }
+        });
     }
 }

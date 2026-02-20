@@ -7,15 +7,23 @@
             <i class="fa icon-ellipsis-v"></i>
         </button>
         <mat-menu #shareMenu="matMenu">
-            <button mat-menu-item (click)="edit()">
+            <button mat-menu-item (click)="moveToRoute.emit()">
+                <i class="fa icon-crosshairs"></i>
+                {{resources.moveToRoute}}
+            </button>
+            <button mat-menu-item (click)="editProperties.emit()">
                 <i class="fa icon-pencil"></i>
                 {{resources.edit}}
             </button>
-            <button mat-menu-item (click)="editRoute()">
+            <button mat-menu-item (click)="editRoute.emit()">
                 <i class="fa icon-recordings"></i>
                 {{resources.editRoute}}
             </button>
-            <button mat-menu-item (click)="delete()">
+            <button mat-menu-item (click)="addToRoutes.emit()">
+                <i class="fa icon-plus"></i>
+                {{resources.addToRoutes}}
+            </button>
+            <button mat-menu-item (click)="delete.emit()">
                 <i class="fa icon-trash"></i>
                 {{resources.delete}}
             </button>
@@ -70,4 +78,35 @@
         }
         <span>{{resources.date}}: {{shareUrl().lastModifiedDate | date:'dd/MM/yyyy'}}</span>
     </div>
+    @if (isApp()) {
+    <div class="flex flex-row">
+        <button mat-button class="w-full" (click)="share()" angulartics2On="click" angularticsCategory="Share"
+            angularticsAction="Share mobile button"><i class="fa fa-lg icon-share-alt"></i></button>
+    </div>
+    } @else {
+    <div class="flex flex-row">
+        <div class="flex-1">
+            <a mat-button class="w-full" [href]="facebookShareAddress" [target]="'_blank'"
+                matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="above" angulartics2On="click"
+                angularticsCategory="Share" angularticsAction="Share facebook"><i
+                    class="fa icon-facebook fa-lg"></i></a>
+        </div>
+        <div class="flex-1">
+            <a mat-button class="w-full" [href]="whatsappShareAddress" [target]="'_blank'"
+                matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="above" angulartics2On="click"
+                angularticsCategory="Share" angularticsAction="Share whatsapp"><i
+                    class="fa icon-whatsapp fa-lg"></i></a>
+        </div>
+        <div class="flex-1">
+            <button mat-button class="w-full" [cdkCopyToClipboard]="shareAddress" (click)="copiedToClipboard = true"
+                matTooltip="{{resources.copyUrl}}" matTooltipPosition="above" angulartics2On="click"
+                angularticsCategory="Share" angularticsAction="Share copy to clipboard">
+                <i class="fa icon-clipboard fa-lg"></i>
+                @if (copiedToClipboard) {
+                <i class="fa fa-lg icon-check-circle" [style.color]="'green'"></i>
+                }
+            </button>
+        </div>
+    </div>
+    }
 </div>

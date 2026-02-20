@@ -38,7 +38,11 @@
             </mat-menu>
         </div>
         @for (shareUrl of filteredShareUrls; track shareUrl.id ) {
-        <share-item [shareUrl]="shareUrl" [showMenu]="true"></share-item>
+        <div [id]="'share-url-' + shareUrl.id">
+            <share-item [shareUrl]="shareUrl" [showMenu]="true" (delete)="deleteShareUrl(shareUrl)"
+                (editProperties)="openEditShareUrlDialog(shareUrl)" (editRoute)="showShareUrl(shareUrl)"
+                (addToRoutes)="addShareUrlToRoutes(shareUrl)" (moveToRoute)="moveToShare(shareUrl)"></share-item>
+        </div>
         }
     </div>
     <div class="max-md:hidden w-2/3">
