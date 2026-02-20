@@ -11,4 +11,5 @@ export type InMemoryState = {
     baseLayer: string;
     fileUrl: string;
     shareUrl: ShareUrl;
+    searchTerm: string;
 };

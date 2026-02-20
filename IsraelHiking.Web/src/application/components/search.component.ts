@@ -20,9 +20,10 @@ import { remove } from "lodash-es";
 import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../services/resources.service";
-import { RouteStrings } from "../services/hash.service";
+import { HashService, RouteStrings } from "../services/hash.service";
 import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider } from "../services/search-results.provider";
+import { SetSearchTermAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, SearchResultsPointOfInterest } from "../models";
 
 export type SearchContext = {
@@ -62,6 +63,7 @@ export class SearchComponent {
     private readonly toastService = inject(ToastService);
     private readonly router = inject(Router);
     private readonly store = inject(Store);
+    private readonly hashService = inject(HashService);
 
     constructor() {
         this.configureInputFormControl(this.searchFrom, this.fromContext);
@@ -189,5 +191,13 @@ export class SearchComponent {
         } catch {
             this.toastService.warning(this.resources.unableToGetSearchResults);
         }
+    }
+
+    public isShares() {
+        return this.hashService.isShares();
+    }
+
+    public updateSearchTerm(searchTerm: string) {
+        this.store.dispatch(new SetSearchTermAction(searchTerm));
     }
 }

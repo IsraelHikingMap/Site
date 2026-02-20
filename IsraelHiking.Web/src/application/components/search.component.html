@@ -1,4 +1,9 @@
 ﻿<mat-form-field class="search-input-container" [class.logged-in]="isLoggedIn()" subscriptSizing="dynamic">
+  @if (isShares()) {
+  <input type="text" matInput class="control-container-item" placeholder="{{resources.searchPlaceHolder}}"
+    [dir]="resources.getDirection(fromContext.searchTerm)" (input)="updateSearchTerm($event.target.value)">
+  }
+  @else {
   <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom"
     [matAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}"
     [dir]="resources.getDirection(fromContext.searchTerm)" (focus)="focusOnSearchInput()">
@@ -17,4 +22,5 @@
     </mat-option>
     }
   </mat-autocomplete>
+  }
 </mat-form-field>

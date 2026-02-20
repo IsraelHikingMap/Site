@@ -7,6 +7,7 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatFormField, MatLabel, MatOption, MatSelect } from "@angular/material/select";
 import { Dir } from "@angular/cdk/bidi";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Store } from "@ngxs/store";
 import { Immutable } from "immer";
 import { MapComponent, MarkerComponent, PopupComponent } from "@maplibre/ngx-maplibre-gl";
@@ -17,6 +18,7 @@ import { ShareItemComponent } from "../share-item.component";
 import { LayersComponent } from "../map/layers.component";
 import { RoutesPathComponent } from "../map/routes-path.component";
 import { ShareEditDialogComponent, ShareEditDialogComponentData } from "../dialogs/share-edit-dialog.component";
+import { ScrollToDirective } from "application/directives/scroll-to.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
@@ -27,7 +29,7 @@ import { ToastService } from "../../services/toast.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { RouteStrings } from "application/services/hash.service";
 import type { ApplicationState, ShareUrl } from "../../models";
-import { ScrollToDirective } from "application/directives/scroll-to.directive";
+import { SetSearchTermAction } from "application/reducers/in-memory.reducer";
 
 @Component({
     selector: "shares",
@@ -68,6 +70,10 @@ export class SharesComponent {
         this.destroyRef.onDestroy(() => {
             this.mapService.unsetMap();
         });
+        this.store.dispatch(new SetSearchTermAction(""));
+        this.store.select((state: ApplicationState) => state.inMemoryState.searchTerm).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+            this.runFilter();
+        });
     }
 
     public mapLoaded(map: Map) {
@@ -95,6 +101,7 @@ export class SharesComponent {
 
     private async runFilter() {
         const shareUrls = await this.getSharesNormialized();
+        const searchTerm = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.searchTerm);
         const filteredShareUrls = shareUrls.filter((share: Immutable<ShareUrl>) => {
             for (const key in this.filter) {
                 const propValue = share[key as any as keyof ShareUrl];
@@ -103,7 +110,8 @@ export class SharesComponent {
                 }
             }
             return true;
-        });
+        }).filter((share) => this.findInShareUrl(share, searchTerm));
+
         let sortBy = this.sortBy;
         switch (sortBy) {
             case "length":
@@ -215,5 +223,28 @@ export class SharesComponent {
                 hasHiddenRoutes: false
             }
         });
+    }
+
+    private findInShareUrl(shareUrl: Immutable<ShareUrl>, searchTerm: string) {
+        if (!searchTerm) {
+            return true;
+        }
+        const lowerSearchTerm = searchTerm.toLowerCase();
+        if ((shareUrl.description || "").toLowerCase().includes(lowerSearchTerm)) {
+            return true;
+        }
+        if ((shareUrl.title || "").toLowerCase().includes(lowerSearchTerm)) {
+            return true;
+        }
+        if ((shareUrl.id || "").toLowerCase().includes(lowerSearchTerm)) {
+            return true;
+        }
+        if ((new Date(shareUrl.lastModifiedDate).toISOString()).toLowerCase().includes(lowerSearchTerm)) {
+            return true;
+        }
+        if ((new Date(shareUrl.creationDate).toISOString()).toLowerCase().includes(lowerSearchTerm)) {
+            return true;
+        }
+        return false;
     }
 }
