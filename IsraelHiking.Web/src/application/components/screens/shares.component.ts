@@ -102,7 +102,7 @@ export class SharesComponent {
     }
 
     private async runFilter() {
-        const shareUrls = await this.getSharesNormialized();
+        const shareUrls = this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState.shareUrls);
         const searchTerm = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.searchTerm);
         const filteredShareUrls = shareUrls.filter((share: Immutable<ShareUrl>) => {
             for (const key in this.filter) {
@@ -131,25 +131,6 @@ export class SharesComponent {
         this.filteredShareUrls = orderBy(filteredShareUrls, sortBy, this.sortDirection);
     }
 
-    private async getSharesNormialized(): Promise<Immutable<ShareUrl>[]> {
-        const shareUrls = this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState.shareUrls);
-        const normalized: Immutable<ShareUrl>[] = [];
-        for (const share of shareUrls) {
-            let dataContainer = share.dataContainer;
-            if (!dataContainer) {
-                const shareUrl = await this.shareUrlsService.getShareUrl(share.id);
-                dataContainer = shareUrl.dataContainer;
-            }
-            normalized.push({
-                ...share,
-                length: share.length ?? 0,
-                difficulty: share.difficulty ?? "Unknown",
-                type: share.type ?? "Unknown",
-                dataContainer
-            });
-        }
-        return normalized;
-    }
 
     public onStartPointClick(shareUrl: Immutable<ShareUrl>) {
         if (this.selectedShareUrl?.id === shareUrl.id) {
@@ -161,10 +142,11 @@ export class SharesComponent {
         ScrollToDirective.scrollTo(`share-url-${shareUrl.id}`, 60);
     }
 
-    public moveToShare(shareUrl: Immutable<ShareUrl>) {
-        this.selectedShareUrl = shareUrl;
+    public async moveToShare(shareUrl: Immutable<ShareUrl>) {
+        const share = await this.shareUrlsService.getShareUrl(shareUrl.id);
+        this.selectedShareUrl = share;
         const features: GeoJSON.Feature[] = [];
-        for (const route of shareUrl.dataContainer.routes) {
+        for (const route of share.dataContainer.routes) {
             features.push(...this.selectedRouteService.createFeaturesForRoute(route));
         }
         this.routesGeoJson = { type: "FeatureCollection", features };

@@ -13,6 +13,7 @@ import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import { UpdateShareUrlAction, RemoveShareUrlAction, AddShareUrlAction, SetShareUrlsLastModifiedDateAction } from "../reducers/share-urls.reducer";
+import { SpatialService } from "./spatial.service";
 import { Urls } from "../urls";
 import type { ShareUrl, ApplicationState, UserPermissions } from "../models";
 
@@ -105,7 +106,14 @@ export class ShareUrlsService {
             this.loggingService.info("[Shares] Got the list of shares, starting to compare against exiting list");
             const exitingShareUrls = this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState).shareUrls;
             for (const shareUrl of shareUrls) {
-                if (exitingShareUrls.find(s => s.id === shareUrl.id) != null) {
+                shareUrl.type = shareUrl.type ?? "Unknown";
+                shareUrl.difficulty = shareUrl.difficulty ?? "Unknown";
+                shareUrl.length = shareUrl.length ?? 0;
+                shareUrl.gain = shareUrl.gain ?? 0;
+                shareUrl.loss = shareUrl.loss ?? 0;
+                const exitingShareUrl = exitingShareUrls.find(s => s.id === shareUrl.id);
+                if (exitingShareUrl != null) {
+                    shareUrl.start = shareUrl.start ?? exitingShareUrl.start;
                     this.store.dispatch(new UpdateShareUrlAction(shareUrl));
                 } else {
                     this.store.dispatch(new AddShareUrlAction(shareUrl));
@@ -125,12 +133,38 @@ export class ShareUrlsService {
                 await this.getShareFromServerAndCacheIt(shareToGet.id);
                 this.store.dispatch(new SetShareUrlsLastModifiedDateAction(new Date(shareToGet.lastModifiedDate)));
             }
+
+            await this.updateShareUrlStart(shareUrls);
             this.store.dispatch(new SetShareUrlsLastModifiedDateAction(operationStartTimeStamp));
             this.loggingService.info(`[Shares] Finished shares sync, last modified: ${operationStartTimeStamp.toUTCString()}`);
         } catch (ex) {
             this.loggingService.error("[Shares] Unable to sync shares: " + (ex as Error).message);
         } finally {
             this.syncing = false;
+        }
+    }
+
+    /** 
+     * Updates the start location of share urls that don't have it.
+     * This is needed because old share urls don't have the start location.
+     */
+    private async updateShareUrlStart(shareUrls: Immutable<ShareUrl>[]) {
+        for (let shareUrl of shareUrls.filter(s => s.start == null)) {
+            let fullShareUrl = await this.databaseService.getShareUrlById(shareUrl.id);
+            if (fullShareUrl.dataContainer == null) {
+                await this.databaseService.deleteShareUrlById(shareUrl.id);
+                fullShareUrl = await this.getShareFromServerAndCacheIt(shareUrl.id);
+            }
+            try {
+                if (fullShareUrl != null) {
+                    const shareToUpdate = structuredClone(shareUrl) as ShareUrl;
+                    shareToUpdate.start = fullShareUrl.dataContainer.routes?.[0]?.segments?.[0]?.latlngs?.[0];
+                    shareToUpdate.start = shareToUpdate.start ?? SpatialService.getLatlngInterpolatedValue(fullShareUrl.dataContainer.northEast, fullShareUrl.dataContainer.southWest, 0.5);
+                    this.store.dispatch(new UpdateShareUrlAction(shareToUpdate));
+                }
+            } catch (ex) {
+                this.loggingService.error("[Shares] Unable to get share start for " + shareUrl.id + " " + (ex as Error).message + "\n" + JSON.stringify(fullShareUrl, null, 2));
+            }
         }
     }
 

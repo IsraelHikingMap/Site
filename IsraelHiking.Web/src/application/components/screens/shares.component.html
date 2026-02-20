@@ -76,7 +76,7 @@
                 <layers [isMainMap]="false"></layers>
                 <routes-path [routesGeoJson]="routesGeoJson"></routes-path>
                 @for (shareUrl of filteredShareUrls; track shareUrl.id ) {
-                <mgl-marker [lngLat]="shareUrl.dataContainer.routes[0].segments[0].latlngs[0]">
+                <mgl-marker [lngLat]="shareUrl.start">
                     <span class="fa-stack fa-lg cursor-pointer selected-marker-icon"
                         (click)="onStartPointClick(shareUrl)">
                         <i class="fa icon-map-marker-rect fa-stack-2x"
@@ -86,8 +86,8 @@
                 </mgl-marker>
                 }
                 @if (selectedShareUrl) {
-                <mgl-popup [lngLat]="selectedShareUrl.dataContainer.routes[0].segments[0].latlngs[0]"
-                    [closeOnClick]="false" (popupClose)="onStartPointClick(selectedShareUrl)" [offset]="[0, -15]">
+                <mgl-popup [lngLat]="selectedShareUrl.start" [closeOnClick]="false"
+                    (popupClose)="onStartPointClick(selectedShareUrl)" [offset]="[0, -15]">
                     <div class="flex flex-row">
                         {{selectedShareUrl.title}}
                     </div>
