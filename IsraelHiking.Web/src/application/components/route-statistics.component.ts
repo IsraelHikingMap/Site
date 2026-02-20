@@ -39,6 +39,7 @@ interface IMargin {
 interface IChartSubRouteRange {
     xStart: number;
     xEnd: number;
+    rangeSelectionSource: GeoJSON.FeatureCollection<GeoJSON.LineString>;
 }
 
 interface IChartElements {
@@ -68,7 +69,7 @@ interface IChartElements {
     imports: [Dir, NgClass, MatGridList, MatGridTile, MatTooltip, MatButton, Angulartics2OnModule, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, DecimalPipe, DistancePipe]
 })
 export class RouteStatisticsComponent implements OnInit {
-    private static readonly HOVER_BOX_WIDTH = 160;
+    private static readonly HOVER_BOX_WIDTH = 110;
     private static readonly MAX_SLOPE = 20;
 
     public length: number = 0;
@@ -338,7 +339,7 @@ export class RouteStatisticsComponent implements OnInit {
         this.chartElements.hoverGroup.selectAll("circle").attr("cy", chartYCoordinate);
         const safeDistance = 20;
         let boxPosition = safeDistance;
-        if (chartXCoordinate > +this.chartElements.svg.attr("width") / 2) {
+        if (chartXCoordinate + 40 > +this.chartElements.svg.attr("width") / 2) {
             boxPosition = -RouteStatisticsComponent.HOVER_BOX_WIDTH - safeDistance;
         }
         this.chartElements.hoverGroup.select("g").attr("transform", `translate(${boxPosition}, 0)`);
@@ -364,7 +365,8 @@ export class RouteStatisticsComponent implements OnInit {
         this.chartElements.dragState = "start";
         this.subRouteRange = {
             xStart: this.getMouseOrTouchChartXPosition(e),
-            xEnd: null
+            xEnd: null,
+            rangeSelectionSource: { type: "FeatureCollection", features: [] }
         };
     };
 
@@ -382,12 +384,38 @@ export class RouteStatisticsComponent implements OnInit {
         }
         if (this.chartElements.dragState === "drag") {
             this.subRouteRange.xEnd = xPosition;
+            this.updateRangeSelectionSource(point);
             this.updateSubRouteSelectionOnChart();
             this.hideChartHover();
             this.updatePointOnMap(point);
         }
-
     };
+
+    /**
+     * This updates the source that shows the line on the map when selecting a sub range
+     * @param point 
+     */
+    private updateRangeSelectionSource(point: RouteStatisticsPoint) {
+        const latlngs = this.getRouteForChart() ? this.getRouteForChart().latlngs : [];
+        let endPoint = point;
+        let startPoint = this.routeStatisticsService.interpolateStatistics(this.statistics, this.subRouteRange.xStart);
+        if (this.subRouteRange.xStart > this.subRouteRange.xEnd) {
+            endPoint = startPoint;
+            startPoint = point;
+        }
+        const statistics = this.routeStatisticsService.getStatisticsByRange(latlngs, startPoint, endPoint);
+        this.subRouteRange.rangeSelectionSource = {
+            type: "FeatureCollection",
+            features: [{
+                type: "Feature",
+                properties: {},
+                geometry: {
+                    type: "LineString",
+                    coordinates: statistics.points.map(p => [p.latlng.lng, p.latlng.lat])
+                }
+            }]
+        };
+    }
 
     private onMouseUp() {
         if (this.chartElements.dragState === "drag") {
@@ -399,7 +427,7 @@ export class RouteStatisticsComponent implements OnInit {
         this.clearSubRouteSelection();
         this.cancelableTimeoutService.setTimeoutByName(() => {
             this.hideChartHover();
-        }, 5000, "clickOnChart");
+        }, 2000, "clickOnChart");
     }
 
     private initChart() {
@@ -559,8 +587,8 @@ export class RouteStatisticsComponent implements OnInit {
             .extent([[0, 0], [this.chartElements.width, this.chartElements.height]])
             .filter((event: Event) => {
                 if (event.type === "wheel") { return true; }
-                if (event.type === "touchstart" || event.type === "touchmove") {
-                    return (event as TouchEvent).touches.length === 2;
+                if (this.isTouchEvent(event)) {
+                    return event.touches.length === 2;
                 }
                 return false;
             })
@@ -586,12 +614,16 @@ export class RouteStatisticsComponent implements OnInit {
             .style("pointer-events", "all")
             .on("mousedown touchstart", (e: Event) => {
                 // Only start drag selection for single touch / mouse
-                if (e.type === "touchstart" && (e as TouchEvent).touches.length !== 1) { return; }
+                if (this.isTouchEvent(e) && e.touches.length !== 1) { return; }
                 this.onMouseDown(e);
             })
             .on("mousemove touchmove", (e: Event) => {
                 // Only handle hover/drag for single touch / mouse
-                if (e.type === "touchmove" && (e as TouchEvent).touches.length !== 1) { return; }
+                if (this.isTouchEvent(e) && e.touches.length !== 1) {
+                    this.subRouteRange = null;
+                    this.chartElements.dragState = "none";
+                    return;
+                }
                 this.onMouseMove(e);
             })
             .on("mouseup touchend", () => {
@@ -1042,5 +1074,9 @@ export class RouteStatisticsComponent implements OnInit {
 
     private getMouseOrTouchChartXPosition(e: Event): number {
         return this.chartElements.xScale.invert(d3.pointers(e)[0][0]);
+    }
+
+    private isTouchEvent(e: Event): e is TouchEvent {
+        return e.type.startsWith("touch");
     }
 }

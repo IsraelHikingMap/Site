@@ -211,6 +211,20 @@
           }">
 </mgl-layer>
 
+@if (subRouteRange) {
+<mgl-geojson-source id="chart-range-selection" [data]="subRouteRange.rangeSelectionSource"></mgl-geojson-source>
+<mgl-layer id="chart-range-selection-layer-casing" type="line" source="chart-range-selection" before="chart-hover-layer"
+  [paint]="{
+          'line-color': 'purple',
+          'line-width': 5
+          }"></mgl-layer>
+<mgl-layer id="chart-range-selection-layer" type="line" source="chart-range-selection" before="chart-hover-layer"
+  [paint]="{
+          'line-color': 'white',
+          'line-width': 3
+          }"></mgl-layer>
+}
+
 <mgl-geojson-source id="chart-hover" [data]="chartHoverSource"></mgl-geojson-source>
 <mgl-layer id="chart-hover-layer" type="circle" source="chart-hover" [paint]="{
           'circle-color': ['get', 'color'],
