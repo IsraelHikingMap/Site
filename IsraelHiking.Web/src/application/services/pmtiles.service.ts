@@ -92,7 +92,7 @@ export class PmTilesService {
         if (z >= TILES_ZOOM) {
             ({ tileX, tileY } = SpatialService.getParentZoomTileCoordinates({ x, y }, z, TILES_ZOOM));
         }
-        if (this.store.selectSnapshot((state: ApplicationState) => state.offlineState).downloadedTiles[`${tileX}-${tileY}`] == null) {
+        if (this.store.selectSnapshot((state: ApplicationState) => state.offlineState).downloadedTiles?.[`${tileX}-${tileY}`] == null) {
             return false;
         }
         const fileName = this.getFileNameByType(z, x, y, type);
