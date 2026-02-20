@@ -6,6 +6,7 @@ import { MatButton } from "@angular/material/button";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatFormField, MatLabel, MatOption, MatSelect } from "@angular/material/select";
+import { MatDivider } from "@angular/material/divider";
 import { Dir } from "@angular/cdk/bidi";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Store } from "@ngxs/store";
@@ -28,14 +29,14 @@ import { SpatialService } from "../../services/spatial.service";
 import { ToastService } from "../../services/toast.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { RouteStrings } from "application/services/hash.service";
-import type { ApplicationState, ShareUrl } from "../../models";
 import { SetSearchTermAction } from "application/reducers/in-memory.reducer";
+import type { ApplicationState, ShareUrl } from "../../models";
 
 @Component({
     selector: "shares",
     templateUrl: "./shares.component.html",
     styleUrls: ["./shares.component.scss"],
-    imports: [MapComponent, LayersComponent, MatButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, ShareItemComponent, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, PopupComponent]
+    imports: [MapComponent, LayersComponent, MatButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, ShareItemComponent, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, PopupComponent, MatDivider]
 })
 export class SharesComponent {
     public mapStyle: StyleSpecification;
@@ -45,7 +46,8 @@ export class SharesComponent {
     public sortBy: keyof ShareUrl = "lastModifiedDate";
     public sortDirection: "asc" | "desc" = "desc";
     public filter: Record<string, string[]> = {
-        difficulty: ["Easy", "Moderate", "Hard", "Unknown"]
+        difficulty: ["Easy", "Moderate", "Hard", "Unknown"],
+        type: ["Biking", "Hiking", "4x4", "Unknown"]
     };
 
     public readonly resources = inject(ResourcesService);
@@ -142,6 +144,7 @@ export class SharesComponent {
                 ...share,
                 length: share.length ?? 0,
                 difficulty: share.difficulty ?? "Unknown",
+                type: share.type ?? "Unknown",
                 dataContainer
             });
         }

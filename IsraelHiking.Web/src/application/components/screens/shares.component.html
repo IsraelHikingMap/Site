@@ -19,21 +19,46 @@
                 {{resources.filter}}
             </button>
             <mat-menu #filterMenu="matMenu">
-                <div mat-menu-item>
+                <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Hard')"
                         [checked]="filter.difficulty.includes('Hard')">{{resources.hard}}</mat-checkbox>
                 </div>
-                <div mat-menu-item>
+                <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Moderate')"
                         [checked]="filter.difficulty.includes('Moderate')">{{resources.moderate}}</mat-checkbox>
                 </div>
-                <div mat-menu-item>
+                <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Easy')"
                         [checked]="filter.difficulty.includes('Easy')">{{resources.easy}}</mat-checkbox>
                 </div>
-                <div mat-menu-item>
+                <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Unknown')"
                         [checked]="filter.difficulty.includes('Unknown')">{{resources.unknown}}</mat-checkbox>
+                </div>
+                <mat-divider></mat-divider>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterChange('type', 'Biking')"
+                        [checked]="filter.type.includes('Biking')">
+                        <i class="fa icon-hike"></i>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterChange('type', 'Hiking')"
+                        [checked]="filter.type.includes('Hiking')">
+                        <i class="fa icon-bike"></i>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterChange('type', '4x4')"
+                        [checked]="filter.type.includes('4x4')">
+                        <i class="fa icon-four-by-four"></i>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterChange('type', 'Unknown')"
+                        [checked]="filter.type.includes('Unknown')">
+                        <i class="fa icon-question"></i>
+                    </mat-checkbox>
                 </div>
             </mat-menu>
         </div>

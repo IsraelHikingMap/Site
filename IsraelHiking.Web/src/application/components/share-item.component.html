@@ -7,7 +7,7 @@
             <i class="fa icon-ellipsis-v"></i>
         </button>
         <mat-menu #shareMenu="matMenu">
-            <button mat-menu-item (click)="moveToRoute.emit()">
+            <button mat-menu-item class="max-md:hidden!" (click)="moveToRoute.emit()">
                 <i class="fa icon-crosshairs"></i>
                 {{resources.moveToRoute}}
             </button>
