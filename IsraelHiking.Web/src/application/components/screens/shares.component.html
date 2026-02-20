@@ -62,13 +62,32 @@
                 }
                 @if (selectedShareUrl) {
                 <mgl-popup [lngLat]="selectedShareUrl.dataContainer.routes[0].segments[0].latlngs[0]"
-                    [closeOnClick]="false" [closeButton]="false" [offset]="[0, -15]">
+                    [closeOnClick]="false" (popupClose)="onStartPointClick(selectedShareUrl)" [offset]="[0, -15]">
                     <div class="flex flex-row">
                         {{selectedShareUrl.title}}
                     </div>
                     <div class="flex flex-row">
-                        <button mat-button class="flex-1 w-full">
+                        <button mat-menu-item (click)="openEditShareUrlDialog(selectedShareUrl)">
+                            <i class="fa icon-pencil"></i>
+                            {{resources.edit}}
+                        </button>
+                    </div>
+                    <div class="flex flex-row">
+                        <button mat-menu-item (click)="showShareUrl(selectedShareUrl)">
+                            <i class="fa icon-recordings"></i>
+                            {{resources.editRoute}}
+                        </button>
+                    </div>
+                    <div class="flex flex-row">
+                        <button mat-menu-item (click)="addShareUrlToRoutes(selectedShareUrl)">
+                            <i class="fa icon-plus"></i>
+                            {{resources.addToRoutes}}
+                        </button>
+                    </div>
+                    <div class="flex flex-row">
+                        <button mat-menu-item (click)="deleteShareUrl(selectedShareUrl)">
                             <i class="fa icon-trash"></i>
+                            {{resources.delete}}
                         </button>
                     </div>
                 </mgl-popup>
