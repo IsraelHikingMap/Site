@@ -45,6 +45,9 @@ export class MapService {
     }
 
     public unsetMap() {
+        if (this.currentMap == null) {
+            return;
+        }
         this.currentMap.off("dragstart", this.onDragstart);
         this.currentMap.off("styleimagemissing", this.onStyleImageMissing);
         this.currentMap.off("error", this.onError);
