@@ -149,7 +149,7 @@ export class ShareUrlsService {
      * This is needed because old share urls don't have the start location.
      */
     private async updateShareUrlStart(shareUrls: Immutable<ShareUrl>[]) {
-        for (let shareUrl of shareUrls.filter(s => s.start == null)) {
+        for (const shareUrl of shareUrls.filter(s => s.start == null)) {
             let fullShareUrl = await this.databaseService.getShareUrlById(shareUrl.id);
             if (fullShareUrl.dataContainer == null) {
                 await this.databaseService.deleteShareUrlById(shareUrl.id);
