@@ -65,6 +65,8 @@ export class ShareUrlsService {
     private async getShareFromServerAndCacheIt(shareUrlId: string, timeToWait = 60000): Promise<ShareUrl> {
         this.loggingService.info(`[Shares] Getting share by id ${shareUrlId}`);
         const shareUrl = await firstValueFrom(this.httpClient.get<ShareUrl>(Urls.urls + shareUrlId).pipe(timeout(timeToWait)));
+        shareUrl.start = shareUrl.start ?? shareUrl.dataContainer.routes?.[0]?.segments?.[0]?.latlngs?.[0];
+        shareUrl.start = shareUrl.start ?? SpatialService.getLatlngInterpolatedValue(shareUrl.dataContainer.northEast, shareUrl.dataContainer.southWest, 0.5);
         this.databaseService.storeShareUrl(shareUrl);
         return shareUrl;
     }
@@ -151,7 +153,7 @@ export class ShareUrlsService {
     private async updateShareUrlStart(shareUrls: Immutable<ShareUrl>[]) {
         for (const shareUrl of shareUrls.filter(s => s.start == null)) {
             let fullShareUrl = await this.databaseService.getShareUrlById(shareUrl.id);
-            if (fullShareUrl.dataContainer == null) {
+            if (fullShareUrl.dataContainer == null || fullShareUrl.start == null) {
                 await this.databaseService.deleteShareUrlById(shareUrl.id);
                 fullShareUrl = await this.getShareFromServerAndCacheIt(shareUrl.id);
             }

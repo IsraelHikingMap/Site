@@ -178,15 +178,13 @@ export class SharesComponent {
 
     public async showShareUrl(shareUrl: Immutable<ShareUrl>) {
         if (this.selectedRouteService.areRoutesEmpty()) {
-            const share = await this.shareUrlsService.setShareUrlById(shareUrl.id);
-            this.dataContainerService.setData(share.dataContainer, false);
+            this.router.navigate([RouteStrings.ROUTE_SHARE, shareUrl.id]);
             return;
         }
         this.toastService.confirm({
             message: this.resources.thisWillDeteleAllCurrentRoutesAreYouSure,
             confirmAction: async () => {
-                const share = await this.shareUrlsService.setShareUrlById(shareUrl.id);
-                this.dataContainerService.setData(share.dataContainer, false);
+                this.router.navigate([RouteStrings.ROUTE_SHARE, shareUrl.id]);
             },
             type: "YesNo"
         });
