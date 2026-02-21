@@ -36,6 +36,7 @@ export class MapService {
     }
 
     public setMap(map: Map) {
+        this.loggingService.info("[Map] Initializing map");
         this.currentMap = map;
         this.resolve();
 
@@ -45,6 +46,7 @@ export class MapService {
     }
 
     public unsetMap() {
+        this.loggingService.info("[Map] Uninitializing map");
         if (this.currentMap == null) {
             return;
         }
