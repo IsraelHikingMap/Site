@@ -243,7 +243,8 @@ export const initialState =
             keepNorthUp: false,
             shareUrl: null,
             fileUrl: null,
-            baseLayer: null
+            baseLayer: null,
+            searchTerm: "",
         },
         gpsState: {
             tracking: "disabled",

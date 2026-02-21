@@ -26,12 +26,16 @@ export class RouteStrings {
     public static readonly SHARE = "share";
     public static readonly URL = "url";
     public static readonly POI = "poi";
+
     public static readonly ROUTE_ROOT = "/";
     public static readonly ROUTE_MAP = `/${RouteStrings.MAP}`;
     public static readonly ROUTE_SHARE = `/${RouteStrings.SHARE}`;
     public static readonly ROUTE_URL = `/${RouteStrings.URL}`;
     public static readonly ROUTE_POI = `/${RouteStrings.POI}`;
     public static readonly ROUTE_LAYER = "/layer";
+    public static readonly ROUTE_LANDING = "/landing";
+    public static readonly ROUTE_SHARES = "/shares";
+    public static readonly ROUTE_ABOUT = "/about";
     public static readonly COORDINATES = "Coordinates";
 
     public static readonly LAT = "lat";
@@ -177,5 +181,13 @@ export class HashService {
         const urlTree = this.router.createUrlTree([RouteStrings.POI, poiSourceAndId.source, poiSourceAndId.id],
             { queryParams: { language: poiSourceAndId.language } });
         return Urls.baseAddress + urlTree.toString();
+    }
+
+    public isHome() {
+        return this.router.url === RouteStrings.ROUTE_ROOT || this.router.url === RouteStrings.ROUTE_LANDING || this.router.url === RouteStrings.ROUTE_ABOUT;
+    }
+
+    public isShares() {
+        return this.router.url === RouteStrings.ROUTE_SHARES;
     }
 }

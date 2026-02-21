@@ -81,24 +81,30 @@ describe("Share Urls Service", () => {
             const promise = shareUrlsService.initialize();
 
             mockBackend.expectOne(Urls.urls).flush([{
-                id: "2"
+                id: "2",
+                start: { lat: 1, lng: 1 },
             }, {
-                id: "3"
+                id: "3",
+                start: { lat: 1, lng: 1 },
             }]);
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            mockBackend.expectOne(Urls.urls + "2").flush({});
+            mockBackend.expectOne(Urls.urls + "2").flush({
+                start: { lat: 1, lng: 1 },
+            });
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            mockBackend.expectOne(Urls.urls + "3").flush({});
+            mockBackend.expectOne(Urls.urls + "3").flush({
+                start: { lat: 1, lng: 1 },
+            });
 
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(UpdateShareUrlAction);
             expect(spy.calls.all()[1].args[0]).toBeInstanceOf(AddShareUrlAction);
             expect(spy.calls.all()[2].args[0]).toBeInstanceOf(RemoveShareUrlAction);
             expect(spy.calls.all()[3].args[0]).toBeInstanceOf(SetShareUrlsLastModifiedDateAction);
 
-            return promise;
+            await promise;
         }
     ));
 
@@ -129,11 +135,11 @@ describe("Share Urls Service", () => {
             mockBackend.expectOne(Urls.urls + "5/timestamp").flush(new Date(0).toISOString());
 
             expect(() => mockBackend.expectNone(Urls.urls)).not.toThrow();
-            return promise;
+            await promise;
         }
     ));
 
-    it("Should get share url server if not cached", inject([ShareUrlsService, HttpTestingController, DatabaseService],
+    it("Should get share url from server if not cached", inject([ShareUrlsService, HttpTestingController, DatabaseService],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
 
             databaseService.getShareUrlById = () => null;
@@ -142,11 +148,54 @@ describe("Share Urls Service", () => {
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            mockBackend.expectOne(Urls.urls + "6").flush({});
+            mockBackend.expectOne(Urls.urls + "6").flush({
+                start: { lat: 1, lng: 1 },
+            });
 
             const response = await promise;
             expect(response).toBeDefined();
-            return promise;
+            expect(response.start.lat).toBe(1);
+            expect(response.start.lng).toBe(1);
+        }
+    ));
+
+    it("Should get share url from server if not cached and use datacontainer routes to set start point", inject([ShareUrlsService, HttpTestingController, DatabaseService],
+        async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
+
+            databaseService.getShareUrlById = () => null;
+
+            const promise = shareUrlsService.getShareUrl("6");
+
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+
+            mockBackend.expectOne(Urls.urls + "6").flush({
+                dataContainer: { routes: [{ segments: [{ latlngs: [{ lat: 1, lng: 1 }] }] }] },
+            });
+
+            const response = await promise;
+            expect(response).toBeDefined();
+            expect(response.start.lat).toBe(1);
+            expect(response.start.lng).toBe(1);
+        }
+    ));
+
+    it("Should get share url from server if not cached and use datacontainer corners to set start point", inject([ShareUrlsService, HttpTestingController, DatabaseService],
+        async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
+
+            databaseService.getShareUrlById = () => null;
+
+            const promise = shareUrlsService.getShareUrl("6");
+
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+
+            mockBackend.expectOne(Urls.urls + "6").flush({
+                dataContainer: { northEast: { lat: 0, lng: 0 }, southWest: { lat: 2, lng: 2 } },
+            });
+
+            const response = await promise;
+            expect(response).toBeDefined();
+            expect(response.start.lat).toBe(1);
+            expect(response.start.lng).toBe(1);
         }
     ));
 
@@ -163,8 +212,10 @@ describe("Share Urls Service", () => {
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            expect(() => mockBackend.expectOne(Urls.urls + "7").flush({})).not.toThrow();
-            return promise;
+            expect(() => mockBackend.expectOne(Urls.urls + "7").flush({
+                start: { lat: 1, lng: 1 },
+            })).not.toThrow();
+            await promise;
         }
     ));
 
@@ -180,8 +231,10 @@ describe("Share Urls Service", () => {
             mockBackend.expectOne(Urls.urls + "7").flush(null, { status: 500, statusText: "Internal Server Error" });
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            expect(() => mockBackend.expectOne(Urls.urls + "7").flush({})).not.toThrow();
-            return promise;
+            expect(() => mockBackend.expectOne(Urls.urls + "7").flush({
+                start: { lat: 1, lng: 1 },
+            })).not.toThrow();
+            await promise;
         }
     ));
 
@@ -195,7 +248,7 @@ describe("Share Urls Service", () => {
             });
 
             mockBackend.expectOne(Urls.urls).flush({});
-            return promise;
+            await promise;
         }
     ));
 
@@ -209,7 +262,7 @@ describe("Share Urls Service", () => {
             });
 
             mockBackend.expectOne(Urls.urls + shareUrl.id).flush({});
-            return promise;
+            await promise;
         }
     ));
 
@@ -225,7 +278,7 @@ describe("Share Urls Service", () => {
             });
 
             mockBackend.expectOne(Urls.urls + shareUrl.id).flush({});
-            return promise;
+            await promise;
         }
     ));
 

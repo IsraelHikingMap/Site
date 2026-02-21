@@ -29,7 +29,7 @@
         angularticsAction="User traces open">
         <span><i class="fa fa-lg icon-recordings"></i> {{resources.myTraces}}</span>
       </button>
-      <button mat-menu-item (click)="openShares()" angulartics2On="click" angularticsCategory="User Menu"
+      <button mat-menu-item routerLink="/shares" angulartics2On="click" angularticsCategory="User Menu"
         angularticsAction="User shares open">
         <span><i class="fa fa-lg icon-mixcloud"></i> {{resources.mySavesInTheCloud}}</span>
       </button>

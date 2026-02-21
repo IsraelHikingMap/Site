@@ -18,7 +18,12 @@ describe("MapService", () => {
                 MapService,
                 CancelableTimeoutService,
                 { provide: SidebarService, useValue: {} },
-                { provide: LoggingService, useValue: {} }
+                {
+                    provide: LoggingService, useValue: {
+                        info: () => { },
+                        error: () => { }
+                    }
+                }
             ]
         });
     });
