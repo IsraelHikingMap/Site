@@ -89,12 +89,12 @@
                 <mgl-popup [lngLat]="selectedShareUrl.start" [closeOnClick]="false"
                     (popupClose)="onStartPointClick(selectedShareUrl)" [offset]="[0, -15]">
                     <div class="flex flex-row">
-                        {{selectedShareUrl.title}}
+                        <h3>{{selectedShareUrl.title}}</h3>
                     </div>
                     <div class="flex flex-row">
                         <button mat-menu-item (click)="openEditShareUrlDialog(selectedShareUrl)">
                             <i class="fa icon-pencil"></i>
-                            {{resources.edit}}
+                            {{resources.editProperties}}
                         </button>
                     </div>
                     <div class="flex flex-row">
