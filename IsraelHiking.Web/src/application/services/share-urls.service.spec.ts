@@ -193,6 +193,11 @@ describe("Share Urls Service", () => {
         expect(displayName).toContain("desc");
     }));
 
+    it("Should get social links for null share url", inject([ShareUrlsService], (shareUrlService: ShareUrlsService) => {
+        const links = shareUrlService.getShareSocialLinks(null);
+        expect(links.facebook).toBe("");
+    }));
+
     it("Should get social links", inject([ShareUrlsService], (shareUrlService: ShareUrlsService) => {
         const links = shareUrlService.getShareSocialLinks({ title: "title", description: "desc" } as ShareUrl);
         expect(links.facebook).toContain(Urls.facebook);
@@ -361,6 +366,32 @@ describe("Share Urls Service", () => {
         const imageUrl = shareUrlsService.getImageUrlFromShareId("42");
 
         expect(imageUrl).toContain("42");
+    }));
+
+    it("Should set share Url to store", inject([ShareUrlsService, Store], (shareUrlsService: ShareUrlsService, store: Store) => {
+        store.dispatch = jasmine.createSpy();
+        shareUrlsService.setShareUrl({} as any);
+        expect(store.dispatch).toHaveBeenCalled();
+    }));
+
+    it("Should get share url from store", inject([ShareUrlsService, Store], (shareUrlsService: ShareUrlsService, store: Store) => {
+        store.reset({
+            inMemoryState: {
+                shareUrl: {
+                    id: "42"
+                }
+            }
+        })
+        const shareUrl = shareUrlsService.getSelectedShareUrl();
+        expect(shareUrl.id).toBe("42");
+    }));
+
+    it("Should get users permissions from server", inject([ShareUrlsService, HttpTestingController], async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController) => {
+        const promise = shareUrlsService.getUserPermissions();
+
+        mockBackend.expectOne(Urls.permissions).flush({});
+        const permissions = await promise;
+        expect(permissions).not.toBeNull();
     }));
 
     it("Should get hike icon from hiking type", inject([ShareUrlsService], (shareUrlsService: ShareUrlsService) => {
