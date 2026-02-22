@@ -61,11 +61,12 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should not reset address bar if shares are open", inject([HashService, Router, Store],
-        (service: HashService, routerMock: Router, store: Store) => {
+    it("Should not reset address bar if shares are open", inject([HashService, Router, Store, MapService],
+        (service: HashService, routerMock: Router, store: Store, mapService: MapService) => {
             const spy = jasmine.createSpy();
             routerMock.navigate = spy;
-            (routerMock as any).url = RouteStrings.ROUTE_SHARE;
+            (routerMock as any).url = RouteStrings.ROUTE_SHARES;
+            mapService.isMoving = () => false;
             store.reset({
                 poiState: {}
             });
