@@ -1,12 +1,13 @@
 import { TestBed, inject } from "@angular/core/testing";
-import { NgxsModule } from "@ngxs/store";
+import { NgxsModule, Store } from "@ngxs/store";
 import type { Map, ErrorEvent } from "maplibre-gl";
 
 import { MapService } from "./map.service";
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
-import { InMemoryReducer } from "../reducers/in-memory.reducer";
 import { LoggingService } from "./logging.service";
 import { SidebarService } from "./sidebar.service";
+import { InMemoryReducer } from "../reducers/in-memory.reducer";
+import { SetLocationAction } from "../reducers/location.reducer";
 
 describe("MapService", () => {
     beforeEach(() => {
@@ -47,21 +48,6 @@ describe("MapService", () => {
 
         expect(url).toContain("/123");
     }));
-
-    it("Should set panned state on drag start", inject([MapService, CancelableTimeoutService],
-        async (service: MapService, cancelableTimeoutService: CancelableTimeoutService) => {
-            const spy = jasmine.createSpy();
-            cancelableTimeoutService.setTimeoutByName = spy;
-            service.initialize();
-            service.setMap({
-                on: (event: string, callback: () => void) => {
-                    if (event == "dragstart") callback();
-                }
-            } as any as Map);
-            await new Promise(resolve => setTimeout(resolve, 100));
-            expect(spy).toHaveBeenCalled();
-        }
-    ));
 
     it("Should should not do anything when missing image addres does not start with http", inject([MapService],
         async (service: MapService) => {
@@ -141,6 +127,34 @@ describe("MapService", () => {
         } as any as Map);
         await service.initializationPromise;
         expect(loggingService.error).toHaveBeenCalled();
+    }));
+
+    it("should update the state on moveend", inject([MapService, Store], async (service: MapService, store: Store) => {
+        const spy = jasmine.createSpy();
+        store.dispatch = spy;
+        service.setMap({
+            on: (event: string, callback: (error: ErrorEvent) => void) => {
+                if (event == "moveend") callback({} as any);
+            },
+            getCenter: () => ({ lng: 1, lat: 2 }),
+            getZoom: () => 1,
+        } as any as Map);
+        await service.initializationPromise;
+        expect(spy).toHaveBeenCalled();
+        expect(spy.calls.first().args[0]).toBeInstanceOf(SetLocationAction)
+    }));
+
+    it("should not throw if moveend is called after map removal", inject([MapService], async (service: MapService) => {
+        let moveendCallback: (e: any) => void;
+        service.setMap({
+            on: (event: string, callback: (error: ErrorEvent) => void) => {
+                if (event == "moveend") moveendCallback = callback;
+            },
+            off: () => { }
+        } as any as Map);
+        await service.initializationPromise;
+        service.unsetMap();
+        expect(() => moveendCallback(null)).not.toThrow();
     }));
 
     it("should get bounds from map", inject([MapService], async (service: MapService) => {

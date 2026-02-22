@@ -47,15 +47,6 @@ export class MapService {
         this.currentMap.on("moveend", this.onMoveEnd);
     }
 
-    public onMoveEnd = (e: DragEvent) => {
-        if (!e || !this.currentMap) {
-            return;
-        }
-        const centerLatLon = this.currentMap.getCenter();
-        const zoom = this.currentMap.getZoom();
-        this.store.dispatch(new SetLocationAction(centerLatLon.lng, centerLatLon.lat, zoom));
-    }
-
     public unsetMap() {
         this.loggingService.info("[Map] Uninitializing map");
         if (this.currentMap == null) {
@@ -102,6 +93,15 @@ export class MapService {
             return;
         }
         this.loggingService.error("[Map] Error: " + e?.error?.message);
+    }
+
+    public onMoveEnd = (e: DragEvent) => {
+        if (!e || !this.currentMap) {
+            return;
+        }
+        const centerLatLon = this.currentMap.getCenter();
+        const zoom = this.currentMap.getZoom();
+        this.store.dispatch(new SetLocationAction(centerLatLon.lng, centerLatLon.lat, zoom));
     }
 
     public getMapBounds(): Bounds {
