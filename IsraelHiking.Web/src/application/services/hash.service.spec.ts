@@ -29,7 +29,11 @@ describe("HashService", () => {
                 { provide: MapService, useValue: {} },
                 { provide: DataContainerService, useValue: {} },
                 { provide: ShareUrlsService, useValue: {} },
-                { provide: LayersService, useValue: {} },
+                {
+                    provide: LayersService, useValue: {
+                        addLayerAfterNavigation: () => { }
+                    }
+                },
                 SidebarService,
                 HashService
             ]
@@ -223,8 +227,8 @@ describe("HashService", () => {
         }
         ));
 
-    it("Should flyTo in case of map url", inject([HashService, Router, MapService],
-        (service: HashService, routerMock: Router, mapService: MapService) => {
+    it("Should flyTo in case of map url", inject([Router, MapService, HashService],
+        (routerMock: Router, mapService: MapService) => {
             mapService.flyTo = jasmine.createSpy();
             (routerMock as any).url = RouteStrings.ROUTE_MAP + "/2.00/2.000000/3.000000";
             (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
@@ -234,8 +238,8 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should set share in case of share url", inject([HashService, Router, DataContainerService],
-        (service: HashService, routerMock: Router, dataContainerService: DataContainerService) => {
+    it("Should set share in case of share url", inject([Router, DataContainerService, HashService],
+        (routerMock: Router, dataContainerService: DataContainerService) => {
             dataContainerService.setShareUrlAfterNavigation = jasmine.createSpy();
             (routerMock as any).url = RouteStrings.ROUTE_SHARE + "/1234";
             (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
@@ -245,8 +249,8 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should set file in case of file url", inject([HashService, Router, DataContainerService],
-        (service: HashService, routerMock: Router, dataContainerService: DataContainerService) => {
+    it("Should set file in case of file url", inject([Router, DataContainerService, HashService],
+        (routerMock: Router, dataContainerService: DataContainerService) => {
             dataContainerService.setFileUrlAfterNavigation = jasmine.createSpy();
             (routerMock as any).url = RouteStrings.ROUTE_URL + "/1234";
             (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
@@ -255,10 +259,21 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should open poi pane in case of poi url", inject([HashService, Router, SidebarService],
-        (service: HashService, routerMock: Router, sidebarService: SidebarService) => {
+    it("Should open poi pane in case of poi url", inject([Router, SidebarService, HashService],
+        (routerMock: Router, sidebarService: SidebarService) => {
             sidebarService.show = jasmine.createSpy();
             (routerMock as any).url = RouteStrings.ROUTE_POI + "/1234";
+            (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
+
+            expect(sidebarService.show).toHaveBeenCalled();
+        }
+    ));
+
+    it("Should show layers pane in case of layers url", inject([Router, SidebarService, MapService, HashService],
+        (routerMock: Router, sidebarService: SidebarService, mapService: MapService) => {
+            sidebarService.show = jasmine.createSpy();
+            mapService.isMoving = () => true;
+            (routerMock as any).url = RouteStrings.ROUTE_LAYER + "/1234";
             (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
 
             expect(sidebarService.show).toHaveBeenCalled();
