@@ -117,6 +117,9 @@ export class HashService {
         if (this.sidebarService.viewName === "public-poi") {
             return;
         }
+        if (this.router.url.includes(RouteStrings.ROUTE_SHARES)) {
+            return;
+        }
         const inMemoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
         if (inMemoryState.shareUrl) {
             this.router.navigate([RouteStrings.ROUTE_SHARE, inMemoryState.shareUrl.id], { replaceUrl: true });

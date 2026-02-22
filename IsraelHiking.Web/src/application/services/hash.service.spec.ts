@@ -18,7 +18,8 @@ describe("HashService", () => {
             navigate: jasmine.createSpy("navigate"),
             events: new Subject<any>(),
             createUrlTree: (array: []) => array.join("/"),
-            parseUrl: (url: string) => ({ root: { children: { primary: { segments: url.split("/") }, } }, queryParams: {} })
+            parseUrl: (url: string) => ({ root: { children: { primary: { segments: url.split("/") }, } }, queryParams: {} }),
+            url: ""
         };
         TestBed.configureTestingModule({
             imports: [NgxsModule.forRoot([InMemoryReducer])],
@@ -44,6 +45,31 @@ describe("HashService", () => {
             });
             service.initialize();
             sidebar.show("public-poi");
+            store.reset({
+                poiState: {
+                    selectedPointOfInterest: {}
+                },
+                inMemoryState: {},
+                locationState: {
+                    zoom: 1,
+                    latitude: 2,
+                    longitude: 3
+                }
+            });
+
+            expect(spy).not.toHaveBeenCalled();
+        }
+    ));
+
+    it("Should not reset address bar if shares are open", inject([HashService, Router, Store],
+        (service: HashService, routerMock: Router, store: Store) => {
+            const spy = jasmine.createSpy();
+            routerMock.navigate = spy;
+            (routerMock as any).url = RouteStrings.ROUTE_SHARE;
+            store.reset({
+                poiState: {}
+            });
+            service.initialize();
             store.reset({
                 poiState: {
                     selectedPointOfInterest: {}
