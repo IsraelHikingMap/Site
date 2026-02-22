@@ -165,7 +165,7 @@ export class ShareUrlsService {
                     this.store.dispatch(new UpdateShareUrlAction(shareToUpdate));
                 }
             } catch (ex) {
-                this.loggingService.error("[Shares] Unable to get share start for " + shareUrl.id + " " + (ex as Error).message + "\n" + JSON.stringify(fullShareUrl, null, 2));
+                this.loggingService.error("[Shares] Unable to get share start for " + shareUrl.id + " " + (ex as Error).message);
             }
         }
     }
