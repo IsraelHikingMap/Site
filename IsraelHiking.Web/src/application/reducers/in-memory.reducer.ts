@@ -11,12 +11,12 @@ export class ToggleDistanceAction {
 
 export class SetFollowingAction {
     public static type = this.prototype.constructor.name;
-    constructor(public following: boolean) {}
+    constructor(public following: boolean) { }
 }
 
 export class SetPannedAction {
     public static type = this.prototype.constructor.name;
-    constructor(public pannedTimestamp: Date) {}
+    constructor(public pannedTimestamp: Date) { }
 }
 
 export class ToggleKeepNorthUpAction {
@@ -25,12 +25,17 @@ export class ToggleKeepNorthUpAction {
 
 export class SetShareUrlAction {
     public static type = this.prototype.constructor.name;
-    constructor(public shareUrl: ShareUrl) {}
+    constructor(public shareUrl: ShareUrl) { }
 }
 
 export class SetFileUrlAndBaseLayerAction {
     public static type = this.prototype.constructor.name;
-    constructor(public fileUrl: string, public baseLayer: string) {}
+    constructor(public fileUrl: string, public baseLayer: string) { }
+}
+
+export class SetSearchTermAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public searchTerm: string) { }
 }
 
 @State({
@@ -85,6 +90,14 @@ export class InMemoryReducer {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.fileUrl = action.fileUrl;
             lastState.baseLayer = action.baseLayer;
+            return lastState;
+        }));
+    }
+
+    @Action(SetSearchTermAction)
+    public setSearchTerm(ctx: StateContext<InMemoryState>, action: SetSearchTermAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.searchTerm = action.searchTerm;
             return lastState;
         }));
     }

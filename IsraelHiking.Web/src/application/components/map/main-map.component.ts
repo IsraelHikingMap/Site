@@ -27,7 +27,6 @@ import { ResourcesService } from "../../services/resources.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
-import { SetLocationAction } from "../../reducers/location.reducer";
 import type { ApplicationState, LocationState } from "../../models";
 
 @Component({
@@ -67,15 +66,6 @@ export class MainMapComponent {
         this.destroyRef.onDestroy(() => {
             this.mapService.unsetMap();
         });
-    }
-
-    public moveEnd(e: DragEvent) {
-        if (!e || !this.map) {
-            return;
-        }
-        const centerLatLon = this.map.getCenter();
-        const zoom = this.map.getZoom();
-        this.store.dispatch(new SetLocationAction(centerLatLon.lng, centerLatLon.lat, zoom));
     }
 
     public mapLoaded(map: Map) {

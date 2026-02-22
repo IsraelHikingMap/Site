@@ -2,8 +2,7 @@
 <sidebar></sidebar>
 <div class="flex flex-row w-full map-height" [dir]="resources.direction">
   <mgl-map ngSkipHydration="true" [zoom]="[location.zoom]" [center]="[location.longitude, location.latitude]"
-    [mapStyle]="initialStyle" (moveEnd)="moveEnd($event)" (mapLoad)="mapLoaded($event)" [doubleClickZoom]="false"
-    [attributionControl]="false">
+    [mapStyle]="initialStyle" (mapLoad)="mapLoaded($event)" [doubleClickZoom]="false" [attributionControl]="false">
     <layers [isMainMap]="true"></layers>
     @if (!isIFrame()) {
     <public-pois></public-pois>

@@ -22,10 +22,8 @@ import { FileService } from "../services/file.service";
 import { LayersService } from "../services/layers.service";
 import { HashService } from "../services/hash.service";
 import { PurchaseService } from "../services/purchase.service";
-import { OsmAddressesService } from "../services/osm-addresses.service";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
 import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
-import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
 import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.component";
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 import { SendReportDialogComponent } from "./dialogs/send-report-dialog.component";
@@ -47,7 +45,6 @@ export class MainMenuComponent {
     public readonly resources = inject(ResourcesService);
 
     private readonly authorizationService = inject(AuthorizationService);
-    private readonly osmAddressesService = inject(OsmAddressesService);
     private readonly dialog = inject(MatDialog);
     private readonly runningContextService = inject(RunningContextService);
     private readonly toastService = inject(ToastService);
@@ -175,10 +172,6 @@ export class MainMenuComponent {
 
     public openTraces() {
         this.dialog.open(TracesDialogComponent, { width: "480px", data: [] });
-    }
-
-    public openShares() {
-        this.dialog.open(SharesDialogComponent, { width: "480px" });
     }
 
     public openConfigurationDialog() {

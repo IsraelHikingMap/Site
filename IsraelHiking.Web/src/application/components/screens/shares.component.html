@@ -19,26 +19,55 @@
                 {{resources.filter}}
             </button>
             <mat-menu #filterMenu="matMenu">
-                <div mat-menu-item>
+                <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Hard')"
                         [checked]="filter.difficulty.includes('Hard')">{{resources.hard}}</mat-checkbox>
                 </div>
-                <div mat-menu-item>
+                <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Moderate')"
                         [checked]="filter.difficulty.includes('Moderate')">{{resources.moderate}}</mat-checkbox>
                 </div>
-                <div mat-menu-item>
+                <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Easy')"
                         [checked]="filter.difficulty.includes('Easy')">{{resources.easy}}</mat-checkbox>
                 </div>
-                <div mat-menu-item>
+                <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Unknown')"
                         [checked]="filter.difficulty.includes('Unknown')">{{resources.unknown}}</mat-checkbox>
+                </div>
+                <mat-divider></mat-divider>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterChange('type', 'Biking')"
+                        [checked]="filter.type.includes('Biking')">
+                        <i class="fa icon-hike"></i>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterChange('type', 'Hiking')"
+                        [checked]="filter.type.includes('Hiking')">
+                        <i class="fa icon-bike"></i>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterChange('type', '4x4')"
+                        [checked]="filter.type.includes('4x4')">
+                        <i class="fa icon-four-by-four"></i>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterChange('type', 'Unknown')"
+                        [checked]="filter.type.includes('Unknown')">
+                        <i class="fa icon-question"></i>
+                    </mat-checkbox>
                 </div>
             </mat-menu>
         </div>
         @for (shareUrl of filteredShareUrls; track shareUrl.id ) {
-        <share-item [shareUrl]="shareUrl" [showMenu]="true"></share-item>
+        <div [id]="'share-url-' + shareUrl.id">
+            <share-item [shareUrl]="shareUrl" [showMenu]="true" (delete)="deleteShareUrl(shareUrl)"
+                (editProperties)="openEditShareUrlDialog(shareUrl)" (open)="openShareUrl(shareUrl)"
+                (addToRoutes)="addShareUrlToRoutes(shareUrl)" (moveToRoute)="moveToShare(shareUrl)"></share-item>
+        </div>
         }
     </div>
     <div class="max-md:hidden w-2/3">
@@ -47,7 +76,7 @@
                 <layers [isMainMap]="false"></layers>
                 <routes-path [routesGeoJson]="routesGeoJson"></routes-path>
                 @for (shareUrl of filteredShareUrls; track shareUrl.id ) {
-                <mgl-marker [lngLat]="shareUrl.dataContainer.routes[0].segments[0].latlngs[0]">
+                <mgl-marker [lngLat]="shareUrl.start">
                     <span class="fa-stack fa-lg cursor-pointer selected-marker-icon"
                         (click)="onStartPointClick(shareUrl)">
                         <i class="fa icon-map-marker-rect fa-stack-2x"
@@ -57,14 +86,33 @@
                 </mgl-marker>
                 }
                 @if (selectedShareUrl) {
-                <mgl-popup [lngLat]="selectedShareUrl.dataContainer.routes[0].segments[0].latlngs[0]"
-                    [closeOnClick]="false" [closeButton]="false" [offset]="[0, -15]">
+                <mgl-popup [lngLat]="selectedShareUrl.start" [closeOnClick]="false"
+                    (popupClose)="onStartPointClick(selectedShareUrl)" [offset]="[0, -15]">
                     <div class="flex flex-row">
-                        {{selectedShareUrl.title}}
+                        <h3>{{selectedShareUrl.title}}</h3>
                     </div>
                     <div class="flex flex-row">
-                        <button mat-button class="flex-1 w-full">
+                        <button mat-menu-item (click)="openEditShareUrlDialog(selectedShareUrl)">
+                            <i class="fa icon-pencil"></i>
+                            {{resources.editProperties}}
+                        </button>
+                    </div>
+                    <div class="flex flex-row">
+                        <button mat-menu-item (click)="openShareUrl(selectedShareUrl)">
+                            <i class="fa icon-external-link-square"></i>
+                            {{resources.openCloudSave}}
+                        </button>
+                    </div>
+                    <div class="flex flex-row">
+                        <button mat-menu-item (click)="addShareUrlToRoutes(selectedShareUrl)">
+                            <i class="fa icon-plus"></i>
+                            {{resources.addToRoutes}}
+                        </button>
+                    </div>
+                    <div class="flex flex-row">
+                        <button mat-menu-item (click)="deleteShareUrl(selectedShareUrl)">
                             <i class="fa icon-trash"></i>
+                            {{resources.delete}}
                         </button>
                     </div>
                 </mgl-popup>

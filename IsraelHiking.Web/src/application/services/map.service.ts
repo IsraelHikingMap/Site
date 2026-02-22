@@ -7,6 +7,7 @@ import { LoggingService } from "./logging.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
 import { SpatialService } from "./spatial.service";
 import { SidebarService } from "./sidebar.service";
+import { SetLocationAction } from "../reducers/location.reducer";
 import type { ApplicationState, Bounds, LatLngAltTime } from "../models";
 
 @Injectable()
@@ -36,21 +37,25 @@ export class MapService {
     }
 
     public setMap(map: Map) {
+        this.loggingService.info("[Map] Initializing map");
         this.currentMap = map;
         this.resolve();
 
         this.currentMap.on("dragstart", this.onDragstart);
         this.currentMap.on("styleimagemissing", this.onStyleImageMissing);
         this.currentMap.on("error", this.onError);
+        this.currentMap.on("moveend", this.onMoveEnd);
     }
 
     public unsetMap() {
+        this.loggingService.info("[Map] Uninitializing map");
         if (this.currentMap == null) {
             return;
         }
         this.currentMap.off("dragstart", this.onDragstart);
         this.currentMap.off("styleimagemissing", this.onStyleImageMissing);
         this.currentMap.off("error", this.onError);
+        this.currentMap.off("moveend", this.onMoveEnd);
         this.initializationPromise = new Promise<void>((resolve) => {
             this.resolve = resolve;
         });
@@ -88,6 +93,15 @@ export class MapService {
             return;
         }
         this.loggingService.error("[Map] Error: " + e?.error?.message);
+    }
+
+    public onMoveEnd = (e: DragEvent) => {
+        if (!e || !this.currentMap) {
+            return;
+        }
+        const centerLatLon = this.currentMap.getCenter();
+        const zoom = this.currentMap.getZoom();
+        this.store.dispatch(new SetLocationAction(centerLatLon.lng, centerLatLon.lat, zoom));
     }
 
     public getMapBounds(): Bounds {
