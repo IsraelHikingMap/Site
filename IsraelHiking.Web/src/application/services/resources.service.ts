@@ -274,6 +274,7 @@ export class ResourcesService {
     public activityType: string;
     public faqContent: string;
     public editProperties: string;
+    public openCloudSave: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -505,7 +506,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1771695727006");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1771761713350");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -759,6 +760,7 @@ export class ResourcesService {
         this.activityType = this.gettextCatalog.getString("Activity Type");
         this.faqContent = this.gettextCatalog.getString("All FAQ content goes here");
         this.editProperties = this.gettextCatalog.getString("Edit Properties");
+        this.openCloudSave = this.gettextCatalog.getString("Open Cloud Save");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

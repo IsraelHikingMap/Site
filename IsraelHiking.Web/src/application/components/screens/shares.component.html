@@ -65,7 +65,7 @@
         @for (shareUrl of filteredShareUrls; track shareUrl.id ) {
         <div [id]="'share-url-' + shareUrl.id">
             <share-item [shareUrl]="shareUrl" [showMenu]="true" (delete)="deleteShareUrl(shareUrl)"
-                (editProperties)="openEditShareUrlDialog(shareUrl)" (editRoute)="showShareUrl(shareUrl)"
+                (editProperties)="openEditShareUrlDialog(shareUrl)" (open)="openShareUrl(shareUrl)"
                 (addToRoutes)="addShareUrlToRoutes(shareUrl)" (moveToRoute)="moveToShare(shareUrl)"></share-item>
         </div>
         }
@@ -98,9 +98,9 @@
                         </button>
                     </div>
                     <div class="flex flex-row">
-                        <button mat-menu-item (click)="showShareUrl(selectedShareUrl)">
-                            <i class="fa icon-recordings"></i>
-                            {{resources.editRoute}}
+                        <button mat-menu-item (click)="openShareUrl(selectedShareUrl)">
+                            <i class="fa icon-external-link-square"></i>
+                            {{resources.openCloudSave}}
                         </button>
                     </div>
                     <div class="flex flex-row">

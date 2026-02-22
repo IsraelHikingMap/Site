@@ -176,7 +176,7 @@ export class SharesComponent {
         });
     }
 
-    public async showShareUrl(shareUrl: Immutable<ShareUrl>) {
+    public async openShareUrl(shareUrl: Immutable<ShareUrl>) {
         if (this.selectedRouteService.areRoutesEmpty()) {
             this.router.navigate([RouteStrings.ROUTE_SHARE, shareUrl.id]);
             return;

@@ -24,7 +24,7 @@ export class ShareItemComponent implements OnInit {
     public showMenu = input<boolean>(false);
     public delete = output<void>();
     public editProperties = output<void>();
-    public editRoute = output<void>();
+    public open = output<void>();
     public addToRoutes = output<void>();
     public moveToRoute = output<void>();
 

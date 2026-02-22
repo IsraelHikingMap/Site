@@ -27,7 +27,6 @@ import { ResourcesService } from "../../services/resources.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
-import { SetLocationAction } from "../../reducers/location.reducer";
 import type { ApplicationState, LocationState } from "../../models";
 
 @Component({
