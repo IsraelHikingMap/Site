@@ -89,9 +89,10 @@ export class ShareEditDialogComponent {
             this.shareUrl.public = this.shareUrl.public ?? false;
             this.shareUrl.type = this.shareUrl.type || activityType;
             this.shareUrl.difficulty = this.shareUrl.difficulty || "Unknown";
-            this.shareUrl.base64Preview = null;
+            this.shareUrl.base64Preview = this.shareUrlsService.getImageUrlFromShareId(this.shareUrl.id);
             this.canUpdate = true;
             this.shareUrl.dataContainer = this.data.dataContainer ?? this.shareUrl.dataContainer;
+            this.updateCurrentShare = true;
         } else {
             this.shareUrl = {
                 id: "",
@@ -104,11 +105,6 @@ export class ShareEditDialogComponent {
                 base64Preview: null,
                 dataContainer: this.data.dataContainer
             };
-        }
-        if (this.canUpdate && this.data.dataContainer == null) {
-            // In case of editing the a route from the routes menu - the defualt should be to update.
-            this.updateCurrentShare = true;
-            this.shareUrl.base64Preview = this.shareUrlsService.getImageUrlFromShareId(this.shareUrl.id);
         }
         const geojson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = { type: "FeatureCollection", features: [] };
         for (const route of this.shareUrl.dataContainer.routes) {
