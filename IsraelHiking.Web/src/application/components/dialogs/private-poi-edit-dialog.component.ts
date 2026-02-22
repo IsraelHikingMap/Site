@@ -257,6 +257,10 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
         return `${Urls.waze}${this.marker.latlng.lat},${this.marker.latlng.lng}`;
     }
 
+    public getGoogleMapsAddress() {
+        return `${Urls.googleMaps}${this.marker.latlng.lat},${this.marker.latlng.lng}`;
+    }
+
     @HostListener("window:keydown", ["$event"])
     public onEnterPress($event: KeyboardEvent) {
         if ($event.shiftKey) {

@@ -44,6 +44,7 @@ export type PoiSocialLinks = {
     facebook: string;
     whatsapp: string;
     waze: string;
+    googleMaps: string;
 };
 
 export type SelectableCategory = Category & {
@@ -488,7 +489,8 @@ export class PoiService {
             poiLink,
             facebook: `${Urls.facebook}${escaped}`,
             whatsapp: this.whatsappService.getUrl(GeoJSONUtils.getTitle(feature, language), escaped) as string,
-            waze: `${Urls.waze}${location.lat},${location.lng}`
+            waze: `${Urls.waze}${location.lat},${location.lng}`,
+            googleMaps: `${Urls.googleMaps}${location.lat},${location.lng}`
         };
     }
 

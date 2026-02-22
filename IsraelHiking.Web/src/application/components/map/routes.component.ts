@@ -35,7 +35,7 @@ interface RoutePointViewData {
 export class RoutesComponent implements AfterViewInit {
 
     public routePointPopupData: RoutePointViewData;
-    public nonEditRoutePointPopupData: { latlng: LatLngAltTime; wazeAddress: string; routeId: string };
+    public nonEditRoutePointPopupData: { latlng: LatLngAltTime; wazeAddress: string; googleMapsAddress: string; routeId: string };
     public editingRouteGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = {
         type: "FeatureCollection",
         features: []
@@ -198,6 +198,7 @@ export class RoutesComponent implements AfterViewInit {
         this.nonEditRoutePointPopupData = {
             latlng: event.lngLat,
             wazeAddress: `${Urls.waze}${event.lngLat.lat},${event.lngLat.lng}`,
+            googleMapsAddress: `${Urls.googleMaps}${event.lngLat.lat},${event.lngLat.lng}`,
             routeId
         };
     }

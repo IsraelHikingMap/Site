@@ -100,6 +100,10 @@
         <a mat-menu-item [href]="getWazeAddress()" target="_blank" angulartics2On="click"
           angularticsCategory="Private POI" angularticsAction="Share with Waze"><i class="fa icon-waze"></i>
           {{resources.navigateWithWaze}}</a>
+        <a mat-menu-item [href]="getGoogleMapsAddress()" target="_blank" angulartics2On="click"
+          angularticsCategory="Private POI" angularticsAction="Share with Google Maps"><i
+            class="fa icon-map-marker"></i>
+          {{resources.navigateWithGoogleMaps}}</a>
       </mat-menu>
       <button mat-button [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}" matTooltipPosition="above"
         angulartics2On="click" angularticsCategory="Private POI" angularticsAction="More"><i

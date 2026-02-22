@@ -45,14 +45,29 @@
 <mgl-popup [lngLat]="[nonEditRoutePointPopupData.latlng.lng, nonEditRoutePointPopupData.latlng.lat]"
   (popupClose)="nonEditRoutePointPopupData = null">
   <div [dir]="resources.direction">
-    <div class="flex flex-row">
-      <div class="w-1/2">
-        <a mat-button class="w-full" [href]="nonEditRoutePointPopupData.wazeAddress" target="_blank"
-          matTooltip="{{resources.navigateWithWaze}}" matTooltipPosition="above"><i class="fa icon-waze"></i></a>
+    <div class="flex flex-row gap-1">
+      <div class="flex-1">
+        <div class="flex flex-col text-center">
+          <a mat-button class="w-full" [href]="nonEditRoutePointPopupData.wazeAddress" target="_blank"
+            matTooltip="{{resources.navigateWithWaze}}" matTooltipPosition="above"><i class="fa icon-waze"></i></a>
+          {{resources.navigateWithWaze}}
+        </div>
       </div>
-      <div class="w-1/2">
-        <button mat-button class="w-full" (click)="switchToEditMode(nonEditRoutePointPopupData.routeId)"
-          matTooltip="{{resources.edit}}" matTooltipPosition="above"><i class="fa icon-pencil"></i></button>
+      <div class="flex-1">
+        <div class="flex flex-col text-center">
+          <a mat-button class="w-full" [href]="nonEditRoutePointPopupData.googleMapsAddress" target="_blank"
+            matTooltip="{{resources.navigateWithGoogleMaps}}" matTooltipPosition="above"><i
+              class="fa icon-map-marker"></i>
+          </a>
+          {{resources.navigateWithGoogleMaps}}
+        </div>
+      </div>
+      <div class="flex-1">
+        <div class="flex flex-col text-center">
+          <button mat-button class="w-full" (click)="switchToEditMode(nonEditRoutePointPopupData.routeId)"
+            matTooltip="{{resources.edit}}" matTooltipPosition="above"><i class="fa icon-pencil"></i></button>
+          {{resources.edit}}
+        </div>
       </div>
     </div>
   </div>

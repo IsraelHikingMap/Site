@@ -201,6 +201,7 @@ export class ResourcesService {
     public gotLostWarnings: string;
     public gotLostWarningsHint: string;
     public navigateWithWaze: string;
+    public navigateWithGoogleMaps: string;
     public offlinePurchaseGraditude: string;
     public purchaseSubscription: string;
     public renewSubscription: string;
@@ -506,7 +507,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1771761713350");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1771792248161");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -687,6 +688,7 @@ export class ResourcesService {
         this.gotLostWarningsHint = this.gettextCatalog.getString("Lets you know when the your planned route " +
             "is more than 50 meters from your current position");
         this.navigateWithWaze = this.gettextCatalog.getString("Navigate with Waze");
+        this.navigateWithGoogleMaps = this.gettextCatalog.getString("Navigate with Google Maps");
         this.offlinePurchaseGraditude = this.gettextCatalog.getString("Thanks for purchasing! download instructions here...");
         this.purchaseSubscription = this.gettextCatalog.getString("Mapeak Pro");
         this.renewSubscription = this.gettextCatalog.getString("Renew subscription");

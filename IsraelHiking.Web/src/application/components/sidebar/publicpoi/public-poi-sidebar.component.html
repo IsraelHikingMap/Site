@@ -39,6 +39,11 @@
                 matTooltip="{{resources.navigateWithWaze}}" matTooltipPosition="below" angulartics2On="click"
                 angularticsCategory="Share" angularticsAction="Navigate with waze"><i class="fa icon-waze"></i></a>
             </div>
+            <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks.googleMaps" [target]="'_blank'"
+                matTooltip="{{resources.navigateWithGoogleMaps}}" matTooltipPosition="below" angulartics2On="click"
+                angularticsCategory="Share" angularticsAction="Navigate with google maps"><i
+                  class="fa icon-map-marker"></i></a>
+            </div>
             @if (isApp()) {
             <div class="flex-1"><button mat-button class="w-full" (click)=share() matTooltip="{{resources.share}}"
                 matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share"

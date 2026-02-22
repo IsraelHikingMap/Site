@@ -38,6 +38,7 @@ export class Urls {
 
     public static readonly facebook = "https://www.facebook.com/sharer/sharer.php?u=";
     public static readonly waze = "https://www.waze.com/ul?navigate=yes&zoom=17&ll=";
+    public static readonly googleMaps = "https://www.google.com/search/?api=1&query=";
     public static readonly tranlation = "https://mapeak.com/api/translation/translate";
 
     public static readonly HIKING_STYLE_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json";
