@@ -141,7 +141,7 @@ describe("MapService", () => {
         } as any as Map);
         await service.initializationPromise;
         expect(spy).toHaveBeenCalled();
-        expect(spy.calls.first().args[0]).toBeInstanceOf(SetLocationAction)
+        expect(spy.calls.all()[0].args[0]).toBeInstanceOf(SetLocationAction)
     }));
 
     it("should not throw if moveend is called after map removal", inject([MapService], async (service: MapService) => {
