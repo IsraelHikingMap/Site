@@ -19,7 +19,7 @@ export class AppRootComponent {
 
   public readonly resources = inject(ResourcesService);
   private readonly runningContextService = inject(RunningContextService)
-  private readonly hasService = inject(HashService);
+  private readonly hashService = inject(HashService);
 
   @HostListener("window:scroll", [])
   onWindowScroll() {
@@ -31,7 +31,7 @@ export class AppRootComponent {
   }
 
   public isHome() {
-    return this.hasService.isHome();
+    return this.hashService.isHome();
   }
 
 }
