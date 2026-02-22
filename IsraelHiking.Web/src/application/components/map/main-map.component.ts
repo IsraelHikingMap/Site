@@ -69,15 +69,6 @@ export class MainMapComponent {
         });
     }
 
-    public moveEnd(e: DragEvent) {
-        if (!e || !this.map) {
-            return;
-        }
-        const centerLatLon = this.map.getCenter();
-        const zoom = this.map.getZoom();
-        this.store.dispatch(new SetLocationAction(centerLatLon.lng, centerLatLon.lat, zoom));
-    }
-
     public mapLoaded(map: Map) {
         this.map = map;
         this.mapService.setMap(this.map);
