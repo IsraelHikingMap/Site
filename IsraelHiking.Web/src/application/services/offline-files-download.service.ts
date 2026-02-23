@@ -208,7 +208,7 @@ export class OfflineFilesDownloadService {
         const params: Record<string, string> = {};
         if (lastModifiedString) {
             params.lastModified = lastModifiedString;
-        };
+        }
         if (tileX != null && tileY != null) {
             params.tileX = tileX.toString();
             params.tileY = tileY.toString();

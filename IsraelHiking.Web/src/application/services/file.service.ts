@@ -304,60 +304,58 @@ export class FileService {
         });
     }
 
-    public downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void, abortController: AbortController): Promise<void> {
+    public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void, abortController: AbortController): Promise<void> {
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
         let previousPercentage = 0;
-        return new Promise<void>((resolve, reject) => {
-            fetch(url, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
-                signal: abortController.signal
-            }).then(async (response) => {
-                if (!response.ok) {
-                    this.loggingService.error(`[Files] Failed to download file: ${fileName}, status: ${response.statusText}`);
-                    reject(new Error(`Failed to download file: ${fileName}, status: ${response.statusText}`));
-                    return;
-                }
-                const reader = response.body.getReader();
-                const contentLength = Number(response.headers.get("Content-Length"));
-                let receivedLength = 0;
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (abortController.signal.aborted) {
-                        this.loggingService.info(`[Files] Aborting download of file ${fileName}`);
-                        resolve();
-                        return;
-                    }
-                    if (done) {
-                        this.loggingService.info(`[Files] Finished downloading and writing file to cache, file name ${fileName}`);
-                        resolve();
-                        break;
-                    }
-                    if (receivedLength === 0) {
-                        await Filesystem.writeFile({
-                            path: fileName,
-                            directory: Directory.Cache,
-                            data: encode(value.buffer),
-                        });
-                    } else {
-                        await Filesystem.appendFile({
-                            path: fileName,
-                            directory: Directory.Cache,
-                            data: encode(value.buffer),
-                        });
-                    }
-                    receivedLength += value.length;
-                    if (contentLength > 0) {
-                        const currentPercentage = receivedLength / contentLength;
-                        if (currentPercentage - previousPercentage > 0.001) {
-                            progressCallback(currentPercentage);
-                            previousPercentage = currentPercentage;
-                        }
-                    }
-                }
-            });
+        const response = await fetch(url, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            signal: abortController.signal
         });
+        if (!response.ok) {
+            this.loggingService.error(`[Files] Failed to download file: ${fileName}, status: ${response.statusText}`);
+            throw new Error(`Failed to download file: ${fileName}, status: ${response.statusText}`);
+        }
+        const reader = response.body.getReader();
+        const contentLength = Number(response.headers.get("Content-Length"));
+        let receivedLength = 0;
+        let done = false;
+        do {
+            const readResult = await reader.read();
+            done = readResult.done;
+            if (done) {
+                break;
+            }
+            const value = readResult.value;
+            if (abortController.signal.aborted) {
+                this.loggingService.info(`[Files] Aborting download of file ${fileName}`);
+                return;
+            }
+
+            if (receivedLength === 0) {
+                await Filesystem.writeFile({
+                    path: fileName,
+                    directory: Directory.Cache,
+                    data: encode(value.buffer),
+                });
+            } else {
+                await Filesystem.appendFile({
+                    path: fileName,
+                    directory: Directory.Cache,
+                    data: encode(value.buffer),
+                });
+            }
+            receivedLength += value.length;
+            if (contentLength > 0) {
+                const currentPercentage = receivedLength / contentLength;
+                if (currentPercentage - previousPercentage > 0.001) {
+                    progressCallback(currentPercentage);
+                    previousPercentage = currentPercentage;
+                }
+            }
+        } while (!done);
+        this.loggingService.info(`[Files] Finished downloading and writing file to cache, file name ${fileName}`);
     }
 
     public async moveFileFromCacheToDataDirectory(fileName: string): Promise<void> {
