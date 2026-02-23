@@ -506,7 +506,7 @@ export class PoiService {
         feature.properties.poiIcon = feature.properties.poiIcon || `icon-${markerData.type || "star"}`;
         for (const url of (markerData.urls.filter(u => u.mimeType.startsWith("image")).map(u => u.url))) {
             GeoJSONUtils.setProperty(feature, "image", url);
-        };
+        }
     }
 
     public getItmCoordinates(feature: GeoJSON.Feature): NorthEast {
