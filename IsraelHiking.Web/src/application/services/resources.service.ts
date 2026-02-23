@@ -276,6 +276,9 @@ export class ResourcesService {
     public faqContent: string;
     public editProperties: string;
     public openCloudSave: string;
+    public FAQ: string;
+    public downloadMapForOfflineUse: string;
+    public privacyPolicyTermsOfService: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -345,17 +348,6 @@ export class ResourcesService {
     public dontSwitchApps: string;
     public tooManyRoutes: string;
     public openRoutesPanel: string;
-    // Info
-    public infoSubheader: string;
-    public infoHelpfulLinks: string;
-    public infoFacebookLink: string;
-    public infoGithubLink: string;
-    public infoFAQLink: string;
-    public infoDownloadMapForOfflineUse: string;
-    public infoDownloadOldMapsForOfflineUse: string;
-    public infoFooterThanks: string;
-    public infoFooterAuthors: string;
-    public infoPrivacyPolicyTermsOfService: string;
     // Legend
     public legendMarkedTrails: string;
     public legendRedMarkedTrail: string;
@@ -763,6 +755,9 @@ export class ResourcesService {
         this.faqContent = this.gettextCatalog.getString("All FAQ content goes here");
         this.editProperties = this.gettextCatalog.getString("Edit Properties");
         this.openCloudSave = this.gettextCatalog.getString("Open Cloud Save");
+        this.FAQ = this.gettextCatalog.getString("F.A.Q");
+        this.downloadMapForOfflineUse = this.gettextCatalog.getString("Download Map for Offline Use");
+        this.privacyPolicyTermsOfService = this.gettextCatalog.getString("Privacy Policy and Terms of Service");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -849,20 +844,6 @@ export class ResourcesService {
         this.dontSwitchApps = this.gettextCatalog.getString("To prevent download errors, please don't switch apps or lock your screen until the download is finished");
         this.tooManyRoutes = this.gettextCatalog.getString("You have more than 10 routes which can cause performance issues.");
         this.openRoutesPanel = this.gettextCatalog.getString("Open routes panel");
-        // Info
-        this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
-        this.infoSubheader = this.gettextCatalog
-            .getString("This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.")
-            .replace("{{link}}", "<a dir='ltr' href='https://www.openstreetmap.org/' target='_blank'>")
-            .replace("{{linkend}}", "</a>");
-        this.infoFacebookLink = this.gettextCatalog.getString("Interact with other users in our Facebook group");
-        this.infoGithubLink = this.gettextCatalog
-            .getString("Request features and report bugs on our Github project page");
-        this.infoFAQLink = this.gettextCatalog.getString("F.A.Q");
-        this.infoDownloadMapForOfflineUse = this.gettextCatalog.getString("Download Map for Offline Use");
-        this.infoFooterThanks = this.gettextCatalog.getString("Thank you for your support!");
-        this.infoFooterAuthors = this.gettextCatalog.getString("Harel and Zeev");
-        this.infoPrivacyPolicyTermsOfService = this.gettextCatalog.getString("Privacy Policy and Terms of Service");
         // Legend
         this.legendMarkedTrails = this.gettextCatalog.getString("Marked Trails");
         this.legendRedMarkedTrail = this.gettextCatalog.getString("Red Marked Trail");
