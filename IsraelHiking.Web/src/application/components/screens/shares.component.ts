@@ -76,6 +76,9 @@ export class SharesComponent {
         this.store.select((state: ApplicationState) => state.inMemoryState.searchTerm).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.runFilter();
         });
+        this.store.select((state: ApplicationState) => state.shareUrlsState.shareUrls).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+            this.runFilter();
+        });
     }
 
     public mapLoaded(map: Map) {
