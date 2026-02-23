@@ -184,16 +184,10 @@ export class MainMenuComponent {
     }
 
     public isPurchaseAvailable() {
-        if (!this.isLoggedIn() && this.runningContextService.isIos) {
-            return false;
-        }
         return this.purchaseService.isPurchaseAvailable();
     }
 
     public isRenewAvailable() {
-        if (!this.isLoggedIn() && this.runningContextService.isIos) {
-            return false;
-        }
         return this.purchaseService.isRenewAvailable();
     }
 

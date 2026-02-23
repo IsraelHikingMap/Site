@@ -33,6 +33,20 @@
         angularticsAction="User shares open">
         <span><i class="fa fa-lg icon-mixcloud"></i> {{resources.mySavesInTheCloud}}</span>
       </button>
+      @if (isPurchaseAvailable()) {
+      <button mat-menu-item (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu"
+        angularticsAction="Order">
+        <i class="text-green-600 fa fa-lg icon-dollar mat-icon"></i>
+        <span class="mx-1 text-green-600">{{resources.purchaseSubscription}}</span>
+      </button>
+      }
+      @if (isRenewAvailable()) {
+      <button mat-menu-item (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu"
+        angularticsAction="Renew">
+        <i class="text-green-600 fa fa-lg icon-dollar mat-icon"></i>
+        <span class="text-green-600 mx-1">{{resources.renewSubscription}}</span>
+      </button>
+      }
       @if (isOfflineDownloadAvailable()) {
       <button mat-menu-item (click)="downloadOfflineMaps()" angulartics2On="click" angularticsCategory="User Menu"
         angularticsAction="Download">
@@ -49,20 +63,6 @@
         <span><i class="fa fa-lg icon-sign-out"></i> {{resources.logout}}</span>
       </button>
       <hr />
-      }
-      @if (isPurchaseAvailable()) {
-      <button mat-menu-item (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu"
-        angularticsAction="Order">
-        <i class="text-green-600 fa fa-lg icon-dollar mat-icon"></i>
-        <span class="mx-1 text-green-600">{{resources.purchaseSubscription}}</span>
-      </button>
-      }
-      @if (isRenewAvailable()) {
-      <button mat-menu-item (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu"
-        angularticsAction="Renew">
-        <i class="text-green-600 fa fa-lg icon-dollar mat-icon"></i>
-        <span class="text-green-600 mx-1">{{resources.renewSubscription}}</span>
-      </button>
       }
       @if (!isIFrame()) {
       <button mat-menu-item routerLink="/map" angulartics2On="click" angularticsCategory="Menu"
