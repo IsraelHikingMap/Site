@@ -5,7 +5,7 @@ import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } fr
 import { NgClass, NgStyle } from "@angular/common";
 import { MatDialog } from "@angular/material/dialog";
 import { Dir } from "@angular/cdk/bidi";
-import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from "@angular/cdk/drag-drop";
+import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } from "@angular/cdk/drag-drop";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatError, MatInput } from "@angular/material/input";
 import { MatSlider, MatSliderThumb } from "@angular/material/slider";
@@ -42,7 +42,7 @@ import type { ApplicationState, LatLngAltTime, RouteData, ShareUrl } from "../..
     selector: "private-routes-sidebar",
     templateUrl: "./private-routes-sidebar.component.html",
     styleUrls: ["./private-routes-sidebar.component.scss"],
-    imports: [Dir, MatButton, Angulartics2OnModule, MatTooltip, NgClass, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgStyle, MatFormFieldModule, MatInput, FormsModule, MatSlider, MatError, NameInUseValidatorDirective, MatSliderThumb, MatMiniFabButton, MatRadioButton, DistancePipe, MatMenu, MatMenuItem, MatMenuTrigger, CdkDrag, CdkDropList]
+    imports: [Dir, MatButton, Angulartics2OnModule, MatTooltip, NgClass, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgStyle, MatFormFieldModule, MatInput, FormsModule, MatSlider, MatError, NameInUseValidatorDirective, MatSliderThumb, MatMiniFabButton, MatRadioButton, DistancePipe, MatMenu, MatMenuItem, MatMenuTrigger, CdkDrag, CdkDropList, CdkDragHandle]
 })
 export class PrivateRoutesSidebarComponent {
     public routes: Immutable<RouteData[]>;
