@@ -68,6 +68,9 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             }
             this.currentLanguageCode = language.code;
         }));
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.offlineState.downloadedTiles).subscribe(() => {
+            this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
+        }));
     }
 
     public ngOnDestroy() {
