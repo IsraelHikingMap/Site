@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { FormsModule } from "@angular/forms";
@@ -7,6 +7,7 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatFormField, MatLabel, MatOption, MatSelect } from "@angular/material/select";
 import { MatDivider } from "@angular/material/divider";
+import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { Dir } from "@angular/cdk/bidi";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Store } from "@ngxs/store";
@@ -36,9 +37,10 @@ import type { ApplicationState, ShareUrl } from "../../models";
     selector: "shares",
     templateUrl: "./shares.component.html",
     styleUrls: ["./shares.component.scss"],
-    imports: [MapComponent, LayersComponent, MatButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, ShareItemComponent, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, PopupComponent, MatDivider]
+    imports: [MapComponent, LayersComponent, MatButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, ShareItemComponent, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, PopupComponent, MatDivider, MatProgressSpinner]
 })
-export class SharesComponent {
+export class SharesComponent implements OnInit {
+    public loading = false;
     public mapStyle: StyleSpecification;
     public selectedShareUrl: Immutable<ShareUrl> = null;
     public filteredShareUrls: Immutable<ShareUrl[]> = [];
@@ -79,6 +81,12 @@ export class SharesComponent {
         this.store.select((state: ApplicationState) => state.shareUrlsState.shareUrls).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.runFilter();
         });
+    }
+
+    public async ngOnInit(): Promise<void> {
+        this.loading = true;
+        await this.shareUrlsService.syncShareUrls();
+        this.loading = false;
     }
 
     public mapLoaded(map: Map) {
