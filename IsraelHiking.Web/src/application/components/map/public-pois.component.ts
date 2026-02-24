@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit, signal } from "@angular/core";
 
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
@@ -40,7 +40,7 @@ export class PublicPoisComponent implements OnInit {
     public poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
 
     public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point>;
-    public selectedPoiFeature: GeoJSON.Feature<GeoJSON.Point> = null;
+    public selectedPoiFeature = signal<GeoJSON.Feature<GeoJSON.Point> | null>(null);
     public selectedPoiGeoJson: Immutable<GeoJSON.FeatureCollection> = {
         type: "FeatureCollection",
         features: []
@@ -82,14 +82,14 @@ export class PublicPoisComponent implements OnInit {
     }
 
     private onSelectedPoiChanged(poi: Immutable<GeoJSON.Feature>) {
-        this.selectedPoiFeature = !poi ? null : {
+        this.selectedPoiFeature.set(!poi ? null : {
             type: "Feature",
             properties: poi.properties,
             geometry: {
                 type: "Point",
                 coordinates: [poi.properties.poiGeolocation.lon, poi.properties.poiGeolocation.lat]
             }
-        };
+        });
         this.selectedPoiGeoJson = {
             type: "FeatureCollection",
             features: poi == null ? [] : [poi]
@@ -190,7 +190,7 @@ export class PublicPoisComponent implements OnInit {
     }
 
     public getSelectedFeatureLatlng(): LatLngAltTime {
-        return SpatialService.toLatLng(this.selectedPoiFeature.geometry.coordinates as [number, number]);
+        return SpatialService.toLatLng(this.selectedPoiFeature().geometry.coordinates as [number, number]);
     }
 
     public navigateHere() {

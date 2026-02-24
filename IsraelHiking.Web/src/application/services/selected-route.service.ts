@@ -111,6 +111,9 @@ export class SelectedRouteService {
     public getOrCreateSelectedRoute(): Immutable<RouteData> {
         if (this.selectedRouteId === null && this.routes.length > 0) {
             this.store.dispatch(new SetSelectedRouteAction(this.routes[0].id));
+            if (this.routes[0].state === "Hidden") {
+                this.store.dispatch(new ChangeRouteStateAction(this.routes[0].id, "ReadOnly"));
+            }
         }
         if (this.routes.length === 0) {
             const data = this.routesFactory.createRouteData(this.createRouteName(), this.getLeastUsedColor());

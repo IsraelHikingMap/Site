@@ -106,6 +106,18 @@ describe("Selected Route Service", () => {
         }
     ));
 
+    it("Should select the first route if selected route it null and change its visibility if hidden", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{ id: "42", state: "Hidden" } as any]);
+            setupSelectedRoute(store, null);
+
+            const selectedRoute = selectedRouteService.getOrCreateSelectedRoute();
+
+            expect(selectedRoute.id).toBe("42");
+            expect(selectedRoute.state).not.toBe("Hidden");
+        }
+    ));
+
     it("Should set selected route if there's no selected route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupSelectedRoute(store, null);

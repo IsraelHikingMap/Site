@@ -38,8 +38,8 @@
   <div [dir]="resources.getDirection(getTitle(hoverFeature))">{{getTitle(hoverFeature)}}</div>
 </mgl-popup>
 }
-@if (isShowCoordinatesPopup && selectedPoiFeature && isCoordinatesFeature(selectedPoiFeature)) {
-<mgl-popup [lngLat]="selectedPoiFeature.geometry.coordinates" [offset]="[0, -30]"
+@if (isShowCoordinatesPopup && selectedPoiFeature() && isCoordinatesFeature(selectedPoiFeature())) {
+<mgl-popup [lngLat]="selectedPoiFeature().geometry.coordinates" [offset]="[0, -30]"
   (popupClose)="isShowCoordinatesPopup = false">
   <div class="flex flex-row">
     <div class="w-1/3">
@@ -63,16 +63,16 @@
   </div>
 </mgl-popup>
 }
-@if (selectedPoiFeature) {
-<mgl-marker [lngLat]="selectedPoiFeature.geometry.coordinates" anchor="bottom">
-  <span class="fa-stack fa-lg cursor-pointer selected-marker-icon" (click)="openPoi(selectedPoiFeature, $event)"
-    (mouseover)="setHoverFeature(selectedPoiFeature)" (mouseout)="hoverFeature = null">
-    @if (hasExtraData(selectedPoiFeature)) {
-    <span class="has-extra-data" [style.background]="selectedPoiFeature.properties.poiIconColor"></span>
+@if (selectedPoiFeature()) {
+<mgl-marker [lngLat]="selectedPoiFeature().geometry.coordinates" anchor="bottom">
+  <span class="fa-stack fa-lg cursor-pointer selected-marker-icon" (click)="openPoi(selectedPoiFeature(), $event)"
+    (mouseover)="setHoverFeature(selectedPoiFeature())" (mouseout)="hoverFeature = null">
+    @if (hasExtraData(selectedPoiFeature())) {
+    <span class="has-extra-data" [style.background]="selectedPoiFeature().properties.poiIconColor"></span>
     }
     <i class="fa icon-map-marker-rect fa-stack-2x" style="color: white; text-shadow: 3px 3px 3px #000;"></i>
-    <i class="fa {{selectedPoiFeature.properties.poiIcon}} fa-stack-1x stack-icon-top stack-icon-large"
-      [style.color]="selectedPoiFeature.properties.poiIconColor"></i>
+    <i class="fa {{selectedPoiFeature().properties.poiIcon}} fa-stack-1x stack-icon-top stack-icon-large"
+      [style.color]="selectedPoiFeature().properties.poiIconColor"></i>
   </span>
 </mgl-marker>
 }
