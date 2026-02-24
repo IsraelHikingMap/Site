@@ -15,6 +15,7 @@ import { AVAILABLE_LANGUAGES, HIKING_MAP, MTB_MAP } from "../../reducers/initial
 import { RunningContextService } from "../../services/running-context.service";
 import { SetActivityTypeAction } from "../../reducers/user.reducer";
 import { SelectBaseLayerAction } from "../../reducers/layers.reducer";
+import { SetRoutingTypeAction } from "../../reducers/route-editing.reducer";
 import type { ActivityType } from "../../models";
 
 import languageAnimationData from "../../../content/lottie/dialog-language.json";
@@ -75,10 +76,19 @@ export class IntroDialogComponent {
     public setActivityType(activityType: ActivityType) {
         this.activityType = activityType;
         this.store.dispatch(new SetActivityTypeAction(activityType));
-        if (this.activityType === "Biking") {
-            this.store.dispatch(new SelectBaseLayerAction(MTB_MAP))
-        } else {
-            this.store.dispatch(new SelectBaseLayerAction(HIKING_MAP))
+        switch (this.activityType) {
+            case "Hiking":
+                this.store.dispatch(new SelectBaseLayerAction(HIKING_MAP));
+                this.store.dispatch(new SetRoutingTypeAction("Hike"));
+                break;
+            case "Biking":
+                this.store.dispatch(new SelectBaseLayerAction(MTB_MAP));
+                this.store.dispatch(new SetRoutingTypeAction("Bike"));
+                break;
+            case "4x4":
+                this.store.dispatch(new SelectBaseLayerAction(HIKING_MAP));
+                this.store.dispatch(new SetRoutingTypeAction("4WD"));
+                break;
         }
     }
 }
