@@ -8,6 +8,8 @@ import type { RouteDataWithoutState, ApplicationState, RouteData } from "../mode
 @Injectable()
 export class RoutesFactory {
 
+    private invertedColorsCache = new Map<string, string>();
+
     // default values - in case the response from server takes too long.
     public colors: string[] = [
         "#0000FF", // blue
@@ -77,5 +79,33 @@ export class RoutesFactory {
                 ids.push(routeData.id);
             }
         }
+    }
+
+    public invertColorToBW(color: string): string {
+        if (this.invertedColorsCache.has(color)) {
+            return this.invertedColorsCache.get(color);
+        }
+        const temp = document.createElement("div");
+        temp.style.color = color;
+        document.body.appendChild(temp);
+
+        const rgb = window.getComputedStyle(temp).color;
+        document.body.removeChild(temp);
+
+        const [r, g, b] = rgb.match(/\d+/g).map(num => 255 - parseInt(num));
+
+        const invertedColor = this.getLuminance([r, g, b]) < 0.1791288 ? "#000000" : "#FFFFFF";
+        this.invertedColorsCache.set(color, invertedColor);
+        return invertedColor;
+    }
+
+    private getLuminance(c: number[]) {
+        let i, x;
+        const a = []; // so we don't mutate
+        for (i = 0; i < c.length; i++) {
+            x = c[i] / 255;
+            a[i] = x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+        }
+        return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
     }
 }

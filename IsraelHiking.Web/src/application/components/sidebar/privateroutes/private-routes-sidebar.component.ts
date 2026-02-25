@@ -14,7 +14,6 @@ import { MatRadioButton } from "@angular/material/radio";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { Store } from "@ngxs/store";
 import { Immutable } from "immer";
-import invert from "invert-color";
 
 import { ShareEditDialogComponent, ShareEditDialogComponentData } from "../../dialogs/share-edit-dialog.component";
 import { FileSaveDialogComponent } from "../../../components/dialogs/file-save-dialog.component";
@@ -187,7 +186,7 @@ export class PrivateRoutesSidebarComponent {
     }
 
     public getCheckIconColor(color: string) {
-        return invert(color, true);
+        return this.routesFactory.invertColorToBW(color);
     }
 
     public updateProperty(routeData: Immutable<RouteData>, property: any, value: any) {

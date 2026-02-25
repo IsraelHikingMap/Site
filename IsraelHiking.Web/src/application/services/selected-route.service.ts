@@ -2,7 +2,6 @@ import { Injectable, EventEmitter, inject } from "@angular/core";
 import { some } from "lodash-es";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
-import invert from "invert-color";
 import type { Immutable } from "immer";
 
 import { RoutesFactory } from "./routes.factory";
@@ -527,7 +526,7 @@ export class SelectedRouteService {
         const color = route.color;
         const opacity = route.opacity == null ? 1.0 : route.opacity;
         const width = route.weight;
-        const iconColor = opacity > 0.5 ? invert(color, true) : color;
+        const iconColor = opacity > 0.5 ? this.routesFactory.invertColorToBW(color) : color;
         const iconSize = width < 10 ? 0.5 : 0.5 * width / 10.0;
         return {
             color,

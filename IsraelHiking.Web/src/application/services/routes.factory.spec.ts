@@ -75,4 +75,10 @@ describe("RoutesFactory", () => {
         factory.regenerateDuplicateIds(routes);
         expect(routes[2].id).not.toBe("1");
     }));
+
+    it("should invert color to BW", inject([RoutesFactory], (factory: RoutesFactory) => {
+        expect(factory.invertColorToBW("red")).toBe("#FFFFFF");
+        expect(factory.invertColorToBW("yellow")).toBe("#000000");
+        expect(factory.invertColorToBW("#ff0000")).toBe("#FFFFFF");
+    }));
 });
