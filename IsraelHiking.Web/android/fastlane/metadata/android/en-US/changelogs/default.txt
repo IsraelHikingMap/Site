@@ -1,3 +1,7 @@
-- Global heatmap
-- More properties when creating a cloud save
-- Offline maps banners
+- Introducing a new Cloud Saves screen
+- Smoother chart zoom, improved range selection, and clearer slope colors
+- Quickly navigate to a location using Google Maps
+- Easily reorder your private routes with drag and drop
+- Statistics are now hidden when no route is selected
+- Choose your activity during onboarding
+- Plus various bug fixes and performance improvements
