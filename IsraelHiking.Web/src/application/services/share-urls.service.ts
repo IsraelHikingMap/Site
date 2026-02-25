@@ -153,7 +153,7 @@ export class ShareUrlsService {
     private async updateShareUrlStart(shareUrls: Immutable<ShareUrl>[]) {
         for (const shareUrl of shareUrls.filter(s => s.start == null)) {
             let fullShareUrl = await this.databaseService.getShareUrlById(shareUrl.id);
-            if (fullShareUrl.dataContainer == null || fullShareUrl.start == null) {
+            if (fullShareUrl?.dataContainer == null || fullShareUrl?.start == null) {
                 await this.databaseService.deleteShareUrlById(shareUrl.id);
                 fullShareUrl = await this.getShareFromServerAndCacheIt(shareUrl.id);
             }
