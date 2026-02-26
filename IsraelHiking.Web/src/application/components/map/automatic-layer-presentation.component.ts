@@ -135,7 +135,10 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
         const tryLocalStyle = this.isMainMap() && DEFAULT_BASE_LAYERS.some(l => l.key === layerData.key) && this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles != null;
         const response = await this.fileService.getStyleJsonContent(layerData.address, tryLocalStyle);
         const language = this.resources.getCurrentLanguageCodeSimplified();
-        const styleJson = JSON.parse(JSON.stringify(response).replace(/name:he/g, `name:${language}`)) as StyleSpecification;
+        let styleAsText = JSON.stringify(response);
+        styleAsText = styleAsText.replace(/name:he/g, `name:${language}`);
+        styleAsText = styleAsText.replaceAll("Open Sans", "Noto Sans");
+        const styleJson = JSON.parse(styleAsText) as StyleSpecification;
         if (tryLocalStyle) {
             for (const source of Object.values(styleJson.sources)) {
                 if (source.type === "vector") {

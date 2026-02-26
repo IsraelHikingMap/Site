@@ -24,7 +24,7 @@
         </mgl-layer>
         <mgl-layer id="download-tiles-text" type="symbol" source="download-tiles" [minzoom]="4" [layout]="{
               'text-field': ['get', 'label'],
-              'text-font': ['Open Sans Regular'],
+              'text-font': ['Noto Sans Regular'],
               'text-size': 30,
           }" [paint]="{
               'text-color': ['get', 'color'],
@@ -50,7 +50,7 @@
         </mgl-layer>
         <mgl-layer id="selected-tile-text" type="symbol" source="selected-tile" [minzoom]="4" [layout]="{
               'text-field': ['get', 'label'],
-              'text-font': ['Open Sans Regular'],
+              'text-font': ['Noto Sans Regular'],
               'text-size': 30,
               'text-allow-overlap': true
           }" [paint]="{
@@ -72,7 +72,7 @@
         <mgl-layer id="in-progress-tile-text" type="symbol" source="in-progress-tile" [minzoom]="4"
           [filter]="['==', ['get', 'stroke'], 'true']" [layout]="{
               'text-field': ['get', 'label'],
-              'text-font': ['Open Sans Regular'],
+              'text-font': ['Noto Sans Regular'],
               'text-size': 30,
               'text-allow-overlap': true
           }" [paint]="{

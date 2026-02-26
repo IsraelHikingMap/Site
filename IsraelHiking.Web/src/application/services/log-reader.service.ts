@@ -127,7 +127,7 @@ export class LogReaderService {
             source: "log-points-geojson",
             layout: {
                 "text-field": ["get", "label"],
-                "text-font": ["Open Sans Regular"],
+                "text-font": ["Noto Sans Regular"],
                 "text-size": 14,
                 "text-offset": [0, 1.5],
                 "text-anchor": "top",
