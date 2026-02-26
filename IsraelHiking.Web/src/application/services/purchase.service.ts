@@ -49,7 +49,7 @@ export class PurchaseService {
             this.loggingService.info(`[Store] Product is ${subscribed ? "valid" : "expired"} from server`);
             this.store.dispatch(new SetOfflineSubscribedAction(subscribed));
         } catch {
-            this.loggingService.info(`[Store] Unable to check expiration from server, keeping current state`);
+            this.loggingService.info("[Store] Unable to check expiration from server, keeping current state");
         }
     }
 
