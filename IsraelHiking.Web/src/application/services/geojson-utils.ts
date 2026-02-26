@@ -26,7 +26,7 @@ export class GeoJSONUtils {
     public static setLocation(feature: GeoJSON.Feature, value: LatLngAltTime) {
         feature.properties.poiGeolocation = {
             lat: value.lat,
-            lon: value.lng
+            lng: value.lng
         };
     }
 
@@ -67,7 +67,7 @@ export class GeoJSONUtils {
     public static getLocation(feature: Immutable<GeoJSON.Feature>): LatLngAltTime {
         return {
             lat: feature.properties.poiGeolocation.lat,
-            lng: feature.properties.poiGeolocation.lon,
+            lng: feature.properties.poiGeolocation.lng,
             alt: feature.properties.poiAlt
         };
     }

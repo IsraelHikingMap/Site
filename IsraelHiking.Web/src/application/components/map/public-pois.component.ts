@@ -87,7 +87,7 @@ export class PublicPoisComponent implements OnInit {
             properties: poi.properties,
             geometry: {
                 type: "Point",
-                coordinates: [poi.properties.poiGeolocation.lon, poi.properties.poiGeolocation.lat]
+                coordinates: [poi.properties.poiGeolocation.lng, poi.properties.poiGeolocation.lat]
             }
         });
         this.selectedPoiGeoJson = {

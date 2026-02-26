@@ -20,8 +20,9 @@ import { GeoJSONUtils } from "./geojson-utils";
 import { INatureService } from "./inature.service";
 import { WikidataService } from "./wikidata.service";
 import { ImageAttributionService } from "./image-attribution.service";
-import { LatLon, OsmTagsService, PoiProperties } from "./osm-tags.service";
+import { OsmTagsService, PoiProperties } from "./osm-tags.service";
 import { ShareUrlsService } from "./share-urls.service";
+import { NakebService } from "./nakeb.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction } from "../reducers/offline.reducer";
 import { SetSelectedPoiAction, SetUploadMarkerDataAction } from "../reducers/poi.reducer";
 import { Urls } from "../urls";
@@ -70,6 +71,7 @@ export class PoiService {
     private readonly mapService = inject(MapService);
     private readonly iNatureService = inject(INatureService);
     private readonly wikidataService = inject(WikidataService);
+    private readonly nakebService = inject(NakebService);
     private readonly overpassTurboService = inject(OverpassTurboService);
     private readonly imageAttributinoService = inject(ImageAttributionService);
     private readonly shareUrlsService = inject(ShareUrlsService);
@@ -137,37 +139,28 @@ export class PoiService {
         }
     }
 
-    private getGeolocation(feature: GeoJSON.Feature): LatLon {
+    private getGeolocation(feature: GeoJSON.Feature): LatLngAltTime {
         switch (feature.geometry.type) {
             case "Point":
-                return {
-                    lat: feature.geometry.coordinates[1],
-                    lon: feature.geometry.coordinates[0],
-                };
+                return SpatialService.toLatLng(feature.geometry.coordinates);
             case "LineString":
-                return {
-                    lat: feature.geometry.coordinates[0][1],
-                    lon: feature.geometry.coordinates[0][0],
-                };
+                return SpatialService.toLatLng(feature.geometry.coordinates[0]);
             case "Polygon": {
                 const bounds = SpatialService.getBoundsForFeature(feature);
                 return {
                     lat: (bounds.northEast.lat + bounds.southWest.lat) / 2,
-                    lon: (bounds.northEast.lng + bounds.southWest.lng) / 2,
+                    lng: (bounds.northEast.lng + bounds.southWest.lng) / 2,
                 };
             }
             case "MultiPolygon": {
                 const bounds = SpatialService.getBoundsForFeature(feature);
                 return {
                     lat: (bounds.northEast.lat + bounds.southWest.lat) / 2,
-                    lon: (bounds.northEast.lng + bounds.southWest.lng) / 2,
+                    lng: (bounds.northEast.lng + bounds.southWest.lng) / 2,
                 };
             }
             case "MultiLineString":
-                return {
-                    lat: feature.geometry.coordinates[0][0][1],
-                    lon: feature.geometry.coordinates[0][0][0],
-                };
+                return SpatialService.toLatLng(feature.geometry.coordinates[0][0]);
             default:
                 throw new Error("Unsupported geometry type: " + feature.geometry.type);
         }
@@ -206,7 +199,7 @@ export class PoiService {
                 properties: { ...poi.properties },
                 geometry: {
                     type: "Point",
-                    coordinates: [poi.properties.poiGeolocation.lon, poi.properties.poiGeolocation.lat]
+                    coordinates: [poi.properties.poiGeolocation.lng, poi.properties.poiGeolocation.lat]
                 }
             };
             return pointFeature;
@@ -346,6 +339,13 @@ export class PoiService {
                     this.store.dispatch(new SetSelectedPoiAction(clone));
                     return clone;
                 }
+                case "Nakeb": {
+                    const poi = await this.nakebService.getRoute(id);
+                    this.poisCache.splice(0, 0, poi);
+                    const clone = cloneDeep(poi);
+                    this.store.dispatch(new SetSelectedPoiAction(clone));
+                    return clone;
+                }
                 default: {
                     const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
                     const poi = await firstValueFrom(this.httpClient.get<GeoJSON.Feature>(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000)));
@@ -368,7 +368,7 @@ export class PoiService {
 
     private convertShareUrlToPoi(shareUrl: ShareUrl): GeoJSON.Feature {
         let geometry: GeoJSON.LineString | GeoJSON.MultiLineString;
-        const geoLocation = shareUrl.start ? { lat: shareUrl.start.lat, lon: shareUrl.start.lng } : { lat: shareUrl.dataContainer.routes[0].segments[0].latlngs[0].lat, lon: shareUrl.dataContainer.routes[0].segments[0].latlngs[0].lng };
+        const geoLocation = shareUrl.start ? shareUrl.start : shareUrl.dataContainer.routes[0].segments[0].latlngs[0];
         if (shareUrl.dataContainer.routes.length > 1) {
             geometry = {
                 type: "MultiLineString",

@@ -27,6 +27,7 @@ import { LayersReducer } from "../reducers/layers.reducer";
 import { AddToPoiQueueAction, OfflineReducer } from "../reducers/offline.reducer";
 import { ConfigurationReducer } from "../reducers/configuration.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models";
+import { NakebService } from "./nakeb.service";
 
 describe("Poi Service", () => {
 
@@ -90,6 +91,11 @@ describe("Poi Service", () => {
                     provide: WikidataService, useValue: {
                         enritchFeatureFromWikimedia: () => Promise.resolve(),
                         createFeatureFromPageId: () => Promise.resolve()
+                    }
+                },
+                {
+                    provide: NakebService, useValue: {
+                        getRoute: () => Promise.reject()
                     }
                 },
                 { provide: ImageAttributionService, useValue: { getAttributionForImage: () => "aaa" } },
@@ -201,7 +207,7 @@ describe("Poi Service", () => {
                     properties: {
                         natural: "spring",
                         "name:he": "name",
-                        poiGeolocation: "{\"lat\": 1.1, \"lon\": 1.1 }"
+                        poiGeolocation: "{\"lat\": 1.1, \"lng\": 1.1 }"
                     }
                 }
             ] as any;
@@ -408,6 +414,20 @@ describe("Poi Service", () => {
             expect(store.dispatch).toHaveBeenCalled();
             expect(feature.geometry.type).toBe("LineString");
             expect(feature.properties.website).toBeDefined();
+        }
+    )));
+
+    it("Should get a point by id and source from Nakeb", (inject([PoiService, Store, NakebService],
+        async (poiService: PoiService, store: Store, nakebService: NakebService) => {
+            store.dispatch = jasmine.createSpy();
+            const id = "42";
+            const source = "Nakeb";
+
+            nakebService.getRoute = () => Promise.resolve({} as any)
+
+            const feature = await poiService.getBasicInfo(id, source);
+            expect(feature).not.toBeNull();
+            expect(store.dispatch).toHaveBeenCalled();
         }
     )));
 
@@ -698,7 +718,7 @@ describe("Poi Service", () => {
                 expect(feature.properties.poiRemovedImages).toEqual(["wikimedia.org/some-old-image-url"]);
                 expect(feature.properties.poiIcon).toBe("icon-spring");
                 expect(feature.properties.poiGeolocation.lat).toBe(1);
-                expect(feature.properties.poiGeolocation.lon).toBe(2);
+                expect(feature.properties.poiGeolocation.lng).toBe(2);
                 expect(GeoJSONUtils.getLocation(feature).lat).toBe(1);
                 expect(GeoJSONUtils.getLocation(feature).lng).toBe(2);
                 // expected to not change geometry
@@ -818,7 +838,7 @@ describe("Poi Service", () => {
                 expect(feature.properties.poiAddedImages).toEqual(["some-image-url"]);
                 expect(feature.properties.poiIcon).toBeUndefined();
                 expect(feature.properties.poiGeolocation.lat).toBe(1);
-                expect(feature.properties.poiGeolocation.lon).toBe(2);
+                expect(feature.properties.poiGeolocation.lng).toBe(2);
                 expect(GeoJSONUtils.getLocation(feature).lat).toBe(1);
                 expect(GeoJSONUtils.getLocation(feature).lng).toBe(2);
                 // expected to not change geometry
@@ -998,7 +1018,7 @@ describe("Poi Service", () => {
                 identifier: "way_42",
                 poiGeolocation: {
                     lat: 1,
-                    lon: 2
+                    lng: 2
                 }
             },
             geometry: {
