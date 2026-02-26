@@ -47,7 +47,7 @@
         <span class="text-green-600 mx-1">{{resources.renewSubscription}}</span>
       </button>
       }
-      @if (!isOfflineDownloadAvailable()) {
+      @if (isOfflineDownloadAvailable()) {
       <button mat-menu-item routerLink="/offline-management" angulartics2On="click" angularticsCategory="User Menu"
         angularticsAction="Download">
         <i class="fa fa-lg icon-download mat-icon"></i>
