@@ -35,14 +35,7 @@ export class PurchaseService {
             this.loggingService.info("[Store] Logged in: " + userInfo.id);
             await this.initializeStoreConnection(userInfo.id);
 
-            if (await this.isExpired()) {
-                this.loggingService.debug("[Store] Product is expired from server");
-                this.store.dispatch(new SetOfflineSubscribedAction(false));
-            } else {
-                // HM TODO: remove this after setup puchase from the stores
-                this.loggingService.debug("[Store] Product is valid from server");
-                this.store.dispatch(new SetOfflineSubscribedAction(true));
-            }
+            await this.checkSubscription();
 
             if (this.shouldShowPaywall()) {
                 this.showPaywall();
@@ -50,11 +43,13 @@ export class PurchaseService {
         });
     }
 
-    private async isExpired(): Promise<boolean> {
+    private async checkSubscription(): Promise<void> {
         try {
-            return !(await firstValueFrom(this.httpClient.get<boolean>(Urls.subscribed).pipe(timeout(5000))));
+            const subscribed = await firstValueFrom(this.httpClient.get<boolean>(Urls.subscribed).pipe(timeout(5000)));
+            this.loggingService.info(`[Store] Product is ${subscribed ? "valid" : "expired"} from server`);
+            this.store.dispatch(new SetOfflineSubscribedAction(subscribed));
         } catch {
-            return false;
+            this.loggingService.info(`[Store] Unable to check expiration from server, keeping current state`);
         }
     }
 
