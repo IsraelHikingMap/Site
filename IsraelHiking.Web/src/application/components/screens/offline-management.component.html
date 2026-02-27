@@ -1,14 +1,8 @@
-<div [dir]="resources.direction">
-  <div mat-dialog-title>
-    <div>{{resources.manageOfflineMaps}}</div>
-    <button mat-button type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
-  </div>
-  <div mat-dialog-content>
-    <div class="w-full offline-map-container">
-      <mgl-map [mapStyle]="offlineMapStyle" (mapClick)="onMapClick($event)" (mapLoad)="onMapLoad($event)"
+<div class="w-full map-h-full relative" [dir]="resources.direction">
+    <mgl-map [mapStyle]="offlineMapStyle" (mapClick)="onMapClick($event)" (mapLoad)="onMapLoad($event)"
         [attributionControl]="false">
         <auto-layer [layerData]="baseLayerData" [visible]="true" [isBaselayer]="true" [isMainMap]="false"
-          [before]="resources.endOfBaseLayer">
+            [before]="resources.endOfBaseLayer">
         </auto-layer>
         <mgl-geojson-source id="download-tiles" [data]="downloadedTiles">
         </mgl-geojson-source>
@@ -70,7 +64,7 @@
           }">
         </mgl-layer>
         <mgl-layer id="in-progress-tile-text" type="symbol" source="in-progress-tile" [minzoom]="4"
-          [filter]="['==', ['get', 'stroke'], 'true']" [layout]="{
+            [filter]="['==', ['get', 'stroke'], 'true']" [layout]="{
               'text-field': ['get', 'label'],
               'text-font': ['Open Sans Regular'],
               'text-size': 30,
@@ -82,56 +76,54 @@
           }">
         </mgl-layer>
         <mgl-layer id="in-progress-tile-fill" type="fill" source="in-progress-tile"
-          [filter]="['==', ['get', 'fill'], 'true']" [paint]="{
+            [filter]="['==', ['get', 'fill'], 'true']" [paint]="{
               'fill-color': 'rgba(0, 128, 128, 0.5)'
           }">
         </mgl-layer>
-      </mgl-map>
-    </div>
-  </div>
-  <div mat-dialog-actions>
-    <div class="flex flex-row w-full">
-      @if (!selectedTileXY && !downloadingTileXY()) {
-      <div class="flex-1">
-        <div>
-          {{resources.clickTheMapToSelectATile}}
+    </mgl-map>
+</div>
+<div class="absolute bottom-0 w-full text-lg text-center">
+    <div class="flex flex-row">
+        @if (!selectedTileXY && !downloadingTileXY()) {
+        <div class="flex-1 bg-white">
+            <div class="p-2">
+                {{resources.clickTheMapToSelectATile}}
+            </div>
         </div>
-      </div>
-      }
-      @if (selectedTileXY && !isSelectedAvailableForOffline() && !downloadingTileXY()) {
-      <div class="flex-1">
-        <button mat-raised-button class="w-full" color="primary" (click)="downloadSelected()" angulartics2On="click"
-          angularticsCategory="Offline Management" angularticsAction="Download">
-          <i class="fa fa-lg icon-download"></i>
-          {{resources.startDownload}}
-        </button>
-      </div>
-      }
-      @if (selectedTileXY && isSelectedAvailableForOffline() && !downloadingTileXY()) {
-      <div class="flex-1">
-        <button mat-raised-button class="w-full" color="primary" (click)="downloadSelected()" angulartics2On="click"
-          angularticsCategory="Offline Management" angularticsAction="Update">
-          <i class="fa fa-lg icon-download"></i>
-          {{resources.update}}
-        </button>
-      </div>
-      <div class="flex-1">
-        <button mat-raised-button class="w-full" color="warn" (click)="deleteSelected()" angulartics2On="click"
-          angularticsCategory="Offline Management" angularticsAction="Delete">
-          <i class="fa fa-lg icon-trash"></i>
-          {{resources.delete}}
-        </button>
-      </div>
-      }
-      @if (downloadingTileXY()) {
-      <div class="flex-1">
-        <button mat-raised-button class="w-full" color="primary" (click)="cancelDownload()" angulartics2On="click"
-          angularticsCategory="Offline Management" angularticsAction="Cancel">
-          <i class="fa fa-lg icon-close"></i>
-          {{resources.cancel}}
-        </button>
-      </div>
-      }
+        }
+        @if (selectedTileXY && !isSelectedAvailableForOffline() && !downloadingTileXY()) {
+        <div class="flex-1 m-1">
+            <button mat-raised-button class="w-full" color="primary" (click)="downloadSelected()" angulartics2On="click"
+                angularticsCategory="Offline Management" angularticsAction="Download">
+                <i class="fa fa-lg icon-download"></i>
+                {{resources.startDownload}}
+            </button>
+        </div>
+        }
+        @if (selectedTileXY && isSelectedAvailableForOffline() && !downloadingTileXY()) {
+        <div class="flex-1 m-1">
+            <button mat-raised-button class="w-full" color="primary" (click)="downloadSelected()" angulartics2On="click"
+                angularticsCategory="Offline Management" angularticsAction="Update">
+                <i class="fa fa-lg icon-download"></i>
+                {{resources.update}}
+            </button>
+        </div>
+        <div class="flex-1 m-1">
+            <button mat-raised-button class="w-full" color="warn" (click)="deleteSelected()" angulartics2On="click"
+                angularticsCategory="Offline Management" angularticsAction="Delete">
+                <i class="fa fa-lg icon-trash"></i>
+                {{resources.delete}}
+            </button>
+        </div>
+        }
+        @if (downloadingTileXY()) {
+        <div class="flex-1 m-1">
+            <button mat-raised-button class="w-full" color="primary" (click)="cancelDownload()" angulartics2On="click"
+                angularticsCategory="Offline Management" angularticsAction="Cancel">
+                <i class="fa fa-lg icon-close"></i>
+                {{resources.cancel}}
+            </button>
+        </div>
+        }
     </div>
-  </div>
 </div>

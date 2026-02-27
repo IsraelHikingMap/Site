@@ -35,6 +35,7 @@ export class RouteStrings {
     public static readonly ROUTE_LAYER = "/layer";
     public static readonly ROUTE_LANDING = "/landing";
     public static readonly ROUTE_SHARES = "/shares";
+    public static readonly ROUTE_OFFLINE_MANAGEMENT = "/offline-management";
     public static readonly ROUTE_ABOUT = "/about";
     public static readonly COORDINATES = "Coordinates";
 
@@ -118,6 +119,9 @@ export class HashService {
             return;
         }
         if (this.router.url.includes(RouteStrings.ROUTE_SHARES)) {
+            return;
+        }
+        if (this.router.url.includes(RouteStrings.ROUTE_OFFLINE_MANAGEMENT)) {
             return;
         }
         const inMemoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);

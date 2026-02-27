@@ -48,7 +48,7 @@
       </button>
       }
       @if (isOfflineDownloadAvailable()) {
-      <button mat-menu-item (click)="downloadOfflineMaps()" angulartics2On="click" angularticsCategory="User Menu"
+      <button mat-menu-item routerLink="/offline-management" angulartics2On="click" angularticsCategory="User Menu"
         angularticsAction="Download">
         <i class="fa fa-lg icon-download mat-icon"></i>
         <span class="mx-1">{{resources.downloadMapForOfflineUse}}</span>

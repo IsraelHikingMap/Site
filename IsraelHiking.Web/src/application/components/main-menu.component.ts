@@ -12,7 +12,6 @@ import { Store } from "@ngxs/store";
 import { EmailComposer } from "capacitor-email-composer"
 import platform from "platform";
 
-import { OfflineManagementDialogComponent } from "./dialogs/offline-management-dialog.component";
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
 import { RunningContextService } from "../services/running-context.service";
@@ -198,9 +197,5 @@ export class MainMenuComponent {
             return;
         }
         this.purchaseService.showPaywall();
-    }
-
-    public async downloadOfflineMaps() {
-        OfflineManagementDialogComponent.openDialog(this.dialog);
     }
 }
