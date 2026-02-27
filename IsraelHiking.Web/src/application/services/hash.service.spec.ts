@@ -91,6 +91,32 @@ describe("HashService", () => {
         }
     ));
 
+    it("Should not reset address bar if offline management are open", inject([HashService, Router, Store, MapService],
+        (service: HashService, routerMock: Router, store: Store, mapService: MapService) => {
+            const spy = jasmine.createSpy();
+            routerMock.navigate = spy;
+            (routerMock as any).url = RouteStrings.ROUTE_OFFLINE_MANAGEMENT;
+            mapService.isMoving = () => false;
+            store.reset({
+                poiState: {}
+            });
+            service.initialize();
+            store.reset({
+                poiState: {
+                    selectedPointOfInterest: {}
+                },
+                inMemoryState: {},
+                locationState: {
+                    zoom: 1,
+                    latitude: 2,
+                    longitude: 3
+                }
+            });
+
+            expect(spy).not.toHaveBeenCalled();
+        }
+    ));
+
     it("Should navigate to share url if it stored in the state", inject([HashService, Router, Store],
         (service: HashService, routerMock: Router, store: Store) => {
             const spy = jasmine.createSpy();
