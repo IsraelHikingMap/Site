@@ -25,7 +25,7 @@
   <ng-template matMenuContent>
     <div [dir]="resources.direction">
       @if (isLoggedIn()) {
-      <button mat-menu-item (click)="openTraces()" angulartics2On="click" angularticsCategory="User Menu"
+      <button mat-menu-item routerLink="/traces" angulartics2On="click" angularticsCategory="User Menu"
         angularticsAction="User traces open">
         <span><i class="fa fa-lg icon-recordings"></i> {{resources.myTraces}}</span>
       </button>

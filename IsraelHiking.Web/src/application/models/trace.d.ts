@@ -1,4 +1,4 @@
-﻿import type { DataContainer } from ".";
+﻿import type { DataContainer, LatLngAltTime } from ".";
 
 export type TraceVisibility = "private" | "public" | "local" | "identifiable" | "trackable";
 
@@ -12,4 +12,5 @@ export type Trace = {
     tagsString: string;
     visibility: TraceVisibility;
     dataContainer?: DataContainer;
+    start: LatLngAltTime
 };

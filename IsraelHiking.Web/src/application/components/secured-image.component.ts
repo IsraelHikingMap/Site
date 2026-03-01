@@ -8,7 +8,7 @@ import { AsyncPipe } from "@angular/common";
 @Component({
     selector: "secured-image",
     template: `
-    <img [src]="dataUrl$|async" class="w-full"/>
+    <img [src]="dataUrl$|async" loading="lazy" alt="" class="float-end w-1/3 h-auto object-cover block ps-2 rounded-2xl"/>
   `,
     imports: [AsyncPipe]
 })

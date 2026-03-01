@@ -130,7 +130,8 @@ export class RecordedRouteService {
             url: "",
             imageUrl: "",
             dataUrl: "",
-            user: ""
+            user: "",
+            start: routeData.segments[0]?.latlngs?.[0]
         };
 
         this.store.dispatch(new AddRouteAction(routeData));

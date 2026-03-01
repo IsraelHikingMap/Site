@@ -83,7 +83,11 @@ export class TracesService {
                 timeStamp: traceJson.timestamp ? new Date(traceJson.timestamp) : new Date(),
                 visibility: traceJson.visibility,
                 url: Urls.osmBase + `/user/${traceJson.user}/traces/${traceJson.id}`,
-                imageUrl: Urls.tracePicture + traceJson.id + "/picture"
+                imageUrl: Urls.tracePicture + traceJson.id + "/picture",
+                start: {
+                    lat: traceJson.lat,
+                    lng: traceJson.lon
+                },
             } as Trace));
             const allTraces = serverTraces.concat(existingTraces.filter(t => t.visibility === "local") as any as Trace[]);
             const serverTracesMap = serverTraces.reduce((acc, trace) => {
