@@ -1,4 +1,4 @@
-<div [dir]="resources.direction">
+<div class="flex flex-row map-h-full" [dir]="resources.direction">
     <div class="max-md:w-full w-1/3 overflow-y-auto">
         <div class="flex flex-row">
             <label class="w-full">
@@ -79,10 +79,7 @@
         <div class="w-full h-full">
             <mgl-map [mapStyle]="mapStyle" [attributionControl]="false" (mapLoad)="mapLoaded($event)">
                 <layers [isMainMap]="false"></layers>
-                <mgl-geojson-source id="trace-line" [data]="traceGeoJson"></mgl-geojson-source>
-                <mgl-layer source="trace-line" type="line" [paint]="{ 'line-color': '#000', 'line-width': 2 }">
-                </mgl-layer>
-                <!--
+                <routes-path [routesGeoJson]="traceGeoJson"></routes-path>
                 @for (trace of filteredTraces; track trace.id) {
                 <mgl-marker [lngLat]="trace.start">
                     <span class="fa-stack fa-lg cursor-pointer selected-marker-icon" (click)="onStartPointClick(trace)">
@@ -118,7 +115,6 @@
                     </div>
                 </mgl-popup>
                 }
-                -->
             </mgl-map>
         </div>
     </div>

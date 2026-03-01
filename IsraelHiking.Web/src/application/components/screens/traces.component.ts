@@ -1,17 +1,21 @@
-import { Component, OnInit, ViewEncapsulation, inject } from "@angular/core";
+import { Component, DestroyRef, OnInit, ViewEncapsulation, inject } from "@angular/core";
 import { Router } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
-import { GeoJSONSourceComponent, LayerComponent, MapComponent, MarkerComponent, PopupComponent } from "@maplibre/ngx-maplibre-gl";
+import { MapComponent, MarkerComponent, PopupComponent } from "@maplibre/ngx-maplibre-gl";
 import { MatButton, MatAnchor } from "@angular/material/button";
 import { DatePipe } from "@angular/common";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { orderBy } from "lodash-es";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
+import type { StyleSpecification, Map } from "maplibre-gl";
 
 import { SecuredImageComponent } from "../secured-image.component";
+import { LayersComponent } from "../map/layers.component";
+import { RoutesPathComponent } from "../map/routes-path.component";
+import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
@@ -23,6 +27,8 @@ import { RunningContextService } from "../../services/running-context.service";
 import { SpatialService } from "../../services/spatial.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { RouteStrings } from "../../services/hash.service";
+import { DefaultStyleService } from "../../services/default-style.service";
+import { SelectedRouteService } from "../../services/selected-route.service";
 import { SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
 import type { ApplicationState, Trace, TraceVisibility } from "../../models";
 
@@ -31,14 +37,15 @@ import type { ApplicationState, Trace, TraceVisibility } from "../../models";
     templateUrl: "./traces.component.html",
     styleUrls: ["./traces.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, MatAnchor, Angulartics2OnModule, SecuredImageComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, MarkerComponent, PopupComponent, GeoJSONSourceComponent, LayerComponent]
+    imports: [Dir, MatButton, MatAnchor, Angulartics2OnModule, SecuredImageComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, MarkerComponent, PopupComponent, LayersComponent, RoutesPathComponent]
 })
 export class TracesComponent implements OnInit {
 
+    public mapStyle: StyleSpecification;
     public filteredTraces: Immutable<Trace[]>;
     public loadingTraces: boolean = false;
     public selectedTrace: Immutable<Trace> | undefined;
-    public traceGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString> | undefined = {
+    public traceGeoJson: GeoJSON.FeatureCollection | undefined = {
         type: "FeatureCollection",
         features: []
     };
@@ -52,10 +59,17 @@ export class TracesComponent implements OnInit {
     private readonly tracesService = inject(TracesService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly dataContainerService = inject(DataContainerService);
+    private readonly defaultStyleService = inject(DefaultStyleService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly router = inject(Router);
     private readonly store = inject(Store);
+    private readonly destroyRef = inject(DestroyRef);
 
     constructor() {
+        this.mapStyle = this.defaultStyleService.getStyleWithPlaceholders();
+        const location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
+        this.mapStyle.zoom = location.zoom;
+        this.mapStyle.center = [location.longitude, location.latitude];
         this.store.select((s: ApplicationState) => s.inMemoryState.searchTerm).pipe(takeUntilDestroyed()).subscribe((searchTerm: string) => {
             this.runFilter();
         });
@@ -64,6 +78,9 @@ export class TracesComponent implements OnInit {
                 this.runFilter();
             }
         });
+        this.destroyRef.onDestroy(() => {
+            this.mapService.unsetMap();
+        });
     }
 
     public async ngOnInit() {
@@ -71,6 +88,11 @@ export class TracesComponent implements OnInit {
         await this.tracesService.syncTraces();
         this.loadingTraces = false;
         this.runFilter();
+    }
+
+    public mapLoaded(map: Map) {
+        this.mapService.setMap(map);
+        this.mapService.addArrowToMap(map);
     }
 
     public async addTraceToRoutes(shallowTrace: Immutable<Trace>) {
@@ -202,11 +224,28 @@ export class TracesComponent implements OnInit {
         }
     }
 
-    public moveToTrace(trace: Immutable<Trace>) {
-        // move the map to the trace
+    public async moveToTrace(trace: Immutable<Trace>) {
+        const fullTrace = await this.tracesService.getTraceById(trace.id);
+        this.selectedTrace = fullTrace;
+        const features: GeoJSON.Feature[] = [];
+        for (const route of fullTrace.dataContainer.routes) {
+            route.color = "magenta";
+            route.weight = 10;
+            route.opacity = 0.7;
+            features.push(...this.selectedRouteService.createFeaturesForRoute(route));
+        }
+        this.traceGeoJson = { type: "FeatureCollection", features };
+        const bounds = SpatialService.getBoundsForFeatureCollection(this.traceGeoJson);
+        this.mapService.fitBounds(bounds);
     }
 
     public onStartPointClick(trace: Immutable<Trace>) {
-        this.selectedTrace = trace;
+        if (this.selectedTrace?.id === trace.id) {
+            this.selectedTrace = null;
+            this.traceGeoJson = { type: "FeatureCollection", features: [] };
+            return;
+        }
+        this.moveToTrace(trace);
+        ScrollToDirective.scrollTo(`trace-${trace.id}`, 60);
     }
 }
