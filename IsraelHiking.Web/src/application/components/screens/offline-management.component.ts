@@ -1,5 +1,4 @@
 import { Component, inject } from "@angular/core";
-import { MatDialog, MatDialogActions, MatDialogClose, MatDialogTitle } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { type Map, type MapMouseEvent, MercatorCoordinate, type StyleSpecification } from "maplibre-gl";
@@ -18,12 +17,12 @@ import { DEFAULT_BASE_LAYERS, HIKING_MAP, MTB_MAP } from "../../reducers/initial
 import type { ApplicationState, EditableLayer } from "../../models";
 
 @Component({
-    selector: "offline-management-dialog",
-    templateUrl: "./offline-management-dialog.component.html",
-    styleUrls: ["./offline-management-dialog.component.scss"],
-    imports: [MapComponent, Angulartics2OnModule, MatDialogActions, MatDialogTitle, MatDialogClose, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent],
+    selector: "offline-management",
+    templateUrl: "./offline-management.component.html",
+    styleUrls: ["./offline-management.component.scss"],
+    imports: [MapComponent, Angulartics2OnModule, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent],
 })
-export class OfflineManagementDialogComponent {
+export class OfflineManagementComponent {
     public offlineMapStyle: StyleSpecification;
     public selectedTile: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
     public inProgressTile: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
@@ -40,14 +39,6 @@ export class OfflineManagementDialogComponent {
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
     public readonly resources = inject(ResourcesService);
-
-    public static openDialog(matDialog: MatDialog) {
-        return matDialog.open(OfflineManagementDialogComponent, {
-            width: "100vw",
-            height: "calc(100vh-env(safe-area-inset-bottom, 0)-env(safe-area-inset-top, 0))",
-            maxWidth: "100vw",
-        });
-    }
 
     constructor() {
         this.offlineMapStyle = this.defaultStyleService.getStyleWithPlaceholders();

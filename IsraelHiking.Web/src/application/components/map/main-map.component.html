@@ -1,6 +1,6 @@
 ﻿<ng-progress ngProgressHttp [ngStyle]="{'z-index':1500}"></ng-progress>
 <sidebar></sidebar>
-<div class="flex flex-row w-full map-height" [dir]="resources.direction">
+<div class="flex flex-row w-full map-h-full" [dir]="resources.direction">
   <mgl-map ngSkipHydration="true" [zoom]="[location.zoom]" [center]="[location.longitude, location.latitude]"
     [mapStyle]="initialStyle" (mapLoad)="mapLoaded($event)" [doubleClickZoom]="false" [attributionControl]="false">
     <layers [isMainMap]="true"></layers>

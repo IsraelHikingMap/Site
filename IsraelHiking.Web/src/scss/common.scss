@@ -222,6 +222,16 @@ overlay.overlay-shown {
     box-shadow: 0 0 10px #32CD6D, 0 0 5px #32CD6D !important
 }
 
+.map-h-full {
+    height: calc(100vh - var(--mat-toolbar-mobile-height) - env(safe-area-inset-top, 0));
+}
+
+@media (width >=600px) {
+    .map-h-full {
+        height: calc(100vh - var(--mat-toolbar-standard-height) - env(safe-area-inset-top, 0));
+    }
+}
+
 /* Progressbar override */
 
 @media print {

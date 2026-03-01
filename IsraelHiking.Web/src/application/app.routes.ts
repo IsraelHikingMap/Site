@@ -6,6 +6,7 @@ import { FaqComponent } from "./components/screens/faq.component";
 import { AttributionComponent } from "./components/screens/attribution.component";
 import { SharesComponent } from "./components/screens/shares.component";
 import { TracesComponent } from "./components/screens/traces.component";
+import { OfflineManagementComponent } from "./components/screens/offline-management.component";
 import { environment } from "environments/environment";
 
 export const routes: Route[] = [
@@ -16,5 +17,6 @@ export const routes: Route[] = [
     { path: "attribution", component: AttributionComponent },
     { path: "shares", component: SharesComponent },
     { path: "traces", component: TracesComponent },
+    { path: "offline-management", component: OfflineManagementComponent },
     { path: "**", component: MainMapComponent }
 ];
