@@ -193,8 +193,8 @@ export class SearchComponent {
         }
     }
 
-    public isShares() {
-        return this.hashService.isShares();
+    public isPoisSearch() {
+        return !this.hashService.isShares() && !this.hashService.isTraces();
     }
 
     public updateSearchTerm(searchTerm: string) {

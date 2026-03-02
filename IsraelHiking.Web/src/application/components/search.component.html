@@ -1,5 +1,5 @@
 ﻿<mat-form-field class="search-input-container" [class.logged-in]="isLoggedIn()" subscriptSizing="dynamic">
-  @if (isShares()) {
+  @if (!isPoisSearch()) {
   <input type="text" matInput class="control-container-item" placeholder="{{resources.searchPlaceHolder}}"
     [dir]="resources.getDirection(fromContext.searchTerm)" (input)="updateSearchTerm($event.target.value)">
   }

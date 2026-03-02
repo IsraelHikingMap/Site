@@ -3,7 +3,7 @@ import { Router } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
-import { MapComponent, MarkerComponent, PopupComponent } from "@maplibre/ngx-maplibre-gl";
+import { ClusterPointDirective, GeoJSONSourceComponent, MapComponent, MarkersForClustersComponent, PointDirective, PopupComponent } from "@maplibre/ngx-maplibre-gl";
 import { MatButton, MatAnchor } from "@angular/material/button";
 import { DatePipe } from "@angular/common";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
@@ -37,7 +37,7 @@ import type { ApplicationState, Trace, TraceVisibility } from "../../models";
     templateUrl: "./traces.component.html",
     styleUrls: ["./traces.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, MatAnchor, Angulartics2OnModule, SecuredImageComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, MarkerComponent, PopupComponent, LayersComponent, RoutesPathComponent]
+    imports: [Dir, MatButton, MatAnchor, Angulartics2OnModule, SecuredImageComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, PopupComponent, LayersComponent, RoutesPathComponent, MarkersForClustersComponent, GeoJSONSourceComponent, ClusterPointDirective, PointDirective]
 })
 export class TracesComponent implements OnInit {
 
@@ -45,7 +45,11 @@ export class TracesComponent implements OnInit {
     public filteredTraces: Immutable<Trace[]>;
     public loadingTraces: boolean = false;
     public selectedTrace: Immutable<Trace> | undefined;
-    public traceGeoJson: GeoJSON.FeatureCollection | undefined = {
+    public tracesGeoJson: GeoJSON.FeatureCollection<GeoJSON.Point> | undefined = {
+        type: "FeatureCollection",
+        features: []
+    };
+    public selectedTraceGeoJson: GeoJSON.FeatureCollection | undefined = {
         type: "FeatureCollection",
         features: []
     };
@@ -70,7 +74,7 @@ export class TracesComponent implements OnInit {
         const location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
         this.mapStyle.zoom = location.zoom;
         this.mapStyle.center = [location.longitude, location.latitude];
-        this.store.select((s: ApplicationState) => s.inMemoryState.searchTerm).pipe(takeUntilDestroyed()).subscribe((searchTerm: string) => {
+        this.store.select((s: ApplicationState) => s.inMemoryState.searchTerm).pipe(takeUntilDestroyed()).subscribe(() => {
             this.runFilter();
         });
         this.store.select((state: ApplicationState) => state.tracesState.traces).pipe(takeUntilDestroyed()).subscribe(() => {
@@ -158,8 +162,24 @@ export class TracesComponent implements OnInit {
 
     private runFilter() {
         const searchTerm = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.searchTerm).trim();
-        let traces = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces;
+        const traces = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces;
         this.filteredTraces = orderBy(traces.filter((t) => this.findInTrace(t, searchTerm)), ["timeStamp"], ["desc"]);
+        this.tracesGeoJson = {
+            type: "FeatureCollection",
+            features: this.filteredTraces.map(t => ({
+                type: "Feature",
+                geometry: {
+                    type: "Point",
+                    coordinates: [t.start.lng, t.start.lat],
+                },
+                properties: {
+                    id: t.id,
+                    name: this.getTraceDisplayName(t),
+                    description: t.description,
+                    timeStamp: t.timeStamp,
+                },
+            })),
+        };
     }
 
     private findInTrace(trace: Immutable<Trace>, searchTerm: string) {
@@ -224,8 +244,8 @@ export class TracesComponent implements OnInit {
         }
     }
 
-    public async moveToTrace(trace: Immutable<Trace>) {
-        const fullTrace = await this.tracesService.getTraceById(trace.id);
+    public async moveToTrace(traceId: string) {
+        const fullTrace = await this.tracesService.getTraceById(traceId);
         this.selectedTrace = fullTrace;
         const features: GeoJSON.Feature[] = [];
         for (const route of fullTrace.dataContainer.routes) {
@@ -234,18 +254,24 @@ export class TracesComponent implements OnInit {
             route.opacity = 0.7;
             features.push(...this.selectedRouteService.createFeaturesForRoute(route));
         }
-        this.traceGeoJson = { type: "FeatureCollection", features };
-        const bounds = SpatialService.getBoundsForFeatureCollection(this.traceGeoJson);
+        this.selectedTraceGeoJson = { type: "FeatureCollection", features };
+        const bounds = SpatialService.getBoundsForFeatureCollection(this.selectedTraceGeoJson);
         this.mapService.fitBounds(bounds);
     }
 
-    public onStartPointClick(trace: Immutable<Trace>) {
-        if (this.selectedTrace?.id === trace.id) {
+    public onStartPointClick(traceId: string, event?: Event) {
+        event?.stopPropagation();
+        if (this.selectedTrace?.id === traceId) {
             this.selectedTrace = null;
-            this.traceGeoJson = { type: "FeatureCollection", features: [] };
+            this.selectedTraceGeoJson = { type: "FeatureCollection", features: [] };
             return;
         }
-        this.moveToTrace(trace);
-        ScrollToDirective.scrollTo(`trace-${trace.id}`, 60);
+        this.moveToTrace(traceId);
+        ScrollToDirective.scrollTo(`trace-${traceId}`, 60);
+    }
+
+    public expandCluster(feature: GeoJSON.Feature<GeoJSON.Point>, event: Event) {
+        event.stopPropagation();
+        this.mapService.flyTo({ lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0] }, 15.1);
     }
 }

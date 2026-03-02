@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnChanges, inject, input } from "@angular/core";
+import { Component, ElementRef, OnChanges, inject, input, AfterViewInit } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 import { HttpClient } from "@angular/common/http";
 import { BehaviorSubject, Observable } from "rxjs";
@@ -12,7 +12,7 @@ import { AsyncPipe } from "@angular/common";
   `,
     imports: [AsyncPipe]
 })
-export class SecuredImageComponent implements OnChanges {
+export class SecuredImageComponent implements OnChanges, AfterViewInit {
     // This code block just creates an rxjs stream from the src
     // this makes sure that we can handle source changes
     // or even when the component gets destroyed
@@ -49,7 +49,7 @@ export class SecuredImageComponent implements OnChanges {
                 this.isVisible$.next(true);
                 observer.disconnect(); // Cleanup immediately after visibility detected
             }
-        }, { rootMargin: '100px' }); // Load slightly before it hits the screen
+        }, { rootMargin: "100px" }); // Load slightly before it hits the screen
 
         observer.observe(this.el.nativeElement);
     }

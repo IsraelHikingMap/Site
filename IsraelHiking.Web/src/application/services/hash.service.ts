@@ -201,4 +201,8 @@ export class HashService {
     public isShares() {
         return this.router.url === RouteStrings.ROUTE_SHARES;
     }
+
+    public isTraces() {
+        return this.router.url === RouteStrings.ROUTE_TRACES;
+    }
 }

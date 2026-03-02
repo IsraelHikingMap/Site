@@ -23,7 +23,7 @@
                         {{resources.uploadFileToOsm}}
                     </button>
                     }
-                    <button mat-menu-item class="max-md:hidden!" (click)="moveToTrace(trace)">
+                    <button mat-menu-item class="max-md:hidden!" (click)="moveToTrace(trace.id)">
                         <i class="fa icon-crosshairs"></i>
                         {{resources.moveToRoute}}
                     </button>
@@ -79,19 +79,29 @@
         <div class="w-full h-full">
             <mgl-map [mapStyle]="mapStyle" [attributionControl]="false" (mapLoad)="mapLoaded($event)">
                 <layers [isMainMap]="false"></layers>
-                <routes-path [routesGeoJson]="traceGeoJson"></routes-path>
-                @for (trace of filteredTraces; track trace.id) {
-                <mgl-marker [lngLat]="trace.start">
-                    <span class="fa-stack fa-lg cursor-pointer selected-marker-icon" (click)="onStartPointClick(trace)">
-                        <i class="fa icon-map-marker-rect fa-stack-2x"
-                            style="color: white; text-shadow: 3px 3px 3px #000;"></i>
-                        <i class="fa icon-recordings fa-stack-1x stack-icon-top stack-icon-large"></i>
-                    </span>
-                </mgl-marker>
-                }
+                <routes-path [routesGeoJson]="selectedTraceGeoJson"></routes-path>
+                <mgl-geojson-source id="traces-source" [data]="tracesGeoJson" [cluster]="true" [clusterMaxZoom]="14"
+                    [clusterRadius]="100"></mgl-geojson-source>
+                <mgl-markers-for-clusters source="traces-source">
+                    <ng-template mglPoint let-feature>
+                        <span class="fa-stack fa-lg cursor-pointer marker-icon"
+                            (click)="onStartPointClick(feature.properties.id, $event)" angulartics2On="click"
+                            angularticsCategory="Traces" angularticsAction="Open a Trace from the map">
+                            <i class="fa icon-map-marker-rect fa-stack-2x"
+                                style="color: white; text-shadow: 3px 3px 3px #000;"></i>
+                            <i class="fa icon-recordings fa-stack-1x stack-icon-top stack-icon-large"></i>
+                        </span>
+                    </ng-template>
+                    <ng-template mglClusterPoint let-feature>
+                        <div class="marker-cluster" (click)="expandCluster(feature, $event)" angulartics2On="click"
+                            angularticsCategory="Traces" angularticsAction="Traces cluster click">
+                            {{ feature.properties?.point_count }}
+                        </div>
+                    </ng-template>
+                </mgl-markers-for-clusters>
                 @if (selectedTrace) {
                 <mgl-popup [lngLat]="selectedTrace.start" [closeOnClick]="false"
-                    (popupClose)="onStartPointClick(selectedTrace)" [offset]="[0, -15]">
+                    (popupClose)="onStartPointClick(selectedTrace.id)" [offset]="[0, -15]">
                     <div class="flex flex-row">
                         <h3>{{getTraceDisplayName(selectedTrace)}}</h3>
                     </div>
