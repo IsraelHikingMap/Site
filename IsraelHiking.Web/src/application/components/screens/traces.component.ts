@@ -3,7 +3,7 @@ import { Router } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
-import { ClusterPointDirective, GeoJSONSourceComponent, MapComponent, MarkersForClustersComponent, PointDirective, PopupComponent } from "@maplibre/ngx-maplibre-gl";
+import { ClusterPointDirective, GeoJSONSourceComponent, LayerComponent, MapComponent, MarkerComponent, MarkersForClustersComponent, PointDirective, PopupComponent } from "@maplibre/ngx-maplibre-gl";
 import { MatButton, MatAnchor } from "@angular/material/button";
 import { DatePipe } from "@angular/common";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
@@ -15,6 +15,7 @@ import type { StyleSpecification, Map } from "maplibre-gl";
 import { SecuredImageComponent } from "../secured-image.component";
 import { LayersComponent } from "../map/layers.component";
 import { RoutesPathComponent } from "../map/routes-path.component";
+import { MissingPartOverlayComponent } from "../overlays/missing-part-overlay.component";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
@@ -29,15 +30,16 @@ import { DataContainerService } from "../../services/data-container.service";
 import { RouteStrings } from "../../services/hash.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
-import { SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
-import type { ApplicationState, Trace, TraceVisibility } from "../../models";
+import type { ApplicationState, LatLngAltTime, Trace, TraceVisibility } from "../../models";
+import { EditTraceDialogComponent } from "../dialogs/edit-trece-dialog.component";
+import { MatDialog } from "@angular/material/dialog";
 
 @Component({
     selector: "traces",
     templateUrl: "./traces.component.html",
     styleUrls: ["./traces.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, MatAnchor, Angulartics2OnModule, SecuredImageComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, PopupComponent, LayersComponent, RoutesPathComponent, MarkersForClustersComponent, GeoJSONSourceComponent, ClusterPointDirective, PointDirective]
+    imports: [Dir, MatButton, MatAnchor, Angulartics2OnModule, SecuredImageComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, PopupComponent, LayersComponent, RoutesPathComponent, MarkersForClustersComponent, GeoJSONSourceComponent, ClusterPointDirective, PointDirective, MarkerComponent, MissingPartOverlayComponent, LayerComponent, GeoJSONSourceComponent]
 })
 export class TracesComponent implements OnInit {
 
@@ -50,6 +52,16 @@ export class TracesComponent implements OnInit {
         features: []
     };
     public selectedTraceGeoJson: GeoJSON.FeatureCollection | undefined = {
+        type: "FeatureCollection",
+        features: []
+    };
+    public selectedFeature: GeoJSON.Feature<GeoJSON.LineString>;
+    public missingCoordinates: LatLngAltTime = null;
+    public missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString> = {
+        type: "FeatureCollection",
+        features: []
+    };
+    public selectedFeatureSource: GeoJSON.FeatureCollection<GeoJSON.LineString> = {
         type: "FeatureCollection",
         features: []
     };
@@ -68,6 +80,7 @@ export class TracesComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly store = inject(Store);
     private readonly destroyRef = inject(DestroyRef);
+    private readonly dialog = inject(MatDialog);
 
     constructor() {
         this.mapStyle = this.defaultStyleService.getStyleWithPlaceholders();
@@ -110,8 +123,9 @@ export class TracesComponent implements OnInit {
     }
 
     public editTrace(shallowTrace: Immutable<Trace>) {
-        // HM TODO: create edit dialog
-        // open edit dialog   
+        this.dialog.open<EditTraceDialogComponent, Immutable<Trace>>(EditTraceDialogComponent, {
+            data: shallowTrace,
+        });
     }
 
     public deleteTrace(shallowTrace: Immutable<Trace>) {
@@ -134,11 +148,13 @@ export class TracesComponent implements OnInit {
             const geoJson = await this.tracesService.getMissingParts(shallowTrace.id);
             if (geoJson.features.length === 0) {
                 this.toastService.confirm({ message: this.resources.noUnmappedRoutes, type: "Ok" });
+                this.missingParts = {
+                    type: "FeatureCollection",
+                    features: []
+                };
                 return;
             }
-            const trace = await this.tracesService.getTraceById(shallowTrace.id);
-            this.store.dispatch(new SetVisibleTraceAction(trace.id));
-            this.store.dispatch(new SetMissingPartsAction(geoJson));
+            this.missingParts = geoJson;
             const bounds = SpatialService.getBoundsForFeatureCollection(geoJson);
             this.mapService.fitBounds(bounds);
         } catch (ex) {
@@ -273,5 +289,37 @@ export class TracesComponent implements OnInit {
     public expandCluster(feature: GeoJSON.Feature<GeoJSON.Point>, event: Event) {
         event.stopPropagation();
         this.mapService.flyTo({ lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0] }, 15.1);
+    }
+
+    public getLatLngLikeForFeature(feautre: GeoJSON.Feature<GeoJSON.LineString>): GeoJSON.Position {
+        return feautre.geometry.coordinates[0];
+    }
+
+    public setSelectedFeature(feature: GeoJSON.Feature<GeoJSON.LineString>, event: Event) {
+        this.selectedFeature = feature;
+        const coordinates = this.getLatLngLikeForFeature(this.selectedFeature);
+        this.missingCoordinates = { lat: coordinates[1], lng: coordinates[0] };
+        this.selectedFeatureSource = {
+            type: "FeatureCollection",
+            features: [this.selectedFeature]
+        };
+        event.stopPropagation();
+    }
+
+    public removeMissingPart() {
+        this.missingParts = {
+            type: "FeatureCollection",
+            features: this.missingParts.features.filter(f => f !== this.selectedFeature)
+        }
+        this.clearSelection();
+    }
+
+    public clearSelection() {
+        this.selectedFeature = null;
+        this.missingCoordinates = null;
+        this.selectedFeatureSource = {
+            type: "FeatureCollection",
+            features: []
+        };
     }
 }

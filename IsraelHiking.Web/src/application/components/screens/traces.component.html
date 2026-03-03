@@ -125,6 +125,35 @@
                     </div>
                 </mgl-popup>
                 }
+                <mgl-geojson-source id="missing-parts" [data]="missingParts"></mgl-geojson-source>
+                <mgl-layer id="missing-part-line" source="missing-parts" type="line" [paint]="{
+                    'line-color': 'red',
+                    'line-width': 3
+                }">
+                </mgl-layer>
+                <mgl-geojson-source id="selected-feature" [data]="selectedFeatureSource"></mgl-geojson-source>
+                <mgl-layer id="missing-part-line-selected" source="selected-feature" type="line" [paint]="{
+                    'line-color': 'brown',
+                    'line-width': 5
+                }">
+                </mgl-layer>
+                @if (missingCoordinates) {
+                <mgl-popup [lngLat]="missingCoordinates" [offset]="[0, -30]" (popupClose)="clearSelection()">
+                    <missing-part-overlay [feature]="selectedFeature" [latlng]="missingCoordinates"
+                        (removed)="removeMissingPart()"></missing-part-overlay>
+                </mgl-popup>
+                }
+                @for (feature of missingParts.features; track feature) {
+                <mgl-marker [lngLat]="getLatLngLikeForFeature(feature)" anchor="bottom">
+                    <div (click)="setSelectedFeature(feature, $event)">
+                        <span class='fa-stack fa-lg'>
+                            <i class='fa icon-map-marker fa-stack-2x'
+                                style='color:white;text-shadow: 3px 3px 3px #000;'></i>
+                            <i class='fa icon-star fa-stack-1x stack-icon-top' style='color:orange;'></i>
+                        </span>
+                    </div>
+                </mgl-marker>
+                }
             </mgl-map>
         </div>
     </div>

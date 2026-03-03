@@ -210,9 +210,7 @@ export const initialState =
             pendingProcessing: []
         },
         tracesState: {
-            visibleTraceId: null,
-            traces: [],
-            missingParts: null,
+            traces: []
         },
         layersState: {
             baseLayers: [],
