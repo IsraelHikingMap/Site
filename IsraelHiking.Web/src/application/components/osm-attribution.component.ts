@@ -2,6 +2,7 @@ import { Component, inject } from "@angular/core";
 
 import { OsmAddressesService } from "../services/osm-addresses.service";
 import { RunningContextService } from "../services/running-context.service";
+import { ResourcesService } from "../services/resources.service";
 
 @Component({
     selector: "osm-attribution",
@@ -10,6 +11,7 @@ import { RunningContextService } from "../services/running-context.service";
     imports: []
 })
 export class OsmAttributionComponent {
+    public readonly resources = inject(ResourcesService);
     private readonly osmAddressService = inject(OsmAddressesService);
     private readonly runningContextService = inject(RunningContextService);
 

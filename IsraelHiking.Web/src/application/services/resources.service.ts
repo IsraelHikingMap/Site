@@ -279,6 +279,7 @@ export class ResourcesService {
     public FAQ: string;
     public downloadMapForOfflineUse: string;
     public privacyPolicyTermsOfService: string;
+    public editThisMap: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -499,7 +500,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1771792248161");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1772562193550");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -758,6 +759,7 @@ export class ResourcesService {
         this.FAQ = this.gettextCatalog.getString("F.A.Q");
         this.downloadMapForOfflineUse = this.gettextCatalog.getString("Download Map for Offline Use");
         this.privacyPolicyTermsOfService = this.gettextCatalog.getString("Privacy Policy and Terms of Service");
+        this.editThisMap = this.gettextCatalog.getString("Edit this map");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

@@ -3,6 +3,7 @@
         OpenStreetMap</a>
     @if (!isMobile()) {
     <span class="mx-1 text-black text-xs">|</span>
-    <a class="no-underline text-black text-xs" [href]="getEditAddress()" target="_blank">Edit the map</a>
+    <a class="no-underline text-black text-xs" [href]="getEditAddress()" [dir]="resources.direction"
+        target="_blank">{{resources.editThisMap}}</a>
     }
 </div>
