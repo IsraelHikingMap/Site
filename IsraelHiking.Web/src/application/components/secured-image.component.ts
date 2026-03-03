@@ -1,14 +1,14 @@
 import { Component, ElementRef, OnChanges, inject, input, AfterViewInit } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 import { HttpClient } from "@angular/common/http";
-import { BehaviorSubject, Observable } from "rxjs";
-import { switchMap, map, filter, take } from "rxjs/operators";
+import { BehaviorSubject, Observable, of } from "rxjs";
+import { switchMap, map, filter, take, catchError } from "rxjs/operators";
 import { AsyncPipe } from "@angular/common";
 
 @Component({
     selector: "secured-image",
     template: `
-    <img [src]="dataUrl$|async" loading="lazy" alt="" class="float-end w-1/3 h-auto object-cover block ps-2 rounded-2xl"/>
+    <img [src]="dataUrl$|async" loading="lazy" alt="" class="float-end w-1/6 h-auto object-cover block ps-2 rounded-2xl"/>
   `,
     imports: [AsyncPipe]
 })
@@ -31,7 +31,10 @@ export class SecuredImageComponent implements OnChanges, AfterViewInit {
         filter(visible => visible), // Wait until visible
         take(1),                    // Load only once per component lifecycle
         switchMap(() => this.src$),
-        switchMap(url => this.loadImage(url))
+        switchMap(url => this.loadImage(url).pipe(
+            // Catch error on the inner observable to provide fallback
+            catchError(() => of("content/logo.png"))
+        ))
     );
 
     private readonly httpClient = inject(HttpClient);
