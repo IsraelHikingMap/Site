@@ -3,11 +3,11 @@
         <mat-button-toggle-group [(ngModel)]="showMap">
             <mat-button-toggle [value]="false">
                 <i class="fa icon-list"></i>
-                List
+                {{resources.list}}
             </mat-button-toggle>
             <mat-button-toggle [value]="true">
-                <i class="fa icon-map-editing"></i>
-                Map
+                <i class="fa icon-map-o"></i>
+                {{resources.map}}
             </mat-button-toggle>
         </mat-button-toggle-group>
     </div>
