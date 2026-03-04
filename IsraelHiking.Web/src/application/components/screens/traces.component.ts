@@ -158,6 +158,7 @@ export class TracesComponent implements OnInit {
                 return;
             }
             this.missingParts = geoJson;
+            this.showMap = true;
             const bounds = SpatialService.getBoundsForFeatureCollection(geoJson);
             this.mapService.fitBounds(bounds);
         } catch (ex) {
