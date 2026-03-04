@@ -7,6 +7,9 @@ import { ClusterPointDirective, GeoJSONSourceComponent, LayerComponent, MapCompo
 import { MatButton, MatAnchor } from "@angular/material/button";
 import { DatePipe } from "@angular/common";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
+import { MatButtonToggle, MatButtonToggleGroup } from "@angular/material/button-toggle";
+import { MatDialog } from "@angular/material/dialog";
+import { FormsModule } from "@angular/forms";
 import { orderBy } from "lodash-es";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
@@ -16,6 +19,7 @@ import { SecuredImageComponent } from "../secured-image.component";
 import { LayersComponent } from "../map/layers.component";
 import { RoutesPathComponent } from "../map/routes-path.component";
 import { MissingPartOverlayComponent } from "../overlays/missing-part-overlay.component";
+import { EditTraceDialogComponent } from "../dialogs/edit-trece-dialog.component";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
@@ -31,18 +35,17 @@ import { RouteStrings } from "../../services/hash.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import type { ApplicationState, LatLngAltTime, Trace, TraceVisibility } from "../../models";
-import { EditTraceDialogComponent } from "../dialogs/edit-trece-dialog.component";
-import { MatDialog } from "@angular/material/dialog";
 
 @Component({
     selector: "traces",
     templateUrl: "./traces.component.html",
     styleUrls: ["./traces.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, MatAnchor, Angulartics2OnModule, SecuredImageComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, PopupComponent, LayersComponent, RoutesPathComponent, MarkersForClustersComponent, GeoJSONSourceComponent, ClusterPointDirective, PointDirective, MarkerComponent, MissingPartOverlayComponent, LayerComponent, GeoJSONSourceComponent]
+    imports: [Dir, MatButton, MatAnchor, Angulartics2OnModule, SecuredImageComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, PopupComponent, LayersComponent, RoutesPathComponent, MarkersForClustersComponent, GeoJSONSourceComponent, ClusterPointDirective, PointDirective, MarkerComponent, MissingPartOverlayComponent, LayerComponent, GeoJSONSourceComponent, MatButtonToggle, MatButtonToggleGroup, FormsModule]
 })
 export class TracesComponent implements OnInit {
 
+    public showMap = false;
     public mapStyle: StyleSpecification;
     public filteredTraces: Immutable<Trace[]>;
     public loadingTraces: boolean = false;

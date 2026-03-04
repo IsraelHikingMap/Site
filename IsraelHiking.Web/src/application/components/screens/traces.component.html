@@ -1,5 +1,17 @@
-<div class="flex flex-row map-h-full" [dir]="resources.direction">
-    <div class="max-md:w-full w-1/3 overflow-y-auto">
+<div class="flex flex-row map-h-full relative" [dir]="resources.direction">
+    <div class="hidden max-md:block absolute bottom-0 bg-white left-1/2 -translate-x-1/2 z-10">
+        <mat-button-toggle-group [(ngModel)]="showMap">
+            <mat-button-toggle [value]="false">
+                <i class="fa icon-list"></i>
+                List
+            </mat-button-toggle>
+            <mat-button-toggle [value]="true">
+                <i class="fa icon-map-editing"></i>
+                Map
+            </mat-button-toggle>
+        </mat-button-toggle-group>
+    </div>
+    <div class="max-md:{{showMap ? 'hidden' : 'w-full'}} w-1/3 overflow-y-auto">
         <div class="flex flex-row">
             <label class="w-full">
                 <a class="w-full" mat-raised-button color="primary" angulartics2On="click" angularticsCategory="OSM"
@@ -75,7 +87,7 @@
         <mat-spinner></mat-spinner>
         }
     </div>
-    <div class="max-md:hidden w-2/3">
+    <div class="max-md:{{!showMap ? 'hidden' : 'w-full'}} w-2/3">
         <div class="w-full h-full">
             <mgl-map [mapStyle]="mapStyle" [attributionControl]="false" (mapLoad)="mapLoaded($event)">
                 <layers [isMainMap]="false"></layers>
