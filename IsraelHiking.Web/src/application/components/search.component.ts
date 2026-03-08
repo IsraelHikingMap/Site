@@ -200,4 +200,14 @@ export class SearchComponent {
     public updateSearchTerm(searchTerm: string) {
         this.store.dispatch(new SetSearchTermAction(searchTerm));
     }
+
+    public placeholder() {
+        if (this.hashService.isShares()) {
+            return this.resources.searchSharesPlaceHolder;
+        }
+        if (this.hashService.isTraces()) {
+            return this.resources.searchTracesPlaceHolder;
+        }
+        return this.resources.searchPlaceHolder;
+    }
 }
