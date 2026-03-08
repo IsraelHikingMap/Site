@@ -350,6 +350,7 @@ export class ResourcesService {
     public dontSwitchApps: string;
     public tooManyRoutes: string;
     public openRoutesPanel: string;
+    public thisMightTakeAWhile: string;
     // Legend
     public legendMarkedTrails: string;
     public legendRedMarkedTrail: string;
@@ -501,7 +502,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1772658967562");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1773007401893");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -848,6 +849,7 @@ export class ResourcesService {
         this.dontSwitchApps = this.gettextCatalog.getString("To prevent download errors, please don't switch apps or lock your screen until the download is finished");
         this.tooManyRoutes = this.gettextCatalog.getString("You have more than 10 routes which can cause performance issues.");
         this.openRoutesPanel = this.gettextCatalog.getString("Open routes panel");
+        this.thisMightTakeAWhile = this.gettextCatalog.getString("This might take a while");
         // Legend
         this.legendMarkedTrails = this.gettextCatalog.getString("Marked Trails");
         this.legendRedMarkedTrail = this.gettextCatalog.getString("Red Marked Trail");

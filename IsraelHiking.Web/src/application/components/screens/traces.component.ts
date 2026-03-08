@@ -3,15 +3,16 @@ import { Router } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
-import { ClusterPointDirective, GeoJSONSourceComponent, LayerComponent, MapComponent, MarkerComponent, MarkersForClustersComponent, PointDirective, PopupComponent } from "@maplibre/ngx-maplibre-gl";
+import { ClusterPointDirective, ControlComponent, GeoJSONSourceComponent, LayerComponent, MapComponent, MarkerComponent, MarkersForClustersComponent, PointDirective, PopupComponent } from "@maplibre/ngx-maplibre-gl";
 import { MatButton, MatAnchor } from "@angular/material/button";
-import { DatePipe } from "@angular/common";
+import { DatePipe, NgClass } from "@angular/common";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { MatButtonToggle, MatButtonToggleGroup } from "@angular/material/button-toggle";
 import { MatDialog } from "@angular/material/dialog";
 import { FormsModule } from "@angular/forms";
 import { orderBy } from "lodash-es";
 import { Store } from "@ngxs/store";
+import { MatFormField, MatLabel, MatOption, MatSelect } from "@angular/material/select";
 import type { Immutable } from "immer";
 import type { StyleSpecification, Map } from "maplibre-gl";
 
@@ -20,6 +21,7 @@ import { LayersComponent } from "../map/layers.component";
 import { RoutesPathComponent } from "../map/routes-path.component";
 import { MissingPartOverlayComponent } from "../overlays/missing-part-overlay.component";
 import { EditTraceDialogComponent } from "../dialogs/edit-trece-dialog.component";
+import { OsmAttributionComponent } from "../osm-attribution.component";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
@@ -35,17 +37,20 @@ import { RouteStrings } from "../../services/hash.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import type { ApplicationState, LatLngAltTime, Trace, TraceVisibility } from "../../models";
+import { ZoomComponent } from "../zoom.component";
 
 @Component({
     selector: "traces",
     templateUrl: "./traces.component.html",
     styleUrls: ["./traces.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, MatAnchor, Angulartics2OnModule, SecuredImageComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, PopupComponent, LayersComponent, RoutesPathComponent, MarkersForClustersComponent, GeoJSONSourceComponent, ClusterPointDirective, PointDirective, MarkerComponent, MissingPartOverlayComponent, LayerComponent, GeoJSONSourceComponent, MatButtonToggle, MatButtonToggleGroup, FormsModule]
+    imports: [Dir, MatButton, MatAnchor, Angulartics2OnModule, SecuredImageComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, PopupComponent, LayersComponent, RoutesPathComponent, MarkersForClustersComponent, GeoJSONSourceComponent, ClusterPointDirective, PointDirective, MarkerComponent, MissingPartOverlayComponent, LayerComponent, GeoJSONSourceComponent, MatButtonToggle, MatButtonToggleGroup, FormsModule, MatOption, MatLabel, MatFormField, MatSelect, OsmAttributionComponent, ControlComponent, ZoomComponent, NgClass]
 })
 export class TracesComponent implements OnInit {
 
     public showMap = false;
+    public sortBy: "timeStamp" | "name" = "timeStamp";
+    public sortDirection: "asc" | "desc" = "desc";
     public mapStyle: StyleSpecification;
     public filteredTraces: Immutable<Trace[]>;
     public loadingTraces: boolean = false;
@@ -115,6 +120,15 @@ export class TracesComponent implements OnInit {
         this.mapService.addArrowToMap(map);
     }
 
+    public onSortChange() {
+        this.runFilter();
+    }
+
+    public onSortDirectionChange() {
+        this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+        this.runFilter();
+    }
+
     public async addTraceToRoutes(shallowTrace: Immutable<Trace>) {
         const trace = await this.tracesService.getTraceById(shallowTrace.id);
         if (trace.dataContainer.routes.length === 1) {
@@ -148,6 +162,7 @@ export class TracesComponent implements OnInit {
 
     public async findUnmappedRoutes(shallowTrace: Immutable<Trace>): Promise<void> {
         try {
+            this.toastService.info(this.resources.thisMightTakeAWhile);
             const geoJson = await this.tracesService.getMissingParts(shallowTrace.id);
             if (geoJson.features.length === 0) {
                 this.toastService.confirm({ message: this.resources.noUnmappedRoutes, type: "Ok" });
@@ -183,7 +198,7 @@ export class TracesComponent implements OnInit {
     private runFilter() {
         const searchTerm = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.searchTerm).trim();
         const traces = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces;
-        this.filteredTraces = orderBy(traces.filter((t) => this.findInTrace(t, searchTerm)), ["timeStamp"], ["desc"]);
+        this.filteredTraces = orderBy(traces.filter((t) => this.findInTrace(t, searchTerm)), [this.sortBy], [this.sortDirection]);
         this.tracesGeoJson = {
             type: "FeatureCollection",
             features: this.filteredTraces.map(t => ({
@@ -275,6 +290,7 @@ export class TracesComponent implements OnInit {
             features.push(...this.selectedRouteService.createFeaturesForRoute(route));
         }
         this.selectedTraceGeoJson = { type: "FeatureCollection", features };
+        this.showMap = true;
         const bounds = SpatialService.getBoundsForFeatureCollection(this.selectedTraceGeoJson);
         this.mapService.fitBounds(bounds);
     }
