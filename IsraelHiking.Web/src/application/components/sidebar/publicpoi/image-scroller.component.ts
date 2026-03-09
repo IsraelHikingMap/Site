@@ -9,7 +9,6 @@ import { ResourcesService } from "../../../services/resources.service";
 import { FileService } from "../../../services/file.service";
 import { ImageGalleryService } from "../../../services/image-gallery.service";
 import { ImageResizeService } from "../../../services/image-resize.service";
-import { RunningContextService } from "../../../services/running-context.service";
 import { ImageAttributionService, ImageAttribution } from "../../../services/image-attribution.service";
 import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.json";
 
