@@ -2,17 +2,15 @@ import { Component, ViewEncapsulation, ElementRef, inject, viewChildren, Destroy
 import { MatDialog } from "@angular/material/dialog";
 import { NgStyle } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
-import { type StyleSpecification, type Map, ScaleControl, Unit, PointLike, IControl, ControlPosition } from "maplibre-gl";
+import { type StyleSpecification, type Map, ScaleControl, Unit, IControl, ControlPosition } from "maplibre-gl";
 import { NgProgressbar } from "ngx-progressbar";
 import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";
 
-import { TracesDialogComponent } from "../dialogs/traces-dialog.component";
 import { SidebarComponent } from "../sidebar/sidebar.component";
 import { LayersComponent } from "./layers.component";
 import { RoutesComponent } from "./routes.component";
 import { RecordedRouteComponent } from "./recorded-route.component";
-import { TracesComponent } from "./traces.component";
 import { ZoomComponent } from "../zoom.component";
 import { LocationComponent } from "../location.component";
 import { DrawingComponent } from "../drawing.component";
@@ -34,7 +32,7 @@ import type { ApplicationState, LocationState } from "../../models";
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, TracesComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent]
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent]
 })
 export class MainMapComponent {
 
@@ -105,17 +103,6 @@ export class MainMapComponent {
                 this.map.addControl(control, "bottom-" + start as ControlPosition);
                 this.addedControls.push(control);
             }
-        });
-
-        this.map.on("click", (e) => {
-            // This is used for the personal heatmap, assuming there's a layer there called "record_lines".
-            const bbox = [
-                [e.point.x - 5, e.point.y - 5],
-                [e.point.x + 5, e.point.y + 5]
-            ] as [PointLike, PointLike];
-            const features = this.map.queryRenderedFeatures(bbox).filter(f => f.sourceLayer === "record_lines");
-            if (features.length <= 0) { return; }
-            this.dialog.open(TracesDialogComponent, { width: "480px", data: features.map(f => f.properties.trace_id) });
         });
     }
 

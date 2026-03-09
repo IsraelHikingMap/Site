@@ -1,0 +1,39 @@
+<div [dir]="resources.direction">
+    <div mat-dialog-title>
+        <div>{{title}}</div>
+        <button mat-button type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
+    </div>
+    <div mat-dialog-content>
+        <div class="flex flex-row">
+            <mat-form-field class="w-full">
+                <mat-label>{{resources.description}}</mat-label>
+                <textarea matInput type="text" [(ngModel)]="description"></textarea>
+            </mat-form-field>
+        </div>
+        <div class="flex flex-row">
+            <mat-form-field class="w-full">
+                <mat-label>{{resources.tags}}</mat-label>
+                <input matInput type="text" [(ngModel)]="tagsString" />
+            </mat-form-field>
+        </div>
+        <div class="flex flex-row">
+            <mat-form-field class="w-full">
+                <mat-select [(ngModel)]="visibility">
+                    <mat-option value="trackable">{{resources.private}}</mat-option>
+                    <mat-option value="identifiable">{{resources.public}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+    </div>
+    <div mat-dialog-actions>
+        <div class="flex flex-row w-full">
+            <div class="flex-1">
+                <button class="w-full" mat-button mat-dialog-close>{{resources.cancel}}</button>
+            </div>
+            <div class="flex-1">
+                <button class="w-full" color="primary" mat-raised-button mat-dialog-close
+                    (click)="update()">{{resources.update}}</button>
+            </div>
+        </div>
+    </div>
+</div>

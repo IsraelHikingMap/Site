@@ -280,6 +280,9 @@ export class ResourcesService {
     public downloadMapForOfflineUse: string;
     public privacyPolicyTermsOfService: string;
     public editThisMap: string;
+    public list: string;
+    public searchSharesPlaceHolder: string;
+    public searchTracesPlaceHolder: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -349,6 +352,7 @@ export class ResourcesService {
     public dontSwitchApps: string;
     public tooManyRoutes: string;
     public openRoutesPanel: string;
+    public thisMightTakeAWhile: string;
     // Legend
     public legendMarkedTrails: string;
     public legendRedMarkedTrail: string;
@@ -500,7 +504,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1772562193550");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1773007649942");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -760,6 +764,9 @@ export class ResourcesService {
         this.downloadMapForOfflineUse = this.gettextCatalog.getString("Download Map for Offline Use");
         this.privacyPolicyTermsOfService = this.gettextCatalog.getString("Privacy Policy and Terms of Service");
         this.editThisMap = this.gettextCatalog.getString("Edit this map");
+        this.list = this.gettextCatalog.getString("List");
+        this.searchSharesPlaceHolder = this.gettextCatalog.getString("Search cloud saves...");
+        this.searchTracesPlaceHolder = this.gettextCatalog.getString("Search traces...");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -846,6 +853,7 @@ export class ResourcesService {
         this.dontSwitchApps = this.gettextCatalog.getString("To prevent download errors, please don't switch apps or lock your screen until the download is finished");
         this.tooManyRoutes = this.gettextCatalog.getString("You have more than 10 routes which can cause performance issues.");
         this.openRoutesPanel = this.gettextCatalog.getString("Open routes panel");
+        this.thisMightTakeAWhile = this.gettextCatalog.getString("This might take a while");
         // Legend
         this.legendMarkedTrails = this.gettextCatalog.getString("Marked Trails");
         this.legendRedMarkedTrail = this.gettextCatalog.getString("Red Marked Trail");

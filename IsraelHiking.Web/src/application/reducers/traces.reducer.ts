@@ -7,37 +7,22 @@ import type { TracesState, Trace } from "../models";
 
 export class AddTraceAction {
     public static type = this.prototype.constructor.name;
-    constructor(public trace: Trace) {}
+    constructor(public trace: Trace) { }
 }
 
 export class UpdateTraceAction {
     public static type = this.prototype.constructor.name;
-    constructor(public trace: Trace) {}
+    constructor(public trace: Trace) { }
 }
 
 export class RemoveTraceAction {
     public static type = this.prototype.constructor.name;
-    constructor(public traceId: string) {}
+    constructor(public traceId: string) { }
 }
 
 export class BulkReplaceTracesAction {
     public static type = this.prototype.constructor.name;
-    constructor(public traces: Trace[]) {}
-}
-
-export class SetVisibleTraceAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public traceId: string) {}
-}
-
-export class SetMissingPartsAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString>) {}
-}
-
-export class RemoveMissingPartAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public missingPartIndex: number) {}
+    constructor(public traces: Trace[]) { }
 }
 
 @State<TracesState>({
@@ -77,30 +62,6 @@ export class TracesReducer {
     public bulkReplace(ctx: StateContext<TracesState>, action: BulkReplaceTracesAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.traces = action.traces;
-            return lastState;
-        }));
-    }
-
-    @Action(SetVisibleTraceAction)
-    public setVisibleTrace(ctx: StateContext<TracesState>, action: SetVisibleTraceAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.visibleTraceId = action.traceId;
-            return lastState;
-        }));
-    }
-
-    @Action(SetMissingPartsAction)
-    public setMissingPart(ctx: StateContext<TracesState>, action: SetMissingPartsAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.missingParts = action.missingParts;
-            return lastState;
-        }));
-    }
-
-    @Action(RemoveMissingPartAction)
-    public removeMissingPart(ctx: StateContext<TracesState>, action: RemoveMissingPartAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.missingParts.features.splice(action.missingPartIndex, 1);
             return lastState;
         }));
     }

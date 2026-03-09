@@ -148,8 +148,7 @@ export class GeoLocationService {
                     }
                     this.handlePositionChange(this.lastReceivedPosition);
                     return;
-                }
-                if (error) {
+                } else if (error) {
                     this.loggingService.error(`[GeoLocation] Failed to start background tracking: ${error.message} code: ${error.code}`);
                     this.disable();
                     if (this.runningContextService.isIos) {
