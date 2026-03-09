@@ -1,7 +1,7 @@
 ﻿<mat-form-field class="search-input-container" [class.logged-in]="isLoggedIn()" subscriptSizing="dynamic">
   @if (!isPoisSearch()) {
-  <input type="text" matInput class="control-container-item" [placeholder]="placeholder()"
-    [dir]="resources.getDirection(fromContext.searchTerm)" (input)="updateSearchTerm($event.target.value)">
+  <input type="text" matInput #searchInput class="control-container-item" [placeholder]="placeholder()"
+    [dir]="resources.getDirection(searchInput.value)" (input)="updateSearchTerm($event.target.value)">
   }
   @else {
   <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom"
