@@ -1,5 +1,4 @@
 import { Component, ViewEncapsulation, ElementRef, inject, viewChildren, DestroyRef } from "@angular/core";
-import { MatDialog } from "@angular/material/dialog";
 import { NgStyle } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
 import { type StyleSpecification, type Map, ScaleControl, Unit, IControl, ControlPosition } from "maplibre-gl";
@@ -50,7 +49,6 @@ export class MainMapComponent {
     private readonly mapService = inject(MapService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly defaultStyleService = inject(DefaultStyleService);
-    private readonly dialog = inject(MatDialog);
     private readonly store = inject(Store);
     private readonly destroyRef = inject(DestroyRef);
 
