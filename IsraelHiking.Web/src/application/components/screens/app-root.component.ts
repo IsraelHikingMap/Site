@@ -1,12 +1,14 @@
 import { Component, HostListener, inject } from "@angular/core";
 import { MatToolbar } from "@angular/material/toolbar";
 import { RouterOutlet } from "@angular/router";
+import { Store } from "@ngxs/store";
 
 import { MainMenuComponent } from "../main-menu.component";
 import { SearchComponent } from "../search.component";
 import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
-import { HashService } from "../../services/hash.service";
+import { RouteStrings } from "../../services/hash.service";
+import type { ApplicationState } from "../../models";
 
 @Component({
   selector: "app-root",
@@ -19,7 +21,7 @@ export class AppRootComponent {
 
   public readonly resources = inject(ResourcesService);
   private readonly runningContextService = inject(RunningContextService)
-  private readonly hashService = inject(HashService);
+  private readonly store = inject(Store);
 
   @HostListener("window:scroll", [])
   onWindowScroll() {
@@ -31,7 +33,7 @@ export class AppRootComponent {
   }
 
   public isHome() {
-    return this.hashService.isHome();
+    const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
+    return currentUrl === RouteStrings.ROUTE_ROOT || currentUrl === RouteStrings.ROUTE_LANDING || currentUrl === RouteStrings.ROUTE_ABOUT;
   }
-
 }

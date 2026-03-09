@@ -38,6 +38,11 @@ export class SetSearchTermAction {
     constructor(public searchTerm: string) { }
 }
 
+export class SetUrlAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public url: string) { }
+}
+
 @State({
     name: "inMemoryState",
     defaults: initialState.inMemoryState
@@ -98,6 +103,14 @@ export class InMemoryReducer {
     public setSearchTerm(ctx: StateContext<InMemoryState>, action: SetSearchTermAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.searchTerm = action.searchTerm;
+            return lastState;
+        }));
+    }
+
+    @Action(SetUrlAction)
+    public setUrl(ctx: StateContext<InMemoryState>, action: SetUrlAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.currentUrl = action.url;
             return lastState;
         }));
     }

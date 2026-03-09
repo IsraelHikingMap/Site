@@ -325,22 +325,4 @@ describe("HashService", () => {
             expect(fullUrl).toContain(RouteStrings.COORDINATES);
         }
     ));
-
-    it("should return is home true when on home", inject([HashService, Router], (service: HashService, routerMock: Router) => {
-        (routerMock as any).url = RouteStrings.ROUTE_ROOT;
-
-        expect(service.isHome()).toBe(true);
-    }));
-
-    it("should return is home true when on landing", inject([HashService, Router], (service: HashService, routerMock: Router) => {
-        (routerMock as any).url = RouteStrings.ROUTE_LANDING;
-
-        expect(service.isHome()).toBe(true);
-    }));
-
-    it("should return is shares true when on shares", inject([HashService, Router], (service: HashService, routerMock: Router) => {
-        (routerMock as any).url = RouteStrings.ROUTE_SHARES;
-
-        expect(service.isShares()).toBe(true);
-    }));
 });

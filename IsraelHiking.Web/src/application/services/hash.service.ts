@@ -9,7 +9,7 @@ import { SidebarService } from "./sidebar.service";
 import { DataContainerService } from "./data-container.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { LayersService } from "./layers.service";
-import { SetFileUrlAndBaseLayerAction, SetShareUrlAction } from "../reducers/in-memory.reducer";
+import { SetFileUrlAndBaseLayerAction, SetShareUrlAction, SetUrlAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models";
 
 export type PoiRouteUrlInfo = {
@@ -70,6 +70,7 @@ export class HashService {
             filter(event => event instanceof NavigationEnd)
         ).subscribe((event: NavigationEnd) => {
             const tree = this.router.parseUrl(event.url);
+            this.store.dispatch(new SetUrlAction(event.url));
             const segments = tree.root.children.primary?.segments ?? [];
             const queryParams = tree.queryParams;
             if (this.router.url.startsWith(RouteStrings.ROUTE_MAP)) {
@@ -192,17 +193,5 @@ export class HashService {
         const urlTree = this.router.createUrlTree([RouteStrings.POI, poiSourceAndId.source, poiSourceAndId.id],
             { queryParams: { language: poiSourceAndId.language } });
         return Urls.baseAddress + urlTree.toString();
-    }
-
-    public isHome() {
-        return this.router.url === RouteStrings.ROUTE_ROOT || this.router.url === RouteStrings.ROUTE_LANDING || this.router.url === RouteStrings.ROUTE_ABOUT;
-    }
-
-    public isShares() {
-        return this.router.url === RouteStrings.ROUTE_SHARES;
-    }
-
-    public isTraces() {
-        return this.router.url === RouteStrings.ROUTE_TRACES;
     }
 }

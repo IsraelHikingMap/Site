@@ -20,7 +20,7 @@ import { remove } from "lodash-es";
 import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../services/resources.service";
-import { HashService, RouteStrings } from "../services/hash.service";
+import { RouteStrings } from "../services/hash.service";
 import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider } from "../services/search-results.provider";
 import { SetSearchTermAction } from "../reducers/in-memory.reducer";
@@ -63,7 +63,6 @@ export class SearchComponent {
     private readonly toastService = inject(ToastService);
     private readonly router = inject(Router);
     private readonly store = inject(Store);
-    private readonly hashService = inject(HashService);
 
     constructor() {
         this.configureInputFormControl(this.searchFrom, this.fromContext);
@@ -194,7 +193,8 @@ export class SearchComponent {
     }
 
     public isPoisSearch() {
-        return !this.hashService.isShares() && !this.hashService.isTraces();
+        const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
+        return currentUrl !== RouteStrings.ROUTE_SHARES && currentUrl !== RouteStrings.ROUTE_TRACES;
     }
 
     public updateSearchTerm(searchTerm: string) {
@@ -202,10 +202,11 @@ export class SearchComponent {
     }
 
     public placeholder() {
-        if (this.hashService.isShares()) {
+        const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
+        if (currentUrl === RouteStrings.ROUTE_SHARES) {
             return this.resources.searchSharesPlaceHolder;
         }
-        if (this.hashService.isTraces()) {
+        if (currentUrl === RouteStrings.ROUTE_TRACES) {
             return this.resources.searchTracesPlaceHolder;
         }
         return this.resources.searchPlaceHolder;
