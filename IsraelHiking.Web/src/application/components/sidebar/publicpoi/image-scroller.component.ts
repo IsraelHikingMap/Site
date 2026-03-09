@@ -36,7 +36,6 @@ export class ImageScrollerComponent implements OnChanges {
     public readonly resources = inject(ResourcesService);
 
     private readonly fileService = inject(FileService);
-    private readonly runningContextService = inject(RunningContextService);
     private readonly imageGalleryService = inject(ImageGalleryService);
     private readonly imageResizeService = inject(ImageResizeService);
     private readonly imageAttributionService = inject(ImageAttributionService);
@@ -104,7 +103,7 @@ export class ImageScrollerComponent implements OnChanges {
         if (imageUrl == null) {
             return null;
         }
-        return this.resources.getResizedImageUrl(imageUrl, 800)
+        return this.resources.getResizedImageUrl(imageUrl, 960)
     }
 
     private async updateCurrentImageAttribution(): Promise<void> {
@@ -119,7 +118,7 @@ export class ImageScrollerComponent implements OnChanges {
     public showImage() {
         const imagesUrls = [];
         for (const imageUrl of this.images()) {
-            const imageUrlToPush = this.resources.getResizedImageUrl(imageUrl, 1600);
+            const imageUrlToPush = this.resources.getResizedImageUrl(imageUrl, 1920);
             imagesUrls.push(imageUrlToPush);
         }
         this.imageGalleryService.open(imagesUrls, this.currentIndex);
