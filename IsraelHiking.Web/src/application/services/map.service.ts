@@ -131,9 +131,6 @@ export class MapService {
 
     public async fitBounds(bounds: Bounds, noPadding = false) {
         await this.initializationPromise;
-        if (!this.currentMap) {
-            return;
-        }
         const maxZoom = Math.max(this.currentMap.getZoom(), 16);
         const mbBounds = SpatialService.boundsToMBBounds(bounds);
 
@@ -182,9 +179,6 @@ export class MapService {
 
     public async moveTo(center: LatLngAltTime, zoom: number, bearing: number) {
         await this.initializationPromise;
-        if (!this.currentMap) {
-            return;
-        }
         this.currentMap.easeTo({
             bearing,
             center,
