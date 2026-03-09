@@ -107,7 +107,7 @@ export class ImageScrollerComponent implements OnChanges {
             return null;
         }
         return this.runningContextService.isOnline
-            ? this.resources.getResizedImageUrl(imageUrl, 800)
+            ? this.resources.getResizedImageUrl(imageUrl, 960)
             : imageUrl;
     }
 
