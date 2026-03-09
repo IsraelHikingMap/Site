@@ -157,6 +157,9 @@ export class MapService {
 
     public async flyTo(latLng: LatLngAltTime, zoom: number) {
         await this.initializationPromise;
+        if (!this.currentMap) {
+            return;
+        }
         if (SpatialService.getDistance(this.currentMap.getCenter(), latLng) < 0.0001 &&
             Math.abs(zoom - this.currentMap.getZoom()) < 0.01) {
             // ignoring flyto for small coordinates change:
@@ -168,6 +171,9 @@ export class MapService {
     }
 
     public async moveToWithCurrentZoom(center: LatLngAltTime, bearing: number) {
+        if (!this.currentMap) {
+            return;
+        }
         this.moveTo(center, this.currentMap.getZoom(), bearing);
     }
 

@@ -39,7 +39,7 @@
             <input type="file" (change)="addImage($event)" [style.display]="'none'" accept="image/*;capture=camera" />
           </label>
           } @else {
-          <img [src]="resources.getResizedImageUrl(imageLink.url, 300)" class="img-responsive w-full" />
+          <img [src]="resources.getResizedImageUrl(imageLink.url, 330)" class="img-responsive w-full" />
           }
         </div>
         @if (imageLink) {

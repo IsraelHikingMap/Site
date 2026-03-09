@@ -258,6 +258,16 @@ describe("MapService", () => {
         }
     ));
 
+    it("Should not move to with current zoom after map was removed", inject([MapService],
+        async (service: MapService) => {
+            const spy = jasmine.createSpy();
+            service.setMap({ easeTo: spy, on: () => { }, getZoom: () => 1, off: () => { } } as any as Map);
+            service.unsetMap();
+            await service.moveToWithCurrentZoom({ lng: 2, lat: 2 }, 1);
+            expect(spy).not.toHaveBeenCalled();
+        }
+    ));
+
     it("should call map's add layer", inject([MapService], async (service: MapService) => {
         const spy = jasmine.createSpy();
         service.setMap({
