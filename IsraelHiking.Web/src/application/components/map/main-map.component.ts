@@ -1,7 +1,7 @@
 import { Component, ViewEncapsulation, ElementRef, inject, viewChildren, DestroyRef } from "@angular/core";
 import { NgStyle } from "@angular/common";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
-import { type StyleSpecification, type Map, ScaleControl, Unit, IControl, ControlPosition } from "maplibre-gl";
+import { type StyleSpecification, type Map, ScaleControl, Unit, IControl, ControlPosition, type RasterDEMSourceSpecification } from "maplibre-gl";
 import { NgProgressbar } from "ngx-progressbar";
 import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";
@@ -54,6 +54,7 @@ export class MainMapComponent {
 
     private addedControls: IControl[] = [];
     private map: Map;
+    private isTerrainOn: boolean = false;
 
     constructor() {
         this.location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
@@ -114,5 +115,47 @@ export class MainMapComponent {
 
     public isApp() {
         return this.runningContextService.isCapacitor;
+    }
+
+    public pitchChanged() {
+        if (this.runningContextService.isMobile || !this.map) {
+            return;
+        }
+        const pitch = this.map.getPitch();
+        if (pitch <= 10 && !this.isTerrainOn) {
+            // Terrain is off and pitch is low, nothing to do.
+            return;
+        }
+
+        if (pitch > 10 && this.isTerrainOn) {
+            // Terrain is on and pitch is high, nothing to do.
+            return;
+        }
+
+        if (pitch <= 10 && this.isTerrainOn) {
+            // Terrain is on and pitch is low, turning off.
+            this.isTerrainOn = false;
+            this.map.setTerrain(null);
+            return;
+        }
+
+        // Terrain is off and pitch is high, turning on.
+        this.isTerrainOn = true;
+        let source: RasterDEMSourceSpecification = {
+            type: "raster-dem",
+            tiles: ["slice://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.png"],
+            minzoom: 7,
+            maxzoom: 11,
+            tileSize: 512,
+            encoding: "terrarium"
+        };
+        const currentSourceTerrain = this.map.getSource("terrain");
+        if (!currentSourceTerrain) {
+            this.map.addSource("terrain", source);
+        } else if (currentSourceTerrain && currentSourceTerrain.serialize().url !== source.url) {
+            this.map.removeSource("terrain");
+            this.map.addSource("terrain", source);
+        }
+        this.map.setTerrain({ source: "terrain", exaggeration: 2 });
     }
 }
