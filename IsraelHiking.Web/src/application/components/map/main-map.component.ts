@@ -62,6 +62,7 @@ export class MainMapComponent {
         this.titleService.clear();
         this.destroyRef.onDestroy(() => {
             this.mapService.unsetMap();
+            this.map = null;
         });
     }
 
