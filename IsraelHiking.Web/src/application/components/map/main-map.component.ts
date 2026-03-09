@@ -141,7 +141,7 @@ export class MainMapComponent {
 
         // Terrain is off and pitch is high, turning on.
         this.isTerrainOn = true;
-        let source: RasterDEMSourceSpecification = {
+        const source: RasterDEMSourceSpecification = {
             type: "raster-dem",
             tiles: ["slice://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.png"],
             minzoom: 7,
