@@ -68,9 +68,9 @@ export class HashService {
     constructor() {
         this.router.events.pipe(
             filter(event => event instanceof NavigationEnd)
-        ).subscribe((event: NavigationEnd) => {
-            const tree = this.router.parseUrl(event.url);
-            this.store.dispatch(new SetUrlAction(event.url));
+        ).subscribe(() => {
+            const tree = this.router.parseUrl(this.router.url);
+            this.store.dispatch(new SetUrlAction(this.router.url));
             const segments = tree.root.children.primary?.segments ?? [];
             const queryParams = tree.queryParams;
             if (this.router.url.startsWith(RouteStrings.ROUTE_MAP)) {
