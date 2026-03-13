@@ -1,4 +1,28 @@
 @use "variables" as v;
+@use '@angular/material' as mat;
+
+// Customize the entire app. Change :root to your selector if you want to scope the styles.
+:root {
+    @include mat.sidenav-overrides((container-width: v.$app-sidebar-width));
+}
+
+@media (width <=550px) {
+    :root {
+        @include mat.sidenav-overrides((container-width: 100vw));
+    }
+
+    mat-sidenav:has(public-poi-sidebar) {
+        top: unset !important;
+        bottom: 0 !important;
+        height: 55vh;
+    }
+
+    mat-sidenav:has(public-poi-sidebar .minimized) {
+        top: unset !important;
+        bottom: 0 !important;
+        height: 15vh;
+    }
+}
 
 .maplibregl-ctrl-top-left {
     z-index: v.$app-left-z-index !important;
