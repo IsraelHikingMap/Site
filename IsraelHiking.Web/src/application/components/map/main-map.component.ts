@@ -1,12 +1,13 @@
-import { Component, ViewEncapsulation, ElementRef, inject, viewChildren, DestroyRef } from "@angular/core";
+import { Component, ViewEncapsulation, ElementRef, inject, viewChildren, DestroyRef, signal } from "@angular/core";
 import { NgStyle } from "@angular/common";
+import { MatSidenavContainer, MatSidenav, MatSidenavContent } from "@angular/material/sidenav";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
 import { type StyleSpecification, type Map, ScaleControl, Unit, IControl, ControlPosition, type RasterDEMSourceSpecification } from "maplibre-gl";
 import { NgProgressbar } from "ngx-progressbar";
 import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
-import { SidebarComponent } from "../sidebar/sidebar.component";
 import { LayersComponent } from "./layers.component";
 import { RoutesComponent } from "./routes.component";
 import { RecordedRouteComponent } from "./recorded-route.component";
@@ -19,11 +20,15 @@ import { MapeakLinkComponent } from "../mapeak-link.component";
 import { PublicPoisComponent } from "./public-pois.component";
 import { LayersButtonComponent } from "../layers-button.component";
 import { OsmAttributionComponent } from "../osm-attribution.component";
+import { LayersSidebarComponent } from "../sidebar/layers/layers-sidebar.component";
+import { PublicPoiSidebarComponent } from "../sidebar/publicpoi/public-poi-sidebar.component";
+import { PrivateRoutesSidebarComponent } from "../sidebar/privateroutes/private-routes-sidebar.component";
 import { MapeakTitleService } from "../../services/mapeak-title.service";
 import { ResourcesService } from "../../services/resources.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
+import { SidebarService } from "../../services/sidebar.service";
 import type { ApplicationState, LocationState } from "../../models";
 
 @Component({
@@ -31,7 +36,7 @@ import type { ApplicationState, LocationState } from "../../models";
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgProgressbar, NgProgressHttp, NgStyle, SidebarComponent, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent]
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent, MatSidenavContainer, MatSidenav, MatSidenavContent, LayersSidebarComponent, PublicPoiSidebarComponent, PrivateRoutesSidebarComponent]
 })
 export class MainMapComponent {
 
@@ -40,6 +45,8 @@ export class MainMapComponent {
     public bottomEndControls = viewChildren("bottomEndControl", { read: ElementRef });
     public bottomStartControls = viewChildren("bottomStartControl", { read: ElementRef });
 
+    public sidenavVisible = signal(false);
+    public sidenavViewName = "";
     public location: LocationState;
     public initialStyle: StyleSpecification;
 
@@ -49,6 +56,7 @@ export class MainMapComponent {
     private readonly mapService = inject(MapService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly defaultStyleService = inject(DefaultStyleService);
+    private readonly sidebarService = inject(SidebarService);
     private readonly store = inject(Store);
     private readonly destroyRef = inject(DestroyRef);
 
@@ -64,6 +72,12 @@ export class MainMapComponent {
             this.mapService.unsetMap();
             this.map = null;
         });
+        this.sidebarService.sideBarStateChanged.pipe(takeUntilDestroyed()).subscribe(() => {
+            this.sidenavViewName = this.sidebarService.viewName;
+            this.sidenavVisible.set(this.sidebarService.isSidebarOpen());
+        });
+        this.sidenavViewName = this.sidebarService.viewName;
+        this.sidenavVisible.set(this.sidebarService.isSidebarOpen());
     }
 
     public mapLoaded(map: Map) {
