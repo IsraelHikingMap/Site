@@ -150,9 +150,7 @@ export class SharesComponent implements OnInit {
 
 
     public onStartPointClick(shareUrl: Immutable<ShareUrl>) {
-        if (this.selectedShareUrl?.id === shareUrl.id) {
-            this.selectedShareUrl = null;
-            this.routesGeoJson = { type: "FeatureCollection", features: [] };
+        if (this.clearShareUrlIfSelected(shareUrl.id)) {
             return;
         }
         this.moveToShare(shareUrl);
@@ -183,12 +181,12 @@ export class SharesComponent implements OnInit {
             message,
             confirmAction: async () => {
                 try {
+                    this.clearShareUrlIfSelected(shareUrl.id);
                     await this.shareUrlsService.deleteShareUrl(shareUrl);
                     this.runFilter();
                 } catch (ex) {
                     this.toastService.error(ex, this.resources.unableToDeleteShare);
                 }
-
             },
             type: "YesNo"
         });
@@ -249,5 +247,14 @@ export class SharesComponent implements OnInit {
             return true;
         }
         return false;
+    }
+
+    private clearShareUrlIfSelected(id: string): boolean {
+        if (this.selectedShareUrl?.id !== id) {
+            return false;
+        }
+        this.selectedShareUrl = null;
+        this.routesGeoJson = { type: "FeatureCollection", features: [] };
+        return true;
     }
 }
