@@ -26,7 +26,7 @@ internal class WikidataLiteral
 internal class WikidataBinding
 {
     [JsonPropertyName("place")]
-    public WikidataLiteral Place{ get; set; }
+    public WikidataLiteral Place { get; set; }
     [JsonPropertyName("location")]
     public WikidataLiteral Location { get; set; }
     [JsonPropertyName("links")]
@@ -50,7 +50,7 @@ internal class WikidataResults
 }
 public class WikidataGateway : IWikidataGateway
 {
-    private const string WIKIDATA_LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Wikidata-logo-en.svg/128px-Wikidata-logo-en.svg.png";
+    private const string WIKIDATA_LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Wikidata-logo-en.svg/120px-Wikidata-logo-en.svg.png";
     private const string QUERY_API = "https://query.wikidata.org/sparql?query=";
 
     private readonly WKTReader _wktReader;
@@ -63,7 +63,7 @@ public class WikidataGateway : IWikidataGateway
         _logger = logger;
         _wktReader = new WKTReader();
     }
-    
+
     public async Task<List<IFeature>> GetByBoundingBox(Coordinate southWest, Coordinate northEast)
     {
         _logger.LogInformation($"Starting getting Wikidata items for coordinates: ({southWest.X}, {southWest.Y}), ({northEast.X}, {northEast.Y})");
@@ -77,7 +77,7 @@ public class WikidataGateway : IWikidataGateway
                     "    ?place wdt:P18 ?image.\n" +
                     "  }\n" +
                     "  ?place rdfs:label ?label .\n";
-        
+
         foreach (var language in Languages.Array)
         {
             query += "  OPTIONAL {\n" +
@@ -114,7 +114,7 @@ public class WikidataGateway : IWikidataGateway
             {
                 return null;
             }
-            var languagesTitlesAndLinks = links.Select(l => 
+            var languagesTitlesAndLinks = links.Select(l =>
             (
                 Language: l.Replace("https://", "").Split(".").First(),
                 Title: l.Split("/").Last().Replace("_", " "),
