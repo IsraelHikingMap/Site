@@ -23,37 +23,3 @@
         height: 15vh;
     }
 }
-
-.maplibregl-ctrl-top-left {
-    z-index: v.$app-left-z-index !important;
-    margin-left: env(safe-area-inset-left, 0) !important;
-}
-
-.maplibregl-ctrl-top-right {
-    z-index: v.$app-left-z-index - 10 !important;
-}
-
-.maplibregl-ctrl-bottom-right {
-    z-index: v.$app-left-z-index - 30 !important;
-    margin-bottom: env(safe-area-inset-bottom, 0) !important;
-}
-
-.maplibregl-ctrl-bottom-left {
-    z-index: v.$app-left-z-index - 20 !important;
-    margin-bottom: env(safe-area-inset-bottom, 0) !important;
-    margin-left: env(safe-area-inset-left, 0) !important;
-}
-
-[dir=rtl] .maplibregl-ctrl-bottom-right {
-    z-index: v.$app-left-z-index - 20 !important;
-}
-
-[dir=rtl] .maplibregl-ctrl-bottom-left {
-    z-index: v.$app-left-z-index - 30 !important;
-}
-
-mgl-map {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-}

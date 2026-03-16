@@ -1,6 +1,6 @@
 ﻿<ng-progress ngProgressHttp [ngStyle]="{'z-index':1500}"></ng-progress>
 <mat-sidenav-container [dir]="resources.direction" [hasBackdrop]="false" [autosize]="false">
-  <mat-sidenav [opened]="sidenavVisible()" position="end">
+  <mat-sidenav [opened]="sidenavVisible()" position="end" class="magrin-top-with-toolbar">
     @switch (sidenavViewName) {
     @case ('layers') {
     <layers-sidebar></layers-sidebar>
@@ -14,7 +14,7 @@
     }
   </mat-sidenav>
   <mat-sidenav-content>
-    <div class="flex flex-row w-full map-h-full">
+    <div class="flex flex-row w-full h-screen">
       <mgl-map ngSkipHydration="true" [zoom]="[location.zoom]" [center]="[location.longitude, location.latitude]"
         [mapStyle]="initialStyle" (mapLoad)="mapLoaded($event)" (pitchEvt)="pitchChanged()" [doubleClickZoom]="false"
         [attributionControl]="false">

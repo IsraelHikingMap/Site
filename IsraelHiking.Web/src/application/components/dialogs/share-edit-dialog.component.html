@@ -22,8 +22,8 @@
           </mgl-control>
         </mgl-map>
         } @else {
-        <div class="img-container-small">
-          <img [src]="shareUrl.base64Preview" class="img-responsive-full img-center" (error)="removeImage()" />
+        <div class="relative w-full h-[200px]">
+          <img [src]="shareUrl.base64Preview" class="w-full object-contain img-center" (error)="removeImage()" />
           <button matMiniFab color="" class="absolute! top-2 end-2" (click)="removeImage()" angulartics2On="click"
             angularticsCategory="Share" angularticsAction="Remove image">
             <i class="fa icon-trash fa-2x pt-1"></i>
