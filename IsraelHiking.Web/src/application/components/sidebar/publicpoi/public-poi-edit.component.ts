@@ -25,7 +25,6 @@ import type { EditablePublicPointData, IconColorLabel } from "../../../models";
 @Component({
     selector: "public-poi-edit",
     templateUrl: "./public-poi-edit.component.html",
-    styleUrls: ["./public-poi-edit.component.scss"],
     imports: [Dir, MatCard, MatCardHeader, MatCardTitle, NgClass, MatFormField, MatLabel, MatInput, FormsModule, ImageScrollerComponent, MatIconButton, MatSuffix, MatButton, MatSelect, MatOption, MatTooltip, MatCheckbox, MatProgressSpinner, ScrollToDirective]
 })
 export class PublicPointOfInterestEditComponent implements OnInit {

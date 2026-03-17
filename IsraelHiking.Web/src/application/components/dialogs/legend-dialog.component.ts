@@ -22,7 +22,6 @@ export type LegendSection = {
 @Component({
     selector: "legend-dialog",
     templateUrl: "./legend-dialog.component.html",
-    styleUrls: ["./legend-dialog.component.scss"],
     imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, LegendItemComponent, MatDialogTitle, MatDialogClose, MatDialogContent, MatButton]
 })
 export class LegendDialogComponent {

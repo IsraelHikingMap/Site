@@ -32,7 +32,6 @@ import type { UserInfo, ApplicationState } from "../models";
 @Component({
     selector: "main-menu",
     templateUrl: "./main-menu.component.html",
-    styleUrls: ["./main-menu.component.scss"],
     imports: [MatButton, Angulartics2OnModule, MatMenuTrigger, MatMenu, MatMenuContent, MatMenuItem, RouterLink]
 })
 export class MainMenuComponent {

@@ -84,32 +84,9 @@ body {
     overflow: hidden;
 }
 
-.input-wrapper-spacer {
-    height: 0;
-    margin-bottom: 1rem;
-}
-
-@media (width <=550px) {
-    .route-statistics-control-container {
-        margin-bottom: 0 !important;
-        margin-right: 0 !important;
-    }
-}
-
 .active {
     outline: 3px solid #32CD6D !important;
 }
-
-// photoswipe, used for placing overlay at the right z-index
-overlay.overlay-shown {
-    z-index: 2000 !important;
-}
-
-.cdk-overlay-container {
-    z-index: 1500 !important;
-}
-
-// end photoswipe
 
 .stack-icon-top {
     top: -2px;
@@ -184,6 +161,8 @@ overlay.overlay-shown {
 .ng-meteor {
     box-shadow: 0 0 10px #32CD6D, 0 0 5px #32CD6D !important
 }
+
+/* Progressbar override end */
 
 .maplibregl-ctrl-top-left {
     margin-left: env(safe-area-inset-left, 0) !important;

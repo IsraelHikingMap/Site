@@ -52,7 +52,6 @@ export type SourceImageUrlPair = {
 @Component({
     selector: "public-poi-sidebar",
     templateUrl: "./public-poi-sidebar.component.html",
-    styleUrls: ["./public-poi-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None,
     imports: [Dir, MatButton, Angulartics2OnModule, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, MatCard, PublicPointOfInterestEditComponent, FormsModule, MatCardHeader, MatCardTitle, NgClass, MatCardContent, ImageScrollerComponent, DecimalPipe]
 })
