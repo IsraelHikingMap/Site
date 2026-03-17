@@ -126,7 +126,7 @@ export class ImageScrollerComponent implements OnChanges {
         }
         const imagesUrls = [];
         for (const imageUrl of this.images()) {
-            const imageUrlToPush = this.resources.getResizedImageUrl(imageUrl, 1600);
+            const imageUrlToPush = this.resources.getResizedImageUrl(imageUrl, 1920);
             imagesUrls.push(imageUrlToPush);
         }
         this.imageGalleryService.open(imagesUrls, this.currentIndex);
