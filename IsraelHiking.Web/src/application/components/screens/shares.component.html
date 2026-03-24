@@ -1,12 +1,12 @@
 <div class="flex flex-row h-screen relative" [dir]="resources.direction">
     <div class="hidden max-md:block absolute bottom-0 bg-white left-1/2 -translate-x-1/2 z-10">
         <mat-button-toggle-group [(ngModel)]="showMap">
-            <mat-button-toggle [value]="false" angulartics2On="click" angularticsCategory="Traces"
+            <mat-button-toggle [value]="false" angulartics2On="click" angularticsCategory="Shares"
                 angularticsAction="Open list view">
                 <i class="fa icon-list"></i>
                 {{resources.list}}
             </mat-button-toggle>
-            <mat-button-toggle [value]="true" angulartics2On="click" angularticsCategory="Traces"
+            <mat-button-toggle [value]="true" angulartics2On="click" angularticsCategory="Shares"
                 angularticsAction="Open map view">
                 <i class="fa icon-map-o"></i>
                 {{resources.map}}
@@ -52,14 +52,14 @@
                 </div>
                 <mat-divider></mat-divider>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('type', 'Biking')"
-                        [checked]="filter.type.includes('Biking')">
+                    <mat-checkbox color="primary" (change)="onFilterChange('type', 'Hiking')"
+                        [checked]="filter.type.includes('Hiking')">
                         <i class="fa icon-hike"></i>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('type', 'Hiking')"
-                        [checked]="filter.type.includes('Hiking')">
+                    <mat-checkbox color="primary" (change)="onFilterChange('type', 'Biking')"
+                        [checked]="filter.type.includes('Biking')">
                         <i class="fa icon-bike"></i>
                     </mat-checkbox>
                 </div>

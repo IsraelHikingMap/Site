@@ -25,6 +25,8 @@ export class ResourcesService {
     public editRouteLines = "editing-route-layer-lines";
     public editRouteSource = "editing-route-source";
     public locationIcon = "location-icon-layer";
+    public globalPointsLayer = "global-points-layer";
+    public globalPointsExternalLayer = "global-points-external-layer";
     public readonly recordedRouteColor = "#FF6600";
     // All the text in the app //
     /////////////////////////////

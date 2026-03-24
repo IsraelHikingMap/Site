@@ -36,6 +36,7 @@ import { skip } from "rxjs";
 })
 export class PublicPoisComponent implements OnInit {
     private static readonly MAX_MENU_POINTS_IN_CLUSTER = 50;
+    public readonly poisSrouceId = "points-of-interest";
 
     public poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
 
@@ -70,7 +71,7 @@ export class PublicPoisComponent implements OnInit {
             this.poiGeoJsonData = this.poiService.getPoisGeoJson();
         });
         this.mapComponent.sourceData.subscribe((sourceData) => {
-            if (sourceData.sourceId === PoiService.POIS_SOURCE_ID) {
+            if (sourceData.sourceId === this.poisSrouceId) {
                 this.poiGeoJsonData = this.poiService.getPoisGeoJson();
             }
         });

@@ -55,10 +55,6 @@ export type SelectableCategory = Category & {
 
 @Injectable()
 export class PoiService {
-
-    private static readonly POIS_SOURCE_LAYER_NAMES = ["global_points", "external"];
-    public static readonly POIS_SOURCE_ID = "points-of-interest";
-
     private poisCache: GeoJSON.Feature[] = [];
     private queueIsProcessing: boolean = false;
 
@@ -185,7 +181,7 @@ export class PoiService {
     }
 
     private getFeaturesFromTiles(): GeoJSONFeature[] {
-        return this.mapService.getFeaturesFromTiles(PoiService.POIS_SOURCE_LAYER_NAMES, PoiService.POIS_SOURCE_ID);
+        return this.mapService.getFeaturesFromTiles();
     }
 
     private getPoisFromTiles(): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
@@ -211,7 +207,7 @@ export class PoiService {
             hashSet.add(p.properties.poiId);
             return true;
         });
-        return this.filterFeatures(pois);
+        return pois;
     }
 
     public osmTileFeatureToPoiIdentifier(feature: GeoJSON.Feature): string {
@@ -247,12 +243,11 @@ export class PoiService {
         return poi;
     }
 
-    private filterFeatures(features: GeoJSON.Feature<GeoJSON.Point, PoiProperties>[]): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
+    private filterFeatures(features: GeoJSON.Feature<GeoJSON.Point, PoiProperties>[], categories: string[]): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
         const visibleFeatures = [];
-        const visibleCategories = this.getVisibleCategories();
         const language = this.resources.getCurrentLanguageCodeSimplified();
         for (const feature of features) {
-            if (visibleCategories.indexOf(feature.properties.poiCategory) === -1) {
+            if (categories.indexOf(feature.properties.poiCategory) === -1) {
                 continue;
             }
             if (GeoJSONUtils.getTitle(feature, language) || GeoJSONUtils.hasExtraData(feature, language)) {
@@ -267,16 +262,31 @@ export class PoiService {
     }
 
     public getPoisGeoJson(): GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> {
-        if (this.getVisibleCategories().length === 0) {
+        const categoires = this.getVisibleCategories();
+        if (categoires.length === 0) {
             return {
                 type: "FeatureCollection",
                 features: []
             };
         }
-        const visibleFeatures = this.getPoisFromTiles();
+        const tileFeautes = this.getPoisFromTiles();
         return {
             type: "FeatureCollection",
-            features: visibleFeatures
+            features: this.filterFeatures(tileFeautes, categoires)
+        };
+    }
+
+    public getPublicRoutes(categoires: string[]): GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> {
+        if (categoires.length === 0) {
+            return {
+                type: "FeatureCollection",
+                features: []
+            };
+        }
+        const tileFeautes = this.getPoisFromTiles();
+        return {
+            type: "FeatureCollection",
+            features: this.filterFeatures(tileFeautes, categoires)
         };
     }
 

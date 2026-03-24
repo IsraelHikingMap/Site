@@ -1,8 +1,8 @@
-<mgl-vector-source id="points-of-interest" [tiles]="poisVectorTileAddress" [maxzoom]="14"
+<mgl-vector-source [id]="poisSrouceId" [tiles]="poisVectorTileAddress" [maxzoom]="14"
   [minzoom]="10"></mgl-vector-source>
-<mgl-layer id="global-points-layer" source="points-of-interest" type="circle" sourceLayer="global_points"
+<mgl-layer [id]="resources.globalPointsLayer" [source]="poisSrouceId" type="circle" sourceLayer="global_points"
   [paint]="{'circle-color': 'transparent'}" [before]="resources.endOfBaseLayer"></mgl-layer>
-<mgl-layer id="external-layer" source="points-of-interest" type="circle" sourceLayer="external"
+<mgl-layer [id]="resources.globalPointsExternalLayer" [source]="poisSrouceId" type="circle" sourceLayer="external"
   [paint]="{'circle-color': 'transparent'}" [before]="resources.endOfBaseLayer"></mgl-layer>
 <mgl-geojson-source #clusterSource id="poi-cluster-source" [data]="poiGeoJsonData" [cluster]="true"
   [clusterMaxZoom]="17" [clusterRadius]="100">
