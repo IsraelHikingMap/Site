@@ -33,9 +33,9 @@ import { RouteStrings } from "../../services/hash.service";
 import type { ApplicationState } from "../../models";
 
 @Component({
-    selector: 'public-routes',
-    templateUrl: './public-routes.component.html',
-    styleUrls: ['./public-routes.component.scss'],
+    selector: "public-routes",
+    templateUrl: "./public-routes.component.html",
+    styleUrls: ["./public-routes.component.scss"],
     imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, Angulartics2OnModule, NgClass, MatFormField, MatSelect, MatMenuTrigger, MatMenuItem, MatCheckbox, MatLabel, MatMenu, MatOption, DistancePipe, GeoJSONSourceComponent, LayerComponent]
 })
 export class PublicRoutesComponent {
@@ -143,10 +143,6 @@ export class PublicRoutesComponent {
         }
         const bounds = SpatialService.getBoundsForFeature(fullFeature);
         this.mapService.fitBounds(bounds);
-    }
-
-    public toggleClusterPopup(event: MouseEvent, feature: GeoJSON.Feature<GeoJSON.Point>, source: GeoJSONSourceComponent) {
-
     }
 
     public getTitle(feature: GeoJSON.Feature<GeoJSON.Point>) {

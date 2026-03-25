@@ -115,7 +115,7 @@
                 <osm-attribution></osm-attribution>
             </mgl-control>
             <mgl-geojson-source id="traces-source" [data]="tracesGeoJson" [cluster]="true" [clusterMaxZoom]="14"
-                [clusterRadius]="100"></mgl-geojson-source>
+                [clusterRadius]="100" #tracesClusterSource></mgl-geojson-source>
             <mgl-markers-for-clusters source="traces-source">
                 <ng-template mglPoint let-feature>
                     <span class="fa-stack fa-lg cursor-pointer marker-icon"
@@ -127,8 +127,8 @@
                     </span>
                 </ng-template>
                 <ng-template mglClusterPoint let-feature>
-                    <div class="marker-cluster" (click)="expandCluster(feature, $event)" angulartics2On="click"
-                        angularticsCategory="Traces" angularticsAction="Traces cluster click">
+                    <div class="marker-cluster" (click)="expandCluster(feature, $event, tracesClusterSource)"
+                        angulartics2On="click" angularticsCategory="Traces" angularticsAction="Traces cluster click">
                         {{ feature.properties?.point_count }}
                     </div>
                 </ng-template>
