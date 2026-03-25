@@ -14,7 +14,7 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { Router } from "@angular/router";
 import { orderBy } from "lodash-es";
-import type { StyleSpecification, Map } from "maplibre-gl";
+import type { StyleSpecification, Map, MapSourceDataEvent } from "maplibre-gl";
 import type { Immutable } from "immer";
 
 import { Urls } from "../../urls";
@@ -41,6 +41,7 @@ import type { ApplicationState } from "../../models";
 export class PublicRoutesComponent {
     public mapStyle: StyleSpecification;
     public showMap: boolean = true;
+    public readonly routesSrouceId = "routes-of-interest";
     public sortBy: string = "length";
     public sortDirection: "asc" | "desc" = "desc";
     public filter: Partial<Record<keyof PoiProperties, string[]>> = {
@@ -76,12 +77,23 @@ export class PublicRoutesComponent {
         this.store.select((state: ApplicationState) => state.locationState).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.runFilter();
         });
+        this.destroyRef.onDestroy(() => {
+            this.mapService.unsetMap();
+        });
     }
 
     public mapLoaded(map: Map) {
         this.mapService.setMap(map);
         this.mapService.addArrowToMap(map);
         this.runFilter();
+        map.on('sourcedata', (e) => this.onSourceData(e, map))
+    }
+
+    private onSourceData(e: MapSourceDataEvent, map: Map) {
+        if (e.sourceId === this.routesSrouceId) {
+            this.runFilter();
+            map.off('sourcedata', (e) => this.onSourceData(e, map))
+        }
     }
 
     private runFilter() {

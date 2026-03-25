@@ -42,12 +42,12 @@
         </div>
         <mgl-map [mapStyle]="mapStyle" [attributionControl]="false" (mapLoad)="mapLoaded($event)">
             <layers [isMainMap]="false"></layers>
-            <mgl-vector-source id="points-of-interest" [tiles]="poisVectorTileAddress" [maxzoom]="14"
+            <mgl-vector-source [id]="routesSrouceId" [tiles]="poisVectorTileAddress" [maxzoom]="14"
                 [minzoom]="10"></mgl-vector-source>
-            <mgl-layer [id]="resources.globalPointsLayer" source="points-of-interest" type="circle"
+            <mgl-layer [id]="resources.globalPointsLayer" [source]="routesSrouceId" type="circle"
                 sourceLayer="global_points" [paint]="{'circle-color': 'transparent'}"
                 [before]="resources.endOfBaseLayer"></mgl-layer>
-            <mgl-layer [id]="resources.globalPointsExternalLayer" source="points-of-interest" type="circle"
+            <mgl-layer [id]="resources.globalPointsExternalLayer" [source]="routesSrouceId" type="circle"
                 sourceLayer="external" [paint]="{'circle-color': 'transparent'}"
                 [before]="resources.endOfBaseLayer"></mgl-layer>
             @for (feature of poiGeoJsonData.features; track feature.properties.poiId) {
