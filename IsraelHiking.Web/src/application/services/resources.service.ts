@@ -286,6 +286,7 @@ export class ResourcesService {
     public list: string;
     public searchSharesPlaceHolder: string;
     public searchTracesPlaceHolder: string;
+    public noRoutesFoundMoveTheMapOrChangeTheFilters: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -507,7 +508,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1774441127338");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1774454729163");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -771,6 +772,7 @@ export class ResourcesService {
         this.list = this.gettextCatalog.getString("List");
         this.searchSharesPlaceHolder = this.gettextCatalog.getString("Search cloud saves...");
         this.searchTracesPlaceHolder = this.gettextCatalog.getString("Search traces...");
+        this.noRoutesFoundMoveTheMapOrChangeTheFilters = this.gettextCatalog.getString("No routes found, move the map or change the filters...");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
