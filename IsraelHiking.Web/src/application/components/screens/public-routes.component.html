@@ -52,7 +52,7 @@
                 [before]="resources.endOfBaseLayer"></mgl-layer>
             @for (feature of poiGeoJsonData.features; track feature.properties.poiId) {
             <mgl-marker [lngLat]="feature.geometry.coordinates">
-                <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="moveToFeature(feature, $event)"
+                <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="onStartPointClick(feature, $event)"
                     (mouseenter)="hover(feature)" (mouseleave)="hover(null)" angulartics2On="click"
                     angularticsCategory="POI" angularticsAction="Open POI sidebar from map">
                     <span class="has-extra-data" [style.background]="feature.properties.poiIconColor"></span>
@@ -149,6 +149,19 @@
                 }
             </div>
             <div class="flex flex-row mx-10 items-center">
+                <button mat-button [matMenuTriggerFor]="routeMenu">
+                    <i class="fa icon-ellipsis-v"></i>
+                </button>
+                <mat-menu #routeMenu="matMenu">
+                    <button mat-menu-item (click)="moveToFeature(route)">
+                        <i class="fa icon-crosshairs"></i>
+                        {{resources.moveToRoute}}
+                    </button>
+                    <button mat-menu-item (click)="convertToRoute(route)">
+                        <i class="fa icon-plus"></i>
+                        {{resources.addToRoutes}}
+                    </button>
+                </mat-menu>
                 @switch (route.properties.poiDifficulty) {
                 @case ("Easy") {
                 <span class="rounded-full bg-green-500 p-2">

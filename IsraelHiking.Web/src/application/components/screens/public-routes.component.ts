@@ -12,6 +12,7 @@ import { MatFormField, MatLabel } from "@angular/material/input";
 import { MatOption, MatSelect } from "@angular/material/select";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatCheckbox } from "@angular/material/checkbox";
+import { Router } from "@angular/router";
 import { orderBy } from "lodash-es";
 import type { StyleSpecification, Map } from "maplibre-gl";
 import type { Immutable } from "immer";
@@ -25,8 +26,10 @@ import { MapService } from "../../services/map.service";
 import { ResourcesService } from "../../services/resources.service";
 import { PoiService } from "../../services/poi.service";
 import { SpatialService } from "../../services/spatial.service";
+import { SelectedRouteService } from "../../services/selected-route.service";
 import { GeoJSONUtils } from "../../services/geojson-utils";
 import { PoiProperties } from "../../services/osm-tags.service";
+import { RouteStrings } from "../../services/hash.service";
 import type { ApplicationState } from "../../models";
 
 @Component({
@@ -62,6 +65,8 @@ export class PublicRoutesComponent {
     private readonly defaultStyleService = inject(DefaultStyleService);
     private readonly destroyRef = inject(DestroyRef);
     private readonly store = inject(Store);
+    private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly router = inject(Router);
 
     constructor() {
         this.mapStyle = this.defaultStyleService.getStyleWithPlaceholders();
@@ -116,9 +121,14 @@ export class PublicRoutesComponent {
         }
     }
 
-    public async moveToFeature(feature: GeoJSON.Feature<GeoJSON.Point>, event: MouseEvent) {
+    public async onStartPointClick(feature: GeoJSON.Feature<GeoJSON.Point>, event: MouseEvent) {
         event.stopPropagation();
         ScrollToDirective.scrollTo(`route-${feature.properties.poiId}`, 60);
+        this.moveToFeature(feature);
+    }
+
+    public async moveToFeature(feature: GeoJSON.Feature<GeoJSON.Point>) {
+        this.showMap = true;
         const fullFeature = await this.poiService.getBasicInfo(feature.properties.identifier, feature.properties.poiSource, this.resources.getCurrentLanguageCodeSimplified());
         this.selectedRouteGeoJson = {
             type: "FeatureCollection",
@@ -181,5 +191,18 @@ export class PublicRoutesComponent {
             default:
                 return "icon-question";
         }
+    }
+
+    public async convertToRoute(feature: GeoJSON.Feature<GeoJSON.Point>) {
+        const fullFeature = await this.poiService.getBasicInfo(feature.properties.identifier, feature.properties.poiSource, this.resources.getCurrentLanguageCodeSimplified());
+        if (feature.properties.poiSource === "OSM") {
+            await this.poiService.updateExtendedInfo(fullFeature, this.resources.getCurrentLanguageCodeSimplified());
+        }
+        this.selectedRouteService.convertToRoute(fullFeature, this.getDescription(feature));
+        this.router.navigate([RouteStrings.MAP]);
+        // This is to let the route change to the map so that the relevant map will be used for fit bounds.
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        const bounds = SpatialService.getBoundsForFeature(fullFeature);
+        this.mapService.fitBounds(bounds);
     }
 }

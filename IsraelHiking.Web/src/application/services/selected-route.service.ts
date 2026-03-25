@@ -9,7 +9,12 @@ import { ResourcesService } from "./resources.service";
 import { SpatialService } from "./spatial.service";
 import { ToastService } from "./toast.service";
 import { SidebarService } from "./sidebar.service";
+import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
+import { ShareUrlsService } from "./share-urls.service";
+import { GeoJsonParser } from "./geojson.parser";
+import { ElevationProvider } from "./elevation.provider";
 import { RoutingProvider } from "./routing.provider";
+import { GeoJSONUtils } from "./geojson-utils";
 import { MINIMAL_ANGLE, MINIMAL_DISTANCE } from "./route-statistics.service";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
@@ -63,6 +68,9 @@ export class SelectedRouteService {
     private readonly toastService = inject(ToastService);
     private readonly sidebarService = inject(SidebarService);
     private readonly store = inject(Store);
+    private readonly shareUrlsService = inject(ShareUrlsService);
+    private readonly geoJsonParser = inject(GeoJsonParser);
+    private readonly elevationProvider = inject(ElevationProvider);
 
     constructor() {
         this.store.select((state: ApplicationState) => state.routes.present).subscribe((r) => {
@@ -541,5 +549,32 @@ export class SelectedRouteService {
 
     public hasHiddenRoutes(): boolean {
         return this.routes.filter(r => r.state === "Hidden").length > 0;
+    }
+
+    public async convertToRoute(fullFeature: GeoJSON.Feature, description: string) {
+        if (fullFeature.properties.poiSource === "Users") {
+            const shareUrl = await this.shareUrlsService.getShareUrl(fullFeature.properties.identifier);
+            for (const route of shareUrl.dataContainer.routes) {
+                const newRoute = this.routesFactory.createRouteDataAddMissingFields(route, this.getLeastUsedColor());
+                this.store.dispatch(new AddRouteAction(newRoute));
+                this.setSelectedRoute(newRoute.id);
+            }
+            return;
+        }
+        const routes = this.geoJsonParser.toRoutes(fullFeature as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString>);
+        const featureColor = GeoJSONUtils.getFeatureColor(fullFeature);
+        for (let i = 0; i < routes.length; i++) {
+            const route = routes[i];
+            const name = this.createRouteName(route.name);
+            const newRoute = this.routesFactory.createRouteData(name, this.getLeastUsedColor());
+            if (i === 0 && featureColor) {
+                newRoute.color = featureColor;
+            }
+            await this.elevationProvider.updateHeights(route.latlngs);
+            newRoute.description = description;
+            newRoute.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs, "Hike");
+            this.store.dispatch(new AddRouteAction(newRoute));
+            this.setSelectedRoute(newRoute.id);
+        }
     }
 }

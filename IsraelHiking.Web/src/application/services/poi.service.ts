@@ -24,7 +24,7 @@ import { OsmTagsService, PoiProperties } from "./osm-tags.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { NakebService } from "./nakeb.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction } from "../reducers/offline.reducer";
-import { SetSelectedPoiAction, SetUploadMarkerDataAction } from "../reducers/poi.reducer";
+import { SetUploadMarkerDataAction } from "../reducers/poi.reducer";
 import { Urls } from "../urls";
 import type {
     MarkerData,
@@ -324,45 +324,33 @@ export class PoiService {
                 case "iNature": {
                     const poi = await this.iNatureService.createFeatureFromPageId(id);
                     this.poisCache.splice(0, 0, poi);
-                    const clone = cloneDeep(poi);
-                    this.store.dispatch(new SetSelectedPoiAction(clone));
-                    return clone;
+                    return poi;
                 }
                 case "Wikidata": {
                     const poi = await this.wikidataService.createFeatureFromPageId(id, language);
                     this.poisCache.splice(0, 0, poi);
-                    const clone = cloneDeep(poi);
-                    this.store.dispatch(new SetSelectedPoiAction(clone));
-                    return clone;
+                    return poi;
                 }
                 case RouteStrings.COORDINATES: {
                     const poi = this.getFeatureFromCoordinatesId(id, language);
-                    const clone = cloneDeep(poi);
-                    this.store.dispatch(new SetSelectedPoiAction(clone));
-                    return clone;
+                    return poi;
                 }
                 case "Users": {
                     const shareUrl = await this.shareUrlsService.getShareUrl(id);
                     const poi = this.convertShareUrlToPoi(shareUrl);
                     this.poisCache.splice(0, 0, poi);
-                    const clone = cloneDeep(poi);
-                    this.store.dispatch(new SetSelectedPoiAction(clone));
-                    return clone;
+                    return poi;
                 }
                 case "Nakeb": {
                     const poi = await this.nakebService.getRoute(id);
                     this.poisCache.splice(0, 0, poi);
-                    const clone = cloneDeep(poi);
-                    this.store.dispatch(new SetSelectedPoiAction(clone));
-                    return clone;
+                    return poi;
                 }
                 default: {
                     const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
                     const poi = await firstValueFrom(this.httpClient.get<GeoJSON.Feature>(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000)));
                     this.poisCache.splice(0, 0, poi);
-                    const clone = cloneDeep(poi);
-                    this.store.dispatch(new SetSelectedPoiAction(clone));
-                    return clone;
+                    return poi;
                 }
             }
         } catch (ex) {
@@ -448,7 +436,6 @@ export class PoiService {
         } catch (ex) {
             this.loggingService.warning(`[POIs] Failed to enrich feature with id: ${feature.properties.poiId}, error: ${(ex as Error).message}`);
         }
-        this.store.dispatch(new SetSelectedPoiAction(cloneDeep(feature)));
         return feature;
     }
 

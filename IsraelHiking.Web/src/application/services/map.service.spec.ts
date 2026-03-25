@@ -6,6 +6,7 @@ import { MapService } from "./map.service";
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { LoggingService } from "./logging.service";
 import { SidebarService } from "./sidebar.service";
+import { ResourcesService } from "./resources.service";
 import { InMemoryReducer } from "../reducers/in-memory.reducer";
 import { SetLocationAction } from "../reducers/location.reducer";
 
@@ -19,6 +20,7 @@ describe("MapService", () => {
                 MapService,
                 CancelableTimeoutService,
                 { provide: SidebarService, useValue: {} },
+                { provide: ResourcesService, useValue: {} },
                 {
                     provide: LoggingService, useValue: {
                         info: () => { },
@@ -177,17 +179,17 @@ describe("MapService", () => {
     }));
 
     it("should get an empty list of features when the map was not initialized", inject([MapService], async (service: MapService) => {
-        const features = service.getFeaturesFromTiles(["42"], "42");
+        const features = service.getFeaturesFromTiles();
         expect(features).toEqual([]);
     }));
 
     it("should get a list of features when the map was initialized", inject([MapService], async (service: MapService) => {
         service.setMap({
             on: () => { },
-            querySourceFeatures: () => [{ id: "42" }, { id: "43" }]
+            queryRenderedFeatures: () => [{ id: "42" }, { id: "43" }]
         } as any as Map);
-        const features = service.getFeaturesFromTiles(["layer1", "layer2"], "42");
-        expect(features.length).toEqual(4);
+        const features = service.getFeaturesFromTiles();
+        expect(features.length).toEqual(2);
     }));
 
     it("should return is moving when the map is moving", inject([MapService], async (service: MapService) => {
