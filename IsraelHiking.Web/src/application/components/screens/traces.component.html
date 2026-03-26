@@ -18,14 +18,20 @@
         <div class="flex flex-row sticky top-0 z-10 bg-white">
             <mat-form-field subscriptSizing="dynamic">
                 <mat-label>{{resources.sort}}</mat-label>
-                <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()">
+                <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()" angulartics2On="click"
+                    angularticsCategory="Traces" angularticsAction="Open sort menu">
                     <mat-option value="timeStamp" angulartics2On="click" angularticsCategory="Traces"
-                        angularticsAction="Sort by date">{{resources.date}}</mat-option>
+                        angularticsAction="Sort by date">
+                        {{resources.date}}
+                    </mat-option>
                     <mat-option value="name" angulartics2On="click" angularticsCategory="Traces"
-                        angularticsAction="Sort by name">{{resources.name}}</mat-option>
+                        angularticsAction="Sort by name">
+                        {{resources.name}}
+                    </mat-option>
                 </mat-select>
             </mat-form-field>
-            <button mat-button class="!h-[56px] ms-2" (click)="onSortDirectionChange()">
+            <button mat-button class="!h-[56px] ms-2" (click)="onSortDirectionChange()" angulartics2On="click"
+                angularticsCategory="Traces" angularticsAction="Change sort direction">
                 <i class="fa icon-sort mx-2"></i>
             </button>
             <label class="flex-1 !h-[56px] ms-2">
@@ -40,18 +46,20 @@
         <div [id]="'trace-' + trace.id">
             <secured-image [src]="trace.imageUrl" alt="" class="w-full"></secured-image>
             <h4 class="m-2">
-                <button mat-button [matMenuTriggerFor]="shareMenu">
+                <button mat-button [matMenuTriggerFor]="shareMenu" angulartics2On="click" angularticsCategory="Traces"
+                    angularticsAction="Open trace menu">
                     <i class="fa icon-ellipsis-v"></i>
                 </button>
                 <mat-menu #shareMenu="matMenu">
                     @if (canUploadToOsm(trace)) {
                     <button mat-menu-item (click)="uploadRecordingToOsm(trace)" angulartics2On="click"
-                        angularticsCategory="Traces" angularticsAction="Upload locally recorded route">
+                        angularticsCategory="Traces" angularticsAction="Upload locally recorded trace">
                         <i class="fa icon-cloud-upload"></i>
                         {{resources.uploadFileToOsm}}
                     </button>
                     }
-                    <button mat-menu-item (click)="moveToTrace(trace.id)">
+                    <button mat-menu-item (click)="moveToTrace(trace.id)" angulartics2On="click"
+                        angularticsCategory="Traces" angularticsAction="Move to trace">
                         <i class="fa icon-crosshairs"></i>
                         {{resources.moveToRoute}}
                     </button>
