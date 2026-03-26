@@ -270,6 +270,7 @@ export class ResourcesService {
     public easy: string;
     public moderate: string;
     public hard: string;
+    public veryHard: string;
     public unknown: string;
     public contactUsToPublishAPublicRoute: string;
     public activityType: string;
@@ -504,7 +505,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1773067833590");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1774561566028");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -754,6 +755,7 @@ export class ResourcesService {
         this.easy = this.gettextCatalog.getString("Easy");
         this.moderate = this.gettextCatalog.getString("Moderate");
         this.hard = this.gettextCatalog.getString("Hard");
+        this.veryHard = this.gettextCatalog.getString("Very Hard");
         this.unknown = this.gettextCatalog.getString("Unknown");
         this.contactUsToPublishAPublicRoute = this.gettextCatalog.getString("Contact us to publish a public route");
         this.activityType = this.gettextCatalog.getString("Activity Type");

@@ -141,6 +141,7 @@ export class SharesComponent implements OnInit {
                     if (share.difficulty === "Easy") return 1;
                     if (share.difficulty === "Moderate") return 2;
                     if (share.difficulty === "Hard") return 3;
+                    if (share.difficulty === "Very Hard") return 4;
                     return 0;
                 })] as any;
                 break;
