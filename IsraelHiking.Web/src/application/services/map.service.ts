@@ -153,10 +153,13 @@ export class MapService {
         return { top: 50, left: 50, bottom: window.innerHeight / 2, right: 50 }
     }
 
-    public async flyTo(latLng: LatLngAltTime, zoom: number) {
+    public async flyTo(latLng: LatLngAltTime, zoom?: number) {
         await this.initializationPromise;
         if (!this.currentMap) {
             return;
+        }
+        if (!zoom) {
+            zoom = this.currentMap.getZoom();
         }
         if (SpatialService.getDistance(this.currentMap.getCenter(), latLng) < 0.0001 &&
             Math.abs(zoom - this.currentMap.getZoom()) < 0.01) {
