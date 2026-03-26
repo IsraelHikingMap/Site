@@ -306,9 +306,10 @@ export class TracesComponent implements OnInit {
         ScrollToDirective.scrollTo(`trace-${traceId}`, 60);
     }
 
-    public expandCluster(feature: GeoJSON.Feature<GeoJSON.Point>, event: Event) {
+    public async expandCluster(feature: GeoJSON.Feature<GeoJSON.Point>, event: Event, source: GeoJSONSourceComponent) {
         event.stopPropagation();
-        this.mapService.flyTo({ lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0] }, 15.1);
+        const zoom = await source.getClusterExpansionZoom(feature.properties.cluster_id);
+        this.mapService.flyTo({ lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0] }, zoom);
     }
 
     public getLatLngLikeForFeature(feautre: GeoJSON.Feature<GeoJSON.LineString>): GeoJSON.Position {
