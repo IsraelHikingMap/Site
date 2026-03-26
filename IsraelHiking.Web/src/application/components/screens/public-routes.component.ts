@@ -1,4 +1,5 @@
 import { Component, DestroyRef, inject } from "@angular/core";
+import { Router } from "@angular/router";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { GeoJSONSourceComponent, MapComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent } from "@maplibre/ngx-maplibre-gl";
@@ -13,10 +14,10 @@ import { MatOption, MatSelect } from "@angular/material/select";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatSlider, MatSliderRangeThumb } from "@angular/material/slider";
-import { Router } from "@angular/router";
+import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
+import { Share } from "@capacitor/share";
 import { orderBy } from "lodash-es";
 import type { StyleSpecification, Map, MapSourceDataEvent } from "maplibre-gl";
-import type { Immutable } from "immer";
 
 import { Urls } from "../../urls";
 import { DistancePipe } from "../../pipes/distance.pipe";
@@ -28,6 +29,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { PoiService } from "../../services/poi.service";
 import { SpatialService } from "../../services/spatial.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
+import { RunningContextService } from "../../services/running-context.service";
 import { GeoJSONUtils } from "../../services/geojson-utils";
 import { PoiProperties } from "../../services/osm-tags.service";
 import { RouteStrings } from "../../services/hash.service";
@@ -37,7 +39,7 @@ import type { ApplicationState } from "../../models";
     selector: "public-routes",
     templateUrl: "./public-routes.component.html",
     styleUrls: ["./public-routes.component.scss"],
-    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, Angulartics2OnModule, NgClass, MatFormField, MatSelect, MatMenuTrigger, MatMenuItem, MatCheckbox, MatLabel, MatMenu, MatOption, DistancePipe, GeoJSONSourceComponent, LayerComponent, MatSlider, MatSliderRangeThumb]
+    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, Angulartics2OnModule, NgClass, MatFormField, MatSelect, MatMenuTrigger, MatMenuItem, MatCheckbox, MatLabel, MatMenu, MatOption, DistancePipe, GeoJSONSourceComponent, LayerComponent, MatSlider, MatSliderRangeThumb, CdkCopyToClipboard]
 })
 export class PublicRoutesComponent {
     public mapStyle: StyleSpecification;
@@ -71,6 +73,7 @@ export class PublicRoutesComponent {
     private readonly store = inject(Store);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly router = inject(Router);
+    private readonly runningContextSerivce = inject(RunningContextService);
 
     constructor() {
         this.mapStyle = this.defaultStyleService.getStyleWithPlaceholders();
@@ -240,5 +243,19 @@ export class PublicRoutesComponent {
     public onFilterLengthEndChange(value: number) {
         this.filterLengthEnd = value;
         this.runFilter();
+    }
+
+    public isApp() {
+        return this.runningContextSerivce.isCapacitor;
+    }
+
+    public getShareLinks(feature: GeoJSON.Feature<GeoJSON.Point>) {
+        return this.poiService.getPoiSocialLinks(feature);
+    }
+
+    public share(poiLink: string) {
+        Share.share({
+            url: poiLink
+        });
     }
 }

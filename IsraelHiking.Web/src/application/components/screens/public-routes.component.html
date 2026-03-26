@@ -192,6 +192,48 @@
                     <i class="fa icon-plus"></i>
                     {{resources.addToRoutes}}
                 </button>
+                <button class="mt-2" mat-button [matMenuTriggerFor]="shareMenu">
+                    <i class="fa icon-share-alt"></i>
+                    {{resources.share}}
+                </button>
+                <mat-menu #shareMenu="matMenu">
+                    <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).waze" [target]="'_blank'"
+                        angulartics2On="click" angularticsCategory="Share" angularticsAction="Navigate with waze">
+                        <i class="fa icon-waze"></i>
+                        {{resources.navigateWithWaze}}
+                    </a>
+                    <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).googleMaps" [target]="'_blank'"
+                        angulartics2On="click" angularticsCategory="Share"
+                        angularticsAction="Navigate with google maps">
+                        <i class="fa icon-map-marker"></i>
+                        {{resources.navigateWithGoogleMaps}}
+                    </a>
+                    @if (isApp()) {
+                    <button mat-menu-item (click)=share(getShareLinks(selectedRoutePoint).poiLink)
+                        angulartics2On="click" angularticsCategory="Share"
+                        angularticsAction="Share with os capabilities">
+                        <i class="fa icon-ellipsis-v"></i>
+                        {{resources.share}}
+                    </button>
+                    } @else {
+                    <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).facebook" [target]="'_blank'"
+                        angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook poi">
+                        <i class="fa icon-facebook"></i>
+                        {{resources.shareWithFacebook}}
+                    </a>
+                    <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).whatsapp" [target]="'_blank'"
+                        angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatsapp poi">
+                        <i class="fa icon-whatsapp"></i>
+                        {{resources.shareWithWhatsapp}}
+                    </a>
+                    <button mat-menu-item [cdkCopyToClipboard]="getShareLinks(selectedRoutePoint).poiLink"
+                        angulartics2On="click" angularticsCategory="Share"
+                        angularticsAction="Share copy to clipboard poi">
+                        <i class="fa icon-clipboard"></i>
+                        {{resources.copyToClipboard}}
+                    </button>
+                    }
+                </mat-menu>
             </mgl-popup>
             }
         </mgl-map>
