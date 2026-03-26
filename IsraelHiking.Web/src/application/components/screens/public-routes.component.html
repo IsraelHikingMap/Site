@@ -17,13 +17,16 @@
         <div class="absolute w-full top-0 magrin-top-with-toolbar z-10 bg-white hidden max-md:block">
             <div class="flex flex-row items-center">
                 <span class="mx-2">{{resources.filter}}</span>
-                <button mat-button class="flex-1" [matMenuTriggerFor]="mapFilterTypeMenu">
+                <button mat-button class="flex-1" [matMenuTriggerFor]="mapFilterTypeMenu" angulartics2On="click"
+                    angularticsCategory="Public routes" angularticsAction="Open filter type menu">
                     <i class="fa fa-lg icon-sliders mx-2"></i>
                 </button>
-                <button mat-button class="flex-1" [matMenuTriggerFor]="mapFilterLengthMenu">
+                <button mat-button class="flex-1" [matMenuTriggerFor]="mapFilterLengthMenu" angulartics2On="click"
+                    angularticsCategory="Public routes" angularticsAction="Open filter length menu">
                     <i class="fa fa-lg icon-measure mx-2"></i>
                 </button>
-                <button mat-button class="flex-1" [matMenuTriggerFor]="mapFilterDifficultyMenu">
+                <button mat-button class="flex-1" [matMenuTriggerFor]="mapFilterDifficultyMenu" angulartics2On="click"
+                    angularticsCategory="Public routes" angularticsAction="Open filter difficulty menu">
                     <i class="fa fa-lg icon-speed mx-2"></i>
                 </button>
             </div>
@@ -31,19 +34,22 @@
                 <span class="mx-2">{{resources.routeType}}</span>
                 <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterCategoryChange('Hiking')"
-                        [checked]="filterCategories.includes('Hiking')">
+                        [checked]="filterCategories.includes('Hiking')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by hiking">
                         <i class="fa icon-hike"></i>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterCategoryChange('Bicycle')"
-                        [checked]="filterCategories.includes('Bicycle')">
+                        [checked]="filterCategories.includes('Bicycle')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by bicycle">
                         <i class="fa icon-bike"></i>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterCategoryChange('4x4')"
-                        [checked]="filterCategories.includes('4x4')">
+                        [checked]="filterCategories.includes('4x4')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by 4x4">
                         <i class="fa icon-four-by-four"></i>
                     </mat-checkbox>
                 </div>
@@ -52,7 +58,8 @@
                 <span class="mx-2">{{resources.length}}</span>
                 <div mat-menu-item (click)="$event.stopPropagation()">
                     <div class="flex flex-row" dir="ltr">
-                        <mat-slider class="w-full" min="0" max="50" step="1">
+                        <mat-slider class="w-full" min="0" max="50" step="1" angulartics2On="click"
+                            angularticsCategory="Public routes" angularticsAction="Filter by length">
                             <input [(ngModel)]="filterLengthStart" matSliderStartThumb (valueChange)="runFilter()">
                             <input [(ngModel)]="filterLengthEnd" matSliderEndThumb (valueChange)="runFilter()">
                         </mat-slider>
@@ -71,25 +78,29 @@
                 <span class="mx-2">{{resources.difficulty}}</span>
                 <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Easy')"
-                        [checked]="filterDifficulty.includes('Easy')">
+                        [checked]="filterDifficulty.includes('Easy')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by easy difficulty">
                         <span class="rounded-full bg-green-500 p-2">{{resources.easy}}</span>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Moderate')"
-                        [checked]="filterDifficulty.includes('Moderate')">
+                        [checked]="filterDifficulty.includes('Moderate')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by moderate difficulty">
                         <span class="rounded-full bg-yellow-500 p-2">{{resources.moderate}}</span>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Hard')"
-                        [checked]="filterDifficulty.includes('Hard')">
+                        [checked]="filterDifficulty.includes('Hard')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by hard difficulty">
                         <span class="rounded-full bg-red-500 p-2 text-white">{{resources.hard}}</span>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Very Hard')"
-                        [checked]="filterDifficulty.includes('Very Hard')">
+                        [checked]="filterDifficulty.includes('Very Hard')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by very hard difficulty">
                         <span class="rounded-full bg-black p-2 text-white">{{resources.veryHard}}</span>
                     </mat-checkbox>
                 </div>
@@ -109,7 +120,7 @@
             <mgl-marker [lngLat]="feature.geometry.coordinates">
                 <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="onStartPointClick(feature, $event)"
                     (mouseenter)="hover(feature)" (mouseleave)="hover(null)" angulartics2On="click"
-                    angularticsCategory="POI" angularticsAction="Open POI sidebar from map">
+                    angularticsCategory="Public routes" angularticsAction="Select route on map">
                     <span class="has-extra-data" [style.background]="feature.properties.poiIconColor"></span>
                     <i class="fa icon-map-marker-rect fa-stack-2x"
                         style="color: white; text-shadow: 3px 3px 3px #000;"></i>
@@ -188,46 +199,51 @@
                 }
                 }
                 <span class="mx-2">{{selectedRoutePoint.properties.poiLength | distance}}</span>
-                <button class="mt-2" mat-button (click)="convertToRoute(selectedRoutePoint)">
+                <button class="mt-2" mat-button (click)="convertToRoute(selectedRoutePoint)" angulartics2On="click"
+                    angularticsCategory="Public routes" angularticsAction="Add to routes">
                     <i class="fa icon-plus"></i>
                     {{resources.addToRoutes}}
                 </button>
-                <button class="mt-2" mat-button [matMenuTriggerFor]="shareMenu">
+                <button class="mt-2" mat-button [matMenuTriggerFor]="shareMenu" angulartics2On="click"
+                    angularticsCategory="Public routes" angularticsAction="Open share menu">
                     <i class="fa icon-share-alt"></i>
                     {{resources.share}}
                 </button>
                 <mat-menu #shareMenu="matMenu">
                     <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).waze" [target]="'_blank'"
-                        angulartics2On="click" angularticsCategory="Share" angularticsAction="Navigate with waze">
+                        angulartics2On="click" angularticsCategory="Public routes"
+                        angularticsAction="Navigate with waze">
                         <i class="fa icon-waze"></i>
                         {{resources.navigateWithWaze}}
                     </a>
                     <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).googleMaps" [target]="'_blank'"
-                        angulartics2On="click" angularticsCategory="Share"
+                        angulartics2On="click" angularticsCategory="Public routes"
                         angularticsAction="Navigate with google maps">
                         <i class="fa icon-map-marker"></i>
                         {{resources.navigateWithGoogleMaps}}
                     </a>
                     @if (isApp()) {
                     <button mat-menu-item (click)=share(getShareLinks(selectedRoutePoint).poiLink)
-                        angulartics2On="click" angularticsCategory="Share"
+                        angulartics2On="click" angularticsCategory="Public routes"
                         angularticsAction="Share with os capabilities">
                         <i class="fa icon-ellipsis-v"></i>
                         {{resources.share}}
                     </button>
                     } @else {
                     <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).facebook" [target]="'_blank'"
-                        angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook poi">
+                        angulartics2On="click" angularticsCategory="Public routes"
+                        angularticsAction="Share facebook poi">
                         <i class="fa icon-facebook"></i>
                         {{resources.shareWithFacebook}}
                     </a>
                     <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).whatsapp" [target]="'_blank'"
-                        angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatsapp poi">
+                        angulartics2On="click" angularticsCategory="Public routes"
+                        angularticsAction="Share whatsapp poi">
                         <i class="fa icon-whatsapp"></i>
                         {{resources.shareWithWhatsapp}}
                     </a>
                     <button mat-menu-item [cdkCopyToClipboard]="getShareLinks(selectedRoutePoint).poiLink"
-                        angulartics2On="click" angularticsCategory="Share"
+                        angulartics2On="click" angularticsCategory="Public routes"
                         angularticsAction="Share copy to clipboard poi">
                         <i class="fa icon-clipboard"></i>
                         {{resources.copyToClipboard}}
@@ -250,27 +266,32 @@
                     <mat-option value="name">{{resources.name}}</mat-option>
                 </mat-select>
             </mat-form-field>
-            <button mat-button class="!h-[56px] ms-2" (click)="onSortDirectionChange()">
+            <button mat-button class="!h-[56px] ms-2" (click)="onSortDirectionChange()" angulartics2On="click"
+                angularticsCategory="Public routes" angularticsAction="Change sort direction">
                 <i class="fa icon-sort mx-2"></i>
             </button>
-            <button mat-button class="!h-[56px] ms-2" [matMenuTriggerFor]="filterMenu">
+            <button mat-button class="!h-[56px] ms-2" [matMenuTriggerFor]="filterMenu" angulartics2On="click"
+                angularticsCategory="Public routes" angularticsAction="Open filter menu from list">
                 <i class="fa icon-sliders mx-2"></i>
                 {{resources.filter}}
             </button>
             <mat-menu #filterMenu="matMenu">
-                <div mat-menu-item (click)="$event.stopPropagation()">
+                <div mat-menu-item (click)="$event.stopPropagation()" angulartics2On="click"
+                    angularticsCategory="Public routes" angularticsAction="Filter hiking">
                     <mat-checkbox color="primary" (change)="onFilterCategoryChange('Hiking')"
                         [checked]="filterCategories.includes('Hiking')">
                         <i class="fa icon-hike"></i>
                     </mat-checkbox>
                 </div>
-                <div mat-menu-item (click)="$event.stopPropagation()">
+                <div mat-menu-item (click)="$event.stopPropagation()" angulartics2On="click"
+                    angularticsCategory="Public routes" angularticsAction="Filter bicycle">
                     <mat-checkbox color="primary" (change)="onFilterCategoryChange('Bicycle')"
                         [checked]="filterCategories.includes('Bicycle')">
                         <i class="fa icon-bike"></i>
                     </mat-checkbox>
                 </div>
-                <div mat-menu-item (click)="$event.stopPropagation()">
+                <div mat-menu-item (click)="$event.stopPropagation()" angulartics2On="click"
+                    angularticsCategory="Public routes" angularticsAction="Filter 4x4">
                     <mat-checkbox color="primary" (change)="onFilterCategoryChange('4x4')"
                         [checked]="filterCategories.includes('4x4')">
                         <i class="fa icon-four-by-four"></i>
@@ -290,15 +311,18 @@
                 }
             </div>
             <div class="flex flex-row mx-10 max-md:mx-2 items-center">
-                <button mat-button [matMenuTriggerFor]="routeMenu">
+                <button mat-button [matMenuTriggerFor]="routeMenu" angulartics2On="click"
+                    angularticsCategory="Public routes" angularticsAction="Open route menu from list">
                     <i class="fa icon-ellipsis-v"></i>
                 </button>
                 <mat-menu #routeMenu="matMenu">
-                    <button mat-menu-item (click)="moveToFeature(route)">
+                    <button mat-menu-item (click)="moveToFeature(route)" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Move to route from list">
                         <i class="fa icon-crosshairs"></i>
                         {{resources.moveToRoute}}
                     </button>
-                    <button mat-menu-item (click)="convertToRoute(route)">
+                    <button mat-menu-item (click)="convertToRoute(route)" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Add to routes from list">
                         <i class="fa icon-plus"></i>
                         {{resources.addToRoutes}}
                     </button>
