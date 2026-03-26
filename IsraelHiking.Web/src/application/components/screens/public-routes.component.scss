@@ -1,30 +1,3 @@
-.marker-cluster {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background-color: #4f615a;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    border: 2px solid #56C498;
-    cursor: pointer;
-}
-
 .marker-icon {
     transform: translate(0, -70%);
-}
-
-.selected-marker-icon {
-    transform: translate(0, -20%);
-}
-
-.top-with-toolbar {
-    top: calc(var(--mat-toolbar-mobile-height) + env(safe-area-inset-top, 0));
-}
-
-@media (width >=600px) {
-    .top-with-toolbar {
-        top: calc(var(--mat-toolbar-standard-height) + env(safe-area-inset-top, 0));
-    }
 }
