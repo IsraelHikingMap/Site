@@ -92,13 +92,13 @@ export class PublicRoutesComponent {
         this.mapService.setMap(map);
         this.mapService.addArrowToMap(map);
         this.runFilter();
-        map.on('sourcedata', (e) => this.onSourceData(e, map))
+        map.on("sourcedata", (e) => this.onSourceData(e, map))
     }
 
     private onSourceData(e: MapSourceDataEvent, map: Map) {
         if (e.sourceId === this.routesSrouceId) {
             this.runFilter();
-            map.off('sourcedata', (e) => this.onSourceData(e, map))
+            map.off("sourcedata", (e) => this.onSourceData(e, map))
         }
     }
 
