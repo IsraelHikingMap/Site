@@ -14,28 +14,83 @@
         </mat-button-toggle-group>
     </div>
     <div class="w-2/3" [ngClass]="{'max-md:hidden': !showMap, 'max-md:w-full': showMap}">
-        <div class="flex flex-row absolute top-0 end-0 magrin-top-with-toolbar z-10 bg-white hidden max-md:block">
-            <button mat-button class="!h-[56px] ms-2" [matMenuTriggerFor]="mapFilterMenu">
-                <i class="fa icon-sliders mx-2"></i>
-                {{resources.filter}}
-            </button>
-            <mat-menu #mapFilterMenu="matMenu">
+        <div class="absolute w-full top-0 magrin-top-with-toolbar z-10 bg-white hidden max-md:block">
+            <div class="flex flex-row items-center">
+                <span class="mx-2">{{resources.filter}}</span>
+                <button mat-button class="flex-1" [matMenuTriggerFor]="mapFilterTypeMenu">
+                    <i class="fa fa-lg icon-sliders mx-2"></i>
+                </button>
+                <button mat-button class="flex-1" [matMenuTriggerFor]="mapFilterLengthMenu">
+                    <i class="fa fa-lg icon-measure mx-2"></i>
+                </button>
+                <button mat-button class="flex-1" [matMenuTriggerFor]="mapFilterDifficultyMenu">
+                    <i class="fa fa-lg icon-speed mx-2"></i>
+                </button>
+            </div>
+            <mat-menu #mapFilterTypeMenu="matMenu">
+                <span class="mx-2">{{resources.routeType}}</span>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('poiCategory', 'Hiking')"
-                        [checked]="filter.poiCategory.includes('Hiking')">
+                    <mat-checkbox color="primary" (change)="onFilterCategoryChange('Hiking')"
+                        [checked]="filterCategories.includes('Hiking')">
                         <i class="fa icon-hike"></i>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('poiCategory', 'Bicycle')"
-                        [checked]="filter.poiCategory.includes('Bicycle')">
+                    <mat-checkbox color="primary" (change)="onFilterCategoryChange('Bicycle')"
+                        [checked]="filterCategories.includes('Bicycle')">
                         <i class="fa icon-bike"></i>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('poiCategory', '4x4')"
-                        [checked]="filter.poiCategory.includes('4x4')">
+                    <mat-checkbox color="primary" (change)="onFilterCategoryChange('4x4')"
+                        [checked]="filterCategories.includes('4x4')">
                         <i class="fa icon-four-by-four"></i>
+                    </mat-checkbox>
+                </div>
+            </mat-menu>
+            <mat-menu #mapFilterLengthMenu="matMenu">
+                <span class="mx-2">{{resources.length}}</span>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <div class="flex flex-row" dir="ltr">
+                        <mat-slider class="w-full" min="0" max="50" step="1">
+                            <input [(ngModel)]="filterLengthStart" matSliderStartThumb (valueChange)="runFilter()">
+                            <input [(ngModel)]="filterLengthEnd" matSliderEndThumb (valueChange)="runFilter()">
+                        </mat-slider>
+                    </div>
+                    <div class="flex flex-row" dir="ltr">
+                        <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthStart}}
+                            {{resources.kmUnit}}</span>
+                        <span class="flex-grow"></span>
+                        <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthEnd === 50 ?
+                            "\u200E+50" : filterLengthEnd}}
+                            {{resources.kmUnit}}</span>
+                    </div>
+                </div>
+            </mat-menu>
+            <mat-menu #mapFilterDifficultyMenu="matMenu">
+                <span class="mx-2">{{resources.difficulty}}</span>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Easy')"
+                        [checked]="filterDifficulty.includes('Easy')">
+                        <span class="rounded-full bg-green-500 p-2">{{resources.easy}}</span>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Moderate')"
+                        [checked]="filterDifficulty.includes('Moderate')">
+                        <span class="rounded-full bg-yellow-500 p-2">{{resources.moderate}}</span>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Hard')"
+                        [checked]="filterDifficulty.includes('Hard')">
+                        <span class="rounded-full bg-red-500 p-2 text-white">{{resources.hard}}</span>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Very Hard')"
+                        [checked]="filterDifficulty.includes('Very Hard')">
+                        <span class="rounded-full bg-black p-2 text-white">{{resources.veryHard}}</span>
                     </mat-checkbox>
                 </div>
             </mat-menu>
@@ -95,6 +150,50 @@
                 <div [dir]="resources.getDirection(getTitle(hoverFeature))">{{getTitle(hoverFeature)}}</div>
             </mgl-popup>
             }
+            @if (selectedRoutePoint) {
+            <mgl-popup [lngLat]="selectedRoutePoint.geometry.coordinates" [closeButton]="false" [offset]="[0, -30]"
+                class="text-right" (popupClose)="selectedRoutePoint = null">
+                <div class="text-lg" [dir]="resources.getDirection(getTitle(selectedRoutePoint))">
+                    {{getTitle(selectedRoutePoint)}}
+                </div>
+                @switch (selectedRoutePoint.properties.poiDifficulty) {
+                @case ("Easy") {
+                <span class="rounded-full bg-green-500 p-2">
+                    <i class="fa {{getIconFromType(selectedRoutePoint)}}"></i>
+                    {{resources.easy}}
+                </span>
+                }
+                @case ("Moderate") {
+                <span class="rounded-full bg-yellow-500 p-2">
+                    <i class="fa {{getIconFromType(selectedRoutePoint)}}"></i>
+                    {{resources.legendModerate}}
+                </span>
+                }
+                @case ("Hard") {
+                <span class="rounded-full bg-red-500 p-2 text-white">
+                    <i class="fa {{getIconFromType(selectedRoutePoint)}}"></i>
+                    {{resources.legendAdvanced}}
+                </span>
+                }
+                @case ("Very Hard") {
+                <span class="rounded-full bg-black p-2 text-white">
+                    <i class="fa {{getIconFromType(selectedRoutePoint)}}"></i>
+                    {{resources.veryHard}}
+                </span>
+                }
+                @default {
+                <span class="rounded-full bg-gray-300 p-2">
+                    <i class="fa {{getIconFromType(selectedRoutePoint)}}"></i>
+                </span>
+                }
+                }
+                <span class="mx-2">{{selectedRoutePoint.properties.poiLength | distance}}</span>
+                <button class="mt-2" mat-button (click)="convertToRoute(selectedRoutePoint)">
+                    <i class="fa icon-plus"></i>
+                    {{resources.addToRoutes}}
+                </button>
+            </mgl-popup>
+            }
         </mgl-map>
     </div>
     <div [ngClass]="{'max-md:hidden': showMap, 'max-md:w-full': !showMap}"
@@ -118,20 +217,20 @@
             </button>
             <mat-menu #filterMenu="matMenu">
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('poiCategory', 'Hiking')"
-                        [checked]="filter.poiCategory.includes('Hiking')">
+                    <mat-checkbox color="primary" (change)="onFilterCategoryChange('Hiking')"
+                        [checked]="filterCategories.includes('Hiking')">
                         <i class="fa icon-hike"></i>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('poiCategory', 'Bicycle')"
-                        [checked]="filter.poiCategory.includes('Bicycle')">
+                    <mat-checkbox color="primary" (change)="onFilterCategoryChange('Bicycle')"
+                        [checked]="filterCategories.includes('Bicycle')">
                         <i class="fa icon-bike"></i>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('poiCategory', '4x4')"
-                        [checked]="filter.poiCategory.includes('4x4')">
+                    <mat-checkbox color="primary" (change)="onFilterCategoryChange('4x4')"
+                        [checked]="filterCategories.includes('4x4')">
                         <i class="fa icon-four-by-four"></i>
                     </mat-checkbox>
                 </div>
@@ -139,7 +238,7 @@
         </div>
         @for (route of poiGeoJsonData.features; track route.properties.poiId) {
         <div (mouseenter)="hover(route)" (mouseleave)="hover(null)" id="route-{{route.properties.poiId}}">
-            <div class="flex flex-row mx-10">
+            <div class="flex flex-row mx-10 max-md:mx-2">
                 @if (route.properties.website) {
                 <h3>
                     <a class="w-full" [href]="route.properties.website" target="_blank">{{getTitle(route)}}</a>
@@ -148,7 +247,7 @@
                 <h3 class="w-full">{{getTitle(route)}}</h3>
                 }
             </div>
-            <div class="flex flex-row mx-10 items-center">
+            <div class="flex flex-row mx-10 max-md:mx-2 items-center">
                 <button mat-button [matMenuTriggerFor]="routeMenu">
                     <i class="fa icon-ellipsis-v"></i>
                 </button>
@@ -195,12 +294,12 @@
                 }
                 <span class="mx-2">{{resources.length}}: {{route.properties.poiLength | distance}}</span>
             </div>
-            <div class="flex flex-row mx-10">
+            <div class="flex flex-row mx-10 max-md:mx-2">
                 <div class="relative w-full h-[200px]">
                     <img class="w-full object-contain img-center" [src]="route.properties.image" alt="">
                 </div>
             </div>
-            <div class="flex flex-row mx-10 mb-2">
+            <div class="flex flex-row mx-10 max-md:mx-2 mb-2">
                 <div class="w-full">{{getDescription(route)}}</div>
             </div>
         </div>

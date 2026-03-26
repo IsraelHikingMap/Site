@@ -12,6 +12,7 @@ import { MatFormField, MatLabel } from "@angular/material/input";
 import { MatOption, MatSelect } from "@angular/material/select";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatCheckbox } from "@angular/material/checkbox";
+import { MatSlider, MatSliderRangeThumb } from "@angular/material/slider";
 import { Router } from "@angular/router";
 import { orderBy } from "lodash-es";
 import type { StyleSpecification, Map, MapSourceDataEvent } from "maplibre-gl";
@@ -36,7 +37,7 @@ import type { ApplicationState } from "../../models";
     selector: "public-routes",
     templateUrl: "./public-routes.component.html",
     styleUrls: ["./public-routes.component.scss"],
-    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, Angulartics2OnModule, NgClass, MatFormField, MatSelect, MatMenuTrigger, MatMenuItem, MatCheckbox, MatLabel, MatMenu, MatOption, DistancePipe, GeoJSONSourceComponent, LayerComponent]
+    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, Angulartics2OnModule, NgClass, MatFormField, MatSelect, MatMenuTrigger, MatMenuItem, MatCheckbox, MatLabel, MatMenu, MatOption, DistancePipe, GeoJSONSourceComponent, LayerComponent, MatSlider, MatSliderRangeThumb]
 })
 export class PublicRoutesComponent {
     public mapStyle: StyleSpecification;
@@ -44,9 +45,10 @@ export class PublicRoutesComponent {
     public readonly routesSrouceId = "routes-of-interest";
     public sortBy: string = "length";
     public sortDirection: "asc" | "desc" = "desc";
-    public filter: Partial<Record<keyof PoiProperties, string[]>> = {
-        poiCategory: ["Biking", "Hiking", "4x4"]
-    };
+    public filterCategories: string[] = ["Bicycle", "Hiking", "4x4"];
+    public filterDifficulty: string[] = ["Easy", "Moderate", "Hard", "Very Hard"];
+    public filterLengthStart: number = 0;
+    public filterLengthEnd: number = 50;
 
     public poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
     public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point> = {
@@ -54,10 +56,11 @@ export class PublicRoutesComponent {
         features: []
     };
     public hoverFeature: GeoJSON.Feature<GeoJSON.Point> = null;
-    public selectedRouteGeoJson: Immutable<GeoJSON.FeatureCollection> = {
+    public selectedRouteGeoJson: GeoJSON.FeatureCollection = {
         type: "FeatureCollection",
         features: []
     };
+    public selectedRoutePoint: GeoJSON.Feature<GeoJSON.Point> = null;
 
     public readonly resources = inject(ResourcesService);
 
@@ -96,16 +99,21 @@ export class PublicRoutesComponent {
         }
     }
 
-    private runFilter() {
+    public runFilter() {
         let features = this.poiService.getPublicRoutes(["Hiking", "Bicycle", "4x4"]).features;
         features = features.filter(f => f.properties.image != null);
         features = features.filter(feature => {
-            for (const key in this.filter) {
-                const filterKey = key as keyof PoiProperties;
-                const propValue = feature.properties[filterKey];
-                if (this.filter[filterKey] && !this.filter[filterKey].includes(propValue as any)) {
-                    return false;
-                }
+            if (!this.filterCategories.includes(feature.properties.poiCategory)) {
+                return false;
+            }
+            if (feature.properties.poiDifficulty && !this.filterDifficulty.includes(feature.properties.poiDifficulty)) {
+                return false;
+            }
+            if (feature.properties.poiLength / 1000 < this.filterLengthStart) {
+                return false;
+            }
+            if (feature.properties.poiLength / 1000 > this.filterLengthEnd && this.filterLengthEnd < 50) {
+                return false;
             }
             return true;
         });
@@ -141,6 +149,7 @@ export class PublicRoutesComponent {
 
     public async moveToFeature(feature: GeoJSON.Feature<GeoJSON.Point>) {
         this.showMap = true;
+        this.selectedRoutePoint = feature;
         const fullFeature = await this.poiService.getBasicInfo(feature.properties.identifier, feature.properties.poiSource, this.resources.getCurrentLanguageCodeSimplified());
         this.selectedRouteGeoJson = {
             type: "FeatureCollection",
@@ -173,11 +182,20 @@ export class PublicRoutesComponent {
         this.runFilter();
     }
 
-    public onFilterChange(key: keyof PoiProperties, value: string) {
-        if (this.filter[key].includes(value)) {
-            this.filter[key] = this.filter[key].filter((x) => x !== value);
+    public onFilterCategoryChange(value: string) {
+        if (this.filterCategories.includes(value)) {
+            this.filterCategories = this.filterCategories.filter((x) => x !== value);
         } else {
-            this.filter[key].push(value);
+            this.filterCategories.push(value);
+        }
+        this.runFilter();
+    }
+
+    public onFilterDifficultyChange(value: string) {
+        if (this.filterDifficulty.includes(value)) {
+            this.filterDifficulty = this.filterDifficulty.filter((x) => x !== value);
+        } else {
+            this.filterDifficulty.push(value);
         }
         this.runFilter();
     }
@@ -212,5 +230,15 @@ export class PublicRoutesComponent {
         await new Promise((resolve) => setTimeout(resolve, 100));
         const bounds = SpatialService.getBoundsForFeature(fullFeature);
         this.mapService.fitBounds(bounds);
+    }
+
+    public onFilterLengthStartChange(value: number) {
+        this.filterLengthStart = value;
+        this.runFilter();
+    }
+
+    public onFilterLengthEndChange(value: number) {
+        this.filterLengthEnd = value;
+        this.runFilter();
     }
 }
