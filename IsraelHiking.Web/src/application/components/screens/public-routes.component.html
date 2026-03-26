@@ -109,7 +109,7 @@
         <mgl-map [mapStyle]="mapStyle" [attributionControl]="false" (mapLoad)="mapLoaded($event)">
             <layers [isMainMap]="false"></layers>
             <mgl-vector-source [id]="routesSrouceId" [tiles]="poisVectorTileAddress" [maxzoom]="14"
-                [minzoom]="10"></mgl-vector-source>
+                [minzoom]="9"></mgl-vector-source>
             <mgl-layer [id]="resources.globalPointsLayer" [source]="routesSrouceId" type="circle"
                 sourceLayer="global_points" [paint]="{'circle-color': 'transparent'}"
                 [before]="resources.endOfBaseLayer"></mgl-layer>
