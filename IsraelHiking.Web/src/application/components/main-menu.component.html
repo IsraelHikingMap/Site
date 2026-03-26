@@ -4,6 +4,11 @@
   <i class="fa fa-lg icon-map-o mat-icon"></i>
   <span class="mx-1">{{resources.planAndExplore}}</span>
 </button>
+<button mat-button routerLink="/public-routes" angulartics2On="click" angularticsCategory="Menu"
+  angularticsAction="Find Routes" class="max-md:hidden! text-white!">
+  <i class="fa fa-lg icon-recordings mat-icon"></i>
+  <span class="mx-1">{{resources.findRoutes}}</span>
+</button>
 }
 @if (!isIFrame() && !isLoggedIn()) {
 <button mat-raised-button (click)="login()">{{resources.signIn}}</button>
@@ -65,11 +70,17 @@
       <hr />
       }
       @if (!isIFrame()) {
+      <button mat-menu-item routerLink="/public-routes" angulartics2On="click" angularticsCategory="Menu"
+        angularticsAction="Find Routes" class="block md:hidden!">
+        <i class="fa fa-lg icon-recordings mat-icon"></i>
+        <span class="mx-1">{{resources.findRoutes}}</span>
+      </button>
       <button mat-menu-item routerLink="/map" angulartics2On="click" angularticsCategory="Menu"
         angularticsAction="Plan & Explore" class="block md:hidden!">
         <i class="fa fa-lg icon-map-o mat-icon"></i>
         <span class="mx-1">{{resources.planAndExplore}}</span>
       </button>
+      <hr />
       }
       <button mat-menu-item (click)="openLanguage()" angulartics2On="click" angularticsCategory="Menu"
         angularticsAction="Open language selection">
