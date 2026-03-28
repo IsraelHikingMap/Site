@@ -103,6 +103,10 @@ export class MapService {
         }
         const centerLatLon = this.currentMap.getCenter();
         const zoom = this.currentMap.getZoom();
+        const currentLocation = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
+        if (currentLocation.longitude === centerLatLon.lng && currentLocation.latitude === centerLatLon.lat && currentLocation.zoom === zoom) {
+            return;
+        }
         this.store.dispatch(new SetLocationAction(centerLatLon.lng, centerLatLon.lat, zoom));
     }
 
