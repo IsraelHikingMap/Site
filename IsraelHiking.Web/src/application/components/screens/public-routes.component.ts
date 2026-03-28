@@ -9,8 +9,6 @@ import { MatButton } from "@angular/material/button";
 import { FormsModule } from "@angular/forms";
 import { MatButtonToggle, MatButtonToggleGroup } from "@angular/material/button-toggle";
 import { Angulartics2OnModule } from "application/directives/gtag.directive";
-import { MatFormField, MatLabel } from "@angular/material/input";
-import { MatOption, MatSelect } from "@angular/material/select";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatSlider, MatSliderRangeThumb } from "@angular/material/slider";
@@ -39,7 +37,7 @@ import type { ApplicationState } from "../../models";
     selector: "public-routes",
     templateUrl: "./public-routes.component.html",
     styleUrls: ["./public-routes.component.scss"],
-    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, Angulartics2OnModule, NgClass, MatFormField, MatSelect, MatMenuTrigger, MatMenuItem, MatCheckbox, MatLabel, MatMenu, MatOption, DistancePipe, GeoJSONSourceComponent, LayerComponent, MatSlider, MatSliderRangeThumb, CdkCopyToClipboard]
+    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, Angulartics2OnModule, NgClass, MatMenuTrigger, MatMenuItem, MatCheckbox, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, MatSlider, MatSliderRangeThumb, CdkCopyToClipboard]
 })
 export class PublicRoutesComponent {
     public mapStyle: StyleSpecification;
