@@ -134,6 +134,13 @@ describe("MapService", () => {
     it("should update the state on moveend", inject([MapService, Store], async (service: MapService, store: Store) => {
         const spy = jasmine.createSpy();
         store.dispatch = spy;
+        store.reset({
+            locationState: {
+                longitude: 0,
+                latitude: 0,
+                zoom: 0
+            }
+        })
         service.setMap({
             on: (event: string, callback: (error: ErrorEvent) => void) => {
                 if (event == "moveend") callback({} as any);
@@ -144,6 +151,27 @@ describe("MapService", () => {
         await service.initializationPromise;
         expect(spy).toHaveBeenCalled();
         expect(spy.calls.all()[0].args[0]).toBeInstanceOf(SetLocationAction)
+    }));
+
+    it("should not update the state on moveend if location is the same", inject([MapService, Store], async (service: MapService, store: Store) => {
+        const spy = jasmine.createSpy();
+        store.dispatch = spy;
+        store.reset({
+            locationState: {
+                longitude: 1,
+                latitude: 2,
+                zoom: 1
+            }
+        })
+        service.setMap({
+            on: (event: string, callback: (error: ErrorEvent) => void) => {
+                if (event == "moveend") callback({} as any);
+            },
+            getCenter: () => ({ lng: 1, lat: 2 }),
+            getZoom: () => 1,
+        } as any as Map);
+        await service.initializationPromise;
+        expect(spy).not.toHaveBeenCalled();
     }));
 
     it("should not throw if moveend is called after map removal", inject([MapService], async (service: MapService) => {
