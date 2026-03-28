@@ -262,8 +262,8 @@ describe("MapService", () => {
 
     it("Should not fly to on small changes", inject([MapService],
         async (service: MapService) => {
-            service.setMap({ getCenter: () => { return { lat: 1, lng: 1 } }, flyTo: () => { }, on: () => { }, getZoom: () => 1 } as any as Map);
             const spy = jasmine.createSpy();
+            service.setMap({ getCenter: () => { return { lat: 1, lng: 1 } }, flyTo: spy, on: () => { }, getZoom: () => 1 } as any as Map);
             await service.flyTo({ lng: 1, lat: 1 }, 1);
             expect(spy).not.toHaveBeenCalled();
         }
@@ -275,6 +275,16 @@ describe("MapService", () => {
             service.setMap({ getCenter: () => { return { lat: 1, lng: 1 } }, flyTo: spy, on: () => { } } as any as Map);
             await service.flyTo({ lng: 2, lat: 2 }, 1);
             expect(spy).toHaveBeenCalled();
+        }
+    ));
+
+    it("Should use current zoom if not provided", inject([MapService],
+        async (service: MapService) => {
+            const spy = jasmine.createSpy();
+            service.setMap({ getCenter: () => { return { lat: 1, lng: 1 } }, flyTo: spy, on: () => { }, getZoom: () => 1 } as any as Map);
+            await service.flyTo({ lng: 2, lat: 2 });
+            expect(spy).toHaveBeenCalled();
+            expect(spy.calls.all()[0].args[0].zoom).toBe(1);
         }
     ));
 

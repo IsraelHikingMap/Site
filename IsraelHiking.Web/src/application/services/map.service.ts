@@ -159,9 +159,6 @@ export class MapService {
 
     public async flyTo(latLng: LatLngAltTime, zoom?: number) {
         await this.initializationPromise;
-        if (!this.currentMap) {
-            return;
-        }
         if (!zoom) {
             zoom = this.currentMap.getZoom();
         }
