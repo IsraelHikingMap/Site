@@ -208,6 +208,10 @@ mgl-map {
     object-fit: cover;
 }
 
+.maplibregl-ctrl {
+    margin: 0 !important;
+}
+
 @media print {
 
     .mat-mdc-tooltip,

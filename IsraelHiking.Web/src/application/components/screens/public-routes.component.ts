@@ -2,7 +2,7 @@ import { Component, DestroyRef, inject } from "@angular/core";
 import { Router } from "@angular/router";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
-import { GeoJSONSourceComponent, MapComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent } from "@maplibre/ngx-maplibre-gl";
+import { GeoJSONSourceComponent, MapComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, ControlComponent } from "@maplibre/ngx-maplibre-gl";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Store } from "@ngxs/store";
 import { MatButton } from "@angular/material/button";
@@ -18,7 +18,8 @@ import { orderBy } from "lodash-es";
 import type { StyleSpecification, Map, MapSourceDataEvent } from "maplibre-gl";
 
 import { ImageAttributionComponent } from "../image-attribution.component";
-import { Urls } from "../../urls";
+import { ZoomComponent } from "../zoom.component";
+import { OsmAttributionComponent } from "../osm-attribution.component";
 import { DistancePipe } from "../../pipes/distance.pipe";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { DefaultStyleService } from "../../services/default-style.service";
@@ -32,13 +33,14 @@ import { RunningContextService } from "../../services/running-context.service";
 import { GeoJSONUtils } from "../../services/geojson-utils";
 import { PoiProperties } from "../../services/osm-tags.service";
 import { RouteStrings } from "../../services/hash.service";
+import { Urls } from "../../urls";
 import type { ApplicationState } from "../../models";
 
 @Component({
     selector: "public-routes",
     templateUrl: "./public-routes.component.html",
     styleUrls: ["./public-routes.component.scss"],
-    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, Angulartics2OnModule, NgClass, MatMenuTrigger, MatMenuItem, MatCheckbox, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, MatSlider, MatSliderRangeThumb, CdkCopyToClipboard, ImageAttributionComponent]
+    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, Angulartics2OnModule, NgClass, MatMenuTrigger, MatMenuItem, MatCheckbox, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, MatSlider, MatSliderRangeThumb, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, ControlComponent]
 })
 export class PublicRoutesComponent {
     public mapStyle: StyleSpecification;
