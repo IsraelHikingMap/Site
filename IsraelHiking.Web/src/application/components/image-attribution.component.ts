@@ -21,13 +21,10 @@ export class ImageAttributionComponent implements OnInit, OnChanges {
     }
 
     async ngOnChanges(changes: SimpleChanges<ImageAttributionComponent>): Promise<void> {
-        console.log(changes.imageUrl.currentValue);
         if (changes.imageUrl.currentValue) {
             this.imageAttribution = await this.imageAttributionService.getAttributionForImage(changes.imageUrl.currentValue);
-            console.log(this.imageAttribution, "for value", changes.imageUrl.currentValue);
         } else {
             this.imageAttribution = null;
         }
-        console.log(this.imageAttribution);
     }
 }
