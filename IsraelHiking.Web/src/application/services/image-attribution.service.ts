@@ -10,7 +10,7 @@ export type ImageAttribution = {
 
 @Injectable()
 export class ImageAttributionService {
-    private attributionImageCache = new Map<string, ImageAttribution>();
+    private attributionImageCache = new Map<string, Promise<ImageAttribution>>();
 
     private readonly httpClient = inject(HttpClient);
 
@@ -60,10 +60,16 @@ export class ImageAttributionService {
                 author: url.origin,
                 url: url.origin
             };
-            this.attributionImageCache.set(imageUrl, imageAttribution);
+            this.attributionImageCache.set(imageUrl, Promise.resolve(imageAttribution));
             return imageAttribution;
         }
 
+        const imageAttribution = this.getAttributionForImageInternal(imageUrl);
+        this.attributionImageCache.set(imageUrl, imageAttribution);
+        return imageAttribution;
+    }
+
+    private async getAttributionForImageInternal(imageUrl: string): Promise<ImageAttribution> {
         const imageName = imageUrl.split("/").pop().replace(/^File:/, "");
         let wikiPrefix = "https://commons.wikimedia.org/";
         const languageMatch = imageUrl.match(/https:\/\/upload\.wikimedia\.org\/wikipedia\/(.*?)\//);
@@ -87,7 +93,6 @@ export class ImageAttributionService {
                     author,
                     url: `${wikiPrefix}wiki/File:${imageName}`
                 };
-                this.attributionImageCache.set(imageUrl, imageAttribution);
                 return imageAttribution;
             }
             const licenseLower = extmetadata?.LicenseShortName?.value.toLowerCase() || "";
@@ -97,7 +102,7 @@ export class ImageAttributionService {
                     url: `${wikiPrefix}wiki/File:${imageName}`
                 };
             }
-        } catch {} // eslint-disable-line
+        } catch { } // eslint-disable-line
         return null;
     }
 }

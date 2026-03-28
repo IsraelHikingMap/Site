@@ -17,6 +17,7 @@ import { Share } from "@capacitor/share";
 import { orderBy } from "lodash-es";
 import type { StyleSpecification, Map, MapSourceDataEvent } from "maplibre-gl";
 
+import { ImageAttributionComponent } from "../image-attribution.component";
 import { Urls } from "../../urls";
 import { DistancePipe } from "../../pipes/distance.pipe";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
@@ -37,7 +38,7 @@ import type { ApplicationState } from "../../models";
     selector: "public-routes",
     templateUrl: "./public-routes.component.html",
     styleUrls: ["./public-routes.component.scss"],
-    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, Angulartics2OnModule, NgClass, MatMenuTrigger, MatMenuItem, MatCheckbox, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, MatSlider, MatSliderRangeThumb, CdkCopyToClipboard]
+    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, Angulartics2OnModule, NgClass, MatMenuTrigger, MatMenuItem, MatCheckbox, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, MatSlider, MatSliderRangeThumb, CdkCopyToClipboard, ImageAttributionComponent]
 })
 export class PublicRoutesComponent {
     public mapStyle: StyleSpecification;

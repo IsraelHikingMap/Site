@@ -412,6 +412,13 @@
                     <img class="w-full object-contain img-center" [src]="route.properties.image" alt="">
                 </div>
             </div>
+            <div class="flex flex-row" class="text-center text-sm">
+                @defer (on viewport) {
+                <image-attribution [imageUrl]="route.properties.image"></image-attribution>
+                } @placeholder {
+                <div></div>
+                }
+            </div>
             <div class="flex flex-row mx-10 max-md:mx-2 mb-2">
                 <div class="w-full">{{getDescription(route)}}</div>
             </div>

@@ -53,9 +53,6 @@
   </div>
 </div>
 }
-@if (!canEdit() && currentImageAttribution) {
-<div class="flex flex-row" class="text-center text-sm">
-  <div class="w-full truncate" [dir]="resources.direction">{{resources.imageBy}} <a [href]="currentImageAttribution.url"
-      target="_blank">{{currentImageAttribution.author}}</a></div>
-</div>
+@if (!canEdit()) {
+<image-attribution [imageUrl]="getCurrentValue()"></image-attribution>
 }
