@@ -1160,7 +1160,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("should convert to route for OSM source", inject([SelectedRouteService, ElevationProvider, Store],
+    it("should convert to route for OSM source with color", inject([SelectedRouteService, ElevationProvider, Store],
         async (service: SelectedRouteService, elevationProvider: ElevationProvider, store: Store) => {
             const spy = jasmine.createSpy();
             store.dispatch = spy;
@@ -1177,12 +1177,14 @@ describe("Selected Route Service", () => {
                 },
                 properties: {
                     identifier: "1",
-                    poiSource: "OSM"
+                    poiSource: "OSM",
+                    colour: "red"
                 },
             };
             await service.convertToRoute(feature, "description");
             expect(spy).toHaveBeenCalled();
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddRouteAction);
+            expect(spy.calls.all()[0].args[0].routeData.color).toBe("red");
         }
     ));
 });
