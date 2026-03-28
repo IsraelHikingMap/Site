@@ -219,6 +219,68 @@ describe("Poi Service", () => {
         }
     )));
 
+    it("Should not get public routes for empty categories", (inject([PoiService],
+        async (poiService: PoiService) => {
+            expect(poiService.getPublicRoutes([]).features.length).toBe(0);
+        }
+    )));
+
+    it("Should get public routes for tiles", (inject([PoiService, Store, MapService],
+        async (poiService: PoiService, store: Store, mapServiceMock: MapService) => {
+            store.reset({
+                configuration: {
+                    language: "he"
+                }
+            });
+            mapServiceMock.getFeaturesFromTiles = () => [
+                {
+                    id: "11",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[0, 0], [1, 1]]
+                    },
+                    properties: {
+                        poiId: "42",
+                        poiCategory: "Hiking",
+                        poiIconColor: "black",
+                        poiIcon: "icon-hike",
+                        name: "line",
+                        "name:he": "line"
+                    }
+                }
+            ] as any;
+            expect(poiService.getPublicRoutes(["Hiking"]).features.length).toBe(1);
+        }
+    )));
+
+    it("Should not get public routes for tiles for incorrect category", (inject([PoiService, Store, MapService],
+        async (poiService: PoiService, store: Store, mapServiceMock: MapService) => {
+            store.reset({
+                configuration: {
+                    language: "he"
+                }
+            });
+            mapServiceMock.getFeaturesFromTiles = () => [
+                {
+                    id: "11",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[0, 0], [1, 1]]
+                    },
+                    properties: {
+                        poiId: "42",
+                        poiCategory: "Hiking",
+                        poiIconColor: "black",
+                        poiIcon: "icon-hike",
+                        name: "line",
+                        "name:he": "line"
+                    }
+                }
+            ] as any;
+            expect(poiService.getPublicRoutes(["Biking"]).features.length).toBe(0);
+        }
+    )));
+
     it("Should clear offline queue if feature is not in database", (inject([PoiService, Store, DatabaseService],
         async (poiService: PoiService, store: Store, databaseService: DatabaseService) => {
 
