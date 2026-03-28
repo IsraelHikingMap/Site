@@ -154,6 +154,7 @@ export class PublicRoutesComponent {
     public async moveToFeature(feature: GeoJSON.Feature<GeoJSON.Point>) {
         this.showMap = true;
         this.selectedRoutePoint = feature;
+        this.hoverFeature = null;
         const fullFeature = await this.poiService.getBasicInfo(feature.properties.identifier, feature.properties.poiSource, this.resources.getCurrentLanguageCodeSimplified());
         this.selectedRouteGeoJson = {
             type: "FeatureCollection",
