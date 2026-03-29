@@ -147,6 +147,15 @@ export class PublicRoutesComponent {
 
     public async onStartPointClick(feature: GeoJSON.Feature<GeoJSON.Point>, event: MouseEvent) {
         event.stopPropagation();
+        if (this.selectedRoutePoint?.properties.poiId === feature.properties.poiId) {
+            this.selectedRoutePoint = null;
+            this.selectedRouteGeoJson = {
+                type: "FeatureCollection",
+                features: []
+            };
+            this.hoverFeature = null;
+            return;
+        }
         ScrollToDirective.scrollTo(`route-${feature.properties.poiId}`, 60);
         this.moveToFeature(feature);
     }
