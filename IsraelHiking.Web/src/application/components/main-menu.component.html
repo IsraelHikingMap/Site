@@ -4,6 +4,11 @@
   <i class="fa fa-lg icon-map-o mat-icon"></i>
   <span class="mx-1">{{resources.planAndExplore}}</span>
 </button>
+<button mat-button routerLink="/public-routes" routerLinkActive="border-b-4! border-[#32CD6D]!" angulartics2On="click"
+  angularticsCategory="Menu" angularticsAction="Find Routes" class="max-md:hidden! text-white!">
+  <i class="fa fa-lg icon-recordings mat-icon"></i>
+  <span class="mx-1">{{resources.findRoutes}}</span>
+</button>
 }
 @if (!isIFrame() && !isLoggedIn()) {
 <button mat-raised-button (click)="login()">{{resources.signIn}}</button>
@@ -25,9 +30,14 @@
   <div [dir]="resources.direction">
     @if (!isIFrame()) {
     <button mat-menu-item routerLink="/map" routerLinkActive="bg-blue-50! border-s-4! border-[#32CD6D]!"
-      angulartics2On="click" angularticsCategory="Menu" angularticsAction="Plan & Explore" class="block md:hidden!">
+      class="block md:hidden!" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Plan & Explore">
       <i class="fa fa-lg icon-map-o mat-icon"></i>
       <span class="mx-1">{{resources.planAndExplore}}</span>
+    </button>
+    <button mat-menu-item routerLink="/public-routes" routerLinkActive="bg-blue-50! border-s-4! border-[#32CD6D]!"
+      class="block md:hidden!" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Find Routes">
+      <i class="fa fa-lg icon-recordings mat-icon"></i>
+      <span class="mx-1">{{resources.findRoutes}}</span>
     </button>
     <hr class="block md:hidden!" />
     }

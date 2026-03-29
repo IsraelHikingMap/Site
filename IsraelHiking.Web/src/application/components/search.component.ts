@@ -22,6 +22,7 @@ import { Store } from "@ngxs/store";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStrings } from "../services/hash.service";
 import { ToastService } from "../services/toast.service";
+import { MapService } from "../services/map.service";
 import { SearchResultsProvider } from "../services/search-results.provider";
 import { SetSearchTermAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, SearchResultsPointOfInterest } from "../models";
@@ -63,6 +64,7 @@ export class SearchComponent {
     private readonly toastService = inject(ToastService);
     private readonly router = inject(Router);
     private readonly store = inject(Store);
+    private readonly mapService = inject(MapService);
 
     constructor() {
         this.configureInputFormControl(this.searchFrom, this.fromContext);
@@ -113,6 +115,11 @@ export class SearchComponent {
     }
 
     public moveToResults(searchResults: SearchResultsPointOfInterest) {
+        if (this.router.url === RouteStrings.ROUTE_PUBLIC_ROUTES) {
+            this.mapService.flyTo(searchResults.location);
+            return;
+        }
+
         this.router.navigate([RouteStrings.ROUTE_POI, searchResults.source, searchResults.id],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
     }

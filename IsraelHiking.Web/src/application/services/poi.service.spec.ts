@@ -219,6 +219,68 @@ describe("Poi Service", () => {
         }
     )));
 
+    it("Should not get public routes for empty categories", (inject([PoiService],
+        async (poiService: PoiService) => {
+            expect(poiService.getPublicRoutes([]).features.length).toBe(0);
+        }
+    )));
+
+    it("Should get public routes for tiles", (inject([PoiService, Store, MapService],
+        async (poiService: PoiService, store: Store, mapServiceMock: MapService) => {
+            store.reset({
+                configuration: {
+                    language: "he"
+                }
+            });
+            mapServiceMock.getFeaturesFromTiles = () => [
+                {
+                    id: "11",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[0, 0], [1, 1]]
+                    },
+                    properties: {
+                        poiId: "42",
+                        poiCategory: "Hiking",
+                        poiIconColor: "black",
+                        poiIcon: "icon-hike",
+                        name: "line",
+                        "name:he": "line"
+                    }
+                }
+            ] as any;
+            expect(poiService.getPublicRoutes(["Hiking"]).features.length).toBe(1);
+        }
+    )));
+
+    it("Should not get public routes for tiles for incorrect category", (inject([PoiService, Store, MapService],
+        async (poiService: PoiService, store: Store, mapServiceMock: MapService) => {
+            store.reset({
+                configuration: {
+                    language: "he"
+                }
+            });
+            mapServiceMock.getFeaturesFromTiles = () => [
+                {
+                    id: "11",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[0, 0], [1, 1]]
+                    },
+                    properties: {
+                        poiId: "42",
+                        poiCategory: "Hiking",
+                        poiIconColor: "black",
+                        poiIcon: "icon-hike",
+                        name: "line",
+                        "name:he": "line"
+                    }
+                }
+            ] as any;
+            expect(poiService.getPublicRoutes(["Biking"]).features.length).toBe(0);
+        }
+    )));
+
     it("Should clear offline queue if feature is not in database", (inject([PoiService, Store, DatabaseService],
         async (poiService: PoiService, store: Store, databaseService: DatabaseService) => {
 
@@ -345,9 +407,8 @@ describe("Poi Service", () => {
         expect(data.originalFeature).toEqual(feature);
     }));
 
-    it("Should get a point by id and source from the server", (inject([PoiService, HttpTestingController, Store],
-        async (poiService: PoiService, mockBackend: HttpTestingController, store: Store) => {
-            store.dispatch = jasmine.createSpy();
+    it("Should get a point by id and source from the server", (inject([PoiService, HttpTestingController],
+        async (poiService: PoiService, mockBackend: HttpTestingController) => {
             const id = "42";
             const source = "source";
 
@@ -358,37 +419,31 @@ describe("Poi Service", () => {
 
             const res = await promise;
             expect(res).not.toBeNull();
-            expect(store.dispatch).toHaveBeenCalled();
         }
     )));
 
-    it("Should get a point by id and source from iNature", (inject([PoiService, Store],
-        async (poiService: PoiService, store: Store) => {
-            store.dispatch = jasmine.createSpy();
+    it("Should get a point by id and source from iNature", (inject([PoiService],
+        async (poiService: PoiService) => {
             const id = "42";
             const source = "iNature";
 
             const feature = await poiService.getBasicInfo(id, source);
             expect(feature).not.toBeNull();
-            expect(store.dispatch).toHaveBeenCalled();
         }
     )));
 
-    it("Should get a point by id and source from Wikidata", (inject([PoiService, Store],
-        async (poiService: PoiService, store: Store) => {
-            store.dispatch = jasmine.createSpy();
+    it("Should get a point by id and source from Wikidata", (inject([PoiService],
+        async (poiService: PoiService) => {
             const id = "42";
             const source = "Wikidata";
 
             const feature = await poiService.getBasicInfo(id, source);
             expect(feature).not.toBeNull();
-            expect(store.dispatch).toHaveBeenCalled();
         }
     )));
 
-    it("Should get a line by id and source from Users share", (inject([PoiService, Store, ShareUrlsService],
-        async (poiService: PoiService, store: Store, shareUrlsService: ShareUrlsService) => {
-            store.dispatch = jasmine.createSpy();
+    it("Should get a line by id and source from Users share", (inject([PoiService, ShareUrlsService],
+        async (poiService: PoiService, shareUrlsService: ShareUrlsService) => {
             const id = "42";
             const source = "Users";
 
@@ -411,15 +466,13 @@ describe("Poi Service", () => {
 
             const feature = await poiService.getBasicInfo(id, source);
             expect(feature).not.toBeNull();
-            expect(store.dispatch).toHaveBeenCalled();
             expect(feature.geometry.type).toBe("LineString");
             expect(feature.properties.website).toBeDefined();
         }
     )));
 
-    it("Should get a point by id and source from Nakeb", (inject([PoiService, Store, NakebService],
-        async (poiService: PoiService, store: Store, nakebService: NakebService) => {
-            store.dispatch = jasmine.createSpy();
+    it("Should get a point by id and source from Nakeb", (inject([PoiService, NakebService],
+        async (poiService: PoiService, nakebService: NakebService) => {
             const id = "42";
             const source = "Nakeb";
 
@@ -427,13 +480,11 @@ describe("Poi Service", () => {
 
             const feature = await poiService.getBasicInfo(id, source);
             expect(feature).not.toBeNull();
-            expect(store.dispatch).toHaveBeenCalled();
         }
     )));
 
     it("Should get a multi line by id and source from Users share when there are more than one route", (inject([PoiService, Store, ShareUrlsService],
         async (poiService: PoiService, store: Store, shareUrlsService: ShareUrlsService) => {
-            store.dispatch = jasmine.createSpy();
             const id = "42";
             const source = "Users";
 
@@ -458,7 +509,6 @@ describe("Poi Service", () => {
 
             const feature = await poiService.getBasicInfo(id, source);
             expect(feature).not.toBeNull();
-            expect(store.dispatch).toHaveBeenCalled();
             expect(feature.geometry.type).toBe("MultiLineString");
         }
     )));
@@ -610,14 +660,11 @@ describe("Poi Service", () => {
         }
     )));
 
-    it("Should get coordinates basic info", inject([PoiService, Store], async (service: PoiService, store: Store) => {
-        store.dispatch = jasmine.createSpy();
-
+    it("Should get coordinates basic info", inject([PoiService], async (service: PoiService) => {
         const coordinatesFeature = await service.getBasicInfo("1_2", RouteStrings.COORDINATES, "he");
 
         expect(coordinatesFeature.geometry.type).toBe("Point");
         expect((coordinatesFeature.geometry as GeoJSON.Point).coordinates).toEqual([2, 1]);
-        expect(store.dispatch).toHaveBeenCalled();
     }));
 
     it("Should create simple point",

@@ -40,7 +40,6 @@ import type { ApplicationState, ShareUrl } from "../../models";
 @Component({
     selector: "shares",
     templateUrl: "./shares.component.html",
-    styleUrls: ["./shares.component.scss"],
     encapsulation: ViewEncapsulation.None,
     imports: [MapComponent, LayersComponent, MatButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, ShareItemComponent, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, PopupComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, ControlComponent, MatButtonToggle, MatButtonToggleGroup, NgClass]
 })

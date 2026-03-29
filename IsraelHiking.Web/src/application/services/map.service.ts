@@ -7,6 +7,7 @@ import { LoggingService } from "./logging.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
 import { SpatialService } from "./spatial.service";
 import { SidebarService } from "./sidebar.service";
+import { ResourcesService } from "./resources.service";
 import { SetLocationAction } from "../reducers/location.reducer";
 import type { ApplicationState, Bounds, LatLngAltTime } from "../models";
 
@@ -20,6 +21,7 @@ export class MapService {
     private readonly sidebarService = inject(SidebarService);
     private readonly cancelableTimeoutService = inject(CancelableTimeoutService);
     private readonly loggingService = inject(LoggingService);
+    private readonly resourcesService = inject(ResourcesService)
     private readonly store = inject(Store);
 
     public initializationPromise = new Promise<void>((resolve) => { this.resolve = resolve; });
@@ -101,6 +103,10 @@ export class MapService {
         }
         const centerLatLon = this.currentMap.getCenter();
         const zoom = this.currentMap.getZoom();
+        const currentLocation = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
+        if (currentLocation.longitude === centerLatLon.lng && currentLocation.latitude === centerLatLon.lat && currentLocation.zoom === zoom) {
+            return;
+        }
         this.store.dispatch(new SetLocationAction(centerLatLon.lng, centerLatLon.lat, zoom));
     }
 
@@ -113,16 +119,12 @@ export class MapService {
         return this.currentMap.project(latlng);
     }
 
-    public getFeaturesFromTiles(sourceLayers: string[], sourceId: string): GeoJSONFeature[] {
+    public getFeaturesFromTiles(): GeoJSONFeature[] {
         if (this.currentMap == null) {
             // Map is not ready yet
             return [];
         }
-        let features: GeoJSONFeature[] = [];
-        for (const sourceLayer of sourceLayers) {
-            features = features.concat(this.currentMap.querySourceFeatures(sourceId, { sourceLayer }));
-        }
-        return features;
+        return this.currentMap.queryRenderedFeatures({ layers: [this.resourcesService.globalPointsExternalLayer, this.resourcesService.globalPointsLayer] });
     }
 
     public isMoving(): boolean {
@@ -155,10 +157,10 @@ export class MapService {
         return { top: 50, left: 50, bottom: window.innerHeight / 2, right: 50 }
     }
 
-    public async flyTo(latLng: LatLngAltTime, zoom: number) {
+    public async flyTo(latLng: LatLngAltTime, zoom?: number) {
         await this.initializationPromise;
-        if (!this.currentMap) {
-            return;
+        if (!zoom) {
+            zoom = this.currentMap.getZoom();
         }
         if (SpatialService.getDistance(this.currentMap.getCenter(), latLng) < 0.0001 &&
             Math.abs(zoom - this.currentMap.getZoom()) < 0.01) {

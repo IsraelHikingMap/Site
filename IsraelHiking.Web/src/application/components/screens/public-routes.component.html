@@ -1,0 +1,441 @@
+<div class="flex flex-row relative h-screen relative" [dir]="resources.direction">
+    <div class="hidden max-md:block fixed bottom-0 bg-white left-1/2 -translate-x-1/2 z-20">
+        <mat-button-toggle-group [(ngModel)]="showMap">
+            <mat-button-toggle [value]="false" angulartics2On="click" angularticsCategory="Public routes"
+                angularticsAction="Open list view">
+                <i class="fa icon-list"></i>
+                {{resources.list}}
+            </mat-button-toggle>
+            <mat-button-toggle [value]="true" angulartics2On="click" angularticsCategory="Public routes"
+                angularticsAction="Open map view">
+                <i class="fa icon-map-o"></i>
+                {{resources.map}}
+            </mat-button-toggle>
+        </mat-button-toggle-group>
+    </div>
+    <div class="w-2/3" [ngClass]="{'max-md:hidden': !showMap, 'max-md:w-full': showMap}">
+        <div class="absolute w-full top-0 magrin-top-with-toolbar z-10 bg-white hidden max-md:block">
+            <div class="flex flex-row items-center">
+                <span class="mx-2">{{resources.filter}}</span>
+                <button mat-button class="flex-1" [matMenuTriggerFor]="mapFilterTypeMenu" angulartics2On="click"
+                    angularticsCategory="Public routes" angularticsAction="Open filter type menu">
+                    <i class="fa fa-lg icon-sliders mx-2"></i>
+                </button>
+                <button mat-button class="flex-1" [matMenuTriggerFor]="mapFilterLengthMenu" angulartics2On="click"
+                    angularticsCategory="Public routes" angularticsAction="Open filter length menu">
+                    <i class="fa fa-lg icon-measure mx-2"></i>
+                </button>
+                <button mat-button class="flex-1" [matMenuTriggerFor]="mapFilterDifficultyMenu" angulartics2On="click"
+                    angularticsCategory="Public routes" angularticsAction="Open filter difficulty menu">
+                    <i class="fa fa-lg icon-speed mx-2"></i>
+                </button>
+            </div>
+            <mat-menu #mapFilterTypeMenu="matMenu">
+                <span class="mx-2">{{resources.routeType}}</span>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterCategoryChange('Hiking')"
+                        [checked]="filterCategories.includes('Hiking')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by hiking">
+                        <i class="fa icon-hike"></i>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterCategoryChange('Bicycle')"
+                        [checked]="filterCategories.includes('Bicycle')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by bicycle">
+                        <i class="fa icon-bike"></i>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterCategoryChange('4x4')"
+                        [checked]="filterCategories.includes('4x4')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by 4x4">
+                        <i class="fa icon-four-by-four"></i>
+                    </mat-checkbox>
+                </div>
+            </mat-menu>
+            <mat-menu #mapFilterLengthMenu="matMenu">
+                <span class="mx-2">{{resources.length}}</span>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <div class="flex flex-row" dir="ltr">
+                        <mat-slider class="w-full" min="0" max="50" step="1" angulartics2On="click"
+                            angularticsCategory="Public routes" angularticsAction="Filter by length">
+                            <input [(ngModel)]="filterLengthStart" matSliderStartThumb (valueChange)="runFilter()">
+                            <input [(ngModel)]="filterLengthEnd" matSliderEndThumb (valueChange)="runFilter()">
+                        </mat-slider>
+                    </div>
+                    <div class="flex flex-row" dir="ltr">
+                        <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthStart}}
+                            {{resources.kmUnit}}</span>
+                        <span class="flex-grow"></span>
+                        <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthEnd === 50 ?
+                            "\u200E+50" : filterLengthEnd}}
+                            {{resources.kmUnit}}</span>
+                    </div>
+                </div>
+            </mat-menu>
+            <mat-menu #mapFilterDifficultyMenu="matMenu">
+                <span class="mx-2">{{resources.difficulty}}</span>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Easy')"
+                        [checked]="filterDifficulty.includes('Easy')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by easy difficulty">
+                        <span class="rounded-full bg-green-500 p-2">{{resources.easy}}</span>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Moderate')"
+                        [checked]="filterDifficulty.includes('Moderate')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by moderate difficulty">
+                        <span class="rounded-full bg-yellow-500 p-2">{{resources.moderate}}</span>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Hard')"
+                        [checked]="filterDifficulty.includes('Hard')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by hard difficulty">
+                        <span class="rounded-full bg-red-500 p-2 text-white">{{resources.hard}}</span>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Very Hard')"
+                        [checked]="filterDifficulty.includes('Very Hard')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by very hard difficulty">
+                        <span class="rounded-full bg-black p-2 text-white">{{resources.veryHard}}</span>
+                    </mat-checkbox>
+                </div>
+            </mat-menu>
+        </div>
+        <mgl-map [mapStyle]="mapStyle" [attributionControl]="false" (mapLoad)="mapLoaded($event)">
+            <layers [isMainMap]="false"></layers>
+            <mgl-control [position]="resources.direction === 'rtl' ? 'top-left' : 'top-right'">
+                <zoom></zoom>
+            </mgl-control>
+            <mgl-control [position]="resources.direction === 'rtl' ? 'top-right' : 'top-left'">
+                <div class="max-md:mt-[36px]">
+                    <osm-attribution></osm-attribution>
+                </div>
+            </mgl-control>
+            <mgl-vector-source [id]="routesSrouceId" [tiles]="poisVectorTileAddress" [maxzoom]="14"
+                [minzoom]="9"></mgl-vector-source>
+            <mgl-layer [id]="resources.globalPointsLayer" [source]="routesSrouceId" type="circle"
+                sourceLayer="global_points" [paint]="{'circle-color': 'transparent'}"
+                [before]="resources.endOfBaseLayer"></mgl-layer>
+            <mgl-layer [id]="resources.globalPointsExternalLayer" [source]="routesSrouceId" type="circle"
+                sourceLayer="external" [paint]="{'circle-color': 'transparent'}"
+                [before]="resources.endOfBaseLayer"></mgl-layer>
+            @for (feature of poiGeoJsonData.features; track feature.properties.poiId) {
+            <mgl-marker [lngLat]="feature.geometry.coordinates">
+                <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="onStartPointClick(feature, $event)"
+                    (mouseenter)="hover(feature)" (mouseleave)="hover(null)" angulartics2On="click"
+                    angularticsCategory="Public routes" angularticsAction="Select route on map">
+                    <span class="has-extra-data" [style.background]="feature.properties.poiIconColor"></span>
+                    <i class="fa icon-map-marker-rect fa-stack-2x"
+                        style="color: white; text-shadow: 3px 3px 3px #000;"></i>
+                    <i class="fa {{feature.properties.poiIcon}} fa-stack-1x stack-icon-top stack-icon-large"
+                        [style.color]="feature.properties.poiIconColor"></i>
+                </span>
+            </mgl-marker>
+            }
+            <mgl-geojson-source id="selected-route" [data]="selectedRouteGeoJson"></mgl-geojson-source>
+            <mgl-layer id="selected-route-left" type="line" source="selected-route" [paint]="{
+                'line-color': 'magenta',
+                'line-offset': -5,
+                'line-opacity': 0.5,
+                'line-width': 2
+            }">
+            </mgl-layer>
+            <mgl-layer id="selected-route-right" type="line" source="selected-route" [paint]="{
+                'line-color': 'magenta',
+                'line-offset': 5,
+                'line-opacity': 0.5,
+                'line-width': 2
+            }">
+            </mgl-layer>
+            <mgl-layer id="selected-route-arrows" type="symbol" source="selected-route" [layout]="{
+                'symbol-placement': 'line',
+                'symbol-spacing': 40,
+                'icon-image': 'arrow',
+                'icon-size': 0.75,
+                'icon-allow-overlap': true,
+                'icon-ignore-placement': true
+            }" [paint]="{
+                'icon-color': 'magenta'
+            }">
+            </mgl-layer>
+            @if (hoverFeature) {
+            <mgl-popup [lngLat]="hoverFeature.geometry.coordinates" [closeButton]="false" [offset]="[0, -30]"
+                class="text-right">
+                <div [dir]="resources.getDirection(getTitle(hoverFeature))">{{getTitle(hoverFeature)}}</div>
+            </mgl-popup>
+            }
+            @if (selectedRoutePoint) {
+            <mgl-popup [lngLat]="selectedRoutePoint.geometry.coordinates" [closeButton]="false" [offset]="[0, -30]"
+                class="text-right" (popupClose)="selectedRoutePoint = null">
+                <div class="text-lg" [dir]="resources.getDirection(getTitle(selectedRoutePoint))">
+                    {{getTitle(selectedRoutePoint)}}
+                </div>
+                @switch (selectedRoutePoint.properties.poiDifficulty) {
+                @case ("Easy") {
+                <span class="rounded-full bg-green-500 p-2">
+                    <i class="fa {{getIconFromType(selectedRoutePoint)}}"></i>
+                    {{resources.easy}}
+                </span>
+                }
+                @case ("Moderate") {
+                <span class="rounded-full bg-yellow-500 p-2">
+                    <i class="fa {{getIconFromType(selectedRoutePoint)}}"></i>
+                    {{resources.legendModerate}}
+                </span>
+                }
+                @case ("Hard") {
+                <span class="rounded-full bg-red-500 p-2 text-white">
+                    <i class="fa {{getIconFromType(selectedRoutePoint)}}"></i>
+                    {{resources.legendAdvanced}}
+                </span>
+                }
+                @case ("Very Hard") {
+                <span class="rounded-full bg-black p-2 text-white">
+                    <i class="fa {{getIconFromType(selectedRoutePoint)}}"></i>
+                    {{resources.veryHard}}
+                </span>
+                }
+                @default {
+                <span class="rounded-full bg-gray-300 p-2">
+                    <i class="fa {{getIconFromType(selectedRoutePoint)}}"></i>
+                </span>
+                }
+                }
+                <span class="mx-2">{{selectedRoutePoint.properties.poiLength | distance}}</span>
+                <button class="mt-2" mat-button (click)="convertToRoute(selectedRoutePoint)" angulartics2On="click"
+                    angularticsCategory="Public routes" angularticsAction="Add to routes">
+                    <i class="fa icon-plus"></i>
+                    {{resources.addToRoutes}}
+                </button>
+                <button class="mt-2" mat-button [matMenuTriggerFor]="shareMenu" angulartics2On="click"
+                    angularticsCategory="Public routes" angularticsAction="Open share menu">
+                    <i class="fa icon-share-alt"></i>
+                    {{resources.share}}
+                </button>
+                <mat-menu #shareMenu="matMenu">
+                    <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).waze" [target]="'_blank'"
+                        angulartics2On="click" angularticsCategory="Public routes"
+                        angularticsAction="Navigate with waze">
+                        <i class="fa icon-waze"></i>
+                        {{resources.navigateWithWaze}}
+                    </a>
+                    <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).googleMaps" [target]="'_blank'"
+                        angulartics2On="click" angularticsCategory="Public routes"
+                        angularticsAction="Navigate with google maps">
+                        <i class="fa icon-map-marker"></i>
+                        {{resources.navigateWithGoogleMaps}}
+                    </a>
+                    @if (isApp()) {
+                    <button mat-menu-item (click)=share(getShareLinks(selectedRoutePoint).poiLink)
+                        angulartics2On="click" angularticsCategory="Public routes"
+                        angularticsAction="Share with os capabilities">
+                        <i class="fa icon-ellipsis-v"></i>
+                        {{resources.share}}
+                    </button>
+                    } @else {
+                    <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).facebook" [target]="'_blank'"
+                        angulartics2On="click" angularticsCategory="Public routes"
+                        angularticsAction="Share facebook poi">
+                        <i class="fa icon-facebook"></i>
+                        {{resources.shareWithFacebook}}
+                    </a>
+                    <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).whatsapp" [target]="'_blank'"
+                        angulartics2On="click" angularticsCategory="Public routes"
+                        angularticsAction="Share whatsapp poi">
+                        <i class="fa icon-whatsapp"></i>
+                        {{resources.shareWithWhatsapp}}
+                    </a>
+                    <button mat-menu-item [cdkCopyToClipboard]="getShareLinks(selectedRoutePoint).poiLink"
+                        angulartics2On="click" angularticsCategory="Public routes"
+                        angularticsAction="Share copy to clipboard poi">
+                        <i class="fa icon-clipboard"></i>
+                        {{resources.copyToClipboard}}
+                    </button>
+                    }
+                </mat-menu>
+            </mgl-popup>
+            }
+        </mgl-map>
+    </div>
+    <div [ngClass]="{'max-md:hidden': showMap, 'max-md:w-full': !showMap}"
+        class="overflow-y-auto z-10 w-1/3 magrin-top-with-toolbar pb-12">
+        <div class="flex flex-row sticky top-0 z-10 bg-white items-center">
+            <span class="mx-2">{{resources.filter}}</span>
+            <button mat-button class="flex-1" [matMenuTriggerFor]="listFilterTypeMenu" angulartics2On="click"
+                angularticsCategory="Public routes" angularticsAction="Open filter type menu">
+                <i class="fa fa-lg icon-sliders mx-2"></i>
+            </button>
+            <button mat-button class="flex-1" [matMenuTriggerFor]="listFilterLengthMenu" angulartics2On="click"
+                angularticsCategory="Public routes" angularticsAction="Open filter length menu">
+                <i class="fa fa-lg icon-measure mx-2"></i>
+            </button>
+            <button mat-button class="flex-1" [matMenuTriggerFor]="listFilterDifficultyMenu" angulartics2On="click"
+                angularticsCategory="Public routes" angularticsAction="Open filter difficulty menu">
+                <i class="fa fa-lg icon-speed mx-2"></i>
+            </button>
+            <mat-menu #listFilterTypeMenu="matMenu">
+                <span class="mx-2">{{resources.routeType}}</span>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterCategoryChange('Hiking')"
+                        [checked]="filterCategories.includes('Hiking')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by hiking">
+                        <i class="fa icon-hike"></i>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterCategoryChange('Bicycle')"
+                        [checked]="filterCategories.includes('Bicycle')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by bicycle">
+                        <i class="fa icon-bike"></i>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterCategoryChange('4x4')"
+                        [checked]="filterCategories.includes('4x4')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by 4x4">
+                        <i class="fa icon-four-by-four"></i>
+                    </mat-checkbox>
+                </div>
+            </mat-menu>
+            <mat-menu #listFilterLengthMenu="matMenu">
+                <span class="mx-2">{{resources.length}}</span>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <div class="flex flex-row" dir="ltr">
+                        <mat-slider class="w-full" min="0" max="50" step="1" angulartics2On="click"
+                            angularticsCategory="Public routes" angularticsAction="Filter by length">
+                            <input [(ngModel)]="filterLengthStart" matSliderStartThumb (valueChange)="runFilter()">
+                            <input [(ngModel)]="filterLengthEnd" matSliderEndThumb (valueChange)="runFilter()">
+                        </mat-slider>
+                    </div>
+                    <div class="flex flex-row" dir="ltr">
+                        <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthStart}}
+                            {{resources.kmUnit}}</span>
+                        <span class="flex-grow"></span>
+                        <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthEnd === 50 ?
+                            "\u200E+50" : filterLengthEnd}}
+                            {{resources.kmUnit}}</span>
+                    </div>
+                </div>
+            </mat-menu>
+            <mat-menu #listFilterDifficultyMenu="matMenu">
+                <span class="mx-2">{{resources.difficulty}}</span>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Easy')"
+                        [checked]="filterDifficulty.includes('Easy')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by easy difficulty">
+                        <span class="rounded-full bg-green-500 p-2">{{resources.easy}}</span>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Moderate')"
+                        [checked]="filterDifficulty.includes('Moderate')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by moderate difficulty">
+                        <span class="rounded-full bg-yellow-500 p-2">{{resources.moderate}}</span>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Hard')"
+                        [checked]="filterDifficulty.includes('Hard')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by hard difficulty">
+                        <span class="rounded-full bg-red-500 p-2 text-white">{{resources.hard}}</span>
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Very Hard')"
+                        [checked]="filterDifficulty.includes('Very Hard')" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Filter by very hard difficulty">
+                        <span class="rounded-full bg-black p-2 text-white">{{resources.veryHard}}</span>
+                    </mat-checkbox>
+                </div>
+            </mat-menu>
+        </div>
+        @for (route of poiGeoJsonData.features; track route.properties.poiId) {
+        <div (mouseenter)="hover(route)" (mouseleave)="hover(null)" id="route-{{route.properties.poiId}}">
+            <div class="flex flex-row mx-10 max-md:mx-2">
+                @if (route.properties.website) {
+                <h3>
+                    <a class="w-full" [href]="route.properties.website" target="_blank">{{getTitle(route)}}</a>
+                </h3>
+                } @else {
+                <h3 class="w-full">{{getTitle(route)}}</h3>
+                }
+            </div>
+            <div class="flex flex-row mx-10 max-md:mx-2 items-center">
+                <button mat-button [matMenuTriggerFor]="routeMenu" angulartics2On="click"
+                    angularticsCategory="Public routes" angularticsAction="Open route menu from list">
+                    <i class="fa icon-ellipsis-v"></i>
+                </button>
+                <mat-menu #routeMenu="matMenu">
+                    <button mat-menu-item (click)="moveToFeature(route)" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Move to route from list">
+                        <i class="fa icon-crosshairs"></i>
+                        {{resources.moveToRoute}}
+                    </button>
+                    <button mat-menu-item (click)="convertToRoute(route)" angulartics2On="click"
+                        angularticsCategory="Public routes" angularticsAction="Add to routes from list">
+                        <i class="fa icon-plus"></i>
+                        {{resources.addToRoutes}}
+                    </button>
+                </mat-menu>
+                @switch (route.properties.poiDifficulty) {
+                @case ("Easy") {
+                <span class="rounded-full bg-green-500 p-2">
+                    <i class="fa {{getIconFromType(route)}}"></i>
+                    {{resources.easy}}
+                </span>
+                }
+                @case ("Moderate") {
+                <span class="rounded-full bg-yellow-500 p-2">
+                    <i class="fa {{getIconFromType(route)}}"></i>
+                    {{resources.legendModerate}}
+                </span>
+                }
+                @case ("Hard") {
+                <span class="rounded-full bg-red-500 p-2 text-white">
+                    <i class="fa {{getIconFromType(route)}}"></i>
+                    {{resources.legendAdvanced}}
+                </span>
+                }
+                @case ("Very Hard") {
+                <span class="rounded-full bg-black p-2 text-white">
+                    <i class="fa {{getIconFromType(route)}}"></i>
+                    {{resources.veryHard}}
+                </span>
+                }
+                @default {
+                <span class="rounded-full bg-gray-300 p-2">
+                    <i class="fa {{getIconFromType(route)}}"></i>
+                </span>
+                }
+                }
+                <span class="mx-2">{{resources.length}}: {{route.properties.poiLength | distance}}</span>
+            </div>
+            <div class="flex flex-row mx-10 max-md:mx-2">
+                <div class="relative w-full h-[200px]">
+                    <img class="w-full object-contain img-center" [src]="route.properties.image" alt="">
+                </div>
+            </div>
+            <div class="flex flex-row" class="text-center text-sm">
+                @defer (on viewport) {
+                <image-attribution [imageUrl]="route.properties.image"></image-attribution>
+                } @placeholder {
+                <div></div>
+                }
+            </div>
+            <div class="flex flex-row mx-10 max-md:mx-2 mb-2">
+                <div class="w-full">{{getDescription(route)}}</div>
+            </div>
+        </div>
+        }
+        @empty {
+        <div class="flex flex-row m-10">
+            {{resources.noRoutesFoundMoveTheMapOrChangeTheFilters}}
+        </div>
+        }
+    </div>
+</div>

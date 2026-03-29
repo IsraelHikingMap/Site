@@ -105,7 +105,8 @@ export class LocationService {
             !this.isPanned &&
             !this.selectedRouteService.isEditingRoute() &&
             currentUrl !== RouteStrings.ROUTE_SHARES &&
-            currentUrl !== RouteStrings.ROUTE_TRACES;
+            currentUrl !== RouteStrings.ROUTE_TRACES &&
+            currentUrl !== RouteStrings.ROUTE_PUBLIC_ROUTES;
     }
 
     public moveMapToGpsPosition() {

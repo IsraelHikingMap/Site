@@ -25,6 +25,8 @@ export class ResourcesService {
     public editRouteLines = "editing-route-layer-lines";
     public editRouteSource = "editing-route-source";
     public locationIcon = "location-icon-layer";
+    public globalPointsLayer = "global-points-layer";
+    public globalPointsExternalLayer = "global-points-external-layer";
     public readonly recordedRouteColor = "#FF6600";
     // All the text in the app //
     /////////////////////////////
@@ -284,6 +286,9 @@ export class ResourcesService {
     public list: string;
     public searchSharesPlaceHolder: string;
     public searchTracesPlaceHolder: string;
+    public noRoutesFoundMoveTheMapOrChangeTheFilters: string;
+    public copyToClipboard: string;
+    public findRoutes: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -769,6 +774,9 @@ export class ResourcesService {
         this.list = this.gettextCatalog.getString("List");
         this.searchSharesPlaceHolder = this.gettextCatalog.getString("Search cloud saves...");
         this.searchTracesPlaceHolder = this.gettextCatalog.getString("Search traces...");
+        this.noRoutesFoundMoveTheMapOrChangeTheFilters = this.gettextCatalog.getString("No routes found, move the map or change the filters...");
+        this.copyToClipboard = this.gettextCatalog.getString("Copy to clipboard");
+        this.findRoutes = this.gettextCatalog.getString("Find Routes");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

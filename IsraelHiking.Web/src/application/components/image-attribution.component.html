@@ -1,0 +1,7 @@
+@if (imageAttribution !== null) {
+<div class="flex flex-row" class="text-center text-sm">
+    <div class="w-full truncate" [dir]="resources.direction">{{resources.imageBy}}
+        <a [href]="imageAttribution.url" target="_blank">{{imageAttribution.author}}</a>
+    </div>
+</div>
+}

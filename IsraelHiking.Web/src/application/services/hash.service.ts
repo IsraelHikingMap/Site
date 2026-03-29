@@ -35,6 +35,7 @@ export class RouteStrings {
     public static readonly ROUTE_LAYER = "/layer";
     public static readonly ROUTE_LANDING = "/landing";
     public static readonly ROUTE_SHARES = "/shares";
+    public static readonly ROUTE_PUBLIC_ROUTES = "/public-routes";
     public static readonly ROUTE_OFFLINE_MANAGEMENT = "/offline-management";
     public static readonly ROUTE_TRACES = "/traces";
     public static readonly ROUTE_ABOUT = "/about";
@@ -129,6 +130,10 @@ export class HashService {
         if (this.router.url.includes(RouteStrings.ROUTE_TRACES)) {
             return;
         }
+        if (this.router.url.includes(RouteStrings.ROUTE_PUBLIC_ROUTES)) {
+            return;
+        }
+
         const inMemoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
         if (inMemoryState.shareUrl) {
             this.router.navigate([RouteStrings.ROUTE_SHARE, inMemoryState.shareUrl.id], { replaceUrl: true });
