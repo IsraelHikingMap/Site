@@ -189,7 +189,7 @@ export class ShareEditDialogComponent {
         if (file == null) {
             return;
         }
-        this.shareUrl.base64Preview = await this.imageResizeService.resizeImage(file, 1600);
+        this.shareUrl.base64Preview = await this.imageResizeService.resizeImage(file, 1920);
     }
 
     public removeImage() {
@@ -207,5 +207,25 @@ export class ShareEditDialogComponent {
     public setActivityType(activityType: ActivityType) {
         this.shareUrl.type = activityType;
         this.store.dispatch(new SetActivityTypeAction(activityType));
+    }
+
+    // Alow pasting image from clipboard
+    public async pasteImage(e: Event) {
+        try {
+            const items = await navigator.clipboard.read();
+            for (const item of items) {
+                // Find image types (e.g., 'image/png')
+                const imageType = item.types.find(type => type.startsWith('image/'));
+                if (!imageType) {
+                    continue;
+                }
+                const blob = await item.getType(imageType);
+                this.shareUrl.base64Preview = await this.imageResizeService.resizeImage(blob as File, 1920);
+            }
+        } catch {
+            // ignore
+        }
+
+
     }
 }

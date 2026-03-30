@@ -15,7 +15,7 @@ export class ImageResizeService {
      * @param maxSize - The maximum size of the image.
      * @returns The resized image as a base64 string.
      */
-    public resizeImage(file: File, maxSize = 1600): Promise<string> {
+    public resizeImage(file: File, maxSize = 1920): Promise<string> {
         return this.resizeImageAndConvertToAny<string>(file, data => data, false, maxSize);
     }
 
@@ -26,7 +26,7 @@ export class ImageResizeService {
     private async resizeImageAndConvertToAny<TReturn>(file: File,
         convertMethod: (data: string, name: string, geoLocation: LatLngAltTime) => TReturn,
         throwIfNoLocation = true,
-        maxSize = 1600): Promise<TReturn> {
+        maxSize = 1920): Promise<TReturn> {
 
         const arrayBuffer = await file.arrayBuffer();
         const base64 = "data:" + file.type + ";base64," + encode(arrayBuffer);
