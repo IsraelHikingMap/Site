@@ -176,7 +176,7 @@ public class ConfigurationData
         GraphhopperServerAddress = "http://localhost:8989/";
         ElasticsearchServerAddress = "http://localhost:9200/";
         GpsBabelServerAddress = "http://localhost:11987/";
-        ImageCreatorServerAddress = "http://localhost:11311/";
+        ImageCreatorServerAddress = "https://mapeak.com/api/temp-images/";
         OfflineFilesFolder = "./";
         ExternalFilesFolder = "./";
         OsmBaseAddress = "https://www.openstreetmap.org";

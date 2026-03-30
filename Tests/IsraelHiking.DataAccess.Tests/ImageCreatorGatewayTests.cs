@@ -10,19 +10,16 @@ using System.Net.Http;
 namespace IsraelHiking.DataAccess.Tests;
 
 [TestClass]
-[Ignore]
 public class ImageCreatorGatewayTests
 {
     [TestMethod]
+    [Ignore]
     public void CreateImage()
     {
         var factory = Substitute.For<IHttpClientFactory>();
         factory.CreateClient().Returns(new HttpClient());
         var options = Substitute.For<IOptions<ConfigurationData>>();
-        options.Value.Returns(new ConfigurationData
-        {
-            ImageCreatorServerAddress = "https://mapeak.com/api/temp-images/"
-        });
+        options.Value.Returns(new ConfigurationData());
         var gateway = new ImageCreationGateway(factory, options);
         var results = gateway.Create(new DataContainerPoco
         {
@@ -36,7 +33,7 @@ public class ImageCreatorGatewayTests
                                     Lng = 35
                                 },
                                 new LatLngTime {
-                                    Lat = 30.50614,
+                                    Lat = 30.001,
                                     Lng = 35
                                 }
                             ]
