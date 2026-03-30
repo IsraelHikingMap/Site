@@ -25,7 +25,6 @@ export interface ILegendItem {
 @Component({
     selector: "legend-item",
     templateUrl: "./legend-item.component.html",
-    styleUrls: ["./legend-item.component.scss"],
     imports: [NgClass, Dir, Angulartics2OnModule, MatTooltip]
 })
 export class LegendItemComponent {

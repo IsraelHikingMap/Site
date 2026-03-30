@@ -1,8 +1,13 @@
 ﻿@if (!isIFrame()) {
-<button mat-button routerLink="/map" angulartics2On="click" angularticsCategory="Menu"
-  angularticsAction="Plan & Explore" class="max-md:hidden! text-white!">
+<button mat-button routerLink="/map" routerLinkActive="border-b-4! border-[#32CD6D]!" angulartics2On="click"
+  angularticsCategory="Menu" angularticsAction="Plan & Explore" class="max-md:hidden! text-white!">
   <i class="fa fa-lg icon-map-o mat-icon"></i>
   <span class="mx-1">{{resources.planAndExplore}}</span>
+</button>
+<button mat-button routerLink="/public-routes" routerLinkActive="border-b-4! border-[#32CD6D]!" angulartics2On="click"
+  angularticsCategory="Menu" angularticsAction="Find Routes" class="max-md:hidden! text-white!">
+  <i class="fa fa-lg icon-recordings mat-icon"></i>
+  <span class="mx-1">{{resources.findRoutes}}</span>
 </button>
 }
 @if (!isIFrame() && !isLoggedIn()) {
@@ -22,72 +27,76 @@
   </span>
 </button>
 <mat-menu #appMenu="matMenu" xPosition="before">
-  <ng-template matMenuContent>
-    <div [dir]="resources.direction">
-      @if (isLoggedIn()) {
-      <button mat-menu-item routerLink="/traces" angulartics2On="click" angularticsCategory="User Menu"
-        angularticsAction="User traces open">
-        <span><i class="fa fa-lg icon-recordings"></i> {{resources.myTraces}}</span>
-      </button>
-      <button mat-menu-item routerLink="/shares" angulartics2On="click" angularticsCategory="User Menu"
-        angularticsAction="User shares open">
-        <span><i class="fa fa-lg icon-mixcloud"></i> {{resources.mySavesInTheCloud}}</span>
-      </button>
-      @if (isPurchaseAvailable()) {
-      <button mat-menu-item (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu"
-        angularticsAction="Order">
-        <i class="text-green-600 fa fa-lg icon-dollar mat-icon"></i>
-        <span class="mx-1 text-green-600">{{resources.purchaseSubscription}}</span>
-      </button>
-      }
-      @if (isRenewAvailable()) {
-      <button mat-menu-item (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu"
-        angularticsAction="Renew">
-        <i class="text-green-600 fa fa-lg icon-dollar mat-icon"></i>
-        <span class="text-green-600 mx-1">{{resources.renewSubscription}}</span>
-      </button>
-      }
-      @if (isOfflineDownloadAvailable()) {
-      <button mat-menu-item routerLink="/offline-management" angulartics2On="click" angularticsCategory="User Menu"
-        angularticsAction="Download">
-        <i class="fa fa-lg icon-download mat-icon"></i>
-        <span class="mx-1">{{resources.downloadMapForOfflineUse}}</span>
-      </button>
-      }
-      <button mat-menu-item (click)="openConfigurationDialog()" angulartics2On="click" angularticsCategory="User Menu"
-        angularticsAction="Advanced settings open">
-        <span><i class="fa fa-lg icon-cogs"></i> {{resources.advancedSettings}}</span>
-      </button>
-      <button mat-menu-item (click)="logout()" angulartics2On="click" angularticsCategory="User Menu"
-        angularticsAction="Logout">
-        <span><i class="fa fa-lg icon-sign-out"></i> {{resources.logout}}</span>
-      </button>
-      <hr />
-      }
-      @if (!isIFrame()) {
-      <button mat-menu-item routerLink="/map" angulartics2On="click" angularticsCategory="Menu"
-        angularticsAction="Plan & Explore" class="block md:hidden!">
-        <i class="fa fa-lg icon-map-o mat-icon"></i>
-        <span class="mx-1">{{resources.planAndExplore}}</span>
-      </button>
-      }
-      <button mat-menu-item (click)="openLanguage()" angulartics2On="click" angularticsCategory="Menu"
-        angularticsAction="Open language selection">
-        <i class="fa fa-lg icon-language mat-icon"></i>
-        <span class="mx-1">Language</span>
-      </button>
-      @if (!isIFrame()) {
-      <button mat-menu-item routerLink="/about" angulartics2On="click" angularticsCategory="Menu"
-        angularticsAction="About">
-        <i class="fa fa-lg icon-info mat-icon"></i>
-        <span class="mx-1">{{resources.about}}</span>
-      </button>
-      <button mat-menu-item (click)="reportAnIssue()" angulartics2On="click" angularticsCategory="Menu"
-        angularticsAction="Report an issue">
-        <i class="fa fa-lg icon-envelope mat-icon"></i>
-        <span class="mx-1">{{resources.reportAnIssue}}</span>
-      </button>
-      }
-    </div>
-  </ng-template>
+  <div [dir]="resources.direction">
+    @if (!isIFrame()) {
+    <button mat-menu-item routerLink="/map" routerLinkActive="bg-blue-50! border-s-4! border-[#32CD6D]!"
+      class="block md:hidden!" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Plan & Explore">
+      <i class="fa fa-lg icon-map-o mat-icon"></i>
+      <span class="mx-1">{{resources.planAndExplore}}</span>
+    </button>
+    <button mat-menu-item routerLink="/public-routes" routerLinkActive="bg-blue-50! border-s-4! border-[#32CD6D]!"
+      class="block md:hidden!" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Find Routes">
+      <i class="fa fa-lg icon-recordings mat-icon"></i>
+      <span class="mx-1">{{resources.findRoutes}}</span>
+    </button>
+    <hr class="block md:hidden!" />
+    }
+    @if (isLoggedIn()) {
+    <button mat-menu-item routerLink="/shares" routerLinkActive="bg-blue-50! border-s-4! border-[#32CD6D]!"
+      angulartics2On="click" angularticsCategory="User Menu" angularticsAction="User shares open">
+      <span><i class="fa fa-lg icon-mixcloud"></i> {{resources.mySavesInTheCloud}}</span>
+    </button>
+    <button mat-menu-item routerLink="/traces" routerLinkActive="bg-blue-50! border-s-4! border-[#32CD6D]!"
+      angulartics2On="click" angularticsCategory="User Menu" angularticsAction="User traces open">
+      <span><i class="fa fa-lg icon-recordings"></i> {{resources.myTraces}}</span>
+    </button>
+    @if (isPurchaseAvailable()) {
+    <button mat-menu-item (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu"
+      angularticsAction="Order">
+      <i class="text-green-600 fa fa-lg icon-dollar mat-icon"></i>
+      <span class="mx-1 text-green-600">{{resources.purchaseSubscription}}</span>
+    </button>
+    }
+    @if (isRenewAvailable()) {
+    <button mat-menu-item (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu"
+      angularticsAction="Renew">
+      <i class="text-green-600 fa fa-lg icon-dollar mat-icon"></i>
+      <span class="text-green-600 mx-1">{{resources.renewSubscription}}</span>
+    </button>
+    }
+    @if (isOfflineDownloadAvailable()) {
+    <button mat-menu-item routerLink="/offline-management" routerLinkActive="bg-blue-50! border-s-4! border-[#32CD6D]!"
+      angulartics2On="click" angularticsCategory="User Menu" angularticsAction="Download">
+      <i class="fa fa-lg icon-download mat-icon"></i>
+      <span class="mx-1">{{resources.downloadMapForOfflineUse}}</span>
+    </button>
+    }
+    <button mat-menu-item (click)="openConfigurationDialog()" angulartics2On="click" angularticsCategory="User Menu"
+      angularticsAction="Advanced settings open">
+      <span><i class="fa fa-lg icon-cogs"></i> {{resources.advancedSettings}}</span>
+    </button>
+    <button mat-menu-item (click)="logout()" angulartics2On="click" angularticsCategory="User Menu"
+      angularticsAction="Logout">
+      <span><i class="fa fa-lg icon-sign-out"></i> {{resources.logout}}</span>
+    </button>
+    <hr />
+    }
+    <button mat-menu-item (click)="openLanguage()" angulartics2On="click" angularticsCategory="Menu"
+      angularticsAction="Open language selection">
+      <i class="fa fa-lg icon-language mat-icon"></i>
+      <span class="mx-1">Language</span>
+    </button>
+    @if (!isIFrame()) {
+    <button mat-menu-item routerLink="/about" routerLinkActive="bg-blue-50! border-s-4! border-[#32CD6D]!"
+      angulartics2On="click" angularticsCategory="Menu" angularticsAction="About">
+      <i class="fa fa-lg icon-info mat-icon"></i>
+      <span class="mx-1">{{resources.about}}</span>
+    </button>
+    <button mat-menu-item (click)="reportAnIssue()" angulartics2On="click" angularticsCategory="Menu"
+      angularticsAction="Report an issue">
+      <i class="fa fa-lg icon-envelope mat-icon"></i>
+      <span class="mx-1">{{resources.reportAnIssue}}</span>
+    </button>
+    }
+  </div>
 </mat-menu>

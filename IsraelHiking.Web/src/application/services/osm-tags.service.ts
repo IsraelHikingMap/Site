@@ -8,8 +8,12 @@ export type PoiProperties = {
     poiIconColor: string;
     poiIcon: string;
     poiCategory: string;
+    poiLength: number;
+    poiDifficulty: string;
     "name:he"?: string;
     "name:en"?: string;
+    website: string;
+    image: string;
 }
 
 export class OsmTagsService {

@@ -6,6 +6,7 @@ import { MapService } from "./map.service";
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { LoggingService } from "./logging.service";
 import { SidebarService } from "./sidebar.service";
+import { ResourcesService } from "./resources.service";
 import { InMemoryReducer } from "../reducers/in-memory.reducer";
 import { SetLocationAction } from "../reducers/location.reducer";
 
@@ -19,6 +20,7 @@ describe("MapService", () => {
                 MapService,
                 CancelableTimeoutService,
                 { provide: SidebarService, useValue: {} },
+                { provide: ResourcesService, useValue: {} },
                 {
                     provide: LoggingService, useValue: {
                         info: () => { },
@@ -132,6 +134,13 @@ describe("MapService", () => {
     it("should update the state on moveend", inject([MapService, Store], async (service: MapService, store: Store) => {
         const spy = jasmine.createSpy();
         store.dispatch = spy;
+        store.reset({
+            locationState: {
+                longitude: 0,
+                latitude: 0,
+                zoom: 0
+            }
+        })
         service.setMap({
             on: (event: string, callback: (error: ErrorEvent) => void) => {
                 if (event == "moveend") callback({} as any);
@@ -142,6 +151,27 @@ describe("MapService", () => {
         await service.initializationPromise;
         expect(spy).toHaveBeenCalled();
         expect(spy.calls.all()[0].args[0]).toBeInstanceOf(SetLocationAction)
+    }));
+
+    it("should not update the state on moveend if location is the same", inject([MapService, Store], async (service: MapService, store: Store) => {
+        const spy = jasmine.createSpy();
+        store.dispatch = spy;
+        store.reset({
+            locationState: {
+                longitude: 1,
+                latitude: 2,
+                zoom: 1
+            }
+        })
+        service.setMap({
+            on: (event: string, callback: (error: ErrorEvent) => void) => {
+                if (event == "moveend") callback({} as any);
+            },
+            getCenter: () => ({ lng: 1, lat: 2 }),
+            getZoom: () => 1,
+        } as any as Map);
+        await service.initializationPromise;
+        expect(spy).not.toHaveBeenCalled();
     }));
 
     it("should not throw if moveend is called after map removal", inject([MapService], async (service: MapService) => {
@@ -177,17 +207,17 @@ describe("MapService", () => {
     }));
 
     it("should get an empty list of features when the map was not initialized", inject([MapService], async (service: MapService) => {
-        const features = service.getFeaturesFromTiles(["42"], "42");
+        const features = service.getFeaturesFromTiles();
         expect(features).toEqual([]);
     }));
 
     it("should get a list of features when the map was initialized", inject([MapService], async (service: MapService) => {
         service.setMap({
             on: () => { },
-            querySourceFeatures: () => [{ id: "42" }, { id: "43" }]
+            queryRenderedFeatures: () => [{ id: "42" }, { id: "43" }]
         } as any as Map);
-        const features = service.getFeaturesFromTiles(["layer1", "layer2"], "42");
-        expect(features.length).toEqual(4);
+        const features = service.getFeaturesFromTiles();
+        expect(features.length).toEqual(2);
     }));
 
     it("should return is moving when the map is moving", inject([MapService], async (service: MapService) => {
@@ -232,8 +262,8 @@ describe("MapService", () => {
 
     it("Should not fly to on small changes", inject([MapService],
         async (service: MapService) => {
-            service.setMap({ getCenter: () => { return { lat: 1, lng: 1 } }, flyTo: () => { }, on: () => { }, getZoom: () => 1 } as any as Map);
             const spy = jasmine.createSpy();
+            service.setMap({ getCenter: () => { return { lat: 1, lng: 1 } }, flyTo: spy, on: () => { }, getZoom: () => 1 } as any as Map);
             await service.flyTo({ lng: 1, lat: 1 }, 1);
             expect(spy).not.toHaveBeenCalled();
         }
@@ -245,6 +275,16 @@ describe("MapService", () => {
             service.setMap({ getCenter: () => { return { lat: 1, lng: 1 } }, flyTo: spy, on: () => { } } as any as Map);
             await service.flyTo({ lng: 2, lat: 2 }, 1);
             expect(spy).toHaveBeenCalled();
+        }
+    ));
+
+    it("Should use current zoom if not provided", inject([MapService],
+        async (service: MapService) => {
+            const spy = jasmine.createSpy();
+            service.setMap({ getCenter: () => { return { lat: 1, lng: 1 } }, flyTo: spy, on: () => { }, getZoom: () => 1 } as any as Map);
+            await service.flyTo({ lng: 2, lat: 2 });
+            expect(spy).toHaveBeenCalled();
+            expect(spy.calls.all()[0].args[0].zoom).toBe(1);
         }
     ));
 

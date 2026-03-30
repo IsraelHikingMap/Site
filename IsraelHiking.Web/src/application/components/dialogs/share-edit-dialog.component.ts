@@ -44,7 +44,6 @@ export type ShareEditDialogComponentData = {
 @Component({
     selector: "share-edit-dialog",
     templateUrl: "./share-edit-dialog.component.html",
-    styleUrls: ["./share-edit-dialog.component.scss"],
     imports: [Dir, MatDialogTitle, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, Angulartics2OnModule, MatAnchor, MapComponent, LayersComponent, MatRadioGroup, MatRadioButton, MatDialogActions, MatFormField, ControlComponent, MatButtonModule, MatTooltip, RoutesPathComponent, DistancePipe]
 })
 export class ShareEditDialogComponent {

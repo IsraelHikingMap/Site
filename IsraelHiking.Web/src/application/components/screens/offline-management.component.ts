@@ -19,7 +19,6 @@ import type { ApplicationState, EditableLayer } from "../../models";
 @Component({
     selector: "offline-management",
     templateUrl: "./offline-management.component.html",
-    styleUrls: ["./offline-management.component.scss"],
     imports: [MapComponent, Angulartics2OnModule, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent],
 })
 export class OfflineManagementComponent {

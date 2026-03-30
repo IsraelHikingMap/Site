@@ -3,19 +3,19 @@ import { MatAnchor, MatButton } from "@angular/material/button";
 import { Dir } from "@angular/cdk/bidi";
 import { AnimationOptions, LottieComponent } from "ngx-lottie";
 
+import { ImageAttributionComponent } from "../../image-attribution.component";
 import { ImageCaptureDirective } from "../../../directives/image-capture.directive";
 import { Angulartics2OnModule } from "../../../directives/gtag.directive";
 import { ResourcesService } from "../../../services/resources.service";
 import { FileService } from "../../../services/file.service";
 import { ImageGalleryService } from "../../../services/image-gallery.service";
 import { ImageResizeService } from "../../../services/image-resize.service";
-import { ImageAttributionService, ImageAttribution } from "../../../services/image-attribution.service";
 import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.json";
 
 @Component({
     selector: "image-scroller",
     templateUrl: "./image-scroller.component.html",
-    imports: [LottieComponent, MatAnchor, ImageCaptureDirective, Angulartics2OnModule, MatButton, Dir]
+    imports: [LottieComponent, MatAnchor, ImageCaptureDirective, Angulartics2OnModule, MatButton, Dir, ImageAttributionComponent]
 })
 export class ImageScrollerComponent implements OnChanges {
     lottiePOI: AnimationOptions = {
@@ -24,10 +24,7 @@ export class ImageScrollerComponent implements OnChanges {
 
     private currentIndex: number = 0;
 
-    public currentImageAttribution: ImageAttribution = null;
-
     public images = input<string[]>();
-
     public canEdit = input<boolean>();
 
     public currentImageChanged = output<string>();
@@ -37,12 +34,10 @@ export class ImageScrollerComponent implements OnChanges {
     private readonly fileService = inject(FileService);
     private readonly imageGalleryService = inject(ImageGalleryService);
     private readonly imageResizeService = inject(ImageResizeService);
-    private readonly imageAttributionService = inject(ImageAttributionService);
 
-    public ngOnChanges(changes: SimpleChanges): void {
+    public ngOnChanges(changes: SimpleChanges<ImageScrollerComponent>): void {
         if (changes.images) {
             this.currentIndex = 0;
-            this.updateCurrentImageAttribution();
         }
     }
 
@@ -52,7 +47,6 @@ export class ImageScrollerComponent implements OnChanges {
             this.currentIndex = this.images().length - 1;
         }
         this.currentImageChanged.emit(this.getCurrentValue());
-        this.updateCurrentImageAttribution();
     }
 
     public previous() {
@@ -61,7 +55,6 @@ export class ImageScrollerComponent implements OnChanges {
             this.currentIndex = 0;
         }
         this.currentImageChanged.emit(this.getCurrentValue());
-        this.updateCurrentImageAttribution();
     }
 
     public hasNext(): boolean {
@@ -103,15 +96,6 @@ export class ImageScrollerComponent implements OnChanges {
             return null;
         }
         return this.resources.getResizedImageUrl(imageUrl, 960)
-    }
-
-    private async updateCurrentImageAttribution(): Promise<void> {
-        const imageUrl = this.getCurrentValue();
-        if (imageUrl == null) {
-            this.currentImageAttribution = null;
-            return;
-        }
-        this.currentImageAttribution = await this.imageAttributionService.getAttributionForImage(imageUrl);
     }
 
     public showImage() {

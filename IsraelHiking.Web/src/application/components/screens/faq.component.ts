@@ -15,7 +15,6 @@ export type FAQSection = {
 @Component({
     selector: "faq",
     templateUrl: "./faq.component.html",
-    styleUrls: ["./faq.component.scss"],
     imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle]
 })
 export class FaqComponent implements AfterViewInit {

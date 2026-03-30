@@ -10,7 +10,6 @@ import { Urls } from "../urls";
 @Component({
     selector: "mapeak-link",
     templateUrl: "./mapeak-link.component.html",
-    styleUrls: ["./mapeak-link.component.scss"],
     imports: [Angulartics2OnModule, MatTooltip]
 })
 export class MapeakLinkComponent {

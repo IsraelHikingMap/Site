@@ -23,19 +23,14 @@ import { MapeakTitleService } from "../../../services/mapeak-title.service";
 import { ToastService } from "../../../services/toast.service";
 import { RouteStrings, PoiRouteUrlInfo } from "../../../services/hash.service";
 import { SelectedRouteService } from "../../../services/selected-route.service";
-import { RoutesFactory } from "../../../services/routes.factory";
 import { MapService } from "../../../services/map.service";
 import { SpatialService } from "../../../services/spatial.service";
 import { RunningContextService } from "../../../services/running-context.service";
 import { SidebarService } from "../../../services/sidebar.service";
 import { NavigateHereService } from "../../../services/navigate-here.service";
-import { GpxDataContainerConverterService } from "../../../services/gpx-data-container-converter.service";
 import { OsmAddressesService } from "../../../services/osm-addresses.service";
 import { TranslationService } from "../../../services/translation.service";
-import { ShareUrlsService } from "../../../services/share-urls.service";
-import { ElevationProvider } from "../../../services/elevation.provider";
-import { GeoJsonParser } from "../../../services/geojson.parser";
-import { AddRouteAction, AddPrivatePoiAction } from "../../../reducers/routes.reducer";
+import { AddPrivatePoiAction } from "../../../reducers/routes.reducer";
 import { SetSelectedPoiAction } from "../../../reducers/poi.reducer";
 import { GeoJSONUtils } from "../../../services/geojson-utils";
 import type {
@@ -43,6 +38,7 @@ import type {
     ApplicationState,
     EditablePublicPointData
 } from "../../../models";
+import { cloneDeep } from "lodash-es";
 
 export type SourceImageUrlPair = {
     imageUrl: string;
@@ -52,7 +48,6 @@ export type SourceImageUrlPair = {
 @Component({
     selector: "public-poi-sidebar",
     templateUrl: "./public-poi-sidebar.component.html",
-    styleUrls: ["./public-poi-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None,
     imports: [Dir, MatButton, Angulartics2OnModule, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, MatCard, PublicPointOfInterestEditComponent, FormsModule, MatCardHeader, MatCardTitle, NgClass, MatCardContent, ImageScrollerComponent, DecimalPipe]
 })
@@ -80,16 +75,12 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     private readonly poiService = inject(PoiService);
     private readonly osmAddressesService = inject(OsmAddressesService);
     private readonly selectedRouteService = inject(SelectedRouteService);
-    private readonly routesFactory = inject(RoutesFactory);
     private readonly toastService = inject(ToastService);
     private readonly mapService = inject(MapService);
     private readonly sidebarService = inject(SidebarService);
     private readonly runningContextSerivce = inject(RunningContextService);
     private readonly navigateHereService = inject(NavigateHereService);
-    private readonly geoJsonParser = inject(GeoJsonParser);
-    private readonly elevationProvider = inject(ElevationProvider);
     private readonly translationService = inject(TranslationService);
-    private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly store = inject(Store);
 
     constructor() {
@@ -149,16 +140,20 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             if (this.getRouteUrlInfo().id !== data.id) {
                 return;
             }
-            this.osmEditableInfo = await this.poiService.createEditableDataAndMerge(feature);
-            await this.initFromFeature(feature);
+            let clonedFeature = cloneDeep(feature);
+            this.store.dispatch(new SetSelectedPoiAction(clonedFeature));
+            this.osmEditableInfo = await this.poiService.createEditableDataAndMerge(clonedFeature);
+            await this.initFromFeature(clonedFeature);
             if (data.source === "OSM") {
-                await this.poiService.updateExtendedInfo(feature, data.language);
+                await this.poiService.updateExtendedInfo(clonedFeature, data.language);
                 if (this.getRouteUrlInfo().id !== data.id) {
                     return;
                 }
-                await this.initFromFeature(feature);
+                clonedFeature = cloneDeep(clonedFeature);
+                this.store.dispatch(new SetSelectedPoiAction(clonedFeature));
+                await this.initFromFeature(clonedFeature);
             }
-            const bounds = SpatialService.getBoundsForFeature(feature);
+            const bounds = SpatialService.getBoundsForFeature(clonedFeature);
             this.mapService.fitBounds(bounds);
             if (data.source === RouteStrings.COORDINATES) {
                 this.fullFeature = null;
@@ -276,31 +271,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     }
 
     public async convertToRoute() {
-        if (this.fullFeature.properties.poiSource === "Users") {
-            const shareUrl = await this.shareUrlsService.getShareUrl(this.fullFeature.properties.identifier);
-            for (const route of shareUrl.dataContainer.routes) {
-                const newRoute = this.routesFactory.createRouteDataAddMissingFields(route, this.selectedRouteService.getLeastUsedColor());
-                this.store.dispatch(new AddRouteAction(newRoute));
-                this.selectedRouteService.setSelectedRoute(newRoute.id);
-            }
-            this.close();
-            return;
-        }
-        const routes = this.geoJsonParser.toRoutes(this.fullFeature as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString>);
-        const featureColor = GeoJSONUtils.getFeatureColor(this.fullFeature);
-        for (let i = 0; i < routes.length; i++) {
-            const route = routes[i];
-            const name = this.selectedRouteService.createRouteName(route.name);
-            const newRoute = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
-            if (i === 0 && featureColor) {
-                newRoute.color = featureColor;
-            }
-            await this.elevationProvider.updateHeights(route.latlngs);
-            newRoute.description = this.description;
-            newRoute.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs, "Hike");
-            this.store.dispatch(new AddRouteAction(newRoute));
-            this.selectedRouteService.setSelectedRoute(newRoute.id);
-        }
+        this.selectedRouteService.convertToRoute(this.fullFeature, this.description);
         this.close();
     }
 

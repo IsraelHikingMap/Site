@@ -40,7 +40,6 @@ import type { ApplicationState, ShareUrl } from "../../models";
 @Component({
     selector: "shares",
     templateUrl: "./shares.component.html",
-    styleUrls: ["./shares.component.scss"],
     encapsulation: ViewEncapsulation.None,
     imports: [MapComponent, LayersComponent, MatButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, ShareItemComponent, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, PopupComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, ControlComponent, MatButtonToggle, MatButtonToggleGroup, NgClass]
 })
@@ -141,6 +140,7 @@ export class SharesComponent implements OnInit {
                     if (share.difficulty === "Easy") return 1;
                     if (share.difficulty === "Moderate") return 2;
                     if (share.difficulty === "Hard") return 3;
+                    if (share.difficulty === "Very Hard") return 4;
                     return 0;
                 })] as any;
                 break;
@@ -150,9 +150,7 @@ export class SharesComponent implements OnInit {
 
 
     public onStartPointClick(shareUrl: Immutable<ShareUrl>) {
-        if (this.selectedShareUrl?.id === shareUrl.id) {
-            this.selectedShareUrl = null;
-            this.routesGeoJson = { type: "FeatureCollection", features: [] };
+        if (this.clearShareUrlIfSelected(shareUrl.id)) {
             return;
         }
         this.moveToShare(shareUrl);
@@ -183,12 +181,12 @@ export class SharesComponent implements OnInit {
             message,
             confirmAction: async () => {
                 try {
+                    this.clearShareUrlIfSelected(shareUrl.id);
                     await this.shareUrlsService.deleteShareUrl(shareUrl);
                     this.runFilter();
                 } catch (ex) {
                     this.toastService.error(ex, this.resources.unableToDeleteShare);
                 }
-
             },
             type: "YesNo"
         });
@@ -249,5 +247,14 @@ export class SharesComponent implements OnInit {
             return true;
         }
         return false;
+    }
+
+    private clearShareUrlIfSelected(id: string): boolean {
+        if (this.selectedShareUrl?.id !== id) {
+            return false;
+        }
+        this.selectedShareUrl = null;
+        this.routesGeoJson = { type: "FeatureCollection", features: [] };
+        return true;
     }
 }

@@ -7,7 +7,6 @@ import { ResourcesService } from "../services/resources.service";
 @Component({
     selector: "osm-attribution",
     templateUrl: "./osm-attribution.component.html",
-    styleUrls: ["./osm-attribution.component.scss"],
     imports: []
 })
 export class OsmAttributionComponent {

@@ -22,7 +22,8 @@ public class ReceiptValidationGatewayTests
         options.Value.Returns(new NonPublicConfigurationData
         {
             FoveaApiKey = "fill-here",
-            RevenueCatApiKey = "fill-here"
+            RevenueCatApiKey = "fill-here",
+            RevenueCatApiKeyIHM = "fill-here"
         });
         _gateway = new ReceiptValidationGateway(factory, options, Substitute.For<ILogger>());
     }

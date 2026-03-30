@@ -1,47 +1,53 @@
 ﻿<div class="flex flex-row sticky top-0 z-10 bg-white">
   <div class="flex-1">
-    <button mat-button class="w-full min-w-unset p-0!" (click)="save()" [disabled]="isLoading" matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
+    <button mat-button class="w-full min-w-[unset]! p-0!" (click)="save()" [disabled]="isLoading"
+      matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI"
+      angularticsAction="Save POI"><i class="fa icon-check"></i></button>
   </div>
   <div class="flex-1">
-    <button mat-button class="w-full min-w-unset p-0!" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below">
+    <button mat-button class="w-full min-w-[unset]! p-0!" (click)="close()" matTooltip="{{resources.close}}"
+      matTooltipPosition="below">
       @if (isLoading) {
-        <mat-spinner diameter="24"></mat-spinner>
+      <mat-spinner diameter="24"></mat-spinner>
       } @else {
-        <i class="fa icon-close"></i>
-      }      
+      <i class="fa icon-close"></i>
+      }
     </button>
   </div>
 </div>
 <mat-card appearance="outlined" class="mat-elevation-z0">
   @if (!info().canEditTitle) {
-    <mat-card-header>
-      <mat-card-title [ngClass]="resources.getTextAlignment(info().title)" [dir]="resources.getDirection(info().title)">
-        <span class="text-xl" [dir]="resources.getDirection(info().title)">{{info().title}}</span>
-      </mat-card-title>
-    </mat-card-header>
+  <mat-card-header>
+    <mat-card-title [ngClass]="resources.getTextAlignment(info().title)" [dir]="resources.getDirection(info().title)">
+      <span class="text-xl" [dir]="resources.getDirection(info().title)">{{info().title}}</span>
+    </mat-card-title>
+  </mat-card-header>
   } @else {
-    <div class="flex flex-row">
-      <mat-form-field class="w-full">
-        <mat-label>{{resources.nameInLanguage}}</mat-label>
-        <input matInput type="text" class="w-full" [dir]="resources.getDirection(info().title)" [(ngModel)]="info().title" />
-      </mat-form-field>
-    </div>
+  <div class="flex flex-row">
+    <mat-form-field class="w-full">
+      <mat-label>{{resources.nameInLanguage}}</mat-label>
+      <input matInput type="text" class="w-full" [dir]="resources.getDirection(info().title)"
+        [(ngModel)]="info().title" />
+    </mat-form-field>
+  </div>
   }
   <image-scroller [images]="info().imagesUrls" [canEdit]="true"></image-scroller>
   <div class="flex flex-row">
     <mat-form-field class="w-full">
       <mat-label>{{resources.descriptionInLanguage}}</mat-label>
-      <textarea id="description" scrollToOnClick="description" scrollToOnClickOffset="56" rows="4" maxlength="255" matInput class="w-full" [dir]="resources.getDirection(info().description)" [(ngModel)]="info().description"></textarea>
+      <textarea id="description" scrollToOnClick="description" scrollToOnClickOffset="56" rows="4" maxlength="255"
+        matInput class="w-full" [dir]="resources.getDirection(info().description)"
+        [(ngModel)]="info().description"></textarea>
     </mat-form-field>
   </div>
   @for (url of info().urls; track url; let i = $index) {
-    <div class="flex flex-row">
-      <mat-form-field class="w-full">
-        <mat-label>{{resources.aLinkToAWebsite}}</mat-label>
-        <input matInput class="w-full" maxlength="255" type="text" dir="ltr" [(ngModel)]="info().urls[i]"/>
-        <button matSuffix mat-icon-button (click)="removeUrl(i)"><i class="fa icon-trash"></i></button>
-      </mat-form-field>
-    </div>
+  <div class="flex flex-row">
+    <mat-form-field class="w-full">
+      <mat-label>{{resources.aLinkToAWebsite}}</mat-label>
+      <input matInput class="w-full" maxlength="255" type="text" dir="ltr" [(ngModel)]="info().urls[i]" />
+      <button matSuffix mat-icon-button (click)="removeUrl(i)"><i class="fa icon-trash"></i></button>
+    </mat-form-field>
+  </div>
   }
 
   <div class="flex flex-row">
@@ -49,33 +55,35 @@
   </div>
   <br />
   @if (isPoint()) {
-    <div class="flex flex-row">
-      <mat-form-field class="w-full">
-        <mat-label>{{resources.categories}}</mat-label>
-        <mat-select class="w-full" [ngModel]="selectedCategory" (selectionChange)="selectCategory($event)">
-          @for (category of categories; track category) {
-            <mat-option [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{resources.translate(category.name)}}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-    </div>
-    <br />
-    @if (selectedCategory) {
-      <div class="flex flex-row flex-wrap">
-        @for (icon of selectedCategory.selectableItems; track icon) {
-          <button mat-button (click)="selectIcon(icon)" class="flex-1 h-unset" [class.active]="icon === selectedCategory.selectedIcon">
-            <i class="fa fa-lg" [ngClass]="icon.icon" [style.color]="icon.color"></i>
-            <br />
-            <span class="chrome-wordwrap-fix category-button-text">{{resources.translate(icon.label)}}</span>
-          </button>
+  <div class="flex flex-row">
+    <mat-form-field class="w-full">
+      <mat-label>{{resources.categories}}</mat-label>
+      <mat-select class="w-full" [ngModel]="selectedCategory" (selectionChange)="selectCategory($event)">
+        @for (category of categories; track category) {
+        <mat-option [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i>
+          {{resources.translate(category.name)}}</mat-option>
         }
-      </div>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <br />
+  @if (selectedCategory) {
+  <div class="flex flex-row flex-wrap">
+    @for (icon of selectedCategory.selectableItems; track icon) {
+    <button mat-button (click)="selectIcon(icon)" class="flex-1 h-[unset]!"
+      [class.active]="icon === selectedCategory.selectedIcon">
+      <i class="fa fa-lg" [ngClass]="icon.icon" [style.color]="icon.color"></i>
+      <br />
+      <span class="break-words whitespace-normal">{{resources.translate(icon.label)}}</span>
+    </button>
     }
-    <br />
+  </div>
+  }
+  <br />
   }
   @if (info().showLocationUpdate) {
-    <div class="flex flex-row">
-      <mat-checkbox color="primary" [(ngModel)]="updateLocation">{{resources.updateLocation}}</mat-checkbox>
-    </div>
+  <div class="flex flex-row">
+    <mat-checkbox color="primary" [(ngModel)]="updateLocation">{{resources.updateLocation}}</mat-checkbox>
+  </div>
   }
 </mat-card>

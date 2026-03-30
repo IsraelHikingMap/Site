@@ -1,8 +1,8 @@
 import { Component, inject } from "@angular/core";
-import { RouterLink } from "@angular/router";
+import { RouterLink, RouterLinkActive } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatButton } from "@angular/material/button";
-import { MatMenuTrigger, MatMenu, MatMenuContent, MatMenuItem } from "@angular/material/menu";
+import { MatMenuTrigger, MatMenu, MatMenuItem } from "@angular/material/menu";
 import { MatDialog } from "@angular/material/dialog";
 import { timer } from "rxjs";
 import { Device } from "@capacitor/device";
@@ -32,8 +32,7 @@ import type { UserInfo, ApplicationState } from "../models";
 @Component({
     selector: "main-menu",
     templateUrl: "./main-menu.component.html",
-    styleUrls: ["./main-menu.component.scss"],
-    imports: [MatButton, Angulartics2OnModule, MatMenuTrigger, MatMenu, MatMenuContent, MatMenuItem, RouterLink]
+    imports: [MatButton, Angulartics2OnModule, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, RouterLinkActive]
 })
 export class MainMenuComponent {
 
