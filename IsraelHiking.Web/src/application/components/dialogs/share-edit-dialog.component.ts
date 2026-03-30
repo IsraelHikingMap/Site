@@ -210,12 +210,12 @@ export class ShareEditDialogComponent {
     }
 
     // Alow pasting image from clipboard
-    public async pasteImage(e: Event) {
+    public async pasteImage() {
         try {
             const items = await navigator.clipboard.read();
             for (const item of items) {
                 // Find image types (e.g., 'image/png')
-                const imageType = item.types.find(type => type.startsWith('image/'));
+                const imageType = item.types.find(type => type.startsWith("image/"));
                 if (!imageType) {
                     continue;
                 }

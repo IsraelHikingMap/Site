@@ -5,7 +5,7 @@
   </div>
   <div mat-dialog-content>
     <div class="flex flex-row justify-center">
-      <div class="w-[256px] h-[256px]" (keydown.meta.v)="pasteImage($event)" (keydown.ctrl.v)="pasteImage($event)">
+      <div class="w-[256px] h-[256px]" (keydown.meta.v)="pasteImage()" (keydown.ctrl.v)="pasteImage()">
         @if (!shareUrl.base64Preview) {
         <mgl-map [interactive]="false" [mapStyle]="style" [attributionControl]="false"
           [canvasContextAttributes]="{ preserveDrawingBuffer: true }" (mapLoad)="mapLoaded($event)">
