@@ -1,116 +1,99 @@
 ﻿<div class="side-control maplibregl-ctrl">
-  <button mat-button (click)="toggleTracking()" [class.active]="isActive()" matTooltip="{{resources.showMeWhereIAm}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Location" angularticsAction="Toggle GPS location">
+  <button mat-button (click)="toggleTracking()" [class.active]="isActive()" matTooltip="{{resources.showMeWhereIAm}}"
+    matTooltipPosition="right" angulartics2On="click" angularticsCategory="Location"
+    angularticsAction="Toggle GPS location">
     @if (isDisabled() || isActive()) {
-      <i class="fa fa-lg icon-crosshairs" [class.following]="isActive() && isFollowingLocation()"></i>
+    <i class="fa fa-lg icon-crosshairs" [class.following]="isActive() && isFollowingLocation()"></i>
     }
     @if (isLoading()) {
-      <div class="spinner-container">
-        <mat-spinner diameter="30"></mat-spinner>
-      </div>
+    <div class="spinner-container">
+      <mat-spinner diameter="30"></mat-spinner>
+    </div>
     }
   </button>
-  <button mat-button class="mt-1" (click)="toggleKeepNorthUp()" [class.active]="isKeepNorthUp()"><div [style.transform]="getRotationAngle()" matTooltip="{{resources.northUp}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Location" angularticsAction="North Up"><i class="icon-north"></i></div></button>
+  <button mat-button class="mt-1" (click)="toggleKeepNorthUp()" [class.active]="isKeepNorthUp()">
+    <div [style.transform]="getRotationAngle()" matTooltip="{{resources.northUp}}" matTooltipPosition="right"
+      angulartics2On="click" angularticsCategory="Location" angularticsAction="North Up"><i class="icon-north"></i>
+    </div>
+  </button>
   @if (canRecord()) {
-    <button mat-button class="mt-1" (click)="toggleRecording()" [class.active]="isRecording()" angulartics2On="click" angularticsCategory="Location" angularticsAction="Toggle recording">
-      @if (isRecording()) {
-        <i class="fa fa-lg icon-square"></i>
-      } @else {
-        <i class="fa fa-lg icon-circle recording-button"></i>
-      }
-    </button>
+  <button mat-button class="mt-1" (click)="toggleRecording()" [class.active]="isRecording()" angulartics2On="click"
+    angularticsCategory="Location" angularticsAction="Toggle recording">
+    @if (isRecording()) {
+    <i class="fa fa-lg icon-square"></i>
+    } @else {
+    <i class="fa fa-lg icon-circle recording-button"></i>
+    }
+  </button>
   }
   @if (isRecording()) {
-    <button mat-button class="mt-1" (click)="toggleAddRecordingPoi()" [class.active]="isAddingRecordingPoi()" angulartics2On="click" angularticsCategory="Location" angularticsAction="Toggle add recording POI">
-      <i class="fa fa-lg icon-map-marker" [style.color]="resources.recordedRouteColor"></i>
-    </button>
+  <button mat-button class="mt-1" (click)="toggleAddRecordingPoi()" [class.active]="isAddingRecordingPoi()"
+    angulartics2On="click" angularticsCategory="Location" angularticsAction="Toggle add recording POI">
+    <i class="fa fa-lg icon-map-marker" [style.color]="resources.recordedRouteColor"></i>
+  </button>
   }
 </div>
 
 <mgl-geojson-source id="location-source" [data]="locationFeatures"></mgl-geojson-source>
 @if (locationFeatures.features.length > 0) {
-  <mgl-layer [id]="resources.locationIcon"
-    type="symbol"
-    source="location-source"
-    [filter]="['==', '$type', 'Point']"
-           [layout]="{
+<mgl-layer [id]="resources.locationIcon" type="symbol" source="location-source" [filter]="['==', '$type', 'Point']"
+  [layout]="{
                 'icon-image': 'gps-arrow',
                 'icon-size': 0.5,
                 'icon-rotate': ['get', 'heading'],
                 'icon-rotation-alignment': 'map',
                 'icon-ignore-placement': true,
                 'icon-allow-overlap': true
-            }"
-    (layerClick)="openLocationPopup()">
-  </mgl-layer>
-  <mgl-layer id="location-circle"
-    type="fill"
-    source="location-source"
-    [filter]="['==', '$type', 'Polygon']"
-           [paint]="{
+            }" (layerClick)="openLocationPopup()">
+</mgl-layer>
+<mgl-layer id="location-circle" type="fill" source="location-source" [filter]="['==', '$type', 'Polygon']" [paint]="{
                 'fill-color': '#136AEC',
                 'fill-outline-color': '#136AEC',
                 'fill-opacity': 0.2
             }">
-  </mgl-layer>
-  <mgl-layer id="location-circle-stroke"
-    type="line"
-    source="location-source"
-    [filter]="['==', '$type', 'Polygon']"
-           [paint]="{
+</mgl-layer>
+<mgl-layer id="location-circle-stroke" type="line" source="location-source" [filter]="['==', '$type', 'Polygon']"
+  [paint]="{
                 'line-color': '#136AEC',
                 'line-width': 2
             }">
-  </mgl-layer>
+</mgl-layer>
 }
 @if (locationLatLng) {
-  <mgl-popup [lngLat]="locationLatLng" (popupClose)="locationLatLng = null">
-    <gps-location-overlay [latlng]="locationLatLng" (closed)="locationLatLng = null"></gps-location-overlay>
-  </mgl-popup>
+<mgl-popup [lngLat]="locationLatLng" (popupClose)="locationLatLng = null">
+  <gps-location-overlay [latlng]="locationLatLng" (closed)="locationLatLng = null"></gps-location-overlay>
+</mgl-popup>
 }
 
 <mgl-geojson-source id="distance-source" [data]="distanceFeatures"></mgl-geojson-source>
 @if (showDistance) {
-  <mgl-layer id="distance-line"
-    type="line"
-    source="distance-source"
-    [filter]="['==', '$type', 'LineString']"
-           [layout]="{
+<mgl-layer id="distance-line" type="line" source="distance-source" [filter]="['==', '$type', 'LineString']" [layout]="{
                 'line-cap': 'round',
                 'line-join': 'bevel'
-           }"
-           [paint]="{
+           }" [paint]="{
                 'line-color': 'magenta',
                 'line-width': 5
             }">
-  </mgl-layer>
-  <mgl-layer id="distance-end"
-    type="circle"
-    source="distance-source"
-    [filter]="['==', '$type', 'Point']"
-           [paint]="{
+</mgl-layer>
+<mgl-layer id="distance-end" type="circle" source="distance-source" [filter]="['==', '$type', 'Point']" [paint]="{
                 'circle-radius': 12,
                 'circle-stroke-color': 'magenta',
                 'circle-stroke-width': 2,
                 'circle-opacity': 0
             }">
-  </mgl-layer>
-  <mgl-layer id="distance-line-text"
-    type="symbol"
-    source="distance-source"
-    [filter]="['==', '$type', 'Point']"
-           [layout]="{
+</mgl-layer>
+<mgl-layer id="distance-line-text" type="symbol" source="distance-source" [filter]="['==', '$type', 'Point']" [layout]="{
                 'symbol-placement': 'point',
-                'text-font': ['Open Sans Bold'],
+                'text-font': ['Noto Sans Bold'],
                 'text-field': ['get', 'distance'],
                 'text-size': 20,
                 'text-allow-overlap': true,
                 'text-ignore-placement': false,
                 'text-offset': [0, -1.5]
-            }"
-           [paint]="{
+            }" [paint]="{
                 'text-color': 'magenta',
                 'text-halo-width': 3,
                 'text-halo-color': 'rgba(255,255,255,0.75)'
             }">
-  </mgl-layer>
+</mgl-layer>
 }
