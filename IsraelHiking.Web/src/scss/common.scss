@@ -45,10 +45,26 @@ $app-background: map.get($app-theme, background);
 }
 
 @font-face {
-    font-family: 'Noto Sans';
+    font-family: 'Noto Sans Regular';
     font-style: normal;
     font-display: swap;
     src: url('../fonts/noto-sans-regular.woff2') format('woff2');
+}
+
+
+@font-face {
+    font-family: 'Open Sans Regular';
+    font-style: normal;
+    font-display: swap;
+    src: url('../fonts/open-sans-regular.woff2') format('woff2');
+}
+
+
+@font-face {
+    font-family: 'Open Sans Cond Bold';
+    font-style: normal;
+    font-display: swap;
+    src: url('../fonts/open-sans-condensed-bold.ttf') format('truetype');
 }
 
 html {
