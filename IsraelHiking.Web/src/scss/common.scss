@@ -44,6 +44,13 @@ $app-background: map.get($app-theme, background);
     }
 }
 
+@font-face {
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-display: swap;
+    src: url('../fonts/noto-sans-regular.woff2') format('woff2');
+}
+
 html {
     height: 100%;
 }
