@@ -1,4 +1,4 @@
-- Allow 3D on desktop site
-- Show recordings with a Map
-- Allow seeing the map of the cloud saves on mobile device
+- Allow finding near by routes
+- Improve navigation bar appearance and current screen recognition
+- Improve recording thumbnails
 - Plus various bug fixes and performance improvements
