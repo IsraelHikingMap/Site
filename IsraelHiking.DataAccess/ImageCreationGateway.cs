@@ -31,8 +31,6 @@ public class ImageCreationGateway(IHttpClientFactory httpClientFactory, IOptions
         {
             Path = "stroke:blue|width:5|" + allPointsString
         };
-
-        Console.WriteLine(body.Path);
         var response = await client.PostAsync(_serverAddress + queryParameters, JsonContent.Create(body));
         return await response.Content.ReadAsByteArrayAsync();
     }
