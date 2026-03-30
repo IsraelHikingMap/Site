@@ -16,7 +16,6 @@ export class DefaultStyleService {
             version: 8,
             sources: {},
             layers: [],
-            glyphs: "{fontstack}/{range}.pbf", // to please maplibre
             sprite: this.mapService.getFullUrl("content/sprite/sprite")
         };
     }

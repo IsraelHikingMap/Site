@@ -61,6 +61,9 @@ export class ApplicationInitializeService {
 
     public async initialize() {
         try {
+            await document.fonts.load("12px Noto Sans");
+            await document.fonts.load("12px Open Sans");
+            await document.fonts.load("12px Open Sans Cond Bold");
             await this.loggingService.initialize();
             this.loggingService.info("---------------------------------------");
             this.loggingService.info("Starting Mapeak Application Initialization");
