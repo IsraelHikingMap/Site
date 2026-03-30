@@ -28,7 +28,6 @@ interface RoutePointViewData {
 @Component({
     selector: "routes",
     templateUrl: "./routes.component.html",
-    styleUrls: ["./routes.component.scss"],
     encapsulation: ViewEncapsulation.None,
     imports: [SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, RoutePointOverlayComponent, Dir, MatAnchor, MatTooltip, MatButton, MarkerComponent, PrivatePoiOverlayComponent, RoutesPathComponent]
 })

@@ -67,7 +67,7 @@ export class WikidataService {
                 poiIcon: "icon-wikipedia-w",
                 poiCategory: "Wikipedia",
                 poiIconColor: "black",
-                poiSourceImageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Wikidata-logo.svg/128px-Wikidata-logo.svg.png",
+                poiSourceImageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Wikidata-logo.svg/120px-Wikidata-logo.svg.png",
             },
             geometry: {
                 type: "Point",
@@ -118,7 +118,7 @@ export class WikidataService {
             return;
         }
         const indexString = GeoJSONUtils.setProperty(feature, "website", `https://${language}.wikipedia.org/wiki/${title}`);
-        feature.properties["poiSourceImageUrl" + indexString] = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/128px-Wikipedia-logo-v2.svg.png";
+        feature.properties["poiSourceImageUrl" + indexString] = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/120px-Wikipedia-logo-v2.svg.png";
         const imageAndDescription = await this.getDescriptionAndImageByLanguageAndTitle(language, title);
         if (imageAndDescription?.image) {
             GeoJSONUtils.setPropertyUnique(feature, "image", imageAndDescription.image);

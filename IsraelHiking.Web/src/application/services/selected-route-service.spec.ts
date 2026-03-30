@@ -6,13 +6,15 @@ import { SEGMENT, SEGMENT_POINT, SelectedRouteService } from "./selected-route.s
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { SidebarService } from "./sidebar.service";
+import { ShareUrlsService } from "./share-urls.service";
+import { GeoJsonParser } from "./geojson.parser";
+import { ElevationProvider } from "./elevation.provider";
 import { RoutingProvider } from "./routing.provider";
 import { RoutesFactory } from "./routes.factory";
 import { SetSelectedRouteAction, RouteEditingReducer } from "../reducers/route-editing.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
 import { AddRouteAction, ChangeRouteStateAction, BulkReplaceRoutesAction, RoutesReducer, MergeRoutesAction, SplitRouteAction, ReplaceRouteAction, UpdateSegmentsAction, DeleteSegmentAction, AddPrivatePoiAction } from "../reducers/routes.reducer";
 import type { RouteDataWithoutState, RouteData } from "../models";
-
 
 describe("Selected Route Service", () => {
     const setupRoutes = (store: Store, routes: RouteData[]) => {
@@ -43,6 +45,9 @@ describe("Selected Route Service", () => {
                 { provide: RoutingProvider, useValue: routingProviderMock },
                 { provide: ToastService, useValue: toastServiceMock },
                 { provide: SidebarService, useValue: { show: jasmine.createSpy() } },
+                { provide: ShareUrlsService, useValue: {} },
+                { provide: ElevationProvider, useValue: {} },
+                GeoJsonParser,
                 RoutesFactory,
                 SelectedRouteService,
             ]
@@ -1122,4 +1127,64 @@ describe("Selected Route Service", () => {
         ]);
         expect(service.hasHiddenRoutes()).toBeTruthy();
     }));
+
+    it("should convert to route for users source", inject([SelectedRouteService, ShareUrlsService, Store],
+        async (service: SelectedRouteService, shareUrlsService: ShareUrlsService, store: Store) => {
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+            const feature = {
+                type: "Feature" as const,
+                geometry: {
+                    type: "LineString" as const,
+                    coordinates: [
+                        [1, 1],
+                        [2, 2],
+                        [3, 3],
+                    ],
+                },
+                properties: {
+                    identifier: "1",
+                    poiSource: "Users"
+                },
+            };
+            shareUrlsService.getShareUrl = () => Promise.resolve({
+                dataContainer: {
+                    routes: [{
+                        segments: []
+                    }]
+                }
+            });
+            await service.convertToRoute(feature, "description");
+            expect(spy).toHaveBeenCalled();
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddRouteAction);
+        }
+    ));
+
+    it("should convert to route for OSM source with color", inject([SelectedRouteService, ElevationProvider, Store],
+        async (service: SelectedRouteService, elevationProvider: ElevationProvider, store: Store) => {
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+            elevationProvider.updateHeights = () => Promise.resolve();
+            const feature = {
+                type: "Feature" as const,
+                geometry: {
+                    type: "LineString" as const,
+                    coordinates: [
+                        [1, 1],
+                        [2, 2],
+                        [3, 3],
+                    ],
+                },
+                properties: {
+                    identifier: "1",
+                    poiSource: "OSM",
+                    colour: "red"
+                },
+            };
+            await service.convertToRoute(feature, "description");
+            expect(spy).toHaveBeenCalled();
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddRouteAction);
+            expect(spy.calls.all()[0].args[0].routeData.color).toBe("red");
+        }
+    ));
 });

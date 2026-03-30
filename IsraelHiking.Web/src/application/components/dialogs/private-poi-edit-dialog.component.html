@@ -33,13 +33,13 @@
         <div class="flex flex-row">
           @if (!imageLink) {
           <label>
-            <a mat-button class="w-full h-unset" [style.color]="'black'" imageCapture (changed)="addImage($event)"
+            <a mat-button class="w-full h-[unset]!" [style.color]="'black'" imageCapture (changed)="addImage($event)"
               angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i
                 class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
             <input type="file" (change)="addImage($event)" [style.display]="'none'" accept="image/*;capture=camera" />
           </label>
           } @else {
-          <img [src]="resources.getResizedImageUrl(imageLink.url, 300)" class="img-responsive w-full" />
+          <img [src]="resources.getResizedImageUrl(imageLink.url, 330)" class="max-w-full w-full" />
           }
         </div>
         @if (imageLink) {

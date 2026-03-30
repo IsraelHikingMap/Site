@@ -95,7 +95,7 @@ public static class GeoJsonExtensions
         {
             return true;
         }
-        if (feature.Attributes.Exists("place") && 
+        if (feature.Attributes.Exists("place") &&
             !feature.Attributes.Has("place", "suburb") &&
             !feature.Attributes.Has("place", "neighbourhood") &&
             !feature.Attributes.Has("place", "quarter") &&
@@ -131,22 +131,28 @@ public static class GeoJsonExtensions
 
     public static string GetTitle(this IFeature feature, string language)
     {
-        if (feature.Attributes.Exists("name:" + language)) {
+        if (feature.Attributes.Exists("name:" + language))
+        {
             return feature.Attributes.GetOptionalValue("name:" + language) as string;
         }
-        if (feature.Attributes.Exists("name:en")) {
+        if (feature.Attributes.Exists("name:en"))
+        {
             return feature.Attributes["name:en"].ToString();
         }
-        if (feature.Attributes.Exists("name")) {
+        if (feature.Attributes.Exists("name"))
+        {
             return feature.Attributes["name"].ToString();
         }
-        if (feature.Attributes.Exists("mtb:name:" + language)) {
+        if (feature.Attributes.Exists("mtb:name:" + language))
+        {
             return feature.Attributes["mtb:name:" + language].ToString();
         }
-        if (feature.Attributes.Exists("mtb:name:en")) {
+        if (feature.Attributes.Exists("mtb:name:en"))
+        {
             return feature.Attributes["mtb:name:en"].ToString();
         }
-        if (feature.Attributes.Exists("mtb:name")) {
+        if (feature.Attributes.Exists("mtb:name"))
+        {
             return feature.Attributes["mtb:name"].ToString();
         }
         return string.Empty;
@@ -178,9 +184,9 @@ public static class GeoJsonExtensions
                 {
                     return feature.Attributes[attr].ToString();
                 }
-                    
+
             }
-                
+
         }
         return string.Empty;
     }
@@ -268,10 +274,12 @@ public static class GeoJsonExtensions
         {
             throw new InvalidOperationException($"Missing location for feature with id {feature.GetId()}");
         }
+        var y = double.Parse(locationTable[FeatureAttributes.LAT].ToString());
+        var x = locationTable.GetNames().Contains(FeatureAttributes.LON) ? double.Parse(locationTable[FeatureAttributes.LON].ToString()) : double.Parse(locationTable[FeatureAttributes.LNG].ToString());
         var location = new Coordinate
         {
-            Y = double.Parse(locationTable[FeatureAttributes.LAT].ToString()),
-            X = double.Parse(locationTable[FeatureAttributes.LON].ToString())
+            Y = y,
+            X = x
         };
         return location;
     }
@@ -286,7 +294,8 @@ public static class GeoJsonExtensions
         var geoLocationTable = new AttributesTable
         {
             {FeatureAttributes.LAT, geoLocation.Y},
-            {FeatureAttributes.LON, geoLocation.X}
+            {FeatureAttributes.LON, geoLocation.X},
+            {FeatureAttributes.LNG, geoLocation.X}
         };
         table.AddOrUpdate(FeatureAttributes.POI_GEOLOCATION, geoLocationTable);
     }
@@ -297,7 +306,7 @@ public static class GeoJsonExtensions
         {
             if (feature.Geometry is GeometryCollection geometryCollection)
             {
-                return geometryCollectionOther.Geometries.Any(og => geometryCollection.Geometries.Any(gc => gc.Contains(og)));    
+                return geometryCollectionOther.Geometries.Any(og => geometryCollection.Geometries.Any(gc => gc.Contains(og)));
             }
             return geometryCollectionOther.Geometries.Any(og => feature.Geometry.Contains(og));
         }
@@ -333,7 +342,7 @@ public static class GeoJsonExtensions
             }
             else
             {
-                target.Geometry = geometryFactory.CreateGeometryCollection([target.Geometry, source.Geometry]);    
+                target.Geometry = geometryFactory.CreateGeometryCollection([target.Geometry, source.Geometry]);
             }
         }
     }

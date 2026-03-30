@@ -1,8 +1,8 @@
 import { Component, inject } from "@angular/core";
-import { RouterLink } from "@angular/router";
+import { RouterLink, RouterLinkActive } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatButton } from "@angular/material/button";
-import { MatMenuTrigger, MatMenu, MatMenuContent, MatMenuItem } from "@angular/material/menu";
+import { MatMenuTrigger, MatMenu, MatMenuItem } from "@angular/material/menu";
 import { MatDialog } from "@angular/material/dialog";
 import { timer } from "rxjs";
 import { Device } from "@capacitor/device";
@@ -12,7 +12,6 @@ import { Store } from "@ngxs/store";
 import { EmailComposer } from "capacitor-email-composer"
 import platform from "platform";
 
-import { OfflineManagementDialogComponent } from "./dialogs/offline-management-dialog.component";
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
 import { RunningContextService } from "../services/running-context.service";
@@ -23,7 +22,6 @@ import { LayersService } from "../services/layers.service";
 import { HashService } from "../services/hash.service";
 import { PurchaseService } from "../services/purchase.service";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
-import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
 import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.component";
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 import { SendReportDialogComponent } from "./dialogs/send-report-dialog.component";
@@ -34,8 +32,7 @@ import type { UserInfo, ApplicationState } from "../models";
 @Component({
     selector: "main-menu",
     templateUrl: "./main-menu.component.html",
-    styleUrls: ["./main-menu.component.scss"],
-    imports: [MatButton, Angulartics2OnModule, MatMenuTrigger, MatMenu, MatMenuContent, MatMenuItem, RouterLink]
+    imports: [MatButton, Angulartics2OnModule, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, RouterLinkActive]
 })
 export class MainMenuComponent {
 
@@ -170,10 +167,6 @@ export class MainMenuComponent {
         LanguageDialogComponent.openDialog(this.dialog);
     }
 
-    public openTraces() {
-        this.dialog.open(TracesDialogComponent, { width: "480px", data: [] });
-    }
-
     public openConfigurationDialog() {
         this.dialog.open(ConfigurationDialogComponent, { width: "480px" });
     }
@@ -198,9 +191,5 @@ export class MainMenuComponent {
             return;
         }
         this.purchaseService.showPaywall();
-    }
-
-    public async downloadOfflineMaps() {
-        OfflineManagementDialogComponent.openDialog(this.dialog);
     }
 }

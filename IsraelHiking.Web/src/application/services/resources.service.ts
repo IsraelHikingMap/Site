@@ -25,6 +25,8 @@ export class ResourcesService {
     public editRouteLines = "editing-route-layer-lines";
     public editRouteSource = "editing-route-source";
     public locationIcon = "location-icon-layer";
+    public globalPointsLayer = "global-points-layer";
+    public globalPointsExternalLayer = "global-points-external-layer";
     public readonly recordedRouteColor = "#FF6600";
     // All the text in the app //
     /////////////////////////////
@@ -270,6 +272,7 @@ export class ResourcesService {
     public easy: string;
     public moderate: string;
     public hard: string;
+    public veryHard: string;
     public unknown: string;
     public contactUsToPublishAPublicRoute: string;
     public activityType: string;
@@ -279,6 +282,13 @@ export class ResourcesService {
     public FAQ: string;
     public downloadMapForOfflineUse: string;
     public privacyPolicyTermsOfService: string;
+    public editThisMap: string;
+    public list: string;
+    public searchSharesPlaceHolder: string;
+    public searchTracesPlaceHolder: string;
+    public noRoutesFoundMoveTheMapOrChangeTheFilters: string;
+    public copyToClipboard: string;
+    public findRoutes: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -348,6 +358,7 @@ export class ResourcesService {
     public dontSwitchApps: string;
     public tooManyRoutes: string;
     public openRoutesPanel: string;
+    public thisMightTakeAWhile: string;
     // Legend
     public legendMarkedTrails: string;
     public legendRedMarkedTrail: string;
@@ -499,7 +510,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1771792248161");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1774561566028");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -749,6 +760,7 @@ export class ResourcesService {
         this.easy = this.gettextCatalog.getString("Easy");
         this.moderate = this.gettextCatalog.getString("Moderate");
         this.hard = this.gettextCatalog.getString("Hard");
+        this.veryHard = this.gettextCatalog.getString("Very Hard");
         this.unknown = this.gettextCatalog.getString("Unknown");
         this.contactUsToPublishAPublicRoute = this.gettextCatalog.getString("Contact us to publish a public route");
         this.activityType = this.gettextCatalog.getString("Activity Type");
@@ -758,6 +770,13 @@ export class ResourcesService {
         this.FAQ = this.gettextCatalog.getString("F.A.Q");
         this.downloadMapForOfflineUse = this.gettextCatalog.getString("Download Map for Offline Use");
         this.privacyPolicyTermsOfService = this.gettextCatalog.getString("Privacy Policy and Terms of Service");
+        this.editThisMap = this.gettextCatalog.getString("Edit this map");
+        this.list = this.gettextCatalog.getString("List");
+        this.searchSharesPlaceHolder = this.gettextCatalog.getString("Search cloud saves...");
+        this.searchTracesPlaceHolder = this.gettextCatalog.getString("Search traces...");
+        this.noRoutesFoundMoveTheMapOrChangeTheFilters = this.gettextCatalog.getString("No routes found, move the map or change the filters...");
+        this.copyToClipboard = this.gettextCatalog.getString("Copy to clipboard");
+        this.findRoutes = this.gettextCatalog.getString("Find Routes");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -844,6 +863,7 @@ export class ResourcesService {
         this.dontSwitchApps = this.gettextCatalog.getString("To prevent download errors, please don't switch apps or lock your screen until the download is finished");
         this.tooManyRoutes = this.gettextCatalog.getString("You have more than 10 routes which can cause performance issues.");
         this.openRoutesPanel = this.gettextCatalog.getString("Open routes panel");
+        this.thisMightTakeAWhile = this.gettextCatalog.getString("This might take a while");
         // Legend
         this.legendMarkedTrails = this.gettextCatalog.getString("Marked Trails");
         this.legendRedMarkedTrail = this.gettextCatalog.getString("Red Marked Trail");

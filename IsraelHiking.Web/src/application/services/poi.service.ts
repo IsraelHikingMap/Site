@@ -20,10 +20,11 @@ import { GeoJSONUtils } from "./geojson-utils";
 import { INatureService } from "./inature.service";
 import { WikidataService } from "./wikidata.service";
 import { ImageAttributionService } from "./image-attribution.service";
-import { LatLon, OsmTagsService, PoiProperties } from "./osm-tags.service";
+import { OsmTagsService, PoiProperties } from "./osm-tags.service";
 import { ShareUrlsService } from "./share-urls.service";
+import { NakebService } from "./nakeb.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction } from "../reducers/offline.reducer";
-import { SetSelectedPoiAction, SetUploadMarkerDataAction } from "../reducers/poi.reducer";
+import { SetUploadMarkerDataAction } from "../reducers/poi.reducer";
 import { Urls } from "../urls";
 import type {
     MarkerData,
@@ -54,10 +55,6 @@ export type SelectableCategory = Category & {
 
 @Injectable()
 export class PoiService {
-
-    private static readonly POIS_SOURCE_LAYER_NAMES = ["global_points", "external"];
-    public static readonly POIS_SOURCE_ID = "points-of-interest";
-
     private poisCache: GeoJSON.Feature[] = [];
     private queueIsProcessing: boolean = false;
 
@@ -70,6 +67,7 @@ export class PoiService {
     private readonly mapService = inject(MapService);
     private readonly iNatureService = inject(INatureService);
     private readonly wikidataService = inject(WikidataService);
+    private readonly nakebService = inject(NakebService);
     private readonly overpassTurboService = inject(OverpassTurboService);
     private readonly imageAttributinoService = inject(ImageAttributionService);
     private readonly shareUrlsService = inject(ShareUrlsService);
@@ -137,37 +135,28 @@ export class PoiService {
         }
     }
 
-    private getGeolocation(feature: GeoJSON.Feature): LatLon {
+    private getGeolocation(feature: GeoJSON.Feature): LatLngAltTime {
         switch (feature.geometry.type) {
             case "Point":
-                return {
-                    lat: feature.geometry.coordinates[1],
-                    lon: feature.geometry.coordinates[0],
-                };
+                return SpatialService.toLatLng(feature.geometry.coordinates);
             case "LineString":
-                return {
-                    lat: feature.geometry.coordinates[0][1],
-                    lon: feature.geometry.coordinates[0][0],
-                };
+                return SpatialService.toLatLng(feature.geometry.coordinates[0]);
             case "Polygon": {
                 const bounds = SpatialService.getBoundsForFeature(feature);
                 return {
                     lat: (bounds.northEast.lat + bounds.southWest.lat) / 2,
-                    lon: (bounds.northEast.lng + bounds.southWest.lng) / 2,
+                    lng: (bounds.northEast.lng + bounds.southWest.lng) / 2,
                 };
             }
             case "MultiPolygon": {
                 const bounds = SpatialService.getBoundsForFeature(feature);
                 return {
                     lat: (bounds.northEast.lat + bounds.southWest.lat) / 2,
-                    lon: (bounds.northEast.lng + bounds.southWest.lng) / 2,
+                    lng: (bounds.northEast.lng + bounds.southWest.lng) / 2,
                 };
             }
             case "MultiLineString":
-                return {
-                    lat: feature.geometry.coordinates[0][0][1],
-                    lon: feature.geometry.coordinates[0][0][0],
-                };
+                return SpatialService.toLatLng(feature.geometry.coordinates[0][0]);
             default:
                 throw new Error("Unsupported geometry type: " + feature.geometry.type);
         }
@@ -192,7 +181,7 @@ export class PoiService {
     }
 
     private getFeaturesFromTiles(): GeoJSONFeature[] {
-        return this.mapService.getFeaturesFromTiles(PoiService.POIS_SOURCE_LAYER_NAMES, PoiService.POIS_SOURCE_ID);
+        return this.mapService.getFeaturesFromTiles();
     }
 
     private getPoisFromTiles(): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
@@ -206,7 +195,7 @@ export class PoiService {
                 properties: { ...poi.properties },
                 geometry: {
                     type: "Point",
-                    coordinates: [poi.properties.poiGeolocation.lon, poi.properties.poiGeolocation.lat]
+                    coordinates: [poi.properties.poiGeolocation.lng, poi.properties.poiGeolocation.lat]
                 }
             };
             return pointFeature;
@@ -218,7 +207,7 @@ export class PoiService {
             hashSet.add(p.properties.poiId);
             return true;
         });
-        return this.filterFeatures(pois);
+        return pois;
     }
 
     public osmTileFeatureToPoiIdentifier(feature: GeoJSON.Feature): string {
@@ -254,12 +243,11 @@ export class PoiService {
         return poi;
     }
 
-    private filterFeatures(features: GeoJSON.Feature<GeoJSON.Point, PoiProperties>[]): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
+    private filterFeatures(features: GeoJSON.Feature<GeoJSON.Point, PoiProperties>[], categories: string[]): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
         const visibleFeatures = [];
-        const visibleCategories = this.getVisibleCategories();
         const language = this.resources.getCurrentLanguageCodeSimplified();
         for (const feature of features) {
-            if (visibleCategories.indexOf(feature.properties.poiCategory) === -1) {
+            if (categories.indexOf(feature.properties.poiCategory) === -1) {
                 continue;
             }
             if (GeoJSONUtils.getTitle(feature, language) || GeoJSONUtils.hasExtraData(feature, language)) {
@@ -274,16 +262,31 @@ export class PoiService {
     }
 
     public getPoisGeoJson(): GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> {
-        if (this.getVisibleCategories().length === 0) {
+        const categoires = this.getVisibleCategories();
+        if (categoires.length === 0) {
             return {
                 type: "FeatureCollection",
                 features: []
             };
         }
-        const visibleFeatures = this.getPoisFromTiles();
+        const tileFeautes = this.getPoisFromTiles();
         return {
             type: "FeatureCollection",
-            features: visibleFeatures
+            features: this.filterFeatures(tileFeautes, categoires)
+        };
+    }
+
+    public getPublicRoutes(categoires: string[]): GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> {
+        if (categoires.length === 0) {
+            return {
+                type: "FeatureCollection",
+                features: []
+            };
+        }
+        const tileFeautes = this.getPoisFromTiles();
+        return {
+            type: "FeatureCollection",
+            features: this.filterFeatures(tileFeautes, categoires)
         };
     }
 
@@ -321,38 +324,33 @@ export class PoiService {
                 case "iNature": {
                     const poi = await this.iNatureService.createFeatureFromPageId(id);
                     this.poisCache.splice(0, 0, poi);
-                    const clone = cloneDeep(poi);
-                    this.store.dispatch(new SetSelectedPoiAction(clone));
-                    return clone;
+                    return poi;
                 }
                 case "Wikidata": {
                     const poi = await this.wikidataService.createFeatureFromPageId(id, language);
                     this.poisCache.splice(0, 0, poi);
-                    const clone = cloneDeep(poi);
-                    this.store.dispatch(new SetSelectedPoiAction(clone));
-                    return clone;
+                    return poi;
                 }
                 case RouteStrings.COORDINATES: {
                     const poi = this.getFeatureFromCoordinatesId(id, language);
-                    const clone = cloneDeep(poi);
-                    this.store.dispatch(new SetSelectedPoiAction(clone));
-                    return clone;
+                    return poi;
                 }
                 case "Users": {
                     const shareUrl = await this.shareUrlsService.getShareUrl(id);
                     const poi = this.convertShareUrlToPoi(shareUrl);
                     this.poisCache.splice(0, 0, poi);
-                    const clone = cloneDeep(poi);
-                    this.store.dispatch(new SetSelectedPoiAction(clone));
-                    return clone;
+                    return poi;
+                }
+                case "Nakeb": {
+                    const poi = await this.nakebService.getRoute(id);
+                    this.poisCache.splice(0, 0, poi);
+                    return poi;
                 }
                 default: {
                     const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
                     const poi = await firstValueFrom(this.httpClient.get<GeoJSON.Feature>(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000)));
                     this.poisCache.splice(0, 0, poi);
-                    const clone = cloneDeep(poi);
-                    this.store.dispatch(new SetSelectedPoiAction(clone));
-                    return clone;
+                    return poi;
                 }
             }
         } catch (ex) {
@@ -368,7 +366,7 @@ export class PoiService {
 
     private convertShareUrlToPoi(shareUrl: ShareUrl): GeoJSON.Feature {
         let geometry: GeoJSON.LineString | GeoJSON.MultiLineString;
-        const geoLocation = shareUrl.start ? { lat: shareUrl.start.lat, lon: shareUrl.start.lng } : { lat: shareUrl.dataContainer.routes[0].segments[0].latlngs[0].lat, lon: shareUrl.dataContainer.routes[0].segments[0].latlngs[0].lng };
+        const geoLocation = shareUrl.start ? shareUrl.start : shareUrl.dataContainer.routes[0].segments[0].latlngs[0];
         if (shareUrl.dataContainer.routes.length > 1) {
             geometry = {
                 type: "MultiLineString",
@@ -438,7 +436,6 @@ export class PoiService {
         } catch (ex) {
             this.loggingService.warning(`[POIs] Failed to enrich feature with id: ${feature.properties.poiId}, error: ${(ex as Error).message}`);
         }
-        this.store.dispatch(new SetSelectedPoiAction(cloneDeep(feature)));
         return feature;
     }
 

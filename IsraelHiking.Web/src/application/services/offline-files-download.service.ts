@@ -1,6 +1,6 @@
 import { EventEmitter, inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { MatDialog } from "@angular/material/dialog";
+import { Router } from "@angular/router";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
@@ -10,12 +10,12 @@ import pLimit from "p-limit";
 import type { StyleSpecification } from "maplibre-gl";
 
 import { Urls } from "../urls";
-import { OfflineManagementDialogComponent } from "../components/dialogs/offline-management-dialog.component";
 import { FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { PmTilesService } from "./pmtiles.service";
+import { RouteStrings } from "./hash.service";
 import { DeleteOfflineMapsTileAction, SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
 import type { ApplicationState, FileNameDateVersion, TileMetadataPerFile } from "../models";
 
@@ -25,10 +25,10 @@ export class OfflineFilesDownloadService {
     private readonly fileService = inject(FileService);
     private readonly loggingService = inject(LoggingService);
     private readonly httpClient = inject(HttpClient);
-    private readonly matDialog = inject(MatDialog);
     private readonly toastService = inject(ToastService);
     private readonly pmtilesService = inject(PmTilesService);
     private readonly store = inject(Store);
+    private readonly router = inject(Router);
 
     private metadata: Record<string, string> = {};
     private abortController = new AbortController();
@@ -59,7 +59,7 @@ export class OfflineFilesDownloadService {
                 type: "YesNo",
                 message: this.resources.reccomendOfflineDownload,
                 confirmAction: async () => {
-                    OfflineManagementDialogComponent.openDialog(this.matDialog);
+                    this.router.navigate([RouteStrings.ROUTE_OFFLINE_MANAGEMENT]);
                 }
             });
         } catch {

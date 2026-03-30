@@ -21,11 +21,10 @@
           required="" />
       </mat-form-field>
     </div>
-    <div class="flex flex-row">
+    <div class="flex flex-row mb-2">
       <a class="text-sm" href="https://github.com/IsraelHikingMap/Site/wiki/Custom-maps"
         target="_blank">{{resources.moreInfo}}</a>
     </div>
-    <div class="input-wrapper-spacer"></div>
     <div class="flex flex-row gap-1">
       <mat-form-field class="flex-1">
         <mat-label>{{resources.minZoom}}</mat-label>
@@ -39,8 +38,9 @@
       <div class="flex-1">
         <div class="flex flex-col">
           <label class="text-center">{{resources.opacity}}</label>
-          <mat-slider min="0.1" max="1.0" step="0.1" color="primary" class="slider-small"><input matSliderThumb
-              [(ngModel)]="layerData.opacity" /></mat-slider>
+          <mat-slider min="0.1" max="1.0" step="0.1" color="primary" class="slider-small">
+            <input matSliderThumb [(ngModel)]="layerData.opacity" />
+          </mat-slider>
         </div>
       </div>
       }

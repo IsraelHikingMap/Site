@@ -1,4 +1,5 @@
-import { Component, DestroyRef, inject, OnInit } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit, ViewEncapsulation } from "@angular/core";
+import { NgClass } from "@angular/common";
 import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { FormsModule } from "@angular/forms";
@@ -10,9 +11,10 @@ import { MatDivider } from "@angular/material/divider";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { Dir } from "@angular/cdk/bidi";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { MatButtonToggle, MatButtonToggleGroup } from "@angular/material/button-toggle";
 import { Store } from "@ngxs/store";
 import { Immutable } from "immer";
-import { MapComponent, MarkerComponent, PopupComponent } from "@maplibre/ngx-maplibre-gl";
+import { ControlComponent, MapComponent, MarkerComponent, PopupComponent } from "@maplibre/ngx-maplibre-gl";
 import { orderBy } from "lodash-es";
 import type { StyleSpecification, Map } from "maplibre-gl";
 
@@ -20,6 +22,8 @@ import { ShareItemComponent } from "../share-item.component";
 import { LayersComponent } from "../map/layers.component";
 import { RoutesPathComponent } from "../map/routes-path.component";
 import { ShareEditDialogComponent, ShareEditDialogComponentData } from "../dialogs/share-edit-dialog.component";
+import { ZoomComponent } from "../zoom.component";
+import { OsmAttributionComponent } from "../osm-attribution.component";
 import { ScrollToDirective } from "application/directives/scroll-to.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { DefaultStyleService } from "../../services/default-style.service";
@@ -36,11 +40,12 @@ import type { ApplicationState, ShareUrl } from "../../models";
 @Component({
     selector: "shares",
     templateUrl: "./shares.component.html",
-    styleUrls: ["./shares.component.scss"],
-    imports: [MapComponent, LayersComponent, MatButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, ShareItemComponent, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, PopupComponent, MatDivider, MatProgressSpinner]
+    encapsulation: ViewEncapsulation.None,
+    imports: [MapComponent, LayersComponent, MatButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, ShareItemComponent, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, PopupComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, ControlComponent, MatButtonToggle, MatButtonToggleGroup, NgClass]
 })
 export class SharesComponent implements OnInit {
     public loading = false;
+    public showMap = false;
     public mapStyle: StyleSpecification;
     public selectedShareUrl: Immutable<ShareUrl> = null;
     public filteredShareUrls: Immutable<ShareUrl[]> = [];
@@ -135,6 +140,7 @@ export class SharesComponent implements OnInit {
                     if (share.difficulty === "Easy") return 1;
                     if (share.difficulty === "Moderate") return 2;
                     if (share.difficulty === "Hard") return 3;
+                    if (share.difficulty === "Very Hard") return 4;
                     return 0;
                 })] as any;
                 break;
@@ -144,9 +150,7 @@ export class SharesComponent implements OnInit {
 
 
     public onStartPointClick(shareUrl: Immutable<ShareUrl>) {
-        if (this.selectedShareUrl?.id === shareUrl.id) {
-            this.selectedShareUrl = null;
-            this.routesGeoJson = { type: "FeatureCollection", features: [] };
+        if (this.clearShareUrlIfSelected(shareUrl.id)) {
             return;
         }
         this.moveToShare(shareUrl);
@@ -161,6 +165,7 @@ export class SharesComponent implements OnInit {
             features.push(...this.selectedRouteService.createFeaturesForRoute(route));
         }
         this.routesGeoJson = { type: "FeatureCollection", features };
+        this.showMap = true;
         const bounds = SpatialService.getBoundsForFeatureCollection(this.routesGeoJson);
         this.mapService.fitBounds(bounds);
     }
@@ -176,12 +181,12 @@ export class SharesComponent implements OnInit {
             message,
             confirmAction: async () => {
                 try {
+                    this.clearShareUrlIfSelected(shareUrl.id);
                     await this.shareUrlsService.deleteShareUrl(shareUrl);
                     this.runFilter();
                 } catch (ex) {
                     this.toastService.error(ex, this.resources.unableToDeleteShare);
                 }
-
             },
             type: "YesNo"
         });
@@ -242,5 +247,14 @@ export class SharesComponent implements OnInit {
             return true;
         }
         return false;
+    }
+
+    private clearShareUrlIfSelected(id: string): boolean {
+        if (this.selectedShareUrl?.id !== id) {
+            return false;
+        }
+        this.selectedShareUrl = null;
+        this.routesGeoJson = { type: "FeatureCollection", features: [] };
+        return true;
     }
 }

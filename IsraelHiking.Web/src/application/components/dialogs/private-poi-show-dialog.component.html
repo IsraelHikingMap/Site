@@ -14,12 +14,13 @@
   <div mat-dialog-content>
     <div class="flex flex-row">
       @if (imageLink) {
-      <img [src]="resources.getResizedImageUrl(imageLink.url, 300)" class="img-responsive cursor-pointer w-full"
+      <img [src]="resources.getResizedImageUrl(imageLink.url, 330)" class="max-w-full cursor-pointer w-full"
         (click)="showImage()" />
       }
     </div>
     <div class="flex flex-row">
-      <p [dir]="resources.getDirection(description)" class="break-lines {{resources.getTextAlignment(description)}}">
+      <p [dir]="resources.getDirection(description)"
+        class="whitespace-pre-line {{resources.getTextAlignment(description)}}">
         {{description}}</p>
     </div>
     @if (showCoordinates) {

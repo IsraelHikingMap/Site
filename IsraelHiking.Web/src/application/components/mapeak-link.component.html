@@ -1,10 +1,12 @@
-﻿<a [href]="getHref()" [target]="target" class="cursor-pointer link-container maplibregl-ctrl" matTooltip="{{getTooltipText()}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Mapeak-Link" angularticsAction="Mapeak-Link click">
+﻿<a [href]="getHref()" [target]="target" class="cursor-pointer no-underline maplibregl-ctrl"
+  matTooltip="{{getTooltipText()}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Mapeak-Link"
+  angularticsAction="Mapeak-Link click">
   @if (!isIFrameMobile()) {
-    <img src="content/logo.png" height="64" class="logo" />
+  <img src="content/logo.png" height="64" class="logo" class="rounded-full bg-[#fffa]" />
   } @else {
-    <div class="flex flex-col items-center open-in-app">
-      <img src="content/open-in-app.png" height="128"/>
-      <span>{{resources.openInApp}}</span>
-    </div>
+  <div class="flex flex-col items-center text-[#082254] text-[17px] text-center">
+    <img src="content/open-in-app.png" height="128" class="-mb-5" />
+    <span class="max-w-[100px] break-words">{{resources.openInApp}}</span>
+  </div>
   }
 </a>

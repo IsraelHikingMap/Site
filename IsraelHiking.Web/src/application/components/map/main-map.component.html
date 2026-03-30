@@ -1,30 +1,46 @@
 ﻿<ng-progress ngProgressHttp [ngStyle]="{'z-index':1500}"></ng-progress>
-<sidebar></sidebar>
-<div class="flex flex-row w-full map-height" [dir]="resources.direction">
-  <mgl-map ngSkipHydration="true" [zoom]="[location.zoom]" [center]="[location.longitude, location.latitude]"
-    [mapStyle]="initialStyle" (mapLoad)="mapLoaded($event)" [doubleClickZoom]="false" [attributionControl]="false">
-    <layers [isMainMap]="true"></layers>
-    @if (!isIFrame()) {
-    <public-pois></public-pois>
+<mat-sidenav-container [dir]="resources.direction" [hasBackdrop]="false" [autosize]="false">
+  <mat-sidenav [opened]="sidenavVisible()" position="end" class="magrin-top-with-toolbar">
+    @switch (sidenavViewName) {
+    @case ('layers') {
+    <layers-sidebar></layers-sidebar>
     }
-    <routes></routes>
-    @if (!isIFrame()) {
-    <recorded-route></recorded-route>
-    <traces></traces>
-    <drawing #topStartControl></drawing>
+    @case ('public-poi') {
+    <public-poi-sidebar></public-poi-sidebar>
     }
-    <zoom #topEndControl></zoom>
-    @if (isMobile() || !isIFrame()) {
-    <location #topEndControl></location>
+    @case ('private-routes') {
+    <private-routes-sidebar></private-routes-sidebar>
     }
-    @if (!isIFrame()) {
-    <layers-button #topEndControl></layers-button>
     }
-    <route-statistics #bottomStartControl></route-statistics>
-    <osm-attribution #bottomStartControl></osm-attribution>
-    <center-me #bottomStartControl></center-me>
-    @if (!isApp()) {
-    <mapeak-link #bottomEndControl></mapeak-link>
-    }
-  </mgl-map>
-</div>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <div class="flex flex-row w-full h-screen">
+      <mgl-map ngSkipHydration="true" [zoom]="[location.zoom]" [center]="[location.longitude, location.latitude]"
+        [mapStyle]="initialStyle" (mapLoad)="mapLoaded($event)" (pitchEvt)="pitchChanged()" [doubleClickZoom]="false"
+        [attributionControl]="false">
+        <layers [isMainMap]="true"></layers>
+        @if (!isIFrame()) {
+        <public-pois></public-pois>
+        }
+        <routes></routes>
+        @if (!isIFrame()) {
+        <recorded-route></recorded-route>
+        <drawing #topStartControl></drawing>
+        }
+        <zoom #topEndControl></zoom>
+        @if (isMobile() || !isIFrame()) {
+        <location #topEndControl></location>
+        }
+        @if (!isIFrame()) {
+        <layers-button #topEndControl></layers-button>
+        }
+        <route-statistics #bottomStartControl></route-statistics>
+        <osm-attribution #bottomStartControl></osm-attribution>
+        <center-me #bottomStartControl></center-me>
+        @if (!isApp()) {
+        <mapeak-link #bottomEndControl></mapeak-link>
+        }
+      </mgl-map>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

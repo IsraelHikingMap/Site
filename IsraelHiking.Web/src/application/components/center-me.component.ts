@@ -12,7 +12,6 @@ import type { ApplicationState } from "../models";
 @Component({
     selector: "center-me",
     templateUrl: "./center-me.component.html",
-    styleUrls: ["./center-me.component.scss"],
     imports: [MatButton, Angulartics2OnModule]
 })
 export class CenterMeComponent {

@@ -1,45 +1,25 @@
 @use "variables" as v;
+@use '@angular/material' as mat;
 
-.map-height {
-    height: calc(100vh - var(--mat-toolbar-mobile-height) - env(safe-area-inset-top, 0));
+// Customize the entire app. Change :root to your selector if you want to scope the styles.
+:root {
+    @include mat.sidenav-overrides((container-width: v.$app-sidebar-width));
 }
 
-@media (width >=600px) {
-    .map-height {
-        height: calc(100vh - var(--mat-toolbar-standard-height) - env(safe-area-inset-top, 0));
+@media (width <=550px) {
+    :root {
+        @include mat.sidenav-overrides((container-width: 100vw));
     }
-}
 
-.maplibregl-ctrl-top-left {
-    z-index: v.$app-left-z-index !important;
-    margin-left: env(safe-area-inset-left, 0) !important;
-}
+    mat-sidenav:has(public-poi-sidebar) {
+        top: unset !important;
+        bottom: 0 !important;
+        height: 55vh;
+    }
 
-.maplibregl-ctrl-top-right {
-    z-index: v.$app-left-z-index - 10 !important;
-}
-
-.maplibregl-ctrl-bottom-right {
-    z-index: v.$app-left-z-index - 30 !important;
-    margin-bottom: env(safe-area-inset-bottom, 0) !important;
-}
-
-.maplibregl-ctrl-bottom-left {
-    z-index: v.$app-left-z-index - 20 !important;
-    margin-bottom: env(safe-area-inset-bottom, 0) !important;
-    margin-left: env(safe-area-inset-left, 0) !important;
-}
-
-[dir=rtl] .maplibregl-ctrl-bottom-right {
-    z-index: v.$app-left-z-index - 20 !important;
-}
-
-[dir=rtl] .maplibregl-ctrl-bottom-left {
-    z-index: v.$app-left-z-index - 30 !important;
-}
-
-mgl-map {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
+    mat-sidenav:has(public-poi-sidebar .minimized) {
+        top: unset !important;
+        bottom: 0 !important;
+        height: 15vh;
+    }
 }

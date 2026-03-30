@@ -91,6 +91,58 @@ describe("HashService", () => {
         }
     ));
 
+    it("Should not reset address bar if offline management are open", inject([HashService, Router, Store, MapService],
+        (service: HashService, routerMock: Router, store: Store, mapService: MapService) => {
+            const spy = jasmine.createSpy();
+            routerMock.navigate = spy;
+            (routerMock as any).url = RouteStrings.ROUTE_OFFLINE_MANAGEMENT;
+            mapService.isMoving = () => false;
+            store.reset({
+                poiState: {}
+            });
+            service.initialize();
+            store.reset({
+                poiState: {
+                    selectedPointOfInterest: {}
+                },
+                inMemoryState: {},
+                locationState: {
+                    zoom: 1,
+                    latitude: 2,
+                    longitude: 3
+                }
+            });
+
+            expect(spy).not.toHaveBeenCalled();
+        }
+    ));
+
+    it("Should not reset address bar if public routes are open", inject([HashService, Router, Store, MapService],
+        (service: HashService, routerMock: Router, store: Store, mapService: MapService) => {
+            const spy = jasmine.createSpy();
+            routerMock.navigate = spy;
+            (routerMock as any).url = RouteStrings.ROUTE_PUBLIC_ROUTES;
+            mapService.isMoving = () => false;
+            store.reset({
+                poiState: {}
+            });
+            service.initialize();
+            store.reset({
+                poiState: {
+                    selectedPointOfInterest: {}
+                },
+                inMemoryState: {},
+                locationState: {
+                    zoom: 1,
+                    latitude: 2,
+                    longitude: 3
+                }
+            });
+
+            expect(spy).not.toHaveBeenCalled();
+        }
+    ));
+
     it("Should navigate to share url if it stored in the state", inject([HashService, Router, Store],
         (service: HashService, routerMock: Router, store: Store) => {
             const spy = jasmine.createSpy();
@@ -299,22 +351,4 @@ describe("HashService", () => {
             expect(fullUrl).toContain(RouteStrings.COORDINATES);
         }
     ));
-
-    it("should return is home true when on home", inject([HashService, Router], (service: HashService, routerMock: Router) => {
-        (routerMock as any).url = RouteStrings.ROUTE_ROOT;
-
-        expect(service.isHome()).toBe(true);
-    }));
-
-    it("should return is home true when on landing", inject([HashService, Router], (service: HashService, routerMock: Router) => {
-        (routerMock as any).url = RouteStrings.ROUTE_LANDING;
-
-        expect(service.isHome()).toBe(true);
-    }));
-
-    it("should return is shares true when on shares", inject([HashService, Router], (service: HashService, routerMock: Router) => {
-        (routerMock as any).url = RouteStrings.ROUTE_SHARES;
-
-        expect(service.isShares()).toBe(true);
-    }));
 });

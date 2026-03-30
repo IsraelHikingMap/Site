@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace IsraelHiking.Common;
 
@@ -84,7 +85,9 @@ public static class FeatureAttributes
     ];
 
     public const string LAT = "lat";
+    [Obsolete("Use LNG instead, remove by 5.2026")]
     public const string LON = "lon";
+    public const string LNG = "lng";
     public const double INVALID_LOCATION = -9999;
 }
 

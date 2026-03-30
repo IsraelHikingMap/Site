@@ -6,6 +6,7 @@ import { DeviceOrientationService } from "./device-orientation.service";
 import { MapService } from "./map.service";
 import { LoggingService } from "./logging.service";
 import { SelectedRouteService } from "./selected-route.service";
+import { RouteStrings } from "./hash.service";
 import { SetFollowingAction, SetPannedAction, ToggleDistanceAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models";
 
@@ -42,13 +43,13 @@ export class LocationService {
             this.lastSpeed = null;
             this.locationWithBearing.bearing = bearing;
             this.changed.next(this.locationWithBearing);
-            if (!this.mapService.isMoving() && this.isFollowing() && !this.selectedRouteService.isEditingRoute()) {
+            if (!this.mapService.isMoving() && this.isFollowing()) {
                 this.moveMapToGpsPosition();
             }
         });
 
         this.geoLocationService.backToForeground.subscribe(() => {
-            if (this.isFollowing() && !this.selectedRouteService.isEditingRoute()) {
+            if (this.isFollowing()) {
                 this.moveMapToGpsPosition();
             }
         });
@@ -64,7 +65,7 @@ export class LocationService {
             if (this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState).distance) {
                 this.store.dispatch(new ToggleDistanceAction());
             }
-            if (this.isFollowing() && !this.selectedRouteService.isEditingRoute()) {
+            if (this.isFollowing()) {
                 this.moveMapToGpsPosition();
             }
         });
@@ -99,7 +100,13 @@ export class LocationService {
     }
 
     public isFollowing(): boolean {
-        return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).following && !this.isPanned;
+        const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
+        return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).following &&
+            !this.isPanned &&
+            !this.selectedRouteService.isEditingRoute() &&
+            currentUrl !== RouteStrings.ROUTE_SHARES &&
+            currentUrl !== RouteStrings.ROUTE_TRACES &&
+            currentUrl !== RouteStrings.ROUTE_PUBLIC_ROUTES;
     }
 
     public moveMapToGpsPosition() {
@@ -138,7 +145,7 @@ export class LocationService {
             accuracy: position.coords.accuracy
         };
         this.changed.next(this.locationWithBearing);
-        if (!this.mapService.isMoving() && this.isFollowing() && !this.selectedRouteService.isEditingRoute()) {
+        if (!this.mapService.isMoving() && this.isFollowing()) {
             this.moveMapToGpsPosition();
         }
     }

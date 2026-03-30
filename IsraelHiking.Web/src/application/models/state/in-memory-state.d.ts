@@ -12,4 +12,5 @@ export type InMemoryState = {
     fileUrl: string;
     shareUrl: ShareUrl;
     searchTerm: string;
+    currentUrl: string;
 };

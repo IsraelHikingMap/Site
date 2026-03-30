@@ -2,21 +2,21 @@
 <div class="flex flex-row">
   @if (canEdit()) {
   <label class="w-full" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
-    <a mat-button imageCapture class="w-full h-unset" (changed)="add($event)" angulartics2On="click"
+    <a mat-button imageCapture class="w-full h-[unset]!" (changed)="add($event)" angulartics2On="click"
       angularticsCategory="OSM" angularticsAction="Upload image first image"><i class="fa icon-camera fa-5x"></i> <i
         class="fa icon-plus fa-3x"></i></a>
     <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*;capture=camera" multiple />
   </label>
   } @else {
-  <div class="img-container-small" style="overflow: hidden;">
-    <ng-lottie class="img-responsive img-center" [options]="lottiePOI"></ng-lottie>
+  <div class="relative w-full h-[200px]" style="overflow: hidden;">
+    <ng-lottie class="max-w-full img-center" [options]="lottiePOI"></ng-lottie>
   </div>
   }
 </div>
 } @else {
 <div class="flex flex-row">
-  <div class="img-container-small" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
-    <img [src]="getCurrentImage()" class="img-responsive-full cursor-zoom-in img-center" (click)="showImage()" />
+  <div class="relative w-full h-[200px]" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
+    <img [src]="getCurrentImage()" class="w-full object-contain cursor-zoom-in img-center" (click)="showImage()" />
   </div>
 </div>
 }
@@ -53,9 +53,6 @@
   </div>
 </div>
 }
-@if (!canEdit() && currentImageAttribution) {
-<div class="flex flex-row" class="text-center text-sm">
-  <div class="w-full truncate" [dir]="resources.direction">{{resources.imageBy}} <a [href]="currentImageAttribution.url"
-      target="_blank">{{currentImageAttribution.author}}</a></div>
-</div>
+@if (!canEdit()) {
+<image-attribution [imageUrl]="getCurrentValue()"></image-attribution>
 }
