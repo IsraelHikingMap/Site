@@ -1,6 +1,9 @@
 @if (showButton()) {
 <div class="side-control maplibregl-ctrl">
-  <button class="max-w-max mx-2" mat-button (click)="centerMe()" angulartics2On="click" angularticsCategory="Location"
-    angularticsAction="Center me"><i class="fa fa-lg icon-follow-me"></i> {{resources.centerMe}}</button>
+  <button class="w-[unset]! mx-2" mat-button (click)="centerMe()" angulartics2On="click" angularticsCategory="Location"
+    angularticsAction="Center me">
+    <i class="fa fa-lg icon-follow-me"></i>
+    {{resources.centerMe}}
+  </button>
 </div>
 }

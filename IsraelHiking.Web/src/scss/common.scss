@@ -24,7 +24,7 @@ $app-background: map.get($app-theme, background);
 @include mat.all-component-themes($app-theme);
 
 .mat-mdc-snack-bar-container {
-    margin-bottom: env(safe-area-inset-bottom, 0) !important;
+    margin-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)) !important;
 
     &.success-snackbar {
         --mat-snack-bar-container-color: #32CD6D;
@@ -187,41 +187,45 @@ body {
 
 /* Progressbar override end */
 
+.safe-bottom {
+    bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+}
+
 .maplibregl-ctrl-top-left {
-    margin-left: env(safe-area-inset-left, 0) !important;
-    margin-top: calc(var(--mat-toolbar-mobile-height) + env(safe-area-inset-top, 0)) !important;
+    margin-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0)) !important;
+    margin-top: calc(var(--mat-toolbar-mobile-height) + var(--safe-area-inset-top, env(safe-area-inset-top, 0))) !important;
 }
 
 .maplibregl-ctrl-top-right {
-    margin-top: calc(var(--mat-toolbar-mobile-height) + env(safe-area-inset-top, 0)) !important;
+    margin-top: calc(var(--mat-toolbar-mobile-height) + var(--safe-area-inset-top, env(safe-area-inset-top, 0))) !important;
 }
 
 .maplibregl-ctrl-bottom-right {
-    margin-bottom: env(safe-area-inset-bottom, 0) !important;
+    margin-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)) !important;
 }
 
 .maplibregl-ctrl-bottom-left {
-    margin-bottom: env(safe-area-inset-bottom, 0) !important;
-    margin-left: env(safe-area-inset-left, 0) !important;
+    margin-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)) !important;
+    margin-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0)) !important;
 }
 
 @media (width >=600px) {
     .maplibregl-ctrl-top-left {
-        margin-top: calc(var(--mat-toolbar-standard-height) + env(safe-area-inset-top, 0)) !important;
+        margin-top: calc(var(--mat-toolbar-standard-height) + var(--safe-area-inset-top, env(safe-area-inset-top, 0))) !important;
     }
 
     .maplibregl-ctrl-top-right {
-        margin-top: calc(var(--mat-toolbar-standard-height) + env(safe-area-inset-top, 0)) !important;
+        margin-top: calc(var(--mat-toolbar-standard-height) + var(--safe-area-inset-top, env(safe-area-inset-top, 0))) !important;
     }
 }
 
 .magrin-top-with-toolbar {
-    margin-top: calc(var(--mat-toolbar-mobile-height) + env(safe-area-inset-top, 0));
+    margin-top: calc(var(--mat-toolbar-mobile-height) + var(--safe-area-inset-top, env(safe-area-inset-top, 0)));
 }
 
 @media (width >=600px) {
     .magrin-top-with-toolbar {
-        margin-top: calc(var(--mat-toolbar-standard-height) + env(safe-area-inset-top, 0));
+        margin-top: calc(var(--mat-toolbar-standard-height) + var(--safe-area-inset-top, env(safe-area-inset-top, 0)));
     }
 }
 

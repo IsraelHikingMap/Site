@@ -18,7 +18,6 @@ dependencies {
     implementation project(':capacitor-share')
     implementation project(':capacitor-text-zoom')
     implementation project(':capawesome-team-capacitor-android-battery-optimization')
-    implementation project(':capawesome-capacitor-android-edge-to-edge-support')
     implementation project(':capawesome-capacitor-app-update')
     implementation project(':capgo-background-geolocation')
     implementation project(':capgo-capacitor-compass')

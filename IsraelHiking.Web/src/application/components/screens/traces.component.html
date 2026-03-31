@@ -1,5 +1,5 @@
 <div class="flex flex-row relative h-screen" [dir]="resources.direction">
-    <div class="hidden max-md:block absolute bottom-0 bg-white left-1/2 -translate-x-1/2 z-10">
+    <div class="hidden max-md:block absolute safe-bottom bg-white left-1/2 -translate-x-1/2 z-10">
         <mat-button-toggle-group [(ngModel)]="showMap">
             <mat-button-toggle [value]="false" angulartics2On="click" angularticsCategory="Traces"
                 angularticsAction="Open list view">
