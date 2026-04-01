@@ -1,4 +1,4 @@
 .toolbar {
-    top: env(safe-area-inset-top, 0);
+    top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
     background-color: #528CFA80;
 }

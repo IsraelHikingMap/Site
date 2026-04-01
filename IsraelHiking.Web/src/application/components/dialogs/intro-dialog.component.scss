@@ -1,12 +1,14 @@
 .safe-top {
-    padding-top: env(safe-area-inset-top, 0);
+    padding-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
 }
 
 .square-container {
     // width: 100%;
     max-width: 528px;
-    padding-top: 100%; /* 1:1 Aspect Ratio */
-    position: relative; /* If you want text inside of it */
+    padding-top: 100%;
+    /* 1:1 Aspect Ratio */
+    position: relative;
+    /* If you want text inside of it */
 
     ng-lottie {
         /* If you want content inside of the container */

@@ -1,5 +1,5 @@
 @import "photoswipe/dist/photoswipe.css";
 
 .pswp {
-    top: env(safe-area-inset-top, 0);
+    top: var(--safe-area-inset-top, env(safe-area-inset-top, 0));
 }

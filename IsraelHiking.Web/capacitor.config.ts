@@ -7,11 +7,6 @@ const config: CapacitorConfig = {
   server: {
     errorPath: "/"
   },
-  plugins: {
-    SystemBars: {
-      insetsHandling: "disable"
-    }
-  },
   ios: {
     preferredContentMode: "mobile"
   },

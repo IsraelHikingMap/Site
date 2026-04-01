@@ -21,7 +21,6 @@
     "@capacitor/share": "^8.0.1",
     "@capacitor/text-zoom": "^8.0.1",
     "@capawesome-team/capacitor-android-battery-optimization": "^8.0.1",
-    "@capawesome/capacitor-android-edge-to-edge-support": "^8.0.6",
     "@capawesome/capacitor-app-update": "^8.0.3",
     "@capgo/background-geolocation": "^8.0.26",
     "@capgo/capacitor-compass": "^8.1.11",
