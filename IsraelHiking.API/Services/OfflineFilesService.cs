@@ -54,6 +54,10 @@ public class OfflineFilesService : IOfflineFilesService
             {
                 continue;
             }
+            if (!content.Name.EndsWith(".pmtiles"))
+            {
+                continue;
+            }
             filesDictionary[content.Name] = content.LastModified.DateTime;
         }
         return filesDictionary;
