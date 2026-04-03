@@ -58,20 +58,18 @@
                         <h3 [style.color]="route.color">{{route.name}}</h3>
                     </mat-radio-button>
                 </div>
-                <div class="w-full">
-                    <div class="flex flex-row w-full">
-                        <div matTooltip="{{resources.gain}}" matTooltipPosition="above" class="mx-2">
-                            <i class="fa icon-arrow-up"></i>
-                            <span class="mx-1">{{getStatistics(route).gain | distance}}</span>
-                        </div>
-                        <div matTooltip="{{resources.loss}}" matTooltipPosition="above" class="mx-2">
-                            <i class="fa icon-arrow-down"></i>
-                            <span class="mx-1">{{getStatistics(route).loss | distance}}</span>
-                        </div>
-                        <div matTooltip="{{resources.length}}" matTooltipPosition="above" class="mx-2">
-                            <i class="fa icon-arrow-right"></i>
-                            <span class="mx-1">{{getStatistics(route).length | distance}}</span>
-                        </div>
+                <div class="flex flex-row w-full mb-1">
+                    <div matTooltip="{{resources.gain}}" matTooltipPosition="above" class="mx-2">
+                        <i class="fa icon-arrow-up"></i>
+                        <span class="mx-1">{{getStatistics(route).gain | distance}}</span>
+                    </div>
+                    <div matTooltip="{{resources.loss}}" matTooltipPosition="above" class="mx-2">
+                        <i class="fa icon-arrow-down"></i>
+                        <span class="mx-1">{{getStatistics(route).loss | distance}}</span>
+                    </div>
+                    <div matTooltip="{{resources.length}}" matTooltipPosition="above" class="mx-2">
+                        <i class="fa icon-arrow-right"></i>
+                        <span class="mx-1">{{getStatistics(route).length | distance}}</span>
                     </div>
                 </div>
             </div>
@@ -130,53 +128,48 @@
                         (ngModelChange)="updateProperty(route, 'description', $event)"></textarea>
                 </mat-form-field>
 
-                <div class="flex flex-row flex-wrap justify-between items-stretch">
-                    <div class="sm:w-1/2 w-full">
-                        <div class="flex flex-col gap-1">
-                            @for (rowIndex of [0,1,2]; track rowIndex) {
-                            <div class="button-row">
-                                <div class="flex flex-row gap-1">
-                                    @for (currentColor of colors; track currentColor; let i = $index) {
-                                    <div class="flex-1" [hidden]="i % 3 !== rowIndex">
-                                        <button mat-mini-fab color="primary" class="w-full" type="button"
-                                            [style.backgroundColor]="currentColor"
-                                            (click)="updateProperty(route, 'color', currentColor)">
-                                            @if (currentColor === route.color) {
-                                            <i class="fa icon-check"
-                                                [style.color]="getCheckIconColor(currentColor)"></i>
-                                            }
-                                        </button>
-                                    </div>
-                                    }
+                <div class="flex flex-row mb-2">
+                    <div class="flex flex-col gap-1 w-full">
+                        @for (rowIndex of [0,1,2]; track rowIndex) {
+                        <div class="button-row">
+                            <div class="flex flex-row gap-1">
+                                @for (currentColor of colors; track currentColor; let i = $index) {
+                                <div class="flex-1" [hidden]="i % 3 !== rowIndex">
+                                    <button mat-mini-fab color="primary" class="w-full" type="button"
+                                        [style.backgroundColor]="currentColor"
+                                        (click)="updateProperty(route, 'color', currentColor)">
+                                        @if (currentColor === route.color) {
+                                        <i class="fa icon-check" [style.color]="getCheckIconColor(currentColor)"></i>
+                                        }
+                                    </button>
                                 </div>
+                                }
                             </div>
-                            }
                         </div>
+                        }
                     </div>
-                    <div class="sm:w-1/2 w-full">
-                        <div class="flex flex-row w-full">
-                            <label>{{resources.width}}</label>
-                        </div>
-                        <div class="flex flex-row w-full" dir="ltr">
-                            <mat-slider class="w-full!" min="4" max="20" step="2" color="primary">
-                                <input [ngModel]="route.weight"
-                                    (ngModelChange)="updateProperty(route, 'weight', $event)" matSliderThumb />
-                            </mat-slider>
-                        </div>
-                        <div class="flex flex-row w-full">
-                            <label>{{resources.opacity}}</label>
-                        </div>
-                        <div class="flex flex-row w-full" dir="ltr">
-                            <mat-slider class="w-full!" min="0" max="1.0" step="0.1" color="primary">
-                                <input [ngModel]="route.opacity"
-                                    (ngModelChange)="updateProperty(route, 'opacity', $event)" matSliderThumb />
-                            </mat-slider>
-                        </div>
-                    </div>
+                </div>
+                <div class="flex flex-row w-full">
+                    <label>{{resources.width}}</label>
+                </div>
+                <div class="flex flex-row w-full">
+                    <mat-slider class="w-full!" min="4" max="20" step="2" color="primary">
+                        <input [ngModel]="route.weight" (ngModelChange)="updateProperty(route, 'weight', $event)"
+                            matSliderThumb />
+                    </mat-slider>
+                </div>
+                <div class="flex flex-row w-full">
+                    <label>{{resources.opacity}}</label>
+                </div>
+                <div class="flex flex-row w-full">
+                    <mat-slider class="w-full!" min="0" max="1.0" step="0.1" color="primary">
+                        <input [ngModel]="route.opacity" (ngModelChange)="updateProperty(route, 'opacity', $event)"
+                            matSliderThumb />
+                    </mat-slider>
                 </div>
                 <div class="flex flex-row" style="position: relative">
                     <img width="100%" height="50px" src="content/legend/hike_legendLight4WDVehicles.png">
-                    <hr class="w-100 border-0 border-solid absolute" [ngStyle]="{
+                    <hr class="w-full border-0 border-solid absolute" [ngStyle]="{
                     'height': route.weight + 'px', 
                     'background-color': route.color, 
                     'opacity': route.opacity,

@@ -57,14 +57,14 @@
             <mat-menu #mapFilterLengthMenu="matMenu">
                 <span class="mx-2">{{resources.length}}</span>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <div class="flex flex-row" dir="ltr">
+                    <div class="flex flex-row">
                         <mat-slider class="w-full" min="0" max="50" step="1" angulartics2On="click"
                             angularticsCategory="Public routes" angularticsAction="Filter by length">
                             <input [(ngModel)]="filterLengthStart" matSliderStartThumb (valueChange)="runFilter()">
                             <input [(ngModel)]="filterLengthEnd" matSliderEndThumb (valueChange)="runFilter()">
                         </mat-slider>
                     </div>
-                    <div class="flex flex-row" dir="ltr">
+                    <div class="flex flex-row">
                         <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthStart}}
                             {{resources.kmUnit}}</span>
                         <span class="flex-grow"></span>
@@ -305,14 +305,14 @@
             <mat-menu #listFilterLengthMenu="matMenu">
                 <span class="mx-2">{{resources.length}}</span>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <div class="flex flex-row" dir="ltr">
+                    <div class="flex flex-row">
                         <mat-slider class="w-full" min="0" max="50" step="1" angulartics2On="click"
                             angularticsCategory="Public routes" angularticsAction="Filter by length">
                             <input [(ngModel)]="filterLengthStart" matSliderStartThumb (valueChange)="runFilter()">
                             <input [(ngModel)]="filterLengthEnd" matSliderEndThumb (valueChange)="runFilter()">
                         </mat-slider>
                     </div>
-                    <div class="flex flex-row" dir="ltr">
+                    <div class="flex flex-row">
                         <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthStart}}
                             {{resources.kmUnit}}</span>
                         <span class="flex-grow"></span>
