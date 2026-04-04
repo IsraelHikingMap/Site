@@ -140,7 +140,7 @@ describe("OverpassTurboService", () => {
         };
 
         const promise = service.getLongWay("id", "name", false, false);
-        mockBackend.expectOne("https://overpass-api.de/api/interpreter").flush(response);
+        mockBackend.expectOne(Urls.overpassApi).flush(response);
 
         const results = await promise;
         expect(results.geometry.type).toBe("LineString");
@@ -175,7 +175,7 @@ describe("OverpassTurboService", () => {
             },]
         };
         const promise = service.getLongWay("id", "name", false, false);
-        mockBackend.expectOne("https://overpass-api.de/api/interpreter").flush(response);
+        mockBackend.expectOne(Urls.overpassApi).flush(response);
 
         const results = await promise;
         expect(results.geometry.type).toBe("Polygon");
@@ -187,7 +187,7 @@ describe("OverpassTurboService", () => {
         // Act
         const promise = service.getLongWay("id", "name", false, false);
 
-        mockBackend.expectOne("https://overpass-api.de/api/interpreter").flush(response);
+        mockBackend.expectOne(Urls.overpassApi).flush(response);
         // Assert
         const results = await promise;
         expect(results).toBeUndefined();
@@ -236,7 +236,7 @@ describe("OverpassTurboService", () => {
         // Act
         const promise = service.getPlaceGeometry("42");
 
-        mockBackend.expectOne("https://overpass-api.de/api/interpreter").flush(response);
+        mockBackend.expectOne(Urls.overpassApi).flush(response);
         // Assert
         const results = await promise;
         expect(results).toBeUndefined();
