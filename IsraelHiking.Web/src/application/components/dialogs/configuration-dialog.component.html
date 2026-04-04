@@ -5,6 +5,16 @@
   </div>
   <div mat-dialog-content>
     <br />
+    <div class="flex flex-row items-center">
+      {{resources.units}}:
+      <mat-radio-group (change)=setUnits($event.value) [value]="units$ | async">
+        <mat-radio-button value="metric" color="primary" angulartics2On="click" angularticsCategory="Configuration"
+          angularticsAction="Set units metric">{{resources.metric}}</mat-radio-button>
+        <mat-radio-button value="imperial" color="primary" angulartics2On="click" angularticsCategory="Configuration"
+          angularticsAction="Set units imperial">{{resources.imperial}}</mat-radio-button>
+      </mat-radio-group>
+    </div>
+
     @if (isApp()) {
     <div class="flex flex-row">
       <div class="flex-1">

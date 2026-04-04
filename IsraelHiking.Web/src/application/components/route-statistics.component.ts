@@ -108,7 +108,7 @@ export class RouteStatisticsComponent implements OnInit {
 
     private statistics: RouteStatistics;
     private chartElements: IChartElements = {
-        margin: { top: 10, right: 10, bottom: 40, left: 40 },
+        margin: { top: 10, right: 10, bottom: 40, left: 50 },
         zoomTransform: d3.zoomIdentity
     };
     private zoom: number = 7;
@@ -212,6 +212,10 @@ export class RouteStatisticsComponent implements OnInit {
         });
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.redrawChart();
+        });
+        this.store.select((state: ApplicationState) => state.configuration.units).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+            this.redrawChart();
+            this.updateKmMarkers();
         });
         this.store.select((state: ApplicationState) => state.gpsState.currentPosition).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(p => {
             this.onGeolocationChanged(p);
@@ -469,7 +473,7 @@ export class RouteStatisticsComponent implements OnInit {
             .attr("text-anchor", "middle")
             .attr("transform", `translate(${this.chartElements.width / 2},30)`)
             .attr("dir", this.resources.direction)
-            .text(this.resources.distanceInKm)
+            .text(`${this.resources.distance} (${this.getDistanceUnitText()})`)
             .select(".domain")
             .remove();
 
@@ -481,7 +485,7 @@ export class RouteStatisticsComponent implements OnInit {
             .attr("transform", `translate(-30, ${this.chartElements.height / 2}) rotate(-90)`)
             .attr("text-anchor", "middle")
             .attr("dir", this.resources.direction)
-            .text(this.resources.heightInMeters);
+            .text(`${this.resources.height} (${this.getHeightUnitText()})`);
     }
 
     private addChartPath() {
@@ -637,8 +641,11 @@ export class RouteStatisticsComponent implements OnInit {
 
     private buildAllTextInHoverBox(point: RouteStatisticsPoint) {
         this.chartElements.hoverGroup.selectAll("text").remove();
-        this.createHoverBoxText(this.resources.distance, point.coordinate[0].toFixed(2), " " + this.resources.kmUnit, 20);
-        this.createHoverBoxText(this.resources.height, point.coordinate[1].toFixed(0), " " + this.resources.meterUnit, 40, true);
+        const units = this.store.selectSnapshot((state: ApplicationState) => state.configuration.units);
+        const distanceText = (point.coordinate[0] / (units === "metric" ? 1 : 1.60934)).toFixed(2);
+        const heightText = (point.coordinate[1] * (units === "metric" ? 1 : 3.28084)).toFixed(0);
+        this.createHoverBoxText(this.resources.distance, distanceText, " " + this.getDistanceUnitText(), 20);
+        this.createHoverBoxText(this.resources.height, heightText, " " + this.getHeightUnitText(), 40, true);
         if (this.resources.direction === "rtl") {
             // the following is a hack due to bad svg presentation...
             this.createHoverBoxText(this.resources.slope, Math.abs(point.slope).toFixed(0) + "%", point.slope < 0 ? "-" : "", 60);
@@ -697,12 +704,31 @@ export class RouteStatisticsComponent implements OnInit {
             .x(d => this.chartElements.xScale(d[0]))
             .y(d => this.chartElements.yScale(d[1]));
         chartTransition.select(".line").duration(duration).attr("d", line(data));
+
+        const units = this.store.selectSnapshot((state: ApplicationState) => state.configuration.units);
+        const kmToDistance = units === "imperial" ? 1.60934 : 1;
+        const distanceScale = d3.scaleLinear()
+            .domain(this.chartElements.xScale.domain().map(d => d / kmToDistance));
+        const distanceTicks = distanceScale.ticks(5);
+
         chartTransition.select(".x-axis")
             .duration(duration)
-            .call(d3.axisBottom(this.chartElements.xScale).ticks(5) as any);
+            .call((d3.axisBottom(this.chartElements.xScale)
+                .tickValues(distanceTicks.map(d => d * kmToDistance)) as any)
+                .tickFormat((_d: any, i: number) => distanceTicks[i])
+            );
+
+        const mToHeight = units === "imperial" ? 3.28084 : 1;
+        const heightScale = d3.scaleLinear()
+            .domain(this.chartElements.yScale.domain().map(d => d * mToHeight));
+        const heightTicks = heightScale.ticks(5);
+
         chartTransition.select(".y-axis")
-            .call(d3.axisLeft(this.chartElements.yScale).ticks(5) as any)
-            .duration(duration);
+            .duration(duration)
+            .call((d3.axisLeft(this.chartElements.yScale)
+                .tickValues(heightTicks.map(d => d / mToHeight)) as any)
+                .tickFormat((_d: any, i: number) => heightTicks[i])
+            );
         let slopeData = [] as [number, number][];
         if (data.length > 0) {
             // smoothing the slope data for the chart
@@ -785,7 +811,8 @@ export class RouteStatisticsComponent implements OnInit {
 
     private getKmPoints(latlngs: Immutable<LatLngAltTime[]>): LatLngAltTime[] {
         let length = 0;
-        const markersDistance = this.getMarkerDistance() * 1000;
+        const units = this.store.selectSnapshot((state: ApplicationState) => state.configuration.units);
+        const markersDistance = this.getMarkerDistance() * (units === "metric" ? 1000 : 1609.34);
         const start = latlngs[0];
         const results = [start];
         let previousPoint = start;
@@ -1078,5 +1105,25 @@ export class RouteStatisticsComponent implements OnInit {
 
     private isTouchEvent(e: Event): e is TouchEvent {
         return e.type.startsWith("touch");
+    }
+
+    private getDistanceUnitText(): string {
+        const units = this.store.selectSnapshot((state: ApplicationState) => state.configuration.units);
+        const language = this.resources.getCurrentLanguageCodeSimplified();
+        const distanceUnit = units === "metric" ? "kilometer" : "mile";
+        return new Intl.NumberFormat(language, {
+            style: "unit",
+            unit: distanceUnit
+        }).formatToParts(1).find(part => part.type === "unit")?.value;
+    }
+
+    private getHeightUnitText(): string {
+        const units = this.store.selectSnapshot((state: ApplicationState) => state.configuration.units);
+        const language = this.resources.getCurrentLanguageCodeSimplified();
+        const heightUnit = units === "metric" ? "meter" : "foot";
+        return new Intl.NumberFormat(language, {
+            style: "unit",
+            unit: heightUnit
+        }).formatToParts(1).find(part => part.type === "unit")?.value;
     }
 }

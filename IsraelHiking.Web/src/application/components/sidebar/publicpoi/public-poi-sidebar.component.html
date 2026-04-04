@@ -109,8 +109,8 @@
     </mat-card-header>
     <mat-card-content>
       <image-scroller [images]="imagesUrls" [canEdit]="false"></image-scroller>
-      @if (lengthInKm && isRoute()) {
-      <p class="text-center">{{resources.length}}: {{lengthInKm | number : '1.2-2'}} {{resources.kmUnit}}</p>
+      @if (length && isRoute()) {
+      <p class="text-center">{{resources.length}}: {{length | distance}}</p>
       }
       <div class="flex flex-row">
         <p class="w-full whitespace-pre-line" [ngClass]="resources.getTextAlignment(description)"

@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation, ElementRef, inject, viewChildren, Destroy
 import { NgStyle } from "@angular/common";
 import { MatSidenavContainer, MatSidenav, MatSidenavContent } from "@angular/material/sidenav";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
-import { type StyleSpecification, type Map, ScaleControl, Unit, IControl, ControlPosition, type RasterDEMSourceSpecification } from "maplibre-gl";
+import { type StyleSpecification, type Map, ScaleControl, IControl, ControlPosition, type RasterDEMSourceSpecification } from "maplibre-gl";
 import { NgProgressbar } from "ngx-progressbar";
 import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";
@@ -86,38 +86,43 @@ export class MainMapComponent {
         this.mapService.addArrowToMap(this.map);
         this.map.doubleClickZoom.enable();
         this.map._zoomLevelsToOverscale = 4;
-        this.store.select((state: ApplicationState) => state.configuration.language.rtl).subscribe((rtl) => {
-            const start = rtl ? "right" : "left";
-            const end = rtl ? "left" : "right";
-            for (const control of this.addedControls) {
-                this.map.removeControl(control);
-            }
-            this.addedControls = [];
-            for (const c of this.topStartControls()) {
-                const control = new CustomControl(c.nativeElement);
-                this.map.addControl(control, "top-" + start as ControlPosition);
-                this.addedControls.push(control);
-            }
-            for (const c of this.topEndControls()) {
-                const control = new CustomControl(c.nativeElement);
-                this.map.addControl(new CustomControl(c.nativeElement), "top-" + end as ControlPosition);
-                this.addedControls.push(control);
-            }
-            const control = new ScaleControl({ unit: "meter" as Unit });
-            this.map.addControl(control, "bottom-" + end as ControlPosition);
-            this.addedControls.push(control);
-
-            for (const c of this.bottomEndControls()) {
-                const control = new CustomControl(c.nativeElement);
-                this.map.addControl(control, "bottom-" + end as ControlPosition);
-                this.addedControls.push(control);
-            }
-            for (const c of this.bottomStartControls()) {
-                const control = new CustomControl(c.nativeElement);
-                this.map.addControl(control, "bottom-" + start as ControlPosition);
-                this.addedControls.push(control);
-            }
+        this.store.select((state: ApplicationState) => state.configuration.language.rtl).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+            this.initControls();
         });
+        this.store.select((state: ApplicationState) => state.configuration.units).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+            this.initControls();
+        });
+    }
+
+    private initControls() {
+        for (const control of this.addedControls) {
+            this.map.removeControl(control);
+        }
+        this.addedControls = [];
+        for (const c of this.topStartControls()) {
+            const control = new CustomControl(c.nativeElement);
+            this.map.addControl(control, "top-" + this.resources.start as ControlPosition);
+            this.addedControls.push(control);
+        }
+        for (const c of this.topEndControls()) {
+            const control = new CustomControl(c.nativeElement);
+            this.map.addControl(new CustomControl(c.nativeElement), "top-" + this.resources.end as ControlPosition);
+            this.addedControls.push(control);
+        }
+        const control = new ScaleControl({ unit: this.store.selectSnapshot((state: ApplicationState) => state.configuration.units) });
+        this.map.addControl(control, "bottom-" + this.resources.end as ControlPosition);
+        this.addedControls.push(control);
+
+        for (const c of this.bottomEndControls()) {
+            const control = new CustomControl(c.nativeElement);
+            this.map.addControl(control, "bottom-" + this.resources.end as ControlPosition);
+            this.addedControls.push(control);
+        }
+        for (const c of this.bottomStartControls()) {
+            const control = new CustomControl(c.nativeElement);
+            this.map.addControl(control, "bottom-" + this.resources.start as ControlPosition);
+            this.addedControls.push(control);
+        }
     }
 
     public isMobile() {

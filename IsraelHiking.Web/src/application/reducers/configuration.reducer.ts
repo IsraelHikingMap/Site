@@ -8,12 +8,12 @@ import type { ConfigurationState, Language, BatteryOptimizationType } from "../m
 
 export class SetLanguageAction {
     public static type = this.prototype.constructor.name;
-    constructor(public language: Language) {}
+    constructor(public language: Language) { }
 }
 
 export class SetBatteryOptimizationTypeAction {
     public static type = this.prototype.constructor.name;
-    constructor(public batteryOptimizationType: BatteryOptimizationType) {}
+    constructor(public batteryOptimizationType: BatteryOptimizationType) { }
 }
 
 export class ToggleAutomaticRecordingUploadAction {
@@ -40,12 +40,22 @@ export class StopShowingIntroAction {
     public static type = this.prototype.constructor.name;
 }
 
+export class SetUnitsAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public units: "metric" | "imperial") { }
+}
+
+export class SetDateFormateAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public dateFormate: "YYYY-MM-DD" | "DD-MM-YYYY" | "MM-DD-YYYY") { }
+}
+
 @State<ConfigurationState>({
     name: "configuration",
     defaults: initialState.configuration
 })
 @Injectable()
-export class ConfigurationReducer{
+export class ConfigurationReducer {
 
     @Action(SetBatteryOptimizationTypeAction)
     public setBatteryOptimization(ctx: StateContext<ConfigurationState>, action: SetBatteryOptimizationTypeAction) {
@@ -107,6 +117,22 @@ export class ConfigurationReducer{
     public setLanguage(ctx: StateContext<ConfigurationState>, action: SetLanguageAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.language = action.language;
+            return lastState;
+        }));
+    }
+
+    @Action(SetUnitsAction)
+    public setUnits(ctx: StateContext<ConfigurationState>, action: SetUnitsAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.units = action.units;
+            return lastState;
+        }));
+    }
+
+    @Action(SetDateFormateAction)
+    public setDateFormate(ctx: StateContext<ConfigurationState>, action: SetDateFormateAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.dateFormate = action.dateFormate;
             return lastState;
         }));
     }
