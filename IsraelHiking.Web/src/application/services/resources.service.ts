@@ -184,7 +184,6 @@ export class ResourcesService {
     public currentSpeed: string;
     public averageSpeed: string;
     public duration: string;
-    public kmPerHourUnit: string;
     public reportAnIssue: string;
     public reportAnIssueInstructions: string;
     public reportAnIssueSiteInstructions: string;
@@ -288,6 +287,7 @@ export class ResourcesService {
     public units: string;
     public metric: string;
     public imperial: string;
+    public dateFormat: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -509,7 +509,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1775335185160");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1775415125018");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -668,7 +668,6 @@ export class ResourcesService {
         this.currentSpeed = this.gettextCatalog.getString("Current speed");
         this.averageSpeed = this.gettextCatalog.getString("Average speed");
         this.duration = this.gettextCatalog.getString("Duration");
-        this.kmPerHourUnit = this.gettextCatalog.getString("km per hour");
         this.reportAnIssue = this.gettextCatalog.getString("Report an issue");
         this.reportAnIssueInstructions = this.gettextCatalog.getString("Report an issue instructions");
         this.reportAnIssueSiteInstructions = this.gettextCatalog.getString("Report an issue site instructions");
@@ -775,6 +774,7 @@ export class ResourcesService {
         this.units = this.gettextCatalog.getString("Units");
         this.metric = this.gettextCatalog.getString("Metric");
         this.imperial = this.gettextCatalog.getString("Imperial");
+        this.dateFormat = this.gettextCatalog.getString("Date Format");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -1092,5 +1092,9 @@ export class ResourcesService {
             unit: speedUnit,
             unitDisplay: "short"
         }).formatToParts(1).find(part => part.type === "unit")?.value;
+    }
+
+    public getDateFormat() {
+        return this.store.selectSnapshot((s: ApplicationState) => s.configuration).dateFormat;
     }
 }

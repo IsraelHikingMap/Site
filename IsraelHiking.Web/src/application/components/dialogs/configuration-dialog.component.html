@@ -51,7 +51,9 @@
         <div class="flex-1">
           <mat-checkbox [checked]="isAutomaticRecordingUpload$ | async" (change)="toggleAutomaticRecordingUpload()"
             color="primary" angulartics2On="click" angularticsCategory="Configuration"
-            angularticsAction="Toggle automatic upload">{{resources.automaticRecordingUpload}}</mat-checkbox>
+            angularticsAction="Toggle automatic upload">
+            {{resources.automaticRecordingUpload}}
+          </mat-checkbox>
           <br />
           <span class="text-sm">{{resources.automaticRecordingUploadHint}}</span>
         </div>
@@ -59,13 +61,24 @@
       <div class="flex flex-row">
         <div class="flex-1">
           <mat-checkbox [checked]="isGotLostWarnings$ | async" (change)="toggleGotLostWarnings()" color="primary"
-            angulartics2On="click" angularticsCategory="Configuration"
-            angularticsAction="Toggle got lost warnings">{{resources.gotLostWarnings}}</mat-checkbox>
+            angulartics2On="click" angularticsCategory="Configuration" angularticsAction="Toggle got lost warnings">
+            {{resources.gotLostWarnings}}
+          </mat-checkbox>
           <br />
           <span class="text-sm">{{resources.gotLostWarningsHint}}</span>
         </div>
       </div>
       }
+    </div>
+    <div class="flex flex-row">
+      <mat-form-field class="w-full">
+        <mat-label>{{resources.dateFormat}}</mat-label>
+        <mat-select [ngModel]="dateFormat$ | async" (ngModelChange)="setDateFormat($event)">
+          <mat-option value="yyyy-MM-dd">yyyy-MM-dd</mat-option>
+          <mat-option value="dd/MM/yyyy">dd/MM/yyyy</mat-option>
+          <mat-option value="MM/dd/yyyy">MM/dd/yyyy</mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
     <br />
     <p class="ms-2">

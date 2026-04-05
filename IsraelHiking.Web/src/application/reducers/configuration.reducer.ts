@@ -45,9 +45,9 @@ export class SetUnitsAction {
     constructor(public units: "metric" | "imperial") { }
 }
 
-export class SetDateFormateAction {
+export class SetDateFormatAction {
     public static type = this.prototype.constructor.name;
-    constructor(public dateFormate: "YYYY-MM-DD" | "DD-MM-YYYY" | "MM-DD-YYYY") { }
+    constructor(public dateFormat: string) { }
 }
 
 @State<ConfigurationState>({
@@ -129,10 +129,10 @@ export class ConfigurationReducer {
         }));
     }
 
-    @Action(SetDateFormateAction)
-    public setDateFormate(ctx: StateContext<ConfigurationState>, action: SetDateFormateAction) {
+    @Action(SetDateFormatAction)
+    public setDateFormat(ctx: StateContext<ConfigurationState>, action: SetDateFormatAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.dateFormate = action.dateFormate;
+            lastState.dateFormat = action.dateFormat;
             return lastState;
         }));
     }

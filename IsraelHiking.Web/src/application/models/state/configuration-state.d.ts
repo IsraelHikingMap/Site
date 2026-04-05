@@ -13,5 +13,5 @@ export type ConfigurationState = {
     version: number;
     language: Language;
     units: "metric" | "imperial";
-    dateFormate: "YYYY-MM-DD" | "DD-MM-YYYY" | "MM-DD-YYYY";
+    dateFormat: string;
 };

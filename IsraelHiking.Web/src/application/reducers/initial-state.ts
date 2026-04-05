@@ -187,7 +187,7 @@ export const initialState =
             version: 10,
             language: AVAILABLE_LANGUAGES.find(l => l.code === navigator.language) ?? AVAILABLE_LANGUAGES[0],
             units: "metric",
-            dateFormate: "DD-MM-YYYY"
+            dateFormat: "dd/MM/yyyy"
         },
         locationState: {
             longitude: 0,

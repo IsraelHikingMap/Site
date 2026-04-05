@@ -95,7 +95,7 @@
                 {{getTraceDisplayName(trace)}}
             </h4>
             <div class="ms-2">
-                {{trace.timeStamp | date:'dd/MM/yyyy'}}
+                {{trace.timeStamp | date:resources.getDateFormat()}}
             </div>
             <div class="ms-2">
                 {{getVisibilityTranslation(trace.visibility)}}
