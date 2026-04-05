@@ -1084,4 +1084,13 @@ export class ResourcesService {
             unitDisplay: "short"
         }).formatToParts(1).find(part => part.type === "unit")?.value;
     }
+
+    public getSpeedUnitString(units: "metric" | "imperial") {
+        const speedUnit = units === "metric" ? "kilometer-per-hour" : "mile-per-hour";
+        return new Intl.NumberFormat(this.getCurrentLanguageCodeSimplified(), {
+            style: "unit",
+            unit: speedUnit,
+            unitDisplay: "short"
+        }).formatToParts(1).find(part => part.type === "unit")?.value;
+    }
 }

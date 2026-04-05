@@ -79,6 +79,7 @@ export class RouteStatisticsComponent implements OnInit {
     public durationUnits: string = "";
     public averageSpeed: number | null = null;
     public currentSpeed: number | null = null;
+    public speedUnitString: string = "";
     public remainingDistance: number = 0;
     public traveledDistance: number = 0;
     public ETA: string = "--:--";
@@ -213,7 +214,8 @@ export class RouteStatisticsComponent implements OnInit {
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.redrawChart();
         });
-        this.store.select((state: ApplicationState) => state.configuration.units).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+        this.store.select((state: ApplicationState) => state.configuration.units).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((units) => {
+            this.speedUnitString = this.resources.getSpeedUnitString(units);
             this.redrawChart();
             this.updateKmMarkers();
         });
@@ -1115,5 +1117,21 @@ export class RouteStatisticsComponent implements OnInit {
     private getHeightUnitText(): string {
         const units = this.store.selectSnapshot((state: ApplicationState) => state.configuration.units);
         return this.resources.getShortDistanceUnitString(units);
+    }
+
+    public getSpeedString(speed: number | null): string {
+        if (speed == null) {
+            return "";
+        }
+        const units = this.store.selectSnapshot((state: ApplicationState) => state.configuration.units);
+        const factor = units === "metric" ? 1 : 1.60934;
+        const speedInUnits = speed / factor;
+        if (speedInUnits > 100) {
+            return speedInUnits.toFixed(0);
+        }
+        if (speedInUnits > 10) {
+            return speedInUnits.toFixed(1);
+        }
+        return speedInUnits.toFixed(2);
     }
 }

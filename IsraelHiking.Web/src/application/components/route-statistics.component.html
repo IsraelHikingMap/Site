@@ -55,7 +55,7 @@
           <div class="flex flex-col items-center">
             <i class="fa icon-avg-speed"></i>
             @if (averageSpeed) {
-            <span>{{averageSpeed | number: '1.0-2'}} <span class="units">{{resources.kmPerHourUnit}}</span></span>
+            <span>{{getSpeedString(averageSpeed)}} <span class="units">{{speedUnitString}}</span></span>
             } @else {
             <span>--</span>
             }
@@ -65,7 +65,7 @@
           <div class="flex flex-col items-center">
             <i class="fa icon-speed"></i>
             @if (currentSpeed) {
-            <span>{{currentSpeed | number: '1.0-2'}} <span class="units">{{resources.kmPerHourUnit}}</span></span>
+            <span>{{getSpeedString(currentSpeed)}} <span class="units">{{speedUnitString}}</span></span>
             } @else {
             <span>--</span>
             }
