@@ -791,7 +791,7 @@ export class RouteStatisticsComponent implements OnInit {
             return;
         }
 
-        const points = this.getKmPoints(route.latlngs);
+        const points = this.getDistancePoints(route.latlngs);
         const features = [] as GeoJSON.Feature<GeoJSON.Point>[];
         for (let i = 0; i < points.length; i++) {
             features.push({
@@ -809,7 +809,7 @@ export class RouteStatisticsComponent implements OnInit {
         };
     }
 
-    private getKmPoints(latlngs: Immutable<LatLngAltTime[]>): LatLngAltTime[] {
+    private getDistancePoints(latlngs: Immutable<LatLngAltTime[]>): LatLngAltTime[] {
         let length = 0;
         const units = this.store.selectSnapshot((state: ApplicationState) => state.configuration.units);
         const markersDistance = this.getMarkerDistance() * (units === "metric" ? 1000 : 1609.34);
@@ -1109,21 +1109,11 @@ export class RouteStatisticsComponent implements OnInit {
 
     private getDistanceUnitText(): string {
         const units = this.store.selectSnapshot((state: ApplicationState) => state.configuration.units);
-        const language = this.resources.getCurrentLanguageCodeSimplified();
-        const distanceUnit = units === "metric" ? "kilometer" : "mile";
-        return new Intl.NumberFormat(language, {
-            style: "unit",
-            unit: distanceUnit
-        }).formatToParts(1).find(part => part.type === "unit")?.value;
+        return this.resources.getLongDistanceUnitString(units);
     }
 
     private getHeightUnitText(): string {
         const units = this.store.selectSnapshot((state: ApplicationState) => state.configuration.units);
-        const language = this.resources.getCurrentLanguageCodeSimplified();
-        const heightUnit = units === "metric" ? "meter" : "foot";
-        return new Intl.NumberFormat(language, {
-            style: "unit",
-            unit: heightUnit
-        }).formatToParts(1).find(part => part.type === "unit")?.value;
+        return this.resources.getShortDistanceUnitString(units);
     }
 }

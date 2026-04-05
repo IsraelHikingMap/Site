@@ -73,8 +73,7 @@ export class ResourcesService {
     public length: string;
     public gain: string;
     public loss: string;
-    public kmPoi: string;
-    public kmUnit: string;
+    public distanceMarkers: string;
     public distance: string;
     public height: string;
     public width: string;
@@ -556,8 +555,7 @@ export class ResourcesService {
         this.length = this.gettextCatalog.getString("Length");
         this.gain = this.gettextCatalog.getString("Gain");
         this.loss = this.gettextCatalog.getString("Loss");
-        this.kmPoi = this.gettextCatalog.getString("Km markers");
-        this.kmUnit = this.gettextCatalog.getString("Km");
+        this.distanceMarkers = this.gettextCatalog.getString("Distance markers");
         this.distance = this.gettextCatalog.getString("Distance");
         this.height = this.gettextCatalog.getString("Height");
         this.width = this.gettextCatalog.getString("Width");
@@ -1067,5 +1065,23 @@ export class ResourcesService {
             return "l";
         }
         return "";
+    }
+
+    public getLongDistanceUnitString(units: "metric" | "imperial") {
+        const distanceUnit = units === "metric" ? "kilometer" : "mile";
+        return new Intl.NumberFormat(this.getCurrentLanguageCodeSimplified(), {
+            style: "unit",
+            unit: distanceUnit,
+            unitDisplay: "short"
+        }).formatToParts(1).find(part => part.type === "unit")?.value;
+    }
+
+    public getShortDistanceUnitString(units: "metric" | "imperial") {
+        const distanceUnit = units === "metric" ? "meter" : "foot";
+        return new Intl.NumberFormat(this.getCurrentLanguageCodeSimplified(), {
+            style: "unit",
+            unit: distanceUnit,
+            unitDisplay: "short"
+        }).formatToParts(1).find(part => part.type === "unit")?.value;
     }
 }
