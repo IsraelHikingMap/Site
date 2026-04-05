@@ -10,13 +10,13 @@ import { Store } from "@ngxs/store";
 
 import { Angulartics2OnModule } from "../../directives/gtag.directive";
 import { ResourcesService } from "../../services/resources.service";
-import { StopShowingIntroAction } from "../../reducers/configuration.reducer";
+import { SetDateFormatAction, SetUnitsAction, StopShowingIntroAction } from "../../reducers/configuration.reducer";
 import { AVAILABLE_LANGUAGES, HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import { RunningContextService } from "../../services/running-context.service";
 import { SetActivityTypeAction } from "../../reducers/user.reducer";
 import { SelectBaseLayerAction } from "../../reducers/layers.reducer";
 import { SetRoutingTypeAction } from "../../reducers/route-editing.reducer";
-import type { ActivityType } from "../../models";
+import type { ActivityType, LanguageCode } from "../../models";
 
 import languageAnimationData from "../../../content/lottie/dialog-language.json";
 import mapsAnimationData from "../../../content/lottie/dialog-maps.json";
@@ -65,6 +65,13 @@ export class IntroDialogComponent {
     }
 
     public close() {
+        if (this.getLanuguageCode() == "en-US") {
+            this.store.dispatch(new SetDateFormatAction("MM/dd/yyyy"));
+            this.store.dispatch(new SetUnitsAction("imperial"));
+        } else {
+            this.store.dispatch(new SetDateFormatAction("dd/MM/yyyy"));
+            this.store.dispatch(new SetUnitsAction("metric"));
+        }
         this.store.dispatch(new StopShowingIntroAction());
         this.dialogRef.close();
     }
