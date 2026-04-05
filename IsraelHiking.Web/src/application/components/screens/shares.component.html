@@ -53,6 +53,13 @@
             </button>
             <mat-menu #filterMenu="matMenu">
                 <div mat-menu-item (click)="$event.stopPropagation()">
+                    <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Very Hard')"
+                        [checked]="filter.difficulty.includes('Very Hard')" angulartics2On="click"
+                        angularticsCategory="Shares" angularticsAction="Filter by very hard difficulty">
+                        {{resources.veryHard}}
+                    </mat-checkbox>
+                </div>
+                <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Hard')"
                         [checked]="filter.difficulty.includes('Hard')" angulartics2On="click"
                         angularticsCategory="Shares" angularticsAction="Filter by hard difficulty">
@@ -86,14 +93,14 @@
                     <mat-checkbox color="primary" (change)="onFilterChange('type', 'Hiking')"
                         [checked]="filter.type.includes('Hiking')" angulartics2On="click" angularticsCategory="Shares"
                         angularticsAction="Filter by hiking">
-                        <i class="fa icon-bike"></i>
+                        <i class="fa icon-hike"></i>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterChange('type', 'Biking')"
                         [checked]="filter.type.includes('Biking')" angulartics2On="click" angularticsCategory="Shares"
                         angularticsAction="Filter by biking">
-                        <i class="fa icon-hike"></i>
+                        <i class="fa icon-bike"></i>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
