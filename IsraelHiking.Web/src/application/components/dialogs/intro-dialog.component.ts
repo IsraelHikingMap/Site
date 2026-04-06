@@ -16,7 +16,7 @@ import { RunningContextService } from "../../services/running-context.service";
 import { SetActivityTypeAction } from "../../reducers/user.reducer";
 import { SelectBaseLayerAction } from "../../reducers/layers.reducer";
 import { SetRoutingTypeAction } from "../../reducers/route-editing.reducer";
-import type { ActivityType, LanguageCode } from "../../models";
+import type { ActivityType } from "../../models";
 
 import languageAnimationData from "../../../content/lottie/dialog-language.json";
 import mapsAnimationData from "../../../content/lottie/dialog-maps.json";
