@@ -124,6 +124,9 @@ export class MapService {
             // Map is not ready yet
             return [];
         }
+        if (!this.currentMap.getLayer(this.resourcesService.globalPointsExternalLayer)) {
+            return [];
+        }
         return this.currentMap.queryRenderedFeatures({ layers: [this.resourcesService.globalPointsExternalLayer, this.resourcesService.globalPointsLayer] });
     }
 
