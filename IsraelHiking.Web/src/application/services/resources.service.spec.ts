@@ -39,7 +39,8 @@ describe("ResourcesService", () => {
                 expect(store.dispatch).toHaveBeenCalled();
             });
             return promise;
-        }));
+        }
+    ));
 
     it("Should faciliate translation", inject([ResourcesService, GetTextCatalogService],
         (service: ResourcesService, getText: GetTextCatalogService) => {
@@ -47,7 +48,8 @@ describe("ResourcesService", () => {
             spyOn(getText, "getString").and.returnValue("word's translation");
 
             expect(service.translate("word")).toBe("word's translation");
-        }));
+        }
+    ));
 
     it("Should be able to test if a text contains hebrew", inject([ResourcesService], (service: ResourcesService) => {
         expect(service.hasRtlCharacters("שלום")).toBeTruthy();
