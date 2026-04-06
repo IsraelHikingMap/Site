@@ -510,7 +510,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1774561566028");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1775507616257");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -774,7 +774,7 @@ export class ResourcesService {
         this.list = this.gettextCatalog.getString("List");
         this.searchSharesPlaceHolder = this.gettextCatalog.getString("Search cloud saves...");
         this.searchTracesPlaceHolder = this.gettextCatalog.getString("Search traces...");
-        this.noRoutesFoundMoveTheMapOrChangeTheFilters = this.gettextCatalog.getString("No routes found, move the map or change the filters...");
+        this.noRoutesFoundMoveTheMapOrChangeTheFilters = this.gettextCatalog.getString("No routes found, zoom in the map or change the filters...");
         this.copyToClipboard = this.gettextCatalog.getString("Copy to clipboard");
         this.findRoutes = this.gettextCatalog.getString("Find Routes");
         // Toasts: Errors/Warnings/Success
