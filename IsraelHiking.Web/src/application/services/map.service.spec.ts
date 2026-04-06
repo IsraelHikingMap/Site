@@ -214,7 +214,8 @@ describe("MapService", () => {
     it("should get a list of features when the map was initialized", inject([MapService], async (service: MapService) => {
         service.setMap({
             on: () => { },
-            queryRenderedFeatures: () => [{ id: "42" }, { id: "43" }]
+            queryRenderedFeatures: () => [{ id: "42" }, { id: "43" }],
+            getLayer: () => true
         } as any as Map);
         const features = service.getFeaturesFromTiles();
         expect(features.length).toEqual(2);
