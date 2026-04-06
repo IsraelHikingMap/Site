@@ -1,7 +1,7 @@
 import { Component, inject, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
-import { NgClass, DecimalPipe } from "@angular/common";
+import { NgClass } from "@angular/common";
 import { MatButton, MatAnchor } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
@@ -17,6 +17,7 @@ import { Store } from "@ngxs/store";
 import { PublicPointOfInterestEditComponent } from "./public-poi-edit.component";
 import { ImageScrollerComponent } from "./image-scroller.component";
 import { Angulartics2OnModule } from "../../../directives/gtag.directive";
+import { DistancePipe } from "../../../pipes/distance.pipe";
 import { ResourcesService } from "../../../services/resources.service";
 import { PoiService, PoiSocialLinks } from "../../../services/poi.service";
 import { MapeakTitleService } from "../../../services/mapeak-title.service";
@@ -49,7 +50,7 @@ export type SourceImageUrlPair = {
     selector: "public-poi-sidebar",
     templateUrl: "./public-poi-sidebar.component.html",
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, Angulartics2OnModule, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, MatCard, PublicPointOfInterestEditComponent, FormsModule, MatCardHeader, MatCardTitle, NgClass, MatCardContent, ImageScrollerComponent, DecimalPipe]
+    imports: [Dir, MatButton, Angulartics2OnModule, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, MatCard, PublicPointOfInterestEditComponent, FormsModule, MatCardHeader, MatCardTitle, NgClass, MatCardContent, ImageScrollerComponent, DistancePipe]
 })
 export class PublicPoiSidebarComponent implements OnDestroy {
     public isLoading: boolean = true;
@@ -57,7 +58,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     public sourceImageUrls: SourceImageUrlPair[];
     public shareLinks = {} as PoiSocialLinks;
     public showingTranslated: boolean = true;
-    public lengthInKm: number = null;
+    public length: number = null;
     public description: string = "";
     public title: string = "";
     public imagesUrls: string[] = [];
@@ -175,7 +176,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         this.urls = GeoJSONUtils.getUrls(feature);
         this.description = await this.getDescription();
         this.showToggleTranslation = this.translationService.isTranslationPossibleAndNeeded(feature) && this.description != this.translationService.getBestDescription(feature);
-        this.lengthInKm = this.poiService.getLengthInKm(feature);
+        this.length = this.poiService.getLengthInMeters(feature);
         const language = this.resources.getCurrentLanguageCodeSimplified();
         this.titleService.set(GeoJSONUtils.getTitle(feature, language));
         this.title = GeoJSONUtils.getTitle(feature, language);

@@ -52,6 +52,7 @@ export class PublicRoutesComponent {
     public filterDifficulty: string[] = ["Easy", "Moderate", "Hard", "Very Hard"];
     public filterLengthStart: number = 0;
     public filterLengthEnd: number = 50;
+    public unitString: string = "km";
 
     public poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
     public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point> = {
@@ -84,6 +85,9 @@ export class PublicRoutesComponent {
         this.store.select((state: ApplicationState) => state.locationState).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.runFilter();
         });
+        this.store.select((state: ApplicationState) => state.configuration.units).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((units) => {
+            this.unitString = this.resources.getLongDistanceUnitString(units);
+        });
         this.destroyRef.onDestroy(() => {
             this.mapService.unsetMap();
         });
@@ -107,16 +111,18 @@ export class PublicRoutesComponent {
         let features = this.poiService.getPublicRoutes(["Hiking", "Bicycle", "4x4"]).features;
         features = features.filter(f => f.properties.image != null);
         features = features.filter(feature => {
+            const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration).units;
+            const factor = units === "metric" ? 1000.0 : 1609.344;
             if (!this.filterCategories.includes(feature.properties.poiCategory)) {
                 return false;
             }
             if (feature.properties.poiDifficulty && !this.filterDifficulty.includes(feature.properties.poiDifficulty)) {
                 return false;
             }
-            if (feature.properties.poiLength / 1000 < this.filterLengthStart) {
+            if (feature.properties.poiLength / factor < this.filterLengthStart) {
                 return false;
             }
-            if (feature.properties.poiLength / 1000 > this.filterLengthEnd && this.filterLengthEnd < 50) {
+            if (feature.properties.poiLength / factor > this.filterLengthEnd && this.filterLengthEnd < 50) {
                 return false;
             }
             return true;

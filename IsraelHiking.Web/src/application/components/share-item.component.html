@@ -87,7 +87,7 @@
         @if (shareUrl().public) {
         <span class="mx-1">{{resources.public}}, </span>
         }
-        <span>{{resources.date}}: {{shareUrl().lastModifiedDate | date:'dd/MM/yyyy'}}</span>
+        <span>{{resources.date}}: {{shareUrl().lastModifiedDate | date:resources.getDateFormat()}}</span>
     </div>
     @if (isApp()) {
     <div class="flex flex-row">

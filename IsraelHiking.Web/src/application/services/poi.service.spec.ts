@@ -908,7 +908,7 @@ describe("Poi Service", () => {
                 coordinates: [1, 2]
             }
         } as GeoJSON.Feature;
-        const length = await poiService.getLengthInKm(feature);
+        const length = await poiService.getLengthInMeters(feature);
         expect(length).toBeNull();
     }));
 
@@ -925,7 +925,7 @@ describe("Poi Service", () => {
                 coordinates: [[1, 2], [3, 4]]
             }
         } as GeoJSON.Feature;
-        const length = await poiService.getLengthInKm(feature);
+        const length = await poiService.getLengthInMeters(feature);
         expect(length).toBeGreaterThan(0);
     }));
 

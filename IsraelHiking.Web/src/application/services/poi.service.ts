@@ -650,9 +650,9 @@ export class PoiService {
         await this.addPointToUploadQueue(featureContainingOnlyChanges);
     }
 
-    public getLengthInKm(feature: Immutable<GeoJSON.Feature>): number | null {
+    public getLengthInMeters(feature: Immutable<GeoJSON.Feature>): number | null {
         if (feature.geometry.type === "LineString" || feature.geometry.type === "MultiLineString") {
-            return SpatialService.getLengthInMetersForGeometry(feature.geometry) / 1000.0;
+            return SpatialService.getLengthInMetersForGeometry(feature.geometry);
         }
         return null;
     }

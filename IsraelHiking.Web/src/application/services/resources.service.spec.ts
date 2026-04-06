@@ -10,11 +10,13 @@ describe("ResourcesService", () => {
         TestBed.configureTestingModule({
             imports: [NgxsModule.forRoot([])],
             providers: [
-                {provide: GetTextCatalogService, useValue: {
-                    getString: () => "",
-                    loadRemote: () => Promise.resolve(),
-                    setCurrentLanguage: () => {}
-                }},
+                {
+                    provide: GetTextCatalogService, useValue: {
+                        getString: () => "",
+                        loadRemote: () => Promise.resolve(),
+                        setCurrentLanguage: () => { }
+                    }
+                },
                 ResourcesService
             ]
         });
@@ -23,29 +25,31 @@ describe("ResourcesService", () => {
     it("Should faciliate language change to english and raise event", inject([ResourcesService, Store],
         (service: ResourcesService, store: Store) => {
 
-        store.reset({
-            configuration: {
-                language: {
-                    code: "he"
+            store.reset({
+                configuration: {
+                    language: {
+                        code: "he"
+                    }
                 }
-            }
-        });
-        store.dispatch = jasmine.createSpy();
+            });
+            store.dispatch = jasmine.createSpy();
 
-        const promise = service.setLanguage("he").then(() => {
-            expect(service.getCurrentLanguageCodeSimplified()).toBe("he");
-            expect(store.dispatch).toHaveBeenCalled();
-        });
-        return promise;
-    }));
+            const promise = service.setLanguage("he").then(() => {
+                expect(service.getCurrentLanguageCodeSimplified()).toBe("he");
+                expect(store.dispatch).toHaveBeenCalled();
+            });
+            return promise;
+        }
+    ));
 
     it("Should faciliate translation", inject([ResourcesService, GetTextCatalogService],
         (service: ResourcesService, getText: GetTextCatalogService) => {
 
-        spyOn(getText, "getString").and.returnValue("word's translation");
+            spyOn(getText, "getString").and.returnValue("word's translation");
 
-        expect(service.translate("word")).toBe("word's translation");
-    }));
+            expect(service.translate("word")).toBe("word's translation");
+        }
+    ));
 
     it("Should be able to test if a text contains hebrew", inject([ResourcesService], (service: ResourcesService) => {
         expect(service.hasRtlCharacters("שלום")).toBeTruthy();
@@ -90,5 +94,80 @@ describe("ResourcesService", () => {
 
     it("Should after wikipedia file url", inject([ResourcesService], (service: ResourcesService) => {
         expect(service.getResizedImageUrl("File:456.png", 123)).toContain("Redirect/file/");
+    }));
+
+    it("should get long distance unit when language is Hebrew", inject([ResourcesService, Store], (service: ResourcesService, store: Store) => {
+        store.reset({
+            configuration: {
+                language: {
+                    code: "he"
+                }
+            }
+        });
+        expect(service.getLongDistanceUnitString("metric")).toBe("ק״מ");
+    }));
+
+    it("should get long distance unit when language is English", inject([ResourcesService, Store], (service: ResourcesService, store: Store) => {
+        store.reset({
+            configuration: {
+                language: {
+                    code: "en-US"
+                }
+            }
+        });
+        expect(service.getLongDistanceUnitString("imperial")).toBe("mi");
+    }));
+
+    it("should get short distance unit when language is Hebrew", inject([ResourcesService, Store], (service: ResourcesService, store: Store) => {
+        store.reset({
+            configuration: {
+                language: {
+                    code: "he"
+                }
+            }
+        });
+        expect(service.getShortDistanceUnitString("metric")).toBe("מ׳");
+    }));
+
+    it("should get short distance unit when language is English", inject([ResourcesService, Store], (service: ResourcesService, store: Store) => {
+        store.reset({
+            configuration: {
+                language: {
+                    code: "en-US"
+                }
+            }
+        });
+        expect(service.getShortDistanceUnitString("imperial")).toBe("ft");
+    }));
+
+    it("should get speed unit when language is Hebrew", inject([ResourcesService, Store], (service: ResourcesService, store: Store) => {
+        store.reset({
+            configuration: {
+                language: {
+                    code: "he"
+                }
+            }
+        });
+        expect(service.getSpeedUnitString("metric")).toBe("קמ״ש");
+    }));
+
+    it("should get speed unit when language is English", inject([ResourcesService, Store], (service: ResourcesService, store: Store) => {
+        store.reset({
+            configuration: {
+                language: {
+                    code: "en-US"
+                }
+            }
+        });
+        expect(service.getSpeedUnitString("imperial")).toBe("mph");
+    }));
+
+    it("should get date format from store", inject([ResourcesService, Store], (service: ResourcesService, store: Store) => {
+        store.reset({
+            configuration: {
+                dateFormat: "dd-MM-yyyy"
+            }
+        });
+        expect(service.getDateFormat()).toBe("dd-MM-yyyy");
     }));
 });
