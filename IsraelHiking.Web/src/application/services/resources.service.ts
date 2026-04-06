@@ -73,14 +73,10 @@ export class ResourcesService {
     public length: string;
     public gain: string;
     public loss: string;
-    public kmPoi: string;
-    public meterUnit: string;
-    public kmUnit: string;
+    public distanceMarkers: string;
     public distance: string;
     public height: string;
     public width: string;
-    public heightInMeters: string;
-    public distanceInKm: string;
     public searchPlaceHolder: string;
     public close: string;
     public layerNamePlaceHolder: string;
@@ -188,7 +184,6 @@ export class ResourcesService {
     public currentSpeed: string;
     public averageSpeed: string;
     public duration: string;
-    public kmPerHourUnit: string;
     public reportAnIssue: string;
     public reportAnIssueInstructions: string;
     public reportAnIssueSiteInstructions: string;
@@ -289,6 +284,10 @@ export class ResourcesService {
     public noRoutesFoundMoveTheMapOrChangeTheFilters: string;
     public copyToClipboard: string;
     public findRoutes: string;
+    public units: string;
+    public metric: string;
+    public imperial: string;
+    public dateFormat: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -556,14 +555,10 @@ export class ResourcesService {
         this.length = this.gettextCatalog.getString("Length");
         this.gain = this.gettextCatalog.getString("Gain");
         this.loss = this.gettextCatalog.getString("Loss");
-        this.kmPoi = this.gettextCatalog.getString("Km markers");
-        this.meterUnit = this.gettextCatalog.getString("m");
-        this.kmUnit = this.gettextCatalog.getString("Km");
+        this.distanceMarkers = this.gettextCatalog.getString("Distance markers");
         this.distance = this.gettextCatalog.getString("Distance");
         this.height = this.gettextCatalog.getString("Height");
         this.width = this.gettextCatalog.getString("Width");
-        this.heightInMeters = this.gettextCatalog.getString("Height (m)");
-        this.distanceInKm = this.gettextCatalog.getString("Distance (Km)");
         this.searchPlaceHolder = this.gettextCatalog.getString("Type to search...");
         this.close = this.gettextCatalog.getString("Close");
         this.layerNamePlaceHolder = this.gettextCatalog.getString("A name to be displayed in the layers controller");
@@ -673,7 +668,6 @@ export class ResourcesService {
         this.currentSpeed = this.gettextCatalog.getString("Current speed");
         this.averageSpeed = this.gettextCatalog.getString("Average speed");
         this.duration = this.gettextCatalog.getString("Duration");
-        this.kmPerHourUnit = this.gettextCatalog.getString("km per hour");
         this.reportAnIssue = this.gettextCatalog.getString("Report an issue");
         this.reportAnIssueInstructions = this.gettextCatalog.getString("Report an issue instructions");
         this.reportAnIssueSiteInstructions = this.gettextCatalog.getString("Report an issue site instructions");
@@ -777,6 +771,10 @@ export class ResourcesService {
         this.noRoutesFoundMoveTheMapOrChangeTheFilters = this.gettextCatalog.getString("No routes found, zoom in the map or change the filters...");
         this.copyToClipboard = this.gettextCatalog.getString("Copy to clipboard");
         this.findRoutes = this.gettextCatalog.getString("Find Routes");
+        this.units = this.gettextCatalog.getString("Units");
+        this.metric = this.gettextCatalog.getString("Metric");
+        this.imperial = this.gettextCatalog.getString("Imperial");
+        this.dateFormat = this.gettextCatalog.getString("Date Format");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -1067,5 +1065,36 @@ export class ResourcesService {
             return "l";
         }
         return "";
+    }
+
+    public getLongDistanceUnitString(units: "metric" | "imperial") {
+        const distanceUnit = units === "metric" ? "kilometer" : "mile";
+        return new Intl.NumberFormat(this.getCurrentLanguageCodeSimplified(), {
+            style: "unit",
+            unit: distanceUnit,
+            unitDisplay: "short"
+        }).formatToParts(1).find(part => part.type === "unit")?.value;
+    }
+
+    public getShortDistanceUnitString(units: "metric" | "imperial") {
+        const distanceUnit = units === "metric" ? "meter" : "foot";
+        return new Intl.NumberFormat(this.getCurrentLanguageCodeSimplified(), {
+            style: "unit",
+            unit: distanceUnit,
+            unitDisplay: "short"
+        }).formatToParts(1).find(part => part.type === "unit")?.value;
+    }
+
+    public getSpeedUnitString(units: "metric" | "imperial") {
+        const speedUnit = units === "metric" ? "kilometer-per-hour" : "mile-per-hour";
+        return new Intl.NumberFormat(this.getCurrentLanguageCodeSimplified(), {
+            style: "unit",
+            unit: speedUnit,
+            unitDisplay: "short"
+        }).formatToParts(1).find(part => part.type === "unit")?.value;
+    }
+
+    public getDateFormat() {
+        return this.store.selectSnapshot((s: ApplicationState) => s.configuration).dateFormat;
     }
 }

@@ -258,6 +258,8 @@ export class LocationComponent {
 
         const center = this.mapComponent.mapInstance.getCenter();
         const distance = SpatialService.getDistanceInMeters(center, gps);
+        const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration).units;
+        const factor = units === "metric" ? 1000.0 : 1609.344;
         this.distanceFeatures = {
             type: "FeatureCollection",
             features: [{
@@ -271,7 +273,7 @@ export class LocationComponent {
             {
                 type: "Feature",
                 properties: {
-                    distance: (distance / 1000.0).toFixed(2) + " " + this.resources.kmUnit
+                    distance: (distance / factor).toFixed(2) + " " + this.resources.getLongDistanceUnitString(units)
                 },
                 geometry: {
                     type: "Point",

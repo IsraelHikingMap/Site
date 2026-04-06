@@ -2,9 +2,12 @@ import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton, MatAnchor } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
+import { MatFormField, MatLabel } from "@angular/material/input";
 import { AsyncPipe } from "@angular/common";
 import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
 import { MatCheckbox } from "@angular/material/checkbox";
+import { FormsModule } from "@angular/forms";
+import { MatOption, MatSelect } from "@angular/material/select";
 import { MatDialogRef, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
@@ -18,6 +21,8 @@ import { DatabaseService } from "../../services/database.service";
 import { initialState } from "../../reducers/initial-state";
 import {
     SetBatteryOptimizationTypeAction,
+    SetDateFormatAction,
+    SetUnitsAction,
     ToggleAutomaticRecordingUploadAction,
     ToggleGotLostWarningsAction
 } from "../../reducers/configuration.reducer";
@@ -26,13 +31,15 @@ import type { ApplicationState, BatteryOptimizationType } from "../../models";
 @Component({
     selector: "configuration-dialog",
     templateUrl: "./configuration-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, MatRadioButton, Angulartics2OnModule, MatCheckbox, MatDialogActions, MatAnchor, AsyncPipe]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, MatRadioButton, Angulartics2OnModule, MatCheckbox, MatDialogActions, MatAnchor, AsyncPipe, FormsModule, MatFormField, MatSelect, MatOption, MatLabel]
 })
 export class ConfigurationDialogComponent {
 
     public batteryOptimizationType$: Observable<BatteryOptimizationType>;
     public isAutomaticRecordingUpload$: Observable<boolean>;
     public isGotLostWarnings$: Observable<boolean>;
+    public units$: Observable<"metric" | "imperial">;
+    public dateFormat$: Observable<string>;
     public manageSubscriptions: string;
 
     public readonly resources = inject(ResourcesService);
@@ -48,6 +55,8 @@ export class ConfigurationDialogComponent {
         this.batteryOptimizationType$ = this.store.select((state: ApplicationState) => state.configuration.batteryOptimizationType);
         this.isAutomaticRecordingUpload$ = this.store.select((state: ApplicationState) => state.configuration.isAutomaticRecordingUpload);
         this.isGotLostWarnings$ = this.store.select((state: ApplicationState) => state.configuration.isGotLostWarnings);
+        this.units$ = this.store.select((state: ApplicationState) => state.configuration.units);
+        this.dateFormat$ = this.store.select((state: ApplicationState) => state.configuration.dateFormat);
         this.manageSubscriptions = this.runningContextService.isIos
             ? "https://apps.apple.com/account/subscriptions"
             : "https://play.google.com/store/account/subscriptions";
@@ -55,6 +64,10 @@ export class ConfigurationDialogComponent {
 
     public isApp() {
         return this.runningContextService.isCapacitor;
+    }
+
+    public setUnits(units: "metric" | "imperial") {
+        this.store.dispatch(new SetUnitsAction(units));
     }
 
     public toggleAutomaticRecordingUpload() {
@@ -83,6 +96,12 @@ export class ConfigurationDialogComponent {
                 }
             }
         });
+    }
 
+    public setDateFormat(dateFormat: string) {
+        if (!dateFormat) {
+            return;
+        }
+        this.store.dispatch(new SetDateFormatAction(dateFormat.replaceAll("Y", "y").replaceAll("D", "d")));
     }
 }

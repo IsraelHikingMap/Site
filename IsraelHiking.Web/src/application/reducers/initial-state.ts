@@ -186,6 +186,8 @@ export const initialState =
             isShowSlope: false,
             version: 10,
             language: AVAILABLE_LANGUAGES.find(l => l.code === navigator.language) ?? AVAILABLE_LANGUAGES[0],
+            units: "metric",
+            dateFormat: "dd/MM/yyyy"
         },
         locationState: {
             longitude: 0,

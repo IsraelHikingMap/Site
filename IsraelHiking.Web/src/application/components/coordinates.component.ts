@@ -2,6 +2,7 @@ import { Component, inject, input, OnInit } from "@angular/core";
 import { DecimalPipe } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 
+import { DistancePipe } from "../pipes/distance.pipe";
 import { ResourcesService } from "../services/resources.service";
 import { ElevationProvider } from "../services/elevation.provider";
 import { CoordinatesService } from "../services/coordinates.service";
@@ -10,7 +11,7 @@ import type { LatLngAltTime, NorthEast } from "../models";
 @Component({
     selector: "coordinates",
     templateUrl: "./coordinates.component.html",
-    imports: [Dir, DecimalPipe]
+    imports: [Dir, DecimalPipe, DistancePipe]
 })
 export class CoordinatesComponent implements OnInit {
 

@@ -1,11 +1,11 @@
 ﻿@if (latlng()) {
-  <div class="{{'text-' + resources.start}}">
-    <p>
-      <span dir="ltr">{{latlng().lat | number: '1.0-6' }}°, {{latlng().lng | number:'1.0-6'}}°</span><br />
-      <span dir="ltr">{{itmCoordinates.east.toFixed(0) }} / {{itmCoordinates.north.toFixed(0) }}</span><br />
-      @if (latlng().alt) {
-        <span>{{resources.elevation}}: <span dir="ltr">{{latlng().alt | number: '1.0-0' }}</span> {{resources.meterUnit}}</span>
-      }
-    </p>
-  </div>
+<div class="text-start">
+  <p>
+    <span dir="ltr">{{latlng().lat | number: '1.0-6' }}°, {{latlng().lng | number:'1.0-6'}}°</span><br />
+    <span dir="ltr">{{itmCoordinates.east.toFixed(0) }} / {{itmCoordinates.north.toFixed(0) }}</span><br />
+    @if (latlng().alt) {
+    <span>{{resources.elevation}}: <span dir="ltr">{{latlng().alt | distance }}</span></span>
+    }
+  </p>
+</div>
 }
