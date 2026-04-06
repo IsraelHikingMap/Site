@@ -69,6 +69,7 @@ export class MainMapComponent {
         this.initialStyle = this.defaultStyleService.getStyleWithPlaceholders();
         this.titleService.clear();
         this.destroyRef.onDestroy(() => {
+            this.sidebarService.hide();
             this.mapService.unsetMap();
             this.map = null;
         });
