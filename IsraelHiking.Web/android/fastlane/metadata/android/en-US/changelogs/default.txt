@@ -1,4 +1,2 @@
-- Allow finding near by routes
-- Improve navigation bar appearance and current screen recognition
-- Improve recording thumbnails
+- Support imperial units
 - Plus various bug fixes and performance improvements
