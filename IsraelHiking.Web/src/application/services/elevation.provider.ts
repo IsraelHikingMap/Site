@@ -64,7 +64,7 @@ export class ElevationProvider {
                 const useOffline = await this.pmTilesService.isOfflineFileAvailable(ElevationProvider.MAX_ELEVATION_ZOOM, tileX, tileY, ElevationProvider.ELEVATION_SCHEMA)
                 const arrayBuffer = useOffline
                     ? await this.pmTilesService.getTileByType(ElevationProvider.MAX_ELEVATION_ZOOM, tileX, tileY, ElevationProvider.ELEVATION_SCHEMA)
-                    : await firstValueFrom(this.httpClient.get(`https://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/${ElevationProvider.MAX_ELEVATION_ZOOM}/${tileX}/${tileY}.png`, { responseType: "arraybuffer" }));
+                    : await firstValueFrom(this.httpClient.get(`https://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/${ElevationProvider.MAX_ELEVATION_ZOOM}/${tileX}/${tileY}.webp`, { responseType: "arraybuffer" }));
                 const data = await this.getImageData(arrayBuffer);
                 this.elevationCache.set(key, data);
             }
