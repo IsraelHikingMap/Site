@@ -113,7 +113,7 @@ export class ElevationProvider {
 
     private async getImageData(data: ArrayBuffer): Promise<Uint8ClampedArray> {
         const imageBitmapSupported = typeof createImageBitmap === "function";
-        const blob: Blob = new Blob([new Uint8Array(data)], { type: "image/png" });
+        const blob: Blob = new Blob([new Uint8Array(data)], { type: "image/webp" });
         const img = imageBitmapSupported
             ? await createImageBitmap(blob)
             : await this.arrayBufferToImage(blob);
