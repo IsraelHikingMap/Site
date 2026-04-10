@@ -142,8 +142,8 @@ export class PublicPoiSidebarComponent implements OnDestroy {
                 return;
             }
             let clonedFeature = cloneDeep(feature);
-            this.store.dispatch(new SetSelectedPoiAction(clonedFeature));
             this.osmEditableInfo = await this.poiService.createEditableDataAndMerge(clonedFeature);
+            this.store.dispatch(new SetSelectedPoiAction(clonedFeature));
             await this.initFromFeature(clonedFeature);
             if (data.source === "OSM") {
                 await this.poiService.updateExtendedInfo(clonedFeature, data.language);
