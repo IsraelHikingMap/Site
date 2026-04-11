@@ -27,8 +27,7 @@
               "src/empty-for-oauth.html",
               "src/googlef59316cdb0845a8c.html",
               "src/robots.txt",
-              "src/fonts/glyphs",
-              "src/fonts/glyphs.json",
+              "add-protocol-worker.js",
               {
                 "glob": "**/mapbox-gl-rtl-text.js",
                 "input": "./node_modules/@mapbox/mapbox-gl-rtl-text/dist",
