@@ -187,8 +187,16 @@ body {
 
 /* Progressbar override end */
 
-.safe-bottom {
+.bottom-safe {
     bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+}
+
+.pb-safe {
+    padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+}
+
+.pb-safe-w-button {
+    padding-bottom: calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + v.$app-button-size);
 }
 
 .maplibregl-ctrl-top-left {
