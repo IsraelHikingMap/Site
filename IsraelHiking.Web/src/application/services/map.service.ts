@@ -45,6 +45,7 @@ export class MapService {
     public setMap(map: Map) {
         this.loggingService.info("[Map] Initializing map");
         this.currentMap = map;
+        this.currentMap._zoomLevelsToOverscale = 4;
         this.resolve();
 
         this.currentMap.on("dragstart", this.onDragstart);
