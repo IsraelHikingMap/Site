@@ -1,7 +1,9 @@
 import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { firstValueFrom, timeout } from "rxjs";
+import { Urls } from "../urls";
 import type { WikiMetadata, WikiPage } from "./wikidata.service";
+import type { OsmUserDetails, ShareUrl } from "../models";
 
 export type ImageAttribution = {
     author: string;
@@ -54,6 +56,16 @@ export class ImageAttributionService {
         const wikidataFileUrl = imageUrl.startsWith("File:");
         if (!url.hostname && !wikidataFileUrl) {
             return null;
+        }
+        if (url.hostname.includes("mapeak.com")) {
+            const shareUrl = await firstValueFrom(this.httpClient.get<ShareUrl>(imageUrl.replace("/thumbnail", "")));
+            const osmUser = await firstValueFrom(this.httpClient.get<OsmUserDetails>(`${Urls.osmApi}user/${shareUrl.osmUserId}`));
+            const imageAttribution = {
+                author: osmUser.user.display_name,
+                url: shareUrl.website
+            };
+            this.attributionImageCache.set(imageUrl, Promise.resolve(imageAttribution));
+            return imageAttribution;
         }
         if (!url.hostname.includes("upload.wikimedia") && !wikidataFileUrl) {
             const imageAttribution = {
