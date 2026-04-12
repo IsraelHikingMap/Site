@@ -74,10 +74,10 @@
     </div>
     <div class="flex flex-row">
       <mat-radio-group [value]="shareUrl.type" (change)="setActivityType($event.value)" color="primary">
-        <mat-radio-button value="Hiking"><i class="fa icon-hike"></i></mat-radio-button>
-        <mat-radio-button value="Biking"><i class="fa icon-bike"></i></mat-radio-button>
-        <mat-radio-button value="4x4"><i class="fa icon-four-by-four"></i></mat-radio-button>
-        <mat-radio-button value="Unknown"><i class="fa icon-question"></i></mat-radio-button>
+        <mat-radio-button value="Hiking"><i class="fa fa-lg icon-hike me-3"></i></mat-radio-button>
+        <mat-radio-button value="Biking"><i class="fa fa-lg icon-bike me-3"></i></mat-radio-button>
+        <mat-radio-button value="4x4"><i class="fa fa-lg icon-four-by-four me-3"></i></mat-radio-button>
+        <mat-radio-button value="Unknown"><i class="fa fa-lg icon-question me-3"></i></mat-radio-button>
       </mat-radio-group>
     </div>
     <div class="flex flex-row">
@@ -85,16 +85,21 @@
     </div>
     <div class="flex flex-row">
       <mat-radio-group [(ngModel)]="shareUrl.difficulty" color="primary">
-        <mat-radio-button value="Easy"><span
-            class="rounded-full bg-green-500 p-2">{{resources.easy}}</span></mat-radio-button>
-        <mat-radio-button value="Moderate"><span
-            class="rounded-full bg-yellow-500 p-2">{{resources.moderate}}</span></mat-radio-button>
-        <mat-radio-button value="Hard"><span
-            class="rounded-full bg-red-500 p-2 text-white">{{resources.hard}}</span></mat-radio-button>
-        <mat-radio-button value="Very Hard"><span
-            class="rounded-full bg-black p-2 text-white">{{resources.veryHard}}</span></mat-radio-button>
-        <mat-radio-button value="Unknown"><span
-            class="rounded-full bg-gray-300 p-2">{{resources.unknown}}</span></mat-radio-button>
+        <mat-radio-button value="Easy">
+          <span class="rounded-full bg-green-500 p-2 me-2">{{resources.easy}}</span>
+        </mat-radio-button>
+        <mat-radio-button value="Moderate">
+          <span class="rounded-full bg-yellow-500 p-2 me-2">{{resources.moderate}}</span>
+        </mat-radio-button>
+        <mat-radio-button value="Hard">
+          <span class="rounded-full bg-red-500 p-2 text-white me-2">{{resources.hard}}</span>
+        </mat-radio-button>
+        <mat-radio-button value="Very Hard">
+          <span class="rounded-full bg-black p-2 text-white me-2">{{resources.veryHard}}</span>
+        </mat-radio-button>
+        <mat-radio-button value="Unknown">
+          <span class="rounded-full bg-gray-300 p-2 me-2">{{resources.unknown}}</span>
+        </mat-radio-button>
       </mat-radio-group>
     </div>
     <div class="flex flex-row">
