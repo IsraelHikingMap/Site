@@ -38,12 +38,6 @@
         <input matInput class="w-full" type="text" [(ngModel)]="shareUrl.title" />
       </mat-form-field>
     </div>
-    <div class="flex flex-row">
-      <mat-form-field class="w-full" hintLabel="{{resources.descriptionPlaceHolder}}">
-        <mat-label>{{resources.description}}</mat-label>
-        <textarea matInput class="w-full" rows="2" type="text" [(ngModel)]="shareUrl.description"></textarea>
-      </mat-form-field>
-    </div>
     @if (hasHiddenRoutes) {
     <div class="flex flex-row">
       <mat-hint class="text-sm">⚠️ {{resources.hiddenRoutesWillNotBeSaved}}</mat-hint>
@@ -101,6 +95,13 @@
           <span class="rounded-full bg-gray-300 p-2 me-2">{{resources.unknown}}</span>
         </mat-radio-button>
       </mat-radio-group>
+    </div>
+    <div class="flex flex-row">
+      <mat-form-field class="w-full" hintLabel="{{resources.descriptionPlaceHolder}}">
+        <mat-label>{{resources.description}}</mat-label>
+        <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="2" cdkAutosizeMaxRows="10" class="w-full" rows="2"
+          type="text" [(ngModel)]="shareUrl.description"></textarea>
+      </mat-form-field>
     </div>
     <div class="flex flex-row">
       <mat-form-field class="w-full">
