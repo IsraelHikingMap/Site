@@ -36,17 +36,25 @@ export class MapService {
                 }, MapService.NOT_FOLLOWING_TIMEOUT, "panned");
             }
         });
-        const workerCode = await fetch("./add-protocol-worker.js");
-        const workerCodeText = await workerCode.text();
-        const workerUrl = URL.createObjectURL(new Blob([workerCodeText], { type: "application/javascript" }));
-        getGlobalDispatcher().registerMessageHandler("contour-worker" as any, async () => {
-            getGlobalDispatcher().broadcast("contour-worker" as any, {
-                demUrlPattern: "slice://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.webp",
-                encoding: "terrarium",
-                maxzoom: 11
+        const promise = new Promise<void>(resolve => {
+            getGlobalDispatcher().registerMessageHandler("contour-worker" as any, async () => {
+                await getGlobalDispatcher().broadcast("contour-worker" as any, {
+                    demUrlPattern: "slice://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.webp",
+                    encoding: "terrarium",
+                    maxzoom: 11
+                });
+                resolve();
             });
         });
-        importScriptInWorkers(workerUrl);
+        const linkEl = document.createElement('a');
+        linkEl.href = "./add-protocol-worker.js";
+        importScriptInWorkers(linkEl.href);
+        await Promise.all([
+            promise,
+            document.fonts.load("12px Noto Sans"),
+            document.fonts.load("12px Open Sans"),
+            document.fonts.load("12px Open Sans Cond Bold")
+        ]);
     }
 
     public setMap(map: Map) {

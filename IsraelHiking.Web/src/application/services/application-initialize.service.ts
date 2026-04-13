@@ -61,9 +61,6 @@ export class ApplicationInitializeService {
 
     public async initialize() {
         try {
-            await document.fonts.load("12px Noto Sans");
-            await document.fonts.load("12px Open Sans");
-            await document.fonts.load("12px Open Sans Cond Bold");
             await this.loggingService.initialize();
             this.loggingService.info("---------------------------------------");
             this.loggingService.info("Starting Mapeak Application Initialization");
@@ -78,7 +75,7 @@ export class ApplicationInitializeService {
             this.geoLocationService.initialize();
             this.hashService.initialize();
             this.dragAndDropService.initialize();
-            this.mapService.initialize();
+            await this.mapService.initialize();
             if (this.runningContextService.isMobile
                 && !this.runningContextService.isCapacitor
                 && !this.runningContextService.isIFrame) {
