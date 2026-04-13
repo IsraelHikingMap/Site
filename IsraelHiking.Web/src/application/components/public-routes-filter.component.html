@@ -1,0 +1,100 @@
+<div class="flex flex-row items-center">
+    <span class="mx-2">{{resources.filter}}</span>
+    <button mat-button class="flex-1" [matMenuTriggerFor]="listFilterTypeMenu" angulartics2On="click"
+        angularticsCategory="Public routes" angularticsAction="Open filter type menu">
+        <i class="fa fa-lg icon-sliders mx-2"></i>
+        @if (isCategoryFiltered()) {
+        <i class="fa fa icon-filter mx-2 text-gray-400"></i>
+        }
+    </button>
+    <button mat-button class="flex-1" [matMenuTriggerFor]="listFilterLengthMenu" angulartics2On="click"
+        angularticsCategory="Public routes" angularticsAction="Open filter length menu">
+        <i class="fa fa-lg icon-measure mx-2"></i>
+        @if (isLengthFiltered()) {
+        <i class="fa fa icon-filter mx-2 text-gray-400"></i>
+        }
+    </button>
+    <button mat-button class="flex-1" [matMenuTriggerFor]="listFilterDifficultyMenu" angulartics2On="click"
+        angularticsCategory="Public routes" angularticsAction="Open filter difficulty menu">
+        <i class="fa fa-lg icon-speed mx-2"></i>
+        @if (isDifficultyFiltered()) {
+        <i class="fa fa icon-filter mx-2 text-gray-400"></i>
+        }
+    </button>
+    <mat-menu #listFilterTypeMenu="matMenu">
+        <span class="mx-2">{{resources.routeType}}</span>
+        <div mat-menu-item (click)="$event.stopPropagation()">
+            <mat-checkbox color="primary" (change)="onFilterCategoryChange('Hiking')"
+                [checked]="isCategorySelected('Hiking')" angulartics2On="click" angularticsCategory="Public routes"
+                angularticsAction="Filter by hiking">
+                <i class="fa icon-hike"></i>
+            </mat-checkbox>
+        </div>
+        <div mat-menu-item (click)="$event.stopPropagation()">
+            <mat-checkbox color="primary" (change)="onFilterCategoryChange('Bicycle')"
+                [checked]="isCategorySelected('Bicycle')" angulartics2On="click" angularticsCategory="Public routes"
+                angularticsAction="Filter by bicycle">
+                <i class="fa icon-bike"></i>
+            </mat-checkbox>
+        </div>
+        <div mat-menu-item (click)="$event.stopPropagation()">
+            <mat-checkbox color="primary" (change)="onFilterCategoryChange('4x4')" [checked]="isCategorySelected('4x4')"
+                angulartics2On="click" angularticsCategory="Public routes" angularticsAction="Filter by 4x4">
+                <i class="fa icon-four-by-four"></i>
+            </mat-checkbox>
+        </div>
+    </mat-menu>
+    <mat-menu #listFilterLengthMenu="matMenu">
+        <span class="mx-2">{{resources.length}}</span>
+        <div mat-menu-item (click)="$event.stopPropagation()">
+            <div class="flex flex-row">
+                <mat-slider class="w-full" min="0" max="50" step="1" angulartics2On="click"
+                    angularticsCategory="Public routes" angularticsAction="Filter by length">
+                    <input [value]="filterLengthStart" matSliderStartThumb
+                        (input)="onFilterLengthStartChange($event.srcElement.value)">
+                    <input [value]="filterLengthEnd" matSliderEndThumb
+                        (input)="onFilterLengthEndChange($event.srcElement.value)">
+                </mat-slider>
+            </div>
+            <div class="flex flex-row">
+                <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthStart}}
+                    {{unitString}}</span>
+                <span class="flex-grow"></span>
+                <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthEnd === 50 ?
+                    "\u200E+50" : filterLengthEnd}}
+                    {{unitString}}</span>
+            </div>
+        </div>
+    </mat-menu>
+    <mat-menu #listFilterDifficultyMenu="matMenu">
+        <span class="mx-2">{{resources.difficulty}}</span>
+        <div mat-menu-item (click)="$event.stopPropagation()">
+            <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Easy')"
+                [checked]="isDificultySelected('Easy')" angulartics2On="click" angularticsCategory="Public routes"
+                angularticsAction="Filter by easy difficulty">
+                <span class="rounded-full bg-green-500 p-2">{{resources.easy}}</span>
+            </mat-checkbox>
+        </div>
+        <div mat-menu-item (click)="$event.stopPropagation()">
+            <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Moderate')"
+                [checked]="isDificultySelected('Moderate')" angulartics2On="click" angularticsCategory="Public routes"
+                angularticsAction="Filter by moderate difficulty">
+                <span class="rounded-full bg-yellow-500 p-2">{{resources.moderate}}</span>
+            </mat-checkbox>
+        </div>
+        <div mat-menu-item (click)="$event.stopPropagation()">
+            <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Hard')"
+                [checked]="isDificultySelected('Hard')" angulartics2On="click" angularticsCategory="Public routes"
+                angularticsAction="Filter by hard difficulty">
+                <span class="rounded-full bg-red-500 p-2 text-white">{{resources.hard}}</span>
+            </mat-checkbox>
+        </div>
+        <div mat-menu-item (click)="$event.stopPropagation()">
+            <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Very Hard')"
+                [checked]="isDificultySelected('Very Hard')" angulartics2On="click" angularticsCategory="Public routes"
+                angularticsAction="Filter by very hard difficulty">
+                <span class="rounded-full bg-black p-2 text-white">{{resources.veryHard}}</span>
+            </mat-checkbox>
+        </div>
+    </mat-menu>
+</div>

@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { ShareUrl, InMemoryState } from "../models";
+import type { ShareUrl, InMemoryState, PublicRoutesFilter } from "../models";
 
 export class ToggleDistanceAction {
     public static type = this.prototype.constructor.name;
@@ -41,6 +41,11 @@ export class SetSearchTermAction {
 export class SetUrlAction {
     public static type = this.prototype.constructor.name;
     constructor(public url: string) { }
+}
+
+export class SetPublicRoutesFilterAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public filters: PublicRoutesFilter) { }
 }
 
 @State({
@@ -111,6 +116,14 @@ export class InMemoryReducer {
     public setUrl(ctx: StateContext<InMemoryState>, action: SetUrlAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.currentUrl = action.url;
+            return lastState;
+        }));
+    }
+
+    @Action(SetPublicRoutesFilterAction)
+    public setPublicRoutesFilter(ctx: StateContext<InMemoryState>, action: SetPublicRoutesFilterAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.publicRoutesFilter = action.filters;
             return lastState;
         }));
     }

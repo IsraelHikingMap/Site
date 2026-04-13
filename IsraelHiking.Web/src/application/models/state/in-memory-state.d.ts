@@ -1,4 +1,4 @@
-﻿import type { ShareUrl } from "..";
+﻿import type { ShareUrl, PublicRoutesFilter } from "..";
 
 /**
  * this state should be clean every time the app starts
@@ -13,4 +13,5 @@ export type InMemoryState = {
     shareUrl: ShareUrl;
     searchTerm: string;
     currentUrl: string;
+    publicRoutesFilter: PublicRoutesFilter;
 };

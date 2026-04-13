@@ -245,6 +245,11 @@ export const initialState =
             fileUrl: null,
             baseLayer: null,
             searchTerm: "",
+            publicRoutesFilter: {
+                categories: ["Bicycle", "Hiking", "4x4"],
+                difficulty: ["Easy", "Moderate", "Hard", "Very Hard"],
+                lengthRange: [0, 50]
+            }
         },
         gpsState: {
             tracking: "disabled",

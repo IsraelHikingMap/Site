@@ -10,8 +10,6 @@ import { FormsModule } from "@angular/forms";
 import { MatButtonToggle, MatButtonToggleGroup } from "@angular/material/button-toggle";
 import { Angulartics2OnModule } from "application/directives/gtag.directive";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
-import { MatCheckbox } from "@angular/material/checkbox";
-import { MatSlider, MatSliderRangeThumb } from "@angular/material/slider";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { Share } from "@capacitor/share";
 import { orderBy } from "lodash-es";
@@ -20,6 +18,7 @@ import type { StyleSpecification, Map, MapSourceDataEvent } from "maplibre-gl";
 import { ImageAttributionComponent } from "../image-attribution.component";
 import { ZoomComponent } from "../zoom.component";
 import { OsmAttributionComponent } from "../osm-attribution.component";
+import { PublicRoutesFilterComponent } from "../public-routes-filter.component";
 import { DistancePipe } from "../../pipes/distance.pipe";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { DefaultStyleService } from "../../services/default-style.service";
@@ -34,25 +33,20 @@ import { GeoJSONUtils } from "../../services/geojson-utils";
 import { PoiProperties } from "../../services/osm-tags.service";
 import { RouteStrings } from "../../services/hash.service";
 import { Urls } from "../../urls";
-import type { ApplicationState } from "../../models";
+import { SetPublicRoutesFilterAction } from "application/reducers/in-memory.reducer";
+import type { ApplicationState, PublicRoutesFilter } from "../../models";
 
 @Component({
     selector: "public-routes",
     templateUrl: "./public-routes.component.html",
     styleUrls: ["./public-routes.component.scss"],
-    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, Angulartics2OnModule, NgClass, MatMenuTrigger, MatMenuItem, MatCheckbox, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, MatSlider, MatSliderRangeThumb, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, ControlComponent]
+    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, Angulartics2OnModule, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, ControlComponent, PublicRoutesFilterComponent]
 })
 export class PublicRoutesComponent {
     public mapStyle: StyleSpecification;
     public showMap: boolean = true;
     public readonly routesSrouceId = "routes-of-interest";
-    public sortBy: string = "length";
-    public sortDirection: "asc" | "desc" = "desc";
-    public filterCategories: string[] = ["Bicycle", "Hiking", "4x4"];
-    public filterDifficulty: string[] = ["Easy", "Moderate", "Hard", "Very Hard"];
-    public filterLengthStart: number = 0;
-    public filterLengthEnd: number = 50;
-    public unitString: string = "km";
+
 
     public poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
     public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point> = {
@@ -85,8 +79,8 @@ export class PublicRoutesComponent {
         this.store.select((state: ApplicationState) => state.locationState).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.runFilter();
         });
-        this.store.select((state: ApplicationState) => state.configuration.units).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((units) => {
-            this.unitString = this.resources.getLongDistanceUnitString(units);
+        this.store.select((state: ApplicationState) => state.inMemoryState.publicRoutesFilter).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((filters) => {
+            this.runFilter();
         });
         this.destroyRef.onDestroy(() => {
             this.mapService.unsetMap();
@@ -109,42 +103,30 @@ export class PublicRoutesComponent {
 
     public runFilter() {
         let features = this.poiService.getPublicRoutes(["Hiking", "Bicycle", "4x4"]).features;
+        const filters = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter);
         features = features.filter(f => f.properties.image != null);
         features = features.filter(feature => {
             const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration).units;
             const factor = units === "metric" ? 1000.0 : 1609.344;
-            if (!this.filterCategories.includes(feature.properties.poiCategory)) {
+            if (!filters.categories.includes(feature.properties.poiCategory)) {
                 return false;
             }
-            if (feature.properties.poiDifficulty && !this.filterDifficulty.includes(feature.properties.poiDifficulty)) {
+            if (feature.properties.poiDifficulty && !filters.difficulty.includes(feature.properties.poiDifficulty)) {
                 return false;
             }
-            if (feature.properties.poiLength / factor < this.filterLengthStart) {
+            if (feature.properties.poiLength / factor < filters.lengthRange[0]) {
                 return false;
             }
-            if (feature.properties.poiLength / factor > this.filterLengthEnd && this.filterLengthEnd < 50) {
+            if (feature.properties.poiLength / factor > filters.lengthRange[1] && filters.lengthRange[1] < 50) {
                 return false;
             }
             return true;
         });
-        let sortBy: ((f: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) => string | number)[];
-        switch (this.sortBy) {
-            case "difficulty":
-                sortBy = [(f: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) => f.properties.poiDifficulty];
-                break;
-            case "category":
-                sortBy = [(f: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) => f.properties.poiCategory];
-                break;
-            case "length":
-                sortBy = [(f: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) => f.properties.poiLength];
-                break;
-            case "name":
-                sortBy = [(f: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) => GeoJSONUtils.getTitle(f, this.resources.getCurrentLanguageCodeSimplified())];
-                break;
-        }
+        let sortBy = [(f: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) => f.properties.poiLength];
 
 
-        features = orderBy(features, sortBy, [this.sortDirection]);
+
+        features = orderBy(features, sortBy, ['desc']);
         this.poiGeoJsonData = {
             type: "FeatureCollection",
             features
@@ -202,28 +184,6 @@ export class PublicRoutesComponent {
         this.runFilter();
     }
 
-    public onFilterCategoryChange(value: string) {
-        if (this.filterCategories.includes(value)) {
-            this.filterCategories = this.filterCategories.filter((x) => x !== value);
-        } else {
-            this.filterCategories.push(value);
-        }
-        this.runFilter();
-    }
-
-    public onFilterDifficultyChange(value: string) {
-        if (this.filterDifficulty.includes(value)) {
-            this.filterDifficulty = this.filterDifficulty.filter((x) => x !== value);
-        } else {
-            this.filterDifficulty.push(value);
-        }
-        this.runFilter();
-    }
-
-    public onSortDirectionChange() {
-        this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
-        this.runFilter();
-    }
 
     public getIconFromType(feature: GeoJSON.Feature<GeoJSON.Point>) {
         switch (feature.properties.poiCategory) {
@@ -250,16 +210,6 @@ export class PublicRoutesComponent {
         await new Promise((resolve) => setTimeout(resolve, 100));
         const bounds = SpatialService.getBoundsForFeature(fullFeature);
         this.mapService.fitBounds(bounds);
-    }
-
-    public onFilterLengthStartChange(value: number) {
-        this.filterLengthStart = value;
-        this.runFilter();
-    }
-
-    public onFilterLengthEndChange(value: number) {
-        this.filterLengthEnd = value;
-        this.runFilter();
     }
 
     public isApp() {

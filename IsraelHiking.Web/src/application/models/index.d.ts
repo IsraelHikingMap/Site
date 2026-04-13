@@ -25,6 +25,7 @@ export type { NorthEast } from "./north-east";
 export type { CategoriesGroup, Category, IconColorLabel, CategoriesGroupType } from "./categories-group";
 export type { Language, LanguageCode } from "./language";
 export type { RecordedRoute } from "./recorded-route";
+export type { PublicRoutesFilter } from "./public-routes-filter";
 // states:
 export type { ApplicationState, MutableApplicationState } from "./state/application-state";
 export type { ConfigurationState, BatteryOptimizationType } from "./state/configuration-state";
