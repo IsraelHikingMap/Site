@@ -46,7 +46,7 @@ export class MapService {
                 resolve();
             });
         });
-        const linkEl = document.createElement('a');
+        const linkEl = document.createElement("a");
         linkEl.href = "./add-protocol-worker.js";
         importScriptInWorkers(linkEl.href);
         await Promise.all([

@@ -33,8 +33,7 @@ import { GeoJSONUtils } from "../../services/geojson-utils";
 import { PoiProperties } from "../../services/osm-tags.service";
 import { RouteStrings } from "../../services/hash.service";
 import { Urls } from "../../urls";
-import { SetPublicRoutesFilterAction } from "application/reducers/in-memory.reducer";
-import type { ApplicationState, PublicRoutesFilter } from "../../models";
+import type { ApplicationState } from "../../models";
 
 @Component({
     selector: "public-routes",
@@ -79,7 +78,7 @@ export class PublicRoutesComponent {
         this.store.select((state: ApplicationState) => state.locationState).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.runFilter();
         });
-        this.store.select((state: ApplicationState) => state.inMemoryState.publicRoutesFilter).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((filters) => {
+        this.store.select((state: ApplicationState) => state.inMemoryState.publicRoutesFilter).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.runFilter();
         });
         this.destroyRef.onDestroy(() => {
@@ -122,11 +121,11 @@ export class PublicRoutesComponent {
             }
             return true;
         });
-        let sortBy = [(f: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) => f.properties.poiLength];
+        const sortBy = [(f: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) => f.properties.poiLength];
 
 
 
-        features = orderBy(features, sortBy, ['desc']);
+        features = orderBy(features, sortBy, ["desc"]);
         this.poiGeoJsonData = {
             type: "FeatureCollection",
             features
