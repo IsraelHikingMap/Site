@@ -1,5 +1,5 @@
 import { inject, Injectable } from "@angular/core";
-import { type ErrorEvent, type GeoJSONFeature, type LayerSpecification, type Map, type Point, setRTLTextPlugin, type SourceSpecification, importScriptInWorkers } from "maplibre-gl";
+import { type ErrorEvent, type GeoJSONFeature, type LayerSpecification, type Map, type Point, setRTLTextPlugin, type SourceSpecification, importScriptInWorkers, getGlobalDispatcher } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
@@ -39,6 +39,13 @@ export class MapService {
         const workerCode = await fetch("./add-protocol-worker.js");
         const workerCodeText = await workerCode.text();
         const workerUrl = URL.createObjectURL(new Blob([workerCodeText], { type: "application/javascript" }));
+        getGlobalDispatcher().registerMessageHandler("contour-worker" as any, async () => {
+            getGlobalDispatcher().broadcast("contour-worker" as any, {
+                demUrlPattern: "slice://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.webp",
+                encoding: "terrarium",
+                maxzoom: 11
+            });
+        });
         importScriptInWorkers(workerUrl);
     }
 

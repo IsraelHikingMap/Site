@@ -63,7 +63,8 @@
     "linear-interpolator": "^1.0.2",
     "lodash-es": "^4.18.1",
     "lottie-web": "^5.13.0",
-    "maplibre-gl": "^5.21.1",
+    "maplibre-contour": "^0.1.0",
+    "maplibre-gl": "^5.23.0",
     "minisearch": "^7.2.0",
     "ngx-infinite-scroll": "^21.0.0",
     "ngx-lottie": "^21.2.0",
@@ -122,6 +123,7 @@
     "karma-jasmine-html-reporter": "^2.2.0",
     "karma-junit-reporter": "^2.0.1",
     "openapi-typescript": "^7.13.0",
+    "patch-package": "^8.0.1",
     "postcss": "^8.5.8",
     "puppeteer": "^24.40.0",
     "replace-in-file": "^8.4.0",
@@ -149,7 +151,8 @@
     "generate-legend": "tsx ./scripts/generate-legend.ts",
     "generate-sprite": "tsx ./scripts/generate-sprite.ts",
     "generate-user-data-types": "openapi-typescript https://raw.githubusercontent.com/Mapeak-com/user-data/refs/heads/main/user-data.openapi.yml -o ./src/application/models/user-data.g.d.ts",
-    "set-version": "tsx ./scripts/set-version.ts"
+    "set-version": "tsx ./scripts/set-version.ts",
+    "postinstall": "patch-package"
   },
   "type": "module",
   "version": "9.21.0"
