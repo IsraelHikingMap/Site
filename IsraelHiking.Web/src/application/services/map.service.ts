@@ -1,5 +1,5 @@
 import { inject, Injectable } from "@angular/core";
-import { type ErrorEvent, type GeoJSONFeature, type LayerSpecification, type Map, type Point, setRTLTextPlugin, type SourceSpecification } from "maplibre-gl";
+import { type ErrorEvent, type GeoJSONFeature, type LayerSpecification, type Map, type Point, setRTLTextPlugin, type SourceSpecification, importScriptInWorkers, getGlobalDispatcher } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
@@ -26,7 +26,7 @@ export class MapService {
 
     public initializationPromise = new Promise<void>((resolve) => { this.resolve = resolve; });
 
-    public initialize() {
+    public async initialize() {
         setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
         this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
             this.cancelableTimeoutService.clearTimeoutByName("panned");
@@ -36,11 +36,23 @@ export class MapService {
                 }, MapService.NOT_FOLLOWING_TIMEOUT, "panned");
             }
         });
+        const workerCode = await fetch("./add-protocol-worker.js");
+        const workerCodeText = await workerCode.text();
+        const workerUrl = URL.createObjectURL(new Blob([workerCodeText], { type: "application/javascript" }));
+        getGlobalDispatcher().registerMessageHandler("contour-worker" as any, async () => {
+            getGlobalDispatcher().broadcast("contour-worker" as any, {
+                demUrlPattern: "slice://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.webp",
+                encoding: "terrarium",
+                maxzoom: 11
+            });
+        });
+        importScriptInWorkers(workerUrl);
     }
 
     public setMap(map: Map) {
         this.loggingService.info("[Map] Initializing map");
         this.currentMap = map;
+        this.currentMap._zoomLevelsToOverscale = 4;
         this.resolve();
 
         this.currentMap.on("dragstart", this.onDragstart);

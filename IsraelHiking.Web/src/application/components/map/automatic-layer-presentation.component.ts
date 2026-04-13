@@ -71,6 +71,9 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
         this.subscriptions.push(this.store.select((state: ApplicationState) => state.offlineState.downloadedTiles).subscribe(() => {
             this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
         }));
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.units).subscribe(() => {
+            this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
+        }));
     }
 
     public ngOnDestroy() {
@@ -132,7 +135,8 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     }
 
     private async createJsonLayer(layerData: EditableLayer) {
-        const tryLocalStyle = this.isMainMap() && DEFAULT_BASE_LAYERS.some(l => l.key === layerData.key) && this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles != null;
+        const isBuiltInBaseLayer = DEFAULT_BASE_LAYERS.some(l => l.key === layerData.key);
+        const tryLocalStyle = this.isMainMap() && isBuiltInBaseLayer && this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles != null;
         const response = await this.fileService.getStyleJsonContent(layerData.address, tryLocalStyle);
         const language = this.resources.getCurrentLanguageCodeSimplified();
         let styleAsText = JSON.stringify(response);
@@ -152,6 +156,12 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
                     source.tiles[0] = source.tiles[0].replace("https://", "slice://");
                 }
             }
+        }
+        if (isBuiltInBaseLayer && styleJson.sources["Contour"]?.type === "vector") {
+            const contourSource = styleJson.sources["Contour"];
+            const multiplier = this.store.selectSnapshot((s: ApplicationState) => s.configuration.units) === "metric" ? 1 : 3.28084;
+            delete contourSource.url;
+            contourSource.tiles[0] = `dem-contour://{z}/{x}/{y}?contourLayer=contours&elevationKey=ele&levelKey=level&multiplier=${multiplier}&overzoom=1&thresholds=11*200*1000~12*10*100~13*10*100~14*10*100~15*10*100`
         }
         this.updateSourcesAndLayers(layerData, styleJson.sources, styleJson.layers);
     }

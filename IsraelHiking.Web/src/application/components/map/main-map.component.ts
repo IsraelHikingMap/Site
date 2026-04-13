@@ -86,7 +86,6 @@ export class MainMapComponent {
         this.mapService.setMap(this.map);
         this.mapService.addArrowToMap(this.map);
         this.map.doubleClickZoom.enable();
-        this.map._zoomLevelsToOverscale = 4;
         this.store.select((state: ApplicationState) => state.configuration.language.rtl).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.initControls();
         });
