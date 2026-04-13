@@ -36,6 +36,7 @@ import { DataContainerService } from "../../services/data-container.service";
 import { RouteStrings } from "../../services/hash.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
+import { getHighlightSegments } from "../../utils/highlight-segments";
 import type { ApplicationState, LatLngAltTime, Trace, TraceVisibility } from "../../models";
 import { ZoomComponent } from "../zoom.component";
 
@@ -54,6 +55,7 @@ export class TracesComponent implements OnInit {
     public mapStyle: StyleSpecification;
     public filteredTraces: Immutable<Trace[]>;
     public loadingTraces: boolean = false;
+    public searchTerm = "";
     public selectedTrace: Immutable<Trace> | undefined;
     public tracesGeoJson: GeoJSON.FeatureCollection<GeoJSON.Point> | undefined = {
         type: "FeatureCollection",
@@ -197,6 +199,7 @@ export class TracesComponent implements OnInit {
 
     private runFilter() {
         const searchTerm = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.searchTerm).trim();
+        this.searchTerm = searchTerm;
         const traces = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces;
         this.filteredTraces = orderBy(traces.filter((t) => this.findInTrace(t, searchTerm)), [this.sortBy], [this.sortDirection]);
         this.tracesGeoJson = {
@@ -277,6 +280,10 @@ export class TracesComponent implements OnInit {
             default:
                 throw new Error(`invalid visibility value: ${visibility}`);
         }
+    }
+
+    public getHighlightedSegments(value: string | null | undefined) {
+        return getHighlightSegments(value, this.searchTerm);
     }
 
     public async moveToTrace(traceId: string) {

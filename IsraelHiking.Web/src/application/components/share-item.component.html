@@ -34,7 +34,13 @@
             </button>
         </mat-menu>
         }
-        {{shareUrl().title}}
+        @for (segment of getHighlightedSegments(shareUrl().title); track $index) {
+        @if (segment.isMatch) {
+        <mark>{{segment.text}}</mark>
+        } @else {
+        {{segment.text}}
+        }
+        }
     </h4>
     <div class="m-2">
         @switch (shareUrl().difficulty) {
@@ -65,7 +71,13 @@
         }
     </div>
     <div class="mx-2">
-        {{shareUrl().description}}
+        @for (segment of getHighlightedSegments(shareUrl().description); track $index) {
+        @if (segment.isMatch) {
+        <mark>{{segment.text}}</mark>
+        } @else {
+        {{segment.text}}
+        }
+        }
     </div>
     @if (shareUrl().length > 0) {
     <div class="inline-flex flex-row gap-1 text-sm mx-2">

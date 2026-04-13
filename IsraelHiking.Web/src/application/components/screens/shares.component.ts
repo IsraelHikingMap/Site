@@ -49,6 +49,7 @@ export class SharesComponent implements OnInit {
     public mapStyle: StyleSpecification;
     public selectedShareUrl: Immutable<ShareUrl> = null;
     public filteredShareUrls: Immutable<ShareUrl[]> = [];
+    public currentSearchTerm = "";
     public routesGeoJson: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
     public sortBy: keyof ShareUrl = "lastModifiedDate";
     public sortDirection: "asc" | "desc" = "desc";
@@ -120,6 +121,7 @@ export class SharesComponent implements OnInit {
     private async runFilter() {
         const shareUrls = this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState.shareUrls);
         const searchTerm = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.searchTerm);
+        this.currentSearchTerm = searchTerm;
         const filteredShareUrls = shareUrls.filter((share: Immutable<ShareUrl>) => {
             for (const key in this.filter) {
                 const propValue = share[key as any as keyof ShareUrl];

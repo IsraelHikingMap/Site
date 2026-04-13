@@ -124,7 +124,7 @@
         }
         @for (shareUrl of filteredShareUrls; track shareUrl.id) {
         <div [id]="'share-url-' + shareUrl.id">
-            <share-item [shareUrl]="shareUrl" [showMenu]="true" (delete)="deleteShareUrl(shareUrl)"
+            <share-item [shareUrl]="shareUrl" [showMenu]="true" [searchTerm]="currentSearchTerm" (delete)="deleteShareUrl(shareUrl)"
                 (editProperties)="openEditShareUrlDialog(shareUrl)" (open)="openShareUrl(shareUrl)"
                 (addToRoutes)="addShareUrlToRoutes(shareUrl)" (moveToRoute)="moveToShare(shareUrl)"></share-item>
         </div>

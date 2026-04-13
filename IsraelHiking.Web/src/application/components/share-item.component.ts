@@ -13,6 +13,7 @@ import { Angulartics2OnModule } from "../directives/gtag.directive";
 import { ShareUrlsService } from "../services/share-urls.service";
 import { ResourcesService } from "../services/resources.service";
 import { RunningContextService } from "../services/running-context.service";
+import { getHighlightSegments } from "../utils/highlight-segments";
 import type { ShareUrl } from "../models/";
 
 @Component({
@@ -23,6 +24,7 @@ import type { ShareUrl } from "../models/";
 export class ShareItemComponent implements OnInit {
     public shareUrl = input<Immutable<ShareUrl>>();
     public showMenu = input<boolean>(false);
+    public searchTerm = input<string>("");
     public delete = output<void>();
     public editProperties = output<void>();
     public open = output<void>();
@@ -62,5 +64,9 @@ export class ShareItemComponent implements OnInit {
         Share.share({
             url: this.shareAddress
         });
+    }
+
+    public getHighlightedSegments(value: string | null | undefined) {
+        return getHighlightSegments(value, this.searchTerm());
     }
 }

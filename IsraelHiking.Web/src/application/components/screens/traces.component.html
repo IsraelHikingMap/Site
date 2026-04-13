@@ -92,7 +92,13 @@
                         {{resources.findUnmappedRoutes}}
                     </button>
                 </mat-menu>
-                {{getTraceDisplayName(trace)}}
+                @for (segment of getHighlightedSegments(getTraceDisplayName(trace)); track $index) {
+                @if (segment.isMatch) {
+                <mark>{{segment.text}}</mark>
+                } @else {
+                {{segment.text}}
+                }
+                }
             </h4>
             <div class="ms-2">
                 {{trace.timeStamp | date:resources.getDateFormat()}}
@@ -101,7 +107,13 @@
                 {{getVisibilityTranslation(trace.visibility)}}
             </div>
             <div class="ms-2">
-                {{trace.tagsString}}
+                @for (segment of getHighlightedSegments(trace.tagsString); track $index) {
+                @if (segment.isMatch) {
+                <mark>{{segment.text}}</mark>
+                } @else {
+                {{segment.text}}
+                }
+                }
             </div>
         </div>
         <div class="clear-left"></div>
