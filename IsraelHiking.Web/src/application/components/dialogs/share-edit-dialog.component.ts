@@ -9,6 +9,7 @@ import { FormsModule } from "@angular/forms";
 import { MatCheckbox, MatCheckboxChange } from "@angular/material/checkbox";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatRadioButton, MatRadioGroup } from "@angular/material/radio";
+import { CdkTextareaAutosize } from "@angular/cdk/text-field";
 import { MapComponent, ControlComponent } from "@maplibre/ngx-maplibre-gl";
 import { Store } from "@ngxs/store";
 import { Immutable } from "immer";
@@ -44,7 +45,7 @@ export type ShareEditDialogComponentData = {
 @Component({
     selector: "share-edit-dialog",
     templateUrl: "./share-edit-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, Angulartics2OnModule, MatAnchor, MapComponent, LayersComponent, MatRadioGroup, MatRadioButton, MatDialogActions, MatFormField, ControlComponent, MatButtonModule, MatTooltip, RoutesPathComponent, DistancePipe]
+    imports: [Dir, MatDialogTitle, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, Angulartics2OnModule, MatAnchor, MapComponent, LayersComponent, MatRadioGroup, MatRadioButton, MatDialogActions, MatFormField, ControlComponent, MatButtonModule, MatTooltip, RoutesPathComponent, DistancePipe, CdkTextareaAutosize]
 })
 export class ShareEditDialogComponent {
     public shareUrl: ShareUrl;
