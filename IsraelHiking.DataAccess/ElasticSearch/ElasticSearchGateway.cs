@@ -221,7 +221,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                 q.MultiMatch(m =>
                     m.Type(TextQueryType.Phrase)
                         .Query(searchTerm)
-                        .Fields(f => f.Fields(Languages.ArrayWithDefault.Select(l => new Field("name." + l + ".keyword"))))
+                        .Fields(f => f.Fields(Languages.ArrayWithDefault.Select(l => new Field("name." + l))))
                 )
             ).Explain()
         );
