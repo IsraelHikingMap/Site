@@ -1,9 +1,9 @@
 diff --git a/node_modules/maplibre-contour/dist/add-protocol-worker.js b/node_modules/maplibre-contour/dist/add-protocol-worker.js
 new file mode 100644
-index 0000000..9df3f13
+index 0000000..110995f
 --- /dev/null
 +++ b/node_modules/maplibre-contour/dist/add-protocol-worker.js
-@@ -0,0 +1,1943 @@
+@@ -0,0 +1,1954 @@
 +/*! *****************************************************************************
 +Copyright (c) Microsoft Corporation.
 +
@@ -157,6 +157,10 @@ index 0000000..9df3f13
 +function isAborted(abortController) {
 +    var _a;
 +    return Boolean((_a = abortController === null || abortController === void 0 ? void 0 : abortController.signal) === null || _a === void 0 ? void 0 : _a.aborted);
++}
++function parseUrl(url) {
++    const [, z, x, y] = /\/\/(\d+)\/(\d+)\/(\d+)/.exec(url) || [];
++    return [Number(z), Number(x), Number(y)];
 +}
 +
 +let num = 0;
@@ -1933,17 +1937,24 @@ index 0000000..9df3f13
 +        encoding: params.encoding,
 +        maxzoom: params.maxzoom,
 +        getTile: (url, abortController) => __awaiter(void 0, void 0, void 0, function* () {
-+            const { data } = yield self.makreRequest(url, abortController);
-+            return {
-+                data: new Blob([data])
++            const request = {
++                url,
++                type: "arrayBuffer",
 +            };
-+        })
++            const { data } = yield self.makeRequest(request, abortController);
++            return {
++                data: new Blob([data]),
++            };
++        }),
 +    });
 +    self.addProtocol("dem-contour", (request, abortController) => __awaiter(void 0, void 0, void 0, function* () {
-+        const [, z, x, y] = /\/\/(\d+)\/(\d+)\/(\d+)/.exec(request.url) || [];
++        const [z, x, y] = parseUrl(request.url);
 +        const options = decodeOptions(request.url);
-+        const data = yield localDemManager.fetchContourTile(Number(z), Number(x), Number(y), getOptionsForZoom(options, Number(z)), abortController);
++        const data = yield localDemManager.fetchContourTile(z, x, y, getOptionsForZoom(options, z), abortController);
 +        return { data: data.arrayBuffer };
 +    }));
 +}));
-+self.worker.actor.sendAsync({ type: "contour-worker", data: "Finished init" });
++self.worker.actor.sendAsync({
++    type: "contour-worker",
++    data: "Finished init",
++});
