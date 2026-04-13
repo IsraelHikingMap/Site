@@ -167,17 +167,17 @@ export class MapService {
     }
 
     private getPadding(noPadding = false) {
-        let padding = 50;
         if (noPadding) {
-            padding = 0;
+            return 0;
         }
+        const topPadding = window.innerWidth < 550 ? 90 : 50;
         if (!this.sidebarService.isSidebarOpen()) {
-            return padding;
+            return { top: topPadding, left: 50, bottom: 50, right: 50 };
         }
         if (window.innerWidth >= 550) {
-            return { top: 50, left: 400, bottom: 50, right: 50 }
+            return { top: topPadding, left: 400, bottom: 50, right: 50 };
         }
-        return { top: 50, left: 50, bottom: window.innerHeight / 2, right: 50 }
+        return { top: topPadding, left: 50, bottom: window.innerHeight / 2, right: 50 };
     }
 
     public async flyTo(latLng: LatLngAltTime, zoom?: number) {
