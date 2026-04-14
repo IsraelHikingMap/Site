@@ -196,7 +196,7 @@ body {
 }
 
 .pb-safe-w-button {
-    padding-bottom: calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + v.$app-button-size);
+    padding-bottom: calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 48px);
 }
 
 .maplibregl-ctrl-top-left {
