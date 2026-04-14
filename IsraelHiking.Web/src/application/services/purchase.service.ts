@@ -70,6 +70,8 @@ export class PurchaseService {
                     apiKey,
                     appUserID: `${userId}`
                 });
+                const languageCode = this.store.selectSnapshot((s: ApplicationState) => s.configuration).language.code;
+                await Purchases.overridePreferredUILocale({ locale: languageCode });
             } else if (isConfigured) {
                 await Purchases.logIn({ appUserID: `${userId}` });
             }
@@ -85,24 +87,8 @@ export class PurchaseService {
         const { result } = await RevenueCatUI.presentPaywall();
         this.loggingService.info("[Store] Paywall result: " + result);
         if (result === PAYWALL_RESULT.PURCHASED) {
-            this.orderInternal();
+            await this.checkAndUpdateOfflineAvailability();
         } else if (result === PAYWALL_RESULT.RESTORED) {
-            await Purchases.syncPurchases();
-            await this.checkAndUpdateOfflineAvailability();
-        }
-    }
-
-    private async orderInternal() {
-        this.loggingService.info("[Store] Ordering product");
-        const offerings = await Purchases.getOfferings();
-
-        try {
-            await Purchases.purchasePackage({
-                aPackage: offerings.current.annual
-            });
-            await this.checkAndUpdateOfflineAvailability();
-        } catch (error) {
-            this.loggingService.error("[Store] Failed to purchase product: " + (error as any).message);
             await Purchases.syncPurchases();
             await this.checkAndUpdateOfflineAvailability();
         }
