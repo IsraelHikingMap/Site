@@ -7,17 +7,22 @@ import type { RoutingType, RouteEditingState } from "../models";
 
 export class SetSelectedRouteAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routeId: string) {}
+    constructor(public routeId: string) { }
 }
 
 export class SetRoutingTypeAction {
     public static type = this.prototype.constructor.name;
-    constructor(public routingType: RoutingType) {}
+    constructor(public routingType: RoutingType) { }
 }
 
-export class SetOpacityAndWeightAction {
+export class SetOpacityAction {
     public static type = this.prototype.constructor.name;
-    constructor(public opacity: number, public weight: number) {}
+    constructor(public opacity: number) { }
+}
+
+export class SetWeightAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public weight: number) { }
 }
 
 @State<RouteEditingState>({
@@ -43,10 +48,17 @@ export class RouteEditingReducer {
         }));
     }
 
-    @Action(SetOpacityAndWeightAction)
-    public setOpacityAndWeight(ctx: StateContext<RouteEditingState>, action: SetOpacityAndWeightAction) {
+    @Action(SetOpacityAction)
+    public setOpacity(ctx: StateContext<RouteEditingState>, action: SetOpacityAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.opacity = action.opacity;
+            return lastState;
+        }));
+    }
+
+    @Action(SetWeightAction)
+    public setWeight(ctx: StateContext<RouteEditingState>, action: SetWeightAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
             lastState.weight = action.weight;
             return lastState;
         }));

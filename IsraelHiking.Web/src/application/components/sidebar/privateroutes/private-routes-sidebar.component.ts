@@ -33,7 +33,7 @@ import { ShareUrlsService } from "../../../services/share-urls.service";
 import { DataContainerService } from "../../../services/data-container.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { ChangeRouteStateAction, ToggleAllRoutesAction, DeleteAllRoutesAction, AddRouteAction, ChangeRoutePropertiesAction, DeleteRouteAction, BulkReplaceRoutesAction } from "../../../reducers/routes.reducer";
-import { SetSelectedRouteAction } from "../../../reducers/route-editing.reducer";
+import { SetOpacityAction, SetSelectedRouteAction, SetWeightAction } from "../../../reducers/route-editing.reducer";
 import type { ApplicationState, LatLngAltTime, RouteData, ShareUrl } from "../../../models";
 
 
@@ -192,6 +192,11 @@ export class PrivateRoutesSidebarComponent {
     public updateProperty(routeData: Immutable<RouteData>, property: any, value: any) {
         const newRouteData = structuredClone(routeData) as any;
         newRouteData[property] = value;
+        if (property === "opacity") {
+            this.store.dispatch(new SetOpacityAction(value));
+        } else if (property === "weight") {
+            this.store.dispatch(new SetWeightAction(value));
+        }
         this.store.dispatch(new ChangeRoutePropertiesAction(routeData.id, newRouteData));
     }
 
