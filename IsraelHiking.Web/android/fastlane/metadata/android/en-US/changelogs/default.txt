@@ -1,2 +1,3 @@
-- Support imperial units
+- Support imperial units and contours
+- Add monthly subscription
 - Plus various bug fixes and performance improvements
