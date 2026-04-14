@@ -162,6 +162,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             const multiplier = this.store.selectSnapshot((s: ApplicationState) => s.configuration.units) === "metric" ? 1 : 3.28084;
             delete contourSource.url;
             contourSource.tiles[0] = `dem-contour://{z}/{x}/{y}?contourLayer=contours&elevationKey=ele&levelKey=level&multiplier=${multiplier}&overzoom=1&thresholds=11*200*1000~12*10*100~13*10*100~14*10*100~15*10*100`
+            contourSource.maxzoom = 16;
         }
         this.updateSourcesAndLayers(layerData, styleJson.sources, styleJson.layers);
     }
