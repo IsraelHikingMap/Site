@@ -164,7 +164,7 @@ export class PublicRoutesComponent {
             };
         }
         const bounds = SpatialService.getBoundsForFeature(fullFeature);
-        this.mapService.fitBounds(bounds);
+        this.mapService.fitBounds(bounds, 100, { top: 100, left: 50, bottom: window.innerHeight / 2, right: 50 });
     }
 
     public getTitle(feature: GeoJSON.Feature<GeoJSON.Point>) {

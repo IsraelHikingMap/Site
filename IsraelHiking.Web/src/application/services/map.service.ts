@@ -1,12 +1,11 @@
 import { inject, Injectable } from "@angular/core";
-import { type ErrorEvent, type GeoJSONFeature, type LayerSpecification, type Map, type Point, setRTLTextPlugin, type SourceSpecification, importScriptInWorkers, getGlobalDispatcher } from "maplibre-gl";
+import { type ErrorEvent, type GeoJSONFeature, type LayerSpecification, type Map, type Point, setRTLTextPlugin, type SourceSpecification, importScriptInWorkers, getGlobalDispatcher, type PaddingOptions } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { LoggingService } from "./logging.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
 import { SpatialService } from "./spatial.service";
-import { SidebarService } from "./sidebar.service";
 import { ResourcesService } from "./resources.service";
 import { SetLocationAction } from "../reducers/location.reducer";
 import type { ApplicationState, Bounds, LatLngAltTime } from "../models";
@@ -18,7 +17,6 @@ export class MapService {
     private missingImagesArray: string[] = [];
     private currentMap: Map;
 
-    private readonly sidebarService = inject(SidebarService);
     private readonly cancelableTimeoutService = inject(CancelableTimeoutService);
     private readonly loggingService = inject(LoggingService);
     private readonly resourcesService = inject(ResourcesService)
@@ -155,7 +153,7 @@ export class MapService {
         return this.currentMap?.isMoving() ?? false;
     }
 
-    public async fitBounds(bounds: Bounds, noPadding = false) {
+    public async fitBounds(bounds: Bounds, padding = 50, smallScreenPadding?: PaddingOptions) {
         await this.initializationPromise;
         const maxZoom = Math.max(this.currentMap.getZoom(), 16);
         const mbBounds = SpatialService.boundsToMBBounds(bounds);
@@ -163,22 +161,18 @@ export class MapService {
         this.store.dispatch(new SetPannedAction(new Date()));
         this.currentMap.fitBounds(mbBounds, {
             maxZoom,
-            padding: this.getPadding(noPadding)
+            padding: this.getPadding(padding, smallScreenPadding)
         });
     }
 
-    private getPadding(noPadding = false) {
-        let padding = 50;
-        if (noPadding) {
-            padding = 0;
-        }
-        if (!this.sidebarService.isSidebarOpen()) {
+    private getPadding(padding: number, smallScreenPadding?: PaddingOptions) {
+        if (!smallScreenPadding) {
             return padding;
         }
         if (window.innerWidth >= 550) {
-            return { top: 50, left: 400, bottom: 50, right: 50 }
+            return padding;
         }
-        return { top: 50, left: 50, bottom: window.innerHeight / 2, right: 50 }
+        return smallScreenPadding;
     }
 
     public async flyTo(latLng: LatLngAltTime, zoom?: number) {

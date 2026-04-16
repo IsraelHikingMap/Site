@@ -14,7 +14,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatButtonToggle, MatButtonToggleGroup } from "@angular/material/button-toggle";
 import { Store } from "@ngxs/store";
 import { Immutable } from "immer";
-import { ControlComponent, MapComponent, MarkerComponent, PopupComponent } from "@maplibre/ngx-maplibre-gl";
+import { ControlComponent, MapComponent, MarkerComponent } from "@maplibre/ngx-maplibre-gl";
 import { orderBy } from "lodash-es";
 import type { StyleSpecification, Map } from "maplibre-gl";
 
@@ -41,7 +41,7 @@ import type { ApplicationState, ShareUrl } from "../../models";
     selector: "shares",
     templateUrl: "./shares.component.html",
     encapsulation: ViewEncapsulation.None,
-    imports: [MapComponent, LayersComponent, MatButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, ShareItemComponent, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, PopupComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, ControlComponent, MatButtonToggle, MatButtonToggleGroup, NgClass]
+    imports: [MapComponent, LayersComponent, MatButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, ShareItemComponent, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, ControlComponent, MatButtonToggle, MatButtonToggleGroup, NgClass]
 })
 export class SharesComponent implements OnInit {
     public loading = false;
@@ -167,7 +167,7 @@ export class SharesComponent implements OnInit {
         this.routesGeoJson = { type: "FeatureCollection", features };
         this.showMap = true;
         const bounds = SpatialService.getBoundsForFeatureCollection(this.routesGeoJson);
-        this.mapService.fitBounds(bounds);
+        this.mapService.fitBounds(bounds, 100, { top: 150, left: 50, bottom: window.innerHeight / 3, right: 50 });
     }
 
     public getIconFromType(shareUrl: Immutable<ShareUrl>) {

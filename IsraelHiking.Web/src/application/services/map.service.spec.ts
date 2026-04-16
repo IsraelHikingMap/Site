@@ -5,7 +5,6 @@ import type { Map, ErrorEvent } from "maplibre-gl";
 import { MapService } from "./map.service";
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { LoggingService } from "./logging.service";
-import { SidebarService } from "./sidebar.service";
 import { ResourcesService } from "./resources.service";
 import { InMemoryReducer } from "../reducers/in-memory.reducer";
 import { SetLocationAction } from "../reducers/location.reducer";
@@ -19,7 +18,6 @@ describe("MapService", () => {
             providers: [
                 MapService,
                 CancelableTimeoutService,
-                { provide: SidebarService, useValue: {} },
                 { provide: ResourcesService, useValue: {} },
                 {
                     provide: LoggingService, useValue: {
@@ -229,34 +227,30 @@ describe("MapService", () => {
         expect(service.isMoving()).toEqual(true);
     }));
 
-    it("Should fit bounds when sidebar serive is open with padding on large screen", inject([MapService, SidebarService],
-        async (service: MapService, sidebarService: SidebarService) => {
-            sidebarService.isSidebarOpen = () => true;
+    it("Should fit bounds with default value when not passed", inject([MapService],
+        async (service: MapService) => {
             const spy = jasmine.createSpy();
             service.setMap({ fitBounds: spy, on: () => { }, getZoom: () => 1 } as any as Map);
-            (window as any).innerWidth = 1500;
             await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } });
-            expect(spy.calls.all()[0].args[1].padding.left).toBe(400);
+            expect(spy.calls.all()[0].args[1].padding).toBe(50);
         }
     ));
 
-    it("Should fit bounds when sidebar serive is open with padding on small screen", inject([MapService, SidebarService],
-        async (service: MapService, sidebarService: SidebarService) => {
-            sidebarService.isSidebarOpen = () => true;
+    it("Should fit bounds when with padding on small screen", inject([MapService],
+        async (service: MapService) => {
             const spy = jasmine.createSpy();
             service.setMap({ fitBounds: spy, on: () => { }, getZoom: () => 1 } as any as Map);
             (window as any).innerWidth = 500;
-            await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } });
+            await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } }, 0, { bottom: window.innerHeight / 2 });
             expect(spy.calls.all()[0].args[1].padding.bottom).toBe(window.innerHeight / 2);
         }
     ));
 
-    it("Should fit bounds when sidebar serive is closed without padding", inject([MapService, SidebarService],
-        async (service: MapService, sidebarService: SidebarService) => {
-            sidebarService.isSidebarOpen = () => false;
+    it("Should fit bounds for large screen and not use the small padding", inject([MapService],
+        async (service: MapService) => {
             const spy = jasmine.createSpy();
             service.setMap({ fitBounds: spy, on: () => { }, getZoom: () => 1 } as any as Map);
-            await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } }, true);
+            await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } }, 0, { bottom: 100 });
             expect(spy.calls.all()[0].args[1].padding).toBe(0);
         }
     ));

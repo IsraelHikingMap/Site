@@ -152,42 +152,45 @@
                 </span>
             </mgl-marker>
             }
-            @if (selectedShareUrl) {
-            <mgl-popup [lngLat]="selectedShareUrl.start" [closeOnClick]="false"
-                (popupClose)="onStartPointClick(selectedShareUrl)" [offset]="[0, -15]">
-                <div class="flex flex-row">
-                    <h3>{{selectedShareUrl.title}}</h3>
-                </div>
-                <div class="flex flex-row">
-                    <button mat-menu-item (click)="openEditShareUrlDialog(selectedShareUrl)" angulartics2On="click"
-                        angularticsCategory="Shares" angularticsAction="Edit share from map">
-                        <i class="fa icon-pencil"></i>
-                        {{resources.editProperties}}
-                    </button>
-                </div>
-                <div class="flex flex-row">
-                    <button mat-menu-item (click)="openShareUrl(selectedShareUrl)" angulartics2On="click"
-                        angularticsCategory="Shares" angularticsAction="Open share from map">
-                        <i class="fa icon-external-link-square"></i>
-                        {{resources.openCloudSave}}
-                    </button>
-                </div>
-                <div class="flex flex-row">
-                    <button mat-menu-item (click)="addShareUrlToRoutes(selectedShareUrl)" angulartics2On="click"
-                        angularticsCategory="Shares" angularticsAction="Add share to routes from map">
-                        <i class="fa icon-plus"></i>
-                        {{resources.addToRoutes}}
-                    </button>
-                </div>
-                <div class="flex flex-row">
-                    <button mat-menu-item (click)="deleteShareUrl(selectedShareUrl)" angulartics2On="click"
-                        angularticsCategory="Shares" angularticsAction="Delete share from map">
-                        <i class="fa icon-trash"></i>
-                        {{resources.delete}}
-                    </button>
-                </div>
-            </mgl-popup>
-            }
         </mgl-map>
+        @if (selectedShareUrl) {
+        <div class="hidden max-md:block fixed bottom-safe bg-white w-full z-30 animate-slide-in-up">
+            <div class="flex flex-row justify-center items-center mx-2">
+                <div class="flex-1 text-center text-xl">{{selectedShareUrl.title}}</div>
+                <button mat-button class="w-1/6" type="button" (click)="onStartPointClick(selectedShareUrl)"
+                    tabindex="-1">
+                    <i class="fa fa-lg icon-close"></i>
+                </button>
+            </div>
+            <div class="flex flex-row">
+                <button mat-menu-item (click)="openEditShareUrlDialog(selectedShareUrl)" angulartics2On="click"
+                    angularticsCategory="Shares" angularticsAction="Edit share from map">
+                    <i class="fa icon-pencil"></i>
+                    {{resources.editProperties}}
+                </button>
+            </div>
+            <div class="flex flex-row">
+                <button mat-menu-item (click)="openShareUrl(selectedShareUrl)" angulartics2On="click"
+                    angularticsCategory="Shares" angularticsAction="Open share from map">
+                    <i class="fa icon-external-link-square"></i>
+                    {{resources.openCloudSave}}
+                </button>
+            </div>
+            <div class="flex flex-row">
+                <button mat-menu-item (click)="addShareUrlToRoutes(selectedShareUrl)" angulartics2On="click"
+                    angularticsCategory="Shares" angularticsAction="Add share to routes from map">
+                    <i class="fa icon-plus"></i>
+                    {{resources.addToRoutes}}
+                </button>
+            </div>
+            <div class="flex flex-row">
+                <button mat-menu-item (click)="deleteShareUrl(selectedShareUrl)" angulartics2On="click"
+                    angularticsCategory="Shares" angularticsAction="Delete share from map">
+                    <i class="fa icon-trash"></i>
+                    {{resources.delete}}
+                </button>
+            </div>
+        </div>
+        }
     </div>
 </div>

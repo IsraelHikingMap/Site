@@ -141,42 +141,6 @@
                     </div>
                 </ng-template>
             </mgl-markers-for-clusters>
-            @if (selectedTrace) {
-            <mgl-popup [lngLat]="selectedTrace.start" [closeOnClick]="false"
-                (popupClose)="onStartPointClick(selectedTrace.id)" [offset]="[0, -15]">
-                <div class="flex flex-row">
-                    <h3>{{getTraceDisplayName(selectedTrace)}}</h3>
-                </div>
-                <div class="flex flex-row">
-                    <button mat-menu-item (click)="editTrace(selectedTrace)" angulartics2On="click"
-                        angularticsCategory="Traces" angularticsAction="Edit OSM trace properties from popup">
-                        <i class="fa icon-pencil"></i>
-                        {{resources.editProperties}}
-                    </button>
-                </div>
-                <div class="flex flex-row">
-                    <button mat-menu-item (click)="addTraceToRoutes(selectedTrace)" angulartics2On="click"
-                        angularticsCategory="Traces" angularticsAction="Add OSM trace to routes from popup">
-                        <i class="fa icon-plus"></i>
-                        {{resources.addToRoutes}}
-                    </button>
-                </div>
-                <div class="flex flex-row">
-                    <button mat-menu-item (click)="deleteTrace(selectedTrace)" angulartics2On="click"
-                        angularticsCategory="Traces" angularticsAction="Delete OSM trace parts from popup">
-                        <i class="fa icon-trash"></i>
-                        {{resources.delete}}
-                    </button>
-                </div>
-                <div class="flex flex-row">
-                    <button mat-menu-item (click)="findUnmappedRoutes(selectedTrace)" angulartics2On="click"
-                        angularticsCategory="Traces" angularticsAction="Find unmapped trace parts from popup">
-                        <i class="fa icon-search"></i>
-                        {{resources.findUnmappedRoutes}}
-                    </button>
-                </div>
-            </mgl-popup>
-            }
             <mgl-geojson-source id="missing-parts" [data]="missingParts"></mgl-geojson-source>
             <mgl-layer id="missing-part-line" source="missing-parts" type="line" [paint]="{
                     'line-color': 'red',
@@ -207,5 +171,43 @@
             </mgl-marker>
             }
         </mgl-map>
+        @if (selectedTrace) {
+        <div class="hidden max-md:block fixed bottom-safe bg-white w-full z-30">
+            <div class="flex flex-row justify-center items-center mx-2">
+                <div class="flex-1 text-center text-xl">{{getTraceDisplayName(selectedTrace)}}</div>
+                <button mat-button class="w-1/6" type="button" (click)="selectedTrace = null" tabindex="-1">
+                    <i class="fa fa-lg icon-close"></i>
+                </button>
+            </div>
+            <div class="flex flex-row">
+                <button mat-button (click)="editTrace(selectedTrace)" angulartics2On="click"
+                    angularticsCategory="Traces" angularticsAction="Edit OSM trace properties from popup">
+                    <i class="fa icon-pencil"></i>
+                    {{resources.editProperties}}
+                </button>
+            </div>
+            <div class="flex flex-row">
+                <button mat-button (click)="addTraceToRoutes(selectedTrace)" angulartics2On="click"
+                    angularticsCategory="Traces" angularticsAction="Add OSM trace to routes from popup">
+                    <i class="fa icon-plus"></i>
+                    {{resources.addToRoutes}}
+                </button>
+            </div>
+            <div class="flex flex-row">
+                <button mat-button (click)="deleteTrace(selectedTrace)" angulartics2On="click"
+                    angularticsCategory="Traces" angularticsAction="Delete OSM trace parts from popup">
+                    <i class="fa icon-trash"></i>
+                    {{resources.delete}}
+                </button>
+            </div>
+            <div class="flex flex-row">
+                <button mat-button (click)="findUnmappedRoutes(selectedTrace)" angulartics2On="click"
+                    angularticsCategory="Traces" angularticsAction="Find unmapped trace parts from popup">
+                    <i class="fa icon-search"></i>
+                    {{resources.findUnmappedRoutes}}
+                </button>
+            </div>
+        </div>
+        }
     </div>
 </div>
