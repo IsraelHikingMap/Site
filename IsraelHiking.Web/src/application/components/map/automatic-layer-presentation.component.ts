@@ -141,9 +141,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
         const language = this.resources.getCurrentLanguageCodeSimplified();
         let styleAsText = JSON.stringify(response);
         styleAsText = styleAsText.replace(/name:he/g, `name:${language}`);
-        if (language != "he") {
-            styleAsText = styleAsText.replaceAll("Open Sans", "Noto Sans");
-        }
+        styleAsText = styleAsText.replaceAll("Open Sans", "Noto Sans");
         const styleJson = JSON.parse(styleAsText) as StyleSpecification;
         if (tryLocalStyle) {
             for (const source of Object.values(styleJson.sources)) {

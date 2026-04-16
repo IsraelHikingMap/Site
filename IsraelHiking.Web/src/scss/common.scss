@@ -53,18 +53,10 @@ $app-background: map.get($app-theme, background);
 
 
 @font-face {
-    font-family: 'Open Sans Regular';
+    font-family: 'Noto Sans Cond Bold';
     font-style: normal;
     font-display: swap;
-    src: url('../fonts/open-sans-regular.woff2') format('woff2');
-}
-
-
-@font-face {
-    font-family: 'Open Sans Cond Bold';
-    font-style: normal;
-    font-display: swap;
-    src: url('../fonts/open-sans-condensed-bold.ttf') format('truetype');
+    src: url('../fonts/noto-sans-condensed-bold.ttf') format('truetype');
 }
 
 html {

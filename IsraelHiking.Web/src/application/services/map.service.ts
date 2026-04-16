@@ -49,12 +49,15 @@ export class MapService {
         const linkEl = document.createElement("a");
         linkEl.href = "./add-protocol-worker.js";
         importScriptInWorkers(linkEl.href);
+        // In order for the font to get to media folder it needs to also be in common.scss file.
+        // This way it forces the load of the font file before the map renders and caches some symbols.
+        const notoSansCondBold = new FontFace("Noto Sans Cond Bold", "url(./media/noto-sans-condensed-bold.ttf)");
         await Promise.all([
             promise,
-            document.fonts.load("12px Noto Sans"),
-            document.fonts.load("12px Open Sans"),
-            document.fonts.load("12px Open Sans Cond Bold")
+            notoSansCondBold.load(),
+            document.fonts.load("12px Noto Sans")
         ]);
+        document.fonts.add(notoSansCondBold);
     }
 
     public setMap(map: Map) {
