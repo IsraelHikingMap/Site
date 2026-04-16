@@ -142,6 +142,8 @@ export class ShareEditDialogComponent {
         if (this.shareUrl.base64Preview == null) {
             this.shareUrl.base64Preview = this.map.getCanvas().toDataURL("image/png")
         }
+        this.shareUrl.title = this.shareUrl.title.trim();
+        this.shareUrl.description = this.shareUrl.description.trim();
         try {
             const shareUrl = this.updateCurrentShare
                 ? await this.shareUrlsService.updateShareUrl(this.shareUrl)

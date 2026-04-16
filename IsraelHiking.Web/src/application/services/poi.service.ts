@@ -609,11 +609,11 @@ export class PoiService {
         }
         const language = this.resources.getCurrentLanguageCodeSimplified();
         if (info.title !== editableDataBeforeChanges.title) {
-            GeoJSONUtils.setTitle(featureContainingOnlyChanges, info.title, language);
+            GeoJSONUtils.setTitle(featureContainingOnlyChanges, info.title.trim(), language);
             hasChages = true;
         }
         if (info.description !== editableDataBeforeChanges.description) {
-            GeoJSONUtils.setDescription(featureContainingOnlyChanges, info.description, language);
+            GeoJSONUtils.setDescription(featureContainingOnlyChanges, info.description.trim(), language);
             hasChages = true;
         }
         if (info.icon !== editableDataBeforeChanges.icon || info.iconColor !== editableDataBeforeChanges.iconColor) {

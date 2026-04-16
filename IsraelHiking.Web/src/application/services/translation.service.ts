@@ -30,11 +30,12 @@ export class TranslationService {
         const language = this.resources.getCurrentLanguageCodeSimplified();
         const keys = Object.keys(feature.properties).filter(key => key.startsWith("poiExternalDescription:"));
 
-        return feature.properties["description:" + language] ||
+        const description: string = feature.properties["description:" + language] ||
             feature.properties["poiExternalDescription:" + language] ||
             feature.properties.description ||
             feature.properties["description:en"] ||
-            (keys.length > 0 ? feature.properties[keys[0]] : "");
+            (keys.length > 0 ? feature.properties[keys[0]] || "" : "");
+        return description.trim();
     }
 
     public async getTranslatedDescription(feature: GeoJSON.Feature): Promise<string> {
