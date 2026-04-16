@@ -96,10 +96,6 @@ export class OfflineFilesDownloadService {
             }
             this.updateInProgressTilesList(0, -1, 0);
             const fileNames = [...fileNamesForRoot, ...fileNamesForTile];
-            const nonPmtilesFile = fileNames.find(f => !f.fileName.endsWith(".pmtiles"))
-            if (nonPmtilesFile) {
-                this.loggingService.info("[Offline Download] Some files are not pmtiles, skipping: " + nonPmtilesFile.fileName);
-            }
             const currentAbortController = this.abortController; // keep a referece to the current abort controller for the case of aborting and then downloading again
             await this.downloadOfflineFilesProgressAction(fileNames, fileNamesForRoot.length, currentAbortController);
 
@@ -218,7 +214,9 @@ export class OfflineFilesDownloadService {
         if (Object.keys(fileNames).length === 0) {
             return [];
         }
-        return Object.entries(fileNames).map(([key, value]) => ({ fileName: key, date: value }));
+        const fileNameDates = Object.entries(fileNames).map(([key, value]) => ({ fileName: key, date: value }));
+        // Only pmtiles and non-contour files.
+        return fileNameDates.filter(fnd => fnd.fileName.endsWith(".pmtiles") && !fnd.fileName.includes("_contour_"));
     }
 
     public abortCurrentDownload(): void {
@@ -230,14 +228,21 @@ export class OfflineFilesDownloadService {
 
     public async deleteTile(tileX: number, tileY: number): Promise<void> {
         this.loggingService.info(`[Offline Download] Deleting tile ${tileX}-${tileY}`);
-        this.store.dispatch(new DeleteOfflineMapsTileAction(tileX, tileY));
-        // This assumes that the tiles that needs to be downloaded have the same names as the ones that needs to be deleted.
-        // It looks for the download date, so there's a need to clean the date before this call, which is done above.
-        const files = await this.getFilesToDownload(tileX, tileY);
-        for (const { fileName } of files) {
-            await this.fileService.deleteFileInDataDirectory(fileName);
+        let downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.offlineState.downloadedTiles);
+        if (!downloadedTiles) {
+            this.loggingService.info(`[Offline Download] No tiles to delete`);
+            return;
         }
-        const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.offlineState.downloadedTiles);
+        this.store.dispatch(new DeleteOfflineMapsTileAction(tileX, tileY));
+        const downloadedTile = downloadedTiles[`${tileX}-${tileY}`];
+        if (Array.isArray(downloadedTile)) {
+            const fileNames = downloadedTile.map(fnd => fnd.fileName);
+            for (const fileName of fileNames) {
+                this.loggingService.info(`[Offline Download] Deleting file ${fileName}`);
+                await this.fileService.deleteFileInDataDirectory(fileName);
+            }
+        }
+        downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.offlineState.downloadedTiles);
         if (downloadedTiles && Object.keys(downloadedTiles).length === 1) {
             this.deleteTile(undefined, undefined);
         }
