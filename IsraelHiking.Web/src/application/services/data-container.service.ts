@@ -48,7 +48,7 @@ export class DataContainerService {
         }
 
         if (dataContainer.northEast != null && dataContainer.southWest != null) {
-            this.mapService.fitBounds({ northEast: dataContainer.northEast, southWest: dataContainer.southWest }, true);
+            this.mapService.fitBounds({ northEast: dataContainer.northEast, southWest: dataContainer.southWest }, 0);
         }
     }
 

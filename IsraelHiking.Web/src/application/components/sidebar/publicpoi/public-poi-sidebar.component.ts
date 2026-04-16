@@ -155,7 +155,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
                 await this.initFromFeature(clonedFeature);
             }
             const bounds = SpatialService.getBoundsForFeature(clonedFeature);
-            this.mapService.fitBounds(bounds);
+            this.mapService.fitBounds(bounds, 100, { top: 100, left: 50, bottom: window.innerHeight / 2, right: 50 });
             if (data.source === RouteStrings.COORDINATES) {
                 this.fullFeature = null;
                 this.close();
