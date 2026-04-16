@@ -29,12 +29,12 @@
 <mat-menu #appMenu="matMenu" xPosition="before">
   <div [dir]="resources.direction">
     @if (!isIFrame()) {
-    <button mat-menu-item routerLink="/map" routerLinkActive="bg-blue-50! border-s-4! border-[#32CD6D]!"
+    <button mat-menu-item routerLink="/map" routerLinkActive="bg-[#528CFA40]! border-s-4! border-[#32CD6D]!"
       class="block md:hidden!" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Plan & Explore">
       <i class="fa fa-lg icon-map-o mat-icon"></i>
       <span class="mx-1">{{resources.planAndExplore}}</span>
     </button>
-    <button mat-menu-item routerLink="/public-routes" routerLinkActive="bg-blue-50! border-s-4! border-[#32CD6D]!"
+    <button mat-menu-item routerLink="/public-routes" routerLinkActive="bg-[#528CFA40]! border-s-4! border-[#32CD6D]!"
       class="block md:hidden!" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Find Routes">
       <i class="fa fa-lg icon-recordings mat-icon"></i>
       <span class="mx-1">{{resources.findRoutes}}</span>
@@ -42,11 +42,11 @@
     <hr class="block md:hidden!" />
     }
     @if (isLoggedIn()) {
-    <button mat-menu-item routerLink="/shares" routerLinkActive="bg-blue-50! border-s-4! border-[#32CD6D]!"
+    <button mat-menu-item routerLink="/shares" routerLinkActive="bg-[#528CFA40]! border-s-4! border-[#32CD6D]!"
       angulartics2On="click" angularticsCategory="User Menu" angularticsAction="User shares open">
       <span><i class="fa fa-lg icon-mixcloud"></i> {{resources.mySavesInTheCloud}}</span>
     </button>
-    <button mat-menu-item routerLink="/traces" routerLinkActive="bg-blue-50! border-s-4! border-[#32CD6D]!"
+    <button mat-menu-item routerLink="/traces" routerLinkActive="bg-[#528CFA40]! border-s-4! border-[#32CD6D]!"
       angulartics2On="click" angularticsCategory="User Menu" angularticsAction="User traces open">
       <span><i class="fa fa-lg icon-recordings"></i> {{resources.myTraces}}</span>
     </button>
@@ -65,8 +65,9 @@
     </button>
     }
     @if (isOfflineDownloadAvailable()) {
-    <button mat-menu-item routerLink="/offline-management" routerLinkActive="bg-blue-50! border-s-4! border-[#32CD6D]!"
-      angulartics2On="click" angularticsCategory="User Menu" angularticsAction="Download">
+    <button mat-menu-item routerLink="/offline-management"
+      routerLinkActive="bg-[#528CFA40]! border-s-4! border-[#32CD6D]!" angulartics2On="click"
+      angularticsCategory="User Menu" angularticsAction="Download">
       <i class="fa fa-lg icon-download mat-icon"></i>
       <span class="mx-1">{{resources.downloadMapForOfflineUse}}</span>
     </button>
@@ -87,7 +88,7 @@
       <span class="mx-1">Language</span>
     </button>
     @if (!isIFrame()) {
-    <button mat-menu-item routerLink="/about" routerLinkActive="bg-blue-50! border-s-4! border-[#32CD6D]!"
+    <button mat-menu-item routerLink="/about" routerLinkActive="bg-[#528CFA40]! border-s-4! border-[#32CD6D]!"
       angulartics2On="click" angularticsCategory="Menu" angularticsAction="About">
       <i class="fa fa-lg icon-info mat-icon"></i>
       <span class="mx-1">{{resources.about}}</span>
