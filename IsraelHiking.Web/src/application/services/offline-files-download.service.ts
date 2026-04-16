@@ -230,7 +230,7 @@ export class OfflineFilesDownloadService {
         this.loggingService.info(`[Offline Download] Deleting tile ${tileX}-${tileY}`);
         let downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.offlineState.downloadedTiles);
         if (!downloadedTiles) {
-            this.loggingService.info(`[Offline Download] No tiles to delete`);
+            this.loggingService.info("[Offline Download] No tiles to delete");
             return;
         }
         this.store.dispatch(new DeleteOfflineMapsTileAction(tileX, tileY));
