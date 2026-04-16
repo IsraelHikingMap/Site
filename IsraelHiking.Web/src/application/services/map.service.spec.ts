@@ -246,11 +246,11 @@ describe("MapService", () => {
         }
     ));
 
-    it("Should fit bounds without padding", inject([MapService],
+    it("Should fit bounds for large screen and not use the small padding", inject([MapService],
         async (service: MapService) => {
             const spy = jasmine.createSpy();
             service.setMap({ fitBounds: spy, on: () => { }, getZoom: () => 1 } as any as Map);
-            await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } }, 0);
+            await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } }, 0, { bottom: 100 });
             expect(spy.calls.all()[0].args[1].padding).toBe(0);
         }
     ));
