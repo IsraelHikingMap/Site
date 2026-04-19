@@ -8,6 +8,7 @@ import type { OsmUserDetails, ShareUrl } from "../models";
 export type ImageAttribution = {
     author: string;
     url: string;
+    userId?: string;
 };
 
 @Injectable()
@@ -58,11 +59,21 @@ export class ImageAttributionService {
         if (!url.hostname && !wikidataFileUrl) {
             return null;
         }
+        if (url.hostname.includes("nakeb")) {
+            const imageAttribution = {
+                author: "נָאקֶבּ",
+                url: "https://www.nakeb.co.il",
+                userId: "Nakeb"
+            };
+            this.attributionImageCache.set(imageUrl, Promise.resolve(imageAttribution));
+            return imageAttribution;
+        }
         if (url.hostname.includes("mapeak.com")) {
             const shareUrl = await firstValueFrom(this.httpClient.get<ShareUrl>(imageUrl.replace("/thumbnail", "")));
             const imageAttribution = {
                 author: await this.getUserName(shareUrl.osmUserId),
-                url: shareUrl.website
+                url: shareUrl.website,
+                userId: shareUrl.osmUserId
             };
             this.attributionImageCache.set(imageUrl, Promise.resolve(imageAttribution));
             return imageAttribution;
@@ -111,7 +122,8 @@ export class ImageAttributionService {
             if ((licenseLower.includes("cc") && !licenseLower.includes("nc")) || licenseLower.includes("public domain")) {
                 return {
                     author: "Unknown",
-                    url: `${wikiPrefix}wiki/File:${imageName}`
+                    url: `${wikiPrefix}wiki/File:${imageName}`,
+                    userId: null
                 };
             }
         } catch { } // eslint-disable-line

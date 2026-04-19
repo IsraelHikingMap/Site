@@ -29,6 +29,7 @@ import { PoiService } from "../../services/poi.service";
 import { SpatialService } from "../../services/spatial.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { RunningContextService } from "../../services/running-context.service";
+import { ImageAttributionService } from "../../services/image-attribution.service";
 import { GeoJSONUtils } from "../../services/geojson-utils";
 import { PoiProperties } from "../../services/osm-tags.service";
 import { RouteStrings } from "../../services/hash.service";
@@ -69,6 +70,7 @@ export class PublicRoutesComponent {
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly router = inject(Router);
     private readonly runningContextSerivce = inject(RunningContextService);
+    private readonly imageAttributionService = inject(ImageAttributionService);
 
     constructor() {
         this.mapStyle = this.defaultStyleService.getStyleWithPlaceholders();
@@ -117,6 +119,9 @@ export class PublicRoutesComponent {
                 return false;
             }
             if (feature.properties.poiLength / factor > filters.lengthRange[1] && filters.lengthRange[1] < 50) {
+                return false;
+            }
+            if (filters.userId && feature.properties.poiUserId !== filters.userId) {
                 return false;
             }
             return true;

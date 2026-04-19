@@ -256,7 +256,7 @@
             </div>
             <div class="flex flex-row" class="text-center text-sm">
                 @defer (on viewport) {
-                <image-attribution [imageUrl]="route.properties.image"></image-attribution>
+                <image-attribution [imageUrl]="route.properties.image" [allowFiltering]="true"></image-attribution>
                 } @placeholder {
                 <div></div>
                 }

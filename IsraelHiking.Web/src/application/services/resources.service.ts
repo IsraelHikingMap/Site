@@ -288,6 +288,7 @@ export class ResourcesService {
     public metric: string;
     public imperial: string;
     public dateFormat: string;
+    public moreFrom: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -509,7 +510,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1775507616257");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1776597953833");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -775,6 +776,7 @@ export class ResourcesService {
         this.metric = this.gettextCatalog.getString("Metric");
         this.imperial = this.gettextCatalog.getString("Imperial");
         this.dateFormat = this.gettextCatalog.getString("Date Format");
+        this.moreFrom = this.gettextCatalog.getString("More from");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

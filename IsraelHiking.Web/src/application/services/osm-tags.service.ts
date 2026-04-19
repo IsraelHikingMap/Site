@@ -10,6 +10,7 @@ export type PoiProperties = {
     poiCategory: string;
     poiLength: number;
     poiDifficulty: string;
+    poiUserId?: string;
     "name:he"?: string;
     "name:en"?: string;
     website: string;
