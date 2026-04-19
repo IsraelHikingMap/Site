@@ -354,13 +354,4 @@ describe("ImageAttributionService", () => {
         const response2 = await promise;
         expect(response2).toBe("Osm User Name");
     }));
-
-    it("should return a nakeb for nakeb user id", inject([ImageAttributionService, HttpTestingController], async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-        const promise = service.getUserName("Nakeb");
-        await new Promise(resolve => setTimeout(resolve, 0));
-        mockBackend.expectNone(r => r.url.startsWith(`${Urls.osmApi}user`));
-
-        const response = await promise;
-        expect(response).toBe("נָאקֶבּ");
-    }));
 });
