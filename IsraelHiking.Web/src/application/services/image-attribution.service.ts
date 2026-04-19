@@ -134,6 +134,9 @@ export class ImageAttributionService {
         if (this.userIdToNameCache.has(userId)) {
             return this.userIdToNameCache.get(userId);
         }
+        if (userId === "Nakeb") {
+            return "נָאקֶבּ";
+        }
         const osmUser = await firstValueFrom(this.httpClient.get<OsmUserDetails>(`${Urls.osmApi}user/${userId}`));
         this.userIdToNameCache.set(userId, osmUser.user.display_name);
         return osmUser.user.display_name;
