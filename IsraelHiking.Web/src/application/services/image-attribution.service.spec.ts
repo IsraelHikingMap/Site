@@ -34,6 +34,13 @@ describe("ImageAttributionService", () => {
         expect(response.url).toBe("https://www.example.com");
     }));
 
+    it("should return nakeb when getting it", inject([ImageAttributionService], async (service: ImageAttributionService) => {
+        const response = await service.getAttributionForImage("https://www.nakeb.co.il/image.png");
+        expect(response).not.toBeNull();
+        expect(response.author).toBe("נָאקֶבּ");
+        expect(response.url).toBe("https://www.nakeb.co.il");
+    }));
+
     it("should return a OSM user display name when getting a share url", inject([ImageAttributionService, HttpTestingController], async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
         const promise = service.getAttributionForImage("https://www.mapeak.com/api/urls/12345/thumbnail");
         mockBackend.match(r => r.url.startsWith("https://www.mapeak.com/api/urls/"))[0].flush({
@@ -330,4 +337,21 @@ describe("ImageAttributionService", () => {
             expect(response.author).toBe("OSM User");
         }
     ));
+
+    it("should return a OSM user display name when sending a osm id and cache it", inject([ImageAttributionService, HttpTestingController], async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
+        let promise = service.getUserName("12");
+        mockBackend.match(r => r.url.startsWith(`${Urls.osmApi}user/12`))[0].flush({
+            user: {
+                display_name: "Osm User Name"
+            }
+        });
+
+        const response = await promise;
+        expect(response).toBe("Osm User Name");
+
+        promise = service.getUserName("12");
+        mockBackend.expectNone(r => r.url.startsWith(`${Urls.osmApi}user`));
+        const response2 = await promise;
+        expect(response2).toBe("Osm User Name");
+    }));
 });

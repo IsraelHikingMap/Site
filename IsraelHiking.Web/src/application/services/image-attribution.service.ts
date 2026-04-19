@@ -8,11 +8,13 @@ import type { OsmUserDetails, ShareUrl } from "../models";
 export type ImageAttribution = {
     author: string;
     url: string;
+    userId?: string;
 };
 
 @Injectable()
 export class ImageAttributionService {
     private attributionImageCache = new Map<string, Promise<ImageAttribution>>();
+    private userIdToNameCache = new Map<string, string>();
 
     private readonly httpClient = inject(HttpClient);
 
@@ -57,12 +59,22 @@ export class ImageAttributionService {
         if (!url.hostname && !wikidataFileUrl) {
             return null;
         }
+        if (url.hostname.includes("nakeb")) {
+            const userId = "Nakeb";
+            const imageAttribution = {
+                author: await this.getUserName(userId),
+                url: "https://www.nakeb.co.il",
+                userId
+            };
+            this.attributionImageCache.set(imageUrl, Promise.resolve(imageAttribution));
+            return imageAttribution;
+        }
         if (url.hostname.includes("mapeak.com")) {
             const shareUrl = await firstValueFrom(this.httpClient.get<ShareUrl>(imageUrl.replace("/thumbnail", "")));
-            const osmUser = await firstValueFrom(this.httpClient.get<OsmUserDetails>(`${Urls.osmApi}user/${shareUrl.osmUserId}`));
             const imageAttribution = {
-                author: osmUser.user.display_name,
-                url: shareUrl.website
+                author: await this.getUserName(shareUrl.osmUserId),
+                url: shareUrl.website,
+                userId: shareUrl.osmUserId
             };
             this.attributionImageCache.set(imageUrl, Promise.resolve(imageAttribution));
             return imageAttribution;
@@ -116,5 +128,17 @@ export class ImageAttributionService {
             }
         } catch { } // eslint-disable-line
         return null;
+    }
+
+    public async getUserName(userId: string): Promise<string> {
+        if (this.userIdToNameCache.has(userId)) {
+            return this.userIdToNameCache.get(userId);
+        }
+        if (userId === "Nakeb") {
+            return "נָאקֶבּ";
+        }
+        const osmUser = await firstValueFrom(this.httpClient.get<OsmUserDetails>(`${Urls.osmApi}user/${userId}`));
+        this.userIdToNameCache.set(userId, osmUser.user.display_name);
+        return osmUser.user.display_name;
     }
 }

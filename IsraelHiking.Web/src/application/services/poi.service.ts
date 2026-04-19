@@ -389,6 +389,7 @@ export class PoiService {
                 poiDifficulty: shareUrl.difficulty,
                 poiGeolocation: geoLocation,
                 poiId: "Users_" + shareUrl.id,
+                poiUserId: shareUrl.osmUserId,
                 identifier: shareUrl.id,
                 name: shareUrl.title,
                 description: shareUrl.description,

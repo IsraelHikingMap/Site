@@ -1,7 +1,21 @@
 @if (imageAttribution !== null) {
 <div class="flex flex-row" class="text-center text-sm">
-    <div class="w-full truncate" [dir]="resources.direction">{{resources.imageBy}}
-        <a [href]="imageAttribution.url" target="_blank">{{imageAttribution.author}}</a>
+    @if (imageAttribution.userId) {
+    <div class="w-full truncate" [dir]="resources.direction">
+        <button mat-raised-button class="mb-2" (click)="filterByUserId(imageAttribution.userId)" angulartics2On="click"
+            angularticsCategory="Attribution" angularticsAction="Filter by user">
+            {{resources.moreFrom}}
+            {{imageAttribution.author}}
+        </button>
     </div>
+    } @else {
+    <div class="w-full truncate" [dir]="resources.direction">
+        {{resources.imageBy}}
+        <a [href]="imageAttribution.url" target="_blank" angulartics2On="click" angularticsCategory="Attribution"
+            angularticsAction="Image Link">
+            {{imageAttribution.author}}
+        </a>
+    </div>
+    }
 </div>
 }
