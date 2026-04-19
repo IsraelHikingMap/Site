@@ -2,11 +2,12 @@
 <div class="flex flex-row" class="text-center text-sm">
     @if (imageAttribution.userId) {
     <div class="w-full truncate" [dir]="resources.direction">
-        {{resources.moreFrom}}
-        <button mat-button (click)="filterByUserId(imageAttribution.userId)" angulartics2On="click"
-            angularticsCategory="Attribution" angularticsAction="Filter by user">{{imageAttribution.author}}</button>
+        <button mat-raised-button class="mb-2" (click)="filterByUserId(imageAttribution.userId)" angulartics2On="click"
+            angularticsCategory="Attribution" angularticsAction="Filter by user">
+            {{resources.moreFrom}}
+            {{imageAttribution.author}}
+        </button>
     </div>
-
     } @else {
     <div class="w-full truncate" [dir]="resources.direction">
         {{resources.imageBy}}
