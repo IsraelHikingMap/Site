@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Elasticsearch.Net;
@@ -25,17 +27,17 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     IExternalSourcesRepository
 {
     private readonly ConfigurationData _options = options.Value;
-    
+
     private const int PAGE_SIZE = 10000;
     private const int NUMBER_OF_RESULTS = 20;
-    
+
     private const string PROPERTIES = "properties";
     private const string EXTERNAL_POIS = "external_pois";
     private const string IMAGES = "images";
     private const string REBUILD_LOG = "rebuild_log";
     private const string POINTS = "points";
     private const string BBOX = "bbox";
-    
+
     private IElasticClient _elasticClient;
 
     public async Task Initialize()
@@ -54,8 +56,8 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         }
         logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
     }
-        
-    private List<IHit<T>> GetAllItemsByScrolling<T>(ISearchResponse<T> response) where T: class
+
+    private List<IHit<T>> GetAllItemsByScrolling<T>(ISearchResponse<T> response) where T : class
     {
         var list = new List<IHit<T>>();
         list.AddRange(response.Hits.ToList());
@@ -95,7 +97,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
 
         return null;
     }
-    
+
     /// <summary>
     /// This method is used to find the language with the highest contribution to the score
     /// </summary>
@@ -115,7 +117,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         }
         return fallbackLanguage;
     }
-    
+
     private IFeature HitToFeature(IHit<PointDocument> d, string language)
     {
         IFeature feature = new Feature(new Point(d.Source.Location[0], d.Source.Location[1]), new AttributesTable
@@ -148,8 +150,8 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         feature.SetLocation(new Coordinate(d.Source.Location[0], d.Source.Location[1]));
         return feature;
     }
-    
-    private QueryContainer DocumentNameSearchQuery<T>(QueryContainerDescriptor<T> q, string searchTerm) where T: class
+
+    private QueryContainer DocumentNameSearchQuery<T>(QueryContainerDescriptor<T> q, string searchTerm) where T : class
     {
         return q.DisMax(dm =>
             dm.Queries(
@@ -188,13 +190,14 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             )
         );
     }
-        
+
     public async Task<List<IFeature>> Search(string searchTerm, string language)
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
         {
             return [];
         }
+        searchTerm = NormalizeSearchTerm(searchTerm);
 
         var response = await _elasticClient.SearchAsync<PointDocument>(s => s.Index(POINTS)
             .Size(NUMBER_OF_RESULTS)
@@ -205,19 +208,19 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         );
         return response.Hits.Select(d => HitToFeature(d, language)).ToList();
     }
-        
+
     public async Task<List<IFeature>> SearchExact(string searchTerm, string language)
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
         {
             return [];
         }
-
+        searchTerm = NormalizeSearchTerm(searchTerm);
         var response = await _elasticClient.SearchAsync<PointDocument>(s => s.Index(POINTS)
             .Size(NUMBER_OF_RESULTS)
             .TrackScores()
             .Sort(f => f.Descending("_score"))
-            .Query(q => 
+            .Query(q =>
                 q.MultiMatch(m =>
                     m.Type(TextQueryType.Phrase)
                         .Query(searchTerm)
@@ -286,7 +289,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                             {
                                 if (coordinates.Length == 1)
                                 {
-                                    return sh.Point(ConvertCoordinate(coordinates[0]));    
+                                    return sh.Point(ConvertCoordinate(coordinates[0]));
                                 }
 
                                 return sh.Envelope([
@@ -363,8 +366,8 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             .Size(PAGE_SIZE)
             .Scroll("10s")
             .Query(q =>
-                q.Bool(b => 
-                    b.MustNot(mn => 
+                q.Bool(b =>
+                    b.MustNot(mn =>
                         mn.Term(t => t.Field(p => p.PoiIcon).Value("icon-search"))
                     )
                 )
@@ -487,5 +490,18 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     public Task StoreRebuildContext(RebuildContext context)
     {
         return _elasticClient.IndexAsync(context, r => r.Index(REBUILD_LOG).Id(context.StartTime.ToString("o")));
+    }
+
+    private static string NormalizeSearchTerm(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+        // Strip niqqud (U+05B0-U+05C7) and other non-spacing marks (accents etc.)
+        return string.Concat(
+            input.Normalize(NormalizationForm.FormD)
+                 .Where(c => c < '\u05B0' || c > '\u05C7')
+                 .Where(c => CharUnicodeInfo.GetUnicodeCategory(c)
+                             != UnicodeCategory.NonSpacingMark)
+        ).Normalize(NormalizationForm.FormC)
+         .ToLowerInvariant();
     }
 }

@@ -4,6 +4,7 @@ import { firstValueFrom, timeout } from "rxjs";
 
 import { ResourcesService } from "./resources.service";
 import { Urls } from "../urls";
+import type { Immutable } from "immer";
 
 export type TranslationResponse = {
     translatedText: string;
@@ -15,7 +16,7 @@ export class TranslationService {
     private readonly resources = inject(ResourcesService);
     private translationCache = new Map<string, string>();
 
-    public isTranslationPossibleAndNeeded(feature: GeoJSON.Feature): boolean {
+    public isTranslationPossibleAndNeeded(feature: Immutable<GeoJSON.Feature>): boolean {
         const language = this.resources.getCurrentLanguageCodeSimplified();
         const description = feature.properties["description:" + language] ||
             feature.properties["poiExternalDescription:" + language];
@@ -26,7 +27,7 @@ export class TranslationService {
         return isNeeded && isPossible;
     }
 
-    public getBestDescription(feature: GeoJSON.Feature): string {
+    public getBestDescription(feature: Immutable<GeoJSON.Feature>): string {
         const language = this.resources.getCurrentLanguageCodeSimplified();
         const keys = Object.keys(feature.properties).filter(key => key.startsWith("poiExternalDescription:"));
 
@@ -38,7 +39,7 @@ export class TranslationService {
         return description.trim();
     }
 
-    public async getTranslatedDescription(feature: GeoJSON.Feature): Promise<string> {
+    public async getTranslatedDescription(feature: Immutable<GeoJSON.Feature>): Promise<string> {
         const language = this.resources.getCurrentLanguageCodeSimplified();
         const cacheKey = `${feature.properties.poiId}_${language}`;
         if (this.translationCache.has(cacheKey)) {

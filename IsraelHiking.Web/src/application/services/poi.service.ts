@@ -473,7 +473,7 @@ export class PoiService {
         this.store.dispatch(new AddToPoiQueueAction(this.getFeatureId(feature)));
     }
 
-    public getPoiSocialLinks(feature: GeoJSON.Feature): PoiSocialLinks {
+    public getPoiSocialLinks(feature: Immutable<GeoJSON.Feature>): PoiSocialLinks {
         const language = this.resources.getCurrentLanguageCodeSimplified();
         const poiLink = this.hashService.getFullUrlFromPoiId({
             source: feature.properties.poiSource,

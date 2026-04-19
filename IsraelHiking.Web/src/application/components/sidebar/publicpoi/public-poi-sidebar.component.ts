@@ -40,6 +40,7 @@ import type {
     EditablePublicPointData
 } from "../../../models";
 import { cloneDeep } from "lodash-es";
+import type { Immutable } from "immer";
 
 export type SourceImageUrlPair = {
     imageUrl: string;
@@ -67,7 +68,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     public showToggleTranslation: boolean = false;
 
     private editMode: boolean;
-    private fullFeature: GeoJSON.Feature;
+    private fullFeature: Immutable<GeoJSON.Feature>;
 
     public readonly resources = inject(ResourcesService);
 
@@ -144,13 +145,14 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             let clonedFeature = cloneDeep(feature);
             this.osmEditableInfo = await this.poiService.createEditableDataAndMerge(clonedFeature);
             this.store.dispatch(new SetSelectedPoiAction(clonedFeature));
+
             await this.initFromFeature(clonedFeature);
             if (data.source === "OSM") {
+                clonedFeature = cloneDeep(clonedFeature); // dispatch is making this object immutable
                 await this.poiService.updateExtendedInfo(clonedFeature, data.language);
                 if (this.getRouteUrlInfo().id !== data.id) {
                     return;
                 }
-                clonedFeature = cloneDeep(clonedFeature);
                 this.store.dispatch(new SetSelectedPoiAction(clonedFeature));
                 await this.initFromFeature(clonedFeature);
             }
@@ -168,7 +170,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         }
     }
 
-    private async initFromFeature(feature: GeoJSON.Feature) {
+    private async initFromFeature(feature: Immutable<GeoJSON.Feature>) {
         this.fullFeature = feature;
         this.sourceImageUrls = this.getSourceImageUrls(feature);
         this.shareLinks = this.poiService.getPoiSocialLinks(feature);
@@ -182,7 +184,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         this.title = GeoJSONUtils.getTitle(feature, language);
     }
 
-    private getSourceImageUrls(feature: GeoJSON.Feature): SourceImageUrlPair[] {
+    private getSourceImageUrls(feature: Immutable<GeoJSON.Feature>): SourceImageUrlPair[] {
         return Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => {
             let url = feature.properties[k] as string;
             let imageUrl = feature.properties[k.replace("website", "poiSourceImageUrl")] as string;
