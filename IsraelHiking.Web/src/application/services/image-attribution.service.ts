@@ -60,10 +60,11 @@ export class ImageAttributionService {
             return null;
         }
         if (url.hostname.includes("nakeb")) {
+            const userId = "Nakeb";
             const imageAttribution = {
-                author: "נָאקֶבּ",
+                author: await this.getUserName(userId),
                 url: "https://www.nakeb.co.il",
-                userId: "Nakeb"
+                userId
             };
             this.attributionImageCache.set(imageUrl, Promise.resolve(imageAttribution));
             return imageAttribution;
