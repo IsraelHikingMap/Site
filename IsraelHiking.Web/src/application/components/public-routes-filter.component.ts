@@ -7,6 +7,7 @@ import { MatSlider, MatSliderRangeThumb } from "@angular/material/slider";
 import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../services/resources.service";
+import { ImageAttributionService } from "../services/image-attribution.service";
 import { SetPublicRoutesFilterAction } from "../reducers/in-memory.reducer";
 import { initialState } from "../reducers/initial-state";
 import type { ApplicationState, PublicRoutesFilter } from "../models";
@@ -21,18 +22,22 @@ export class PublicRoutesFilterComponent {
 
     private readonly store = inject(Store);
     private readonly destroyRef = inject(DestroyRef);
+    private readonly imageAttributionService = inject(ImageAttributionService);
 
     public unitString: string = "km";
     public filterLengthStart: number;
     public filterLengthEnd: number;
+    public filterUserName: string;
 
     constructor() {
         this.store.select((state: ApplicationState) => state.configuration.units).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((units) => {
             this.unitString = this.resources.getLongDistanceUnitString(units);
         });
-        const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter));
-        this.filterLengthStart = filters.lengthRange[0];
-        this.filterLengthEnd = filters.lengthRange[1];
+        this.store.select((state: ApplicationState) => state.inMemoryState.publicRoutesFilter).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(async (filters) => {
+            this.filterLengthStart = filters.lengthRange[0];
+            this.filterLengthEnd = filters.lengthRange[1];
+            this.filterUserName = filters.userId ? await this.imageAttributionService.getUserName(filters.userId) : null;
+        });
     }
 
     public onFilterCategoryChange(value: string) {
@@ -91,5 +96,15 @@ export class PublicRoutesFilterComponent {
 
     public isLengthFiltered() {
         return this.filterLengthStart > 0 || this.filterLengthEnd < 50
+    }
+
+    public hasUserFilter() {
+        return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter.userId) != null;
+    }
+
+    public clearUserFilter() {
+        const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter)) as PublicRoutesFilter;
+        filters.userId = null;
+        this.store.dispatch(new SetPublicRoutesFilterAction(filters));
     }
 }

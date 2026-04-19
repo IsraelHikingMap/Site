@@ -14,7 +14,7 @@
         </mat-button-toggle-group>
     </div>
     <div class="w-2/3" [ngClass]="{'max-md:hidden': !showMap, 'max-md:w-full': showMap}">
-        <div class="absolute w-full top-0 magrin-top-with-toolbar z-10 bg-white hidden max-md:block">
+        <div class="absolute w-full top-0 magrin-top-with-toolbar z-10 hidden max-md:block">
             <public-routes-filter></public-routes-filter>
         </div>
         <mgl-map [mapStyle]="mapStyle" [attributionControl]="false" (mapLoad)="mapLoaded($event)">
@@ -185,7 +185,7 @@
     </div>
     <div [ngClass]="{'max-md:hidden': showMap, 'max-md:w-full': !showMap}"
         class="overflow-y-auto z-10 w-1/3 magrin-top-with-toolbar pb-safe-w-button">
-        <div class="sticky top-0 z-10 bg-white">
+        <div class="sticky top-0 z-10">
             <public-routes-filter></public-routes-filter>
         </div>
         @for (route of poiGeoJsonData.features; track route.properties.poiId) {

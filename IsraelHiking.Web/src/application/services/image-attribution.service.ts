@@ -13,6 +13,7 @@ export type ImageAttribution = {
 @Injectable()
 export class ImageAttributionService {
     private attributionImageCache = new Map<string, Promise<ImageAttribution>>();
+    private userIdToNameCache = new Map<string, string>();
 
     private readonly httpClient = inject(HttpClient);
 
@@ -59,9 +60,8 @@ export class ImageAttributionService {
         }
         if (url.hostname.includes("mapeak.com")) {
             const shareUrl = await firstValueFrom(this.httpClient.get<ShareUrl>(imageUrl.replace("/thumbnail", "")));
-            const osmUser = await firstValueFrom(this.httpClient.get<OsmUserDetails>(`${Urls.osmApi}user/${shareUrl.osmUserId}`));
             const imageAttribution = {
-                author: osmUser.user.display_name,
+                author: await this.getUserName(shareUrl.osmUserId),
                 url: shareUrl.website
             };
             this.attributionImageCache.set(imageUrl, Promise.resolve(imageAttribution));
@@ -116,5 +116,14 @@ export class ImageAttributionService {
             }
         } catch { } // eslint-disable-line
         return null;
+    }
+
+    public async getUserName(userId: string): Promise<string> {
+        if (this.userIdToNameCache.has(userId)) {
+            return this.userIdToNameCache.get(userId);
+        }
+        const osmUser = await firstValueFrom(this.httpClient.get<OsmUserDetails>(`${Urls.osmApi}user/${userId}`));
+        this.userIdToNameCache.set(userId, osmUser.user.display_name);
+        return osmUser.user.display_name;
     }
 }
