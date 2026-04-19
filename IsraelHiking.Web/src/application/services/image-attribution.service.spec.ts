@@ -337,4 +337,30 @@ describe("ImageAttributionService", () => {
             expect(response.author).toBe("OSM User");
         }
     ));
+
+    it("should return a OSM user display name when sending a osm id and cache it", inject([ImageAttributionService, HttpTestingController], async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
+        let promise = service.getUserName("12");
+        mockBackend.match(r => r.url.startsWith(`${Urls.osmApi}user/12`))[0].flush({
+            user: {
+                display_name: "Osm User Name"
+            }
+        });
+
+        const response = await promise;
+        expect(response).toBe("Osm User Name");
+
+        promise = service.getUserName("12");
+        mockBackend.expectNone(r => r.url.startsWith(`${Urls.osmApi}user`));
+        const response2 = await promise;
+        expect(response2).toBe("Osm User Name");
+    }));
+
+    it("should return a nakeb for nakeb user id", inject([ImageAttributionService, HttpTestingController], async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
+        const promise = service.getUserName("Nakeb");
+        await new Promise(resolve => setTimeout(resolve, 0));
+        mockBackend.expectNone(r => r.url.startsWith(`${Urls.osmApi}user`));
+
+        const response = await promise;
+        expect(response).toBe("נָאקֶבּ");
+    }));
 });
