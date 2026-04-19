@@ -11,14 +11,14 @@ import { OfflineManagementComponent } from "./components/screens/offline-managem
 import { PublicRoutesComponent } from "./components/screens/public-routes.component";
 
 export const routes: Route[] = [
-    { path: "", redirectTo: environment.isCapacitor ? "/map" : "/about", pathMatch: "full" },
-    { path: "about", component: LandingComponent },
-    { path: "attribution", component: AttributionComponent },
-    { path: "faq", component: FaqComponent },
-    { path: "offline-management", component: OfflineManagementComponent },
-    { path: "public-routes", component: PublicRoutesComponent },
-    { path: "privacy-policy", component: PrivacyPolicyComponent },
-    { path: "shares", component: SharesComponent },
-    { path: "traces", component: TracesComponent },
-    { path: "**", component: MainMapComponent }
+    { path: "", redirectTo: environment.isCapacitor ? "/map" : "/about", pathMatch: "full", title: "Mapeak" },
+    { path: "about", component: LandingComponent, title: "Mapeak" },
+    { path: "attribution", component: AttributionComponent, title: "Mapeak - Attribution" },
+    { path: "faq", component: FaqComponent, title: "Mapeak - FAQ" },
+    { path: "offline-management", component: OfflineManagementComponent, title: "Mapeak - Offline Management" },
+    { path: "public-routes", component: PublicRoutesComponent, title: "Mapeak - Public Routes" },
+    { path: "privacy-policy", component: PrivacyPolicyComponent, title: "Mapeak - Privacy Policy" },
+    { path: "shares", component: SharesComponent, title: "Mapeak - Cloud Saves" },
+    { path: "traces", component: TracesComponent, title: "Mapeak - Traces" },
+    { path: "**", component: MainMapComponent, title: "Mapeak" }
 ];

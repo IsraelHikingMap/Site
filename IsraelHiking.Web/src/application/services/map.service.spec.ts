@@ -240,8 +240,10 @@ describe("MapService", () => {
         async (service: MapService) => {
             const spy = jasmine.createSpy();
             service.setMap({ fitBounds: spy, on: () => { }, getZoom: () => 1 } as any as Map);
+            const originalInnerWidth = (window as any).innerWidth;
             (window as any).innerWidth = 500;
             await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } }, 0, { bottom: window.innerHeight / 2 });
+            (window as any).innerWidth = originalInnerWidth;
             expect(spy.calls.all()[0].args[1].padding.bottom).toBe(window.innerHeight / 2);
         }
     ));
