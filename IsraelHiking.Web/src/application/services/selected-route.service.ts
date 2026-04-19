@@ -551,7 +551,7 @@ export class SelectedRouteService {
         return this.routes.filter(r => r.state === "Hidden").length > 0;
     }
 
-    public async convertToRoute(fullFeature: GeoJSON.Feature, description: string) {
+    public async convertToRoute(fullFeature: Immutable<GeoJSON.Feature>, description: string) {
         if (fullFeature.properties.poiSource === "Users") {
             const shareUrl = await this.shareUrlsService.getShareUrl(fullFeature.properties.identifier);
             for (const route of shareUrl.dataContainer.routes) {
