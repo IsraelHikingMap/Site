@@ -3,13 +3,15 @@
     @if (imageAttribution.userId) {
     <div class="w-full truncate" [dir]="resources.direction">
         {{resources.moreFrom}}
-        <button mat-button (click)="filterByUserId(imageAttribution.userId)">{{imageAttribution.author}}</button>
+        <button mat-button (click)="filterByUserId(imageAttribution.userId)" angulartics2On="click"
+            angulartics2Category="Attribution" angulartics2Label="Filter by user">{{imageAttribution.author}}</button>
     </div>
 
     } @else {
     <div class="w-full truncate" [dir]="resources.direction">
         {{resources.imageBy}}
-        <a [href]="imageAttribution.url" target="_blank">{{imageAttribution.author}}</a>
+        <a [href]="imageAttribution.url" target="_blank" angulartics2On="click" angulartics2Category="Attribution"
+            angulartics2Label="Image Link">{{imageAttribution.author}}</a>
     </div>
     }
 </div>

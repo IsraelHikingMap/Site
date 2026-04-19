@@ -2,6 +2,7 @@ import { Component, inject, input, SimpleChanges, OnInit, OnChanges } from "@ang
 import { MatButton } from "@angular/material/button";
 import { Store } from "@ngxs/store";
 
+import { Angulartics2OnModule } from "application/directives/gtag.directive";
 import { ImageAttribution, ImageAttributionService } from "../services/image-attribution.service";
 import { ResourcesService } from "../services/resources.service";
 import { SetPublicRoutesFilterAction } from "application/reducers/in-memory.reducer";
@@ -10,7 +11,7 @@ import type { ApplicationState, PublicRoutesFilter } from "application/models";
 @Component({
     selector: "image-attribution",
     templateUrl: "./image-attribution.component.html",
-    imports: [MatButton]
+    imports: [MatButton, Angulartics2OnModule]
 })
 export class ImageAttributionComponent implements OnInit, OnChanges {
 
