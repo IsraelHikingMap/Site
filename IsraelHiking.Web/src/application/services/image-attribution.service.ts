@@ -122,8 +122,7 @@ export class ImageAttributionService {
             if ((licenseLower.includes("cc") && !licenseLower.includes("nc")) || licenseLower.includes("public domain")) {
                 return {
                     author: "Unknown",
-                    url: `${wikiPrefix}wiki/File:${imageName}`,
-                    userId: null
+                    url: `${wikiPrefix}wiki/File:${imageName}`
                 };
             }
         } catch { } // eslint-disable-line
