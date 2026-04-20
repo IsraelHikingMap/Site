@@ -9,7 +9,7 @@
     (focus)="focusOnSearchInput()">
   <mat-autocomplete positionY="below" autoActiveFirstOption="true" #autoFrom="matAutocomplete"
     [displayWith]="displayResults">
-    @for (result of fromContext.searchResults; track result) {
+    @for (result of fromContext.searchResults; track result.id) {
     <mat-option [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']"
       [dir]="resources.getDirection(result.title)">
       @if (result.hasExtraData) {
