@@ -49,8 +49,6 @@
         (change)="updateCurrentShareChanged($event)">{{resources.updateCurrentShare}}</mat-checkbox>
     </div>
     }
-    <!-- HM TODO: remove this when the feature is matured -->
-    @if (canPublishPublic) {
     <div class="flex flex-row items-center">
       <mat-radio-group [(ngModel)]="shareUrl.public" color="primary">
         <mat-radio-button [value]="false">{{resources.private}}</mat-radio-button>
@@ -62,7 +60,6 @@
       </span>
       }
     </div>
-    }
     <div class="flex flex-row">
       <mat-label>{{resources.routeType}}</mat-label>
     </div>
