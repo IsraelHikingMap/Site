@@ -48,14 +48,10 @@ export class GeoLocationService {
         }
 
         this.store.select((s: ApplicationState) => s.routes.present).subscribe(() => {
-            if (!this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings ||
-                this.wasInitialized === false) {
-                return;
+            if (this.wasInitialized &&
+                this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings) {
+                this.sendPlannedRouteToPlugin();
             }
-            // HM TODO: need to pass this to the plugin even if it's not tracking
-            const route = this.selectedRouteService.getSelectedRoute();
-            const routePoints = route?.segments.map(segment => segment.latlngs.map(l => ([l.lng, l.lat] as [number, number]))).flat(1) || [];
-            BackgroundGeolocation.setPlannedRoute({ route: routePoints, soundFile: "content/uh-oh.mp3", distance: 50 });
         });
 
         if (!this.runningContextService.isCapacitor) {
@@ -177,6 +173,7 @@ export class GeoLocationService {
                 }
             });
             this.wasInitialized = true;
+            this.sendPlannedRouteToPlugin();
         } catch {
             // ignore errors.
         }
@@ -214,5 +211,11 @@ export class GeoLocationService {
             },
             timestamp: location.time
         } as GeolocationPosition;
+    }
+
+    private sendPlannedRouteToPlugin() {
+        const route = this.selectedRouteService.getSelectedRoute();
+        const routePoints = route?.segments.map(segment => segment.latlngs.map(l => ([l.lng, l.lat] as [number, number]))).flat(1) || [];
+        BackgroundGeolocation.setPlannedRoute({ route: routePoints, soundFile: "content/uh-oh.mp3", distance: 50 });
     }
 }
