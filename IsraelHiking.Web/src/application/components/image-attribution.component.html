@@ -1,6 +1,6 @@
 @if (imageAttribution !== null) {
 <div class="flex flex-row" class="text-center text-sm">
-    @if (imageAttribution.userId) {
+    @if (imageAttribution.userId && allowFiltering()) {
     <div class="w-full truncate" [dir]="resources.direction">
         <button mat-raised-button class="mb-2" (click)="filterByUserId(imageAttribution.userId)" angulartics2On="click"
             angularticsCategory="Attribution" angularticsAction="Filter by user">
