@@ -1,3 +1,2 @@
-- Support imperial units and contours
-- Add monthly subscription
+- Add ability to filter public routes by a user
 - Plus various bug fixes and performance improvements
