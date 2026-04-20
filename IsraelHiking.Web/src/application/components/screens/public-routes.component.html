@@ -1,13 +1,13 @@
 <div class="flex flex-row relative h-screen relative" [dir]="resources.direction">
     <div class="hidden max-md:block fixed bottom-safe bg-white left-1/2 -translate-x-1/2 z-20">
         <mat-button-toggle-group [(ngModel)]="showMap">
-            <mat-button-toggle [value]="false" angulartics2On="click" angularticsCategory="Public routes"
-                angularticsAction="Open list view">
+            <mat-button-toggle [value]="false" analyticsOn="click" analyticsCategory="Public routes"
+                analyticsLabel="Open list view">
                 <i class="fa icon-list"></i>
                 {{resources.list}}
             </mat-button-toggle>
-            <mat-button-toggle [value]="true" angulartics2On="click" angularticsCategory="Public routes"
-                angularticsAction="Open map view">
+            <mat-button-toggle [value]="true" analyticsOn="click" analyticsCategory="Public routes"
+                analyticsLabel="Open map view">
                 <i class="fa icon-map-o"></i>
                 {{resources.map}}
             </mat-button-toggle>
@@ -38,8 +38,8 @@
             @for (feature of poiGeoJsonData.features; track feature.properties.poiId) {
             <mgl-marker [lngLat]="feature.geometry.coordinates">
                 <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="onStartPointClick(feature, $event)"
-                    (mouseenter)="hover(feature)" (mouseleave)="hover(null)" angulartics2On="click"
-                    angularticsCategory="Public routes" angularticsAction="Select route on map">
+                    (mouseenter)="hover(feature)" (mouseleave)="hover(null)" analyticsOn="click"
+                    analyticsCategory="Public routes" analyticsLabel="Select route on map">
                     <span class="has-extra-data" [style.background]="feature.properties.poiIconColor"></span>
                     <i class="fa icon-map-marker-rect fa-stack-2x"
                         style="color: white; text-shadow: 3px 3px 3px #000;"></i>
@@ -122,51 +122,49 @@
             }
             <span class="mx-2">{{selectedRoutePoint.properties.poiLength | distance}}</span>
             <div class="flex flex-row">
-                <button class="mt-2" mat-button (click)="convertToRoute(selectedRoutePoint)" angulartics2On="click"
-                    angularticsCategory="Public routes" angularticsAction="Add to routes">
+                <button class="mt-2" mat-button (click)="convertToRoute(selectedRoutePoint)" analyticsOn="click"
+                    analyticsCategory="Public routes" analyticsLabel="Add to routes">
                     <i class="fa icon-plus"></i>
                     {{resources.addToRoutes}}
                 </button>
             </div>
             <div class="flex flex-row">
-                <button class="mt-2" mat-button [matMenuTriggerFor]="shareMenu" angulartics2On="click"
-                    angularticsCategory="Public routes" angularticsAction="Open share menu">
+                <button class="mt-2" mat-button [matMenuTriggerFor]="shareMenu" analyticsOn="click"
+                    analyticsCategory="Public routes" analyticsLabel="Open share menu">
                     <i class="fa icon-share-alt"></i>
                     {{resources.share}}
                 </button>
             </div>
             <mat-menu #shareMenu="matMenu">
-                <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).waze" [target]="'_blank'"
-                    angulartics2On="click" angularticsCategory="Public routes" angularticsAction="Navigate with waze">
+                <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).waze" [target]="'_blank'" analyticsOn="click"
+                    analyticsCategory="Public routes" analyticsLabel="Navigate with waze">
                     <i class="fa icon-waze"></i>
                     {{resources.navigateWithWaze}}
                 </a>
                 <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).googleMaps" [target]="'_blank'"
-                    angulartics2On="click" angularticsCategory="Public routes"
-                    angularticsAction="Navigate with google maps">
+                    analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Navigate with google maps">
                     <i class="fa icon-map-marker"></i>
                     {{resources.navigateWithGoogleMaps}}
                 </a>
                 @if (isApp()) {
-                <button mat-menu-item (click)=share(getShareLinks(selectedRoutePoint).poiLink) angulartics2On="click"
-                    angularticsCategory="Public routes" angularticsAction="Share with os capabilities">
+                <button mat-menu-item (click)=share(getShareLinks(selectedRoutePoint).poiLink) analyticsOn="click"
+                    analyticsCategory="Public routes" analyticsLabel="Share with os capabilities">
                     <i class="fa icon-ellipsis-v"></i>
                     {{resources.share}}
                 </button>
                 } @else {
                 <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).facebook" [target]="'_blank'"
-                    angulartics2On="click" angularticsCategory="Public routes" angularticsAction="Share facebook poi">
+                    analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Share facebook poi">
                     <i class="fa icon-facebook"></i>
                     {{resources.shareWithFacebook}}
                 </a>
                 <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).whatsapp" [target]="'_blank'"
-                    angulartics2On="click" angularticsCategory="Public routes" angularticsAction="Share whatsapp poi">
+                    analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Share whatsapp poi">
                     <i class="fa icon-whatsapp"></i>
                     {{resources.shareWithWhatsapp}}
                 </a>
                 <button mat-menu-item [cdkCopyToClipboard]="getShareLinks(selectedRoutePoint).poiLink"
-                    angulartics2On="click" angularticsCategory="Public routes"
-                    angularticsAction="Share copy to clipboard poi">
+                    analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Share copy to clipboard poi">
                     <i class="fa icon-clipboard"></i>
                     {{resources.copyToClipboard}}
                 </button>
@@ -201,18 +199,18 @@
                 }
             </div>
             <div class="flex flex-row mx-10 max-md:mx-2 items-center">
-                <button mat-button [matMenuTriggerFor]="routeMenu" angulartics2On="click"
-                    angularticsCategory="Public routes" angularticsAction="Open route menu from list">
+                <button mat-button [matMenuTriggerFor]="routeMenu" analyticsOn="click" analyticsCategory="Public routes"
+                    analyticsLabel="Open route menu from list">
                     <i class="fa icon-ellipsis-v"></i>
                 </button>
                 <mat-menu #routeMenu="matMenu">
-                    <button mat-menu-item (click)="moveToFeature(route)" angulartics2On="click"
-                        angularticsCategory="Public routes" angularticsAction="Move to route from list">
+                    <button mat-menu-item (click)="moveToFeature(route)" analyticsOn="click"
+                        analyticsCategory="Public routes" analyticsLabel="Move to route from list">
                         <i class="fa icon-crosshairs"></i>
                         {{resources.moveToRoute}}
                     </button>
-                    <button mat-menu-item (click)="convertToRoute(route)" angulartics2On="click"
-                        angularticsCategory="Public routes" angularticsAction="Add to routes from list">
+                    <button mat-menu-item (click)="convertToRoute(route)" analyticsOn="click"
+                        analyticsCategory="Public routes" analyticsLabel="Add to routes from list">
                         <i class="fa icon-plus"></i>
                         {{resources.addToRoutes}}
                     </button>

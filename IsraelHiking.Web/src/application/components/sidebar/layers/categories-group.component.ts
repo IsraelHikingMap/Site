@@ -4,7 +4,7 @@ import { MatButton } from "@angular/material/button";
 import { NgClass } from "@angular/common";
 import { Store } from "@ngxs/store";
 
-import { Angulartics2OnModule } from "../../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../../directives/analytics.directive";
 import { ResourcesService } from "../../../services/resources.service";
 import {
     CollapseGroupAction,
@@ -17,7 +17,7 @@ import type { ApplicationState, CategoriesGroup, Category } from "../../../model
 @Component({
     selector: "categories-group",
     templateUrl: "./categories-group.component.html",
-    imports: [MatExpansionPanel, MatExpansionPanelHeader, MatButton, Angulartics2OnModule, NgClass]
+    imports: [MatExpansionPanel, MatExpansionPanelHeader, MatButton, AnalyticsDirective, NgClass]
 })
 export class CategoriesGroupComponent {
 

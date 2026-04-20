@@ -10,7 +10,7 @@ import { Store } from "@ngxs/store";
 import { CoordinatesComponent } from "../coordinates.component";
 import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
 import { PrivatePoiEditDialogComponent } from "./private-poi-edit-dialog.component";
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { ImageGalleryService } from "../../services/image-gallery.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
@@ -28,7 +28,7 @@ interface IPrivatePoiShowDialogData {
 @Component({
     selector: "private-poi-show-dialog",
     templateUrl: "private-poi-show-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, CoordinatesComponent, MatDialogActions, Angulartics2OnModule, MatTooltip]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, CoordinatesComponent, MatDialogActions, AnalyticsDirective, MatTooltip]
 })
 export class PrivatePoiShowDialogComponent {
 

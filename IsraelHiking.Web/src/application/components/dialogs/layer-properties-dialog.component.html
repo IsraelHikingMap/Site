@@ -61,14 +61,14 @@
       <div class="flex-1">
         @if (isApp) {
         <button mat-button class="w-full" mat-dialog-close type="button" (click)="shareLayer()"
-          [matTooltip]="resources.share" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers"
-          angularticsAction="Share layer from app">
+          [matTooltip]="resources.share" matTooltipPosition="above" analyticsOn="click" analyticsCategory="Layers"
+          analyticsLabel="Share layer from app">
           <i class="fa fa-lg icon-share-alt"></i>
         </button>
         } @else {
         <button mat-button class="w-full" type="button" [cdkCopyToClipboard]="getShareLayerAddress()"
           (click)="copiedToClipboard = true" [matTooltip]="resources.copyUrl" matTooltipPosition="above"
-          angulartics2On="click" angularticsCategory="Layers" angularticsAction="Share layer from web">
+          analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Share layer from web">
           <i class="fa fa-lg icon-clipboard"></i>
           @if (copiedToClipboard) {
           <i class="fa fa-lg icon-check-circle" [style.color]="'green'"></i>
@@ -79,14 +79,14 @@
       <div class="flex-1">
         @if (!isNew) {
         <button mat-button class="w-full" mat-dialog-close type="button" (click)="removeLayer()"
-          matTooltip="{{resources.deleteLayer}}" matTooltipPosition="above" angulartics2On="click"
-          angularticsCategory="Layers" angularticsAction="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
+          matTooltip="{{resources.deleteLayer}}" matTooltipPosition="above" analyticsOn="click"
+          analyticsCategory="Layers" analyticsLabel="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
         }
       </div>
       <div class="flex-1">
         <button mat-button class="w-full" mat-dialog-close type="button" (click)="saveLayer()"
           [disabled]="keyInput.errors !== null" matTooltip="{{resources.save}}" matTooltipPosition="above"
-          angulartics2On="click" angularticsCategory="Layers" angularticsAction="Save layer"><i
+          analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Save layer"><i
             class="fa icon-check"></i></button>
       </div>
     </div>

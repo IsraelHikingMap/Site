@@ -16,7 +16,7 @@ import type { Selection, ScaleContinuousNumeric, ZoomTransform } from "d3";
 import type { Immutable } from "immer";
 
 import { DistancePipe } from "../pipes/distance.pipe";
-import { Angulartics2OnModule } from "../directives/gtag.directive";
+import { AnalyticsDirective } from "../directives/analytics.directive";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStatisticsService, RouteStatistics, RouteStatisticsPoint } from "../services/route-statistics.service";
@@ -66,7 +66,7 @@ interface IChartElements {
     templateUrl: "./route-statistics.component.html",
     styleUrls: ["./route-statistics.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, NgClass, MatGridList, MatGridTile, MatTooltip, MatButton, Angulartics2OnModule, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, DistancePipe]
+    imports: [Dir, NgClass, MatGridList, MatGridTile, MatTooltip, MatButton, AnalyticsDirective, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, DistancePipe]
 })
 export class RouteStatisticsComponent implements OnInit {
     private static readonly HOVER_BOX_WIDTH = 110;

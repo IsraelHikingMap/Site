@@ -14,7 +14,7 @@ import type { Immutable } from "immer";
 import { CoordinatesComponent } from "../coordinates.component";
 import { ClusterOverlayComponent } from "../overlays/cluster-overlay.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { PoiService } from "../../services/poi.service";
 import { RouteStrings } from "../../services/hash.service";
 import { ResourcesService } from "../../services/resources.service";
@@ -32,7 +32,7 @@ import { skip } from "rxjs";
     selector: "public-pois",
     templateUrl: "public-pois.component.html",
     styleUrls: ["public-pois.component.scss"],
-    imports: [SourceDirective, GeoJSONSourceComponent, MarkersForClustersComponent, PointDirective, Angulartics2OnModule, ClusterPointDirective, PopupComponent, ClusterOverlayComponent, Dir, MatButton, MatTooltip, CoordinatesComponent, MarkerComponent, LayerComponent, VectorSourceComponent]
+    imports: [SourceDirective, GeoJSONSourceComponent, MarkersForClustersComponent, PointDirective, AnalyticsDirective, ClusterPointDirective, PopupComponent, ClusterOverlayComponent, Dir, MatButton, MatTooltip, CoordinatesComponent, MarkerComponent, LayerComponent, VectorSourceComponent]
 })
 export class PublicPoisComponent implements OnInit {
     private static readonly MAX_MENU_POINTS_IN_CLUSTER = 50;

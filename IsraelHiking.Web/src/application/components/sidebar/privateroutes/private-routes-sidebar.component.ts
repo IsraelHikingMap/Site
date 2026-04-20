@@ -18,7 +18,7 @@ import { Immutable } from "immer";
 import { ShareEditDialogComponent, ShareEditDialogComponentData } from "../../dialogs/share-edit-dialog.component";
 import { FileSaveDialogComponent } from "../../../components/dialogs/file-save-dialog.component";
 import { DistancePipe } from "../../../pipes/distance.pipe";
-import { Angulartics2OnModule } from "../../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../../directives/analytics.directive";
 import { NameInUseValidatorDirective } from "../../../directives/name-in-use-validator.directive";
 import { SelectedRouteService } from "../../../services/selected-route.service";
 import { ResourcesService } from "../../../services/resources.service";
@@ -41,7 +41,7 @@ import type { ApplicationState, LatLngAltTime, RouteData, ShareUrl } from "../..
     selector: "private-routes-sidebar",
     templateUrl: "./private-routes-sidebar.component.html",
     styleUrls: ["./private-routes-sidebar.component.scss"],
-    imports: [Dir, MatButton, Angulartics2OnModule, MatTooltip, NgClass, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgStyle, MatFormFieldModule, MatInput, FormsModule, MatSlider, MatError, NameInUseValidatorDirective, MatSliderThumb, MatMiniFabButton, MatRadioButton, DistancePipe, MatMenu, MatMenuItem, MatMenuTrigger, CdkDrag, CdkDropList, CdkDragHandle]
+    imports: [Dir, MatButton, AnalyticsDirective, MatTooltip, NgClass, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgStyle, MatFormFieldModule, MatInput, FormsModule, MatSlider, MatError, NameInUseValidatorDirective, MatSliderThumb, MatMiniFabButton, MatRadioButton, DistancePipe, MatMenu, MatMenuItem, MatMenuTrigger, CdkDrag, CdkDropList, CdkDragHandle]
 })
 export class PrivateRoutesSidebarComponent {
     public routes: Immutable<RouteData[]>;

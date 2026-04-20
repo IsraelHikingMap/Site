@@ -12,7 +12,7 @@ import type { Immutable } from "immer";
 import { CategoriesGroupComponent } from "./categories-group.component";
 import { LayerPropertiesDialogComponent } from "../../dialogs/layer-properties-dialog.component";
 import { LegendDialogComponent } from "../../dialogs/legend-dialog.component";
-import { Angulartics2OnModule } from "../../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../../directives/analytics.directive";
 import { ResourcesService } from "../../../services/resources.service";
 import { LayersService } from "../../../services/layers.service";
 import { SidebarService } from "../../../services/sidebar.service";
@@ -26,7 +26,7 @@ import type { ApplicationState, EditableLayer } from "../../../models";
     templateUrl: "./layers-sidebar.component.html",
     styleUrls: ["./layers-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, Angulartics2OnModule, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatTooltip, CategoriesGroupComponent, AsyncPipe]
+    imports: [Dir, MatButton, AnalyticsDirective, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatTooltip, CategoriesGroupComponent, AsyncPipe]
 })
 export class LayersSidebarComponent {
 

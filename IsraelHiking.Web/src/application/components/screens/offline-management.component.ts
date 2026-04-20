@@ -5,7 +5,7 @@ import { type Map, type MapMouseEvent, MercatorCoordinate, type StyleSpecificati
 import { MatButton } from "@angular/material/button";
 
 import { AutomaticLayerPresentationComponent } from "../map/automatic-layer-presentation.component";
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
 import { DefaultStyleService } from "../../services/default-style.service";
@@ -19,7 +19,7 @@ import type { ApplicationState, EditableLayer } from "../../models";
 @Component({
     selector: "offline-management",
     templateUrl: "./offline-management.component.html",
-    imports: [MapComponent, Angulartics2OnModule, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent],
+    imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent],
 })
 export class OfflineManagementComponent {
     public offlineMapStyle: StyleSpecification;

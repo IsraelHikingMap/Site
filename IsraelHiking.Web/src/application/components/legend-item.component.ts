@@ -3,7 +3,7 @@ import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { MatTooltip } from "@angular/material/tooltip";
 
-import { Angulartics2OnModule } from "../directives/gtag.directive";
+import { AnalyticsDirective } from "../directives/analytics.directive";
 import { LayersService } from "../services/layers.service";
 import { ResourcesService } from "../services/resources.service";
 import { MapService } from "../services/map.service";
@@ -25,7 +25,7 @@ export interface ILegendItem {
 @Component({
     selector: "legend-item",
     templateUrl: "./legend-item.component.html",
-    imports: [NgClass, Dir, Angulartics2OnModule, MatTooltip]
+    imports: [NgClass, Dir, AnalyticsDirective, MatTooltip]
 })
 export class LegendItemComponent {
 

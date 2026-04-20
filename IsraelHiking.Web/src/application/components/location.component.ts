@@ -9,7 +9,7 @@ import { Store } from "@ngxs/store";
 import { BatteryOptimization } from "@capawesome-team/capacitor-android-battery-optimization";
 
 import { GpsLocationOverlayComponent } from "./overlays/gps-location-overlay.component";
-import { Angulartics2OnModule } from "../directives/gtag.directive";
+import { AnalyticsDirective } from "../directives/analytics.directive";
 import { ResourcesService } from "../services/resources.service";
 import { ToastService } from "../services/toast.service";
 import { SelectedRouteService } from "../services/selected-route.service";
@@ -28,7 +28,7 @@ import type { LatLngAltTime, ApplicationState } from "../models";
     selector: "location",
     templateUrl: "./location.component.html",
     styleUrls: ["./location.component.scss"],
-    imports: [MatButton, Angulartics2OnModule, MatTooltip, MatProgressSpinner, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, GpsLocationOverlayComponent]
+    imports: [MatButton, AnalyticsDirective, MatTooltip, MatProgressSpinner, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, GpsLocationOverlayComponent]
 })
 export class LocationComponent {
     public locationFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;

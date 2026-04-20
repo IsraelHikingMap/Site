@@ -1,12 +1,13 @@
 ﻿<div [dir]="resources.direction">
   <div mat-dialog-content>
     <div class="flex flex-row">
-      <mat-progress-bar color="primary" [mode]="progressPersentage > 0 ? 'buffer' : 'determinate'" [value]="progressPersentage"></mat-progress-bar>
+      <mat-progress-bar color="primary" [mode]="progressPersentage > 0 ? 'buffer' : 'determinate'"
+        [value]="progressPersentage"></mat-progress-bar>
     </div>
     <div class="flex flex-row">
       <span class="text-sm">
         @if (progressPersentage > 0) {
-          {{progressPersentage | number: '1.1-1' }}%
+        {{progressPersentage | number: '1.1-1' }}%
         }
         {{' ' + text}}
       </span>
@@ -15,17 +16,20 @@
   <div mat-dialog-actions>
     <div class="flex flex-row w-full">
       @if (isError) {
-        <div class="flex-1">
-          <button mat-raised-button class="w-full" color="warn" mat-dialog-close angulartics2On="click" angularticsCategory="Progress" angularticsAction="Error progress dialog">{{resources.close}}</button>
-        </div>
+      <div class="flex-1">
+        <button mat-raised-button class="w-full" color="warn" mat-dialog-close analyticsOn="click"
+          analyticsCategory="Progress" analyticsLabel="Error progress dialog">{{resources.close}}</button>
+      </div>
       }
       @if (isContinue) {
-        <div class="flex-1">
-          <button mat-raised-button class="w-full" color="primary" (click)="continueAction()" angulartics2On="click" angularticsCategory="Progress" angularticsAction="Continue progress dialog">{{resources.continue}}</button>
-        </div>
+      <div class="flex-1">
+        <button mat-raised-button class="w-full" color="primary" (click)="continueAction()" analyticsOn="click"
+          analyticsCategory="Progress" analyticsLabel="Continue progress dialog">{{resources.continue}}</button>
+      </div>
       }
       <div class="w-1/4">
-        <button mat-raised-button class="w-full" mat-dialog-close angulartics2On="click" angularticsCategory="Progress" angularticsAction="Cancel progress dialog">{{resources.cancel}}</button>
+        <button mat-raised-button class="w-full" mat-dialog-close analyticsOn="click" analyticsCategory="Progress"
+          analyticsLabel="Cancel progress dialog">{{resources.cancel}}</button>
       </div>
     </div>
   </div>

@@ -25,14 +25,14 @@ import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog
 import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.component";
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 import { SendReportDialogComponent } from "./dialogs/send-report-dialog.component";
-import { Angulartics2OnModule } from "../directives/gtag.directive";
+import { AnalyticsDirective } from "../directives/analytics.directive";
 import { SetAgreeToTermsAction } from "../reducers/user.reducer";
 import type { UserInfo, ApplicationState } from "../models";
 
 @Component({
     selector: "main-menu",
     templateUrl: "./main-menu.component.html",
-    imports: [MatButton, Angulartics2OnModule, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, RouterLinkActive]
+    imports: [MatButton, AnalyticsDirective, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, RouterLinkActive]
 })
 export class MainMenuComponent {
 

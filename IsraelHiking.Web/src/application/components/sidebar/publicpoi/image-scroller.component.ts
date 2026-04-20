@@ -5,7 +5,7 @@ import { AnimationOptions, LottieComponent } from "ngx-lottie";
 
 import { ImageAttributionComponent } from "../../image-attribution.component";
 import { ImageCaptureDirective } from "../../../directives/image-capture.directive";
-import { Angulartics2OnModule } from "../../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../../directives/analytics.directive";
 import { ResourcesService } from "../../../services/resources.service";
 import { FileService } from "../../../services/file.service";
 import { ImageGalleryService } from "../../../services/image-gallery.service";
@@ -15,7 +15,7 @@ import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.j
 @Component({
     selector: "image-scroller",
     templateUrl: "./image-scroller.component.html",
-    imports: [LottieComponent, MatAnchor, ImageCaptureDirective, Angulartics2OnModule, MatButton, Dir, ImageAttributionComponent]
+    imports: [LottieComponent, MatAnchor, ImageCaptureDirective, AnalyticsDirective, MatButton, Dir, ImageAttributionComponent]
 })
 export class ImageScrollerComponent implements OnChanges {
     lottiePOI: AnimationOptions = {

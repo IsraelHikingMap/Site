@@ -5,7 +5,7 @@ import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MAT_DIALOG_DATA, MatDialog, MatDialogTitle, MatDialogClose, MatDialogContent } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
 
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { PoiService, SimplePointType } from "../../services/poi.service";
 import { ToastService } from "../../services/toast.service";
@@ -25,7 +25,7 @@ export type AddSimplePoiDialogData = {
 @Component({
     selector: "add-simple-poi-doalog",
     templateUrl: "./add-simple-poi-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, Angulartics2OnModule]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, AnalyticsDirective]
 })
 export class AddSimplePoiDialogComponent {
 

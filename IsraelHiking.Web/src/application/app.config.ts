@@ -93,11 +93,9 @@ import { LogReaderService } from "./services/log-reader.service";
 import { TranslationService } from "./services/translation.service";
 import { AnalyticsService } from "./services/analytics.service";
 import { NakebService } from "./services/nakeb.service";
-// Components
+// Map Interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
-// Directives
-import { Angulartics2OnModule } from "./directives/gtag.directive";
 // Reducers
 import { ConfigurationReducer } from "./reducers/configuration.reducer";
 import { LocationReducer } from "./reducers/location.reducer";
@@ -148,7 +146,6 @@ export const appConfig: ApplicationConfig = {
             ClipboardModule,
             NgxMapLibreGLModule,
             InfiniteScrollDirective,
-            Angulartics2OnModule,
             DragDropModule,
             NgxsModule.forRoot([
                 ConfigurationReducer,

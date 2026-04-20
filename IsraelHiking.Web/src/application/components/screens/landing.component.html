@@ -12,12 +12,12 @@
         </p>
         @if (!isApp()) {
         <div class="flex flex-col gap-4 sm:flex-row">
-            <a [href]="androidAppUrl" angularticsAction="Download from google play store"
+            <a [href]="androidAppUrl" analyticsLabel="Download from google play store"
                 class="group flex items-center gap-3 rounded-lg transition-all hover:scale-105">
                 <img src="content/google-play-badge.png" alt="Google Play" width="200">
             </a>
 
-            <a [href]="iosAppUrl" angularticsAction="Download from app store"
+            <a [href]="iosAppUrl" analyticsLabel="Download from app store"
                 class="group flex items-center gap-3 rounded-lg transition-all hover:scale-105">
                 <img src="content/app-store-badge.png" alt="App Store" width="200">
             </a>
@@ -215,15 +215,15 @@
     }
 
     <div class="mb-4">
-        <a routerLink="/privacy-policy" angularticsAction="Privacy policy" class="hover:text-white transition-colors">
+        <a routerLink="/privacy-policy" analyticsLabel="Privacy policy" class="hover:text-white transition-colors">
             {{resources.privacyPolicyTermsOfService}}
         </a>
         <span>|</span>
-        <a routerLink="/attribution" angularticsAction="Attribution" class="hover:text-white transition-colors">
+        <a routerLink="/attribution" analyticsLabel="Attribution" class="hover:text-white transition-colors">
             {{resources.attribution}}
         </a>
         <span>|</span>
-        <a routerLink="/faq" angularticsAction="FAQ" class="hover:text-white transition-colors">
+        <a routerLink="/faq" analyticsLabel="FAQ" class="hover:text-white transition-colors">
             {{resources.FAQ}}
         </a>
     </div>

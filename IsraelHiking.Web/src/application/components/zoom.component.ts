@@ -3,13 +3,13 @@ import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 
-import { Angulartics2OnModule } from "../directives/gtag.directive";
+import { AnalyticsDirective } from "../directives/analytics.directive";
 import { ResourcesService } from "../services/resources.service";
 
 @Component({
     selector: "zoom",
     templateUrl: "./zoom.component.html",
-    imports: [MatButton, Angulartics2OnModule, MatTooltip]
+    imports: [MatButton, AnalyticsDirective, MatTooltip]
 })
 export class ZoomComponent {
     public readonly resources = inject(ResourcesService);

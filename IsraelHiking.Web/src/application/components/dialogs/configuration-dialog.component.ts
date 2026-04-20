@@ -12,7 +12,7 @@ import { MatDialogRef, MatDialogTitle, MatDialogClose, MatDialogContent, MatDial
 import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
@@ -31,7 +31,7 @@ import type { ApplicationState, BatteryOptimizationType } from "../../models";
 @Component({
     selector: "configuration-dialog",
     templateUrl: "./configuration-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, MatRadioButton, Angulartics2OnModule, MatCheckbox, MatDialogActions, MatAnchor, AsyncPipe, FormsModule, MatFormField, MatSelect, MatOption, MatLabel]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, MatRadioButton, AnalyticsDirective, MatCheckbox, MatDialogActions, MatAnchor, AsyncPipe, FormsModule, MatFormField, MatSelect, MatOption, MatLabel]
 })
 export class ConfigurationDialogComponent {
 

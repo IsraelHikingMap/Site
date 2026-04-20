@@ -19,7 +19,7 @@ import { LayersComponent } from "../map/layers.component";
 import { ShareShowDialogComponent } from "./share-show-dialog.component";
 import { RoutesPathComponent } from "../map/routes-path.component";
 import { DistancePipe } from "../../pipes/distance.pipe";
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
@@ -45,7 +45,7 @@ export type ShareEditDialogComponentData = {
 @Component({
     selector: "share-edit-dialog",
     templateUrl: "./share-edit-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, Angulartics2OnModule, MatAnchor, MapComponent, LayersComponent, MatRadioGroup, MatRadioButton, MatDialogActions, MatFormField, ControlComponent, MatButtonModule, MatTooltip, RoutesPathComponent, DistancePipe, CdkTextareaAutosize]
+    imports: [Dir, MatDialogTitle, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, AnalyticsDirective, MatAnchor, MapComponent, LayersComponent, MatRadioGroup, MatRadioButton, MatDialogActions, MatFormField, ControlComponent, MatButtonModule, MatTooltip, RoutesPathComponent, DistancePipe, CdkTextareaAutosize]
 })
 export class ShareEditDialogComponent {
     public shareUrl: ShareUrl;

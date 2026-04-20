@@ -1,13 +1,13 @@
 <div class="flex flex-row h-screen relative" [dir]="resources.direction">
     <div class="hidden max-md:block absolute bottom-safe bg-white left-1/2 -translate-x-1/2 z-10">
         <mat-button-toggle-group [(ngModel)]="showMap">
-            <mat-button-toggle [value]="false" angulartics2On="click" angularticsCategory="Shares"
-                angularticsAction="Open list view">
+            <mat-button-toggle [value]="false" analyticsOn="click" analyticsCategory="Shares"
+                analyticsLabel="Open list view">
                 <i class="fa icon-list"></i>
                 {{resources.list}}
             </mat-button-toggle>
-            <mat-button-toggle [value]="true" angulartics2On="click" angularticsCategory="Shares"
-                angularticsAction="Open map view">
+            <mat-button-toggle [value]="true" analyticsOn="click" analyticsCategory="Shares"
+                analyticsLabel="Open map view">
                 <i class="fa icon-map-o"></i>
                 {{resources.map}}
             </mat-button-toggle>
@@ -18,102 +18,101 @@
         <div class="flex flex-row sticky top-0 z-10 bg-white">
             <mat-form-field subscriptSizing="dynamic">
                 <mat-label>{{resources.sort}}</mat-label>
-                <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()" angulartics2On="click"
-                    angularticsCategory="Shares" angularticsAction="Open sort menu">
-                    <mat-option value="lastModifiedDate" angulartics2On="click" angularticsCategory="Shares"
-                        angularticsAction="Sort by date">
+                <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()" analyticsOn="click"
+                    analyticsCategory="Shares" analyticsLabel="Open sort menu">
+                    <mat-option value="lastModifiedDate" analyticsOn="click" analyticsCategory="Shares"
+                        analyticsLabel="Sort by date">
                         {{resources.date}}
                     </mat-option>
-                    <mat-option value="difficulty" angulartics2On="click" angularticsCategory="Shares"
-                        angularticsAction="Sort by difficulty">
+                    <mat-option value="difficulty" analyticsOn="click" analyticsCategory="Shares"
+                        analyticsLabel="Sort by difficulty">
                         {{resources.difficulty}}
                     </mat-option>
-                    <mat-option value="type" angulartics2On="click" angularticsCategory="Shares"
-                        angularticsAction="Sort by type">
+                    <mat-option value="type" analyticsOn="click" analyticsCategory="Shares"
+                        analyticsLabel="Sort by type">
                         {{resources.routeType}}
                     </mat-option>
-                    <mat-option value="length" angulartics2On="click" angularticsCategory="Shares"
-                        angularticsAction="Sort by length">
+                    <mat-option value="length" analyticsOn="click" analyticsCategory="Shares"
+                        analyticsLabel="Sort by length">
                         {{resources.length}}
                     </mat-option>
-                    <mat-option value="title" angulartics2On="click" angularticsCategory="Shares"
-                        angularticsAction="Sort by name">
+                    <mat-option value="title" analyticsOn="click" analyticsCategory="Shares"
+                        analyticsLabel="Sort by name">
                         {{resources.name}}
                     </mat-option>
                 </mat-select>
             </mat-form-field>
-            <button mat-button class="!h-[56px] ms-2" (click)="onSortDirectionChange()" angulartics2On="click"
-                angularticsCategory="Shares" angularticsAction="Chnage sort direction">
+            <button mat-button class="!h-[56px] ms-2" (click)="onSortDirectionChange()" analyticsOn="click"
+                analyticsCategory="Shares" analyticsLabel="Chnage sort direction">
                 <i class="fa icon-sort mx-2"></i>
             </button>
-            <button mat-button class="!h-[56px] ms-2" [matMenuTriggerFor]="filterMenu" angulartics2On="click"
-                angularticsCategory="Shares" angularticsAction="Open filter menu">
+            <button mat-button class="!h-[56px] ms-2" [matMenuTriggerFor]="filterMenu" analyticsOn="click"
+                analyticsCategory="Shares" analyticsLabel="Open filter menu">
                 <i class="fa icon-sliders mx-2"></i>
                 {{resources.filter}}
             </button>
             <mat-menu #filterMenu="matMenu">
                 <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Very Hard')"
-                        [checked]="filter.difficulty.includes('Very Hard')" angulartics2On="click"
-                        angularticsCategory="Shares" angularticsAction="Filter by very hard difficulty">
+                        [checked]="filter.difficulty.includes('Very Hard')" analyticsOn="click"
+                        analyticsCategory="Shares" analyticsLabel="Filter by very hard difficulty">
                         {{resources.veryHard}}
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Hard')"
-                        [checked]="filter.difficulty.includes('Hard')" angulartics2On="click"
-                        angularticsCategory="Shares" angularticsAction="Filter by hard difficulty">
+                        [checked]="filter.difficulty.includes('Hard')" analyticsOn="click" analyticsCategory="Shares"
+                        analyticsLabel="Filter by hard difficulty">
                         {{resources.hard}}
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Moderate')"
-                        angulartics2On="click" angularticsCategory="Shares"
-                        angularticsAction="Filter by moderate difficulty"
+                        analyticsOn="click" analyticsCategory="Shares" analyticsLabel="Filter by moderate difficulty"
                         [checked]="filter.difficulty.includes('Moderate')">
                         {{resources.moderate}}
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Easy')" angulartics2On="click"
-                        angularticsCategory="Shares" angularticsAction="Filter by easy difficulty"
+                    <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Easy')" analyticsOn="click"
+                        analyticsCategory="Shares" analyticsLabel="Filter by easy difficulty"
                         [checked]="filter.difficulty.includes('Easy')">
                         {{resources.easy}}
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Unknown')"
-                        [checked]="filter.difficulty.includes('Unknown')" angulartics2On="click"
-                        angularticsCategory="Shares" angularticsAction="Filter by unknown difficulty">
+                        [checked]="filter.difficulty.includes('Unknown')" analyticsOn="click" analyticsCategory="Shares"
+                        analyticsLabel="Filter by unknown difficulty">
                         {{resources.unknown}}
                     </mat-checkbox>
                 </div>
                 <mat-divider></mat-divider>
                 <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterChange('type', 'Hiking')"
-                        [checked]="filter.type.includes('Hiking')" angulartics2On="click" angularticsCategory="Shares"
-                        angularticsAction="Filter by hiking">
+                        [checked]="filter.type.includes('Hiking')" analyticsOn="click" analyticsCategory="Shares"
+                        analyticsLabel="Filter by hiking">
                         <i class="fa icon-hike"></i>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterChange('type', 'Biking')"
-                        [checked]="filter.type.includes('Biking')" angulartics2On="click" angularticsCategory="Shares"
-                        angularticsAction="Filter by biking">
+                        [checked]="filter.type.includes('Biking')" analyticsOn="click" analyticsCategory="Shares"
+                        analyticsLabel="Filter by biking">
                         <i class="fa icon-bike"></i>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('type', '4x4')" angulartics2On="click"
-                        angularticsCategory="Shares" angularticsAction="Filter by 4x4"
+                    <mat-checkbox color="primary" (change)="onFilterChange('type', '4x4')" analyticsOn="click"
+                        analyticsCategory="Shares" analyticsLabel="Filter by 4x4"
                         [checked]="filter.type.includes('4x4')">
                         <i class="fa icon-four-by-four"></i>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
                     <mat-checkbox color="primary" (change)="onFilterChange('type', 'Unknown')"
-                        [checked]="filter.type.includes('Unknown')" angulartics2On="click" angularticsCategory="Shares"
-                        angularticsAction="Filter by unknown type">
+                        [checked]="filter.type.includes('Unknown')" analyticsOn="click" analyticsCategory="Shares"
+                        analyticsLabel="Filter by unknown type">
                         <i class="fa icon-question"></i>
                     </mat-checkbox>
                 </div>
@@ -145,7 +144,7 @@
             @for (shareUrl of filteredShareUrls; track shareUrl.id) {
             <mgl-marker [lngLat]="shareUrl.start">
                 <span class="fa-stack fa-lg cursor-pointer selected-marker-icon" (click)="onStartPointClick(shareUrl)"
-                    angulartics2On="click" angularticsCategory="Shares" angularticsAction="Open share from map">
+                    analyticsOn="click" analyticsCategory="Shares" analyticsLabel="Open share from map">
                     <i class="fa icon-map-marker-rect fa-stack-2x"
                         style="color: white; text-shadow: 3px 3px 3px #000;"></i>
                     <i class="fa {{getIconFromType(shareUrl)}} fa-stack-1x stack-icon-top stack-icon-large"></i>
@@ -163,29 +162,29 @@
                 </button>
             </div>
             <div class="flex flex-row">
-                <button mat-menu-item (click)="openEditShareUrlDialog(selectedShareUrl)" angulartics2On="click"
-                    angularticsCategory="Shares" angularticsAction="Edit share from map">
+                <button mat-menu-item (click)="openEditShareUrlDialog(selectedShareUrl)" analyticsOn="click"
+                    analyticsCategory="Shares" analyticsLabel="Edit share from map">
                     <i class="fa icon-pencil"></i>
                     {{resources.editProperties}}
                 </button>
             </div>
             <div class="flex flex-row">
-                <button mat-menu-item (click)="openShareUrl(selectedShareUrl)" angulartics2On="click"
-                    angularticsCategory="Shares" angularticsAction="Open share from map">
+                <button mat-menu-item (click)="openShareUrl(selectedShareUrl)" analyticsOn="click"
+                    analyticsCategory="Shares" analyticsLabel="Open share from map">
                     <i class="fa icon-external-link-square"></i>
                     {{resources.openCloudSave}}
                 </button>
             </div>
             <div class="flex flex-row">
-                <button mat-menu-item (click)="addShareUrlToRoutes(selectedShareUrl)" angulartics2On="click"
-                    angularticsCategory="Shares" angularticsAction="Add share to routes from map">
+                <button mat-menu-item (click)="addShareUrlToRoutes(selectedShareUrl)" analyticsOn="click"
+                    analyticsCategory="Shares" analyticsLabel="Add share to routes from map">
                     <i class="fa icon-plus"></i>
                     {{resources.addToRoutes}}
                 </button>
             </div>
             <div class="flex flex-row">
-                <button mat-menu-item (click)="deleteShareUrl(selectedShareUrl)" angulartics2On="click"
-                    angularticsCategory="Shares" angularticsAction="Delete share from map">
+                <button mat-menu-item (click)="deleteShareUrl(selectedShareUrl)" analyticsOn="click"
+                    analyticsCategory="Shares" analyticsLabel="Delete share from map">
                     <i class="fa icon-trash"></i>
                     {{resources.delete}}
                 </button>

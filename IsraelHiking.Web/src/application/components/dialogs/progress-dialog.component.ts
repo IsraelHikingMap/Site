@@ -6,7 +6,7 @@ import { DecimalPipe } from "@angular/common";
 import { MatButton } from "@angular/material/button";
 import { MatDialogRef, MatDialog, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions, MatDialogClose } from "@angular/material/dialog";
 
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { LoggingService } from "../../services/logging.service";
 
@@ -21,7 +21,7 @@ export interface IProgressDialogConfig {
 @Component({
     selector: "progress-dialog",
     templateUrl: "progress-dialog.component.html",
-    imports: [Dir, CdkScrollable, MatDialogContent, MatProgressBar, MatDialogActions, MatButton, MatDialogClose, Angulartics2OnModule, DecimalPipe]
+    imports: [Dir, CdkScrollable, MatDialogContent, MatProgressBar, MatDialogActions, MatButton, MatDialogClose, AnalyticsDirective, DecimalPipe]
 })
 export class ProgressDialogComponent {
     public progressPersentage: number = 0;

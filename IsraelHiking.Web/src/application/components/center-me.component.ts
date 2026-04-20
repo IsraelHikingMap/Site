@@ -3,7 +3,7 @@ import { Component, inject } from "@angular/core";
 import { MatButton } from "@angular/material/button";
 import { Store } from "@ngxs/store";
 
-import { Angulartics2OnModule } from "../directives/gtag.directive";
+import { AnalyticsDirective } from "../directives/analytics.directive";
 import { ResourcesService } from "../services/resources.service";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
@@ -12,7 +12,7 @@ import type { ApplicationState } from "../models";
 @Component({
     selector: "center-me",
     templateUrl: "./center-me.component.html",
-    imports: [MatButton, Angulartics2OnModule]
+    imports: [MatButton, AnalyticsDirective]
 })
 export class CenterMeComponent {
 

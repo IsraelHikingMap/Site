@@ -7,7 +7,7 @@ import { MatTooltip } from "@angular/material/tooltip";
 import { firstValueFrom } from "rxjs";
 
 import { CoordinatesComponent } from "../coordinates.component";
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { Urls } from "../../urls";
@@ -18,7 +18,7 @@ import type { LatLngAltTime } from "../../models";
     templateUrl: "./missing-part-overlay.component.html",
     styleUrls: ["./missing-part-overlay.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, NgClass, MatTooltip, Angulartics2OnModule, CoordinatesComponent]
+    imports: [Dir, MatButton, NgClass, MatTooltip, AnalyticsDirective, CoordinatesComponent]
 })
 export class MissingPartOverlayComponent {
 

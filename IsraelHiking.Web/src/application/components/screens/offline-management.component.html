@@ -93,8 +93,8 @@
         }
         @if (selectedTileXY && !isSelectedAvailableForOffline() && !downloadingTileXY()) {
         <div class="flex-1 m-1">
-            <button mat-raised-button class="w-full" color="primary" (click)="downloadSelected()" angulartics2On="click"
-                angularticsCategory="Offline Management" angularticsAction="Download">
+            <button mat-raised-button class="w-full" color="primary" (click)="downloadSelected()" analyticsOn="click"
+                analyticsCategory="Offline Management" analyticsLabel="Download">
                 <i class="fa fa-lg icon-download"></i>
                 {{resources.startDownload}}
             </button>
@@ -102,15 +102,15 @@
         }
         @if (selectedTileXY && isSelectedAvailableForOffline() && !downloadingTileXY()) {
         <div class="flex-1 m-1">
-            <button mat-raised-button class="w-full" color="primary" (click)="downloadSelected()" angulartics2On="click"
-                angularticsCategory="Offline Management" angularticsAction="Update">
+            <button mat-raised-button class="w-full" color="primary" (click)="downloadSelected()" analyticsOn="click"
+                analyticsCategory="Offline Management" analyticsLabel="Update">
                 <i class="fa fa-lg icon-download"></i>
                 {{resources.update}}
             </button>
         </div>
         <div class="flex-1 m-1">
-            <button mat-raised-button class="w-full" color="warn" (click)="deleteSelected()" angulartics2On="click"
-                angularticsCategory="Offline Management" angularticsAction="Delete">
+            <button mat-raised-button class="w-full" color="warn" (click)="deleteSelected()" analyticsOn="click"
+                analyticsCategory="Offline Management" analyticsLabel="Delete">
                 <i class="fa fa-lg icon-trash"></i>
                 {{resources.delete}}
             </button>
@@ -118,8 +118,8 @@
         }
         @if (downloadingTileXY()) {
         <div class="flex-1 m-1">
-            <button mat-raised-button class="w-full" color="primary" (click)="cancelDownload()" angulartics2On="click"
-                angularticsCategory="Offline Management" angularticsAction="Cancel">
+            <button mat-raised-button class="w-full" color="primary" (click)="cancelDownload()" analyticsOn="click"
+                analyticsCategory="Offline Management" analyticsLabel="Cancel">
                 <i class="fa fa-lg icon-close"></i>
                 {{resources.cancel}}
             </button>

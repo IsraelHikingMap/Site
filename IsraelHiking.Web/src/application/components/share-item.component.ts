@@ -9,7 +9,7 @@ import { MatButton } from "@angular/material/button";
 import { Share } from "@capacitor/share";
 import type { Immutable } from "immer";
 
-import { Angulartics2OnModule } from "../directives/gtag.directive";
+import { AnalyticsDirective } from "../directives/analytics.directive";
 import { ShareUrlsService } from "../services/share-urls.service";
 import { ResourcesService } from "../services/resources.service";
 import { RunningContextService } from "../services/running-context.service";
@@ -18,7 +18,7 @@ import type { ShareUrl } from "../models/";
 @Component({
     selector: "share-item",
     templateUrl: "./share-item.component.html",
-    imports: [DatePipe, DistancePipe, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger, MatButton, CdkCopyToClipboard, Angulartics2OnModule]
+    imports: [DatePipe, DistancePipe, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger, MatButton, CdkCopyToClipboard, AnalyticsDirective]
 })
 export class ShareItemComponent implements OnInit {
     public shareUrl = input<Immutable<ShareUrl>>();

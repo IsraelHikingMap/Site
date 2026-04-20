@@ -10,9 +10,9 @@
                 <mat-radio-group (change)=resources.setLanguage($event.value) [value]="getLanuguageCode()">
                     @for (language of availableLanguages; track language) {
                     <div>
-                        <mat-radio-button [value]="language.code" color="primary" angulartics2On="click"
-                            angularticsCategory="Intro"
-                            angularticsAction="Select language {{language.code}}">{{language.label}}</mat-radio-button>
+                        <mat-radio-button [value]="language.code" color="primary" analyticsOn="click"
+                            analyticsCategory="Intro"
+                            analyticsLabel="Select language {{language.code}}">{{language.label}}</mat-radio-button>
                     </div>
                     }
                 </mat-radio-group>
@@ -64,20 +64,19 @@
         <div class="flex flex-row w-full">
             <div class="flex-1">
                 @if (step !== 0) {
-                <button mat-button class="w-full" (click)="step = step - 1" angulartics2On="click"
-                    angularticsCategory="Intro" angularticsAction="Intro back">{{resources.back}}</button>
+                <button mat-button class="w-full" (click)="step = step - 1" analyticsOn="click"
+                    analyticsCategory="Intro" analyticsLabel="Intro back">{{resources.back}}</button>
                 }
             </div>
             @if (step !== 2) {
             <div class="flex-1">
-                <button mat-raised-button color="primary" class="w-full" (click)="step = step + 1"
-                    angulartics2On="click" angularticsCategory="Intro"
-                    angularticsAction="Intro next">{{resources.next}}</button>
+                <button mat-raised-button color="primary" class="w-full" (click)="step = step + 1" analyticsOn="click"
+                    analyticsCategory="Intro" analyticsLabel="Intro next">{{resources.next}}</button>
             </div>
             } @else {
             <div class="flex-1">
-                <button mat-raised-button color="primary" class="w-full" (click)="close()" angulartics2On="click"
-                    angularticsCategory="Intro" angularticsAction="Intro close">{{resources.close}}</button>
+                <button mat-raised-button color="primary" class="w-full" (click)="close()" analyticsOn="click"
+                    analyticsCategory="Intro" analyticsLabel="Intro close">{{resources.close}}</button>
             </div>
             }
         </div>

@@ -1,11 +1,11 @@
 ﻿@if (!isIFrame()) {
-<button mat-button routerLink="/map" routerLinkActive="border-b-4! border-[#32CD6D]!" angulartics2On="click"
-  angularticsCategory="Menu" angularticsAction="Plan & Explore" class="max-md:hidden! text-white!">
+<button mat-button routerLink="/map" routerLinkActive="border-b-4! border-[#32CD6D]!" analyticsOn="click"
+  analyticsCategory="Menu" analyticsLabel="Plan & Explore" class="max-md:hidden! text-white!">
   <i class="fa fa-lg icon-map-o mat-icon"></i>
   <span class="mx-1">{{resources.planAndExplore}}</span>
 </button>
-<button mat-button routerLink="/public-routes" routerLinkActive="border-b-4! border-[#32CD6D]!" angulartics2On="click"
-  angularticsCategory="Menu" angularticsAction="Find Routes" class="max-md:hidden! text-white!">
+<button mat-button routerLink="/public-routes" routerLinkActive="border-b-4! border-[#32CD6D]!" analyticsOn="click"
+  analyticsCategory="Menu" analyticsLabel="Find Routes" class="max-md:hidden! text-white!">
   <i class="fa fa-lg icon-recordings mat-icon"></i>
   <span class="mx-1">{{resources.findRoutes}}</span>
 </button>
@@ -13,8 +13,8 @@
 @if (!isIFrame() && !isLoggedIn()) {
 <button mat-raised-button (click)="login()">{{resources.signIn}}</button>
 }
-<button mat-button [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Menu"
-  angularticsAction="Toggle main menu" class="!h-[56px] text-white!">
+<button mat-button [matMenuTriggerFor]="appMenu" analyticsOn="click" analyticsCategory="Menu"
+  analyticsLabel="Toggle main menu" class="!h-[56px] text-white!">
   <span class="flex flex-row justify-center items-center">
     @if (isLoggedIn()) {
     @if (userInfo?.imageUrl) {
@@ -30,12 +30,12 @@
   <div [dir]="resources.direction">
     @if (!isIFrame()) {
     <button mat-menu-item routerLink="/map" routerLinkActive="bg-[#528CFA40]! border-s-4! border-[#32CD6D]!"
-      class="block md:hidden!" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Plan & Explore">
+      class="block md:hidden!" analyticsOn="click" analyticsCategory="Menu" analyticsLabel="Plan & Explore">
       <i class="fa fa-lg icon-map-o mat-icon"></i>
       <span class="mx-1">{{resources.planAndExplore}}</span>
     </button>
     <button mat-menu-item routerLink="/public-routes" routerLinkActive="bg-[#528CFA40]! border-s-4! border-[#32CD6D]!"
-      class="block md:hidden!" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Find Routes">
+      class="block md:hidden!" analyticsOn="click" analyticsCategory="Menu" analyticsLabel="Find Routes">
       <i class="fa fa-lg icon-recordings mat-icon"></i>
       <span class="mx-1">{{resources.findRoutes}}</span>
     </button>
@@ -43,58 +43,57 @@
     }
     @if (isLoggedIn()) {
     <button mat-menu-item routerLink="/shares" routerLinkActive="bg-[#528CFA40]! border-s-4! border-[#32CD6D]!"
-      angulartics2On="click" angularticsCategory="User Menu" angularticsAction="User shares open">
+      analyticsOn="click" analyticsCategory="User Menu" analyticsLabel="User shares open">
       <span><i class="fa fa-lg icon-mixcloud"></i> {{resources.mySavesInTheCloud}}</span>
     </button>
     <button mat-menu-item routerLink="/traces" routerLinkActive="bg-[#528CFA40]! border-s-4! border-[#32CD6D]!"
-      angulartics2On="click" angularticsCategory="User Menu" angularticsAction="User traces open">
+      analyticsOn="click" analyticsCategory="User Menu" analyticsLabel="User traces open">
       <span><i class="fa fa-lg icon-recordings"></i> {{resources.myTraces}}</span>
     </button>
     @if (isPurchaseAvailable()) {
-    <button mat-menu-item (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu"
-      angularticsAction="Order">
+    <button mat-menu-item (click)="orderOfflineMaps()" analyticsOn="click" analyticsCategory="Menu"
+      analyticsLabel="Order">
       <i class="text-green-600 fa fa-lg icon-dollar mat-icon"></i>
       <span class="mx-1 text-green-600">{{resources.purchaseSubscription}}</span>
     </button>
     }
     @if (isRenewAvailable()) {
-    <button mat-menu-item (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu"
-      angularticsAction="Renew">
+    <button mat-menu-item (click)="orderOfflineMaps()" analyticsOn="click" analyticsCategory="Menu"
+      analyticsLabel="Renew">
       <i class="text-green-600 fa fa-lg icon-dollar mat-icon"></i>
       <span class="text-green-600 mx-1">{{resources.renewSubscription}}</span>
     </button>
     }
     @if (isOfflineDownloadAvailable()) {
     <button mat-menu-item routerLink="/offline-management"
-      routerLinkActive="bg-[#528CFA40]! border-s-4! border-[#32CD6D]!" angulartics2On="click"
-      angularticsCategory="User Menu" angularticsAction="Download">
+      routerLinkActive="bg-[#528CFA40]! border-s-4! border-[#32CD6D]!" analyticsOn="click" analyticsCategory="User Menu"
+      analyticsLabel="Download">
       <i class="fa fa-lg icon-download mat-icon"></i>
       <span class="mx-1">{{resources.downloadMapForOfflineUse}}</span>
     </button>
     }
-    <button mat-menu-item (click)="openConfigurationDialog()" angulartics2On="click" angularticsCategory="User Menu"
-      angularticsAction="Advanced settings open">
+    <button mat-menu-item (click)="openConfigurationDialog()" analyticsOn="click" analyticsCategory="User Menu"
+      analyticsLabel="Advanced settings open">
       <span><i class="fa fa-lg icon-cogs"></i> {{resources.advancedSettings}}</span>
     </button>
-    <button mat-menu-item (click)="logout()" angulartics2On="click" angularticsCategory="User Menu"
-      angularticsAction="Logout">
+    <button mat-menu-item (click)="logout()" analyticsOn="click" analyticsCategory="User Menu" analyticsLabel="Logout">
       <span><i class="fa fa-lg icon-sign-out"></i> {{resources.logout}}</span>
     </button>
     <hr />
     }
-    <button mat-menu-item (click)="openLanguage()" angulartics2On="click" angularticsCategory="Menu"
-      angularticsAction="Open language selection">
+    <button mat-menu-item (click)="openLanguage()" analyticsOn="click" analyticsCategory="Menu"
+      analyticsLabel="Open language selection">
       <i class="fa fa-lg icon-language mat-icon"></i>
       <span class="mx-1">Language</span>
     </button>
     @if (!isIFrame()) {
     <button mat-menu-item routerLink="/about" routerLinkActive="bg-[#528CFA40]! border-s-4! border-[#32CD6D]!"
-      angulartics2On="click" angularticsCategory="Menu" angularticsAction="About">
+      analyticsOn="click" analyticsCategory="Menu" analyticsLabel="About">
       <i class="fa fa-lg icon-info mat-icon"></i>
       <span class="mx-1">{{resources.about}}</span>
     </button>
-    <button mat-menu-item (click)="reportAnIssue()" angulartics2On="click" angularticsCategory="Menu"
-      angularticsAction="Report an issue">
+    <button mat-menu-item (click)="reportAnIssue()" analyticsOn="click" analyticsCategory="Menu"
+      analyticsLabel="Report an issue">
       <i class="fa fa-lg icon-envelope mat-icon"></i>
       <span class="mx-1">{{resources.reportAnIssue}}</span>
     </button>

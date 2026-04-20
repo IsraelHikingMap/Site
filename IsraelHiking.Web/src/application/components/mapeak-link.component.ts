@@ -1,7 +1,7 @@
 import { Component, inject } from "@angular/core";
 import { MatTooltip } from "@angular/material/tooltip";
 
-import { Angulartics2OnModule } from "../directives/gtag.directive";
+import { AnalyticsDirective } from "../directives/analytics.directive";
 import { HashService } from "../services/hash.service";
 import { ResourcesService } from "../services/resources.service";
 import { RunningContextService } from "../services/running-context.service";
@@ -10,7 +10,7 @@ import { Urls } from "../urls";
 @Component({
     selector: "mapeak-link",
     templateUrl: "./mapeak-link.component.html",
-    imports: [Angulartics2OnModule, MatTooltip]
+    imports: [AnalyticsDirective, MatTooltip]
 })
 export class MapeakLinkComponent {
 

@@ -2,8 +2,8 @@
 <div class="flex flex-row" class="text-center text-sm">
     @if (imageAttribution.userId && allowFiltering()) {
     <div class="w-full truncate" [dir]="resources.direction">
-        <button mat-raised-button class="mb-2" (click)="filterByUserId(imageAttribution.userId)" angulartics2On="click"
-            angularticsCategory="Attribution" angularticsAction="Filter by user">
+        <button mat-raised-button class="mb-2" (click)="filterByUserId(imageAttribution.userId)" analyticsOn="click"
+            analyticsCategory="Attribution" analyticsLabel="Filter by user">
             {{resources.moreFrom}}
             {{imageAttribution.author}}
         </button>
@@ -11,8 +11,8 @@
     } @else {
     <div class="w-full truncate" [dir]="resources.direction">
         {{resources.imageBy}}
-        <a [href]="imageAttribution.url" target="_blank" angulartics2On="click" angularticsCategory="Attribution"
-            angularticsAction="Image Link">
+        <a [href]="imageAttribution.url" target="_blank" analyticsOn="click" analyticsCategory="Attribution"
+            analyticsLabel="Image Link">
             {{imageAttribution.author}}
         </a>
     </div>

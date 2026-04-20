@@ -8,9 +8,8 @@
       <div class="flex-1">
         <mat-radio-group [(ngModel)]="selectedLanguageCode" class="flex flex-col">
           @for (language of availableLanguages; track language) {
-          <mat-radio-button [value]="language.code" color="primary" angulartics2On="click"
-            angularticsCategory="Language"
-            angularticsAction="Select language {{language.code}}">{{language.label}}</mat-radio-button>
+          <mat-radio-button [value]="language.code" color="primary" analyticsOn="click" analyticsCategory="Language"
+            analyticsLabel="Select language {{language.code}}">{{language.label}}</mat-radio-button>
           }
         </mat-radio-group>
       </div>
@@ -19,8 +18,8 @@
 
     <div mat-dialog-actions>
       <div class="flex flex-row w-full">
-        <button class="w-full" mat-dialog-close mat-button (click)="saveLanguage()" angulartics2On="click"
-          angularticsCategory="Language" angularticsAction="Save language {{selectedLanguageCode}}"
+        <button class="w-full" mat-dialog-close mat-button (click)="saveLanguage()" analyticsOn="click"
+          analyticsCategory="Language" analyticsLabel="Save language {{selectedLanguageCode}}"
           matTooltip="{{resources.save}}" matTooltipPosition="above"><i class="fa icon-check"></i></button>
       </div>
     </div>

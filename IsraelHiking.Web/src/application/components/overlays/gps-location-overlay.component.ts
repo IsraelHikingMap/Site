@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from "uuid";
 import { CoordinatesComponent } from "../coordinates.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { AddSimplePoiDialogComponent } from "../dialogs/add-simple-poi-dialog.component";
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { RunningContextService } from "../../services/running-context.service";
@@ -26,7 +26,7 @@ import type { ApplicationState, LatLngAltTime, LinkData, MarkerData } from "../.
 @Component({
     selector: "gps-location-overlay",
     templateUrl: "./gps-location-overlay.component.html",
-    imports: [Dir, MatButton, Angulartics2OnModule, MatTooltip, CoordinatesComponent, AsyncPipe]
+    imports: [Dir, MatButton, AnalyticsDirective, MatTooltip, CoordinatesComponent, AsyncPipe]
 })
 export class GpsLocationOverlayComponent {
 

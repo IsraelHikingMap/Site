@@ -5,19 +5,23 @@
         <p class="w-full">{{resources.translate(categoriesGroup().type)}}</p>
       </div>
       <div class="w-1/5">
-        <button class="w-full h-full!" mat-button (click)="toggleVisibility($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle visibility of category layer {{categoriesGroup().type}}">
-          <i class="fa fa-lg" [ngClass]="{'icon-eye': isCategoryGroupVisible(), 'icon-eye-slash': !isCategoryGroupVisible()}"></i>
+        <button class="w-full h-full!" mat-button (click)="toggleVisibility($event)" analyticsOn="click"
+          analyticsCategory="Layers" analyticsLabel="Toggle visibility of category layer {{categoriesGroup().type}}">
+          <i class="fa fa-lg"
+            [ngClass]="{'icon-eye': isCategoryGroupVisible(), 'icon-eye-slash': !isCategoryGroupVisible()}"></i>
         </button>
       </div>
     </div>
   </mat-expansion-panel-header>
   @for (category of categoriesGroup().categories; track category) {
-    <div class="flex flex-row">
-      <button mat-button class="row-button w-full justify-start!" (click)="toggleCategory(category)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle category visibility {{category.name}}">
-        <i class="fa" [ngClass]="{'icon-eye': isCategoryVisible(category), 'icon-eye-slash': !isCategoryVisible(category)}"></i>
-        <i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i>
-        <span>{{resources.translate(category.name)}}</span>
-      </button>
-    </div>
+  <div class="flex flex-row">
+    <button mat-button class="row-button w-full justify-start!" (click)="toggleCategory(category)" analyticsOn="click"
+      analyticsCategory="Layers" analyticsLabel="Toggle category visibility {{category.name}}">
+      <i class="fa"
+        [ngClass]="{'icon-eye': isCategoryVisible(category), 'icon-eye-slash': !isCategoryVisible(category)}"></i>
+      <i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i>
+      <span>{{resources.translate(category.name)}}</span>
+    </button>
+  </div>
   }
 </mat-expansion-panel>

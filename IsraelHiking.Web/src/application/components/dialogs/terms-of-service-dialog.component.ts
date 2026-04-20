@@ -6,7 +6,7 @@ import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { FormsModule } from "@angular/forms";
 
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { AuthorizationService } from "../../services/authorization.service";
 import { ToastService } from "../../services/toast.service";
@@ -14,7 +14,7 @@ import { ToastService } from "../../services/toast.service";
 @Component({
     selector: "terms-of-service-dialog",
     templateUrl: "./terms-of-service-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatCheckbox, FormsModule, MatDialogActions, Angulartics2OnModule]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatCheckbox, FormsModule, MatDialogActions, AnalyticsDirective]
 })
 export class TermsOfServiceDialogComponent {
     public wikimediaTermsOfServiceUrl: string;

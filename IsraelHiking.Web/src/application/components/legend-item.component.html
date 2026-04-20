@@ -1,14 +1,14 @@
 ﻿<div class="border border-black mb-2 w-[201px]" [ngClass]="{'table' : item().type === 'POI'}">
   <div (click)="moveToLocation()" class="cursor-pointer h-[50px]"
-    [ngClass]="{'w-[200px]': item().type === 'Way', 'w-[50px]': item().type === 'POI'}" dir="ltr" angulartics2On="click"
-    angularticsCategory="Info" angularticsAction="Legend move map">
+    [ngClass]="{'w-[200px]': item().type === 'Way', 'w-[50px]': item().type === 'POI'}" dir="ltr" analyticsOn="click"
+    analyticsCategory="Info" analyticsLabel="Legend move map">
     <img [src]="getImageAddress()" class="w-full h-full" />
   </div>
   <div class="px-2" [ngClass]="{'w-full table-cell text-start align-middle' : item().type === 'POI'}"
     matTooltip="{{item().osmTags.join(', ')}}" matTooltipPosition="above">
     @if (item().link) {
-    <a [href]="getLink()" [target]="'_blank'" class="no-underline text-black" angulartics2On="click"
-      angularticsCategory="Info" angularticsAction="Legend text OSM link">{{item().title}}</a>
+    <a [href]="getLink()" [target]="'_blank'" class="no-underline text-black" analyticsOn="click"
+      analyticsCategory="Info" analyticsLabel="Legend text OSM link">{{item().title}}</a>
     } @else {
     <span class="no-underline text-black">{{item().title}}</span>
     }

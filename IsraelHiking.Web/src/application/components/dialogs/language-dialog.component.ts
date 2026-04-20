@@ -9,7 +9,7 @@ import { MatTooltip } from "@angular/material/tooltip";
 import { MatDialog, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
 
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { AVAILABLE_LANGUAGES } from "../../reducers/initial-state";
 import { ApplicationState, LanguageCode } from "../../models";
@@ -18,7 +18,7 @@ import languageAnimationData from "../../../content/lottie/dialog-language.json"
 @Component({
     selector: "language-dialog",
     templateUrl: "./language-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, FormsModule, MatRadioButton, Angulartics2OnModule, MatDialogActions, MatTooltip, LottieComponent]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, FormsModule, MatRadioButton, AnalyticsDirective, MatDialogActions, MatTooltip, LottieComponent]
 })
 export class LanguageDialogComponent {
     public selectedLanguageCode: LanguageCode;

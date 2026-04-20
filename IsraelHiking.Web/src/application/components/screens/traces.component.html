@@ -1,13 +1,13 @@
 <div class="flex flex-row relative h-screen" [dir]="resources.direction">
     <div class="hidden max-md:block absolute bottom-safe bg-white left-1/2 -translate-x-1/2 z-10">
         <mat-button-toggle-group [(ngModel)]="showMap">
-            <mat-button-toggle [value]="false" angulartics2On="click" angularticsCategory="Traces"
-                angularticsAction="Open list view">
+            <mat-button-toggle [value]="false" analyticsOn="click" analyticsCategory="Traces"
+                analyticsLabel="Open list view">
                 <i class="fa icon-list"></i>
                 {{resources.list}}
             </mat-button-toggle>
-            <mat-button-toggle [value]="true" angulartics2On="click" angularticsCategory="Traces"
-                angularticsAction="Open map view">
+            <mat-button-toggle [value]="true" analyticsOn="click" analyticsCategory="Traces"
+                analyticsLabel="Open map view">
                 <i class="fa icon-map-o"></i>
                 {{resources.map}}
             </mat-button-toggle>
@@ -18,25 +18,25 @@
         <div class="flex flex-row sticky top-0 z-10 bg-white">
             <mat-form-field subscriptSizing="dynamic">
                 <mat-label>{{resources.sort}}</mat-label>
-                <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()" angulartics2On="click"
-                    angularticsCategory="Traces" angularticsAction="Open sort menu">
-                    <mat-option value="timeStamp" angulartics2On="click" angularticsCategory="Traces"
-                        angularticsAction="Sort by date">
+                <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()" analyticsOn="click"
+                    analyticsCategory="Traces" analyticsLabel="Open sort menu">
+                    <mat-option value="timeStamp" analyticsOn="click" analyticsCategory="Traces"
+                        analyticsLabel="Sort by date">
                         {{resources.date}}
                     </mat-option>
-                    <mat-option value="name" angulartics2On="click" angularticsCategory="Traces"
-                        angularticsAction="Sort by name">
+                    <mat-option value="name" analyticsOn="click" analyticsCategory="Traces"
+                        analyticsLabel="Sort by name">
                         {{resources.name}}
                     </mat-option>
                 </mat-select>
             </mat-form-field>
-            <button mat-button class="!h-[56px] ms-2" (click)="onSortDirectionChange()" angulartics2On="click"
-                angularticsCategory="Traces" angularticsAction="Change sort direction">
+            <button mat-button class="!h-[56px] ms-2" (click)="onSortDirectionChange()" analyticsOn="click"
+                analyticsCategory="Traces" analyticsLabel="Change sort direction">
                 <i class="fa icon-sort mx-2"></i>
             </button>
             <label class="flex-1 !h-[56px] ms-2">
-                <a class="w-full !h-full" mat-raised-button color="primary" angulartics2On="click"
-                    angularticsCategory="Traces" angularticsAction="Upload OSM trace"><i
+                <a class="w-full !h-full" mat-raised-button color="primary" analyticsOn="click"
+                    analyticsCategory="Traces" analyticsLabel="Upload OSM trace"><i
                         class="fa icon-folder-open fa-lg"></i>
                     {{resources.uploadFileToOsm}}</a>
                 <input type="file" (change)="uploadToOsm($event)" [style.display]="'none'" />
@@ -46,48 +46,47 @@
         <div [id]="'trace-' + trace.id">
             <secured-image [src]="trace.imageUrl" alt="" class="w-full"></secured-image>
             <h4 class="m-2">
-                <button mat-button [matMenuTriggerFor]="shareMenu" angulartics2On="click" angularticsCategory="Traces"
-                    angularticsAction="Open trace menu">
+                <button mat-button [matMenuTriggerFor]="shareMenu" analyticsOn="click" analyticsCategory="Traces"
+                    analyticsLabel="Open trace menu">
                     <i class="fa icon-ellipsis-v"></i>
                 </button>
                 <mat-menu #shareMenu="matMenu">
                     @if (canUploadToOsm(trace)) {
-                    <button mat-menu-item (click)="uploadRecordingToOsm(trace)" angulartics2On="click"
-                        angularticsCategory="Traces" angularticsAction="Upload locally recorded trace">
+                    <button mat-menu-item (click)="uploadRecordingToOsm(trace)" analyticsOn="click"
+                        analyticsCategory="Traces" analyticsLabel="Upload locally recorded trace">
                         <i class="fa icon-cloud-upload"></i>
                         {{resources.uploadFileToOsm}}
                     </button>
                     }
-                    <button mat-menu-item (click)="moveToTrace(trace.id)" angulartics2On="click"
-                        angularticsCategory="Traces" angularticsAction="Move to trace">
+                    <button mat-menu-item (click)="moveToTrace(trace.id)" analyticsOn="click" analyticsCategory="Traces"
+                        analyticsLabel="Move to trace">
                         <i class="fa icon-crosshairs"></i>
                         {{resources.moveToRoute}}
                     </button>
-                    <button mat-menu-item (click)="editTrace(trace)" angulartics2On="click" angularticsCategory="Traces"
-                        angularticsAction="Edit OSM trace properties">
+                    <button mat-menu-item (click)="editTrace(trace)" analyticsOn="click" analyticsCategory="Traces"
+                        analyticsLabel="Edit OSM trace properties">
                         <i class="fa icon-pencil"></i>
                         {{resources.editProperties}}
                     </button>
                     @if (!isMobile()) {
                     <button mat-menu-item [disabled]="canUploadToOsm(trace)" (click)="editInOsm(trace)"
-                        angulartics2On="click" angularticsCategory="Traces" angularticsAction="Edit OSM trace in OSM">
+                        analyticsOn="click" analyticsCategory="Traces" analyticsLabel="Edit OSM trace in OSM">
                         <i class="fa icon-map-editing fa-lg"></i>
                         {{resources.editThisMapUsingOsm}}
                     </button>
                     }
-                    <button mat-menu-item (click)="addTraceToRoutes(trace)" angulartics2On="click"
-                        angularticsCategory="Traces" angularticsAction="Add OSM trace to routes">
+                    <button mat-menu-item (click)="addTraceToRoutes(trace)" analyticsOn="click"
+                        analyticsCategory="Traces" analyticsLabel="Add OSM trace to routes">
                         <i class="fa icon-plus"></i>
                         {{resources.addToRoutes}}
                     </button>
-                    <button mat-menu-item (click)="deleteTrace(trace)" angulartics2On="click"
-                        angularticsCategory="Traces" angularticsAction="Delete OSM trace">
+                    <button mat-menu-item (click)="deleteTrace(trace)" analyticsOn="click" analyticsCategory="Traces"
+                        analyticsLabel="Delete OSM trace">
                         <i class="fa icon-trash"></i>
                         {{resources.delete}}
                     </button>
                     <button mat-menu-item [disabled]="canUploadToOsm(trace)" (click)="findUnmappedRoutes(trace)"
-                        angulartics2On="click" angularticsCategory="Traces"
-                        angularticsAction="Find unmapped trace parts">
+                        analyticsOn="click" analyticsCategory="Traces" analyticsLabel="Find unmapped trace parts">
                         <i class="fa icon-search"></i>
                         {{resources.findUnmappedRoutes}}
                     </button>
@@ -127,8 +126,8 @@
             <mgl-markers-for-clusters source="traces-source">
                 <ng-template mglPoint let-feature>
                     <span class="fa-stack fa-lg cursor-pointer marker-icon"
-                        (click)="onStartPointClick(feature.properties.id, $event)" angulartics2On="click"
-                        angularticsCategory="Traces" angularticsAction="Open a Trace from the map">
+                        (click)="onStartPointClick(feature.properties.id, $event)" analyticsOn="click"
+                        analyticsCategory="Traces" analyticsLabel="Open a Trace from the map">
                         <i class="fa icon-map-marker-rect fa-stack-2x"
                             style="color: white; text-shadow: 3px 3px 3px #000;"></i>
                         <i class="fa icon-recordings fa-stack-1x stack-icon-top stack-icon-large"></i>
@@ -136,7 +135,7 @@
                 </ng-template>
                 <ng-template mglClusterPoint let-feature>
                     <div class="marker-cluster" (click)="expandCluster(feature, $event, tracesClusterSource)"
-                        angulartics2On="click" angularticsCategory="Traces" angularticsAction="Traces cluster click">
+                        analyticsOn="click" analyticsCategory="Traces" analyticsLabel="Traces cluster click">
                         {{ feature.properties?.point_count }}
                     </div>
                 </ng-template>
@@ -180,29 +179,29 @@
                 </button>
             </div>
             <div class="flex flex-row">
-                <button mat-button (click)="editTrace(selectedTrace)" angulartics2On="click"
-                    angularticsCategory="Traces" angularticsAction="Edit OSM trace properties from popup">
+                <button mat-button (click)="editTrace(selectedTrace)" analyticsOn="click" analyticsCategory="Traces"
+                    analyticsLabel="Edit OSM trace properties from popup">
                     <i class="fa icon-pencil"></i>
                     {{resources.editProperties}}
                 </button>
             </div>
             <div class="flex flex-row">
-                <button mat-button (click)="addTraceToRoutes(selectedTrace)" angulartics2On="click"
-                    angularticsCategory="Traces" angularticsAction="Add OSM trace to routes from popup">
+                <button mat-button (click)="addTraceToRoutes(selectedTrace)" analyticsOn="click"
+                    analyticsCategory="Traces" analyticsLabel="Add OSM trace to routes from popup">
                     <i class="fa icon-plus"></i>
                     {{resources.addToRoutes}}
                 </button>
             </div>
             <div class="flex flex-row">
-                <button mat-button (click)="deleteTrace(selectedTrace)" angulartics2On="click"
-                    angularticsCategory="Traces" angularticsAction="Delete OSM trace parts from popup">
+                <button mat-button (click)="deleteTrace(selectedTrace)" analyticsOn="click" analyticsCategory="Traces"
+                    analyticsLabel="Delete OSM trace parts from popup">
                     <i class="fa icon-trash"></i>
                     {{resources.delete}}
                 </button>
             </div>
             <div class="flex flex-row">
-                <button mat-button (click)="findUnmappedRoutes(selectedTrace)" angulartics2On="click"
-                    angularticsCategory="Traces" angularticsAction="Find unmapped trace parts from popup">
+                <button mat-button (click)="findUnmappedRoutes(selectedTrace)" analyticsOn="click"
+                    analyticsCategory="Traces" analyticsLabel="Find unmapped trace parts from popup">
                     <i class="fa icon-search"></i>
                     {{resources.findUnmappedRoutes}}
                 </button>

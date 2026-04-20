@@ -13,8 +13,8 @@
           <routes-path [routesGeoJson]="routesGeoJson"></routes-path>
           <mgl-control [position]="resources.direction === 'rtl' ? 'top-left' : 'top-right'">
             <label>
-              <a matMiniFab color="" (changed)="addImage($event)" angulartics2On="click" angularticsCategory="Share"
-                angularticsAction="Upload image">
+              <a matMiniFab color="" (changed)="addImage($event)" analyticsOn="click" analyticsCategory="Share"
+                analyticsLabel="Upload image">
                 <i class="fa icon-image fa-2x pt-1"></i>
               </a>
               <input type="file" (change)="addImage($event)" [style.display]="'none'" />
@@ -24,8 +24,8 @@
         } @else {
         <div class="relative w-full h-[200px]">
           <img [src]="shareUrl.base64Preview" class="w-full object-contain img-center" (error)="removeImage()" />
-          <button matMiniFab color="" class="absolute! top-2 end-2" (click)="removeImage()" angulartics2On="click"
-            angularticsCategory="Share" angularticsAction="Remove image">
+          <button matMiniFab color="" class="absolute! top-2 end-2" (click)="removeImage()" analyticsOn="click"
+            analyticsCategory="Share" analyticsLabel="Remove image">
             <i class="fa icon-trash fa-2x pt-1"></i>
           </button>
         </div>
@@ -124,8 +124,8 @@
   <div mat-dialog-actions>
     <div class="flex flex-row w-full">
       <button mat-raised-button class="w-full" color="primary" (click)="uploadShareUrl()"
-        [disabled]="isLoading || !canUpload()" angulartics2On="click" angularticsCategory="Share"
-        angularticsAction="Share {{updateCurrentShare ? 'update' : 'create'}}">{{updateCurrentShare ? resources.update :
+        [disabled]="isLoading || !canUpload()" analyticsOn="click" analyticsCategory="Share"
+        analyticsLabel="Share {{updateCurrentShare ? 'update' : 'create'}}">{{updateCurrentShare ? resources.update :
         resources.generateUrlToShareWithYourFriends}}</button>
     </div>
   </div>

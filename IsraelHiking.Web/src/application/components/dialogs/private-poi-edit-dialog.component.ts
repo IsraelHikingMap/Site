@@ -16,7 +16,7 @@ import type { Immutable } from "immer";
 import { CoordinatesComponent } from "../coordinates.component";
 import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
 import { ImageCaptureDirective } from "../../directives/image-capture.directive";
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { ImageResizeService } from "../../services/image-resize.service";
@@ -43,7 +43,7 @@ interface PrivatePoiEditDialogData {
 @Component({
     selector: "private-poi-edit-dialog",
     templateUrl: "private-poi-edit-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatAnchor, ImageCaptureDirective, Angulartics2OnModule, MatTooltip, NgStyle, MatIconButton, MatSuffix, CoordinatesComponent, MatDialogActions, MatMenu, MatMenuItem, MatMenuTrigger]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatAnchor, ImageCaptureDirective, AnalyticsDirective, MatTooltip, NgStyle, MatIconButton, MatSuffix, CoordinatesComponent, MatDialogActions, MatMenu, MatMenuItem, MatMenuTrigger]
 })
 export class PrivatePoiEditDialogComponent implements AfterViewInit {
     private static readonly NUMBER_OF_ICONS_PER_ROW = 4;

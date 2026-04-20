@@ -19,7 +19,7 @@ import type { Immutable } from "immer";
 
 import { AutomaticLayerPresentationComponent } from "../map/automatic-layer-presentation.component";
 import { NameInUseValidatorDirective } from "../../directives/name-in-use-validator.directive";
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
@@ -35,7 +35,7 @@ export type LayerPropertiesDialogComponentData = {
 @Component({
     selector: "layer-dialog",
     templateUrl: "./layer-properties-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, NameInUseValidatorDirective, MatError, MatSlider, MatSliderThumb, MapComponent, AutomaticLayerPresentationComponent, MatDialogActions, Angulartics2OnModule, MatTooltip, AsyncPipe, CdkCopyToClipboard]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, NameInUseValidatorDirective, MatError, MatSlider, MatSliderThumb, MapComponent, AutomaticLayerPresentationComponent, MatDialogActions, AnalyticsDirective, MatTooltip, AsyncPipe, CdkCopyToClipboard]
 })
 export class LayerPropertiesDialogComponent {
     public title: string;

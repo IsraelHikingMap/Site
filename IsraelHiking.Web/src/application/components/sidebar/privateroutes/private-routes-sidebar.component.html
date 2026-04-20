@@ -8,29 +8,29 @@
     <div class="flex flex-row w-full">
         <div class="flex-1">
             <button mat-button class="w-full" (click)="addRoute($event)" matTooltip="{{resources.addRoute}}"
-                matTooltipPosition="below" angulartics2On="click" angularticsCategory="Private Routes"
-                angularticsAction="Add route">
+                matTooltipPosition="below" analyticsOn="click" analyticsCategory="Private Routes"
+                analyticsLabel="Add route">
                 <i class="fa fa-lg icon-plus"></i>
             </button>
         </div>
         <div class="flex-1">
             <button mat-button class="w-full" [disabled]="routes.length === 0" (click)="share()"
-                matTooltip="{{resources.share}}" matTooltipPosition="below" angulartics2On="click"
-                angularticsCategory="Private Routes" angularticsAction="Share">
+                matTooltip="{{resources.share}}" matTooltipPosition="below" analyticsOn="click"
+                analyticsCategory="Private Routes" analyticsLabel="Share">
                 <i class="fa fa-lg icon-share-alt"></i>
                 <span class="mx-1">({{routes.length}})</span>
             </button>
         </div>
         <div class="flex-1">
             <button mat-button class="w-full" (click)="toggleAllRoutes($event)" matTooltipPosition="below"
-                angulartics2On="click" angularticsCategory="Private Routes" angularticsAction="Toggle all routes">
+                analyticsOn="click" analyticsCategory="Private Routes" analyticsLabel="Toggle all routes">
                 <i class="fa fa-lg" [ngClass]="isAllRoutesHidden() ? 'icon-eye-slash' : 'icon-eye'"></i>
             </button>
         </div>
         <div class="flex-1">
             <label>
-                <a mat-button class="w-full" angulartics2On="click" matTooltip="{{resources.openAFile}}"
-                    matTooltipPosition="below" angularticsCategory="Private Routes" angularticsAction="Open file">
+                <a mat-button class="w-full" analyticsOn="click" matTooltip="{{resources.openAFile}}"
+                    matTooltipPosition="below" analyticsCategory="Private Routes" analyticsLabel="Open file">
                     <i class="fa fa-lg icon-folder-open"></i>
                 </a>
                 <input type="file" name="file" (change)="openFile($event)" [style.display]="'none'" />
@@ -38,8 +38,8 @@
         </div>
         <div class="flex-1">
             <button mat-button class="w-full" (click)="deleteAllRoutes($event)"
-                matTooltip="{{resources.deleteAllRoutes}}" matTooltipPosition="below" angulartics2On="click"
-                angularticsCategory="Private Routes" angularticsAction="Delete all routes">
+                matTooltip="{{resources.deleteAllRoutes}}" matTooltipPosition="below" analyticsOn="click"
+                analyticsCategory="Private Routes" analyticsLabel="Delete all routes">
                 <i class="fa fa-lg icon-trash"></i>
             </button>
         </div>
@@ -79,30 +79,29 @@
                     <mat-panel-title>
                         <div class="flex flex-row w-full">
                             <mat-menu #appMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
-                                <button mat-menu-item (click)="saveRouteToFile(route)" angulartics2On="click"
-                                    angularticsCategory="Route" angularticsAction="Save route to file">
+                                <button mat-menu-item (click)="saveRouteToFile(route)" analyticsOn="click"
+                                    analyticsCategory="Route" analyticsLabel="Save route to file">
                                     <i class="fa fa-lg icon-external-link-square"></i>
                                     <span class="ms-2">{{resources.saveRouteToFile}}</span>
                                 </button>
-                                <button mat-menu-item (click)="moveToRoute(route)" angulartics2On="click"
-                                    angularticsCategory="Route" angularticsAction="Move to route">
+                                <button mat-menu-item (click)="moveToRoute(route)" analyticsOn="click"
+                                    analyticsCategory="Route" analyticsLabel="Move to route">
                                     <i class="fa fa-lg icon-crosshairs"></i>
                                     <span class="ms-2">{{resources.moveToRoute}}</span>
                                 </button>
-                                <button mat-menu-item (click)="reverseRoute(route)" angulartics2On="click"
-                                    angularticsCategory="Route" angularticsAction="Reverse route">
+                                <button mat-menu-item (click)="reverseRoute(route)" analyticsOn="click"
+                                    analyticsCategory="Route" analyticsLabel="Reverse route">
                                     <i class="fa fa-lg icon-arrows-h"></i>
                                     <span class="ms-2">{{resources.reverseRoute}}</span>
                                 </button>
                             </mat-menu>
-                            <button mat-button class="flex-1" (click)="deleteRoute($event, route)"
-                                angulartics2On="click" angularticsCategory="Private Routes"
-                                angularticsAction="Delete route">
+                            <button mat-button class="flex-1" (click)="deleteRoute($event, route)" analyticsOn="click"
+                                analyticsCategory="Private Routes" analyticsLabel="Delete route">
                                 <i class="fa icon-trash"></i>
                             </button>
                             <button mat-button class="flex-1" (click)="toggleRouteVisibility($event, route)"
-                                angulartics2On="click" angularticsCategory="Private Routes"
-                                angularticsAction="Toggle route visibility">
+                                analyticsOn="click" analyticsCategory="Private Routes"
+                                analyticsLabel="Toggle route visibility">
                                 <i class="fa" [ngClass]="isRouteVisible(route) ? 'icon-eye' : 'icon-eye-slash'"></i>
                             </button>
                             <button mat-button class="flex-1" [matMenuTriggerFor]="appMenu"

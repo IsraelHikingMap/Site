@@ -8,7 +8,7 @@ import { MatDialog, MatDialogConfig, MatDialogRef, MatDialogContent, MatDialogAc
 import { AnimationOptions, LottieComponent } from "ngx-lottie";
 import { Store } from "@ngxs/store";
 
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { SetDateFormatAction, SetUnitsAction, StopShowingIntroAction } from "../../reducers/configuration.reducer";
 import { AVAILABLE_LANGUAGES, HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
@@ -27,7 +27,7 @@ import moreAnimationData from "../../../content/lottie/dialog-more.json";
     selector: "intro-dialog",
     templateUrl: "./intro-dialog.component.html",
     styleUrls: ["./intro-dialog.component.scss"],
-    imports: [Dir, CdkScrollable, MatDialogContent, MatRadioGroup, MatRadioButton, Angulartics2OnModule, LottieComponent, MatDialogActions, MatButton, MatLabel]
+    imports: [Dir, CdkScrollable, MatDialogContent, MatRadioGroup, MatRadioButton, AnalyticsDirective, LottieComponent, MatDialogActions, MatButton, MatLabel]
 })
 export class IntroDialogComponent {
 

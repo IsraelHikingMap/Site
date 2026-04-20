@@ -9,7 +9,7 @@ import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
 import { ShareEditDialogComponent, ShareEditDialogComponentData } from "./dialogs/share-edit-dialog.component";
-import { Angulartics2OnModule } from "../directives/gtag.directive";
+import { AnalyticsDirective } from "../directives/analytics.directive";
 import { ResourcesService } from "../services/resources.service";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { ToastService } from "../services/toast.service";
@@ -33,7 +33,7 @@ import type { RoutingType, ApplicationState, RouteData, ShareUrl } from "../mode
 @Component({
     selector: "drawing",
     templateUrl: "./drawing.component.html",
-    imports: [Dir, MatButton, Angulartics2OnModule, NgClass, NgStyle, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger, AsyncPipe]
+    imports: [Dir, MatButton, AnalyticsDirective, NgClass, NgStyle, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger, AsyncPipe]
 })
 export class DrawingComponent {
 

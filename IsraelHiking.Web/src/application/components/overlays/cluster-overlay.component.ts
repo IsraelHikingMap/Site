@@ -4,7 +4,7 @@ import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
 import { MatButton } from "@angular/material/button";
 
-import { Angulartics2OnModule } from "../../directives/gtag.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { RouteStrings } from "../../services/hash.service";
 import { GeoJSONUtils } from "../../services/geojson-utils";
@@ -13,7 +13,7 @@ import { GeoJSONUtils } from "../../services/geojson-utils";
     selector: "cluster-overlay",
     templateUrl: "./cluster-overlay.component.html",
     styleUrls: ["./cluster-overlay.component.scss"],
-    imports: [Dir, MatButton, Angulartics2OnModule, NgClass]
+    imports: [Dir, MatButton, AnalyticsDirective, NgClass]
 })
 export class ClusterOverlayComponent {
 

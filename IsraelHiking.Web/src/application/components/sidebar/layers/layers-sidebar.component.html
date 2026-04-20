@@ -18,36 +18,35 @@
       @for (baseLayer of defaultBaseLayers; track baseLayer.key) {
       <div class="flex flex-row">
         <button mat-button class="row-button flex-1 justify-start!" (click)="selectBaseLayer(baseLayer)"
-          angulartics2On="click" angularticsCategory="Layers" angularticsAction="Select base layer {{baseLayer.key}}">
+          analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Select base layer {{baseLayer.key}}">
           <span><i class="fa"
               [ngClass]="{'icon-eye': isBaseLayerSelected(baseLayer), 'icon-eye-slash': !isBaseLayerSelected(baseLayer)}"></i></span>
           <span class="break-all">{{resources.translate(baseLayer.key)}}</span>
         </button>
         <div class="w-1/12">
           <button mat-button class="w-full short-button" (click)="openLegend(baseLayer)"
-            matTooltip="{{resources.legend}}" matTooltipPosition="before" angulartics2On="click"
-            angularticsCategory="Layers" angularticsAction="Open legend {{baseLayer.key}}"><i
-              class="fa icon-info"></i></button>
+            matTooltip="{{resources.legend}}" matTooltipPosition="before" analyticsOn="click" analyticsCategory="Layers"
+            analyticsLabel="Open legend {{baseLayer.key}}"><i class="fa icon-info"></i></button>
         </div>
       </div>
       }
       @for (baseLayer of (baseLayers$ | async); track baseLayer.key) {
       <div class="flex flex-row">
         <button mat-button class="row-button flex-1 justify-start!" (click)="selectBaseLayer(baseLayer)"
-          angulartics2On="click" angularticsCategory="Layers" angularticsAction="Select base layer {{baseLayer.key}}">
+          analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Select base layer {{baseLayer.key}}">
           <span><i class="fa"
               [ngClass]="{'icon-eye': isBaseLayerSelected(baseLayer), 'icon-eye-slash': !isBaseLayerSelected(baseLayer)}"></i></span>
           <span class="break-all">{{resources.translate(baseLayer.key)}}</span>
         </button>
         <div class="w-1/12">
           <button mat-button class="w-full short-button" (click)="editBaseLayer($event, baseLayer)"
-            matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click"
-            angularticsCategory="Layers" angularticsAction="Edit base layer"><i class="fa icon-ellipsis-v"></i></button>
+            matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" analyticsOn="click"
+            analyticsCategory="Layers" analyticsLabel="Edit base layer"><i class="fa icon-ellipsis-v"></i></button>
         </div>
       </div>
       }
-      <button mat-button (click)="addBaseLayer($event)" angulartics2On="click" angularticsCategory="Layers"
-        angularticsAction="Add base layer"><i class="fa fa-lg icon-plus"></i> {{resources.addBaseLayer}}</button>
+      <button mat-button (click)="addBaseLayer($event)" analyticsOn="click" analyticsCategory="Layers"
+        analyticsLabel="Add base layer"><i class="fa fa-lg icon-plus"></i> {{resources.addBaseLayer}}</button>
     </mat-expansion-panel>
     <mat-expansion-panel [expanded]="getExpandState('Overlays')" (opened)="expand('Overlays')"
       (closed)="collapse('Overlays')">
@@ -57,8 +56,8 @@
             <p class="w-full">{{resources.overlays}}</p>
           </div>
           <div class="w-1/5">
-            <button mat-button class="w-full h-full!" (click)="hideAllOverlays($event)" angulartics2On="click"
-              angularticsCategory="Layers" angularticsAction="Hide all overlays"><i class="fa fa-lg"
+            <button mat-button class="w-full h-full!" (click)="hideAllOverlays($event)" analyticsOn="click"
+              analyticsCategory="Layers" analyticsLabel="Hide all overlays"><i class="fa fa-lg"
                 [ngClass]="isAllOverlaysHidden() ? 'icon-eye-slash' : 'icon-eye'"></i></button>
           </div>
         </div>
@@ -66,8 +65,7 @@
       @for (overlay of defaultOverlays; track overlay.key) {
       <div class="flex flex-row">
         <button mat-button class="row-button flex-1 justify-start!" (click)="toggleVisibility(overlay)"
-          angulartics2On="click" angularticsCategory="Layers"
-          angularticsAction="Toggle overlay visibility {{overlay.key}}">
+          analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Toggle overlay visibility {{overlay.key}}">
           <span><i class="fa"
               [ngClass]="{'icon-eye': isOverlayVisible(overlay), 'icon-eye-slash': !isOverlayVisible(overlay)}"></i></span>
           <span class="break-all">{{resources.translate(overlay.key)}}</span>
@@ -77,21 +75,20 @@
       @for (overlay of (overlays$ | async); track overlay.key) {
       <div class="flex flex-row">
         <button mat-button class="row-button flex-1 justify-start!" (click)="toggleVisibility(overlay)"
-          angulartics2On="click" angularticsCategory="Layers"
-          angularticsAction="Toggle overlay visibility {{overlay.key}}">
+          analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Toggle overlay visibility {{overlay.key}}">
           <span><i class="fa"
               [ngClass]="{'icon-eye': isOverlayVisible(overlay), 'icon-eye-slash': !isOverlayVisible(overlay)}"></i></span>
           <span class="break-all">{{resources.translate(overlay.key)}}</span>
         </button>
         <div class="w-1/12">
           <button mat-button class="w-full short-button" (click)="editOverlay($event, overlay)"
-            matTooltip="{{resources.overlayProperties}}" matTooltipPosition="before" angulartics2On="click"
-            angularticsCategory="Layers" angularticsAction="Edit overlay"><i class="fa icon-ellipsis-v"></i></button>
+            matTooltip="{{resources.overlayProperties}}" matTooltipPosition="before" analyticsOn="click"
+            analyticsCategory="Layers" analyticsLabel="Edit overlay"><i class="fa icon-ellipsis-v"></i></button>
         </div>
       </div>
       }
-      <button mat-button (click)="addOverlay($event)" matTooltipPosition="below" angulartics2On="click"
-        angularticsCategory="Layers" angularticsAction="Add overlay"><i class="fa fa-lg icon-plus"></i>
+      <button mat-button (click)="addOverlay($event)" matTooltipPosition="below" analyticsOn="click"
+        analyticsCategory="Layers" analyticsLabel="Add overlay"><i class="fa fa-lg icon-plus"></i>
         {{resources.addOverlay}} </button>
     </mat-expansion-panel>
     @for (categoriesGroup of categoriesGroups; track categoriesGroup.type) {
