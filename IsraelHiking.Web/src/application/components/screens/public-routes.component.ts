@@ -177,6 +177,7 @@ export class PublicRoutesComponent {
     }
 
     public getDescription(feature: GeoJSON.Feature<GeoJSON.Point>) {
+        // HM TODO: add translation support here as well
         return GeoJSONUtils.getDescription(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 

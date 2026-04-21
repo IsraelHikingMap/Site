@@ -64,7 +64,7 @@
         }
         }
     </div>
-    <div class="mx-2">
+    <div class="mx-2 whitespace-pre-line" [ngClass]="resources.getTextAlignment(shareUrl().description)">
         {{shareUrl().description}}
     </div>
     @if (shareUrl().length > 0) {

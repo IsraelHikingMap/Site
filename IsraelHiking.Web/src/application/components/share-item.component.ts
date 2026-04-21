@@ -2,7 +2,7 @@
 import { Component, inject, input, OnInit, output } from "@angular/core";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { MatTooltip } from "@angular/material/tooltip";
-import { DatePipe } from "@angular/common";
+import { DatePipe, NgClass } from "@angular/common";
 import { DistancePipe } from "../pipes/distance.pipe";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatButton } from "@angular/material/button";
@@ -18,7 +18,7 @@ import type { ShareUrl } from "../models/";
 @Component({
     selector: "share-item",
     templateUrl: "./share-item.component.html",
-    imports: [DatePipe, DistancePipe, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger, MatButton, CdkCopyToClipboard, AnalyticsDirective]
+    imports: [DatePipe, DistancePipe, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger, MatButton, CdkCopyToClipboard, AnalyticsDirective, NgClass]
 })
 export class ShareItemComponent implements OnInit {
     public shareUrl = input<Immutable<ShareUrl>>();

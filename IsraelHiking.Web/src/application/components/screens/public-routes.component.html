@@ -261,7 +261,9 @@
                 }
             </div>
             <div class="flex flex-row mx-10 max-md:mx-2 mb-2">
-                <div class="w-full">{{getDescription(route)}}</div>
+                <div class="w-full whitespace-pre-line" [ngClass]="resources.getTextAlignment(getDescription(route))">
+                    {{getDescription(route)}}
+                </div>
             </div>
         </div>
         }
