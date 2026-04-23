@@ -467,7 +467,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for church", () => {
         // Arrange
-        const feature = createFeature({ amenity: "place_of_worship", religion: "christian" });
+        const feature = createFeature({ amenity: "monastery", religion: "christian" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);

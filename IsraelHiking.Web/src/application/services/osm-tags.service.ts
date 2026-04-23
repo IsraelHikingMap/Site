@@ -226,7 +226,7 @@ export class OsmTagsService {
             }
         }
 
-        if (feature.properties.amenity === "place_of_worship") {
+        if (feature.properties.amenity === "place_of_worship" || feature.properties.amenity === "monastery") {
             poi.properties.poiIconColor = "black";
             poi.properties.poiCategory = "Other";
             switch (feature.properties.religion) {

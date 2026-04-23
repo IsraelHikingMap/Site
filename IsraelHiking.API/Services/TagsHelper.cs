@@ -419,7 +419,7 @@ public class TagsHelper : ITagsHelper
             };
         }
 
-        if ("place_of_worship".Equals(GetString(attributes, "amenity")))
+        if ("place_of_worship".Equals(GetString(attributes, "amenity")) || "monastery".Equals(GetString(attributes, "amenity")))
         {
             var religion = GetString(attributes, "religion");
             switch (religion)
