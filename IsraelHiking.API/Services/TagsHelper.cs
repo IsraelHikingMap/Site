@@ -108,6 +108,18 @@ public class TagsHelper : ITagsHelper
             case "icon-inature":
                 tagCombinations.Add([new("ref:IL:inature", "*")]);
                 return tagCombinations;
+            case "icon-synagogue":
+                tagCombinations.Add([new("amenity", "place_of_worship"), new("religion", "jewish")]);
+                return tagCombinations;
+            case "icon-church":
+                tagCombinations.Add([new("amenity", "place_of_worship"), new("religion", "christian")]);
+                return tagCombinations;
+            case "icon-mosque":
+                tagCombinations.Add([new("amenity", "place_of_worship"), new("religion", "muslim")]);
+                return tagCombinations;
+            case "icon-holy-place":
+                tagCombinations.Add([new("amenity", "place_of_worship")]);
+                return tagCombinations;
             case "icon-search":
             default:
                 // Default icon - could represent any unmatched tags
@@ -405,6 +417,42 @@ public class TagsHelper : ITagsHelper
                 Icon = "icon-inature",
                 Category = Categories.OTHER
             };
+        }
+
+        if ("place_of_worship".Equals(GetString(attributes, "amenity")))
+        {
+            var religion = GetString(attributes, "religion");
+            switch (religion)
+            {
+                case "jewish":
+                    return new IconColorCategory
+                    {
+                        Color = "black",
+                        Icon = "icon-synagogue",
+                        Category = Categories.OTHER
+                    };
+                case "christian":
+                    return new IconColorCategory
+                    {
+                        Color = "black",
+                        Icon = "icon-church",
+                        Category = Categories.OTHER
+                    };
+                case "muslim":
+                    return new IconColorCategory
+                    {
+                        Color = "black",
+                        Icon = "icon-mosque",
+                        Category = Categories.OTHER
+                    };
+                default:
+                    return new IconColorCategory
+                    {
+                        Color = "black",
+                        Icon = "icon-holy-place",
+                        Category = Categories.OTHER
+                    };
+            }
         }
 
         return new IconColorCategory

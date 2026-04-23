@@ -233,6 +233,25 @@ export class OsmTagsService {
             }
         }
 
+        if (feature.properties.amenity === "place_of_worship") {
+            poi.properties.poiIconColor = "black";
+            poi.properties.poiCategory = "Other";
+            switch (feature.properties.religion) {
+                case "jewish":
+                    poi.properties.poiIcon = "icon-synagogue";
+                    return;
+                case "christian":
+                    poi.properties.poiIcon = "icon-church";
+                    return;
+                case "muslim":
+                    poi.properties.poiIcon = "icon-mosque";
+                    return;
+                default:
+                    poi.properties.poiIcon = "icon-holy-place";
+                    return;
+            }
+        }
+
         if (feature.properties.wikidata || feature.properties.wikipedia) {
             poi.properties.poiIconColor = "black";
             poi.properties.poiIcon = "icon-wikipedia-w";
