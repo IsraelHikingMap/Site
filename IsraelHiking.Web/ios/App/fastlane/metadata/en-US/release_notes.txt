@@ -1,2 +1,2 @@
-- Add ability to filter public routes by a user
+- Improved search functionality
 - Plus various bug fixes and performance improvements
