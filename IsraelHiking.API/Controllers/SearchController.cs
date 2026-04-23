@@ -39,13 +39,13 @@ public class SearchController : ControllerBase
     [Route("{term}")]
     public async Task<IEnumerable<SearchResultsPointOfInterest>> GetSearchResults(string term, string language)
     {
-        if ((term.StartsWith("\"") || term.StartsWith("״")) && 
+        if ((term.StartsWith("\"") || term.StartsWith("״")) &&
             (term.EndsWith("\"") || term.EndsWith("״")))
         {
             var exactFeatures = await _searchRepository.SearchExact(term.Substring(1, term.Length - 2), language);
             return await Task.WhenAll(exactFeatures.ToList().Select(ConvertFromFeature));
         }
-            
+
         if (term.Count(c => c == ',') == 1)
         {
             var featuresWithinPlaces = await _searchRepository.SearchPlaces(term, language);
@@ -65,7 +65,7 @@ public class SearchController : ControllerBase
         string language = feature.Attributes[FeatureAttributes.SEARCH_LANGUAGE].ToString();
         var title = feature.GetTitle(language);
         var geoLocation = feature.GetLocation();
-        var latLng = new LatLng(geoLocation.Y,geoLocation.X);
+        var latLng = new LatLng(geoLocation.Y, geoLocation.X);
         var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
         if (string.IsNullOrWhiteSpace(icon))
         {
