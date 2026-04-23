@@ -6,7 +6,7 @@ function createFeature(properties: any): GeoJSON.Feature {
         properties: properties,
         geometry: {
             type: "Point",
-            coordinates: [0 ,0]
+            coordinates: [0, 0]
         }
     };
 }
@@ -36,7 +36,7 @@ describe("OsmTagsService", () => {
 
     it("Should set§ icon color category for protected_area", () => {
         // Arrange
-        const feature = createFeature({boundary: "protected_area" });
+        const feature = createFeature({ boundary: "protected_area" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -48,7 +48,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for route hiking", () => {
         // Arrange
-        const feature = createFeature({route: "hiking" });
+        const feature = createFeature({ route: "hiking" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -60,7 +60,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for route bicycle", () => {
         // Arrange
-        const feature = createFeature({route: "bicycle" });
+        const feature = createFeature({ route: "bicycle" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -72,7 +72,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for scenic route bicycle", () => {
         // Arrange
-        const feature = createFeature({route: "road", scenic: "yes" });
+        const feature = createFeature({ route: "road", scenic: "yes" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -84,7 +84,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for historic ruins", () => {
         // Arrange
-        const feature = createFeature({historic: "ruins" });
+        const feature = createFeature({ historic: "ruins" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -96,7 +96,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for historic archaeological_site", () => {
         // Arrange
-        const feature = createFeature({historic: "archaeological_site" });
+        const feature = createFeature({ historic: "archaeological_site" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -108,7 +108,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for historic memorial", () => {
         // Arrange
-        const feature = createFeature({historic: "memorial" });
+        const feature = createFeature({ historic: "memorial" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -120,7 +120,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for historic tomb", () => {
         // Arrange
-        const feature = createFeature({historic: "tomb" });
+        const feature = createFeature({ historic: "tomb" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -131,7 +131,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for picnic table", () => {
         // Arrange
-        const feature = createFeature({leisure: "picnic_table" });
+        const feature = createFeature({ leisure: "picnic_table" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -143,7 +143,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for cave entrance", () => {
         // Arrange
-        const feature = createFeature({natural: "cave_entrance" });
+        const feature = createFeature({ natural: "cave_entrance" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -155,7 +155,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for spring", () => {
         // Arrange
-        const feature = createFeature({natural: "spring" });
+        const feature = createFeature({ natural: "spring" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -167,7 +167,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for tree", () => {
         // Arrange
-        const feature = createFeature({natural: "tree" });
+        const feature = createFeature({ natural: "tree" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -179,7 +179,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for flowers", () => {
         // Arrange
-        const feature = createFeature({natural: "flowers" });
+        const feature = createFeature({ natural: "flowers" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -191,7 +191,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for waterhole", () => {
         // Arrange
-        const feature = createFeature({natural: "waterhole" });
+        const feature = createFeature({ natural: "waterhole" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -203,7 +203,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for pond", () => {
         // Arrange
-        const feature = createFeature({water: "pond" });
+        const feature = createFeature({ water: "pond" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -215,7 +215,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for stream_pool", () => {
         // Arrange
-        const feature = createFeature({water: "stream_pool" });
+        const feature = createFeature({ water: "stream_pool" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -227,7 +227,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for reservoir", () => {
         // Arrange
-        const feature = createFeature({water: "reservoir" });
+        const feature = createFeature({ water: "reservoir" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -239,7 +239,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for lake", () => {
         // Arrange
-        const feature = createFeature({water: "lake" });
+        const feature = createFeature({ water: "lake" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -323,7 +323,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for viewpoint", () => {
         // Arrange
-        const feature = createFeature({tourism: "viewpoint" });
+        const feature = createFeature({ tourism: "viewpoint" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -335,7 +335,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for picnic_site", () => {
         // Arrange
-        const feature = createFeature({tourism: "camp_site" });
+        const feature = createFeature({ tourism: "camp_site" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -347,7 +347,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for attraction", () => {
         // Arrange
-        const feature = createFeature({tourism: "attraction" });
+        const feature = createFeature({ tourism: "attraction" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -359,7 +359,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for artwork", () => {
         // Arrange
-        const feature = createFeature({tourism: "artwork" });
+        const feature = createFeature({ tourism: "artwork" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -371,7 +371,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for alpine hut", () => {
         // Arrange
-        const feature = createFeature({tourism: "alpine_hut" });
+        const feature = createFeature({ tourism: "alpine_hut" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -395,7 +395,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for natural peak", () => {
         // Arrange
-        const feature = createFeature({natural: "peak" });
+        const feature = createFeature({ natural: "peak" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -407,7 +407,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for cycleway", () => {
         // Arrange
-        const feature = createFeature({highway: "cycleway" });
+        const feature = createFeature({ highway: "cycleway" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -419,7 +419,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for path", () => {
         // Arrange
-        const feature = createFeature({highway: "path" });
+        const feature = createFeature({ highway: "path" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -431,7 +431,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for footway", () => {
         // Arrange
-        const feature = createFeature({highway: "footway" });
+        const feature = createFeature({ highway: "footway" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -443,13 +443,61 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for track", () => {
         // Arrange
-        const feature = createFeature({highway: "track" });
+        const feature = createFeature({ highway: "track" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
         // Assert
         expect(poi.properties.poiCategory).toBe("4x4");
         expect(poi.properties.poiIcon).toBe("icon-four-by-four");
+        expect(poi.properties.poiIconColor).toBe("black");
+    });
+
+    it("Should set icon color category for synagogue", () => {
+        // Arrange
+        const feature = createFeature({ amenity: "place_of_worship", religion: "jewish" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("Other");
+        expect(poi.properties.poiIcon).toBe("icon-synagogue");
+        expect(poi.properties.poiIconColor).toBe("black");
+    });
+
+    it("Should set icon color category for church", () => {
+        // Arrange
+        const feature = createFeature({ amenity: "place_of_worship", religion: "christian" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("Other");
+        expect(poi.properties.poiIcon).toBe("icon-church");
+        expect(poi.properties.poiIconColor).toBe("black");
+    });
+
+    it("Should set icon color category for mosque", () => {
+        // Arrange
+        const feature = createFeature({ amenity: "place_of_worship", religion: "muslim" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("Other");
+        expect(poi.properties.poiIcon).toBe("icon-mosque");
+        expect(poi.properties.poiIconColor).toBe("black");
+    });
+
+    it("Should set icon color category for holy place", () => {
+        // Arrange
+        const feature = createFeature({ amenity: "place_of_worship", religion: "other" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("Other");
+        expect(poi.properties.poiIcon).toBe("icon-holy-place");
         expect(poi.properties.poiIconColor).toBe("black");
     });
 
