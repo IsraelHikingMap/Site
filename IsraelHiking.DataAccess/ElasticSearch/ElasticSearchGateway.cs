@@ -153,41 +153,52 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
 
     private QueryContainer DocumentNameSearchQuery<T>(QueryContainerDescriptor<T> q, string searchTerm) where T : class
     {
-        return q.DisMax(dm =>
-            dm.Queries(
-                // Exact phrase match (highest boost)
-                sh => sh.MultiMatch(m =>
-                    m.Type(TextQueryType.Phrase)
-                    .Query(searchTerm)
-                    .Boost(10)
-                    .Fields(f => f.Fields(Languages.ArrayWithDefault.Select(l => new Field("name." + l + ".keyword"))))
+        return q.Bool(b => b
+            .Should(
+                // Tier 1: Exact keyword match — constant score, always wins
+                sh => sh.ConstantScore(cs => cs
+                    .Boost(100)
+                    .Filter(f => f.MultiMatch(m =>
+                        m.Type(TextQueryType.Phrase)
+                        .Query(searchTerm)
+                        .Fields(f2 => f2.Fields(
+                            Languages.ArrayWithDefault.Select(l => new Field("name." + l + ".keyword"))))
+                    ))
                 ),
 
-                // Prefix matching for "starts with" searches
+                // Tier 2: Prefix / "starts with"
                 sh => sh.MultiMatch(m =>
                     m.Type(TextQueryType.PhrasePrefix)
                     .Query(searchTerm)
                     .Boost(8)
-                    .Fields(f => f.Fields(Languages.ArrayWithDefault.Select(l => new Field("name." + l))))
+                    .Fields(f => f.Fields(
+                        Languages.ArrayWithDefault.Select(l => new Field("name." + l))))
                 ),
 
-                // Wildcard matching for substring searches
-                sh => sh.MultiMatch(m =>
-                    m.Query($"*{searchTerm.ToLower()}*")
-                    .Type(TextQueryType.BestFields)
-                    .Boost(6)
-                    .Fields(f => f.Fields(Languages.ArrayWithDefault.Select(l => new Field("name." + l + ".keyword"))))
+                // Tier 3: Substring wildcard (lowercase only — keyword fields are not analyzed)
+                sh => sh.Bool(wb => wb
+                    .Should(Languages.ArrayWithDefault
+                        .Select(l => (QueryContainer)new WildcardQuery
+                        {
+                            Field = "name." + l + ".keyword",
+                            Value = $"*{searchTerm.ToLower()}*",
+                            Boost = 5
+                        })
+                        .ToArray()
+                    )
                 ),
 
-                // Fuzzy matching (lowest boost)
+                // Tier 4: Fuzzy — only kicks in when nothing above matched
                 sh => sh.MultiMatch(m =>
                     m.Type(TextQueryType.BestFields)
                     .Query(searchTerm)
                     .Fuzziness(Fuzziness.Auto)
                     .Boost(2)
-                    .Fields(f => f.Fields(Languages.ArrayWithDefault.Select(l => new Field("name." + l))))
+                    .Fields(f => f.Fields(
+                        Languages.ArrayWithDefault.Select(l => new Field("name." + l))))
                 )
             )
+            .MinimumShouldMatch(1)
         );
     }
 
