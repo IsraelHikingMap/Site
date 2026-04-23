@@ -201,13 +201,6 @@ export class OsmTagsService {
             return;
         }
 
-        if (feature.properties["ref:IL:inature"]) {
-            poi.properties.poiIconColor = "#116C00";
-            poi.properties.poiIcon = "icon-inature";
-            poi.properties.poiCategory = "iNature";
-            return;
-        }
-
         if (feature.properties.highway != null) {
             switch (feature.properties.highway) {
                 case "cycleway":
@@ -250,6 +243,13 @@ export class OsmTagsService {
                     poi.properties.poiIcon = "icon-holy-place";
                     return;
             }
+        }
+
+        if (feature.properties["ref:IL:inature"]) {
+            poi.properties.poiIconColor = "#116C00";
+            poi.properties.poiIcon = "icon-inature";
+            poi.properties.poiCategory = "iNature";
+            return;
         }
 
         if (feature.properties.wikidata || feature.properties.wikipedia) {
