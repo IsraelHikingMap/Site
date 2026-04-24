@@ -241,8 +241,8 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     public async Task<List<IFeature>> SearchPlaces(string searchTerm, string language)
     {
         var split = searchTerm.Split(',');
-        var place = split.Last().Trim();
-        searchTerm = split.First().Trim();
+        var place = NormalizeSearchTerm(split.Last().Trim());
+        searchTerm = NormalizeSearchTerm(string.Join(",", split.Take(split.Length - 1)).Trim());
         if (string.IsNullOrWhiteSpace(searchTerm) || string.IsNullOrWhiteSpace(place))
         {
             return [];
