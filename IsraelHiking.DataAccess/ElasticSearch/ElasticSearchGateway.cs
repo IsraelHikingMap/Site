@@ -175,17 +175,13 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                         Languages.ArrayWithDefault.Select(l => new Field("name." + l))))
                 ),
 
-                // Tier 3: Substring wildcard (lowercase only — keyword fields are not analyzed)
-                sh => sh.Bool(wb => wb
-                    .Should(Languages.ArrayWithDefault
-                        .Select(l => (QueryContainer)new WildcardQuery
-                        {
-                            Field = "name." + l + ".keyword",
-                            Value = $"*{searchTerm.ToLower()}*",
-                            Boost = 5
-                        })
-                        .ToArray()
-                    )
+                // Tier 3: Catches substrings that the standard analyzer tokenizes as words
+                sh => sh.MultiMatch(m =>
+                    m.Type(TextQueryType.Phrase)
+                    .Query(searchTerm)
+                    .Boost(5)
+                    .Fields(f => f.Fields(
+                        Languages.ArrayWithDefault.Select(l => new Field("name." + l))))
                 ),
 
                 // Tier 4: Fuzzy — only kicks in when nothing above matched
