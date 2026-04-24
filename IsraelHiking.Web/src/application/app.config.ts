@@ -1,5 +1,5 @@
 import { provideAppInitializer, ErrorHandler, importProvidersFrom, inject, ApplicationConfig } from "@angular/core";
-import { provideHttpClient, withInterceptors } from "@angular/common/http";
+import { provideHttpClient, withFetch, withInterceptors } from "@angular/common/http";
 import { Title, BrowserModule } from "@angular/platform-browser";
 import { CommonModule } from "@angular/common";
 import { MatDialogModule } from "@angular/material/dialog";
@@ -226,7 +226,8 @@ export const appConfig: ApplicationConfig = {
         { provide: ErrorHandler, useClass: GlobalErrorHandler },
         { provide: SaveAsFactory, useFactory: () => saveAs },
         provideHttpClient(
-            withInterceptors([osmTokenInterceptor, progressInterceptor])
+            withInterceptors([osmTokenInterceptor, progressInterceptor]),
+            withFetch()
         ),
         provideNgIdle(),
         provideRouter(routes),

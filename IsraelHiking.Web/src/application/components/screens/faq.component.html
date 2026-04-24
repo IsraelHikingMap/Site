@@ -7,7 +7,7 @@
     <div class="max-w-3xl mx-auto px-4 flex pt-1 flex-col">
         <mat-accordion [multi]="false">
 
-            @for (item of sections; track item.id) {
+            @for (item of sections(); track item.id) {
             <mat-expansion-panel [id]="item.id" (opened)="onPanelOpened(item.id)">
                 <mat-expansion-panel-header>
                     <mat-panel-title class="font-semibold text-gray-800 flex items-center justify-between gap-4">

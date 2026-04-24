@@ -22,7 +22,7 @@ public class HomePageHelperTests
         var fileInfo = Substitute.For<IFileInfo>();
         var stream = new MemoryStream(Encoding.UTF8.GetBytes(HOME_PAGE_SAMPLE_CONTENT));
         fileInfo.CreateReadStream().Returns(stream);
-        rootFolder.GetFileInfo("/index.html").Returns(fileInfo);
+        rootFolder.GetFileInfo("/index.csr.html").Returns(fileInfo);
         hostingEnvironment.WebRootFileProvider.Returns(rootFolder);
         _homePageHelper = new HomePageHelper(hostingEnvironment);
     }

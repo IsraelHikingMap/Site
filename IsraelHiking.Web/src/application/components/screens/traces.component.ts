@@ -292,7 +292,8 @@ export class TracesComponent implements OnInit {
         this.selectedTraceGeoJson = { type: "FeatureCollection", features };
         this.showMap = true;
         const bounds = SpatialService.getBoundsForFeatureCollection(this.selectedTraceGeoJson);
-        this.mapService.fitBounds(bounds, 100, { top: 100, left: 50, bottom: window.innerHeight / 3, right: 50 });
+        const bottom = typeof window !== 'undefined' ? window.innerHeight / 3 : 0;
+        this.mapService.fitBounds(bounds, 100, { top: 100, left: 50, bottom, right: 50 });
     }
 
     public onStartPointClick(traceId: string, event?: Event) {

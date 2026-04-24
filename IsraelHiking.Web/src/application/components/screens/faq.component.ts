@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, inject, viewChildren } from "@angular/core";
+import { afterNextRender, AfterViewInit, Component, DestroyRef, inject, signal, viewChildren } from "@angular/core";
 import { ResourcesService } from "../../services/resources.service";
 import { Store } from "@ngxs/store";
 import { ApplicationState } from "application/models";
@@ -23,30 +23,37 @@ export class FaqComponent implements AfterViewInit {
     private readonly store = inject(Store);
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
+    private readonly destroyRef = inject(DestroyRef);
 
-    public sections: FAQSection[];
+    public sections = signal<FAQSection[]>([]);
 
     private panels = viewChildren(MatExpansionPanel);
 
     constructor() {
-        this.store.select((s: ApplicationState) => s.configuration.language).pipe(takeUntilDestroyed()).subscribe(() => {
-            this.buildSections();
+        afterNextRender(() => {
+            this.store.select((s: ApplicationState) => s.configuration.language).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+                this.buildSections();
+                this.openFaqItem(this.route.snapshot.fragment);
+            });
         });
     }
 
     public ngAfterViewInit(): void {
-        this.route.fragment.subscribe(fragment => {
-            if (!fragment) { return; }
-            const index = this.sections.findIndex(s => s.id === fragment);
-            if (index === -1) { return; }
+        this.route.fragment.subscribe(fragment => this.openFaqItem(fragment));
+    }
+
+    private openFaqItem(fragment: string | null): void {
+        if (!fragment) { return; }
+        const index = this.sections().findIndex(s => s.id === fragment);
+        debugger;
+        if (index === -1) { return; }
+        setTimeout(() => {
+            // wait for expansion panel to appear
             const panel = this.panels()[index];
             if (!panel) { return; }
-            // wait for expansion animation then scroll
-            setTimeout(() => {
-                panel.open();
-                document.getElementById(fragment)?.scrollIntoView({ behavior: "smooth", block: "center" });
-            }, 0);
-        });
+            panel.open();
+            document.getElementById(fragment)?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 100);
     }
 
     private hashQuestion(text: string): string {
@@ -58,7 +65,7 @@ export class FaqComponent implements AfterViewInit {
     }
 
     private buildSections(): void {
-        this.sections = this.resources.faqContent.split("\n").map(line => {
+        this.sections.set(this.resources.faqContent.split("\n").map(line => {
             const parts = line.split("|");
             const question = parts[0];
             return {
@@ -66,7 +73,7 @@ export class FaqComponent implements AfterViewInit {
                 answer: parts.slice(1).join("|"),
                 id: this.hashQuestion(question)
             };
-        });
+        }));
     }
 
     public onPanelOpened(id: string): void {

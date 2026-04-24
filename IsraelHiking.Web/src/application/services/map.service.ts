@@ -44,9 +44,8 @@ export class MapService {
                 resolve();
             });
         });
-        const linkEl = document.createElement("a");
-        linkEl.href = "./add-protocol-worker.js";
-        importScriptInWorkers(linkEl.href);
+        const addProtocolWorkerUrl = this.getFullUrl("add-protocol-worker.js");
+        importScriptInWorkers(addProtocolWorkerUrl);
         await Promise.all([
             promise,
             document.fonts.load("12px Noto Sans Cond Bold"),
@@ -90,7 +89,9 @@ export class MapService {
     }
 
     public getFullUrl(relativePath: string): string {
-        return (window.origin || window.location.origin) + "/" + relativePath;
+        const linkEl = document.createElement("a");
+        linkEl.href = relativePath;
+        return linkEl.href;
     }
 
     private onDragstart = () => {

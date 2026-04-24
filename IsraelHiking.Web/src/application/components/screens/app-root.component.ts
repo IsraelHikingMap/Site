@@ -25,7 +25,7 @@ export class AppRootComponent {
 
   @HostListener("window:scroll", [])
   onWindowScroll() {
-    this.isScrolled = window.scrollY > 50;
+    this.isScrolled = typeof window !== 'undefined' && window.scrollY > 50;
   }
 
   public isIFrame() {

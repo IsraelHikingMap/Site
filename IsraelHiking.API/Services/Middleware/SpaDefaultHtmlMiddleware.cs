@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 namespace IsraelHiking.API.Services.Middleware;
 
 /// <summary>
-/// This middleware is responsible in returning the index.html file
+/// This middleware is responsible in returning the index.csr.html file
 /// </summary>
 public class SpaDefaultHtmlMiddleware
 {
@@ -17,7 +17,7 @@ public class SpaDefaultHtmlMiddleware
     /// </summary>
     /// <param name="next"></param>
     /// <param name="environment"></param>
-    public SpaDefaultHtmlMiddleware(RequestDelegate next, 
+    public SpaDefaultHtmlMiddleware(RequestDelegate next,
         IWebHostEnvironment environment)
     {
         _next = next;
@@ -34,7 +34,7 @@ public class SpaDefaultHtmlMiddleware
             await _next.Invoke(context);
             return;
         }
-        var indexFileInfo = _environment.WebRootFileProvider.GetFileInfo("/index.html");
+        var indexFileInfo = _environment.WebRootFileProvider.GetFileInfo("/index.csr.html");
         context.Response.ContentType = "text/html";
         context.Response.ContentLength = indexFileInfo.Length;
         await context.Response.SendFileAsync(indexFileInfo);
