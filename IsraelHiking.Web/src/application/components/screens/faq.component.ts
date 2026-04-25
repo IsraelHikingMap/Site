@@ -1,6 +1,8 @@
-import { afterNextRender, AfterViewInit, Component, DestroyRef, inject, signal, viewChildren } from "@angular/core";
+import { AfterViewInit, Component, DestroyRef, inject, signal, viewChildren } from "@angular/core";
 import { ResourcesService } from "../../services/resources.service";
 import { Store } from "@ngxs/store";
+import { skip } from "rxjs";
+
 import { ApplicationState } from "application/models";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from "@angular/material/expansion";
@@ -30,11 +32,9 @@ export class FaqComponent implements AfterViewInit {
     private panels = viewChildren(MatExpansionPanel);
 
     constructor() {
-        afterNextRender(() => {
-            this.store.select((s: ApplicationState) => s.configuration.language).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-                this.buildSections();
-                this.openFaqItem(this.route.snapshot.fragment);
-            });
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(this.destroyRef), skip(1)).subscribe(() => {
+            this.buildSections();
+            this.openFaqItem(this.route.snapshot.fragment);
         });
     }
 
