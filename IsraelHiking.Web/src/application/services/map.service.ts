@@ -1,6 +1,6 @@
 import { inject, Injectable } from "@angular/core";
-import { type ErrorEvent, type GeoJSONFeature, type LayerSpecification, type Map, type Point, setRTLTextPlugin, type SourceSpecification, importScriptInWorkers, getGlobalDispatcher, type PaddingOptions } from "maplibre-gl";
 import { Store } from "@ngxs/store";
+import type { ErrorEvent, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, SourceSpecification } from "maplibre-gl";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { LoggingService } from "./logging.service";
@@ -25,7 +25,11 @@ export class MapService {
     public initializationPromise = new Promise<void>((resolve) => { this.resolve = resolve; });
 
     public async initialize() {
-        setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
+        if (typeof window === "undefined") {
+            return;
+        }
+        const maplibregl = (await import("maplibre-gl")).default;
+        maplibregl.setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
         this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
             this.cancelableTimeoutService.clearTimeoutByName("panned");
             if (pannedTimestamp) {
@@ -34,9 +38,10 @@ export class MapService {
                 }, MapService.NOT_FOLLOWING_TIMEOUT, "panned");
             }
         });
+        const globalDispatcher = maplibregl.getGlobalDispatcher();
         const promise = new Promise<void>(resolve => {
-            getGlobalDispatcher().registerMessageHandler("contour-worker" as any, async () => {
-                await getGlobalDispatcher().broadcast("contour-worker" as any, {
+            globalDispatcher.registerMessageHandler("contour-worker" as any, async () => {
+                await globalDispatcher.broadcast("contour-worker" as any, {
                     demUrlPattern: "slice://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.webp",
                     encoding: "terrarium",
                     maxzoom: 11
@@ -45,7 +50,7 @@ export class MapService {
             });
         });
         const addProtocolWorkerUrl = this.getFullUrl("add-protocol-worker.js");
-        importScriptInWorkers(addProtocolWorkerUrl);
+        maplibregl.importScriptInWorkers(addProtocolWorkerUrl);
         await Promise.all([
             promise,
             document.fonts.load("12px Noto Sans Cond Bold"),
@@ -89,6 +94,9 @@ export class MapService {
     }
 
     public getFullUrl(relativePath: string): string {
+        if (typeof document === "undefined") {
+            return relativePath;
+        }
         const linkEl = document.createElement("a");
         linkEl.href = relativePath;
         return linkEl.href;

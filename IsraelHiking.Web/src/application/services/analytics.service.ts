@@ -1,4 +1,5 @@
-import { DOCUMENT, inject, Injectable, RendererFactory2 } from "@angular/core";
+import { isPlatformBrowser } from "@angular/common";
+import { DOCUMENT, inject, Injectable, NgZone, PLATFORM_ID, RendererFactory2 } from "@angular/core";
 
 declare let gtag: (event: string, action: string, params: { event_category: string }) => void;
 
@@ -6,22 +7,28 @@ declare let gtag: (event: string, action: string, params: { event_category: stri
 export class AnalyticsService {
     private document = inject(DOCUMENT);
     private rendererFactory = inject(RendererFactory2);
+    private ngZone = inject(NgZone);
+    private platformId = inject(PLATFORM_ID);
 
     initialize() {
-        const renderer = this.rendererFactory.createRenderer(null, null);
-        const script = renderer.createElement("script");
-        script.src = "https://www.googletagmanager.com/gtag/js?id=G-H495KRZ5CD";
-        script.async = true;
-        renderer.appendChild(this.document.head, script);
+        if (!isPlatformBrowser(this.platformId)) return;
 
-        const initScript = renderer.createElement("script");
-        initScript.text = `
-      window.dataLayer = window.dataLayer || [];
-      function gtag() { dataLayer.push(arguments); }
-      gtag('js', new Date());
-      gtag('config', 'G-H495KRZ5CD');
-    `;
-        renderer.appendChild(this.document.head, initScript);
+        this.ngZone.runOutsideAngular(() => {
+            const renderer = this.rendererFactory.createRenderer(null, null);
+            const script = renderer.createElement("script");
+            script.src = "https://www.googletagmanager.com/gtag/js?id=G-H495KRZ5CD";
+            script.async = true;
+            renderer.appendChild(this.document.head, script);
+
+            const initScript = renderer.createElement("script");
+            initScript.text = `
+                window.dataLayer = window.dataLayer || [];
+                function gtag() { dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-H495KRZ5CD');
+            `;
+            renderer.appendChild(this.document.head, initScript);
+        });
     }
 
     trackEvent(category: string, action: string) {

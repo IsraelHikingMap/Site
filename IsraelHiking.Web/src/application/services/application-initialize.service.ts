@@ -102,6 +102,7 @@ export class ApplicationInitializeService {
             if (this.runningContextService.isIFrame) {
                 return;
             }
+            console.error("[Init Error]", ex);
             if (typeof alert === "undefined") {
                 return;
             }

@@ -15,8 +15,8 @@
   </mat-sidenav>
   <mat-sidenav-content>
     <div class="flex flex-row w-full h-screen">
-      <mgl-map ngSkipHydration="true" [zoom]="[location.zoom]" [center]="[location.longitude, location.latitude]"
-        [mapStyle]="initialStyle" (mapLoad)="mapLoaded($event)" (pitchEvt)="pitchChanged()" [doubleClickZoom]="false"
+      <mgl-map [zoom]="[location.zoom]" [center]="[location.longitude, location.latitude]" [mapStyle]="initialStyle"
+        (mapLoad)="mapLoaded($event)" (pitchEvt)="pitchChanged()" [doubleClickZoom]="false"
         [attributionControl]="false">
         <layers [isMainMap]="true"></layers>
         @if (!isIFrame()) {
