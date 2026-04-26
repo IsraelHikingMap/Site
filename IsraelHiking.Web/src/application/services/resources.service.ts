@@ -271,7 +271,6 @@ export class ResourcesService {
     public unknown: string;
     public contactUsToPublishAPublicRoute: string;
     public activityType: string;
-    public faqContent: string;
     public editProperties: string;
     public openCloudSave: string;
     public FAQ: string;
@@ -510,7 +509,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1776597953833");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1777194626419");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -759,7 +758,6 @@ export class ResourcesService {
         this.unknown = this.gettextCatalog.getString("Unknown");
         this.contactUsToPublishAPublicRoute = this.gettextCatalog.getString("Contact us to publish a public route");
         this.activityType = this.gettextCatalog.getString("Activity Type");
-        this.faqContent = this.gettextCatalog.getString("All FAQ content goes here");
         this.editProperties = this.gettextCatalog.getString("Edit Properties");
         this.openCloudSave = this.gettextCatalog.getString("Open Cloud Save");
         this.FAQ = this.gettextCatalog.getString("F.A.Q");

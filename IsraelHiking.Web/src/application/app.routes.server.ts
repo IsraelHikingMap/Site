@@ -1,4 +1,5 @@
 import { RenderMode, ServerRoute } from "@angular/ssr";
+import { AVAILABLE_LANGUAGES } from "../application/reducers/initial-state";
 
 export const serverRoutes: ServerRoute[] = [
   {
@@ -6,8 +7,11 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Prerender
   },
   {
-    path: "faq",
-    renderMode: RenderMode.Prerender
+    path: ":lang/faq",
+    renderMode: RenderMode.Prerender,
+    async getPrerenderParams() {
+      return AVAILABLE_LANGUAGES.map(lang => ({ lang: lang.code }));
+    }
   },
   {
     path: "privacy-policy",
