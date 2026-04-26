@@ -1,5 +1,5 @@
 import { Component, inject, signal } from "@angular/core";
-import { MarkdownComponent } from 'ngx-markdown';
+import { MarkdownComponent } from "ngx-markdown";
 
 import { Router } from "@angular/router";
 
@@ -15,9 +15,9 @@ export class FaqComponent {
     private readonly router = inject(Router);
 
     constructor() {
-        const language = this.router.url.split('/')[1];
+        const language = this.router.url.split("/")[1];
         this.markdownFilePath.set(`content/faq-${language}.md`);
-        if (language === 'he' || language === 'ar') {
+        if (language === "he" || language === "ar") {
             this.direction.set("rtl");
         }
     }

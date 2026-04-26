@@ -167,7 +167,7 @@ export class SharesComponent implements OnInit {
         this.routesGeoJson = { type: "FeatureCollection", features };
         this.showMap = true;
         const bounds = SpatialService.getBoundsForFeatureCollection(this.routesGeoJson);
-        const bottom = typeof window !== 'undefined' ? window.innerHeight / 2 : 0;
+        const bottom = typeof window !== "undefined" ? window.innerHeight / 2 : 0;
         this.mapService.fitBounds(bounds, 100, { top: 150, left: 50, bottom, right: 50 });
     }
 
