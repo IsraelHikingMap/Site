@@ -3,7 +3,7 @@ import { environment } from "environments/environment";
 import { LandingComponent } from "./components/screens/landing.component";
 import { MainMapComponent } from "./components/map/main-map.component";
 import { PrivacyPolicyComponent } from "./components/screens/privacy-policy.component";
-import { FaqComponent } from "./components/screens/faq/faq.component";
+import { FaqComponent } from "./components/screens/faq.component";
 import { AttributionComponent } from "./components/screens/attribution.component";
 import { SharesComponent } from "./components/screens/shares.component";
 import { TracesComponent } from "./components/screens/traces.component";
