@@ -72,11 +72,12 @@ public class CrawlersMiddleware
         if (context.Request.Path.StartsWithSegments("/share"))
         {
             var url = await _shareUrlGateway.GetUrlById(context.Request.Path.Value.Split("/").Last());
-            if (url == null) {
+            if (url == null)
+            {
                 await _next.Invoke(context);
                 return;
             }
-                
+
             title = string.IsNullOrWhiteSpace(url.Title) ? Branding.ROUTE_SHARE_DEFAULT_TITLE : url.Title;
             description = url.Description;
             thumbnailUrl = Branding.BASE_URL + "/api/urls/" + url.Id + "/thumbnail";
@@ -112,7 +113,7 @@ public class CrawlersMiddleware
 
     private Task WriteHomePage(HttpContext context, string title, string thumbnailUrl, string description, string language)
     {
-        string text = _homePageHelper.Render(title, description, thumbnailUrl,language);
+        string text = _homePageHelper.Render(title, description, thumbnailUrl, language);
         context.Response.ContentType = "text/html";
         return context.Response.WriteAsync(text);
     }
