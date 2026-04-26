@@ -1,7 +1,11 @@
 import { Component, inject, signal } from "@angular/core";
 import { MarkdownComponent } from "ngx-markdown";
+import { skip } from "rxjs";
 
 import { Router } from "@angular/router";
+import { Store } from "@ngxs/store";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { ApplicationState } from "application/models";
 
 @Component({
     selector: "faq",
@@ -13,12 +17,22 @@ export class FaqComponent {
     public markdownFilePath = signal<string>("content/faq-en-US.md");
 
     private readonly router = inject(Router);
+    private readonly store = inject(Store);
 
     constructor() {
-        const language = this.router.url.split("/")[1];
+        this.loadMarkdownFile(this.router.url.split("/")[1]);
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(), skip(1)).subscribe((language) => {
+            this.router.navigate([`${language.code}/faq`]);
+            this.loadMarkdownFile(language.code);
+        });
+    }
+
+    private loadMarkdownFile(language: string) {
         this.markdownFilePath.set(`content/faq-${language}.md`);
         if (language === "he" || language === "ar") {
             this.direction.set("rtl");
+        } else {
+            this.direction.set("ltr");
         }
     }
 }
