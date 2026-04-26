@@ -1030,7 +1030,15 @@ export class ResourcesService {
     }
 
     public getCurrentLanguageCodeSimplified(): string {
-        return this.store.selectSnapshot((s: ApplicationState) => s.configuration).language.code.split("-")[0];
+        return this.getCurrentLanguageCode().split("-")[0];
+    }
+
+    /**
+     * Use this only when the full language code is needed!
+     * @returns The full language code, like en-US for example
+     */
+    public getCurrentLanguageCode(): string {
+        return this.store.selectSnapshot((s: ApplicationState) => s.configuration).language.code;
     }
 
     public getResizedImageUrl(imageUrl: string, size: number) {
@@ -1069,7 +1077,7 @@ export class ResourcesService {
 
     public getLongDistanceUnitString(units: "metric" | "imperial") {
         const distanceUnit = units === "metric" ? "kilometer" : "mile";
-        return new Intl.NumberFormat(this.getCurrentLanguageCodeSimplified(), {
+        return new Intl.NumberFormat(this.getCurrentLanguageCode(), {
             style: "unit",
             unit: distanceUnit,
             unitDisplay: "short"
@@ -1078,7 +1086,7 @@ export class ResourcesService {
 
     public getShortDistanceUnitString(units: "metric" | "imperial") {
         const distanceUnit = units === "metric" ? "meter" : "foot";
-        return new Intl.NumberFormat(this.getCurrentLanguageCodeSimplified(), {
+        return new Intl.NumberFormat(this.getCurrentLanguageCode(), {
             style: "unit",
             unit: distanceUnit,
             unitDisplay: "short"
@@ -1087,7 +1095,7 @@ export class ResourcesService {
 
     public getSpeedUnitString(units: "metric" | "imperial") {
         const speedUnit = units === "metric" ? "kilometer-per-hour" : "mile-per-hour";
-        return new Intl.NumberFormat(this.getCurrentLanguageCodeSimplified(), {
+        return new Intl.NumberFormat(this.getCurrentLanguageCode(), {
             style: "unit",
             unit: speedUnit,
             unitDisplay: "short"
