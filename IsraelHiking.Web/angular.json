@@ -73,13 +73,7 @@
             "sourceMap": true,
             "optimization": false,
             "namedChunks": true,
-            "browser": "src/main.ts",
-            "server": "src/main.server.ts",
-            "outputMode": "static",
-            "ssr": false,
-            "security": {
-              "allowedHosts": []
-            }
+            "browser": "src/main.ts"
           },
           "configurations": {
             "production": {
@@ -94,6 +88,12 @@
               "sourceMap": false,
               "namedChunks": false,
               "extractLicenses": true,
+              "server": "src/main.server.ts",
+              "outputMode": "static",
+              "ssr": false,
+              "security": {
+                "allowedHosts": []
+              },
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
