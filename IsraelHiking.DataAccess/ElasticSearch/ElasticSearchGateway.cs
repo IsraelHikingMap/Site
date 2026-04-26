@@ -366,6 +366,22 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
 
     }
 
+    public async Task<List<IFeature>> GetPoisWithinBoundingBox(Coordinate topLeft, Coordinate bottomRight, string language)
+    {
+        var response = await _elasticClient.SearchAsync<PointDocument>(s =>
+            s.Index(POINTS)
+            .Size(500)
+            .Query(q =>
+                q.GeoBoundingBox(b => b.BoundingBox(
+                        bb => bb.TopLeft(new GeoCoordinate(topLeft.Y, topLeft.X))
+                            .BottomRight(new GeoCoordinate(bottomRight.Y, bottomRight.X))
+                    ).Field(p => p.Location))
+                && q.Bool(b => b.MustNot(mn => mn.Term(t => t.Field(p => p.PoiIcon).Value("icon-search"))))
+            )
+        );
+        return response.Hits.Select(d => HitToFeature(d, language ?? Languages.DEFAULT)).ToList();
+    }
+
     public async Task<List<IFeature>> GetAllPointsOfInterest()
     {
         await _elasticClient.Indices.RefreshAsync(POINTS);

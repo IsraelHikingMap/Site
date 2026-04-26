@@ -3,11 +3,13 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
+using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.LinearReferencing;
 using OsmSharp;
 using OsmSharp.Complete;
 using OsmSharp.IO.API;
@@ -460,5 +462,111 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
         var wikiImageUrl = await _wikimediaCommonGateway.UploadImage(file.FileName, nonEmptyDescription, userDisplayName, memoryStream, feature.GetLocation());
         await _imageUrlStoreExecutor.StoreImage(md5, file.Content, wikiImageUrl);
         return wikiImageUrl;
+    }
+
+    /// <inheritdoc/>
+    public async Task<List<RoutePoiItem>> GetPoisAlongRoute(LatLng[] coordinates, double bufferMeters, string language)
+    {
+        if (coordinates == null || coordinates.Length < 2)
+        {
+            return [];
+        }
+
+        var routeCoords = coordinates.Select(c => new Coordinate(c.Lng, c.Lat)).ToArray();
+        var bufferDegrees = bufferMeters / 111000.0;
+
+        var minLon = routeCoords.Min(c => c.X) - bufferDegrees;
+        var maxLon = routeCoords.Max(c => c.X) + bufferDegrees;
+        var minLat = routeCoords.Min(c => c.Y) - bufferDegrees;
+        var maxLat = routeCoords.Max(c => c.Y) + bufferDegrees;
+
+        var features = await _pointsOfInterestRepository.GetPoisWithinBoundingBox(
+            new Coordinate(minLon, maxLat),
+            new Coordinate(maxLon, minLat),
+            language);
+
+        var line = new LineString(routeCoords);
+        var lil = new LengthIndexedLine(line);
+
+        var results = new List<RoutePoiItem>();
+        foreach (var feature in features)
+        {
+            var title = feature.GetTitle(language);
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                continue;
+            }
+
+            var poiCoord = feature.Geometry.Coordinate;
+            var distanceDegrees = line.Distance(new Point(poiCoord));
+            var distanceMeters = distanceDegrees * 111000.0;
+
+            if (distanceMeters > bufferMeters)
+            {
+                continue;
+            }
+
+            var projIndex = lil.IndexOf(poiCoord);
+            var distanceFromStartKm = ComputeDistanceAlongRouteKm(routeCoords, projIndex);
+
+            var location = feature.GetLocation();
+            results.Add(new RoutePoiItem
+            {
+                Poi = new SearchResultsPointOfInterest
+                {
+                    Id = feature.Attributes[FeatureAttributes.ID].ToString(),
+                    Source = feature.Attributes[FeatureAttributes.POI_SOURCE].ToString(),
+                    Title = title,
+                    DisplayName = title,
+                    Icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString(),
+                    IconColor = feature.Attributes[FeatureAttributes.POI_ICON_COLOR].ToString(),
+                    Location = new LatLng(location.Y, location.X),
+                    HasExtraData = feature.HasExtraData(language)
+                },
+                DistanceFromStartKm = Math.Round(distanceFromStartKm, 2),
+                DistanceFromRouteMeters = Math.Round(distanceMeters, 0),
+                Description = feature.GetDescription(language)
+            });
+        }
+
+        return [.. results.OrderBy(r => r.DistanceFromStartKm)];
+    }
+
+    private static double ComputeDistanceAlongRouteKm(Coordinate[] routeCoords, double projIndex)
+    {
+        double cumulativeEuclidean = 0;
+        double cumulativeHaversineKm = 0;
+
+        for (int i = 0; i < routeCoords.Length - 1; i++)
+        {
+            double segEuclidean = routeCoords[i].Distance(routeCoords[i + 1]);
+            double segHaversineKm = HaversineKm(
+                routeCoords[i].Y, routeCoords[i].X,
+                routeCoords[i + 1].Y, routeCoords[i + 1].X);
+
+            if (cumulativeEuclidean + segEuclidean >= projIndex)
+            {
+                double fraction = segEuclidean > 0
+                    ? (projIndex - cumulativeEuclidean) / segEuclidean
+                    : 0;
+                return cumulativeHaversineKm + fraction * segHaversineKm;
+            }
+
+            cumulativeEuclidean += segEuclidean;
+            cumulativeHaversineKm += segHaversineKm;
+        }
+
+        return cumulativeHaversineKm;
+    }
+
+    private static double HaversineKm(double lat1, double lon1, double lat2, double lon2)
+    {
+        const double R = 6371.0;
+        var dLat = (lat2 - lat1) * Math.PI / 180.0;
+        var dLon = (lon2 - lon1) * Math.PI / 180.0;
+        var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                Math.Cos(lat1 * Math.PI / 180.0) * Math.Cos(lat2 * Math.PI / 180.0) *
+                Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+        return R * 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
     }
 }

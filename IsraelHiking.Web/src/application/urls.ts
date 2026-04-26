@@ -22,6 +22,7 @@ export class Urls {
     public static readonly poiClosest = Urls.poi + "closest/";
     public static readonly poiUpdates = Urls.poi + "updates/";
     public static readonly poiSimple = Urls.poi + "simple/";
+    public static readonly poisAlongRoute = Urls.poi + "along-route";
 
     public static readonly urls = Urls.apiBase + "urls/";
     public static readonly userLayers = Urls.apiBase + "userLayers/";

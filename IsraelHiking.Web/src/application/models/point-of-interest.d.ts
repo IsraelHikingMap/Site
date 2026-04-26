@@ -30,3 +30,10 @@ export type EditablePublicPointData = UpdateablePublicPointData & {
     location: LatLngAlt;
     originalFeature: Immutable<GeoJSON.Feature>;
 };
+
+export type RoutePoiItem = {
+    poi: SearchResultsPointOfInterest;
+    distanceFromStartKm: number;
+    distanceFromRouteMeters: number;
+    description: string;
+};

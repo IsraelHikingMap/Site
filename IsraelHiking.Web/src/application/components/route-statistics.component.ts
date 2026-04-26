@@ -1,6 +1,6 @@
 import { Component, ViewEncapsulation, OnInit, ElementRef, ChangeDetectorRef, DestroyRef, inject, viewChild, signal } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { NgClass } from "@angular/common";
+import { NgClass, DecimalPipe } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { MatGridList, MatGridTile } from "@angular/material/grid-list";
 import { MatTooltip } from "@angular/material/tooltip";
@@ -24,8 +24,10 @@ import { CancelableTimeoutService } from "../services/cancelable-timeout.service
 import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
 import { GeoLocationService } from "../services/geo-location.service";
+import { PoiService } from "../services/poi.service";
+import { MapService } from "../services/map.service";
 import { ToggleIsShowKmMarkersAction, ToggleIsShowSlopeAction } from "../reducers/configuration.reducer";
-import type { LatLngAltTime, ApplicationState } from "../models";
+import type { LatLngAltTime, ApplicationState, RoutePoiItem } from "../models";
 
 declare type DragState = "start" | "drag" | "none";
 
@@ -66,7 +68,7 @@ interface IChartElements {
     templateUrl: "./route-statistics.component.html",
     styleUrls: ["./route-statistics.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, NgClass, MatGridList, MatGridTile, MatTooltip, MatButton, AnalyticsDirective, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, DistancePipe]
+    imports: [Dir, NgClass, DecimalPipe, MatGridList, MatGridTile, MatTooltip, MatButton, AnalyticsDirective, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, DistancePipe]
 })
 export class RouteStatisticsComponent implements OnInit {
     private static readonly HOVER_BOX_WIDTH = 110;
@@ -87,6 +89,10 @@ export class RouteStatisticsComponent implements OnInit {
     public isSlopeOn: boolean = false;
     public isExpanded: boolean = false;
     public isTable: boolean = false;
+    public isPois: boolean = false;
+    public isPoisLoading: boolean = false;
+    public routePois: RoutePoiItem[] = [];
+    public selectedPoiSource: GeoJSON.FeatureCollection<GeoJSON.Point> = { type: "FeatureCollection", features: [] };
     public isOpen = signal(false);
     public isFollowing: boolean = false;
     public isVisible: boolean = false;
@@ -122,6 +128,8 @@ export class RouteStatisticsComponent implements OnInit {
     private readonly routeStatisticsService = inject(RouteStatisticsService);
     private readonly cancelableTimeoutService = inject(CancelableTimeoutService);
     private readonly sidebarService = inject(SidebarService);
+    private readonly poiService = inject(PoiService);
+    private readonly mapService = inject(MapService);
     private readonly store = inject(Store);
     private readonly destroyRef = inject(DestroyRef);
 
@@ -252,20 +260,62 @@ export class RouteStatisticsComponent implements OnInit {
     public changeState(state: string) {
         switch (state) {
             case "table":
-                if (this.isTable) {
+                if (this.isTable && !this.isPois) {
                     this.toggle();
                 } else {
                     this.isTable = true;
+                    this.isPois = false;
                 }
                 break;
             case "graph":
-                if (!this.isTable) {
+                if (!this.isTable && !this.isPois) {
                     this.toggle();
                 } else {
                     this.isTable = false;
+                    this.isPois = false;
                     this.redrawChart();
                 }
+                break;
+            case "pois":
+                if (this.isPois) {
+                    this.toggle();
+                } else {
+                    this.isPois = true;
+                    this.isTable = false;
+                    this.loadPois();
+                }
         }
+    }
+
+    public async loadPois() {
+        const route = this.getRouteForChart();
+        if (!route || route.latlngs.length === 0) {
+            this.routePois = [];
+            return;
+        }
+        this.isPoisLoading = true;
+        this.routePois = [];
+        try {
+            const language = this.store.selectSnapshot((s: ApplicationState) => s.configuration.language.code);
+            const latlngs = [...route.latlngs] as LatLngAltTime[];
+            this.routePois = await this.poiService.getPoisAlongRoute(latlngs, 500, language);
+        } catch {
+            this.routePois = [];
+        } finally {
+            this.isPoisLoading = false;
+        }
+    }
+
+    public flyToPoiLocation(item: RoutePoiItem) {
+        this.mapService.flyTo(item.poi.location);
+        this.selectedPoiSource = {
+            type: "FeatureCollection",
+            features: [{
+                type: "Feature",
+                properties: {},
+                geometry: { type: "Point", coordinates: [item.poi.location.lng, item.poi.location.lat] }
+            }]
+        };
     }
 
     public isSidebarVisible() {
@@ -278,6 +328,7 @@ export class RouteStatisticsComponent implements OnInit {
             this.redrawChart();
         } else {
             this.clearSubRouteSelection();
+            this.selectedPoiSource = { type: "FeatureCollection", features: [] };
         }
     }
 

@@ -1,6 +1,9 @@
-﻿using NetTopologySuite.Features;
+﻿using IsraelHiking.Common;
+using IsraelHiking.Common.Poi;
+using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp.IO.API;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services.Poi;
@@ -45,4 +48,13 @@ public interface IPointsOfInterestProvider
     /// <param name="language"></param>
     /// <returns></returns>
     public Task<IFeature> GetClosestPoint(Coordinate location, string source, string language);
+
+    /// <summary>
+    /// Returns POIs within bufferMeters of the given route, sorted by distance from start.
+    /// </summary>
+    /// <param name="coordinates">Ordered route coordinates (lat/lng)</param>
+    /// <param name="bufferMeters">Search corridor width in metres</param>
+    /// <param name="language">UI language code</param>
+    /// <returns></returns>
+    Task<List<RoutePoiItem>> GetPoisAlongRoute(LatLng[] coordinates, double bufferMeters, string language);
 }

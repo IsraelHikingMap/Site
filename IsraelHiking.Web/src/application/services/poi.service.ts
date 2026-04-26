@@ -35,7 +35,8 @@ import type {
     NorthEast,
     EditablePublicPointData,
     UpdateablePublicPoiData,
-    ShareUrl
+    ShareUrl,
+    RoutePoiItem
 } from "../models";
 
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite" | "Bench"
@@ -544,6 +545,14 @@ export class PoiService {
             this.loggingService.warning(`[POIs] Unable to get closest POI: ${(ex as Error).message}`);
         }
         return null;
+    }
+
+    public async getPoisAlongRoute(latlngs: LatLngAltTime[], bufferMeters: number, language: string): Promise<RoutePoiItem[]> {
+        const params = new HttpParams()
+            .set("bufferMeters", bufferMeters.toString())
+            .set("language", language);
+        const url = `${Urls.poisAlongRoute}?${params.toString()}`;
+        return firstValueFrom(this.httpClient.post<RoutePoiItem[]>(url, latlngs));
     }
 
     public addSimplePoint(latlng: LatLngAltTime, pointType: SimplePointType, id: string): Promise<any> {

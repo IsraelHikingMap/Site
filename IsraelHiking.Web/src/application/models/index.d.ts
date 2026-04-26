@@ -20,7 +20,7 @@ export type { EditableLayer } from "./editable-layer.js";
 export type { Trace, TraceVisibility } from "./trace";
 export type { OsmUserDetails } from "./osm-user-details";
 export type { UserInfo } from "./user-info";
-export type { SearchResultsPointOfInterest, EditablePublicPointData, UpdateablePublicPointData as UpdateablePublicPoiData } from "./point-of-interest";
+export type { SearchResultsPointOfInterest, EditablePublicPointData, UpdateablePublicPointData as UpdateablePublicPoiData, RoutePoiItem } from "./point-of-interest";
 export type { NorthEast } from "./north-east";
 export type { CategoriesGroup, Category, IconColorLabel, CategoriesGroupType } from "./categories-group";
 export type { Language, LanguageCode } from "./language";

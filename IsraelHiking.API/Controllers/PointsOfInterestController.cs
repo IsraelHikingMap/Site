@@ -4,6 +4,7 @@ using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Extensions;
+using IsraelHiking.Common.Poi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
@@ -185,6 +186,24 @@ public class PointsOfInterestController : ControllerBase
     public Task<IFeature> GetClosestPoint(string location, string source, string language)
     {
         return _pointsOfInterestProvider.GetClosestPoint(location.ToCoordinate(), source, language);
+    }
+
+    /// <summary>
+    /// Returns POIs along the given route, sorted by km-from-start.
+    /// </summary>
+    /// <param name="coordinates">Ordered list of route coordinates (lat/lng)</param>
+    /// <param name="bufferMeters">Search corridor half-width in metres (default 500)</param>
+    /// <param name="language">UI language code</param>
+    /// <returns></returns>
+    [HttpPost]
+    [Route("along-route")]
+    public async Task<IActionResult> GetPoisAlongRoute(
+        [FromBody] LatLng[] coordinates,
+        [FromQuery] double bufferMeters = 500,
+        [FromQuery] string language = "")
+    {
+        var results = await _pointsOfInterestProvider.GetPoisAlongRoute(coordinates, bufferMeters, language);
+        return Ok(results);
     }
 
     /// <summary>

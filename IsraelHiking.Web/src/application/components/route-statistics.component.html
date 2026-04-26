@@ -3,7 +3,35 @@
   @if (isOpen()) {
   <div animate.enter="chart-enter" animate.leave="chart-leave" class="chart-control-container chart-animated"
     [class.expanded]="isExpanded" [class.sidebar]="isSidebarVisible()">
-    @if (isTable) {
+    @if (isPois) {
+    <div class="chart-container overflow-y-auto">
+      @if (isPoisLoading) {
+      <div class="flex items-center justify-center h-full">
+        <i class="fa icon-spinner fa-spin fa-2x"></i>
+      </div>
+      } @else if (routePois.length === 0) {
+      <div class="flex items-center justify-center h-full text-gray-500 text-sm p-4">
+        <span>No POIs found along this route</span>
+      </div>
+      } @else {
+      <div class="flex flex-col gap-1 p-2">
+        @for (item of routePois; track item.poi.id) {
+        <div class="flex flex-row items-start gap-2 p-1 border-b border-gray-200 cursor-pointer hover:bg-gray-100 active:bg-gray-200"
+          (click)="flyToPoiLocation(item)">
+          <i class="fa {{item.poi.icon}} mt-1 text-base" [style.color]="item.poi.iconColor"></i>
+          <div class="flex flex-col min-w-0 flex-1">
+            <span class="font-semibold text-sm truncate">{{item.poi.title}}</span>
+            @if (item.description) {
+            <span class="text-xs text-gray-600 line-clamp-2">{{item.description}}</span>
+            }
+          </div>
+          <span class="text-xs text-gray-500 whitespace-nowrap">{{item.distanceFromStartKm | number:'1.1-1'}} km</span>
+        </div>
+        }
+      </div>
+      }
+    </div>
+    } @else if (isTable) {
     <div class="chart-container">
       <mat-grid-list cols="3" rowHeight="fit" class="chart-table">
         @if (!isFollowing) {
@@ -101,18 +129,21 @@
     }
     <div class="absolute start-0 bottom-0 flex flex-col m-1">
       @if (!isExpanded) {
-      <button mat-button (click)="changeState('table')" [class.active]="isTable" analyticsOn="click"
+      <button mat-button (click)="changeState('table')" [class.active]="isTable && !isPois" analyticsOn="click"
         analyticsCategory="Route statistics" analyticsLabel="Toggle table view"><i
           class="fa icon-table fa-lg"></i></button>
       }
-      <button mat-button (click)="changeState('graph')" [class.active]="!isTable" analyticsOn="click"
+      <button mat-button (click)="changeState('graph')" [class.active]="!isTable && !isPois" analyticsOn="click"
         analyticsCategory="Route statistics" analyticsLabel="Toggle graph view"><i
           class="fa icon-area-chart fa-lg"></i></button>
+      <button mat-button (click)="changeState('pois')" [class.active]="isPois" analyticsOn="click"
+        analyticsCategory="Route statistics" analyticsLabel="Toggle POIs view"><i
+          class="fa icon-map-marker fa-lg"></i></button>
     </div>
     <div class="absolute top-0 end-0 flex flex-col">
       <button mat-button class="m-1" (click)="toggle()" analyticsCategory="Route statistics"
         analyticsLabel="Route statistics close"><i class="fa icon-close fa-lg"></i></button>
-      @if (!isTable) {
+      @if (!isTable && !isPois) {
       <button mat-button class="m-1 max-sm:hidden!" (click)="toggleExpand()" analyticsOn="click"
         analyticsCategory="Route statistics" analyticsLabel="Toggle expand view"><i class="fa fa-lg"
           [ngClass]="{ 'icon-chevron-right' : isExpanded && resources.end === 'left' || !isExpanded && resources.end === 'right', 'icon-chevron-left' : !isExpanded && resources.end === 'left' || isExpanded && resources.end === 'right'}"></i></button>
@@ -229,6 +260,15 @@
 <mgl-layer id="chart-hover-layer" type="circle" source="chart-hover" [paint]="{
           'circle-color': ['get', 'color'],
           'circle-radius': 7,
+          'circle-stroke-color': 'white',
+          'circle-stroke-width': 3
+          }">
+</mgl-layer>
+
+<mgl-geojson-source id="selected-poi" [data]="selectedPoiSource"></mgl-geojson-source>
+<mgl-layer id="selected-poi-layer" type="circle" source="selected-poi" [paint]="{
+          'circle-color': '#e53e3e',
+          'circle-radius': 9,
           'circle-stroke-color': 'white',
           'circle-stroke-width': 3
           }">
