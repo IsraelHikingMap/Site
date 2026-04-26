@@ -145,8 +145,8 @@
   "private": true,
   "scripts": {
     "ng": "ng",
-    "build": "ng build",
-    "build:watch": "ng build --watch",
+    "build": "ng build --configuration dev",
+    "build:watch": "ng build --configuration dev --watch",
     "build:prod": "npm run generate-user-data-types && ng build --configuration production",
     "build:mobile": "npm run generate-user-data-types && ng build -c mobile",
     "build:mobile-watch": "ng build -c mobile-debug --watch",
@@ -158,8 +158,7 @@
     "generate-sprite": "tsx ./scripts/generate-sprite.ts",
     "generate-user-data-types": "openapi-typescript https://raw.githubusercontent.com/Mapeak-com/user-data/refs/heads/main/user-data.openapi.yml -o ./src/application/models/user-data.g.d.ts",
     "set-version": "tsx ./scripts/set-version.ts",
-    "postinstall": "patch-package",
-    "serve:ssr:israel-hiking": "node wwwroot/server/server.mjs"
+    "postinstall": "patch-package"
   },
   "type": "module",
   "version": "9.21.0"

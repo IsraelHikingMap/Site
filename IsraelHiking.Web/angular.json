@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "israel-hiking": {
+    "mapeak": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -76,6 +76,12 @@
             "browser": "src/main.ts"
           },
           "configurations": {
+            "dev": {
+              "index": {
+                "input": "src/index.html",
+                "output": "index.csr.html"
+              }
+            },
             "production": {
               "budgets": [
                 {
@@ -149,23 +155,6 @@
             }
           },
           "defaultConfiguration": ""
-        },
-        "serve": {
-          "builder": "@angular/build:dev-server",
-          "options": {
-            "buildTarget": "israel-hiking:build"
-          },
-          "configurations": {
-            "production": {
-              "buildTarget": "israel-hiking:build:production"
-            }
-          }
-        },
-        "extract-i18n": {
-          "builder": "@angular/build:extract-i18n",
-          "options": {
-            "buildTarget": "israel-hiking:build"
-          }
         },
         "test": {
           "builder": "@angular/build:karma",
