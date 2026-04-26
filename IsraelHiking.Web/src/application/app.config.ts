@@ -1,5 +1,5 @@
 import { provideAppInitializer, ErrorHandler, importProvidersFrom, inject, ApplicationConfig } from "@angular/core";
-import { provideHttpClient, withInterceptors } from "@angular/common/http";
+import { provideHttpClient, withFetch, withInterceptors } from "@angular/common/http";
 import { Title, BrowserModule } from "@angular/platform-browser";
 import { CommonModule } from "@angular/common";
 import { MatDialogModule } from "@angular/material/dialog";
@@ -33,6 +33,7 @@ import { InfiniteScrollDirective } from "ngx-infinite-scroll";
 import { progressInterceptor } from "ngx-progressbar/http";
 import { provideLottieOptions } from "ngx-lottie";
 import { saveAs } from "file-saver-es";
+import { provideMarkdown } from "ngx-markdown";
 import player from "lottie-web";
 // Services
 import { AuthorizationService } from "./services/authorization.service";
@@ -226,10 +227,12 @@ export const appConfig: ApplicationConfig = {
         { provide: ErrorHandler, useClass: GlobalErrorHandler },
         { provide: SaveAsFactory, useFactory: () => saveAs },
         provideHttpClient(
-            withInterceptors([osmTokenInterceptor, progressInterceptor])
+            withInterceptors([osmTokenInterceptor, progressInterceptor]),
+            withFetch()
         ),
         provideNgIdle(),
         provideRouter(routes),
         provideLottieOptions({ player: () => player }),
+        provideMarkdown()
     ]
 }

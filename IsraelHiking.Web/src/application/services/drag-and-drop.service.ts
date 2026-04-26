@@ -12,6 +12,9 @@ export class DragAndDropService {
     private readonly toastService = inject(ToastService);
 
     public initialize() {
+        if (typeof document === "undefined") {
+            return;
+        }
         document.addEventListener("dragover", (event) => {
             event.preventDefault();
         });

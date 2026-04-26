@@ -14,7 +14,7 @@ export const routes: Route[] = [
     { path: "", redirectTo: environment.isCapacitor ? "/map" : "/about", pathMatch: "full", title: "Mapeak" },
     { path: "about", component: LandingComponent, title: "Mapeak" },
     { path: "attribution", component: AttributionComponent, title: "Mapeak - Attribution" },
-    { path: "faq", component: FaqComponent, title: "Mapeak - FAQ" },
+    { path: ":lang/faq", component: FaqComponent, title: "Mapeak - FAQ" },
     { path: "offline-management", component: OfflineManagementComponent, title: "Mapeak - Offline Management" },
     { path: "public-routes", component: PublicRoutesComponent, title: "Mapeak - Public Routes" },
     { path: "privacy-policy", component: PrivacyPolicyComponent, title: "Mapeak - Privacy Policy" },

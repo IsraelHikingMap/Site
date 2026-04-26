@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Injectable, NgZone } from "@angular/core";
 import { HttpClient, HttpResponse } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { firstValueFrom } from "rxjs";
@@ -48,8 +48,12 @@ export class DatabaseService {
     private readonly pmTilesService = inject(PmTilesService);
     private readonly httpClient = inject(HttpClient);
     private readonly store = inject(Store);
+    private readonly ngZone = inject(NgZone);
 
     public async initialize() {
+        if (typeof window === "undefined") {
+            return;
+        }
         this.stateDatabase = new Dexie(DatabaseService.STATE_DB_NAME);
         this.stateDatabase.version(1).stores({
             state: "id"
@@ -90,10 +94,14 @@ export class DatabaseService {
         }
 
         this.store.reset(storedState);
-        // HM TODO: need to find a way around this.
-        this.store.select(s => s).pipe(debounceTime(2000)).subscribe((state: ApplicationState) => {
-            this.updateState(state);
-        });
+        this.ngZone.runOutsideAngular(() => {
+            setTimeout(() => {
+                // Do this only inside the setTimeout to avoid causing angular hydration to delay
+                this.store.select(s => s).pipe(debounceTime(2000)).subscribe((state: ApplicationState) => {
+                    this.updateState(state);
+                });
+            }, 3000)
+        })
     }
 
     private initCustomTileLoadFunction() {

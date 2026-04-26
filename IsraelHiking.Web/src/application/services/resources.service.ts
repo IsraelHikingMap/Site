@@ -271,7 +271,6 @@ export class ResourcesService {
     public unknown: string;
     public contactUsToPublishAPublicRoute: string;
     public activityType: string;
-    public faqContent: string;
     public editProperties: string;
     public openCloudSave: string;
     public FAQ: string;
@@ -510,7 +509,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1776597953833");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1777194626419");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -759,7 +758,6 @@ export class ResourcesService {
         this.unknown = this.gettextCatalog.getString("Unknown");
         this.contactUsToPublishAPublicRoute = this.gettextCatalog.getString("Contact us to publish a public route");
         this.activityType = this.gettextCatalog.getString("Activity Type");
-        this.faqContent = this.gettextCatalog.getString("All FAQ content goes here");
         this.editProperties = this.gettextCatalog.getString("Edit Properties");
         this.openCloudSave = this.gettextCatalog.getString("Open Cloud Save");
         this.FAQ = this.gettextCatalog.getString("F.A.Q");
@@ -1032,7 +1030,15 @@ export class ResourcesService {
     }
 
     public getCurrentLanguageCodeSimplified(): string {
-        return this.store.selectSnapshot((s: ApplicationState) => s.configuration).language.code.split("-")[0];
+        return this.getCurrentLanguageCode().split("-")[0];
+    }
+
+    /**
+     * Use this only when the full language code is needed!
+     * @returns The full language code, like en-US for example
+     */
+    public getCurrentLanguageCode(): string {
+        return this.store.selectSnapshot((s: ApplicationState) => s.configuration).language.code;
     }
 
     public getResizedImageUrl(imageUrl: string, size: number) {
@@ -1071,7 +1077,7 @@ export class ResourcesService {
 
     public getLongDistanceUnitString(units: "metric" | "imperial") {
         const distanceUnit = units === "metric" ? "kilometer" : "mile";
-        return new Intl.NumberFormat(this.getCurrentLanguageCodeSimplified(), {
+        return new Intl.NumberFormat(this.getCurrentLanguageCode(), {
             style: "unit",
             unit: distanceUnit,
             unitDisplay: "short"
@@ -1080,7 +1086,7 @@ export class ResourcesService {
 
     public getShortDistanceUnitString(units: "metric" | "imperial") {
         const distanceUnit = units === "metric" ? "meter" : "foot";
-        return new Intl.NumberFormat(this.getCurrentLanguageCodeSimplified(), {
+        return new Intl.NumberFormat(this.getCurrentLanguageCode(), {
             style: "unit",
             unit: distanceUnit,
             unitDisplay: "short"
@@ -1089,7 +1095,7 @@ export class ResourcesService {
 
     public getSpeedUnitString(units: "metric" | "imperial") {
         const speedUnit = units === "metric" ? "kilometer-per-hour" : "mile-per-hour";
-        return new Intl.NumberFormat(this.getCurrentLanguageCodeSimplified(), {
+        return new Intl.NumberFormat(this.getCurrentLanguageCode(), {
             style: "unit",
             unit: speedUnit,
             unitDisplay: "short"

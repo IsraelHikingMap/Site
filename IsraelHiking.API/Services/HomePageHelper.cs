@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 namespace IsraelHiking.API.Services;
 
 /// <summary>
-/// Small helper to render the index.html file for the crawlers.
+/// Small helper to render the index.csr.html file for the crawlers.
 /// </summary>
 public class HomePageHelper : IHomePageHelper
 {
@@ -21,7 +21,7 @@ public class HomePageHelper : IHomePageHelper
     /// </summary>
     public HomePageHelper(IWebHostEnvironment environment)
     {
-        var indexFileInfo = environment.WebRootFileProvider.GetFileInfo("/index.html");
+        var indexFileInfo = environment.WebRootFileProvider.GetFileInfo("/index.csr.html");
         using var reader = new StreamReader(indexFileInfo.CreateReadStream());
         var fileContents = reader.ReadToEnd();
         var parts = Regex.Split(fileContents, SPLIT_PATTERN);
@@ -38,7 +38,7 @@ public class HomePageHelper : IHomePageHelper
     /// <param name="thumbnailUrl"></param>
     /// <param name="language"></param>
     /// <returns></returns>
-    public string Render(string title, string description, string thumbnailUrl, string language="")
+    public string Render(string title, string description, string thumbnailUrl, string language = "")
     {
         title = WebUtility.HtmlEncode(title.Trim());
         title += (string.IsNullOrWhiteSpace(title) ? "" : " | ") + Branding.SITE_NAME;
@@ -47,7 +47,7 @@ public class HomePageHelper : IHomePageHelper
         description = WebUtility.HtmlEncode(description);
 
         var secureThumbUrl = thumbnailUrl.Replace("http://", "https://");
-            
+
         var s = $@"
                     <meta property=""og:title"" content=""{title}"" />
                     <meta property=""og:image"" content=""{thumbnailUrl}"" />
