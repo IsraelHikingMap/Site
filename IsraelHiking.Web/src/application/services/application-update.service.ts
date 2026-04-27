@@ -30,14 +30,17 @@ export class ApplicationUpdateService {
                     if (result.immediateUpdateAllowed) {
                         AppUpdate.performImmediateUpdate();
                     } else {
-                        AppUpdate.openAppStore();
+                        AppUpdate.openAppStore({
+                            androidPackageName: "com.mapeak",
+                            appId: "6751947875"
+                        });
                     }
-                }, 
+                },
                 declineAction: () => { }
             });
         } catch (ex) {
             this.loggingService.warning("[Application Update] Failed to check for updates: " + (ex as Error).message);
         }
-        
+
     }
 }
