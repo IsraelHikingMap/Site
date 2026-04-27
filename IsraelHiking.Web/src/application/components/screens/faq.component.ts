@@ -14,7 +14,7 @@ import { ApplicationState } from "application/models";
 })
 export class FaqComponent {
     public direction = signal<string>("ltr");
-    public markdownFilePath = signal<string>("content/faq-en-US.md");
+    public markdownFilePath = signal<string>("content/faq/en-US.md");
 
     private readonly router = inject(Router);
     private readonly store = inject(Store);
@@ -27,9 +27,9 @@ export class FaqComponent {
         });
     }
 
-    private loadMarkdownFile(language: string) {
-        this.markdownFilePath.set(`content/faq-${language}.md`);
-        if (language === "he" || language === "ar") {
+    private loadMarkdownFile(languageCode: string) {
+        this.markdownFilePath.set(`content/faq/${languageCode}.md`);
+        if (languageCode === "he" || languageCode === "ar") {
             this.direction.set("rtl");
         } else {
             this.direction.set("ltr");
