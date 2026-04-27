@@ -1,2 +1,2 @@
-- Improved search functionality
+- Improved FAQ
 - Plus various bug fixes and performance improvements
