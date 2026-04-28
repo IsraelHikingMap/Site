@@ -48,10 +48,7 @@ export class GeoLocationService {
         }
 
         this.store.select((s: ApplicationState) => s.routes.present).subscribe(() => {
-            if (this.wasInitialized &&
-                this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings) {
-                this.sendPlannedRouteToPlugin();
-            }
+            this.sendPlannedRouteToPluginIfNeeded();
         });
 
         if (!this.runningContextService.isCapacitor) {
@@ -173,7 +170,7 @@ export class GeoLocationService {
                 }
             });
             this.wasInitialized = true;
-            this.sendPlannedRouteToPlugin();
+            this.sendPlannedRouteToPluginIfNeeded();
         } catch {
             // ignore errors.
         }
@@ -213,7 +210,11 @@ export class GeoLocationService {
         } as GeolocationPosition;
     }
 
-    private sendPlannedRouteToPlugin() {
+    private sendPlannedRouteToPluginIfNeeded() {
+        if (!this.wasInitialized ||
+            !this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings) {
+            return;
+        }
         const route = this.selectedRouteService.getSelectedRoute();
         const routePoints = route?.segments.map(segment => segment.latlngs.map(l => ([l.lng, l.lat] as [number, number]))).flat(1) || [];
         BackgroundGeolocation.setPlannedRoute({ route: routePoints, soundFile: "content/uh-oh.mp3", distance: 50 });
