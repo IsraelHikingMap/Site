@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { lineString } from "@turf/helpers";
 
 import { SpatialService } from "./spatial.service";

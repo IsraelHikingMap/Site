@@ -1,3 +1,4 @@
+import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 
@@ -5,169 +6,224 @@ import { ResourcesService } from "./resources.service";
 import { GetTextCatalogService } from "./gettext-catalog.service";
 
 describe("ResourcesService", () => {
-
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([])],
-            providers: [
-                {
-                    provide: GetTextCatalogService, useValue: {
-                        getString: () => "",
-                        loadRemote: () => Promise.resolve(),
-                        setCurrentLanguage: () => { }
-                    }
-                },
-                ResourcesService
-            ]
-        });
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [NgxsModule.forRoot([])],
+      providers: [
+        {
+          provide: GetTextCatalogService,
+          useValue: {
+            getString: () => "",
+            loadRemote: () => Promise.resolve(),
+            setCurrentLanguage: () => { },
+          },
+        },
+        ResourcesService,
+      ],
     });
+  });
 
-    it("Should faciliate language change to english and raise event", inject([ResourcesService, Store],
-        (service: ResourcesService, store: Store) => {
+  it("Should faciliate language change to english and raise event", inject(
+    [ResourcesService, Store],
+    (service: ResourcesService, store: Store) => {
+      store.reset({
+        configuration: {
+          language: {
+            code: "he",
+          },
+        },
+      });
+      store.dispatch = vi.fn();
 
-            store.reset({
-                configuration: {
-                    language: {
-                        code: "he"
-                    }
-                }
-            });
-            store.dispatch = jasmine.createSpy();
+      const promise = service.setLanguage("he").then(() => {
+        expect(service.getCurrentLanguageCodeSimplified()).toBe("he");
+        expect(store.dispatch).toHaveBeenCalled();
+      });
+      return promise;
+    }
+  ));
 
-            const promise = service.setLanguage("he").then(() => {
-                expect(service.getCurrentLanguageCodeSimplified()).toBe("he");
-                expect(store.dispatch).toHaveBeenCalled();
-            });
-            return promise;
-        }
-    ));
+  it("Should faciliate translation", inject(
+    [ResourcesService, GetTextCatalogService],
+    (service: ResourcesService, getText: GetTextCatalogService) => {
+      vi.spyOn(getText, "getString").mockReturnValue("word's translation");
 
-    it("Should faciliate translation", inject([ResourcesService, GetTextCatalogService],
-        (service: ResourcesService, getText: GetTextCatalogService) => {
+      expect(service.translate("word")).toBe("word's translation");
+    }
+  ));
 
-            spyOn(getText, "getString").and.returnValue("word's translation");
+  it("Should be able to test if a text contains hebrew", inject(
+    [ResourcesService],
+    (service: ResourcesService) => {
+      expect(service.hasRtlCharacters("שלום")).toBeTruthy();
+      expect(service.hasRtlCharacters("1. שלום")).toBeTruthy();
+      expect(service.hasRtlCharacters("1. نص عربي")).toBeTruthy();
+      expect(service.hasRtlCharacters("hello")).toBeFalsy();
+      expect(service.hasRtlCharacters("1. hello")).toBeFalsy();
+      expect(service.hasRtlCharacters("1. Кейсария")).toBeFalsy();
+    }
+  ));
 
-            expect(service.translate("word")).toBe("word's translation");
-        }
-    ));
+  it("Should be able get the layout direction for titles", inject(
+    [ResourcesService],
+    (service: ResourcesService) => {
+      expect(service.getDirection("")).toBeUndefined();
+      expect(service.getDirection("שלום")).toBe("rtl");
+      expect(service.getDirection("1. שלום")).toBe("rtl");
+      expect(service.getDirection("hello")).toBe("ltr");
+      expect(service.getDirection("1. hello")).toBe("ltr");
+    }
+  ));
 
-    it("Should be able to test if a text contains hebrew", inject([ResourcesService], (service: ResourcesService) => {
-        expect(service.hasRtlCharacters("שלום")).toBeTruthy();
-        expect(service.hasRtlCharacters("1. שלום")).toBeTruthy();
-        expect(service.hasRtlCharacters("1. نص عربي")).toBeTruthy();
-        expect(service.hasRtlCharacters("hello")).toBeFalsy();
-        expect(service.hasRtlCharacters("1. hello")).toBeFalsy();
-        expect(service.hasRtlCharacters("1. Кейсария")).toBeFalsy();
-    }));
+  it("Should be able get the text alignment for titles", inject(
+    [ResourcesService],
+    (service: ResourcesService) => {
+      expect(service.getTextAlignment("שלום")).toBe("text-right");
+      expect(service.getTextAlignment("1. שלום")).toBe("text-right");
+      expect(service.getTextAlignment("hello")).toBe("text-left");
+      expect(service.getTextAlignment("1. hello")).toBe("text-left");
+    }
+  ));
 
-    it("Should be able get the layout direction for titles", inject([ResourcesService], (service: ResourcesService) => {
-        expect(service.getDirection("")).toBeUndefined();
-        expect(service.getDirection("שלום")).toBe("rtl");
-        expect(service.getDirection("1. שלום")).toBe("rtl");
-        expect(service.getDirection("hello")).toBe("ltr");
-        expect(service.getDirection("1. hello")).toBe("ltr");
-    }));
+  it("Should get null when trying to resize nu", inject(
+    [ResourcesService],
+    (service: ResourcesService) => {
+      expect(service.getResizedImageUrl(null, 1)).toBe(null);
+    }
+  ));
 
-    it("Should be able get the text alignment for titles", inject([ResourcesService], (service: ResourcesService) => {
-        expect(service.getTextAlignment("שלום")).toBe("text-right");
-        expect(service.getTextAlignment("1. שלום")).toBe("text-right");
-        expect(service.getTextAlignment("hello")).toBe("text-left");
-        expect(service.getTextAlignment("1. hello")).toBe("text-left");
-    }));
+  it("Should alter wikimedia url and resize it", inject(
+    [ResourcesService],
+    (service: ResourcesService) => {
+      const url = service.getResizedImageUrl(
+        "https://upload.wikimedia.org/wikipedia/commons/4/5/7.svg",
+        123
+      );
+      expect(url).toContain("123");
+      expect(url).toContain("png");
+    }
+  ));
 
-    it("Should get null when trying to resize nu", inject([ResourcesService], (service: ResourcesService) => {
-        expect(service.getResizedImageUrl(null, 1)).toBe(null);
-    }));
+  it("Should alter imgur url and resize it according to size", inject(
+    [ResourcesService],
+    (service: ResourcesService) => {
+      expect(
+        service.getResizedImageUrl("https://i.imgur.com/456.png", 123)
+      ).toContain("456t");
+      expect(
+        service.getResizedImageUrl("https://i.imgur.com/456.png", 345)
+      ).toContain("456m");
+      expect(
+        service.getResizedImageUrl("https://i.imgur.com/456.png", 600)
+      ).toContain("456l");
+      expect(
+        service.getResizedImageUrl("https://i.imgur.com/456.png", 800)
+      ).toContain("456");
+    }
+  ));
 
-    it("Should alter wikimedia url and resize it", inject([ResourcesService], (service: ResourcesService) => {
-        const url = service.getResizedImageUrl("https://upload.wikimedia.org/wikipedia/commons/4/5/7.svg", 123);
-        expect(url).toContain("123");
-        expect(url).toContain("png");
-    }));
+  it("Should after wikipedia file url", inject(
+    [ResourcesService],
+    (service: ResourcesService) => {
+      expect(service.getResizedImageUrl("File:456.png", 123)).toContain(
+        "Redirect/file/"
+      );
+    }
+  ));
 
-    it("Should alter imgur url and resize it according to size", inject([ResourcesService], (service: ResourcesService) => {
-        expect(service.getResizedImageUrl("https://i.imgur.com/456.png", 123)).toContain("456t");
-        expect(service.getResizedImageUrl("https://i.imgur.com/456.png", 345)).toContain("456m");
-        expect(service.getResizedImageUrl("https://i.imgur.com/456.png", 600)).toContain("456l");
-        expect(service.getResizedImageUrl("https://i.imgur.com/456.png", 800)).toContain("456");
-    }));
+  it("should get long distance unit when language is Hebrew", inject(
+    [ResourcesService, Store],
+    (service: ResourcesService, store: Store) => {
+      store.reset({
+        configuration: {
+          language: {
+            code: "he",
+          },
+        },
+      });
+      expect(service.getLongDistanceUnitString("metric")).toBe("ק״מ");
+    }
+  ));
 
-    it("Should after wikipedia file url", inject([ResourcesService], (service: ResourcesService) => {
-        expect(service.getResizedImageUrl("File:456.png", 123)).toContain("Redirect/file/");
-    }));
+  it("should get long distance unit when language is English", inject(
+    [ResourcesService, Store],
+    (service: ResourcesService, store: Store) => {
+      store.reset({
+        configuration: {
+          language: {
+            code: "en-US",
+          },
+        },
+      });
+      expect(service.getLongDistanceUnitString("imperial")).toBe("mi");
+    }
+  ));
 
-    it("should get long distance unit when language is Hebrew", inject([ResourcesService, Store], (service: ResourcesService, store: Store) => {
-        store.reset({
-            configuration: {
-                language: {
-                    code: "he"
-                }
-            }
-        });
-        expect(service.getLongDistanceUnitString("metric")).toBe("ק״מ");
-    }));
+  it("should get short distance unit when language is Hebrew", inject(
+    [ResourcesService, Store],
+    (service: ResourcesService, store: Store) => {
+      store.reset({
+        configuration: {
+          language: {
+            code: "he",
+          },
+        },
+      });
+      expect(service.getShortDistanceUnitString("metric")).toBe("מ׳");
+    }
+  ));
 
-    it("should get long distance unit when language is English", inject([ResourcesService, Store], (service: ResourcesService, store: Store) => {
-        store.reset({
-            configuration: {
-                language: {
-                    code: "en-US"
-                }
-            }
-        });
-        expect(service.getLongDistanceUnitString("imperial")).toBe("mi");
-    }));
+  it("should get short distance unit when language is English", inject(
+    [ResourcesService, Store],
+    (service: ResourcesService, store: Store) => {
+      store.reset({
+        configuration: {
+          language: {
+            code: "en-US",
+          },
+        },
+      });
+      expect(service.getShortDistanceUnitString("imperial")).toBe("ft");
+    }
+  ));
 
-    it("should get short distance unit when language is Hebrew", inject([ResourcesService, Store], (service: ResourcesService, store: Store) => {
-        store.reset({
-            configuration: {
-                language: {
-                    code: "he"
-                }
-            }
-        });
-        expect(service.getShortDistanceUnitString("metric")).toBe("מ׳");
-    }));
+  it("should get speed unit when language is Hebrew", inject(
+    [ResourcesService, Store],
+    (service: ResourcesService, store: Store) => {
+      store.reset({
+        configuration: {
+          language: {
+            code: "he",
+          },
+        },
+      });
+      expect(service.getSpeedUnitString("metric")).toBe("קמ״ש");
+    }
+  ));
 
-    it("should get short distance unit when language is English", inject([ResourcesService, Store], (service: ResourcesService, store: Store) => {
-        store.reset({
-            configuration: {
-                language: {
-                    code: "en-US"
-                }
-            }
-        });
-        expect(service.getShortDistanceUnitString("imperial")).toBe("ft");
-    }));
+  it("should get speed unit when language is English", inject(
+    [ResourcesService, Store],
+    (service: ResourcesService, store: Store) => {
+      store.reset({
+        configuration: {
+          language: {
+            code: "en-US",
+          },
+        },
+      });
+      expect(service.getSpeedUnitString("imperial")).toBe("mph");
+    }
+  ));
 
-    it("should get speed unit when language is Hebrew", inject([ResourcesService, Store], (service: ResourcesService, store: Store) => {
-        store.reset({
-            configuration: {
-                language: {
-                    code: "he"
-                }
-            }
-        });
-        expect(service.getSpeedUnitString("metric")).toBe("קמ״ש");
-    }));
-
-    it("should get speed unit when language is English", inject([ResourcesService, Store], (service: ResourcesService, store: Store) => {
-        store.reset({
-            configuration: {
-                language: {
-                    code: "en-US"
-                }
-            }
-        });
-        expect(service.getSpeedUnitString("imperial")).toBe("mph");
-    }));
-
-    it("should get date format from store", inject([ResourcesService, Store], (service: ResourcesService, store: Store) => {
-        store.reset({
-            configuration: {
-                dateFormat: "dd-MM-yyyy"
-            }
-        });
-        expect(service.getDateFormat()).toBe("dd-MM-yyyy");
-    }));
+  it("should get date format from store", inject(
+    [ResourcesService, Store],
+    (service: ResourcesService, store: Store) => {
+      store.reset({
+        configuration: {
+          dateFormat: "dd-MM-yyyy",
+        },
+      });
+      expect(service.getDateFormat()).toBe("dd-MM-yyyy");
+    }
+  ));
 });

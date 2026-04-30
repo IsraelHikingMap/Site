@@ -1,3 +1,4 @@
+import { describe, beforeEach, it, expect } from "vitest";
 import { RouteStatisticsService, RouteStatistics, RouteStatisticsPoint } from "./route-statistics.service";
 import type { LatLngAltTime } from "../models";
 

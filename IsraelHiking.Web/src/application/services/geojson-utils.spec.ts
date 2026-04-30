@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { GeoJSONUtils } from "./geojson-utils";
 
 describe("GeoJsonUtils", () => {

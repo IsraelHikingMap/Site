@@ -1,3 +1,4 @@
+import { describe, beforeEach, vi, it, expect } from "vitest";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { inject, TestBed } from "@angular/core/testing";
@@ -10,9 +11,11 @@ describe("WikidataService", () => {
         TestBed.configureTestingModule({
             providers: [
                 WikidataService,
-                { provide: ResourcesService, useValue: {
-                    getCurrentLanguageCodeSimplified: () => "he"
-                } },
+                {
+                    provide: ResourcesService, useValue: {
+                        getCurrentLanguageCodeSimplified: () => "he"
+                    }
+                },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting()
             ]
@@ -51,7 +54,7 @@ describe("WikidataService", () => {
         await new Promise((resolve) => setTimeout(resolve, 10));
         backend.expectOne(r => r.url.startsWith(`https://commons.wikimedia.org/w/api.php?action=query&titles=File:${imageName}`)).flush({
             query: {
-                pages: { 
+                pages: {
                     "-1": {
                         imageinfo: [{
                             url: "image-url"
@@ -63,7 +66,7 @@ describe("WikidataService", () => {
         await new Promise((resolve) => setTimeout(resolve, 10));
         backend.expectOne(r => r.url.startsWith(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles=${title}`)).flush({
             query: {
-                pages: { 
+                pages: {
                     "1": {
                         extract: "external descriptiopn",
                         original: {
@@ -73,7 +76,7 @@ describe("WikidataService", () => {
                 }
             }
         });
-        
+
         const feature = await promise;
         expect(feature.properties.identifier).toBe(wikidataId);
         expect(feature.properties.poiId).toBe("Wikidata_" + wikidataId);
@@ -83,7 +86,7 @@ describe("WikidataService", () => {
         expect(feature.properties.name).toBe(title);
         expect(feature.properties["poiExternalDescription:" + language]).toBe("external descriptiopn");
         expect(feature.geometry.type).toBe("Point");
-        expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([2,1]);
+        expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([2, 1]);
     }));
 
     it("should create a feature from wikidata page id english title", inject([WikidataService, HttpTestingController], async (serive: WikidataService, backend: HttpTestingController) => {
@@ -122,13 +125,13 @@ describe("WikidataService", () => {
                 }
             }
         });
-        
+
         const feature = await promise;
         expect(feature.properties["name:en"]).toBe(title);
         expect(feature.properties.name).toBe(title);
         expect(feature.properties["description:en"]).toBe("external description");
         expect(feature.geometry.type).toBe("Point");
-        expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([2,1]);
+        expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([2, 1]);
     }));
 
     it("should create a feature from wikidata page id with title from label", inject([WikidataService, HttpTestingController], async (serive: WikidataService, backend: HttpTestingController) => {
@@ -154,12 +157,12 @@ describe("WikidataService", () => {
                 }]
             }
         });
-        
+
         const feature = await promise;
         expect(feature.properties["name:en"]).toBe(title);
         expect(feature.properties.name).toBe("default-name");
         expect(feature.geometry.type).toBe("Point");
-        expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([2,1]);
+        expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([2, 1]);
     }));
 
 
@@ -185,13 +188,13 @@ describe("WikidataService", () => {
             }
         });
         await new Promise((resolve) => setTimeout(resolve, 10));
-        
+
         const feature = await promise;
         expect(feature.properties.image).toBeUndefined();
         expect(feature.properties.name).toBeUndefined();
         expect(feature.properties["description:" + language]).toBe("description");
         expect(feature.geometry.type).toBe("Point");
-        expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([2,1]);
+        expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([2, 1]);
     }));
 
     it("should enritch feature that does not link to valid pages", inject([WikidataService, HttpTestingController], async (serive: WikidataService, backend: HttpTestingController) => {
@@ -199,11 +202,11 @@ describe("WikidataService", () => {
         const imageName = "image_name";
         const language = "he";
         const title = "he-test";
-        const feature: GeoJSON.Feature = { 
-            type: "Feature", 
-            geometry: { 
-                type: "Point", 
-                coordinates: [1,2]
+        const feature: GeoJSON.Feature = {
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates: [1, 2]
             },
             properties: {
                 wikidata: wikidataId
@@ -245,7 +248,7 @@ describe("WikidataService", () => {
                 pages: {}
             }
         });
-        
+
         await promise;
         expect(feature.properties.image).toBeUndefined();
         expect(feature.properties["description:" + language]).toBeUndefined();

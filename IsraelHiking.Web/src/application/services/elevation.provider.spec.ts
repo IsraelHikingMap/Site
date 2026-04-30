@@ -1,3 +1,4 @@
+import { describe, beforeEach, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
@@ -30,9 +31,11 @@ describe("ElevationProvider", () => {
             ],
             providers: [
                 { provide: LoggingService, useValue: { warning: () => { } } },
-                { provide: PmTilesService, useValue: {
-                    isOfflineFileAvailable: () => Promise.resolve(false),
-                } },
+                {
+                    provide: PmTilesService, useValue: {
+                        isOfflineFileAvailable: () => Promise.resolve(false),
+                    }
+                },
                 ElevationProvider,
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting()
@@ -67,32 +70,32 @@ describe("ElevationProvider", () => {
 
     it("Should not update elevation when getting an error from server and offline is not available",
         inject([ElevationProvider, HttpTestingController],
-        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
+            async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
 
-            const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
+                const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
-            const promise = elevationProvider.updateHeights(latlngs);
+                const promise = elevationProvider.updateHeights(latlngs);
 
-            await new Promise((resolve) => setTimeout(resolve, 0)); // Let the http call be made
+                await new Promise((resolve) => setTimeout(resolve, 0)); // Let the http call be made
 
-            mockBackend.match(() => true)[0].flush(null, { status: 500, statusText: "Server Error" });
-            await promise;
-            expect(latlngs[0].alt).toBe(0);
-        }
-    ));
+                mockBackend.match(() => true)[0].flush(null, { status: 500, statusText: "Server Error" });
+                await promise;
+                expect(latlngs[0].alt).toBe(0);
+            }
+        ));
 
     it("Should update elevation when offline is available",
         inject([ElevationProvider, PmTilesService],
-        async (elevationProvider: ElevationProvider, db: PmTilesService) => {
-            const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
+            async (elevationProvider: ElevationProvider, db: PmTilesService) => {
+                const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
-            db.isOfflineFileAvailable = () => Promise.resolve(true);
-            db.getTileByType = getArrayBufferOfNonEmptyTile;
+                db.isOfflineFileAvailable = () => Promise.resolve(true);
+                db.getTileByType = getArrayBufferOfNonEmptyTile;
 
-            const promise = elevationProvider.updateHeights(latlngs);
+                const promise = elevationProvider.updateHeights(latlngs);
 
-            await promise;
-            expect(latlngs[0].alt).not.toBe(0);
-        }
-    ));
+                await promise;
+                expect(latlngs[0].alt).not.toBe(0);
+            }
+        ));
 });
