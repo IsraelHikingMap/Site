@@ -1,2 +1,2 @@
-- Improved FAQ
+- Improved offline usage for routes and traces
 - Plus various bug fixes and performance improvements
