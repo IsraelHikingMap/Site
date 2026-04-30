@@ -18,7 +18,7 @@
       <mgl-map [zoom]="[location.zoom]" [center]="[location.longitude, location.latitude]" [mapStyle]="initialStyle"
         (mapLoad)="mapLoaded($event)" (pitchEvt)="pitchChanged()" [doubleClickZoom]="false"
         [attributionControl]="false">
-        <layers [isMainMap]="true"></layers>
+        <layers [allowOffline]="true"></layers>
         @if (!isIFrame()) {
         <public-pois></public-pois>
         }

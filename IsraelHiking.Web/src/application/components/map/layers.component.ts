@@ -12,7 +12,7 @@ import type { EditableLayer } from "../../models";
 })
 export class LayersComponent {
 
-    public readonly isMainMap = input<boolean>(true);
+    public readonly allowOffline = input<boolean>(true);
 
     public readonly resources = inject(ResourcesService);
 

@@ -9,7 +9,7 @@
         @if (!shareUrl.base64Preview) {
         <mgl-map [interactive]="false" [mapStyle]="style" [attributionControl]="false"
           [canvasContextAttributes]="{ preserveDrawingBuffer: true }" (mapLoad)="mapLoaded($event)">
-          <layers [isMainMap]="false"></layers>
+          <layers [allowOffline]="true"></layers>
           <routes-path [routesGeoJson]="routesGeoJson"></routes-path>
           <mgl-control [position]="resources.direction === 'rtl' ? 'top-left' : 'top-right'">
             <label>

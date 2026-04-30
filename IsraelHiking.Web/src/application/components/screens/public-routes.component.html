@@ -18,7 +18,7 @@
             <public-routes-filter></public-routes-filter>
         </div>
         <mgl-map [mapStyle]="mapStyle" [attributionControl]="false" (mapLoad)="mapLoaded($event)">
-            <layers [isMainMap]="false"></layers>
+            <layers [allowOffline]="false"></layers>
             <mgl-control [position]="resources.direction === 'rtl' ? 'top-left' : 'top-right'">
                 <zoom></zoom>
             </mgl-control>

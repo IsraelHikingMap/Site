@@ -113,7 +113,7 @@
     </div>
     <div [ngClass]="{'max-md:w-full': showMap, 'max-md:hidden': !showMap}" class="w-2/3">
         <mgl-map [mapStyle]="mapStyle" [attributionControl]="false" (mapLoad)="mapLoaded($event)">
-            <layers [isMainMap]="false"></layers>
+            <layers [allowOffline]="true"></layers>
             <routes-path [routesGeoJson]="selectedTraceGeoJson"></routes-path>
             <mgl-control [position]="resources.direction === 'rtl' ? 'top-left' : 'top-right'">
                 <zoom></zoom>
