@@ -118,9 +118,6 @@
                 </div>
             </mat-menu>
         </div>
-        @if (loading) {
-        <mat-spinner></mat-spinner>
-        }
         @for (shareUrl of filteredShareUrls; track shareUrl.id) {
         <div [id]="'share-url-' + shareUrl.id">
             <share-item [shareUrl]="shareUrl" [showMenu]="true" (delete)="deleteShareUrl(shareUrl)"
@@ -129,6 +126,9 @@
         </div>
         } @empty {
         <p class="mx-2">{{resources.noShares}}</p>
+        }
+        @if (loading) {
+        <mat-spinner></mat-spinner>
         }
     </div>
     <div [ngClass]="{'max-md:w-full': showMap, 'max-md:hidden': !showMap}" class="w-2/3">
