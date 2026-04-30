@@ -48,12 +48,12 @@ public class TagsHelper : ITagsHelper
                 tagCombinations.Add([new("historic", "monument")]);
                 return tagCombinations;
             case "icon-cave":
-                tagCombinations.Add([new("historic", "tomb")]);
                 tagCombinations.Add([new("natural", "cave_entrance")]);
+                tagCombinations.Add([new("historic", "tomb")]);
                 return tagCombinations;
             case "icon-picnic":
-                tagCombinations.Add([new("leisure", "picnic_table")]);
                 tagCombinations.Add([new("tourism", "picnic_site")]);
+                tagCombinations.Add([new("leisure", "picnic_table")]);
                 tagCombinations.Add([new("amenity", "picnic")]);
                 return tagCombinations;
             case "icon-tint":
