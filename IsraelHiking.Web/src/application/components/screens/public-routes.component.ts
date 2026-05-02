@@ -19,6 +19,7 @@ import { ImageAttributionComponent } from "../image-attribution.component";
 import { ZoomComponent } from "../zoom.component";
 import { OsmAttributionComponent } from "../osm-attribution.component";
 import { PublicRoutesFilterComponent } from "../public-routes-filter.component";
+import { DescriptionComponent } from "../description.component";
 import { DistancePipe } from "../../pipes/distance.pipe";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { DefaultStyleService } from "../../services/default-style.service";
@@ -29,7 +30,7 @@ import { PoiService } from "../../services/poi.service";
 import { SpatialService } from "../../services/spatial.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { RunningContextService } from "../../services/running-context.service";
-import { ImageAttributionService } from "../../services/image-attribution.service";
+import { TranslationService } from "../../services/translation.service";
 import { GeoJSONUtils } from "../../services/geojson-utils";
 import { PoiProperties } from "../../services/osm-tags.service";
 import { RouteStrings } from "../../services/hash.service";
@@ -40,7 +41,7 @@ import type { ApplicationState } from "../../models";
     selector: "public-routes",
     templateUrl: "./public-routes.component.html",
     styleUrls: ["./public-routes.component.scss"],
-    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, ControlComponent, PublicRoutesFilterComponent]
+    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, ControlComponent, PublicRoutesFilterComponent, DescriptionComponent]
 })
 export class PublicRoutesComponent {
     public mapStyle: StyleSpecification;
@@ -70,7 +71,7 @@ export class PublicRoutesComponent {
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly router = inject(Router);
     private readonly runningContextSerivce = inject(RunningContextService);
-    private readonly imageAttributionService = inject(ImageAttributionService);
+    private readonly translationService = inject(TranslationService);
 
     constructor() {
         this.mapStyle = this.defaultStyleService.getStyleWithPlaceholders();
@@ -176,11 +177,6 @@ export class PublicRoutesComponent {
         return GeoJSONUtils.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
-    public getDescription(feature: GeoJSON.Feature<GeoJSON.Point>) {
-        // HM TODO: add translation support here as well
-        return GeoJSONUtils.getDescription(feature, this.resources.getCurrentLanguageCodeSimplified());
-    }
-
     public hover(feature: GeoJSON.Feature<GeoJSON.Point>) {
         this.hoverFeature = feature;
     }
@@ -209,7 +205,7 @@ export class PublicRoutesComponent {
         if (feature.properties.poiSource === "OSM") {
             await this.poiService.updateExtendedInfo(fullFeature, this.resources.getCurrentLanguageCodeSimplified());
         }
-        this.selectedRouteService.convertToRoute(fullFeature, this.getDescription(feature));
+        this.selectedRouteService.convertToRoute(fullFeature, this.translationService.getBestDescription(feature));
         this.router.navigate([RouteStrings.MAP]);
         // This is to let the route change to the map so that the relevant map will be used for fit bounds.
         await new Promise((resolve) => setTimeout(resolve, 100));

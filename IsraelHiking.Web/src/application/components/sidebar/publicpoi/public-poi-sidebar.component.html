@@ -112,20 +112,7 @@
       @if (length && isRoute()) {
       <p class="text-center">{{resources.length}}: {{length | distance}}</p>
       }
-      <div class="flex flex-row">
-        <p class="w-full whitespace-pre-line" [ngClass]="resources.getTextAlignment(description)"
-          [dir]="resources.getDirection(description)">
-          {{description}}
-        </p>
-      </div>
-      @if (showToggleTranslation) {
-      <div class="flex flex-row cursor-pointer" (click)="toggleTranslation()" analyticsOn="click"
-        analyticsCategory="POI" analyticsLabel="Toggle translation">
-        <span class="w-full text-sm text-center">
-          {{showingTranslated ? resources.translatedBy : resources.clickToTranslate}}
-        </span>
-      </div>
-      }
+      <description [feature]="fullFeature" [isEditable]="isEditable()"></description>
       @if (isShowSeeAlso()) {
       <div class="flex flex-row max-sm:hidden">
         <h4>{{resources.seeAlso}}</h4>

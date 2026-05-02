@@ -82,8 +82,8 @@
             }
         </mgl-map>
         @if (selectedRoutePoint) {
-        <div class="hidden max-md:block fixed bottom-safe bg-white w-full z-30">
-            <div class="flex flex-row justify-center items-center mx-2">
+        <div class="hidden max-md:block fixed bottom-safe bg-white w-full z-30 max-h-1/2 overflow-y-auto">
+            <div class="flex flex-row justify-center items-center px-2 sticky top-0 bg-white z-10 w-full mb-2">
                 <div class="flex-1 text-center text-xl">{{getTitle(selectedRoutePoint)}}</div>
                 <button mat-button class="w-1/6" type="button" (click)="selectedRoutePoint = null" tabindex="-1">
                     <i class="fa fa-lg icon-close"></i>
@@ -170,7 +170,7 @@
                 </button>
                 }
             </mat-menu>
-            <div class="flex flex-row mx-10 max-md:mx-2">
+            <div class="flex flex-row mx-2">
                 <div class="relative w-full h-[200px]">
                     <img class="w-full object-contain img-center" [src]="selectedRoutePoint.properties.image" alt="">
                 </div>
@@ -178,6 +178,9 @@
             <div class="flex flex-row" class="text-center text-sm">
                 <image-attribution [imageUrl]="selectedRoutePoint.properties.image"
                     [allowFiltering]="true"></image-attribution>
+            </div>
+            <div class="mx-2">
+                <description [feature]="selectedRoutePoint" [isEditable]="false"></description>
             </div>
         </div>
         }
@@ -253,18 +256,16 @@
                     <img class="w-full object-contain img-center" [src]="route.properties.image" alt="">
                 </div>
             </div>
+            @defer (on viewport) {
             <div class="flex flex-row" class="text-center text-sm">
-                @defer (on viewport) {
                 <image-attribution [imageUrl]="route.properties.image" [allowFiltering]="true"></image-attribution>
-                } @placeholder {
-                <div></div>
-                }
             </div>
-            <div class="flex flex-row mx-10 max-md:mx-2 mb-2">
-                <div class="w-full whitespace-pre-line" [ngClass]="resources.getTextAlignment(getDescription(route))">
-                    {{getDescription(route)}}
-                </div>
+            <div class="mx-10 max-md:mx-2 mb-2">
+                <description [feature]="route" [isEditable]="false"></description>
             </div>
+            } @placeholder {
+            <div></div>
+            }
         </div>
         }
         @empty {
