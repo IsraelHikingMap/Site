@@ -132,17 +132,20 @@ export class LoggingService {
     }
 
     public getErrorTypeAndMessage(ex: any): ErrorTypeAndMessage {
-        const typeAndMessage = {
+        const typeAndMessage: ErrorTypeAndMessage = {
             type: "server",
-            message: (ex as Error).message
-        } as ErrorTypeAndMessage;
+            message: (ex as Error).message,
+        };
+
         if ((ex as Error).name === "TimeoutError") {
             typeAndMessage.type = "timeout";
-        } else if ((ex as HttpErrorResponse).error && (ex as HttpErrorResponse).error.constructor.name === "ProgressEvent") {
+        } else if ((ex as HttpErrorResponse).status === 0) {
             typeAndMessage.type = "client";
-        } else {
+        } else if ((ex as HttpErrorResponse).status >= 400) {
             typeAndMessage.statusCode = (ex as HttpErrorResponse).status;
+            typeAndMessage.type = (ex as HttpErrorResponse).status >= 500 ? "server" : "client";
         }
+
         return typeAndMessage;
     }
 }
