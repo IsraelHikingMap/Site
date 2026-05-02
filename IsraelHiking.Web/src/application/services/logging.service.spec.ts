@@ -72,10 +72,8 @@ describe("LoggingService", () => {
     });
 
     it("Should classify client side error", async () => {
-        const timeoutError = new HttpErrorResponse({
-            error: new ProgressEvent({} as any)
-        });
-        const typeAndMessage = service.getErrorTypeAndMessage(timeoutError);
+        const clientError = new HttpErrorResponse({ status: 0 });
+        const typeAndMessage = service.getErrorTypeAndMessage(clientError);
         expect(typeAndMessage.type).toBe("client");
     });
 

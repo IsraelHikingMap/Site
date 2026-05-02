@@ -141,11 +141,9 @@ export class LoggingService {
             typeAndMessage.type = "timeout";
         } else if ((ex as HttpErrorResponse).status === 0) {
             typeAndMessage.type = "client";
-        } else if ((ex as HttpErrorResponse).status >= 400) {
+        } else {
             typeAndMessage.statusCode = (ex as HttpErrorResponse).status;
-            typeAndMessage.type = (ex as HttpErrorResponse).status >= 500 ? "server" : "client";
         }
-
         return typeAndMessage;
     }
 }
