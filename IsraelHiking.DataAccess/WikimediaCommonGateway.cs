@@ -110,7 +110,7 @@ public class WikimediaCommonGateway : IWikimediaCommonGateway
     {
         var imagePage = new WikiPage(_site, pageName);
         await imagePage.RefreshAsync(PageQueryOptions.None);
-        return Uri.UnescapeDataString(imagePage.LastFileRevision?.Url);
+        return Uri.UnescapeDataString(imagePage.LastFileRevision?.Url)?.Split('?').FirstOrDefault();
     }
 
     public static string GetWikiName(string name)
