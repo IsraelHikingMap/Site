@@ -174,68 +174,68 @@ jobs:
         env:
           VERSION: ${{ needs.version.outputs.version_string }}
 
-  ios:
-    runs-on: macos-latest
-    needs: version
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #ios:
+  #  runs-on: macos-latest
+  #  needs: version
+  #  steps:
+  #    - name: Checkout code
+  #      uses: actions/checkout@v4
 
-      - name: Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: IsraelHiking.Web/.nvmrc
+  #    - name: Setup node
+  #      uses: actions/setup-node@v4
+  #      with:
+  #        node-version-file: IsraelHiking.Web/.nvmrc
 
-      - name: Setup xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: 16.4
+  #    - name: Setup xcode
+  #      uses: maxim-lobanov/setup-xcode@v1
+  #      with:
+  #        xcode-version: 16.4
 
-      - name: setup-cocoapods
-        uses: maxim-lobanov/setup-cocoapods@v1
-        with:
-          podfile-path: IsraelHiking.Web/ios/App/Podfile.lock
+  #    - name: setup-cocoapods
+  #      uses: maxim-lobanov/setup-cocoapods@v1
+  #      with:
+  #        podfile-path: IsraelHiking.Web/ios/App/Podfile.lock
 
-      - name: Set up Git to use PAT for private match repo
-        run: |
-          git config --global url."https://x-access-token:${{ secrets.FASTLANE_MATCH_PAT }}@github.com/".insteadOf "https://github.com/"
+  #    - name: Set up Git to use PAT for private match repo
+  #      run: |
+  #        git config --global url."https://x-access-token:${{ secrets.FASTLANE_MATCH_PAT }}@github.com/".insteadOf "https://github.com/"
 
-      - name: Build UI
-        run: |
-          cd IsraelHiking.Web
-          npm ci
-          npm run set-version ${{ needs.version.outputs.version_string }} ${{ needs.version.outputs.version_code }}
-          npm run build:mobile -- --no-progress
-          npx cap sync ios
-      - name: Build iOS with signing
-        if: ${{ github.secret_source == 'Actions' }}
-        run: |
-          cd IsraelHiking.Web/ios/App
-          fastlane build_ios
-        env:
-          MATCH_PASSWORD: ${{ secrets.PASSWORD }}
-      - name: Upload artifacts
-        if: ${{ github.secret_source == 'Actions' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: IHM_signed_${{ needs.version.outputs.version_string }}.ipa
-          path: IsraelHiking.Web/ios/App/App.ipa
-      - name: Upload to testers
-        if: ${{ github.event.inputs.publishios == 'true' && github.event.inputs.production == 'false' }}
-        run: |
-          cd IsraelHiking.Web/ios/App
-          fastlane upload_to_testers
-        env:
-          APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
-      - name: Upload and send for review
-        if: ${{ github.event.inputs.publishios == 'true' && github.event.inputs.production == 'true' }}
-        run: |
-          cd IsraelHiking.Web/ios/App
-          echo "ראו https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/he/release_notes.txt
-          echo "See https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/en-US/release_notes.txt
-          fastlane upload_to_production
-        env:
-          APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
+  #    - name: Build UI
+  #      run: |
+  #        cd IsraelHiking.Web
+  #        npm ci
+  #        npm run set-version ${{ needs.version.outputs.version_string }} ${{ needs.version.outputs.version_code }}
+  #        npm run build:mobile -- --no-progress
+  #        npx cap sync ios
+  #    - name: Build iOS with signing
+  #      if: ${{ github.secret_source == 'Actions' }}
+  #      run: |
+  #        cd IsraelHiking.Web/ios/App
+  #        fastlane build_ios
+  #      env:
+  #        MATCH_PASSWORD: ${{ secrets.PASSWORD }}
+  #    - name: Upload artifacts
+  #      if: ${{ github.secret_source == 'Actions' }}
+  #      uses: actions/upload-artifact@v4
+  #      with:
+  #        name: IHM_signed_${{ needs.version.outputs.version_string }}.ipa
+  #        path: IsraelHiking.Web/ios/App/App.ipa
+  #    - name: Upload to testers
+  #      if: ${{ github.event.inputs.publishios == 'true' && github.event.inputs.production == 'false' }}
+  #      run: |
+  #        cd IsraelHiking.Web/ios/App
+  #        fastlane upload_to_testers
+  #      env:
+  #        APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
+  #    - name: Upload and send for review
+  #      if: ${{ github.event.inputs.publishios == 'true' && github.event.inputs.production == 'true' }}
+  #      run: |
+  #        cd IsraelHiking.Web/ios/App
+  #        echo "ראו https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/he/release_notes.txt
+  #        echo "See https://github.com/${{ github.repository }}/milestone/${{ needs.version.outputs.milestone_id }}?closed=1" > fastlane/metadata/en-US/release_notes.txt
+  #        fastlane upload_to_production
+  #      env:
+  #        APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
 
   github-release:
     if: ${{ github.event.inputs.production == 'true' }}
