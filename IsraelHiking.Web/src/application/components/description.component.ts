@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, inject, input, SimpleChanges } from "@angular/core";
+import { Component, inject, input, OnChanges } from "@angular/core";
 import { NgClass } from "@angular/common";
 import { Store } from "@ngxs/store";
 
@@ -11,7 +11,7 @@ import type { ApplicationState } from "application/models";
     templateUrl: "description.component.html",
     imports: [NgClass]
 })
-export class DescriptionComponent {
+export class DescriptionComponent implements OnChanges {
 
     public readonly feature = input<GeoJSON.Feature>();
     public readonly isEditable = input<boolean>(false);
