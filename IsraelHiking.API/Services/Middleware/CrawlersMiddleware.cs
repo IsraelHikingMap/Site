@@ -81,10 +81,6 @@ public class CrawlersMiddleware
             title = string.IsNullOrWhiteSpace(url.Title) ? Branding.ROUTE_SHARE_DEFAULT_TITLE : url.Title;
             description = url.Description;
             thumbnailUrl = Branding.BASE_URL + "/api/urls/" + url.Id + "/thumbnail";
-            if (isWhatsApp)
-            {
-                thumbnailUrl += "?width=256&height=256";
-            }
         }
         else if (context.Request.Path.StartsWithSegments("/poi"))
         {
@@ -101,7 +97,7 @@ public class CrawlersMiddleware
                 .FirstOrDefault() ?? string.Empty;
             if (isWhatsApp)
             {
-                thumbnailUrl = Regex.Replace(thumbnailUrl, @"(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)", "$1thumb/$2$3/200px-$3");
+                thumbnailUrl = Regex.Replace(thumbnailUrl, @"(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)", "$1thumb/$2$3/250px-$3");
             }
             context.Request.Query.TryGetValue("language", out var languages);
             language = languages.FirstOrDefault() ?? Languages.HEBREW;
