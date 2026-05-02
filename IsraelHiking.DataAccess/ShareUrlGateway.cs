@@ -21,6 +21,11 @@ public class ShareUrlGateway(IHttpClientFactory httpClientFactory, IOptions<Conf
         try
         {
             var response = await client.GetAsync(_options.ShareUrlApiAddress + id);
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogError("Share url " + id + " can't be retrieve. Status code: " + response.StatusCode.ToString());
+                return null;
+            }
             var content = await response.Content.ReadAsStringAsync();
             var shareUrl = JsonSerializer.Deserialize<ShareUrl>(content);
             return shareUrl;
