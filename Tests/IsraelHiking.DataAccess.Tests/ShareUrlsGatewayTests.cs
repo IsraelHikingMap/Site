@@ -10,8 +10,8 @@ namespace IsraelHiking.DataAccess.Tests;
 [TestClass]
 public class ShareUrlsGatewayTests
 {
-    private IShareUrlGateway _gateway; 
-    
+    private IShareUrlGateway _gateway;
+
     [TestInitialize]
     public void TestInitialize()
     {
@@ -19,7 +19,7 @@ public class ShareUrlsGatewayTests
         options.Value.Returns(new ConfigurationData());
         var httpFactory = Substitute.For<IHttpClientFactory>();
         httpFactory.CreateClient().Returns(new HttpClient());
-        _gateway = new ShareUrlGateway(httpFactory, options);
+        _gateway = new ShareUrlGateway(httpFactory, options, new TraceLogger());
     }
 
     [TestMethod]
@@ -29,5 +29,4 @@ public class ShareUrlsGatewayTests
         var shareUrl = _gateway.GetUrlById("123").Result;
         Assert.IsNotNull(shareUrl);
     }
-    
 }
