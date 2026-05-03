@@ -408,7 +408,7 @@
     "Unable to get search results...": "لا يمكن الحصول على نتائج البحث...",
     "Unable to load from URL...": "لا يمكن التحميل من الرابط...",
     "Unable to login...": "تعذر تسجيل الدخول...",
-    "Unable to save an empty route, Please try and select a different one from the layers control on your left.": "تعذر حفظ مسار فارغ، يرجى اختيار مسار آخر من التحكم في الطبقات على يسارك.",
+    "Unable to save an empty route, Please add more points to the route and try again.": "لا يمكن حفظ مسار فارغ. يرجى إضافة المزيد من النقاط إلى المسار والمحاولة مرة أخرى.",
     "Unable to save data, please try again later...": "تعذر حفظ البيانات، يرجى المحاولة مرة أخرى لاحقًا...",
     "Unable to save to file...": "لا يمكن الحفظ في الملف...",
     "Unable to send route...": "لا يمكن إرسال المسار...",

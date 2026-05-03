@@ -509,7 +509,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1777194626419");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1777838898465");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -798,7 +798,7 @@ export class ResourcesService {
             .getString("File uploaded successfully, It will take some time to add it to OSM database.");
         this.unableToUploadFile = this.gettextCatalog.getString("Unable to upload the file...");
         this.unableToSaveAnEmptyRoute = this.gettextCatalog
-            .getString("Unable to save an empty route, Please try and select a different one from the layers control on your left.");
+            .getString("Unable to save an empty route, Please add more points to the route and try again.");
         this.dataUpdatedSuccessfully = this.gettextCatalog.getString("The data was updated successfully!");
         this.dataUpdatedSuccessfullyItWillTakeTimeToSeeIt = this.gettextCatalog
             .getString("The data was updated successfully! It will take time to see it on the map...");

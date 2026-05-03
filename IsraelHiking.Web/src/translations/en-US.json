@@ -408,7 +408,7 @@
     "Unable to get search results...": "Unable to get search results...",
     "Unable to load from URL...": "Unable to load from URL...",
     "Unable to login...": "Unable to login...",
-    "Unable to save an empty route, Please try and select a different one from the layers control on your left.": "Unable to export an empty route, Please try and select a different one from the route list on your left.",
+    "Unable to save an empty route, Please add more points to the route and try again.": "Unable to save an empty route, Please add more points to the route and try again.",
     "Unable to save data, please try again later...": "Unable to export data, please try again later...",
     "Unable to save to file...": "Unable to export...",
     "Unable to send route...": "Unable to send route...",

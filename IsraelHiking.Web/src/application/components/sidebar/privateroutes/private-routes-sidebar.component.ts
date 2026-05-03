@@ -229,6 +229,11 @@ export class PrivateRoutesSidebarComponent {
             return;
         }
         const dataContainer = this.dataContainerService.getContainerForRoutes(this.routes.filter(r => r.state !== "Hidden"));
+        if (dataContainer.routes.length === 0 || dataContainer.routes[0].segments.length == 0 ||
+            dataContainer.routes[0].segments[0].latlngs.length === 0) {
+            this.toastService.warning(this.resources.unableToSaveAnEmptyRoute);
+            return;
+        }
         this.dialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, {
             width: "480px",
             data: {

@@ -408,7 +408,7 @@
     "Unable to get search results...": "Не удалось получить результаты поиска...",
     "Unable to load from URL...": "Не удалось загрузить с URL...",
     "Unable to login...": "Не удалось войти...",
-    "Unable to save an empty route, Please try and select a different one from the layers control on your left.": "Не удалось сохранить пустой маршрут, пожалуйста, попробуйте выбрать другой из бокового меню.",
+    "Unable to save an empty route, Please add more points to the route and try again.": "Не удалось сохранить пустой маршрут. Пожалуйста, добавьте больше точек в маршрут и попробуйте снова.",
     "Unable to save data, please try again later...": "Не удалось сохранить данные, пожалуйста, попробуйте позже...",
     "Unable to save to file...": "Не удалось сохранить в файл...",
     "Unable to send route...": "Не удалось отправить маршрут...",
