@@ -1,6 +1,4 @@
-﻿export type CategoriesGroupType = "Points of Interest" | "Routes";
-
-export type IconColorLabel = {
+﻿export type IconColorLabel = {
     icon: string;
     color: string;
     label: string;
@@ -11,9 +9,4 @@ export type Category = {
     icon: string;
     color: string;
     selectableItems: IconColorLabel[];
-};
-
-export type CategoriesGroup = {
-    type: CategoriesGroupType;
-    categories: Category[];
 };

@@ -2,18 +2,18 @@
   <mat-expansion-panel-header>
     <div class="flex flex-row w-full">
       <div class="w-4/5">
-        <p class="w-full">{{resources.translate(categoriesGroup().type)}}</p>
+        <p class="w-full">{{resources.legendPoi}}</p>
       </div>
       <div class="w-1/5">
         <button class="w-full h-full!" mat-button (click)="toggleVisibility($event)" analyticsOn="click"
-          analyticsCategory="Layers" analyticsLabel="Toggle visibility of category layer {{categoriesGroup().type}}">
+          analyticsCategory="Layers" analyticsLabel="Toggle visibility of points of interest">
           <i class="fa fa-lg"
             [ngClass]="{'icon-eye': isCategoryGroupVisible(), 'icon-eye-slash': !isCategoryGroupVisible()}"></i>
         </button>
       </div>
     </div>
   </mat-expansion-panel-header>
-  @for (category of categoriesGroup().categories; track category) {
+  @for (category of categories; track category) {
   <div class="flex flex-row">
     <button mat-button class="row-button w-full justify-start!" (click)="toggleCategory(category)" analyticsOn="click"
       analyticsCategory="Layers" analyticsLabel="Toggle category visibility {{category.name}}">

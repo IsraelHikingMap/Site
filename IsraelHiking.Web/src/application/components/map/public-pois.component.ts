@@ -67,7 +67,7 @@ export class PublicPoisComponent implements OnInit {
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(this.destroyRef), skip(1)).subscribe(() => {
             this.poiGeoJsonData = this.poiService.getPoisGeoJson();
         });
-        this.store.select((state: ApplicationState) => state.layersState.visibleCategories).pipe(takeUntilDestroyed(this.destroyRef), skip(1)).subscribe(() => {
+        this.store.select((state: ApplicationState) => state.layersState.visiblePoisCategories).pipe(takeUntilDestroyed(this.destroyRef), skip(1)).subscribe(() => {
             this.poiGeoJsonData = this.poiService.getPoisGeoJson();
         });
         this.mapComponent.sourceData.subscribe((sourceData) => {

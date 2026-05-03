@@ -258,7 +258,7 @@ export class PoiService {
     }
 
     private getVisibleCategories(): string[] {
-        return this.store.selectSnapshot((s: ApplicationState) => s.layersState.visibleCategories).map(c => c.name);
+        return [...this.store.selectSnapshot((s: ApplicationState) => s.layersState.visiblePoisCategories)];
     }
 
     public getPoisGeoJson(): GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> {

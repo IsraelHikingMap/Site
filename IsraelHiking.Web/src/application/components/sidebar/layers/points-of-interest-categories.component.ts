@@ -1,4 +1,4 @@
-import { Component, inject, input } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { MatExpansionPanel, MatExpansionPanelHeader } from "@angular/material/expansion";
 import { MatButton } from "@angular/material/button";
 import { NgClass } from "@angular/common";
@@ -9,53 +9,55 @@ import { ResourcesService } from "../../../services/resources.service";
 import {
     CollapseGroupAction,
     ExpandGroupAction,
-    ToggleCategoriesGroupVisibilityAction,
+    TogglePoisCategoriesVisibilityAction,
     ToggleCategoryVisibilityAction
 } from "../../../reducers/layers.reducer";
-import type { ApplicationState, CategoriesGroup, Category } from "../../../models";
+import type { ApplicationState, Category } from "../../../models";
+import { POINTS_OF_INTEREST, POINTS_OF_INTEREST_CATEGORIES } from "application/reducers/initial-state";
 
 @Component({
-    selector: "categories-group",
-    templateUrl: "./categories-group.component.html",
+    selector: "points-of-interest-categories",
+    templateUrl: "./points-of-interest-categories.component.html",
     imports: [MatExpansionPanel, MatExpansionPanelHeader, MatButton, AnalyticsDirective, NgClass]
 })
-export class CategoriesGroupComponent {
+export class PointsOfInterestCategoriesComponent {
 
-    public categoriesGroup = input<CategoriesGroup>();
+    public categories = POINTS_OF_INTEREST_CATEGORIES
+    public title = POINTS_OF_INTEREST;
 
     public readonly resources = inject(ResourcesService);
 
     private readonly store = inject(Store);
 
     public expand() {
-        this.store.dispatch(new ExpandGroupAction(this.categoriesGroup().type));
+        this.store.dispatch(new ExpandGroupAction(POINTS_OF_INTEREST));
     }
 
     public collapse() {
-        this.store.dispatch(new CollapseGroupAction(this.categoriesGroup().type));
+        this.store.dispatch(new CollapseGroupAction(POINTS_OF_INTEREST));
     }
 
     public getExpandState(): boolean {
         return this.store.selectSnapshot((s: ApplicationState) => s.layersState)
-            .expanded.find(l => l === this.categoriesGroup().type) != null;
+            .expanded.find(l => l === POINTS_OF_INTEREST) != null;
     }
 
     public toggleCategory(category: Category) {
-        this.store.dispatch(new ToggleCategoryVisibilityAction(category.name, this.categoriesGroup().type));
+        this.store.dispatch(new ToggleCategoryVisibilityAction(category.name));
     }
 
     public toggleVisibility(event: Event) {
         event.stopPropagation();
-        this.store.dispatch(new ToggleCategoriesGroupVisibilityAction(this.categoriesGroup().type));
+        this.store.dispatch(new TogglePoisCategoriesVisibilityAction());
     }
 
     public isCategoryVisible(category: Category): boolean {
         const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
-        return layersState.visibleCategories.find(c => c.name === category.name && this.categoriesGroup().type == c.groupType) != null;
+        return layersState.visiblePoisCategories.includes(category.name);
     }
 
     public isCategoryGroupVisible(): boolean {
         const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
-        return layersState.visibleCategories.some(c => this.categoriesGroup().type === c.groupType);
+        return layersState.visiblePoisCategories.length > 0;
     }
 }

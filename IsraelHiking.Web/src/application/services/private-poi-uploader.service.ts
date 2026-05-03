@@ -9,7 +9,7 @@ import { PoiService } from "./poi.service";
 import { ToastService } from "./toast.service";
 import { RouteStrings } from "./hash.service";
 import { SetUploadMarkerDataAction } from "../reducers/poi.reducer";
-import { CATEGORIES_GROUPS } from "../reducers/initial-state";
+import { POINTS_OF_INTEREST_CATEGORIES } from "../reducers/initial-state";
 import type { LinkData, LatLngAltTime, MarkerData } from "../models";
 
 @Injectable()
@@ -67,7 +67,7 @@ export class PrivatePoiUploaderService {
         }
         let message = `${this.resources.wouldYouLikeToUpdate} ${results.title || this.resources.translate(results.type)}?`;
         if (!results.title) {
-            const categories = CATEGORIES_GROUPS[0].categories;
+            const categories = POINTS_OF_INTEREST_CATEGORIES;
             const iconWithLabel = flatten(categories.map(c => c.selectableItems))
                 .find(i => i.icon === `icon-${results.type}`);
             if (iconWithLabel) {

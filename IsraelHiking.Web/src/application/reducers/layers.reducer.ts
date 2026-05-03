@@ -3,8 +3,8 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 import { orderBy } from "lodash-es";
 
-import { CATEGORIES_GROUPS, initialState } from "./initial-state";
-import type { LayersState, EditableLayer, CategoriesGroupType } from "../models";
+import { initialState, POINTS_OF_INTEREST_CATEGORIES } from "./initial-state";
+import type { LayersState, EditableLayer } from "../models";
 
 export class AddBaseLayerAction {
     public static type = this.prototype.constructor.name;
@@ -60,14 +60,14 @@ export class CollapseGroupAction {
     constructor(public name: string) { }
 }
 
-export class ToggleCategoriesGroupVisibilityAction {
+export class TogglePoisCategoriesVisibilityAction {
     public static type = this.prototype.constructor.name;
-    constructor(public groupType: CategoriesGroupType) { }
+    constructor() { }
 }
 
 export class ToggleCategoryVisibilityAction {
     public static type = this.prototype.constructor.name;
-    constructor(public name: string, public groupType: CategoriesGroupType) { }
+    constructor(public name: string) { }
 }
 
 @State({
@@ -189,29 +189,26 @@ export class LayersReducer {
     }
 
     @Action(ToggleCategoryVisibilityAction)
-    public setCategoryVisibility(ctx: StateContext<LayersState>, action: ToggleCategoryVisibilityAction) {
+    public toggleCategoryVisibility(ctx: StateContext<LayersState>, action: ToggleCategoryVisibilityAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
-            const visiblityItem = lastState.visibleCategories.find(c => c.name === action.name && c.groupType === action.groupType);
+            const visiblityItem = lastState.visiblePoisCategories.find(c => c === action.name);
             if (!visiblityItem) {
-                lastState.visibleCategories.push({ name: action.name, groupType: action.groupType });
+                lastState.visiblePoisCategories.push(action.name);
                 return lastState;
             }
-            lastState.visibleCategories.splice(lastState.visibleCategories.indexOf(visiblityItem), 1);
+            lastState.visiblePoisCategories.splice(lastState.visiblePoisCategories.indexOf(visiblityItem), 1);
             return lastState;
         }));
     }
 
-    @Action(ToggleCategoriesGroupVisibilityAction)
-    public setCategoriesGroupVisibility(ctx: StateContext<LayersState>, action: ToggleCategoriesGroupVisibilityAction) {
+    @Action(TogglePoisCategoriesVisibilityAction)
+    public togglePoisCategoriesVisibility(ctx: StateContext<LayersState>, action: TogglePoisCategoriesVisibilityAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
-            if (lastState.visibleCategories.some(g => g.groupType === action.groupType)) {
-                lastState.visibleCategories = lastState.visibleCategories.filter(c => c.groupType !== action.groupType);
+            if (lastState.visiblePoisCategories.length > 0) {
+                lastState.visiblePoisCategories = [];
                 return lastState;
             }
-            const names = CATEGORIES_GROUPS.find(g => g.type === action.groupType).categories.map(c => c.name);
-            for (const name of names) {
-                lastState.visibleCategories.push({ name, groupType: action.groupType });
-            }
+            lastState.visiblePoisCategories.push(...POINTS_OF_INTEREST_CATEGORIES.map(c => c.name));
             return lastState;
         }));
     }
