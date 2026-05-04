@@ -1,2 +1,4 @@
-- Improved offline usage for routes and traces
+- Add Spanish language support
+- Show username in configuration screen
+- Add route description with translation in public routes
 - Plus various bug fixes and performance improvements
