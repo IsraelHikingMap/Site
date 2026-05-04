@@ -41,6 +41,7 @@ export class ConfigurationDialogComponent {
     public units$: Observable<"metric" | "imperial">;
     public dateFormat$: Observable<string>;
     public manageSubscriptions: string;
+    public username: string;
 
     public readonly resources = inject(ResourcesService);
 
@@ -60,6 +61,7 @@ export class ConfigurationDialogComponent {
         this.manageSubscriptions = this.runningContextService.isIos
             ? "https://apps.apple.com/account/subscriptions"
             : "https://play.google.com/store/account/subscriptions";
+        this.username = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo.displayName);
     }
 
     public isApp() {
