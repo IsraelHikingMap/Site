@@ -91,8 +91,6 @@
         analyticsCategory="Layers" analyticsLabel="Add overlay"><i class="fa fa-lg icon-plus"></i>
         {{resources.addOverlay}} </button>
     </mat-expansion-panel>
-    @for (categoriesGroup of categoriesGroups; track categoriesGroup.type) {
-    <categories-group [categoriesGroup]="categoriesGroup"></categories-group>
-    }
+    <points-of-interest-categories></points-of-interest-categories>
   </mat-accordion>
 </div>

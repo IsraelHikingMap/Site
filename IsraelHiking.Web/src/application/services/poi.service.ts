@@ -243,7 +243,7 @@ export class PoiService {
         return poi;
     }
 
-    private filterFeatures(features: GeoJSON.Feature<GeoJSON.Point, PoiProperties>[], categories: string[]): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
+    private filterFeatures(features: GeoJSON.Feature<GeoJSON.Point, PoiProperties>[], categories: Immutable<string[]>): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
         const visibleFeatures = [];
         const language = this.resources.getCurrentLanguageCodeSimplified();
         for (const feature of features) {
@@ -257,12 +257,8 @@ export class PoiService {
         return visibleFeatures;
     }
 
-    private getVisibleCategories(): string[] {
-        return this.store.selectSnapshot((s: ApplicationState) => s.layersState.visibleCategories).map(c => c.name);
-    }
-
     public getPoisGeoJson(): GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> {
-        const categoires = this.getVisibleCategories();
+        const categoires = this.store.selectSnapshot((s: ApplicationState) => s.layersState.visiblePoisCategories)
         if (categoires.length === 0) {
             return {
                 type: "FeatureCollection",

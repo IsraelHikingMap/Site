@@ -9,7 +9,7 @@ import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
-import { CategoriesGroupComponent } from "./categories-group.component";
+import { PointsOfInterestCategoriesComponent } from "./points-of-interest-categories.component";
 import { LayerPropertiesDialogComponent } from "../../dialogs/layer-properties-dialog.component";
 import { LegendDialogComponent } from "../../dialogs/legend-dialog.component";
 import { AnalyticsDirective } from "../../../directives/analytics.directive";
@@ -18,7 +18,7 @@ import { LayersService } from "../../../services/layers.service";
 import { SidebarService } from "../../../services/sidebar.service";
 
 import { ExpandGroupAction, CollapseGroupAction } from "../../../reducers/layers.reducer";
-import { DEFAULT_BASE_LAYERS, CATEGORIES_GROUPS, DEFAULT_OVERLAYS } from "../../../reducers/initial-state";
+import { DEFAULT_BASE_LAYERS, DEFAULT_OVERLAYS } from "../../../reducers/initial-state";
 import type { ApplicationState, EditableLayer } from "../../../models";
 
 @Component({
@@ -26,7 +26,7 @@ import type { ApplicationState, EditableLayer } from "../../../models";
     templateUrl: "./layers-sidebar.component.html",
     styleUrls: ["./layers-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, AnalyticsDirective, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatTooltip, CategoriesGroupComponent, AsyncPipe]
+    imports: [Dir, MatButton, AnalyticsDirective, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatTooltip, PointsOfInterestCategoriesComponent, AsyncPipe]
 })
 export class LayersSidebarComponent {
 
@@ -34,7 +34,6 @@ export class LayersSidebarComponent {
     public readonly defaultOverlays = DEFAULT_OVERLAYS;
     public baseLayers$: Observable<Immutable<EditableLayer[]>>;
     public overlays$: Observable<Immutable<EditableLayer[]>>;
-    public categoriesGroups = CATEGORIES_GROUPS;
 
     public readonly resources = inject(ResourcesService);
 
