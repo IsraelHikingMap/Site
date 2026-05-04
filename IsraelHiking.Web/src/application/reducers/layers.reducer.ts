@@ -202,7 +202,7 @@ export class LayersReducer {
     }
 
     @Action(TogglePoisCategoriesVisibilityAction)
-    public togglePoisCategoriesVisibility(ctx: StateContext<LayersState>, action: TogglePoisCategoriesVisibilityAction) {
+    public togglePoisCategoriesVisibility(ctx: StateContext<LayersState>, _action: TogglePoisCategoriesVisibilityAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             if (lastState.visiblePoisCategories.length > 0) {
                 lastState.visiblePoisCategories = [];

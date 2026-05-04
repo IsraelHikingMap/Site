@@ -114,7 +114,7 @@ describe("Poi Service", () => {
 
             store.reset({
                 layersState: {
-                    visibleCategories: []
+                    visiblePoisCategories: []
                 },
                 offlineState: {
                     uploadPoiQueue: []
@@ -131,7 +131,7 @@ describe("Poi Service", () => {
 
             store.reset({
                 layersState: {
-                    visibleCategories: [{ groupType: "Water", name: "Water" }]
+                    visiblePoisCategories: ["Water"]
                 },
                 configuration: {},
                 offlineState: {
@@ -174,7 +174,7 @@ describe("Poi Service", () => {
 
             store.reset({
                 layersState: {
-                    visibleCategories: [{ groupType: "Water", name: "Water" }]
+                    visiblePoisCategories: ["Water"]
                 },
                 configuration: {
                     language: "he"
