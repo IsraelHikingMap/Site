@@ -105,13 +105,16 @@ public static class Languages
     public const string ENGLISH = "en";
     public const string RUSSIAN = "ru";
     public const string ARABIC = "ar";
+    public const string SPANISH = "es";
+
     public const string DEFAULT = "default";
     public static readonly string[] Array =
     [
         HEBREW,
         ENGLISH,
         RUSSIAN,
-        ARABIC
+        ARABIC,
+        SPANISH
     ];
     public static readonly string[] ArrayWithDefault = new[] { DEFAULT }.Concat(Array).ToArray();
 }
