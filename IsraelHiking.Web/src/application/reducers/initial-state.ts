@@ -197,7 +197,7 @@ export const initialState =
             baseLayers: [],
             overlays: [],
             selectedBaseLayerKey: HIKING_MAP,
-            expanded: ["Base Layers", "Overlays"],
+            expanded: ["Base Layers", "Overlays", POINTS_OF_INTEREST],
             visiblePoisCategories: POINTS_OF_INTEREST_CATEGORIES.map(c => c.name),
             visibleOverlays: []
         },
