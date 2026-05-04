@@ -23,7 +23,6 @@ import { POINTS_OF_INTEREST, POINTS_OF_INTEREST_CATEGORIES } from "application/r
 export class PointsOfInterestCategoriesComponent {
 
     public categories = POINTS_OF_INTEREST_CATEGORIES
-    public title = POINTS_OF_INTEREST;
 
     public readonly resources = inject(ResourcesService);
 
