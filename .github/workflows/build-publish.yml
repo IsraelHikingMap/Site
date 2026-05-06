@@ -118,14 +118,14 @@ jobs:
           KEYSTORE_PATH: ${{ github.workspace }}/IsraelHiking.Web/android/app/Mapeak.jks
       - name: Upload aab artifacts
         if: ${{ github.secret_source == 'Actions' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: Mapeak_signed_${{ needs.version.outputs.version_string }}.aab
           path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
 
       - name: Upload apk artifacts
         if: ${{ github.secret_source == 'Actions' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: Mapeak_signed_${{ needs.version.outputs.version_string }}.apk
           path: IsraelHiking.Web/android/app/build/outputs/apk/release/app-release.apk
@@ -223,7 +223,7 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.PASSWORD }}
       - name: Upload ipa artifacts
         if: ${{ github.secret_source == 'Actions' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: Mapeak_signed_${{ needs.version.outputs.version_string }}.ipa
           path: IsraelHiking.Web/ios/App/App.ipa
