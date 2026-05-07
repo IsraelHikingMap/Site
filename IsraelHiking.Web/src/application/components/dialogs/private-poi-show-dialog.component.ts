@@ -18,7 +18,7 @@ import { SelectedRouteService } from "../../services/selected-route.service";
 import { ToastService } from "../../services/toast.service";
 import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
-import type { ApplicationState, MarkerDataWithoutId, LinkData, MarkerData } from "../../models";
+import type { ApplicationState, LinkData, MarkerData } from "../../models";
 
 interface IPrivatePoiShowDialogData {
     marker: Immutable<MarkerData>;
