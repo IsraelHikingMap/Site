@@ -14,7 +14,6 @@ import { PrivatePoiOverlayComponent } from "../overlays/private-poi-overlay.comp
 import { RoutesPathComponent } from "./routes-path.component";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { ResourcesService } from "../../services/resources.service";
-import { FileService } from "../../services/file.service";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "../intercations/route-edit-route.interaction";
 import { Urls } from "../../urls";
@@ -50,7 +49,6 @@ export class RoutesComponent implements AfterViewInit {
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly routeEditPoiInteraction = inject(RouteEditPoiInteraction);
     private readonly routeEditRouteInteraction = inject(RouteEditRouteInteraction);
-    private readonly fileService = inject(FileService);
     private readonly mapComponent = inject(MapComponent);
     private readonly store = inject(Store);
 
