@@ -16,7 +16,7 @@ import { Store } from "@ngxs/store";
 
 import { PublicPointOfInterestEditComponent } from "./public-poi-edit.component";
 import { ImageScrollerComponent } from "./image-scroller.component";
-import { DescriptionComponent } from "application/components/description.component";
+import { DescriptionComponent } from "../../description.component";
 import { AnalyticsDirective } from "../../../directives/analytics.directive";
 import { DistancePipe } from "../../../pipes/distance.pipe";
 import { ResourcesService } from "../../../services/resources.service";
@@ -55,12 +55,12 @@ export type SourceImageUrlPair = {
     imports: [Dir, MatButton, AnalyticsDirective, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, MatCard, PublicPointOfInterestEditComponent, FormsModule, MatCardHeader, MatCardTitle, NgClass, MatCardContent, ImageScrollerComponent, DistancePipe, DescriptionComponent]
 })
 export class PublicPoiSidebarComponent implements OnDestroy {
-    public isLoading: boolean = true;
-    public isMinimized: boolean = false;
+    public isLoading = true;
+    public isMinimized = false;
     public sourceImageUrls: SourceImageUrlPair[];
     public shareLinks = {} as PoiSocialLinks;
     public length: number = null;
-    public title: string = "";
+    public title = "";
     public imagesUrls: string[] = [];
     public urls: string[] = [];
     public osmEditableInfo: EditablePublicPointData;

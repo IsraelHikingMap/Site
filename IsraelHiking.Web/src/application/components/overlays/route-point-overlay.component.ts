@@ -15,8 +15,8 @@ import type { LatLngAltTime } from "../../models";
     imports: [Dir, MatButton, MatTooltip, CoordinatesComponent]
 })
 export class RoutePointOverlayComponent implements OnChanges {
-    public canMerge: boolean = false;
-    public isMiddle: boolean = false;
+    public canMerge = false;
+    public isMiddle = false;
 
     public latlng = input<LatLngAltTime>();
 
@@ -24,7 +24,7 @@ export class RoutePointOverlayComponent implements OnChanges {
 
     public closed = output();
 
-    public hideCoordinates: boolean = true;
+    public hideCoordinates = true;
 
     public readonly resources = inject(ResourcesService);
 

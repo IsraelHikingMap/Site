@@ -22,7 +22,7 @@ export class ImageScrollerComponent implements OnChanges {
         animationData: sceneryPlaceholder,
     };
 
-    private currentIndex: number = 0;
+    private currentIndex = 0;
 
     public images = input<string[]>();
     public canEdit = input<boolean>();

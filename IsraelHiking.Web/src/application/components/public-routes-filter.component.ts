@@ -24,7 +24,7 @@ export class PublicRoutesFilterComponent {
     private readonly destroyRef = inject(DestroyRef);
     private readonly imageAttributionService = inject(ImageAttributionService);
 
-    public unitString: string = "km";
+    public unitString = "km";
     public filterLengthStart: number;
     public filterLengthEnd: number;
     public filterUserName: string;

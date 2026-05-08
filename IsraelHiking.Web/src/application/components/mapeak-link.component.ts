@@ -14,7 +14,7 @@ import { Urls } from "../urls";
 })
 export class MapeakLinkComponent {
 
-    public target: string = "";
+    public target = "";
 
     public readonly resources = inject(ResourcesService);
 

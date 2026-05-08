@@ -29,7 +29,7 @@ export class LocationService {
     private lastSpeed: number = null;
     private lastSpeedTime: number = null;
     private locationWithBearing: LocationWithBearing | null = null;
-    private isPanned: boolean = false;
+    private isPanned = false;
 
     public async initialize() {
         await this.mapService.initializationPromise;

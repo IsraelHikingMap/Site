@@ -41,7 +41,7 @@ export class PrivatePoiShowDialogComponent {
     public url: LinkData;
     public title: string;
     public description: string;
-    public showCoordinates: boolean = false;
+    public showCoordinates = false;
 
     public readonly resources = inject(ResourcesService);
 

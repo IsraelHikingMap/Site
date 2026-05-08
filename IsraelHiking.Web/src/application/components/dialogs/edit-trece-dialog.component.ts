@@ -19,10 +19,10 @@ import type { Trace, TraceVisibility } from "../../models";
     imports: [FormsModule, MatFormField, MatLabel, MatInput, MatOption, MatSelect, MatButton, MatDialogActions, MatDialogTitle, MatDialogContent, MatDialogClose, Dir]
 })
 export class EditTraceDialogComponent {
-    public description: string = "";
-    public tagsString: string = "";
+    public description = "";
+    public tagsString = "";
     public visibility: TraceVisibility = "trackable";
-    public title: string = "";
+    public title = "";
 
     public resources = inject(ResourcesService);
     private readonly tracesService = inject(TracesService);

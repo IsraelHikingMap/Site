@@ -53,7 +53,7 @@ export class TracesComponent implements OnInit {
     public sortDirection: "asc" | "desc" = "desc";
     public mapStyle: StyleSpecification;
     public filteredTraces: Immutable<Trace[]>;
-    public loadingTraces: boolean = false;
+    public loadingTraces = false;
     public selectedTrace: Immutable<Trace> | undefined;
     public tracesGeoJson: GeoJSON.FeatureCollection<GeoJSON.Point> | undefined = {
         type: "FeatureCollection",

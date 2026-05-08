@@ -29,7 +29,7 @@ export class ShareItemComponent implements OnInit {
     public addToRoutes = output<void>();
     public moveToRoute = output<void>();
 
-    public copiedToClipboard: boolean = false;
+    public copiedToClipboard = false;
     public shareAddress: string;
     public whatsappShareAddress: string;
     public facebookShareAddress: string;

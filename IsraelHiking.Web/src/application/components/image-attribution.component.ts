@@ -2,11 +2,11 @@ import { Component, inject, input, SimpleChanges, OnInit, OnChanges } from "@ang
 import { MatButton } from "@angular/material/button";
 import { Store } from "@ngxs/store";
 
-import { AnalyticsDirective } from "application/directives/analytics.directive";
+import { AnalyticsDirective } from "../directives/analytics.directive";
 import { ImageAttribution, ImageAttributionService } from "../services/image-attribution.service";
 import { ResourcesService } from "../services/resources.service";
-import { SetPublicRoutesFilterAction } from "application/reducers/in-memory.reducer";
-import type { ApplicationState, PublicRoutesFilter } from "application/models";
+import { SetPublicRoutesFilterAction } from "../reducers/in-memory.reducer";
+import type { ApplicationState, PublicRoutesFilter } from "../models";
 
 @Component({
     selector: "image-attribution",

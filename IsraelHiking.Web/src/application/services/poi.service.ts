@@ -56,7 +56,7 @@ export type SelectableCategory = Category & {
 @Injectable()
 export class PoiService {
     private poisCache: GeoJSON.Feature[] = [];
-    private queueIsProcessing: boolean = false;
+    private queueIsProcessing = false;
 
     private readonly resources = inject(ResourcesService);
     private readonly httpClient = inject(HttpClient);
@@ -354,7 +354,7 @@ export class PoiService {
             if (feature == null) {
                 const message = `Failed to load POI ${id} from offline or in-memory tiles after failing to get it from server, error: ${(ex as Error).message}`;
                 this.loggingService.warning(`[POIs] ${message}`);
-                throw new Error(message);
+                throw new Error(message, { cause: ex });
             }
             return this.convertFeatureToPoi(feature, id);
         }
