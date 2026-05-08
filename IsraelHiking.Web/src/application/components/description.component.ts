@@ -4,7 +4,7 @@ import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../services/resources.service";
 import { TranslationService } from "../services/translation.service";
-import type { ApplicationState } from "application/models";
+import type { ApplicationState } from "../models";
 
 @Component({
     selector: "description",
@@ -22,8 +22,8 @@ export class DescriptionComponent implements OnChanges {
     private readonly store = inject(Store);
 
     public description: string;
-    public showToggleTranslation: boolean = false;
-    public showingTranslated: boolean = true;
+    public showToggleTranslation = false;
+    public showingTranslated = true;
 
     public async ngOnChanges(): Promise<void> {
         if (!this.feature()) {

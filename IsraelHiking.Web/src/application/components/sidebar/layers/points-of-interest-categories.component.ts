@@ -12,8 +12,8 @@ import {
     TogglePoisCategoriesVisibilityAction,
     ToggleCategoryVisibilityAction
 } from "../../../reducers/layers.reducer";
+import { POINTS_OF_INTEREST, POINTS_OF_INTEREST_CATEGORIES } from "../../../reducers/initial-state";
 import type { ApplicationState, Category } from "../../../models";
-import { POINTS_OF_INTEREST, POINTS_OF_INTEREST_CATEGORIES } from "application/reducers/initial-state";
 
 @Component({
     selector: "points-of-interest-categories",

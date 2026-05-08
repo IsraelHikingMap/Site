@@ -49,7 +49,7 @@ export class PublicPoisComponent implements OnInit {
     public selectedCluster: GeoJSON.Feature<GeoJSON.Point> = null;
     public clusterFeatures: GeoJSON.Feature<GeoJSON.Point>[];
     public hoverFeature: GeoJSON.Feature<GeoJSON.Point> = null;
-    public isShowCoordinatesPopup: boolean = false;
+    public isShowCoordinatesPopup = false;
 
     public readonly resources = inject(ResourcesService);
 

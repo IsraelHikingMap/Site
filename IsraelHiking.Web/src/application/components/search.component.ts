@@ -54,7 +54,7 @@ export class SearchComponent {
     public searchFrom = new FormControl<string | SearchResultsPointOfInterest>("");
 
     private requestsQueue: SearchRequestQueueItem[] = [];
-    private selectFirstSearchResults: boolean = false;
+    private selectFirstSearchResults = false;
 
     public searchFromInput = viewChild<ElementRef>("searchFromInput");
     public matAutocompleteTriggers = viewChildren(MatAutocompleteTrigger);

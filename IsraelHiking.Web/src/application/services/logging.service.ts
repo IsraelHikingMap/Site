@@ -91,7 +91,7 @@ export class LoggingService {
             message
         } as LogLine;
         if (!environment.production && this.logToConsole) {
-            // eslint-disable-next-line
+             
             console.debug(this.logLineToString(logLine));
         }
         this.writeToStorage(logLine);

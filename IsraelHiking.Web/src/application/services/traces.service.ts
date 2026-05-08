@@ -93,7 +93,7 @@ export class TracesService {
             const serverTracesMap = serverTraces.reduce((acc, trace) => {
                 acc[trace.id] = trace;
                 return acc;
-            }, {} as { [key: string]: Trace });
+            }, {} as Record<string, Trace>);
             this.store.dispatch(new BulkReplaceTracesAction(allTraces));
             for (const existingTrace of existingTraces.filter(t => t.visibility !== "local" && serverTracesMap[t.id] == null)) {
                 this.databaseService.deleteTraceById(existingTrace.id); // no need to wait.

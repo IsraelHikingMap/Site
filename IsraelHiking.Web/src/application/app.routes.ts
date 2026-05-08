@@ -1,5 +1,5 @@
 import { Route } from "@angular/router";
-import { environment } from "environments/environment";
+import { environment } from "../environments/environment";
 import { LandingComponent } from "./components/screens/landing.component";
 import { MainMapComponent } from "./components/map/main-map.component";
 import { PrivacyPolicyComponent } from "./components/screens/privacy-policy.component";

@@ -133,7 +133,7 @@ export class OfflineManagementComponent {
     }
 
 
-    private tileCoordinatesToPolygon(tileX: number, tileY: number, label: string = "", progress: number = 1): GeoJSON.Feature {
+    private tileCoordinatesToPolygon(tileX: number, tileY: number, label = "", progress = 1): GeoJSON.Feature {
         return {
             type: "Feature",
             geometry: {

@@ -38,7 +38,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     private jsonLayersIds: string[] = [];
     private mapLoadedPromise: Promise<void>;
     private currentLanguageCode: LanguageCode;
-    private recreateQueue: Subject<() => Promise<void>> = new Subject();
+    private recreateQueue = new Subject<() => Promise<void>>();
 
     public readonly resources = inject(ResourcesService);
 
@@ -165,7 +165,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
         this.updateSourcesAndLayers(layerData, styleJson.sources, styleJson.layers);
     }
 
-    private updateSourcesAndLayers(layerData: LayerData, sources: { [_: string]: SourceSpecification }, layers: LayerSpecification[]) {
+    private updateSourcesAndLayers(layerData: LayerData, sources: Record<string, SourceSpecification>, layers: LayerSpecification[]) {
         if (!this.visible()) {
             return;
         }

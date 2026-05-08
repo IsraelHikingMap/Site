@@ -62,7 +62,7 @@ export class MainMapComponent {
 
     private addedControls: IControl[] = [];
     private map: Map;
-    private isTerrainOn: boolean = false;
+    private isTerrainOn = false;
 
     constructor() {
         this.location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);

@@ -35,7 +35,7 @@ export class GpsLocationOverlayComponent {
     public closed = output();
 
     public distance$: Observable<boolean>;
-    public hideCoordinates: boolean = true;
+    public hideCoordinates = true;
 
     public readonly resources = inject(ResourcesService);
 

@@ -50,14 +50,14 @@ export type ShareEditDialogComponentData = {
 export class ShareEditDialogComponent {
     public shareUrl: ShareUrl;
 
-    public isLoading: boolean = false;
-    public canUpdate: boolean = false;
-    public updateCurrentShare: boolean = false;
-    public hasHiddenRoutes: boolean = false;
+    public isLoading = false;
+    public canUpdate = false;
+    public updateCurrentShare = false;
+    public hasHiddenRoutes = false;
     public style: StyleSpecification;
-    public copiedToClipboard: boolean = false;
+    public copiedToClipboard = false;
     public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = { type: "FeatureCollection", features: [] };
-    public canPublishPublic: boolean = false;
+    public canPublishPublic = false;
 
     public readonly resources = inject(ResourcesService);
 

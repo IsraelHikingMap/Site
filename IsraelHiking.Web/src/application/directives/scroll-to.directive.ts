@@ -5,13 +5,13 @@ import { Directive, HostListener, Input } from "@angular/core";
 })
 export class ScrollToDirective {
   @Input("scrollToOnClick") targetId: string | undefined;
-  @Input("scrollToOnClickOffset") offset: number = 0; // New input for the offset
+  @Input("scrollToOnClickOffset") offset = 0;
 
-  @HostListener("click") 
+  @HostListener("click")
   onClick(): void {
     if (!this.targetId) {
-        console.warn("targetId parameter is missing");
-        return;
+      console.warn("targetId parameter is missing");
+      return;
     }
     ScrollToDirective.scrollTo(this.targetId, this.offset)
   }
@@ -25,16 +25,16 @@ export class ScrollToDirective {
   public static scrollTo(targetId: string, offset = 0) {
     const targetElement = document.getElementById(targetId);
     if (!targetElement) {
-        console.warn(`Scroll target element with ID "${targetId}" not found.`);
-        return;
+      console.warn(`Scroll target element with ID "${targetId}" not found.`);
+      return;
     }
     const container = ScrollToDirective.getFirstScrollableParent(targetElement);
     const containerRect = container.getBoundingClientRect();
     const targetRect = targetElement.getBoundingClientRect();
-      
+
     const elementPositionTop = targetRect.top - containerRect.top + container.scrollTop;
     const offsetPosition = elementPositionTop - offset;
-      
+
     container.scrollTo({ top: offsetPosition, behavior: "smooth" });
   }
 
@@ -52,7 +52,7 @@ export class ScrollToDirective {
 
     let style: CSSStyleDeclaration = window.getComputedStyle(nativeElement);
 
-    const overflowRegex: RegExp = /(auto|scroll|overlay)/;
+    const overflowRegex = /(auto|scroll|overlay)/;
 
     if (style.position === "fixed") {
       return null;

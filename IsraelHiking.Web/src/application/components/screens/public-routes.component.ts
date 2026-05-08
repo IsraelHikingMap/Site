@@ -8,7 +8,7 @@ import { Store } from "@ngxs/store";
 import { MatButton } from "@angular/material/button";
 import { FormsModule } from "@angular/forms";
 import { MatButtonToggle, MatButtonToggleGroup } from "@angular/material/button-toggle";
-import { AnalyticsDirective } from "application/directives/analytics.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { Share } from "@capacitor/share";
@@ -45,7 +45,7 @@ import type { ApplicationState } from "../../models";
 })
 export class PublicRoutesComponent {
     public mapStyle: StyleSpecification;
-    public showMap: boolean = true;
+    public showMap = true;
     public readonly routesSrouceId = "routes-of-interest";
 
 

@@ -31,10 +31,10 @@ export class PublicPointOfInterestEditComponent implements OnInit {
 
     public info = input<EditablePublicPointData>();
 
-    public isLoading: boolean = false;
+    public isLoading = false;
     public categories: SelectableCategory[] = [];
     public selectedCategory: SelectableCategory = null;
-    public updateLocation: boolean = false;
+    public updateLocation = false;
 
     public readonly resources = inject(ResourcesService);
 

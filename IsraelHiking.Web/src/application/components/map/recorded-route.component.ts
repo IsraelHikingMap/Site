@@ -35,7 +35,7 @@ export class RecordedRouteComponent {
     public recordedRoute$: Observable<Immutable<RecordedRoute>>;
 
     private currentPosition$: Observable<Immutable<GeolocationPosition>>;
-    private lastSplit: number = 0;
+    private lastSplit = 0;
 
     public readonly resources = inject(ResourcesService);
 

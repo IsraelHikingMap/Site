@@ -18,7 +18,7 @@ import { ToastService } from "../../services/toast.service";
 })
 export class TermsOfServiceDialogComponent {
     public wikimediaTermsOfServiceUrl: string;
-    public iAgree: boolean = false;
+    public iAgree = false;
 
     public readonly resources = inject(ResourcesService);
 
