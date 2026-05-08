@@ -280,6 +280,7 @@ export class TracesComponent implements OnInit {
     }
 
     public async moveToTrace(traceId: string) {
+        this.showMap = true;
         const fullTrace = await this.tracesService.getTraceById(traceId);
         this.selectedTrace = fullTrace;
         const features: GeoJSON.Feature[] = [];
@@ -290,9 +291,8 @@ export class TracesComponent implements OnInit {
             features.push(...this.selectedRouteService.createFeaturesForRoute(route));
         }
         this.selectedTraceGeoJson = { type: "FeatureCollection", features };
-        this.showMap = true;
         const bounds = SpatialService.getBoundsForFeatureCollection(this.selectedTraceGeoJson);
-        this.mapService.fitBounds(bounds, 100, { top: 100, left: 50, bottom: window.innerHeight / 3, right: 50 });
+        this.mapService.fitBounds(bounds, 100, { top: 100, left: 50, bottom: window.innerHeight / 2, right: 50 });
     }
 
     public onStartPointClick(traceId: string, event?: Event) {

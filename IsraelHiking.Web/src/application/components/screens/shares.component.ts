@@ -158,6 +158,7 @@ export class SharesComponent implements OnInit {
     }
 
     public async moveToShare(shareUrl: Immutable<ShareUrl>) {
+        this.showMap = true;
         const share = await this.shareUrlsService.getShareUrl(shareUrl.id);
         this.selectedShareUrl = share;
         const features: GeoJSON.Feature[] = [];
@@ -165,7 +166,6 @@ export class SharesComponent implements OnInit {
             features.push(...this.selectedRouteService.createFeaturesForRoute(route));
         }
         this.routesGeoJson = { type: "FeatureCollection", features };
-        this.showMap = true;
         const bounds = SpatialService.getBoundsForFeatureCollection(this.routesGeoJson);
         this.mapService.fitBounds(bounds, 100, { top: 150, left: 50, bottom: window.innerHeight / 2, right: 50 });
     }
