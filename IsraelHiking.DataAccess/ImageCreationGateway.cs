@@ -29,7 +29,7 @@ public class ImageCreationGateway(IHttpClientFactory httpClientFactory, IOptions
         var allPointsString = string.Join("|", dataContainer.Routes.SelectMany(r => r.Segments.SelectMany(s => s.Latlngs)).Select(l => $"{l.Lng},{l.Lat}"));
         var body = new TileServerImageCreatorBody
         {
-            Path = "stroke:blue|width:5|" + allPointsString
+            Path = "stroke:blue|width:5|linejoin:round|linecap:round|" + allPointsString
         };
         var response = await client.PostAsync(_serverAddress + queryParameters, JsonContent.Create(body));
         return await response.Content.ReadAsByteArrayAsync();
