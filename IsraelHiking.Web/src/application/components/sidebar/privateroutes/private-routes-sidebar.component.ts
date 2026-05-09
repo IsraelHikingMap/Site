@@ -10,7 +10,7 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatError, MatInput } from "@angular/material/input";
 import { MatSlider, MatSliderThumb } from "@angular/material/slider";
 import { FormsModule } from "@angular/forms";
-import { MatRadioButton } from "@angular/material/radio";
+import { MatRadioButton, MatRadioGroup } from "@angular/material/radio";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { Store } from "@ngxs/store";
 import { Immutable } from "immer";
@@ -36,17 +36,13 @@ import { ChangeRouteStateAction, ToggleAllRoutesAction, DeleteAllRoutesAction, A
 import { SetOpacityAction, SetSelectedRouteAction, SetWeightAction } from "../../../reducers/route-editing.reducer";
 import type { ApplicationState, LatLngAltTime, RouteData, ShareUrl } from "../../../models";
 
-
 @Component({
     selector: "private-routes-sidebar",
     templateUrl: "./private-routes-sidebar.component.html",
     styleUrls: ["./private-routes-sidebar.component.scss"],
-    imports: [Dir, MatButton, AnalyticsDirective, MatTooltip, NgClass, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgStyle, MatFormFieldModule, MatInput, FormsModule, MatSlider, MatError, NameInUseValidatorDirective, MatSliderThumb, MatMiniFabButton, MatRadioButton, DistancePipe, MatMenu, MatMenuItem, MatMenuTrigger, CdkDrag, CdkDropList, CdkDragHandle]
+    imports: [Dir, MatButton, AnalyticsDirective, MatTooltip, NgClass, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgStyle, MatFormFieldModule, MatInput, FormsModule, MatSlider, MatError, NameInUseValidatorDirective, MatSliderThumb, MatMiniFabButton, MatRadioButton, MatRadioGroup, DistancePipe, MatMenu, MatMenuItem, MatMenuTrigger, CdkDrag, CdkDropList, CdkDragHandle]
 })
 export class PrivateRoutesSidebarComponent {
-    public routes: Immutable<RouteData[]>;
-    public colors: string[];
-
     public readonly resources = inject(ResourcesService);
 
     private routeStatistics: Record<string, RouteStatistics> = {};
@@ -64,8 +60,13 @@ export class PrivateRoutesSidebarComponent {
     private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly dataContainerService = inject(DataContainerService);
 
+    public routes: Immutable<RouteData[]>;
+    public colors = this.routesFactory.colors;
+    public selectedRouteId = this.store.selectSignal((state: ApplicationState) => state.routeEditingState.selectedRouteId);
+    public hiddenRoutesCount = this.store.selectSignal((state: ApplicationState) => state.routes.present.filter(route => route.state === "Hidden").length);
+    public isAllRoutesHidden = this.store.selectSignal((state: ApplicationState) => state.routes.present.every(route => route.state === "Hidden"));
+
     constructor() {
-        this.colors = this.routesFactory.colors;
         this.store.select((state: ApplicationState) => state.routes.present).subscribe(routes => {
             this.routes = routes;
             this.routeStatistics = {};
@@ -123,25 +124,8 @@ export class PrivateRoutesSidebarComponent {
         }
     }
 
-    public isAllRoutesHidden(): boolean {
-        return this.store.selectSnapshot((s: ApplicationState) => s.routes).present.find(r => r.state !== "Hidden") == null;
-    }
-
     public isRouteVisible(routeData: Immutable<RouteData>): boolean {
         return routeData.state !== "Hidden";
-    }
-
-    public isRouteSelected(routeData: Immutable<RouteData>): boolean {
-        const selectedRoute = this.selectedRouteService.getSelectedRoute();
-        return selectedRoute != null && selectedRoute.id === routeData.id;
-    }
-
-    public isRouteInEditMode(routeData: Immutable<RouteData>): boolean {
-        return routeData.state === "Route" || routeData.state === "Poi";
-    }
-
-    public isShowActive(routeData: Immutable<RouteData>): boolean {
-        return this.isRouteSelected(routeData) && this.store.selectSnapshot((s: ApplicationState) => s.routes).present.length > 1;
     }
 
     public async openFile(event: Event) {
