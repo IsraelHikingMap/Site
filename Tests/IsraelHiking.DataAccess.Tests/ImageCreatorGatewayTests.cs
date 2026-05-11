@@ -29,12 +29,20 @@ public class ImageCreatorGatewayTests
                         new RouteSegmentData {
                             Latlngs = [
                                 new LatLngTime {
-                                    Lat = 30,
-                                    Lng = 35
+                                    Lat = 31.287068,
+                                    Lng = 34.837875
                                 },
                                 new LatLngTime {
-                                    Lat = 30.001,
-                                    Lng = 35
+                                    Lat = 31.286924,
+                                    Lng = 34.837885
+                                },
+                                new LatLngTime {
+                                    Lat = 31.28697,
+                                    Lng = 34.837932
+                                },
+                                new LatLngTime {
+                                    Lat = 31.286764,
+                                    Lng = 34.837992
                                 }
                             ]
                         }

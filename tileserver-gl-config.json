@@ -1,0 +1,7 @@
+{
+    "styles": {
+        "mapeak-hike": {
+            "style": "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json"
+        }
+    }
+}

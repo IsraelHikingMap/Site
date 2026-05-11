@@ -67,6 +67,18 @@ services:
     volumes:
       - ./nginx:/etc/nginx/conf.d:ro
     restart: unless-stopped
+  tileserver-gl:
+    image: "maptiler/tileserver-gl"
+    build:
+      context: https://github.com/maptiler/tileserver-gl.git#v5.6.0
+    command:
+      - --verbose
+      - --config
+      - tileserver-gl-config.json
+    ports:
+      - 11223:8080
+    volumes:
+      - ./tileserver-gl-config.json:/data/tileserver-gl-config.json:ro
 volumes:
   esdata:
     driver: local

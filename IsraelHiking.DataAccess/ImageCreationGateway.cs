@@ -31,14 +31,11 @@ public class ImageCreationGateway(IHttpClientFactory httpClientFactory, IOptions
     public async Task<byte[]> Create(DataContainerPoco dataContainer, int width, int height)
     {
         var client = _httpClientFactory.CreateClient();
-        var queryParameters = $"styles/mapeak-hike/static/auto/{width}x{height}.jpg";
+        var queryParameters = $"styles/mapeak-hike/static/auto/{width}x{height}.jpg?linejoin=round&linecap=round";
         var allPointsString = string.Join("|", dataContainer.Routes.SelectMany(r => r.Segments.SelectMany(s => s.Latlngs)).Select(l => $"{l.Lng},{l.Lat}"));
         var body = new TileServerImageCreatorBody
         {
-            Path = "stroke:blue|width:5|" + allPointsString,
-            Border = "white",
-            LineCap = "round",
-            LineJoin = "round"
+            Path = "stroke:blue|width:5|border:white|borderwidth:2|" + allPointsString,
         };
         var response = await client.PostAsync(_serverAddress + queryParameters, JsonContent.Create(body));
         return await response.Content.ReadAsByteArrayAsync();
