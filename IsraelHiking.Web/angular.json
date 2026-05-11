@@ -33,6 +33,11 @@
                 "output": "./"
               },
               {
+                "glob": "**/maplibre-gl-worker.mjs",
+                "input": "./node_modules/maplibre-gl/dist",
+                "output": "./"
+              },
+              {
                 "glob": "**/add-protocol-worker.js",
                 "input": "./node_modules/maplibre-contour/dist",
                 "output": "./"

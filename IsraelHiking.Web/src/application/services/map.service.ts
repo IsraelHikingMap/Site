@@ -28,8 +28,6 @@ export class MapService {
         if (typeof window === "undefined") {
             return;
         }
-        const maplibregl = (await import("maplibre-gl")).default;
-        maplibregl.setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
         this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
             this.cancelableTimeoutService.clearTimeoutByName("panned");
             if (pannedTimestamp) {
@@ -38,21 +36,20 @@ export class MapService {
                 }, MapService.NOT_FOLLOWING_TIMEOUT, "panned");
             }
         });
+        const maplibregl = await import("maplibre-gl");
+        maplibregl.setWorkerUrl("./maplibre-gl-worker.mjs");
+        maplibregl.setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
         const globalDispatcher = maplibregl.getGlobalDispatcher();
-        const promise = new Promise<void>(resolve => {
-            globalDispatcher.registerMessageHandler("contour-worker" as any, async () => {
-                await globalDispatcher.broadcast("contour-worker" as any, {
-                    demUrlPattern: "slice://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.webp",
-                    encoding: "terrarium",
-                    maxzoom: 11
-                });
-                resolve();
+        globalDispatcher.registerMessageHandler("contour-worker" as any, async () => {
+            await globalDispatcher.broadcast("contour-worker" as any, {
+                demUrlPattern: "slice://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.webp",
+                encoding: "terrarium",
+                maxzoom: 11
             });
         });
         const addProtocolWorkerUrl = this.getFullUrl("add-protocol-worker.js");
         maplibregl.importScriptInWorkers(addProtocolWorkerUrl);
         await Promise.all([
-            promise,
             document.fonts.load("12px Noto Sans Cond Bold"),
             document.fonts.load("12px Noto Sans Bold"),
             document.fonts.load("12px Noto Sans Regular")
