@@ -93,9 +93,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         });
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(), skip(1)).subscribe(() => {
             const sourceIdAndLanguage = this.getRouteUrlInfo();
-            const queryParams: Record<string, string | boolean> = {
-                language: this.resources.getCurrentLanguageCodeSimplified()
-            };
+            const queryParams: Record<string, boolean> = {};
             if (sourceIdAndLanguage.editMode) {
                 queryParams.edit = true;
             }
@@ -225,7 +223,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             return;
         }
         this.router.navigate([RouteStrings.ROUTE_POI, this.fullFeature.properties.poiSource, this.fullFeature.properties.identifier],
-            { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
+            { queryParams: { edit: true } });
     }
 
     public isEditable() {

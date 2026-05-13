@@ -35,7 +35,8 @@ import type {
     NorthEast,
     EditablePublicPointData,
     UpdateablePublicPoiData,
-    ShareUrl
+    ShareUrl,
+    PublicRoutesFilter
 } from "../models";
 
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite" | "Bench"
@@ -272,17 +273,36 @@ export class PoiService {
         };
     }
 
-    public getPublicRoutes(categoires: string[]): GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> {
-        if (categoires.length === 0) {
+    public getPublicRoutes(filters: Immutable<PublicRoutesFilter>): GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> {
+        if (filters.categories.length === 0) {
             return {
                 type: "FeatureCollection",
                 features: []
             };
         }
-        const tileFeautes = this.getPoisFromTiles();
+        const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration).units;
+        const factor = units === "metric" ? 1000.0 : 1609.344;
+        let features = this.getPoisFromTiles();
+        features = this.filterFeatures(features, filters.categories);
+        features = features.filter(feature => {
+            if (feature.properties.poiDifficulty && !filters.difficulty.includes(feature.properties.poiDifficulty)) {
+                return false;
+            }
+            if (feature.properties.poiLength / factor < filters.lengthRange[0]) {
+                return false;
+            }
+            if (feature.properties.poiLength / factor > filters.lengthRange[1] && filters.lengthRange[1] < 50) {
+                return false;
+            }
+            if (filters.userId && feature.properties.poiUserId !== filters.userId) {
+                return false;
+            }
+            return true;
+        });
+
         return {
             type: "FeatureCollection",
-            features: this.filterFeatures(tileFeautes, categoires)
+            features
         };
     }
 

@@ -135,6 +135,15 @@
                     {{resources.share}}
                 </button>
             </div>
+            @if (isEditable(selectedRoutePoint)) {
+            <div class="flex flex-row">
+                <button class="mt-2" (click)="navigateToEditPoi(selectedRoutePoint)" analyticsOn="click"
+                    analyticsCategory="Public routes" analyticsLabel="Edit OSM route">
+                    <i class="fa icon-pencil"></i>
+                    {{resources.editProperties}}
+                </button>
+            </div>
+            }
             <mat-menu #shareMenu="matMenu">
                 <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).waze" [target]="'_blank'" analyticsOn="click"
                     analyticsCategory="Public routes" analyticsLabel="Navigate with waze">
@@ -171,8 +180,12 @@
                 }
             </mat-menu>
             <div class="flex flex-row mx-2">
-                <div class="relative w-full h-[200px]">
+                <div class="relative w-full h-[200px] overflow-hidden">
+                    @if (selectedRoutePoint.properties.image) {
                     <img class="w-full object-contain img-center" [src]="selectedRoutePoint.properties.image" alt="">
+                    } @else {
+                    <ng-lottie class="max-w-full img-center" [options]="lottieScenery"></ng-lottie>
+                    }
                 </div>
             </div>
             <div class="flex flex-row" class="text-center text-sm">
@@ -217,6 +230,13 @@
                         <i class="fa icon-plus"></i>
                         {{resources.addToRoutes}}
                     </button>
+                    @if (isEditable(route)) {
+                    <button mat-menu-item (click)="navigateToEditPoi(route)" analyticsOn="click"
+                        analyticsCategory="Public routes" analyticsLabel="Edit OSM route from list">
+                        <i class="fa icon-pencil"></i>
+                        {{resources.editProperties}}
+                    </button>
+                    }
                 </mat-menu>
                 @switch (route.properties.poiDifficulty) {
                 @case ("Easy") {
@@ -252,8 +272,12 @@
                 <span class="mx-2">{{resources.length}}: {{route.properties.poiLength | distance}}</span>
             </div>
             <div class="flex flex-row mx-10 max-md:mx-2">
-                <div class="relative w-full h-[200px]">
+                <div class="relative w-full h-[200px] overflow-hidden">
+                    @if (route.properties.image) {
                     <img class="w-full object-contain img-center" [src]="route.properties.image" alt="">
+                    } @else {
+                    <ng-lottie class="max-w-full img-center" [options]="lottieScenery"></ng-lottie>
+                    }
                 </div>
             </div>
             @defer (on viewport) {
