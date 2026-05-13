@@ -93,13 +93,11 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         });
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(), skip(1)).subscribe(() => {
             const sourceIdAndLanguage = this.getRouteUrlInfo();
-            const queryParams: Record<string, string | boolean> = {
-                language: this.resources.getCurrentLanguageCodeSimplified()
-            };
+            const queryParams: Record<string, boolean> = {};
             if (sourceIdAndLanguage.editMode) {
                 queryParams.edit = true;
             }
-            this.router.navigate([RouteStrings.ROUTE_POI, sourceIdAndLanguage.source, sourceIdAndLanguage.id]);
+            this.router.navigate([RouteStrings.ROUTE_POI, sourceIdAndLanguage.source, sourceIdAndLanguage.id], { queryParams });
         });
         this.initOrUpdate();
     }
