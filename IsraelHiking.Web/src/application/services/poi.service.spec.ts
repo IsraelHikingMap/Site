@@ -275,7 +275,7 @@ describe("Poi Service", () => {
                     }
                 }
             ] as any;
-            expect(poiService.getPublicRoutes({ categories: ["Biking"], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "" }).features.length).toBe(0);
+            expect(poiService.getPublicRoutes({ categories: ["Bicycle"], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "" }).features.length).toBe(0);
         }
     )));
 
