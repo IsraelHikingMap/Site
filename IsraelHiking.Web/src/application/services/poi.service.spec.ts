@@ -30,7 +30,6 @@ import type { ApplicationState, LatLngAltTime } from "../models";
 import { NakebService } from "./nakeb.service";
 
 describe("Poi Service", () => {
-
     beforeEach(() => {
         const hashService = {
             getFullUrlFromPoiId: (s: PoiRouteUrlInfo) => s.source + "/" + s.id,
@@ -219,9 +218,187 @@ describe("Poi Service", () => {
         }
     )));
 
-    it("Should not get public routes for empty categories", (inject([PoiService],
-        async (poiService: PoiService) => {
-            expect(poiService.getPublicRoutes([]).features.length).toBe(0);
+    it("Should not get public routes for empty categories", (inject([PoiService, Store, MapService],
+        async (poiService: PoiService, store: Store, mapServiceMock: MapService) => {
+            store.reset({
+                configuration: {
+                    language: "he"
+                }
+            });
+            mapServiceMock.getFeaturesFromTiles = () => [
+                {
+                    id: "11",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[0, 0], [1, 1]]
+                    },
+                    properties: {
+                        poiId: "42",
+                        poiCategory: "Hiking",
+                        poiIconColor: "black",
+                        poiIcon: "icon-hike",
+                        poiLength: 10000,
+                        poiDifficulty: "Hard",
+                        name: "line",
+                        "name:he": "line"
+                    }
+                }
+            ] as any;
+
+            expect(poiService.getPublicRoutes({ categories: [], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "" }).features.length).toBe(0);
+        }
+    )));
+
+    it("Should not get public routes with unselected category", (inject([PoiService, Store, MapService],
+        async (poiService: PoiService, store: Store, mapServiceMock: MapService) => {
+            store.reset({
+                configuration: {
+                    language: "he"
+                }
+            });
+            mapServiceMock.getFeaturesFromTiles = () => [
+                {
+                    id: "11",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[0, 0], [1, 1]]
+                    },
+                    properties: {
+                        poiId: "42",
+                        poiCategory: "Hiking",
+                        poiIconColor: "black",
+                        poiIcon: "icon-hike",
+                        poiLength: 10000,
+                        poiDifficulty: "Hard",
+                        name: "line",
+                        "name:he": "line"
+                    }
+                }
+            ] as any;
+            expect(poiService.getPublicRoutes({ categories: ["Biking"], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "" }).features.length).toBe(0);
+        }
+    )));
+
+    it("Should not get public routes with unselected difficulty", (inject([PoiService, Store, MapService],
+        async (poiService: PoiService, store: Store, mapServiceMock: MapService) => {
+            store.reset({
+                configuration: {
+                    language: "he"
+                }
+            });
+            mapServiceMock.getFeaturesFromTiles = () => [
+                {
+                    id: "11",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[0, 0], [1, 1]]
+                    },
+                    properties: {
+                        poiId: "42",
+                        poiCategory: "Hiking",
+                        poiIconColor: "black",
+                        poiIcon: "icon-hike",
+                        poiLength: 10000,
+                        poiDifficulty: "Hard",
+                        name: "line",
+                        "name:he": "line"
+                    }
+                }
+            ] as any;
+            expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [0, 50], difficulty: ["Easy"], userId: "" }).features.length).toBe(0);
+        }
+    )));
+
+    it("Should not get public routes with too short length", (inject([PoiService, Store, MapService],
+        async (poiService: PoiService, store: Store, mapServiceMock: MapService) => {
+            store.reset({
+                configuration: {
+                    language: "he",
+                    unit: "metric"
+                }
+            });
+            mapServiceMock.getFeaturesFromTiles = () => [
+                {
+                    id: "11",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[0, 0], [1, 1]]
+                    },
+                    properties: {
+                        poiId: "42",
+                        poiCategory: "Hiking",
+                        poiIconColor: "black",
+                        poiIcon: "icon-hike",
+                        poiLength: 10000,
+                        poiDifficulty: "Hard",
+                        name: "line",
+                        "name:he": "line"
+                    }
+                }
+            ] as any;
+            expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [15, 50], difficulty: ["Hard"], userId: "" }).features.length).toBe(0);
+        }
+    )));
+
+    it("Should not get public routes with too long length", (inject([PoiService, Store, MapService],
+        async (poiService: PoiService, store: Store, mapServiceMock: MapService) => {
+            store.reset({
+                configuration: {
+                    language: "he",
+                    unit: "metric"
+                }
+            });
+            mapServiceMock.getFeaturesFromTiles = () => [
+                {
+                    id: "11",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[0, 0], [1, 1]]
+                    },
+                    properties: {
+                        poiId: "42",
+                        poiCategory: "Hiking",
+                        poiIconColor: "black",
+                        poiIcon: "icon-hike",
+                        poiLength: 10000,
+                        poiDifficulty: "Hard",
+                        name: "line",
+                        "name:he": "line"
+                    }
+                }
+            ] as any;
+            expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [0, 5], difficulty: ["Hard"], userId: "" }).features.length).toBe(0);
+        }
+    )));
+
+    it("Should not get public routes for incorrect user id", (inject([PoiService, Store, MapService],
+        async (poiService: PoiService, store: Store, mapServiceMock: MapService) => {
+            store.reset({
+                configuration: {
+                    language: "he"
+                }
+            });
+            mapServiceMock.getFeaturesFromTiles = () => [
+                {
+                    id: "11",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[0, 0], [1, 1]]
+                    },
+                    properties: {
+                        poiId: "42",
+                        poiCategory: "Hiking",
+                        poiIconColor: "black",
+                        poiIcon: "icon-hike",
+                        poiLength: 10000,
+                        poiDifficulty: "Hard",
+                        osmUserId: "123",
+                        name: "line",
+                        "name:he": "line"
+                    }
+                }
+            ] as any;
+            expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "42" }).features.length).toBe(0);
         }
     )));
 
@@ -244,40 +421,14 @@ describe("Poi Service", () => {
                         poiCategory: "Hiking",
                         poiIconColor: "black",
                         poiIcon: "icon-hike",
+                        poiLength: 10000,
+                        poiDifficulty: "Hard",
                         name: "line",
                         "name:he": "line"
                     }
                 }
             ] as any;
-            expect(poiService.getPublicRoutes(["Hiking"]).features.length).toBe(1);
-        }
-    )));
-
-    it("Should not get public routes for tiles for incorrect category", (inject([PoiService, Store, MapService],
-        async (poiService: PoiService, store: Store, mapServiceMock: MapService) => {
-            store.reset({
-                configuration: {
-                    language: "he"
-                }
-            });
-            mapServiceMock.getFeaturesFromTiles = () => [
-                {
-                    id: "11",
-                    geometry: {
-                        type: "LineString",
-                        coordinates: [[0, 0], [1, 1]]
-                    },
-                    properties: {
-                        poiId: "42",
-                        poiCategory: "Hiking",
-                        poiIconColor: "black",
-                        poiIcon: "icon-hike",
-                        name: "line",
-                        "name:he": "line"
-                    }
-                }
-            ] as any;
-            expect(poiService.getPublicRoutes(["Biking"]).features.length).toBe(0);
+            expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "" }).features.length).toBe(1);
         }
     )));
 

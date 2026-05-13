@@ -109,9 +109,7 @@ export class PublicPoisComponent implements OnInit {
             return;
         }
         const sourceAndId = this.getSourceAndId(this.poiService.getFeatureId(feature));
-        this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
-            { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
-
+        this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id]);
     }
 
     public async toggleClusterPopup(event: MouseEvent, feature: GeoJSON.Feature<GeoJSON.Point>, sourceComponent: GeoJSONSourceComponent) {

@@ -99,7 +99,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             if (sourceIdAndLanguage.editMode) {
                 queryParams.edit = true;
             }
-            this.router.navigate([RouteStrings.ROUTE_POI, sourceIdAndLanguage.source, sourceIdAndLanguage.id], { queryParams });
+            this.router.navigate([RouteStrings.ROUTE_POI, sourceIdAndLanguage.source, sourceIdAndLanguage.id]);
         });
         this.initOrUpdate();
     }
@@ -225,7 +225,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             return;
         }
         this.router.navigate([RouteStrings.ROUTE_POI, this.fullFeature.properties.poiSource, this.fullFeature.properties.identifier],
-            { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
+            { queryParams: { edit: true } });
     }
 
     public isEditable() {

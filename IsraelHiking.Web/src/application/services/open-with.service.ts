@@ -63,10 +63,8 @@ export class OpenWithService {
             const sourceAndId = pathname.replace(RouteStrings.ROUTE_POI + "/", "");
             const source = sourceAndId.split("/")[0];
             const id = sourceAndId.split("/")[1];
-            const language = new URLSearchParams(url.search).get("language");
             this.ngZone.run(() => {
-                this.router.navigate([RouteStrings.ROUTE_POI, source, id],
-                    { queryParams: { language } });
+                this.router.navigate([RouteStrings.ROUTE_POI, source, id]);
             });
         } else if (pathname.startsWith(RouteStrings.ROUTE_URL)) {
             const urlData = pathname.replace(RouteStrings.ROUTE_URL + "/", "");
@@ -140,8 +138,7 @@ export class OpenWithService {
     private moveToCoordinates(coords: string[]) {
         const latLng = SpatialService.toLatLng([+coords[2], +coords[1]]);
         this.ngZone.run(() => {
-            this.router.navigate([RouteStrings.ROUTE_POI, RouteStrings.COORDINATES, getIdFromLatLng(latLng)],
-                { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+            this.router.navigate([RouteStrings.ROUTE_POI, RouteStrings.COORDINATES, getIdFromLatLng(latLng)]);
         });
     }
 }

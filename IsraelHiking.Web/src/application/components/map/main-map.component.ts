@@ -163,7 +163,7 @@ export class MainMapComponent {
         this.isTerrainOn = true;
         const source: RasterDEMSourceSpecification = {
             type: "raster-dem",
-            tiles: ["slice://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.webp"],
+            tiles: ["https://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.webp"],
             minzoom: 7,
             maxzoom: 11,
             tileSize: 512,

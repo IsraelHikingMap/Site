@@ -13,6 +13,7 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { Share } from "@capacitor/share";
 import { orderBy } from "lodash-es";
+import { AnimationOptions, LottieComponent } from "ngx-lottie";
 import type { StyleSpecification, Map, MapSourceDataEvent } from "maplibre-gl";
 
 import { ImageAttributionComponent } from "../image-attribution.component";
@@ -36,21 +37,24 @@ import { PoiProperties } from "../../services/osm-tags.service";
 import { RouteStrings } from "../../services/hash.service";
 import { Urls } from "../../urls";
 import type { ApplicationState } from "../../models";
+import sceneryPlaceholder from "../../../content/lottie/placeholder-scenery.json";
 
 @Component({
     selector: "public-routes",
     templateUrl: "./public-routes.component.html",
     styleUrls: ["./public-routes.component.scss"],
-    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, ControlComponent, PublicRoutesFilterComponent, DescriptionComponent]
+    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, ControlComponent, PublicRoutesFilterComponent, DescriptionComponent, LottieComponent]
 })
 export class PublicRoutesComponent {
+    public readonly lottieScenery: AnimationOptions = {
+        animationData: sceneryPlaceholder,
+    };
     public mapStyle: StyleSpecification;
     public showMap = true;
     public readonly routesSrouceId = "routes-of-interest";
 
-
     public poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
-    public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point> = {
+    public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> = {
         type: "FeatureCollection",
         features: []
     };
@@ -59,7 +63,7 @@ export class PublicRoutesComponent {
         type: "FeatureCollection",
         features: []
     };
-    public selectedRoutePoint: GeoJSON.Feature<GeoJSON.Point> = null;
+    public selectedRoutePoint: GeoJSON.Feature<GeoJSON.Point, PoiProperties> = null;
 
     public readonly resources = inject(ResourcesService);
 
@@ -104,33 +108,9 @@ export class PublicRoutesComponent {
     }
 
     public runFilter() {
-        let features = this.poiService.getPublicRoutes(["Hiking", "Bicycle", "4x4"]).features;
         const filters = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter);
-        features = features.filter(f => f.properties.image != null);
-        features = features.filter(feature => {
-            const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration).units;
-            const factor = units === "metric" ? 1000.0 : 1609.344;
-            if (!filters.categories.includes(feature.properties.poiCategory)) {
-                return false;
-            }
-            if (feature.properties.poiDifficulty && !filters.difficulty.includes(feature.properties.poiDifficulty)) {
-                return false;
-            }
-            if (feature.properties.poiLength / factor < filters.lengthRange[0]) {
-                return false;
-            }
-            if (feature.properties.poiLength / factor > filters.lengthRange[1] && filters.lengthRange[1] < 50) {
-                return false;
-            }
-            if (filters.userId && feature.properties.poiUserId !== filters.userId) {
-                return false;
-            }
-            return true;
-        });
+        let features = this.poiService.getPublicRoutes(filters).features;
         const sortBy = [(f: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) => f.properties.poiLength];
-
-
-
         features = orderBy(features, sortBy, ["desc"]);
         this.poiGeoJsonData = {
             type: "FeatureCollection",
@@ -138,7 +118,7 @@ export class PublicRoutesComponent {
         }
     }
 
-    public async onStartPointClick(feature: GeoJSON.Feature<GeoJSON.Point>, event: MouseEvent) {
+    public async onStartPointClick(feature: GeoJSON.Feature<GeoJSON.Point, PoiProperties>, event: MouseEvent) {
         event.stopPropagation();
         if (this.selectedRoutePoint?.properties.poiId === feature.properties.poiId) {
             this.selectedRoutePoint = null;
@@ -153,7 +133,7 @@ export class PublicRoutesComponent {
         this.moveToFeature(feature);
     }
 
-    public async moveToFeature(feature: GeoJSON.Feature<GeoJSON.Point>) {
+    public async moveToFeature(feature: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
         this.showMap = true;
         this.selectedRoutePoint = feature;
         this.hoverFeature = null;
@@ -186,7 +166,7 @@ export class PublicRoutesComponent {
     }
 
 
-    public getIconFromType(feature: GeoJSON.Feature<GeoJSON.Point>) {
+    public getIconFromType(feature: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
         switch (feature.properties.poiCategory) {
             case "Hiking":
                 return "icon-hike";
@@ -225,5 +205,14 @@ export class PublicRoutesComponent {
         Share.share({
             url: poiLink
         });
+    }
+
+    public isEditable(route: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
+        return route.properties.poiSource === "OSM";
+    }
+
+    public navigateToEditPoi(route: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
+        this.router.navigate([RouteStrings.ROUTE_POI, route.properties.poiSource, route.properties.identifier],
+            { queryParams: { edit: true } });
     }
 }
