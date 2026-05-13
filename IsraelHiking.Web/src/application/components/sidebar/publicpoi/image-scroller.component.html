@@ -15,7 +15,7 @@
 </div>
 } @else {
 <div class="flex flex-row">
-  <div class="relative w-full h-[200px] overflow-hidden" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
+  <div class="relative w-full h-[200px]" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
     <img [src]="getCurrentImage()" class="w-full object-contain cursor-zoom-in img-center" (click)="showImage()" />
   </div>
 </div>
