@@ -207,6 +207,12 @@ describe("Selected Route Service", () => {
         recordedRouteState: {
           isAddingPoi: false,
         },
+        routeEditingState: {
+          selectedRouteId: null
+        },
+        routes: {
+          present: []
+        }
       });
       const spy = vi.fn();
       store.dispatch = spy;
@@ -227,6 +233,12 @@ describe("Selected Route Service", () => {
         recordedRouteState: {
           isAddingPoi: true,
         },
+        routeEditingState: {
+          selectedRouteId: null
+        },
+        routes: {
+          present: []
+        }
       });
       const spy = vi.fn();
       store.dispatch = spy;

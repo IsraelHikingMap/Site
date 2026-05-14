@@ -163,7 +163,7 @@
             ],
             "tsConfig": "./tsconfig.spec.json",
             "browsers": [
-              "chromium"
+              "chromiumHeadless"
             ]
           }
         },
