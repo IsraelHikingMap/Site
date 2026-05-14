@@ -1,5 +1,5 @@
 PODS:
-  - Capacitor (8.3.2):
+  - Capacitor (8.3.4):
     - CapacitorCordova
   - CapacitorApp (8.1.0):
     - Capacitor
@@ -10,7 +10,7 @@ PODS:
     - Capacitor
   - CapacitorCommunityScreenBrightness (8.0.0):
     - Capacitor
-  - CapacitorCordova (8.3.2)
+  - CapacitorCordova (8.3.4)
   - CapacitorDevice (8.0.2):
     - Capacitor
   - CapacitorEmailComposer (8.0.0):
@@ -112,12 +112,12 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@revenuecat/purchases-capacitor-ui"
 
 SPEC CHECKSUMS:
-  Capacitor: 8e88dda7b053edc42f139e51e56dabeade57de9f
+  Capacitor: d13cad5fa09155679672808cc4ca9fbc2997e1b4
   CapacitorApp: 449ffe26375e96f8aaaee625ac6e01e5c57c8650
   CapacitorCamera: 8f6acf83664118321111e76acef86390211ccb08
   CapacitorCommunityKeepAwake: d41922812644562e94a79acaf7f41e6d9413af8c
   CapacitorCommunityScreenBrightness: e4075e1181f7e88259edb8b1e3b9a209e1144d45
-  CapacitorCordova: d1bc4f39d5ebd7512be472dec3a05d5c792953f6
+  CapacitorCordova: c07921bdcfec6f691bae22274446b4d606ebf6a4
   CapacitorDevice: 14cba6f88d1c3074cbf825fea977c8c526453ff8
   CapacitorEmailComposer: cf36b8e16e43ce51eeb03994645a864ded9b40b4
   CapacitorFilesystem: 2db285a1ac6e475cc27cae2e1bea999000f9e2be
