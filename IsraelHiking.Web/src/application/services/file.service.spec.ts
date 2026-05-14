@@ -257,6 +257,7 @@ describe("FileService", () => {
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(progressSpy).not.toHaveBeenCalled();
+      fetchSpy.mockRestore();
     }
   ));
 
@@ -303,6 +304,7 @@ describe("FileService", () => {
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(mockReader.read).toHaveBeenCalledTimes(3);
       expect(progressSpy).not.toHaveBeenCalled();
+      fetchSpy.mockRestore();
     }
   ));
 
@@ -365,6 +367,7 @@ describe("FileService", () => {
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(mockReader.read).toHaveBeenCalledTimes(2);
       expect(progressSpy).toHaveBeenCalledTimes(1);
+      fetchSpy.mockRestore();
     }
   ));
 
