@@ -24,28 +24,28 @@ PODS:
     - Capacitor
   - CapawesomeCapacitorAppUpdate (8.0.3):
     - Capacitor
-  - CapgoBackgroundGeolocation (8.0.33):
+  - CapgoBackgroundGeolocation (8.0.35):
     - Capacitor
-  - CapgoCapacitorCompass (8.1.12):
+  - CapgoCapacitorCompass (8.1.13):
     - Capacitor
-  - CapgoInappbrowser (8.6.3):
+  - CapgoInappbrowser (8.6.6):
     - Capacitor
   - IONCameraLib (1.0.4)
   - IONFilesystemLib (1.1.2)
-  - PurchasesHybridCommon (18.4.0):
-    - RevenueCat (= 5.70.0)
-  - PurchasesHybridCommonUI (18.4.0):
-    - PurchasesHybridCommon (= 18.4.0)
-    - RevenueCatUI (= 5.70.0)
-  - RevenueCat (5.70.0)
-  - RevenuecatPurchasesCapacitor (13.1.0):
+  - PurchasesHybridCommon (18.6.0):
+    - RevenueCat (= 5.72.0)
+  - PurchasesHybridCommonUI (18.6.0):
+    - PurchasesHybridCommon (= 18.6.0)
+    - RevenueCatUI (= 5.72.0)
+  - RevenueCat (5.72.0)
+  - RevenuecatPurchasesCapacitor (13.1.1):
     - Capacitor
-    - PurchasesHybridCommon (= 18.4.0)
-  - RevenuecatPurchasesCapacitorUi (13.1.0):
+    - PurchasesHybridCommon (= 18.6.0)
+  - RevenuecatPurchasesCapacitorUi (13.1.1):
     - Capacitor
-    - PurchasesHybridCommonUI (= 18.4.0)
-  - RevenueCatUI (5.70.0):
-    - RevenueCat (= 5.70.0)
+    - PurchasesHybridCommonUI (= 18.6.0)
+  - RevenueCatUI (5.72.0):
+    - RevenueCat (= 5.72.0)
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -124,17 +124,17 @@ SPEC CHECKSUMS:
   CapacitorShare: 0c58305114538568059bfc07111f22dcb9cb2a82
   CapacitorTextZoom: b3c80b09abef831245bc3434b1c03aa898ad4762
   CapawesomeCapacitorAppUpdate: 3a7537c6a6696837b51d06f26b2e909fd7b9226f
-  CapgoBackgroundGeolocation: 18b08ffc4f7a6e428c87759035e8e364394de840
-  CapgoCapacitorCompass: f2fc318357b006fb92c937f9e711cb3c5fc6d937
-  CapgoInappbrowser: 1544a1031142ee81beabf63f0ead0904352633e2
+  CapgoBackgroundGeolocation: adb26253bb21d96d12d7f8279ac4094d476cb8a8
+  CapgoCapacitorCompass: dd7db969bc11a99bc0b968fe12f5a865546b1a31
+  CapgoInappbrowser: 16fb1afea92ae1b63f2b436115f88b9b86bd39a4
   IONCameraLib: f2349804460bd9e3f892e42109b8d996ab3fa19d
   IONFilesystemLib: 21a63377696b2d8fab5632ecfb7d2ac67bddb68a
-  PurchasesHybridCommon: 2cd3e4b74c60f5a61603d78e4071274217cd9f6b
-  PurchasesHybridCommonUI: 3b62fb69d17b6f8b6855b38d26a4c62c269bff49
-  RevenueCat: f30d8ee4fd36ce56afa40923d314239761eb58a2
-  RevenuecatPurchasesCapacitor: f894c0f464ec4ea2c2fb645aeebc2f1609b77388
-  RevenuecatPurchasesCapacitorUi: 85a73009da2ef5c06ef892150eab9005645d07d1
-  RevenueCatUI: f7e36aa08d5d8de905c0c864c1523d4f39708be3
+  PurchasesHybridCommon: 89a3ddba365c20457a4712bc3d6377b0ea3c9b4f
+  PurchasesHybridCommonUI: 4aba51371b9d6c0e2859a2e514e47bf37c8fb9eb
+  RevenueCat: 136390ad99039cdd692156af5e479293ae83b2a9
+  RevenuecatPurchasesCapacitor: 006d88975222cc477532cb1d87da4006a139fa92
+  RevenuecatPurchasesCapacitorUi: 91f48f4aaf36231bc54a2aa4a536a20f4664771d
+  RevenueCatUI: 3fb3791bba4f7532b3b83dd2947824f8f702f6fa
 
 PODFILE CHECKSUM: 4100186683d9b9f68e127c62eacebf293150ad41
 
