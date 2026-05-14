@@ -1,5 +1,6 @@
 import { defineConfig } from "vitest/config";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
+import { resolve } from "path";
 
 export default defineConfig({
   plugins: [
@@ -10,9 +11,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      // fflate's ESM node entry uses createRequire which doesn't exist in browser.
-      // Force Vite to use the browser-specific build instead.
-      fflate: "fflate/esm/browser.js",
+      fflate: resolve(__dirname, "node_modules/fflate/esm/browser.js"),
+      "piexif-ts": resolve(__dirname, "node_modules/piexif-ts/dist/piexif.js"),
     },
   },
 });

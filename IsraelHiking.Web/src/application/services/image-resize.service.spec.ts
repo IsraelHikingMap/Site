@@ -1,11 +1,18 @@
 import { describe, beforeEach, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { dump, insert, TagValues, type IExif } from "piexif-ts";
+import { decode } from "base64-arraybuffer";
 
 import { ImageResizeService } from "./image-resize.service";
 
 const IMAGE_BASE_64 =
   "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wCEAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAf/CABEIAAEAAQMBIgACEQEDEQH/xAAUAAEAAAAAAAAAAAAAAAAAAAAK/9oACAEBAAAAAH8f/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAhAAAAB//8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAxAAAAB//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPwB//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAgEBPwB//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAwEBPwB//9k=";
+
+function dataUrlToBlob(dataUrl: string): Blob {
+  const base64Url = dataUrl.split(",")[1];
+  const buffer = decode(base64Url);
+  return new Blob([buffer], { type: "image/jpeg" });
+}
 
 describe("ImageResizeService", () => {
   beforeEach(() => {
@@ -30,8 +37,7 @@ describe("ImageResizeService", () => {
       const exifData: IExif = {};
       const exifbytes = dump(exifData);
       const dataUrl = insert(exifbytes, IMAGE_BASE_64);
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
+      const blob = dataUrlToBlob(dataUrl);
       await expect(service.resizeImage(blob as File)).resolves.not.toThrow();
     }
   ));
@@ -57,8 +63,7 @@ describe("ImageResizeService", () => {
       };
       const exifbytes = dump(exifData);
       const dataUrl = insert(exifbytes, IMAGE_BASE_64);
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
+      const blob = dataUrlToBlob(dataUrl);
       await expect(
         service.resizeImageAndConvert(blob as File)
       ).rejects.toThrowError("Image does not contain geolocation information");
@@ -86,8 +91,7 @@ describe("ImageResizeService", () => {
       };
       const exifbytes = dump(exifData);
       const dataUrl = insert(exifbytes, IMAGE_BASE_64);
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
+      const blob = dataUrlToBlob(dataUrl);
       await expect(
         service.resizeImageAndConvert(blob as File)
       ).rejects.toThrowError("Image does not contain geolocation information");
@@ -115,8 +119,7 @@ describe("ImageResizeService", () => {
       };
       const exifbytes = dump(exifData);
       const dataUrl = insert(exifbytes, IMAGE_BASE_64);
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
+      const blob = dataUrlToBlob(dataUrl);
       const dataContainer = await service.resizeImageAndConvert(blob as File);
       expect(dataContainer.routes.length).toBe(1);
       expect(dataContainer.routes[0].markers.length).toBe(1);

@@ -20,8 +20,15 @@ describe("ElevationProvider", () => {
         ctx.save();
         const url = canvas.toDataURL("image/png");
 
-        const response = await fetch(url);
-        return response.arrayBuffer();
+        return new Promise<ArrayBuffer>((resolve, reject) => {
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    reject(new Error("canvas.toBlob returned null"));
+                    return;
+                }
+                resolve(blob.arrayBuffer());
+            }, "image/png");
+        });
     }
 
     beforeEach(() => {

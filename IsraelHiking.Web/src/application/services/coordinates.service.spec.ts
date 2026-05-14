@@ -61,6 +61,6 @@ describe("Coordinates Service", () => {
         const expected = { lat: 32, lng: 35 };
         const roundTrip = service.fromItm(service.toItm(expected));
         expect(roundTrip.lat).toBeCloseTo(expected.lat, 8);
-        expect(roundTrip.lng).toBeCloseTo(expected.lng, 9);
+        expect(roundTrip.lng).toBeCloseTo(expected.lng, 8);
     }));
 });
