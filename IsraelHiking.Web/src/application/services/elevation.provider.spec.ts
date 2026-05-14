@@ -18,7 +18,6 @@ describe("ElevationProvider", () => {
         ctx.fillStyle = "red";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.save();
-        const url = canvas.toDataURL("image/png");
 
         return new Promise<ArrayBuffer>((resolve, reject) => {
             canvas.toBlob((blob) => {

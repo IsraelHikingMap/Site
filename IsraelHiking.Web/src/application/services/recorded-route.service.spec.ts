@@ -468,7 +468,7 @@ describe("Recorded Route Service", () => {
             expect(
                 vi
                     .mocked(spy)
-                    .mock.calls[i++][0].startsWith(
+                    .mock.calls[i][0].startsWith(
                         "[Record] Rejecting position for rejected"
                     )
             ).toBeTruthy();

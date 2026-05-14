@@ -1,4 +1,4 @@
-import { describe, beforeEach, vi, it, expect } from "vitest";
+import { describe, beforeEach, it, expect } from "vitest";
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 
 describe("CancelableTimeoutService", () => {
