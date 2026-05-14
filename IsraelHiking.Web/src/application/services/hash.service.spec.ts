@@ -57,6 +57,7 @@ describe("HashService", () => {
       routerMock.navigate = spy;
       store.reset({
         poiState: {},
+        inMemoryState: {}
       });
       service.initialize();
       sidebar.show("public-poi");
@@ -90,6 +91,7 @@ describe("HashService", () => {
       mapService.isMoving = () => false;
       store.reset({
         poiState: {},
+        inMemoryState: {}
       });
       service.initialize();
       store.reset({
@@ -122,6 +124,7 @@ describe("HashService", () => {
       mapService.isMoving = () => false;
       store.reset({
         poiState: {},
+        inMemoryState: {}
       });
       service.initialize();
       store.reset({
@@ -154,6 +157,7 @@ describe("HashService", () => {
       mapService.isMoving = () => false;
       store.reset({
         poiState: {},
+        inMemoryState: {}
       });
       service.initialize();
       store.reset({
@@ -177,6 +181,10 @@ describe("HashService", () => {
     (service: HashService, routerMock: Router, store: Store) => {
       const spy = vi.fn();
       routerMock.navigate = spy;
+      store.reset({
+        poiState: {},
+        inMemoryState: {}
+      });
       service.initialize();
       store.reset({
         poiState: {},
@@ -202,6 +210,10 @@ describe("HashService", () => {
     (service: HashService, routerMock: Router, store: Store) => {
       const spy = vi.fn();
       routerMock.navigate = spy;
+      store.reset({
+        poiState: {},
+        inMemoryState: {}
+      });
       service.initialize();
       store.reset({
         poiState: {},
@@ -232,6 +244,10 @@ describe("HashService", () => {
     ) => {
       const spy = vi.fn();
       routerMock.navigate = spy;
+      store.reset({
+        poiState: {},
+        inMemoryState: {}
+      });
       service.initialize();
       mapService.isMoving = () => true;
       store.reset({
@@ -259,9 +275,15 @@ describe("HashService", () => {
       const spy = vi.fn();
       routerMock.navigate = spy;
       mapService.isMoving = () => false;
-      service.initialize();
       store.reset({
         poiState: {},
+        inMemoryState: {}
+      });
+      service.initialize();
+      store.reset({
+        poiState: {
+          selectedPointOfInterest: {},
+        },
         inMemoryState: {},
         locationState: {
           zoom: 1,
@@ -297,10 +319,9 @@ describe("HashService", () => {
   ));
 
   it("Should return share url", inject(
-    [HashService, Router, Store, ShareUrlsService],
+    [HashService, Store, ShareUrlsService],
     (
       service: HashService,
-      routerMock: Router,
       store: Store,
       shareUrlService: ShareUrlsService
     ) => {
