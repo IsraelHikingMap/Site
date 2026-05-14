@@ -325,11 +325,14 @@ describe("MapService", () => {
         on: () => { },
         getZoom: () => 1,
       } as any as Map);
+      const originalInnerWidth = (window as any).innerWidth;
+      (window as any).innerWidth = 1000;
       await service.fitBounds(
         { northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } },
         0,
         { bottom: 100 }
       );
+      (window as any).innerWidth = originalInnerWidth;
       expect(vi.mocked(spy).mock.calls[0][1].padding).toBe(0);
     }
   ));
