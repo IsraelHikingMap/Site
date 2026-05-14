@@ -34,7 +34,7 @@ export class LocationComponent {
     public locationFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     public distanceFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     public locationLatLng: LatLngAltTime = null;
-    public showDistance: boolean = false;
+    public showDistance = false;
 
     public readonly resources = inject(ResourcesService);
     private readonly toastService = inject(ToastService);

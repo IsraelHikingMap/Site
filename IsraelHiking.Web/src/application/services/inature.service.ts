@@ -11,9 +11,9 @@ type INatureRsponse = {
             pageid: number;
             ns: number;
             title: string;
-            revisions: Array<{
+            revisions: {
                 "*": string;
-            }>;
+            }[];
         }>;
     };
 }
@@ -22,12 +22,12 @@ type INatureRsponse = {
 export class INatureService {
     private readonly API_URL = "https://inature.info/w/api.php";
     private readonly TIMEOUT = 3000;
-    
+
     private readonly httpClient: HttpClient = inject(HttpClient);
 
     public async createFeatureFromPageId(pageId: string): Promise<GeoJSON.Feature> {
         const address = this.getContnetRetrivalAddress(pageId, true);
-        const {content, title} = await this.getPageContentAndTitleFromAddress(address);
+        const { content, title } = await this.getPageContentAndTitleFromAddress(address);
         const feature: GeoJSON.Feature = {
             type: "Feature",
             properties: {},
@@ -92,7 +92,7 @@ export class INatureService {
         return baseAddress + `&titles=${key}`;
     }
 
-    private async getPageContentAndTitleFromAddress(address: string): Promise<{content: string, title: string}> {
+    private async getPageContentAndTitleFromAddress(address: string): Promise<{ content: string, title: string }> {
         const iNatureJson = await firstValueFrom(this.httpClient.get<INatureRsponse>(address).pipe(timeout(this.TIMEOUT)));
         const pageData = iNatureJson.query.pages[Object.keys(iNatureJson.query.pages)[0]];
         return {

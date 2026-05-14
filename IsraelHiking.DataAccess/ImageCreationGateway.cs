@@ -15,6 +15,12 @@ class TileServerImageCreatorBody
 {
     [JsonProperty("path")]
     public string Path { get; set; }
+    [JsonProperty("linejoin")]
+    public string LineJoin { get; set; }
+    [JsonProperty("linecap")]
+    public string LineCap { get; set; }
+    [JsonProperty("border")]
+    public string Border { get; set; }
 }
 
 public class ImageCreationGateway(IHttpClientFactory httpClientFactory, IOptions<ConfigurationData> options) : IImageCreationGateway
@@ -25,11 +31,11 @@ public class ImageCreationGateway(IHttpClientFactory httpClientFactory, IOptions
     public async Task<byte[]> Create(DataContainerPoco dataContainer, int width, int height)
     {
         var client = _httpClientFactory.CreateClient();
-        var queryParameters = $"styles/mapeak-hike/static/auto/{width}x{height}.jpg?border=white";
+        var queryParameters = $"styles/mapeak-hike/static/auto/{width}x{height}.jpg?linejoin=round&linecap=round";
         var allPointsString = string.Join("|", dataContainer.Routes.SelectMany(r => r.Segments.SelectMany(s => s.Latlngs)).Select(l => $"{l.Lng},{l.Lat}"));
         var body = new TileServerImageCreatorBody
         {
-            Path = "stroke:blue|width:5|" + allPointsString
+            Path = "stroke:blue|width:5|border:white|borderwidth:2|" + allPointsString,
         };
         var response = await client.PostAsync(_serverAddress + queryParameters, JsonContent.Create(body));
         return await response.Content.ReadAsByteArrayAsync();

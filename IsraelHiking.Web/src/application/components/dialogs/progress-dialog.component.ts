@@ -24,8 +24,8 @@ export interface IProgressDialogConfig {
     imports: [Dir, CdkScrollable, MatDialogContent, MatProgressBar, MatDialogActions, MatButton, MatDialogClose, AnalyticsDirective, DecimalPipe]
 })
 export class ProgressDialogComponent {
-    public progressPersentage: number = 0;
-    public text: string = "";
+    public progressPersentage = 0;
+    public text = "";
     public isError: boolean;
     public isContinue: boolean;
 

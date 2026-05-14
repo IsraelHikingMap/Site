@@ -19,7 +19,7 @@ import { ResourcesService } from "../../../services/resources.service";
 import { SidebarService } from "../../../services/sidebar.service";
 import { ToastService } from "../../../services/toast.service";
 import { ScrollToDirective } from "../../../directives/scroll-to.directive";
-import { CATEGORIES_GROUPS } from "../../../reducers/initial-state";
+import { POINTS_OF_INTEREST_CATEGORIES } from "../../../reducers/initial-state";
 import type { EditablePublicPointData, IconColorLabel } from "../../../models";
 
 @Component({
@@ -31,10 +31,10 @@ export class PublicPointOfInterestEditComponent implements OnInit {
 
     public info = input<EditablePublicPointData>();
 
-    public isLoading: boolean = false;
+    public isLoading = false;
     public categories: SelectableCategory[] = [];
     public selectedCategory: SelectableCategory = null;
-    public updateLocation: boolean = false;
+    public updateLocation = false;
 
     public readonly resources = inject(ResourcesService);
 
@@ -43,7 +43,7 @@ export class PublicPointOfInterestEditComponent implements OnInit {
     private readonly toastService = inject(ToastService);
 
     private initializeCategories() {
-        this.categories = structuredClone(CATEGORIES_GROUPS[0].categories) as SelectableCategory[];
+        this.categories = structuredClone(POINTS_OF_INTEREST_CATEGORIES) as SelectableCategory[];
     }
 
     public ngOnInit() {

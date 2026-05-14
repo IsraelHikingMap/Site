@@ -275,7 +275,7 @@ public static class GeoJsonExtensions
             throw new InvalidOperationException($"Missing location for feature with id {feature.GetId()}");
         }
         var y = double.Parse(locationTable[FeatureAttributes.LAT].ToString());
-        var x = locationTable.GetNames().Contains(FeatureAttributes.LON) ? double.Parse(locationTable[FeatureAttributes.LON].ToString()) : double.Parse(locationTable[FeatureAttributes.LNG].ToString());
+        var x = double.Parse(locationTable[FeatureAttributes.LNG].ToString());
         var location = new Coordinate
         {
             Y = y,
@@ -294,7 +294,6 @@ public static class GeoJsonExtensions
         var geoLocationTable = new AttributesTable
         {
             {FeatureAttributes.LAT, geoLocation.Y},
-            {FeatureAttributes.LON, geoLocation.X},
             {FeatureAttributes.LNG, geoLocation.X}
         };
         table.AddOrUpdate(FeatureAttributes.POI_GEOLOCATION, geoLocationTable);

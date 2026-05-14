@@ -8,17 +8,19 @@ import { Store } from "@ngxs/store";
 import { MatButton } from "@angular/material/button";
 import { FormsModule } from "@angular/forms";
 import { MatButtonToggle, MatButtonToggleGroup } from "@angular/material/button-toggle";
-import { AnalyticsDirective } from "application/directives/analytics.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { Share } from "@capacitor/share";
 import { orderBy } from "lodash-es";
+import { AnimationOptions, LottieComponent } from "ngx-lottie";
 import type { StyleSpecification, Map, MapSourceDataEvent } from "maplibre-gl";
 
 import { ImageAttributionComponent } from "../image-attribution.component";
 import { ZoomComponent } from "../zoom.component";
 import { OsmAttributionComponent } from "../osm-attribution.component";
 import { PublicRoutesFilterComponent } from "../public-routes-filter.component";
+import { DescriptionComponent } from "../description.component";
 import { DistancePipe } from "../../pipes/distance.pipe";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { DefaultStyleService } from "../../services/default-style.service";
@@ -29,27 +31,30 @@ import { PoiService } from "../../services/poi.service";
 import { SpatialService } from "../../services/spatial.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { RunningContextService } from "../../services/running-context.service";
-import { ImageAttributionService } from "../../services/image-attribution.service";
+import { TranslationService } from "../../services/translation.service";
 import { GeoJSONUtils } from "../../services/geojson-utils";
 import { PoiProperties } from "../../services/osm-tags.service";
 import { RouteStrings } from "../../services/hash.service";
 import { Urls } from "../../urls";
 import type { ApplicationState } from "../../models";
+import sceneryPlaceholder from "../../../content/lottie/placeholder-scenery.json";
 
 @Component({
     selector: "public-routes",
     templateUrl: "./public-routes.component.html",
     styleUrls: ["./public-routes.component.scss"],
-    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, ControlComponent, PublicRoutesFilterComponent]
+    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, ControlComponent, PublicRoutesFilterComponent, DescriptionComponent, LottieComponent]
 })
 export class PublicRoutesComponent {
+    public readonly lottieScenery: AnimationOptions = {
+        animationData: sceneryPlaceholder,
+    };
     public mapStyle: StyleSpecification;
-    public showMap: boolean = true;
+    public showMap = true;
     public readonly routesSrouceId = "routes-of-interest";
 
-
     public poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
-    public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point> = {
+    public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> = {
         type: "FeatureCollection",
         features: []
     };
@@ -58,7 +63,7 @@ export class PublicRoutesComponent {
         type: "FeatureCollection",
         features: []
     };
-    public selectedRoutePoint: GeoJSON.Feature<GeoJSON.Point> = null;
+    public selectedRoutePoint: GeoJSON.Feature<GeoJSON.Point, PoiProperties> = null;
 
     public readonly resources = inject(ResourcesService);
 
@@ -70,7 +75,7 @@ export class PublicRoutesComponent {
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly router = inject(Router);
     private readonly runningContextSerivce = inject(RunningContextService);
-    private readonly imageAttributionService = inject(ImageAttributionService);
+    private readonly translationService = inject(TranslationService);
 
     constructor() {
         this.mapStyle = this.defaultStyleService.getStyleWithPlaceholders();
@@ -103,33 +108,9 @@ export class PublicRoutesComponent {
     }
 
     public runFilter() {
-        let features = this.poiService.getPublicRoutes(["Hiking", "Bicycle", "4x4"]).features;
         const filters = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter);
-        features = features.filter(f => f.properties.image != null);
-        features = features.filter(feature => {
-            const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration).units;
-            const factor = units === "metric" ? 1000.0 : 1609.344;
-            if (!filters.categories.includes(feature.properties.poiCategory)) {
-                return false;
-            }
-            if (feature.properties.poiDifficulty && !filters.difficulty.includes(feature.properties.poiDifficulty)) {
-                return false;
-            }
-            if (feature.properties.poiLength / factor < filters.lengthRange[0]) {
-                return false;
-            }
-            if (feature.properties.poiLength / factor > filters.lengthRange[1] && filters.lengthRange[1] < 50) {
-                return false;
-            }
-            if (filters.userId && feature.properties.poiUserId !== filters.userId) {
-                return false;
-            }
-            return true;
-        });
+        let features = this.poiService.getPublicRoutes(filters).features;
         const sortBy = [(f: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) => f.properties.poiLength];
-
-
-
         features = orderBy(features, sortBy, ["desc"]);
         this.poiGeoJsonData = {
             type: "FeatureCollection",
@@ -137,7 +118,7 @@ export class PublicRoutesComponent {
         }
     }
 
-    public async onStartPointClick(feature: GeoJSON.Feature<GeoJSON.Point>, event: MouseEvent) {
+    public async onStartPointClick(feature: GeoJSON.Feature<GeoJSON.Point, PoiProperties>, event: MouseEvent) {
         event.stopPropagation();
         if (this.selectedRoutePoint?.properties.poiId === feature.properties.poiId) {
             this.selectedRoutePoint = null;
@@ -152,7 +133,7 @@ export class PublicRoutesComponent {
         this.moveToFeature(feature);
     }
 
-    public async moveToFeature(feature: GeoJSON.Feature<GeoJSON.Point>) {
+    public async moveToFeature(feature: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
         this.showMap = true;
         this.selectedRoutePoint = feature;
         this.hoverFeature = null;
@@ -176,11 +157,6 @@ export class PublicRoutesComponent {
         return GeoJSONUtils.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
-    public getDescription(feature: GeoJSON.Feature<GeoJSON.Point>) {
-        // HM TODO: add translation support here as well
-        return GeoJSONUtils.getDescription(feature, this.resources.getCurrentLanguageCodeSimplified());
-    }
-
     public hover(feature: GeoJSON.Feature<GeoJSON.Point>) {
         this.hoverFeature = feature;
     }
@@ -190,7 +166,7 @@ export class PublicRoutesComponent {
     }
 
 
-    public getIconFromType(feature: GeoJSON.Feature<GeoJSON.Point>) {
+    public getIconFromType(feature: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
         switch (feature.properties.poiCategory) {
             case "Hiking":
                 return "icon-hike";
@@ -209,7 +185,7 @@ export class PublicRoutesComponent {
         if (feature.properties.poiSource === "OSM") {
             await this.poiService.updateExtendedInfo(fullFeature, this.resources.getCurrentLanguageCodeSimplified());
         }
-        this.selectedRouteService.convertToRoute(fullFeature, this.getDescription(feature));
+        this.selectedRouteService.convertToRoute(fullFeature, this.translationService.getBestDescription(feature));
         this.router.navigate([RouteStrings.MAP]);
         // This is to let the route change to the map so that the relevant map will be used for fit bounds.
         await new Promise((resolve) => setTimeout(resolve, 100));
@@ -229,5 +205,14 @@ export class PublicRoutesComponent {
         Share.share({
             url: poiLink
         });
+    }
+
+    public isEditable(route: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
+        return route.properties.poiSource === "OSM";
+    }
+
+    public navigateToEditPoi(route: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
+        this.router.navigate([RouteStrings.ROUTE_POI, route.properties.poiSource, route.properties.identifier],
+            { queryParams: { edit: true } });
     }
 }

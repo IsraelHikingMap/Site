@@ -5,7 +5,7 @@ import { skip } from "rxjs";
 import { Router } from "@angular/router";
 import { Store } from "@ngxs/store";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ApplicationState } from "application/models";
+import { ApplicationState } from "../../models";
 
 @Component({
     selector: "faq",

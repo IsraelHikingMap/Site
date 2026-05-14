@@ -13,19 +13,20 @@ export type RoutingType = components["schemas"]["RouteSegmentData"]["routingType
 export type DataContainer = components["schemas"]["DataContainer"];
 export type UserPermissions = components["schemas"]["UserPermissions"];
 export type ActivityType = ShareUrl["type"];
+export type Difficulty = ShareUrl["difficulty"];
 
 export type RouteEditStateType = "Poi" | "Route" | "ReadOnly" | "Hidden";
 export type { Bounds } from "./bounds";
-export type { EditableLayer } from "./editable-layer.js";
+export type { EditableLayer } from "./editable-layer";
 export type { Trace, TraceVisibility } from "./trace";
 export type { OsmUserDetails } from "./osm-user-details";
 export type { UserInfo } from "./user-info";
 export type { SearchResultsPointOfInterest, EditablePublicPointData, UpdateablePublicPointData as UpdateablePublicPoiData } from "./point-of-interest";
 export type { NorthEast } from "./north-east";
-export type { CategoriesGroup, Category, IconColorLabel, CategoriesGroupType } from "./categories-group";
+export type { Category, IconColorLabel } from "./category";
 export type { Language, LanguageCode } from "./language";
 export type { RecordedRoute } from "./recorded-route";
-export type { PublicRoutesFilter } from "./public-routes-filter";
+export type { CategoryType, PublicRoutesFilter } from "./public-routes-filter";
 // states:
 export type { ApplicationState, MutableApplicationState } from "./state/application-state";
 export type { ConfigurationState, BatteryOptimizationType } from "./state/configuration-state";

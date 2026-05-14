@@ -49,7 +49,7 @@ export class PublicPoisComponent implements OnInit {
     public selectedCluster: GeoJSON.Feature<GeoJSON.Point> = null;
     public clusterFeatures: GeoJSON.Feature<GeoJSON.Point>[];
     public hoverFeature: GeoJSON.Feature<GeoJSON.Point> = null;
-    public isShowCoordinatesPopup: boolean = false;
+    public isShowCoordinatesPopup = false;
 
     public readonly resources = inject(ResourcesService);
 
@@ -67,7 +67,7 @@ export class PublicPoisComponent implements OnInit {
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(this.destroyRef), skip(1)).subscribe(() => {
             this.poiGeoJsonData = this.poiService.getPoisGeoJson();
         });
-        this.store.select((state: ApplicationState) => state.layersState.visibleCategories).pipe(takeUntilDestroyed(this.destroyRef), skip(1)).subscribe(() => {
+        this.store.select((state: ApplicationState) => state.layersState.visiblePoisCategories).pipe(takeUntilDestroyed(this.destroyRef), skip(1)).subscribe(() => {
             this.poiGeoJsonData = this.poiService.getPoisGeoJson();
         });
         this.mapComponent.sourceData.subscribe((sourceData) => {
@@ -109,9 +109,7 @@ export class PublicPoisComponent implements OnInit {
             return;
         }
         const sourceAndId = this.getSourceAndId(this.poiService.getFeatureId(feature));
-        this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
-            { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
-
+        this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id]);
     }
 
     public async toggleClusterPopup(event: MouseEvent, feature: GeoJSON.Feature<GeoJSON.Point>, sourceComponent: GeoJSONSourceComponent) {

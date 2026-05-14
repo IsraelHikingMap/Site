@@ -90,9 +90,9 @@ export class FileService {
             return [];
         }
         const filesToReturn = [];
-        // eslint-disable-next-line @typescript-eslint/prefer-for-of
-        for (let i = 0; i < files.length; i++) {
-            filesToReturn.push(files[i]);
+
+        for (const file of files) {
+            filesToReturn.push(file);
         }
         const target = e.target || e.srcElement;
         target.value = ""; // this will reset files so we need to clone the array.
@@ -205,7 +205,7 @@ export class FileService {
     }
 
     public async addRoutesFromFile(file: File): Promise<void> {
-        let dataContainer: DataContainer = null;
+        let dataContainer: DataContainer;
         if (file.type === ImageResizeService.JPEG) {
             dataContainer = await this.imageResizeService.resizeImageAndConvert(file);
         } else {
@@ -320,7 +320,7 @@ export class FileService {
         const reader = response.body.getReader();
         const contentLength = Number(response.headers.get("Content-Length"));
         let receivedLength = 0;
-        let done = false;
+        let done: boolean;
         do {
             const readResult = await reader.read();
             done = readResult.done;

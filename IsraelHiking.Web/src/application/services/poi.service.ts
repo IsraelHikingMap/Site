@@ -35,7 +35,8 @@ import type {
     NorthEast,
     EditablePublicPointData,
     UpdateablePublicPoiData,
-    ShareUrl
+    ShareUrl,
+    PublicRoutesFilter
 } from "../models";
 
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite" | "Bench"
@@ -56,7 +57,7 @@ export type SelectableCategory = Category & {
 @Injectable()
 export class PoiService {
     private poisCache: GeoJSON.Feature[] = [];
-    private queueIsProcessing: boolean = false;
+    private queueIsProcessing = false;
 
     private readonly resources = inject(ResourcesService);
     private readonly httpClient = inject(HttpClient);
@@ -243,7 +244,7 @@ export class PoiService {
         return poi;
     }
 
-    private filterFeatures(features: GeoJSON.Feature<GeoJSON.Point, PoiProperties>[], categories: string[]): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
+    private filterFeatures(features: GeoJSON.Feature<GeoJSON.Point, PoiProperties>[], categories: Immutable<string[]>): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
         const visibleFeatures = [];
         const language = this.resources.getCurrentLanguageCodeSimplified();
         for (const feature of features) {
@@ -257,12 +258,8 @@ export class PoiService {
         return visibleFeatures;
     }
 
-    private getVisibleCategories(): string[] {
-        return this.store.selectSnapshot((s: ApplicationState) => s.layersState.visibleCategories).map(c => c.name);
-    }
-
     public getPoisGeoJson(): GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> {
-        const categoires = this.getVisibleCategories();
+        const categoires = this.store.selectSnapshot((s: ApplicationState) => s.layersState.visiblePoisCategories)
         if (categoires.length === 0) {
             return {
                 type: "FeatureCollection",
@@ -276,17 +273,36 @@ export class PoiService {
         };
     }
 
-    public getPublicRoutes(categoires: string[]): GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> {
-        if (categoires.length === 0) {
+    public getPublicRoutes(filters: Immutable<PublicRoutesFilter>): GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> {
+        if (filters.categories.length === 0) {
             return {
                 type: "FeatureCollection",
                 features: []
             };
         }
-        const tileFeautes = this.getPoisFromTiles();
+        const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration).units;
+        const factor = units === "metric" ? 1000.0 : 1609.344;
+        let features = this.getPoisFromTiles();
+        features = this.filterFeatures(features, filters.categories);
+        features = features.filter(feature => {
+            if (feature.properties.poiDifficulty && !filters.difficulty.includes(feature.properties.poiDifficulty)) {
+                return false;
+            }
+            if (feature.properties.poiLength / factor < filters.lengthRange[0]) {
+                return false;
+            }
+            if (feature.properties.poiLength / factor > filters.lengthRange[1] && filters.lengthRange[1] < 50) {
+                return false;
+            }
+            if (filters.userId && feature.properties.poiUserId !== filters.userId) {
+                return false;
+            }
+            return true;
+        });
+
         return {
             type: "FeatureCollection",
-            features: this.filterFeatures(tileFeautes, categoires)
+            features
         };
     }
 
@@ -358,7 +374,7 @@ export class PoiService {
             if (feature == null) {
                 const message = `Failed to load POI ${id} from offline or in-memory tiles after failing to get it from server, error: ${(ex as Error).message}`;
                 this.loggingService.warning(`[POIs] ${message}`);
-                throw new Error(message);
+                throw new Error(message, { cause: ex });
             }
             return this.convertFeatureToPoi(feature, id);
         }

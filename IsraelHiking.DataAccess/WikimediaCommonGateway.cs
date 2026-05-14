@@ -55,7 +55,7 @@ public class WikimediaCommonGateway : IWikimediaCommonGateway
         var site = await CreateClient();
         var wikiFileName = GetNonExistingFilePageName(fileName, site);
         var comment = CreateWikipediaComment(location, description, author);
-        
+
         await site.GetTokenAsync("edit", true);
         var results = await site.UploadAsync(wikiFileName, new StreamUploadSource(contentStream), comment, true).ConfigureAwait(false);
         if (results.ResultCode != UploadResultCode.Success)
@@ -94,7 +94,7 @@ public class WikimediaCommonGateway : IWikimediaCommonGateway
     {
         var imagePage = new WikiPage(site, pageName);
         await imagePage.RefreshAsync(PageQueryOptions.None);
-        return Uri.UnescapeDataString(imagePage.LastFileRevision?.Url);
+        return Uri.UnescapeDataString(imagePage.LastFileRevision?.Url)?.Split('?').FirstOrDefault();
     }
 
     public static string GetWikiName(string name)

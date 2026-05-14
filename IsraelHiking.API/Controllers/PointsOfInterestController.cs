@@ -173,21 +173,6 @@ public class PointsOfInterestController : ControllerBase
     }
 
     /// <summary>
-    /// Gets the closest point to a given location.
-    /// </summary>
-    /// <param name="location">The location string "lat,lon" to search around</param>
-    /// <param name="source">The source to use, empty means no constraints</param>
-    /// <param name="language">Optional, if given this is the only language this method will use</param>
-    /// <returns></returns>
-    [HttpGet]
-    [Route("closest")]
-    [Obsolete("This is no longer in use, remove by 3.2026")]
-    public Task<IFeature> GetClosestPoint(string location, string source, string language)
-    {
-        return _pointsOfInterestProvider.GetClosestPoint(location.ToCoordinate(), source, language);
-    }
-
-    /// <summary>
     /// Creates a simple POI
     /// </summary>
     /// <param name="request"></param>

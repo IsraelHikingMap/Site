@@ -85,8 +85,6 @@ public static class FeatureAttributes
     ];
 
     public const string LAT = "lat";
-    [Obsolete("Use LNG instead, remove by 5.2026")]
-    public const string LON = "lon";
     public const string LNG = "lng";
     public const double INVALID_LOCATION = -9999;
 }
@@ -107,13 +105,16 @@ public static class Languages
     public const string ENGLISH = "en";
     public const string RUSSIAN = "ru";
     public const string ARABIC = "ar";
+    public const string SPANISH = "es";
+
     public const string DEFAULT = "default";
     public static readonly string[] Array =
     [
         HEBREW,
         ENGLISH,
         RUSSIAN,
-        ARABIC
+        ARABIC,
+        SPANISH
     ];
     public static readonly string[] ArrayWithDefault = new[] { DEFAULT }.Concat(Array).ToArray();
 }

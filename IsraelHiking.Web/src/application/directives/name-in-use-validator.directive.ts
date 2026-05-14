@@ -1,5 +1,5 @@
 import { Directive, AfterViewInit, input, inject } from "@angular/core";
-import { Validator, AbstractControl, NG_VALIDATORS } from "@angular/forms";
+import { Validator, AbstractControl, NG_VALIDATORS, ValidationErrors } from "@angular/forms";
 
 import { LayersService } from "../services/layers.service";
 import { SelectedRouteService } from "../services/selected-route.service";
@@ -25,7 +25,7 @@ export class NameInUseValidatorDirective implements Validator, AfterViewInit {
         this.initialKey = this.nameInUse();
     }
 
-    public validate(control: AbstractControl): { [key: string]: any } {
+    public validate(control: AbstractControl): ValidationErrors | null {
         if (this.initialKey === control.value) {
             return null;
         }

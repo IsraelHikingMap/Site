@@ -37,7 +37,7 @@ export class IntroDialogComponent {
     public lottieMore: AnimationOptions = { animationData: moreAnimationData };
 
     public activityType: ActivityType = "Hiking";
-    public step: number = 0;
+    public step = 0;
     public availableLanguages = AVAILABLE_LANGUAGES;
 
     public readonly resources = inject(ResourcesService);

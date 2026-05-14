@@ -1,2 +1,1 @@
-- Improved FAQ
-- Plus various bug fixes and performance improvements
+- Various bug fixes and performance improvements

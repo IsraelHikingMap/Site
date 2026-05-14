@@ -10,7 +10,7 @@ import { ResourcesService } from "../services/resources.service";
 import { ImageAttributionService } from "../services/image-attribution.service";
 import { SetPublicRoutesFilterAction } from "../reducers/in-memory.reducer";
 import { initialState } from "../reducers/initial-state";
-import type { ApplicationState, PublicRoutesFilter } from "../models";
+import type { ApplicationState, CategoryType, Difficulty, PublicRoutesFilter } from "../models";
 
 @Component({
     selector: "public-routes-filter",
@@ -24,7 +24,7 @@ export class PublicRoutesFilterComponent {
     private readonly destroyRef = inject(DestroyRef);
     private readonly imageAttributionService = inject(ImageAttributionService);
 
-    public unitString: string = "km";
+    public unitString = "km";
     public filterLengthStart: number;
     public filterLengthEnd: number;
     public filterUserName: string;
@@ -40,7 +40,7 @@ export class PublicRoutesFilterComponent {
         });
     }
 
-    public onFilterCategoryChange(value: string) {
+    public onFilterCategoryChange(value: CategoryType) {
         const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter)) as PublicRoutesFilter;
         if (filters.categories.includes(value)) {
             filters.categories = filters.categories.filter((x) => x !== value);
@@ -50,7 +50,7 @@ export class PublicRoutesFilterComponent {
         this.store.dispatch(new SetPublicRoutesFilterAction(filters));
     }
 
-    public onFilterDifficultyChange(value: string) {
+    public onFilterDifficultyChange(value: Difficulty) {
         const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter)) as PublicRoutesFilter;
         if (filters.difficulty.includes(value)) {
             filters.difficulty = filters.difficulty.filter((x) => x !== value);
@@ -60,7 +60,7 @@ export class PublicRoutesFilterComponent {
         this.store.dispatch(new SetPublicRoutesFilterAction(filters));
     }
 
-    public isCategorySelected(category: string) {
+    public isCategorySelected(category: CategoryType) {
         const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter)) as PublicRoutesFilter;
         return filters.categories.includes(category);
     }
@@ -75,7 +75,7 @@ export class PublicRoutesFilterComponent {
         return filters.difficulty.length !== initialState.inMemoryState.publicRoutesFilter.difficulty.length;
     }
 
-    public isDificultySelected(difficulty: string) {
+    public isDificultySelected(difficulty: Difficulty) {
         const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter)) as PublicRoutesFilter;
         return filters.difficulty.includes(difficulty);
     }

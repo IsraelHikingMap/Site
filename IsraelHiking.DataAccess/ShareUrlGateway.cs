@@ -1,14 +1,16 @@
+using System;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.DataAccess;
 
-public class ShareUrlGateway(IHttpClientFactory httpClientFactory, IOptions<ConfigurationData> options)
+public class ShareUrlGateway(IHttpClientFactory httpClientFactory, IOptions<ConfigurationData> options, ILogger logger)
     : IShareUrlGateway
 {
     private readonly ConfigurationData _options = options.Value;
@@ -16,9 +18,22 @@ public class ShareUrlGateway(IHttpClientFactory httpClientFactory, IOptions<Conf
     public async Task<ShareUrl> GetUrlById(string id)
     {
         var client = httpClientFactory.CreateClient();
-        var response = await client.GetAsync(_options.ShareUrlApiAddress + id);
-        var content = await response.Content.ReadAsStringAsync();
-        var shareUrl = JsonSerializer.Deserialize<ShareUrl>(content);
-        return shareUrl;
+        try
+        {
+            var response = await client.GetAsync(_options.ShareUrlApiAddress + id);
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogError("Share url " + id + " can't be retrieve. Status code: " + response.StatusCode.ToString());
+                return null;
+            }
+            var content = await response.Content.ReadAsStringAsync();
+            var shareUrl = JsonSerializer.Deserialize<ShareUrl>(content);
+            return shareUrl;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error getting share url by id: " + id);
+            return null;
+        }
     }
 }

@@ -213,6 +213,11 @@ export class DrawingComponent {
         const allRoutes = this.store.selectSnapshot((s: ApplicationState) => s.routes).present;
         const relevantRoutes = mode === "current" ? [selectedRoute] : allRoutes.filter(r => r.state !== "Hidden");
         const dataContainer = this.dataContainerService.getContainerForRoutes(relevantRoutes);
+        if (dataContainer.routes.length === 0 || dataContainer.routes[0].segments.length == 0 ||
+            dataContainer.routes[0].segments[0].latlngs.length === 0) {
+            this.toastService.warning(this.resources.unableToSaveAnEmptyRoute);
+            return;
+        }
         this.dialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, {
             width: "480px",
             data: {

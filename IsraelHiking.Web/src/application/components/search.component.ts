@@ -54,7 +54,7 @@ export class SearchComponent {
     public searchFrom = new FormControl<string | SearchResultsPointOfInterest>("");
 
     private requestsQueue: SearchRequestQueueItem[] = [];
-    private selectFirstSearchResults: boolean = false;
+    private selectFirstSearchResults = false;
 
     public searchFromInput = viewChild<ElementRef>("searchFromInput");
     public matAutocompleteTriggers = viewChildren(MatAutocompleteTrigger);
@@ -120,8 +120,7 @@ export class SearchComponent {
             return;
         }
 
-        this.router.navigate([RouteStrings.ROUTE_POI, searchResults.source, searchResults.id],
-            { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+        this.router.navigate([RouteStrings.ROUTE_POI, searchResults.source, searchResults.id]);
     }
 
     private selectResults(searchContext: SearchContext, searchResult: SearchResultsPointOfInterest) {

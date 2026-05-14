@@ -37,7 +37,7 @@ import type { UserInfo, ApplicationState } from "../models";
 export class MainMenuComponent {
 
     public userInfo: UserInfo = null;
-    public drawingVisible: boolean = false;
+    public drawingVisible = false;
 
     public readonly resources = inject(ResourcesService);
 

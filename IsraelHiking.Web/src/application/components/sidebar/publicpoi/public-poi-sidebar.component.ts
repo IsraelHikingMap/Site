@@ -16,6 +16,7 @@ import { Store } from "@ngxs/store";
 
 import { PublicPointOfInterestEditComponent } from "./public-poi-edit.component";
 import { ImageScrollerComponent } from "./image-scroller.component";
+import { DescriptionComponent } from "../../description.component";
 import { AnalyticsDirective } from "../../../directives/analytics.directive";
 import { DistancePipe } from "../../../pipes/distance.pipe";
 import { ResourcesService } from "../../../services/resources.service";
@@ -51,24 +52,21 @@ export type SourceImageUrlPair = {
     selector: "public-poi-sidebar",
     templateUrl: "./public-poi-sidebar.component.html",
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, AnalyticsDirective, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, MatCard, PublicPointOfInterestEditComponent, FormsModule, MatCardHeader, MatCardTitle, NgClass, MatCardContent, ImageScrollerComponent, DistancePipe]
+    imports: [Dir, MatButton, AnalyticsDirective, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, MatCard, PublicPointOfInterestEditComponent, FormsModule, MatCardHeader, MatCardTitle, NgClass, MatCardContent, ImageScrollerComponent, DistancePipe, DescriptionComponent]
 })
 export class PublicPoiSidebarComponent implements OnDestroy {
-    public isLoading: boolean = true;
-    public isMinimized: boolean = false;
+    public isLoading = true;
+    public isMinimized = false;
     public sourceImageUrls: SourceImageUrlPair[];
     public shareLinks = {} as PoiSocialLinks;
-    public showingTranslated: boolean = true;
     public length: number = null;
-    public description: string = "";
-    public title: string = "";
+    public title = "";
     public imagesUrls: string[] = [];
     public urls: string[] = [];
     public osmEditableInfo: EditablePublicPointData;
-    public showToggleTranslation: boolean = false;
+    public fullFeature: Immutable<GeoJSON.Feature>;
 
     private editMode: boolean;
-    private fullFeature: Immutable<GeoJSON.Feature>;
 
     public readonly resources = inject(ResourcesService);
 
@@ -95,9 +93,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         });
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(), skip(1)).subscribe(() => {
             const sourceIdAndLanguage = this.getRouteUrlInfo();
-            const queryParams: Record<string, string | boolean> = {
-                language: this.resources.getCurrentLanguageCodeSimplified()
-            };
+            const queryParams: Record<string, boolean> = {};
             if (sourceIdAndLanguage.editMode) {
                 queryParams.edit = true;
             }
@@ -176,8 +172,6 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         this.shareLinks = this.poiService.getPoiSocialLinks(feature);
         this.imagesUrls = await this.poiService.getImagesThatHaveAttribution(feature);
         this.urls = GeoJSONUtils.getUrls(feature);
-        this.description = await this.getDescription();
-        this.showToggleTranslation = this.translationService.isTranslationPossibleAndNeeded(feature) && this.description != this.translationService.getBestDescription(feature);
         this.length = this.poiService.getLengthInMeters(feature);
         const language = this.resources.getCurrentLanguageCodeSimplified();
         this.titleService.set(GeoJSONUtils.getTitle(feature, language));
@@ -218,27 +212,6 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             this.editMode;
     }
 
-    private async getDescription(): Promise<string> {
-        if (!this.fullFeature) {
-            return "";
-        }
-        const description = this.showingTranslated && this.translationService.isTranslationPossibleAndNeeded(this.fullFeature)
-            ? await this.translationService.getTranslatedDescription(this.fullFeature)
-            : this.translationService.getBestDescription(this.fullFeature);
-
-        if (description) {
-            return description;
-        }
-        if (!this.isEditable()) {
-            return this.resources.noDescriptionAvailableInYourLanguage;
-        }
-        const isLoggedOut = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo) == null;
-        if (isLoggedOut) {
-            return this.resources.noDescriptionLoginRequired;
-        }
-        return this.resources.emptyPoiDescription;
-    }
-
     public isEditMode(): boolean {
         return this.editMode;
     }
@@ -250,7 +223,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             return;
         }
         this.router.navigate([RouteStrings.ROUTE_POI, this.fullFeature.properties.poiSource, this.fullFeature.properties.identifier],
-            { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
+            { queryParams: { edit: true } });
     }
 
     public isEditable() {
@@ -274,7 +247,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     }
 
     public async convertToRoute() {
-        this.selectedRouteService.convertToRoute(this.fullFeature, this.description);
+        this.selectedRouteService.convertToRoute(this.fullFeature, this.translationService.getBestDescription(this.fullFeature));
         this.close();
     }
 
@@ -285,7 +258,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             id: this.fullFeature.properties.identifier,
             latlng: GeoJSONUtils.getLocation(this.fullFeature),
             title: this.title,
-            description: this.description,
+            description: this.translationService.getBestDescription(this.fullFeature),
             type: this.fullFeature.properties.poiIcon.replace("icon-", ""),
             urls
         }));
@@ -355,10 +328,5 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     private isBadWikipediaUrl(url: string) {
         const language = this.resources.getCurrentLanguageCodeSimplified();
         return url == null || (url.includes("wikipedia") && !url.includes(language + ".wikipedia"));
-    }
-
-    public async toggleTranslation(): Promise<void> {
-        this.showingTranslated = !this.showingTranslated;
-        this.description = await this.getDescription();
     }
 }

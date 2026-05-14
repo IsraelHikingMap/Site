@@ -72,7 +72,7 @@ public class CrawlersMiddlewareTests
 
         _next.Received().Invoke(context);
     }
-        
+
     [TestMethod]
     public void TestNonCrawler_ShouldPassThrough()
     {
@@ -98,7 +98,7 @@ public class CrawlersMiddlewareTests
 
         _next.Received().Invoke(context);
     }
-        
+
     [TestMethod]
     public void TestCrawler_NotExpected_ShouldPassThrough()
     {
@@ -115,7 +115,7 @@ public class CrawlersMiddlewareTests
 
         _next.Received().Invoke(context);
     }
-        
+
     [TestMethod]
     public void TestCrawler_Poi()
     {
@@ -129,7 +129,7 @@ public class CrawlersMiddlewareTests
         const string name = "name";
         const string description = "description";
         const string url = "https://upload.wikimedia.org/wikipedia/commons/6/66/Israel_Hiking_Map_%D7%A2%D7%99%D7%9F_%D7%A0%D7%98%D7%A3.jpeg";
-            
+
         _pointsOfInterestProvider.GetFeatureById(source, id).Returns(new Feature(new Point(0, 0),
             new AttributesTable
             {
@@ -146,7 +146,7 @@ public class CrawlersMiddlewareTests
         Assert.AreEqual("OUT", bodyString);
         _next.DidNotReceive().Invoke(context);
     }
-        
+
     [TestMethod]
     public void TestCrawler_NotExistingPoi_ShouldCallNext()
     {
@@ -161,13 +161,13 @@ public class CrawlersMiddlewareTests
         };
         var detectionService = SetupDetectionService();
         _pointsOfInterestProvider.GetFeatureById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
-            
+
         _middleware.InvokeAsync(context, detectionService).Wait();
-            
+
         _homePageHelper.DidNotReceive().Render(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
         _next.Received().Invoke(context);
     }
-        
+
     [TestMethod]
     public void TestCrawler_PoiWithExternalDescription_ShouldReturnExternal()
     {
@@ -181,7 +181,7 @@ public class CrawlersMiddlewareTests
         const string name = "Jabel Wadi";
         const string externalDescription = "This feature only has an external description";
         const string url = "https://upload.wikimedia.org/wikipedia/commons/6/66/Israel_Hiking_Map_%D7%A2%D7%99%D7%9F_%D7%A0%D7%98%D7%A3.jpeg";
-            
+
         _pointsOfInterestProvider.GetFeatureById(source, id).Returns(new Feature(new Point(0, 0),
             new AttributesTable
             {
@@ -217,7 +217,7 @@ public class CrawlersMiddlewareTests
         _next.Received().Invoke(context);
         _homePageHelper.DidNotReceive().Render(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
     }
-        
+
     [TestMethod]
     public void TestCrawler_Share()
     {
@@ -241,7 +241,7 @@ public class CrawlersMiddlewareTests
 
         _middleware.InvokeAsync(context, detectionService).Wait();
 
-        var checkUrl = Arg.Is<string>(x => x.EndsWith(shareUrl.Id + "/thumbnail?width=256&height=256"));
+        var checkUrl = Arg.Is<string>(x => x.EndsWith(shareUrl.Id + "/thumbnail"));
         _homePageHelper.Received().Render(shareUrl.Title, shareUrl.Description, checkUrl);
         _next.DidNotReceive().Invoke(context);
     }

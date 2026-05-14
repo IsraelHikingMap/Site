@@ -75,7 +75,7 @@ export class DatabaseService {
             traces: "id",
         });
         if (this.runningContextService.isIFrame) {
-            initialState.layersState.visibleCategories = [];
+            initialState.layersState.visiblePoisCategories = [];
             this.store.reset(initialState);
             return;
         }
@@ -131,7 +131,7 @@ export class DatabaseService {
                     if (!this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)) {
                         this.store.dispatch(new SetLastOfflineDetectedDate(new Date()));
                     }
-                    throw new Error(`Failed to get ${params.url}: ${(ex as Error).message}`);
+                    throw new Error(`Failed to get ${params.url}: ${(ex as Error).message}`, { cause: ex });
                 }
                 const data = await this.pmTilesService.getTileByType(z, x, y, type);
                 return { data };

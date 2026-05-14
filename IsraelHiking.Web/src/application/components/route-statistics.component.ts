@@ -72,24 +72,24 @@ export class RouteStatisticsComponent implements OnInit {
     private static readonly HOVER_BOX_WIDTH = 110;
     private static readonly MAX_SLOPE = 20;
 
-    public length: number = 0;
-    public gain: number = 0;
-    public loss: number = 0;
-    public duration: string = "--:--";
-    public durationUnits: string = "";
+    public length = 0;
+    public gain = 0;
+    public loss = 0;
+    public duration = "--:--";
+    public durationUnits = "";
     public averageSpeed: number | null = null;
     public currentSpeed: number | null = null;
-    public speedUnitString: string = "";
-    public remainingDistance: number = 0;
-    public traveledDistance: number = 0;
-    public ETA: string = "--:--";
-    public isKmMarkersOn: boolean = false;
-    public isSlopeOn: boolean = false;
-    public isExpanded: boolean = false;
-    public isTable: boolean = false;
+    public speedUnitString = "";
+    public remainingDistance = 0;
+    public traveledDistance = 0;
+    public ETA = "--:--";
+    public isKmMarkersOn = false;
+    public isSlopeOn = false;
+    public isExpanded = false;
+    public isTable = false;
     public isOpen = signal(false);
-    public isFollowing: boolean = false;
-    public isVisible: boolean = false;
+    public isFollowing = false;
+    public isVisible = false;
     public kmMarkersSource: GeoJSON.FeatureCollection<GeoJSON.Point> = {
         type: "FeatureCollection",
         features: []
@@ -112,7 +112,7 @@ export class RouteStatisticsComponent implements OnInit {
         margin: { top: 10, right: 10, bottom: 40, left: 50 },
         zoomTransform: d3.zoomIdentity
     };
-    private zoom: number = 7;
+    private zoom = 7;
     private routeColor: string;
     private heading: number | null = null;
 
@@ -689,7 +689,7 @@ export class RouteStatisticsComponent implements OnInit {
         this.chartElements.hoverGroup.select(".circle-point-aura").attr("stroke", this.routeColor);
     }
 
-    private setDataToChart(data: [number, number][], duration: number = 1000) {
+    private setDataToChart(data: [number, number][], duration = 1000) {
         if (!this.isOpen()) {
             return;
         }
@@ -1097,7 +1097,7 @@ export class RouteStatisticsComponent implements OnInit {
             g = Math.floor(255 * (1 - ratio));
             b = Math.floor(255 * ratio);
         }
-        // eslint-disable-next-line
+         
         return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
 

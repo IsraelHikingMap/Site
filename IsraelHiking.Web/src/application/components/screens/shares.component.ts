@@ -24,7 +24,7 @@ import { RoutesPathComponent } from "../map/routes-path.component";
 import { ShareEditDialogComponent, ShareEditDialogComponentData } from "../dialogs/share-edit-dialog.component";
 import { ZoomComponent } from "../zoom.component";
 import { OsmAttributionComponent } from "../osm-attribution.component";
-import { ScrollToDirective } from "application/directives/scroll-to.directive";
+import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
@@ -33,8 +33,8 @@ import { MapService } from "../../services/map.service";
 import { SpatialService } from "../../services/spatial.service";
 import { ToastService } from "../../services/toast.service";
 import { DataContainerService } from "../../services/data-container.service";
-import { RouteStrings } from "application/services/hash.service";
-import { SetSearchTermAction } from "application/reducers/in-memory.reducer";
+import { RouteStrings } from "../../services/hash.service";
+import { SetSearchTermAction } from "../../reducers/in-memory.reducer";
 import type { ApplicationState, ShareUrl } from "../../models";
 
 @Component({
@@ -158,6 +158,7 @@ export class SharesComponent implements OnInit {
     }
 
     public async moveToShare(shareUrl: Immutable<ShareUrl>) {
+        this.showMap = true;
         const share = await this.shareUrlsService.getShareUrl(shareUrl.id);
         this.selectedShareUrl = share;
         const features: GeoJSON.Feature[] = [];
@@ -165,7 +166,6 @@ export class SharesComponent implements OnInit {
             features.push(...this.selectedRouteService.createFeaturesForRoute(route));
         }
         this.routesGeoJson = { type: "FeatureCollection", features };
-        this.showMap = true;
         const bounds = SpatialService.getBoundsForFeatureCollection(this.routesGeoJson);
         this.mapService.fitBounds(bounds, 100, { top: 150, left: 50, bottom: window.innerHeight / 2, right: 50 });
     }

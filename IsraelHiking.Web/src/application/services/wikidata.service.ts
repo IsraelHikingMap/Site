@@ -6,10 +6,10 @@ import { firstValueFrom, timeout } from "rxjs";
 import { GeoJSONUtils } from "./geojson-utils";
 
 type WikiDataPage = {
-    sitelinks: { [key: string]: { site: string, title: string } };
-    statements: { [key: string]: { value: { content: any } }[] };
-    labels?: { [key: string]: string };
-    descriptions?: { [key: string]: string };
+    sitelinks: Record<string, { site: string, title: string }>;
+    statements: Record<string, { value: { content: any } }[]>;
+    labels?: Record<string, string>;
+    descriptions?: Record<string, string>;
 }
 
 export type WikiMetadata = {
@@ -26,19 +26,17 @@ export type WikiMetadata = {
 
 export type WikiPage = {
     query: {
-        pages: {
-            [key: string]: {
-                extract: string,
-                original?: {
-                    source: string
-                };
-                revisions?: [Record<string, string>];
-                imageinfo: {
-                    url?: string;
-                    extmetadata: WikiMetadata;
-                }[];
-            }
-        },
+        pages: Record<string, {
+            extract: string,
+            original?: {
+                source: string
+            };
+            revisions?: [Record<string, string>];
+            imageinfo: {
+                url?: string;
+                extmetadata: WikiMetadata;
+            }[];
+        }>
     }
 }
 

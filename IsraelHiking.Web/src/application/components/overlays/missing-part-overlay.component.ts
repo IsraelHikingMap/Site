@@ -28,7 +28,7 @@ export class MissingPartOverlayComponent {
 
     public removed = output();
 
-    public hideCoordinates: boolean = true;
+    public hideCoordinates = true;
 
     public readonly resources = inject(ResourcesService);
 

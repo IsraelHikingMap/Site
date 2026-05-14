@@ -50,14 +50,14 @@ export type ShareEditDialogComponentData = {
 export class ShareEditDialogComponent {
     public shareUrl: ShareUrl;
 
-    public isLoading: boolean = false;
-    public canUpdate: boolean = false;
-    public updateCurrentShare: boolean = false;
-    public hasHiddenRoutes: boolean = false;
+    public isLoading = false;
+    public canUpdate = false;
+    public updateCurrentShare = false;
+    public hasHiddenRoutes = false;
     public style: StyleSpecification;
-    public copiedToClipboard: boolean = false;
+    public copiedToClipboard = false;
     public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = { type: "FeatureCollection", features: [] };
-    public canPublishPublic: boolean = false;
+    public canPublishPublic = false;
 
     public readonly resources = inject(ResourcesService);
 
@@ -173,13 +173,13 @@ export class ShareEditDialogComponent {
             return;
         }
         this.shareUrl.start = latlngs[0];
-        let statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
+        const statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
         for (let routeIndex = 1; routeIndex < this.shareUrl.dataContainer.routes.length; routeIndex++) {
             latlngs = this.selectedRouteService.getLatlngs(this.shareUrl.dataContainer.routes[routeIndex]);
-            statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
-            statistics.gain += statistics.gain;
-            statistics.loss += statistics.loss;
-            statistics.length += statistics.length;
+            const otherStatistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
+            statistics.gain += otherStatistics.gain;
+            statistics.loss += otherStatistics.loss;
+            statistics.length += otherStatistics.length;
         }
         this.shareUrl.gain = statistics.gain;
         this.shareUrl.loss = statistics.loss;

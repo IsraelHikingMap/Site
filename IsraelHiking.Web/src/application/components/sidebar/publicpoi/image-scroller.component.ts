@@ -18,11 +18,11 @@ import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.j
     imports: [LottieComponent, MatAnchor, ImageCaptureDirective, AnalyticsDirective, MatButton, Dir, ImageAttributionComponent]
 })
 export class ImageScrollerComponent implements OnChanges {
-    lottiePOI: AnimationOptions = {
+    public readonly lottiePOI: AnimationOptions = {
         animationData: sceneryPlaceholder,
     };
 
-    private currentIndex: number = 0;
+    private currentIndex = 0;
 
     public images = input<string[]>();
     public canEdit = input<boolean>();

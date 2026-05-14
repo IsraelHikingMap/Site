@@ -6,6 +6,7 @@ import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { CoordinatesComponent } from "../coordinates.component";
 import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
@@ -17,10 +18,10 @@ import { SelectedRouteService } from "../../services/selected-route.service";
 import { ToastService } from "../../services/toast.service";
 import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
-import type { ApplicationState, MarkerDataWithoutId, LinkData, MarkerData } from "../../models";
+import type { ApplicationState, LinkData, MarkerData } from "../../models";
 
 interface IPrivatePoiShowDialogData {
-    marker: MarkerData;
+    marker: Immutable<MarkerData>;
     routeId: string;
     index: number;
 }
@@ -40,7 +41,7 @@ export class PrivatePoiShowDialogComponent {
     public url: LinkData;
     public title: string;
     public description: string;
-    public showCoordinates: boolean = false;
+    public showCoordinates = false;
 
     public readonly resources = inject(ResourcesService);
 
@@ -55,7 +56,7 @@ export class PrivatePoiShowDialogComponent {
 
     constructor() {
 
-        this.marker = this.data.marker;
+        this.marker = structuredClone(this.data.marker) as MarkerData;
         this.routeId = this.data.routeId;
         this.index = this.data.index;
         this.title = this.marker.title;
@@ -64,7 +65,7 @@ export class PrivatePoiShowDialogComponent {
         this.url = this.marker.urls.find(u => !u.mimeType.startsWith("image"));
     }
 
-    public static openDialog(dialog: MatDialog, marker: MarkerDataWithoutId, routeId: string, index: number) {
+    public static openDialog(dialog: MatDialog, marker: MarkerData, routeId: string, index: number) {
         setTimeout(() => {
             // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
             dialog.open(PrivatePoiShowDialogComponent,

@@ -54,8 +54,8 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
     public marker: MarkerData;
     public url: LinkData;
     public imageLink: LinkData;
-    public showIcons: boolean = false;
-    public showCoordinates: boolean = false;
+    public showIcons = false;
+    public showCoordinates = false;
     public showUrl: boolean;
     public title: string;
     public markerType: string;

@@ -1,0 +1,14 @@
+<div class="flex flex-row">
+    <p class="w-full whitespace-pre-line" [ngClass]="resources.getTextAlignment(description)"
+        [dir]="resources.getDirection(description)">
+        {{description}}
+    </p>
+</div>
+@if (showToggleTranslation) {
+<div class="flex flex-row cursor-pointer" (click)="toggleTranslation()" analyticsOn="click"
+    analyticsCategory="Description" analyticsLabel="Toggle translation">
+    <span class="w-full text-sm text-center">
+        {{showingTranslated ? resources.translatedBy : resources.clickToTranslate}}
+    </span>
+</div>
+}

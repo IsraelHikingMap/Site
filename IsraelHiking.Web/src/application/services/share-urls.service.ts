@@ -15,7 +15,7 @@ import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import { UpdateShareUrlAction, RemoveShareUrlAction, AddShareUrlAction, SetShareUrlsLastModifiedDateAction } from "../reducers/share-urls.reducer";
 import { SpatialService } from "./spatial.service";
 import { Urls } from "../urls";
-import type { ShareUrl, ApplicationState, UserPermissions } from "../models";
+import type { ShareUrl, ApplicationState, UserPermissions, ActivityType } from "../models";
 
 interface IShareUrlSocialLinks {
     facebook: string;
@@ -222,7 +222,7 @@ export class ShareUrlsService {
         return await firstValueFrom(this.httpClient.get<UserPermissions>(Urls.permissions));
     }
 
-    public getIconFromType(type: ShareUrl["type"]) {
+    public getIconFromType(type: ActivityType) {
         switch (type) {
             case "Hiking":
                 return "icon-hike";

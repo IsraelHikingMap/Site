@@ -44,8 +44,8 @@ public class PointsOfInterestControllerTests
         optionsProvider.Value.Returns(new ConfigurationData());
         var factory = Substitute.For<IClientsFactory>();
         factory.CreateOAuth2Client(Arg.Any<string>()).Returns(_osmGateway);
-        _controller = new PointsOfInterestController(factory, 
-            _tagHelper, 
+        _controller = new PointsOfInterestController(factory,
+            _tagHelper,
             _pointsOfInterestProvider,
             _simplePointAdderExecutor,
             _persistentCache,
@@ -56,7 +56,7 @@ public class PointsOfInterestControllerTests
     public void GetPointOfInterest_WrongSource_ShouldReturnBadRequest()
     {
         _pointsOfInterestProvider.GetFeatureById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
-            
+
         var result = _controller.GetPointOfInterest("wrong source", string.Empty).Result as NotFoundResult;
 
         Assert.IsNotNull(result);
@@ -77,8 +77,8 @@ public class PointsOfInterestControllerTests
     [TestMethod]
     public void CreatePointOfInterest_WrongSource_ShouldReturnBadRequest()
     {
-        var poi = new Feature(new Point(0, 0), new AttributesTable { { FeatureAttributes.POI_SOURCE, "wrong source" }, {FeatureAttributes.POI_ID, "1"} });
-            
+        var poi = new Feature(new Point(0, 0), new AttributesTable { { FeatureAttributes.POI_SOURCE, "wrong source" }, { FeatureAttributes.POI_ID, "1" } });
+
         var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as BadRequestObjectResult;
 
         Assert.IsNotNull(result);
@@ -93,7 +93,7 @@ public class PointsOfInterestControllerTests
             { FeatureAttributes.WEBSITE, string.Join("", Enumerable.Repeat("i", 256)) },
             { FeatureAttributes.POI_ID, "1" }
         });
-            
+
         var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as BadRequestObjectResult;
 
         Assert.IsNotNull(result);
@@ -129,7 +129,7 @@ public class PointsOfInterestControllerTests
         });
         poi.SetLocation(new Coordinate(0, 0));
         _persistentCache.Get(Arg.Any<string>()).Returns((byte[])null);
-        _pointsOfInterestProvider.AddFeature(poi, _osmGateway, Languages.HEBREW).Returns(new Feature(new Point(0,0), new AttributesTable
+        _pointsOfInterestProvider.AddFeature(poi, _osmGateway, Languages.HEBREW).Returns(new Feature(new Point(0, 0), new AttributesTable
         {
             { FeatureAttributes.ID, "new id" }
         }));
@@ -175,7 +175,7 @@ public class PointsOfInterestControllerTests
 
         Assert.IsNotNull(result);
     }
-        
+
     [TestMethod]
     public void UpdatePointOfInterest_DescriptionTooLong_ShouldNotUpdate()
     {
@@ -192,7 +192,7 @@ public class PointsOfInterestControllerTests
 
         Assert.IsNotNull(result);
     }
-        
+
     [TestMethod]
     public void UpdatePointOfInterest_TitleTooLong_ShouldNotUpdate()
     {
@@ -209,7 +209,7 @@ public class PointsOfInterestControllerTests
 
         Assert.IsNotNull(result);
     }
-        
+
     [TestMethod]
     public void UpdatePointOfInterest_ValidFeature_ShouldUpdate()
     {
@@ -227,26 +227,6 @@ public class PointsOfInterestControllerTests
         _pointsOfInterestProvider.Received(1).UpdateFeature(Arg.Any<Feature>(), _osmGateway, Arg.Any<string>());
     }
 
-    [TestMethod]
-    public void GetClosestPoint_ShouldGetTheClosesOsmPoint()
-    {
-        _pointsOfInterestProvider.GetClosestPoint(Arg.Any<Coordinate>(), Arg.Any<string>(), Arg.Any<string>()).Returns(new Feature(new Point(0,0), new AttributesTable()));
-
-        var results = _controller.GetClosestPoint("0,0", Sources.OSM, Languages.HEBREW).Result;
-
-        Assert.IsNotNull(results);
-    }
-        
-    [TestMethod]
-    public void GetClosestPoint_NoSource_ShouldGetTheClosesPoint()
-    {
-        _pointsOfInterestProvider.GetClosestPoint(Arg.Any<Coordinate>(), Arg.Any<string>(), Arg.Any<string>()).Returns(new Feature(new Point(0,0), new AttributesTable()));
-
-        var results = _controller.GetClosestPoint("0,0", null, Languages.HEBREW).Result;
-
-        Assert.IsNotNull(results);
-    }
-        
     [TestMethod]
     public void CreateSimplePoint_DoesNotExistInCache_ShouldAddIt()
     {
