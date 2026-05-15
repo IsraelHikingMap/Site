@@ -119,6 +119,7 @@ describe("Recorded Route Service", () => {
         [RecordedRouteService, Store],
         (service: RecordedRouteService, store: Store) => {
             store.reset({
+                gpsState: {},
                 recordedRouteState: {
                     isRecording: true,
                     route: {
@@ -156,6 +157,7 @@ describe("Recorded Route Service", () => {
         [RecordedRouteService, Store],
         (service: RecordedRouteService, store: Store) => {
             store.reset({
+                gpsState: {},
                 recordedRouteState: {
                     isRecording: true,
                     route: {
@@ -484,12 +486,14 @@ describe("Recorded Route Service", () => {
         [RecordedRouteService, Store],
         (service: RecordedRouteService, store: Store) => {
             store.reset({
+                gpsState: {},
                 recordedRouteState: {
                     isRecording: false,
                 },
             });
             service.initialize();
             store.reset({
+                gpsState: {},
                 recordedRouteState: {
                     route: {
                         latlngs: [
