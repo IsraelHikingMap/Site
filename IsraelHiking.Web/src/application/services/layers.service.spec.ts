@@ -66,6 +66,10 @@ describe("LayersService", () => {
       vi.spyOn(store, "dispatch");
 
       store.reset({
+        layersState: {
+          overlays: [],
+          baseLayers: []
+        },
         userState: {
           userInfo: null,
         },
@@ -85,6 +89,10 @@ describe("LayersService", () => {
       vi.spyOn(store, "dispatch");
 
       store.reset({
+        layersState: {
+          overlays: [],
+          baseLayers: []
+        },
         userState: {
           userInfo: {},
         },
@@ -175,6 +183,11 @@ describe("LayersService", () => {
       store.reset({
         layersState: {
           selectedBaseLayerKey: layer.key,
+          overlays: [],
+          baseLayers: []
+        },
+        userState: {
+          userInfo: null,
         },
       });
       expect(service.isBaseLayerSelected(layer)).toBe(true);
@@ -190,6 +203,10 @@ describe("LayersService", () => {
         layersState: {
           baseLayers: [layer1, layer2],
           selectedBaseLayerKey: layer2.key,
+          overlays: [],
+        },
+        userState: {
+          userInfo: null,
         },
       });
 
@@ -204,6 +221,10 @@ describe("LayersService", () => {
         layersState: {
           baseLayers: [],
           selectedBaseLayerKey: "nonexistent",
+          overlays: [],
+        },
+        userState: {
+          userInfo: null,
         },
       });
 
@@ -223,6 +244,10 @@ describe("LayersService", () => {
         layersState: {
           baseLayers: [baseLayer],
           selectedBaseLayerKey: baseLayer.key,
+          overlays: [],
+        },
+        userState: {
+          userInfo: null,
         },
       });
 
@@ -248,6 +273,10 @@ describe("LayersService", () => {
         layersState: {
           baseLayers: [baseLayer],
           selectedBaseLayerKey: baseLayer.key,
+          overlays: [],
+        },
+        userState: {
+          userInfo: null,
         },
       });
 
@@ -279,6 +308,10 @@ describe("LayersService", () => {
         layersState: {
           baseLayers: [baseLayer],
           selectedBaseLayerKey: baseLayer.key,
+          overlays: [],
+        },
+        userState: {
+          userInfo: null,
         },
       });
 
@@ -310,6 +343,10 @@ describe("LayersService", () => {
         layersState: {
           baseLayers: [baseLayer],
           selectedBaseLayerKey: baseLayer.key,
+          overlays: [],
+        },
+        userState: {
+          userInfo: null,
         },
       });
 
@@ -336,6 +373,9 @@ describe("LayersService", () => {
           baseLayers: [layer1, layer2],
           overlays: [overlay1],
           visibleOverlays: [overlay1.key],
+        },
+        userState: {
+          userInfo: null,
         },
       });
 
@@ -367,6 +407,11 @@ describe("LayersService", () => {
       store.reset({
         layersState: {
           visibleOverlays: [],
+          baseLayers: [],
+          overlays: [],
+        },
+        userState: {
+          userInfo: null,
         },
       });
       const overlay: EditableLayer = { key: "overlay1" } as EditableLayer;
@@ -388,6 +433,10 @@ describe("LayersService", () => {
         layersState: {
           overlays: [overlay1, overlay2],
           visibleOverlays: [],
+          baseLayers: []
+        },
+        userState: {
+          userInfo: null,
         },
       });
 
@@ -409,6 +458,10 @@ describe("LayersService", () => {
         layersState: {
           overlays: [overlay1, overlay2],
           visibleOverlays: [overlay1.key, overlay2.key],
+          baseLayers: []
+        },
+        userState: {
+          userInfo: null,
         },
       });
 
@@ -430,6 +483,9 @@ describe("LayersService", () => {
           overlays: [overlay1, overlay2],
           selectedBaseLayerKey: "base",
           visibleOverlays: [overlay1.key],
+        },
+        userState: {
+          userInfo: null,
         },
       });
 
@@ -471,6 +527,7 @@ describe("LayersService", () => {
         },
         layersState: {
           baseLayers: [],
+          overlays: []
         },
       });
       backend
@@ -514,7 +571,11 @@ describe("LayersService", () => {
       store.reset({
         layersState: {
           baseLayers: [existingLayer],
+          overlays: []
         },
+        userState: {
+          userInfo: null
+        }
       });
 
       service.addBaseLayer({ key: "existingLayer" } as LayerData);
@@ -530,7 +591,11 @@ describe("LayersService", () => {
         layersState: {
           overlays: [],
           visibleOverlays: [],
+          baseLayers: []
         },
+        userState: {
+          userInfo: null
+        }
       });
       const spy = vi.spyOn(store, "dispatch");
       const overlayData = {
@@ -560,6 +625,7 @@ describe("LayersService", () => {
         layersState: {
           overlays: [],
           visibleOverlays: [],
+          baseLayers: []
         },
       });
       backend
@@ -604,7 +670,11 @@ describe("LayersService", () => {
         layersState: {
           overlays: [existingOverlay],
           visibleOverlays: [],
+          baseLayers: []
         },
+        userState: {
+          userInfo: null
+        }
       });
 
       const result = service.addOverlay({
@@ -624,7 +694,11 @@ describe("LayersService", () => {
       store.reset({
         layersState: {
           baseLayers: [layer],
+          overlays: []
         },
+        userState: {
+          userInfo: null
+        }
       });
 
       service.updateBaseLayer(layer, layer);
@@ -646,8 +720,9 @@ describe("LayersService", () => {
           userInfo: {},
         },
         layersState: {
+          baseLayers: [],
           overlays: [],
-          visibleOverlays: [],
+          visibleOverlays: []
         },
       });
       const spy = vi.spyOn(store, "dispatch");
@@ -676,7 +751,11 @@ describe("LayersService", () => {
         layersState: {
           baseLayers: [layer1, layer2],
           selectedBaseLayerKey: layer2.key,
+          overlays: []
         },
+        userState: {
+          userInfo: null
+        }
       });
 
       service.removeBaseLayer(layer2);
@@ -697,7 +776,11 @@ describe("LayersService", () => {
         layersState: {
           overlays: [],
           visibleOverlays: [],
+          baseLayers: []
         },
+        userState: {
+          userInfo: null
+        }
       });
       const spy = vi.spyOn(store, "dispatch");
       const overlay = { key: "overlay1", id: "1" } as EditableLayer;
@@ -718,7 +801,11 @@ describe("LayersService", () => {
         layersState: {
           overlays: [],
           visibleOverlays: [],
+          baseLayers: []
         },
+        userState: {
+          userInfo: null
+        }
       });
       const layerData: LayerData = {
         key: "test",
