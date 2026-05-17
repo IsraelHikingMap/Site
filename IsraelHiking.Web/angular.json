@@ -156,6 +156,7 @@
             "coverageExclude": [
               "src/application/services/database.service.ts",
               "src/application/services/geo-location.service.ts",
+              "src/application/services/device-orientation.service.ts",
               "src/application/components/**",
               "src/application/directives/**",
               "src/application/pipes/**",
