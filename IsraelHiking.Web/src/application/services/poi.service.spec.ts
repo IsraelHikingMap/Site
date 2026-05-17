@@ -1,6 +1,6 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
-import { HttpRequest, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
