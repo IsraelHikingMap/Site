@@ -18,26 +18,16 @@ describe("CancelableTimeoutService", () => {
     it("should fire timeout only once", async () => {
         let counter = 0;
         let resolve: () => void;
-        const promise = new Promise<void>((res) => {
-            resolve = res;
-        });
-        service.setTimeoutByName(
-            () => {
-                counter++;
-                resolve();
-            },
-            10,
-            "test"
-        );
+        const promise = new Promise<void>((res) => { resolve = res; });
+        service.setTimeoutByName(() => {
+            counter++;
+            resolve();
+        }, 10, "test");
 
-        service.setTimeoutByName(
-            () => {
-                counter++;
-                resolve();
-            },
-            10,
-            "test"
-        );
+        service.setTimeoutByName(() => {
+            counter++;
+            resolve();
+        }, 10, "test");
 
         await expect(promise).resolves.not.toThrow();
         expect(counter).toBe(1);
@@ -45,13 +35,9 @@ describe("CancelableTimeoutService", () => {
 
     it("should not fire timeout when cancelled", async () => {
         let counter = 0;
-        service.setTimeoutByName(
-            () => {
-                counter++;
-            },
-            10,
-            "test"
-        );
+        service.setTimeoutByName(() => {
+            counter++;
+        }, 10, "test");
 
         service.clearTimeoutByName("test");
 
