@@ -3,11 +3,7 @@ import { inject, TestBed } from "@angular/core/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
-import {
-    SEGMENT,
-    SEGMENT_POINT,
-    SelectedRouteService
-} from "./selected-route.service";
+import { SEGMENT, SEGMENT_POINT, SelectedRouteService } from "./selected-route.service";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { SidebarService } from "./sidebar.service";
@@ -16,23 +12,9 @@ import { GeoJsonParser } from "./geojson.parser";
 import { ElevationProvider } from "./elevation.provider";
 import { RoutingProvider } from "./routing.provider";
 import { RoutesFactory } from "./routes.factory";
-import {
-    SetSelectedRouteAction,
-    RouteEditingReducer
-} from "../reducers/route-editing.reducer";
+import { SetSelectedRouteAction, RouteEditingReducer } from "../reducers/route-editing.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
-import {
-    AddRouteAction,
-    ChangeRouteStateAction,
-    BulkReplaceRoutesAction,
-    RoutesReducer,
-    MergeRoutesAction,
-    SplitRouteAction,
-    ReplaceRouteAction,
-    UpdateSegmentsAction,
-    DeleteSegmentAction,
-    AddPrivatePoiAction
-} from "../reducers/routes.reducer";
+import { AddRouteAction, ChangeRouteStateAction, BulkReplaceRoutesAction, RoutesReducer, MergeRoutesAction, SplitRouteAction, ReplaceRouteAction, UpdateSegmentsAction, DeleteSegmentAction, AddPrivatePoiAction } from "../reducers/routes.reducer";
 import type { RouteDataWithoutState, RouteData } from "../models";
 
 describe("Selected Route Service", () => {
@@ -71,33 +53,21 @@ describe("Selected Route Service", () => {
         });
     });
 
-    it("Should issue a toast if there are too many routes, and show the sidebar when user declines", inject(
-        [SelectedRouteService, Store, SidebarService],
-        (
-            selectedRouteService: SelectedRouteService,
-            store: Store,
-            sidebarService: SidebarService
-        ) => {
-            setupRoutes(
-                store,
-                Array.from({ length: 100 }, (_, i) => ({ id: i.toString() } as any))
-            );
+    it("Should issue a toast if there are too many routes, and show the sidebar when user declines", inject([SelectedRouteService, Store, SidebarService],
+        (selectedRouteService: SelectedRouteService, store: Store, sidebarService: SidebarService) => {
+            setupRoutes(store, Array.from({ length: 100 }, (_, i) => ({ id: i.toString() } as any)));
             selectedRouteService.initialize();
             expect(sidebarService.show).toHaveBeenCalled();
         }
     ));
 
-    it("Should get undefined selected route when there're no routes", inject(
-        [SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            const selectedRoute = selectedRouteService.getSelectedRoute();
+    it("Should get undefined selected route when there're no routes", inject([SelectedRouteService], (selectedRouteService: SelectedRouteService) => {
+        const selectedRoute = selectedRouteService.getSelectedRoute();
 
-            expect(selectedRoute).toBeUndefined();
-        }
-    ));
+        expect(selectedRoute).toBeUndefined();
+    }));
 
-    it("Should sync selected route with editing route", inject(
-        [SelectedRouteService, Store],
+    it("Should sync selected route with editing route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             store.dispatch = vi.fn();
             setupRoutes(store, [{ id: "42", state: "Poi" } as any]);
@@ -109,8 +79,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should create a route when calling get or create and there are none", inject(
-        [SelectedRouteService, Store],
+    it("Should create a route when calling get or create and there are none", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, []);
             store.reset({
@@ -126,14 +95,11 @@ describe("Selected Route Service", () => {
             selectedRouteService.getOrCreateSelectedRoute();
 
             expect(spy).toHaveBeenCalled();
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                AddRouteAction
-            );
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(AddRouteAction);
         }
     ));
 
-    it("Should select the first route if selected route it null and there are routes", inject(
-        [SelectedRouteService, Store],
+    it("Should select the first route if selected route it null and there are routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [{ id: "42" } as any]);
             setupSelectedRoute(store, null);
@@ -144,8 +110,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should select the first route if selected route it null and change its visibility if hidden", inject(
-        [SelectedRouteService, Store],
+    it("Should select the first route if selected route it null and change its visibility if hidden", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [{ id: "42", state: "Hidden" } as any]);
             setupSelectedRoute(store, null);
@@ -157,8 +122,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should set selected route if there's no selected route", inject(
-        [SelectedRouteService, Store],
+    it("Should set selected route if there's no selected route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupSelectedRoute(store, null);
             store.dispatch = vi.fn();
@@ -169,8 +133,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should unselect selected route and selected the given route", inject(
-        [SelectedRouteService, Store],
+    it("Should unselect selected route and selected the given route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupSelectedRoute(store, "1");
             const spy = vi.fn();
@@ -178,21 +141,15 @@ describe("Selected Route Service", () => {
             selectedRouteService.setSelectedRoute("42");
 
             expect(spy).toHaveBeenCalled();
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                SetSelectedRouteAction
-            );
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(SetSelectedRouteAction);
         }
     ));
 
-    it("Should return empty routes where there are none", inject(
-        [SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            expect(selectedRouteService.areRoutesEmpty()).toBeTruthy();
-        }
-    ));
+    it("Should return empty routes where there are none", inject([SelectedRouteService], (selectedRouteService: SelectedRouteService) => {
+        expect(selectedRouteService.areRoutesEmpty()).toBeTruthy();
+    }));
 
-    it("Should not return empty routes where there are routes", inject(
-        [SelectedRouteService, Store],
+    it("Should not return empty routes where there are routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [{ id: "42" } as any]);
 
@@ -200,8 +157,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should change route edit state when not adding recorded POI", inject(
-        [SelectedRouteService, Store],
+    it("Should change route edit state when not adding recorded POI", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             store.reset({
                 recordedRouteState: {
@@ -220,14 +176,11 @@ describe("Selected Route Service", () => {
             selectedRouteService.changeRouteEditState("42", "ReadOnly");
 
             expect(spy).toHaveBeenCalled();
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                ChangeRouteStateAction
-            );
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(ChangeRouteStateAction);
         }
     ));
 
-    it("Should change route edit state when adding recorded POI", inject(
-        [SelectedRouteService, Store],
+    it("Should change route edit state when adding recorded POI", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             store.reset({
                 recordedRouteState: {
@@ -246,17 +199,12 @@ describe("Selected Route Service", () => {
             selectedRouteService.changeRouteEditState("42", "ReadOnly");
 
             expect(spy).toHaveBeenCalled();
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                ToggleAddRecordingPoiAction
-            );
-            expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(
-                ChangeRouteStateAction
-            );
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(ToggleAddRecordingPoiAction);
+            expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(ChangeRouteStateAction);
         }
     ));
 
-    it("Should create route name when there's a route with that name", inject(
-        [SelectedRouteService, Store],
+    it("Should create route name when there's a route with that name", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             const routeName = selectedRouteService.createRouteName();
             setupRoutes(store, [{ id: "42", name: routeName } as any]);
@@ -266,8 +214,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should not get closet route to selected route when there are no other routes", inject(
-        [SelectedRouteService, Store],
+    it("Should not get closet route to selected route when there are no other routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -294,8 +241,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should get closet route to selected route when there is another route", inject(
-        [SelectedRouteService, Store],
+    it("Should get closet route to selected route when there is another route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -342,8 +288,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should get the closet route to selected route when there are multiple close by routes", inject(
-        [SelectedRouteService, Store],
+    it("Should get the closet route to selected route when there are multiple close by routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -467,8 +412,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should not get closet route to GPS when there's no location", inject(
-        [SelectedRouteService, Store],
+    it("Should not get closet route to GPS when there's no location", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, []);
 
@@ -477,21 +421,16 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should not get closet route to GPS when there are no routes", inject(
-        [SelectedRouteService, Store],
+    it("Should not get closet route to GPS when there are no routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, []);
 
-            const closetRoute = selectedRouteService.getClosestRouteToGPS(
-                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                0
-            );
+            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date().toISOString() }, 0);
             expect(closetRoute).toBeNull();
         }
     ));
 
-    it("Should not get closet route to GPS when there are no visible routes", inject(
-        [SelectedRouteService, Store],
+    it("Should not get closet route to GPS when there are no visible routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -512,16 +451,12 @@ describe("Selected Route Service", () => {
                 }
             ]);
 
-            const closetRoute = selectedRouteService.getClosestRouteToGPS(
-                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                0
-            );
+            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date().toISOString() }, 0);
             expect(closetRoute).toBeNull();
         }
     ));
 
-    it("Should get closet route to GPS when there are routes", inject(
-        [SelectedRouteService, Store],
+    it("Should get closet route to GPS when there are routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -543,16 +478,12 @@ describe("Selected Route Service", () => {
                 }
             ]);
 
-            const closetRoute = selectedRouteService.getClosestRouteToGPS(
-                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                0
-            );
+            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date().toISOString() }, 0);
             expect(closetRoute.id).toBe("1");
         }
     ));
 
-    it("Should get closet route to GPS when there are routes when heading is opposite", inject(
-        [SelectedRouteService, Store],
+    it("Should get closet route to GPS when there are routes when heading is opposite", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -573,16 +504,12 @@ describe("Selected Route Service", () => {
                     state: "ReadOnly"
                 }
             ]);
-            const closetRoute = selectedRouteService.getClosestRouteToGPS(
-                { lat: 1.0001, lng: 1, timestamp: new Date().toISOString() },
-                90
-            );
+            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1.0001, lng: 1, timestamp: new Date().toISOString() }, 90);
             expect(closetRoute.id).toBe("1");
         }
     ));
 
-    it("Should split a route at the middle and add 'split' to name", inject(
-        [SelectedRouteService, Store],
+    it("Should split a route at the middle and add 'split' to name", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -626,9 +553,7 @@ describe("Selected Route Service", () => {
 
             selectedRouteService.splitRoute(1);
 
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                SplitRouteAction
-            );
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(SplitRouteAction);
             const action = vi.mocked(spy).mock.calls[0][0] as SplitRouteAction;
             expect(action.routeId).toBe("1");
             expect(action.routeData.segments.length).toBe(2);
@@ -643,8 +568,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should split a route at the middle and add not split word", inject(
-        [SelectedRouteService, Store],
+    it("Should split a route at the middle and add not split word", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -688,16 +612,13 @@ describe("Selected Route Service", () => {
 
             selectedRouteService.splitRoute(1);
 
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                SplitRouteAction
-            );
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(SplitRouteAction);
             const action = vi.mocked(spy).mock.calls[0][0] as SplitRouteAction;
             expect(action.splitRouteData.name).toBe("name split 2");
         }
     ));
 
-    it("Should merge routes with the same direction", inject(
-        [SelectedRouteService, Store],
+    it("Should merge routes with the same direction", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -758,25 +679,14 @@ describe("Selected Route Service", () => {
 
             selectedRouteService.mergeRoutes(false);
 
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                MergeRoutesAction
-            );
-            expect(
-                vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments.length
-            ).toBe(3);
-            expect(
-                vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[0]
-                    .latlngs[0].lat
-            ).toBe(1);
-            expect(
-                vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2]
-                    .latlngs[1].lat
-            ).toBe(3);
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(MergeRoutesAction);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments.length).toBe(3);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
         }
     ));
 
-    it("Should merge routes with the same direction when selected route is second", inject(
-        [SelectedRouteService, Store],
+    it("Should merge routes with the same direction when selected route is second", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -837,25 +747,14 @@ describe("Selected Route Service", () => {
 
             selectedRouteService.mergeRoutes(true);
 
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                MergeRoutesAction
-            );
-            expect(
-                vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments.length
-            ).toBe(3);
-            expect(
-                vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[0]
-                    .latlngs[0].lat
-            ).toBe(1);
-            expect(
-                vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2]
-                    .latlngs[1].lat
-            ).toBe(3);
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(MergeRoutesAction);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments.length).toBe(3);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
         }
     ));
 
-    it("Should merge routes with oposite direction", inject(
-        [SelectedRouteService, Store],
+    it("Should merge routes with oposite direction", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -916,25 +815,14 @@ describe("Selected Route Service", () => {
 
             selectedRouteService.mergeRoutes(false);
 
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                MergeRoutesAction
-            );
-            expect(
-                vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments.length
-            ).toBe(3);
-            expect(
-                vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[0]
-                    .latlngs[0].lat
-            ).toBe(1);
-            expect(
-                vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2]
-                    .latlngs[1].lat
-            ).toBe(3);
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(MergeRoutesAction);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments.length).toBe(3);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
         }
     ));
 
-    it("Should merge routes with a gap and remove the gap", inject(
-        [SelectedRouteService, Store],
+    it("Should merge routes with a gap and remove the gap", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -1007,37 +895,17 @@ describe("Selected Route Service", () => {
 
             selectedRouteService.mergeRoutes(false);
 
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                MergeRoutesAction
-            );
-            expect(
-                vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments.length
-            ).toBe(3);
-            expect(
-                vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[0]
-                    .latlngs[0].lat
-            ).toBe(1);
-            expect(
-                vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[1]
-                    .latlngs[1].lat
-            ).toBe(2);
-            expect(
-                vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2]
-                    .latlngs[0].lat
-            ).toBe(2);
-            expect(
-                vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2]
-                    .latlngs[1].lat
-            ).toBe(2.0001);
-            expect(
-                vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2]
-                    .latlngs[2].lat
-            ).toBe(3);
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(MergeRoutesAction);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments.length).toBe(3);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[1].latlngs[1].lat).toBe(2);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2].latlngs[0].lat).toBe(2);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2].latlngs[1].lat).toBe(2.0001);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2].latlngs[2].lat).toBe(3);
         }
     ));
 
-    it("Should revese an empty route", inject(
-        [SelectedRouteService, Store],
+    it("Should revese an empty route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -1056,17 +924,14 @@ describe("Selected Route Service", () => {
 
             selectedRouteService.reverseRoute("1");
 
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                ReplaceRouteAction
-            );
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(ReplaceRouteAction);
             const action = vi.mocked(spy).mock.calls[0][0] as ReplaceRouteAction;
             expect(action.routeId).toBe("1");
             expect(action.routeData.segments.length).toBe(0);
         }
     ));
 
-    it("Should revese a route", inject(
-        [SelectedRouteService, Store],
+    it("Should revese a route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -1110,9 +975,7 @@ describe("Selected Route Service", () => {
 
             selectedRouteService.reverseRoute("1");
 
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                ReplaceRouteAction
-            );
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(ReplaceRouteAction);
             const action = vi.mocked(spy).mock.calls[0][0] as ReplaceRouteAction;
             expect(action.routeId).toBe("1");
             expect(action.routeData.segments.length).toBe(3);
@@ -1123,8 +986,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should remove the first segement", inject(
-        [SelectedRouteService, Store],
+    it("Should remove the first segement", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -1168,9 +1030,7 @@ describe("Selected Route Service", () => {
 
             selectedRouteService.removeSegment(0);
 
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                UpdateSegmentsAction
-            );
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(UpdateSegmentsAction);
             const action = vi.mocked(spy).mock.calls[0][0] as UpdateSegmentsAction;
             expect(action.routeId).toBe("1");
             expect(action.indices).toEqual([0, 1]);
@@ -1179,8 +1039,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should remove the last segement", inject(
-        [SelectedRouteService, Store],
+    it("Should remove the last segement", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -1224,17 +1083,14 @@ describe("Selected Route Service", () => {
 
             selectedRouteService.removeSegment(2);
 
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                DeleteSegmentAction
-            );
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(DeleteSegmentAction);
             const action = vi.mocked(spy).mock.calls[0][0] as DeleteSegmentAction;
             expect(action.routeId).toBe("1");
             expect(action.index).toBe(2);
         }
     ));
 
-    it("Should remove a middle segement", inject(
-        [SelectedRouteService, Store],
+    it("Should remove a middle segement", inject([SelectedRouteService, Store],
         async (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -1278,9 +1134,7 @@ describe("Selected Route Service", () => {
 
             await selectedRouteService.removeSegment(1);
 
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                UpdateSegmentsAction
-            );
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(UpdateSegmentsAction);
             const action = vi.mocked(spy).mock.calls[0][0] as UpdateSegmentsAction;
             expect(action.routeId).toBe("1");
             expect(action.indices).toEqual([1, 2]);
@@ -1288,8 +1142,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should add external empty route should not fail", inject(
-        [SelectedRouteService, Store],
+    it("Should add external empty route should not fail", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             const spy = vi.fn();
             store.dispatch = spy;
@@ -1300,8 +1153,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should add external route with only markers to first route", inject(
-        [SelectedRouteService, Store],
+    it("Should add external route with only markers to first route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -1318,34 +1170,26 @@ describe("Selected Route Service", () => {
             const spy = vi.fn();
             store.dispatch = spy;
 
-            selectedRouteService.addRoutes([
-        {
-            segments: [],
-            markers: [{ title: "title" }]
-        } as RouteDataWithoutState
-            ]);
+            selectedRouteService.addRoutes([{ segments: [], markers: [{ title: "title" }] } as RouteDataWithoutState]);
 
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                AddPrivatePoiAction
-            );
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(AddPrivatePoiAction);
             const action = vi.mocked(spy).mock.calls[0][0] as AddPrivatePoiAction;
             expect(action.routeId).toBe("1");
             expect(action.markerData.title).toBe("title");
         }
     ));
 
-    it("Should add external route to routes", inject(
-        [SelectedRouteService, Store],
+    it("Should add external route to routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
-        {
-            id: "1",
-            description: "",
-            markers: [],
-            name: "name",
-            segments: [],
-            state: "ReadOnly"
-        } as RouteData
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [],
+                    state: "ReadOnly"
+                } as RouteData
             ]);
             setupSelectedRoute(store, "1");
 
@@ -1353,23 +1197,20 @@ describe("Selected Route Service", () => {
             store.dispatch = spy;
 
             selectedRouteService.addRoutes([
-        {
-            name: "name",
-            segments: [{}],
-            markers: [{ title: "title" }]
-        } as RouteDataWithoutState
+                {
+                    name: "name",
+                    segments: [{}],
+                    markers: [{ title: "title" }]
+                } as RouteDataWithoutState
             ]);
 
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                AddRouteAction
-            );
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(AddRouteAction);
             const action = vi.mocked(spy).mock.calls[0][0] as AddRouteAction;
             expect(action.routeData.name).toBe("name 1");
         }
     ));
 
-    it("Should return empty features list from empty route", inject(
-        [SelectedRouteService],
+    it("Should return empty features list from empty route", inject([SelectedRouteService],
         (selectedRouteService: SelectedRouteService) => {
             const route: Immutable<RouteData> = {
                 id: "1",
@@ -1386,8 +1227,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should return features list from route", inject(
-        [SelectedRouteService],
+    it("Should return features list from route", inject([SelectedRouteService],
         (selectedRouteService: SelectedRouteService) => {
             const route: Immutable<RouteData> = {
                 id: "1",
@@ -1419,20 +1259,13 @@ describe("Selected Route Service", () => {
             };
 
             const features = selectedRouteService.createFeaturesForRoute(route);
-            expect(
-                features.some((f) => f.properties.id.toString().includes("start"))
-            ).toBeTruthy();
-            expect(
-                features.some((f) => f.properties.id.toString().includes("end"))
-            ).toBeTruthy();
-            expect(
-                features.every((f) => f.properties.id?.toString() === f.id)
-            ).toBeTruthy();
+            expect(features.some((f) => f.properties.id.toString().includes("start"))).toBeTruthy();
+            expect(features.some((f) => f.properties.id.toString().includes("end"))).toBeTruthy();
+            expect(features.every((f) => f.properties.id?.toString() === f.id)).toBeTruthy();
         }
     ));
 
-    it("Should return features list from route for editing", inject(
-        [SelectedRouteService],
+    it("Should return features list from route for editing", inject([SelectedRouteService],
         (selectedRouteService: SelectedRouteService) => {
             const route: Immutable<RouteData> = {
                 id: "1",
@@ -1463,38 +1296,25 @@ describe("Selected Route Service", () => {
                 color: "#ff0000"
             };
 
-            const features =
-        selectedRouteService.createFeaturesForEditingRoute(route);
-            expect(
-                features.some((f) => f.properties.id.toString().includes(SEGMENT))
-            ).toBeTruthy();
-            expect(
-                features.some((f) => f.properties.id.toString().includes(SEGMENT_POINT))
-            ).toBeTruthy();
-            expect(
-                features.every((f) => f.properties.id.toString() === f.id)
-            ).toBeTruthy();
+            const features = selectedRouteService.createFeaturesForEditingRoute(route);
+            expect(features.some((f) => f.properties.id.toString().includes(SEGMENT))).toBeTruthy();
+            expect(features.some((f) => f.properties.id.toString().includes(SEGMENT_POINT))).toBeTruthy();
+            expect(features.every((f) => f.properties.id.toString() === f.id)).toBeTruthy();
         }
     ));
 
-    it("should return true if there are hidden routes in the store", inject(
-        [SelectedRouteService, Store],
+    it("should return true if there are hidden routes in the store", inject([SelectedRouteService, Store],
         (service: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
-        { id: "1", state: "Hidden" } as RouteData,
-        { id: "2", state: "Poi" } as RouteData
+                { id: "1", state: "Hidden" } as RouteData,
+                { id: "2", state: "Poi" } as RouteData
             ]);
             expect(service.hasHiddenRoutes()).toBeTruthy();
         }
     ));
 
-    it("should convert to route for users source", inject(
-        [SelectedRouteService, ShareUrlsService, Store],
-        async (
-            service: SelectedRouteService,
-            shareUrlsService: ShareUrlsService,
-            store: Store
-        ) => {
+    it("should convert to route for users source", inject([SelectedRouteService, ShareUrlsService, Store],
+        async (service: SelectedRouteService, shareUrlsService: ShareUrlsService, store: Store) => {
             const spy = vi.fn();
             store.dispatch = spy;
             const feature = {
@@ -1524,19 +1344,12 @@ describe("Selected Route Service", () => {
                 });
             await service.convertToRoute(feature, "description");
             expect(spy).toHaveBeenCalled();
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                AddRouteAction
-            );
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(AddRouteAction);
         }
     ));
 
-    it("should convert to route for OSM source with color", inject(
-        [SelectedRouteService, ElevationProvider, Store],
-        async (
-            service: SelectedRouteService,
-            elevationProvider: ElevationProvider,
-            store: Store
-        ) => {
+    it("should convert to route for OSM source with color", inject([SelectedRouteService, ElevationProvider, Store],
+        async (service: SelectedRouteService, elevationProvider: ElevationProvider, store: Store) => {
             const spy = vi.fn();
             store.dispatch = spy;
             elevationProvider.updateHeights = () => Promise.resolve();
@@ -1558,9 +1371,7 @@ describe("Selected Route Service", () => {
             };
             await service.convertToRoute(feature, "description");
             expect(spy).toHaveBeenCalled();
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                AddRouteAction
-            );
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(AddRouteAction);
             expect(vi.mocked(spy).mock.calls[0][0].routeData.color).toBe("red");
         }
     ));
