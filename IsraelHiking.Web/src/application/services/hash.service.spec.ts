@@ -174,9 +174,7 @@ describe("HashService", () => {
             });
 
             expect(spy).toHaveBeenCalled();
-            expect(vi.mocked(spy).mock.calls[0][0][0]).toBe(
-                RouteStrings.ROUTE_SHARE
-            );
+            expect(vi.mocked(spy).mock.calls[0][0][0]).toBe(RouteStrings.ROUTE_SHARE);
         }
     ));
 
@@ -202,9 +200,7 @@ describe("HashService", () => {
                 },
             });
             expect(spy).toHaveBeenCalled();
-            expect(vi.mocked(spy).mock.calls[0][0][0]).toBe(
-                RouteStrings.ROUTE_URL
-            );
+            expect(vi.mocked(spy).mock.calls[0][0][0]).toBe(RouteStrings.ROUTE_URL);
         }
     ));
 
@@ -255,9 +251,7 @@ describe("HashService", () => {
             });
 
             expect(spy).toHaveBeenCalled();
-            expect(vi.mocked(spy).mock.calls[0][0][0]).toBe(
-                RouteStrings.ROUTE_MAP
-            );
+            expect(vi.mocked(spy).mock.calls[0][0][0]).toBe(RouteStrings.ROUTE_MAP);
         }
     ));
 
@@ -315,11 +309,8 @@ describe("HashService", () => {
     it("Should flyTo in case of map url", inject([Router, MapService, HashService],
         (routerMock: Router, mapService: MapService) => {
             mapService.flyTo = vi.fn();
-            (routerMock as any).url =
-                RouteStrings.ROUTE_MAP + "/2.00/2.000000/3.000000";
-            (routerMock.events as Subject<any>).next(
-                new NavigationEnd(1, routerMock.url, routerMock.url)
-            );
+            (routerMock as any).url = RouteStrings.ROUTE_MAP + "/2.00/2.000000/3.000000";
+            (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
 
             expect(mapService.flyTo).toHaveBeenCalled();
         }
@@ -329,13 +320,9 @@ describe("HashService", () => {
         (routerMock: Router, dataContainerService: DataContainerService) => {
             dataContainerService.setShareUrlAfterNavigation = vi.fn();
             (routerMock as any).url = RouteStrings.ROUTE_SHARE + "/1234";
-            (routerMock.events as Subject<any>).next(
-                new NavigationEnd(1, routerMock.url, routerMock.url)
-            );
+            (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
 
-            expect(
-                dataContainerService.setShareUrlAfterNavigation
-            ).toHaveBeenCalled();
+            expect(dataContainerService.setShareUrlAfterNavigation).toHaveBeenCalled();
         }
     ));
 
@@ -343,9 +330,7 @@ describe("HashService", () => {
         (routerMock: Router, dataContainerService: DataContainerService) => {
             dataContainerService.setFileUrlAfterNavigation = vi.fn();
             (routerMock as any).url = RouteStrings.ROUTE_URL + "/1234";
-            (routerMock.events as Subject<any>).next(
-                new NavigationEnd(1, routerMock.url, routerMock.url)
-            );
+            (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
 
             expect(dataContainerService.setFileUrlAfterNavigation).toHaveBeenCalled();
         }
@@ -355,9 +340,7 @@ describe("HashService", () => {
         (routerMock: Router, sidebarService: SidebarService) => {
             sidebarService.show = vi.fn();
             (routerMock as any).url = RouteStrings.ROUTE_POI + "/1234";
-            (routerMock.events as Subject<any>).next(
-                new NavigationEnd(1, routerMock.url, routerMock.url)
-            );
+            (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
 
             expect(sidebarService.show).toHaveBeenCalled();
         }
@@ -368,9 +351,7 @@ describe("HashService", () => {
             sidebarService.show = vi.fn();
             mapService.isMoving = () => true;
             (routerMock as any).url = RouteStrings.ROUTE_LAYER + "/1234";
-            (routerMock.events as Subject<any>).next(
-                new NavigationEnd(1, routerMock.url, routerMock.url)
-            );
+            (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
 
             expect(sidebarService.show).toHaveBeenCalled();
         }
@@ -380,9 +361,7 @@ describe("HashService", () => {
         (service: HashService, routerMock: Router, sidebarService: SidebarService) => {
             sidebarService.hide = vi.fn();
             (routerMock as any).url = RouteStrings.ROUTE_ROOT;
-            (routerMock.events as Subject<any>).next(
-                new NavigationEnd(1, routerMock.url, routerMock.url)
-            );
+            (routerMock.events as Subject<any>).next(new NavigationEnd(1, routerMock.url, routerMock.url));
 
             expect(sidebarService.hide).toHaveBeenCalled();
         }
