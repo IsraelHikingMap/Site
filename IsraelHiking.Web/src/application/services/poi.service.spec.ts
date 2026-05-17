@@ -456,10 +456,7 @@ describe("Poi Service", () => {
             const promise = poiService.initialize();
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            expect(
-                store.selectSnapshot((state: ApplicationState) => state.offlineState)
-                    .uploadPoiQueue.length
-            ).toBe(0);
+            expect(store.selectSnapshot((state: ApplicationState) => state.offlineState).uploadPoiQueue.length).toBe(0);
 
             return promise;
         }
@@ -490,94 +487,88 @@ describe("Poi Service", () => {
         }
     ));
 
-    it("Should allow adding a point from private marker for a new point", inject([PoiService, Store],
-        async (poiService: PoiService, store: Store) => {
-            const id = uuidv4();
-            const markerData = {
-                description: "description",
-                title: "title",
-                type: "some-type",
-                urls: [
-                    { mimeType: "image", url: "wikimedia.org/image-url", text: "text" }
-                ],
-                latlng: { lng: 1, lat: 2 },
-                id
-            };
+    it("Should allow adding a point from private marker for a new point", inject([PoiService, Store], async (poiService: PoiService, store: Store) => {
+        const id = uuidv4();
+        const markerData = {
+            description: "description",
+            title: "title",
+            type: "some-type",
+            urls: [
+                { mimeType: "image", url: "wikimedia.org/image-url", text: "text" }
+            ],
+            latlng: { lng: 1, lat: 2 },
+            id
+        };
 
-            store.reset({
-                poiState: {
-                    uploadMarkerData: markerData
-                }
-            });
+        store.reset({
+            poiState: {
+                uploadMarkerData: markerData
+            }
+        });
 
-            const feature = await poiService.getBasicInfo("", "new", "he");
-            const data = await poiService.createEditableDataAndMerge(feature);
-            expect(data.location.lat).toBe(2);
-            expect(data.location.lng).toBe(1);
-            expect(data.description).toBe("description");
-            expect(data.title).toBe("title");
-            expect(data.imagesUrls[0]).toBe("wikimedia.org/image-url");
-            expect(data.icon).toBe("icon-some-type");
-            expect(data.showLocationUpdate).toBeFalsy();
-            expect(data.id).toBe(id);
-        }
-    ));
+        const feature = await poiService.getBasicInfo("", "new", "he");
+        const data = await poiService.createEditableDataAndMerge(feature);
+        expect(data.location.lat).toBe(2);
+        expect(data.location.lng).toBe(1);
+        expect(data.description).toBe("description");
+        expect(data.title).toBe("title");
+        expect(data.imagesUrls[0]).toBe("wikimedia.org/image-url");
+        expect(data.icon).toBe("icon-some-type");
+        expect(data.showLocationUpdate).toBeFalsy();
+        expect(data.id).toBe(id);
+    }));
 
-    it("Should return null when trying to create data for non OSM points", inject([PoiService],
-        async (poiService: PoiService) => {
-            const data = await poiService.createEditableDataAndMerge({
-                type: "Feature",
-                geometry: {
-                    type: "Point",
-                    coordinates: [1, 2]
-                },
-                properties: {}
-            });
-            expect(data).toBeNull();
-        }
-    ));
+    it("Should return null when trying to create data for non OSM points", inject([PoiService], async (poiService: PoiService) => {
+        const data = await poiService.createEditableDataAndMerge({
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates: [1, 2]
+            },
+            properties: {}
+        });
+        expect(data).toBeNull();
+    }));
 
-    it("Should create data for updating a point from private marker by merging it, for an existing point", inject([PoiService, Store],
-        async (poiService: PoiService, store: Store) => {
-            const markerData = {
-                description: "description",
-                title: "title",
-                type: "some-type",
-                urls: [
-                    { mimeType: "image", url: "wikimedia.org/image-url", text: "text" }
-                ],
-                latlng: { lng: 1, lat: 2 }
-            };
+    it("Should create data for updating a point from private marker by merging it, for an existing point", inject([PoiService, Store], async (poiService: PoiService, store: Store) => {
+        const markerData = {
+            description: "description",
+            title: "title",
+            type: "some-type",
+            urls: [
+                { mimeType: "image", url: "wikimedia.org/image-url", text: "text" }
+            ],
+            latlng: { lng: 1, lat: 2 }
+        };
 
-            store.reset({
-                poiState: {
-                    uploadMarkerData: markerData
-                }
-            });
+        store.reset({
+            poiState: {
+                uploadMarkerData: markerData
+            }
+        });
 
-            const feature: GeoJSON.Feature = {
-                type: "Feature",
-                geometry: {
-                    type: "Point",
-                    coordinates: [3, 4]
-                },
-                properties: {
-                    poiId: "poi-42",
-                    poiSource: "OSM"
-                }
-            };
+        const feature: GeoJSON.Feature = {
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates: [3, 4]
+            },
+            properties: {
+                poiId: "poi-42",
+                poiSource: "OSM"
+            }
+        };
 
-            const data = await poiService.createEditableDataAndMerge(structuredClone(feature));
-            expect(data.location.lat).toBe(2);
-            expect(data.location.lng).toBe(1);
-            expect(data.description).toBe("description");
-            expect(data.title).toBe("title");
-            expect(data.imagesUrls[0]).toBe("wikimedia.org/image-url");
-            expect(data.icon).toBe("icon-some-type");
-            expect(data.showLocationUpdate).toBeTruthy();
-            expect(data.originalFeature).toEqual(feature);
-        }
-    ));
+        const data = await poiService.createEditableDataAndMerge(structuredClone(feature));
+        expect(data.location.lat).toBe(2);
+        expect(data.location.lng).toBe(1);
+        expect(data.description).toBe("description");
+        expect(data.title).toBe("title");
+        expect(data.imagesUrls[0]).toBe("wikimedia.org/image-url");
+        expect(data.icon).toBe("icon-some-type");
+        expect(data.showLocationUpdate).toBeTruthy();
+        expect(data.originalFeature).toEqual(feature);
+    }));
 
     it("Should get a point by id and source from the server", inject(
         [PoiService, HttpTestingController],
