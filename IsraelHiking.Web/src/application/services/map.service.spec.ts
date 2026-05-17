@@ -29,25 +29,19 @@ describe("MapService", () => {
         });
     });
 
-    it("Should resolve promise when setting the map", inject(
-        [MapService],
-        async (service: MapService) => {
-            service.setMap({ on: () => { } } as any as Map);
-            await service.initializationPromise;
-            expect(true).toBe(true);
-        }
-    ));
+    it("Should resolve promise when setting the map", inject([MapService], async (service: MapService) => {
+        service.setMap({ on: () => { } } as any as Map);
+        await service.initializationPromise;
+        expect(true).toBe(true);
+    }));
 
-    it("Should unset the map and remove listeners", inject(
-        [MapService],
-        async (service: MapService) => {
-            const spy = vi.fn();
-            service.setMap({ on: () => { }, off: spy } as any as Map);
-            await service.initializationPromise;
-            service.unsetMap();
-            expect(spy).toHaveBeenCalled();
-        }
-    ));
+    it("Should unset the map and remove listeners", inject([MapService], async (service: MapService) => {
+        const spy = vi.fn();
+        service.setMap({ on: () => { }, off: spy } as any as Map);
+        await service.initializationPromise;
+        service.unsetMap();
+        expect(spy).toHaveBeenCalled();
+    }));
 
     it("Should get full URL", inject([MapService], (service: MapService) => {
         const url = service.getFullUrl("123");
@@ -55,8 +49,7 @@ describe("MapService", () => {
         expect(url).toContain("/123");
     }));
 
-    it("Should should not do anything when missing image addres does not start with http", inject(
-        [MapService],
+    it("Should should not do anything when missing image addres does not start with http", inject([MapService],
         async (service: MapService) => {
             const spy = vi.fn();
             const mapMock = {
@@ -71,8 +64,7 @@ describe("MapService", () => {
         }
     ));
 
-    it("Should load image when missing", inject(
-        [MapService],
+    it("Should load image when missing", inject([MapService],
         async (service: MapService) => {
             const spy = vi.fn().mockReturnValue(Promise.resolve({ data: "123" }));
             const addImageSpy = vi.fn();
@@ -92,8 +84,7 @@ describe("MapService", () => {
         }
     ));
 
-    it("Should not call twice on the same missing", inject(
-        [MapService],
+    it("Should not call twice on the same missing", inject([MapService],
         async (service: MapService) => {
             const spy = vi.fn().mockReturnValue(Promise.resolve({ data: "123" }));
             const addImageSpy = vi.fn();
@@ -116,168 +107,135 @@ describe("MapService", () => {
         }
     ));
 
-    it("should not log 418 error message", inject(
-        [MapService, LoggingService],
-        async (service: MapService, loggingService: LoggingService) => {
-            loggingService.error = vi.fn();
-            service.setMap({
-                on: (event: string, callback: (error: ErrorEvent) => void) => {
-                    if (event == "error")
-                        callback({ error: new Error("418") } as any as ErrorEvent);
-                },
-            } as any as Map);
-            await service.initializationPromise;
-            expect(loggingService.error).not.toHaveBeenCalled();
-        }
-    ));
+    it("should not log 418 error message", inject([MapService, LoggingService], async (service: MapService, loggingService: LoggingService) => {
+        loggingService.error = vi.fn();
+        service.setMap({
+            on: (event: string, callback: (error: ErrorEvent) => void) => {
+                if (event == "error")
+                    callback({ error: new Error("418") } as any as ErrorEvent);
+            },
+        } as any as Map);
+        await service.initializationPromise;
+        expect(loggingService.error).not.toHaveBeenCalled();
+    }));
 
-    it("should log error message", inject(
-        [MapService, LoggingService],
-        async (service: MapService, loggingService: LoggingService) => {
-            loggingService.error = vi.fn();
-            service.setMap({
-                on: (event: string, callback: (error: ErrorEvent) => void) => {
-                    if (event == "error")
-                        callback({ error: new Error("other") } as any as ErrorEvent);
-                },
-            } as any as Map);
-            await service.initializationPromise;
-            expect(loggingService.error).toHaveBeenCalled();
-        }
-    ));
+    it("should log error message", inject([MapService, LoggingService], async (service: MapService, loggingService: LoggingService) => {
+        loggingService.error = vi.fn();
+        service.setMap({
+            on: (event: string, callback: (error: ErrorEvent) => void) => {
+                if (event == "error")
+                    callback({ error: new Error("other") } as any as ErrorEvent);
+            },
+        } as any as Map);
+        await service.initializationPromise;
+        expect(loggingService.error).toHaveBeenCalled();
+    }));
 
-    it("should update the state on moveend", inject(
-        [MapService, Store],
-        async (service: MapService, store: Store) => {
-            const spy = vi.fn();
-            store.dispatch = spy;
-            store.reset({
-                locationState: {
-                    longitude: 0,
-                    latitude: 0,
-                    zoom: 0,
-                },
-            });
-            service.setMap({
-                on: (event: string, callback: (error: ErrorEvent) => void) => {
-                    if (event == "moveend") callback({} as any);
-                },
-                getCenter: () => ({ lng: 1, lat: 2 }),
-                getZoom: () => 1,
-            } as any as Map);
-            await service.initializationPromise;
-            expect(spy).toHaveBeenCalled();
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-                SetLocationAction
-            );
-        }
-    ));
+    it("should update the state on moveend", inject([MapService, Store], async (service: MapService, store: Store) => {
+        const spy = vi.fn();
+        store.dispatch = spy;
+        store.reset({
+            locationState: {
+                longitude: 0,
+                latitude: 0,
+                zoom: 0,
+            },
+        });
+        service.setMap({
+            on: (event: string, callback: (error: ErrorEvent) => void) => {
+                if (event == "moveend") callback({} as any);
+            },
+            getCenter: () => ({ lng: 1, lat: 2 }),
+            getZoom: () => 1,
+        } as any as Map);
+        await service.initializationPromise;
+        expect(spy).toHaveBeenCalled();
+        expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(SetLocationAction);
+    }));
 
-    it("should not update the state on moveend if location is the same", inject(
-        [MapService, Store],
-        async (service: MapService, store: Store) => {
-            const spy = vi.fn();
-            store.dispatch = spy;
-            store.reset({
-                locationState: {
-                    longitude: 1,
-                    latitude: 2,
-                    zoom: 1,
-                },
-            });
-            service.setMap({
-                on: (event: string, callback: (error: ErrorEvent) => void) => {
-                    if (event == "moveend") callback({} as any);
-                },
-                getCenter: () => ({ lng: 1, lat: 2 }),
-                getZoom: () => 1,
-            } as any as Map);
-            await service.initializationPromise;
-            expect(spy).not.toHaveBeenCalled();
-        }
-    ));
+    it("should not update the state on moveend if location is the same", inject([MapService, Store], async (service: MapService, store: Store) => {
+        const spy = vi.fn();
+        store.dispatch = spy;
+        store.reset({
+            locationState: {
+                longitude: 1,
+                latitude: 2,
+                zoom: 1,
+            },
+        });
+        service.setMap({
+            on: (event: string, callback: (error: ErrorEvent) => void) => {
+                if (event == "moveend") callback({} as any);
+            },
+            getCenter: () => ({ lng: 1, lat: 2 }),
+            getZoom: () => 1,
+        } as any as Map);
+        await service.initializationPromise;
+        expect(spy).not.toHaveBeenCalled();
+    }));
 
-    it("should not throw if moveend is called after map removal", inject(
-        [MapService],
-        async (service: MapService) => {
-            let moveendCallback: (e: any) => void;
-            service.setMap({
-                on: (event: string, callback: (error: ErrorEvent) => void) => {
-                    if (event == "moveend") moveendCallback = callback;
-                },
-                off: () => { },
-            } as any as Map);
-            await service.initializationPromise;
-            service.unsetMap();
-            expect(() => moveendCallback(null)).not.toThrow();
-        }
-    ));
+    it("should not throw if moveend is called after map removal", inject([MapService], async (service: MapService) => {
+        let moveendCallback: (e: any) => void;
+        service.setMap({
+            on: (event: string, callback: (error: ErrorEvent) => void) => {
+                if (event == "moveend") moveendCallback = callback;
+            },
+            off: () => { },
+        } as any as Map);
+        await service.initializationPromise;
+        service.unsetMap();
+        expect(() => moveendCallback(null)).not.toThrow();
+    }));
 
-    it("should get bounds from map", inject(
-        [MapService],
-        async (service: MapService) => {
-            service.setMap({
-                on: () => { },
-                getBounds: () => ({
-                    getNorthEast: () => ({ lat: 1, lng: 1 }),
-                    getSouthWest: () => ({ lat: 2, lng: 2 }),
-                }),
-            } as any as Map);
-            const bounds = service.getMapBounds();
-            expect(bounds).toEqual({
-                northEast: { lat: 1, lng: 1 },
-                southWest: { lat: 2, lng: 2 },
-            });
-        }
-    ));
+    it("should get bounds from map", inject([MapService], async (service: MapService) => {
+        service.setMap({
+            on: () => { },
+            getBounds: () => ({
+                getNorthEast: () => ({ lat: 1, lng: 1 }),
+                getSouthWest: () => ({ lat: 2, lng: 2 }),
+            }),
+        } as any as Map);
+        const bounds = service.getMapBounds();
+        expect(bounds).toEqual({
+            northEast: { lat: 1, lng: 1 },
+            southWest: { lat: 2, lng: 2 },
+        });
+    }));
 
-    it("should project point", inject(
-        [MapService],
-        async (service: MapService) => {
-            service.setMap({
-                on: () => { },
-                project: () => ({ x: 1, y: 2 }),
-            } as any as Map);
-            const point = service.project({ lng: 1, lat: 2 });
-            expect(point.x).toEqual(1);
-            expect(point.y).toEqual(2);
-        }
-    ));
+    it("should project point", inject([MapService], async (service: MapService) => {
+        service.setMap({
+            on: () => { },
+            project: () => ({ x: 1, y: 2 }),
+        } as any as Map);
+        const point = service.project({ lng: 1, lat: 2 });
+        expect(point.x).toEqual(1);
+        expect(point.y).toEqual(2);
+    }));
 
-    it("should get an empty list of features when the map was not initialized", inject(
-        [MapService],
-        async (service: MapService) => {
-            const features = service.getFeaturesFromTiles();
-            expect(features).toEqual([]);
-        }
-    ));
+    it("should get an empty list of features when the map was not initialized", inject([MapService], async (service: MapService) => {
+        const features = service.getFeaturesFromTiles();
+        expect(features).toEqual([]);
+    }));
 
-    it("should get a list of features when the map was initialized", inject(
-        [MapService],
-        async (service: MapService) => {
-            service.setMap({
-                on: () => { },
-                queryRenderedFeatures: () => [{ id: "42" }, { id: "43" }],
-                getLayer: () => true,
-            } as any as Map);
-            const features = service.getFeaturesFromTiles();
-            expect(features.length).toEqual(2);
-        }
-    ));
+    it("should get a list of features when the map was initialized", inject([MapService], async (service: MapService) => {
+        service.setMap({
+            on: () => { },
+            queryRenderedFeatures: () => [{ id: "42" }, { id: "43" }],
+            getLayer: () => true,
+        } as any as Map);
+        const features = service.getFeaturesFromTiles();
+        expect(features.length).toEqual(2);
+    }));
 
-    it("should return is moving when the map is moving", inject(
-        [MapService],
-        async (service: MapService) => {
-            service.setMap({
-                on: () => { },
-                isMoving: () => true,
-            } as any as Map);
-            expect(service.isMoving()).toEqual(true);
-        }
-    ));
+    it("should return is moving when the map is moving", inject([MapService], async (service: MapService) => {
+        service.setMap({
+            on: () => { },
+            isMoving: () => true,
+        } as any as Map);
+        expect(service.isMoving()).toEqual(true);
+    }));
 
-    it("Should fit bounds with default value when not passed", inject(
-        [MapService],
+    it("Should fit bounds with default value when not passed", inject([MapService],
         async (service: MapService) => {
             const spy = vi.fn();
             service.setMap({
@@ -285,16 +243,12 @@ describe("MapService", () => {
                 on: () => { },
                 getZoom: () => 1,
             } as any as Map);
-            await service.fitBounds({
-                northEast: { lat: 1, lng: 1 },
-                southWest: { lat: 2, lng: 2 },
-            });
+            await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } });
             expect(vi.mocked(spy).mock.calls[0][1].padding).toBe(50);
         }
     ));
 
-    it("Should fit bounds when with padding on small screen", inject(
-        [MapService],
+    it("Should fit bounds when with padding on small screen", inject([MapService],
         async (service: MapService) => {
             const spy = vi.fn();
             service.setMap({
@@ -304,20 +258,13 @@ describe("MapService", () => {
             } as any as Map);
             const originalInnerWidth = (window as any).innerWidth;
             (window as any).innerWidth = 500;
-            await service.fitBounds(
-                { northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } },
-                0,
-                { bottom: window.innerHeight / 2 }
-            );
+            await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } }, 0, { bottom: window.innerHeight / 2 });
             (window as any).innerWidth = originalInnerWidth;
-            expect(vi.mocked(spy).mock.calls[0][1].padding.bottom).toBe(
-                window.innerHeight / 2
-            );
+            expect(vi.mocked(spy).mock.calls[0][1].padding.bottom).toBe(window.innerHeight / 2);
         }
     ));
 
-    it("Should fit bounds for large screen and not use the small padding", inject(
-        [MapService],
+    it("Should fit bounds for large screen and not use the small padding", inject([MapService],
         async (service: MapService) => {
             const spy = vi.fn();
             service.setMap({
@@ -327,18 +274,13 @@ describe("MapService", () => {
             } as any as Map);
             const originalInnerWidth = (window as any).innerWidth;
             (window as any).innerWidth = 1000;
-            await service.fitBounds(
-                { northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } },
-                0,
-                { bottom: 100 }
-            );
+            await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } }, 0, { bottom: 100 });
             (window as any).innerWidth = originalInnerWidth;
             expect(vi.mocked(spy).mock.calls[0][1].padding).toBe(0);
         }
     ));
 
-    it("Should not fly to on small changes", inject(
-        [MapService],
+    it("Should not fly to on small changes", inject([MapService],
         async (service: MapService) => {
             const spy = vi.fn();
             service.setMap({
@@ -354,8 +296,7 @@ describe("MapService", () => {
         }
     ));
 
-    it("Should fly to on large changes", inject(
-        [MapService],
+    it("Should fly to on large changes", inject([MapService],
         async (service: MapService) => {
             const spy = vi.fn();
             service.setMap({
@@ -370,8 +311,7 @@ describe("MapService", () => {
         }
     ));
 
-    it("Should use current zoom if not provided", inject(
-        [MapService],
+    it("Should use current zoom if not provided", inject([MapService],
         async (service: MapService) => {
             const spy = vi.fn();
             service.setMap({
@@ -388,8 +328,7 @@ describe("MapService", () => {
         }
     ));
 
-    it("Should move to with current zoom", inject(
-        [MapService],
+    it("Should move to with current zoom", inject([MapService],
         async (service: MapService) => {
             const spy = vi.fn();
             service.setMap({
@@ -403,8 +342,7 @@ describe("MapService", () => {
         }
     ));
 
-    it("Should not move to with current zoom after map was removed", inject(
-        [MapService],
+    it("Should not move to with current zoom after map was removed", inject([MapService],
         async (service: MapService) => {
             const spy = vi.fn();
             service.setMap({
@@ -419,8 +357,7 @@ describe("MapService", () => {
         }
     ));
 
-    it("should call map's add layer", inject(
-        [MapService],
+    it("should call map's add layer", inject([MapService],
         async (service: MapService) => {
             const spy = vi.fn();
             service.setMap({
@@ -432,8 +369,7 @@ describe("MapService", () => {
         }
     ));
 
-    it("should call map's add source", inject(
-        [MapService],
+    it("should call map's add source", inject([MapService],
         async (service: MapService) => {
             const spy = vi.fn();
             service.setMap({
