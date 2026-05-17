@@ -241,8 +241,7 @@ describe("TranslationService", () => {
 
         const translation = await promise;
         expect(translation).toBe("Translated Description");
-    }
-    ));
+    }));
 
     it("should get a description translation from cache", inject([TranslationService, HttpTestingController], async (service: TranslationService, backend: HttpTestingController) => {
         const feature: GeoJSON.Feature = {
@@ -286,6 +285,5 @@ describe("TranslationService", () => {
 
         const translation = await promise;
         expect(translation).toBe("");
-    }
-    ));
+    }));
 });
