@@ -104,38 +104,40 @@ describe("Recorded Route Service", () => {
         }
     ));
 
-    it("Should initialize after a recording stopped in the middle and stop the recording gracefully", inject([RecordedRouteService, Store],
-        (service: RecordedRouteService, store: Store) => {
-            store.reset({
-                gpsState: {},
-                recordedRouteState: {
-                    isRecording: true,
-                    route: {
-                        markers: [],
-                        latlngs: [
-                            {
-                                lat: 1,
-                                lng: 2,
-                                alt: 10,
-                                timestamp: new Date(0),
-                            },
-                        ],
+    it("Should initialize after a recording stopped in the middle and stop the recording gracefully",
+        inject([RecordedRouteService, Store],
+            (service: RecordedRouteService, store: Store) => {
+                store.reset({
+                    gpsState: {},
+                    recordedRouteState: {
+                        isRecording: true,
+                        route: {
+                            markers: [],
+                            latlngs: [
+                                {
+                                    lat: 1,
+                                    lng: 2,
+                                    alt: 10,
+                                    timestamp: new Date(0),
+                                },
+                            ],
+                        },
                     },
-                },
-                routeEditingState: {
-                    routingType: "Hike",
-                },
-                userState: {
-                    userInfo: null,
-                },
-            });
-            const spy = vi.fn();
-            store.dispatch = spy;
-            service.initialize();
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(StopRecordingAction);
-            expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(AddRouteAction);
-        }
-    ));
+                    routeEditingState: {
+                        routingType: "Hike",
+                    },
+                    userState: {
+                        userInfo: null,
+                    },
+                });
+                const spy = vi.fn();
+                store.dispatch = spy;
+                service.initialize();
+                expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(StopRecordingAction);
+                expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(AddRouteAction);
+            }
+        )
+    );
 
     it("Should initialize after a recording stopped in the middle with pending proccessing location and stop the recording gracefully",
         inject([RecordedRouteService, Store],
