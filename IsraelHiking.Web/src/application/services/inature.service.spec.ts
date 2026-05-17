@@ -43,8 +43,8 @@ describe("INatureService", () => {
             // Assert
             await promise;
             expect(feature.properties.image).toBe("https://inature.info/w/index.php?title=Special:Redirect/file/image");
-
-        }));
+        }
+    ));
 
     it("Should create feature from page id that contain a share", inject([INatureService, HttpTestingController],
         async (service: INatureService, mockBackend: HttpTestingController) => {
@@ -85,7 +85,8 @@ describe("INatureService", () => {
             expect(result.properties.poiIcon).toBe("icon-hike");
             expect(result.properties.poiIconColor).toBe("black");
             expect(result.properties.image).toBe("https://inature.info/w/index.php?title=Special:Redirect/file/image");
-        }));
+        }
+    ));
 
     it("Should create feature from page id", inject([INatureService, HttpTestingController],
         async (service: INatureService, mockBackend: HttpTestingController) => {
@@ -124,5 +125,6 @@ describe("INatureService", () => {
             expect(result.properties.poiIcon).toBe("icon-inature");
             expect(result.properties.poiIconColor).toBe("#116C00");
             expect(result.properties.image).toBe("https://inature.info/w/index.php?title=Special:Redirect/file/image");
-        }));
+        }
+    ));
 });
