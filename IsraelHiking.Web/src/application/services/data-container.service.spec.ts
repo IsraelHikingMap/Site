@@ -158,7 +158,7 @@ describe("DataContainerService", () => {
         expect(fileService.openFromUrl).not.toHaveBeenCalled();
     }));
 
-    it("should set share URL and not show toast message if in iframe and select base layer", inject([DataContainerService, ShareUrlsService, ToastService, RunningContextService, LayersService,], async (service: DataContainerService, shareUrlsService: ShareUrlsService, toastService: ToastService, runningContextService: RunningContextService, layerService: LayersService) => {
+    it("should set share URL and not show toast message if in iframe and select base layer", inject([DataContainerService, ShareUrlsService, ToastService, RunningContextService, LayersService], async (service: DataContainerService, shareUrlsService: ShareUrlsService, toastService: ToastService, runningContextService: RunningContextService, layerService: LayersService) => {
         (runningContextService as any).isIFrame = true;
         const shareUrl = {
             id: "123",
