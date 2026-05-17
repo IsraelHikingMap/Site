@@ -244,51 +244,48 @@ describe("TranslationService", () => {
     }
     ));
 
-    it("should get a description translation from cache", inject([TranslationService, HttpTestingController],
-        async (service: TranslationService, backend: HttpTestingController) => {
-            const feature: GeoJSON.Feature = {
-                type: "Feature",
-                geometry: {
-                    type: "Point",
-                    coordinates: [0, 0]
-                },
-                properties: {
-                    poiId: "12345",
-                    "description:en": "Description in English"
-                }
-            };
-            const promise = service.getTranslatedDescription(feature);
+    it("should get a description translation from cache", inject([TranslationService, HttpTestingController], async (service: TranslationService, backend: HttpTestingController) => {
+        const feature: GeoJSON.Feature = {
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates: [0, 0]
+            },
+            properties: {
+                poiId: "12345",
+                "description:en": "Description in English"
+            }
+        };
+        const promise = service.getTranslatedDescription(feature);
 
-            backend.expectOne(req => req.method === "POST" && req.url === Urls.tranlation).flush({
-                translatedText: "Translated Description"
-            } as TranslationResponse);
+        backend.expectOne(req => req.method === "POST" && req.url === Urls.tranlation).flush({
+            translatedText: "Translated Description"
+        } as TranslationResponse);
 
-            const translation = await promise;
-            const translation2 = await service.getTranslatedDescription(feature);
-            expect(translation).toBe("Translated Description");
-            expect(translation2).toBe("Translated Description");
-        }
-    ));
+        const translation = await promise;
+        const translation2 = await service.getTranslatedDescription(feature);
+        expect(translation).toBe("Translated Description");
+        expect(translation2).toBe("Translated Description");
+    }));
 
-    it("should return empty string in case of error", inject([TranslationService, HttpTestingController],
-        async (service: TranslationService, backend: HttpTestingController) => {
-            const feature: GeoJSON.Feature = {
-                type: "Feature",
-                geometry: {
-                    type: "Point",
-                    coordinates: [0, 0]
-                },
-                properties: {
-                    poiId: "12345",
-                    "description:en": "Description in English"
-                }
-            };
-            const promise = service.getTranslatedDescription(feature);
+    it("should return empty string in case of error", inject([TranslationService, HttpTestingController], async (service: TranslationService, backend: HttpTestingController) => {
+        const feature: GeoJSON.Feature = {
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates: [0, 0]
+            },
+            properties: {
+                poiId: "12345",
+                "description:en": "Description in English"
+            }
+        };
+        const promise = service.getTranslatedDescription(feature);
 
-            backend.expectOne(req => req.method === "POST" && req.url === Urls.tranlation).flush({}, { status: 500, statusText: "Server Error" });
+        backend.expectOne(req => req.method === "POST" && req.url === Urls.tranlation).flush({}, { status: 500, statusText: "Server Error" });
 
-            const translation = await promise;
-            expect(translation).toBe("");
-        }
+        const translation = await promise;
+        expect(translation).toBe("");
+    }
     ));
 });
