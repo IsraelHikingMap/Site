@@ -21,17 +21,19 @@ export class ImageGalleryService {
             this.overlayRef.dispose();
         }
         this.overlayRef = this.overlay.create({
-              hasBackdrop: false,
-              positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
-              scrollStrategy: this.overlay.scrollStrategies.block()
+            hasBackdrop: false,
+            positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
+            scrollStrategy: this.overlay.scrollStrategies.block()
         });
         const injector = Injector.create({
             providers: [
                 { provide: OverlayRef, useValue: this.overlayRef },
-                { provide: PHOTO_SWIPE_DATA, useValue: {
-                    imageUrls: urls,
-                    index
-                }}
+                {
+                    provide: PHOTO_SWIPE_DATA, useValue: {
+                        imageUrls: urls,
+                        index
+                    }
+                }
             ]
         });
 

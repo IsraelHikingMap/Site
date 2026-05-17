@@ -1,12 +1,12 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import {
-  provideHttpClient,
-  withInterceptorsFromDi,
+    provideHttpClient,
+    withInterceptorsFromDi,
 } from "@angular/common/http";
 import {
-  HttpTestingController,
-  provideHttpClientTesting,
+    HttpTestingController,
+    provideHttpClientTesting,
 } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 
@@ -16,434 +16,434 @@ import { ResourcesService } from "./resources.service";
 import { DatabaseService } from "./database.service";
 import { Urls } from "../urls";
 import {
-  BulkReplaceTracesAction,
-  RemoveTraceAction,
-  UpdateTraceAction,
+    BulkReplaceTracesAction,
+    RemoveTraceAction,
+    UpdateTraceAction,
 } from "../reducers/traces.reducer";
 import type { Trace } from "../models";
 
 describe("Traces Service", () => {
-  beforeEach(() => {
-    const loggignMock = {
-      info: () => { },
-      error: () => { },
-    };
-    TestBed.configureTestingModule({
-      imports: [NgxsModule.forRoot([])],
-      providers: [
-        TracesService,
-        {
-          provide: ResourcesService,
-          useValue: {
-            getCurrentLanguageCodeSimplified: () => "he",
-          },
-        },
-        { provide: LoggingService, useValue: loggignMock },
-        {
-          provide: DatabaseService,
-          useValue: {
-            deleteTraceById: () => { },
-          },
-        },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    });
-  });
-
-  it("Should get missing parts", inject(
-    [TracesService, HttpTestingController],
-    async (
-      tracesService: TracesService,
-      mockBackend: HttpTestingController
-    ) => {
-      const trace = { id: "123" } as Trace;
-
-      const promise = tracesService.getMissingParts(trace.id).then((res) => {
-        expect(res).not.toBeNull();
-      });
-
-      mockBackend
-        .expectOne(Urls.missingParts + "?traceId=" + trace.id)
-        .flush({});
-      return promise;
-    }
-  ));
-
-  it("Should not upload local traces if configured not to", inject(
-    [TracesService, HttpTestingController, Store],
-    async (
-      tracesService: TracesService,
-      mockBackend: HttpTestingController,
-      store: Store
-    ) => {
-      store.reset({
-        configuration: {
-          isAutomaticRecordingUpload: false,
-        },
-      });
-
-      await tracesService.initialize();
-
-      expect(() =>
-        mockBackend.expectNone(Urls.uploadDataContainer)
-      ).not.toThrow();
-    }
-  ));
-
-  it("Should not upload local traces if user is logged out", inject(
-    [TracesService, HttpTestingController, Store],
-    async (
-      tracesService: TracesService,
-      mockBackend: HttpTestingController,
-      store: Store
-    ) => {
-      store.reset({
-        configuration: {
-          isAutomaticRecordingUpload: true,
-        },
-        userState: {
-          userInfo: null,
-        },
-      });
-      await tracesService.initialize();
-
-      expect(() =>
-        mockBackend.expectNone(Urls.uploadDataContainer)
-      ).not.toThrow();
-    }
-  ));
-
-  it("Should not upload local traces if there are no local traces", inject(
-    [TracesService, HttpTestingController, Store],
-    async (
-      tracesService: TracesService,
-      mockBackend: HttpTestingController,
-      store: Store
-    ) => {
-      store.reset({
-        configuration: {
-          isAutomaticRecordingUpload: true,
-        },
-        userState: {
-          userInfo: {},
-        },
-        tracesState: {
-          traces: [{ visibility: "private" }],
-        },
-      });
-      await tracesService.initialize();
-
-      expect(() =>
-        mockBackend.expectNone(Urls.uploadDataContainer)
-      ).not.toThrow();
-    }
-  ));
-
-  it("Should upload local traces and run sync with no traces", inject(
-    [TracesService, HttpTestingController, Store],
-    async (
-      tracesService: TracesService,
-      mockBackend: HttpTestingController,
-      store: Store
-    ) => {
-      const spy = vi.fn();
-      store.dispatch = spy;
-      store.reset({
-        configuration: {
-          isAutomaticRecordingUpload: true,
-        },
-        userState: {
-          userInfo: {},
-        },
-        tracesState: {
-          traces: [
-            {
-              id: "42",
-              visibility: "local",
-              dataContainer: {
-                routes: [{}],
-              },
-            },
-          ],
-        },
-      });
-      const promise = tracesService.initialize();
-
-      mockBackend
-        .expectOne((u) => u.url.startsWith(Urls.uploadDataContainer))
-        .flush({});
-
-      await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-      mockBackend
-        .expectOne((u) => u.url.startsWith(Urls.osmGpxFiles))
-        .flush({ traces: [] });
-
-      await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-      expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-        RemoveTraceAction
-      );
-      return promise;
-    }
-  ));
-
-  it("Should upload local traces and run sync with traces", inject(
-    [TracesService, HttpTestingController, Store],
-    async (
-      tracesService: TracesService,
-      mockBackend: HttpTestingController,
-      store: Store
-    ) => {
-      const spy = vi.fn();
-      store.dispatch = spy;
-      store.reset({
-        configuration: {
-          isAutomaticRecordingUpload: true,
-        },
-        userState: {
-          userInfo: {},
-        },
-        tracesState: {
-          traces: [
-            {
-              id: "42",
-              visibility: "local",
-              dataContainer: {
-                routes: [{}],
-              },
-            },
-            {
-              id: "1",
-              visibility: "private",
-            },
-          ],
-        },
-      });
-      const promise = tracesService.initialize();
-
-      mockBackend
-        .expectOne((u) => u.url.startsWith(Urls.uploadDataContainer))
-        .flush({});
-
-      await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-      mockBackend
-        .expectOne((u) => u.url.startsWith(Urls.osmGpxFiles))
-        .flush({
-          traces: [
-            {
-              id: 1,
-              visibility: "public",
-            },
-            {
-              id: 2,
-              visibility: "private",
-            },
-          ],
+    beforeEach(() => {
+        const loggignMock = {
+            info: () => { },
+            error: () => { },
+        };
+        TestBed.configureTestingModule({
+            imports: [NgxsModule.forRoot([])],
+            providers: [
+                TracesService,
+                {
+                    provide: ResourcesService,
+                    useValue: {
+                        getCurrentLanguageCodeSimplified: () => "he",
+                    },
+                },
+                { provide: LoggingService, useValue: loggignMock },
+                {
+                    provide: DatabaseService,
+                    useValue: {
+                        deleteTraceById: () => { },
+                    },
+                },
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ],
         });
+    });
 
-      await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+    it("Should get missing parts", inject(
+        [TracesService, HttpTestingController],
+        async (
+            tracesService: TracesService,
+            mockBackend: HttpTestingController
+        ) => {
+            const trace = { id: "123" } as Trace;
 
-      expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
-        RemoveTraceAction
-      );
-      expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(
-        BulkReplaceTracesAction
-      );
+            const promise = tracesService.getMissingParts(trace.id).then((res) => {
+                expect(res).not.toBeNull();
+            });
 
-      const req = mockBackend.match((u) => u.url.startsWith(Urls.osmGpx));
-      expect(req.length).toBe(2);
-      req[0].flush({});
-      req[1].flush({});
-      await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+            mockBackend
+                .expectOne(Urls.missingParts + "?traceId=" + trace.id)
+                .flush({});
+            return promise;
+        }
+    ));
 
-      expect(vi.mocked(spy).mock.calls[2][0]).toBeInstanceOf(
-        UpdateTraceAction
-      );
-      expect(vi.mocked(spy).mock.calls[3][0]).toBeInstanceOf(
-        UpdateTraceAction
-      );
+    it("Should not upload local traces if configured not to", inject(
+        [TracesService, HttpTestingController, Store],
+        async (
+            tracesService: TracesService,
+            mockBackend: HttpTestingController,
+            store: Store
+        ) => {
+            store.reset({
+                configuration: {
+                    isAutomaticRecordingUpload: false,
+                },
+            });
 
-      return promise;
-    }
-  ));
+            await tracesService.initialize();
 
-  it("Should return null get a trace by id when there's no trace", inject(
-    [TracesService, Store],
-    async (tracesService: TracesService, store: Store) => {
-      store.reset({
-        tracesState: {
-          traces: [],
-        },
-      });
-      const trace = await tracesService.getTraceById("42");
+            expect(() =>
+                mockBackend.expectNone(Urls.uploadDataContainer)
+            ).not.toThrow();
+        }
+    ));
 
-      expect(trace).toBeNull();
-    }
-  ));
+    it("Should not upload local traces if user is logged out", inject(
+        [TracesService, HttpTestingController, Store],
+        async (
+            tracesService: TracesService,
+            mockBackend: HttpTestingController,
+            store: Store
+        ) => {
+            store.reset({
+                configuration: {
+                    isAutomaticRecordingUpload: true,
+                },
+                userState: {
+                    userInfo: null,
+                },
+            });
+            await tracesService.initialize();
 
-  it("Should return a trace store in DB", inject(
-    [TracesService, Store, DatabaseService],
-    async (
-      tracesService: TracesService,
-      store: Store,
-      databaseService: DatabaseService
-    ) => {
-      databaseService.getTraceById = () => {
-        return Promise.resolve({} as Trace);
-      };
+            expect(() =>
+                mockBackend.expectNone(Urls.uploadDataContainer)
+            ).not.toThrow();
+        }
+    ));
 
-      store.reset({
-        tracesState: {
-          traces: [
-            {
-              id: "1",
-            },
-          ],
-        },
-      });
-      const trace = await tracesService.getTraceById("1");
+    it("Should not upload local traces if there are no local traces", inject(
+        [TracesService, HttpTestingController, Store],
+        async (
+            tracesService: TracesService,
+            mockBackend: HttpTestingController,
+            store: Store
+        ) => {
+            store.reset({
+                configuration: {
+                    isAutomaticRecordingUpload: true,
+                },
+                userState: {
+                    userInfo: {},
+                },
+                tracesState: {
+                    traces: [{ visibility: "private" }],
+                },
+            });
+            await tracesService.initialize();
 
-      expect(trace.id).toBe("1");
-    }
-  ));
+            expect(() =>
+                mockBackend.expectNone(Urls.uploadDataContainer)
+            ).not.toThrow();
+        }
+    ));
 
-  it("Should return a trace stored in the state in case of a local recording and not in database", inject(
-    [TracesService, Store, DatabaseService],
-    async (
-      tracesService: TracesService,
-      store: Store,
-      databaseService: DatabaseService
-    ) => {
-      databaseService.getTraceById = () => {
-        return Promise.resolve(null as Trace);
-      };
+    it("Should upload local traces and run sync with no traces", inject(
+        [TracesService, HttpTestingController, Store],
+        async (
+            tracesService: TracesService,
+            mockBackend: HttpTestingController,
+            store: Store
+        ) => {
+            const spy = vi.fn();
+            store.dispatch = spy;
+            store.reset({
+                configuration: {
+                    isAutomaticRecordingUpload: true,
+                },
+                userState: {
+                    userInfo: {},
+                },
+                tracesState: {
+                    traces: [
+                        {
+                            id: "42",
+                            visibility: "local",
+                            dataContainer: {
+                                routes: [{}],
+                            },
+                        },
+                    ],
+                },
+            });
+            const promise = tracesService.initialize();
 
-      store.reset({
-        tracesState: {
-          traces: [
-            {
-              id: "1",
-              visibility: "local",
-              dataContainer: {
-                routes: [{}],
-              },
-            },
-          ],
-        },
-      });
-      const trace = await tracesService.getTraceById("1");
+            mockBackend
+                .expectOne((u) => u.url.startsWith(Urls.uploadDataContainer))
+                .flush({});
 
-      expect(trace.id).toBe("1");
-      expect(trace.dataContainer).not.toBeNull();
-    }
-  ));
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-  it("Should get a trace from server when it's not in the DB", inject(
-    [TracesService, Store, DatabaseService, HttpTestingController],
-    async (
-      tracesService: TracesService,
-      store: Store,
-      databaseService: DatabaseService,
-      mockBackend: HttpTestingController
-    ) => {
-      databaseService.getTraceById = () => {
-        return Promise.resolve(null as Trace);
-      };
-      databaseService.storeTrace = () => {
-        return Promise.resolve();
-      };
+            mockBackend
+                .expectOne((u) => u.url.startsWith(Urls.osmGpxFiles))
+                .flush({ traces: [] });
 
-      store.reset({
-        tracesState: {
-          traces: [
-            {
-              id: "1",
-            },
-          ],
-        },
-      });
-      const promise = tracesService.getTraceById("1");
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
+                RemoveTraceAction
+            );
+            return promise;
+        }
+    ));
 
-      await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+    it("Should upload local traces and run sync with traces", inject(
+        [TracesService, HttpTestingController, Store],
+        async (
+            tracesService: TracesService,
+            mockBackend: HttpTestingController,
+            store: Store
+        ) => {
+            const spy = vi.fn();
+            store.dispatch = spy;
+            store.reset({
+                configuration: {
+                    isAutomaticRecordingUpload: true,
+                },
+                userState: {
+                    userInfo: {},
+                },
+                tracesState: {
+                    traces: [
+                        {
+                            id: "42",
+                            visibility: "local",
+                            dataContainer: {
+                                routes: [{}],
+                            },
+                        },
+                        {
+                            id: "1",
+                            visibility: "private",
+                        },
+                    ],
+                },
+            });
+            const promise = tracesService.initialize();
 
-      mockBackend.expectOne(Urls.traceAsDataContainer + "1").flush({ id: "1" });
+            mockBackend
+                .expectOne((u) => u.url.startsWith(Urls.uploadDataContainer))
+                .flush({});
 
-      const trace = await promise;
-      expect(trace.id).toBe("1");
-    }
-  ));
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-  it("Should upload a trace", inject(
-    [TracesService, HttpTestingController],
-    async (
-      tracesService: TracesService,
-      mockBackend: HttpTestingController
-    ) => {
-      const file = new File([""], "file.txt");
-      const promise = tracesService.uploadTrace(file);
+            mockBackend
+                .expectOne((u) => u.url.startsWith(Urls.osmGpxFiles))
+                .flush({
+                    traces: [
+                        {
+                            id: 1,
+                            visibility: "public",
+                        },
+                        {
+                            id: 2,
+                            visibility: "private",
+                        },
+                    ],
+                });
 
-      await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-      mockBackend.expectOne(Urls.osmGpx).flush({ id: "1" });
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
+                RemoveTraceAction
+            );
+            expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(
+                BulkReplaceTracesAction
+            );
 
-      const trace = await promise;
-      expect(trace.id).toBe("1");
-    }
-  ));
+            const req = mockBackend.match((u) => u.url.startsWith(Urls.osmGpx));
+            expect(req.length).toBe(2);
+            req[0].flush({});
+            req[1].flush({});
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-  it("Should update a trace without an empty tag", inject(
-    [TracesService, HttpTestingController],
-    async (
-      tracesService: TracesService,
-      mockBackend: HttpTestingController
-    ) => {
-      const trace = {
-        id: "1",
-        visibility: "private",
-        tagsString: "",
-        timeStamp: new Date(),
-      } as Trace;
-      const promise = tracesService.updateTrace(trace);
+            expect(vi.mocked(spy).mock.calls[2][0]).toBeInstanceOf(
+                UpdateTraceAction
+            );
+            expect(vi.mocked(spy).mock.calls[3][0]).toBeInstanceOf(
+                UpdateTraceAction
+            );
 
-      mockBackend
-        .expectOne(
-          (request) =>
-            !request.body.includes("<tag></tag>") && request.method === "PUT"
-        )
-        .flush({ id: "1" });
+            return promise;
+        }
+    ));
 
-      await expect(promise).resolves.not.toThrow();
-    }
-  ));
+    it("Should return null get a trace by id when there's no trace", inject(
+        [TracesService, Store],
+        async (tracesService: TracesService, store: Store) => {
+            store.reset({
+                tracesState: {
+                    traces: [],
+                },
+            });
+            const trace = await tracesService.getTraceById("42");
 
-  it("Should update a trace", inject(
-    [TracesService, HttpTestingController],
-    async (
-      tracesService: TracesService,
-      mockBackend: HttpTestingController
-    ) => {
-      const trace = {
-        id: "1",
-        visibility: "private",
-        tagsString: "tag1,tag2",
-        description: "description",
-        timeStamp: new Date(),
-      } as Trace;
-      const promise = tracesService.updateTrace(trace);
+            expect(trace).toBeNull();
+        }
+    ));
 
-      mockBackend
-        .expectOne(
-          (request) =>
-            request.body.includes("<tag>tag1</tag>") &&
+    it("Should return a trace store in DB", inject(
+        [TracesService, Store, DatabaseService],
+        async (
+            tracesService: TracesService,
+            store: Store,
+            databaseService: DatabaseService
+        ) => {
+            databaseService.getTraceById = () => {
+                return Promise.resolve({} as Trace);
+            };
+
+            store.reset({
+                tracesState: {
+                    traces: [
+                        {
+                            id: "1",
+                        },
+                    ],
+                },
+            });
+            const trace = await tracesService.getTraceById("1");
+
+            expect(trace.id).toBe("1");
+        }
+    ));
+
+    it("Should return a trace stored in the state in case of a local recording and not in database", inject(
+        [TracesService, Store, DatabaseService],
+        async (
+            tracesService: TracesService,
+            store: Store,
+            databaseService: DatabaseService
+        ) => {
+            databaseService.getTraceById = () => {
+                return Promise.resolve(null as Trace);
+            };
+
+            store.reset({
+                tracesState: {
+                    traces: [
+                        {
+                            id: "1",
+                            visibility: "local",
+                            dataContainer: {
+                                routes: [{}],
+                            },
+                        },
+                    ],
+                },
+            });
+            const trace = await tracesService.getTraceById("1");
+
+            expect(trace.id).toBe("1");
+            expect(trace.dataContainer).not.toBeNull();
+        }
+    ));
+
+    it("Should get a trace from server when it's not in the DB", inject(
+        [TracesService, Store, DatabaseService, HttpTestingController],
+        async (
+            tracesService: TracesService,
+            store: Store,
+            databaseService: DatabaseService,
+            mockBackend: HttpTestingController
+        ) => {
+            databaseService.getTraceById = () => {
+                return Promise.resolve(null as Trace);
+            };
+            databaseService.storeTrace = () => {
+                return Promise.resolve();
+            };
+
+            store.reset({
+                tracesState: {
+                    traces: [
+                        {
+                            id: "1",
+                        },
+                    ],
+                },
+            });
+            const promise = tracesService.getTraceById("1");
+
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+
+            mockBackend.expectOne(Urls.traceAsDataContainer + "1").flush({ id: "1" });
+
+            const trace = await promise;
+            expect(trace.id).toBe("1");
+        }
+    ));
+
+    it("Should upload a trace", inject(
+        [TracesService, HttpTestingController],
+        async (
+            tracesService: TracesService,
+            mockBackend: HttpTestingController
+        ) => {
+            const file = new File([""], "file.txt");
+            const promise = tracesService.uploadTrace(file);
+
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+
+            mockBackend.expectOne(Urls.osmGpx).flush({ id: "1" });
+
+            const trace = await promise;
+            expect(trace.id).toBe("1");
+        }
+    ));
+
+    it("Should update a trace without an empty tag", inject(
+        [TracesService, HttpTestingController],
+        async (
+            tracesService: TracesService,
+            mockBackend: HttpTestingController
+        ) => {
+            const trace = {
+                id: "1",
+                visibility: "private",
+                tagsString: "",
+                timeStamp: new Date(),
+            } as Trace;
+            const promise = tracesService.updateTrace(trace);
+
+            mockBackend
+                .expectOne(
+                    (request) =>
+                        !request.body.includes("<tag></tag>") && request.method === "PUT"
+                )
+                .flush({ id: "1" });
+
+            await expect(promise).resolves.not.toThrow();
+        }
+    ));
+
+    it("Should update a trace", inject(
+        [TracesService, HttpTestingController],
+        async (
+            tracesService: TracesService,
+            mockBackend: HttpTestingController
+        ) => {
+            const trace = {
+                id: "1",
+                visibility: "private",
+                tagsString: "tag1,tag2",
+                description: "description",
+                timeStamp: new Date(),
+            } as Trace;
+            const promise = tracesService.updateTrace(trace);
+
+            mockBackend
+                .expectOne(
+                    (request) =>
+                        request.body.includes("<tag>tag1</tag>") &&
             request.body.includes("<tag>tag2</tag>") &&
             request.body.includes("<description>description</description>") &&
             request.method === "PUT"
-        )
-        .flush({ id: "1" });
+                )
+                .flush({ id: "1" });
 
-      await expect(promise).resolves.not.toThrow();
-    }
-  ));
+            await expect(promise).resolves.not.toThrow();
+        }
+    ));
 });

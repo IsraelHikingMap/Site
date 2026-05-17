@@ -11,29 +11,29 @@ import { RouteStrings } from "../../services/hash.service";
 import type { ApplicationState } from "../../models";
 
 @Component({
-  selector: "app-root",
-  templateUrl: "./app-root.component.html",
-  styleUrls: ["./app-root.component.scss"],
-  imports: [MatToolbar, RouterOutlet, MainMenuComponent, SearchComponent]
+    selector: "app-root",
+    templateUrl: "./app-root.component.html",
+    styleUrls: ["./app-root.component.scss"],
+    imports: [MatToolbar, RouterOutlet, MainMenuComponent, SearchComponent]
 })
 export class AppRootComponent {
-  public isScrolled = false;
+    public isScrolled = false;
 
-  public readonly resources = inject(ResourcesService);
-  private readonly runningContextService = inject(RunningContextService)
-  private readonly store = inject(Store);
+    public readonly resources = inject(ResourcesService);
+    private readonly runningContextService = inject(RunningContextService)
+    private readonly store = inject(Store);
 
-  @HostListener("window:scroll", [])
-  onWindowScroll() {
-    this.isScrolled = typeof window !== "undefined" && window.scrollY > 50;
-  }
+    @HostListener("window:scroll", [])
+    onWindowScroll() {
+        this.isScrolled = typeof window !== "undefined" && window.scrollY > 50;
+    }
 
-  public isIFrame() {
-    return this.runningContextService.isIFrame;
-  }
+    public isIFrame() {
+        return this.runningContextService.isIFrame;
+    }
 
-  public isHome() {
-    const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
-    return currentUrl === RouteStrings.ROUTE_ROOT || currentUrl === RouteStrings.ROUTE_LANDING || currentUrl === RouteStrings.ROUTE_ABOUT;
-  }
+    public isHome() {
+        const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
+        return currentUrl === RouteStrings.ROUTE_ROOT || currentUrl === RouteStrings.ROUTE_LANDING || currentUrl === RouteStrings.ROUTE_ABOUT;
+    }
 }
