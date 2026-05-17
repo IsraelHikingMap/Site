@@ -861,11 +861,7 @@ describe("Poi Service", () => {
 
     it("Should get coordinates basic info", inject([PoiService],
         async (service: PoiService) => {
-            const coordinatesFeature = await service.getBasicInfo(
-                "1_2",
-                RouteStrings.COORDINATES,
-                "he"
-            );
+            const coordinatesFeature = await service.getBasicInfo("1_2", RouteStrings.COORDINATES, "he");
 
             expect(coordinatesFeature.geometry.type).toBe("Point");
             expect((coordinatesFeature.geometry as GeoJSON.Point).coordinates).toEqual([2, 1]);
