@@ -196,10 +196,7 @@ describe("MapService", () => {
             }),
         } as any as Map);
         const bounds = service.getMapBounds();
-        expect(bounds).toEqual({
-            northEast: { lat: 1, lng: 1 },
-            southWest: { lat: 2, lng: 2 },
-        });
+        expect(bounds).toEqual({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } });
     }));
 
     it("should project point", inject([MapService], async (service: MapService) => {
