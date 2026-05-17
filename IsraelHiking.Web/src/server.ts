@@ -2,7 +2,7 @@ import {
     AngularNodeAppEngine,
     createNodeRequestHandler,
     isMainModule,
-    writeResponseToNodeResponse,
+    writeResponseToNodeResponse
 } from "@angular/ssr/node";
 import express from "express";
 import { join } from "node:path";
@@ -31,7 +31,7 @@ app.use(
     express.static(browserDistFolder, {
         maxAge: "1y",
         index: false,
-        redirect: false,
+        redirect: false
     })
 );
 

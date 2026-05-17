@@ -27,7 +27,7 @@ import type {
     LayerData,
     EditableLayer,
     ApplicationState,
-    UserInfo,
+    UserInfo
 } from "../models";
 import { Urls } from "../urls";
 import { LoggingService } from "./logging.service";
@@ -160,7 +160,7 @@ export class LayersService {
     private addBaseLayerFromData(layerData: LayerData): Immutable<EditableLayer> {
         const baseLayer = {
             ...layerData,
-            isEditable: true,
+            isEditable: true
         } as EditableLayer;
         this.store.dispatch(new AddBaseLayerAction(baseLayer));
         return baseLayer;
@@ -213,7 +213,7 @@ export class LayersService {
     private addOverlayFromData(layerData: LayerData, visible: boolean): Immutable<EditableLayer> {
         const overlay = {
             ...layerData,
-            isEditable: true,
+            isEditable: true
         } as EditableLayer;
         this.store.dispatch(new AddOverlayAction(overlay));
         this.store.dispatch(new SetOverlaysVisibilityAction(overlay.key, visible));
@@ -325,7 +325,7 @@ export class LayersService {
             address: decodeURIComponent(queryParams["address"]),
             minZoom: +queryParams["minzoom"],
             maxZoom: +queryParams["maxzoom"],
-            opacity: +queryParams["opacity"],
+            opacity: +queryParams["opacity"]
         }
         if (queryParams["isoverlay"].toString() == "true") {
             this.addOverlay(layerData);

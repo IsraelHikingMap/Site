@@ -518,7 +518,7 @@ export class SelectedRouteService {
                 type: "Feature",
                 properties: {
                     color: "transparent",
-                    strokeColor: routeProperties.color,
+                    strokeColor: routeProperties.color
                 },
                 geometry: {
                     type: "Point",

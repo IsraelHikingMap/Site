@@ -141,7 +141,7 @@ export class TracesComponent implements OnInit {
 
     public editTrace(shallowTrace: Immutable<Trace>) {
         this.dialog.open<EditTraceDialogComponent, Immutable<Trace>>(EditTraceDialogComponent, {
-            data: shallowTrace,
+            data: shallowTrace
         });
     }
 
@@ -152,7 +152,7 @@ export class TracesComponent implements OnInit {
             type: "YesNo",
             confirmAction: () => {
                 this.tracesService.deleteTrace(shallowTrace);
-            },
+            }
         });
     }
 
@@ -205,15 +205,15 @@ export class TracesComponent implements OnInit {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [t.start.lng, t.start.lat],
+                    coordinates: [t.start.lng, t.start.lat]
                 },
                 properties: {
                     id: t.id,
                     name: this.getTraceDisplayName(t),
                     description: t.description,
-                    timeStamp: t.timeStamp,
-                },
-            })),
+                    timeStamp: t.timeStamp
+                }
+            }))
         };
     }
 

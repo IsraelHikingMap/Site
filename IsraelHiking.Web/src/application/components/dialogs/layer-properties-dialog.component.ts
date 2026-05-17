@@ -67,7 +67,7 @@ export class LayerPropertiesDialogComponent {
             key: "",
             address: "",
             opacity: 1.0,
-            isEditable: true,
+            isEditable: true
         } as EditableLayer;
 
         this.location$ = this.store.select((state: ApplicationState) => state.locationState);
@@ -121,7 +121,7 @@ export class LayerPropertiesDialogComponent {
         const layerData = {
             ...this.layerData,
             minZoom: +this.layerData.minZoom, // fix issue with variable saved as string...
-            maxZoom: +this.layerData.maxZoom,
+            maxZoom: +this.layerData.maxZoom
         } as LayerData;
         this.internalSave(layerData);
     }

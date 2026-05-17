@@ -162,7 +162,7 @@ export const appConfig: ApplicationConfig = {
                 InMemoryReducer,
                 GpsReducer,
                 OfflineReducer,
-                PaywallReducer,
+                PaywallReducer
             ])
         ),
         AuthorizationService,

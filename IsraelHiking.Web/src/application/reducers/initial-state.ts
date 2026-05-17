@@ -155,7 +155,7 @@ export const DEFAULT_OVERLAYS: EditableLayer[] = [{
     minZoom: 1,
     maxZoom: 16,
     opacity: 1,
-    id: null,
+    id: null
 }];
 
 export const initialState =
@@ -243,7 +243,7 @@ export const initialState =
             isSubscribed: false,
             downloadedTiles: null,
             uploadPoiQueue: [],
-            lastOfflineDetectedDate: null,
+            lastOfflineDetectedDate: null
         },
         paywallState: {
             lastPaywallShownDate: null,

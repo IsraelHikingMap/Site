@@ -134,7 +134,7 @@ export class LoggingService {
     public getErrorTypeAndMessage(ex: any): ErrorTypeAndMessage {
         const typeAndMessage: ErrorTypeAndMessage = {
             type: "server",
-            message: (ex as Error).message,
+            message: (ex as Error).message
         };
 
         if ((ex as Error).name === "TimeoutError") {

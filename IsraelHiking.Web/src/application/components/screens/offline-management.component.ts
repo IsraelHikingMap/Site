@@ -19,7 +19,7 @@ import type { ApplicationState, EditableLayer } from "../../models";
 @Component({
     selector: "offline-management",
     templateUrl: "./offline-management.component.html",
-    imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent],
+    imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent]
 })
 export class OfflineManagementComponent {
     public offlineMapStyle: StyleSpecification;
@@ -144,9 +144,9 @@ export class OfflineManagementComponent {
                         SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX + progress, y: tileY }, TILES_ZOOM)),
                         SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX + progress, y: tileY + 1 }, TILES_ZOOM)),
                         SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX, y: tileY + 1 }, TILES_ZOOM)),
-                        SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX, y: tileY }, TILES_ZOOM)),
-                    ],
-                ],
+                        SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX, y: tileY }, TILES_ZOOM))
+                    ]
+                ]
             },
             properties: {
                 label
@@ -181,7 +181,7 @@ export class OfflineManagementComponent {
 
         this.downloadedTiles = {
             type: "FeatureCollection",
-            features: features,
+            features: features
         };
     }
 
@@ -202,7 +202,7 @@ export class OfflineManagementComponent {
             this.downloadingTileXY().tileX,
             this.downloadingTileXY().tileY,
             "",
-            progress / 100.0,
+            progress / 100.0
         );
         fillFeature.properties.fill = "true";
         const strokeFeature = this.tileCoordinatesToPolygon(

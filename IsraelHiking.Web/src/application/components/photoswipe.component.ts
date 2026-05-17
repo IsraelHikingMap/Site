@@ -27,7 +27,7 @@ export class PhotoSwpieComponent implements AfterViewInit {
         const pswpElement = this.photoswipe().nativeElement;
 
         const dataSource = this.data.imageUrls.map(imageUrl => ({
-            src: imageUrl,
+            src: imageUrl
         }));
 
         const pswp = new PhotoSwipe({
@@ -36,7 +36,7 @@ export class PhotoSwpieComponent implements AfterViewInit {
             index: this.data.index,
             closeOnVerticalDrag: false,
             pinchToClose: false,
-            maxZoomLevel: 8,
+            maxZoomLevel: 8
         });
 
         pswp.on("destroy", () => this.closed.emit());

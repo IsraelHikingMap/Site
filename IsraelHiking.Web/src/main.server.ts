@@ -1,7 +1,7 @@
 import {
     BootstrapContext,
     bootstrapApplication,
-    provideClientHydration,
+    provideClientHydration
 } from "@angular/platform-browser";
 import { AppRootComponent } from "./application/components/screens/app-root.component";
 import { config } from "./application/app.config.server";

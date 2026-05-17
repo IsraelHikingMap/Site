@@ -53,7 +53,7 @@ export class LogReaderService {
                         label: (foreground ? "fg " : "bg ") + "acc: " + accuracy + "m\n" + timeString.split("T")[1].replace("Z", ""),
                         foreground,
                         accuracy,
-                        color: foreground ? "#00FF00" : "#0000FF",
+                        color: foreground ? "#00FF00" : "#0000FF"
                     }
                 });
                 accuracyGeojson.features.push(SpatialService.getCirclePolygonFeature({ lng, lat }, accuracy));
@@ -71,12 +71,12 @@ export class LogReaderService {
 
         this.mapService.addSource("log-points-geojson", {
             type: "geojson",
-            data: pointsGeojson,
+            data: pointsGeojson
         });
 
         this.mapService.addSource("log-accuracy-geojson", {
             type: "geojson",
-            data: accuracyGeojson,
+            data: accuracyGeojson
         });
 
         this.mapService.addSource("log-record-line-geojson", {
@@ -92,7 +92,7 @@ export class LogReaderService {
                                 parseFloat(line.split("lng\":")[1].split(",")[0]),
                                 parseFloat(line.split("lat\":")[1].split(",")[0])
                             ]
-                        }),
+                        })
                     },
                     properties: {}
                 }]
@@ -130,7 +130,7 @@ export class LogReaderService {
                 "text-font": ["Noto Sans Regular"],
                 "text-size": 14,
                 "text-offset": [0, 1.5],
-                "text-anchor": "top",
+                "text-anchor": "top"
             },
             paint: {
                 "text-color": "#000000",

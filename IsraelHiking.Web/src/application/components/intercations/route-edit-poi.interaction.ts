@@ -38,7 +38,7 @@ export class RouteEditPoiInteraction {
             const th = 10;
             const gpsMarker = event.target.queryRenderedFeatures([[point.x - th, point.y - th], [point.x + th, point.y + th]],
                 {
-                    layers: [this.resources.locationIcon],
+                    layers: [this.resources.locationIcon]
                 });
             if (gpsMarker.length !== 0) {
                 // do not continue the flow in case we click on the gps marker
@@ -111,7 +111,7 @@ export class RouteEditPoiInteraction {
         if (gpsState.tracking !== "tracking") {
             return {
                 latlng,
-                markerData: null,
+                markerData: null
             }
         }
 
@@ -124,7 +124,7 @@ export class RouteEditPoiInteraction {
                 type: "star",
                 urls: [],
                 title: "",
-                description: "",
+                description: ""
             }]);
         return snappingPointResponse;
     }

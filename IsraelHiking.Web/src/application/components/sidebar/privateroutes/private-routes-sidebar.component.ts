@@ -223,7 +223,7 @@ export class PrivateRoutesSidebarComponent {
             data: {
                 fullShareUrl: structuredClone(this.shareUrlsService.getSelectedShareUrl()) as ShareUrl,
                 dataContainer,
-                hasHiddenRoutes: this.routes.some(r => r.state === "Hidden"),
+                hasHiddenRoutes: this.routes.some(r => r.state === "Hidden")
             }
         });
     }

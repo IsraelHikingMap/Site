@@ -164,7 +164,7 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
             description: this.description,
             latlng: this.marker.latlng,
             type: this.markerType,
-            urls,
+            urls
         };
 
         if (this.routeId) {

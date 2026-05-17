@@ -54,7 +54,7 @@ export class ApplicationExitService {
                         confirmAction: () => {
                             this.loggingService.info("Stop recording using the back button");
                             this.recordingRouteService.stopRecording();
-                        },
+                        }
                     });
                     return;
                 }

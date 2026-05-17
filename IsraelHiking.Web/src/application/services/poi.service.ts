@@ -146,14 +146,14 @@ export class PoiService {
                 const bounds = SpatialService.getBoundsForFeature(feature);
                 return {
                     lat: (bounds.northEast.lat + bounds.southWest.lat) / 2,
-                    lng: (bounds.northEast.lng + bounds.southWest.lng) / 2,
+                    lng: (bounds.northEast.lng + bounds.southWest.lng) / 2
                 };
             }
             case "MultiPolygon": {
                 const bounds = SpatialService.getBoundsForFeature(feature);
                 return {
                     lat: (bounds.northEast.lat + bounds.southWest.lat) / 2,
-                    lng: (bounds.northEast.lng + bounds.southWest.lng) / 2,
+                    lng: (bounds.northEast.lng + bounds.southWest.lng) / 2
                 };
             }
             case "MultiLineString":
@@ -526,7 +526,7 @@ export class PoiService {
     public getItmCoordinates(feature: GeoJSON.Feature): NorthEast {
         return {
             east: feature.properties.poiItmEast,
-            north: feature.properties.poiItmNorth,
+            north: feature.properties.poiItmNorth
         } as NorthEast;
     }
 
@@ -575,7 +575,7 @@ export class PoiService {
             geometry: {
                 type: "Point",
                 coordinates: SpatialService.toCoordinate(latlng)
-            },
+            }
         } as GeoJSON.Feature;
         GeoJSONUtils.setLocation(feature, latlng);
         return this.addPointToUploadQueue(feature);
@@ -711,7 +711,7 @@ export class PoiService {
             icon: feature.properties.poiIcon,
             iconColor: feature.properties.poiIconColor,
             imagesUrls: GeoJSONUtils.getValidImageUrls(feature),
-            urls: GeoJSONUtils.getUrls(feature),
+            urls: GeoJSONUtils.getUrls(feature)
         };
     }
 
@@ -723,7 +723,7 @@ export class PoiService {
                 poiId: info.id,
                 poiCategory: info.category,
                 poiIcon: info.icon,
-                poiIconColor: info.iconColor,
+                poiIconColor: info.iconColor
             } as any
         } as GeoJSON.Feature;
         for (const imageUrl of info.imagesUrls) {

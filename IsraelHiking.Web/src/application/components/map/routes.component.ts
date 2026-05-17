@@ -100,7 +100,7 @@ export class RoutesComponent implements AfterViewInit {
             // allow angular to draw this as it seems not to do it without this timeout...
             this.routePointPopupData = {
                 latlng: segment.routePoint,
-                segmentIndex: pointIndex,
+                segmentIndex: pointIndex
             };
         }, 0);
     };

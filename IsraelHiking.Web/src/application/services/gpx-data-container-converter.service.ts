@@ -145,7 +145,7 @@ export class GpxDataContainerConverterService {
                 creator: "IsraelHikingMap",
                 xmlns: "http://www.topografix.com/GPX/1/1",
                 "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-                "xsi:schemaLocation": "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd",
+                "xsi:schemaLocation": "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"
             },
             metadata: null,
             wpt: [],
@@ -237,7 +237,7 @@ export class GpxDataContainerConverterService {
                         maxlat: dataContainer.northEast.lat.toString(),
                         maxlon: dataContainer.northEast.lng.toString(),
                         minlat: dataContainer.southWest.lat.toString(),
-                        minlon: dataContainer.southWest.lng.toString(),
+                        minlon: dataContainer.southWest.lng.toString()
                     }
                 }
             };
@@ -252,7 +252,7 @@ export class GpxDataContainerConverterService {
         const gpxJsonObject: Gpx = await new Promise<Gpx>((resolve, reject) => {
             // removing namespace since they can be invalid
             gpxXmlString = gpxXmlString.replace(/xmlns="(.*?)"/g, "");
-            parseString(gpxXmlString, { explicitArray: false, }, (err, res) => {
+            parseString(gpxXmlString, { explicitArray: false }, (err, res) => {
                 if (err) {
                     reject(err);
                 }

@@ -50,7 +50,7 @@ export class ShareUrlsService {
             return {
                 app: "",
                 facebook: "",
-                whatsapp: "",
+                whatsapp: ""
             };
         }
         const app = this.getFullUrlFromShareId(shareUrl.id);

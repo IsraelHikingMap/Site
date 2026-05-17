@@ -72,7 +72,7 @@ export class DatabaseService {
         });
         this.tracesDatabase = new Dexie(DatabaseService.TRACES_DB_NAME);
         this.tracesDatabase.version(1).stores({
-            traces: "id",
+            traces: "id"
         });
         if (this.runningContextService.isIFrame) {
             initialState.layersState.visiblePoisCategories = [];

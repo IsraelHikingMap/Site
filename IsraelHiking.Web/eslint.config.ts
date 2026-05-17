@@ -42,7 +42,8 @@ export default defineConfig([
                     argsIgnorePattern: "^_",
                 },
             ],
-            "@typescript-eslint/consistent-type-definitions": "off"
+            "@typescript-eslint/consistent-type-definitions": "off",
+            "comma-dangle": ["error", "never"]
         },
     },
     {

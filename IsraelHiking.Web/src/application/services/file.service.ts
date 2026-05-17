@@ -70,7 +70,7 @@ export class FileService {
         {
             label: "Naviguide binary route file (.twl)",
             extension: "twl",
-            outputFormat: "twl",
+            outputFormat: "twl"
         }
     ];
 
@@ -159,10 +159,10 @@ export class FileService {
 
     public async getFileFromUrl(url: string, type?: string): Promise<File> {
         const fileResponse = await Filesystem.readFile({
-            path: url,
+            path: url
         });
         const statResponse = await Filesystem.stat({
-            path: url,
+            path: url
         });
         type = type || this.getTypeFromUrl(url);
         const blob = await this.base64StringToBlob(fileResponse.data as string, type) as any;
@@ -337,13 +337,13 @@ export class FileService {
                 await Filesystem.writeFile({
                     path: fileName,
                     directory: Directory.Cache,
-                    data: encode(value.buffer),
+                    data: encode(value.buffer)
                 });
             } else {
                 await Filesystem.appendFile({
                     path: fileName,
                     directory: Directory.Cache,
-                    data: encode(value.buffer),
+                    data: encode(value.buffer)
                 });
             }
             receivedLength += value.length;

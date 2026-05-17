@@ -47,7 +47,7 @@ import sceneryPlaceholder from "../../../content/lottie/placeholder-scenery.json
 })
 export class PublicRoutesComponent {
     public readonly lottieScenery: AnimationOptions = {
-        animationData: sceneryPlaceholder,
+        animationData: sceneryPlaceholder
     };
     public mapStyle: StyleSpecification;
     public showMap = true;
