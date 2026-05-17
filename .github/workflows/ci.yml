@@ -34,6 +34,7 @@ jobs:
         run: |
           cd IsraelHiking.Web
           npm ci
+          npx playwright install --with-deps chromium
           npm run test-ci
       - name: Run lint
         run: |

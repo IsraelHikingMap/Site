@@ -179,9 +179,9 @@ export class HashService {
     public getMapAddress() {
         const location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
         const urlTree = this.router.createUrlTree([RouteStrings.MAP,
-        (location.zoom + 1).toFixed(HashService.ZOOM_PERSICION),
-        location.latitude.toFixed(HashService.HIGH_PERSICION),
-        location.longitude.toFixed(HashService.HIGH_PERSICION)]);
+            (location.zoom + 1).toFixed(HashService.ZOOM_PERSICION),
+            location.latitude.toFixed(HashService.HIGH_PERSICION),
+            location.longitude.toFixed(HashService.HIGH_PERSICION)]);
         return Urls.baseAddress + urlTree.toString();
     }
 

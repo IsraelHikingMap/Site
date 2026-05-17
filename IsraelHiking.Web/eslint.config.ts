@@ -16,6 +16,7 @@ export default defineConfig([
         ],
         processor: angular.processInlineTemplates,
         rules: {
+            indent: ["error", 4, { "SwitchCase": 1 }],
             quotes: ["error", "double"],
             "@angular-eslint/component-selector": [
                 "error",

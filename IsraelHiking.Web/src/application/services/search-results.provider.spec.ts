@@ -1,3 +1,4 @@
+import { describe, beforeEach, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
@@ -19,9 +20,11 @@ describe("SearchResultsProvider", () => {
                 CoordinatesService,
                 { provide: RunningContextService, useValue: { isOnline: true } },
                 { provide: PoiService, useValue: null },
-                { provide: ResourcesService, useValue: {
-                    getCurrentLanguageCodeSimplified: () => "en"
-                } },
+                {
+                    provide: ResourcesService, useValue: {
+                        getCurrentLanguageCodeSimplified: () => "en"
+                    }
+                },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting()
             ]
@@ -30,11 +33,10 @@ describe("SearchResultsProvider", () => {
 
     it("Should get all kind of features in results", (inject([SearchResultsProvider, HttpTestingController],
         async (provider: SearchResultsProvider, mockBackend: HttpTestingController) => {
-            const promise = provider.getResults("searchTerm").then((results: SearchResultsPointOfInterest[]) => {
-                expect(results.length).toBe(1);
-            }, fail);
+            const promise = provider.getResults("searchTerm");
 
             mockBackend.match(() => true)[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
-            return promise;
+            const results = await promise;
+            expect(results.length).toBe(1);
         })));
 });

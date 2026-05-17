@@ -1097,7 +1097,7 @@ export class RouteStatisticsComponent implements OnInit {
             g = Math.floor(255 * (1 - ratio));
             b = Math.floor(255 * ratio);
         }
-         
+
         return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
 
