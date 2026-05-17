@@ -45,14 +45,8 @@ describe("HashService", () => {
         });
     });
 
-    it("Should not reset address bar if sidebar is open", inject(
-        [HashService, Router, Store, SidebarService],
-        (
-            service: HashService,
-            routerMock: Router,
-            store: Store,
-            sidebar: SidebarService
-        ) => {
+    it("Should not reset address bar if sidebar is open", inject([HashService, Router, Store, SidebarService],
+        (service: HashService, routerMock: Router, store: Store, sidebar: SidebarService) => {
             const spy = vi.fn();
             routerMock.navigate = spy;
             store.reset({
@@ -77,14 +71,8 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should not reset address bar if shares are open", inject(
-        [HashService, Router, Store, MapService],
-        (
-            service: HashService,
-            routerMock: Router,
-            store: Store,
-            mapService: MapService
-        ) => {
+    it("Should not reset address bar if shares are open", inject([HashService, Router, Store, MapService],
+        (service: HashService, routerMock: Router, store: Store, mapService: MapService) => {
             const spy = vi.fn();
             routerMock.navigate = spy;
             (routerMock as any).url = RouteStrings.ROUTE_SHARES;
@@ -110,14 +98,8 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should not reset address bar if offline management are open", inject(
-        [HashService, Router, Store, MapService],
-        (
-            service: HashService,
-            routerMock: Router,
-            store: Store,
-            mapService: MapService
-        ) => {
+    it("Should not reset address bar if offline management are open", inject([HashService, Router, Store, MapService],
+        (service: HashService, routerMock: Router, store: Store, mapService: MapService) => {
             const spy = vi.fn();
             routerMock.navigate = spy;
             (routerMock as any).url = RouteStrings.ROUTE_OFFLINE_MANAGEMENT;
@@ -143,14 +125,8 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should not reset address bar if public routes are open", inject(
-        [HashService, Router, Store, MapService],
-        (
-            service: HashService,
-            routerMock: Router,
-            store: Store,
-            mapService: MapService
-        ) => {
+    it("Should not reset address bar if public routes are open", inject([HashService, Router, Store, MapService],
+        (service: HashService, routerMock: Router, store: Store, mapService: MapService) => {
             const spy = vi.fn();
             routerMock.navigate = spy;
             (routerMock as any).url = RouteStrings.ROUTE_PUBLIC_ROUTES;
@@ -176,8 +152,7 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should navigate to share url if it stored in the state", inject(
-        [HashService, Router, Store],
+    it("Should navigate to share url if it stored in the state", inject([HashService, Router, Store],
         (service: HashService, routerMock: Router, store: Store) => {
             const spy = vi.fn();
             routerMock.navigate = spy;
@@ -205,8 +180,7 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should navigate to file url if it stored in the state", inject(
-        [HashService, Router, Store],
+    it("Should navigate to file url if it stored in the state", inject([HashService, Router, Store],
         (service: HashService, routerMock: Router, store: Store) => {
             const spy = vi.fn();
             routerMock.navigate = spy;
@@ -234,14 +208,8 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should not navigate to location if the map is moving", inject(
-        [HashService, Router, Store, MapService],
-        (
-            service: HashService,
-            routerMock: Router,
-            store: Store,
-            mapService: MapService
-        ) => {
+    it("Should not navigate to location if the map is moving", inject([HashService, Router, Store, MapService],
+        (service: HashService, routerMock: Router, store: Store, mapService: MapService) => {
             const spy = vi.fn();
             routerMock.navigate = spy;
             store.reset({
@@ -264,14 +232,8 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should navigate to location if the map is not moving", inject(
-        [HashService, Router, Store, MapService],
-        (
-            service: HashService,
-            routerMock: Router,
-            store: Store,
-            mapService: MapService
-        ) => {
+    it("Should navigate to location if the map is not moving", inject([HashService, Router, Store, MapService],
+        (service: HashService, routerMock: Router, store: Store, mapService: MapService) => {
             const spy = vi.fn();
             routerMock.navigate = spy;
             mapService.isMoving = () => false;
@@ -299,8 +261,7 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should return map address", inject(
-        [HashService, Router, Store],
+    it("Should return map address", inject([HashService, Router, Store],
         (service: HashService, routerMock: Router, store: Store) => {
             routerMock.createUrlTree = (arr: []) => arr.join("/") as any as UrlTree;
             store.reset({
@@ -318,13 +279,8 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should return share url", inject(
-        [HashService, Store, ShareUrlsService],
-        (
-            service: HashService,
-            store: Store,
-            shareUrlService: ShareUrlsService
-        ) => {
+    it("Should return share url", inject([HashService, Store, ShareUrlsService],
+        (service: HashService, store: Store, shareUrlService: ShareUrlsService) => {
             shareUrlService.getFullUrlFromShareId = () => "share-address";
             store.reset({
                 inMemoryState: {
@@ -338,8 +294,7 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should return external url", inject(
-        [HashService, Router, Store],
+    it("Should return external url", inject([HashService, Router, Store],
         (service: HashService, routerMock: Router, store: Store) => {
             routerMock.createUrlTree = (array: [], options: any) =>
                 ("file-address?" + options.queryParams.baselayer) as any as UrlTree;
@@ -357,8 +312,7 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should flyTo in case of map url", inject(
-        [Router, MapService, HashService],
+    it("Should flyTo in case of map url", inject([Router, MapService, HashService],
         (routerMock: Router, mapService: MapService) => {
             mapService.flyTo = vi.fn();
             (routerMock as any).url =
@@ -371,8 +325,7 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should set share in case of share url", inject(
-        [Router, DataContainerService, HashService],
+    it("Should set share in case of share url", inject([Router, DataContainerService, HashService],
         (routerMock: Router, dataContainerService: DataContainerService) => {
             dataContainerService.setShareUrlAfterNavigation = vi.fn();
             (routerMock as any).url = RouteStrings.ROUTE_SHARE + "/1234";
@@ -386,8 +339,7 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should set file in case of file url", inject(
-        [Router, DataContainerService, HashService],
+    it("Should set file in case of file url", inject([Router, DataContainerService, HashService],
         (routerMock: Router, dataContainerService: DataContainerService) => {
             dataContainerService.setFileUrlAfterNavigation = vi.fn();
             (routerMock as any).url = RouteStrings.ROUTE_URL + "/1234";
@@ -399,8 +351,7 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should open poi pane in case of poi url", inject(
-        [Router, SidebarService, HashService],
+    it("Should open poi pane in case of poi url", inject([Router, SidebarService, HashService],
         (routerMock: Router, sidebarService: SidebarService) => {
             sidebarService.show = vi.fn();
             (routerMock as any).url = RouteStrings.ROUTE_POI + "/1234";
@@ -412,13 +363,8 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should show layers pane in case of layers url", inject(
-        [Router, SidebarService, MapService, HashService],
-        (
-            routerMock: Router,
-            sidebarService: SidebarService,
-            mapService: MapService
-        ) => {
+    it("Should show layers pane in case of layers url", inject([Router, SidebarService, MapService, HashService],
+        (routerMock: Router, sidebarService: SidebarService, mapService: MapService) => {
             sidebarService.show = vi.fn();
             mapService.isMoving = () => true;
             (routerMock as any).url = RouteStrings.ROUTE_LAYER + "/1234";
@@ -430,13 +376,8 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should hide sidebar in case of root url", inject(
-        [HashService, Router, SidebarService],
-        (
-            service: HashService,
-            routerMock: Router,
-            sidebarService: SidebarService
-        ) => {
+    it("Should hide sidebar in case of root url", inject([HashService, Router, SidebarService],
+        (service: HashService, routerMock: Router, sidebarService: SidebarService) => {
             sidebarService.hide = vi.fn();
             (routerMock as any).url = RouteStrings.ROUTE_ROOT;
             (routerMock.events as Subject<any>).next(
@@ -447,14 +388,11 @@ describe("HashService", () => {
         }
     ));
 
-    it("Should return full URL from LatLng", inject(
-        [HashService],
-        (service: HashService) => {
-            const latlng = { lat: 1, lng: 2, alt: 0 };
-            const fullUrl = service.getFullUrlFromLatLng(latlng);
+    it("Should return full URL from LatLng", inject([HashService], (service: HashService) => {
+        const latlng = { lat: 1, lng: 2, alt: 0 };
+        const fullUrl = service.getFullUrlFromLatLng(latlng);
 
-            expect(fullUrl).toContain(RouteStrings.POI);
-            expect(fullUrl).toContain(RouteStrings.COORDINATES);
-        }
-    ));
+        expect(fullUrl).toContain(RouteStrings.POI);
+        expect(fullUrl).toContain(RouteStrings.COORDINATES);
+    }));
 });
