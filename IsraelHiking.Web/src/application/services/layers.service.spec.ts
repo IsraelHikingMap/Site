@@ -9,7 +9,7 @@ import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { LayersService } from "./layers.service";
 import { SetUserInfoAction, UserInfoReducer } from "../reducers/user.reducer";
-import { AddBaseLayerAction, AddOverlayAction, LayersReducer, RemoveBaseLayerAction, RemoveOverlayAction, SelectBaseLayerAction, SetOverlaysVisibilityAction, UpdateBaseLayerAction, UpdateOverlayAction, } from "../reducers/layers.reducer";
+import { AddBaseLayerAction, AddOverlayAction, LayersReducer, RemoveBaseLayerAction, RemoveOverlayAction, SelectBaseLayerAction, SetOverlaysVisibilityAction, UpdateBaseLayerAction, UpdateOverlayAction } from "../reducers/layers.reducer";
 import { DEFAULT_BASE_LAYERS } from "../reducers/initial-state";
 import type { EditableLayer, LayerData } from "../models";
 
@@ -52,7 +52,7 @@ describe("LayersService", () => {
                 userInfo: null,
             },
         });
-        backend.expectNone((_) => true);
+        backend.expectNone(_ => true);
         expect(true).toBe(true);
     }));
 
@@ -69,7 +69,7 @@ describe("LayersService", () => {
             },
         });
 
-        backend.expectOne((u) => u.url.startsWith(Urls.userLayers)).flush(null);
+        backend.expectOne(u => u.url.startsWith(Urls.userLayers)).flush(null);
 
         expect(true).toBe(true);
     }));
@@ -96,7 +96,7 @@ describe("LayersService", () => {
 
         store.dispatch(new SetUserInfoAction({ id: "1", displayName: "test", imageUrl: "https://test.com", changeSets: 0 }));
 
-        backend.expectOne((u) => u.url.startsWith(Urls.userLayers)).flush([
+        backend.expectOne(u => u.url.startsWith(Urls.userLayers)).flush([
             { key: "layer2", address: "https://layer2-new", isOverlay: false },
             { key: "layer3", address: "https://layer3", isOverlay: false },
             { key: "overlay2", address: "https://overlay2-new", isOverlay: true },
@@ -390,7 +390,7 @@ describe("LayersService", () => {
                 overlays: []
             },
         });
-        backend.expectOne((u) => u.method == "GET" && u.url.startsWith(Urls.userLayers)).flush(null);
+        backend.expectOne(u => u.method == "GET" && u.url.startsWith(Urls.userLayers)).flush(null);
         const spy = vi.spyOn(store, "dispatch");
         const layerData = {
             key: "newLayer",
@@ -399,7 +399,7 @@ describe("LayersService", () => {
 
         service.addBaseLayer(layerData);
 
-        backend.expectOne((u) => u.method == "POST" && u.url.startsWith(Urls.userLayers)).flush({ id: "1" });
+        backend.expectOne(u => u.method == "POST" && u.url.startsWith(Urls.userLayers)).flush({ id: "1" });
 
         await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -459,7 +459,7 @@ describe("LayersService", () => {
                 baseLayers: []
             },
         });
-        backend.expectOne((u) => u.method == "GET" && u.url.startsWith(Urls.userLayers)).flush(null);
+        backend.expectOne(u => u.method == "GET" && u.url.startsWith(Urls.userLayers)).flush(null);
         const spy = vi.spyOn(store, "dispatch");
         const overlayData = {
             key: "newOverlay",
@@ -468,7 +468,7 @@ describe("LayersService", () => {
 
         service.addOverlay(overlayData);
 
-        backend.expectOne((u) => u.method == "POST" && u.url.startsWith(Urls.userLayers)).flush({ id: "1" });
+        backend.expectOne(u => u.method == "POST" && u.url.startsWith(Urls.userLayers)).flush({ id: "1" });
 
         await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -534,7 +534,7 @@ describe("LayersService", () => {
 
         service.updateOverlay(layer, layer);
 
-        backend.expectOne((u) => u.method == "PUT" && u.url.startsWith(Urls.userLayers)).flush(null);
+        backend.expectOne(u => u.method == "PUT" && u.url.startsWith(Urls.userLayers)).flush(null);
         expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(UpdateOverlayAction);
     }));
 
