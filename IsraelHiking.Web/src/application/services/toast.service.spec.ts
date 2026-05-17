@@ -44,108 +44,101 @@ describe("ToastService", () => {
         expect(() => service.success("")).not.toThrow();
     }));
 
-    it("should raise OK confirm toast and dismiss it when clicked", inject(
-        [ToastService, MatSnackBar, ResourcesService],
-        (
-            service: ToastService,
-            snackBar: MatSnackBar,
-            resourcesService: ResourcesService
-        ) => {
-            const options: IConfirmOptions = {
-                message: "message",
-                type: "Ok",
-                confirmAction: vi.fn(),
-            };
+    it("should raise OK confirm toast and dismiss it when clicked",
+        inject([ToastService, MatSnackBar, ResourcesService],
+            (service: ToastService, snackBar: MatSnackBar, resourcesService: ResourcesService) => {
+                const options: IConfirmOptions = {
+                    message: "message",
+                    type: "Ok",
+                    confirmAction: vi.fn(),
+                };
 
-            service.confirm(options);
+                service.confirm(options);
 
-            confirmDialog.confirmAction();
+                confirmDialog.confirmAction();
 
-            expect(snackBar.dismiss).toHaveBeenCalled();
-            expect(confirmDialog.confirmButtonText).toBe(resourcesService.ok);
-        }
-    ));
+                expect(snackBar.dismiss).toHaveBeenCalled();
+                expect(confirmDialog.confirmButtonText).toBe(resourcesService.ok);
+            }
+        )
+    );
 
-    it("should raise OKCancel confirm toast and dismiss it when clicked", inject(
-        [ToastService, MatSnackBar, ResourcesService],
-        (
-            service: ToastService,
-            snackBar: MatSnackBar,
-            resourcesService: ResourcesService
-        ) => {
-            const options: IConfirmOptions = {
-                message: "message",
-                type: "OkCancel",
-                confirmAction: () => { },
-                declineAction: () => { },
-            };
+    it("should raise OKCancel confirm toast and dismiss it when clicked",
+        inject([ToastService, MatSnackBar, ResourcesService],
+            (service: ToastService, snackBar: MatSnackBar, resourcesService: ResourcesService) => {
+                const options: IConfirmOptions = {
+                    message: "message",
+                    type: "OkCancel",
+                    confirmAction: () => { },
+                    declineAction: () => { },
+                };
 
-            service.confirm(options);
+                service.confirm(options);
 
-            confirmDialog.declineAction();
+                confirmDialog.declineAction();
 
-            expect(snackBar.dismiss).toHaveBeenCalled();
-            expect(confirmDialog.confirmButtonText).toBe(resourcesService.ok);
-            expect(confirmDialog.declineButtonText).toBe(resourcesService.cancel);
-        }
-    ));
+                expect(snackBar.dismiss).toHaveBeenCalled();
+                expect(confirmDialog.confirmButtonText).toBe(resourcesService.ok);
+                expect(confirmDialog.declineButtonText).toBe(resourcesService.cancel);
+            }
+        )
+    );
 
-    it("should raise YesNo confirm toast and dismiss it when clicked", inject(
-        [ToastService, MatSnackBar, ResourcesService],
-        (
-            service: ToastService,
-            snackBar: MatSnackBar,
-            resourcesService: ResourcesService
-        ) => {
-            const options: IConfirmOptions = {
-                message: "message",
-                type: "YesNo",
-                confirmAction: () => { },
-                declineAction: () => { },
-            };
+    it("should raise YesNo confirm toast and dismiss it when clicked",
+        inject([ToastService, MatSnackBar, ResourcesService],
+            (service: ToastService, snackBar: MatSnackBar, resourcesService: ResourcesService) => {
+                const options: IConfirmOptions = {
+                    message: "message",
+                    type: "YesNo",
+                    confirmAction: () => { },
+                    declineAction: () => { },
+                };
 
-            service.confirm(options);
+                service.confirm(options);
 
-            confirmDialog.declineAction();
+                confirmDialog.declineAction();
 
-            expect(snackBar.dismiss).toHaveBeenCalled();
-            expect(confirmDialog.confirmButtonText).toBe(resourcesService.yes);
-            expect(confirmDialog.declineButtonText).toBe(resourcesService.no);
-        }
-    ));
+                expect(snackBar.dismiss).toHaveBeenCalled();
+                expect(confirmDialog.confirmButtonText).toBe(resourcesService.yes);
+                expect(confirmDialog.declineButtonText).toBe(resourcesService.no);
+            }
+        )
+    );
 
-    it("should raise custom confirm toast and dismiss it when clicked", inject(
-        [ToastService, MatSnackBar],
-        (service: ToastService, snackBar: MatSnackBar) => {
-            const options: IConfirmOptions = {
-                message: "message",
-                type: "Custom",
-                customConfirmText: "custom confirm",
-                customDeclineText: "custom decline",
-                confirmAction: () => { },
-                declineAction: () => { },
-            };
+    it("should raise custom confirm toast and dismiss it when clicked",
+        inject([ToastService, MatSnackBar],
+            (service: ToastService, snackBar: MatSnackBar) => {
+                const options: IConfirmOptions = {
+                    message: "message",
+                    type: "Custom",
+                    customConfirmText: "custom confirm",
+                    customDeclineText: "custom decline",
+                    confirmAction: () => { },
+                    declineAction: () => { },
+                };
 
-            service.confirm(options);
+                service.confirm(options);
 
-            confirmDialog.confirmAction();
+                confirmDialog.confirmAction();
 
-            expect(snackBar.dismiss).toHaveBeenCalled();
-            expect(confirmDialog.confirmButtonText).toBe(options.customConfirmText);
-            expect(confirmDialog.declineButtonText).toBe(options.customDeclineText);
-        }
-    ));
+                expect(snackBar.dismiss).toHaveBeenCalled();
+                expect(confirmDialog.confirmButtonText).toBe(options.customConfirmText);
+                expect(confirmDialog.declineButtonText).toBe(options.customDeclineText);
+            }
+        )
+    );
 
-    it("should raise undo toast and call final action when dismissed", inject(
-        [ToastService, MatSnackBar],
-        (service: ToastService, snackBar: MatSnackBar) => {
-            const undoAction = vi.fn();
-            const snackbarRef = {
-                onAction: () => ({ subscribe: (callback: () => void) => callback() }),
-            } as any;
-            vi.spyOn(snackBar, "open").mockReturnValue(snackbarRef);
-            service.undo("message", undoAction);
-            expect(undoAction).toHaveBeenCalled();
-        }
-    ));
+    it("should raise undo toast and call final action when dismissed",
+        inject([ToastService, MatSnackBar],
+            (service: ToastService, snackBar: MatSnackBar) => {
+                const undoAction = vi.fn();
+                const snackbarRef = {
+                    onAction: () => ({ subscribe: (callback: () => void) => callback() }),
+                } as any;
+                vi.spyOn(snackBar, "open").mockReturnValue(snackbarRef);
+                service.undo("message", undoAction);
+                expect(undoAction).toHaveBeenCalled();
+            }
+        )
+    );
 });
