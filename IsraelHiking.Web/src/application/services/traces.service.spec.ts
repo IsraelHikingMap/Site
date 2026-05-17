@@ -54,17 +54,19 @@ describe("Traces Service", () => {
         }
     ));
 
-    it("Should not upload local traces if configured not to", inject([TracesService, HttpTestingController, Store], async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store) => {
-        store.reset({
-            configuration: {
-                isAutomaticRecordingUpload: false,
-            },
-        });
+    it("Should not upload local traces if configured not to", inject([TracesService, HttpTestingController, Store],
+        async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store) => {
+            store.reset({
+                configuration: {
+                    isAutomaticRecordingUpload: false,
+                },
+            });
 
-        await tracesService.initialize();
+            await tracesService.initialize();
 
-        expect(() => mockBackend.expectNone(Urls.uploadDataContainer)).not.toThrow();
-    }));
+            expect(() => mockBackend.expectNone(Urls.uploadDataContainer)).not.toThrow();
+        }
+    ));
 
     it("Should not upload local traces if user is logged out", inject([TracesService, HttpTestingController, Store],
         async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store) => {
@@ -189,7 +191,7 @@ describe("Traces Service", () => {
             expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(RemoveTraceAction);
             expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(BulkReplaceTracesAction);
 
-            const req = mockBackend.match((u) => u.url.startsWith(Urls.osmGpx));
+            const req = mockBackend.match(u => u.url.startsWith(Urls.osmGpx));
             expect(req.length).toBe(2);
             req[0].flush({});
             req[1].flush({});
@@ -307,7 +309,8 @@ describe("Traces Service", () => {
             } as Trace;
             const promise = tracesService.updateTrace(trace);
 
-            mockBackend.expectOne((request) => !request.body.includes("<tag></tag>") && request.method === "PUT").flush({ id: "1" });
+            mockBackend.expectOne(request =>
+                !request.body.includes("<tag></tag>") && request.method === "PUT").flush({ id: "1" });
 
             await expect(promise).resolves.not.toThrow();
         }
@@ -324,7 +327,7 @@ describe("Traces Service", () => {
             } as Trace;
             const promise = tracesService.updateTrace(trace);
 
-            mockBackend.expectOne((request) =>
+            mockBackend.expectOne(request =>
                 request.body.includes("<tag>tag1</tag>") &&
                 request.body.includes("<tag>tag2</tag>") &&
                 request.body.includes("<description>description</description>") &&
