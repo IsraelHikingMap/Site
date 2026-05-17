@@ -1,14 +1,7 @@
 import { describe, beforeEach, vi, it, expect, type Mock } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
-import {
-    HttpEventType,
-    provideHttpClient,
-    withInterceptorsFromDi,
-} from "@angular/common/http";
-import {
-    HttpTestingController,
-    provideHttpClientTesting,
-} from "@angular/common/http/testing";
+import { HttpEventType, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { StyleSpecification } from "maplibre-gl";
 
 import { FileService, SaveAsFactory } from "./file.service";
@@ -62,321 +55,214 @@ describe("FileService", () => {
         });
     });
 
-    it("Should save to file on web", inject(
-        [FileService, HttpTestingController],
-        async (service: FileService, mockBackend: HttpTestingController) => {
-            const promise = service.saveToFile(
-                "file.name",
-                "format",
-                {} as DataContainer
-            );
+    it("Should save to file on web", inject([FileService, HttpTestingController], async (service: FileService, mockBackend: HttpTestingController) => {
+        const promise = service.saveToFile("file.name", "format", {} as DataContainer);
 
-            mockBackend.expectOne(Urls.files + "?format=format").flush(btoa("bytes"));
-            await promise;
-            expect(saveAsSpy).toHaveBeenCalled();
-        }
-    ));
+        mockBackend.expectOne(Urls.files + "?format=format").flush(btoa("bytes"));
+        await promise;
+        expect(saveAsSpy).toHaveBeenCalled();
+    }));
 
-    it("Should add routes from url", inject(
-        [FileService, HttpTestingController, SelectedRouteService],
-        async (
-            service: FileService,
-            mockBackend: HttpTestingController,
-            selectedRouteService: SelectedRouteService
-        ) => {
-            const promise = service.addRoutesFromUrl("someurl");
+    it("Should add routes from url", inject([FileService, HttpTestingController, SelectedRouteService], async (service: FileService, mockBackend: HttpTestingController, selectedRouteService: SelectedRouteService) => {
+        const promise = service.addRoutesFromUrl("someurl");
 
-            mockBackend.expectOne(Urls.files + "?url=someurl").flush({
-                northEast: { lat: 1, lng: 1 },
-                southWest: { lat: 2, lng: 2 },
-            });
-            await promise;
-            expect(selectedRouteService.addRoutes).toHaveBeenCalled();
-        }
-    ));
+        mockBackend.expectOne(Urls.files + "?url=someurl").flush({
+            northEast: { lat: 1, lng: 1 },
+            southWest: { lat: 2, lng: 2 },
+        });
+        await promise;
+        expect(selectedRouteService.addRoutes).toHaveBeenCalled();
+    }));
 
-    it("Should open from url by uploading", inject(
-        [FileService, HttpTestingController, SelectedRouteService],
-        async (
-            service: FileService,
-            mockBackend: HttpTestingController,
-            selectedRouteService: SelectedRouteService
-        ) => {
-            const promise = service.addRoutesFromFile(new Blob([""]) as File);
+    it("Should open from url by uploading", inject([FileService, HttpTestingController, SelectedRouteService], async (service: FileService, mockBackend: HttpTestingController, selectedRouteService: SelectedRouteService) => {
+        const promise = service.addRoutesFromFile(new Blob([""]) as File);
 
-            setTimeout(() => {
-                mockBackend.expectOne(Urls.openFile).flush({
-                    northEast: { lat: 0, lng: 0 },
-                    southWest: { lat: 1, lng: 1 },
-                    routes: [
-                        {
-                            markers: [{}],
-                        },
-                    ],
-                } as DataContainer);
-            }, 1000);
+        setTimeout(() => {
+            mockBackend.expectOne(Urls.openFile).flush({
+                northEast: { lat: 0, lng: 0 },
+                southWest: { lat: 1, lng: 1 },
+                routes: [
+                    {
+                        markers: [{}],
+                    },
+                ],
+            } as DataContainer);
+        }, 1000);
 
-            await promise;
-            expect(selectedRouteService.addRoutes).toHaveBeenCalled();
-        }
-    ));
+        await promise;
+        expect(selectedRouteService.addRoutes).toHaveBeenCalled();
+    }));
 
-    it("Should open jpeg file and resize it", inject(
-        [FileService, SelectedRouteService],
-        async (
-            service: FileService,
-            selectedRouteService: SelectedRouteService
-        ) => {
-            const file = new Blob([""], { type: ImageResizeService.JPEG }) as File;
-            await service.addRoutesFromFile(file);
-            expect(selectedRouteService.addRoutes).toHaveBeenCalled();
-        }
-    ));
+    it("Should open jpeg file and resize it", inject([FileService, SelectedRouteService], async (service: FileService, selectedRouteService: SelectedRouteService) => {
+        const file = new Blob([""], { type: ImageResizeService.JPEG }) as File;
+        await service.addRoutesFromFile(file);
+        expect(selectedRouteService.addRoutes).toHaveBeenCalled();
+    }));
 
-    it("Should not get a file from event when there's no files", inject(
-        [FileService],
-        (service: FileService) => {
-            const file = service.getFileFromEvent({ target: { files: [] } });
+    it("Should not get a file from event when there's no files", inject([FileService], (service: FileService) => {
+        const file = service.getFileFromEvent({ target: { files: [] } });
 
-            expect(file).toBe(null);
-        }
-    ));
+        expect(file).toBe(null);
+    }));
 
-    it("Should get a file from event and clear input", inject(
-        [FileService],
-        (service: FileService) => {
-            const event = {
-                target: { files: [{}], value: "123" },
-            };
-            const file = service.getFileFromEvent(event);
+    it("Should get a file from event and clear input", inject([FileService], (service: FileService) => {
+        const event = {
+            target: { files: [{}], value: "123" },
+        };
+        const file = service.getFileFromEvent(event);
 
-            expect(file).not.toBe(null);
-            expect(event.target.value).toBe("");
-        }
-    ));
+        expect(file).not.toBe(null);
+        expect(event.target.value).toBe("");
+    }));
 
-    it("Should not get a files from event", inject(
-        [FileService],
-        (service: FileService) => {
-            const event = {
-                target: { dataTransfer: [] as any[] },
-            };
-            const files = service.getFilesFromEvent(event);
+    it("Should not get a files from event", inject([FileService], (service: FileService) => {
+        const event = {
+            target: { dataTransfer: [] as any[] },
+        };
+        const files = service.getFilesFromEvent(event);
 
-            expect(files.length).toBe(0);
-        }
-    ));
+        expect(files.length).toBe(0);
+    }));
 
-    it("Should get a files from event and clear input", inject(
-        [FileService],
-        (service: FileService) => {
-            const event = {
-                target: { files: [{}], value: "123" },
-            };
-            const files = service.getFilesFromEvent(event);
+    it("Should get a files from event and clear input", inject([FileService], (service: FileService) => {
+        const event = {
+            target: { files: [{}], value: "123" },
+        };
+        const files = service.getFilesFromEvent(event);
 
-            expect(files.length).toBe(1);
-            expect(event.target.value).toBe("");
-        }
-    ));
+        expect(files.length).toBe(1);
+        expect(event.target.value).toBe("");
+    }));
 
-    it("Should get style json content from remote source", inject(
-        [FileService, HttpTestingController],
-        async (service: FileService, mockBackend: HttpTestingController) => {
-            const promise = service.getStyleJsonContent("s.json", false);
+    it("Should get style json content from remote source", inject([FileService, HttpTestingController], async (service: FileService, mockBackend: HttpTestingController) => {
+        const promise = service.getStyleJsonContent("s.json", false);
 
-            mockBackend.expectOne("s.json").flush({});
+        mockBackend.expectOne("s.json").flush({});
 
-            const response = await promise;
-            expect(response).toEqual({} as StyleSpecification);
-        }
-    ));
+        const response = await promise;
+        expect(response).toEqual({} as StyleSpecification);
+    }));
 
-    it("Should save log to zip file", inject(
-        [FileService],
-        async (service: FileService) => {
-            await service.saveLogToZipFile("something.zip", "some text");
+    it("Should save log to zip file", inject([FileService], async (service: FileService) => {
+        await service.saveLogToZipFile("something.zip", "some text");
 
-            expect(saveAsSpy).toHaveBeenCalled();
-        }
-    ));
+        expect(saveAsSpy).toHaveBeenCalled();
+    }));
 
-    it("Should get file with progress", inject(
-        [FileService, HttpTestingController],
-        async (service: FileService, mockBackend: HttpTestingController) => {
-            const spy = vi.fn();
-            const url = "http://123.gpx";
-            const promise = service.getFileContentWithProgress(url, spy);
+    it("Should get file with progress", inject([FileService, HttpTestingController], async (service: FileService, mockBackend: HttpTestingController) => {
+        const spy = vi.fn();
+        const url = "http://123.gpx";
+        const promise = service.getFileContentWithProgress(url, spy);
 
-            const req = mockBackend.expectOne(url);
-            req.event({ type: HttpEventType.DownloadProgress, loaded: 7, total: 10 });
+        const req = mockBackend.expectOne(url);
+        req.event({ type: HttpEventType.DownloadProgress, loaded: 7, total: 10 });
 
-            expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalled();
 
-            req.event({ type: HttpEventType.Response, body: null, ok: true } as any);
+        req.event({ type: HttpEventType.Response, body: null, ok: true } as any);
 
-            return promise;
-        }
-    ));
+        return promise;
+    }));
 
-    it("Should reject if response is no OK", inject(
-        [FileService, HttpTestingController],
-        async (service: FileService, mockBackend: HttpTestingController) => {
-            const spy = vi.fn();
-            const url = "http://123.gpx";
-            const promise = service.getFileContentWithProgress(url, spy);
+    it("Should reject if response is no OK", inject([FileService, HttpTestingController], async (service: FileService, mockBackend: HttpTestingController) => {
+        const spy = vi.fn();
+        const url = "http://123.gpx";
+        const promise = service.getFileContentWithProgress(url, spy);
 
-            const req = mockBackend.expectOne(url);
-            req.event({ type: HttpEventType.Response, body: null, ok: false } as any);
+        const req = mockBackend.expectOne(url);
+        req.event({ type: HttpEventType.Response, body: null, ok: false } as any);
 
-            await expect(promise).rejects.toThrow();
-        }
-    ));
+        await expect(promise).rejects.toThrow();
+    }));
 
-    it("Should not download a file to cache due to network error", inject(
-        [FileService],
-        async (service: FileService) => {
-            const progressSpy = vi.fn();
-            const url = "http://123.pmtiles";
+    it("Should not download a file to cache due to network error", inject([FileService], async (service: FileService) => {
+        const progressSpy = vi.fn();
+        const url = "http://123.pmtiles";
 
-            const mockResponse = { ok: false };
+        const mockResponse = { ok: false };
 
-            const fetchSpy = vi
-                .spyOn(window, "fetch")
-                .mockReturnValue(Promise.resolve(mockResponse as any));
+        const fetchSpy = vi.spyOn(window, "fetch").mockReturnValue(Promise.resolve(mockResponse as any));
 
-            await expect(
-                service.downloadFileToCacheAuthenticated(
-                    url,
-                    url.split("/").pop(),
-                    null,
-                    progressSpy,
-                    new AbortController()
-                )
-            ).rejects.toThrow();
+        await expect(service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, new AbortController())).rejects.toThrow();
 
-            expect(fetchSpy).toHaveBeenCalledTimes(1);
-            expect(progressSpy).not.toHaveBeenCalled();
-            fetchSpy.mockRestore();
-        }
-    ));
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+        expect(progressSpy).not.toHaveBeenCalled();
+        fetchSpy.mockRestore();
+    }));
 
-    it("Should download a file to cache without interruptions but without progress", inject(
-        [FileService],
-        async (service: FileService) => {
-            const progressSpy = vi.fn();
-            const url = "http://123.pmtiles";
-            const mockReader = {
-                read: vi
-                    .fn()
-                    .mockReturnValueOnce(
-                        Promise.resolve({ done: false, value: new Uint8Array([1, 2]) })
-                    )
-                    .mockReturnValueOnce(
-                        Promise.resolve({ done: false, value: new Uint8Array([3, 4]) })
-                    )
-                    .mockReturnValueOnce(Promise.resolve({ done: true })),
-            };
+    it("Should download a file to cache without interruptions but without progress", inject([FileService], async (service: FileService) => {
+        const progressSpy = vi.fn();
+        const url = "http://123.pmtiles";
+        const mockReader = {
+            read: vi
+                .fn()
+                .mockReturnValueOnce(Promise.resolve({ done: false, value: new Uint8Array([1, 2]) }))
+                .mockReturnValueOnce(Promise.resolve({ done: false, value: new Uint8Array([3, 4]) }))
+                .mockReturnValueOnce(Promise.resolve({ done: true })),
+        };
 
-            const mockResponse = {
-                ok: true,
-                body: {
-                    getReader: vi.fn().mockReturnValue(mockReader),
-                },
-                headers: {
-                    get: vi.fn().mockReturnValue(""),
-                },
-            };
+        const mockResponse = {
+            ok: true,
+            body: {
+                getReader: vi.fn().mockReturnValue(mockReader),
+            },
+            headers: {
+                get: vi.fn().mockReturnValue(""),
+            },
+        };
 
-            // Mock fetch
-            const fetchSpy = vi
-                .spyOn(window, "fetch")
-                .mockReturnValue(Promise.resolve(mockResponse as any));
+        // Mock fetch
+        const fetchSpy = vi
+            .spyOn(window, "fetch")
+            .mockReturnValue(Promise.resolve(mockResponse as any));
 
-            await service.downloadFileToCacheAuthenticated(
-                url,
-                url.split("/").pop(),
-                null,
-                progressSpy,
-                new AbortController()
-            );
+        await service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, new AbortController());
 
-            expect(fetchSpy).toHaveBeenCalledTimes(1);
-            expect(mockReader.read).toHaveBeenCalledTimes(3);
-            expect(progressSpy).not.toHaveBeenCalled();
-            fetchSpy.mockRestore();
-        }
-    ));
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+        expect(mockReader.read).toHaveBeenCalledTimes(3);
+        expect(progressSpy).not.toHaveBeenCalled();
+        fetchSpy.mockRestore();
+    }));
 
-    it("Should stop download a file to cache when interrupted", inject(
-        [FileService],
-        async (service: FileService) => {
-            const progressSpy = vi.fn();
-            const url = "http://123.pmtiles";
-            const mockReader = {
-                read: vi
-                    .fn()
-                    .mockReturnValueOnce(
-                        Promise.resolve({ done: false, value: new Uint8Array([1, 2]) })
-                    )
-                    .mockReturnValueOnce(
-                        new Promise((resolve) =>
-                            setTimeout(() => {
-                                resolve({ done: false, value: new Uint8Array([3, 4]) });
-                            }, 100)
-                        )
-                    )
-                    .mockReturnValueOnce(
-                        new Promise((resolve) =>
-                            setTimeout(() => {
-                                resolve({ done: true });
-                            }, 100)
-                        )
-                    ),
-            };
+    it("Should stop download a file to cache when interrupted", inject([FileService], async (service: FileService) => {
+        const progressSpy = vi.fn();
+        const url = "http://123.pmtiles";
+        const mockReader = {
+            read: vi
+                .fn()
+                .mockReturnValueOnce(Promise.resolve({ done: false, value: new Uint8Array([1, 2]) }))
+                .mockReturnValueOnce(new Promise((resolve) => setTimeout(() => resolve({ done: false, value: new Uint8Array([3, 4]) }), 100)))
+                .mockReturnValueOnce(new Promise((resolve) => setTimeout(() => resolve({ done: true }), 100)))
+        };
 
-            const mockResponse = {
-                ok: true,
-                body: {
-                    getReader: vi.fn().mockReturnValue(mockReader),
-                },
-                headers: {
-                    get: vi.fn().mockReturnValue("4"),
-                },
-            };
+        const mockResponse = {
+            ok: true,
+            body: {
+                getReader: vi.fn().mockReturnValue(mockReader),
+            },
+            headers: {
+                get: vi.fn().mockReturnValue("4"),
+            },
+        };
 
-            // Mock fetch
-            const fetchSpy = vi
-                .spyOn(window, "fetch")
-                .mockReturnValue(Promise.resolve(mockResponse as any));
+        // Mock fetch
+        const fetchSpy = vi.spyOn(window, "fetch").mockReturnValue(Promise.resolve(mockResponse as any));
 
-            const abortController = new AbortController();
-            const promise = service.downloadFileToCacheAuthenticated(
-                url,
-                url.split("/").pop(),
-                null,
-                progressSpy,
-                abortController
-            );
+        const abortController = new AbortController();
+        const promise = service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, abortController);
 
-            await new Promise((resolve) => setTimeout(resolve, 50));
-            abortController.abort();
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        abortController.abort();
 
-            await promise;
+        await promise;
 
-            expect(fetchSpy).toHaveBeenCalledTimes(1);
-            expect(mockReader.read).toHaveBeenCalledTimes(2);
-            expect(progressSpy).toHaveBeenCalledTimes(1);
-            fetchSpy.mockRestore();
-        }
-    ));
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+        expect(mockReader.read).toHaveBeenCalledTimes(2);
+        expect(progressSpy).toHaveBeenCalledTimes(1);
+        fetchSpy.mockRestore();
+    }));
 
-    it("Should not throw if delete file fails", inject(
-        [FileService],
-        async (service: FileService) => {
-            await expect(
-                service.deleteFileInDataDirectory("file")
-            ).resolves.not.toThrow();
-        }
-    ));
+    it("Should not throw if delete file fails", inject([FileService], async (service: FileService) => {
+        await expect(service.deleteFileInDataDirectory("file")).resolves.not.toThrow();
+    }));
 });
