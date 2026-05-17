@@ -105,9 +105,7 @@ describe("DataContainerService", () => {
     }));
 
     it("should return if the share URL is already selected", inject([DataContainerService, ShareUrlsService], async (service: DataContainerService, shareUrlsService: ShareUrlsService) => {
-        vi.spyOn(shareUrlsService, "getSelectedShareUrl").mockReturnValue({
-            id: "123",
-        } as any);
+        vi.spyOn(shareUrlsService, "getSelectedShareUrl").mockReturnValue({ id: "123" } as any);
         vi.spyOn(shareUrlsService, "setShareUrlById");
 
         await service.setShareUrlAfterNavigation("123");
@@ -127,9 +125,7 @@ describe("DataContainerService", () => {
             title: "title",
         } as ShareUrl;
         vi.spyOn(shareUrlsService, "getSelectedShareUrl").mockReturnValue(null);
-        vi.spyOn(shareUrlsService, "setShareUrlById").mockReturnValue(
-            Promise.resolve(shareUrl)
-        );
+        vi.spyOn(shareUrlsService, "setShareUrlById").mockReturnValue(Promise.resolve(shareUrl));
         vi.spyOn(toastService, "info");
         (runningContextService as any).isIFrame = false;
         await service.setShareUrlAfterNavigation("42");
@@ -140,9 +136,7 @@ describe("DataContainerService", () => {
     }));
 
     it("should set file url after navigation", inject([DataContainerService, FileService, ToastService, Store], async (service: DataContainerService, fileService: FileService, toastService: ToastService, store: Store) => {
-        vi.spyOn(fileService, "openFromUrl").mockReturnValue(
-            Promise.resolve({} as any)
-        );
+        vi.spyOn(fileService, "openFromUrl").mockReturnValue(Promise.resolve({} as any));
         vi.spyOn(toastService, "warning");
         store.reset({
             inMemoryState: {},
@@ -173,9 +167,7 @@ describe("DataContainerService", () => {
             title: "title",
         } as ShareUrl;
         vi.spyOn(shareUrlsService, "getSelectedShareUrl").mockReturnValue(null);
-        vi.spyOn(shareUrlsService, "setShareUrlById").mockReturnValue(
-            Promise.resolve(shareUrl)
-        );
+        vi.spyOn(shareUrlsService, "setShareUrlById").mockReturnValue(Promise.resolve(shareUrl));
         vi.spyOn(toastService, "info");
         vi.spyOn(layerService, "selectBaseLayer");
 
