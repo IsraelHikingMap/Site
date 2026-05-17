@@ -112,10 +112,7 @@ describe("LocationService", () => {
             store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 3, heading: 4 } } as any));
 
             expect(eventSpy).toHaveBeenCalled();
-            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledWith(
-                { lat: 2, lng: 3, alt: undefined },
-                4
-            );
+            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledWith({ lat: 2, lng: 3, alt: undefined }, 4);
         }
     ));
 
@@ -269,8 +266,7 @@ describe("LocationService", () => {
         }
     ));
 
-    it("Should not move to gps position when editing route", inject(
-        [LocationService, Store, SelectedRouteService, MapService, DeviceOrientationService],
+    it("Should not move to gps position when editing route", inject([LocationService, Store, SelectedRouteService, MapService, DeviceOrientationService],
         async (service: LocationService, store: Store, selectedRouteService: SelectedRouteService, mapService: MapService, deviceOrientationService: DeviceOrientationService) => {
             store.reset({
                 gpsState: {
