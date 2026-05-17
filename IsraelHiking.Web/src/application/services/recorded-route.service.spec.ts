@@ -72,7 +72,7 @@ describe("Recorded Route Service", () => {
                     isRecording: false
                 }
             });
-            expect(service.isRecording()).toBe(false);
+            expect(service.isRecording()).toBeFalsy();
         }
     ));
 
@@ -83,7 +83,7 @@ describe("Recorded Route Service", () => {
                     tracking: "searching"
                 }
             });
-            expect(service.canRecord()).toBe(false);
+            expect(service.canRecord()).toBeFalsy();
         }
     ));
 

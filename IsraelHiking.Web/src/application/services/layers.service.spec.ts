@@ -53,7 +53,7 @@ describe("LayersService", () => {
             }
         });
         backend.expectNone(_ => true);
-        expect(true).toBe(true);
+        expect(true).toBeTruthy();
     }));
 
     it("should sync user layers when user logs in with no data", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
@@ -71,7 +71,7 @@ describe("LayersService", () => {
 
         backend.expectOne(u => u.url.startsWith(Urls.userLayers)).flush(null);
 
-        expect(true).toBe(true);
+        expect(true).toBeTruthy();
     }));
 
     it("should sync user layers when user logs in with data that needs addition, update and removal", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
@@ -126,7 +126,7 @@ describe("LayersService", () => {
                 userInfo: null
             }
         });
-        expect(service.isBaseLayerSelected(layer)).toBe(true);
+        expect(service.isBaseLayerSelected(layer)).toBeTruthy();
     }));
 
     it("should get selected base layer", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -271,11 +271,11 @@ describe("LayersService", () => {
         });
 
         // Different name that doesn't exist is available
-        expect(service.isNameAvailable("layer1", "newLayer", false)).toBe(true);
+        expect(service.isNameAvailable("layer1", "newLayer", false)).toBeTruthy();
         // Name that already exists is not available
-        expect(service.isNameAvailable("layer1", "layer2", false)).toBe(false);
+        expect(service.isNameAvailable("layer1", "layer2", false)).toBeFalsy();
         // For overlays
-        expect(service.isNameAvailable("overlay2", "overlay1", true)).toBe(false);
+        expect(service.isNameAvailable("overlay2", "overlay1", true)).toBeFalsy();
     }));
 
     it("should select base layer", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -318,11 +318,11 @@ describe("LayersService", () => {
             }
         });
 
-        expect(service.isAllOverlaysHidden()).toBe(true);
+        expect(service.isAllOverlaysHidden()).toBeTruthy();
         service.toggleOverlay(overlay1);
-        expect(service.isAllOverlaysHidden()).toBe(false);
-        expect(service.isOverlayVisible(overlay1)).toBe(true);
-        expect(service.isOverlayVisible(overlay2)).toBe(false);
+        expect(service.isAllOverlaysHidden()).toBeFalsy();
+        expect(service.isOverlayVisible(overlay1)).toBeTruthy();
+        expect(service.isOverlayVisible(overlay2)).toBeFalsy();
     }));
 
     it("should hide all overlays", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -342,7 +342,7 @@ describe("LayersService", () => {
 
         service.hideAllOverlays();
 
-        expect(service.isAllOverlaysHidden()).toBe(true);
+        expect(service.isAllOverlaysHidden()).toBeTruthy();
     }));
 
     it("should get data container with selected layers", inject([LayersService, Store], (service: LayersService, store: Store) => {

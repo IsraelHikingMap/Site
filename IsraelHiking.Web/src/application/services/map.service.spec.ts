@@ -32,7 +32,7 @@ describe("MapService", () => {
     it("Should resolve promise when setting the map", inject([MapService], async (service: MapService) => {
         service.setMap({ on: () => { } } as any as Map);
         await service.initializationPromise;
-        expect(true).toBe(true);
+        expect(true).toBeTruthy();
     }));
 
     it("Should unset the map and remove listeners", inject([MapService], async (service: MapService) => {
