@@ -27,8 +27,8 @@ describe("DataContainerService", () => {
                     useValue: {
                         getSelectedShareUrl: () => { },
                         setShareUrlById: () => { },
-                        setShareUrl: () => { },
-                    },
+                        setShareUrl: () => { }
+                    }
                 },
                 {
                     provide: LayersService,
@@ -36,14 +36,14 @@ describe("DataContainerService", () => {
                         addExternalOverlays: vi.fn(),
                         addExternalBaseLayer: vi.fn(),
                         getData: () => ({}),
-                        selectBaseLayer: () => { },
-                    },
+                        selectBaseLayer: () => { }
+                    }
                 },
                 {
                     provide: FileService,
                     useValue: {
-                        openFromUrl: () => { },
-                    },
+                        openFromUrl: () => { }
+                    }
                 },
                 { provide: ResourcesService, useValue: {} },
                 {
@@ -51,27 +51,27 @@ describe("DataContainerService", () => {
                     useValue: {
                         info: () => { },
                         error: () => { },
-                        warning: () => { },
-                    },
+                        warning: () => { }
+                    }
                 },
                 {
                     provide: SelectedRouteService,
                     useValue: {
-                        getSelectedRoute: () => null as any,
-                    },
+                        getSelectedRoute: () => null as any
+                    }
                 },
                 {
                     provide: MapService,
                     useValue: {
                         getMapBounds: () => ({
                             getNorthEast: () => ({ lat: 1, lng: 2 }),
-                            getSouthWest: () => ({ lat: 3, lng: 4 }),
+                            getSouthWest: () => ({ lat: 3, lng: 4 })
                         }),
-                        fitBounds: vi.fn(),
-                    },
+                        fitBounds: vi.fn()
+                    }
                 },
-                { provide: RunningContextService, useValue: {} },
-            ],
+                { provide: RunningContextService, useValue: {} }
+            ]
         });
     });
 
@@ -87,9 +87,9 @@ describe("DataContainerService", () => {
                     {
                         latlngs: [],
                         routePoint: { lat: 1, lng: 2 },
-                        routingType: "Hike",
-                    },
-                ],
+                        routingType: "Hike"
+                    }
+                ]
             },
             {
                 state: "Poi",
@@ -97,8 +97,8 @@ describe("DataContainerService", () => {
                 name: "name2",
                 description: "description2",
                 markers: [{} as any],
-                segments: [],
-            },
+                segments: []
+            }
         ];
         const dataContainer = service.getContainerForRoutes(routes);
         expect(dataContainer.routes.length).toBe(2);
@@ -119,10 +119,10 @@ describe("DataContainerService", () => {
             dataContainer: {
                 routes: [],
                 northEast: { lat: 1, lng: 2 },
-                southWest: { lat: 3, lng: 4 },
+                southWest: { lat: 3, lng: 4 }
             },
             description: "desc",
-            title: "title",
+            title: "title"
         } as ShareUrl;
         vi.spyOn(shareUrlsService, "getSelectedShareUrl").mockReturnValue(null);
         vi.spyOn(shareUrlsService, "setShareUrlById").mockReturnValue(Promise.resolve(shareUrl));
@@ -139,7 +139,7 @@ describe("DataContainerService", () => {
         vi.spyOn(fileService, "openFromUrl").mockReturnValue(Promise.resolve({} as any));
         vi.spyOn(toastService, "warning");
         store.reset({
-            inMemoryState: {},
+            inMemoryState: {}
         });
         await service.setFileUrlAfterNavigation("url", "baseLayer");
 
@@ -150,8 +150,8 @@ describe("DataContainerService", () => {
         vi.spyOn(fileService, "openFromUrl");
         store.reset({
             inMemoryState: {
-                fileUrl: "url",
-            },
+                fileUrl: "url"
+            }
         });
         await service.setFileUrlAfterNavigation("url", "baseLayer");
 
@@ -164,7 +164,7 @@ describe("DataContainerService", () => {
             id: "123",
             dataContainer: { baseLayer: "baseLayer", routes: [] },
             description: "desc",
-            title: "title",
+            title: "title"
         } as ShareUrl;
         vi.spyOn(shareUrlsService, "getSelectedShareUrl").mockReturnValue(null);
         vi.spyOn(shareUrlsService, "setShareUrlById").mockReturnValue(Promise.resolve(shareUrl));

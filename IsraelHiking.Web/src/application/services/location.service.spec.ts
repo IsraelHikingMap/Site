@@ -17,20 +17,20 @@ describe("LocationService", () => {
         const geoLocationService = {
             backToForeground: new EventEmitter<number>(),
             bulkPositionChanged: {
-                subscribe: () => { },
+                subscribe: () => { }
             },
             enable: vi.fn(),
-            disable: vi.fn(),
+            disable: vi.fn()
         };
         const deviceOrientationService = {
             orientationChanged: new EventEmitter<number>(),
             enable: vi.fn(),
-            disable: vi.fn(),
+            disable: vi.fn()
         };
         const mapService = {
             isMoving: () => false,
             initializationPromise: Promise.resolve(),
-            moveToWithCurrentZoom: vi.fn(),
+            moveToWithCurrentZoom: vi.fn()
         };
         TestBed.configureTestingModule({
             imports: [NgxsModule.forRoot([InMemoryReducer, GpsReducer])],
@@ -38,7 +38,7 @@ describe("LocationService", () => {
                 { provide: GeoLocationService, useValue: geoLocationService },
                 {
                     provide: DeviceOrientationService,
-                    useValue: deviceOrientationService,
+                    useValue: deviceOrientationService
                 },
                 { provide: MapService, useValue: mapService },
                 { provide: LoggingService, useValue: { warning: () => { } } },
@@ -46,11 +46,11 @@ describe("LocationService", () => {
                     provide: SelectedRouteService,
                     useValue: {
                         getSelectedRoute: vi.fn().mockReturnValue({ state: "Poi" }),
-                        isEditingRoute: () => false,
-                    },
+                        isEditingRoute: () => false
+                    }
                 },
-                LocationService,
-            ],
+                LocationService
+            ]
         });
     });
 
@@ -86,13 +86,13 @@ describe("LocationService", () => {
         async (service: LocationService, mapService: MapService, store: Store) => {
             store.reset({
                 gpsState: { currentPosition: null },
-                inMemoryState: { following: false },
+                inMemoryState: { following: false }
             });
             await service.initialize();
             const eventSpy = vi.fn();
             service.changed.subscribe(eventSpy);
-            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 1, longitude: 2 }, } as any));
-            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3 }, } as any));
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 1, longitude: 2 } } as any));
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3 } } as any));
 
             expect(eventSpy).toHaveBeenCalled();
             expect(mapService.moveToWithCurrentZoom).toHaveBeenCalled();
@@ -103,7 +103,7 @@ describe("LocationService", () => {
         async (service: LocationService, mapService: MapService, store: Store) => {
             store.reset({
                 gpsState: { currentPosition: null },
-                inMemoryState: { following: false },
+                inMemoryState: { following: false }
             });
             await service.initialize();
             const eventSpy = vi.fn();
@@ -120,7 +120,7 @@ describe("LocationService", () => {
         async (service: LocationService, mapService: MapService, store: Store) => {
             store.reset({
                 gpsState: { currentPosition: null },
-                inMemoryState: { following: false, keepNorthUp: true },
+                inMemoryState: { following: false, keepNorthUp: true }
             });
             await service.initialize();
             const eventSpy = vi.fn();
@@ -137,7 +137,7 @@ describe("LocationService", () => {
         async (service: LocationService, mapService: MapService, store: Store) => {
             store.reset({
                 gpsState: { currentPosition: null },
-                inMemoryState: { following: false },
+                inMemoryState: { following: false }
             });
             await service.initialize();
             const eventSpy = vi.fn();
@@ -165,9 +165,9 @@ describe("LocationService", () => {
             store.reset({
                 gpsState: {
                     currentPosition: null,
-                    tracking: "searching",
+                    tracking: "searching"
                 },
-                inMemoryState: { following: true },
+                inMemoryState: { following: true }
             });
             await service.initialize();
             const eventSpy = vi.fn();
@@ -184,9 +184,9 @@ describe("LocationService", () => {
             store.reset({
                 gpsState: {
                     currentPosition: null,
-                    tracking: "tracking",
+                    tracking: "tracking"
                 },
-                inMemoryState: { following: true },
+                inMemoryState: { following: true }
             });
             await service.initialize();
             const eventSpy = vi.fn();
@@ -203,9 +203,9 @@ describe("LocationService", () => {
             store.reset({
                 gpsState: {
                     currentPosition: null,
-                    tracking: "tracking",
+                    tracking: "tracking"
                 },
-                inMemoryState: { following: true },
+                inMemoryState: { following: true }
             });
             await service.initialize();
             const eventSpy = vi.fn();
@@ -222,16 +222,16 @@ describe("LocationService", () => {
             store.reset({
                 gpsState: {
                     currentPosition: null,
-                    tracking: "tracking",
+                    tracking: "tracking"
                 },
-                inMemoryState: { following: true },
+                inMemoryState: { following: true }
             });
             await service.initialize();
             store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3 } } as any));
             geolocationService.backToForeground.emit();
 
             expect(mapService.moveToWithCurrentZoom).toHaveBeenCalled();
-            expect(service.getLocationCenter()).toEqual({ lat: 2, lng: 3, alt: undefined, });
+            expect(service.getLocationCenter()).toEqual({ lat: 2, lng: 3, alt: undefined });
         }
     ));
 
@@ -240,9 +240,9 @@ describe("LocationService", () => {
             store.reset({
                 gpsState: {
                     currentPosition: null,
-                    tracking: "tracking",
+                    tracking: "tracking"
                 },
-                inMemoryState: { following: true, distance: true },
+                inMemoryState: { following: true, distance: true }
             });
             await service.initialize();
 
@@ -255,9 +255,9 @@ describe("LocationService", () => {
             store.reset({
                 gpsState: {
                     currentPosition: null,
-                    tracking: "tracking",
+                    tracking: "tracking"
                 },
-                inMemoryState: { following: true, distance: true },
+                inMemoryState: { following: true, distance: true }
             });
             await service.initialize();
             expect(service.isFollowing()).toBeTruthy();
@@ -271,9 +271,9 @@ describe("LocationService", () => {
             store.reset({
                 gpsState: {
                     currentPosition: null,
-                    tracking: "tracking",
+                    tracking: "tracking"
                 },
-                inMemoryState: { following: true, distance: true },
+                inMemoryState: { following: true, distance: true }
             });
             await service.initialize();
             selectedRouteService.isEditingRoute = () => true;

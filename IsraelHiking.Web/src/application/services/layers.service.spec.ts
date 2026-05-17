@@ -25,18 +25,18 @@ describe("LayersService", () => {
                     provide: LoggingService,
                     useValue: {
                         info: vi.fn().mockName("LoggingService.info"),
-                        warning: vi.fn().mockName("LoggingService.warning"),
-                    },
+                        warning: vi.fn().mockName("LoggingService.warning")
+                    }
                 },
                 {
                     provide: ResourcesService,
                     useValue: {
                         getCurrentLanguageCodeSimplified: vi
                             .fn()
-                            .mockName("ResourcesService.getCurrentLanguageCodeSimplified"),
-                    },
-                },
-            ],
+                            .mockName("ResourcesService.getCurrentLanguageCodeSimplified")
+                    }
+                }
+            ]
         });
     });
 
@@ -49,8 +49,8 @@ describe("LayersService", () => {
                 baseLayers: []
             },
             userState: {
-                userInfo: null,
-            },
+                userInfo: null
+            }
         });
         backend.expectNone(_ => true);
         expect(true).toBe(true);
@@ -65,8 +65,8 @@ describe("LayersService", () => {
                 baseLayers: []
             },
             userState: {
-                userInfo: {},
-            },
+                userInfo: {}
+            }
         });
 
         backend.expectOne(u => u.url.startsWith(Urls.userLayers)).flush(null);
@@ -79,19 +79,19 @@ describe("LayersService", () => {
 
         store.reset({
             userState: {
-                userInfo: null,
+                userInfo: null
             },
             layersState: {
                 baseLayers: [
                     { key: "layer1", isEditable: true } as EditableLayer,
-                    { key: "layer2", address: "https://layer2" } as EditableLayer,
+                    { key: "layer2", address: "https://layer2" } as EditableLayer
                 ],
                 overlays: [
                     { key: "overlay1", isEditable: true } as EditableLayer,
-                    { key: "overlay2", address: "https://overlay2" } as EditableLayer,
+                    { key: "overlay2", address: "https://overlay2" } as EditableLayer
                 ],
-                visibleOverlays: [],
-            },
+                visibleOverlays: []
+            }
         });
 
         store.dispatch(new SetUserInfoAction({ id: "1", displayName: "test", imageUrl: "https://test.com", changeSets: 0 }));
@@ -100,7 +100,7 @@ describe("LayersService", () => {
             { key: "layer2", address: "https://layer2-new", isOverlay: false },
             { key: "layer3", address: "https://layer3", isOverlay: false },
             { key: "overlay2", address: "https://overlay2-new", isOverlay: true },
-            { key: "overlay3", address: "https://overlay3", isOverlay: true },
+            { key: "overlay3", address: "https://overlay3", isOverlay: true }
         ]);
 
         await new Promise((resolve) => setTimeout(resolve, 10));
@@ -123,8 +123,8 @@ describe("LayersService", () => {
                 baseLayers: []
             },
             userState: {
-                userInfo: null,
-            },
+                userInfo: null
+            }
         });
         expect(service.isBaseLayerSelected(layer)).toBe(true);
     }));
@@ -136,11 +136,11 @@ describe("LayersService", () => {
             layersState: {
                 baseLayers: [layer1, layer2],
                 selectedBaseLayerKey: layer2.key,
-                overlays: [],
+                overlays: []
             },
             userState: {
-                userInfo: null,
-            },
+                userInfo: null
+            }
         });
 
         expect(service.getSelectedBaseLayer()).toEqual(layer2);
@@ -151,11 +151,11 @@ describe("LayersService", () => {
             layersState: {
                 baseLayers: [],
                 selectedBaseLayerKey: "nonexistent",
-                overlays: [],
+                overlays: []
             },
             userState: {
-                userInfo: null,
-            },
+                userInfo: null
+            }
         });
 
         expect(service.getSelectedBaseLayer()).toEqual(DEFAULT_BASE_LAYERS[0]);
@@ -164,18 +164,18 @@ describe("LayersService", () => {
     it("should return the base layer address when it contains '{x}'", inject([LayersService, Store], (service: LayersService, store: Store) => {
         const baseLayer: EditableLayer = {
             key: "layer",
-            address: "https://tiles.server/{z}/{x}/{y}.png",
+            address: "https://tiles.server/{z}/{x}/{y}.png"
         } as EditableLayer;
 
         store.reset({
             layersState: {
                 baseLayers: [baseLayer],
                 selectedBaseLayerKey: baseLayer.key,
-                overlays: [],
+                overlays: []
             },
             userState: {
-                userInfo: null,
-            },
+                userInfo: null
+            }
         });
 
         const address = service.getSelectedBaseLayerAddressForOSM();
@@ -187,18 +187,18 @@ describe("LayersService", () => {
         (service: LayersService, store: Store, resourcesService: ResourcesService) => {
             const baseLayer: EditableLayer = {
                 key: "layer",
-                address: "",
+                address: ""
             } as EditableLayer;
 
             store.reset({
                 layersState: {
                     baseLayers: [baseLayer],
                     selectedBaseLayerKey: baseLayer.key,
-                    overlays: [],
+                    overlays: []
                 },
                 userState: {
-                    userInfo: null,
-                },
+                    userInfo: null
+                }
             });
 
             (resourcesService.getCurrentLanguageCodeSimplified as Mock).mockReturnValue("he");
@@ -211,18 +211,18 @@ describe("LayersService", () => {
         (service: LayersService, store: Store, resourcesService: ResourcesService) => {
             const baseLayer: EditableLayer = {
                 key: "layer",
-                address: "someAddress",
+                address: "someAddress"
             } as EditableLayer;
 
             store.reset({
                 layersState: {
                     baseLayers: [baseLayer],
                     selectedBaseLayerKey: baseLayer.key,
-                    overlays: [],
+                    overlays: []
                 },
                 userState: {
-                    userInfo: null,
-                },
+                    userInfo: null
+                }
             });
 
             (resourcesService.getCurrentLanguageCodeSimplified as Mock).mockReturnValue("en");
@@ -235,18 +235,18 @@ describe("LayersService", () => {
         (service: LayersService, store: Store, resourcesService: ResourcesService) => {
             const baseLayer: EditableLayer = {
                 key: "layer",
-                address: "https://tiles.server/styles/ilMTB.json",
+                address: "https://tiles.server/styles/ilMTB.json"
             } as EditableLayer;
 
             store.reset({
                 layersState: {
                     baseLayers: [baseLayer],
                     selectedBaseLayerKey: baseLayer.key,
-                    overlays: [],
+                    overlays: []
                 },
                 userState: {
-                    userInfo: null,
-                },
+                    userInfo: null
+                }
             });
 
             (resourcesService.getCurrentLanguageCodeSimplified as Mock).mockReturnValue("he");
@@ -263,11 +263,11 @@ describe("LayersService", () => {
             layersState: {
                 baseLayers: [layer1, layer2],
                 overlays: [overlay1],
-                visibleOverlays: [overlay1.key],
+                visibleOverlays: [overlay1.key]
             },
             userState: {
-                userInfo: null,
-            },
+                userInfo: null
+            }
         });
 
         // Different name that doesn't exist is available
@@ -291,11 +291,11 @@ describe("LayersService", () => {
             layersState: {
                 visibleOverlays: [],
                 baseLayers: [],
-                overlays: [],
+                overlays: []
             },
             userState: {
-                userInfo: null,
-            },
+                userInfo: null
+            }
         });
         const overlay: EditableLayer = { key: "overlay1" } as EditableLayer;
 
@@ -314,8 +314,8 @@ describe("LayersService", () => {
                 baseLayers: []
             },
             userState: {
-                userInfo: null,
-            },
+                userInfo: null
+            }
         });
 
         expect(service.isAllOverlaysHidden()).toBe(true);
@@ -336,8 +336,8 @@ describe("LayersService", () => {
                 baseLayers: []
             },
             userState: {
-                userInfo: null,
-            },
+                userInfo: null
+            }
         });
 
         service.hideAllOverlays();
@@ -354,11 +354,11 @@ describe("LayersService", () => {
                 baseLayers: [baseLayer],
                 overlays: [overlay1, overlay2],
                 selectedBaseLayerKey: "base",
-                visibleOverlays: [overlay1.key],
+                visibleOverlays: [overlay1.key]
             },
             userState: {
-                userInfo: null,
-            },
+                userInfo: null
+            }
         });
 
         const data = service.getData();
@@ -372,7 +372,7 @@ describe("LayersService", () => {
         const spy = vi.spyOn(store, "dispatch");
         const layerData = {
             key: "newLayer",
-            address: "https://test.com",
+            address: "https://test.com"
         } as LayerData;
 
         service.addBaseLayer(layerData);
@@ -383,18 +383,18 @@ describe("LayersService", () => {
     it("should add base layer for logged-in user", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
         store.reset({
             userState: {
-                userInfo: {},
+                userInfo: {}
             },
             layersState: {
                 baseLayers: [],
                 overlays: []
-            },
+            }
         });
         backend.expectOne(u => u.method == "GET" && u.url.startsWith(Urls.userLayers)).flush(null);
         const spy = vi.spyOn(store, "dispatch");
         const layerData = {
             key: "newLayer",
-            address: "https://test.com",
+            address: "https://test.com"
         } as LayerData;
 
         service.addBaseLayer(layerData);
@@ -440,7 +440,7 @@ describe("LayersService", () => {
         const spy = vi.spyOn(store, "dispatch");
         const overlayData = {
             key: "newOverlay",
-            address: "https://test.com",
+            address: "https://test.com"
         } as LayerData;
 
         service.addOverlay(overlayData);
@@ -451,19 +451,19 @@ describe("LayersService", () => {
     it("should add overlay for non logged-in user", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
         store.reset({
             userState: {
-                userInfo: {},
+                userInfo: {}
             },
             layersState: {
                 overlays: [],
                 visibleOverlays: [],
                 baseLayers: []
-            },
+            }
         });
         backend.expectOne(u => u.method == "GET" && u.url.startsWith(Urls.userLayers)).flush(null);
         const spy = vi.spyOn(store, "dispatch");
         const overlayData = {
             key: "newOverlay",
-            address: "https://test.com",
+            address: "https://test.com"
         } as LayerData;
 
         service.addOverlay(overlayData);
@@ -492,7 +492,7 @@ describe("LayersService", () => {
         });
 
         const result = service.addOverlay({
-            key: existingOverlay.key,
+            key: existingOverlay.key
         } as LayerData);
 
         expect(result).toEqual(existingOverlay);
@@ -521,13 +521,13 @@ describe("LayersService", () => {
     it("should update overlay when user is logged in", inject([LayersService, Store, HttpTestingController], (service: LayersService, store: Store, backend: HttpTestingController) => {
         store.reset({
             userState: {
-                userInfo: {},
+                userInfo: {}
             },
             layersState: {
                 baseLayers: [],
                 overlays: [],
                 visibleOverlays: []
-            },
+            }
         });
         const spy = vi.spyOn(store, "dispatch");
         const layer = { key: "layer1", id: "1" } as EditableLayer;
@@ -595,7 +595,7 @@ describe("LayersService", () => {
             address: "https://example.com",
             opacity: 1,
             minZoom: 2,
-            maxZoom: 3,
+            maxZoom: 3
         };
         const layerShareAddress = service.layerDataToAddress(layerData, true);
         const url = new URL(layerShareAddress);
@@ -616,7 +616,7 @@ describe("LayersService", () => {
             address: "https://example.com",
             opacity: 1,
             minZoom: 2,
-            maxZoom: 3,
+            maxZoom: 3
         };
         const layerShareAddress = service.layerDataToAddress(layerData, false);
         const url = new URL(layerShareAddress);

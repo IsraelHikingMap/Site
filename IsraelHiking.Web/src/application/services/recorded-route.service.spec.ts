@@ -26,13 +26,13 @@ describe("Recorded Route Service", () => {
     beforeEach(() => {
         const loggingServiceMock = {
             debug: () => { },
-            info: () => { },
+            info: () => { }
         };
         const tracesServiceMock = {
-            uploadLocalTracesIfNeeded: () => Promise.resolve(),
+            uploadLocalTracesIfNeeded: () => Promise.resolve()
         };
         const runnningContextServiceMock = {
-            isCapacitor: true,
+            isCapacitor: true
         };
         TestBed.configureTestingModule({
             imports: [NgxsModule.forRoot([GpsReducer, RecordedRouteReducer])],
@@ -41,27 +41,27 @@ describe("Recorded Route Service", () => {
                 {
                     provide: ToastService,
                     useValue: {
-                        warning: vi.fn(),
-                    },
+                        warning: vi.fn()
+                    }
                 },
                 { provide: LoggingService, useValue: loggingServiceMock },
                 { provide: TracesService, useValue: tracesServiceMock },
                 {
                     provide: RunningContextService,
-                    useValue: runnningContextServiceMock,
+                    useValue: runnningContextServiceMock
                 },
                 {
                     provide: GeoLocationService,
                     useValue: {
                         positionWhileInBackground: new EventEmitter(),
-                        backToForeground: new EventEmitter(),
-                    },
+                        backToForeground: new EventEmitter()
+                    }
                 },
                 RoutesFactory,
                 RecordedRouteService,
                 provideHttpClient(withInterceptorsFromDi()),
-                provideHttpClientTesting(),
-            ],
+                provideHttpClientTesting()
+            ]
         });
     });
 
@@ -69,8 +69,8 @@ describe("Recorded Route Service", () => {
         (service: RecordedRouteService, store: Store) => {
             store.reset({
                 recordedRouteState: {
-                    isRecording: false,
-                },
+                    isRecording: false
+                }
             });
             expect(service.isRecording()).toBe(false);
         }
@@ -80,8 +80,8 @@ describe("Recorded Route Service", () => {
         (service: RecordedRouteService, store: Store) => {
             store.reset({
                 gpsState: {
-                    tracking: "searching",
-                },
+                    tracking: "searching"
+                }
             });
             expect(service.canRecord()).toBe(false);
         }
@@ -95,10 +95,10 @@ describe("Recorded Route Service", () => {
                     currentPosition: {
                         coords: {
                             latitude: 1,
-                            longitude: 2,
-                        },
-                    },
-                },
+                            longitude: 2
+                        }
+                    }
+                }
             });
             expect(service.canRecord()).toBeTruthy();
         }
@@ -118,17 +118,17 @@ describe("Recorded Route Service", () => {
                                     lat: 1,
                                     lng: 2,
                                     alt: 10,
-                                    timestamp: new Date(0),
-                                },
-                            ],
-                        },
+                                    timestamp: new Date(0)
+                                }
+                            ]
+                        }
                     },
                     routeEditingState: {
-                        routingType: "Hike",
+                        routingType: "Hike"
                     },
                     userState: {
-                        userInfo: null,
-                    },
+                        userInfo: null
+                    }
                 });
                 const spy = vi.fn();
                 store.dispatch = spy;
@@ -153,26 +153,26 @@ describe("Recorded Route Service", () => {
                                     lat: 1,
                                     lng: 2,
                                     alt: 10,
-                                    timestamp: new Date(0),
-                                },
-                            ],
+                                    timestamp: new Date(0)
+                                }
+                            ]
                         },
                         pendingProcessing: [
                             {
                                 coords: {
                                     latitude: 1,
-                                    longitude: 2,
+                                    longitude: 2
                                 } as GeolocationCoordinates,
-                                timestamp: new Date(1000).getTime(),
-                            } as GeolocationPosition,
-                        ],
+                                timestamp: new Date(1000).getTime()
+                            } as GeolocationPosition
+                        ]
                     },
                     routeEditingState: {
-                        routingType: "Hike",
+                        routingType: "Hike"
                     },
                     userState: {
-                        userInfo: null,
-                    },
+                        userInfo: null
+                    }
                 });
                 const spy = vi.fn();
                 store.dispatch = spy;
@@ -192,10 +192,10 @@ describe("Recorded Route Service", () => {
                     isRecording: false,
                     route: {
                         markers: [],
-                        latlngs: [],
-                    },
+                        latlngs: []
+                    }
                 },
-                gpsState: {},
+                gpsState: {}
             });
             service.initialize();
 
@@ -210,18 +210,18 @@ describe("Recorded Route Service", () => {
             store.reset({
                 recordedRouteState: {
                     isRecording: false,
-                    route: {},
+                    route: {}
                 },
                 gpsState: {
                     currentPosition: {
                         coords: {
                             latitude: 1,
                             loggitude: 2,
-                            altitude: 10,
+                            altitude: 10
                         },
-                        timestamp: new Date(0).getTime(),
-                    },
-                },
+                        timestamp: new Date(0).getTime()
+                    }
+                }
             });
             service.initialize();
             service.startRecording();
@@ -236,18 +236,18 @@ describe("Recorded Route Service", () => {
             store.reset({
                 recordedRouteState: {
                     isRecording: false,
-                    route: {},
+                    route: {}
                 },
                 gpsState: {
                     currentPosition: {
                         coords: {
                             latitude: 1,
                             loggitude: 2,
-                            altitude: 10,
+                            altitude: 10
                         },
-                        timestamp: new Date(0).getTime(),
-                    },
-                },
+                        timestamp: new Date(0).getTime()
+                    }
+                }
             });
             service.initialize();
             service.startRecording();
@@ -265,18 +265,18 @@ describe("Recorded Route Service", () => {
             store.reset({
                 recordedRouteState: {
                     isRecording: false,
-                    route: {},
+                    route: {}
                 },
                 gpsState: {
                     currentPosition: {
                         coords: {
                             latitude: 1,
                             loggitude: 2,
-                            altitude: 10,
+                            altitude: 10
                         },
-                        timestamp: new Date(0).getTime(),
-                    },
-                },
+                        timestamp: new Date(0).getTime()
+                    }
+                }
             });
             service.initialize();
             service.startRecording();
@@ -296,18 +296,18 @@ describe("Recorded Route Service", () => {
             store.reset({
                 recordedRouteState: {
                     isRecording: false,
-                    route: {},
+                    route: {}
                 },
                 gpsState: {
                     currentPosition: {
                         coords: {
                             latitude: 1,
                             loggitude: 2,
-                            altitude: 10,
+                            altitude: 10
                         },
-                        timestamp: new Date(0).getTime(),
-                    },
-                },
+                        timestamp: new Date(0).getTime()
+                    }
+                }
             });
             service.initialize();
             const spy = vi.spyOn(loggingService, "debug");
@@ -338,8 +338,8 @@ describe("Recorded Route Service", () => {
             store.reset({
                 gpsState: {},
                 recordedRouteState: {
-                    isRecording: false,
-                },
+                    isRecording: false
+                }
             });
             service.initialize();
             store.reset({
@@ -351,21 +351,21 @@ describe("Recorded Route Service", () => {
                                 lat: 1,
                                 lng: 2,
                                 alt: 10,
-                                timestamp: new Date(0),
-                            },
+                                timestamp: new Date(0)
+                            }
                         ],
                         markers: [
-                            { description: "desc", title: "mock-marker" } as MarkerData,
-                        ],
+                            { description: "desc", title: "mock-marker" } as MarkerData
+                        ]
                     },
-                    isRecording: true,
+                    isRecording: true
                 },
                 routeEditingState: {
-                    routingType: "hike",
+                    routingType: "hike"
                 },
                 userState: {
-                    userInfo: null,
-                },
+                    userInfo: null
+                }
             });
             const spy = vi.fn();
             store.dispatch = spy;

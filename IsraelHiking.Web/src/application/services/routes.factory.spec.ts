@@ -21,7 +21,7 @@ describe("RoutesFactory", () => {
     it("Should create an empty route with the given name", inject([RoutesFactory, Store], (factory: RoutesFactory, store: Store) => {
         const routeEditingState = {
             opacity: 1,
-            weight: 2,
+            weight: 2
         };
 
         store.reset({
@@ -44,7 +44,7 @@ describe("RoutesFactory", () => {
     it("Should add missing data to a route", inject([RoutesFactory, Store], (factory: RoutesFactory, store: Store) => {
         const routeEditingState = {
             opacity: 1,
-            weight: 2,
+            weight: 2
         };
         store.reset({
             routeEditingState

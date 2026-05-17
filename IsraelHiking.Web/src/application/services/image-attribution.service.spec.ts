@@ -271,7 +271,7 @@ describe("ImageAttributionService", () => {
                         "-1": {
                             imageinfo: [{
                                 extmetadata: {
-                                    somthing: {},
+                                    somthing: {}
                                 }
                             }]
                         }
@@ -294,7 +294,7 @@ describe("ImageAttributionService", () => {
                         "-1": {
                             imageinfo: [{
                                 extmetadata: {
-                                    somthing: {},
+                                    somthing: {}
                                 }
                             }],
                             revisions: [{
@@ -321,7 +321,7 @@ describe("ImageAttributionService", () => {
                         "-1": {
                             imageinfo: [{
                                 extmetadata: {
-                                    somthing: {},
+                                    somthing: {}
                                 }
                             }],
                             revisions: [{

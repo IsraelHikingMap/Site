@@ -8,7 +8,7 @@ describe("GpxDataContainerConverterService", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [],
-            providers: [GpxDataContainerConverterService],
+            providers: [GpxDataContainerConverterService]
         });
     });
 
@@ -20,7 +20,7 @@ describe("GpxDataContainerConverterService", () => {
                     key: "key",
                     maxZoom: 1,
                     minZoom: 0,
-                    opacity: 1,
+                    opacity: 1
                 },
                 northEast: { lat: 0, lng: 0 },
                 southWest: { lat: 0, lng: 0 },
@@ -31,9 +31,9 @@ describe("GpxDataContainerConverterService", () => {
                         description: "",
                         markers: [],
                         name: "name",
-                        segments: [],
-                    },
-                ],
+                        segments: []
+                    }
+                ]
             });
             const dataContainer = await service.toDataContainer(await new Response(decode(gpxBase64String)).text());
             expect(dataContainer.routes.length).toBe(0);
@@ -48,7 +48,7 @@ describe("GpxDataContainerConverterService", () => {
                     key: "key",
                     maxZoom: 1,
                     minZoom: 0,
-                    opacity: 1,
+                    opacity: 1
                 },
                 northEast: { lat: 0, lng: 0 },
                 southWest: { lat: 0, lng: 0 },
@@ -65,11 +65,11 @@ describe("GpxDataContainerConverterService", () => {
                                 title: "title",
                                 type: "type",
                                 latlng: { lat: 1, lng: 2, alt: 3 },
-                                urls: [{ url: "url", text: "text", mimeType: "image/jpeg" }],
-                            },
-                        ],
-                    },
-                ],
+                                urls: [{ url: "url", text: "text", mimeType: "image/jpeg" }]
+                            }
+                        ]
+                    }
+                ]
             });
             const dataContainer = await service.toDataContainer(await new Response(decode(gpxBase64String)).text());
             expect(dataContainer.routes.length).toBe(1);
@@ -91,7 +91,7 @@ describe("GpxDataContainerConverterService", () => {
                     key: "key",
                     maxZoom: 1,
                     minZoom: 0,
-                    opacity: 1,
+                    opacity: 1
                 },
                 northEast: { lat: 0, lng: 0 },
                 southWest: { lat: 0, lng: 0 },
@@ -106,33 +106,33 @@ describe("GpxDataContainerConverterService", () => {
                             {
                                 latlngs: [
                                     { lat: 0, lng: 0, timestamp: new Date().toISOString() },
-                                    { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                    { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                                 ],
                                 routePoint: { lat: 1, lng: 1 },
-                                routingType: "Hike",
+                                routingType: "Hike"
                             },
                             {
                                 latlngs: [
                                     { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                    { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                    { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                                 ],
                                 routePoint: { lat: 2, lng: 2 },
-                                routingType: "Hike",
+                                routingType: "Hike"
                             },
                             {
                                 latlngs: [
                                     { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                                    { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                                    { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                                 ],
                                 routePoint: { lat: 3, lng: 3 },
-                                routingType: "Hike",
-                            },
+                                routingType: "Hike"
+                            }
                         ],
                         color: "color",
                         opacity: 1,
-                        weight: 10,
-                    },
-                ],
+                        weight: 10
+                    }
+                ]
             });
             const dataContainer = await service.toDataContainer(await new Response(decode(gpxBase64String)).text());
             expect(dataContainer.routes.length).toBe(1);
@@ -151,7 +151,7 @@ describe("GpxDataContainerConverterService", () => {
                     key: "key",
                     maxZoom: 1,
                     minZoom: 0,
-                    opacity: 1,
+                    opacity: 1
                 },
                 northEast: { lat: 0, lng: 0 },
                 southWest: { lat: 0, lng: 0 },
@@ -174,17 +174,17 @@ describe("GpxDataContainerConverterService", () => {
                                     { lat: 6, lng: 6, timestamp: new Date().toISOString() },
                                     { lat: 7, lng: 7, timestamp: new Date().toISOString() },
                                     { lat: 8, lng: 8, timestamp: new Date().toISOString() },
-                                    { lat: 9, lng: 9, timestamp: new Date().toISOString() },
+                                    { lat: 9, lng: 9, timestamp: new Date().toISOString() }
                                 ],
                                 routePoint: { lat: 9, lng: 9 },
-                                routingType: "Hike",
-                            },
+                                routingType: "Hike"
+                            }
                         ],
                         color: "color",
                         opacity: 1,
-                        weight: 10,
-                    },
-                ],
+                        weight: 10
+                    }
+                ]
             });
             // as if this was a not create in this site
             const gpxString = (await new Response(decode(gpxBase64String)).text()).replace("IsraelHikingMap", "");
@@ -241,7 +241,7 @@ describe("GpxDataContainerConverterService", () => {
         const latlngs = [
             { lat: 1, lng: 1, timestamp: new Date(1).toISOString() },
             { lat: 2, lng: 2, timestamp: new Date(2).toISOString() },
-            { lat: 3, lng: 3, timestamp: new Date(3).toISOString() },
+            { lat: 3, lng: 3, timestamp: new Date(3).toISOString() }
         ];
         const segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(latlngs, "Hike");
         expect(segments.length).toBe(2);

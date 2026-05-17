@@ -22,10 +22,10 @@ describe("MapService", () => {
                     provide: LoggingService,
                     useValue: {
                         info: () => { },
-                        error: () => { },
-                    },
-                },
-            ],
+                        error: () => { }
+                    }
+                }
+            ]
         });
     });
 
@@ -56,7 +56,7 @@ describe("MapService", () => {
                 loadImage: spy,
                 on: (event: string, callback: (e: any) => void) => {
                     if (event == "styleimagemissing") callback({ id: "123" });
-                },
+                }
             } as any as Map;
             service.setMap(mapMock);
             await service.initializationPromise;
@@ -75,7 +75,7 @@ describe("MapService", () => {
                     if (event == "styleimagemissing") {
                         callback({ id: "http://123.png" });
                     }
-                },
+                }
             } as any as Map;
             service.setMap(mapMock);
             await service.initializationPromise;
@@ -97,7 +97,7 @@ describe("MapService", () => {
                         storedCallback = callback;
                         callback({ id: "http://123.png" });
                     }
-                },
+                }
             } as any as Map;
             service.setMap(mapMock);
             await service.initializationPromise;
@@ -113,7 +113,7 @@ describe("MapService", () => {
             on: (event: string, callback: (error: ErrorEvent) => void) => {
                 if (event == "error")
                     callback({ error: new Error("418") } as any as ErrorEvent);
-            },
+            }
         } as any as Map);
         await service.initializationPromise;
         expect(loggingService.error).not.toHaveBeenCalled();
@@ -125,7 +125,7 @@ describe("MapService", () => {
             on: (event: string, callback: (error: ErrorEvent) => void) => {
                 if (event == "error")
                     callback({ error: new Error("other") } as any as ErrorEvent);
-            },
+            }
         } as any as Map);
         await service.initializationPromise;
         expect(loggingService.error).toHaveBeenCalled();
@@ -138,15 +138,15 @@ describe("MapService", () => {
             locationState: {
                 longitude: 0,
                 latitude: 0,
-                zoom: 0,
-            },
+                zoom: 0
+            }
         });
         service.setMap({
             on: (event: string, callback: (error: ErrorEvent) => void) => {
                 if (event == "moveend") callback({} as any);
             },
             getCenter: () => ({ lng: 1, lat: 2 }),
-            getZoom: () => 1,
+            getZoom: () => 1
         } as any as Map);
         await service.initializationPromise;
         expect(spy).toHaveBeenCalled();
@@ -160,15 +160,15 @@ describe("MapService", () => {
             locationState: {
                 longitude: 1,
                 latitude: 2,
-                zoom: 1,
-            },
+                zoom: 1
+            }
         });
         service.setMap({
             on: (event: string, callback: (error: ErrorEvent) => void) => {
                 if (event == "moveend") callback({} as any);
             },
             getCenter: () => ({ lng: 1, lat: 2 }),
-            getZoom: () => 1,
+            getZoom: () => 1
         } as any as Map);
         await service.initializationPromise;
         expect(spy).not.toHaveBeenCalled();
@@ -180,7 +180,7 @@ describe("MapService", () => {
             on: (event: string, callback: (error: ErrorEvent) => void) => {
                 if (event == "moveend") moveendCallback = callback;
             },
-            off: () => { },
+            off: () => { }
         } as any as Map);
         await service.initializationPromise;
         service.unsetMap();
@@ -192,8 +192,8 @@ describe("MapService", () => {
             on: () => { },
             getBounds: () => ({
                 getNorthEast: () => ({ lat: 1, lng: 1 }),
-                getSouthWest: () => ({ lat: 2, lng: 2 }),
-            }),
+                getSouthWest: () => ({ lat: 2, lng: 2 })
+            })
         } as any as Map);
         const bounds = service.getMapBounds();
         expect(bounds).toEqual({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } });
@@ -202,7 +202,7 @@ describe("MapService", () => {
     it("should project point", inject([MapService], async (service: MapService) => {
         service.setMap({
             on: () => { },
-            project: () => ({ x: 1, y: 2 }),
+            project: () => ({ x: 1, y: 2 })
         } as any as Map);
         const point = service.project({ lng: 1, lat: 2 });
         expect(point.x).toEqual(1);
@@ -218,7 +218,7 @@ describe("MapService", () => {
         service.setMap({
             on: () => { },
             queryRenderedFeatures: () => [{ id: "42" }, { id: "43" }],
-            getLayer: () => true,
+            getLayer: () => true
         } as any as Map);
         const features = service.getFeaturesFromTiles();
         expect(features.length).toEqual(2);
@@ -227,7 +227,7 @@ describe("MapService", () => {
     it("should return is moving when the map is moving", inject([MapService], async (service: MapService) => {
         service.setMap({
             on: () => { },
-            isMoving: () => true,
+            isMoving: () => true
         } as any as Map);
         expect(service.isMoving()).toEqual(true);
     }));
@@ -238,7 +238,7 @@ describe("MapService", () => {
             service.setMap({
                 fitBounds: spy,
                 on: () => { },
-                getZoom: () => 1,
+                getZoom: () => 1
             } as any as Map);
             await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } });
             expect(vi.mocked(spy).mock.calls[0][1].padding).toBe(50);
@@ -251,7 +251,7 @@ describe("MapService", () => {
             service.setMap({
                 fitBounds: spy,
                 on: () => { },
-                getZoom: () => 1,
+                getZoom: () => 1
             } as any as Map);
             const originalInnerWidth = (window as any).innerWidth;
             (window as any).innerWidth = 500;
@@ -267,7 +267,7 @@ describe("MapService", () => {
             service.setMap({
                 fitBounds: spy,
                 on: () => { },
-                getZoom: () => 1,
+                getZoom: () => 1
             } as any as Map);
             const originalInnerWidth = (window as any).innerWidth;
             (window as any).innerWidth = 1000;
@@ -286,7 +286,7 @@ describe("MapService", () => {
                 },
                 flyTo: spy,
                 on: () => { },
-                getZoom: () => 1,
+                getZoom: () => 1
             } as any as Map);
             await service.flyTo({ lng: 1, lat: 1 }, 1);
             expect(spy).not.toHaveBeenCalled();
@@ -301,7 +301,7 @@ describe("MapService", () => {
                     return { lat: 1, lng: 1 };
                 },
                 flyTo: spy,
-                on: () => { },
+                on: () => { }
             } as any as Map);
             await service.flyTo({ lng: 2, lat: 2 }, 1);
             expect(spy).toHaveBeenCalled();
@@ -317,7 +317,7 @@ describe("MapService", () => {
                 },
                 flyTo: spy,
                 on: () => { },
-                getZoom: () => 1,
+                getZoom: () => 1
             } as any as Map);
             await service.flyTo({ lng: 2, lat: 2 });
             expect(spy).toHaveBeenCalled();
@@ -331,7 +331,7 @@ describe("MapService", () => {
             service.setMap({
                 easeTo: spy,
                 on: () => { },
-                getZoom: () => 1,
+                getZoom: () => 1
             } as any as Map);
             await service.moveToWithCurrentZoom({ lng: 2, lat: 2 }, 1);
             expect(spy).toHaveBeenCalled();
@@ -346,7 +346,7 @@ describe("MapService", () => {
                 easeTo: spy,
                 on: () => { },
                 getZoom: () => 1,
-                off: () => { },
+                off: () => { }
             } as any as Map);
             service.unsetMap();
             await service.moveToWithCurrentZoom({ lng: 2, lat: 2 }, 1);
@@ -359,7 +359,7 @@ describe("MapService", () => {
             const spy = vi.fn();
             service.setMap({
                 on: () => { },
-                addLayer: spy,
+                addLayer: spy
             } as any as Map);
             service.addLayer({ id: "layer1" } as any);
             expect(spy).toHaveBeenCalled();
@@ -371,7 +371,7 @@ describe("MapService", () => {
             const spy = vi.fn();
             service.setMap({
                 on: () => { },
-                addSource: spy,
+                addSource: spy
             } as any as Map);
             service.addSource("source1", {} as any);
             expect(spy).toHaveBeenCalled();

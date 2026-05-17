@@ -72,7 +72,7 @@ describe("WikidataService", () => {
                         original: {
                             source: "image-url2"
                         }
-                    },
+                    }
                 }
             }
         });
@@ -121,7 +121,7 @@ describe("WikidataService", () => {
                         original: {
                             source: "image-url2"
                         }
-                    },
+                    }
                 }
             }
         });
@@ -184,7 +184,7 @@ describe("WikidataService", () => {
                             longitude: 2
                         }
                     }
-                }],
+                }]
             }
         });
         await new Promise((resolve) => setTimeout(resolve, 10));

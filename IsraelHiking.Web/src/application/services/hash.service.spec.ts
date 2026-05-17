@@ -21,9 +21,9 @@ describe("HashService", () => {
             createUrlTree: (array: []) => array.join("/"),
             parseUrl: (url: string) => ({
                 root: { children: { primary: { segments: url.split("/") } } },
-                queryParams: {},
+                queryParams: {}
             }),
-            url: "",
+            url: ""
         };
         TestBed.configureTestingModule({
             imports: [NgxsModule.forRoot([InMemoryReducer])],
@@ -36,12 +36,12 @@ describe("HashService", () => {
                 {
                     provide: LayersService,
                     useValue: {
-                        addLayerAfterNavigation: () => { },
-                    },
+                        addLayerAfterNavigation: () => { }
+                    }
                 },
                 SidebarService,
-                HashService,
-            ],
+                HashService
+            ]
         });
     });
 
@@ -57,14 +57,14 @@ describe("HashService", () => {
             sidebar.show("public-poi");
             store.reset({
                 poiState: {
-                    selectedPointOfInterest: {},
+                    selectedPointOfInterest: {}
                 },
                 inMemoryState: {},
                 locationState: {
                     zoom: 1,
                     latitude: 2,
-                    longitude: 3,
-                },
+                    longitude: 3
+                }
             });
 
             expect(spy).not.toHaveBeenCalled();
@@ -84,14 +84,14 @@ describe("HashService", () => {
             service.initialize();
             store.reset({
                 poiState: {
-                    selectedPointOfInterest: {},
+                    selectedPointOfInterest: {}
                 },
                 inMemoryState: {},
                 locationState: {
                     zoom: 1,
                     latitude: 2,
-                    longitude: 3,
-                },
+                    longitude: 3
+                }
             });
 
             expect(spy).not.toHaveBeenCalled();
@@ -111,14 +111,14 @@ describe("HashService", () => {
             service.initialize();
             store.reset({
                 poiState: {
-                    selectedPointOfInterest: {},
+                    selectedPointOfInterest: {}
                 },
                 inMemoryState: {},
                 locationState: {
                     zoom: 1,
                     latitude: 2,
-                    longitude: 3,
-                },
+                    longitude: 3
+                }
             });
 
             expect(spy).not.toHaveBeenCalled();
@@ -138,14 +138,14 @@ describe("HashService", () => {
             service.initialize();
             store.reset({
                 poiState: {
-                    selectedPointOfInterest: {},
+                    selectedPointOfInterest: {}
                 },
                 inMemoryState: {},
                 locationState: {
                     zoom: 1,
                     latitude: 2,
-                    longitude: 3,
-                },
+                    longitude: 3
+                }
             });
 
             expect(spy).not.toHaveBeenCalled();
@@ -164,13 +164,13 @@ describe("HashService", () => {
             store.reset({
                 poiState: {},
                 inMemoryState: {
-                    shareUrl: {},
+                    shareUrl: {}
                 },
                 locationState: {
                     zoom: 1,
                     latitude: 2,
-                    longitude: 3,
-                },
+                    longitude: 3
+                }
             });
 
             expect(spy).toHaveBeenCalled();
@@ -191,13 +191,13 @@ describe("HashService", () => {
                 poiState: {},
                 inMemoryState: {
                     fileUrl: {},
-                    baseLayer: "baseLayer",
+                    baseLayer: "baseLayer"
                 },
                 locationState: {
                     zoom: 1,
                     latitude: 2,
-                    longitude: 3,
-                },
+                    longitude: 3
+                }
             });
             expect(spy).toHaveBeenCalled();
             expect(vi.mocked(spy).mock.calls[0][0][0]).toBe(RouteStrings.ROUTE_URL);
@@ -220,8 +220,8 @@ describe("HashService", () => {
                 locationState: {
                     zoom: 1,
                     latitude: 2,
-                    longitude: 3,
-                },
+                    longitude: 3
+                }
             });
 
             expect(spy).not.toHaveBeenCalled();
@@ -240,14 +240,14 @@ describe("HashService", () => {
             service.initialize();
             store.reset({
                 poiState: {
-                    selectedPointOfInterest: {},
+                    selectedPointOfInterest: {}
                 },
                 inMemoryState: {},
                 locationState: {
                     zoom: 1,
                     latitude: 2,
-                    longitude: 3,
-                },
+                    longitude: 3
+                }
             });
 
             expect(spy).toHaveBeenCalled();
@@ -263,8 +263,8 @@ describe("HashService", () => {
                 locationState: {
                     zoom: 1,
                     latitude: 2,
-                    longitude: 3,
-                },
+                    longitude: 3
+                }
             });
 
             const href = service.getHref();
@@ -278,8 +278,8 @@ describe("HashService", () => {
             shareUrlService.getFullUrlFromShareId = () => "share-address";
             store.reset({
                 inMemoryState: {
-                    shareUrl: { id: "1" },
-                },
+                    shareUrl: { id: "1" }
+                }
             });
 
             const href = service.getHref();
@@ -293,11 +293,11 @@ describe("HashService", () => {
             routerMock.createUrlTree = (array: [], options: any) => ("file-address?" + options.queryParams.baselayer) as any as UrlTree;
             store.reset({
                 inMemoryState: {
-                    fileUrl: "fileUrl",
+                    fileUrl: "fileUrl"
                 },
                 layersState: {
-                    selectedBaseLayerKey: "base-layer",
-                },
+                    selectedBaseLayerKey: "base-layer"
+                }
             });
             const href = service.getHref();
 

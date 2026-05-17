@@ -3,11 +3,11 @@ import { TestBed, inject } from "@angular/core/testing";
 import {
     HttpRequest,
     provideHttpClient,
-    withInterceptorsFromDi,
+    withInterceptorsFromDi
 } from "@angular/common/http";
 import {
     HttpTestingController,
-    provideHttpClientTesting,
+    provideHttpClientTesting
 } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
@@ -34,7 +34,7 @@ import { Urls } from "../urls";
 import { LayersReducer } from "../reducers/layers.reducer";
 import {
     AddToPoiQueueAction,
-    OfflineReducer,
+    OfflineReducer
 } from "../reducers/offline.reducer";
 import { ConfigurationReducer } from "../reducers/configuration.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models";
@@ -43,10 +43,10 @@ import { NakebService } from "./nakeb.service";
 describe("Poi Service", () => {
     beforeEach(() => {
         const hashService = {
-            getFullUrlFromPoiId: (s: PoiRouteUrlInfo) => s.source + "/" + s.id,
+            getFullUrlFromPoiId: (s: PoiRouteUrlInfo) => s.source + "/" + s.id
         };
         const fileServiceMock = {
-            deleteFileFromCache: () => Promise.resolve(),
+            deleteFileFromCache: () => Promise.resolve()
         };
         const databaseServiceMock = {
             getPoisForClustering: () => Promise.resolve([]),
@@ -54,31 +54,31 @@ describe("Poi Service", () => {
             getPoiById: () => Promise.resolve(),
             deletePois: vi.fn().mockReturnValue(Promise.resolve()),
             storePois: vi.fn().mockReturnValue(Promise.resolve()),
-            storeImages: vi.fn().mockReturnValue(Promise.resolve()),
+            storeImages: vi.fn().mockReturnValue(Promise.resolve())
         } as any;
         const mapServiceMock = {
             getFeaturesFromTiles: () => [] as GeoJSONFeature[],
-            initializationPromise: Promise.resolve(),
+            initializationPromise: Promise.resolve()
         };
         const loggingService = {
             info: () => { },
             warning: () => { },
-            debug: () => { },
+            debug: () => { }
         };
         TestBed.configureTestingModule({
             imports: [
                 NgxsModule.forRoot([
                     LayersReducer,
                     OfflineReducer,
-                    ConfigurationReducer,
-                ]),
+                    ConfigurationReducer
+                ])
             ],
             providers: [
                 {
                     provide: ResourcesService,
                     useValue: {
-                        getCurrentLanguageCodeSimplified: () => "he",
-                    },
+                        getCurrentLanguageCodeSimplified: () => "he"
+                    }
                 },
                 { provide: HashService, useValue: hashService },
                 { provide: ToastService, useValue: {} },
@@ -89,46 +89,46 @@ describe("Poi Service", () => {
                 {
                     provide: ShareUrlsService,
                     useValue: {
-                        getImageUrlFromShareId: () => Promise.resolve("image-url"),
-                    },
+                        getImageUrlFromShareId: () => Promise.resolve("image-url")
+                    }
                 },
                 {
                     provide: OverpassTurboService,
                     useValue: {
-                        getLongWay: () => Promise.resolve(null),
-                    },
+                        getLongWay: () => Promise.resolve(null)
+                    }
                 },
                 {
                     provide: INatureService,
                     useValue: {
                         enritchFeatureFromINature: () => Promise.resolve(),
-                        createFeatureFromPageId: () => Promise.resolve(),
-                    },
+                        createFeatureFromPageId: () => Promise.resolve()
+                    }
                 },
                 {
                     provide: WikidataService,
                     useValue: {
                         enritchFeatureFromWikimedia: () => Promise.resolve(),
-                        createFeatureFromPageId: () => Promise.resolve(),
-                    },
+                        createFeatureFromPageId: () => Promise.resolve()
+                    }
                 },
                 {
                     provide: NakebService,
                     useValue: {
-                        getRoute: () => Promise.reject(),
-                    },
+                        getRoute: () => Promise.reject()
+                    }
                 },
                 {
                     provide: ImageAttributionService,
-                    useValue: { getAttributionForImage: () => "aaa" },
+                    useValue: { getAttributionForImage: () => "aaa" }
                 },
                 GeoJsonParser,
                 RunningContextService,
                 WhatsAppService,
                 PoiService,
                 provideHttpClient(withInterceptorsFromDi()),
-                provideHttpClientTesting(),
-            ],
+                provideHttpClientTesting()
+            ]
         });
     });
 
@@ -137,11 +137,11 @@ describe("Poi Service", () => {
         async (poiService: PoiService, store: Store) => {
             store.reset({
                 layersState: {
-                    visiblePoisCategories: [],
+                    visiblePoisCategories: []
                 },
                 offlineState: {
-                    uploadPoiQueue: [],
-                },
+                    uploadPoiQueue: []
+                }
             });
             poiService.initialize();
 
@@ -159,12 +159,12 @@ describe("Poi Service", () => {
         ) => {
             store.reset({
                 layersState: {
-                    visiblePoisCategories: ["Water"],
+                    visiblePoisCategories: ["Water"]
                 },
                 configuration: {},
                 offlineState: {
-                    uploadPoiQueue: [],
-                },
+                    uploadPoiQueue: []
+                }
             });
 
             (runningContextService as any).isIFrame = false;
@@ -207,14 +207,14 @@ describe("Poi Service", () => {
         ) => {
             store.reset({
                 layersState: {
-                    visiblePoisCategories: ["Water"],
+                    visiblePoisCategories: ["Water"]
                 },
                 configuration: {
                     language: "he"
                 },
                 offlineState: {
-                    uploadPoiQueue: [],
-                },
+                    uploadPoiQueue: []
+                }
             });
 
             (runningContextService as any).isIFrame = false;
@@ -482,8 +482,8 @@ describe("Poi Service", () => {
                 layersState: {},
                 configuration: {},
                 offlineState: {
-                    uploadPoiQueue: ["1"],
-                },
+                    uploadPoiQueue: ["1"]
+                }
             });
 
             databaseService.getPoiFromUploadQueue = () => Promise.resolve(null);
@@ -511,8 +511,8 @@ describe("Poi Service", () => {
                 layersState: {},
                 configuration: {},
                 offlineState: {
-                    uploadPoiQueue: ["1"],
-                },
+                    uploadPoiQueue: ["1"]
+                }
             });
 
             databaseService.getPoiFromUploadQueue = () =>
@@ -545,16 +545,16 @@ describe("Poi Service", () => {
                 title: "title",
                 type: "some-type",
                 urls: [
-                    { mimeType: "image", url: "wikimedia.org/image-url", text: "text" },
+                    { mimeType: "image", url: "wikimedia.org/image-url", text: "text" }
                 ],
                 latlng: { lng: 1, lat: 2 },
-                id,
+                id
             };
 
             store.reset({
                 poiState: {
-                    uploadMarkerData: markerData,
-                },
+                    uploadMarkerData: markerData
+                }
             });
 
             const feature = await poiService.getBasicInfo("", "new", "he");
@@ -577,9 +577,9 @@ describe("Poi Service", () => {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [1, 2],
+                    coordinates: [1, 2]
                 },
-                properties: {},
+                properties: {}
             });
             expect(data).toBeNull();
         }
@@ -593,27 +593,27 @@ describe("Poi Service", () => {
                 title: "title",
                 type: "some-type",
                 urls: [
-                    { mimeType: "image", url: "wikimedia.org/image-url", text: "text" },
+                    { mimeType: "image", url: "wikimedia.org/image-url", text: "text" }
                 ],
-                latlng: { lng: 1, lat: 2 },
+                latlng: { lng: 1, lat: 2 }
             };
 
             store.reset({
                 poiState: {
-                    uploadMarkerData: markerData,
-                },
+                    uploadMarkerData: markerData
+                }
             });
 
             const feature: GeoJSON.Feature = {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [3, 4],
+                    coordinates: [3, 4]
                 },
                 properties: {
                     poiId: "poi-42",
-                    poiSource: "OSM",
-                },
+                    poiSource: "OSM"
+                }
             };
 
             const data = await poiService.createEditableDataAndMerge(
@@ -686,7 +686,7 @@ describe("Poi Service", () => {
                     website: "website",
                     start: {
                         lat: 1,
-                        lng: 2,
+                        lng: 2
                     },
                     dataContainer: {
                         routes: [
@@ -695,14 +695,14 @@ describe("Poi Service", () => {
                                     {
                                         latlngs: [
                                             { lat: 1, lng: 2 },
-                                            { lat: 3, lng: 4 },
-                                        ],
-                                    },
+                                            { lat: 3, lng: 4 }
+                                        ]
+                                    }
                                 ],
-                                markers: [],
-                            },
-                        ],
-                    },
+                                markers: []
+                            }
+                        ]
+                    }
                 });
 
             const feature = await poiService.getBasicInfo(id, source);
@@ -742,7 +742,7 @@ describe("Poi Service", () => {
                     type: "Hiking",
                     start: {
                         lat: 1,
-                        lng: 2,
+                        lng: 2
                     },
                     dataContainer: {
                         routes: [
@@ -751,25 +751,25 @@ describe("Poi Service", () => {
                                     {
                                         latlngs: [
                                             { lat: 1, lng: 2 },
-                                            { lat: 3, lng: 4 },
-                                        ],
-                                    },
+                                            { lat: 3, lng: 4 }
+                                        ]
+                                    }
                                 ],
-                                markers: [],
+                                markers: []
                             },
                             {
                                 segments: [
                                     {
                                         latlngs: [
                                             { lat: 5, lng: 6 },
-                                            { lat: 7, lng: 8 },
-                                        ],
-                                    },
+                                            { lat: 7, lng: 8 }
+                                        ]
+                                    }
                                 ],
-                                markers: [],
-                            },
-                        ],
-                    },
+                                markers: []
+                            }
+                        ]
+                    }
                 });
 
             const feature = await poiService.getBasicInfo(id, source);
@@ -794,16 +794,16 @@ describe("Poi Service", () => {
                         type: "LineString",
                         coordinates: [
                             [35.0415805, 32.4801317],
-                            [35.0417149, 32.4801635],
-                        ],
+                            [35.0417149, 32.4801635]
+                        ]
                     },
                     properties: {
                         wikidata: "Q42",
                         "mtb:name": "mtb:name",
                         highway: "path",
                         "ref:IL:inature": "42",
-                        bicycle: "designated",
-                    },
+                        bicycle: "designated"
+                    }
                 } as GeoJSON.Feature);
 
             overpassTurboService.getLongWay = () =>
@@ -814,10 +814,10 @@ describe("Poi Service", () => {
                         coordinates: [
                             [35.0415805, 32.4801317],
                             [35.0417149, 32.4801635],
-                            [35.0417149, 32.4801635],
-                        ],
+                            [35.0417149, 32.4801635]
+                        ]
                     },
-                    properties: {},
+                    properties: {}
                 } as GeoJSON.Feature);
 
             const res = await poiService.getBasicInfo(id, source, "he");
@@ -841,11 +841,11 @@ describe("Poi Service", () => {
                     type: "Feature",
                     geometry: {
                         type: "Point",
-                        coordinates: [35.0415805, 32.4801317],
+                        coordinates: [35.0415805, 32.4801317]
                     },
                     properties: {
-                        place: "village",
-                    },
+                        place: "village"
+                    }
                 } as GeoJSON.Feature);
             overpassTurboService.getPlaceGeometry = () =>
                 Promise.resolve({
@@ -854,9 +854,9 @@ describe("Poi Service", () => {
                         type: "LineString",
                         coordinates: [
                             [35.0415805, 32.4801317],
-                            [35.0417149, 32.4801635],
-                        ],
-                    },
+                            [35.0417149, 32.4801635]
+                        ]
+                    }
                 } as GeoJSON.Feature);
             const res = await poiService.getBasicInfo(id, source, "he");
             await poiService.updateExtendedInfo(res, "he");
@@ -880,8 +880,8 @@ describe("Poi Service", () => {
                     {
                         id: "421",
                         properties: {},
-                        geometry: { type: "Point", coordinates: [0, 0] },
-                    } as any,
+                        geometry: { type: "Point", coordinates: [0, 0] }
+                    } as any
                 ]);
 
             const promise = poiService.getBasicInfo(id, source);
@@ -963,8 +963,8 @@ describe("Poi Service", () => {
                 .flush({
                     properties: {
                         poiId: id,
-                        source,
-                    },
+                        source
+                    }
                 });
 
             const res = await promise;
@@ -1022,7 +1022,7 @@ describe("Poi Service", () => {
                 canEditTitle: true,
                 originalFeature: null,
                 showLocationUpdate: false,
-                location: { lat: 0, lng: 0 } as LatLngAltTime,
+                location: { lat: 0, lng: 0 } as LatLngAltTime
             });
 
             expect(store.dispatch).toHaveBeenCalled();
@@ -1049,8 +1049,8 @@ describe("Poi Service", () => {
         async (poiService: PoiService, dbMock: DatabaseService, store: Store) => {
             store.reset({
                 offlineState: {
-                    uploadPoiQueue: [] as any[],
-                },
+                    uploadPoiQueue: [] as any[]
+                }
             });
             store.dispatch = vi.fn();
             const spy = vi.spyOn(dbMock, "addPoiToUploadQueue");
@@ -1074,13 +1074,13 @@ describe("Poi Service", () => {
                             poiId: "poiId",
                             identifier: "id",
                             imageUrl: "wikimedia.org/some-old-image-url",
-                            website: "some-old-url",
+                            website: "some-old-url"
                         } as any,
                         geometry: {
                             type: "Point",
-                            coordinates: [0, 0],
-                        },
-                    } as GeoJSON.Feature,
+                            coordinates: [0, 0]
+                        }
+                    } as GeoJSON.Feature
                 },
                 true
             );
@@ -1097,7 +1097,7 @@ describe("Poi Service", () => {
             expect(feature.properties.poiRemovedUrls).toEqual(["some-old-url"]);
             expect(feature.properties.poiAddedImages).toEqual(["some-new-image-url"]);
             expect(feature.properties.poiRemovedImages).toEqual([
-                "wikimedia.org/some-old-image-url",
+                "wikimedia.org/some-old-image-url"
             ]);
             expect(feature.properties.poiIcon).toBe("icon-spring");
             expect(feature.properties.poiGeolocation.lat).toBe(1);
@@ -1115,8 +1115,8 @@ describe("Poi Service", () => {
         async (poiService: PoiService, dbMock: DatabaseService, store: Store) => {
             store.reset({
                 offlineState: {
-                    uploadPoiQueue: [] as any[],
-                },
+                    uploadPoiQueue: [] as any[]
+                }
             });
             const spy = vi.spyOn(dbMock, "addPoiToUploadQueue");
             await poiService.updateComplexPoi(
@@ -1144,13 +1144,13 @@ describe("Poi Service", () => {
                             poiCategory: "natural",
                             poiIcon: "icon-spring",
                             poiIconColor: "#1e80e3",
-                            name: "title",
+                            name: "title"
                         } as any,
                         geometry: {
                             type: "Point",
-                            coordinates: [0, 0],
-                        },
-                    } as GeoJSON.Feature,
+                            coordinates: [0, 0]
+                        }
+                    } as GeoJSON.Feature
                 },
                 false
             );
@@ -1166,19 +1166,19 @@ describe("Poi Service", () => {
                 properties: {
                     poiSource: "OSM",
                     poiId: "poiId",
-                    identifier: "id",
+                    identifier: "id"
                 } as any,
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
-                },
+                    coordinates: [0, 0]
+                }
             } as GeoJSON.Feature;
             GeoJSONUtils.setLocation(featureInQueue, { lat: 1, lng: 2 });
             dbMock.getPoiFromUploadQueue = () => Promise.resolve(featureInQueue);
             store.reset({
                 offlineState: {
-                    uploadPoiQueue: ["poiId"],
-                },
+                    uploadPoiQueue: ["poiId"]
+                }
             });
             store.dispatch = vi.fn();
             const spy = vi.spyOn(dbMock, "addPoiToUploadQueue");
@@ -1202,13 +1202,13 @@ describe("Poi Service", () => {
                             poiId: "poiId",
                             identifier: "id",
                             poiIcon: "icon-spring",
-                            poiIconColor: "#1e80e3",
+                            poiIconColor: "#1e80e3"
                         } as any,
                         geometry: {
                             type: "Point",
-                            coordinates: [0, 0],
-                        },
-                    } as GeoJSON.Feature,
+                            coordinates: [0, 0]
+                        }
+                    } as GeoJSON.Feature
                 },
                 false
             );
@@ -1242,12 +1242,12 @@ describe("Poi Service", () => {
                     poiSource: "OSM",
                     poiId: "poiId",
                     identifier: "id",
-                    image: "invalid-image-url",
+                    image: "invalid-image-url"
                 } as any,
                 geometry: {
                     type: "Point",
-                    coordinates: [1, 2],
-                },
+                    coordinates: [1, 2]
+                }
             } as GeoJSON.Feature;
             const length = await poiService.getLengthInMeters(feature);
             expect(length).toBeNull();
@@ -1262,15 +1262,15 @@ describe("Poi Service", () => {
                     poiSource: "OSM",
                     poiId: "poiId",
                     identifier: "id",
-                    image: "invalid-image-url",
+                    image: "invalid-image-url"
                 } as any,
                 geometry: {
                     type: "LineString",
                     coordinates: [
                         [1, 2],
-                        [3, 4],
-                    ],
-                },
+                        [3, 4]
+                    ]
+                }
             } as GeoJSON.Feature;
             const length = await poiService.getLengthInMeters(feature);
             expect(length).toBeGreaterThan(0);
@@ -1285,17 +1285,17 @@ describe("Poi Service", () => {
                     poiSource: "OSM",
                     poiId: "poiId",
                     identifier: "id",
-                    image: "invalid-image-url",
+                    image: "invalid-image-url"
                 } as any,
                 geometry: {
                     type: "Point",
-                    coordinates: [1, 2],
-                },
+                    coordinates: [1, 2]
+                }
             } as GeoJSON.Feature;
             store.reset({
                 poiState: {
-                    uploadMarkerData: null,
-                },
+                    uploadMarkerData: null
+                }
             });
             const info = await poiService.createEditableDataAndMerge(feature);
             expect(info.imagesUrls.length).toBe(0);
@@ -1314,17 +1314,17 @@ describe("Poi Service", () => {
                         "https://upload.wikimedia.org/wikipedia/commons/b/b6/Building_no_free_image_yet-he.png",
                     image1: "https://upload.wikimedia.org/wikipedia/commons/b/b6/1.svg",
                     image2:
-                        "https://upload.wikimedia.org/wikipedia/commons/b/b6/2.svg.png",
+                        "https://upload.wikimedia.org/wikipedia/commons/b/b6/2.svg.png"
                 } as any,
                 geometry: {
                     type: "Point",
-                    coordinates: [1, 2],
-                },
+                    coordinates: [1, 2]
+                }
             } as GeoJSON.Feature;
             store.reset({
                 poiState: {
-                    uploadMarkerData: null,
-                },
+                    uploadMarkerData: null
+                }
             });
             const info = await poiService.createEditableDataAndMerge(feature);
             expect(info.imagesUrls.length).toBe(0);
@@ -1344,12 +1344,12 @@ describe("Poi Service", () => {
                     identifier: "id",
                     image: "wikimedia.org/image-url",
                     image1: "wikimedia.org/image-url1",
-                    image2: "wikimedia.org/image-url2",
+                    image2: "wikimedia.org/image-url2"
                 } as any,
                 geometry: {
                     type: "Point",
-                    coordinates: [1, 2],
-                },
+                    coordinates: [1, 2]
+                }
             } as GeoJSON.Feature;
             vi.spyOn(attributionService, "getAttributionForImage")
                 .mockReturnValueOnce(Promise.resolve(null))
@@ -1374,26 +1374,26 @@ describe("Poi Service", () => {
                             id: "node/1",
                             properties: {
                                 "name:he": "name",
-                                tourism: "viewpoint",
+                                tourism: "viewpoint"
                             },
                             geometry: {
                                 type: "Point",
-                                coordinates: [1.5, 1.5],
-                            },
+                                coordinates: [1.5, 1.5]
+                            }
                         },
                         {
                             type: "Feature" as const,
                             id: "node/2",
                             properties: {
                                 "name:he": "name2",
-                                natural: "cave_entrance",
+                                natural: "cave_entrance"
                             },
                             geometry: {
                                 type: "Point",
-                                coordinates: [1, 1],
-                            },
-                        },
-                    ],
+                                coordinates: [1, 1]
+                            }
+                        }
+                    ]
                 });
             };
 
@@ -1408,7 +1408,7 @@ describe("Poi Service", () => {
         [PoiService],
         (poiService: PoiService) => {
             const results = poiService.getItmCoordinates({
-                properties: { poiItmEast: 1, poiItmNorth: 2 },
+                properties: { poiItmEast: 1, poiItmNorth: 2 }
             } as any as GeoJSON.Feature);
             expect(results.east).toBe(1);
             expect(results.north).toBe(2);
@@ -1433,13 +1433,13 @@ describe("Poi Service", () => {
                     identifier: "way_42",
                     poiGeolocation: {
                         lat: 1,
-                        lng: 2,
-                    },
+                        lng: 2
+                    }
                 },
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
-                },
+                    coordinates: [0, 0]
+                }
             });
             expect(results.poiLink).toBe("OSM/way_42");
             expect(results.facebook).toContain(Urls.facebook);

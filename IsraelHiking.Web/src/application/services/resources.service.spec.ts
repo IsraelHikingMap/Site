@@ -15,11 +15,11 @@ describe("ResourcesService", () => {
                     useValue: {
                         getString: () => "",
                         loadRemote: () => Promise.resolve(),
-                        setCurrentLanguage: () => { },
-                    },
+                        setCurrentLanguage: () => { }
+                    }
                 },
-                ResourcesService,
-            ],
+                ResourcesService
+            ]
         });
     });
 
@@ -28,9 +28,9 @@ describe("ResourcesService", () => {
             store.reset({
                 configuration: {
                     language: {
-                        code: "he",
-                    },
-                },
+                        code: "he"
+                    }
+                }
             });
             store.dispatch = vi.fn();
 
@@ -98,9 +98,9 @@ describe("ResourcesService", () => {
         store.reset({
             configuration: {
                 language: {
-                    code: "he",
-                },
-            },
+                    code: "he"
+                }
+            }
         });
         expect(service.getLongDistanceUnitString("metric")).toBe("ק״מ");
     }));
@@ -109,9 +109,9 @@ describe("ResourcesService", () => {
         store.reset({
             configuration: {
                 language: {
-                    code: "en-US",
-                },
-            },
+                    code: "en-US"
+                }
+            }
         });
         expect(service.getLongDistanceUnitString("imperial")).toBe("mi");
     }));
@@ -120,9 +120,9 @@ describe("ResourcesService", () => {
         store.reset({
             configuration: {
                 language: {
-                    code: "he",
-                },
-            },
+                    code: "he"
+                }
+            }
         });
         expect(service.getShortDistanceUnitString("metric")).toBe("מ׳");
     }));
@@ -131,9 +131,9 @@ describe("ResourcesService", () => {
         store.reset({
             configuration: {
                 language: {
-                    code: "en-US",
-                },
-            },
+                    code: "en-US"
+                }
+            }
         });
         expect(service.getShortDistanceUnitString("imperial")).toBe("ft");
     }));
@@ -142,9 +142,9 @@ describe("ResourcesService", () => {
         store.reset({
             configuration: {
                 language: {
-                    code: "he",
-                },
-            },
+                    code: "he"
+                }
+            }
         });
         expect(service.getSpeedUnitString("metric")).toBe("קמ״ש");
     }));
@@ -153,9 +153,9 @@ describe("ResourcesService", () => {
         store.reset({
             configuration: {
                 language: {
-                    code: "en-US",
-                },
-            },
+                    code: "en-US"
+                }
+            }
         });
         expect(service.getSpeedUnitString("imperial")).toBe("mph");
     }));
@@ -163,8 +163,8 @@ describe("ResourcesService", () => {
     it("should get date format from store", inject([ResourcesService, Store], (service: ResourcesService, store: Store) => {
         store.reset({
             configuration: {
-                dateFormat: "dd-MM-yyyy",
-            },
+                dateFormat: "dd-MM-yyyy"
+            }
         });
         expect(service.getDateFormat()).toBe("dd-MM-yyyy");
     }));

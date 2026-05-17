@@ -2,11 +2,11 @@ import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import {
     provideHttpClient,
-    withInterceptorsFromDi,
+    withInterceptorsFromDi
 } from "@angular/common/http";
 import {
     HttpTestingController,
-    provideHttpClientTesting,
+    provideHttpClientTesting
 } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 import geojsonVt from "geojson-vt";
@@ -47,28 +47,28 @@ describe("RoutingProvider", () => {
                 {
                     provide: ToastService,
                     useValue: {
-                        warning: vi.fn(),
-                    },
+                        warning: vi.fn()
+                    }
                 },
                 { provide: LoggingService, useValue: { error: () => { } } },
                 { provide: RunningContextService, useValue: {} },
                 {
                     provide: PmTilesService,
                     useValue: {
-                        isOfflineFileAvailable: () => Promise.resolve(false),
-                    },
+                        isOfflineFileAvailable: () => Promise.resolve(false)
+                    }
                 },
                 {
                     provide: ElevationProvider,
                     useValue: {
-                        updateHeights: () => Promise.resolve(),
-                    },
+                        updateHeights: () => Promise.resolve()
+                    }
                 },
                 GeoJsonParser,
                 RoutingProvider,
                 provideHttpClient(withInterceptorsFromDi()),
-                provideHttpClientTesting(),
-            ],
+                provideHttpClientTesting()
+            ]
         });
     });
 
@@ -127,18 +127,18 @@ describe("RoutingProvider", () => {
             {
                 type: "Feature",
                 properties: {
-                    name: "name",
+                    name: "name"
                 },
                 geometry: {
                     type: "LineString",
                     coordinates: [
                         [1, 1],
                         [1.5, 1.5],
-                        [2, 2],
-                    ],
-                } as GeoJSON.LineString,
-            } as GeoJSON.Feature<GeoJSON.LineString>,
-                    ],
+                        [2, 2]
+                    ]
+                } as GeoJSON.LineString
+            } as GeoJSON.Feature<GeoJSON.LineString>
+                    ]
                 } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>);
             const data = await promise;
             expect(data.length).toBe(3);
@@ -154,8 +154,8 @@ describe("RoutingProvider", () => {
         ) => {
             store.reset({
                 offlineState: {
-                    isOfflineAvailable: false,
-                },
+                    isOfflineAvailable: false
+                }
             });
 
             const promise = router.getRoute(
@@ -180,8 +180,8 @@ describe("RoutingProvider", () => {
         ) => {
             store.reset({
                 offlineState: {
-                    isOfflineAvailable: false,
-                },
+                    isOfflineAvailable: false
+                }
             });
 
             const promise = router.getRoute(
@@ -209,8 +209,8 @@ describe("RoutingProvider", () => {
             store.reset({
                 offlineState: {
                     isOfflineAvailable: true,
-                    lastModifiedDate: null,
-                },
+                    lastModifiedDate: null
+                }
             });
 
             const promise = router.getRoute(
@@ -237,8 +237,8 @@ describe("RoutingProvider", () => {
             store.reset({
                 offlineState: {
                     isOfflineAvailable: true,
-                    lastModifiedDate: new Date(),
-                },
+                    lastModifiedDate: new Date()
+                }
             });
 
             const promise = router.getRoute(
@@ -272,14 +272,14 @@ describe("RoutingProvider", () => {
                             coordinates: [
                                 [35.0001, 32.0001],
                                 [35.0001, 32.0002],
-                                [35.0001, 32.0003],
-                            ],
+                                [35.0001, 32.0003]
+                            ]
                         },
                         properties: {
-                            ihm_class: "track",
-                        },
-                    },
-                ],
+                            ihm_class: "track"
+                        }
+                    }
+                ]
             } as GeoJSON.FeatureCollection;
 
             db.isOfflineFileAvailable = () => Promise.resolve(true);
@@ -318,20 +318,20 @@ describe("RoutingProvider", () => {
                                 [
                                     [35.0001, 32.0001],
                                     [35.0001, 32.0002],
-                                    [35.0001, 32.0003],
+                                    [35.0001, 32.0003]
                                 ],
                                 [
                                     [35.0001, 32.0003],
                                     [35.0002, 32.0003],
-                                    [35.0003, 32.0003],
-                                ],
-                            ],
+                                    [35.0003, 32.0003]
+                                ]
+                            ]
                         },
                         properties: {
-                            ihm_class: "track",
-                        },
-                    },
-                ],
+                            ihm_class: "track"
+                        }
+                    }
+                ]
             } as GeoJSON.FeatureCollection;
 
             db.isOfflineFileAvailable = () => Promise.resolve(true);
@@ -369,12 +369,12 @@ describe("RoutingProvider", () => {
                             coordinates: [
                                 [35.0001, 32.0001],
                                 [35.0001, 32.0002],
-                                [35.0001, 32.0003],
-                            ],
+                                [35.0001, 32.0003]
+                            ]
                         },
                         properties: {
-                            ihm_class: "track",
-                        },
+                            ihm_class: "track"
+                        }
                     },
                     {
                         type: "Feature",
@@ -383,14 +383,14 @@ describe("RoutingProvider", () => {
                             coordinates: [
                                 [35.0001, 32.0003],
                                 [35.0002, 32.0003],
-                                [35.0003, 32.0003],
-                            ],
+                                [35.0003, 32.0003]
+                            ]
                         },
                         properties: {
-                            ihm_class: "steps",
-                        },
-                    },
-                ],
+                            ihm_class: "steps"
+                        }
+                    }
+                ]
             } as GeoJSON.FeatureCollection;
 
             db.isOfflineFileAvailable = () => Promise.resolve(true);
@@ -429,14 +429,14 @@ describe("RoutingProvider", () => {
                             coordinates: [
                                 [35.0001, 32.0003],
                                 [35.0002, 32.0003],
-                                [35.0003, 32.0003],
-                            ],
+                                [35.0003, 32.0003]
+                            ]
                         },
                         properties: {
-                            ihm_class: "path",
-                        },
-                    },
-                ],
+                            ihm_class: "path"
+                        }
+                    }
+                ]
             } as GeoJSON.FeatureCollection;
 
             db.getTileByType = () =>
@@ -445,8 +445,8 @@ describe("RoutingProvider", () => {
             store.reset({
                 offlineState: {
                     isOfflineAvailable: true,
-                    lastModifiedDate: new Date(),
-                },
+                    lastModifiedDate: new Date()
+                }
             });
 
             const promise = router.getRoute(
@@ -480,12 +480,12 @@ describe("RoutingProvider", () => {
                             coordinates: [
                                 [35.0001, 32.0001],
                                 [35.0001, 32.0002],
-                                [35.0001, 32.0003],
-                            ],
+                                [35.0001, 32.0003]
+                            ]
                         },
                         properties: {
-                            ihm_class: "major",
-                        },
+                            ihm_class: "major"
+                        }
                     },
                     {
                         type: "Feature",
@@ -494,14 +494,14 @@ describe("RoutingProvider", () => {
                             coordinates: [
                                 [35.0001, 32.000305],
                                 [35.0002, 32.0003],
-                                [35.0003, 32.0003],
-                            ],
+                                [35.0003, 32.0003]
+                            ]
                         },
                         properties: {
-                            ihm_class: "minor",
-                        },
-                    },
-                ],
+                            ihm_class: "minor"
+                        }
+                    }
+                ]
             } as GeoJSON.FeatureCollection;
 
             db.isOfflineFileAvailable = () => Promise.resolve(true);

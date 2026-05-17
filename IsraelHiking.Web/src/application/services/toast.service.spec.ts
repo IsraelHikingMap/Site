@@ -17,13 +17,13 @@ describe("ToastService", () => {
             dismiss: vi.fn(),
             openFromComponent: () => {
                 return { instance: confirmDialog };
-            },
+            }
         } as any;
         const resourceServiceMock = {
             yes: "yes",
             no: "no",
             ok: "ok",
-            cancel: "cancel",
+            cancel: "cancel"
         };
 
         TestBed.configureTestingModule({
@@ -32,8 +32,8 @@ describe("ToastService", () => {
                 { provide: ResourcesService, useValue: resourceServiceMock },
                 { provide: MatDialog, useValue: {} },
                 { provide: LoggingService, useValue: { error: () => { } } },
-                ToastService,
-            ],
+                ToastService
+            ]
         });
     });
 
@@ -50,7 +50,7 @@ describe("ToastService", () => {
                 const options: IConfirmOptions = {
                     message: "message",
                     type: "Ok",
-                    confirmAction: vi.fn(),
+                    confirmAction: vi.fn()
                 };
 
                 service.confirm(options);
@@ -70,7 +70,7 @@ describe("ToastService", () => {
                     message: "message",
                     type: "OkCancel",
                     confirmAction: () => { },
-                    declineAction: () => { },
+                    declineAction: () => { }
                 };
 
                 service.confirm(options);
@@ -91,7 +91,7 @@ describe("ToastService", () => {
                     message: "message",
                     type: "YesNo",
                     confirmAction: () => { },
-                    declineAction: () => { },
+                    declineAction: () => { }
                 };
 
                 service.confirm(options);
@@ -114,7 +114,7 @@ describe("ToastService", () => {
                     customConfirmText: "custom confirm",
                     customDeclineText: "custom decline",
                     confirmAction: () => { },
-                    declineAction: () => { },
+                    declineAction: () => { }
                 };
 
                 service.confirm(options);
@@ -133,7 +133,7 @@ describe("ToastService", () => {
             (service: ToastService, snackBar: MatSnackBar) => {
                 const undoAction = vi.fn();
                 const snackbarRef = {
-                    onAction: () => ({ subscribe: (callback: () => void) => callback() }),
+                    onAction: () => ({ subscribe: (callback: () => void) => callback() })
                 } as any;
                 vi.spyOn(snackBar, "open").mockReturnValue(snackbarRef);
                 service.undo("message", undoAction);

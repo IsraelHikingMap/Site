@@ -25,18 +25,18 @@ describe("FileService", () => {
                 Promise.resolve({
                     northEast: { lat: 0, lng: 0 },
                     southWest: { lat: 1, lng: 1 },
-                    routes: [{ markers: [{} as MarkerData] }] as RouteData[],
-                } as DataContainer),
+                    routes: [{ markers: [{} as MarkerData] }] as RouteData[]
+                } as DataContainer)
         } as any as ImageResizeService;
         const selectedRouteService = {
-            addRoutes: vi.fn(),
+            addRoutes: vi.fn()
         } as any as SelectedRouteService;
         const mapService = {
-            fitBounds: vi.fn(),
+            fitBounds: vi.fn()
         } as any as MapService;
         const loggingServiceMock = {
             info: () => { },
-            error: () => { },
+            error: () => { }
         };
         TestBed.configureTestingModule({
             providers: [
@@ -50,8 +50,8 @@ describe("FileService", () => {
                 { provide: SaveAsFactory, useFactory: () => saveAsSpy },
                 FileService,
                 provideHttpClient(withInterceptorsFromDi()),
-                provideHttpClientTesting(),
-            ],
+                provideHttpClientTesting()
+            ]
         });
     });
 
@@ -71,7 +71,7 @@ describe("FileService", () => {
 
             mockBackend.expectOne(Urls.files + "?url=someurl").flush({
                 northEast: { lat: 1, lng: 1 },
-                southWest: { lat: 2, lng: 2 },
+                southWest: { lat: 2, lng: 2 }
             });
             await promise;
             expect(selectedRouteService.addRoutes).toHaveBeenCalled();
@@ -88,9 +88,9 @@ describe("FileService", () => {
                     southWest: { lat: 1, lng: 1 },
                     routes: [
                         {
-                            markers: [{}],
-                        },
-                    ],
+                            markers: [{}]
+                        }
+                    ]
                 } as DataContainer);
             }, 1000);
 
@@ -115,7 +115,7 @@ describe("FileService", () => {
 
     it("Should get a file from event and clear input", inject([FileService], (service: FileService) => {
         const event = {
-            target: { files: [{}], value: "123" },
+            target: { files: [{}], value: "123" }
         };
         const file = service.getFileFromEvent(event);
 
@@ -125,7 +125,7 @@ describe("FileService", () => {
 
     it("Should not get a files from event", inject([FileService], (service: FileService) => {
         const event = {
-            target: { dataTransfer: [] as any[] },
+            target: { dataTransfer: [] as any[] }
         };
         const files = service.getFilesFromEvent(event);
 
@@ -134,7 +134,7 @@ describe("FileService", () => {
 
     it("Should get a files from event and clear input", inject([FileService], (service: FileService) => {
         const event = {
-            target: { files: [{}], value: "123" },
+            target: { files: [{}], value: "123" }
         };
         const files = service.getFilesFromEvent(event);
 
@@ -215,17 +215,17 @@ describe("FileService", () => {
                     .fn()
                     .mockReturnValueOnce(Promise.resolve({ done: false, value: new Uint8Array([1, 2]) }))
                     .mockReturnValueOnce(Promise.resolve({ done: false, value: new Uint8Array([3, 4]) }))
-                    .mockReturnValueOnce(Promise.resolve({ done: true })),
+                    .mockReturnValueOnce(Promise.resolve({ done: true }))
             };
 
             const mockResponse = {
                 ok: true,
                 body: {
-                    getReader: vi.fn().mockReturnValue(mockReader),
+                    getReader: vi.fn().mockReturnValue(mockReader)
                 },
                 headers: {
-                    get: vi.fn().mockReturnValue(""),
-                },
+                    get: vi.fn().mockReturnValue("")
+                }
             };
 
             // Mock fetch
@@ -257,11 +257,11 @@ describe("FileService", () => {
             const mockResponse = {
                 ok: true,
                 body: {
-                    getReader: vi.fn().mockReturnValue(mockReader),
+                    getReader: vi.fn().mockReturnValue(mockReader)
                 },
                 headers: {
-                    get: vi.fn().mockReturnValue("4"),
-                },
+                    get: vi.fn().mockReturnValue("4")
+                }
             };
 
             // Mock fetch

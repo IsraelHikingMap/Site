@@ -16,7 +16,7 @@ describe("Traces Service", () => {
     beforeEach(() => {
         const loggignMock = {
             info: () => { },
-            error: () => { },
+            error: () => { }
         };
         TestBed.configureTestingModule({
             imports: [NgxsModule.forRoot([])],
@@ -25,19 +25,19 @@ describe("Traces Service", () => {
                 {
                     provide: ResourcesService,
                     useValue: {
-                        getCurrentLanguageCodeSimplified: () => "he",
-                    },
+                        getCurrentLanguageCodeSimplified: () => "he"
+                    }
                 },
                 { provide: LoggingService, useValue: loggignMock },
                 {
                     provide: DatabaseService,
                     useValue: {
-                        deleteTraceById: () => { },
-                    },
+                        deleteTraceById: () => { }
+                    }
                 },
                 provideHttpClient(withInterceptorsFromDi()),
-                provideHttpClientTesting(),
-            ],
+                provideHttpClientTesting()
+            ]
         });
     });
 
@@ -58,8 +58,8 @@ describe("Traces Service", () => {
         async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store) => {
             store.reset({
                 configuration: {
-                    isAutomaticRecordingUpload: false,
-                },
+                    isAutomaticRecordingUpload: false
+                }
             });
 
             await tracesService.initialize();
@@ -72,11 +72,11 @@ describe("Traces Service", () => {
         async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store) => {
             store.reset({
                 configuration: {
-                    isAutomaticRecordingUpload: true,
+                    isAutomaticRecordingUpload: true
                 },
                 userState: {
-                    userInfo: null,
-                },
+                    userInfo: null
+                }
             });
             await tracesService.initialize();
 
@@ -88,14 +88,14 @@ describe("Traces Service", () => {
         async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store) => {
             store.reset({
                 configuration: {
-                    isAutomaticRecordingUpload: true,
+                    isAutomaticRecordingUpload: true
                 },
                 userState: {
-                    userInfo: {},
+                    userInfo: {}
                 },
                 tracesState: {
-                    traces: [{ visibility: "private" }],
-                },
+                    traces: [{ visibility: "private" }]
+                }
             });
             await tracesService.initialize();
 
@@ -109,10 +109,10 @@ describe("Traces Service", () => {
             store.dispatch = spy;
             store.reset({
                 configuration: {
-                    isAutomaticRecordingUpload: true,
+                    isAutomaticRecordingUpload: true
                 },
                 userState: {
-                    userInfo: {},
+                    userInfo: {}
                 },
                 tracesState: {
                     traces: [
@@ -120,11 +120,11 @@ describe("Traces Service", () => {
                             id: "42",
                             visibility: "local",
                             dataContainer: {
-                                routes: [{}],
-                            },
-                        },
-                    ],
-                },
+                                routes: [{}]
+                            }
+                        }
+                    ]
+                }
             });
             const promise = tracesService.initialize();
 
@@ -146,10 +146,10 @@ describe("Traces Service", () => {
             store.dispatch = spy;
             store.reset({
                 configuration: {
-                    isAutomaticRecordingUpload: true,
+                    isAutomaticRecordingUpload: true
                 },
                 userState: {
-                    userInfo: {},
+                    userInfo: {}
                 },
                 tracesState: {
                     traces: [
@@ -157,15 +157,15 @@ describe("Traces Service", () => {
                             id: "42",
                             visibility: "local",
                             dataContainer: {
-                                routes: [{}],
-                            },
+                                routes: [{}]
+                            }
                         },
                         {
                             id: "1",
-                            visibility: "private",
-                        },
-                    ],
-                },
+                            visibility: "private"
+                        }
+                    ]
+                }
             });
             const promise = tracesService.initialize();
 
@@ -177,13 +177,13 @@ describe("Traces Service", () => {
                 traces: [
                     {
                         id: 1,
-                        visibility: "public",
+                        visibility: "public"
                     },
                     {
                         id: 2,
-                        visibility: "private",
-                    },
-                ],
+                        visibility: "private"
+                    }
+                ]
             });
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
@@ -208,8 +208,8 @@ describe("Traces Service", () => {
         async (tracesService: TracesService, store: Store) => {
             store.reset({
                 tracesState: {
-                    traces: [],
-                },
+                    traces: []
+                }
             });
             const trace = await tracesService.getTraceById("42");
 
@@ -225,10 +225,10 @@ describe("Traces Service", () => {
                 tracesState: {
                     traces: [
                         {
-                            id: "1",
-                        },
-                    ],
-                },
+                            id: "1"
+                        }
+                    ]
+                }
             });
             const trace = await tracesService.getTraceById("1");
 
@@ -247,11 +247,11 @@ describe("Traces Service", () => {
                             id: "1",
                             visibility: "local",
                             dataContainer: {
-                                routes: [{}],
-                            },
-                        },
-                    ],
-                },
+                                routes: [{}]
+                            }
+                        }
+                    ]
+                }
             });
             const trace = await tracesService.getTraceById("1");
 
@@ -269,10 +269,10 @@ describe("Traces Service", () => {
                 tracesState: {
                     traces: [
                         {
-                            id: "1",
-                        },
-                    ],
-                },
+                            id: "1"
+                        }
+                    ]
+                }
             });
             const promise = tracesService.getTraceById("1");
 
@@ -305,7 +305,7 @@ describe("Traces Service", () => {
                 id: "1",
                 visibility: "private",
                 tagsString: "",
-                timeStamp: new Date(),
+                timeStamp: new Date()
             } as Trace;
             const promise = tracesService.updateTrace(trace);
 
@@ -323,7 +323,7 @@ describe("Traces Service", () => {
                 visibility: "private",
                 tagsString: "tag1,tag2",
                 description: "description",
-                timeStamp: new Date(),
+                timeStamp: new Date()
             } as Trace;
             const promise = tracesService.updateTrace(trace);
 

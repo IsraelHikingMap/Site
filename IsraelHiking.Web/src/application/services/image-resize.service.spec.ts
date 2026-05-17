@@ -18,7 +18,7 @@ describe("ImageResizeService", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [],
-            providers: [ImageResizeService],
+            providers: [ImageResizeService]
         });
     });
 
@@ -40,8 +40,8 @@ describe("ImageResizeService", () => {
                 [TagValues.GPSIFD.GPSLatitude]: [[0, 1], [0, 1], [0, 1]],
                 [TagValues.GPSIFD.GPSLongitude]: [[0, 1], [0, 1], [0, 1]],
                 [TagValues.GPSIFD.GPSLatitudeRef]: "",
-                [TagValues.GPSIFD.GPSLongitudeRef]: "",
-            },
+                [TagValues.GPSIFD.GPSLongitudeRef]: ""
+            }
         };
         const exifbytes = dump(exifData);
         const dataUrl = insert(exifbytes, IMAGE_BASE_64);
@@ -55,8 +55,8 @@ describe("ImageResizeService", () => {
                 [TagValues.GPSIFD.GPSLatitude]: [[0, 0], [0, 1], [0, 1]],
                 [TagValues.GPSIFD.GPSLongitude]: [[0, 0], [0, 1], [0, 1]],
                 [TagValues.GPSIFD.GPSLatitudeRef]: "S",
-                [TagValues.GPSIFD.GPSLongitudeRef]: "W",
-            },
+                [TagValues.GPSIFD.GPSLongitudeRef]: "W"
+            }
         };
         const exifbytes = dump(exifData);
         const dataUrl = insert(exifbytes, IMAGE_BASE_64);
@@ -70,8 +70,8 @@ describe("ImageResizeService", () => {
                 [TagValues.GPSIFD.GPSLatitude]: [[2, 1], [0, 1], [0, 1]],
                 [TagValues.GPSIFD.GPSLongitude]: [[3, 1], [0, 1], [0, 1]],
                 [TagValues.GPSIFD.GPSLatitudeRef]: "S",
-                [TagValues.GPSIFD.GPSLongitudeRef]: "W",
-            },
+                [TagValues.GPSIFD.GPSLongitudeRef]: "W"
+            }
         };
         const exifbytes = dump(exifData);
         const dataUrl = insert(exifbytes, IMAGE_BASE_64);

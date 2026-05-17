@@ -2,11 +2,11 @@ import { describe, beforeEach, it, expect } from "vitest";
 import { inject, TestBed } from "@angular/core/testing";
 import {
     provideHttpClient,
-    withInterceptorsFromDi,
+    withInterceptorsFromDi
 } from "@angular/common/http";
 import {
     HttpTestingController,
-    provideHttpClientTesting,
+    provideHttpClientTesting
 } from "@angular/common/http/testing";
 
 import { TranslationResponse, TranslationService } from "./translation.service";
@@ -21,12 +21,12 @@ describe("TranslationService", () => {
                 {
                     provide: ResourcesService,
                     useValue: {
-                        getCurrentLanguageCodeSimplified: () => "he",
-                    },
+                        getCurrentLanguageCodeSimplified: () => "he"
+                    }
                 },
                 provideHttpClient(withInterceptorsFromDi()),
-                provideHttpClientTesting(),
-            ],
+                provideHttpClientTesting()
+            ]
         });
     });
 
@@ -37,11 +37,11 @@ describe("TranslationService", () => {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
+                    coordinates: [0, 0]
                 },
                 properties: {
-                    "description:he": "תיאור בעברית",
-                },
+                    "description:he": "תיאור בעברית"
+                }
             } as GeoJSON.Feature);
             expect(isTranslationNeeded).toBe(false);
         }
@@ -54,12 +54,12 @@ describe("TranslationService", () => {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
+                    coordinates: [0, 0]
                 },
                 properties: {
                     "poiExternalDescription:he": "External description",
-                    description: "Original description",
-                },
+                    description: "Original description"
+                }
             } as GeoJSON.Feature);
             expect(isTranslationNeeded).toBe(false);
         }
@@ -72,9 +72,9 @@ describe("TranslationService", () => {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
+                    coordinates: [0, 0]
                 },
-                properties: {},
+                properties: {}
             } as GeoJSON.Feature);
             expect(isTranslationPossible).toBe(false);
         }
@@ -87,11 +87,11 @@ describe("TranslationService", () => {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
+                    coordinates: [0, 0]
                 },
                 properties: {
-                    description: "Original description",
-                },
+                    description: "Original description"
+                }
             } as GeoJSON.Feature);
             expect(isTranslationPossible).toBe(true);
         }
@@ -104,11 +104,11 @@ describe("TranslationService", () => {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
+                    coordinates: [0, 0]
                 },
                 properties: {
-                    "description:en": "Description in English",
-                },
+                    "description:en": "Description in English"
+                }
             } as GeoJSON.Feature);
             expect(isTranslationPossible).toBe(true);
         }
@@ -121,11 +121,11 @@ describe("TranslationService", () => {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
+                    coordinates: [0, 0]
                 },
                 properties: {
-                    "poiExternalDescription:en": "External description",
-                },
+                    "poiExternalDescription:en": "External description"
+                }
             } as GeoJSON.Feature);
             expect(isTranslationPossible).toBe(true);
         }
@@ -138,14 +138,14 @@ describe("TranslationService", () => {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
+                    coordinates: [0, 0]
                 },
                 properties: {
                     "description:he": "תיאור בעברית",
                     poiExternalDescription: "External description",
                     description: "Original description",
-                    "description:en": "Description in English",
-                },
+                    "description:en": "Description in English"
+                }
             };
             const bestDescription = service.getBestDescription(feature);
             expect(bestDescription).toBe("תיאור בעברית");
@@ -159,13 +159,13 @@ describe("TranslationService", () => {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
+                    coordinates: [0, 0]
                 },
                 properties: {
                     "poiExternalDescription:he": "External description",
                     description: "Original description",
-                    "description:en": "Description in English",
-                },
+                    "description:en": "Description in English"
+                }
             };
             const bestDescription = service.getBestDescription(feature);
             expect(bestDescription).toBe("External description");
@@ -179,12 +179,12 @@ describe("TranslationService", () => {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
+                    coordinates: [0, 0]
                 },
                 properties: {
                     description: "Original description",
-                    "description:en": "Description in English",
-                },
+                    "description:en": "Description in English"
+                }
             };
             const bestDescription = service.getBestDescription(feature);
             expect(bestDescription).toBe("Original description");
@@ -198,11 +198,11 @@ describe("TranslationService", () => {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
+                    coordinates: [0, 0]
                 },
                 properties: {
-                    "description:en": "Description in English",
-                },
+                    "description:en": "Description in English"
+                }
             };
             const bestDescription = service.getBestDescription(feature);
             expect(bestDescription).toBe("Description in English");
@@ -216,11 +216,11 @@ describe("TranslationService", () => {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
+                    coordinates: [0, 0]
                 },
                 properties: {
-                    "poiExternalDescription:ar": "External description in Arabic",
-                },
+                    "poiExternalDescription:ar": "External description in Arabic"
+                }
             };
             const bestDescription = service.getBestDescription(feature);
             expect(bestDescription).toBe("External description in Arabic");
@@ -234,11 +234,11 @@ describe("TranslationService", () => {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
+                    coordinates: [0, 0]
                 },
                 properties: {
-                    "description:ar": "Description in Arabic",
-                },
+                    "description:ar": "Description in Arabic"
+                }
             };
             const bestDescription = service.getBestDescription(feature);
             expect(bestDescription).toBe("");
@@ -252,11 +252,11 @@ describe("TranslationService", () => {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
+                    coordinates: [0, 0]
                 },
                 properties: {
-                    "description:en": "",
-                },
+                    "description:en": ""
+                }
             };
             const promise = service.getTranslatedDescription(feature);
 
@@ -276,11 +276,11 @@ describe("TranslationService", () => {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
+                    coordinates: [0, 0]
                 },
                 properties: {
-                    "description:en": "Description in English",
-                },
+                    "description:en": "Description in English"
+                }
             };
             const promise = service.getTranslatedDescription(feature);
 
@@ -289,7 +289,7 @@ describe("TranslationService", () => {
                     (req) => req.method === "POST" && req.url === Urls.tranlation
                 )
                 .flush({
-                    translatedText: "Translated Description",
+                    translatedText: "Translated Description"
                 } as TranslationResponse);
 
             const translation = await promise;
@@ -304,12 +304,12 @@ describe("TranslationService", () => {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
+                    coordinates: [0, 0]
                 },
                 properties: {
                     poiId: "12345",
-                    "description:en": "Description in English",
-                },
+                    "description:en": "Description in English"
+                }
             };
             const promise = service.getTranslatedDescription(feature);
 
@@ -318,7 +318,7 @@ describe("TranslationService", () => {
                     (req) => req.method === "POST" && req.url === Urls.tranlation
                 )
                 .flush({
-                    translatedText: "Translated Description",
+                    translatedText: "Translated Description"
                 } as TranslationResponse);
 
             const translation = await promise;
@@ -335,12 +335,12 @@ describe("TranslationService", () => {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [0, 0],
+                    coordinates: [0, 0]
                 },
                 properties: {
                     poiId: "12345",
-                    "description:en": "Description in English",
-                },
+                    "description:en": "Description in English"
+                }
             };
             const promise = service.getTranslatedDescription(feature);
 

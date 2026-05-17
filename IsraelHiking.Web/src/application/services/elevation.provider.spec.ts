@@ -39,7 +39,7 @@ describe("ElevationProvider", () => {
                 { provide: LoggingService, useValue: { warning: () => { } } },
                 {
                     provide: PmTilesService, useValue: {
-                        isOfflineFileAvailable: () => Promise.resolve(false),
+                        isOfflineFileAvailable: () => Promise.resolve(false)
                     }
                 },
                 ElevationProvider,

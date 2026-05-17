@@ -6,7 +6,7 @@ import type { Immutable } from "immer";
 import {
     SEGMENT,
     SEGMENT_POINT,
-    SelectedRouteService,
+    SelectedRouteService
 } from "./selected-route.service";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
@@ -18,7 +18,7 @@ import { RoutingProvider } from "./routing.provider";
 import { RoutesFactory } from "./routes.factory";
 import {
     SetSelectedRouteAction,
-    RouteEditingReducer,
+    RouteEditingReducer
 } from "../reducers/route-editing.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
 import {
@@ -31,7 +31,7 @@ import {
     ReplaceRouteAction,
     UpdateSegmentsAction,
     DeleteSegmentAction,
-    AddPrivatePoiAction,
+    AddPrivatePoiAction
 } from "../reducers/routes.reducer";
 import type { RouteDataWithoutState, RouteData } from "../models";
 
@@ -47,13 +47,13 @@ describe("Selected Route Service", () => {
     beforeEach(() => {
         const resourceService = {
             route: "route",
-            split: "split",
+            split: "split"
         };
         const routingProviderMock = {
-            getRoute: () => Promise.resolve([]),
+            getRoute: () => Promise.resolve([])
         };
         const toastServiceMock = {
-            confirm: (options: any) => options.declineAction(),
+            confirm: (options: any) => options.declineAction()
         };
         TestBed.configureTestingModule({
             imports: [NgxsModule.forRoot([RoutesReducer, RouteEditingReducer])],
@@ -66,8 +66,8 @@ describe("Selected Route Service", () => {
                 { provide: ElevationProvider, useValue: {} },
                 GeoJsonParser,
                 RoutesFactory,
-                SelectedRouteService,
-            ],
+                SelectedRouteService
+            ]
         });
     });
 
@@ -117,8 +117,8 @@ describe("Selected Route Service", () => {
                 ...store.snapshot(),
                 routeEditingState: {
                     opacity: 1,
-                    weight: 10,
-                },
+                    weight: 10
+                }
             });
             const spy = vi.fn();
             store.dispatch = spy;
@@ -205,7 +205,7 @@ describe("Selected Route Service", () => {
         (selectedRouteService: SelectedRouteService, store: Store) => {
             store.reset({
                 recordedRouteState: {
-                    isAddingPoi: false,
+                    isAddingPoi: false
                 },
                 routeEditingState: {
                     selectedRouteId: null
@@ -231,7 +231,7 @@ describe("Selected Route Service", () => {
         (selectedRouteService: SelectedRouteService, store: Store) => {
             store.reset({
                 recordedRouteState: {
-                    isAddingPoi: true,
+                    isAddingPoi: true
                 },
                 routeEditingState: {
                     selectedRouteId: null
@@ -278,14 +278,14 @@ describe("Selected Route Service", () => {
                     segments: [
                         {
                             latlngs: [
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
             setupSelectedRoute(store, "1");
 
@@ -306,13 +306,13 @@ describe("Selected Route Service", () => {
                     segments: [
                         {
                             latlngs: [
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
+                    state: "ReadOnly"
                 },
                 {
                     id: "2",
@@ -325,15 +325,15 @@ describe("Selected Route Service", () => {
                                 {
                                     lat: 1.00001,
                                     lng: 1.00001,
-                                    timestamp: new Date().toISOString(),
-                                },
+                                    timestamp: new Date().toISOString()
+                                }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
             setupSelectedRoute(store, "1");
 
@@ -354,13 +354,13 @@ describe("Selected Route Service", () => {
                     segments: [
                         {
                             latlngs: [
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
+                    state: "ReadOnly"
                 },
                 {
                     id: "2",
@@ -373,14 +373,14 @@ describe("Selected Route Service", () => {
                                 {
                                     lat: 1.00001,
                                     lng: 1.00001,
-                                    timestamp: new Date().toISOString(),
-                                },
+                                    timestamp: new Date().toISOString()
+                                }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
+                    state: "ReadOnly"
                 },
                 {
                     id: "3",
@@ -390,14 +390,14 @@ describe("Selected Route Service", () => {
                     segments: [
                         {
                             latlngs: [
-                                { lat: 1.00001, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1.00001, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
             setupSelectedRoute(store, "1");
 
@@ -418,13 +418,13 @@ describe("Selected Route Service", () => {
                     segments: [
                         {
                             latlngs: [
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
+                    state: "ReadOnly"
                 },
                 {
                     id: "2",
@@ -434,13 +434,13 @@ describe("Selected Route Service", () => {
                     segments: [
                         {
                             latlngs: [
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 2, lng: 2 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
+                    state: "ReadOnly"
                 },
                 {
                     id: "3",
@@ -451,14 +451,14 @@ describe("Selected Route Service", () => {
                         {
                             latlngs: [
                                 { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 2, lng: 2 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
             setupSelectedRoute(store, "1");
 
@@ -502,14 +502,14 @@ describe("Selected Route Service", () => {
                     segments: [
                         {
                             latlngs: [
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "Hidden",
-                },
+                    state: "Hidden"
+                }
             ]);
 
             const closetRoute = selectedRouteService.getClosestRouteToGPS(
@@ -533,14 +533,14 @@ describe("Selected Route Service", () => {
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
 
             const closetRoute = selectedRouteService.getClosestRouteToGPS(
@@ -564,14 +564,14 @@ describe("Selected Route Service", () => {
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 1, lng: 0, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 0, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
             const closetRoute = selectedRouteService.getClosestRouteToGPS(
                 { lat: 1.0001, lng: 1, timestamp: new Date().toISOString() },
@@ -594,30 +594,30 @@ describe("Selected Route Service", () => {
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 2, lng: 2 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                                { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 3, lng: 3 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
             setupSelectedRoute(store, "1");
 
@@ -656,30 +656,30 @@ describe("Selected Route Service", () => {
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 2, lng: 2 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                                { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 3, lng: 3 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
             setupSelectedRoute(store, "1");
 
@@ -709,21 +709,21 @@ describe("Selected Route Service", () => {
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 2, lng: 2 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
+                    state: "ReadOnly"
                 },
                 {
                     id: "2",
@@ -734,22 +734,22 @@ describe("Selected Route Service", () => {
                         {
                             latlngs: [
                                 { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 2, lng: 2 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                                { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 3, lng: 3 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
             setupSelectedRoute(store, "1");
 
@@ -788,21 +788,21 @@ describe("Selected Route Service", () => {
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 2, lng: 2 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
+                    state: "ReadOnly"
                 },
                 {
                     id: "2",
@@ -813,22 +813,22 @@ describe("Selected Route Service", () => {
                         {
                             latlngs: [
                                 { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 2, lng: 2 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                                { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 3, lng: 3 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
             setupSelectedRoute(store, "2");
 
@@ -867,21 +867,21 @@ describe("Selected Route Service", () => {
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 2, lng: 2 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
+                    state: "ReadOnly"
                 },
                 {
                     id: "2",
@@ -892,22 +892,22 @@ describe("Selected Route Service", () => {
                         {
                             latlngs: [
                                 { lat: 3, lng: 3, timestamp: new Date().toISOString() },
-                                { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 3, lng: 3 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 3, lng: 3, timestamp: new Date().toISOString() },
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 2, lng: 2 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
             setupSelectedRoute(store, "1");
 
@@ -946,21 +946,21 @@ describe("Selected Route Service", () => {
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 2, lng: 2 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
+                    state: "ReadOnly"
                 },
                 {
                     id: "2",
@@ -973,32 +973,32 @@ describe("Selected Route Service", () => {
                                 {
                                     lat: 2.0001,
                                     lng: 2.0001,
-                                    timestamp: new Date().toISOString(),
+                                    timestamp: new Date().toISOString()
                                 },
                                 {
                                     lat: 2.0001,
                                     lng: 2.0001,
-                                    timestamp: new Date().toISOString(),
-                                },
+                                    timestamp: new Date().toISOString()
+                                }
                             ],
                             routePoint: { lat: 2.0001, lng: 2.0001 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 {
                                     lat: 2.0001,
                                     lng: 2.0001,
-                                    timestamp: new Date().toISOString(),
+                                    timestamp: new Date().toISOString()
                                 },
-                                { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 3, lng: 3 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
             setupSelectedRoute(store, "1");
 
@@ -1046,8 +1046,8 @@ describe("Selected Route Service", () => {
                     markers: [],
                     name: "name",
                     segments: [],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
             setupSelectedRoute(store, "1");
 
@@ -1078,30 +1078,30 @@ describe("Selected Route Service", () => {
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 2, lng: 2 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                                { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 3, lng: 3 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
             setupSelectedRoute(store, "1");
 
@@ -1136,30 +1136,30 @@ describe("Selected Route Service", () => {
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 2, lng: 2 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                                { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 3, lng: 3 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
             setupSelectedRoute(store, "1");
 
@@ -1192,30 +1192,30 @@ describe("Selected Route Service", () => {
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 2, lng: 2 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                                { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 3, lng: 3 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
             setupSelectedRoute(store, "1");
 
@@ -1246,30 +1246,30 @@ describe("Selected Route Service", () => {
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 2, lng: 2 },
-                            routingType: "Hike",
+                            routingType: "Hike"
                         },
                         {
                             latlngs: [
                                 { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                                { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                             ],
                             routePoint: { lat: 3, lng: 3 },
-                            routingType: "Hike",
-                        },
+                            routingType: "Hike"
+                        }
                     ],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
             setupSelectedRoute(store, "1");
 
@@ -1310,8 +1310,8 @@ describe("Selected Route Service", () => {
                     markers: [],
                     name: "name",
                     segments: [],
-                    state: "ReadOnly",
-                },
+                    state: "ReadOnly"
+                }
             ]);
             setupSelectedRoute(store, "1");
 
@@ -1321,8 +1321,8 @@ describe("Selected Route Service", () => {
             selectedRouteService.addRoutes([
         {
             segments: [],
-            markers: [{ title: "title" }],
-        } as RouteDataWithoutState,
+            markers: [{ title: "title" }]
+        } as RouteDataWithoutState
             ]);
 
             expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
@@ -1344,8 +1344,8 @@ describe("Selected Route Service", () => {
             markers: [],
             name: "name",
             segments: [],
-            state: "ReadOnly",
-        } as RouteData,
+            state: "ReadOnly"
+        } as RouteData
             ]);
             setupSelectedRoute(store, "1");
 
@@ -1356,8 +1356,8 @@ describe("Selected Route Service", () => {
         {
             name: "name",
             segments: [{}],
-            markers: [{ title: "title" }],
-        } as RouteDataWithoutState,
+            markers: [{ title: "title" }]
+        } as RouteDataWithoutState
             ]);
 
             expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(
@@ -1377,7 +1377,7 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "name",
                 segments: [],
-                state: "ReadOnly",
+                state: "ReadOnly"
             };
 
             const features = selectedRouteService.createFeaturesForRoute(route);
@@ -1399,8 +1399,8 @@ describe("Selected Route Service", () => {
                         latlng: { lat: 1, lng: 1 },
                         description: "description",
                         type: "type",
-                        urls: [],
-                    },
+                        urls: []
+                    }
                 ],
                 name: "name",
                 segments: [
@@ -1408,14 +1408,14 @@ describe("Selected Route Service", () => {
                         latlngs: [
                             { lat: 1, lng: 1, timestamp: new Date().toISOString() },
                             { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                            { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                            { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                         ],
                         routePoint: { lat: 1, lng: 1 },
-                        routingType: "Hike",
-                    },
+                        routingType: "Hike"
+                    }
                 ],
                 state: "ReadOnly",
-                color: "#ff0000",
+                color: "#ff0000"
             };
 
             const features = selectedRouteService.createFeaturesForRoute(route);
@@ -1444,8 +1444,8 @@ describe("Selected Route Service", () => {
                         latlng: { lat: 1, lng: 1 },
                         description: "description",
                         type: "type",
-                        urls: [],
-                    },
+                        urls: []
+                    }
                 ],
                 name: "name",
                 segments: [
@@ -1453,14 +1453,14 @@ describe("Selected Route Service", () => {
                         latlngs: [
                             { lat: 1, lng: 1, timestamp: new Date().toISOString() },
                             { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                            { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                            { lat: 3, lng: 3, timestamp: new Date().toISOString() }
                         ],
                         routePoint: { lat: 1, lng: 1 },
-                        routingType: "Hike",
-                    },
+                        routingType: "Hike"
+                    }
                 ],
                 state: "ReadOnly",
-                color: "#ff0000",
+                color: "#ff0000"
             };
 
             const features =
@@ -1482,7 +1482,7 @@ describe("Selected Route Service", () => {
         (service: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
         { id: "1", state: "Hidden" } as RouteData,
-        { id: "2", state: "Poi" } as RouteData,
+        { id: "2", state: "Poi" } as RouteData
             ]);
             expect(service.hasHiddenRoutes()).toBeTruthy();
         }
@@ -1504,23 +1504,23 @@ describe("Selected Route Service", () => {
                     coordinates: [
                         [1, 1],
                         [2, 2],
-                        [3, 3],
-                    ],
+                        [3, 3]
+                    ]
                 },
                 properties: {
                     identifier: "1",
-                    poiSource: "Users",
-                },
+                    poiSource: "Users"
+                }
             };
             shareUrlsService.getShareUrl = () =>
                 Promise.resolve({
                     dataContainer: {
                         routes: [
                             {
-                                segments: [],
-                            },
-                        ],
-                    },
+                                segments: []
+                            }
+                        ]
+                    }
                 });
             await service.convertToRoute(feature, "description");
             expect(spy).toHaveBeenCalled();
@@ -1547,14 +1547,14 @@ describe("Selected Route Service", () => {
                     coordinates: [
                         [1, 1],
                         [2, 2],
-                        [3, 3],
-                    ],
+                        [3, 3]
+                    ]
                 },
                 properties: {
                     identifier: "1",
                     poiSource: "OSM",
-                    colour: "red",
-                },
+                    colour: "red"
+                }
             };
             await service.convertToRoute(feature, "description");
             expect(spy).toHaveBeenCalled();
