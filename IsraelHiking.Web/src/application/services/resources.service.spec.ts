@@ -49,26 +49,22 @@ describe("ResourcesService", () => {
         }
     ));
 
-    it("Should be able to test if a text contains hebrew", inject([ResourcesService],
-        (service: ResourcesService) => {
-            expect(service.hasRtlCharacters("שלום")).toBeTruthy();
-            expect(service.hasRtlCharacters("1. שלום")).toBeTruthy();
-            expect(service.hasRtlCharacters("1. نص عربي")).toBeTruthy();
-            expect(service.hasRtlCharacters("hello")).toBeFalsy();
-            expect(service.hasRtlCharacters("1. hello")).toBeFalsy();
-            expect(service.hasRtlCharacters("1. Кейсария")).toBeFalsy();
-        }
-    ));
+    it("Should be able to test if a text contains hebrew", inject([ResourcesService], (service: ResourcesService) => {
+        expect(service.hasRtlCharacters("שלום")).toBeTruthy();
+        expect(service.hasRtlCharacters("1. שלום")).toBeTruthy();
+        expect(service.hasRtlCharacters("1. نص عربي")).toBeTruthy();
+        expect(service.hasRtlCharacters("hello")).toBeFalsy();
+        expect(service.hasRtlCharacters("1. hello")).toBeFalsy();
+        expect(service.hasRtlCharacters("1. Кейсария")).toBeFalsy();
+    }));
 
-    it("Should be able get the layout direction for titles", inject([ResourcesService],
-        (service: ResourcesService) => {
-            expect(service.getDirection("")).toBeUndefined();
-            expect(service.getDirection("שלום")).toBe("rtl");
-            expect(service.getDirection("1. שלום")).toBe("rtl");
-            expect(service.getDirection("hello")).toBe("ltr");
-            expect(service.getDirection("1. hello")).toBe("ltr");
-        }
-    ));
+    it("Should be able get the layout direction for titles", inject([ResourcesService], (service: ResourcesService) => {
+        expect(service.getDirection("")).toBeUndefined();
+        expect(service.getDirection("שלום")).toBe("rtl");
+        expect(service.getDirection("1. שלום")).toBe("rtl");
+        expect(service.getDirection("hello")).toBe("ltr");
+        expect(service.getDirection("1. hello")).toBe("ltr");
+    }));
 
     it("Should be able get the text alignment for titles", inject([ResourcesService], (service: ResourcesService) => {
         expect(service.getTextAlignment("שלום")).toBe("text-right");
