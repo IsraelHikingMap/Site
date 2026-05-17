@@ -290,8 +290,7 @@ describe("HashService", () => {
 
     it("Should return external url", inject([HashService, Router, Store],
         (service: HashService, routerMock: Router, store: Store) => {
-            routerMock.createUrlTree = (array: [], options: any) =>
-                ("file-address?" + options.queryParams.baselayer) as any as UrlTree;
+            routerMock.createUrlTree = (array: [], options: any) => ("file-address?" + options.queryParams.baselayer) as any as UrlTree;
             store.reset({
                 inMemoryState: {
                     fileUrl: "fileUrl",
