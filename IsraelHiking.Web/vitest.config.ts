@@ -9,6 +9,11 @@ export default defineConfig({
             exclude: ["module"],
         }),
     ],
+    test: {
+        browser: {
+            screenshotFailures: false
+        }
+    },
     resolve: {
         alias: {
             fflate: resolve(__dirname, "node_modules/fflate/esm/browser.js"),

@@ -15,8 +15,7 @@ import { MatInput } from "@angular/material/input";
 import { MatOption } from "@angular/material/core";
 import { MatAutocompleteTrigger, MatAutocomplete } from "@angular/material/autocomplete";
 import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { debounceTime, filter, tap, map } from "rxjs/operators";
-import { remove } from "lodash-es";
+import { debounceTime, filter, tap, map, distinctUntilChanged, share } from "rxjs/operators";
 import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../services/resources.service";
@@ -31,10 +30,6 @@ export type SearchContext = {
     searchTerm: string;
     searchResults: SearchResultsPointOfInterest[];
     selectedSearchResults: SearchResultsPointOfInterest;
-};
-
-type SearchRequestQueueItem = {
-    searchTerm: string;
 };
 
 @Component({
@@ -53,7 +48,6 @@ export class SearchComponent {
     };
     public searchFrom = new FormControl<string | SearchResultsPointOfInterest>("");
 
-    private requestsQueue: SearchRequestQueueItem[] = [];
     private selectFirstSearchResults = false;
 
     public searchFromInput = viewChild<ElementRef>("searchFromInput");
@@ -75,7 +69,7 @@ export class SearchComponent {
     }
 
     private configureInputFormControl(input: FormControl<string | SearchResultsPointOfInterest>, context: SearchContext) {
-        input.valueChanges.pipe(
+        const stringValues$ = input.valueChanges.pipe(
             tap(x => {
                 if (typeof x !== "string") {
                     this.selectResults(context, x);
@@ -83,14 +77,29 @@ export class SearchComponent {
                     this.selectFirstSearchResults = false;
                 }
             }),
-            filter(x => typeof x === "string"),
-            map(x => x as string),
-            debounceTime(500))
-            .subscribe((x: string) => {
-                context.searchTerm = x;
-                context.selectedSearchResults = null;
-                this.search(context);
-            });
+            filter((x): x is string => typeof x === "string"),
+            share()
+        );
+
+        // Prefix: fires on each keystroke (no debounce)
+        stringValues$.pipe(
+            debounceTime(200),
+            distinctUntilChanged()
+        ).subscribe(x => {
+            context.searchTerm = x;
+            context.selectedSearchResults = null;
+            this.search(context, true);
+        });
+
+        // Full term: only fires after typing genuinely stops
+        stringValues$.pipe(
+            debounceTime(1000),
+            distinctUntilChanged()
+        ).subscribe(x => {
+            context.searchTerm = x;
+            context.selectedSearchResults = null;
+            this.search(context, false);
+        });
     }
 
     public focusOnSearchInput() {
@@ -102,12 +111,20 @@ export class SearchComponent {
 
     }
 
-    public search(searchContext: SearchContext) {
-        if (searchContext.searchTerm.length <= 2) {
-            searchContext.searchResults = [];
-            return;
+    public async search(searchContext: SearchContext, isPrefix: boolean) {
+        try {
+            const results = await this.searchResultsProvider.getResults(searchContext.searchTerm, isPrefix);
+            if (results == null) {
+                return;
+            }
+            searchContext.searchResults = results;
+            if (this.selectFirstSearchResults && searchContext.searchResults.length > 0) {
+                this.selectResults(searchContext, searchContext.searchResults[0]);
+            }
+            this.selectFirstSearchResults = false;
+        } catch {
+            this.toastService.warning(this.resources.unableToGetSearchResults);
         }
-        this.internalSearch(searchContext);
     }
 
     public displayResults(results: SearchResultsPointOfInterest) {
@@ -168,34 +185,6 @@ export class SearchComponent {
         }
         this.selectFirstSearchResults = true;
         return false;
-    }
-
-    private async internalSearch(searchContext: SearchContext) {
-        const searchTerm = searchContext.searchTerm;
-        this.requestsQueue.push({
-            searchTerm
-        } as SearchRequestQueueItem);
-        try {
-            const results = await this.searchResultsProvider.getResults(searchTerm);
-            const queueItem = this.requestsQueue.find(itemToFind => itemToFind.searchTerm === searchTerm);
-            if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
-                this.requestsQueue.splice(0, this.requestsQueue.length - 1);
-                return;
-            }
-            if (searchContext.searchTerm !== searchTerm) {
-                // search term changed since it was requested.
-                remove(this.requestsQueue, queueItem);
-                return;
-            }
-            searchContext.searchResults = results;
-            this.requestsQueue.splice(0);
-            if (this.selectFirstSearchResults && searchContext.searchResults.length > 0) {
-                this.selectResults(searchContext, searchContext.searchResults[0]);
-            }
-            this.selectFirstSearchResults = false;
-        } catch {
-            this.toastService.warning(this.resources.unableToGetSearchResults);
-        }
     }
 
     public isPoisSearch() {
