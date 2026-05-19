@@ -37,7 +37,7 @@ describe("SearchResultsProvider", () => {
         async (provider: SearchResultsProvider, mockBackend: HttpTestingController) => {
             const promise = provider.getResults("a", false);
 
-            mockBackend.expectNone(url => true);
+            mockBackend.expectNone(_ => true);
             const results = await promise;
             expect(results.length).toBe(0);
         }
@@ -47,7 +47,7 @@ describe("SearchResultsProvider", () => {
         async (provider: SearchResultsProvider, mockBackend: HttpTestingController) => {
             const promise = provider.getResults("   ", false);
 
-            mockBackend.expectNone(url => true);
+            mockBackend.expectNone(_ => true);
             const results = await promise;
             expect(results.length).toBe(0);
         }
@@ -60,7 +60,7 @@ describe("SearchResultsProvider", () => {
             })
             const promise = provider.getResults("32 35", false);
 
-            mockBackend.expectNone(url => true);
+            mockBackend.expectNone(_ => true);
             const results = await promise;
             expect(results.length).toBe(1);
             expect(results[0].source).toBe("Coordinates");

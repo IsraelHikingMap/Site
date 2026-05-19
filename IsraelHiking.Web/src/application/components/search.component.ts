@@ -15,7 +15,7 @@ import { MatInput } from "@angular/material/input";
 import { MatOption } from "@angular/material/core";
 import { MatAutocompleteTrigger, MatAutocomplete } from "@angular/material/autocomplete";
 import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { debounceTime, filter, tap, map, distinctUntilChanged, share } from "rxjs/operators";
+import { debounceTime, filter, tap, distinctUntilChanged, share } from "rxjs/operators";
 import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../services/resources.service";
