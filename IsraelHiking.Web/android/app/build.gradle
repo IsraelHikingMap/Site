@@ -44,6 +44,7 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
     implementation "androidx.car.app:app:1.7.0"
+    implementation "org.maplibre.gl:android-sdk:13.1.0"
 }
 
 apply from: 'capacitor.build.gradle'
