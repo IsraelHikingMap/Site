@@ -1,5 +1,6 @@
 package com.mapeak.car;
 
+import androidx.annotation.NonNull;
 import androidx.car.app.CarContext;
 import androidx.car.app.CarToast;
 import androidx.car.app.Screen;
@@ -23,6 +24,7 @@ public class CarMapScreen extends Screen {
         this.carMapRenderer = carMapRenderer;
     }
 
+    @NonNull
     @Override
     public Template onGetTemplate() {
         NavigationTemplate.Builder templateBuilder = new NavigationTemplate.Builder();
@@ -74,7 +76,7 @@ public class CarMapScreen extends Screen {
                                         IconCompat.createWithResource(carContext, R.drawable.ic_zoom_in)
                                 ).build()
                         )
-                        .setOnClickListener(() -> carMapRenderer.zoomInFromButton())
+                        .setOnClickListener(carMapRenderer::zoomInFromButton)
                         .build()
         );
 
@@ -85,7 +87,7 @@ public class CarMapScreen extends Screen {
                                         IconCompat.createWithResource(carContext, R.drawable.ic_zoom_out)
                                 ).build()
                         )
-                        .setOnClickListener(() -> carMapRenderer.zoomOutFromButton())
+                        .setOnClickListener(carMapRenderer::zoomOutFromButton)
                         .build()
         );
 
