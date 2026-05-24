@@ -1,9 +1,11 @@
 package com.mapeak.car;
+
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.location.Location;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,17 +16,17 @@ import android.widget.TextView;
 import androidx.annotation.MainThread;
 import androidx.car.app.CarContext;
 import org.maplibre.android.MapLibre;
+import org.maplibre.android.camera.CameraPosition;
+import org.maplibre.android.camera.CameraUpdateFactory;
 import org.maplibre.android.constants.MapLibreConstants;
+import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.maps.MapLibreMapOptions;
 import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.Style;
 
 public class CarMapContainer {
-
-    public static final String LOG_TAG = "CarMapContainer";
     public static final float DOUBLE_CLICK_FACTOR = 2.0f;
-
     private final CarContext carContext;
     private MapView mapViewInstance = null;
     public MapLibreMap mapLibreMapInstance = null;
@@ -34,34 +36,41 @@ public class CarMapContainer {
         this.carContext = carContext;
     }
 
-    public MapView getMapViewInstance() {
-        return mapViewInstance;
-    }
-
     public void scrollBy(float x, float y) {
         if (mapLibreMapInstance != null) {
             mapLibreMapInstance.scrollBy(-x, -y, 0);
         }
     }
 
+    public void setCenter(Location location) {
+        if (mapLibreMapInstance == null) {
+            return;
+        }
+
+        var targetLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
+        var position = new CameraPosition.Builder()
+                .target(targetLocation)
+                .zoom(mapLibreMapInstance.getZoom())
+                .build();
+        mapLibreMapInstance.easeCamera(CameraUpdateFactory.newCameraPosition(position), 1000);
+    }
+
     private Animator createScaleAnimator(
             double currentZoom,
             double zoomAddition,
-            PointF animationFocalPoint
-    ) {
+            PointF animationFocalPoint) {
         ValueAnimator animator = ValueAnimator.ofFloat(
                 (float) currentZoom,
-                (float) (currentZoom + zoomAddition)
-        );
-        animator.setDuration((long) MapLibreConstants.ANIMATION_DURATION);
+                (float) (currentZoom + zoomAddition));
+        animator.setDuration(MapLibreConstants.ANIMATION_DURATION);
         animator.setInterpolator(new DecelerateInterpolator());
         animator.addUpdateListener(animation -> {
             if (animationFocalPoint != null && mapLibreMapInstance != null) {
                 mapLibreMapInstance.setZoom(
                         (double) (float) animation.getAnimatedValue(),
                         animationFocalPoint,
-                        0
-                );
+                        0);
             }
         });
         return animator;
@@ -74,8 +83,7 @@ public class CarMapContainer {
             scaleAnimator = createScaleAnimator(
                     currentZoom,
                     isZoomIn ? 1.0 : -1.0,
-                    zoomFocalPoint
-            );
+                    zoomFocalPoint);
             scaleAnimator.start();
         }
     }
@@ -102,8 +110,7 @@ public class CarMapContainer {
             mapLibreMapInstance.setZoom(
                     currentZoomLevel + zoomAdditional,
                     new PointF(focusX, focusY),
-                    0
-            );
+                    0);
         }
     }
 
@@ -116,7 +123,8 @@ public class CarMapContainer {
         mapView.getMapAsync(map -> {
             mapViewInstance = mapView;
             mapLibreMapInstance = map;
-            map.setStyle(new Style.Builder().fromUri("https://demotiles.maplibre.org/style.json"));
+            map.setStyle(new Style.Builder().fromUri(
+                    "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json"));
         });
         mapViewInstance = mapView;
 
@@ -129,17 +137,13 @@ public class CarMapContainer {
                 mapView,
                 new ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                )
-        );
+                        ViewGroup.LayoutParams.MATCH_PARENT));
         frameLayout.addView(
                 attribution,
                 new FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.WRAP_CONTENT,
                         FrameLayout.LayoutParams.WRAP_CONTENT,
-                        Gravity.BOTTOM | Gravity.END
-                )
-        );
+                        Gravity.BOTTOM | Gravity.END));
 
         return frameLayout;
     }
@@ -159,8 +163,7 @@ public class CarMapContainer {
     private MapView createMapViewInstance() {
         MapView mapView = new MapView(
                 carContext,
-                MapLibreMapOptions.createFromAttributes(carContext)
-        );
+                MapLibreMapOptions.createFromAttributes(carContext));
         mapView.setLayerType(View.LAYER_TYPE_HARDWARE, new Paint());
         return mapView;
     }

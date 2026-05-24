@@ -1,32 +1,47 @@
 package com.mapeak.car;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.os.Bundle;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.location.Location;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.car.app.CarAppService;
 import androidx.car.app.Session;
 import androidx.car.app.validation.HostValidator;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class MapeakCarAppService extends CarAppService {
-
-    public static final String LOG_TAG = "CarAppService";
-    public static boolean isDebug = false;
-    public static String appPlatform = "ANDROID_AUTO";
+    public static final String LOG_TAG = "MapeakCarAppService";
+    public static CarSession currentSession;
+    private final BroadcastReceiver mapUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Location location = intent.getParcelableExtra("location");
+            Log.d(LOG_TAG, "received position");
+            if (location != null && currentSession != null) {
+                currentSession.setCenter(location);
+            }
+        }
+    };
 
     @NonNull
     @Override
     public Session onCreateSession() {
-        return new CarSession();
+        Log.d(LOG_TAG, "Session created");
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mapUpdateReceiver,
+                new IntentFilter("com.capgo.capacitor_background_geolocation.broadcast")
+        );
+        currentSession = new CarSession();
+        return currentSession;
     }
 
     @NonNull
     @Override
     public HostValidator createHostValidator() {
-        checkManifestForDebug(this);
         // HM TODO: bring this back
         //if (isDebug) {
             return HostValidator.ALLOW_ALL_HOSTS_VALIDATOR;
@@ -35,20 +50,5 @@ public class MapeakCarAppService extends CarAppService {
         //            .addAllowedHosts(R.array.car_template_hosts_allowlist)
         //            .build();
         //}
-    }
-
-    public static void checkManifestForDebug(Context context) {
-        try {
-            ApplicationInfo app = context.getPackageManager().getApplicationInfo(
-                    context.getPackageName(),
-                    PackageManager.GET_META_DATA
-            );
-            Bundle bundle = app.metaData;
-            isDebug = bundle.getBoolean("nl.flitsmeister.maplibrecar.IS_DEBUG", false);
-            String platform = bundle.getString("nl.flitsmeister.maplibrecar.APP_PLATFORM");
-            appPlatform = platform != null ? platform : "ANDROID_AUTO";
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "Failed to check manifest (for debug mode and app platform)", e);
-        }
     }
 }

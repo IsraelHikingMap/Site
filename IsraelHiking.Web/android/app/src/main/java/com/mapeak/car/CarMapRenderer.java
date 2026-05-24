@@ -4,6 +4,7 @@ import android.app.Presentation;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
+import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -107,18 +108,20 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
         uiHandler.removeCallbacksAndMessages(null);
     }
 
-    //@Override
     public void zoomInFromButton() {
         float centerX = surfaceContainer != null ? surfaceContainer.getWidth() / 2f : -1f;
         float centerY = surfaceContainer != null ? surfaceContainer.getHeight() / 2f : -1f;
         onScale(centerX, centerY, CarMapContainer.DOUBLE_CLICK_FACTOR);
     }
 
-    //@Override
     public void zoomOutFromButton() {
         float centerX = surfaceContainer != null ? surfaceContainer.getWidth() / 2f : -1f;
         float centerY = surfaceContainer != null ? surfaceContainer.getHeight() / 2f : -1f;
         onScale(centerX, centerY, -CarMapContainer.DOUBLE_CLICK_FACTOR);
+    }
+
+    public void setCenter(Location location) {
+        mapContainer.setCenter(location);
     }
 
     @Override
