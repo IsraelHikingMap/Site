@@ -18,7 +18,18 @@ import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 
-public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver { // ICarMapRenderer
+import com.getcapacitor.JSObject;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.maplibre.android.geometry.LatLng;
+import org.maplibre.android.gestures.MoveGestureDetector;
+import org.maplibre.android.maps.MapLibreMap;
+
+import java.util.ArrayList;
+
+public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver, CarMessageBus.CarEventListener {
 
     public static final String LOG_TAG = "CarMapRenderer";
 
@@ -35,6 +46,7 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
         this.carContext = carContext;
         this.mapContainer = new CarMapContainer(carContext);
         serviceLifecycle.addObserver(this);
+        CarMessageBus.getInstance().registerListener(this);
     }
 
     @Override
@@ -52,6 +64,7 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
         Log.v(LOG_TAG, "CarMapRenderer.onDestroy");
         mapContainer.cleanUpMap();
         surfaceContainer = null;
+        CarMessageBus.getInstance().unregisterListener(this);
         uiHandler.removeCallbacksAndMessages(null);
         try {
             ((AppManager) carContext.getCarService(CarContext.APP_SERVICE)).setSurfaceCallback(null);
@@ -73,14 +86,17 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
                         surfaceContainer.getHeight(),
                         surfaceContainer.getDpi(),
                         surfaceContainer.getSurface(),
-                        0
-                );
+                        0);
         this.virtualDisplay = virtualDisplay;
 
         Presentation presentation = new Presentation(carContext, virtualDisplay.getDisplay());
         this.presentation = presentation;
         presentation.setContentView(mapContainer.setupMap());
         presentation.show();
+        var payload = new JSObject();
+        payload.put("connected", true);
+        CarMessageBus.getInstance().emitEvent(new CarMessageBus.CarEvent("connected", payload));
+
     }
 
     @Override
@@ -106,6 +122,9 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
         Log.v(LOG_TAG, "Surface destroyed");
         this.surfaceContainer = null;
         uiHandler.removeCallbacksAndMessages(null);
+        var payload = new JSObject();
+        payload.put("connected", false);
+        CarMessageBus.getInstance().emitEvent(new CarMessageBus.CarEvent("connected", payload));
     }
 
     public void zoomInFromButton() {
@@ -120,19 +139,17 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
         onScale(centerX, centerY, -CarMapContainer.DOUBLE_CLICK_FACTOR);
     }
 
-    public void setCenter(Location location) {
-        mapContainer.setCenter(location);
-    }
-
     @Override
     public void onScale(float focusX, float focusY, float scaleFactor) {
         mapContainer.onScale(focusX, focusY, scaleFactor);
+        mapContainer.raiseMoveEnd();
     }
 
     @Override
     public synchronized void onScroll(float distanceX, float distanceY) {
         Log.v(LOG_TAG, "onScroll distanceX(" + distanceX + ") distanceY(" + distanceY + ")");
         mapContainer.scrollBy(distanceX, distanceY);
+        mapContainer.raiseMoveEnd();
     }
 
     @Override
@@ -144,5 +161,35 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
     public void onFling(float velocityX, float velocityY) {
         SurfaceCallback.super.onFling(velocityX, velocityY);
         // We don't need to implement onFling since the MapView does this for us
+    }
+
+    @Override
+    public void onCarEvent(CarMessageBus.CarEvent event) {
+        try {
+            switch (event.actionId()) {
+                case "location":
+                    var location = new Location("GPS");
+
+                    var jsonObject = event.payload();
+                    if (!jsonObject.isNull("bearing")) {
+                        location.setBearing((float) jsonObject.getDouble("bearing"));
+                    }
+                    location.setLatitude((float) jsonObject.getDouble("lat"));
+                    location.setLongitude((float) jsonObject.getDouble("lng"));
+                    location.setAccuracy((float) jsonObject.getDouble("acc"));
+                    mapContainer.setGpsLocation(location, jsonObject.getDouble("zoom"));
+                    break;
+                case "route":
+                    var points = event.payload().getJSONArray("points");
+                    var route = new ArrayList<LatLng>();
+                    for (int i = 0; i < points.length(); i++) {
+                        var point = points.getJSONArray(i);
+                        route.add(new LatLng(point.getDouble(1), point.getDouble(0)));
+                    }
+                    mapContainer.setRoute(route);
+                    break;
+            }
+        } catch (JSONException ignored) {
+        }
     }
 }

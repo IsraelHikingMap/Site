@@ -6,6 +6,7 @@ import { DeviceOrientationService } from "./device-orientation.service";
 import { MapService } from "./map.service";
 import { LoggingService } from "./logging.service";
 import { SelectedRouteService } from "./selected-route.service";
+import { CarService } from "./car.service";
 import { RouteStrings } from "./hash.service";
 import { SetFollowingAction, SetPannedAction, ToggleDistanceAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models";
@@ -23,6 +24,7 @@ export class LocationService {
     private readonly mapService = inject(MapService);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly loggingService = inject(LoggingService);
+    private readonly carService = inject(CarService);
     private readonly store = inject(Store);
 
     public changed = new EventEmitter<LocationWithBearing | null>();
@@ -118,6 +120,7 @@ export class LocationService {
             ? 0
             : this.locationWithBearing.bearing;
         this.mapService.moveToWithCurrentZoom(center, bearing);
+        this.carService.updateGpsPosition(this.locationWithBearing);
     }
 
     private handlePositionChange(position: GeolocationPosition) {

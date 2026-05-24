@@ -12,6 +12,7 @@ public class CarSession extends Session {
     public static boolean isRouteActive = false;
 
     private CarMapRenderer carMapRenderer;
+
     @NonNull
     @Override
     public Screen onCreateScreen(@NonNull Intent intent) {
@@ -20,9 +21,5 @@ public class CarSession extends Session {
         CarMapScreen carMapScreen = new CarMapScreen(getCarContext(), carMapRenderer);
         getCarContext().getCarService(androidx.car.app.ScreenManager.class).push(carMapScreen);
         return carMapScreen;
-    }
-
-    public void setCenter(Location location) {
-        carMapRenderer.setCenter(location);
     }
 }
