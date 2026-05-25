@@ -64,6 +64,7 @@ export class GeoLocationService {
             if (this.isBackground &&
                 !this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording &&
                 !this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings &&
+                !this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).carConnected &&
                 this.wasInitialized) {
                 BackgroundGeolocation.stop();
                 this.wasInitialized = false;
@@ -72,6 +73,7 @@ export class GeoLocationService {
             if (!this.isBackground &&
                 !this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording &&
                 !this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings &&
+                !this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).carConnected &&
                 !this.wasInitialized) {
                 this.startWatching();
             }

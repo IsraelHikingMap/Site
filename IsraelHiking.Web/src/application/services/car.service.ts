@@ -1,12 +1,12 @@
 import { inject, Injectable } from "@angular/core";
-import { registerPlugin } from '@capacitor/core';
+import { registerPlugin } from "@capacitor/core";
 import { Store } from "@ngxs/store";
 
 import { SelectedRouteService } from "./selected-route.service";
 import { SetLocationAction } from "../reducers/location.reducer";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
-import { SetPannedAction } from "../reducers/in-memory.reducer";
+import { SetPannedAction, SetCarConnectedAction } from "../reducers/in-memory.reducer";
 import type { LocationWithBearing } from "./location.service";
 import type { ApplicationState } from "../models";
 
@@ -28,11 +28,11 @@ type CarMessage = {
 interface CarPlugin {
     sendMessage(message: CarMessage): Promise<void>;
     getConnectionState(): Promise<CarConnectedEvent>;
-    addListener(eventName: 'moveend', listener: (event: CarMoveEndEvent) => void): Promise<void>;
-    addListener(eventName: 'connected', listener: (event: CarConnectedEvent) => void): Promise<void>;
+    addListener(eventName: "moveend", listener: (event: CarMoveEndEvent) => void): Promise<void>;
+    addListener(eventName: "connected", listener: (event: CarConnectedEvent) => void): Promise<void>;
 }
 
-const Car = registerPlugin<CarPlugin>('Car');
+const Car = registerPlugin<CarPlugin>("Car");
 
 @Injectable()
 export class CarService {
@@ -42,30 +42,28 @@ export class CarService {
     private readonly runningContextService = inject(RunningContextService);
     private readonly loggingService = inject(LoggingService);
 
-    private isConnected: boolean = false;
-
     constructor() {
         if (!this.runningContextService.isCapacitor || this.runningContextService.isIos) {
             // Only android is supported right now.
             return;
         }
 
-        Car.addListener('moveend', (event) => {
+        Car.addListener("moveend", (event) => {
             this.store.dispatch(new SetPannedAction(new Date()));
             this.store.dispatch(new SetLocationAction(event.lng, event.lat, event.zoom));
         });
-        Car.addListener('connected', (event) => {
+        Car.addListener("connected", (event) => {
             this.loggingService.info(`[Car] connected: ${event.connected}`);
-            this.isConnected = event.connected;
+            this.store.dispatch(new SetCarConnectedAction(event.connected));
         });
         Car.getConnectionState().then((event) => {
             this.loggingService.info(`[Car] connected: ${event.connected}`);
-            this.isConnected = event.connected;
+            this.store.dispatch(new SetCarConnectedAction(event.connected));
         });
     }
 
     public updateGpsPosition(location: LocationWithBearing) {
-        if (!this.isConnected) {
+        if (!this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.carConnected)) {
             return;
         }
         Car.sendMessage({
