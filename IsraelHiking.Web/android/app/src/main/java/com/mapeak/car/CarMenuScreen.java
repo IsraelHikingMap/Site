@@ -37,9 +37,9 @@ public class CarMenuScreen extends Screen {
                 .setOnClickListener(() -> {
                     CarToast.makeText(
                             carContext,
-                            CarSession.isRouteActive ? "Stopping Navigation" : "Starting Navigation",
-                            CarToast.LENGTH_LONG
-                    ).show();
+                            CarSession.isRouteActive ? "Stopping Navigation"
+                                    : "Starting Navigation",
+                            CarToast.LENGTH_LONG).show();
                     CarSession.isRouteActive = !CarSession.isRouteActive;
                     carContext.getCarService(androidx.car.app.ScreenManager.class).pop();
                 })
@@ -49,8 +49,7 @@ public class CarMenuScreen extends Screen {
                 new ItemList.Builder()
                         .addItem(navigationRow)
                         .build(),
-                "Navigation"
-        );
+                "Navigation");
     }
 
     private SectionedItemList buildDevList() {
@@ -60,8 +59,7 @@ public class CarMenuScreen extends Screen {
                     CarToast.makeText(
                             carContext,
                             "Test CarToast",
-                            CarToast.LENGTH_LONG
-                    ).show();
+                            CarToast.LENGTH_LONG).show();
                     carContext.getCarService(androidx.car.app.ScreenManager.class).pop();
                 })
                 .build();
@@ -70,7 +68,6 @@ public class CarMenuScreen extends Screen {
                 new ItemList.Builder()
                         .addItem(testCarToast)
                         .build(),
-                "Developer tools"
-        );
+                "Developer tools");
     }
 }

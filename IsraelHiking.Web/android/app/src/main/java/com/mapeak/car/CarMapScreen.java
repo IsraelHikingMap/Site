@@ -41,25 +41,23 @@ public class CarMapScreen extends Screen {
         actionStripBuilder.addAction(
                 new Action.Builder()
                         .setTitle("Test")
-                        .setOnClickListener(() ->
-                                CarToast.makeText(carContext, "Test", CarToast.LENGTH_LONG).show()
-                        )
-                        .build()
-        );
+                        .setOnClickListener(() -> CarToast
+                                .makeText(carContext, "Test", CarToast.LENGTH_LONG)
+                                .show())
+                        .build());
 
         actionStripBuilder.addAction(
                 new Action.Builder()
                         .setIcon(
                                 new CarIcon.Builder(
-                                        IconCompat.createWithResource(carContext, R.drawable.ic_menu)
-                                ).build()
-                        )
-                        .setOnClickListener(() ->
-                                carContext.getCarService(androidx.car.app.ScreenManager.class)
-                                        .push(new CarMenuScreen(carContext))
-                        )
-                        .build()
-        );
+                                        IconCompat.createWithResource(
+                                                carContext,
+                                                R.drawable.ic_menu))
+                                        .build())
+                        .setOnClickListener(() -> carContext
+                                .getCarService(androidx.car.app.ScreenManager.class)
+                                .push(new CarMenuScreen(carContext)))
+                        .build());
 
         return actionStripBuilder;
     }
@@ -73,23 +71,23 @@ public class CarMapScreen extends Screen {
                 new Action.Builder()
                         .setIcon(
                                 new CarIcon.Builder(
-                                        IconCompat.createWithResource(carContext, R.drawable.ic_zoom_in)
-                                ).build()
-                        )
+                                        IconCompat.createWithResource(
+                                                carContext,
+                                                R.drawable.ic_zoom_in))
+                                        .build())
                         .setOnClickListener(carMapRenderer::zoomInFromButton)
-                        .build()
-        );
+                        .build());
 
         actionStripBuilder.addAction(
                 new Action.Builder()
                         .setIcon(
                                 new CarIcon.Builder(
-                                        IconCompat.createWithResource(carContext, R.drawable.ic_zoom_out)
-                                ).build()
-                        )
+                                        IconCompat.createWithResource(
+                                                carContext,
+                                                R.drawable.ic_zoom_out))
+                                        .build())
                         .setOnClickListener(carMapRenderer::zoomOutFromButton)
-                        .build()
-        );
+                        .build());
 
         return actionStripBuilder;
     }

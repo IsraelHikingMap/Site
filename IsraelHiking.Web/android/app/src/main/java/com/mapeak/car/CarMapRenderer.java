@@ -8,7 +8,6 @@ import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.car.app.AppManager;
 import androidx.car.app.CarContext;
@@ -17,16 +16,9 @@ import androidx.car.app.SurfaceContainer;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
-
 import com.getcapacitor.JSObject;
-
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.maplibre.android.geometry.LatLng;
-import org.maplibre.android.gestures.MoveGestureDetector;
-import org.maplibre.android.maps.MapLibreMap;
-
 import java.util.ArrayList;
 
 public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver, CarMessageBus.CarEventListener {
@@ -62,9 +54,10 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
     @Override
     public void onDestroy(@NonNull LifecycleOwner owner) {
         Log.v(LOG_TAG, "CarMapRenderer.onDestroy");
+        CarMessageBus.getInstance().unregisterListener(this);
         mapContainer.cleanUpMap();
         surfaceContainer = null;
-        CarMessageBus.getInstance().unregisterListener(this);
+
         uiHandler.removeCallbacksAndMessages(null);
         try {
             ((AppManager) carContext.getCarService(CarContext.APP_SERVICE)).setSurfaceCallback(null);
@@ -167,7 +160,7 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
     public void onCarEvent(CarMessageBus.CarEvent event) {
         try {
             switch (event.actionId()) {
-                case "location":
+                case CarMessageBus.EVENT_LOCATION:
                     var location = new Location("GPS");
 
                     var jsonObject = event.payload();
@@ -179,14 +172,17 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
                     location.setAccuracy((float) jsonObject.getDouble("acc"));
                     mapContainer.setGpsLocation(location, jsonObject.getDouble("zoom"));
                     break;
-                case "route":
+                case CarMessageBus.EVENT_ROUTE:
                     var points = event.payload().getJSONArray("points");
-                    var route = new ArrayList<LatLng>();
+                    var weight = event.payload().getDouble("weight");
+                    var color = event.payload().getString("color");
+                    var opacity = event.payload().getDouble("opacity");
+                    var lngLats = new ArrayList<LatLng>();
                     for (int i = 0; i < points.length(); i++) {
                         var point = points.getJSONArray(i);
-                        route.add(new LatLng(point.getDouble(1), point.getDouble(0)));
+                        lngLats.add(new LatLng(point.getDouble(1), point.getDouble(0)));
                     }
-                    mapContainer.setRoute(route);
+                    mapContainer.setRoute(lngLats, weight, color, opacity);
                     break;
             }
         } catch (JSONException ignored) {

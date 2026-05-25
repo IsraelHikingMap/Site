@@ -6,23 +6,27 @@ import android.os.Looper;
 import com.getcapacitor.JSObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CarMessageBus {
 
+    public static final String EVENT_LOCATION = "location";
+    public static final String EVENT_ROUTE = "route";
+    public static final String EVENT_CONNECTED = "connected";
+
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    // Type-safe payload structure
-    public record CarEvent(String actionId, JSObject payload) {
-    }
+    public record CarEvent(String actionId, JSObject payload) {}
 
-    // Callback interface for listeners
     public interface CarEventListener {
         void onCarEvent(CarEvent event);
     }
 
     private static CarMessageBus instance;
     private final List<CarEventListener> listeners = new ArrayList<>();
+    private final Map<String, CarEvent> lastEvents = new HashMap<>();
 
     private CarMessageBus() {
     }
@@ -37,6 +41,12 @@ public class CarMessageBus {
     public synchronized void registerListener(CarEventListener listener) {
         if (!listeners.contains(listener)) {
             listeners.add(listener);
+            // Replay the last event per actionId so late listeners don't miss state
+            for (CarEvent event : lastEvents.values()) {
+                synchronized (CarMessageBus.this) {
+                    mainHandler.post(() -> listener.onCarEvent(event));
+                }
+            }
         }
     }
 
@@ -45,6 +55,7 @@ public class CarMessageBus {
     }
 
     public synchronized void emitEvent(CarEvent event) {
+        lastEvents.put(event.actionId(), event);
         mainHandler.post(() -> {
             synchronized (CarMessageBus.this) {
                 for (CarEventListener listener : listeners) {

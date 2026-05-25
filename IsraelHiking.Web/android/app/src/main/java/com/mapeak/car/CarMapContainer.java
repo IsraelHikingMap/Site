@@ -5,7 +5,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.location.Location;
@@ -19,9 +18,7 @@ import android.widget.TextView;
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.car.app.CarContext;
-
 import com.getcapacitor.JSObject;
-
 import org.maplibre.android.MapLibre;
 import org.maplibre.android.camera.CameraPosition;
 import org.maplibre.android.camera.CameraUpdateFactory;
@@ -32,6 +29,7 @@ import org.maplibre.android.maps.MapLibreMapOptions;
 import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.Style;
 import org.maplibre.android.style.expressions.Expression;
+import org.maplibre.android.style.layers.CircleLayer;
 import org.maplibre.android.style.layers.FillLayer;
 import org.maplibre.android.style.layers.LineLayer;
 import org.maplibre.android.style.layers.Property;
@@ -43,7 +41,6 @@ import org.maplibre.geojson.FeatureCollection;
 import org.maplibre.geojson.LineString;
 import org.maplibre.geojson.Point;
 import org.maplibre.geojson.Polygon;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -57,6 +54,7 @@ public class CarMapContainer {
     private static final String LOCATION_CIRCLE_STROKE_LAYER_ID = "location-accuracy-circle-stroke-layer";
     private static final String ROUTE_SOURCE_ID = "planned-route-source";
     private static final String ROUTE_LAYER_ID = "planned-route-layer";
+    private static final String ROUTE_POINTS_LAYER_ID = "planned-route-points-layer";
     private static final String LOCATION_ICON_IMAGE = "gps-arrow";
     private static final int CIRCLE_STEPS = 64;
     public static final float DOUBLE_CLICK_FACTOR = 2.0f;
@@ -187,7 +185,7 @@ public class CarMapContainer {
         style.addLayer(accuracyCircleStrokeLayer);
     }
 
-    public void setRoute(ArrayList<LatLng> points) {
+    public void setRoute(ArrayList<LatLng> points, double weight, String color, double opacity) {
         if (mapLibreMapInstance == null || mapLibreMapInstance.getStyle() == null) {
             return;
         }
@@ -198,26 +196,59 @@ public class CarMapContainer {
 
         LineString lineString = LineString.fromLngLats(geoJsonPoints);
         Feature routeFeature = Feature.fromGeometry(lineString);
+        routeFeature.properties().addProperty("weight", weight);
+        routeFeature.properties().addProperty("color", color);
+        routeFeature.properties().addProperty("opacity", opacity);
+
+        Feature startPointFeature = Feature
+                .fromGeometry(Point.fromLngLat(points.get(0).getLongitude(), points.get(0).getLatitude()));
+        startPointFeature.properties().addProperty("color", "#43a047");
+        startPointFeature.properties().addProperty("strokeColor", "white");
+
+        Feature endPointFeature = Feature.fromGeometry(Point.fromLngLat(
+                points.get(points.size() - 1).getLongitude(),
+                points.get(points.size() - 1).getLatitude()));
+        endPointFeature.properties().addProperty("color", "red");
+        endPointFeature.properties().addProperty("strokeColor", "white");
+
+        FeatureCollection featureCollection = FeatureCollection.fromFeatures(
+                new Feature[] { routeFeature, startPointFeature, endPointFeature });
 
         var style = mapLibreMapInstance.getStyle();
         GeoJsonSource routeSource = style.getSourceAs(ROUTE_SOURCE_ID);
 
         if (routeSource != null) {
-            routeSource.setGeoJson(routeFeature);
+            routeSource.setGeoJson(featureCollection);
             return;
         }
 
-        GeoJsonSource newSource = new GeoJsonSource(ROUTE_SOURCE_ID, routeFeature);
+        GeoJsonSource newSource = new GeoJsonSource(ROUTE_SOURCE_ID, featureCollection);
         style.addSource(newSource);
+        addRouteLayers(style);
+    }
 
-        LineLayer routeLayer = new LineLayer(ROUTE_LAYER_ID, ROUTE_SOURCE_ID)
-                .withProperties(
-                        PropertyFactory.lineColor(Color.parseColor("#007AFF")),
-                        PropertyFactory.lineWidth(5f),
-                        PropertyFactory.lineJoin("round"),
-                        PropertyFactory.lineCap("round"));
+    private void addRouteLayers(@NonNull Style style) {
+        Expression isLineString = Expression.eq(Expression.geometryType(), Expression.literal("LineString"));
+        Expression isPoint = Expression.eq(Expression.geometryType(), Expression.literal("Point"));
 
+        LineLayer routeLayer = new LineLayer(ROUTE_LAYER_ID, ROUTE_SOURCE_ID);
+        routeLayer.setFilter(isLineString);
+        routeLayer.setProperties(
+                PropertyFactory.lineColor(Expression.get("color")),
+                PropertyFactory.lineWidth(Expression.get("weight")),
+                PropertyFactory.lineOpacity(Expression.get("opacity")),
+                PropertyFactory.lineCap(Property.LINE_CAP_BUTT),
+                PropertyFactory.lineJoin(Property.LINE_JOIN_BEVEL));
         style.addLayer(routeLayer);
+
+        CircleLayer routePointsLayer = new CircleLayer(ROUTE_POINTS_LAYER_ID, ROUTE_SOURCE_ID);
+        routePointsLayer.setFilter(isPoint);
+        routePointsLayer.setProperties(
+                PropertyFactory.circleColor(Expression.get("color")),
+                PropertyFactory.circleRadius(7f),
+                PropertyFactory.circleStrokeColor(Expression.get("strokeColor")),
+                PropertyFactory.circleStrokeWidth(3f));
+        style.addLayer(routePointsLayer);
     }
 
     private Animator createScaleAnimator(
@@ -323,14 +354,22 @@ public class CarMapContainer {
 
     @MainThread
     public void cleanUpMap() {
+        if (mapViewInstance == null) {
+            return;
+        }
+
         mapLibreMapInstance = null;
 
-        if (mapViewInstance != null) {
-            mapViewInstance.onStop();
-            mapViewInstance.onDestroy();
+        mapViewInstance.onPause();
+        mapViewInstance.onStop();
+
+        try {
             ((WindowManager) carContext.getSystemService(Context.WINDOW_SERVICE)).removeView(mapViewInstance);
-            mapViewInstance = null;
+        } catch (IllegalArgumentException ignored) {
         }
+
+        mapViewInstance.onDestroy();
+        mapViewInstance = null;
     }
 
     private MapView createMapViewInstance() {
