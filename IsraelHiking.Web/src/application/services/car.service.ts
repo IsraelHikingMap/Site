@@ -42,7 +42,7 @@ export class CarService {
     private readonly runningContextService = inject(RunningContextService);
     private readonly loggingService = inject(LoggingService);
 
-    constructor() {
+    public initialize() {
         if (!this.runningContextService.isCapacitor || this.runningContextService.isIos) {
             // Only android is supported right now.
             return;

@@ -2,7 +2,6 @@ package com.mapeak.car;
 
 import androidx.annotation.NonNull;
 import androidx.car.app.CarContext;
-import androidx.car.app.CarToast;
 import androidx.car.app.Screen;
 import androidx.car.app.model.Action;
 import androidx.car.app.model.ActionStrip;
@@ -40,23 +39,12 @@ public class CarMapScreen extends Screen {
 
         actionStripBuilder.addAction(
                 new Action.Builder()
-                        .setTitle("Test")
-                        .setOnClickListener(() -> CarToast
-                                .makeText(carContext, "Test", CarToast.LENGTH_LONG)
-                                .show())
-                        .build());
-
-        actionStripBuilder.addAction(
-                new Action.Builder()
                         .setIcon(
                                 new CarIcon.Builder(
                                         IconCompat.createWithResource(
                                                 carContext,
                                                 R.drawable.ic_menu))
                                         .build())
-                        .setOnClickListener(() -> carContext
-                                .getCarService(androidx.car.app.ScreenManager.class)
-                                .push(new CarMenuScreen(carContext)))
                         .build());
 
         return actionStripBuilder;

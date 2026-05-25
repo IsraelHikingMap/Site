@@ -28,6 +28,7 @@ import { HashService } from "./hash.service";
 import { AnalyticsService } from "./analytics.service";
 import { MapService } from "./map.service";
 import { SelectedRouteService } from "./selected-route.service";
+import { CarService } from "./car.service";
 import type { ApplicationState } from "../models";
 
 @Injectable()
@@ -57,6 +58,7 @@ export class ApplicationInitializeService {
     private readonly analyticsService = inject(AnalyticsService);
     private readonly mapService = inject(MapService);
     private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly carService = inject(CarService);
     private readonly store = inject(Store);
 
     public async initialize() {
@@ -75,6 +77,7 @@ export class ApplicationInitializeService {
             this.geoLocationService.initialize();
             this.hashService.initialize();
             this.dragAndDropService.initialize();
+            this.carService.initialize();
             await this.mapService.initialize();
             if (this.runningContextService.isMobile
                 && !this.runningContextService.isCapacitor
