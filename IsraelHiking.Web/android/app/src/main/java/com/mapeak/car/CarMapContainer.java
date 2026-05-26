@@ -347,14 +347,14 @@ public class CarMapContainer {
     }
 
     @MainThread
-    public View setupMap() {
+    public View setupMap(float pixelRatio) {
         MapLibre.getInstance(carContext);
         OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(new SliceProtocolInterceptor(new PmTilesService(carContext)))
                 .build();
         HttpRequestUtil.setOkHttpClient(client);
 
-        MapView mapView = createMapViewInstance();
+        MapView mapView = createMapViewInstance(pixelRatio);
         mapView.onStart();
         mapView.getMapAsync(map -> {
             mapViewInstance = mapView;
@@ -402,10 +402,10 @@ public class CarMapContainer {
         mapViewInstance = null;
     }
 
-    private MapView createMapViewInstance() {
-        MapView mapView = new MapView(
-                carContext,
-                MapLibreMapOptions.createFromAttributes(carContext));
+    private MapView createMapViewInstance(float pixelRatio) {
+        MapLibreMapOptions options = MapLibreMapOptions.createFromAttributes(carContext);
+        options.pixelRatio(pixelRatio);
+        MapView mapView = new MapView(carContext, options);
         mapView.setLayerType(View.LAYER_TYPE_HARDWARE, new Paint());
         return mapView;
     }

@@ -83,7 +83,7 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
 
         Presentation presentation = new Presentation(carContext, virtualDisplay.getDisplay());
         this.presentation = presentation;
-        presentation.setContentView(mapContainer.setupMap());
+        presentation.setContentView(mapContainer.setupMap(computePixelRatio()));
         presentation.show();
         // Doing this after setting the map will allow playback of the events.
         CarMessageBus.getInstance().registerListener(this);
@@ -119,6 +119,16 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
         var payload = new JSObject();
         payload.put("connected", false);
         CarMessageBus.getInstance().emitEvent(new CarMessageBus.CarEvent("connected", payload));
+    }
+
+    private float computePixelRatio() {
+        int dpi = surfaceContainer.getDpi();
+        if (dpi <= 0) {
+            return 1f;
+        }
+        float widthInches = (float) surfaceContainer.getWidth() / dpi;
+        float ratio = widthInches / 6f;
+        return Math.max(1f, Math.min(2.5f, ratio));
     }
 
     public void zoomInFromButton() {
