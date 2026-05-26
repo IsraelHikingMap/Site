@@ -16,6 +16,7 @@ import type { ApplicationState, LatLngAltTime } from "../models";
 export class GeoLocationService {
     private isBackground = false;
     private wasInitialized = false;
+    private needToStartAgain = false;
     private lastReceivedPosition: GeolocationPosition | null = null;
 
     public positionWhileInBackground = new EventEmitter<GeolocationPosition>();
@@ -68,13 +69,11 @@ export class GeoLocationService {
                 this.wasInitialized) {
                 BackgroundGeolocation.stop();
                 this.wasInitialized = false;
+                this.needToStartAgain = true;
                 return;
             }
-            if (!this.isBackground &&
-                !this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording &&
-                !this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings &&
-                !this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).carConnected &&
-                !this.wasInitialized) {
+            if (!this.isBackground && this.needToStartAgain) {
+                this.needToStartAgain = false;
                 this.startWatching();
             }
             if (!this.isBackground) {
@@ -131,7 +130,7 @@ export class GeoLocationService {
                 distanceFilter: 2
             }, (location?: Location, error?: CallbackError) => {
                 if (location) {
-                    this.loggingService.debug("[GeoLocation] Received position: " + `lat: ${location.latitude}, lng: ${location.longitude}, time: ${new Date(location.time).toISOString()}, accuracy: ${location.accuracy}, background: ${this.isBackground}`);
+                    this.loggingService.debug(`[GeoLocation] Received position: lat: ${location.latitude}, lng: ${location.longitude}, time: ${new Date(location.time).toISOString()}, accuracy: ${location.accuracy}, background: ${this.isBackground}`);
                     const position = this.locationToPosition(location);
                     const latLng = GeoLocationService.positionToLatLngTime(position);
                     if (SpatialService.isJammingTarget(latLng)) {
@@ -139,7 +138,7 @@ export class GeoLocationService {
                         return;
                     }
                     this.lastReceivedPosition = position;
-                    if (this.isBackground) {
+                    if (this.isBackground && !this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).carConnected) {
                         this.positionWhileInBackground.next(this.lastReceivedPosition);
                         return;
                     }
