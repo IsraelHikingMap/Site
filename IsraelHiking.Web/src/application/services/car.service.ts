@@ -11,6 +11,7 @@ import { DefaultStyleService } from "./default-style.service";
 import { MapService } from "./map.service";
 import { SetPannedAction, SetCarConnectedAction } from "../reducers/in-memory.reducer";
 import { LocationService, type LocationWithBearing } from "./location.service";
+import { RouteStatisticsService } from "./route-statistics.service";
 import type { ApplicationState } from "../models";
 
 type CarMoveEndEvent = {
@@ -41,6 +42,8 @@ const Car = registerPlugin<CarPlugin>("Car");
 export class CarService {
 
     private lastLocation: LocationWithBearing = null;
+    /** In meters per second */
+    private lastSpeed: number = null;
     private lastMoveEndTime = new Date();
 
     private readonly store = inject(Store);
@@ -51,6 +54,7 @@ export class CarService {
     private readonly layersService = inject(LayersService);
     private readonly locationService = inject(LocationService);
     private readonly mapService = inject(MapService);
+    private readonly routeStatisticsService = inject(RouteStatisticsService);
 
     public async initialize() {
         if (!this.runningContextService.isCapacitor || this.runningContextService.isIos) {
@@ -75,12 +79,19 @@ export class CarService {
         });
         this.store.select((state: ApplicationState) => state.routes.present).subscribe(() => {
             this.setRoute();
+            this.setStatics();
         });
         this.store.select((state: ApplicationState) => state.locationState).subscribe(() => {
-            if (new Date().getTime() - this.lastMoveEndTime.getTime() < 100) {
+            if (new Date().getTime() - this.lastMoveEndTime.getTime() < 500) {
                 return;
             }
             this.setCenter();
+        });
+        this.store.select((state: ApplicationState) => state.gpsState.currentPosition).subscribe(position => {
+            if (position != null && position.coords.speed > 0) {
+                this.lastSpeed = position.coords.speed;
+                this.setStatics();
+            }
         });
         this.locationService.changed.subscribe(location => {
             this.lastLocation = location;
@@ -106,6 +117,7 @@ export class CarService {
         this.setRoute();
         this.setCenter();
         this.setLocation();
+        this.setStatics();
     }
 
     private setLocation() {
@@ -128,8 +140,18 @@ export class CarService {
     }
 
     private setRoute() {
-        const route = this.selectedRouteService.getClosestRouteToGPS(this.locationService.getLocationCenter(), this.lastLocation?.bearing ?? 0) ??
+        const route = this.selectedRouteService.getClosestRouteToGPS(this.lastLocation?.center, this.lastLocation?.bearing ?? 0) ??
             this.selectedRouteService.getSelectedRoute();
+
+        if (!route || !route.segments || route.segments.length === 0) {
+            Car.sendMessage({
+                type: "route",
+                payload: {
+                    points: []
+                }
+            });
+            return;
+        }
 
         const points = route.segments.flatMap(s => s.latlngs.map(p => ([p.lng, p.lat])));
 
@@ -153,6 +175,35 @@ export class CarService {
                 lng: locationState.longitude,
                 zoom: locationState.zoom,
                 bearing: this.mapService.getBearing()
+            }
+        });
+    }
+
+    private setStatics() {
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (this.lastLocation == null || selectedRoute == null || this.lastSpeed == null) {
+            Car.sendMessage({
+                type: "statistics",
+                payload: null
+            });
+            return;
+        }
+        const closetRouteToGPS = this.selectedRouteService.getClosestRouteToGPS(this.lastLocation.center, this.lastLocation.bearing ?? 0)
+        if (!closetRouteToGPS) {
+            Car.sendMessage({
+                type: "statistics",
+                payload: null
+            });
+            return;
+        }
+        const statistics = this.routeStatisticsService.getStatisticsForRouteWithLocation(this.selectedRouteService.getLatlngs(closetRouteToGPS), this.lastLocation.center, this.lastLocation.bearing);
+
+        Car.sendMessage({
+            type: "statistics",
+            payload: {
+                units: this.store.selectSnapshot((s: ApplicationState) => s.configuration.units),
+                remainingMeters: statistics.remainingDistance,
+                remainingSeconds: statistics.remainingDistance / this.lastSpeed
             }
         });
     }

@@ -18,10 +18,12 @@ public class CarMessageBus {
     public static final String EVENT_ROUTE = "route";
     public static final String EVENT_STYLE = "style";
     public static final String EVENT_CONNECTED = "connected";
+    public static final String EVENT_STATISTICS = "statistics";
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    public record CarEvent(String actionId, JSObject payload) {}
+    public record CarEvent(String actionId, JSObject payload) {
+    }
 
     public interface CarEventListener {
         void onCarEvent(CarEvent event);
