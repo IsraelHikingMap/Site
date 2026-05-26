@@ -149,7 +149,7 @@ describe("FileService", () => {
             mockBackend.expectOne("s.json").flush({});
 
             const response = await promise;
-            expect(response).toEqual({} as StyleSpecification);
+            expect(response).toEqual("{}");
         }
     ));
 
