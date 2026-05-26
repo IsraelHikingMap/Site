@@ -1,18 +1,11 @@
 import { Component, OnInit, OnChanges, SimpleChanges, OnDestroy, OutputRefSubscription, inject, input } from "@angular/core";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
-import {
-    StyleSpecification,
-    RasterSourceSpecification,
-    RasterLayerSpecification,
-    SourceSpecification,
-    LayerSpecification
-} from "maplibre-gl";
 import { Subject, mergeMap } from "rxjs";
 import { Store } from "@ngxs/store";
+import type { SourceSpecification, LayerSpecification } from "maplibre-gl";
 
 import { ResourcesService } from "../../services/resources.service";
-import { FileService } from "../../services/file.service";
-import { DEFAULT_BASE_LAYERS } from "../../reducers/initial-state";
+import { DefaultStyleService } from "../../services/default-style.service";
 import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models";
 
 @Component({
@@ -20,19 +13,12 @@ import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from ".
     templateUrl: "./automatic-layer-presentation.component.html"
 })
 export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, OnDestroy {
-    private static indexNumber = 0;
-
-    private static readonly ATTRIBUTION = "<a href='https://github.com/IsraelHikingMap/Site/wiki/Attribution' target='_blank'>" +
-        "Click me to see attribution</a>";
-
     public visible = input<boolean>();
     public before = input<string>();
     public isBaselayer = input<boolean>();
     public layerData = input<EditableLayer>();
     public allowOffline = input<boolean>();
 
-    private rasterSourceId: string;
-    private rasterLayerId: string;
     private subscriptions: OutputRefSubscription[] = [];
     private jsonSourcesIds: string[] = [];
     private jsonLayersIds: string[] = [];
@@ -43,14 +29,10 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     public readonly resources = inject(ResourcesService);
 
     private readonly mapComponent = inject(MapComponent);
-    private readonly fileService = inject(FileService);
+    private readonly defaultStyleService = inject(DefaultStyleService);
     private readonly store = inject(Store);
 
     constructor() {
-        const layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
-        this.rasterLayerId = `raster-layer-${layerIndex}`;
-        this.rasterSourceId = `raster-source-${layerIndex}`;
-
         this.subscriptions.push(this.recreateQueue.pipe(mergeMap((action: () => Promise<void>) => action(), 1)).subscribe());
         this.mapLoadedPromise = new Promise((resolve, _) => {
             this.subscriptions.push(this.mapComponent.mapLoad.subscribe(() => {
@@ -92,92 +74,14 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
         this.addLayerRecreationQuqueItem(changes.layerData ? changes.layerData.previousValue : this.layerData(), this.layerData());
     }
 
-    private isRaster(address: string) {
-        return address.match(/\.json(\?.+)?$/i) == null;
-    }
-
-    private createRasterLayer(layerData: LayerData) {
-        let address = layerData.address;
-        let scheme = "xyz";
-        if (layerData.address.match(/\/MapServer(\/\d+)?$/i) != null) {
-            address += "/export?dpi=96&transparent=true&format=png32&bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&f=image";
-        } else if (layerData.address.indexOf("{-y}") !== -1) {
-            address = address.replace("{-y}", "{y}");
-            scheme = "tms";
-        }
-        const source = {
-            type: "raster",
-            tiles: [address],
-            minzoom: Math.max(layerData.minZoom - 1, 0),
-            maxzoom: layerData.maxZoom,
-            scheme,
-            tileSize: 256,
-            attribution: AutomaticLayerPresentationComponent.ATTRIBUTION
-        } as RasterSourceSpecification;
-        this.mapComponent.mapInstance.addSource(this.rasterSourceId, source);
-        const layer = {
-            id: this.rasterLayerId,
-            type: "raster",
-            source: this.rasterSourceId,
-            layout: {
-                visibility: (this.visible() ? "visible" : "none") as "visible" | "none"
-            },
-            paint: {
-                "raster-opacity": layerData.opacity || 1.0
-            }
-        } as RasterLayerSpecification;
-        this.mapComponent.mapInstance.addLayer(layer, this.before());
-    }
-
-    private removeRasterLayer() {
-        this.mapComponent.mapInstance.removeLayer(this.rasterLayerId);
-        this.mapComponent.mapInstance.removeSource(this.rasterSourceId);
-    }
-
-    private async createJsonLayer(layerData: EditableLayer) {
-        const isBuiltInBaseLayer = DEFAULT_BASE_LAYERS.some(l => l.key === layerData.key);
-        const tryLocalStyle = this.allowOffline() && isBuiltInBaseLayer && this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles != null;
-        const response = await this.fileService.getStyleJsonContent(layerData.address, tryLocalStyle);
-        const language = this.resources.getCurrentLanguageCodeSimplified();
-        let styleAsText = JSON.stringify(response);
-        styleAsText = styleAsText.replace(/name:he/g, `name:${language}`);
-        styleAsText = styleAsText.replaceAll("Open Sans", "Noto Sans");
-        const styleJson = JSON.parse(styleAsText) as StyleSpecification;
-        if (tryLocalStyle) {
-            for (const source of Object.values(styleJson.sources)) {
-                if (source.type === "vector") {
-                    delete source.url;
-                    source.tiles[0] = source.tiles[0].replace("https://", "slice://");
-                }
-                if (source.type === "raster-dem") {
-                    delete source.url;
-                    source.tiles[0] = source.tiles[0].replace("https://", "slice://");
-                }
-            }
-        }
-        if (isBuiltInBaseLayer && styleJson.sources["Contour"]?.type === "vector") {
-            const contourSource = styleJson.sources["Contour"];
-            const multiplier = this.store.selectSnapshot((s: ApplicationState) => s.configuration.units) === "metric" ? 1 : 3.28084;
-            delete contourSource.url;
-            contourSource.tiles[0] = `dem-contour://{z}/{x}/{y}?contourLayer=contours&elevationKey=ele&levelKey=level&multiplier=${multiplier}&overzoom=1&thresholds=11*200*1000~12*10*100~13*10*100~14*10*100~15*10*100`
-            contourSource.maxzoom = 16;
-        }
-        this.updateSourcesAndLayers(layerData, styleJson.sources, styleJson.layers);
-    }
-
     private updateSourcesAndLayers(layerData: LayerData, sources: Record<string, SourceSpecification>, layers: LayerSpecification[]) {
         if (!this.visible()) {
             return;
         }
-        let attributiuonUpdated = false;
         for (let sourceKey of Object.keys(sources)) {
             const source = sources[sourceKey];
             if (!this.isBaselayer()) {
                 sourceKey = layerData.key + "_" + sourceKey;
-            }
-            if (source.type === "vector") {
-                source.attribution = attributiuonUpdated === false ? AutomaticLayerPresentationComponent.ATTRIBUTION : "";
-                attributiuonUpdated = true;
             }
             this.mapComponent.mapInstance.addSource(sourceKey, source);
             this.jsonSourcesIds.push(sourceKey);
@@ -198,7 +102,16 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
         }
     }
 
-    private removeJsonLayer() {
+    private async createLayer(layerData: EditableLayer) {
+        const styleLike = await this.defaultStyleService.getSourcesAndLayers(layerData, this.visible(), this.allowOffline() ? "offline" : "online");
+        this.updateSourcesAndLayers(layerData, styleLike.sources, styleLike.layers);
+
+        if (this.isBaselayer()) {
+            this.mapComponent.mapInstance.setMinZoom(Math.max(layerData.minZoom - 1, 0));
+        }
+    }
+
+    private removeLayer() {
         for (const layerId of this.jsonLayersIds) {
             this.mapComponent.mapInstance.removeLayer(layerId);
         }
@@ -207,25 +120,6 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             this.mapComponent.mapInstance.removeSource(sourceId);
         }
         this.jsonSourcesIds = [];
-    }
-
-    private async createLayer(layerData: EditableLayer) {
-        if (this.isRaster(layerData.address)) {
-            this.createRasterLayer(layerData);
-        } else {
-            await this.createJsonLayer(layerData);
-        }
-        if (this.isBaselayer()) {
-            this.mapComponent.mapInstance.setMinZoom(Math.max(layerData.minZoom - 1, 0));
-        }
-    }
-
-    private removeLayer(layerData: LayerData) {
-        if (this.isRaster(layerData.address)) {
-            this.removeRasterLayer();
-        } else {
-            this.removeJsonLayer();
-        }
     }
 
     /**
@@ -240,7 +134,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
                 await this.mapLoadedPromise;
             }
             if (oldLayer != null) {
-                this.removeLayer(oldLayer);
+                this.removeLayer();
             }
             if (newLayer != null) {
                 await this.createLayer(newLayer);

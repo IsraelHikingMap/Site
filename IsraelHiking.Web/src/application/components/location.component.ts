@@ -38,7 +38,7 @@ export class LocationComponent {
 
     public readonly resources = inject(ResourcesService);
     private readonly toastService = inject(ToastService);
-    private readonly locationSerivce = inject(LocationService);
+    private readonly locationService = inject(LocationService);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly recordedRouteService = inject(RecordedRouteService);
     private readonly mapService = inject(MapService);
@@ -49,7 +49,7 @@ export class LocationComponent {
     constructor() {
         this.clearLocationFeatureCollection();
 
-        this.locationSerivce.changed.pipe(takeUntilDestroyed()).subscribe(location => {
+        this.locationService.changed.pipe(takeUntilDestroyed()).subscribe(location => {
             if (location == null) {
                 this.clearLocationFeatureCollection();
                 return;
@@ -71,15 +71,15 @@ export class LocationComponent {
             });
 
             this.mapComponent.mapInstance.on("resize", () => {
-                if (this.locationSerivce.isFollowing() && this.locationSerivce.getLocationCenter() != null) {
-                    this.mapComponent.mapInstance.setCenter(this.locationSerivce.getLocationCenter());
+                if (this.locationService.isFollowing() && this.locationService.getLocationCenter() != null) {
+                    this.mapComponent.mapInstance.setCenter(this.locationService.getLocationCenter());
                 }
             });
         });
     }
 
     public isFollowingLocation(): boolean {
-        return this.locationSerivce.isFollowing();
+        return this.locationService.isFollowing();
     }
 
     public openLocationPopup() {
@@ -91,7 +91,7 @@ export class LocationComponent {
         if (selectedRoute != null && selectedRoute.state === "Route") {
             return;
         }
-        const center = this.locationSerivce.getLocationCenter();
+        const center = this.locationService.getLocationCenter();
         if (center !== null) {
             this.locationLatLng = center;
         }
@@ -117,11 +117,11 @@ export class LocationComponent {
 
     public toggleTracking() {
         if (this.isLoading()) {
-            this.locationSerivce.disable();
+            this.locationService.disable();
             return;
         }
         if (this.isDisabled()) {
-            this.locationSerivce.enable();
+            this.locationService.enable();
             return;
         }
         // is active must be true
@@ -131,7 +131,7 @@ export class LocationComponent {
             if (this.showDistance) {
                 this.store.dispatch(new ToggleDistanceAction());
             }
-            this.locationSerivce.moveMapToGpsPosition();
+            this.locationService.moveMapToGpsPosition();
             return;
         }
         // following and not panned
@@ -140,7 +140,7 @@ export class LocationComponent {
             return;
         }
         if (!this.isRecording()) {
-            this.locationSerivce.disable();
+            this.locationService.disable();
             return;
         }
     }
@@ -250,7 +250,7 @@ export class LocationComponent {
     }
 
     private updateDistanceFeatureCollection() {
-        const gps = this.locationSerivce.getLocationCenter();
+        const gps = this.locationService.getLocationCenter();
         if (!this.isActive() || !this.showDistance || gps == null) {
             this.clearDistanceFeatureCollection();
             return;

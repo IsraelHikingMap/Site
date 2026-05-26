@@ -38,7 +38,6 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
         this.carContext = carContext;
         this.mapContainer = new CarMapContainer(carContext);
         serviceLifecycle.addObserver(this);
-        CarMessageBus.getInstance().registerListener(this);
     }
 
     @Override
@@ -86,6 +85,8 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
         this.presentation = presentation;
         presentation.setContentView(mapContainer.setupMap());
         presentation.show();
+        // Doing this after setting the map will allow playback of the events.
+        CarMessageBus.getInstance().registerListener(this);
         var payload = new JSObject();
         payload.put("connected", true);
         CarMessageBus.getInstance().emitEvent(new CarMessageBus.CarEvent("connected", payload));
@@ -135,14 +136,12 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
     @Override
     public void onScale(float focusX, float focusY, float scaleFactor) {
         mapContainer.onScale(focusX, focusY, scaleFactor);
-        mapContainer.raiseMoveEnd();
     }
 
     @Override
     public synchronized void onScroll(float distanceX, float distanceY) {
         Log.v(LOG_TAG, "onScroll distanceX(" + distanceX + ") distanceY(" + distanceY + ")");
         mapContainer.scrollBy(distanceX, distanceY);
-        mapContainer.raiseMoveEnd();
     }
 
     @Override
@@ -161,31 +160,57 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
         try {
             switch (event.actionId()) {
                 case CarMessageBus.EVENT_LOCATION:
-                    var location = new Location("GPS");
-
-                    var jsonObject = event.payload();
-                    if (!jsonObject.isNull("bearing")) {
-                        location.setBearing((float) jsonObject.getDouble("bearing"));
-                    }
-                    location.setLatitude((float) jsonObject.getDouble("lat"));
-                    location.setLongitude((float) jsonObject.getDouble("lng"));
-                    location.setAccuracy((float) jsonObject.getDouble("acc"));
-                    mapContainer.setGpsLocation(location, jsonObject.getDouble("zoom"));
+                    handleGpsPositionEvent(event);
                     break;
                 case CarMessageBus.EVENT_ROUTE:
-                    var points = event.payload().getJSONArray("points");
-                    var weight = event.payload().getDouble("weight");
-                    var color = event.payload().getString("color");
-                    var opacity = event.payload().getDouble("opacity");
-                    var lngLats = new ArrayList<LatLng>();
-                    for (int i = 0; i < points.length(); i++) {
-                        var point = points.getJSONArray(i);
-                        lngLats.add(new LatLng(point.getDouble(1), point.getDouble(0)));
-                    }
-                    mapContainer.setRoute(lngLats, weight, color, opacity);
+                    handleRouteEvent(event);
                     break;
+                case CarMessageBus.EVENT_STYLE:
+                    var styleLike = event.payload().getJSObject("style");
+                    mapContainer.setStyle(styleLike);
+                case CarMessageBus.EVENT_CENTER:
+                    handleCenterEvent(event);
             }
         } catch (JSONException ignored) {
         }
+    }
+
+    private void handleGpsPositionEvent(CarMessageBus.CarEvent event) throws JSONException {
+        if (event.payload() == null) {
+            mapContainer.removeGPSLocation();
+            return;
+        }
+
+        var location = new Location("GPS");
+
+        var jsonObject = event.payload();
+        if (!jsonObject.isNull("bearing")) {
+            location.setBearing((float) jsonObject.getDouble("bearing"));
+        }
+        location.setLatitude((float) jsonObject.getDouble("lat"));
+        location.setLongitude((float) jsonObject.getDouble("lng"));
+        location.setAccuracy((float) jsonObject.getDouble("acc"));
+        mapContainer.setGpsLocation(location);
+    }
+
+    private void handleRouteEvent(CarMessageBus.CarEvent event) throws JSONException {
+        var points = event.payload().getJSONArray("points");
+        var weight = event.payload().getDouble("weight");
+        var color = event.payload().getString("color");
+        var opacity = event.payload().getDouble("opacity");
+        var lngLats = new ArrayList<LatLng>();
+        for (int i = 0; i < points.length(); i++) {
+            var point = points.getJSONArray(i);
+            lngLats.add(new LatLng(point.getDouble(1), point.getDouble(0)));
+        }
+        mapContainer.setRoute(lngLats, weight, color, opacity);
+    }
+
+    private void handleCenterEvent(CarMessageBus.CarEvent event) throws JSONException {
+        var lat = event.payload().getDouble("lat");
+        var lng = event.payload().getDouble("lng");
+        var zoom = event.payload().getDouble("zoom");
+        var bearing = event.payload().getDouble("bearing");
+        mapContainer.setCenterAndZoom(lat, lng, zoom, bearing);
     }
 }

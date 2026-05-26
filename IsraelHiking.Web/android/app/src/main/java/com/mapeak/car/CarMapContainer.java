@@ -1,6 +1,7 @@
 package com.mapeak.car;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -28,6 +29,7 @@ import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.maps.MapLibreMapOptions;
 import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.Style;
+import org.maplibre.android.module.http.HttpRequestUtil;
 import org.maplibre.android.style.expressions.Expression;
 import org.maplibre.android.style.layers.CircleLayer;
 import org.maplibre.android.style.layers.FillLayer;
@@ -46,6 +48,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import okhttp3.OkHttpClient;
 
 public class CarMapContainer {
     private static final String LOCATION_SOURCE_ID = "location-source";
@@ -68,48 +72,68 @@ public class CarMapContainer {
     }
 
     public void scrollBy(float x, float y) {
-        if (mapLibreMapInstance != null) {
-            mapLibreMapInstance.scrollBy(-x, -y, 0);
-        }
-    }
-
-    public void setGpsLocation(Location location, double zoom) {
-        if (mapLibreMapInstance == null || mapLibreMapInstance.getStyle() == null) {
+        if (mapLibreMapInstance == null) {
             return;
         }
-        var style = mapLibreMapInstance.getStyle();
-        var targetLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        mapLibreMapInstance.scrollBy(-x, -y, 0);
+        raiseMoveEnd();
+    }
 
-        // Build a FeatureCollection with both the point and the accuracy polygon
-        Feature pointFeature = Feature.fromGeometry(
-                Point.fromLngLat(location.getLongitude(), location.getLatitude()));
-        if (location.hasBearing()) {
-            pointFeature.properties().addProperty("heading", location.getBearing());
+    public void setGpsLocation(Location location) {
+        if (mapLibreMapInstance == null) {
+            return;
+        }
+        mapLibreMapInstance.getStyle(style -> {
+            Feature pointFeature = Feature.fromGeometry(
+                    Point.fromLngLat(location.getLongitude(), location.getLatitude()));
+            if (location.hasBearing()) {
+                pointFeature.properties().addProperty("heading", location.getBearing());
+            }
+
+            Feature circleFeature = Feature.fromGeometry(
+                    createGeoJsonCircle(location.getLongitude(), location.getLatitude(), location.getAccuracy()));
+
+            FeatureCollection featureCollection = FeatureCollection.fromFeatures(
+                    new Feature[] { circleFeature, pointFeature });
+
+            // Add or update the source
+            GeoJsonSource existingSource = (GeoJsonSource) style.getSource(LOCATION_SOURCE_ID);
+
+            if (existingSource != null) {
+                existingSource.setGeoJson(featureCollection);
+            } else {
+                GeoJsonSource locationSource = new GeoJsonSource(LOCATION_SOURCE_ID, featureCollection);
+                style.addSource(locationSource);
+                addLocationLayers(style);
+            }
+        });
+    }
+
+    public void removeGPSLocation() {
+        if (mapLibreMapInstance == null) {
+            return;
+        }
+        mapLibreMapInstance.getStyle(style -> {
+            style.removeLayer(LOCATION_ICON_LAYER_ID);
+            style.removeLayer(LOCATION_CIRCLE_LAYER_ID);
+            style.removeLayer(LOCATION_CIRCLE_STROKE_LAYER_ID);
+            style.removeSource(LOCATION_SOURCE_ID);
+        });
+    }
+
+    public void setCenterAndZoom(double lat, double lng, double zoom, double bearing) {
+        if (mapLibreMapInstance == null) {
+            return;
         }
 
-        Feature circleFeature = Feature.fromGeometry(
-                createGeoJsonCircle(location.getLongitude(), location.getLatitude(), location.getAccuracy()));
-
-        FeatureCollection featureCollection = FeatureCollection.fromFeatures(
-                new Feature[] { circleFeature, pointFeature });
-
-        // Add or update the source
-        GeoJsonSource existingSource = (GeoJsonSource) style.getSource(LOCATION_SOURCE_ID);
-
-        if (existingSource != null) {
-            existingSource.setGeoJson(featureCollection);
-        } else {
-            GeoJsonSource locationSource = new GeoJsonSource(LOCATION_SOURCE_ID, featureCollection);
-            style.addSource(locationSource);
-            addLocationLayers(style);
+        var center = mapLibreMapInstance.getCameraPosition().target;
+        if (Math.abs(center.getLatitude() - lat) < 1e-6 &&
+            Math.abs(center.getLongitude() - lng) < 1e-6 &&
+            Math.abs(mapLibreMapInstance.getCameraPosition().zoom - zoom) < 1e-3) {
+            return;
         }
-
-        var positionBuilder = new CameraPosition.Builder()
-                .target(targetLocation)
-                .zoom(zoom);
-        if (location.hasBearing()) {
-            positionBuilder.bearing(location.getBearing());
-        }
+        var latLng = new LatLng(lat, lng);
+        var positionBuilder = new CameraPosition.Builder().target(latLng).zoom(zoom).bearing(bearing);
         mapLibreMapInstance.easeCamera(CameraUpdateFactory.newCameraPosition(positionBuilder.build()), 250);
     }
 
@@ -186,45 +210,46 @@ public class CarMapContainer {
     }
 
     public void setRoute(ArrayList<LatLng> points, double weight, String color, double opacity) {
-        if (mapLibreMapInstance == null || mapLibreMapInstance.getStyle() == null) {
+        if (mapLibreMapInstance == null) {
             return;
         }
-        List<Point> geoJsonPoints = new ArrayList<>();
-        for (LatLng latLng : points) {
-            geoJsonPoints.add(Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()));
-        }
+        mapLibreMapInstance.getStyle(style -> {
+            List<Point> geoJsonPoints = new ArrayList<>();
+            for (LatLng latLng : points) {
+                geoJsonPoints.add(Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()));
+            }
 
-        LineString lineString = LineString.fromLngLats(geoJsonPoints);
-        Feature routeFeature = Feature.fromGeometry(lineString);
-        routeFeature.properties().addProperty("weight", weight);
-        routeFeature.properties().addProperty("color", color);
-        routeFeature.properties().addProperty("opacity", opacity);
+            LineString lineString = LineString.fromLngLats(geoJsonPoints);
+            Feature routeFeature = Feature.fromGeometry(lineString);
+            routeFeature.properties().addProperty("weight", weight);
+            routeFeature.properties().addProperty("color", color);
+            routeFeature.properties().addProperty("opacity", opacity);
 
-        Feature startPointFeature = Feature
-                .fromGeometry(Point.fromLngLat(points.get(0).getLongitude(), points.get(0).getLatitude()));
-        startPointFeature.properties().addProperty("color", "#43a047");
-        startPointFeature.properties().addProperty("strokeColor", "white");
+            Feature startPointFeature = Feature
+                    .fromGeometry(Point.fromLngLat(points.get(0).getLongitude(), points.get(0).getLatitude()));
+            startPointFeature.properties().addProperty("color", "#43a047");
+            startPointFeature.properties().addProperty("strokeColor", "white");
 
-        Feature endPointFeature = Feature.fromGeometry(Point.fromLngLat(
-                points.get(points.size() - 1).getLongitude(),
-                points.get(points.size() - 1).getLatitude()));
-        endPointFeature.properties().addProperty("color", "red");
-        endPointFeature.properties().addProperty("strokeColor", "white");
+            Feature endPointFeature = Feature.fromGeometry(Point.fromLngLat(
+                    points.get(points.size() - 1).getLongitude(),
+                    points.get(points.size() - 1).getLatitude()));
+            endPointFeature.properties().addProperty("color", "red");
+            endPointFeature.properties().addProperty("strokeColor", "white");
 
-        FeatureCollection featureCollection = FeatureCollection.fromFeatures(
-                new Feature[] { routeFeature, startPointFeature, endPointFeature });
+            FeatureCollection featureCollection = FeatureCollection.fromFeatures(
+                    new Feature[]{routeFeature, startPointFeature, endPointFeature});
 
-        var style = mapLibreMapInstance.getStyle();
-        GeoJsonSource routeSource = style.getSourceAs(ROUTE_SOURCE_ID);
+            GeoJsonSource routeSource = style.getSourceAs(ROUTE_SOURCE_ID);
 
-        if (routeSource != null) {
-            routeSource.setGeoJson(featureCollection);
-            return;
-        }
+            if (routeSource != null) {
+                routeSource.setGeoJson(featureCollection);
+                return;
+            }
 
-        GeoJsonSource newSource = new GeoJsonSource(ROUTE_SOURCE_ID, featureCollection);
-        style.addSource(newSource);
-        addRouteLayers(style);
+            GeoJsonSource newSource = new GeoJsonSource(ROUTE_SOURCE_ID, featureCollection);
+            style.addSource(newSource);
+            addRouteLayers(style);
+        });
     }
 
     private void addRouteLayers(@NonNull Style style) {
@@ -268,6 +293,12 @@ public class CarMapContainer {
                         0);
             }
         });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator a) {
+                raiseMoveEnd();
+            }
+        });
         return animator;
     }
 
@@ -306,29 +337,23 @@ public class CarMapContainer {
                     currentZoomLevel + zoomAdditional,
                     new PointF(focusX, focusY),
                     0);
+            raiseMoveEnd();
         }
     }
 
     @MainThread
     public View setupMap() {
         MapLibre.getInstance(carContext);
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new SliceProtocolInterceptor(new PmTilesService(carContext)))
+                .build();
+        HttpRequestUtil.setOkHttpClient(client);
 
         MapView mapView = createMapViewInstance();
         mapView.onStart();
         mapView.getMapAsync(map -> {
             mapViewInstance = mapView;
             mapLibreMapInstance = map;
-            map.setStyle(new Style.Builder().fromUri(
-                    "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json"));
-            mapLibreMapInstance.getStyle(style -> {
-                try {
-                    InputStream inputStream = carContext.getAssets().open("public/content/gps-arrow.png");
-                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                    style.addImage(LOCATION_ICON_IMAGE, bitmap);
-                    inputStream.close();
-                } catch (IOException ignored) {
-                }
-            });
         });
         mapViewInstance = mapView;
 
@@ -380,19 +405,34 @@ public class CarMapContainer {
         return mapView;
     }
 
-    public void raiseMoveEnd() {
+    private void raiseMoveEnd() {
         if (mapLibreMapInstance == null) {
             return;
         }
 
-        var zoom = mapLibreMapInstance.getZoom();
-        LatLng mapCenter = mapLibreMapInstance.getCameraPosition().target;
-
         var payload = new JSObject();
-        payload.put("zoom", zoom);
+        LatLng mapCenter = mapLibreMapInstance.getCameraPosition().target;
+        payload.put("zoom", mapLibreMapInstance.getCameraPosition().zoom);
         payload.put("lng", mapCenter.getLongitude());
         payload.put("lat", mapCenter.getLatitude());
 
-        CarMessageBus.getInstance().emitEvent(new CarMessageBus.CarEvent("moveend", payload));
+        CarMessageBus.getInstance().emitEvent(new CarMessageBus.CarEvent(CarMessageBus.EVENT_MOVEEND, payload));
+    }
+
+    public void setStyle(JSObject styleData) {
+        if (mapLibreMapInstance == null) {
+            return;
+        }
+
+        mapLibreMapInstance.setStyle(new Style.Builder().fromJson(styleData.toString()));
+        mapLibreMapInstance.getStyle(style -> {
+            try {
+                InputStream inputStream = carContext.getAssets().open("public/content/gps-arrow.png");
+                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                style.addImage(LOCATION_ICON_IMAGE, bitmap);
+                inputStream.close();
+            } catch (IOException ignored) {
+            }
+        });
     }
 }

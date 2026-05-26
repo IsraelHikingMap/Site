@@ -12,8 +12,11 @@ import java.util.Map;
 
 public class CarMessageBus {
 
+    public static final String EVENT_MOVEEND = "moveend";
+    public static final String EVENT_CENTER = "center";
     public static final String EVENT_LOCATION = "location";
     public static final String EVENT_ROUTE = "route";
+    public static final String EVENT_STYLE = "style";
     public static final String EVENT_CONNECTED = "connected";
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());

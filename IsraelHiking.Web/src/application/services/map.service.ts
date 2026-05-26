@@ -225,4 +225,11 @@ export class MapService {
     public addLayer(layer: LayerSpecification) {
         this.currentMap.addLayer(layer);
     }
+
+    public getBearing() {
+        if (!this.currentMap) {
+            return 0;
+        }
+        return this.currentMap.getBearing();
+    }
 }

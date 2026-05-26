@@ -49,7 +49,7 @@ public class CarPlugin extends Plugin implements CarMessageBus.CarEventListener 
                 isConnected = event.payload().getBool("connected");
                 raiseEvent(event.actionId(), event.payload());
                 break;
-            case CarMessageBus.EVENT_LOCATION:
+            case CarMessageBus.EVENT_MOVEEND:
                 raiseEvent(event.actionId(), event.payload());
                 break;
         }
