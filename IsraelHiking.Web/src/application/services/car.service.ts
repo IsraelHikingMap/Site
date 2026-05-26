@@ -105,7 +105,7 @@ export class CarService {
     }
 
     private async setStyle() {
-        this.loggingService.info(`[Car] Setting style`);
+        this.loggingService.info("[Car] Setting style");
         const layerData = this.layersService.getSelectedBaseLayer();
         const styleLike = await this.defaultStyleService.getSourcesAndLayers(layerData, true, "car");
         Car.sendMessage({
@@ -134,7 +134,7 @@ export class CarService {
                 bearing: this.lastLocation.bearing,
                 lat: this.lastLocation.center.lat,
                 lng: this.lastLocation.center.lng,
-                acc: this.lastLocation.accuracy,
+                acc: this.lastLocation.accuracy
             }
         });
     }
@@ -167,7 +167,7 @@ export class CarService {
     }
 
     private setCenter() {
-        var locationState = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
+        const locationState = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
         Car.sendMessage({
             type: "center",
             payload: {

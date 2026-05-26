@@ -110,7 +110,7 @@ export class DefaultStyleService {
         return {
             version: 8,
             sources: {
-                [rasterSourceId]: source,
+                [rasterSourceId]: source
             },
             layers: [layer]
         }

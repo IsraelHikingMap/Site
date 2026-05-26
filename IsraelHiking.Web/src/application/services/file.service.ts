@@ -1,6 +1,5 @@
 import { inject, Injectable, InjectionToken } from "@angular/core";
 import { HttpClient, HttpEventType } from "@angular/common/http";
-import { StyleSpecification } from "maplibre-gl";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
