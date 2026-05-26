@@ -128,8 +128,8 @@ public class CarMapContainer {
 
         var center = mapLibreMapInstance.getCameraPosition().target;
         if (Math.abs(center.getLatitude() - lat) < 1e-6 &&
-            Math.abs(center.getLongitude() - lng) < 1e-6 &&
-            Math.abs(mapLibreMapInstance.getCameraPosition().zoom - zoom) < 1e-3) {
+                Math.abs(center.getLongitude() - lng) < 1e-6 &&
+                Math.abs(mapLibreMapInstance.getCameraPosition().zoom - zoom) < 1e-3) {
             return;
         }
         var latLng = new LatLng(lat, lng);
@@ -219,25 +219,30 @@ public class CarMapContainer {
                 geoJsonPoints.add(Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()));
             }
 
-            LineString lineString = LineString.fromLngLats(geoJsonPoints);
-            Feature routeFeature = Feature.fromGeometry(lineString);
-            routeFeature.properties().addProperty("weight", weight);
-            routeFeature.properties().addProperty("color", color);
-            routeFeature.properties().addProperty("opacity", opacity);
+            FeatureCollection featureCollection;
+            if (points.isEmpty()) {
+                featureCollection = FeatureCollection.fromFeatures(new Feature[0]);
+            } else {
+                LineString lineString = LineString.fromLngLats(geoJsonPoints);
+                Feature routeFeature = Feature.fromGeometry(lineString);
+                routeFeature.properties().addProperty("weight", weight);
+                routeFeature.properties().addProperty("color", color);
+                routeFeature.properties().addProperty("opacity", opacity);
 
-            Feature startPointFeature = Feature
-                    .fromGeometry(Point.fromLngLat(points.get(0).getLongitude(), points.get(0).getLatitude()));
-            startPointFeature.properties().addProperty("color", "#43a047");
-            startPointFeature.properties().addProperty("strokeColor", "white");
+                Feature startPointFeature = Feature
+                        .fromGeometry(Point.fromLngLat(points.get(0).getLongitude(), points.get(0).getLatitude()));
+                startPointFeature.properties().addProperty("color", "#43a047");
+                startPointFeature.properties().addProperty("strokeColor", "white");
 
-            Feature endPointFeature = Feature.fromGeometry(Point.fromLngLat(
-                    points.get(points.size() - 1).getLongitude(),
-                    points.get(points.size() - 1).getLatitude()));
-            endPointFeature.properties().addProperty("color", "red");
-            endPointFeature.properties().addProperty("strokeColor", "white");
+                Feature endPointFeature = Feature.fromGeometry(Point.fromLngLat(
+                        points.get(points.size() - 1).getLongitude(),
+                        points.get(points.size() - 1).getLatitude()));
+                endPointFeature.properties().addProperty("color", "red");
+                endPointFeature.properties().addProperty("strokeColor", "white");
 
-            FeatureCollection featureCollection = FeatureCollection.fromFeatures(
-                    new Feature[]{routeFeature, startPointFeature, endPointFeature});
+                featureCollection = FeatureCollection
+                        .fromFeatures(new Feature[] { routeFeature, startPointFeature, endPointFeature });
+            }
 
             GeoJsonSource routeSource = style.getSourceAs(ROUTE_SOURCE_ID);
 
