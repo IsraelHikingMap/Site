@@ -13,4 +13,9 @@ ext {
     cordovaAndroidVersion = '14.0.1'
     coreSplashScreenVersion = '1.2.0'
     androidxWebkitVersion = '1.14.0'
+    androidxCarAppVersion = '1.7.0'
+    maplibreSdkVersion = '13.2.0'
+    okhttpVersion = '5.3.2'
+    pmtilesReaderVersion = '0.3.7'
+    androidxLocalBroadcastManagerVersion = '1.0.0'
 }

@@ -19,6 +19,7 @@ public class CarMessageBus {
     public static final String EVENT_STYLE = "style";
     public static final String EVENT_CONNECTED = "connected";
     public static final String EVENT_STATISTICS = "statistics";
+    public static final String EVENT_BACKGROUND_MODE = "background-mode";
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 

@@ -43,10 +43,11 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
-    implementation "androidx.car.app:app:1.7.0"
-    implementation "org.maplibre.gl:android-sdk:13.2.0"
-    implementation "com.squareup.okhttp3:okhttp:5.3.2"
-    implementation "ch.poole.geo.pmtiles-reader:Reader:0.3.7"
+    implementation "androidx.car.app:app:$androidxCarAppVersion"
+    implementation "org.maplibre.gl:android-sdk:$maplibreSdkVersion"
+    implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
+    implementation "ch.poole.geo.pmtiles-reader:Reader:$pmtilesReaderVersion"
+    implementation "androidx.localbroadcastmanager:localbroadcastmanager:$androidxLocalBroadcastManagerVersion"
 }
 
 apply from: 'capacitor.build.gradle'

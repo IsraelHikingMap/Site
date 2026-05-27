@@ -10,14 +10,20 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 public class CarPlugin extends Plugin implements CarMessageBus.CarEventListener {
 
     private boolean isConnected = false;
+    private CarBackgroundLocationBridge backgroundLocationBridge;
 
     @Override
     public void load() {
         CarMessageBus.getInstance().registerListener(this);
+        backgroundLocationBridge = new CarBackgroundLocationBridge(getContext());
     }
 
     @Override
     protected void handleOnDestroy() {
+        if (backgroundLocationBridge != null) {
+            backgroundLocationBridge.destroy();
+            backgroundLocationBridge = null;
+        }
         CarMessageBus.getInstance().unregisterListener(this);
         super.handleOnDestroy();
     }

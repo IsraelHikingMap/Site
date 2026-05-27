@@ -100,18 +100,6 @@ export class CarService {
                 this.lastSpeed = position.coords.speed;
                 this.setStatics();
             }
-            if (this.isBackground && position != null) {
-                const adjusted = this.mapService.applyPixelOffset({ lat: position.coords.latitude, lng: position.coords.longitude });
-                Car.sendMessage({
-                    type: "center",
-                    payload: {
-                        lat: adjusted.lat,
-                        lng: adjusted.lng,
-                        zoom: this.mapService.getZoom(),
-                        bearing: position.coords.heading
-                    }
-                });
-            }
         });
         this.locationService.changed.subscribe(location => {
             this.lastLocation = location;
@@ -119,6 +107,10 @@ export class CarService {
         });
         App.addListener("appStateChange", (state) => {
             this.isBackground = !state.isActive;
+            Car.sendMessage({
+                type: "background-mode",
+                payload: { background: this.isBackground }
+            });
         });
 
         const event = await Car.getConnectionState();

@@ -121,19 +121,26 @@ public class CarMapContainer {
         });
     }
 
-    public void setCenterAndZoom(double lat, double lng, double zoom, double bearing) {
+    public void setCenterAndZoom(double lat, double lng, Double zoom, double bearing, int offsetY) {
         if (mapLibreMapInstance == null) {
             return;
         }
 
+        double effectiveZoom = zoom != null ? zoom : mapLibreMapInstance.getCameraPosition().zoom;
         var center = mapLibreMapInstance.getCameraPosition().target;
         if (Math.abs(center.getLatitude() - lat) < 1e-6 &&
                 Math.abs(center.getLongitude() - lng) < 1e-6 &&
-                Math.abs(mapLibreMapInstance.getCameraPosition().zoom - zoom) < 1e-3) {
+                Math.abs(mapLibreMapInstance.getCameraPosition().zoom - effectiveZoom) < 1e-3) {
             return;
         }
         var latLng = new LatLng(lat, lng);
-        var positionBuilder = new CameraPosition.Builder().target(latLng).zoom(zoom).bearing(bearing);
+        var point = mapLibreMapInstance.getProjection().toScreenLocation(latLng);
+        point.y -= offsetY;
+        latLng = mapLibreMapInstance.getProjection().fromScreenLocation(point);
+        CameraPosition.Builder positionBuilder = new CameraPosition.Builder()
+                .target(latLng)
+                .zoom(effectiveZoom)
+                .bearing(bearing);
         mapLibreMapInstance.easeCamera(CameraUpdateFactory.newCameraPosition(positionBuilder.build()), 250);
     }
 

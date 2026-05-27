@@ -178,8 +178,10 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
                 case CarMessageBus.EVENT_STYLE:
                     var styleLike = event.payload().getJSObject("style");
                     mapContainer.setStyle(styleLike);
+                    break;
                 case CarMessageBus.EVENT_CENTER:
                     handleCenterEvent(event);
+                    break;
             }
         } catch (JSONException ignored) {
         }
@@ -217,10 +219,12 @@ public class CarMapRenderer implements SurfaceCallback, DefaultLifecycleObserver
     }
 
     private void handleCenterEvent(CarMessageBus.CarEvent event) throws JSONException {
-        var lat = event.payload().getDouble("lat");
-        var lng = event.payload().getDouble("lng");
-        var zoom = event.payload().getDouble("zoom");
-        var bearing = event.payload().getDouble("bearing");
-        mapContainer.setCenterAndZoom(lat, lng, zoom, bearing);
+        var payload = event.payload();
+        double lat = payload.getDouble("lat");
+        double lng = payload.getDouble("lng");
+        Double zoom = payload.has("zoom") ? payload.getDouble("zoom") : null;
+        double bearing = payload.has("bearing") ? payload.getDouble("bearing") : 0;
+        int offsetY = payload.has("offsetY") ? payload.getInt("offsetY") : 0;
+        mapContainer.setCenterAndZoom(lat, lng, zoom, bearing, offsetY);
     }
 }
