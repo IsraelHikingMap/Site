@@ -15,7 +15,7 @@ class CarPlugin : Plugin(), CarEventListener {
     private var backgroundLocationBridge: CarBackgroundLocationBridge? = null
 
     override fun load() {
-        instance!!.registerListener(this)
+        instance.registerListener(this)
         backgroundLocationBridge = CarBackgroundLocationBridge(context)
     }
 
@@ -24,7 +24,7 @@ class CarPlugin : Plugin(), CarEventListener {
             backgroundLocationBridge!!.destroy()
             backgroundLocationBridge = null
         }
-        instance!!.unregisterListener(this)
+        instance.unregisterListener(this)
         super.handleOnDestroy()
     }
 
@@ -38,7 +38,7 @@ class CarPlugin : Plugin(), CarEventListener {
         }
 
         val payload = call.getObject("payload")
-        instance!!.emitEvent(CarEvent(type, payload))
+        instance.emitEvent(CarEvent(type, payload))
         call.resolve()
     }
 

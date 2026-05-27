@@ -22,25 +22,6 @@ class PmTilesService(context: Context) : AutoCloseable {
         return File(baseDir, getFileNameByType(z, x, y, type)).exists()
     }
 
-    /*
-    @Throws(IOException::class)
-    fun getVersion(fileName: String): String? {
-        val reader = getReader(fileName)
-        val metadata: String?
-        synchronized(reader) {
-            metadata = reader.getMetadata()
-        }
-        if (metadata == null) {
-            return null
-        }
-        try {
-            return JSONObject(metadata).optString("version", null)
-        } catch (ex: JSONException) {
-            throw IOException("Failed to parse metadata of $fileName", ex)
-        }
-    }
-    */
-
     @Synchronized
     override fun close() {
         for (reader in readerCache.values) {
