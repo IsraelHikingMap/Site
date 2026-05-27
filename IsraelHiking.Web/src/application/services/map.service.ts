@@ -232,4 +232,25 @@ export class MapService {
         }
         return this.currentMap.getBearing();
     }
+
+    public getZoom() {
+        if (!this.currentMap) {
+            return 0;
+        }
+        return this.currentMap.getZoom();
+    }
+
+    public applyPixelOffset(lngLat: LatLngAltTime, pixelOffset: [number, number] = [0, 100]): LatLngAltTime {
+        if (!this.currentMap) {
+            return lngLat;
+        }
+        const point = this.currentMap.project(lngLat);
+        point.x += pixelOffset[0];
+        point.y += pixelOffset[1];
+        let unprojected = this.currentMap.unproject(point);
+        return {
+            lat: unprojected.lat,
+            lng: unprojected.lng
+        };
+    }
 }

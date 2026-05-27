@@ -1,5 +1,6 @@
 import { inject, Injectable } from "@angular/core";
 import { registerPlugin } from "@capacitor/core";
+import { App } from "@capacitor/app";
 import { Store } from "@ngxs/store";
 
 import { SelectedRouteService } from "./selected-route.service";
@@ -45,6 +46,7 @@ export class CarService {
     /** In meters per second */
     private lastSpeed: number = null;
     private lastMoveEndTime = new Date();
+    private isBackground: boolean;
 
     private readonly store = inject(Store);
     private readonly selectedRouteService = inject(SelectedRouteService);
@@ -55,6 +57,7 @@ export class CarService {
     private readonly locationService = inject(LocationService);
     private readonly mapService = inject(MapService);
     private readonly routeStatisticsService = inject(RouteStatisticsService);
+
 
     public async initialize() {
         if (!this.runningContextService.isCapacitor || this.runningContextService.isIos) {
@@ -70,9 +73,11 @@ export class CarService {
         Car.addListener("connected", (event) => {
             this.loggingService.info(`[Car] connected: ${event.connected}`);
             this.store.dispatch(new SetCarConnectedAction(event.connected));
-            this.setStyle();
-            this.setRoute();
-            this.setCenter();
+            if (event.connected) {
+                this.setStyle();
+                this.setRoute();
+                this.setCenter();
+            }
         });
         this.store.select((state: ApplicationState) => state.layersState.selectedBaseLayerKey).subscribe(() => {
             this.setStyle();
@@ -85,6 +90,9 @@ export class CarService {
             if (new Date().getTime() - this.lastMoveEndTime.getTime() < 500) {
                 return;
             }
+            if (this.isBackground) {
+                return;
+            }
             this.setCenter();
         });
         this.store.select((state: ApplicationState) => state.gpsState.currentPosition).subscribe(position => {
@@ -92,12 +100,26 @@ export class CarService {
                 this.lastSpeed = position.coords.speed;
                 this.setStatics();
             }
+            if (this.isBackground && position != null) {
+                const adjusted = this.mapService.applyPixelOffset({ lat: position.coords.latitude, lng: position.coords.longitude });
+                Car.sendMessage({
+                    type: "center",
+                    payload: {
+                        lat: adjusted.lat,
+                        lng: adjusted.lng,
+                        zoom: this.mapService.getZoom(),
+                        bearing: position.coords.heading
+                    }
+                });
+            }
         });
         this.locationService.changed.subscribe(location => {
             this.lastLocation = location;
             this.setLocation();
         });
-
+        App.addListener("appStateChange", (state) => {
+            this.isBackground = !state.isActive;
+        });
 
         const event = await Car.getConnectionState();
         this.loggingService.info(`[Car] Initialization completed, connected: ${event.connected}`);
