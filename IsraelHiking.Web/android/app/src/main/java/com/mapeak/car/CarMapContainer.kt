@@ -369,7 +369,7 @@ class CarMapContainer(private val carContext: CarContext) {
     }
 
     @MainThread
-    fun setupMap(pixelRatio: Float): View {
+    fun setupMap(pixelRatio: Float, initialStyleJson: String? = null): View {
         MapLibre.getInstance(carContext)
         val client = OkHttpClient.Builder()
             .addInterceptor(SliceProtocolInterceptor(PmTilesService(carContext)))
@@ -381,6 +381,9 @@ class CarMapContainer(private val carContext: CarContext) {
         mapView.getMapAsync { map: MapLibreMap? ->
             mapViewInstance = mapView
             mapLibreMapInstance = map
+            if (initialStyleJson != null) {
+                setStyle(initialStyleJson)
+            }
         }
         mapViewInstance = mapView
 
@@ -452,12 +455,12 @@ class CarMapContainer(private val carContext: CarContext) {
         CarMessageBus.instance.emitEvent(CarEvent(CarMessageBus.EVENT_MOVEEND, payload))
     }
 
-    fun setStyle(styleData: JSObject) {
+    fun setStyle(styleJson: String) {
         if (mapLibreMapInstance == null) {
             return
         }
 
-        mapLibreMapInstance!!.setStyle(Style.Builder().fromJson(styleData.toString()))
+        mapLibreMapInstance!!.setStyle(Style.Builder().fromJson(styleJson))
         mapLibreMapInstance!!.getStyle { style: Style? ->
             try {
                 val inputStream = carContext.assets.open("public/content/gps-arrow.png")

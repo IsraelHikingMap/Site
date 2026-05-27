@@ -26,6 +26,7 @@ import kotlin.math.min
 class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifecycle) :
     SurfaceCallback, DefaultLifecycleObserver, CarEventListener {
     private val mapContainer: CarMapContainer = CarMapContainer(carContext)
+    private val styleStore = CarStyleStore(carContext)
     private var surfaceContainer: SurfaceContainer? = null
     private val uiHandler = Handler(Looper.getMainLooper())
     private var lastKnownStableArea = Rect()
@@ -78,7 +79,7 @@ class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifec
 
         val presentation = Presentation(carContext, virtualDisplay.display)
         this.presentation = presentation
-        presentation.setContentView(mapContainer.setupMap(computePixelRatio()))
+        presentation.setContentView(mapContainer.setupMap(computePixelRatio(), styleStore.load()))
         presentation.show()
         // Doing this after setting the map will allow playback of the events.
         CarMessageBus.instance.registerListener(this)
@@ -146,8 +147,9 @@ class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifec
                 CarMessageBus.EVENT_LOCATION -> handleGpsPositionEvent(event)
                 CarMessageBus.EVENT_ROUTE -> handleRouteEvent(event)
                 CarMessageBus.EVENT_STYLE -> {
-                    val styleLike = event.payload?.getJSObject("style")
-                    mapContainer.setStyle(styleLike!!)
+                    val styleJson = event.payload?.getJSObject("style")?.toString() ?: return
+                    mapContainer.setStyle(styleJson)
+                    styleStore.save(styleJson)
                 }
 
                 CarMessageBus.EVENT_CENTER -> handleCenterEvent(event)

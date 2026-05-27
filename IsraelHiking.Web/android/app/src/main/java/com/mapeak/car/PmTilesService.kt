@@ -46,13 +46,13 @@ class PmTilesService(context: Context) : AutoCloseable {
     @Throws(IOException::class)
     private fun getTileFromFile(fileName: String, z: Int, x: Int, y: Int): ByteArray? {
         val reader = getReader(fileName)
-        val data: ByteArray
+        val data: ByteArray?
         val compression: Byte
         synchronized(reader) {
             data = reader.getTile(z, x, y)
             compression = reader.tileCompression
         }
-        return decompress(data, compression, fileName)
+        return data?.let { decompress(it, compression, fileName) }
     }
 
     @Synchronized
