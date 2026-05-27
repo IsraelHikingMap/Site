@@ -247,7 +247,7 @@ export class MapService {
         const point = this.currentMap.project(lngLat);
         point.x += pixelOffset[0];
         point.y += pixelOffset[1];
-        let unprojected = this.currentMap.unproject(point);
+        const unprojected = this.currentMap.unproject(point);
         return {
             lat: unprojected.lat,
             lng: unprojected.lng
