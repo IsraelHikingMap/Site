@@ -33,6 +33,8 @@ class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifec
     private var lastKnownVisibleArea = Rect()
     private var presentation: Presentation? = null
     private var virtualDisplay: VirtualDisplay? = null
+    private var lastUserInteractionMs: Long = 0L
+    private var lastCenterEvent: CarEvent? = null
 
     init {
         serviceLifecycle.addObserver(this)
@@ -132,13 +134,20 @@ class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifec
     }
 
     override fun onScale(focusX: Float, focusY: Float, scaleFactor: Float) {
+        lastUserInteractionMs = System.currentTimeMillis()
         mapContainer.onScale(focusX, focusY, scaleFactor)
     }
 
     @Synchronized
     override fun onScroll(distanceX: Float, distanceY: Float) {
         Log.v(LOG_TAG, "onScroll distanceX($distanceX) distanceY($distanceY)")
+        lastUserInteractionMs = System.currentTimeMillis()
         mapContainer.scrollBy(distanceX, distanceY)
+    }
+
+    fun recenterFromButton() {
+        lastUserInteractionMs = 0L
+        lastCenterEvent?.let { handleCenterEvent(it) }
     }
 
     override fun onCarEvent(event: CarEvent) {
@@ -193,6 +202,10 @@ class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifec
 
     @Throws(JSONException::class)
     private fun handleCenterEvent(event: CarEvent) {
+        lastCenterEvent = event
+        if (System.currentTimeMillis() - lastUserInteractionMs < PAN_SUPPRESSION_MS) {
+            return
+        }
         val payload = event.payload!!
         val lat = payload.getDouble("lat")
         val lng = payload.getDouble("lng")
@@ -204,5 +217,6 @@ class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifec
 
     companion object {
         const val LOG_TAG: String = "CarMapRenderer"
+        private const val PAN_SUPPRESSION_MS = 15_000L
     }
 }

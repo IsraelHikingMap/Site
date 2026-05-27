@@ -140,6 +140,21 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
                 .build()
         )
 
+        actionStripBuilder.addAction(
+            Action.Builder()
+                .setIcon(
+                    CarIcon.Builder(
+                        IconCompat.createWithResource(
+                            carContext,
+                            R.drawable.ic_recenter
+                        )
+                    )
+                        .build()
+                )
+                .setOnClickListener { carMapRenderer.recenterFromButton() }
+                .build()
+        )
+
         return actionStripBuilder
     }
 }
