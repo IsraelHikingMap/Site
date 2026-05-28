@@ -5,40 +5,53 @@ import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
-import com.mapeak.car.CarMessageBus.CarEvent
-import com.mapeak.car.CarMessageBus.CarEventListener
-import com.mapeak.car.CarMessageBus.Companion.instance
+import org.json.JSONArray
 
 @CapacitorPlugin(name = "Car")
-class CarPlugin : Plugin(), CarEventListener {
-    private var isConnected = false
-    private var backgroundLocationBridge: CarBackgroundLocationBridge? = null
+class CarPlugin : Plugin(), CarStore.Listener {
+    private lateinit var store: CarStore
 
     override fun load() {
-        instance.registerListener(this)
-        backgroundLocationBridge = CarBackgroundLocationBridge(context)
+        store = CarStore.get(context)
+        store.addListener(this)
     }
 
     protected override fun handleOnDestroy() {
-        if (backgroundLocationBridge != null) {
-            backgroundLocationBridge!!.destroy()
-            backgroundLocationBridge = null
-        }
-        instance.unregisterListener(this)
+        store.removeListener(this)
         super.handleOnDestroy()
     }
 
     @Suppress("unused")
     @PluginMethod
-    fun sendMessage(call: PluginCall) {
-        val type = call.getString("type")
-        if (type == null || type.trim { it <= ' ' }.isEmpty()) {
-            call.reject("type is required")
+    fun storeValue(call: PluginCall) {
+        val key = call.getString("key")
+        if (key.isNullOrBlank()) {
+            call.reject("key is required")
+            return
+        }
+        val value = call.getObject("value")
+        if (value == null) {
+            call.reject("value is required for key=$key")
             return
         }
 
-        val payload = call.getObject("payload")
-        instance.emitEvent(CarEvent(type, payload))
+        when (key) {
+            CarStore.KEY_STYLE -> {
+                injectLayeringAnchor(value)
+                store.saveStyle(value)
+            }
+            CarStore.KEY_ROUTE -> {
+                if (value.optJSONArray("routes")?.length() == 0) {
+                    store.clearRoutes()
+                } else {
+                    store.saveRoutes(value)
+                }
+            }
+            else -> {
+                call.reject("unknown key: $key")
+                return
+            }
+        }
         call.resolve()
     }
 
@@ -46,26 +59,37 @@ class CarPlugin : Plugin(), CarEventListener {
     @PluginMethod
     fun getConnectionState(call: PluginCall) {
         val payload = JSObject()
-        payload.put("connected", isConnected)
+        payload.put("connected", store.isConnected())
         call.resolve(payload)
     }
 
-    override fun onCarEvent(event: CarEvent) {
-        when (event.actionId) {
-            CarMessageBus.EVENT_CONNECTED -> {
-                isConnected = event.payload!!.getBool("connected")!!
-                raiseEvent(event.actionId, event.payload)
-            }
-
-            CarMessageBus.EVENT_MOVEEND -> raiseEvent(event.actionId, event.payload)
+    override fun onCarStoreUpdated(key: String) {
+        if (key != CarStore.KEY_CONNECTED) {
+            return
+        }
+        val bridge = bridge ?: return
+        val payload = JSObject().put("connected", store.isConnected())
+        bridge.executeOnMainThread {
+            notifyListeners(CarStore.KEY_CONNECTED, payload)
         }
     }
 
-    private fun raiseEvent(actionId: String?, payload: JSObject?) {
-        if (getBridge() != null) {
-            getBridge().executeOnMainThread {
-                notifyListeners(actionId, payload)
-            }
-        }
+    private fun injectLayeringAnchor(style: JSObject) {
+        val sources = style.optJSONObject("sources") ?: JSObject().also { style.put("sources", it) }
+        val anchorData = JSObject()
+            .put("type", "FeatureCollection")
+            .put("features", JSONArray())
+        val anchorSource = JSObject()
+            .put("type", "geojson")
+            .put("data", anchorData)
+        sources.put(CarMapContainer.LAYERING_ANCHOR_SOURCE_ID, anchorSource)
+
+        val layers = style.optJSONArray("layers") ?: JSONArray().also { style.put("layers", it) }
+        val anchorLayer = JSObject()
+            .put("id", CarMapContainer.LAYERING_ANCHOR_ID)
+            .put("type", "circle")
+            .put("source", CarMapContainer.LAYERING_ANCHOR_SOURCE_ID)
+            .put("layout", JSObject().put("visibility", "none"))
+        layers.put(anchorLayer)
     }
 }

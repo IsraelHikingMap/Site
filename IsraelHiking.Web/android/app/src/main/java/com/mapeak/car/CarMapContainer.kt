@@ -1,7 +1,6 @@
 package com.mapeak.car
 
 import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.BitmapFactory
@@ -18,7 +17,6 @@ import android.widget.TextView
 import androidx.annotation.MainThread
 import androidx.car.app.CarContext
 import com.getcapacitor.JSObject
-import com.mapeak.car.CarMessageBus.CarEvent
 import okhttp3.OkHttpClient
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
@@ -51,64 +49,92 @@ import kotlin.math.cos
 import kotlin.math.ln
 import kotlin.math.sin
 
-class CarMapContainer(private val carContext: CarContext) {
+class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
+    private val store: CarStore = CarStore.get(carContext)
     private var mapViewInstance: MapView? = null
-    var mapLibreMapInstance: MapLibreMap? = null
+    private var mapLibreMapInstance: MapLibreMap? = null
     private var scaleAnimator: Animator? = null
+    private var routes: List<CarRouteData> = emptyList()
+    private var lastUserInteractionMs: Long = 0L
 
     fun scrollBy(x: Float, y: Float) {
+        lastUserInteractionMs = System.currentTimeMillis()
         if (mapLibreMapInstance == null) {
             return
         }
         mapLibreMapInstance!!.scrollBy(-x, -y, 0)
-        raiseMoveEnd()
     }
 
-    fun setGpsLocation(location: Location) {
-        if (mapLibreMapInstance == null) {
-            return
-        }
-        mapLibreMapInstance!!.getStyle { style: Style? ->
-            val pointFeature = Feature.fromGeometry(
-                Point.fromLngLat(location.longitude, location.latitude)
-            )
-            if (location.hasBearing()) {
-                pointFeature.properties()!!.addProperty("heading", location.bearing)
-            }
+    fun recenter() {
+        lastUserInteractionMs = 0L
+        store.getLocation()?.let { centerOnLocation(it) }
+    }
 
-            val circleFeature = Feature.fromGeometry(
-                createGeoJsonCircle(
-                    location.longitude,
-                    location.latitude,
-                    location.accuracy.toDouble()
-                )
-            )
+    private fun centerOnLocation(location: Location) {
+        val bearing = if (location.hasBearing()) location.bearing.toDouble() else 0.0
+        setCenterAndZoom(
+            location.latitude,
+            location.longitude,
+            null,
+            bearing,
+            CENTER_OFFSET_Y_PX
+        )
+    }
 
-            val featureCollection = FeatureCollection.fromFeatures(
-                arrayOf<Feature>(circleFeature, pointFeature)
-            )
-
-            // Add or update the source
-            val existingSource = style!!.getSource(LOCATION_SOURCE_ID) as GeoJsonSource?
-            if (existingSource != null) {
-                existingSource.setGeoJson(featureCollection)
-            } else {
-                val locationSource = GeoJsonSource(LOCATION_SOURCE_ID, featureCollection)
-                style.addSource(locationSource)
-                addLocationLayers(style)
-            }
+    override fun onCarStoreUpdated(key: String) {
+        when (key) {
+            CarStore.KEY_STYLE -> store.loadStyle()?.let { setStyle(it) }
+            CarStore.KEY_ROUTE -> setRoutes(CarRouteData.listFromJson(store.loadRoutes()))
+            CarStore.KEY_LOCATION -> handleLocationUpdate()
         }
     }
 
-    fun removeGPSLocation() {
-        if (mapLibreMapInstance == null) {
+    private fun handleLocationUpdate() {
+        mapLibreMapInstance?.getStyle { style: Style? -> style?.let { renderGpsLocation(it) } }
+        val location = store.getLocation() ?: return
+        if (System.currentTimeMillis() - lastUserInteractionMs >= PAN_SUPPRESSION_MS) {
+            centerOnLocation(location)
+        }
+    }
+
+    private fun renderGpsLocation(style: Style) {
+        val location = store.getLocation()
+        if (location == null) {
+            if (style.getSource(LOCATION_SOURCE_ID) != null) {
+                style.removeLayer(LOCATION_ICON_LAYER_ID)
+                style.removeLayer(LOCATION_CIRCLE_LAYER_ID)
+                style.removeLayer(LOCATION_CIRCLE_STROKE_LAYER_ID)
+                style.removeSource(LOCATION_SOURCE_ID)
+            }
             return
         }
-        mapLibreMapInstance!!.getStyle { style: Style? ->
-            style!!.removeLayer(LOCATION_ICON_LAYER_ID)
-            style.removeLayer(LOCATION_CIRCLE_LAYER_ID)
-            style.removeLayer(LOCATION_CIRCLE_STROKE_LAYER_ID)
-            style.removeSource(LOCATION_SOURCE_ID)
+
+        val pointFeature = Feature.fromGeometry(
+            Point.fromLngLat(location.longitude, location.latitude)
+        )
+        if (location.hasBearing()) {
+            pointFeature.properties()!!.addProperty("heading", location.bearing)
+        }
+
+        val circleFeature = Feature.fromGeometry(
+            createGeoJsonCircle(
+                location.longitude,
+                location.latitude,
+                location.accuracy.toDouble()
+            )
+        )
+
+        val featureCollection = FeatureCollection.fromFeatures(
+            arrayOf<Feature>(circleFeature, pointFeature)
+        )
+
+        val existingSource = style.getSource(LOCATION_SOURCE_ID) as GeoJsonSource?
+        if (existingSource != null) {
+            existingSource.setGeoJson(featureCollection)
+        } else {
+            val locationSource = GeoJsonSource(LOCATION_SOURCE_ID, featureCollection)
+            style.addSource(locationSource)
+            addLocationLayers(style)
         }
     }
 
@@ -194,7 +220,6 @@ class CarMapContainer(private val carContext: CarContext) {
             PropertyFactory.iconIgnorePlacement(true),
             PropertyFactory.iconAllowOverlap(true)
         )
-        style.addLayer(gpsIconLayer)
 
         val accuracyCircleLayer = FillLayer(LOCATION_CIRCLE_LAYER_ID, LOCATION_SOURCE_ID)
         accuracyCircleLayer.setFilter(isPolygon)
@@ -203,7 +228,6 @@ class CarMapContainer(private val carContext: CarContext) {
             PropertyFactory.fillOutlineColor("#136AEC"),
             PropertyFactory.fillOpacity(0.2f)
         )
-        style.addLayer(accuracyCircleLayer)
 
         val accuracyCircleStrokeLayer =
             LineLayer(LOCATION_CIRCLE_STROKE_LAYER_ID, LOCATION_SOURCE_ID)
@@ -212,64 +236,72 @@ class CarMapContainer(private val carContext: CarContext) {
             PropertyFactory.lineColor("#136AEC"),
             PropertyFactory.lineWidth(2f)
         )
-        style.addLayer(accuracyCircleStrokeLayer)
+
+        if (style.getLayer(LAYERING_ANCHOR_ID) != null) {
+            style.addLayerAbove(accuracyCircleLayer, LAYERING_ANCHOR_ID)
+            style.addLayerAbove(accuracyCircleStrokeLayer, LOCATION_CIRCLE_LAYER_ID)
+            style.addLayerAbove(gpsIconLayer, LOCATION_CIRCLE_STROKE_LAYER_ID)
+        } else {
+            style.addLayer(accuracyCircleLayer)
+            style.addLayer(accuracyCircleStrokeLayer)
+            style.addLayer(gpsIconLayer)
+        }
     }
 
-    fun setRoute(points: ArrayList<LatLng>, weight: Double, color: String?, opacity: Double) {
-        if (mapLibreMapInstance == null) {
-            return
-        }
-        mapLibreMapInstance!!.getStyle { style: Style? ->
-            val geoJsonPoints: MutableList<Point?> = ArrayList()
+    fun setRoutes(routes: List<CarRouteData>) {
+        this.routes = routes
+        mapLibreMapInstance?.getStyle { style: Style? -> style?.let { renderRoutes(it) } }
+    }
+
+    private fun renderRoutes(style: Style) {
+        val features = ArrayList<Feature>(routes.size * 3)
+
+        for (route in routes) {
+            val points = route.lngLats
+            if (points.isEmpty()) {
+                continue
+            }
+            val geoJsonPoints: MutableList<Point?> = ArrayList(points.size)
             for (latLng in points) {
                 geoJsonPoints.add(Point.fromLngLat(latLng.longitude, latLng.latitude))
             }
 
-            val featureCollection: FeatureCollection?
-            if (points.isEmpty()) {
-                featureCollection = FeatureCollection.fromFeatures(arrayOfNulls<Feature>(0))
-            } else {
-                val lineString = LineString.fromLngLats(geoJsonPoints)
-                val routeFeature = Feature.fromGeometry(lineString)
-                routeFeature.properties()!!.addProperty("weight", weight)
-                routeFeature.properties()!!.addProperty("color", color)
-                routeFeature.properties()!!.addProperty("opacity", opacity)
+            val routeFeature = Feature.fromGeometry(LineString.fromLngLats(geoJsonPoints))
+            routeFeature.properties()!!.addProperty("weight", route.weight)
+            routeFeature.properties()!!.addProperty("color", route.color)
+            routeFeature.properties()!!.addProperty("opacity", route.opacity)
 
-                val startPointFeature = Feature
-                    .fromGeometry(Point.fromLngLat(points[0].longitude, points[0].latitude))
-                startPointFeature.properties()!!.addProperty("color", "#43a047")
-                startPointFeature.properties()!!.addProperty("strokeColor", "white")
+            val startPointFeature = Feature
+                .fromGeometry(Point.fromLngLat(points[0].longitude, points[0].latitude))
+            startPointFeature.properties()!!.addProperty("color", "#43a047")
+            startPointFeature.properties()!!.addProperty("strokeColor", "white")
 
-                val endPointFeature = Feature.fromGeometry(
-                    Point.fromLngLat(
-                        points[points.size - 1].longitude,
-                        points[points.size - 1].latitude
-                    )
+            val endPointFeature = Feature.fromGeometry(
+                Point.fromLngLat(
+                    points[points.size - 1].longitude,
+                    points[points.size - 1].latitude
                 )
-                endPointFeature.properties()!!.addProperty("color", "red")
-                endPointFeature.properties()!!.addProperty("strokeColor", "white")
+            )
+            endPointFeature.properties()!!.addProperty("color", "red")
+            endPointFeature.properties()!!.addProperty("strokeColor", "white")
 
-                featureCollection = FeatureCollection
-                    .fromFeatures(
-                        arrayOf<Feature>(
-                            routeFeature,
-                            startPointFeature,
-                            endPointFeature
-                        )
-                    )
-            }
-
-            val routeSource = style!!.getSourceAs<GeoJsonSource?>(ROUTE_SOURCE_ID)
-
-            if (routeSource != null) {
-                routeSource.setGeoJson(featureCollection)
-                return@getStyle
-            }
-
-            val newSource = GeoJsonSource(ROUTE_SOURCE_ID, featureCollection)
-            style.addSource(newSource)
-            addRouteLayers(style)
+            features.add(routeFeature)
+            features.add(startPointFeature)
+            features.add(endPointFeature)
         }
+
+        val featureCollection = FeatureCollection.fromFeatures(features)
+
+        val routeSource = style.getSourceAs<GeoJsonSource?>(ROUTE_SOURCE_ID)
+
+        if (routeSource != null) {
+            routeSource.setGeoJson(featureCollection)
+            return
+        }
+
+        val newSource = GeoJsonSource(ROUTE_SOURCE_ID, featureCollection)
+        style.addSource(newSource)
+        addRouteLayers(style)
     }
 
     private fun addRouteLayers(style: Style) {
@@ -286,7 +318,6 @@ class CarMapContainer(private val carContext: CarContext) {
             PropertyFactory.lineCap(Property.LINE_CAP_BUTT),
             PropertyFactory.lineJoin(Property.LINE_JOIN_BEVEL)
         )
-        style.addLayer(routeLayer)
 
         val routePointsLayer = CircleLayer(ROUTE_POINTS_LAYER_ID, ROUTE_SOURCE_ID)
         routePointsLayer.setFilter(isPoint)
@@ -296,7 +327,14 @@ class CarMapContainer(private val carContext: CarContext) {
             PropertyFactory.circleStrokeColor(Expression.get("strokeColor")),
             PropertyFactory.circleStrokeWidth(3f)
         )
-        style.addLayer(routePointsLayer)
+
+        if (style.getLayer(LAYERING_ANCHOR_ID) != null) {
+            style.addLayerBelow(routeLayer, LAYERING_ANCHOR_ID)
+            style.addLayerAbove(routePointsLayer, ROUTE_LAYER_ID)
+        } else {
+            style.addLayer(routeLayer)
+            style.addLayer(routePointsLayer)
+        }
     }
 
     private fun createScaleAnimator(
@@ -319,11 +357,6 @@ class CarMapContainer(private val carContext: CarContext) {
                 )
             }
         }
-        animator.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator) {
-                raiseMoveEnd()
-            }
-        })
         return animator
     }
 
@@ -347,6 +380,7 @@ class CarMapContainer(private val carContext: CarContext) {
     }
 
     fun onScale(focusX: Float, focusY: Float, scaleFactor: Float) {
+        lastUserInteractionMs = System.currentTimeMillis()
         if (scaleFactor == DOUBLE_CLICK_FACTOR) {
             doubleClickZoomWithAnimation(PointF(focusX, focusY), true)
             return
@@ -364,28 +398,27 @@ class CarMapContainer(private val carContext: CarContext) {
                 PointF(focusX, focusY),
                 0
             )
-            raiseMoveEnd()
         }
     }
 
     @MainThread
-    fun setupMap(pixelRatio: Float, initialStyleJson: String? = null): View {
+    fun setupMap(pixelRatio: Float): View {
         MapLibre.getInstance(carContext)
         val client = OkHttpClient.Builder()
             .addInterceptor(SliceProtocolInterceptor(PmTilesService(carContext)))
             .build()
         HttpRequestUtil.setOkHttpClient(client)
+        routes = CarRouteData.listFromJson(store.loadRoutes())
 
         val mapView = createMapViewInstance(pixelRatio)
         mapView.onStart()
         mapView.getMapAsync { map: MapLibreMap? ->
             mapViewInstance = mapView
             mapLibreMapInstance = map
-            if (initialStyleJson != null) {
-                setStyle(initialStyleJson)
-            }
+            store.loadStyle()?.let { setStyle(it) }
         }
         mapViewInstance = mapView
+        store.addListener(this)
 
         val attribution = TextView(carContext)
         attribution.text = "© OpenStreetMap"
@@ -413,6 +446,7 @@ class CarMapContainer(private val carContext: CarContext) {
 
     @MainThread
     fun cleanUpMap() {
+        store.removeListener(this)
         if (mapViewInstance == null) {
             return
         }
@@ -441,34 +475,21 @@ class CarMapContainer(private val carContext: CarContext) {
         return mapView
     }
 
-    private fun raiseMoveEnd() {
-        if (mapLibreMapInstance == null) {
-            return
-        }
-
-        val payload = JSObject()
-        val mapCenter = mapLibreMapInstance!!.cameraPosition.target
-        payload.put("zoom", mapLibreMapInstance!!.cameraPosition.zoom)
-        payload.put("lng", mapCenter!!.longitude)
-        payload.put("lat", mapCenter.latitude)
-
-        CarMessageBus.instance.emitEvent(CarEvent(CarMessageBus.EVENT_MOVEEND, payload))
-    }
-
     fun setStyle(styleJson: String) {
         if (mapLibreMapInstance == null) {
             return
         }
 
-        mapLibreMapInstance!!.setStyle(Style.Builder().fromJson(styleJson))
-        mapLibreMapInstance!!.getStyle { style: Style? ->
+        mapLibreMapInstance!!.setStyle(Style.Builder().fromJson(styleJson)) { style: Style ->
             try {
                 val inputStream = carContext.assets.open("public/content/gps-arrow.png")
                 val bitmap = BitmapFactory.decodeStream(inputStream)
-                style!!.addImage(LOCATION_ICON_IMAGE, bitmap)
+                style.addImage(LOCATION_ICON_IMAGE, bitmap)
                 inputStream.close()
             } catch (_: IOException) {
             }
+            renderRoutes(style)
+            renderGpsLocation(style)
         }
     }
 
@@ -483,5 +504,11 @@ class CarMapContainer(private val carContext: CarContext) {
         private const val LOCATION_ICON_IMAGE = "gps-arrow"
         private const val CIRCLE_STEPS = 64
         const val DOUBLE_CLICK_FACTOR: Float = 2.0f
+        // Injected into every stored style by CarStore.saveStyle so that
+        // location layers can be added above and route layers below.
+        const val LAYERING_ANCHOR_ID: String = "car-layering-anchor"
+        const val LAYERING_ANCHOR_SOURCE_ID: String = "car-layering-anchor-source"
+        private const val PAN_SUPPRESSION_MS = 15_000L
+        private const val CENTER_OFFSET_Y_PX = 100
     }
 }

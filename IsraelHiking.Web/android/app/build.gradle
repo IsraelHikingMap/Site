@@ -50,6 +50,7 @@ dependencies {
     implementation "ch.poole.geo.pmtiles-reader:Reader:$pmtilesReaderVersion"
     implementation "androidx.localbroadcastmanager:localbroadcastmanager:$androidxLocalBroadcastManagerVersion"
     implementation "androidx.core:core-ktx:$androidxCoreKtxVersion"
+    implementation "com.google.android.gms:play-services-location:$playServicesLocationVersion"
 }
 
 apply from: 'capacitor.build.gradle'

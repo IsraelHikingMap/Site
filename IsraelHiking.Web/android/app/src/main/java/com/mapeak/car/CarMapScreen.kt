@@ -14,44 +14,55 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapeak.R
-import com.mapeak.car.CarMessageBus.CarEvent
-import com.mapeak.car.CarMessageBus.CarEventListener
+import org.json.JSONException
 import java.util.TimeZone
 
 class CarMapScreen(private val carContext: CarContext, private val carMapRenderer: CarMapRenderer) :
     Screen(
         carContext
-    ), CarEventListener, DefaultLifecycleObserver {
-    private var remainingMeters: Double? = null
-    private var remainingSeconds: Long? = null
-    private var units = "metric"
+    ), CarStore.Listener, DefaultLifecycleObserver {
+    private val store: CarStore = CarStore.get(carContext)
+    private var routes: List<CarRouteData> = emptyList()
+    private var statistics: CarStatistics? = null
 
     init {
         lifecycle.addObserver(this)
     }
 
     override fun onCreate(owner: LifecycleOwner) {
-        CarMessageBus.instance.registerListener(this)
+        store.addListener(this)
+        loadRoutes()
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
-        CarMessageBus.instance.unregisterListener(this)
+        store.removeListener(this)
     }
 
-    override fun onCarEvent(event: CarEvent) {
-        if (CarMessageBus.EVENT_STATISTICS != event.actionId) {
-            return
+    override fun onCarStoreUpdated(key: String) {
+        when (key) {
+            CarStore.KEY_LOCATION -> recomputeStatistics()
+            CarStore.KEY_ROUTE -> {
+                loadRoutes()
+                recomputeStatistics()
+            }
         }
-        val payload = event.payload
-        if (payload == null) {
-            remainingMeters = null
-            remainingSeconds = null
-        } else {
-            remainingMeters = payload.optDouble("remainingMeters")
-            remainingSeconds = payload.optLong("remainingSeconds")
-            units = payload.optString("units", "metric")
+    }
+
+    private fun recomputeStatistics() {
+        val location = store.getLocation()
+        val next = if (location == null) null else CarStatisticsCalculator.compute(routes, location)
+        if (next != statistics) {
+            statistics = next
+            invalidate()
         }
-        invalidate()
+    }
+
+    private fun loadRoutes() {
+        routes = try {
+            CarRouteData.listFromJson(store.loadRoutes())
+        } catch (_: JSONException) {
+            emptyList()
+        }
     }
 
     override fun onGetTemplate(): Template {
@@ -68,20 +79,14 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
     }
 
     private fun buildTravelEstimate(): TravelEstimate? {
-        if (remainingMeters == null || remainingSeconds == null) {
-            return null
-        }
-        val isImperial = "imperial" == units
-        val remainingDistance = if (isImperial)
-            Distance.create(remainingMeters!! / 1609.344, Distance.UNIT_MILES)
-        else
-            Distance.create(remainingMeters!! / 1000.0, Distance.UNIT_KILOMETERS)
+        val stats = statistics ?: return null
+        val remainingDistance = Distance.create(stats.remainingMeters / 1000.0, Distance.UNIT_KILOMETERS)
         val arrivalTime = DateTimeWithZone.create(
-            System.currentTimeMillis() + remainingSeconds!! * 1000,
+            System.currentTimeMillis() + stats.remainingSeconds * 1000,
             TimeZone.getDefault()
         )
         return TravelEstimate.Builder(remainingDistance, arrivalTime)
-            .setRemainingTimeSeconds(remainingSeconds!!)
+            .setRemainingTimeSeconds(stats.remainingSeconds)
             .build()
     }
 
