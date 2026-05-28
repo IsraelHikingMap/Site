@@ -18,6 +18,10 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.MainThread
 import androidx.car.app.CarContext
+import java.io.IOException
+import kotlin.math.abs
+import kotlin.math.ln
+import kotlin.math.pow
 import okhttp3.OkHttpClient
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
@@ -43,10 +47,6 @@ import org.maplibre.geojson.LineString
 import org.maplibre.geojson.Point
 import org.maplibre.turf.TurfConstants
 import org.maplibre.turf.TurfTransformation
-import java.io.IOException
-import kotlin.math.abs
-import kotlin.math.ln
-import kotlin.math.pow
 
 class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
     private val store: CarStore = CarStore.get(carContext)
@@ -102,22 +102,23 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
             return
         }
 
-        val pointFeature = Feature.fromGeometry(
-            Point.fromLngLat(location.longitude, location.latitude)
-        ).apply {
-            if (location.hasBearing()) {
-                properties()!!.addProperty("heading", location.bearing)
-            }
-        }
+        val pointFeature =
+                Feature.fromGeometry(Point.fromLngLat(location.longitude, location.latitude))
+                        .apply {
+                            if (location.hasBearing()) {
+                                properties()!!.addProperty("heading", location.bearing)
+                            }
+                        }
 
-        val circleFeature = Feature.fromGeometry(
-            TurfTransformation.circle(
-                Point.fromLngLat(location.longitude, location.latitude),
-                location.accuracy.toDouble(),
-                CIRCLE_STEPS,
-                TurfConstants.UNIT_METERS
-            )
-        )
+        val circleFeature =
+                Feature.fromGeometry(
+                        TurfTransformation.circle(
+                                Point.fromLngLat(location.longitude, location.latitude),
+                                location.accuracy.toDouble(),
+                                CIRCLE_STEPS,
+                                TurfConstants.UNIT_METERS
+                        )
+                )
 
         val featureCollection = FeatureCollection.fromFeatures(arrayOf(circleFeature, pointFeature))
 
@@ -137,62 +138,67 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
             return
         }
         val projection = map.projection
-        val screenPoint = projection.toScreenLocation(LatLng(lat, lng)).apply {
-            y -= offsetY.toFloat()
-        }
+        val screenPoint =
+                projection.toScreenLocation(LatLng(lat, lng)).apply { y -= offsetY.toFloat() }
         val newTarget = projection.fromScreenLocation(screenPoint)
-        val nextPosition = CameraPosition.Builder()
-            .target(newTarget)
-            .zoom(effectiveZoom)
-            .bearing(bearing)
-            .build()
+        val nextPosition =
+                CameraPosition.Builder()
+                        .target(newTarget)
+                        .zoom(effectiveZoom)
+                        .bearing(bearing)
+                        .build()
         map.easeCamera(newCameraPosition(nextPosition), CAMERA_EASE_DURATION_MS)
     }
 
     private fun cameraPositionMatches(
-        position: CameraPosition,
-        lat: Double,
-        lng: Double,
-        zoom: Double
+            position: CameraPosition,
+            lat: Double,
+            lng: Double,
+            zoom: Double
     ): Boolean {
         val target = position.target ?: return false
         return abs(target.latitude - lat) < LATLNG_EPSILON &&
-            abs(target.longitude - lng) < LATLNG_EPSILON &&
-            abs(position.zoom - zoom) < ZOOM_EPSILON
+                abs(target.longitude - lng) < LATLNG_EPSILON &&
+                abs(position.zoom - zoom) < ZOOM_EPSILON
     }
 
     private fun addLocationLayers(style: Style) {
         val isPoint = Expression.eq(Expression.geometryType(), Expression.literal("Point"))
         val isPolygon = Expression.eq(Expression.geometryType(), Expression.literal("Polygon"))
 
-        val gpsIconLayer = SymbolLayer(LOCATION_ICON_LAYER_ID, LOCATION_SOURCE_ID).apply {
-            setFilter(isPoint)
-            setProperties(
-                PropertyFactory.iconImage(LOCATION_ICON_IMAGE),
-                PropertyFactory.iconSize(1.0f),
-                PropertyFactory.iconRotate(Expression.get("heading")),
-                PropertyFactory.iconRotationAlignment(Property.ICON_ROTATION_ALIGNMENT_MAP),
-                PropertyFactory.iconIgnorePlacement(true),
-                PropertyFactory.iconAllowOverlap(true)
-            )
-        }
+        val gpsIconLayer =
+                SymbolLayer(LOCATION_ICON_LAYER_ID, LOCATION_SOURCE_ID).apply {
+                    setFilter(isPoint)
+                    setProperties(
+                            PropertyFactory.iconImage(LOCATION_ICON_IMAGE),
+                            PropertyFactory.iconSize(1.0f),
+                            PropertyFactory.iconRotate(Expression.get("heading")),
+                            PropertyFactory.iconRotationAlignment(
+                                    Property.ICON_ROTATION_ALIGNMENT_MAP
+                            ),
+                            PropertyFactory.iconIgnorePlacement(true),
+                            PropertyFactory.iconAllowOverlap(true)
+                    )
+                }
 
-        val accuracyCircleLayer = FillLayer(LOCATION_CIRCLE_LAYER_ID, LOCATION_SOURCE_ID).apply {
-            setFilter(isPolygon)
-            setProperties(
-                PropertyFactory.fillColor(LOCATION_ACCURACY_COLOR),
-                PropertyFactory.fillOutlineColor(LOCATION_ACCURACY_COLOR),
-                PropertyFactory.fillOpacity(0.2f)
-            )
-        }
+        val accuracyCircleLayer =
+                FillLayer(LOCATION_CIRCLE_LAYER_ID, LOCATION_SOURCE_ID).apply {
+                    setFilter(isPolygon)
+                    setProperties(
+                            PropertyFactory.fillColor(LOCATION_ACCURACY_COLOR),
+                            PropertyFactory.fillOutlineColor(LOCATION_ACCURACY_COLOR),
+                            PropertyFactory.fillOpacity(0.2f)
+                    )
+                }
 
-        val accuracyCircleStrokeLayer = LineLayer(LOCATION_CIRCLE_STROKE_LAYER_ID, LOCATION_SOURCE_ID).apply {
-            setFilter(isPolygon)
-            setProperties(
-                PropertyFactory.lineColor(LOCATION_ACCURACY_COLOR),
-                PropertyFactory.lineWidth(2f)
-            )
-        }
+        val accuracyCircleStrokeLayer =
+                LineLayer(LOCATION_CIRCLE_STROKE_LAYER_ID, LOCATION_SOURCE_ID).apply {
+                    setFilter(isPolygon)
+                    setProperties(
+                            PropertyFactory.lineColor(LOCATION_ACCURACY_COLOR),
+                            PropertyFactory.lineWidth(2f)
+                    )
+                }
 
         if (style.getLayer(LAYERING_ANCHOR_ID) != null) {
             style.addLayerAbove(accuracyCircleLayer, LAYERING_ANCHOR_ID)
@@ -211,9 +217,10 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
     }
 
     private fun renderRoutes(style: Style) {
-        val features = routes
-            .filter { it.lngLats.isNotEmpty() }
-            .flatMap { route -> featuresForRoute(route) }
+        val features =
+                routes.filter { it.lngLats.isNotEmpty() }.flatMap { route ->
+                    featuresForRoute(route)
+                }
         val featureCollection = FeatureCollection.fromFeatures(features)
 
         val existingSource = style.getSourceAs<GeoJsonSource>(ROUTE_SOURCE_ID)
@@ -229,55 +236,60 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
         val points = route.lngLats
         val geoJsonPoints = points.map { Point.fromLngLat(it.longitude, it.latitude) }
 
-        val routeFeature = Feature.fromGeometry(LineString.fromLngLats(geoJsonPoints)).apply {
-            properties()!!.apply {
-                addProperty("weight", route.weight)
-                addProperty("color", route.color)
-                addProperty("opacity", route.opacity)
-                addProperty("iconColor", arrowIconColor(route.color, route.opacity))
-                addProperty("iconSize", arrowIconSize(route.weight))
-            }
-        }
-        val startPointFeature = Feature.fromGeometry(geoJsonPoints.first()).apply {
-            properties()!!.apply {
-                addProperty("color", ROUTE_START_COLOR)
-                addProperty("strokeColor", "white")
-            }
-        }
-        val endPointFeature = Feature.fromGeometry(geoJsonPoints.last()).apply {
-            properties()!!.apply {
-                addProperty("color", ROUTE_END_COLOR)
-                addProperty("strokeColor", "white")
-            }
-        }
+        val routeFeature =
+                Feature.fromGeometry(LineString.fromLngLats(geoJsonPoints)).apply {
+                    properties()!!.apply {
+                        addProperty("weight", route.weight)
+                        addProperty("color", route.color)
+                        addProperty("opacity", route.opacity)
+                        addProperty("iconColor", arrowIconColor(route.color, route.opacity))
+                        addProperty("iconSize", arrowIconSize(route.weight))
+                    }
+                }
+        val startPointFeature =
+                Feature.fromGeometry(geoJsonPoints.first()).apply {
+                    properties()!!.apply {
+                        addProperty("color", ROUTE_START_COLOR)
+                        addProperty("strokeColor", "white")
+                    }
+                }
+        val endPointFeature =
+                Feature.fromGeometry(geoJsonPoints.last()).apply {
+                    properties()!!.apply {
+                        addProperty("color", ROUTE_END_COLOR)
+                        addProperty("strokeColor", "white")
+                    }
+                }
         return listOf(routeFeature, startPointFeature, endPointFeature)
     }
 
     /**
-     * Mirrors selectedRouteService.routeToProperties: when the route is opaque
-     * enough to mask the arrow, return the inverted (b/w) of the route color
-     * so the arrow stays visible; otherwise reuse the route color so the
-     * arrow blends with the line.
+     * Mirrors selectedRouteService.routeToProperties: when the route is opaque enough to mask the
+     * arrow, return the inverted (b/w) of the route color so the arrow stays visible; otherwise
+     * reuse the route color so the arrow blends with the line.
      */
     private fun arrowIconColor(routeColor: String?, opacity: Double): String {
         val color = routeColor ?: return ROUTE_ARROW_FALLBACK_COLOR
         if (opacity <= ARROW_INVERT_OPACITY_THRESHOLD) return color
-        val parsed = try {
-            Color.parseColor(color)
-        } catch (_: IllegalArgumentException) {
-            return color
-        }
+        val parsed =
+                try {
+                    Color.parseColor(color)
+                } catch (_: IllegalArgumentException) {
+                    return color
+                }
         val invertedR = 255 - Color.red(parsed)
         val invertedG = 255 - Color.green(parsed)
         val invertedB = 255 - Color.blue(parsed)
-        val luminance = 0.2126 * channelToLinear(invertedR) +
-            0.7152 * channelToLinear(invertedG) +
-            0.0722 * channelToLinear(invertedB)
+        val luminance =
+                0.2126 * channelToLinear(invertedR) +
+                        0.7152 * channelToLinear(invertedG) +
+                        0.0722 * channelToLinear(invertedB)
         return if (luminance < BW_LUMINANCE_THRESHOLD) "#000000" else "#FFFFFF"
     }
 
     private fun arrowIconSize(weight: Double): Double =
-        if (weight < ARROW_BASE_WEIGHT) ARROW_BASE_SIZE else ARROW_BASE_SIZE * weight / ARROW_BASE_WEIGHT
+            if (weight < ARROW_BASE_WEIGHT) ARROW_BASE_SIZE
+            else ARROW_BASE_SIZE * weight / ARROW_BASE_WEIGHT
 
     private fun channelToLinear(channel: Int): Double {
         val normalized = channel / 255.0
@@ -286,42 +298,46 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
     }
 
     private fun addRouteLayers(style: Style) {
-        val isLineString = Expression.eq(Expression.geometryType(), Expression.literal("LineString"))
+        val isLineString =
+                Expression.eq(Expression.geometryType(), Expression.literal("LineString"))
         val isPoint = Expression.eq(Expression.geometryType(), Expression.literal("Point"))
 
-        val routeLayer = LineLayer(ROUTE_LAYER_ID, ROUTE_SOURCE_ID).apply {
-            setFilter(isLineString)
-            setProperties(
-                PropertyFactory.lineColor(Expression.get("color")),
-                PropertyFactory.lineWidth(Expression.get("weight")),
-                PropertyFactory.lineOpacity(Expression.get("opacity")),
-                PropertyFactory.lineCap(Property.LINE_CAP_BUTT),
-                PropertyFactory.lineJoin(Property.LINE_JOIN_BEVEL)
-            )
-        }
+        val routeLayer =
+                LineLayer(ROUTE_LAYER_ID, ROUTE_SOURCE_ID).apply {
+                    setFilter(isLineString)
+                    setProperties(
+                            PropertyFactory.lineColor(Expression.get("color")),
+                            PropertyFactory.lineWidth(Expression.get("weight")),
+                            PropertyFactory.lineOpacity(Expression.get("opacity")),
+                            PropertyFactory.lineCap(Property.LINE_CAP_BUTT),
+                            PropertyFactory.lineJoin(Property.LINE_JOIN_BEVEL)
+                    )
+                }
 
-        val routeArrowsLayer = SymbolLayer(ROUTE_ARROWS_LAYER_ID, ROUTE_SOURCE_ID).apply {
-            setFilter(isLineString)
-            setProperties(
-                PropertyFactory.symbolPlacement(Property.SYMBOL_PLACEMENT_LINE),
-                PropertyFactory.symbolSpacing(40f),
-                PropertyFactory.iconImage(ROUTE_ARROW_ICON_IMAGE),
-                PropertyFactory.iconSize(Expression.get("iconSize")),
-                PropertyFactory.iconColor(Expression.get("iconColor")),
-                PropertyFactory.iconAllowOverlap(true),
-                PropertyFactory.iconIgnorePlacement(true)
-            )
-        }
+        val routeArrowsLayer =
+                SymbolLayer(ROUTE_ARROWS_LAYER_ID, ROUTE_SOURCE_ID).apply {
+                    setFilter(isLineString)
+                    setProperties(
+                            PropertyFactory.symbolPlacement(Property.SYMBOL_PLACEMENT_LINE),
+                            PropertyFactory.symbolSpacing(40f),
+                            PropertyFactory.iconImage(ROUTE_ARROW_ICON_IMAGE),
+                            PropertyFactory.iconSize(Expression.get("iconSize")),
+                            PropertyFactory.iconColor(Expression.get("iconColor")),
+                            PropertyFactory.iconAllowOverlap(true),
+                            PropertyFactory.iconIgnorePlacement(true)
+                    )
+                }
 
-        val routePointsLayer = CircleLayer(ROUTE_POINTS_LAYER_ID, ROUTE_SOURCE_ID).apply {
-            setFilter(isPoint)
-            setProperties(
-                PropertyFactory.circleColor(Expression.get("color")),
-                PropertyFactory.circleRadius(7f),
-                PropertyFactory.circleStrokeColor(Expression.get("strokeColor")),
-                PropertyFactory.circleStrokeWidth(3f)
-            )
-        }
+        val routePointsLayer =
+                CircleLayer(ROUTE_POINTS_LAYER_ID, ROUTE_SOURCE_ID).apply {
+                    setFilter(isPoint)
+                    setProperties(
+                            PropertyFactory.circleColor(Expression.get("color")),
+                            PropertyFactory.circleRadius(7f),
+                            PropertyFactory.circleStrokeColor(Expression.get("strokeColor")),
+                            PropertyFactory.circleStrokeWidth(3f)
+                    )
+                }
 
         if (style.getLayer(LAYERING_ANCHOR_ID) != null) {
             style.addLayerBelow(routeLayer, LAYERING_ANCHOR_ID)
@@ -335,30 +351,30 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
     }
 
     private fun createScaleAnimator(
-        currentZoom: Double,
-        zoomAddition: Double,
-        animationFocalPoint: PointF
+            currentZoom: Double,
+            zoomAddition: Double,
+            animationFocalPoint: PointF
     ): Animator =
-        ValueAnimator.ofFloat(currentZoom.toFloat(), (currentZoom + zoomAddition).toFloat()).apply {
-            duration = MapLibreConstants.ANIMATION_DURATION.toLong()
-            interpolator = DecelerateInterpolator()
-            addUpdateListener { animation ->
-                mapLibreMapInstance?.setZoom(
-                    (animation.animatedValue as Float).toDouble(),
-                    animationFocalPoint,
-                    0
-                )
-            }
-        }
+            ValueAnimator.ofFloat(currentZoom.toFloat(), (currentZoom + zoomAddition).toFloat())
+                    .apply {
+                        duration = MapLibreConstants.ANIMATION_DURATION.toLong()
+                        interpolator = DecelerateInterpolator()
+                        addUpdateListener { animation ->
+                            mapLibreMapInstance?.setZoom(
+                                    (animation.animatedValue as Float).toDouble(),
+                                    animationFocalPoint,
+                                    0
+                            )
+                        }
+                    }
 
     private fun doubleClickZoomWithAnimation(zoomFocalPoint: PointF, isZoomIn: Boolean) {
         scaleAnimator?.takeIf { it.isStarted }?.cancel()
         val map = mapLibreMapInstance ?: return
-        scaleAnimator = createScaleAnimator(
-            map.zoom,
-            if (isZoomIn) 1.0 else -1.0,
-            zoomFocalPoint
-        ).also { it.start() }
+        scaleAnimator =
+                createScaleAnimator(map.zoom, if (isZoomIn) 1.0 else -1.0, zoomFocalPoint).also {
+                    it.start()
+                }
     }
 
     fun onScale(focusX: Float, focusY: Float, scaleFactor: Float) {
@@ -375,8 +391,8 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
             }
         }
         val map = mapLibreMapInstance ?: return
-        val zoomAdditional = (ln(scaleFactor.toDouble()) / ln(Math.PI / 2)) *
-            MapLibreConstants.ZOOM_RATE
+        val zoomAdditional =
+                (ln(scaleFactor.toDouble()) / ln(Math.PI / 2)) * MapLibreConstants.ZOOM_RATE
         map.setZoom(map.zoom + zoomAdditional, focal, 0)
     }
 
@@ -384,9 +400,9 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
     fun setupMap(pixelRatio: Float): View {
         MapLibre.getInstance(carContext)
         HttpRequestUtil.setOkHttpClient(
-            OkHttpClient.Builder()
-                .addInterceptor(SliceProtocolInterceptor(PmTilesService(carContext)))
-                .build()
+                OkHttpClient.Builder()
+                        .addInterceptor(SliceProtocolInterceptor(PmTilesService(carContext)))
+                        .build()
         )
         routes = CarRouteData.listFromJson(store.loadRoutes())
 
@@ -400,32 +416,29 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
 
         return FrameLayout(carContext).apply {
             addView(
-                mapView,
-                ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
+                    mapView,
+                    ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                    )
             )
             addView(
-                TextView(carContext).apply {
-                    text = "© OpenStreetMap"
-                    setTextColor(ATTRIBUTION_COLOR)
-                },
-                FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    Gravity.BOTTOM or Gravity.END
-                )
+                    TextView(carContext).apply {
+                        text = "© OpenStreetMap"
+                        setTextColor(ATTRIBUTION_COLOR)
+                    },
+                    FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                            Gravity.BOTTOM or Gravity.END
+                    )
             )
         }
     }
 
     private fun initializeMap(map: MapLibreMap) {
-        store.loadZoom()?.let { savedZoom ->
-            map.cameraPosition = CameraPosition.Builder(map.cameraPosition)
-                .zoom(savedZoom)
-                .build()
-        }
+        map.cameraPosition =
+                CameraPosition.Builder(map.cameraPosition).zoom(store.loadZoom()).build()
         map.addOnCameraIdleListener {
             val zoom = map.cameraPosition.zoom
             if (zoom != lastSavedZoom) {
@@ -444,9 +457,10 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
         mapView.onPause()
         mapView.onStop()
         try {
-            (carContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager).removeView(mapView)
-        } catch (_: IllegalArgumentException) {
-        }
+            (carContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager).removeView(
+                    mapView
+            )
+        } catch (_: IllegalArgumentException) {}
         mapView.onDestroy()
         mapViewInstance = null
     }

@@ -15,13 +15,11 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.mapeak.R
-import org.json.JSONException
 import java.util.TimeZone
+import org.json.JSONException
 
-class CarMapScreen(
-    private val carContext: CarContext,
-    private val carMapRenderer: CarMapRenderer
-) : Screen(carContext), CarStore.Listener, DefaultLifecycleObserver {
+class CarMapScreen(private val carContext: CarContext, private val carMapRenderer: CarMapRenderer) :
+        Screen(carContext), CarStore.Listener, DefaultLifecycleObserver {
 
     private val store: CarStore = CarStore.get(carContext)
     private var routes: List<CarRouteData> = emptyList()
@@ -66,11 +64,12 @@ class CarMapScreen(
     }
 
     private fun loadRoutes() {
-        routes = try {
-            CarRouteData.listFromJson(store.loadRoutes())
-        } catch (_: JSONException) {
-            emptyList()
-        }
+        routes =
+                try {
+                    CarRouteData.listFromJson(store.loadRoutes())
+                } catch (_: JSONException) {
+                    emptyList()
+                }
     }
 
     private fun loadUnits() {
@@ -78,8 +77,7 @@ class CarMapScreen(
     }
 
     override fun onGetTemplate(): Template {
-        val templateBuilder = NavigationTemplate.Builder()
-            .setActionStrip(buildActionStrip())
+        val templateBuilder = NavigationTemplate.Builder().setActionStrip(buildActionStrip())
         if (carContext.carAppApiLevel >= 2) {
             templateBuilder.setMapActionStrip(buildMapActionStrip())
         }
@@ -89,38 +87,53 @@ class CarMapScreen(
 
     private fun buildTravelEstimate(): TravelEstimate? {
         val stats = statistics ?: return null
-        val remainingDistance = if (units == UNIT_IMPERIAL) {
-            Distance.create(stats.remainingMeters / METERS_PER_MILE, Distance.UNIT_MILES)
-        } else {
-            Distance.create(stats.remainingMeters / METERS_PER_KILOMETER, Distance.UNIT_KILOMETERS)
-        }
-        val arrivalTime = DateTimeWithZone.create(
-            System.currentTimeMillis() + stats.remainingSeconds * 1000,
-            TimeZone.getDefault()
-        )
+        val remainingDistance =
+                if (units == UNIT_IMPERIAL) {
+                    Distance.create(stats.remainingMeters / METERS_PER_MILE, Distance.UNIT_MILES)
+                } else {
+                    Distance.create(
+                            stats.remainingMeters / METERS_PER_KILOMETER,
+                            Distance.UNIT_KILOMETERS
+                    )
+                }
+        val arrivalTime =
+                DateTimeWithZone.create(
+                        System.currentTimeMillis() + stats.remainingSeconds * 1000,
+                        TimeZone.getDefault()
+                )
         return TravelEstimate.Builder(remainingDistance, arrivalTime)
-            .setRemainingTimeSeconds(stats.remainingSeconds)
-            .build()
+                .setRemainingTimeSeconds(stats.remainingSeconds)
+                .build()
     }
 
     private fun buildActionStrip(): ActionStrip =
-        ActionStrip.Builder()
-            .addAction(iconAction(R.drawable.ic_menu))
-            .build()
+            ActionStrip.Builder().addAction(iconAction(R.drawable.ic_menu)).build()
 
     private fun buildMapActionStrip(): ActionStrip =
-        ActionStrip.Builder()
-            .addAction(Action.PAN)
-            .addAction(iconAction(R.drawable.ic_zoom_in) { carMapRenderer.zoomInFromButton() })
-            .addAction(iconAction(R.drawable.ic_zoom_out) { carMapRenderer.zoomOutFromButton() })
-            .addAction(iconAction(R.drawable.ic_recenter) { carMapRenderer.recenterFromButton() })
-            .build()
+            ActionStrip.Builder()
+                    .addAction(Action.PAN)
+                    .addAction(
+                            iconAction(R.drawable.ic_zoom_in) { carMapRenderer.zoomInFromButton() }
+                    )
+                    .addAction(
+                            iconAction(R.drawable.ic_zoom_out) {
+                                carMapRenderer.zoomOutFromButton()
+                            }
+                    )
+                    .addAction(
+                            iconAction(R.drawable.ic_recenter) {
+                                carMapRenderer.recenterFromButton()
+                            }
+                    )
+                    .build()
 
     private fun iconAction(@DrawableRes iconRes: Int, onClick: (() -> Unit)? = null): Action {
-        val builder = Action.Builder()
-            .setIcon(
-                CarIcon.Builder(IconCompat.createWithResource(carContext, iconRes)).build()
-            )
+        val builder =
+                Action.Builder()
+                        .setIcon(
+                                CarIcon.Builder(IconCompat.createWithResource(carContext, iconRes))
+                                        .build()
+                        )
         if (onClick != null) {
             builder.setOnClickListener { onClick() }
         }

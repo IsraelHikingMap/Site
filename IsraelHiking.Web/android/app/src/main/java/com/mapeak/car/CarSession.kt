@@ -13,15 +13,17 @@ class CarSession : Session() {
         Log.v(LOG_TAG, "onCreateScreen: $intent")
         val renderer = CarMapRenderer(carContext, lifecycle)
         val provider = CarLocationProvider(carContext)
-        lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onStart(owner: LifecycleOwner) {
-                provider.start()
-            }
+        lifecycle.addObserver(
+                object : DefaultLifecycleObserver {
+                    override fun onStart(owner: LifecycleOwner) {
+                        provider.start()
+                    }
 
-            override fun onStop(owner: LifecycleOwner) {
-                provider.stop()
-            }
-        })
+                    override fun onStop(owner: LifecycleOwner) {
+                        provider.stop()
+                    }
+                }
+        )
 
         val screen = CarMapScreen(carContext, renderer)
         carContext.getCarService(ScreenManager::class.java).push(screen)

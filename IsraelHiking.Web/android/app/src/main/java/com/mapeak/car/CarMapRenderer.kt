@@ -17,7 +17,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifecycle) :
-    SurfaceCallback, DefaultLifecycleObserver {
+        SurfaceCallback, DefaultLifecycleObserver {
     private val mapContainer: CarMapContainer = CarMapContainer(carContext)
     private val store: CarStore = CarStore.get(carContext)
     private var surfaceContainer: SurfaceContainer? = null
@@ -32,7 +32,9 @@ class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifec
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         try {
-            (carContext.getCarService(CarContext.APP_SERVICE) as AppManager).setSurfaceCallback(this)
+            (carContext.getCarService(CarContext.APP_SERVICE) as AppManager).setSurfaceCallback(
+                    this
+            )
         } catch (e: Exception) {
             Log.e(LOG_TAG, "Could not set surface callback", e)
         }
@@ -45,7 +47,9 @@ class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifec
 
         uiHandler.removeCallbacksAndMessages(null)
         try {
-            (carContext.getCarService(CarContext.APP_SERVICE) as AppManager).setSurfaceCallback(null)
+            (carContext.getCarService(CarContext.APP_SERVICE) as AppManager).setSurfaceCallback(
+                    null
+            )
         } catch (e: Exception) {
             Log.e(LOG_TAG, "Could not remove surface callback", e)
         }
@@ -55,22 +59,24 @@ class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifec
         Log.v(LOG_TAG, "CarMapRenderer.onSurfaceAvailable")
         this.surfaceContainer = surfaceContainer
 
-        val display = carContext
-            .getSystemService(DisplayManager::class.java)
-            .createVirtualDisplay(
-                "MapLibreSampleVirtualDisplay",
-                surfaceContainer.width,
-                surfaceContainer.height,
-                surfaceContainer.dpi,
-                surfaceContainer.surface,
-                0
-            )
+        val display =
+                carContext
+                        .getSystemService(DisplayManager::class.java)
+                        .createVirtualDisplay(
+                                "MapLibreSampleVirtualDisplay",
+                                surfaceContainer.width,
+                                surfaceContainer.height,
+                                surfaceContainer.dpi,
+                                surfaceContainer.surface,
+                                0
+                        )
         virtualDisplay = display
 
-        presentation = Presentation(carContext, display.display).apply {
-            setContentView(mapContainer.setupMap(computePixelRatio(surfaceContainer)))
-            show()
-        }
+        presentation =
+                Presentation(carContext, display.display).apply {
+                    setContentView(mapContainer.setupMap(computePixelRatio(surfaceContainer)))
+                    show()
+                }
         store.setConnected(true)
     }
 

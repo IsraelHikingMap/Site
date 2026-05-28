@@ -17,15 +17,16 @@ import com.google.android.gms.location.Priority
 class CarLocationProvider(context: Context) {
     private val appContext: Context = context.applicationContext
     private val fusedClient: FusedLocationProviderClient =
-        LocationServices.getFusedLocationProviderClient(appContext)
+            LocationServices.getFusedLocationProviderClient(appContext)
     private val store: CarStore = CarStore.get(appContext)
     private var started = false
 
-    private val locationCallback = object : LocationCallback() {
-        override fun onLocationResult(result: LocationResult) {
-            result.lastLocation?.let { store.setLocation(it) }
-        }
-    }
+    private val locationCallback =
+            object : LocationCallback() {
+                override fun onLocationResult(result: LocationResult) {
+                    result.lastLocation?.let { store.setLocation(it) }
+                }
+            }
 
     @Synchronized
     fun start() {
@@ -36,9 +37,10 @@ class CarLocationProvider(context: Context) {
             Log.w(LOG_TAG, "Location permission not granted, skipping start")
             return
         }
-        val request = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, INTERVAL_MS)
-            .setMinUpdateDistanceMeters(MIN_DISTANCE_M)
-            .build()
+        val request =
+                LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, INTERVAL_MS)
+                        .setMinUpdateDistanceMeters(MIN_DISTANCE_M)
+                        .build()
         try {
             fusedClient.requestLocationUpdates(request, locationCallback, Looper.getMainLooper())
             fusedClient.lastLocation.addOnSuccessListener { last: Location? ->
@@ -62,12 +64,16 @@ class CarLocationProvider(context: Context) {
     }
 
     private fun hasLocationPermission(): Boolean {
-        val fine = ContextCompat.checkSelfPermission(
-            appContext, Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-        val coarse = ContextCompat.checkSelfPermission(
-            appContext, Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+        val fine =
+                ContextCompat.checkSelfPermission(
+                        appContext,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+        val coarse =
+                ContextCompat.checkSelfPermission(
+                        appContext,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
         return fine || coarse
     }
 

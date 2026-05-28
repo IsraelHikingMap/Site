@@ -52,20 +52,17 @@ class CarPlugin : Plugin() {
 
     private fun addLayeringAnchorTo(style: JSObject) {
         val sources = style.optJSONObject("sources") ?: JSObject().also { style.put("sources", it) }
-        val anchorData = JSObject()
-            .put("type", "FeatureCollection")
-            .put("features", JSONArray())
-        val anchorSource = JSObject()
-            .put("type", "geojson")
-            .put("data", anchorData)
+        val anchorData = JSObject().put("type", "FeatureCollection").put("features", JSONArray())
+        val anchorSource = JSObject().put("type", "geojson").put("data", anchorData)
         sources.put(CarMapContainer.LAYERING_ANCHOR_SOURCE_ID, anchorSource)
 
         val layers = style.optJSONArray("layers") ?: JSONArray().also { style.put("layers", it) }
-        val anchorLayer = JSObject()
-            .put("id", CarMapContainer.LAYERING_ANCHOR_ID)
-            .put("type", "circle")
-            .put("source", CarMapContainer.LAYERING_ANCHOR_SOURCE_ID)
-            .put("layout", JSObject().put("visibility", "none"))
+        val anchorLayer =
+                JSObject()
+                        .put("id", CarMapContainer.LAYERING_ANCHOR_ID)
+                        .put("type", "circle")
+                        .put("source", CarMapContainer.LAYERING_ANCHOR_SOURCE_ID)
+                        .put("layout", JSObject().put("visibility", "none"))
         layers.put(anchorLayer)
     }
 }

@@ -27,8 +27,7 @@ class PmTilesService(context: Context) : AutoCloseable {
         for (reader in readerCache.values) {
             try {
                 reader.close()
-            } catch (_: Exception) {
-            }
+            } catch (_: Exception) {}
         }
         readerCache.clear()
     }

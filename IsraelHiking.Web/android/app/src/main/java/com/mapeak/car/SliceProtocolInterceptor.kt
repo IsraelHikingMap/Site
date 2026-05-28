@@ -1,15 +1,15 @@
 package com.mapeak.car
 
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Protocol
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
-import java.io.IOException
-import java.util.concurrent.TimeUnit
 
 class SliceProtocolInterceptor internal constructor(private val pmTilesService: PmTilesService) :
-    Interceptor {
+        Interceptor {
     @Throws(IOException::class)
     override fun intercept(chain: Interceptor.Chain): Response {
         val original = chain.request()
@@ -23,16 +23,20 @@ class SliceProtocolInterceptor internal constructor(private val pmTilesService: 
         val type = parts[parts.size - 4]
         val z = parts[parts.size - 3].toInt()
         val x = parts[parts.size - 2].toInt()
-        val y = parts[parts.size - 1].split("\\.".toRegex()).dropLastWhile { it.isEmpty() }
-            .toTypedArray()[0].toInt()
+        val y =
+                parts[parts.size - 1]
+                                .split("\\.".toRegex())
+                                .dropLastWhile { it.isEmpty() }
+                                .toTypedArray()[0]
+                        .toInt()
 
         val offlineAvailable = pmTilesService.isOfflineFileAvailable(z, x, y, type)
         val timeout: Int =
-            if (offlineAvailable) ONLINE_TIMEOUT_OFFLINE_AVAILABLE_MS else ONLINE_TIMEOUT_MS
+                if (offlineAvailable) ONLINE_TIMEOUT_OFFLINE_AVAILABLE_MS else ONLINE_TIMEOUT_MS
 
-        val timeoutChain = chain
-            .withConnectTimeout(timeout, TimeUnit.MILLISECONDS)
-            .withReadTimeout(timeout, TimeUnit.MILLISECONDS)
+        val timeoutChain =
+                chain.withConnectTimeout(timeout, TimeUnit.MILLISECONDS)
+                        .withReadTimeout(timeout, TimeUnit.MILLISECONDS)
 
         var response: Response? = null
         var networkError: IOException? = null
@@ -53,21 +57,23 @@ class SliceProtocolInterceptor internal constructor(private val pmTilesService: 
                 throw networkError
             }
             throw IOException(
-                ("Failed to get " + url
-                        + (if (response != null) ": HTTP " + response.code else ""))
+                    ("Failed to get " +
+                            url +
+                            (if (response != null) ": HTTP " + response.code else ""))
             )
         }
 
         // Fallback to PMTiles
-        val data = pmTilesService.getTileByType(z, x, y, type)
-            ?: throw IOException("PMTiles fallback returned no data for $url")
+        val data =
+                pmTilesService.getTileByType(z, x, y, type)
+                        ?: throw IOException("PMTiles fallback returned no data for $url")
         return Response.Builder()
-            .request(original)
-            .protocol(Protocol.HTTP_1_1)
-            .code(200)
-            .message("OK")
-            .body(data.toResponseBody("application/x-protobuf".toMediaType()))
-            .build()
+                .request(original)
+                .protocol(Protocol.HTTP_1_1)
+                .code(200)
+                .message("OK")
+                .body(data.toResponseBody("application/x-protobuf".toMediaType()))
+                .build()
     }
 
     companion object {

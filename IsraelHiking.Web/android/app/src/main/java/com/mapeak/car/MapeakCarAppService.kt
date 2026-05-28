@@ -24,8 +24,8 @@ class MapeakCarAppService : CarAppService() {
             HostValidator.ALLOW_ALL_HOSTS_VALIDATOR
         } else {
             HostValidator.Builder(applicationContext)
-                .addAllowedHosts(R.array.hosts_allowlist_sample)
-                .build()
+                    .addAllowedHosts(R.array.hosts_allowlist_sample)
+                    .build()
         }
     }
 

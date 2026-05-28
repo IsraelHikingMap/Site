@@ -8,23 +8,20 @@ import com.getcapacitor.JSObject
 import org.json.JSONException
 
 /**
- * Single source of truth for car-side state. Combines persistent values
- * (style/route in SharedPreferences) and transient values (location/connected
- * in memory) behind one listener API: subscribers receive a key whenever any
- * value updates, then read the current value back from the store. Mirrors the
- * NGXS-style "state + select" pattern used on the JS side.
+ * Single source of truth for car-side state. Combines persistent values (style/route in
+ * SharedPreferences) and transient values (location/connected in memory) behind one listener API:
+ * subscribers receive a key whenever any value updates, then read the current value back from the
+ * store. Mirrors the NGXS-style "state + select" pattern used on the JS side.
  */
 class CarStore private constructor(context: Context) {
-    private val prefs = context.applicationContext
-        .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val prefs =
+            context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val mainHandler = Handler(Looper.getMainLooper())
     private val listeners: MutableList<Listener> = ArrayList()
 
-    @Volatile
-    private var locationCache: Location? = null
+    @Volatile private var locationCache: Location? = null
 
-    @Volatile
-    private var connectedCache: Boolean = false
+    @Volatile private var connectedCache: Boolean = false
 
     fun interface Listener {
         fun onCarStoreUpdated(key: String)
@@ -82,8 +79,8 @@ class CarStore private constructor(context: Context) {
         prefs.edit().putFloat(KEY_ZOOM, zoom.toFloat()).apply()
     }
 
-    fun loadZoom(): Double? {
-        if (!prefs.contains(KEY_ZOOM)) return null
+    fun loadZoom(): Double {
+        if (!prefs.contains(KEY_ZOOM)) return 14.0
         return prefs.getFloat(KEY_ZOOM, 14f).toDouble()
     }
 
@@ -107,9 +104,7 @@ class CarStore private constructor(context: Context) {
     private fun notifyChanged(key: String) {
         mainHandler.post {
             val snapshot: List<Listener>
-            synchronized(this) {
-                snapshot = ArrayList(listeners)
-            }
+            synchronized(this) { snapshot = ArrayList(listeners) }
             for (listener in snapshot) {
                 listener.onCarStoreUpdated(key)
             }
@@ -125,14 +120,14 @@ class CarStore private constructor(context: Context) {
         const val KEY_LOCATION = "location"
         const val KEY_CONNECTED = "connected"
 
-        @Volatile
-        private var instance: CarStore? = null
+        @Volatile private var instance: CarStore? = null
 
         @JvmStatic
         fun get(context: Context): CarStore {
-            return instance ?: synchronized(CarStore::class.java) {
-                instance ?: CarStore(context).also { instance = it }
-            }
+            return instance
+                    ?: synchronized(CarStore::class.java) {
+                        instance ?: CarStore(context).also { instance = it }
+                    }
         }
     }
 }
