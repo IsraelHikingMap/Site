@@ -18,6 +18,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.MainThread
 import androidx.car.app.CarContext
+import androidx.core.animation.doOnEnd
 import java.io.IOException
 import kotlin.math.abs
 import kotlin.math.ln
@@ -71,7 +72,7 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
         val bearing = if (location.hasBearing()) location.bearing.toDouble() else 0.0
         // Push the GPS dot into the bottom third so most of the visible map shows what's ahead.
         val offsetY = (mapViewInstance?.height ?: 0) / 6
-        setCenterAndZoom(location.latitude, location.longitude, null, bearing, offsetY)
+        setCenter(location.latitude, location.longitude, bearing, offsetY)
     }
 
     override fun onCarStoreUpdated(key: String) {
@@ -131,35 +132,23 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
         }
     }
 
-    fun setCenterAndZoom(lat: Double, lng: Double, zoom: Double?, bearing: Double, offsetY: Int) {
+    fun setCenter(lat: Double, lng: Double, bearing: Double, offsetY: Int) {
         val map = mapLibreMapInstance ?: return
-        val effectiveZoom = zoom ?: map.cameraPosition.zoom
-        if (cameraPositionMatches(map.cameraPosition, lat, lng, effectiveZoom)) {
+        if (cameraPositionMatches(map.cameraPosition, lat, lng)) {
             return
         }
         val projection = map.projection
         val screenPoint =
                 projection.toScreenLocation(LatLng(lat, lng)).apply { y -= offsetY.toFloat() }
         val newTarget = projection.fromScreenLocation(screenPoint)
-        val nextPosition =
-                CameraPosition.Builder()
-                        .target(newTarget)
-                        .zoom(effectiveZoom)
-                        .bearing(bearing)
-                        .build()
+        val nextPosition = CameraPosition.Builder().target(newTarget).bearing(bearing).build()
         map.easeCamera(newCameraPosition(nextPosition), CAMERA_EASE_DURATION_MS)
     }
 
-    private fun cameraPositionMatches(
-            position: CameraPosition,
-            lat: Double,
-            lng: Double,
-            zoom: Double
-    ): Boolean {
+    private fun cameraPositionMatches(position: CameraPosition, lat: Double, lng: Double): Boolean {
         val target = position.target ?: return false
         return abs(target.latitude - lat) < LATLNG_EPSILON &&
-                abs(target.longitude - lng) < LATLNG_EPSILON &&
-                abs(position.zoom - zoom) < ZOOM_EPSILON
+                abs(target.longitude - lng) < LATLNG_EPSILON
     }
 
     private fun addLocationLayers(style: Style) {
@@ -350,6 +339,14 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
         }
     }
 
+    private fun persistCurrentZoom() {
+        val zoom = mapLibreMapInstance?.cameraPosition?.zoom ?: return
+        if (zoom != lastSavedZoom) {
+            lastSavedZoom = zoom
+            store.saveZoom(zoom)
+        }
+    }
+
     private fun createScaleAnimator(
             currentZoom: Double,
             zoomAddition: Double,
@@ -366,6 +363,7 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
                                     0
                             )
                         }
+                        doOnEnd { persistCurrentZoom() }
                     }
 
     private fun doubleClickZoomWithAnimation(zoomFocalPoint: PointF, isZoomIn: Boolean) {
@@ -437,15 +435,12 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
     }
 
     private fun initializeMap(map: MapLibreMap) {
+        val initialLocation = store.getLocation() ?: store.loadLastKnownLocation()
         map.cameraPosition =
-                CameraPosition.Builder(map.cameraPosition).zoom(store.loadZoom()).build()
-        map.addOnCameraIdleListener {
-            val zoom = map.cameraPosition.zoom
-            if (zoom != lastSavedZoom) {
-                lastSavedZoom = zoom
-                store.saveZoom(zoom)
-            }
-        }
+                CameraPosition.Builder(map.cameraPosition)
+                        .zoom(store.loadZoom())
+                        .target(LatLng(initialLocation.latitude, initialLocation.longitude))
+                        .build()
         store.loadStyle()?.let { setStyle(it) }
     }
 
@@ -517,7 +512,6 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
         private const val PAN_SUPPRESSION_MS = 15_000L
         private const val CAMERA_EASE_DURATION_MS = 250
         private const val LATLNG_EPSILON = 1e-6
-        private const val ZOOM_EPSILON = 1e-3
         private const val ATTRIBUTION_COLOR = 0x7B996A74.toInt()
         const val DOUBLE_CLICK_FACTOR: Float = 2.0f
 

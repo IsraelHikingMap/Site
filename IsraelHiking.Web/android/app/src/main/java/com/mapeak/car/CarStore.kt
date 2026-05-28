@@ -86,10 +86,29 @@ class CarStore private constructor(context: Context) {
 
     fun setLocation(location: Location?) {
         locationCache = location
+        if (location != null) {
+            prefs.edit()
+                    .putFloat(KEY_LAST_LAT, location.latitude.toFloat())
+                    .putFloat(KEY_LAST_LNG, location.longitude.toFloat())
+                    .apply()
+        }
         notifyChanged(KEY_LOCATION)
     }
 
     fun getLocation(): Location? = locationCache
+
+    /**
+     * Last lat/lng we ever received from GPS, used to center the map on launch before a fresh fix
+     * arrives. Falls back to London on a cold install with no saved fix so the map never opens at
+     * (0, 0). The returned Location only has coordinates — no speed, bearing, or accuracy — so it
+     * should not be fed into ETA computation.
+     */
+    fun loadLastKnownLocation(): Location {
+        return Location(LAST_KNOWN_PROVIDER).apply {
+            latitude = prefs.getFloat(KEY_LAST_LAT, DEFAULT_LAT.toFloat()).toDouble()
+            longitude = prefs.getFloat(KEY_LAST_LNG, DEFAULT_LNG.toFloat()).toDouble()
+        }
+    }
 
     fun setConnected(connected: Boolean) {
         if (connectedCache == connected) {
@@ -114,6 +133,11 @@ class CarStore private constructor(context: Context) {
     companion object {
         private const val PREFS_NAME = "mapeak_car"
         private const val KEY_ZOOM = "zoom"
+        private const val KEY_LAST_LAT = "last_lat"
+        private const val KEY_LAST_LNG = "last_lng"
+        private const val LAST_KNOWN_PROVIDER = "saved"
+        private const val DEFAULT_LAT = 51.5074
+        private const val DEFAULT_LNG = -0.1278
         const val KEY_STYLE = "style"
         const val KEY_ROUTE = "route"
         const val KEY_CONFIG = "config"

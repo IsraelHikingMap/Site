@@ -12,7 +12,7 @@ data class CarStatistics(val remainingMeters: Double, val remainingSeconds: Long
 
 object CarStatisticsCalculator {
     /** Below this speed (m/s) the GPS ETA would be meaningless, so we skip stats entirely. */
-    private const val MIN_SPEED_MPS_FOR_ETA = 1.5f
+    private const val MIN_SPEED_MPS_FOR_ETA = 0.5f
 
     /**
      * Mirrors MINIMAL_DISTANCE / MINIMAL_ANGLE from route-statistics.service.ts: a candidate route
@@ -84,6 +84,15 @@ object CarStatisticsCalculator {
     private fun findClosestRoute(routes: List<CarRouteData>, location: Location): ClosestRouteHit? {
         val gpsPoint = Point.fromLngLat(location.longitude, location.latitude)
         val heading = if (location.hasBearing()) location.bearing.toDouble() else null
+        return findClosestRouteWeighted(routes, gpsPoint, heading)
+                ?: heading?.let { findClosestRouteWeighted(routes, gpsPoint, null) }
+    }
+
+    private fun findClosestRouteWeighted(
+            routes: List<CarRouteData>,
+            gpsPoint: Point,
+            heading: Double?
+    ): ClosestRouteHit? {
         var minimalWeight = MINIMAL_DISTANCE_M
         if (heading != null) {
             minimalWeight += MINIMAL_ANGLE_DEG
