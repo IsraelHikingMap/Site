@@ -1,3 +1,4 @@
+import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
@@ -17,12 +18,12 @@ import type { ShareUrl } from "../models";
 describe("Share Urls Service", () => {
     beforeEach(() => {
         const hashService = {
-            getFullUrlFromShareId: jasmine.createSpy("getFullUrlFromShareId")
+            getFullUrlFromShareId: vi.fn()
         };
         const databaseService = {
             getShareUrlById: () => { },
             storeShareUrl: () => { },
-            deleteShareUrlById: jasmine.createSpy()
+            deleteShareUrlById: vi.fn()
         };
         const loggingService = {
             info: () => { },
@@ -30,13 +31,15 @@ describe("Share Urls Service", () => {
             warning: () => { }
         };
         TestBed.configureTestingModule({
-            imports: [
-                NgxsModule.forRoot([ShareUrlsReducer])],
+            imports: [NgxsModule.forRoot([ShareUrlsReducer])],
             providers: [
                 { provide: HashService, useValue: hashService },
                 { provide: LoggingService, useValue: loggingService },
                 { provide: DatabaseService, useValue: databaseService },
-                { provide: MapService, useValue: { map: { getCanvas: () => ({ toDataURL: () => "url" }) } } },
+                {
+                    provide: MapService,
+                    useValue: { map: { getCanvas: () => ({ toDataURL: () => "url" }) } }
+                },
                 RunningContextService,
                 WhatsAppService,
                 ShareUrlsService,
@@ -48,12 +51,11 @@ describe("Share Urls Service", () => {
 
     it("Should not do anything in initialization if user is not logged in", inject([ShareUrlsService, HttpTestingController, Store],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, store: Store) => {
-
             store.reset({
                 userState: {
                     userInfo: null
                 }
-            })
+            });
 
             await shareUrlsService.initialize();
 
@@ -63,7 +65,7 @@ describe("Share Urls Service", () => {
 
     it("Should sync urls when initializing", inject([ShareUrlsService, HttpTestingController, Store],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, store: Store) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
             store.reset({
                 userState: {
@@ -71,38 +73,44 @@ describe("Share Urls Service", () => {
                 },
                 shareUrlsState: {
                     shareUrlsLastModifiedDate: null,
-                    shareUrls: [{
-                        id: "1"
-                    }, {
-                        id: "2"
-                    }]
+                    shareUrls: [
+                        {
+                            id: "1"
+                        },
+                        {
+                            id: "2"
+                        }
+                    ]
                 }
-            })
+            });
             const promise = shareUrlsService.initialize();
 
-            mockBackend.expectOne(Urls.urls).flush([{
-                id: "2",
-                start: { lat: 1, lng: 1 },
-            }, {
-                id: "3",
-                start: { lat: 1, lng: 1 },
-            }]);
+            mockBackend.expectOne(Urls.urls).flush([
+                {
+                    id: "2",
+                    start: { lat: 1, lng: 1 }
+                },
+                {
+                    id: "3",
+                    start: { lat: 1, lng: 1 }
+                }
+            ]);
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
             mockBackend.expectOne(Urls.urls + "2").flush({
-                start: { lat: 1, lng: 1 },
+                start: { lat: 1, lng: 1 }
             });
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
             mockBackend.expectOne(Urls.urls + "3").flush({
-                start: { lat: 1, lng: 1 },
+                start: { lat: 1, lng: 1 }
             });
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(UpdateShareUrlAction);
-            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(AddShareUrlAction);
-            expect(spy.calls.all()[2].args[0]).toBeInstanceOf(RemoveShareUrlAction);
-            expect(spy.calls.all()[3].args[0]).toBeInstanceOf(SetShareUrlsLastModifiedDateAction);
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(UpdateShareUrlAction);
+            expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(AddShareUrlAction);
+            expect(vi.mocked(spy).mock.calls[2][0]).toBeInstanceOf(RemoveShareUrlAction);
+            expect(vi.mocked(spy).mock.calls[3][0]).toBeInstanceOf(SetShareUrlsLastModifiedDateAction);
 
             await promise;
         }
@@ -110,29 +118,38 @@ describe("Share Urls Service", () => {
 
     it("Should sync urls when initializing and update their start point if missing", inject([ShareUrlsService, HttpTestingController, Store, DatabaseService],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, store: Store, databaseService: DatabaseService) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
-            databaseService.getShareUrlById = () => Promise.resolve({ lastModifiedDate: new Date().toISOString() } as ShareUrl);
+            databaseService.getShareUrlById = () =>
+                Promise.resolve({
+                    lastModifiedDate: new Date().toISOString()
+                } as ShareUrl);
             store.reset({
                 userState: {
                     userInfo: {}
                 },
                 shareUrlsState: {
                     shareUrlsLastModifiedDate: null,
-                    shareUrls: [{
-                        id: "1"
-                    }, {
-                        id: "2"
-                    }]
+                    shareUrls: [
+                        {
+                            id: "1"
+                        },
+                        {
+                            id: "2"
+                        }
+                    ]
                 }
-            })
+            });
             const promise = shareUrlsService.initialize();
 
-            mockBackend.expectOne(Urls.urls).flush([{
-                id: "2",
-            }, {
-                id: "3",
-            }]);
+            mockBackend.expectOne(Urls.urls).flush([
+                {
+                    id: "2"
+                },
+                {
+                    id: "3"
+                }
+            ]);
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
             mockBackend.expectOne(Urls.urls + "2").flush({
@@ -147,8 +164,7 @@ describe("Share Urls Service", () => {
 
             mockBackend.expectOne(Urls.urls + "3").flush({
                 dataContainer: {
-                    routes: [{ segments: [{ latlngs: [{ lat: 1, lng: 1 }] }] }],
-
+                    routes: [{ segments: [{ latlngs: [{ lat: 1, lng: 1 }] }] }]
                 }
             });
 
@@ -166,22 +182,20 @@ describe("Share Urls Service", () => {
 
             mockBackend.expectOne(Urls.urls + "3").flush({
                 dataContainer: {
-                    routes: [{ segments: [{ latlngs: [{ lat: 1, lng: 1 }] }] }],
-
+                    routes: [{ segments: [{ latlngs: [{ lat: 1, lng: 1 }] }] }]
                 }
             });
 
             await promise;
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            expect(spy.calls.all().length).toBe(8);
-            expect(spy.calls.all()[5].args[0]).toBeInstanceOf(UpdateShareUrlAction);
-            expect(spy.calls.all()[5].args[0].shareUrl.start).toBeDefined();
-            expect(spy.calls.all()[6].args[0]).toBeInstanceOf(UpdateShareUrlAction);
-            expect(spy.calls.all()[6].args[0].shareUrl.start).toBeDefined();
+            expect(vi.mocked(spy).mock.calls.length).toBe(8);
+            expect(vi.mocked(spy).mock.calls[5][0]).toBeInstanceOf(UpdateShareUrlAction);
+            expect(vi.mocked(spy).mock.calls[5][0].shareUrl.start).toBeDefined();
+            expect(vi.mocked(spy).mock.calls[6][0]).toBeInstanceOf(UpdateShareUrlAction);
+            expect(vi.mocked(spy).mock.calls[6][0].shareUrl.start).toBeDefined();
         }
     ));
-
 
     it("Should get display name only for the title", inject([ShareUrlsService], (shareUrlService: ShareUrlsService) => {
         expect(shareUrlService.getShareUrlDisplayName({ title: "title" } as ShareUrl)).toBe("title");
@@ -205,7 +219,6 @@ describe("Share Urls Service", () => {
 
     it("Should get share url from database when already cached and don't refresh it if it's not newer", inject([ShareUrlsService, HttpTestingController, DatabaseService],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
-
             databaseService.getShareUrlById = () => Promise.resolve({ lastModifiedDate: new Date().toISOString() } as ShareUrl);
 
             const promise = shareUrlsService.getShareUrl("5");
@@ -221,7 +234,6 @@ describe("Share Urls Service", () => {
 
     it("Should get share url from server if not cached", inject([ShareUrlsService, HttpTestingController, DatabaseService],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
-
             databaseService.getShareUrlById = () => null;
 
             const promise = shareUrlsService.getShareUrl("6");
@@ -229,7 +241,7 @@ describe("Share Urls Service", () => {
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
             mockBackend.expectOne(Urls.urls + "6").flush({
-                start: { lat: 1, lng: 1 },
+                start: { lat: 1, lng: 1 }
             });
 
             const response = await promise;
@@ -241,7 +253,6 @@ describe("Share Urls Service", () => {
 
     it("Should get share url from server if not cached and use datacontainer routes to set start point", inject([ShareUrlsService, HttpTestingController, DatabaseService],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
-
             databaseService.getShareUrlById = () => null;
 
             const promise = shareUrlsService.getShareUrl("6");
@@ -249,7 +260,9 @@ describe("Share Urls Service", () => {
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
             mockBackend.expectOne(Urls.urls + "6").flush({
-                dataContainer: { routes: [{ segments: [{ latlngs: [{ lat: 1, lng: 1 }] }] }] },
+                dataContainer: {
+                    routes: [{ segments: [{ latlngs: [{ lat: 1, lng: 1 }] }] }]
+                }
             });
 
             const response = await promise;
@@ -261,7 +274,6 @@ describe("Share Urls Service", () => {
 
     it("Should get share url from server if not cached and use datacontainer corners to set start point", inject([ShareUrlsService, HttpTestingController, DatabaseService],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
-
             databaseService.getShareUrlById = () => null;
 
             const promise = shareUrlsService.getShareUrl("6");
@@ -269,7 +281,10 @@ describe("Share Urls Service", () => {
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
             mockBackend.expectOne(Urls.urls + "6").flush({
-                dataContainer: { northEast: { lat: 0, lng: 0 }, southWest: { lat: 2, lng: 2 } },
+                dataContainer: {
+                    northEast: { lat: 0, lng: 0 },
+                    southWest: { lat: 2, lng: 2 }
+                }
             });
 
             const response = await promise;
@@ -281,7 +296,6 @@ describe("Share Urls Service", () => {
 
     it("Should get share url from database when already cached and try to refresh it since it's newer", inject([ShareUrlsService, HttpTestingController, DatabaseService],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
-
             databaseService.getShareUrlById = () => Promise.resolve({ lastModifiedDate: new Date(100).toISOString() } as ShareUrl);
 
             const promise = shareUrlsService.getShareUrl("7");
@@ -293,7 +307,7 @@ describe("Share Urls Service", () => {
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
             expect(() => mockBackend.expectOne(Urls.urls + "7").flush({
-                start: { lat: 1, lng: 1 },
+                start: { lat: 1, lng: 1 }
             })).not.toThrow();
             await promise;
         }
@@ -301,7 +315,6 @@ describe("Share Urls Service", () => {
 
     it("Should get share url from database when already cached and try to refresh twice it since it's newer and first fast refresh failed", inject([ShareUrlsService, HttpTestingController, DatabaseService],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
-
             databaseService.getShareUrlById = () => Promise.resolve({ lastModifiedDate: new Date(100).toISOString() } as ShareUrl);
 
             const promise = shareUrlsService.getShareUrl("7");
@@ -312,7 +325,7 @@ describe("Share Urls Service", () => {
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
             expect(() => mockBackend.expectOne(Urls.urls + "7").flush({
-                start: { lat: 1, lng: 1 },
+                start: { lat: 1, lng: 1 }
             })).not.toThrow();
             await promise;
         }
@@ -320,45 +333,38 @@ describe("Share Urls Service", () => {
 
     it("Should create share url", inject([ShareUrlsService, HttpTestingController],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController) => {
-
             const shareUrl = { id: "42" } as ShareUrl;
 
-            const promise = shareUrlsService.createShareUrl(shareUrl).then((res) => {
-                expect(res).not.toBeNull();
-            });
+            const promise = shareUrlsService.createShareUrl(shareUrl);
 
             mockBackend.expectOne(Urls.urls).flush({});
-            await promise;
+            const res = await promise;
+            expect(res).not.toBeNull();
         }
     ));
 
     it("Should update share url", inject([ShareUrlsService, HttpTestingController],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController) => {
-
             const shareUrl = { id: "42" } as ShareUrl;
 
-            const promise = shareUrlsService.updateShareUrl(shareUrl).then((res) => {
-                expect(res).not.toBeNull();
-            });
+            const promise = shareUrlsService.updateShareUrl(shareUrl);
 
             mockBackend.expectOne(Urls.urls + shareUrl.id).flush({});
-            await promise;
+            const res = await promise;
+            expect(res).not.toBeNull();
         }
     ));
 
     it("Should delete share url", inject([ShareUrlsService, HttpTestingController, DatabaseService, Store],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService, store: Store) => {
-
             const shareUrl = { id: "42" } as ShareUrl;
-            store.dispatch = jasmine.createSpy();
-            const promise = shareUrlsService.deleteShareUrl(shareUrl).then(() => {
-
-                expect(store.dispatch).toHaveBeenCalled();
-                expect(databaseService.deleteShareUrlById).toHaveBeenCalled();
-            });
+            store.dispatch = vi.fn();
+            const promise = shareUrlsService.deleteShareUrl(shareUrl);
 
             mockBackend.expectOne(Urls.urls + shareUrl.id).flush({});
             await promise;
+            expect(store.dispatch).toHaveBeenCalled();
+            expect(databaseService.deleteShareUrlById).toHaveBeenCalled();
         }
     ));
 
@@ -369,7 +375,7 @@ describe("Share Urls Service", () => {
     }));
 
     it("Should set share Url to store", inject([ShareUrlsService, Store], (shareUrlsService: ShareUrlsService, store: Store) => {
-        store.dispatch = jasmine.createSpy();
+        store.dispatch = vi.fn();
         shareUrlsService.setShareUrl({} as any);
         expect(store.dispatch).toHaveBeenCalled();
     }));
@@ -381,7 +387,7 @@ describe("Share Urls Service", () => {
                     id: "42"
                 }
             }
-        })
+        });
         const shareUrl = shareUrlsService.getSelectedShareUrl();
         expect(shareUrl.id).toBe("42");
     }));

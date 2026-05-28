@@ -1,3 +1,4 @@
+import { describe, beforeEach, it, expect } from "vitest";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { inject, TestBed } from "@angular/core/testing";
@@ -270,7 +271,7 @@ describe("ImageAttributionService", () => {
                         "-1": {
                             imageinfo: [{
                                 extmetadata: {
-                                    somthing: {},
+                                    somthing: {}
                                 }
                             }]
                         }
@@ -293,7 +294,7 @@ describe("ImageAttributionService", () => {
                         "-1": {
                             imageinfo: [{
                                 extmetadata: {
-                                    somthing: {},
+                                    somthing: {}
                                 }
                             }],
                             revisions: [{
@@ -320,7 +321,7 @@ describe("ImageAttributionService", () => {
                         "-1": {
                             imageinfo: [{
                                 extmetadata: {
-                                    somthing: {},
+                                    somthing: {}
                                 }
                             }],
                             revisions: [{

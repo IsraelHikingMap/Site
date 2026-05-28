@@ -35,7 +35,8 @@ import type {
     NorthEast,
     EditablePublicPointData,
     UpdateablePublicPoiData,
-    ShareUrl
+    ShareUrl,
+    PublicRoutesFilter
 } from "../models";
 
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite" | "Bench"
@@ -145,14 +146,14 @@ export class PoiService {
                 const bounds = SpatialService.getBoundsForFeature(feature);
                 return {
                     lat: (bounds.northEast.lat + bounds.southWest.lat) / 2,
-                    lng: (bounds.northEast.lng + bounds.southWest.lng) / 2,
+                    lng: (bounds.northEast.lng + bounds.southWest.lng) / 2
                 };
             }
             case "MultiPolygon": {
                 const bounds = SpatialService.getBoundsForFeature(feature);
                 return {
                     lat: (bounds.northEast.lat + bounds.southWest.lat) / 2,
-                    lng: (bounds.northEast.lng + bounds.southWest.lng) / 2,
+                    lng: (bounds.northEast.lng + bounds.southWest.lng) / 2
                 };
             }
             case "MultiLineString":
@@ -272,17 +273,36 @@ export class PoiService {
         };
     }
 
-    public getPublicRoutes(categoires: string[]): GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> {
-        if (categoires.length === 0) {
+    public getPublicRoutes(filters: Immutable<PublicRoutesFilter>): GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> {
+        if (filters.categories.length === 0) {
             return {
                 type: "FeatureCollection",
                 features: []
             };
         }
-        const tileFeautes = this.getPoisFromTiles();
+        const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration).units;
+        const factor = units === "metric" ? 1000.0 : 1609.344;
+        let features = this.getPoisFromTiles();
+        features = this.filterFeatures(features, filters.categories);
+        features = features.filter(feature => {
+            if (feature.properties.poiDifficulty && !filters.difficulty.includes(feature.properties.poiDifficulty)) {
+                return false;
+            }
+            if (feature.properties.poiLength / factor < filters.lengthRange[0]) {
+                return false;
+            }
+            if (feature.properties.poiLength / factor > filters.lengthRange[1] && filters.lengthRange[1] < 50) {
+                return false;
+            }
+            if (filters.userId && feature.properties.poiUserId !== filters.userId) {
+                return false;
+            }
+            return true;
+        });
+
         return {
             type: "FeatureCollection",
-            features: this.filterFeatures(tileFeautes, categoires)
+            features
         };
     }
 
@@ -506,7 +526,7 @@ export class PoiService {
     public getItmCoordinates(feature: GeoJSON.Feature): NorthEast {
         return {
             east: feature.properties.poiItmEast,
-            north: feature.properties.poiItmNorth,
+            north: feature.properties.poiItmNorth
         } as NorthEast;
     }
 
@@ -555,7 +575,7 @@ export class PoiService {
             geometry: {
                 type: "Point",
                 coordinates: SpatialService.toCoordinate(latlng)
-            },
+            }
         } as GeoJSON.Feature;
         GeoJSONUtils.setLocation(feature, latlng);
         return this.addPointToUploadQueue(feature);
@@ -691,7 +711,7 @@ export class PoiService {
             icon: feature.properties.poiIcon,
             iconColor: feature.properties.poiIconColor,
             imagesUrls: GeoJSONUtils.getValidImageUrls(feature),
-            urls: GeoJSONUtils.getUrls(feature),
+            urls: GeoJSONUtils.getUrls(feature)
         };
     }
 
@@ -703,7 +723,7 @@ export class PoiService {
                 poiId: info.id,
                 poiCategory: info.category,
                 poiIcon: info.icon,
-                poiIconColor: info.iconColor,
+                poiIconColor: info.iconColor
             } as any
         } as GeoJSON.Feature;
         for (const imageUrl of info.imagesUrls) {

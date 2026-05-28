@@ -87,7 +87,7 @@ export class TracesService {
                 start: {
                     lat: traceJson.lat,
                     lng: traceJson.lon
-                },
+                }
             } as Trace));
             const allTraces = serverTraces.concat(existingTraces.filter(t => t.visibility === "local") as any as Trace[]);
             const serverTracesMap = serverTraces.reduce((acc, trace) => {

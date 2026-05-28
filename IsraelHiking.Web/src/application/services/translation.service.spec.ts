@@ -1,3 +1,4 @@
+import { describe, beforeEach, it, expect } from "vitest";
 import { inject, TestBed } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
@@ -12,8 +13,9 @@ describe("TranslationService", () => {
             providers: [
                 TranslationService,
                 {
-                    provide: ResourcesService, useValue: {
-                        getCurrentLanguageCodeSimplified: () => "he",
+                    provide: ResourcesService,
+                    useValue: {
+                        getCurrentLanguageCodeSimplified: () => "he"
                     }
                 },
                 provideHttpClient(withInterceptorsFromDi()),
@@ -33,7 +35,7 @@ describe("TranslationService", () => {
                 "description:he": "תיאור בעברית"
             }
         } as GeoJSON.Feature);
-        expect(isTranslationNeeded).toBeFalse();
+        expect(isTranslationNeeded).toBeFalsy();
     }));
 
     it("return false if translation is not needed beacuse of external description", inject([TranslationService], (service: TranslationService) => {
@@ -48,7 +50,7 @@ describe("TranslationService", () => {
                 description: "Original description"
             }
         } as GeoJSON.Feature);
-        expect(isTranslationNeeded).toBeFalse();
+        expect(isTranslationNeeded).toBeFalsy();
     }));
 
     it("return false if translation is not possible", inject([TranslationService], (service: TranslationService) => {
@@ -60,7 +62,7 @@ describe("TranslationService", () => {
             },
             properties: {}
         } as GeoJSON.Feature);
-        expect(isTranslationPossible).toBeFalse();
+        expect(isTranslationPossible).toBeFalsy();
     }));
 
     it("return true if translation is possible and needed in original language", inject([TranslationService], (service: TranslationService) => {
@@ -74,7 +76,7 @@ describe("TranslationService", () => {
                 description: "Original description"
             }
         } as GeoJSON.Feature);
-        expect(isTranslationPossible).toBeTrue();
+        expect(isTranslationPossible).toBeTruthy();
     }));
 
     it("return true if translation is possible and needed in english", inject([TranslationService], (service: TranslationService) => {
@@ -88,7 +90,7 @@ describe("TranslationService", () => {
                 "description:en": "Description in English"
             }
         } as GeoJSON.Feature);
-        expect(isTranslationPossible).toBeTrue();
+        expect(isTranslationPossible).toBeTruthy();
     }));
 
     it("return true if translation is possible by external translation from another language", inject([TranslationService], (service: TranslationService) => {
@@ -99,10 +101,10 @@ describe("TranslationService", () => {
                 coordinates: [0, 0]
             },
             properties: {
-                "poiExternalDescription:en": "External description",
+                "poiExternalDescription:en": "External description"
             }
         } as GeoJSON.Feature);
-        expect(isTranslationPossible).toBeTrue();
+        expect(isTranslationPossible).toBeTruthy();
     }));
 
     it("should return the best description from relevant language", inject([TranslationService], (service: TranslationService) => {
@@ -210,7 +212,7 @@ describe("TranslationService", () => {
             },
             properties: {
                 "description:en": ""
-            },
+            }
         };
         const promise = service.getTranslatedDescription(feature);
 
@@ -229,12 +231,12 @@ describe("TranslationService", () => {
             },
             properties: {
                 "description:en": "Description in English"
-            },
+            }
         };
         const promise = service.getTranslatedDescription(feature);
 
         backend.expectOne(req => req.method === "POST" && req.url === Urls.tranlation).flush({
-            translatedText: "Translated Description",
+            translatedText: "Translated Description"
         } as TranslationResponse);
 
         const translation = await promise;
@@ -251,12 +253,12 @@ describe("TranslationService", () => {
             properties: {
                 poiId: "12345",
                 "description:en": "Description in English"
-            },
+            }
         };
         const promise = service.getTranslatedDescription(feature);
 
         backend.expectOne(req => req.method === "POST" && req.url === Urls.tranlation).flush({
-            translatedText: "Translated Description",
+            translatedText: "Translated Description"
         } as TranslationResponse);
 
         const translation = await promise;
@@ -275,7 +277,7 @@ describe("TranslationService", () => {
             properties: {
                 poiId: "12345",
                 "description:en": "Description in English"
-            },
+            }
         };
         const promise = service.getTranslatedDescription(feature);
 

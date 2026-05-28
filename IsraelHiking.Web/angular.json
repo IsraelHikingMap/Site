@@ -74,7 +74,7 @@
             "browser": "src/main.ts"
           },
           "configurations": {
-            "dev": {
+            "development": {
               "index": {
                 "input": "src/index.html",
                 "output": "index.csr.html"
@@ -155,29 +155,23 @@
           "defaultConfiguration": ""
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "codeCoverageExclude": [
+            "runnerConfig": "./vitest.config.ts",
+            "coverageExclude": [
               "src/application/services/database.service.ts",
               "src/application/services/geo-location.service.ts",
-              "src/application/services/connection.service.ts",
+              "src/application/services/device-orientation.service.ts",
+              "src/application/services/pmtiles.service.ts",
+              "src/application/services/analytics.service.ts",
               "src/application/components/**",
               "src/application/directives/**",
               "src/application/pipes/**",
               "src/application/reducers/**"
             ],
-            "karmaConfig": "./karma.conf.cjs",
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
             "tsConfig": "./tsconfig.spec.json",
-            "scripts": [],
-            "assets": [
-              "src/content",
-              "src/translations",
-              "src/resource-not-found.html",
-              "src/empty-for-oauth.html"
+            "browsers": [
+              "chromiumHeadless"
             ]
           }
         },

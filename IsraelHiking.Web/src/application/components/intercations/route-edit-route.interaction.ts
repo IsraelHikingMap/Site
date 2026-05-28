@@ -133,7 +133,7 @@ export class RouteEditRouteInteraction {
         const th = 10;
         const routePoints = event.target.queryRenderedFeatures([[point.x - th, point.y - th], [point.x + th, point.y + th]],
             {
-                layers: [this.resources.editRoutePoints],
+                layers: [this.resources.editRoutePoints]
             });
         this.selectedRoutePoint = routePoints.length > 0 ? this.getFeatureById(routePoints[0].properties.id) : null;
         if (this.selectedRoutePoint != null) {
@@ -381,7 +381,7 @@ export class RouteEditRouteInteraction {
             type: "star",
             urls: [],
             title: "",
-            description: "",
+            description: ""
         } as Immutable<MarkerData>)).concat(this.selectedRouteService.getSelectedRoute().markers);
         const snappingPointResponse = this.snappingService.snapToPoint(latlng, points);
         return snappingPointResponse.latlng;

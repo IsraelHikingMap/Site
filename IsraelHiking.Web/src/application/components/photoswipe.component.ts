@@ -16,7 +16,7 @@ export type PhotoSwipeData = {
     styleUrls: ["./photoswipe.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class PhotoSwpieComponent implements AfterViewInit{
+export class PhotoSwpieComponent implements AfterViewInit {
 
     public readonly resources = inject(ResourcesService);
     public photoswipe = viewChild<ElementRef>("photoswipe");
@@ -27,7 +27,7 @@ export class PhotoSwpieComponent implements AfterViewInit{
         const pswpElement = this.photoswipe().nativeElement;
 
         const dataSource = this.data.imageUrls.map(imageUrl => ({
-            src: imageUrl,
+            src: imageUrl
         }));
 
         const pswp = new PhotoSwipe({
@@ -36,19 +36,19 @@ export class PhotoSwpieComponent implements AfterViewInit{
             index: this.data.index,
             closeOnVerticalDrag: false,
             pinchToClose: false,
-            maxZoomLevel: 8,
+            maxZoomLevel: 8
         });
 
         pswp.on("destroy", () => this.closed.emit());
         pswp.on("beforeOpen", () => {
             const ds = pswp?.options?.dataSource as { src: string; width?: number; height?: number }[];
-              for (let idx = 0; idx < ds.length; idx++) {
+            for (let idx = 0; idx < ds.length; idx++) {
                 const item = ds[idx];
                 const img = new Image();
                 img.onload = () => {
-                  item.width = img.naturalWidth;
-                  item.height = img.naturalHeight;
-                  pswp?.refreshSlideContent(idx);
+                    item.width = img.naturalWidth;
+                    item.height = img.naturalHeight;
+                    pswp?.refreshSlideContent(idx);
                 };
                 img.src = item.src;
             }

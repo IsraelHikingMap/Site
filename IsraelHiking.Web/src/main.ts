@@ -1,22 +1,22 @@
 import { enableProdMode, provideZoneChangeDetection } from "@angular/core";
 import { environment } from "./environments/environment";
 import {
-  bootstrapApplication,
-  provideClientHydration,
-  withEventReplay,
+    bootstrapApplication,
+    provideClientHydration,
+    withEventReplay
 } from "@angular/platform-browser";
 import { appConfig } from "./application/app.config";
 import { AppRootComponent } from "./application/components/screens/app-root.component";
 
 if (environment.production) {
-  enableProdMode();
+    enableProdMode();
 }
 
 bootstrapApplication(AppRootComponent, {
-  ...appConfig,
-  providers: [
-    provideZoneChangeDetection(),
-    ...appConfig.providers,
-    provideClientHydration(withEventReplay()),
-  ],
+    ...appConfig,
+    providers: [
+        provideZoneChangeDetection(),
+        ...appConfig.providers,
+        provideClientHydration(withEventReplay())
+    ]
 });

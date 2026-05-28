@@ -1,3 +1,4 @@
+import { describe, beforeEach, vi, it, expect } from "vitest";
 import { inject, TestBed } from "@angular/core/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 import type { Immutable } from "immer";
@@ -37,40 +38,38 @@ describe("Selected Route Service", () => {
             confirm: (options: any) => options.declineAction()
         };
         TestBed.configureTestingModule({
-            imports: [
-                NgxsModule.forRoot([RoutesReducer, RouteEditingReducer])
-            ],
+            imports: [NgxsModule.forRoot([RoutesReducer, RouteEditingReducer])],
             providers: [
                 { provide: ResourcesService, useValue: resourceService },
                 { provide: RoutingProvider, useValue: routingProviderMock },
                 { provide: ToastService, useValue: toastServiceMock },
-                { provide: SidebarService, useValue: { show: jasmine.createSpy() } },
+                { provide: SidebarService, useValue: { show: vi.fn() } },
                 { provide: ShareUrlsService, useValue: {} },
                 { provide: ElevationProvider, useValue: {} },
                 GeoJsonParser,
                 RoutesFactory,
-                SelectedRouteService,
+                SelectedRouteService
             ]
         });
     });
 
-    it("Should issue a toast if there are too many routes, and show the sidebar when user declines", inject([SelectedRouteService, Store, SidebarService], (selectedRouteService: SelectedRouteService, store: Store, sidebarService: SidebarService) => {
-        setupRoutes(store, Array.from({ length: 100 }, (_, i) => ({ id: i.toString() } as any)));
-        selectedRouteService.initialize();
-        expect(sidebarService.show).toHaveBeenCalled();
-    }));
-
-    it("Should get undefined selected route when there're no routes", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            const selectedRoute = selectedRouteService.getSelectedRoute();
-
-            expect(selectedRoute).toBeUndefined();
+    it("Should issue a toast if there are too many routes, and show the sidebar when user declines", inject([SelectedRouteService, Store, SidebarService],
+        (selectedRouteService: SelectedRouteService, store: Store, sidebarService: SidebarService) => {
+            setupRoutes(store, Array.from({ length: 100 }, (_, i) => ({ id: i.toString() } as any)));
+            selectedRouteService.initialize();
+            expect(sidebarService.show).toHaveBeenCalled();
         }
     ));
 
+    it("Should get undefined selected route when there're no routes", inject([SelectedRouteService], (selectedRouteService: SelectedRouteService) => {
+        const selectedRoute = selectedRouteService.getSelectedRoute();
+
+        expect(selectedRoute).toBeUndefined();
+    }));
+
     it("Should sync selected route with editing route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            store.dispatch = jasmine.createSpy();
+            store.dispatch = vi.fn();
             setupRoutes(store, [{ id: "42", state: "Poi" } as any]);
             setupSelectedRoute(store, "1");
 
@@ -90,13 +89,13 @@ describe("Selected Route Service", () => {
                     weight: 10
                 }
             });
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.getOrCreateSelectedRoute();
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.first().args[0]).toBeInstanceOf(AddRouteAction);
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(AddRouteAction);
         }
     ));
 
@@ -126,7 +125,7 @@ describe("Selected Route Service", () => {
     it("Should set selected route if there's no selected route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupSelectedRoute(store, null);
-            store.dispatch = jasmine.createSpy();
+            store.dispatch = vi.fn();
 
             selectedRouteService.setSelectedRoute("42");
 
@@ -137,20 +136,18 @@ describe("Selected Route Service", () => {
     it("Should unselect selected route and selected the given route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupSelectedRoute(store, "1");
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
             selectedRouteService.setSelectedRoute("42");
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.first().args[0]).toBeInstanceOf(SetSelectedRouteAction);
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(SetSelectedRouteAction);
         }
     ));
 
-    it("Should return empty routes where there are none", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            expect(selectedRouteService.areRoutesEmpty()).toBeTruthy();
-        }
-    ));
+    it("Should return empty routes where there are none", inject([SelectedRouteService], (selectedRouteService: SelectedRouteService) => {
+        expect(selectedRouteService.areRoutesEmpty()).toBeTruthy();
+    }));
 
     it("Should not return empty routes where there are routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
@@ -164,16 +161,22 @@ describe("Selected Route Service", () => {
         (selectedRouteService: SelectedRouteService, store: Store) => {
             store.reset({
                 recordedRouteState: {
-                    isAddingPoi: false,
+                    isAddingPoi: false
+                },
+                routeEditingState: {
+                    selectedRouteId: null
+                },
+                routes: {
+                    present: []
                 }
             });
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.changeRouteEditState("42", "ReadOnly");
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.first().args[0]).toBeInstanceOf(ChangeRouteStateAction);
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(ChangeRouteStateAction);
         }
     ));
 
@@ -181,17 +184,23 @@ describe("Selected Route Service", () => {
         (selectedRouteService: SelectedRouteService, store: Store) => {
             store.reset({
                 recordedRouteState: {
-                    isAddingPoi: true,
+                    isAddingPoi: true
+                },
+                routeEditingState: {
+                    selectedRouteId: null
+                },
+                routes: {
+                    present: []
                 }
             });
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.changeRouteEditState("42", "ReadOnly");
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ToggleAddRecordingPoiAction);
-            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(ChangeRouteStateAction);
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(ToggleAddRecordingPoiAction);
+            expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(ChangeRouteStateAction);
         }
     ));
 
@@ -207,18 +216,24 @@ describe("Selected Route Service", () => {
 
     it("Should not get closet route to selected route when there are no other routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date().toISOString() }],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }]);
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        }
+                    ],
+                    state: "ReadOnly"
+                }
+            ]);
             setupSelectedRoute(store, "1");
 
             const closetRoute = selectedRouteService.getClosestRouteToSelected(true);
@@ -228,29 +243,44 @@ describe("Selected Route Service", () => {
 
     it("Should get closet route to selected route when there is another route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date().toISOString() }],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }, {
-                id: "2",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [{ lat: 1.00001, lng: 1.00001, timestamp: new Date().toISOString() }],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }]);
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        }
+                    ],
+                    state: "ReadOnly"
+                },
+                {
+                    id: "2",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                {
+                                    lat: 1.00001,
+                                    lng: 1.00001,
+                                    timestamp: new Date().toISOString()
+                                }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        }
+                    ],
+                    state: "ReadOnly"
+                }
+            ]);
             setupSelectedRoute(store, "1");
 
             const closetRoute = selectedRouteService.getClosestRouteToSelected(true);
@@ -260,40 +290,59 @@ describe("Selected Route Service", () => {
 
     it("Should get the closet route to selected route when there are multiple close by routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date().toISOString() }],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }, {
-                id: "2",
-                description: "",
-                markers: [],
-                name: "clost but not the closest",
-                segments: [{
-                    latlngs: [{ lat: 1.00001, lng: 1.00001, timestamp: new Date().toISOString() }],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }, {
-                id: "3",
-                description: "",
-                markers: [],
-                name: "closest",
-                segments: [{
-                    latlngs: [{ lat: 1.00001, lng: 1, timestamp: new Date().toISOString() }],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        }
+                    ],
+                    state: "ReadOnly"
+                },
+                {
+                    id: "2",
+                    description: "",
+                    markers: [],
+                    name: "clost but not the closest",
+                    segments: [
+                        {
+                            latlngs: [
+                                {
+                                    lat: 1.00001,
+                                    lng: 1.00001,
+                                    timestamp: new Date().toISOString()
+                                }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        }
+                    ],
+                    state: "ReadOnly"
+                },
+                {
+                    id: "3",
+                    description: "",
+                    markers: [],
+                    name: "closest",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1.00001, lng: 1, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        }
+                    ],
+                    state: "ReadOnly"
+                }
             ]);
             setupSelectedRoute(store, "1");
 
@@ -302,54 +351,66 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should get closet route to selected route when there are other routes and it is near the end of the route",
-        inject([SelectedRouteService, Store],
-            (selectedRouteService: SelectedRouteService, store: Store) => {
-                setupRoutes(store, [{
+    it("Should get closet route to selected route when there are other routes and it is near the end of the route", inject(
+        [SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [
+                {
                     id: "1",
                     description: "",
                     markers: [],
                     name: "name",
-                    segments: [{
-                        latlngs: [{ lat: 1, lng: 1, timestamp: new Date().toISOString() }],
-                        routePoint: { lat: 1, lng: 1 },
-                        routingType: "Hike"
-                    }],
-                    state: "ReadOnly",
-                }, {
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        }
+                    ],
+                    state: "ReadOnly"
+                },
+                {
                     id: "2",
                     description: "",
                     markers: [],
                     name: "name",
-                    segments: [{
-                        latlngs: [{ lat: 2, lng: 2, timestamp: new Date().toISOString() }],
-                        routePoint: { lat: 2, lng: 2 },
-                        routingType: "Hike"
-                    }],
-                    state: "ReadOnly",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 2, lng: 2 },
+                            routingType: "Hike"
+                        }
+                    ],
+                    state: "ReadOnly"
                 },
                 {
                     id: "3",
                     description: "",
                     markers: [],
                     name: "name",
-                    segments: [{
-                        latlngs: [
-                            { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                            { lat: 1, lng: 1, timestamp: new Date().toISOString() }
-                        ],
-                        routePoint: { lat: 2, lng: 2 },
-                        routingType: "Hike"
-                    }],
-                    state: "ReadOnly",
-                }]);
-                setupSelectedRoute(store, "1");
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 2, lng: 2 },
+                            routingType: "Hike"
+                        }
+                    ],
+                    state: "ReadOnly"
+                }
+            ]);
+            setupSelectedRoute(store, "1");
 
-                const closetRoute = selectedRouteService.getClosestRouteToSelected(false);
-                expect(closetRoute.id).toBe("3");
-            }
-        )
-    );
+            const closetRoute = selectedRouteService.getClosestRouteToSelected(false);
+            expect(closetRoute.id).toBe("3");
+        }
+    ));
 
     it("Should not get closet route to GPS when there's no location", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
@@ -371,18 +432,24 @@ describe("Selected Route Service", () => {
 
     it("Should not get closet route to GPS when there are no visible routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date().toISOString() }],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }],
-                state: "Hidden",
-            }]);
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        }
+                    ],
+                    state: "Hidden"
+                }
+            ]);
 
             const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date().toISOString() }, 0);
             expect(closetRoute).toBeNull();
@@ -391,19 +458,25 @@ describe("Selected Route Service", () => {
 
     it("Should get closet route to GPS when there are routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                    { lat: 2, lng: 2, timestamp: new Date().toISOString() }],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }]);
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        }
+                    ],
+                    state: "ReadOnly"
+                }
+            ]);
 
             const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date().toISOString() }, 0);
             expect(closetRoute.id).toBe("1");
@@ -412,19 +485,25 @@ describe("Selected Route Service", () => {
 
     it("Should get closet route to GPS when there are routes when heading is opposite", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [{ lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                    { lat: 1, lng: 0, timestamp: new Date().toISOString() }],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }]);
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 0, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        }
+                    ],
+                    state: "ReadOnly"
+                }
+            ]);
             const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1.0001, lng: 1, timestamp: new Date().toISOString() }, 90);
             expect(closetRoute.id).toBe("1");
         }
@@ -432,44 +511,50 @@ describe("Selected Route Service", () => {
 
     it("Should split a route at the middle and add 'split' to name", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 2, lng: 2 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 3, lng: 3 },
+                            routingType: "Hike"
+                        }
                     ],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 2, lng: 2 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 3, lng: 3 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }]);
+                    state: "ReadOnly"
+                }
+            ]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.splitRoute(1);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(SplitRouteAction);
-            const action = spy.calls.all()[0].args[0] as SplitRouteAction;
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(SplitRouteAction);
+            const action = vi.mocked(spy).mock.calls[0][0] as SplitRouteAction;
             expect(action.routeId).toBe("1");
             expect(action.routeData.segments.length).toBe(2);
             expect(action.routeData.segments[0].latlngs[0].lat).toBe(1);
@@ -485,306 +570,362 @@ describe("Selected Route Service", () => {
 
     it("Should split a route at the middle and add not split word", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name split 1",
-                segments: [{
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name split 1",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 2, lng: 2 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 3, lng: 3 },
+                            routingType: "Hike"
+                        }
                     ],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 2, lng: 2 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 3, lng: 3 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }]);
+                    state: "ReadOnly"
+                }
+            ]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.splitRoute(1);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(SplitRouteAction);
-            const action = spy.calls.all()[0].args[0] as SplitRouteAction;
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(SplitRouteAction);
+            const action = vi.mocked(spy).mock.calls[0][0] as SplitRouteAction;
             expect(action.splitRouteData.name).toBe("name split 2");
         }
     ));
 
     it("Should merge routes with the same direction", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 2, lng: 2 },
+                            routingType: "Hike"
+                        }
                     ],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                    state: "ReadOnly"
+                },
+                {
+                    id: "2",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 2, lng: 2 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 3, lng: 3 },
+                            routingType: "Hike"
+                        }
                     ],
-                    routePoint: { lat: 2, lng: 2 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }, {
-                id: "2",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 2, lng: 2 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 3, lng: 3 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }]);
+                    state: "ReadOnly"
+                }
+            ]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.mergeRoutes(false);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(MergeRoutesAction);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments.length).toBe(3);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(MergeRoutesAction);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments.length).toBe(3);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
         }
     ));
 
     it("Should merge routes with the same direction when selected route is second", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 2, lng: 2 },
+                            routingType: "Hike"
+                        }
                     ],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                    state: "ReadOnly"
+                },
+                {
+                    id: "2",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 2, lng: 2 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 3, lng: 3 },
+                            routingType: "Hike"
+                        }
                     ],
-                    routePoint: { lat: 2, lng: 2 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }, {
-                id: "2",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 2, lng: 2 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 3, lng: 3 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }]);
+                    state: "ReadOnly"
+                }
+            ]);
             setupSelectedRoute(store, "2");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.mergeRoutes(true);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(MergeRoutesAction);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments.length).toBe(3);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(MergeRoutesAction);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments.length).toBe(3);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
         }
     ));
 
     it("Should merge routes with oposite direction", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 2, lng: 2 },
+                            routingType: "Hike"
+                        }
                     ],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                    state: "ReadOnly"
+                },
+                {
+                    id: "2",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 3, lng: 3 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 2, lng: 2 },
+                            routingType: "Hike"
+                        }
                     ],
-                    routePoint: { lat: 2, lng: 2 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }, {
-                id: "2",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [
-                        { lat: 3, lng: 3, timestamp: new Date().toISOString() },
-                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 3, lng: 3 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 3, lng: 3, timestamp: new Date().toISOString() },
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 2, lng: 2 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }]);
+                    state: "ReadOnly"
+                }
+            ]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.mergeRoutes(false);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(MergeRoutesAction);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments.length).toBe(3);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(MergeRoutesAction);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments.length).toBe(3);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
         }
     ));
 
     it("Should merge routes with a gap and remove the gap", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 2, lng: 2 },
+                            routingType: "Hike"
+                        }
                     ],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                    state: "ReadOnly"
+                },
+                {
+                    id: "2",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                {
+                                    lat: 2.0001,
+                                    lng: 2.0001,
+                                    timestamp: new Date().toISOString()
+                                },
+                                {
+                                    lat: 2.0001,
+                                    lng: 2.0001,
+                                    timestamp: new Date().toISOString()
+                                }
+                            ],
+                            routePoint: { lat: 2.0001, lng: 2.0001 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                {
+                                    lat: 2.0001,
+                                    lng: 2.0001,
+                                    timestamp: new Date().toISOString()
+                                },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 3, lng: 3 },
+                            routingType: "Hike"
+                        }
                     ],
-                    routePoint: { lat: 2, lng: 2 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }, {
-                id: "2",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [
-                        { lat: 2.0001, lng: 2.0001, timestamp: new Date().toISOString() },
-                        { lat: 2.0001, lng: 2.0001, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 2.0001, lng: 2.0001 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 2.0001, lng: 2.0001, timestamp: new Date().toISOString() },
-                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 3, lng: 3 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }]);
+                    state: "ReadOnly"
+                }
+            ]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.mergeRoutes(false);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(MergeRoutesAction);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments.length).toBe(3);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[1].latlngs[1].lat).toBe(2);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[0].lat).toBe(2);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[1].lat).toBe(2.0001);
-            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[2].lat).toBe(3);
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(MergeRoutesAction);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments.length).toBe(3);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[1].latlngs[1].lat).toBe(2);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2].latlngs[0].lat).toBe(2);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2].latlngs[1].lat).toBe(2.0001);
+            expect(vi.mocked(spy).mock.calls[0][0].mergedRouteData.segments[2].latlngs[2].lat).toBe(3);
         }
     ));
 
     it("Should revese an empty route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [],
-                state: "ReadOnly",
-            }]);
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [],
+                    state: "ReadOnly"
+                }
+            ]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.reverseRoute("1");
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ReplaceRouteAction);
-            const action = spy.calls.all()[0].args[0] as ReplaceRouteAction;
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(ReplaceRouteAction);
+            const action = vi.mocked(spy).mock.calls[0][0] as ReplaceRouteAction;
             expect(action.routeId).toBe("1");
             expect(action.routeData.segments.length).toBe(0);
         }
@@ -792,44 +933,50 @@ describe("Selected Route Service", () => {
 
     it("Should revese a route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 2, lng: 2 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 3, lng: 3 },
+                            routingType: "Hike"
+                        }
                     ],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 2, lng: 2 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 3, lng: 3 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }]);
+                    state: "ReadOnly"
+                }
+            ]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.reverseRoute("1");
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ReplaceRouteAction);
-            const action = spy.calls.all()[0].args[0] as ReplaceRouteAction;
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(ReplaceRouteAction);
+            const action = vi.mocked(spy).mock.calls[0][0] as ReplaceRouteAction;
             expect(action.routeId).toBe("1");
             expect(action.routeData.segments.length).toBe(3);
             expect(action.routeData.segments[0].latlngs[0].lat).toBe(3);
@@ -841,44 +988,50 @@ describe("Selected Route Service", () => {
 
     it("Should remove the first segement", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 2, lng: 2 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 3, lng: 3 },
+                            routingType: "Hike"
+                        }
                     ],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 2, lng: 2 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 3, lng: 3 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }]);
+                    state: "ReadOnly"
+                }
+            ]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.removeSegment(0);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(UpdateSegmentsAction);
-            const action = spy.calls.all()[0].args[0] as UpdateSegmentsAction;
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(UpdateSegmentsAction);
+            const action = vi.mocked(spy).mock.calls[0][0] as UpdateSegmentsAction;
             expect(action.routeId).toBe("1");
             expect(action.indices).toEqual([0, 1]);
             expect(action.segmentsData[0].latlngs[0].lat).toBe(2);
@@ -888,44 +1041,50 @@ describe("Selected Route Service", () => {
 
     it("Should remove the last segement", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 2, lng: 2 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 3, lng: 3 },
+                            routingType: "Hike"
+                        }
                     ],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 2, lng: 2 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 3, lng: 3 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }]);
+                    state: "ReadOnly"
+                }
+            ]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.removeSegment(2);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(DeleteSegmentAction);
-            const action = spy.calls.all()[0].args[0] as DeleteSegmentAction;
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(DeleteSegmentAction);
+            const action = vi.mocked(spy).mock.calls[0][0] as DeleteSegmentAction;
             expect(action.routeId).toBe("1");
             expect(action.index).toBe(2);
         }
@@ -933,44 +1092,50 @@ describe("Selected Route Service", () => {
 
     it("Should remove a middle segement", inject([SelectedRouteService, Store],
         async (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [{
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 2, lng: 2 },
+                            routingType: "Hike"
+                        },
+                        {
+                            latlngs: [
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 3, lng: 3 },
+                            routingType: "Hike"
+                        }
                     ],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 2, lng: 2 },
-                    routingType: "Hike"
-                }, {
-                    latlngs: [
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                        { lat: 3, lng: 3, timestamp: new Date().toISOString() }
-                    ],
-                    routePoint: { lat: 3, lng: 3 },
-                    routingType: "Hike"
-                }],
-                state: "ReadOnly",
-            }]);
+                    state: "ReadOnly"
+                }
+            ]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             await selectedRouteService.removeSegment(1);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(UpdateSegmentsAction);
-            const action = spy.calls.all()[0].args[0] as UpdateSegmentsAction;
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(UpdateSegmentsAction);
+            const action = vi.mocked(spy).mock.calls[0][0] as UpdateSegmentsAction;
             expect(action.routeId).toBe("1");
             expect(action.indices).toEqual([1, 2]);
             expect(action.segmentsData[0].routePoint.lat).toBe(3);
@@ -979,7 +1144,7 @@ describe("Selected Route Service", () => {
 
     it("Should add external empty route should not fail", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.addRoutes([]);
@@ -990,23 +1155,25 @@ describe("Selected Route Service", () => {
 
     it("Should add external route with only markers to first route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [],
-                state: "ReadOnly",
-            }]);
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [],
+                    state: "ReadOnly"
+                }
+            ]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
             selectedRouteService.addRoutes([{ segments: [], markers: [{ title: "title" }] } as RouteDataWithoutState]);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddPrivatePoiAction);
-            const action = spy.calls.all()[0].args[0] as AddPrivatePoiAction;
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(AddPrivatePoiAction);
+            const action = vi.mocked(spy).mock.calls[0][0] as AddPrivatePoiAction;
             expect(action.routeId).toBe("1");
             expect(action.markerData.title).toBe("title");
         }
@@ -1014,23 +1181,31 @@ describe("Selected Route Service", () => {
 
     it("Should add external route to routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{
-                id: "1",
-                description: "",
-                markers: [],
-                name: "name",
-                segments: [],
-                state: "ReadOnly",
-            } as RouteData]);
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [],
+                    state: "ReadOnly"
+                } as RouteData
+            ]);
             setupSelectedRoute(store, "1");
 
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
 
-            selectedRouteService.addRoutes([{ name: "name", segments: [{}], markers: [{ title: "title" }] } as RouteDataWithoutState]);
+            selectedRouteService.addRoutes([
+                {
+                    name: "name",
+                    segments: [{}],
+                    markers: [{ title: "title" }]
+                } as RouteDataWithoutState
+            ]);
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddRouteAction);
-            const action = spy.calls.all()[0].args[0] as AddRouteAction;
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(AddRouteAction);
+            const action = vi.mocked(spy).mock.calls[0][0] as AddRouteAction;
             expect(action.routeData.name).toBe("name 1");
         }
     ));
@@ -1043,7 +1218,7 @@ describe("Selected Route Service", () => {
                 markers: [],
                 name: "name",
                 segments: [],
-                state: "ReadOnly",
+                state: "ReadOnly"
             };
 
             const features = selectedRouteService.createFeaturesForRoute(route);
@@ -1057,32 +1232,36 @@ describe("Selected Route Service", () => {
             const route: Immutable<RouteData> = {
                 id: "1",
                 description: "",
-                markers: [{
-                    id: "1",
-                    title: "title",
-                    latlng: { lat: 1, lng: 1 },
-                    description: "description",
-                    type: "type",
-                    urls: [],
-                }],
+                markers: [
+                    {
+                        id: "1",
+                        title: "title",
+                        latlng: { lat: 1, lng: 1 },
+                        description: "description",
+                        type: "type",
+                        urls: []
+                    }
+                ],
                 name: "name",
-                segments: [{
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                        { lat: 3, lng: 3, timestamp: new Date().toISOString() },
-                    ],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike",
-                }],
+                segments: [
+                    {
+                        latlngs: [
+                            { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                            { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                            { lat: 3, lng: 3, timestamp: new Date().toISOString() }
+                        ],
+                        routePoint: { lat: 1, lng: 1 },
+                        routingType: "Hike"
+                    }
+                ],
                 state: "ReadOnly",
-                color: "#ff0000",
+                color: "#ff0000"
             };
 
             const features = selectedRouteService.createFeaturesForRoute(route);
-            expect(features.some(f => f.properties.id.toString().includes("start"))).toBeTruthy();
-            expect(features.some(f => f.properties.id.toString().includes("end"))).toBeTruthy();
-            expect(features.every(f => f.properties.id?.toString() === f.id)).toBeTruthy();
+            expect(features.some((f) => f.properties.id.toString().includes("start"))).toBeTruthy();
+            expect(features.some((f) => f.properties.id.toString().includes("end"))).toBeTruthy();
+            expect(features.every((f) => f.properties.id?.toString() === f.id)).toBeTruthy();
         }
     ));
 
@@ -1091,46 +1270,52 @@ describe("Selected Route Service", () => {
             const route: Immutable<RouteData> = {
                 id: "1",
                 description: "",
-                markers: [{
-                    id: "1",
-                    title: "title",
-                    latlng: { lat: 1, lng: 1 },
-                    description: "description",
-                    type: "type",
-                    urls: [],
-                }],
+                markers: [
+                    {
+                        id: "1",
+                        title: "title",
+                        latlng: { lat: 1, lng: 1 },
+                        description: "description",
+                        type: "type",
+                        urls: []
+                    }
+                ],
                 name: "name",
-                segments: [{
-                    latlngs: [
-                        { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                        { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                        { lat: 3, lng: 3, timestamp: new Date().toISOString() },
-                    ],
-                    routePoint: { lat: 1, lng: 1 },
-                    routingType: "Hike",
-                }],
+                segments: [
+                    {
+                        latlngs: [
+                            { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                            { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                            { lat: 3, lng: 3, timestamp: new Date().toISOString() }
+                        ],
+                        routePoint: { lat: 1, lng: 1 },
+                        routingType: "Hike"
+                    }
+                ],
                 state: "ReadOnly",
-                color: "#ff0000",
+                color: "#ff0000"
             };
 
             const features = selectedRouteService.createFeaturesForEditingRoute(route);
-            expect(features.some(f => f.properties.id.toString().includes(SEGMENT))).toBeTruthy();
-            expect(features.some(f => f.properties.id.toString().includes(SEGMENT_POINT))).toBeTruthy();
-            expect(features.every(f => f.properties.id.toString() === f.id)).toBeTruthy();
+            expect(features.some((f) => f.properties.id.toString().includes(SEGMENT))).toBeTruthy();
+            expect(features.some((f) => f.properties.id.toString().includes(SEGMENT_POINT))).toBeTruthy();
+            expect(features.every((f) => f.properties.id.toString() === f.id)).toBeTruthy();
         }
     ));
 
-    it("should return true if there are hidden routes in the store", inject([SelectedRouteService, Store], (service: SelectedRouteService, store: Store) => {
-        setupRoutes(store, [
-            { id: "1", state: "Hidden" } as RouteData,
-            { id: "2", state: "Poi" } as RouteData
-        ]);
-        expect(service.hasHiddenRoutes()).toBeTruthy();
-    }));
+    it("should return true if there are hidden routes in the store", inject([SelectedRouteService, Store],
+        (service: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [
+                { id: "1", state: "Hidden" } as RouteData,
+                { id: "2", state: "Poi" } as RouteData
+            ]);
+            expect(service.hasHiddenRoutes()).toBeTruthy();
+        }
+    ));
 
     it("should convert to route for users source", inject([SelectedRouteService, ShareUrlsService, Store],
         async (service: SelectedRouteService, shareUrlsService: ShareUrlsService, store: Store) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
             const feature = {
                 type: "Feature" as const,
@@ -1139,30 +1324,33 @@ describe("Selected Route Service", () => {
                     coordinates: [
                         [1, 1],
                         [2, 2],
-                        [3, 3],
-                    ],
+                        [3, 3]
+                    ]
                 },
                 properties: {
                     identifier: "1",
                     poiSource: "Users"
-                },
-            };
-            shareUrlsService.getShareUrl = () => Promise.resolve({
-                dataContainer: {
-                    routes: [{
-                        segments: []
-                    }]
                 }
-            });
+            };
+            shareUrlsService.getShareUrl = () =>
+                Promise.resolve({
+                    dataContainer: {
+                        routes: [
+                            {
+                                segments: []
+                            }
+                        ]
+                    }
+                });
             await service.convertToRoute(feature, "description");
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddRouteAction);
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(AddRouteAction);
         }
     ));
 
     it("should convert to route for OSM source with color", inject([SelectedRouteService, ElevationProvider, Store],
         async (service: SelectedRouteService, elevationProvider: ElevationProvider, store: Store) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
             elevationProvider.updateHeights = () => Promise.resolve();
             const feature = {
@@ -1172,19 +1360,19 @@ describe("Selected Route Service", () => {
                     coordinates: [
                         [1, 1],
                         [2, 2],
-                        [3, 3],
-                    ],
+                        [3, 3]
+                    ]
                 },
                 properties: {
                     identifier: "1",
                     poiSource: "OSM",
                     colour: "red"
-                },
+                }
             };
             await service.convertToRoute(feature, "description");
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddRouteAction);
-            expect(spy.calls.all()[0].args[0].routeData.color).toBe("red");
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(AddRouteAction);
+            expect(vi.mocked(spy).mock.calls[0][0].routeData.color).toBe("red");
         }
     ));
 });

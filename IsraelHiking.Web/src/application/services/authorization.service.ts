@@ -61,7 +61,7 @@ export class AuthorizationService {
                 client_id: "jqxu2hhG-gUa-XUxiepzkQPZQf7iQguMC0sTVSRpaKE",
                 grant_type: "authorization_code",
                 code: oauthCode,
-                redirect_uri: this.redirectUrl,
+                redirect_uri: this.redirectUrl
             },
             headers: { "Content-Type": "application/x-www-form-urlencoded" }
         }));

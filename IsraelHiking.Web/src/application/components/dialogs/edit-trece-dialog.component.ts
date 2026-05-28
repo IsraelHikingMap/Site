@@ -41,7 +41,7 @@ export class EditTraceDialogComponent {
             ...structuredClone(this.data),
             tagsString: this.tagsString,
             description: this.description,
-            visibility: this.visibility,
+            visibility: this.visibility
         }
         await this.tracesService.updateTrace(updatedTrace);
         this.toastService.success(this.resources.dataUpdatedSuccessfully);

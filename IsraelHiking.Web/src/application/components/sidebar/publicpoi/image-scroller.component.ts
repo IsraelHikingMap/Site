@@ -18,8 +18,8 @@ import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.j
     imports: [LottieComponent, MatAnchor, ImageCaptureDirective, AnalyticsDirective, MatButton, Dir, ImageAttributionComponent]
 })
 export class ImageScrollerComponent implements OnChanges {
-    lottiePOI: AnimationOptions = {
-        animationData: sceneryPlaceholder,
+    public readonly lottiePOI: AnimationOptions = {
+        animationData: sceneryPlaceholder
     };
 
     private currentIndex = 0;

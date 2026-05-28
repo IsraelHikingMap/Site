@@ -1,3 +1,4 @@
+import { describe, beforeEach, it, expect } from "vitest";
 import { inject, TestBed } from "@angular/core/testing";
 import { decode } from "base64-arraybuffer";
 
@@ -7,45 +8,68 @@ describe("GpxDataContainerConverterService", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [],
-            providers: [
-                GpxDataContainerConverterService
-            ]
+            providers: [GpxDataContainerConverterService]
         });
     });
 
     it("Should roundtrip empty datacontainer", inject([GpxDataContainerConverterService],
         async (service: GpxDataContainerConverterService) => {
             const gpxBase64String = await service.toGpx({
-                baseLayer: { address: "address", key: "key", maxZoom: 1, minZoom: 0, opacity: 1 },
+                baseLayer: {
+                    address: "address",
+                    key: "key",
+                    maxZoom: 1,
+                    minZoom: 0,
+                    opacity: 1
+                },
                 northEast: { lat: 0, lng: 0 },
                 southWest: { lat: 0, lng: 0 },
                 overlays: [],
-                routes: [{ id: "id", description: "", markers: [], name: "name", segments: [] }]
+                routes: [
+                    {
+                        id: "id",
+                        description: "",
+                        markers: [],
+                        name: "name",
+                        segments: []
+                    }
+                ]
             });
             const dataContainer = await service.toDataContainer(await new Response(decode(gpxBase64String)).text());
             expect(dataContainer.routes.length).toBe(0);
-        }));
+        }
+    ));
 
     it("Should roundtrip datacontiner with one marker", inject([GpxDataContainerConverterService],
         async (service: GpxDataContainerConverterService) => {
             const gpxBase64String = await service.toGpx({
-                baseLayer: { address: "address", key: "key", maxZoom: 1, minZoom: 0, opacity: 1 },
+                baseLayer: {
+                    address: "address",
+                    key: "key",
+                    maxZoom: 1,
+                    minZoom: 0,
+                    opacity: 1
+                },
                 northEast: { lat: 0, lng: 0 },
                 southWest: { lat: 0, lng: 0 },
                 overlays: [],
-                routes: [{
-                    id: "id",
-                    description: "description",
-                    name: "name",
-                    segments: [],
-                    markers: [{
-                        description: "desc",
-                        title: "title",
-                        type: "type",
-                        latlng: { lat: 1, lng: 2, alt: 3 },
-                        urls: [{ url: "url", text: "text", mimeType: "image/jpeg" }]
-                    }]
-                }]
+                routes: [
+                    {
+                        id: "id",
+                        description: "description",
+                        name: "name",
+                        segments: [],
+                        markers: [
+                            {
+                                description: "desc",
+                                title: "title",
+                                type: "type",
+                                latlng: { lat: 1, lng: 2, alt: 3 },
+                                urls: [{ url: "url", text: "text", mimeType: "image/jpeg" }]
+                            }
+                        ]
+                    }
+                ]
             });
             const dataContainer = await service.toDataContainer(await new Response(decode(gpxBase64String)).text());
             expect(dataContainer.routes.length).toBe(1);
@@ -56,12 +80,19 @@ describe("GpxDataContainerConverterService", () => {
             expect(dataContainer.routes[0].markers[0].latlng.lng).toBe(2);
             expect(dataContainer.routes[0].markers[0].latlng.alt).toBe(3);
             expect(dataContainer.routes[0].markers[0].urls.length).toBe(1);
-        }));
+        }
+    ));
 
     it("Should roundtrip datacontiner with one route", inject([GpxDataContainerConverterService],
         async (service: GpxDataContainerConverterService) => {
             const gpxBase64String = await service.toGpx({
-                baseLayer: { address: "address", key: "key", maxZoom: 1, minZoom: 0, opacity: 1 },
+                baseLayer: {
+                    address: "address",
+                    key: "key",
+                    maxZoom: 1,
+                    minZoom: 0,
+                    opacity: 1
+                },
                 northEast: { lat: 0, lng: 0 },
                 southWest: { lat: 0, lng: 0 },
                 overlays: [],
@@ -71,34 +102,37 @@ describe("GpxDataContainerConverterService", () => {
                         description: "",
                         markers: [],
                         name: "name",
-                        segments: [{
-                            latlngs: [
-                                { lat: 0, lng: 0, timestamp: new Date().toISOString() },
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() }
-                            ],
-                            routePoint: { lat: 1, lng: 1 },
-                            routingType: "Hike"
-                        }, {
-                            latlngs: [
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
-                            ],
-                            routePoint: { lat: 2, lng: 2 },
-                            routingType: "Hike"
-                        },
-                        {
-                            latlngs: [
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                                { lat: 3, lng: 3, timestamp: new Date().toISOString() }
-                            ],
-                            routePoint: { lat: 3, lng: 3 },
-                            routingType: "Hike"
-                        }
+                        segments: [
+                            {
+                                latlngs: [
+                                    { lat: 0, lng: 0, timestamp: new Date().toISOString() },
+                                    { lat: 1, lng: 1, timestamp: new Date().toISOString() }
+                                ],
+                                routePoint: { lat: 1, lng: 1 },
+                                routingType: "Hike"
+                            },
+                            {
+                                latlngs: [
+                                    { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                    { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                                ],
+                                routePoint: { lat: 2, lng: 2 },
+                                routingType: "Hike"
+                            },
+                            {
+                                latlngs: [
+                                    { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                    { lat: 3, lng: 3, timestamp: new Date().toISOString() }
+                                ],
+                                routePoint: { lat: 3, lng: 3 },
+                                routingType: "Hike"
+                            }
                         ],
                         color: "color",
                         opacity: 1,
                         weight: 10
-                    }]
+                    }
+                ]
             });
             const dataContainer = await service.toDataContainer(await new Response(decode(gpxBase64String)).text());
             expect(dataContainer.routes.length).toBe(1);
@@ -106,12 +140,19 @@ describe("GpxDataContainerConverterService", () => {
             expect(dataContainer.routes[0].segments[0].latlngs.length).toBe(2);
             expect(dataContainer.routes[0].segments[0].latlngs[0].lat).toBe(0);
             expect(dataContainer.routes[0].segments[0].latlngs[0].lng).toBe(0);
-        }));
+        }
+    ));
 
     it("Should roundtrip datacontiner with one route and split it - pretend the GPX was not created in this site",
         inject([GpxDataContainerConverterService], async (service: GpxDataContainerConverterService) => {
             const gpxBase64String = await service.toGpx({
-                baseLayer: { address: "address", key: "key", maxZoom: 1, minZoom: 0, opacity: 1 },
+                baseLayer: {
+                    address: "address",
+                    key: "key",
+                    maxZoom: 1,
+                    minZoom: 0,
+                    opacity: 1
+                },
                 northEast: { lat: 0, lng: 0 },
                 southWest: { lat: 0, lng: 0 },
                 overlays: [],
@@ -121,26 +162,29 @@ describe("GpxDataContainerConverterService", () => {
                         description: "",
                         markers: [],
                         name: "name",
-                        segments: [{
-                            latlngs: [
-                                { lat: 0, lng: 0, timestamp: new Date().toISOString() },
-                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
-                                { lat: 2, lng: 2, timestamp: new Date().toISOString() },
-                                { lat: 3, lng: 3, timestamp: new Date().toISOString() },
-                                { lat: 4, lng: 4, timestamp: new Date().toISOString() },
-                                { lat: 5, lng: 5, timestamp: new Date().toISOString() },
-                                { lat: 6, lng: 6, timestamp: new Date().toISOString() },
-                                { lat: 7, lng: 7, timestamp: new Date().toISOString() },
-                                { lat: 8, lng: 8, timestamp: new Date().toISOString() },
-                                { lat: 9, lng: 9, timestamp: new Date().toISOString() },
-                            ],
-                            routePoint: { lat: 9, lng: 9 },
-                            routingType: "Hike"
-                        }],
+                        segments: [
+                            {
+                                latlngs: [
+                                    { lat: 0, lng: 0, timestamp: new Date().toISOString() },
+                                    { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                    { lat: 2, lng: 2, timestamp: new Date().toISOString() },
+                                    { lat: 3, lng: 3, timestamp: new Date().toISOString() },
+                                    { lat: 4, lng: 4, timestamp: new Date().toISOString() },
+                                    { lat: 5, lng: 5, timestamp: new Date().toISOString() },
+                                    { lat: 6, lng: 6, timestamp: new Date().toISOString() },
+                                    { lat: 7, lng: 7, timestamp: new Date().toISOString() },
+                                    { lat: 8, lng: 8, timestamp: new Date().toISOString() },
+                                    { lat: 9, lng: 9, timestamp: new Date().toISOString() }
+                                ],
+                                routePoint: { lat: 9, lng: 9 },
+                                routingType: "Hike"
+                            }
+                        ],
                         color: "color",
                         opacity: 1,
                         weight: 10
-                    }]
+                    }
+                ]
             });
             // as if this was a not create in this site
             const gpxString = (await new Response(decode(gpxBase64String)).text()).replace("IsraelHikingMap", "");
@@ -153,14 +197,14 @@ describe("GpxDataContainerConverterService", () => {
             expect(dataContainer.routes[0].segments[3].latlngs.length).toBe(2);
             expect(dataContainer.routes[0].segments[3].latlngs[1].lat).toBe(9);
             expect(dataContainer.routes[0].segments[3].latlngs[1].lng).toBe(9);
-
-        }));
+        })
+    );
 
     it("Should regect invalid GPX", inject([GpxDataContainerConverterService], async (service: GpxDataContainerConverterService) => {
         const gpxString = `<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
-            <gpx></gpi>`
+            <gpx></gpi>`;
         const promise = service.toDataContainer(gpxString);
-        await expectAsync(promise).toBeRejected();
+        await expect(promise).rejects.toThrow();
     }));
 
     it("Should convert GPX with rte", inject([GpxDataContainerConverterService], async (service: GpxDataContainerConverterService) => {
@@ -177,7 +221,7 @@ describe("GpxDataContainerConverterService", () => {
                 <rtept lat='31.842175' lon='34.965707'><ele>161</ele></rtept>
                 <rtept lat='31.842176' lon='34.965708'></rtept>
             </rte>
-            </gpx>`
+            </gpx>`;
         const datContainer = await service.toDataContainer(gpxString);
         expect(datContainer.routes.length).toBe(1);
         expect(datContainer.routes[0].segments.length).toBe(3);
@@ -188,7 +232,7 @@ describe("GpxDataContainerConverterService", () => {
         const gpxString = `<?xml version="1.0" ?>
             <gpx xmlns="http://www.topografix.com/GPX/1/1">
                 <wpt lat="32" lon="35"></wpt>
-            </gpx>`
+            </gpx>`;
         const datContainer = await service.toDataContainer(gpxString);
         expect(datContainer.routes.length).toBe(1);
     }));

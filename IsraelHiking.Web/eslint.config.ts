@@ -16,6 +16,7 @@ export default defineConfig([
         ],
         processor: angular.processInlineTemplates,
         rules: {
+            indent: ["error", 4, { "SwitchCase": 1 }],
             quotes: ["error", "double"],
             "@angular-eslint/component-selector": [
                 "error",
@@ -41,7 +42,8 @@ export default defineConfig([
                     argsIgnorePattern: "^_",
                 },
             ],
-            "@typescript-eslint/consistent-type-definitions": "off"
+            "@typescript-eslint/consistent-type-definitions": "off",
+            "comma-dangle": ["error", "never"]
         },
     },
     {

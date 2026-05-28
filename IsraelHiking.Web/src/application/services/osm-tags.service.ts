@@ -1,4 +1,4 @@
-import type { LatLngAltTime } from "../models";
+import type { CategoryType, Difficulty, LatLngAltTime } from "../models";
 
 export type PoiProperties = {
     poiSource: string;
@@ -7,9 +7,9 @@ export type PoiProperties = {
     poiGeolocation: LatLngAltTime;
     poiIconColor: string;
     poiIcon: string;
-    poiCategory: string;
+    poiCategory: CategoryType | string;
     poiLength: number;
-    poiDifficulty: string;
+    poiDifficulty: Difficulty;
     poiUserId?: string;
     "name:he"?: string;
     "name:en"?: string;

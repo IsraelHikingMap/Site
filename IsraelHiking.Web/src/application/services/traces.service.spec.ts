@@ -1,3 +1,4 @@
+import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
@@ -18,18 +19,19 @@ describe("Traces Service", () => {
             error: () => { }
         };
         TestBed.configureTestingModule({
-            imports: [
-                NgxsModule.forRoot([])],
+            imports: [NgxsModule.forRoot([])],
             providers: [
                 TracesService,
                 {
-                    provide: ResourcesService, useValue: {
+                    provide: ResourcesService,
+                    useValue: {
                         getCurrentLanguageCodeSimplified: () => "he"
                     }
                 },
                 { provide: LoggingService, useValue: loggignMock },
                 {
-                    provide: DatabaseService, useValue: {
+                    provide: DatabaseService,
+                    useValue: {
                         deleteTraceById: () => { }
                     }
                 },
@@ -41,7 +43,6 @@ describe("Traces Service", () => {
 
     it("Should get missing parts", inject([TracesService, HttpTestingController],
         async (tracesService: TracesService, mockBackend: HttpTestingController) => {
-
             const trace = { id: "123" } as Trace;
 
             const promise = tracesService.getMissingParts(trace.id).then((res) => {
@@ -104,7 +105,7 @@ describe("Traces Service", () => {
 
     it("Should upload local traces and run sync with no traces", inject([TracesService, HttpTestingController, Store],
         async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
             store.reset({
                 configuration: {
@@ -114,13 +115,15 @@ describe("Traces Service", () => {
                     userInfo: {}
                 },
                 tracesState: {
-                    traces: [{
-                        id: "42",
-                        visibility: "local",
-                        dataContainer: {
-                            routes: [{}]
+                    traces: [
+                        {
+                            id: "42",
+                            visibility: "local",
+                            dataContainer: {
+                                routes: [{}]
+                            }
                         }
-                    }]
+                    ]
                 }
             });
             const promise = tracesService.initialize();
@@ -132,14 +135,14 @@ describe("Traces Service", () => {
             mockBackend.expectOne(u => u.url.startsWith(Urls.osmGpxFiles)).flush({ traces: [] });
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(RemoveTraceAction);
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(RemoveTraceAction);
             return promise;
         }
     ));
 
     it("Should upload local traces and run sync with traces", inject([TracesService, HttpTestingController, Store],
         async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             store.dispatch = spy;
             store.reset({
                 configuration: {
@@ -149,16 +152,19 @@ describe("Traces Service", () => {
                     userInfo: {}
                 },
                 tracesState: {
-                    traces: [{
-                        id: "42",
-                        visibility: "local",
-                        dataContainer: {
-                            routes: [{}]
+                    traces: [
+                        {
+                            id: "42",
+                            visibility: "local",
+                            dataContainer: {
+                                routes: [{}]
+                            }
+                        },
+                        {
+                            id: "1",
+                            visibility: "private"
                         }
-                    }, {
-                        id: "1",
-                        visibility: "private",
-                    }]
+                    ]
                 }
             });
             const promise = tracesService.initialize();
@@ -168,19 +174,22 @@ describe("Traces Service", () => {
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
             mockBackend.expectOne(u => u.url.startsWith(Urls.osmGpxFiles)).flush({
-                traces: [{
-                    id: 1,
-                    visibility: "public"
-                }, {
-                    id: 2,
-                    visibility: "private"
-                }]
+                traces: [
+                    {
+                        id: 1,
+                        visibility: "public"
+                    },
+                    {
+                        id: 2,
+                        visibility: "private"
+                    }
+                ]
             });
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(RemoveTraceAction);
-            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(BulkReplaceTracesAction);
+            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(RemoveTraceAction);
+            expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(BulkReplaceTracesAction);
 
             const req = mockBackend.match(u => u.url.startsWith(Urls.osmGpx));
             expect(req.length).toBe(2);
@@ -188,8 +197,8 @@ describe("Traces Service", () => {
             req[1].flush({});
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            expect(spy.calls.all()[2].args[0]).toBeInstanceOf(UpdateTraceAction);
-            expect(spy.calls.all()[3].args[0]).toBeInstanceOf(UpdateTraceAction);
+            expect(vi.mocked(spy).mock.calls[2][0]).toBeInstanceOf(UpdateTraceAction);
+            expect(vi.mocked(spy).mock.calls[3][0]).toBeInstanceOf(UpdateTraceAction);
 
             return promise;
         }
@@ -210,13 +219,15 @@ describe("Traces Service", () => {
 
     it("Should return a trace store in DB", inject([TracesService, Store, DatabaseService],
         async (tracesService: TracesService, store: Store, databaseService: DatabaseService) => {
-            databaseService.getTraceById = () => { return Promise.resolve({} as Trace) };
+            databaseService.getTraceById = () => Promise.resolve({} as Trace);
 
             store.reset({
                 tracesState: {
-                    traces: [{
-                        id: "1"
-                    }]
+                    traces: [
+                        {
+                            id: "1"
+                        }
+                    ]
                 }
             });
             const trace = await tracesService.getTraceById("1");
@@ -227,17 +238,19 @@ describe("Traces Service", () => {
 
     it("Should return a trace stored in the state in case of a local recording and not in database", inject([TracesService, Store, DatabaseService],
         async (tracesService: TracesService, store: Store, databaseService: DatabaseService) => {
-            databaseService.getTraceById = () => { return Promise.resolve(null as Trace) };
+            databaseService.getTraceById = () => Promise.resolve(null as Trace);
 
             store.reset({
                 tracesState: {
-                    traces: [{
-                        id: "1",
-                        visibility: "local",
-                        dataContainer: {
-                            routes: [{}]
+                    traces: [
+                        {
+                            id: "1",
+                            visibility: "local",
+                            dataContainer: {
+                                routes: [{}]
+                            }
                         }
-                    }]
+                    ]
                 }
             });
             const trace = await tracesService.getTraceById("1");
@@ -249,14 +262,16 @@ describe("Traces Service", () => {
 
     it("Should get a trace from server when it's not in the DB", inject([TracesService, Store, DatabaseService, HttpTestingController],
         async (tracesService: TracesService, store: Store, databaseService: DatabaseService, mockBackend: HttpTestingController) => {
-            databaseService.getTraceById = () => { return Promise.resolve(null as Trace) };
-            databaseService.storeTrace = () => { return Promise.resolve() };
+            databaseService.getTraceById = () => Promise.resolve(null as Trace);
+            databaseService.storeTrace = () => Promise.resolve();
 
             store.reset({
                 tracesState: {
-                    traces: [{
-                        id: "1"
-                    }]
+                    traces: [
+                        {
+                            id: "1"
+                        }
+                    ]
                 }
             });
             const promise = tracesService.getTraceById("1");
@@ -297,7 +312,7 @@ describe("Traces Service", () => {
             mockBackend.expectOne(request =>
                 !request.body.includes("<tag></tag>") && request.method === "PUT").flush({ id: "1" });
 
-            await expectAsync(promise).toBeResolved();
+            await expect(promise).resolves.not.toThrow();
         }
     ));
 
@@ -316,9 +331,10 @@ describe("Traces Service", () => {
                 request.body.includes("<tag>tag1</tag>") &&
                 request.body.includes("<tag>tag2</tag>") &&
                 request.body.includes("<description>description</description>") &&
-                request.method === "PUT").flush({ id: "1" });
+                request.method === "PUT"
+            ).flush({ id: "1" });
 
-            await expectAsync(promise).toBeResolved();
+            await expect(promise).resolves.not.toThrow();
         }
     ));
 });

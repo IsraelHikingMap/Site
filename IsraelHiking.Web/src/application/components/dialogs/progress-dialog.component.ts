@@ -70,7 +70,7 @@ export class ProgressDialogComponent {
             closeOnNavigation: false,
             disableClose: true,
             position: {
-                top: "5px",
+                top: "5px"
             },
             width: "80%",
             data: progressConfig

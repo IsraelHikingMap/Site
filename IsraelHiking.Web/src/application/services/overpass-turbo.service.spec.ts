@@ -1,3 +1,4 @@
+import { describe, beforeEach, it, expect } from "vitest";
 import { inject, TestBed } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
@@ -22,12 +23,12 @@ describe("OverpassTurboService", () => {
                 id: 1,
                 type: "node",
                 lat: 1,
-                lon: 2,
+                lon: 2
             }, {
                 id: 2,
                 type: "node",
                 lat: 3,
-                lon: 4,
+                lon: 4
             }, {
                 id: 3,
                 type: "way",
@@ -117,17 +118,17 @@ describe("OverpassTurboService", () => {
                 id: 1,
                 type: "node",
                 lat: 1,
-                lon: 2,
+                lon: 2
             }, {
                 id: 2,
                 type: "node",
                 lat: 3,
-                lon: 4,
+                lon: 4
             }, {
                 id: 3,
                 type: "node",
                 lat: 4,
-                lon: 5,
+                lon: 5
             }, {
                 id: 4,
                 type: "way",
@@ -152,17 +153,17 @@ describe("OverpassTurboService", () => {
                 id: 1,
                 type: "node",
                 lat: 1,
-                lon: 2,
+                lon: 2
             }, {
                 id: 2,
                 type: "node",
                 lat: 3,
-                lon: 4,
+                lon: 4
             }, {
                 id: 3,
                 type: "node",
                 lat: 4,
-                lon: 5,
+                lon: 5
             }, {
                 id: 4,
                 type: "way",
@@ -172,7 +173,7 @@ describe("OverpassTurboService", () => {
                 id: 5,
                 type: "way",
                 nodes: [1, 2]
-            },]
+            }]
         };
         const promise = service.getLongWay("id", "name", false, false);
         mockBackend.expectOne(Urls.overpassApi).flush(response);
@@ -249,14 +250,14 @@ describe("OverpassTurboService", () => {
                 id: 2,
                 members: [{
                     type: "way",
-                    ref: 3,
+                    ref: 3
                 }]
             }, {
                 type: "relation",
                 id: 1,
                 members: [{
                     type: "relation",
-                    ref: 2,
+                    ref: 2
                 }]
             }]
         };
@@ -266,7 +267,7 @@ describe("OverpassTurboService", () => {
                 id: 2,
                 members: [{
                     type: "way",
-                    ref: 3,
+                    ref: 3
                 }]
             }, {
                 type: "way",
@@ -291,17 +292,17 @@ describe("OverpassTurboService", () => {
                 id: 1,
                 members: [{
                     type: "relation",
-                    ref: 2,
+                    ref: 2
                 }]
             }, {
                 type: "relation",
                 id: 2,
                 members: [{
                     type: "relation",
-                    ref: 1,
+                    ref: 1
                 }, {
                     type: "way",
-                    ref: 3,
+                    ref: 3
                 }]
             }]
         };
@@ -311,7 +312,7 @@ describe("OverpassTurboService", () => {
                 id: 2,
                 members: [{
                     type: "way",
-                    ref: 3,
+                    ref: 3
                 }]
             }, {
                 type: "way",
@@ -334,12 +335,12 @@ describe("OverpassTurboService", () => {
                 type: "node",
                 id: 1,
                 lat: 1,
-                lon: 2,
+                lon: 2
             }, {
                 type: "node",
                 id: 2,
                 lat: 3,
-                lon: 4,
+                lon: 4
             }]
         };
         const promise = service.getPointsInArea({ lat: 0, lng: 0 });

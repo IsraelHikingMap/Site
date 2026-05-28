@@ -41,7 +41,7 @@ export class ImageCaptureDirective implements OnDestroy {
                 confirmIcon: "camera",
                 declineIcon: "image",
                 confirmAction: async () => await this.getPictureFromCamera(),
-                declineAction: async () => await this.getPicturesFromGallery(),
+                declineAction: async () => await this.getPicturesFromGallery()
             });
         });
     }
@@ -58,7 +58,7 @@ export class ImageCaptureDirective implements OnDestroy {
 
     private async getPicturesFromGallery() {
         const response = await Camera.pickImages({
-            correctOrientation: true,
+            correctOrientation: true
         });
         const files = [];
         for (const photo of response.photos) {

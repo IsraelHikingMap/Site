@@ -13,6 +13,7 @@ export type RoutingType = components["schemas"]["RouteSegmentData"]["routingType
 export type DataContainer = components["schemas"]["DataContainer"];
 export type UserPermissions = components["schemas"]["UserPermissions"];
 export type ActivityType = ShareUrl["type"];
+export type Difficulty = ShareUrl["difficulty"];
 
 export type RouteEditStateType = "Poi" | "Route" | "ReadOnly" | "Hidden";
 export type { Bounds } from "./bounds";
@@ -25,7 +26,7 @@ export type { NorthEast } from "./north-east";
 export type { Category, IconColorLabel } from "./category";
 export type { Language, LanguageCode } from "./language";
 export type { RecordedRoute } from "./recorded-route";
-export type { PublicRoutesFilter } from "./public-routes-filter";
+export type { CategoryType, PublicRoutesFilter } from "./public-routes-filter";
 // states:
 export type { ApplicationState, MutableApplicationState } from "./state/application-state";
 export type { ConfigurationState, BatteryOptimizationType } from "./state/configuration-state";

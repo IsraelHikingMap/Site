@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { GeoJSONUtils } from "./geojson-utils";
 
 describe("GeoJsonUtils", () => {
@@ -76,7 +77,7 @@ describe("GeoJsonUtils", () => {
                 image9: "https://example.com/image4.gif",
                 image10: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA",
                 image11: "israelhiking.osm.org.il/inmage.jpg",
-                image12: "mapeak.com/image.jpg",
+                image12: "mapeak.com/image.jpg"
             }
         } as any as GeoJSON.Feature;
         const validUrls = GeoJSONUtils.getValidImageUrls(feature);

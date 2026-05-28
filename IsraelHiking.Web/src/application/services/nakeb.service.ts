@@ -58,7 +58,7 @@ export class NakebService {
                 "name:he": response.title,
                 poiGeolocation: {
                     lat: response.start.lat,
-                    lng: response.start.lng,
+                    lng: response.start.lng
                 },
                 length: response.length,
                 image: response.picture,

@@ -1,3 +1,4 @@
+import { describe, beforeEach, it, expect } from "vitest";
 import { GeoJsonParser } from "./geojson.parser";
 
 describe("GeoJsonParser", () => {

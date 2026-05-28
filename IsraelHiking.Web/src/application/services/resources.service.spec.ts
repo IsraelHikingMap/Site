@@ -1,3 +1,4 @@
+import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 
@@ -5,13 +6,13 @@ import { ResourcesService } from "./resources.service";
 import { GetTextCatalogService } from "./gettext-catalog.service";
 
 describe("ResourcesService", () => {
-
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [NgxsModule.forRoot([])],
             providers: [
                 {
-                    provide: GetTextCatalogService, useValue: {
+                    provide: GetTextCatalogService,
+                    useValue: {
                         getString: () => "",
                         loadRemote: () => Promise.resolve(),
                         setCurrentLanguage: () => { }
@@ -23,8 +24,7 @@ describe("ResourcesService", () => {
     });
 
     it("Should faciliate language change to english and raise event", inject([ResourcesService, Store],
-        (service: ResourcesService, store: Store) => {
-
+        async (service: ResourcesService, store: Store) => {
             store.reset({
                 configuration: {
                     language: {
@@ -32,20 +32,18 @@ describe("ResourcesService", () => {
                     }
                 }
             });
-            store.dispatch = jasmine.createSpy();
+            store.dispatch = vi.fn();
 
-            const promise = service.setLanguage("he").then(() => {
-                expect(service.getCurrentLanguageCodeSimplified()).toBe("he");
-                expect(store.dispatch).toHaveBeenCalled();
-            });
-            return promise;
+            await service.setLanguage("he");
+
+            expect(service.getCurrentLanguageCodeSimplified()).toBe("he");
+            expect(store.dispatch).toHaveBeenCalled();
         }
     ));
 
     it("Should faciliate translation", inject([ResourcesService, GetTextCatalogService],
         (service: ResourcesService, getText: GetTextCatalogService) => {
-
-            spyOn(getText, "getString").and.returnValue("word's translation");
+            vi.spyOn(getText, "getString").mockReturnValue("word's translation");
 
             expect(service.translate("word")).toBe("word's translation");
         }

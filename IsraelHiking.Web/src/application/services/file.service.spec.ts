@@ -1,3 +1,4 @@
+import { describe, beforeEach, vi, it, expect, type Mock } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { HttpEventType, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
@@ -15,27 +16,27 @@ import { Urls } from "../urls";
 import type { DataContainer, MarkerData, RouteData } from "../models";
 
 describe("FileService", () => {
-
-    let saveAsSpy: jasmine.Spy;
+    let saveAsSpy: Mock;
 
     beforeEach(() => {
-        saveAsSpy = jasmine.createSpy();
+        saveAsSpy = vi.fn();
         const imageResizeService = {
-            resizeImageAndConvert: () => Promise.resolve({
-                northEast: { lat: 0, lng: 0 },
-                southWest: { lat: 1, lng: 1 },
-                routes: [{ markers: [{} as MarkerData] }] as RouteData[]
-            } as DataContainer)
+            resizeImageAndConvert: () =>
+                Promise.resolve({
+                    northEast: { lat: 0, lng: 0 },
+                    southWest: { lat: 1, lng: 1 },
+                    routes: [{ markers: [{} as MarkerData] }] as RouteData[]
+                } as DataContainer)
         } as any as ImageResizeService;
         const selectedRouteService = {
-            addRoutes: jasmine.createSpy("addRoutes")
+            addRoutes: vi.fn()
         } as any as SelectedRouteService;
         const mapService = {
-            fitBounds: jasmine.createSpy("fitBounds")
+            fitBounds: vi.fn()
         } as any as MapService;
         const loggingServiceMock = {
             info: () => { },
-            error: () => { },
+            error: () => { }
         };
         TestBed.configureTestingModule({
             providers: [
@@ -56,7 +57,6 @@ describe("FileService", () => {
 
     it("Should save to file on web", inject([FileService, HttpTestingController],
         async (service: FileService, mockBackend: HttpTestingController) => {
-
             const promise = service.saveToFile("file.name", "format", {} as DataContainer);
 
             mockBackend.expectOne(Urls.files + "?format=format").flush(btoa("bytes"));
@@ -67,11 +67,11 @@ describe("FileService", () => {
 
     it("Should add routes from url", inject([FileService, HttpTestingController, SelectedRouteService],
         async (service: FileService, mockBackend: HttpTestingController, selectedRouteService: SelectedRouteService) => {
-
             const promise = service.addRoutesFromUrl("someurl");
 
             mockBackend.expectOne(Urls.files + "?url=someurl").flush({
-                northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 }
+                northEast: { lat: 1, lng: 1 },
+                southWest: { lat: 2, lng: 2 }
             });
             await promise;
             expect(selectedRouteService.addRoutes).toHaveBeenCalled();
@@ -80,16 +80,17 @@ describe("FileService", () => {
 
     it("Should open from url by uploading", inject([FileService, HttpTestingController, SelectedRouteService],
         async (service: FileService, mockBackend: HttpTestingController, selectedRouteService: SelectedRouteService) => {
-
             const promise = service.addRoutesFromFile(new Blob([""]) as File);
 
             setTimeout(() => {
                 mockBackend.expectOne(Urls.openFile).flush({
                     northEast: { lat: 0, lng: 0 },
                     southWest: { lat: 1, lng: 1 },
-                    routes: [{
-                        markers: [{}],
-                    }]
+                    routes: [
+                        {
+                            markers: [{}]
+                        }
+                    ]
                 } as DataContainer);
             }, 1000);
 
@@ -114,7 +115,7 @@ describe("FileService", () => {
 
     it("Should get a file from event and clear input", inject([FileService], (service: FileService) => {
         const event = {
-            target: { files: [{}], value: "123" },
+            target: { files: [{}], value: "123" }
         };
         const file = service.getFileFromEvent(event);
 
@@ -124,7 +125,7 @@ describe("FileService", () => {
 
     it("Should not get a files from event", inject([FileService], (service: FileService) => {
         const event = {
-            target: { dataTransfer: [] as any[] },
+            target: { dataTransfer: [] as any[] }
         };
         const files = service.getFilesFromEvent(event);
 
@@ -133,7 +134,7 @@ describe("FileService", () => {
 
     it("Should get a files from event and clear input", inject([FileService], (service: FileService) => {
         const event = {
-            target: { files: [{}], value: "123" },
+            target: { files: [{}], value: "123" }
         };
         const files = service.getFilesFromEvent(event);
 
@@ -160,7 +161,7 @@ describe("FileService", () => {
 
     it("Should get file with progress", inject([FileService, HttpTestingController],
         async (service: FileService, mockBackend: HttpTestingController) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             const url = "http://123.gpx";
             const promise = service.getFileContentWithProgress(url, spy);
 
@@ -177,96 +178,99 @@ describe("FileService", () => {
 
     it("Should reject if response is no OK", inject([FileService, HttpTestingController],
         async (service: FileService, mockBackend: HttpTestingController) => {
-            const spy = jasmine.createSpy();
+            const spy = vi.fn();
             const url = "http://123.gpx";
             const promise = service.getFileContentWithProgress(url, spy);
 
             const req = mockBackend.expectOne(url);
             req.event({ type: HttpEventType.Response, body: null, ok: false } as any);
 
-            await expectAsync(promise).toBeRejected();
+            await expect(promise).rejects.toThrow();
         }
     ));
 
     it("Should not download a file to cache due to network error", inject([FileService],
         async (service: FileService) => {
-            const progressSpy = jasmine.createSpy();
+            const progressSpy = vi.fn();
             const url = "http://123.pmtiles";
 
             const mockResponse = { ok: false };
 
-            const fetchSpy = spyOn(window, "fetch").and.returnValue(Promise.resolve(mockResponse as any));
+            const fetchSpy = vi.spyOn(window, "fetch").mockReturnValue(Promise.resolve(mockResponse as any));
 
-            await expectAsync(service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, new AbortController())).toBeRejected();
+            await expect(service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, new AbortController())).rejects.toThrow();
 
             expect(fetchSpy).toHaveBeenCalledTimes(1);
             expect(progressSpy).not.toHaveBeenCalled();
+            fetchSpy.mockRestore();
         }
     ));
 
     it("Should download a file to cache without interruptions but without progress", inject([FileService],
         async (service: FileService) => {
-            const progressSpy = jasmine.createSpy();
+            const progressSpy = vi.fn();
             const url = "http://123.pmtiles";
             const mockReader = {
-                read: jasmine.createSpy("read").and.returnValues(
-                    Promise.resolve({ done: false, value: new Uint8Array([1, 2]) }),
-                    Promise.resolve({ done: false, value: new Uint8Array([3, 4]) }),
-                    Promise.resolve({ done: true })
-                ),
+                read: vi
+                    .fn()
+                    .mockReturnValueOnce(Promise.resolve({ done: false, value: new Uint8Array([1, 2]) }))
+                    .mockReturnValueOnce(Promise.resolve({ done: false, value: new Uint8Array([3, 4]) }))
+                    .mockReturnValueOnce(Promise.resolve({ done: true }))
             };
 
             const mockResponse = {
                 ok: true,
                 body: {
-                    getReader: jasmine.createSpy("getReader").and.returnValue(mockReader)
+                    getReader: vi.fn().mockReturnValue(mockReader)
                 },
                 headers: {
-                    get: jasmine.createSpy("get").and.returnValue("")
+                    get: vi.fn().mockReturnValue("")
                 }
             };
 
             // Mock fetch
-            const fetchSpy = spyOn(window, "fetch").and.returnValue(Promise.resolve(mockResponse as any));
-
+            const fetchSpy = vi
+                .spyOn(window, "fetch")
+                .mockReturnValue(Promise.resolve(mockResponse as any));
 
             await service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, new AbortController());
 
             expect(fetchSpy).toHaveBeenCalledTimes(1);
             expect(mockReader.read).toHaveBeenCalledTimes(3);
             expect(progressSpy).not.toHaveBeenCalled();
+            fetchSpy.mockRestore();
         }
     ));
 
     it("Should stop download a file to cache when interrupted", inject([FileService],
         async (service: FileService) => {
-            const progressSpy = jasmine.createSpy();
+            const progressSpy = vi.fn();
             const url = "http://123.pmtiles";
             const mockReader = {
-                read: jasmine.createSpy("read").and.returnValues(
-                    Promise.resolve({ done: false, value: new Uint8Array([1, 2]) }),
-                    new Promise(resolve => setTimeout(() => { resolve({ done: false, value: new Uint8Array([3, 4]) }); }, 100)),
-                    new Promise(resolve => setTimeout(() => { resolve({ done: true }); }, 100))
-                ),
+                read: vi
+                    .fn()
+                    .mockReturnValueOnce(Promise.resolve({ done: false, value: new Uint8Array([1, 2]) }))
+                    .mockReturnValueOnce(new Promise((resolve) => setTimeout(() => resolve({ done: false, value: new Uint8Array([3, 4]) }), 100)))
+                    .mockReturnValueOnce(new Promise((resolve) => setTimeout(() => resolve({ done: true }), 100)))
             };
 
             const mockResponse = {
                 ok: true,
                 body: {
-                    getReader: jasmine.createSpy("getReader").and.returnValue(mockReader)
+                    getReader: vi.fn().mockReturnValue(mockReader)
                 },
                 headers: {
-                    get: jasmine.createSpy("get").and.returnValue("4")
+                    get: vi.fn().mockReturnValue("4")
                 }
             };
 
             // Mock fetch
-            const fetchSpy = spyOn(window, "fetch").and.returnValue(Promise.resolve(mockResponse as any));
+            const fetchSpy = vi.spyOn(window, "fetch").mockReturnValue(Promise.resolve(mockResponse as any));
 
             const abortController = new AbortController();
             const promise = service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, abortController);
 
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await new Promise((resolve) => setTimeout(resolve, 50));
             abortController.abort();
 
             await promise;
@@ -274,13 +278,13 @@ describe("FileService", () => {
             expect(fetchSpy).toHaveBeenCalledTimes(1);
             expect(mockReader.read).toHaveBeenCalledTimes(2);
             expect(progressSpy).toHaveBeenCalledTimes(1);
+            fetchSpy.mockRestore();
         }
     ));
 
-
     it("Should not throw if delete file fails", inject([FileService],
         async (service: FileService) => {
-            await expectAsync(service.deleteFileInDataDirectory("file")).toBeResolved();
+            await expect(service.deleteFileInDataDirectory("file")).resolves.not.toThrow();
         }
     ));
 });
