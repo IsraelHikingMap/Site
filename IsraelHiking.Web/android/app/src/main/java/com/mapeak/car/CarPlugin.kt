@@ -16,7 +16,7 @@ class CarPlugin : Plugin(), CarStore.Listener {
         store.addListener(this)
     }
 
-    protected override fun handleOnDestroy() {
+    override fun handleOnDestroy() {
         store.removeListener(this)
         super.handleOnDestroy()
     }
@@ -37,7 +37,7 @@ class CarPlugin : Plugin(), CarStore.Listener {
 
         when (key) {
             CarStore.KEY_STYLE -> {
-                injectLayeringAnchor(value)
+                addLayeringAnchorTo(value)
                 store.saveStyle(value)
             }
             CarStore.KEY_ROUTE -> {
@@ -75,7 +75,7 @@ class CarPlugin : Plugin(), CarStore.Listener {
         }
     }
 
-    private fun injectLayeringAnchor(style: JSObject) {
+    private fun addLayeringAnchorTo(style: JSObject) {
         val sources = style.optJSONObject("sources") ?: JSObject().also { style.put("sources", it) }
         val anchorData = JSObject()
             .put("type", "FeatureCollection")

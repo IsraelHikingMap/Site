@@ -9,15 +9,10 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 
 class CarSession : Session() {
-    private var carMapRenderer: CarMapRenderer? = null
-    private var locationProvider: CarLocationProvider? = null
-
     override fun onCreateScreen(intent: Intent): Screen {
         Log.v(LOG_TAG, "onCreateScreen: $intent")
-        carMapRenderer = CarMapRenderer(carContext, lifecycle)
-
+        val renderer = CarMapRenderer(carContext, lifecycle)
         val provider = CarLocationProvider(carContext)
-        locationProvider = provider
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onStart(owner: LifecycleOwner) {
                 provider.start()
@@ -28,9 +23,9 @@ class CarSession : Session() {
             }
         })
 
-        val carMapScreen = CarMapScreen(carContext, carMapRenderer!!)
-        carContext.getCarService(ScreenManager::class.java).push(carMapScreen)
-        return carMapScreen
+        val screen = CarMapScreen(carContext, renderer)
+        carContext.getCarService(ScreenManager::class.java).push(screen)
+        return screen
     }
 
     companion object {

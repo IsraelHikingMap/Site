@@ -1,5 +1,6 @@
 package com.mapeak.car
 
+import androidx.annotation.DrawableRes
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
@@ -17,10 +18,11 @@ import com.mapeak.R
 import org.json.JSONException
 import java.util.TimeZone
 
-class CarMapScreen(private val carContext: CarContext, private val carMapRenderer: CarMapRenderer) :
-    Screen(
-        carContext
-    ), CarStore.Listener, DefaultLifecycleObserver {
+class CarMapScreen(
+    private val carContext: CarContext,
+    private val carMapRenderer: CarMapRenderer
+) : Screen(carContext), CarStore.Listener, DefaultLifecycleObserver {
+
     private val store: CarStore = CarStore.get(carContext)
     private var routes: List<CarRouteData> = emptyList()
     private var statistics: CarStatistics? = null
@@ -72,28 +74,25 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
     }
 
     private fun loadUnits() {
-        units = store.loadConfig()?.optString("units", DEFAULT_UNITS) ?: DEFAULT_UNITS
+        units = store.loadConfig()?.optString("units") ?: DEFAULT_UNITS
     }
 
     override fun onGetTemplate(): Template {
         val templateBuilder = NavigationTemplate.Builder()
-        templateBuilder.setActionStrip(buildActionStrip().build())
-        if (carContext.getCarAppApiLevel() >= 2) {
-            templateBuilder.setMapActionStrip(buildMapActionStrip(carMapRenderer).build())
+            .setActionStrip(buildActionStrip())
+        if (carContext.carAppApiLevel >= 2) {
+            templateBuilder.setMapActionStrip(buildMapActionStrip())
         }
-        val estimate = buildTravelEstimate()
-        if (estimate != null) {
-            templateBuilder.setDestinationTravelEstimate(estimate)
-        }
+        buildTravelEstimate()?.let { templateBuilder.setDestinationTravelEstimate(it) }
         return templateBuilder.build()
     }
 
     private fun buildTravelEstimate(): TravelEstimate? {
         val stats = statistics ?: return null
-        val remainingDistance = if (units == "imperial") {
-            Distance.create(stats.remainingMeters / 1609.344, Distance.UNIT_MILES)
+        val remainingDistance = if (units == UNIT_IMPERIAL) {
+            Distance.create(stats.remainingMeters / METERS_PER_MILE, Distance.UNIT_MILES)
         } else {
-            Distance.create(stats.remainingMeters / 1000.0, Distance.UNIT_KILOMETERS)
+            Distance.create(stats.remainingMeters / METERS_PER_KILOMETER, Distance.UNIT_KILOMETERS)
         }
         val arrivalTime = DateTimeWithZone.create(
             System.currentTimeMillis() + stats.remainingSeconds * 1000,
@@ -104,80 +103,34 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
             .build()
     }
 
-    private fun buildActionStrip(): ActionStrip.Builder {
-        val actionStripBuilder = ActionStrip.Builder()
+    private fun buildActionStrip(): ActionStrip =
+        ActionStrip.Builder()
+            .addAction(iconAction(R.drawable.ic_menu))
+            .build()
 
-        actionStripBuilder.addAction(
-            Action.Builder()
-                .setIcon(
-                    CarIcon.Builder(
-                        IconCompat.createWithResource(
-                            carContext,
-                            R.drawable.ic_menu
-                        )
-                    )
-                        .build()
-                )
-                .build()
-        )
+    private fun buildMapActionStrip(): ActionStrip =
+        ActionStrip.Builder()
+            .addAction(Action.PAN)
+            .addAction(iconAction(R.drawable.ic_zoom_in) { carMapRenderer.zoomInFromButton() })
+            .addAction(iconAction(R.drawable.ic_zoom_out) { carMapRenderer.zoomOutFromButton() })
+            .addAction(iconAction(R.drawable.ic_recenter) { carMapRenderer.recenterFromButton() })
+            .build()
 
-        return actionStripBuilder
-    }
-
-    private fun buildMapActionStrip(carMapRenderer: CarMapRenderer): ActionStrip.Builder {
-        val actionStripBuilder = ActionStrip.Builder()
-
-        actionStripBuilder.addAction(Action.PAN)
-
-        actionStripBuilder.addAction(
-            Action.Builder()
-                .setIcon(
-                    CarIcon.Builder(
-                        IconCompat.createWithResource(
-                            carContext,
-                            R.drawable.ic_zoom_in
-                        )
-                    )
-                        .build()
-                )
-                .setOnClickListener { carMapRenderer.zoomInFromButton() }
-                .build()
-        )
-
-        actionStripBuilder.addAction(
-            Action.Builder()
-                .setIcon(
-                    CarIcon.Builder(
-                        IconCompat.createWithResource(
-                            carContext,
-                            R.drawable.ic_zoom_out
-                        )
-                    )
-                        .build()
-                )
-                .setOnClickListener { carMapRenderer.zoomOutFromButton() }
-                .build()
-        )
-
-        actionStripBuilder.addAction(
-            Action.Builder()
-                .setIcon(
-                    CarIcon.Builder(
-                        IconCompat.createWithResource(
-                            carContext,
-                            R.drawable.ic_recenter
-                        )
-                    )
-                        .build()
-                )
-                .setOnClickListener { carMapRenderer.recenterFromButton() }
-                .build()
-        )
-
-        return actionStripBuilder
+    private fun iconAction(@DrawableRes iconRes: Int, onClick: (() -> Unit)? = null): Action {
+        val builder = Action.Builder()
+            .setIcon(
+                CarIcon.Builder(IconCompat.createWithResource(carContext, iconRes)).build()
+            )
+        if (onClick != null) {
+            builder.setOnClickListener { onClick() }
+        }
+        return builder.build()
     }
 
     companion object {
         private const val DEFAULT_UNITS = "metric"
+        private const val UNIT_IMPERIAL = "imperial"
+        private const val METERS_PER_KILOMETER = 1000.0
+        private const val METERS_PER_MILE = 1609.344
     }
 }

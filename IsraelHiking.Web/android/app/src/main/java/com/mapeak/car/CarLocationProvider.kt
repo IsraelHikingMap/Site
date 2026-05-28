@@ -42,7 +42,7 @@ class CarLocationProvider(context: Context) {
         try {
             fusedClient.requestLocationUpdates(request, locationCallback, Looper.getMainLooper())
             fusedClient.lastLocation.addOnSuccessListener { last: Location? ->
-                if (last != null) store.setLocation(last)
+                last?.let { store.setLocation(it) }
             }
             started = true
             Log.i(LOG_TAG, "Started fused location updates")

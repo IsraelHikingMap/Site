@@ -1,7 +1,6 @@
 package com.mapeak.car
 
 import android.app.Presentation
-import android.graphics.Rect
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.os.Handler
@@ -23,8 +22,6 @@ class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifec
     private val store: CarStore = CarStore.get(carContext)
     private var surfaceContainer: SurfaceContainer? = null
     private val uiHandler = Handler(Looper.getMainLooper())
-    private var lastKnownStableArea = Rect()
-    private var lastKnownVisibleArea = Rect()
     private var presentation: Presentation? = null
     private var virtualDisplay: VirtualDisplay? = null
 
@@ -58,7 +55,7 @@ class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifec
         Log.v(LOG_TAG, "CarMapRenderer.onSurfaceAvailable")
         this.surfaceContainer = surfaceContainer
 
-        val virtualDisplay = carContext
+        val display = carContext
             .getSystemService(DisplayManager::class.java)
             .createVirtualDisplay(
                 "MapLibreSampleVirtualDisplay",
@@ -68,25 +65,13 @@ class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifec
                 surfaceContainer.surface,
                 0
             )
-        this.virtualDisplay = virtualDisplay
+        virtualDisplay = display
 
-        val presentation = Presentation(carContext, virtualDisplay.display)
-        this.presentation = presentation
-        presentation.setContentView(mapContainer.setupMap(computePixelRatio()))
-        presentation.show()
+        presentation = Presentation(carContext, display.display).apply {
+            setContentView(mapContainer.setupMap(computePixelRatio(surfaceContainer)))
+            show()
+        }
         store.setConnected(true)
-    }
-
-    override fun onVisibleAreaChanged(visibleArea: Rect) {
-        if (visibleArea != lastKnownVisibleArea) {
-            lastKnownVisibleArea = visibleArea
-        }
-    }
-
-    override fun onStableAreaChanged(stableArea: Rect) {
-        if (stableArea != lastKnownStableArea) {
-            lastKnownStableArea = stableArea
-        }
     }
 
     override fun onSurfaceDestroyed(surfaceContainer: SurfaceContainer) {
@@ -96,26 +81,23 @@ class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifec
         store.setConnected(false)
     }
 
-    private fun computePixelRatio(): Float {
-        val dpi = surfaceContainer!!.dpi
+    private fun computePixelRatio(surface: SurfaceContainer): Float {
+        val dpi = surface.dpi
         if (dpi <= 0) {
             return 1f
         }
-        val widthInches = surfaceContainer!!.width.toFloat() / dpi
+        val widthInches = surface.width.toFloat() / dpi
         val ratio = widthInches / 6f
         return max(1f, min(2.5f, ratio))
     }
 
-    fun zoomInFromButton() {
-        val centerX = if (surfaceContainer != null) surfaceContainer!!.width / 2f else -1f
-        val centerY = if (surfaceContainer != null) surfaceContainer!!.height / 2f else -1f
-        onScale(centerX, centerY, CarMapContainer.DOUBLE_CLICK_FACTOR)
-    }
+    fun zoomInFromButton() = zoomFromButton(CarMapContainer.DOUBLE_CLICK_FACTOR)
 
-    fun zoomOutFromButton() {
-        val centerX = if (surfaceContainer != null) surfaceContainer!!.width / 2f else -1f
-        val centerY = if (surfaceContainer != null) surfaceContainer!!.height / 2f else -1f
-        onScale(centerX, centerY, -CarMapContainer.DOUBLE_CLICK_FACTOR)
+    fun zoomOutFromButton() = zoomFromButton(-CarMapContainer.DOUBLE_CLICK_FACTOR)
+
+    private fun zoomFromButton(factor: Float) {
+        val surface = surfaceContainer ?: return
+        onScale(surface.width / 2f, surface.height / 2f, factor)
     }
 
     override fun onScale(focusX: Float, focusY: Float, scaleFactor: Float) {

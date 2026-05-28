@@ -6,7 +6,7 @@ import org.json.JSONObject
 import org.maplibre.android.geometry.LatLng
 
 data class CarRouteData(
-    val lngLats: MutableList<LatLng> = ArrayList(),
+    val lngLats: List<LatLng> = emptyList(),
     val weight: Double = 0.0,
     val color: String? = null,
     val opacity: Double = 0.0
@@ -15,10 +15,9 @@ data class CarRouteData(
         @Throws(JSONException::class)
         fun fromJson(json: JSONObject): CarRouteData {
             val points = json.getJSONArray("points")
-            val lngLats = ArrayList<LatLng>(points.length())
-            for (i in 0..<points.length()) {
+            val lngLats = List(points.length()) { i ->
                 val point = points.getJSONArray(i)
-                lngLats.add(LatLng(point.getDouble(1), point.getDouble(0)))
+                LatLng(point.getDouble(1), point.getDouble(0))
             }
             return CarRouteData(
                 lngLats = lngLats,
@@ -30,15 +29,8 @@ data class CarRouteData(
 
         @Throws(JSONException::class)
         fun listFromJson(json: JSObject?): List<CarRouteData> {
-            if (json == null) {
-                return ArrayList()
-            }
-            val routes = json.getJSONArray("routes")
-            val result = ArrayList<CarRouteData>(routes.length())
-            for (i in 0..<routes.length()) {
-                result.add(fromJson(routes.getJSONObject(i)))
-            }
-            return result
+            val routes = json?.getJSONArray("routes") ?: return emptyList()
+            return List(routes.length()) { i -> fromJson(routes.getJSONObject(i)) }
         }
     }
 }

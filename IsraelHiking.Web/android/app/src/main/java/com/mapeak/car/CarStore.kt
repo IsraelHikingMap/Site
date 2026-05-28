@@ -59,22 +59,17 @@ class CarStore private constructor(context: Context) {
         notifyChanged(KEY_ROUTE)
     }
 
-    fun loadRoutes(): JSObject? {
-        val raw = prefs.getString(KEY_ROUTE, null) ?: return null
-        return try {
-            JSObject(raw)
-        } catch (_: JSONException) {
-            null
-        }
-    }
+    fun loadRoutes(): JSObject? = loadJSObject(KEY_ROUTE)
 
     fun saveConfig(config: JSObject) {
         prefs.edit().putString(KEY_CONFIG, config.toString()).apply()
         notifyChanged(KEY_CONFIG)
     }
 
-    fun loadConfig(): JSObject? {
-        val raw = prefs.getString(KEY_CONFIG, null) ?: return null
+    fun loadConfig(): JSObject? = loadJSObject(KEY_CONFIG)
+
+    private fun loadJSObject(key: String): JSObject? {
+        val raw = prefs.getString(key, null) ?: return null
         return try {
             JSObject(raw)
         } catch (_: JSONException) {
