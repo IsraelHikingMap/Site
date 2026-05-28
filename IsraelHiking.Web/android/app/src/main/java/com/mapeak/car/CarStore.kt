@@ -89,7 +89,7 @@ class CarStore private constructor(context: Context) {
 
     fun loadZoom(): Double? {
         if (!prefs.contains(KEY_ZOOM)) return null
-        return prefs.getFloat(KEY_ZOOM, 0f).toDouble()
+        return prefs.getFloat(KEY_ZOOM, 14f).toDouble()
     }
 
     fun setLocation(location: Location?) {

@@ -74,7 +74,7 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
     private fun centerOnLocation(location: Location) {
         val bearing = if (location.hasBearing()) location.bearing.toDouble() else 0.0
         // Push the GPS dot into the bottom third so most of the visible map shows what's ahead.
-        val offsetY = (mapViewInstance?.height ?: 0) / 3
+        val offsetY = (mapViewInstance?.height ?: 0) / 6
         setCenterAndZoom(
             location.latitude,
             location.longitude,
