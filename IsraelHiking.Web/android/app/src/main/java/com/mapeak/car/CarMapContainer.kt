@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
 import android.location.Location
@@ -45,6 +46,7 @@ import org.maplibre.turf.TurfTransformation
 import java.io.IOException
 import kotlin.math.abs
 import kotlin.math.ln
+import kotlin.math.pow
 
 class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
     private val store: CarStore = CarStore.get(carContext)
@@ -232,6 +234,8 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
                 addProperty("weight", route.weight)
                 addProperty("color", route.color)
                 addProperty("opacity", route.opacity)
+                addProperty("iconColor", arrowIconColor(route.color, route.opacity))
+                addProperty("iconSize", arrowIconSize(route.weight))
             }
         }
         val startPointFeature = Feature.fromGeometry(geoJsonPoints.first()).apply {
@@ -249,6 +253,38 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
         return listOf(routeFeature, startPointFeature, endPointFeature)
     }
 
+    /**
+     * Mirrors selectedRouteService.routeToProperties: when the route is opaque
+     * enough to mask the arrow, return the inverted (b/w) of the route color
+     * so the arrow stays visible; otherwise reuse the route color so the
+     * arrow blends with the line.
+     */
+    private fun arrowIconColor(routeColor: String?, opacity: Double): String {
+        val color = routeColor ?: return ROUTE_ARROW_FALLBACK_COLOR
+        if (opacity <= ARROW_INVERT_OPACITY_THRESHOLD) return color
+        val parsed = try {
+            Color.parseColor(color)
+        } catch (_: IllegalArgumentException) {
+            return color
+        }
+        val invertedR = 255 - Color.red(parsed)
+        val invertedG = 255 - Color.green(parsed)
+        val invertedB = 255 - Color.blue(parsed)
+        val luminance = 0.2126 * channelToLinear(invertedR) +
+            0.7152 * channelToLinear(invertedG) +
+            0.0722 * channelToLinear(invertedB)
+        return if (luminance < BW_LUMINANCE_THRESHOLD) "#000000" else "#FFFFFF"
+    }
+
+    private fun arrowIconSize(weight: Double): Double =
+        if (weight < ARROW_BASE_WEIGHT) ARROW_BASE_SIZE else ARROW_BASE_SIZE * weight / ARROW_BASE_WEIGHT
+
+    private fun channelToLinear(channel: Int): Double {
+        val normalized = channel / 255.0
+        return if (normalized <= 0.03928) normalized / 12.92
+        else ((normalized + 0.055) / 1.055).pow(2.4)
+    }
+
     private fun addRouteLayers(style: Style) {
         val isLineString = Expression.eq(Expression.geometryType(), Expression.literal("LineString"))
         val isPoint = Expression.eq(Expression.geometryType(), Expression.literal("Point"))
@@ -264,6 +300,19 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
             )
         }
 
+        val routeArrowsLayer = SymbolLayer(ROUTE_ARROWS_LAYER_ID, ROUTE_SOURCE_ID).apply {
+            setFilter(isLineString)
+            setProperties(
+                PropertyFactory.symbolPlacement(Property.SYMBOL_PLACEMENT_LINE),
+                PropertyFactory.symbolSpacing(40f),
+                PropertyFactory.iconImage(ROUTE_ARROW_ICON_IMAGE),
+                PropertyFactory.iconSize(Expression.get("iconSize")),
+                PropertyFactory.iconColor(Expression.get("iconColor")),
+                PropertyFactory.iconAllowOverlap(true),
+                PropertyFactory.iconIgnorePlacement(true)
+            )
+        }
+
         val routePointsLayer = CircleLayer(ROUTE_POINTS_LAYER_ID, ROUTE_SOURCE_ID).apply {
             setFilter(isPoint)
             setProperties(
@@ -276,9 +325,11 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
 
         if (style.getLayer(LAYERING_ANCHOR_ID) != null) {
             style.addLayerBelow(routeLayer, LAYERING_ANCHOR_ID)
-            style.addLayerAbove(routePointsLayer, ROUTE_LAYER_ID)
+            style.addLayerAbove(routeArrowsLayer, ROUTE_LAYER_ID)
+            style.addLayerAbove(routePointsLayer, ROUTE_ARROWS_LAYER_ID)
         } else {
             style.addLayer(routeLayer)
+            style.addLayer(routeArrowsLayer)
             style.addLayer(routePointsLayer)
         }
     }
@@ -410,15 +461,21 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
     fun setStyle(styleJson: String) {
         val map = mapLibreMapInstance ?: return
         map.setStyle(Style.Builder().fromJson(styleJson)) { style: Style ->
-            try {
-                carContext.assets.open("public/content/gps-arrow.png").use { input ->
-                    style.addImage(LOCATION_ICON_IMAGE, BitmapFactory.decodeStream(input))
-                }
-            } catch (e: IOException) {
-                Log.w(LOG_TAG, "Could not load GPS arrow asset", e)
-            }
+            loadStyleImage(style, "public/content/gps-arrow.png", LOCATION_ICON_IMAGE, sdf = false)
+            // Arrow needs to be SDF so the per-feature iconColor expression can recolor it.
+            loadStyleImage(style, "public/content/arrow.png", ROUTE_ARROW_ICON_IMAGE, sdf = true)
             renderRoutes(style)
             renderGpsLocation(style)
+        }
+    }
+
+    private fun loadStyleImage(style: Style, assetPath: String, imageId: String, sdf: Boolean) {
+        try {
+            carContext.assets.open(assetPath).use { input ->
+                style.addImage(imageId, BitmapFactory.decodeStream(input), sdf)
+            }
+        } catch (e: IOException) {
+            Log.w(LOG_TAG, "Could not load asset: $assetPath", e)
         }
     }
 
@@ -432,9 +489,16 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
         private const val LOCATION_ACCURACY_COLOR = "#136AEC"
         private const val ROUTE_SOURCE_ID = "planned-route-source"
         private const val ROUTE_LAYER_ID = "planned-route-layer"
+        private const val ROUTE_ARROWS_LAYER_ID = "planned-route-arrows-layer"
         private const val ROUTE_POINTS_LAYER_ID = "planned-route-points-layer"
         private const val ROUTE_START_COLOR = "#43a047"
         private const val ROUTE_END_COLOR = "red"
+        private const val ROUTE_ARROW_ICON_IMAGE = "arrow"
+        private const val ROUTE_ARROW_FALLBACK_COLOR = "#FFFFFF"
+        private const val ARROW_INVERT_OPACITY_THRESHOLD = 0.5
+        private const val ARROW_BASE_WEIGHT = 10.0
+        private const val ARROW_BASE_SIZE = 1.6
+        private const val BW_LUMINANCE_THRESHOLD = 0.1791288
         private const val CIRCLE_STEPS = 64
         private const val PAN_SUPPRESSION_MS = 15_000L
         private const val CAMERA_EASE_DURATION_MS = 250
