@@ -29,7 +29,7 @@ object CarStatisticsCalculator {
     private data class ClosestRouteHit(
         val route: CarRouteData,
         val linePoints: List<Point>,
-        /** nearestPointOnLine result: properties `dist`, `index`, `location` — all in meters. */
+        /** nearestPointOnLine result: properties `dist` and `index`; geometry is the projected Point. */
         val projection: Feature
     )
 
@@ -48,12 +48,33 @@ object CarStatisticsCalculator {
         }
         val hit = findClosestRoute(routes, location) ?: return null
         val totalM = TurfMeasurement.length(hit.linePoints, TurfConstants.UNIT_METERS)
-        val projectedM = hit.projection.getNumberProperty("location").toDouble()
+        val projectedM = alongLineDistanceMeters(hit)
         val remainingM = (totalM - projectedM).coerceAtLeast(0.0)
         return CarStatistics(
             remainingMeters = remainingM,
             remainingSeconds = (remainingM / location.speed).toLong()
         )
+    }
+
+    /**
+     * Distance from the line start to the projected GPS point, in meters.
+     * Computed manually because maplibre-turf's nearestPointOnLine only sets
+     * `dist` and `index` on the returned feature — unlike Turf.js, it does
+     * not populate a `location` (along-line distance) property.
+     */
+    private fun alongLineDistanceMeters(hit: ClosestRouteHit): Double {
+        val segIdx = hit.projection.getNumberProperty("index").toInt()
+        val nearestPoint = hit.projection.geometry() as Point
+        var along = 0.0
+        for (i in 0 until segIdx) {
+            along += TurfMeasurement.distance(
+                hit.linePoints[i], hit.linePoints[i + 1], TurfConstants.UNIT_METERS
+            )
+        }
+        along += TurfMeasurement.distance(
+            hit.linePoints[segIdx], nearestPoint, TurfConstants.UNIT_METERS
+        )
+        return along
     }
 
     private fun findClosestRoute(routes: List<CarRouteData>, location: Location): ClosestRouteHit? {
