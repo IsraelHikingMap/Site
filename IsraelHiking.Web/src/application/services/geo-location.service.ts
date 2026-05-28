@@ -16,7 +16,6 @@ import type { ApplicationState, LatLngAltTime } from "../models";
 export class GeoLocationService {
     private isBackground = false;
     private wasInitialized = false;
-    private needToStartAgain = false;
     private lastReceivedPosition: GeolocationPosition | null = null;
 
     public positionWhileInBackground = new EventEmitter<GeolocationPosition>();
@@ -65,15 +64,15 @@ export class GeoLocationService {
             if (this.isBackground &&
                 !this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording &&
                 !this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings &&
-                !this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).carConnected &&
                 this.wasInitialized) {
                 BackgroundGeolocation.stop();
                 this.wasInitialized = false;
-                this.needToStartAgain = true;
                 return;
             }
-            if (!this.isBackground && this.needToStartAgain) {
-                this.needToStartAgain = false;
+            if (!this.isBackground &&
+                !this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording &&
+                !this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings &&
+                !this.wasInitialized) {
                 this.startWatching();
             }
             if (!this.isBackground) {
