@@ -6,6 +6,7 @@ import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { LayersService } from "./layers.service";
 import { DefaultStyleService } from "./default-style.service";
+import { ResourcesService } from "./resources.service";
 import { SetCarConnectedAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState } from "../models";
 
@@ -13,7 +14,7 @@ type CarConnectedEvent = {
     connected: boolean;
 }
 
-type CarStoreKey = "style" | "route";
+type CarStoreKey = "style" | "route" | "config";
 
 type CarStoreMessage = {
     key: CarStoreKey;
@@ -36,6 +37,7 @@ export class CarService {
     private readonly loggingService = inject(LoggingService);
     private readonly defaultStyleService = inject(DefaultStyleService);
     private readonly layersService = inject(LayersService);
+    private readonly resources = inject(ResourcesService);
 
     public async initialize() {
         if (!this.runningContextService.isCapacitor || this.runningContextService.isIos) {
@@ -48,6 +50,14 @@ export class CarService {
         });
         this.store.select((state: ApplicationState) => state.routes.present).subscribe(() => {
             this.setRoutes();
+        });
+        // Style is language-specific, so re-send it whenever the language changes.
+        this.store.select((state: ApplicationState) => state.configuration.language).subscribe(() => {
+            this.setStyle();
+            this.setConfig();
+        });
+        this.store.select((state: ApplicationState) => state.configuration.units).subscribe(() => {
+            this.setConfig();
         });
 
         const event = await Car.getConnectionState();
@@ -76,5 +86,15 @@ export class CarService {
             }));
 
         Car.storeValue({ key: "route", value: { routes: routesValue } });
+    }
+
+    private setConfig() {
+        Car.storeValue({
+            key: "config",
+            value: {
+                language: this.resources.getCurrentLanguageCodeSimplified(),
+                units: this.store.selectSnapshot((state: ApplicationState) => state.configuration.units)
+            }
+        });
     }
 }

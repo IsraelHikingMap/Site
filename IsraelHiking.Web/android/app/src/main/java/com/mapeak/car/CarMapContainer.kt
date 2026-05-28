@@ -56,6 +56,7 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
     private var scaleAnimator: Animator? = null
     private var routes: List<CarRouteData> = emptyList()
     private var lastUserInteractionMs: Long = 0L
+    private var lastSavedZoom: Double = Double.NaN
 
     fun scrollBy(x: Float, y: Float) {
         lastUserInteractionMs = System.currentTimeMillis()
@@ -415,6 +416,20 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
         mapView.getMapAsync { map: MapLibreMap? ->
             mapViewInstance = mapView
             mapLibreMapInstance = map
+            if (map != null) {
+                store.loadZoom()?.let { savedZoom ->
+                    map.cameraPosition = CameraPosition.Builder(map.cameraPosition)
+                        .zoom(savedZoom)
+                        .build()
+                }
+                map.addOnCameraIdleListener {
+                    val zoom = map.cameraPosition.zoom
+                    if (zoom != lastSavedZoom) {
+                        lastSavedZoom = zoom
+                        store.saveZoom(zoom)
+                    }
+                }
+            }
             store.loadStyle()?.let { setStyle(it) }
         }
         mapViewInstance = mapView

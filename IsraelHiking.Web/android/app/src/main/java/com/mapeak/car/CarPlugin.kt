@@ -47,6 +47,7 @@ class CarPlugin : Plugin(), CarStore.Listener {
                     store.saveRoutes(value)
                 }
             }
+            CarStore.KEY_CONFIG -> store.saveConfig(value)
             else -> {
                 call.reject("unknown key: $key")
                 return

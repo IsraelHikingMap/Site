@@ -8,6 +8,8 @@ data class CarStatistics(
 )
 
 object CarStatisticsCalculator {
+    /** Below this speed (m/s) the GPS ETA would be meaningless, so we skip stats entirely. */
+    private const val MIN_SPEED_MPS_FOR_ETA = 1.5f
 
     /**
      * For every point in every route, measures distance to the GPS fix. The
@@ -19,8 +21,9 @@ object CarStatisticsCalculator {
      * Returns null when there are no routes, no usable speed, or the GPS fix
      * does not project onto any route point.
      */
+
     fun compute(routes: List<CarRouteData>, location: Location): CarStatistics? {
-        if (routes.isEmpty() || !location.hasSpeed() || location.speed <= 0f) {
+        if (routes.isEmpty() || !location.hasSpeed() || location.speed < MIN_SPEED_MPS_FOR_ETA) {
             return null
         }
 

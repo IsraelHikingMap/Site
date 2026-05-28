@@ -24,6 +24,7 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
     private val store: CarStore = CarStore.get(carContext)
     private var routes: List<CarRouteData> = emptyList()
     private var statistics: CarStatistics? = null
+    private var units: String = DEFAULT_UNITS
 
     init {
         lifecycle.addObserver(this)
@@ -32,6 +33,7 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
     override fun onCreate(owner: LifecycleOwner) {
         store.addListener(this)
         loadRoutes()
+        loadUnits()
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
@@ -44,6 +46,10 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
             CarStore.KEY_ROUTE -> {
                 loadRoutes()
                 recomputeStatistics()
+            }
+            CarStore.KEY_CONFIG -> {
+                loadUnits()
+                invalidate()
             }
         }
     }
@@ -65,6 +71,10 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
         }
     }
 
+    private fun loadUnits() {
+        units = store.loadConfig()?.optString("units", DEFAULT_UNITS) ?: DEFAULT_UNITS
+    }
+
     override fun onGetTemplate(): Template {
         val templateBuilder = NavigationTemplate.Builder()
         templateBuilder.setActionStrip(buildActionStrip().build())
@@ -80,7 +90,11 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
 
     private fun buildTravelEstimate(): TravelEstimate? {
         val stats = statistics ?: return null
-        val remainingDistance = Distance.create(stats.remainingMeters / 1000.0, Distance.UNIT_KILOMETERS)
+        val remainingDistance = if (units == "imperial") {
+            Distance.create(stats.remainingMeters / 1609.344, Distance.UNIT_MILES)
+        } else {
+            Distance.create(stats.remainingMeters / 1000.0, Distance.UNIT_KILOMETERS)
+        }
         val arrivalTime = DateTimeWithZone.create(
             System.currentTimeMillis() + stats.remainingSeconds * 1000,
             TimeZone.getDefault()
@@ -161,5 +175,9 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
         )
 
         return actionStripBuilder
+    }
+
+    companion object {
+        private const val DEFAULT_UNITS = "metric"
     }
 }

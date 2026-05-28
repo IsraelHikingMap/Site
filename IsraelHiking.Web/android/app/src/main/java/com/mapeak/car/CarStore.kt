@@ -68,6 +68,30 @@ class CarStore private constructor(context: Context) {
         }
     }
 
+    fun saveConfig(config: JSObject) {
+        prefs.edit().putString(KEY_CONFIG, config.toString()).apply()
+        notifyChanged(KEY_CONFIG)
+    }
+
+    fun loadConfig(): JSObject? {
+        val raw = prefs.getString(KEY_CONFIG, null) ?: return null
+        return try {
+            JSObject(raw)
+        } catch (_: JSONException) {
+            null
+        }
+    }
+
+    /** Camera zoom is persisted but not part of the listener contract. */
+    fun saveZoom(zoom: Double) {
+        prefs.edit().putFloat(KEY_ZOOM, zoom.toFloat()).apply()
+    }
+
+    fun loadZoom(): Double? {
+        if (!prefs.contains(KEY_ZOOM)) return null
+        return prefs.getFloat(KEY_ZOOM, 0f).toDouble()
+    }
+
     fun setLocation(location: Location?) {
         locationCache = location
         notifyChanged(KEY_LOCATION)
@@ -99,8 +123,10 @@ class CarStore private constructor(context: Context) {
 
     companion object {
         private const val PREFS_NAME = "mapeak_car"
+        private const val KEY_ZOOM = "zoom"
         const val KEY_STYLE = "style"
         const val KEY_ROUTE = "route"
+        const val KEY_CONFIG = "config"
         const val KEY_LOCATION = "location"
         const val KEY_CONNECTED = "connected"
 
