@@ -131,6 +131,10 @@ public static class GeoJsonExtensions
 
     public static string GetTitle(this IFeature feature, string language)
     {
+        if (language == Languages.DEFAULT && feature.Attributes.Exists("name"))
+        {
+            return feature.Attributes["name"].ToString();
+        }
         if (feature.Attributes.Exists("name:" + language))
         {
             return feature.Attributes.GetOptionalValue("name:" + language) as string;

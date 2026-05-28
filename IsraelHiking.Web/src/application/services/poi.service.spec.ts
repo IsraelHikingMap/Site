@@ -1215,6 +1215,29 @@ describe("Poi Service", () => {
         }
     ));
 
+    it("Should deduplicate images with same url", inject([PoiService, ImageAttributionService],
+        async (poiService: PoiService, attributionService: ImageAttributionService) => {
+            const feature = {
+                properties: {
+                    poiSource: "OSM",
+                    poiId: "poiId",
+                    identifier: "id",
+                    image: "wikimedia.org/image-url()",
+                    image1: encodeURIComponent("wikimedia.org/image-url()"),
+                } as any,
+                geometry: {
+                    type: "Point",
+                    coordinates: [1, 2]
+                }
+            } as GeoJSON.Feature;
+            vi.spyOn(attributionService, "getAttributionForImage").mockReturnValue(Promise.resolve("aaa") as any);
+
+            const imagesUrls = await poiService.getImagesThatHaveAttribution(feature);
+            expect(imagesUrls.length).toBe(1);
+            expect(imagesUrls[0]).toBe("wikimedia.org/image-url()");
+        }
+    ));
+
     it("should get closest point from overpass", inject([PoiService, OverpassTurboService],
         async (poiService: PoiService, overpass: OverpassTurboService) => {
             overpass.getPointsInArea = () => {
