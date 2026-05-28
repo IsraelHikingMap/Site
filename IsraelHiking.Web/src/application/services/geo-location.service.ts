@@ -137,7 +137,7 @@ export class GeoLocationService {
                         return;
                     }
                     this.lastReceivedPosition = position;
-                    if (this.isBackground && !this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).carConnected) {
+                    if (this.isBackground) {
                         this.positionWhileInBackground.next(this.lastReceivedPosition);
                         return;
                     }
