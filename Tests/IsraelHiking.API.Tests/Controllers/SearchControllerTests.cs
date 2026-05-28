@@ -53,7 +53,7 @@ public class SearchControllerTests
             {FeatureAttributes.SEARCH_LANGUAGE, Languages.RUSSIAN}
         });
         feature.SetLocation(featureLocation);
-        var list = new List<IFeature> {feature};
+        var list = new List<IFeature> { feature };
         var searchTerm = "searchTerm";
         _searchRepository.Search(searchTerm, Languages.ENGLISH).Returns(list);
 
@@ -61,9 +61,37 @@ public class SearchControllerTests
 
         Assert.IsNotNull(results);
         Assert.AreEqual(list.Count, results.Count());
-        Assert.AreEqual(results.First().Title, "name-russian");
+        Assert.AreEqual("name-russian", results.First().Title);
     }
-        
+
+    [TestMethod]
+    public void GetSearchResults_SearchWillReturnedDefaultLanguage_UseIt()
+    {
+        var featureLocation = new Coordinate(0, 0);
+        var feature = new Feature(new Point(featureLocation), new AttributesTable
+        {
+            {FeatureAttributes.NAME, "name"},
+            {FeatureAttributes.NAME + ":ru", "name-russian"},
+            {FeatureAttributes.NAME + ":en", "name-english"},
+            {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
+            {FeatureAttributes.POI_SOURCE, Sources.OSM},
+            {FeatureAttributes.POI_ICON, string.Empty},
+            {FeatureAttributes.POI_ICON_COLOR, "black"},
+            {FeatureAttributes.ID, "id"},
+            {FeatureAttributes.SEARCH_LANGUAGE, Languages.DEFAULT}
+        });
+        feature.SetLocation(featureLocation);
+        var list = new List<IFeature> { feature };
+        var searchTerm = "searchTerm";
+        _searchRepository.Search(searchTerm, Languages.ENGLISH).Returns(list);
+
+        var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result;
+
+        Assert.IsNotNull(results);
+        Assert.AreEqual(list.Count, results.Count());
+        Assert.AreEqual("name", results.First().Title);
+    }
+
     [TestMethod]
     public void GetSearchResults_UsingQuotes_ShouldGetExactMatch()
     {
@@ -191,16 +219,6 @@ public class SearchControllerTests
     {
         const string place = "place";
         const string searchTerm = "searchTerm, " + place;
-        var placeFeature = new Feature(new Polygon(new LinearRing([
-            new Coordinate(0, 0),
-            new Coordinate(0, 1),
-            new Coordinate(2, 0),
-            new Coordinate(0, 0)
-        ])), new AttributesTable
-        {
-            {FeatureAttributes.NAME, place},
-            {FeatureAttributes.ID, "place_id" }
-        });
         var featureLocation = new Coordinate(0.5, 0.5);
         var featureInPlace = new Feature(new GeometryCollection([
                 new Point(featureLocation),
