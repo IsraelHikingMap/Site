@@ -675,9 +675,16 @@ export class PoiService {
     }
 
     public async getImagesThatHaveAttribution(feature: Immutable<GeoJSON.Feature>) {
-        const imagesUrls = GeoJSONUtils.getValidImageUrls(feature);
+        let imagesUrls = GeoJSONUtils.getValidImageUrls(feature);
         const imageAttributions = await Promise.all(imagesUrls.map(u => this.imageAttributinoService.getAttributionForImage(u)));
-        return imagesUrls.filter((_, i) => imageAttributions[i] != null);
+        imagesUrls = imagesUrls.filter((_, i) => imageAttributions[i] != null);
+        return [...new Set(imagesUrls.map(url => {
+            try {
+                return decodeURIComponent(url);
+            } catch {
+                return url;
+            }
+        }))];
     }
 
     public async createEditableDataAndMerge(feature: GeoJSON.Feature): Promise<EditablePublicPointData> {
