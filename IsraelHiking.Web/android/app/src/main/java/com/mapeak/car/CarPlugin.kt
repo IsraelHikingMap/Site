@@ -8,17 +8,11 @@ import com.getcapacitor.annotation.CapacitorPlugin
 import org.json.JSONArray
 
 @CapacitorPlugin(name = "Car")
-class CarPlugin : Plugin(), CarStore.Listener {
+class CarPlugin : Plugin() {
     private lateinit var store: CarStore
 
     override fun load() {
         store = CarStore.get(context)
-        store.addListener(this)
-    }
-
-    override fun handleOnDestroy() {
-        store.removeListener(this)
-        super.handleOnDestroy()
     }
 
     @Suppress("unused")
@@ -54,25 +48,6 @@ class CarPlugin : Plugin(), CarStore.Listener {
             }
         }
         call.resolve()
-    }
-
-    @Suppress("unused")
-    @PluginMethod
-    fun getConnectionState(call: PluginCall) {
-        val payload = JSObject()
-        payload.put("connected", store.isConnected())
-        call.resolve(payload)
-    }
-
-    override fun onCarStoreUpdated(key: String) {
-        if (key != CarStore.KEY_CONNECTED) {
-            return
-        }
-        val bridge = bridge ?: return
-        val payload = JSObject().put("connected", store.isConnected())
-        bridge.executeOnMainThread {
-            notifyListeners(CarStore.KEY_CONNECTED, payload)
-        }
     }
 
     private fun addLayeringAnchorTo(style: JSObject) {
