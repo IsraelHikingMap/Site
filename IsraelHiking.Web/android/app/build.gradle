@@ -46,6 +46,7 @@ dependencies {
     implementation project(':capacitor-cordova-android-plugins')
     implementation "androidx.car.app:app:$androidxCarAppVersion"
     implementation "org.maplibre.gl:android-sdk:$maplibreSdkVersion"
+    implementation "org.maplibre.gl:android-sdk-turf:$maplibreTurfVersion"
     implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
     implementation "ch.poole.geo.pmtiles-reader:Reader:$pmtilesReaderVersion"
     implementation "androidx.localbroadcastmanager:localbroadcastmanager:$androidxLocalBroadcastManagerVersion"
