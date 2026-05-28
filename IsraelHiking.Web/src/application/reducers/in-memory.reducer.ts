@@ -48,11 +48,6 @@ export class SetPublicRoutesFilterAction {
     constructor(public filters: PublicRoutesFilter) { }
 }
 
-export class SetCarConnectedAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public connected: boolean) { }
-}
-
 @State({
     name: "inMemoryState",
     defaults: initialState.inMemoryState
@@ -129,14 +124,6 @@ export class InMemoryReducer {
     public setPublicRoutesFilter(ctx: StateContext<InMemoryState>, action: SetPublicRoutesFilterAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.publicRoutesFilter = action.filters;
-            return lastState;
-        }));
-    }
-
-    @Action(SetCarConnectedAction)
-    public setCarConnected(ctx: StateContext<InMemoryState>, action: SetCarConnectedAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.carConnected = action.connected;
             return lastState;
         }));
     }

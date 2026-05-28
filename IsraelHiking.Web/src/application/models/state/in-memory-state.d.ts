@@ -14,5 +14,4 @@ export type InMemoryState = {
     searchTerm: string;
     currentUrl: string;
     publicRoutesFilter: PublicRoutesFilter;
-    carConnected: boolean;
 };

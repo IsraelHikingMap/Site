@@ -7,12 +7,7 @@ import { LoggingService } from "./logging.service";
 import { LayersService } from "./layers.service";
 import { DefaultStyleService } from "./default-style.service";
 import { ResourcesService } from "./resources.service";
-import { SetCarConnectedAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState } from "../models";
-
-type CarConnectedEvent = {
-    connected: boolean;
-}
 
 type CarStoreKey = "style" | "route" | "config";
 
@@ -23,8 +18,6 @@ type CarStoreMessage = {
 
 interface CarPlugin {
     storeValue(message: CarStoreMessage): Promise<void>;
-    getConnectionState(): Promise<CarConnectedEvent>;
-    addListener(eventName: "connected", listener: (event: CarConnectedEvent) => void): Promise<void>;
 }
 
 const Car = registerPlugin<CarPlugin>("Car");
@@ -51,7 +44,6 @@ export class CarService {
         this.store.select((state: ApplicationState) => state.routes.present).subscribe(() => {
             this.setRoutes();
         });
-        // Style is language-specific, so re-send it whenever the language changes.
         this.store.select((state: ApplicationState) => state.configuration.language).subscribe(() => {
             this.setStyle();
             this.setConfig();
@@ -59,10 +51,6 @@ export class CarService {
         this.store.select((state: ApplicationState) => state.configuration.units).subscribe(() => {
             this.setConfig();
         });
-
-        const event = await Car.getConnectionState();
-        this.loggingService.info(`[Car] Initialization completed, connected: ${event.connected}`);
-        this.store.dispatch(new SetCarConnectedAction(event.connected));
     }
 
     private async setStyle() {
