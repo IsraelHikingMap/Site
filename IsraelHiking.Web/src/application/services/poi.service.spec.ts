@@ -1223,7 +1223,7 @@ describe("Poi Service", () => {
                     poiId: "poiId",
                     identifier: "id",
                     image: "wikimedia.org/image-url()",
-                    image1: encodeURIComponent("wikimedia.org/image-url()"),
+                    image1: encodeURIComponent("wikimedia.org/image-url()")
                 } as any,
                 geometry: {
                     type: "Point",
