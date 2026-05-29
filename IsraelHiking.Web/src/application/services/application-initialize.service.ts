@@ -74,19 +74,19 @@ export class ApplicationInitializeService {
             this.geoLocationService.initialize();
             this.hashService.initialize();
             this.dragAndDropService.initialize();
-            if (this.runningContextService.isIos && this.runningContextService.isCapacitor) {
+            if (!this.runningContextService.isIFrame) {
                 MigrateToMapeakDialogComponent.openDialog(this.dialog);
             } else if (this.runningContextService.isMobile
                 && !this.runningContextService.isCapacitor
                 && !this.runningContextService.isIFrame) {
-                    if (this.runningContextService.isFacebook) {
-                        FacebookWarningDialogComponent.openDialog(this.dialog);
-                    } else {
-                        UseAppDialogComponent.openDialog(this.dialog);
-                    }
+                if (this.runningContextService.isFacebook) {
+                    FacebookWarningDialogComponent.openDialog(this.dialog);
+                } else {
+                    UseAppDialogComponent.openDialog(this.dialog);
+                }
             } else if (!this.runningContextService.isIFrame
                 && this.store.selectSnapshot((s: ApplicationState) => s.configuration).isShowIntro) {
-                    IntroDialogComponent.openDialog(this.dialog, this.runningContextService);
+                IntroDialogComponent.openDialog(this.dialog, this.runningContextService);
             }
             this.poiService.initialize(); // do not wait for it to complete
             this.recordedRouteService.initialize();
@@ -104,8 +104,8 @@ export class ApplicationInitializeService {
                 alert("Sorry, this site does not support running FireFox in private mode...");
             } else {
                 alert("Ooopppss... We have encountered an unexpected failure. Please try again.\n" +
-                      "If that does not help, please take a screenshot and send it to israelhiking@osm.org.il\n" +
-                      `Init failed: ${(ex as Error).message}`);
+                    "If that does not help, please take a screenshot and send it to israelhiking@osm.org.il\n" +
+                    `Init failed: ${(ex as Error).message}`);
             }
             this.loggingService.error(`Failed IHM Application Initialization: ${(ex as Error).message}`);
         }

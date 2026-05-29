@@ -253,7 +253,8 @@ export class ResourcesService {
     public noDescriptionAvailableInYourLanguage: string;
     public translatedBy: string;
     public clickToTranslate: string;
-    public endOfLife: string;
+    public migrateToMapeakTitle: string;
+    public migrateToMapeakDescription: string;
     public minimize: string;
     public restore: string;
     public syncPurchases: string;
@@ -483,7 +484,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1769516529391");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1780051474852");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -717,7 +718,8 @@ export class ResourcesService {
         this.noDescriptionAvailableInYourLanguage = this.gettextCatalog.getString("No description available in your language");
         this.translatedBy = this.gettextCatalog.getString("Translated by LibreTranslate, click to view original text");
         this.clickToTranslate = this.gettextCatalog.getString("Click to translate");
-        this.endOfLife = this.gettextCatalog.getString("IHM end of life for iOS");
+        this.migrateToMapeakTitle = this.gettextCatalog.getString("Migrate to Mapeak title");
+        this.migrateToMapeakDescription = this.gettextCatalog.getString("Migrate to Mapeak description");
         this.minimize = this.gettextCatalog.getString("Minimize");
         this.restore = this.gettextCatalog.getString("Restore");
         this.syncPurchases = this.gettextCatalog.getString("Sync purchases");

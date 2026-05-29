@@ -1,23 +1,48 @@
 <div [dir]="resources.direction">
     <div matDialogTitle>
-        <div>
-            <i class="fa fa-lg icon-exclamation-triangle" [style.color]="'orange'"></i> {{resources.endOfLife}}
+        <div class="whitespace-pre-line text-center">
+            {{resources.migrateToMapeakTitle}}
         </div>
         <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-actions>
+        <div class="whitespace-pre-line mb-10">
+            {{resources.migrateToMapeakDescription}}
+        </div>
         @if (isAndroid()) {
         <div class="flex flex-row w-full justify-center items-center">
-            <a [href]="androidAppUrl" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Download from google play store">
-            <img src="content/google-play-badge.png" width="200" />
+            <a [href]="androidAppUrl" target="_blank" angulartics2On="click" angularticsCategory="Info"
+                angularticsAction="Download from google play store">
+                <img src="content/google-play-badge.png" width="200" />
+            </a>
+        </div>
+        } @else if (isIos()) {
+        <div class="flex flex-row w-full justify-center items-center">
+            <a [href]="iosAppUrl" target="_blank" angulartics2On="click" angularticsCategory="Info"
+                angularticsAction="Download from app store">
+                <img src="content/app-store-badge.png" width="200" />
             </a>
         </div>
         } @else {
-        <div class="flex flex-row w-full justify-center items-center">
-            <a [href]="iosAppUrl" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Download from app store">
-            <img src="content/app-store-badge.png" width="200" />
+        <div class="flex w-full justify-center" dir="ltr">
+            <a href="https://mapeak.com/map" target="_blank" angulartics2On="click" angularticsCategory="Info"
+                angularticsAction="Click on mapeak web" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2
+            font-semibold text-gray-800 shadow-sm ring-1 ring-gray-200
+            transition hover:bg-gray-50 hover:shadow-md
+            focus:outline-none focus:ring-2 focus:ring-blue-500
+            active:scale-95">
+                <img src="https://mapeak.com/content/logo.png" alt="Mapeak logo" class="h-8 w-auto" />
+                <span>MAPEAK</span>
             </a>
         </div>
+        }
+        @if (resources.getCurrentLanguageCodeSimplified() === 'he') {
+        <div class="flex w-full mb-2"></div>
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/alD-LlG07d0?si=KFdQYTwz8MfbLIWe"
+            title="YouTube video player" frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
         }
     </div>
 </div>

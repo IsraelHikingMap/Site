@@ -21,10 +21,16 @@ export class MigrateToMapeakDialogComponent {
     public readonly resources = inject(ResourcesService);
 
     public isAndroid() {
-        return !this.runningContextServive.isIos;
+        return !this.runningContextServive.isIos && this.runningContextServive.isMobile;
+    }
+
+    public isIos() {
+        return this.runningContextServive.isIos;
     }
 
     public static openDialog(dialog: MatDialog) {
-        dialog.open(MigrateToMapeakDialogComponent);
+        dialog.open(MigrateToMapeakDialogComponent, {
+            maxWidth: "378px"
+        });
     }
 }
