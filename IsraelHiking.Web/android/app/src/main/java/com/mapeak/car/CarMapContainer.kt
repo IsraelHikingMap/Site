@@ -392,6 +392,7 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
         val zoomAdditional =
                 (ln(scaleFactor.toDouble()) / ln(Math.PI / 2)) * MapLibreConstants.ZOOM_RATE
         map.setZoom(map.zoom + zoomAdditional, focal, 0)
+        persistCurrentZoom()
     }
 
     @MainThread
