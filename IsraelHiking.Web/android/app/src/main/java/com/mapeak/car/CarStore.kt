@@ -1,0 +1,157 @@
+package com.mapeak.car
+
+import android.content.Context
+import android.location.Location
+import android.os.Handler
+import android.os.Looper
+import com.getcapacitor.JSObject
+import org.json.JSONException
+
+/**
+ * Single source of truth for car-side state. Combines persistent values (style/route in
+ * SharedPreferences) and transient values (location/connected in memory) behind one listener API:
+ * subscribers receive a key whenever any value updates, then read the current value back from the
+ * store. Mirrors the NGXS-style "state + select" pattern used on the JS side.
+ */
+class CarStore private constructor(context: Context) {
+    private val prefs =
+            context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val listeners: MutableList<Listener> = ArrayList()
+
+    @Volatile private var locationCache: Location? = null
+
+    @Volatile private var connectedCache: Boolean = false
+
+    fun interface Listener {
+        fun onCarStoreUpdated(key: String)
+    }
+
+    @Synchronized
+    fun addListener(listener: Listener) {
+        if (!listeners.contains(listener)) {
+            listeners.add(listener)
+        }
+    }
+
+    @Synchronized
+    fun removeListener(listener: Listener) {
+        listeners.remove(listener)
+    }
+
+    fun saveStyle(style: JSObject) {
+        prefs.edit().putString(KEY_STYLE, style.toString()).apply()
+        notifyChanged(KEY_STYLE)
+    }
+
+    fun loadStyle(): String? = prefs.getString(KEY_STYLE, null)
+
+    fun saveRoutes(payload: JSObject) {
+        prefs.edit().putString(KEY_ROUTE, payload.toString()).apply()
+        notifyChanged(KEY_ROUTE)
+    }
+
+    fun clearRoutes() {
+        prefs.edit().remove(KEY_ROUTE).apply()
+        notifyChanged(KEY_ROUTE)
+    }
+
+    fun loadRoutes(): JSObject? = loadJSObject(KEY_ROUTE)
+
+    fun saveConfig(config: JSObject) {
+        prefs.edit().putString(KEY_CONFIG, config.toString()).apply()
+        notifyChanged(KEY_CONFIG)
+    }
+
+    fun loadConfig(): JSObject? = loadJSObject(KEY_CONFIG)
+
+    private fun loadJSObject(key: String): JSObject? {
+        val raw = prefs.getString(key, null) ?: return null
+        return try {
+            JSObject(raw)
+        } catch (_: JSONException) {
+            null
+        }
+    }
+
+    /** Camera zoom is persisted but not part of the listener contract. */
+    fun saveZoom(zoom: Double) {
+        prefs.edit().putFloat(KEY_ZOOM, zoom.toFloat()).apply()
+    }
+
+    fun loadZoom(): Double {
+        if (!prefs.contains(KEY_ZOOM)) return 14.0
+        return prefs.getFloat(KEY_ZOOM, 14f).toDouble()
+    }
+
+    fun setLocation(location: Location?) {
+        locationCache = location
+        if (location != null) {
+            prefs.edit()
+                    .putFloat(KEY_LAST_LAT, location.latitude.toFloat())
+                    .putFloat(KEY_LAST_LNG, location.longitude.toFloat())
+                    .apply()
+        }
+        notifyChanged(KEY_LOCATION)
+    }
+
+    fun getLocation(): Location? = locationCache
+
+    /**
+     * Last lat/lng we ever received from GPS, used to center the map on launch before a fresh fix
+     * arrives. Falls back to London on a cold install with no saved fix so the map never opens at
+     * (0, 0). The returned Location only has coordinates — no speed, bearing, or accuracy — so it
+     * should not be fed into ETA computation.
+     */
+    fun loadLastKnownLocation(): Location {
+        return Location(LAST_KNOWN_PROVIDER).apply {
+            latitude = prefs.getFloat(KEY_LAST_LAT, DEFAULT_LAT.toFloat()).toDouble()
+            longitude = prefs.getFloat(KEY_LAST_LNG, DEFAULT_LNG.toFloat()).toDouble()
+        }
+    }
+
+    fun setConnected(connected: Boolean) {
+        if (connectedCache == connected) {
+            return
+        }
+        connectedCache = connected
+        notifyChanged(KEY_CONNECTED)
+    }
+
+    fun isConnected(): Boolean = connectedCache
+
+    private fun notifyChanged(key: String) {
+        mainHandler.post {
+            val snapshot: List<Listener>
+            synchronized(this) { snapshot = ArrayList(listeners) }
+            for (listener in snapshot) {
+                listener.onCarStoreUpdated(key)
+            }
+        }
+    }
+
+    companion object {
+        private const val PREFS_NAME = "mapeak_car"
+        private const val KEY_ZOOM = "zoom"
+        private const val KEY_LAST_LAT = "last_lat"
+        private const val KEY_LAST_LNG = "last_lng"
+        private const val LAST_KNOWN_PROVIDER = "saved"
+        private const val DEFAULT_LAT = 51.5074
+        private const val DEFAULT_LNG = -0.1278
+        const val KEY_STYLE = "style"
+        const val KEY_ROUTE = "route"
+        const val KEY_CONFIG = "config"
+        const val KEY_LOCATION = "location"
+        const val KEY_CONNECTED = "connected"
+
+        @Volatile private var instance: CarStore? = null
+
+        @JvmStatic
+        fun get(context: Context): CarStore {
+            return instance
+                    ?: synchronized(CarStore::class.java) {
+                        instance ?: CarStore(context).also { instance = it }
+                    }
+        }
+    }
+}

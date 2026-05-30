@@ -129,7 +129,7 @@ export class GeoLocationService {
                 distanceFilter: 2
             }, (location?: Location, error?: CallbackError) => {
                 if (location) {
-                    this.loggingService.debug("[GeoLocation] Received position: " + `lat: ${location.latitude}, lng: ${location.longitude}, time: ${new Date(location.time).toISOString()}, accuracy: ${location.accuracy}, background: ${this.isBackground}`);
+                    this.loggingService.debug(`[GeoLocation] Received position: lat: ${location.latitude}, lng: ${location.longitude}, time: ${new Date(location.time).toISOString()}, accuracy: ${location.accuracy}, background: ${this.isBackground}`);
                     const position = this.locationToPosition(location);
                     const latLng = GeoLocationService.positionToLatLngTime(position);
                     if (SpatialService.isJammingTarget(latLng)) {

@@ -1,6 +1,5 @@
 import { inject, Injectable, InjectionToken } from "@angular/core";
 import { HttpClient, HttpEventType } from "@angular/common/http";
-import { StyleSpecification } from "maplibre-gl";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
@@ -99,7 +98,7 @@ export class FileService {
         return filesToReturn;
     }
 
-    public async getStyleJsonContent(url: string, tryLocalStyle: boolean): Promise<StyleSpecification> {
+    public async getStyleJsonContent(url: string, tryLocalStyle: boolean): Promise<string> {
         try {
             if (this.runningContextService.isCapacitor && url.startsWith(".")) {
                 return await this.getLocalStyleJson(url);
@@ -107,26 +106,25 @@ export class FileService {
             if (tryLocalStyle) {
                 return await this.getLocalStyleJson(url);
             }
-            return await firstValueFrom(this.httpClient.get<StyleSpecification>(url).pipe(timeout(5000)));
+            return await firstValueFrom(this.httpClient.get(url, { responseType: "text" }).pipe(timeout(5000)));
         } catch (ex) {
             this.loggingService.error(`[Files] Unable to get style file, tryLocalStyle: ${tryLocalStyle}, ${url}, ${(ex as Error).message}`);
-            return {
+            return `{
                 version: 8.0,
                 layers: [],
                 sources: {}
-            };
+            }`;
         }
     }
 
-    private async getLocalStyleJson(url: string): Promise<StyleSpecification> {
+    private async getLocalStyleJson(url: string): Promise<string> {
         const styleFileName = last(url.split("/"));
         const file = await Filesystem.readFile({
             path: styleFileName,
             directory: Directory.Data,
             encoding: Encoding.UTF8
         });
-        const styleText = file.data as string;
-        return JSON.parse(styleText) as StyleSpecification;
+        return file.data as string;
     }
 
     private async base64StringToBlob(base64: string, type = "application/octet-stream"): Promise<Blob> {

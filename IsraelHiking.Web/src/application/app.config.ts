@@ -94,6 +94,7 @@ import { LogReaderService } from "./services/log-reader.service";
 import { TranslationService } from "./services/translation.service";
 import { AnalyticsService } from "./services/analytics.service";
 import { NakebService } from "./services/nakeb.service";
+import { CarService } from "./services/car.service";
 // Map Interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
@@ -222,6 +223,7 @@ export const appConfig: ApplicationConfig = {
         TranslationService,
         AnalyticsService,
         NakebService,
+        CarService,
         RouteEditPoiInteraction,
         RouteEditRouteInteraction,
         { provide: ErrorHandler, useClass: GlobalErrorHandler },
