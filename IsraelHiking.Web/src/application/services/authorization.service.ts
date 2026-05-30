@@ -2,7 +2,7 @@ import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
-import { InAppBrowser } from "@capgo/inappbrowser";
+import { InAppBrowser } from "@capgo/capacitor-inappbrowser";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
