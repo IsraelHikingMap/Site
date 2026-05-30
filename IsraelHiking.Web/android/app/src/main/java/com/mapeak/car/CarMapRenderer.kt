@@ -1,6 +1,7 @@
 package com.mapeak.car
 
 import android.app.Presentation
+import android.graphics.Rect
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.os.Handler
@@ -108,6 +109,11 @@ class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifec
 
     override fun onScale(focusX: Float, focusY: Float, scaleFactor: Float) {
         mapContainer.onScale(focusX, focusY, scaleFactor)
+    }
+
+    override fun onVisibleAreaChanged(visibleArea: Rect) {
+        Log.v(LOG_TAG, "onVisibleAreaChanged $visibleArea")
+        mapContainer.onVisibleAreaChanged(visibleArea)
     }
 
     @Synchronized

@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
+import android.graphics.Rect
 import android.location.Location
 import android.util.Log
 import android.view.Gravity
@@ -20,7 +21,6 @@ import androidx.annotation.MainThread
 import androidx.car.app.CarContext
 import androidx.core.animation.doOnEnd
 import java.io.IOException
-import kotlin.math.abs
 import kotlin.math.ln
 import kotlin.math.pow
 import okhttp3.OkHttpClient
@@ -57,6 +57,7 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
     private var routes: List<CarRouteData> = emptyList()
     private var lastUserInteractionMs: Long = 0L
     private var lastSavedZoom: Double = Double.NaN
+    private var visibleArea: Rect? = null
 
     fun scrollBy(x: Float, y: Float) {
         lastUserInteractionMs = System.currentTimeMillis()
@@ -70,9 +71,18 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
 
     private fun centerOnLocation(location: Location) {
         val bearing = if (location.hasBearing()) location.bearing.toDouble() else 0.0
-        // Push the GPS dot into the bottom third so most of the visible map shows what's ahead.
-        val offsetY = (mapViewInstance?.height ?: 0) / 6
-        setCenter(location.latitude, location.longitude, bearing, offsetY)
+        val view = mapViewInstance ?: return
+        // Push the GPS dot into the bottom third of the visible area so what's ahead stays in view
+        // and the dot can't slip under another app docked on the Android Auto surface.
+        val area = visibleArea?.takeIf { !it.isEmpty } ?: Rect(0, 0, view.width, view.height)
+        val anchorX = area.exactCenterX()
+        val anchorY = area.exactCenterY() + area.height() / 6f
+        setCenter(location.latitude, location.longitude, bearing, anchorX, anchorY)
+    }
+
+    fun onVisibleAreaChanged(area: Rect) {
+        visibleArea = Rect(area)
+        store.getLocation()?.let { centerOnLocation(it) }
     }
 
     override fun onCarStoreUpdated(key: String) {
@@ -132,23 +142,21 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
         }
     }
 
-    fun setCenter(lat: Double, lng: Double, bearing: Double, offsetY: Int) {
+    fun setCenter(lat: Double, lng: Double, bearing: Double, anchorX: Float, anchorY: Float) {
         val map = mapLibreMapInstance ?: return
-        if (cameraPositionMatches(map.cameraPosition, lat, lng)) {
-            return
-        }
+        val view = mapViewInstance ?: return
         val projection = map.projection
-        val screenPoint =
-                projection.toScreenLocation(LatLng(lat, lng)).apply { y -= offsetY.toFloat() }
-        val newTarget = projection.fromScreenLocation(screenPoint)
+        // Camera target lands at the view's geometric center. Shift it so the requested lat/lng
+        // appears at (anchorX, anchorY) instead.
+        val currentScreen = projection.toScreenLocation(LatLng(lat, lng))
+        val targetScreen =
+                PointF(
+                        currentScreen.x - (anchorX - view.width / 2f),
+                        currentScreen.y - (anchorY - view.height / 2f)
+                )
+        val newTarget = projection.fromScreenLocation(targetScreen)
         val nextPosition = CameraPosition.Builder().target(newTarget).bearing(bearing).build()
         map.easeCamera(newCameraPosition(nextPosition), CAMERA_EASE_DURATION_MS)
-    }
-
-    private fun cameraPositionMatches(position: CameraPosition, lat: Double, lng: Double): Boolean {
-        val target = position.target ?: return false
-        return abs(target.latitude - lat) < LATLNG_EPSILON &&
-                abs(target.longitude - lng) < LATLNG_EPSILON
     }
 
     private fun addLocationLayers(style: Style) {
@@ -512,7 +520,6 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
         private const val CIRCLE_STEPS = 64
         private const val PAN_SUPPRESSION_MS = 15_000L
         private const val CAMERA_EASE_DURATION_MS = 250
-        private const val LATLNG_EPSILON = 1e-6
         private const val ATTRIBUTION_COLOR = 0x7B996A74.toInt()
         const val DOUBLE_CLICK_FACTOR: Float = 2.0f
 
