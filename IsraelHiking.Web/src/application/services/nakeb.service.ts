@@ -2,7 +2,13 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable, inject } from "@angular/core";
 import { firstValueFrom } from "rxjs";
 
-type NakebItem = {
+export type NakebMarker = {
+    lat: number;
+    lng: number;
+    title: string;
+}
+
+export type NakebItem = {
     id: string;
     title: string;
     last_modified: string;
@@ -19,11 +25,7 @@ type NakebItem = {
         lat: number;
         lng: number;
     }[];
-    markers: {
-        lat: number;
-        lng: number;
-        title: string;
-    }[];
+    markers: NakebMarker[];
 }
 
 @Injectable()

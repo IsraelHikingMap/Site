@@ -126,7 +126,7 @@ export class DefaultStyleService {
                     delete source.url;
                     if (manupulateSources === "sliceProtocol") {
                         source.tiles[0] = source.tiles[0].replace("https://", "slice://");
-                    } else if (manupulateSources === "sliceQuery") {
+                    } else {
                         source.tiles[0] += "?use=slice";
                     }
                 }
@@ -134,7 +134,7 @@ export class DefaultStyleService {
                     delete source.url;
                     if (manupulateSources === "sliceProtocol") {
                         source.tiles[0] = source.tiles[0].replace("https://", "slice://");
-                    } else if (manupulateSources === "sliceQuery") {
+                    } else {
                         source.tiles[0] += "?use=slice";
                     }
                 }
