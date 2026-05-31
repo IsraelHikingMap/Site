@@ -1,0 +1,24 @@
+{
+  "originHash" : "453476c3c3297b2b4931fe73aed3ecde7ee8345ff69360e3b3c3db7ec62785e5",
+  "pins" : [
+    {
+      "identity" : "swift-log",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-log.git",
+      "state" : {
+        "revision" : "2aed77ae5ec9a86d8fe42c12275e4c2653a286ee",
+        "version" : "1.13.1"
+      }
+    },
+    {
+      "identity" : "swift-pmtiles",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sfomuseum/swift-pmtiles",
+      "state" : {
+        "branch" : "main",
+        "revision" : "eed101a79fdb97d3d4b51d9ecc0da73dd968c142"
+      }
+    }
+  ],
+  "version" : 3
+}
