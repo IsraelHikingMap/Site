@@ -16,11 +16,11 @@ type CarStoreMessage = {
     value: object | null;
 }
 
-interface CarPlugin {
+interface ReactivePreferencesPlugin {
     storeValue(message: CarStoreMessage): Promise<void>;
 }
 
-const Car = registerPlugin<CarPlugin>("Car");
+const ReactivePreferences = registerPlugin<ReactivePreferencesPlugin>("ReactivePreferences");
 
 @Injectable()
 export class CarService {
@@ -50,13 +50,16 @@ export class CarService {
         this.store.select((state: ApplicationState) => state.configuration.units).subscribe(() => {
             this.setConfig();
         });
+        this.setConfig();
+        await this.setStyle();
+        this.setRoutes();
     }
 
     private async setStyle() {
         this.loggingService.info("[Car] Setting style");
         const layerData = this.layersService.getSelectedBaseLayer();
         const styleLike = await this.defaultStyleService.getSourcesAndLayers(layerData, true, "car");
-        Car.storeValue({ key: "style", value: styleLike });
+        ReactivePreferences.storeValue({ key: "style", value: styleLike });
     }
 
     private setRoutes() {
@@ -72,11 +75,12 @@ export class CarService {
                 opacity: route.opacity
             }));
 
-        Car.storeValue({ key: "route", value: { routes: routesValue } });
+        ReactivePreferences.storeValue({ key: "route", value: { routes: routesValue } });
     }
 
     private setConfig() {
-        Car.storeValue({
+        this.loggingService.info("[Car] Setting config");
+        ReactivePreferences.storeValue({
             key: "config",
             value: {
                 language: this.resources.getCurrentLanguageCodeSimplified(),

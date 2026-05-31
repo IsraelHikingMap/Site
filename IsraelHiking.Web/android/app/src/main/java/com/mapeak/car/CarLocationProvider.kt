@@ -18,15 +18,25 @@ class CarLocationProvider(context: Context) {
     private val appContext: Context = context.applicationContext
     private val fusedClient: FusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(appContext)
-    private val store: CarStore = CarStore.get(appContext)
+    private val store: CapacitorStore = CapacitorStore.get(appContext)
     private var started = false
 
     private val locationCallback =
             object : LocationCallback() {
                 override fun onLocationResult(result: LocationResult) {
-                    result.lastLocation?.let { store.setLocation(it) }
+                    result.lastLocation?.let { publishLocation(it) }
                 }
             }
+
+    /**
+     * Broadcast the latest fix to listeners and persist its coordinates so the map can re-center on
+     * the last known position after a cold start, before a fresh fix arrives.
+     */
+    private fun publishLocation(location: Location) {
+        store.setTransient(CarStoreKeys.LOCATION, location)
+        store.saveFloat(CarStoreKeys.LAST_LAT, location.latitude.toFloat())
+        store.saveFloat(CarStoreKeys.LAST_LNG, location.longitude.toFloat())
+    }
 
     @Synchronized
     fun start() {
@@ -44,7 +54,7 @@ class CarLocationProvider(context: Context) {
         try {
             fusedClient.requestLocationUpdates(request, locationCallback, Looper.getMainLooper())
             fusedClient.lastLocation.addOnSuccessListener { last: Location? ->
-                last?.let { store.setLocation(it) }
+                last?.let { publishLocation(it) }
             }
             started = true
             Log.i(LOG_TAG, "Started fused location updates")

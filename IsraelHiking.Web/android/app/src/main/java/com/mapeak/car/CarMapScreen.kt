@@ -1,5 +1,6 @@
 package com.mapeak.car
 
+import android.location.Location
 import androidx.annotation.DrawableRes
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
@@ -19,9 +20,9 @@ import java.util.TimeZone
 import org.json.JSONException
 
 class CarMapScreen(private val carContext: CarContext, private val carMapRenderer: CarMapRenderer) :
-        Screen(carContext), CarStore.Listener, DefaultLifecycleObserver {
+        Screen(carContext), CapacitorStore.Listener, DefaultLifecycleObserver {
 
-    private val store: CarStore = CarStore.get(carContext)
+    private val store: CapacitorStore = CapacitorStore.get(carContext)
     private var routes: List<CarRouteData> = emptyList()
     private var statistics: CarStatistics? = null
     private var units: String = DEFAULT_UNITS
@@ -42,12 +43,12 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
 
     override fun onCarStoreUpdated(key: String) {
         when (key) {
-            CarStore.KEY_LOCATION -> recomputeStatistics()
-            CarStore.KEY_ROUTE -> {
+            CarStoreKeys.LOCATION -> recomputeStatistics()
+            CarStoreKeys.ROUTE -> {
                 loadRoutes()
                 recomputeStatistics()
             }
-            CarStore.KEY_CONFIG -> {
+            CarStoreKeys.CONFIG -> {
                 loadUnits()
                 invalidate()
             }
@@ -55,7 +56,7 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
     }
 
     private fun recomputeStatistics() {
-        val location = store.getLocation()
+        val location: Location? = store.getTransient(CarStoreKeys.LOCATION)
         val next = if (location == null) null else CarStatisticsCalculator.compute(routes, location)
         if (next != statistics) {
             statistics = next
@@ -66,14 +67,14 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
     private fun loadRoutes() {
         routes =
                 try {
-                    CarRouteData.listFromJson(store.loadRoutes())
+                    CarRouteData.listFromJson(store.load(CarStoreKeys.ROUTE))
                 } catch (_: JSONException) {
                     emptyList()
                 }
     }
 
     private fun loadUnits() {
-        units = store.loadConfig()?.optString("units") ?: DEFAULT_UNITS
+        units = store.load(CarStoreKeys.CONFIG)?.optString("units") ?: DEFAULT_UNITS
     }
 
     override fun onGetTemplate(): Template {
@@ -107,7 +108,7 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
     }
 
     private fun buildActionStrip(): ActionStrip =
-            ActionStrip.Builder().addAction(iconAction(R.drawable.ic_menu)).build()
+            ActionStrip.Builder().addAction(iconAction(R.drawable.ic_menu, false)).build()
 
     private fun buildMapActionStrip(): ActionStrip =
             ActionStrip.Builder()
@@ -127,13 +128,20 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
                     )
                     .build()
 
-    private fun iconAction(@DrawableRes iconRes: Int, onClick: (() -> Unit)? = null): Action {
+    private fun iconAction(
+            @DrawableRes iconRes: Int,
+            persist: Boolean = true,
+            onClick: (() -> Unit)? = null,
+    ): Action {
         val builder =
                 Action.Builder()
                         .setIcon(
                                 CarIcon.Builder(IconCompat.createWithResource(carContext, iconRes))
                                         .build()
                         )
+        if (persist && carContext.carAppApiLevel >= PERSISTENT_ACTION_MIN_API) {
+            builder.setFlags(Action.FLAG_IS_PERSISTENT)
+        }
         if (onClick != null) {
             builder.setOnClickListener { onClick() }
         }
@@ -145,5 +153,6 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
         private const val UNIT_IMPERIAL = "imperial"
         private const val METERS_PER_KILOMETER = 1000.0
         private const val METERS_PER_MILE = 1609.344
+        private const val PERSISTENT_ACTION_MIN_API = 5
     }
 }
