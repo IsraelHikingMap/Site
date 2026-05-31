@@ -108,11 +108,8 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
     }
 
     private fun buildActionStrip(): ActionStrip =
-            ActionStrip.Builder().addAction(iconAction(R.drawable.ic_menu)).build()
-
-    private fun buildMapActionStrip(): ActionStrip =
             ActionStrip.Builder()
-                    .addAction(Action.PAN)
+                    .addAction(iconAction(R.drawable.ic_menu))
                     .addAction(
                             iconAction(R.drawable.ic_zoom_in) { carMapRenderer.zoomInFromButton() }
                     )
@@ -127,6 +124,9 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
                             }
                     )
                     .build()
+
+    private fun buildMapActionStrip(): ActionStrip =
+            ActionStrip.Builder().addAction(Action.PAN).build()
 
     private fun iconAction(@DrawableRes iconRes: Int, onClick: (() -> Unit)? = null): Action {
         val builder =
