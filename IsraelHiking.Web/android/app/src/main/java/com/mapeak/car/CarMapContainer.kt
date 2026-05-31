@@ -518,7 +518,7 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
         private const val ARROW_BASE_SIZE = 1.6
         private const val BW_LUMINANCE_THRESHOLD = 0.1791288
         private const val CIRCLE_STEPS = 64
-        private const val PAN_SUPPRESSION_MS = 15_000L
+        private const val PAN_SUPPRESSION_MS = 5_000L
         private const val CAMERA_EASE_DURATION_MS = 250
         private const val ATTRIBUTION_COLOR = 0x7B996A74.toInt()
         const val DOUBLE_CLICK_FACTOR: Float = 2.0f

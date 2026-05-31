@@ -1,1 +1,2 @@
+- Add support for Android Auto
 - Various bug fixes and performance improvements
