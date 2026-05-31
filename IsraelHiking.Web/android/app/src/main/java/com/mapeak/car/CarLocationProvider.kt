@@ -18,7 +18,7 @@ class CarLocationProvider(context: Context) {
     private val appContext: Context = context.applicationContext
     private val fusedClient: FusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(appContext)
-    private val store: CarStore = CarStore.get(appContext)
+    private val store: CapacitorStore = CapacitorStore.get(appContext)
     private var started = false
 
     private val locationCallback =

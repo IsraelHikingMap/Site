@@ -52,7 +52,7 @@ import org.maplibre.turf.TurfConstants
 import org.maplibre.turf.TurfTransformation
 
 class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Listener {
-    private val store: CarStore = CarStore.get(carContext)
+    private val store: CapacitorStore = CapacitorStore.get(carContext)
     private var mapViewInstance: MapView? = null
     private var mapLibreMapInstance: MapLibreMap? = null
     private var scaleAnimator: Animator? = null

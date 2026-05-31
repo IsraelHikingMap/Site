@@ -20,9 +20,9 @@ import java.util.TimeZone
 import org.json.JSONException
 
 class CarMapScreen(private val carContext: CarContext, private val carMapRenderer: CarMapRenderer) :
-        Screen(carContext), CarStore.Listener, DefaultLifecycleObserver {
+        Screen(carContext), CapacitorStore.Listener, DefaultLifecycleObserver {
 
-    private val store: CarStore = CarStore.get(carContext)
+    private val store: CapacitorStore = CapacitorStore.get(carContext)
     private var routes: List<CarRouteData> = emptyList()
     private var statistics: CarStatistics? = null
     private var units: String = DEFAULT_UNITS
