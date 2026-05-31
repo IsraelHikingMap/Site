@@ -8,17 +8,17 @@ import UIKit
  * GPS location (heading arrow + accuracy circle), keeps the dot in the bottom third, auto-recenters
  * after a pan, and exposes pan/zoom/recenter for the CarPlay map buttons.
  *
- * Layer ordering uses the hidden `car-layering-anchor` layer that `CarPlugin` injects into the
- * style: route layers go below it, location layers above it.
+ * Layer ordering uses the hidden `car-layering-anchor` layer that `addLayeringAnchor` injects into
+ * the style: route layers go below it, location layers above it.
  */
-final class CarMapViewController: UIViewController, MLNMapViewDelegate, CarStore.Listener {
+final class CarMapViewController: UIViewController, MLNMapViewDelegate, CapacitorStore.Listener {
 
-    // Injected into every stored style by CarPlugin so that route layers can be added below the
+    // Injected into every style by addLayeringAnchor so that route layers can be added below the
     // anchor and location layers above it. Mirrors the constants in CarMapContainer.kt.
     static let layeringAnchorId = "car-layering-anchor"
     static let layeringAnchorSourceId = "car-layering-anchor-source"
 
-    private let store = CarStore.shared
+    private let store = CapacitorStore.shared
     private var mapView: MLNMapView!
 
     private var routes: [CarRouteData] = []
@@ -68,8 +68,8 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, CarStore
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        routes = CarRouteData.list(from: store.loadRoutes())
-        if let styleJson = store.loadStyle() { applyStyle(styleJson) }
+        routes = CarRouteData.list(from: store.load(CarStoreKeys.route))
+        applyStyle(store.loadString(CarStoreKeys.style))
         store.addListener(self)
     }
 
@@ -91,21 +91,23 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, CarStore
         MLNNetworkConfiguration.sharedManager.sessionConfiguration = config
     }
 
-    // MARK: CarStore.Listener
+    // MARK: CapacitorStore.Listener
 
     func onCarStoreUpdated(_ key: String) {
         switch key {
-        case CarStore.keyStyle:
-            if let styleJson = store.loadStyle() { applyStyle(styleJson) }
-        case CarStore.keyRoute:
-            routes = CarRouteData.list(from: store.loadRoutes())
+        case CarStoreKeys.style:
+            applyStyle(store.loadString(CarStoreKeys.style))
+        case CarStoreKeys.route:
+            routes = CarRouteData.list(from: store.load(CarStoreKeys.route))
             if let style = mapView.style { renderRoutes(style) }
-        case CarStore.keyLocation:
+        case CarStoreKeys.location:
             handleLocationUpdate()
         default:
             break
         }
     }
+
+    private func currentLocation() -> CLLocation? { store.getTransient(CarStoreKeys.location) }
 
     // MARK: MLNMapViewDelegate
 
@@ -123,8 +125,8 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, CarStore
     private func applyInitialCameraIfNeeded() {
         if didApplyInitialCamera { return }
         didApplyInitialCamera = true
-        let coordinate = store.getLocation()?.coordinate ?? store.loadLastKnownLocation()
-        var zoom = store.loadZoom()
+        let coordinate = currentLocation()?.coordinate ?? loadLastKnownLocation()
+        var zoom = store.loadDouble(CarStoreKeys.zoom, default: Const.defaultZoom)
         // Guard against a stale world-level zoom (nobody drives at < z4); recover to the default.
         if zoom < 4 { zoom = 14 }
         mapView.setCenter(coordinate, zoomLevel: zoom, direction: 0, animated: false)
@@ -134,7 +136,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, CarStore
 
     private func handleLocationUpdate() {
         if let style = mapView.style { renderGpsLocation(style) }
-        guard let location = store.getLocation() else { return }
+        guard let location = currentLocation() else { return }
         if Date().timeIntervalSince(lastUserInteraction) >= Const.panSuppression {
             centerOn(location)
         }
@@ -204,7 +206,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, CarStore
     }
 
     private func renderGpsLocation(_ style: MLNStyle) {
-        guard let location = store.getLocation() else {
+        guard let location = currentLocation() else {
             locationPointSource?.shape = nil
             locationCircleSource?.shape = nil
             return
@@ -416,10 +418,10 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, CarStore
 
     func recenter() {
         lastUserInteraction = .distantPast
-        if let location = store.getLocation() {
+        if let location = currentLocation() {
             centerOn(location)
         } else {
-            center(on: store.loadLastKnownLocation(), course: -1)
+            center(on: loadLastKnownLocation(), course: -1)
         }
     }
 
@@ -433,7 +435,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, CarStore
     private func persistZoom(_ zoom: Double) {
         if zoom != lastSavedZoom {
             lastSavedZoom = zoom
-            store.saveZoom(zoom)
+            store.saveDouble(CarStoreKeys.zoom, zoom)
         }
     }
 
@@ -446,10 +448,56 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, CarStore
         style.setImage(sdf ? image.withRenderingMode(.alwaysTemplate) : image, forName: name)
     }
 
-    /// Loads the style straight from the JSON string. This is asynchronous; completion arrives via
-    /// mapView(_:didFinishLoading:), where the images and route/location layers are (re)added.
-    private func applyStyle(_ json: String) {
-        mapView.styleJSON = json
+    /// Loads the style straight from the JSON string (injecting the layering anchor first), falling
+    /// back to the default remote style when nothing has been pushed yet. Asynchronous; completion
+    /// arrives via mapView(_:didFinishLoading:), where the images and route/location layers are
+    /// (re)added.
+    private func applyStyle(_ json: String?) {
+        if let json = json {
+            mapView.styleJSON = addLayeringAnchor(to: json)
+        } else {
+            mapView.styleURL = URL(string: Const.defaultStyleUrl)
+        }
+    }
+
+    /// Injects an invisible anchor source and layer into the style so that location layers can be
+    /// added above it and route layers below it. Mirrors addLayeringAnchorTo in CarMapContainer.kt.
+    private func addLayeringAnchor(to json: String) -> String {
+        guard let data = json.data(using: .utf8),
+              var style = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else { return json }
+
+        var sources = style["sources"] as? [String: Any] ?? [:]
+        sources[Self.layeringAnchorSourceId] = [
+            "type": "geojson",
+            "data": ["type": "FeatureCollection", "features": []]
+        ]
+        style["sources"] = sources
+
+        var layers = style["layers"] as? [[String: Any]] ?? []
+        layers.append([
+            "id": Self.layeringAnchorId,
+            "type": "circle",
+            "source": Self.layeringAnchorSourceId,
+            "layout": ["visibility": "none"]
+        ])
+        style["layers"] = layers
+
+        guard let outData = try? JSONSerialization.data(withJSONObject: style),
+              let out = String(data: outData, encoding: .utf8)
+        else { return json }
+        return out
+    }
+
+    /**
+     * Last lat/lng we ever received from GPS, used to center the map on launch before a fresh fix
+     * arrives. Falls back to London on a cold install with no saved fix so the map never opens at
+     * (0, 0). The returned coordinate has no speed/bearing/accuracy and must not feed ETA.
+     */
+    private func loadLastKnownLocation() -> CLLocationCoordinate2D {
+        CLLocationCoordinate2D(
+            latitude: store.loadDouble(CarStoreKeys.lastLat, default: Const.defaultLat),
+            longitude: store.loadDouble(CarStoreKeys.lastLng, default: Const.defaultLng))
     }
 
     private enum Const {
@@ -478,6 +526,13 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, CarStore
         static let circleSteps = 64
         static let panSuppression: TimeInterval = 5
         static let cameraEase: TimeInterval = 0.25
+
+        static let defaultZoom = 14.0
+        // Cold-install fallbacks; see loadLastKnownLocation / applyStyle.
+        static let defaultLat = 51.5074
+        static let defaultLng = -0.1278
+        static let defaultStyleUrl =
+            "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json"
     }
 }
 

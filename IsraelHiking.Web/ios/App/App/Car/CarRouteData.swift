@@ -26,7 +26,7 @@ struct CarRouteData {
         )
     }
 
-    /// Parses the `{ routes: [...] }` payload stored under `CarStore.keyRoute`.
+    /// Parses the `{ routes: [...] }` payload stored under `CarStoreKeys.route`.
     static func list(from payload: [String: Any]?) -> [CarRouteData] {
         guard let routes = payload?["routes"] as? [[String: Any]] else { return [] }
         return routes.compactMap { from($0) }

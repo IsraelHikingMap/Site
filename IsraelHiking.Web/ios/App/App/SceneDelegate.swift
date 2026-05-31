@@ -26,7 +26,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Capacitor iOS only registers plugins from that list — without this, JS sees "Car" plugin
         // not implemented. makeKeyAndVisible() has loaded the bridge view, so its bridge exists.
         if let bridgeViewController = rootViewController as? CAPBridgeViewController {
-            bridgeViewController.bridge?.registerPluginInstance(CarPlugin())
+            bridgeViewController.bridge?.registerPluginInstance(ReactivePreferencesPlugin())
         }
 
         if let urlContext = connectionOptions.urlContexts.first {

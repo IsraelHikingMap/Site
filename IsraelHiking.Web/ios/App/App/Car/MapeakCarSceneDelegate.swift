@@ -8,9 +8,9 @@ import UIKit
  * view controller in the CPWindow, wires up zoom/recenter/pan via a `CPMapTemplate`, drives the
  * GPS feed, and shows the remaining-distance / arrival estimate panel through a navigation session.
  */
-final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate, CPMapTemplateDelegate, CarStore.Listener {
+final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate, CPMapTemplateDelegate, CapacitorStore.Listener {
 
-    private let store = CarStore.shared
+    private let store = CapacitorStore.shared
     private let locationProvider = CarLocationProvider()
     private var interfaceController: CPInterfaceController?
     private var mapViewController: CarMapViewController?
@@ -49,10 +49,9 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
         mapTemplate = template
         template.mapButtons = mapButtons
 
-        routes = CarRouteData.list(from: store.loadRoutes())
+        routes = CarRouteData.list(from: store.load(CarStoreKeys.route))
         store.addListener(self)
         locationProvider.start()
-        store.setConnected(true)
         recomputeStatistics()
     }
 
@@ -61,7 +60,6 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
                                   from window: CPWindow) {
         store.removeListener(self)
         locationProvider.stop()
-        store.setConnected(false)
         endNavigationSession()
         mapViewController = nil
         mapTemplate = nil
@@ -133,14 +131,14 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
         mapTemplate.mapButtons = mapButtons
     }
 
-    // MARK: CarStore.Listener
+    // MARK: CapacitorStore.Listener
 
     func onCarStoreUpdated(_ key: String) {
         switch key {
-        case CarStore.keyRoute:
-            routes = CarRouteData.list(from: store.loadRoutes())
+        case CarStoreKeys.route:
+            routes = CarRouteData.list(from: store.load(CarStoreKeys.route))
             recomputeStatistics()
-        case CarStore.keyLocation, CarStore.keyConfig:
+        case CarStoreKeys.location, CarStoreKeys.config:
             recomputeStatistics()
         default:
             break
@@ -150,7 +148,8 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
     // MARK: ETA
 
     private func recomputeStatistics() {
-        let stats = store.getLocation().flatMap { CarStatisticsCalculator.compute(routes: routes, location: $0) }
+        let location: CLLocation? = store.getTransient(CarStoreKeys.location)
+        let stats = location.flatMap { CarStatisticsCalculator.compute(routes: routes, location: $0) }
         guard stats != lastStatistics else { return }
         lastStatistics = stats
 
@@ -170,7 +169,7 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
     }
 
     private func travelEstimates(_ stats: CarStatistics) -> CPTravelEstimates {
-        let units = (store.loadConfig()?["units"] as? String) ?? "metric"
+        let units = (store.load(CarStoreKeys.config)?["units"] as? String) ?? "metric"
         let meters = Measurement(value: stats.remainingMeters, unit: UnitLength.meters)
         let distance = units == "imperial" ? meters.converted(to: .miles) : meters.converted(to: .kilometers)
         return CPTravelEstimates(distanceRemaining: distance, timeRemaining: TimeInterval(stats.remainingSeconds))

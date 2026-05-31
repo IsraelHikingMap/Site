@@ -7,7 +7,7 @@ import Foundation
 final class CarLocationProvider: NSObject, CLLocationManagerDelegate {
 
     private let manager = CLLocationManager()
-    private let store = CarStore.shared
+    private let store = CapacitorStore.shared
     private var started = false
 
     override init() {
@@ -37,8 +37,16 @@ final class CarLocationProvider: NSObject, CLLocationManagerDelegate {
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let last = locations.last {
-            store.setLocation(last)
+            publishLocation(last)
         }
+    }
+
+    /// Broadcast the latest fix to listeners and persist its coordinates so the map can re-center on
+    /// the last known position after a cold start, before a fresh fix arrives.
+    private func publishLocation(_ location: CLLocation) {
+        store.setTransient(CarStoreKeys.location, location)
+        store.saveDouble(CarStoreKeys.lastLat, location.coordinate.latitude)
+        store.saveDouble(CarStoreKeys.lastLng, location.coordinate.longitude)
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
