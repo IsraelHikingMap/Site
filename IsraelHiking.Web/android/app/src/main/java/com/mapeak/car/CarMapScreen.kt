@@ -108,8 +108,11 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
     }
 
     private fun buildActionStrip(): ActionStrip =
+            ActionStrip.Builder().addAction(iconAction(R.drawable.ic_menu, false)).build()
+
+    private fun buildMapActionStrip(): ActionStrip =
             ActionStrip.Builder()
-                    .addAction(iconAction(R.drawable.ic_menu))
+                    .addAction(Action.PAN)
                     .addAction(
                             iconAction(R.drawable.ic_zoom_in) { carMapRenderer.zoomInFromButton() }
                     )
@@ -125,16 +128,20 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
                     )
                     .build()
 
-    private fun buildMapActionStrip(): ActionStrip =
-            ActionStrip.Builder().addAction(Action.PAN).build()
-
-    private fun iconAction(@DrawableRes iconRes: Int, onClick: (() -> Unit)? = null): Action {
+    private fun iconAction(
+            @DrawableRes iconRes: Int,
+            persist: Boolean = true,
+            onClick: (() -> Unit)? = null,
+    ): Action {
         val builder =
                 Action.Builder()
                         .setIcon(
                                 CarIcon.Builder(IconCompat.createWithResource(carContext, iconRes))
                                         .build()
                         )
+        if (persist && carContext.carAppApiLevel >= PERSISTENT_ACTION_MIN_API) {
+            builder.setFlags(Action.FLAG_IS_PERSISTENT)
+        }
         if (onClick != null) {
             builder.setOnClickListener { onClick() }
         }
@@ -146,5 +153,6 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
         private const val UNIT_IMPERIAL = "imperial"
         private const val METERS_PER_KILOMETER = 1000.0
         private const val METERS_PER_MILE = 1609.344
+        private const val PERSISTENT_ACTION_MIN_API = 5
     }
 }
