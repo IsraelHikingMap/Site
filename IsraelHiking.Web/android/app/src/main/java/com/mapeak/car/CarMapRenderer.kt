@@ -20,7 +20,6 @@ import kotlin.math.min
 class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifecycle) :
         SurfaceCallback, DefaultLifecycleObserver {
     private val mapContainer: CarMapContainer = CarMapContainer(carContext)
-    private val store: CarStore = CarStore.get(carContext)
     private var surfaceContainer: SurfaceContainer? = null
     private val uiHandler = Handler(Looper.getMainLooper())
     private var presentation: Presentation? = null
@@ -78,14 +77,12 @@ class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifec
                     setContentView(mapContainer.setupMap(computePixelRatio(surfaceContainer)))
                     show()
                 }
-        store.setConnected(true)
     }
 
     override fun onSurfaceDestroyed(surfaceContainer: SurfaceContainer) {
         Log.v(LOG_TAG, "Surface destroyed")
         this.surfaceContainer = null
         uiHandler.removeCallbacksAndMessages(null)
-        store.setConnected(false)
     }
 
     private fun computePixelRatio(surface: SurfaceContainer): Float {

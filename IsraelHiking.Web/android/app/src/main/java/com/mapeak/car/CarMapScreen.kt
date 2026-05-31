@@ -1,5 +1,6 @@
 package com.mapeak.car
 
+import android.location.Location
 import androidx.annotation.DrawableRes
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
@@ -42,12 +43,12 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
 
     override fun onCarStoreUpdated(key: String) {
         when (key) {
-            CarStore.KEY_LOCATION -> recomputeStatistics()
-            CarStore.KEY_ROUTE -> {
+            CarStoreKeys.LOCATION -> recomputeStatistics()
+            CarStoreKeys.ROUTE -> {
                 loadRoutes()
                 recomputeStatistics()
             }
-            CarStore.KEY_CONFIG -> {
+            CarStoreKeys.CONFIG -> {
                 loadUnits()
                 invalidate()
             }
@@ -55,7 +56,7 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
     }
 
     private fun recomputeStatistics() {
-        val location = store.getLocation()
+        val location: Location? = store.getTransient(CarStoreKeys.LOCATION)
         val next = if (location == null) null else CarStatisticsCalculator.compute(routes, location)
         if (next != statistics) {
             statistics = next
@@ -66,14 +67,14 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
     private fun loadRoutes() {
         routes =
                 try {
-                    CarRouteData.listFromJson(store.loadRoutes())
+                    CarRouteData.listFromJson(store.load(CarStoreKeys.ROUTE))
                 } catch (_: JSONException) {
                     emptyList()
                 }
     }
 
     private fun loadUnits() {
-        units = store.loadConfig()?.optString("units") ?: DEFAULT_UNITS
+        units = store.load(CarStoreKeys.CONFIG)?.optString("units") ?: DEFAULT_UNITS
     }
 
     override fun onGetTemplate(): Template {

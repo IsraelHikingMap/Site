@@ -24,6 +24,8 @@ import java.io.IOException
 import kotlin.math.ln
 import kotlin.math.pow
 import okhttp3.OkHttpClient
+import org.json.JSONArray
+import org.json.JSONObject
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory.newCameraPosition
@@ -49,7 +51,7 @@ import org.maplibre.geojson.Point
 import org.maplibre.turf.TurfConstants
 import org.maplibre.turf.TurfTransformation
 
-class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
+class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Listener {
     private val store: CarStore = CarStore.get(carContext)
     private var mapViewInstance: MapView? = null
     private var mapLibreMapInstance: MapLibreMap? = null
@@ -66,7 +68,7 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
 
     fun recenter() {
         lastUserInteractionMs = 0L
-        store.getLocation()?.let { centerOnLocation(it) }
+        currentLocation()?.let { centerOnLocation(it) }
     }
 
     private fun centerOnLocation(location: Location) {
@@ -82,27 +84,30 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
 
     fun onVisibleAreaChanged(area: Rect) {
         visibleArea = Rect(area)
-        store.getLocation()?.let { centerOnLocation(it) }
+        currentLocation()?.let { centerOnLocation(it) }
     }
+
+    private fun currentLocation(): Location? = store.getTransient(CarStoreKeys.LOCATION)
 
     override fun onCarStoreUpdated(key: String) {
         when (key) {
-            CarStore.KEY_STYLE -> store.loadStyle()?.let { setStyle(it) }
-            CarStore.KEY_ROUTE -> setRoutes(CarRouteData.listFromJson(store.loadRoutes()))
-            CarStore.KEY_LOCATION -> handleLocationUpdate()
+            CarStoreKeys.STYLE -> setStyle(store.loadString(CarStoreKeys.STYLE))
+            CarStoreKeys.ROUTE ->
+                    setRoutes(CarRouteData.listFromJson(store.load(CarStoreKeys.ROUTE)))
+            CarStoreKeys.LOCATION -> handleLocationUpdate()
         }
     }
 
     private fun handleLocationUpdate() {
         mapLibreMapInstance?.getStyle { style: Style? -> style?.let { renderGpsLocation(it) } }
-        val location = store.getLocation() ?: return
+        val location = currentLocation() ?: return
         if (System.currentTimeMillis() - lastUserInteractionMs >= PAN_SUPPRESSION_MS) {
             centerOnLocation(location)
         }
     }
 
     private fun renderGpsLocation(style: Style) {
-        val location = store.getLocation()
+        val location = currentLocation()
         if (location == null) {
             if (style.getSource(LOCATION_SOURCE_ID) != null) {
                 style.removeLayer(LOCATION_ICON_LAYER_ID)
@@ -351,7 +356,7 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
         val zoom = mapLibreMapInstance?.cameraPosition?.zoom ?: return
         if (zoom != lastSavedZoom) {
             lastSavedZoom = zoom
-            store.saveZoom(zoom)
+            store.saveFloat(CarStoreKeys.ZOOM, zoom.toFloat())
         }
     }
 
@@ -411,7 +416,7 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
                         .addInterceptor(SliceProtocolInterceptor(PmTilesService(carContext)))
                         .build()
         )
-        routes = CarRouteData.listFromJson(store.loadRoutes())
+        routes = CarRouteData.listFromJson(store.load(CarStoreKeys.ROUTE))
 
         val mapView = createMapViewInstance(pixelRatio).apply { onStart() }
         mapViewInstance = mapView
@@ -444,14 +449,26 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
     }
 
     private fun initializeMap(map: MapLibreMap) {
-        val initialLocation = store.getLocation() ?: store.loadLastKnownLocation()
+        val initialLocation = currentLocation() ?: loadLastKnownLocation()
         map.cameraPosition =
                 CameraPosition.Builder(map.cameraPosition)
-                        .zoom(store.loadZoom())
+                        .zoom(store.loadFloat(CarStoreKeys.ZOOM, DEFAULT_ZOOM).toDouble())
                         .target(LatLng(initialLocation.latitude, initialLocation.longitude))
                         .build()
-        store.loadStyle()?.let { setStyle(it) }
+        setStyle(store.loadString(CarStoreKeys.STYLE))
     }
+
+    /**
+     * Last lat/lng we ever received from GPS, used to center the map on launch before a fresh fix
+     * arrives. Falls back to London on a cold install with no saved fix so the map never opens at
+     * (0, 0). The returned Location only has coordinates — no speed, bearing, or accuracy — so it
+     * should not be fed into ETA computation.
+     */
+    private fun loadLastKnownLocation(): Location =
+            Location(LAST_KNOWN_PROVIDER).apply {
+                latitude = store.loadFloat(CarStoreKeys.LAST_LAT, DEFAULT_LAT.toFloat()).toDouble()
+                longitude = store.loadFloat(CarStoreKeys.LAST_LNG, DEFAULT_LNG.toFloat()).toDouble()
+            }
 
     @MainThread
     fun cleanUpMap() {
@@ -476,15 +493,44 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
         }
     }
 
-    fun setStyle(styleJson: String) {
+    fun setStyle(styleJson: String?) {
         val map = mapLibreMapInstance ?: return
-        map.setStyle(Style.Builder().fromJson(styleJson)) { style: Style ->
+        val builder =
+                if (styleJson != null) Style.Builder().fromJson(addLayeringAnchorTo(styleJson))
+                else
+                        Style.Builder()
+                                .fromUri(
+                                        "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json"
+                                )
+        map.setStyle(builder) { style: Style ->
             loadStyleImage(style, "public/content/gps-arrow.png", LOCATION_ICON_IMAGE, sdf = false)
-            // Arrow needs to be SDF so the per-feature iconColor expression can recolor it.
             loadStyleImage(style, "public/content/arrow.png", ROUTE_ARROW_ICON_IMAGE, sdf = true)
             renderRoutes(style)
             renderGpsLocation(style)
         }
+    }
+
+    /**
+     * Injects an invisible anchor source and layer into the style so that location layers can be
+     * added above it and route layers below it (see addLocationLayers / addRouteLayers).
+     */
+    private fun addLayeringAnchorTo(styleJson: String): String {
+        val style = JSONObject(styleJson)
+        val sources =
+                style.optJSONObject("sources") ?: JSONObject().also { style.put("sources", it) }
+        val anchorData = JSONObject().put("type", "FeatureCollection").put("features", JSONArray())
+        val anchorSource = JSONObject().put("type", "geojson").put("data", anchorData)
+        sources.put(LAYERING_ANCHOR_SOURCE_ID, anchorSource)
+
+        val layers = style.optJSONArray("layers") ?: JSONArray().also { style.put("layers", it) }
+        val anchorLayer =
+                JSONObject()
+                        .put("id", LAYERING_ANCHOR_ID)
+                        .put("type", "circle")
+                        .put("source", LAYERING_ANCHOR_SOURCE_ID)
+                        .put("layout", JSONObject().put("visibility", "none"))
+        layers.put(anchorLayer)
+        return style.toString()
     }
 
     private fun loadStyleImage(style: Style, assetPath: String, imageId: String, sdf: Boolean) {
@@ -518,12 +564,17 @@ class CarMapContainer(private val carContext: CarContext) : CarStore.Listener {
         private const val ARROW_BASE_SIZE = 1.6
         private const val BW_LUMINANCE_THRESHOLD = 0.1791288
         private const val CIRCLE_STEPS = 64
+        private const val DEFAULT_ZOOM = 14f
+        // Cold-install fallback so the map never opens at (0, 0); see loadLastKnownLocation.
+        private const val LAST_KNOWN_PROVIDER = "saved"
+        private const val DEFAULT_LAT = 51.5074
+        private const val DEFAULT_LNG = -0.1278
         private const val PAN_SUPPRESSION_MS = 5_000L
         private const val CAMERA_EASE_DURATION_MS = 250
-        private const val ATTRIBUTION_COLOR = 0x7B996A74.toInt()
+        private const val ATTRIBUTION_COLOR = 0x7B996A74
         const val DOUBLE_CLICK_FACTOR: Float = 2.0f
 
-        // Injected into every stored style by CarStore.saveStyle so that
+        // Injected into every style by addLayeringAnchorTo so that
         // location layers can be added above and route layers below.
         const val LAYERING_ANCHOR_ID: String = "car-layering-anchor"
         const val LAYERING_ANCHOR_SOURCE_ID: String = "car-layering-anchor-source"
