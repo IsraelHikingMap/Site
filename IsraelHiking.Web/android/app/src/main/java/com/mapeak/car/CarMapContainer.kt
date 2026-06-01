@@ -37,6 +37,7 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.android.module.http.HttpRequestUtil
 import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.layers.BackgroundLayer
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.FillLayer
 import org.maplibre.android.style.layers.LineLayer
@@ -60,6 +61,7 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
     private var lastUserInteractionMs: Long = 0L
     private var lastSavedZoom: Double = Double.NaN
     private var visibleArea: Rect? = null
+    private var nightMode: Boolean = carContext.isDarkMode
 
     fun scrollBy(x: Float, y: Float) {
         lastUserInteractionMs = System.currentTimeMillis()
@@ -507,6 +509,27 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
             loadStyleImage(style, "public/content/arrow.png", ROUTE_ARROW_ICON_IMAGE, sdf = true)
             renderRoutes(style)
             renderGpsLocation(style)
+            applyNightMode(style)
+        }
+    }
+
+    /**
+     * Android for Cars requires day and night rendering. The host themes the template chrome
+     * (action strips, travel-estimate card) automatically; for our own MapLibre surface we darken
+     * the map background when the car is in dark mode. Re-applied whenever the style reloads (see
+     * setStyle).
+     */
+    fun setNightMode(enabled: Boolean) {
+        if (nightMode == enabled) return
+        nightMode = enabled
+        // Reload the style so day mode restores the original background colors cleanly.
+        setStyle(store.loadString(CarStoreKeys.STYLE))
+    }
+
+    private fun applyNightMode(style: Style) {
+        if (!nightMode) return
+        style.layers.filterIsInstance<BackgroundLayer>().forEach {
+            it.setProperties(PropertyFactory.backgroundColor(NIGHT_BACKGROUND_COLOR))
         }
     }
 
@@ -559,6 +582,7 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
         private const val ROUTE_END_COLOR = "red"
         private const val ROUTE_ARROW_ICON_IMAGE = "arrow"
         private const val ROUTE_ARROW_FALLBACK_COLOR = "#FFFFFF"
+        private const val NIGHT_BACKGROUND_COLOR = "#000000"
         private const val ARROW_INVERT_OPACITY_THRESHOLD = 0.5
         private const val ARROW_BASE_WEIGHT = 10.0
         private const val ARROW_BASE_SIZE = 1.6

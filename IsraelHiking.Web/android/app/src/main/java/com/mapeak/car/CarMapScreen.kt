@@ -6,6 +6,7 @@ import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
 import androidx.car.app.model.ActionStrip
+import androidx.car.app.model.CarColor
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.DateTimeWithZone
 import androidx.car.app.model.Distance
@@ -19,8 +20,11 @@ import com.mapeak.R
 import java.util.TimeZone
 import org.json.JSONException
 
-class CarMapScreen(private val carContext: CarContext, private val carMapRenderer: CarMapRenderer) :
-        Screen(carContext), CapacitorStore.Listener, DefaultLifecycleObserver {
+class CarMapScreen(
+        private val carContext: CarContext,
+        private val carMapRenderer: CarMapRenderer,
+        private val pendingNavigationQuery: String? = null
+) : Screen(carContext), CapacitorStore.Listener, DefaultLifecycleObserver {
 
     private val store: CapacitorStore = CapacitorStore.get(carContext)
     private var routes: List<CarRouteData> = emptyList()
@@ -35,6 +39,11 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
         store.addListener(this)
         loadRoutes()
         loadUnits()
+        // Launched from a "navigate to X" intent: open search on top of the map so the driver sees
+        // results/route for X, while the map remains the root they return to.
+        if (!pendingNavigationQuery.isNullOrBlank()) {
+            screenManager.push(CarSearchScreen(carContext, pendingNavigationQuery))
+        }
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
@@ -108,7 +117,13 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
     }
 
     private fun buildActionStrip(): ActionStrip =
-            ActionStrip.Builder().addAction(iconAction(R.drawable.ic_menu, false)).build()
+            ActionStrip.Builder()
+                    .addAction(
+                            iconAction(R.drawable.ic_search, false) {
+                                screenManager.push(CarSearchScreen(carContext, null))
+                            }
+                    )
+                    .build()
 
     private fun buildMapActionStrip(): ActionStrip =
             ActionStrip.Builder()
@@ -137,6 +152,9 @@ class CarMapScreen(private val carContext: CarContext, private val carMapRendere
                 Action.Builder()
                         .setIcon(
                                 CarIcon.Builder(IconCompat.createWithResource(carContext, iconRes))
+                                        // Default tint adapts to the host's day/night theme so the
+                                        // glyph stays legible in both modes.
+                                        .setTint(CarColor.DEFAULT)
                                         .build()
                         )
         if (persist && carContext.carAppApiLevel >= PERSISTENT_ACTION_MIN_API) {

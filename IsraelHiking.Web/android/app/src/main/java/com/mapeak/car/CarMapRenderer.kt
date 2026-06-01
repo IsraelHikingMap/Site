@@ -123,6 +123,10 @@ class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifec
         mapContainer.recenter()
     }
 
+    fun setNightMode(enabled: Boolean) {
+        mapContainer.setNightMode(enabled)
+    }
+
     companion object {
         const val LOG_TAG: String = "CarMapRenderer"
     }

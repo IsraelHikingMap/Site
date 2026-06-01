@@ -6,7 +6,6 @@ import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { LayersService } from "./layers.service";
 import { DefaultStyleService } from "./default-style.service";
-import { ResourcesService } from "./resources.service";
 import type { ApplicationState } from "../models";
 
 type CarStoreKey = "style" | "route" | "config";
@@ -30,7 +29,6 @@ export class CarService {
     private readonly loggingService = inject(LoggingService);
     private readonly defaultStyleService = inject(DefaultStyleService);
     private readonly layersService = inject(LayersService);
-    private readonly resources = inject(ResourcesService);
 
     public async initialize() {
         if (!this.runningContextService.isCapacitor || this.runningContextService.isIos) {
@@ -84,7 +82,7 @@ export class CarService {
         ReactivePreferences.storeValue({
             key: "config",
             value: {
-                language: this.resources.getCurrentLanguageCodeSimplified(),
+                language: this.store.selectSnapshot((state: ApplicationState) => state.configuration.language).code,
                 units: this.store.selectSnapshot((state: ApplicationState) => state.configuration.units)
             }
         });
