@@ -109,13 +109,11 @@ class CarMapRenderer(private val carContext: CarContext, serviceLifecycle: Lifec
     }
 
     override fun onVisibleAreaChanged(visibleArea: Rect) {
-        Log.v(LOG_TAG, "onVisibleAreaChanged $visibleArea")
         mapContainer.onVisibleAreaChanged(visibleArea)
     }
 
     @Synchronized
     override fun onScroll(distanceX: Float, distanceY: Float) {
-        Log.v(LOG_TAG, "onScroll distanceX($distanceX) distanceY($distanceY)")
         mapContainer.scrollBy(distanceX, distanceY)
     }
 
