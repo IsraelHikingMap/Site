@@ -6,7 +6,6 @@ import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { LayersService } from "./layers.service";
 import { DefaultStyleService } from "./default-style.service";
-import { ResourcesService } from "./resources.service";
 import type { ApplicationState } from "../models";
 
 type CarStoreKey = "style" | "route" | "config";
@@ -30,7 +29,6 @@ export class CarService {
     private readonly loggingService = inject(LoggingService);
     private readonly defaultStyleService = inject(DefaultStyleService);
     private readonly layersService = inject(LayersService);
-    private readonly resources = inject(ResourcesService);
 
     public async initialize() {
         if (!this.runningContextService.isCapacitor) {
@@ -38,6 +36,9 @@ export class CarService {
         }
 
         this.store.select((state: ApplicationState) => state.layersState.selectedBaseLayerKey).subscribe(() => {
+            this.setStyle();
+        });
+        this.store.select((state: ApplicationState) => state.offlineState.downloadedTiles).subscribe(() => {
             this.setStyle();
         });
         this.store.select((state: ApplicationState) => state.routes.present).subscribe(() => {
@@ -72,7 +73,8 @@ export class CarService {
                 points: route.segments.flatMap(s => s.latlngs.map(p => ([p.lng, p.lat]))),
                 weight: route.weight,
                 color: route.color,
-                opacity: route.opacity
+                opacity: route.opacity,
+                name: route.name
             }));
 
         ReactivePreferences.storeValue({ key: "route", value: { routes: routesValue } });
@@ -83,7 +85,7 @@ export class CarService {
         ReactivePreferences.storeValue({
             key: "config",
             value: {
-                language: this.resources.getCurrentLanguageCodeSimplified(),
+                language: this.store.selectSnapshot((state: ApplicationState) => state.configuration.language).code,
                 units: this.store.selectSnapshot((state: ApplicationState) => state.configuration.units)
             }
         });

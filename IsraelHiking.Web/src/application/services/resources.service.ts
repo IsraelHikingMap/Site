@@ -305,6 +305,8 @@ export class ResourcesService {
     public unableToSendRoute: string;
     public noUnmappedRoutes: string;
     public unableToFindYourLocation: string;
+    public calculatingRoute: string;
+    public noResultsFound: string;
     public routeAddedSuccessfullyItWillTakeTime: string;
     public fileUploadedSuccessfullyItWillTakeTime: string;
     public unableToUploadFile: string;
@@ -792,6 +794,8 @@ export class ResourcesService {
         this.unableToSendRoute = this.gettextCatalog.getString("Unable to send route...");
         this.noUnmappedRoutes = this.gettextCatalog.getString("No unmapped routes! :-)");
         this.unableToFindYourLocation = this.gettextCatalog.getString("Unable to find your location...");
+        this.calculatingRoute = this.gettextCatalog.getString("Calculating route...");
+        this.noResultsFound = this.gettextCatalog.getString("No results found");
         this.routeAddedSuccessfullyItWillTakeTime = this.gettextCatalog
             .getString("Route added successfully, It will take some time for the map to update.");
         this.fileUploadedSuccessfullyItWillTakeTime = this.gettextCatalog

@@ -1,17 +1,15 @@
 package com.mapeak.car
 
 import android.content.Context
-import ch.poole.geo.pmtiles.Reader
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.lang.AutoCloseable
-import java.util.zip.GZIPInputStream
+import com.mapeak.pmtiles.PMTiles
+
 
 class PmTilesService(context: Context) : AutoCloseable {
     private val baseDir: File? = context.filesDir
-    private val readerCache: MutableMap<String?, Reader> = HashMap()
+    private val readerCache: MutableMap<String?, PMTiles> = HashMap()
 
     @Throws(IOException::class)
     fun getTileByType(z: Int, x: Int, y: Int, type: String): ByteArray? {
@@ -45,18 +43,14 @@ class PmTilesService(context: Context) : AutoCloseable {
     @Throws(IOException::class)
     private fun getTileFromFile(fileName: String, z: Int, x: Int, y: Int): ByteArray? {
         val reader = getReader(fileName)
-        val data: ByteArray?
-        val compression: Byte
         synchronized(reader) {
-            data = reader.getTile(z, x, y)
-            compression = reader.tileCompression
+            return reader.getTile(z, x, y)
         }
-        return data?.let { decompress(it, compression, fileName) }
     }
 
     @Synchronized
     @Throws(IOException::class)
-    private fun getReader(fileName: String): Reader {
+    private fun getReader(fileName: String): PMTiles {
         val cached = readerCache[fileName]
         if (cached != null) {
             return cached
@@ -65,34 +59,12 @@ class PmTilesService(context: Context) : AutoCloseable {
         if (!file.exists()) {
             throw IOException("PMTiles file not found: " + file.absolutePath)
         }
-        val reader = Reader(file)
+        val reader = PMTiles(baseDir?.absolutePath + "/" + fileName)
         readerCache[fileName] = reader
         return reader
     }
 
     companion object {
         const val TILES_ZOOM: Int = 7
-
-        private const val COMPRESSION_NONE: Byte = 1
-        private const val COMPRESSION_GZIP: Byte = 2
-
-        @Throws(IOException::class)
-        private fun decompress(data: ByteArray, compression: Byte, fileName: String?): ByteArray? {
-            if (compression == COMPRESSION_NONE) {
-                return data
-            }
-            if (compression == COMPRESSION_GZIP) {
-                GZIPInputStream(ByteArrayInputStream(data)).use { gzip ->
-                    val out = ByteArrayOutputStream(data.size * 2)
-                    val buffer = ByteArray(8192)
-                    var read: Int
-                    while ((gzip.read(buffer).also { read = it }) != -1) {
-                        out.write(buffer, 0, read)
-                    }
-                    return out.toByteArray()
-                }
-            }
-            throw IOException("Unsupported PMTiles tile compression $compression in $fileName")
-        }
     }
 }

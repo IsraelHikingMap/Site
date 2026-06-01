@@ -9,7 +9,8 @@ data class CarRouteData(
         val lngLats: List<LatLng> = emptyList(),
         val weight: Double = 0.0,
         val color: String? = null,
-        val opacity: Double = 0.0
+        val opacity: Double = 0.0,
+        val name: String? = null
 ) {
     companion object {
         @Throws(JSONException::class)
@@ -24,7 +25,8 @@ data class CarRouteData(
                     lngLats = lngLats,
                     weight = json.getDouble("weight"),
                     color = json.getString("color"),
-                    opacity = json.getDouble("opacity")
+                    opacity = json.getDouble("opacity"),
+                    name = json.optString("name").ifEmpty { null }
             )
         }
 
