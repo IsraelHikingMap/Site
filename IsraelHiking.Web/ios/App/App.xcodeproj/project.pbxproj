@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0D4587ED2FCCC8A300269001 /* CarStoreKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4587EC2FCCC8A300269001 /* CarStoreKeys.swift */; };
+		0D4587F02FCE3AAD00269001 /* PMTiles in Frameworks */ = {isa = PBXBuildFile; productRef = 0D4587EF2FCE3AAD00269001 /* PMTiles */; };
 		0D46EA052FCC509C0033E098 /* PMTiles in Frameworks */ = {isa = PBXBuildFile; productRef = 0D46EA042FCC509C0033E098 /* PMTiles */; };
 		0D46EA142FCC67830033E098 /* CarStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0F2FCC67830033E098 /* CarStatistics.swift */; };
 		0D46EA152FCC67830033E098 /* SliceURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA132FCC67830033E098 /* SliceURLProtocol.swift */; };
@@ -61,6 +62,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0D4587F02FCE3AAD00269001 /* PMTiles in Frameworks */,
 				A084ECDBA7D38E1E42DFC39D /* Pods_App.framework in Frameworks */,
 				0D46EA052FCC509C0033E098 /* PMTiles in Frameworks */,
 			);
@@ -187,7 +189,7 @@
 			);
 			mainGroup = 504EC2FB1FED79650016851F;
 			packageReferences = (
-				0D46EA032FCC509C0033E098 /* XCRemoteSwiftPackageReference "swift-pmtiles" */,
+				0D4587EE2FCE3AAD00269001 /* XCRemoteSwiftPackageReference "pmtiles-mobile" */,
 			);
 			productRefGroup = 504EC3051FED79650016851F /* Products */;
 			projectDirPath = "";
@@ -489,6 +491,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		0D4587EE2FCE3AAD00269001 /* XCRemoteSwiftPackageReference "pmtiles-mobile" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mapeak-com/pmtiles-mobile.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		0D46EA032FCC509C0033E098 /* XCRemoteSwiftPackageReference "swift-pmtiles" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sfomuseum/swift-pmtiles";
@@ -500,6 +510,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		0D4587EF2FCE3AAD00269001 /* PMTiles */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0D4587EE2FCE3AAD00269001 /* XCRemoteSwiftPackageReference "pmtiles-mobile" */;
+			productName = PMTiles;
+		};
 		0D46EA042FCC509C0033E098 /* PMTiles */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 0D46EA032FCC509C0033E098 /* XCRemoteSwiftPackageReference "swift-pmtiles" */;
