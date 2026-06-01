@@ -127,7 +127,7 @@ class CarSearchScreen(carContext: CarContext, private val initialQuery: String?)
                 )
                 .show()
         backend.route(origin, result.location, ROUTING_TYPE) { points ->
-            publishRoute(points)
+            publishRoute(points, result.title)
             screenManager.popToRoot()
         }
     }
@@ -136,7 +136,7 @@ class CarSearchScreen(carContext: CarContext, private val initialQuery: String?)
      * Publish the computed route in the same shape the web layer uses (see car.service.ts), so the
      * existing map rendering and travel-estimate logic pick it up unchanged.
      */
-    private fun publishRoute(points: List<LatLng>) {
+    private fun publishRoute(points: List<LatLng>, title: String) {
         if (points.isEmpty()) {
             return
         }
@@ -150,6 +150,7 @@ class CarSearchScreen(carContext: CarContext, private val initialQuery: String?)
                         .put("weight", ROUTE_WEIGHT)
                         .put("color", ROUTE_COLOR)
                         .put("opacity", ROUTE_OPACITY)
+                        .put("name", title)
         val value = JSObject()
         value.put("routes", JSONArray().put(route))
         store.save(CarStoreKeys.ROUTE, value)

@@ -74,7 +74,8 @@ export class CarService {
                 points: route.segments.flatMap(s => s.latlngs.map(p => ([p.lng, p.lat]))),
                 weight: route.weight,
                 color: route.color,
-                opacity: route.opacity
+                opacity: route.opacity,
+                name: route.name
             }));
 
         ReactivePreferences.storeValue({ key: "route", value: { routes: routesValue } });

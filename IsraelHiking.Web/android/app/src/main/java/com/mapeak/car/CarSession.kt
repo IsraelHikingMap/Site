@@ -19,6 +19,8 @@ class CarSession : Session() {
         val renderer = CarMapRenderer(carContext, lifecycle)
         this.renderer = renderer
         val provider = CarLocationProvider(carContext)
+        val navigation = CarNavigation(carContext) { provider.stop() }
+        navigation.attach()
         lifecycle.addObserver(
                 object : DefaultLifecycleObserver {
                     override fun onStart(owner: LifecycleOwner) {
@@ -28,11 +30,15 @@ class CarSession : Session() {
                     override fun onStop(owner: LifecycleOwner) {
                         provider.stop()
                     }
+
+                    override fun onDestroy(owner: LifecycleOwner) {
+                        navigation.detach()
+                    }
                 }
         )
 
         val pendingQuery = if (isNavigationIntent(intent)) navigationQuery(intent) else null
-        val mapScreen = CarMapScreen(carContext, renderer, pendingQuery)
+        val mapScreen = CarMapScreen(carContext, renderer, navigation, pendingQuery)
         carContext.getCarService(ScreenManager::class.java).push(mapScreen)
         return mapScreen
     }

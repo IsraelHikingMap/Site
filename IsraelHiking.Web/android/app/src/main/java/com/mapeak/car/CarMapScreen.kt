@@ -23,6 +23,7 @@ import org.json.JSONException
 class CarMapScreen(
         private val carContext: CarContext,
         private val carMapRenderer: CarMapRenderer,
+        private val navigation: CarNavigation,
         private val pendingNavigationQuery: String? = null
 ) : Screen(carContext), CapacitorStore.Listener, DefaultLifecycleObserver {
 
@@ -37,6 +38,7 @@ class CarMapScreen(
 
     override fun onCreate(owner: LifecycleOwner) {
         store.addListener(this)
+        navigation.onNavigationInfoChanged = { invalidate() }
         loadRoutes()
         loadUnits()
         // Launched from a "navigate to X" intent: open search on top of the map so the driver sees
@@ -48,6 +50,7 @@ class CarMapScreen(
 
     override fun onDestroy(owner: LifecycleOwner) {
         store.removeListener(this)
+        navigation.onNavigationInfoChanged = null
     }
 
     override fun onCarStoreUpdated(key: String) {
@@ -92,6 +95,7 @@ class CarMapScreen(
             templateBuilder.setMapActionStrip(buildMapActionStrip())
         }
         buildTravelEstimate()?.let { templateBuilder.setDestinationTravelEstimate(it) }
+        navigation.navigationInfo?.let { templateBuilder.setNavigationInfo(it) }
         return templateBuilder.build()
     }
 
