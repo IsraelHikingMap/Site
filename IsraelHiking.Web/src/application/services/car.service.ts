@@ -39,6 +39,9 @@ export class CarService {
         this.store.select((state: ApplicationState) => state.layersState.selectedBaseLayerKey).subscribe(() => {
             this.setStyle();
         });
+        this.store.select((state: ApplicationState) => state.offlineState.downloadedTiles).subscribe(() => {
+            this.setStyle();
+        });
         this.store.select((state: ApplicationState) => state.routes.present).subscribe(() => {
             this.setRoutes();
         });

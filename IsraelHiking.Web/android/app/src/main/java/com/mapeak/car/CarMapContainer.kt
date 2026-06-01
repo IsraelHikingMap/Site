@@ -516,20 +516,23 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
     /**
      * Android for Cars requires day and night rendering. The host themes the template chrome
      * (action strips, travel-estimate card) automatically; for our own MapLibre surface we darken
-     * the map background when the car is in dark mode. Re-applied whenever the style reloads (see
-     * setStyle).
+     * the land background and the large area fills when the car is in dark mode. Re-applied
+     * whenever the style reloads (see setStyle).
      */
     fun setNightMode(enabled: Boolean) {
         if (nightMode == enabled) return
         nightMode = enabled
-        // Reload the style so day mode restores the original background colors cleanly.
+        // Reload the style so day mode restores the original colors cleanly.
         setStyle(store.loadString(CarStoreKeys.STYLE))
     }
 
     private fun applyNightMode(style: Style) {
         if (!nightMode) return
         style.layers.filterIsInstance<BackgroundLayer>().forEach {
-            it.setProperties(PropertyFactory.backgroundColor(NIGHT_BACKGROUND_COLOR))
+            it.setProperties(PropertyFactory.backgroundColor(NIGHT_LAND_COLOR))
+        }
+        NIGHT_FILL_COLORS.forEach { (layerId, color) ->
+            (style.getLayer(layerId) as? FillLayer)?.setProperties(PropertyFactory.fillColor(color))
         }
     }
 
@@ -582,7 +585,14 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
         private const val ROUTE_END_COLOR = "red"
         private const val ROUTE_ARROW_ICON_IMAGE = "arrow"
         private const val ROUTE_ARROW_FALLBACK_COLOR = "#FFFFFF"
-        private const val NIGHT_BACKGROUND_COLOR = "#000000"
+        private const val NIGHT_LAND_COLOR = "#1B1B1B"
+        // Large day-bright area fills, dark-shifted for night (see applyNightMode).
+        private val NIGHT_FILL_COLORS =
+                mapOf(
+                        "area-residential" to "#2B2B2B",
+                        "area-landcover-low" to "#1D2A1A",
+                        "water-area" to "#14202E",
+                )
         private const val ARROW_INVERT_OPACITY_THRESHOLD = 0.5
         private const val ARROW_BASE_WEIGHT = 10.0
         private const val ARROW_BASE_SIZE = 1.6
