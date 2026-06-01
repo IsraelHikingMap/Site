@@ -4,12 +4,12 @@ import android.content.Context
 import java.io.File
 import java.io.IOException
 import java.lang.AutoCloseable
-import com.mapeak.pmtiles.PMTiles
+import com.mapeak.pmtiles.PMTilesReader
 
 
 class PmTilesService(context: Context) : AutoCloseable {
     private val baseDir: File? = context.filesDir
-    private val readerCache: MutableMap<String?, PMTiles> = HashMap()
+    private val readerCache: MutableMap<String?, PMTilesReader> = HashMap()
 
     @Throws(IOException::class)
     fun getTileByType(z: Int, x: Int, y: Int, type: String): ByteArray? {
@@ -50,7 +50,7 @@ class PmTilesService(context: Context) : AutoCloseable {
 
     @Synchronized
     @Throws(IOException::class)
-    private fun getReader(fileName: String): PMTiles {
+    private fun getReader(fileName: String): PMTilesReader {
         val cached = readerCache[fileName]
         if (cached != null) {
             return cached
@@ -59,7 +59,7 @@ class PmTilesService(context: Context) : AutoCloseable {
         if (!file.exists()) {
             throw IOException("PMTiles file not found: " + file.absolutePath)
         }
-        val reader = PMTiles(baseDir?.absolutePath + "/" + fileName)
+        val reader = PMTilesReader(baseDir?.absolutePath + "/" + fileName)
         readerCache[fileName] = reader
         return reader
     }
