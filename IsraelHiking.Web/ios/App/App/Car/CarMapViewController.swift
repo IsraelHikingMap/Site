@@ -35,12 +35,6 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     private var animFromHeading: CLLocationDirection = 0
     private var animToHeading: CLLocationDirection = 0
 
-    // Sources kept around so updates re-use them instead of rebuilding the style.
-    private var routeLineSource: MLNShapeSource?
-    private var routePointSource: MLNShapeSource?
-    private var locationPointSource: MLNShapeSource?
-    private var locationCircleSource: MLNShapeSource?
-
     // MARK: lifecycle
 
     override func loadView() {
@@ -207,8 +201,8 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
 
     private func renderGpsLocation(_ style: MLNStyle) {
         guard let location = currentLocation() else {
-            locationPointSource?.shape = nil
-            locationCircleSource?.shape = nil
+            (style.source(withIdentifier: Const.locationPointSource) as? MLNShapeSource)?.shape = nil
+            (style.source(withIdentifier: Const.locationCircleSource) as? MLNShapeSource)?.shape = nil
             return
         }
         let point = MLNPointFeature()
@@ -218,7 +212,8 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         let circle = accuracyCircle(center: location.coordinate,
                                     radiusMeters: max(location.horizontalAccuracy, 1))
 
-        if let pointSource = locationPointSource, let circleSource = locationCircleSource {
+        if let pointSource = style.source(withIdentifier: Const.locationPointSource) as? MLNShapeSource,
+           let circleSource = style.source(withIdentifier: Const.locationCircleSource) as? MLNShapeSource {
             pointSource.shape = point
             circleSource.shape = circle
             return
@@ -228,22 +223,20 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         let circleSource = MLNShapeSource(identifier: Const.locationCircleSource, shape: circle, options: nil)
         style.addSource(pointSource)
         style.addSource(circleSource)
-        locationPointSource = pointSource
-        locationCircleSource = circleSource
-        addLocationLayers(style)
+        addLocationLayers(style, pointSource: pointSource, circleSource: circleSource)
     }
 
-    private func addLocationLayers(_ style: MLNStyle) {
-        let fill = MLNFillStyleLayer(identifier: Const.locationCircleLayer, source: locationCircleSource!)
+    private func addLocationLayers(_ style: MLNStyle, pointSource: MLNShapeSource, circleSource: MLNShapeSource) {
+        let fill = MLNFillStyleLayer(identifier: Const.locationCircleLayer, source: circleSource)
         fill.fillColor = NSExpression(forConstantValue: Const.accuracyColor)
         fill.fillOutlineColor = NSExpression(forConstantValue: Const.accuracyColor)
         fill.fillOpacity = NSExpression(forConstantValue: 0.2)
 
-        let stroke = MLNLineStyleLayer(identifier: Const.locationCircleStrokeLayer, source: locationCircleSource!)
+        let stroke = MLNLineStyleLayer(identifier: Const.locationCircleStrokeLayer, source: circleSource)
         stroke.lineColor = NSExpression(forConstantValue: Const.accuracyColor)
         stroke.lineWidth = NSExpression(forConstantValue: 2)
 
-        let icon = MLNSymbolStyleLayer(identifier: Const.locationIconLayer, source: locationPointSource!)
+        let icon = MLNSymbolStyleLayer(identifier: Const.locationIconLayer, source: pointSource)
         icon.iconImageName = NSExpression(forConstantValue: Const.locationIconImage)
         icon.iconScale = NSExpression(forConstantValue: 1.0)
         icon.iconRotation = NSExpression(forKeyPath: "heading")
@@ -280,7 +273,8 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         let lineCollection = MLNShapeCollectionFeature(shapes: lineFeatures)
         let pointCollection = MLNShapeCollectionFeature(shapes: pointFeatures)
 
-        if let lineSource = routeLineSource, let pointSource = routePointSource {
+        if let lineSource = style.source(withIdentifier: Const.routeSource) as? MLNShapeSource,
+           let pointSource = style.source(withIdentifier: Const.routePointsSource) as? MLNShapeSource {
             lineSource.shape = lineCollection
             pointSource.shape = pointCollection
             return
@@ -290,9 +284,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         let pointSource = MLNShapeSource(identifier: Const.routePointsSource, shape: pointCollection, options: nil)
         style.addSource(lineSource)
         style.addSource(pointSource)
-        routeLineSource = lineSource
-        routePointSource = pointSource
-        addRouteLayers(style)
+        addRouteLayers(style, lineSource: lineSource, pointSource: pointSource)
     }
 
     private func lineFeature(for route: CarRouteData) -> MLNPolylineFeature {
@@ -318,15 +310,15 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         return [start, end]
     }
 
-    private func addRouteLayers(_ style: MLNStyle) {
-        let line = MLNLineStyleLayer(identifier: Const.routeLayer, source: routeLineSource!)
+    private func addRouteLayers(_ style: MLNStyle, lineSource: MLNShapeSource, pointSource: MLNShapeSource) {
+        let line = MLNLineStyleLayer(identifier: Const.routeLayer, source: lineSource)
         line.lineColor = NSExpression(forKeyPath: "color")
         line.lineWidth = NSExpression(forKeyPath: "weight")
         line.lineOpacity = NSExpression(forKeyPath: "opacity")
         line.lineCap = NSExpression(forConstantValue: "butt")
         line.lineJoin = NSExpression(forConstantValue: "bevel")
 
-        let arrows = MLNSymbolStyleLayer(identifier: Const.routeArrowsLayer, source: routeLineSource!)
+        let arrows = MLNSymbolStyleLayer(identifier: Const.routeArrowsLayer, source: lineSource)
         arrows.symbolPlacement = NSExpression(forConstantValue: "line")
         arrows.symbolSpacing = NSExpression(forConstantValue: 40)
         arrows.iconImageName = NSExpression(forConstantValue: Const.routeArrowIconImage)
@@ -335,7 +327,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         arrows.iconAllowsOverlap = NSExpression(forConstantValue: true)
         arrows.iconIgnoresPlacement = NSExpression(forConstantValue: true)
 
-        let points = MLNCircleStyleLayer(identifier: Const.routePointsLayer, source: routePointSource!)
+        let points = MLNCircleStyleLayer(identifier: Const.routePointsLayer, source: pointSource)
         points.circleColor = NSExpression(forKeyPath: "color")
         points.circleRadius = NSExpression(forConstantValue: 7)
         points.circleStrokeColor = NSExpression(forKeyPath: "strokeColor")
