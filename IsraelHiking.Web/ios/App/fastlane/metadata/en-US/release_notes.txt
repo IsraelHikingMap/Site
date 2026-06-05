@@ -1,1 +1,2 @@
+- Support CarPlay
 - Various bug fixes and performance improvements
