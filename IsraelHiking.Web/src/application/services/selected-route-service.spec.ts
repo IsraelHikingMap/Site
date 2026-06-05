@@ -1259,8 +1259,8 @@ describe("Selected Route Service", () => {
             };
 
             const features = selectedRouteService.createFeaturesForRoute(route);
-            expect(features.some((f) => f.properties.id.toString().includes("start"))).toBeTruthy();
-            expect(features.some((f) => f.properties.id.toString().includes("end"))).toBeTruthy();
+            expect(features.some((f) => f.properties.id?.toString().includes("start"))).toBeTruthy();
+            expect(features.some((f) => f.properties.id?.toString().includes("end"))).toBeTruthy();
             expect(features.every((f) => f.properties.id?.toString() === f.id)).toBeTruthy();
         }
     ));

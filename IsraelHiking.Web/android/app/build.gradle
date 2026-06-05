@@ -49,7 +49,7 @@ dependencies {
     implementation "org.maplibre.gl:android-sdk:$maplibreSdkVersion"
     implementation "org.maplibre.gl:android-sdk-turf:$maplibreTurfVersion"
     implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
-    implementation "com.github.Mapeak-com:pmtiles-mobile:v0.1.0"
+    implementation "com.github.Mapeak-com:pmtiles-mobile:v0.1.2"
     implementation "androidx.core:core-ktx:$androidxCoreKtxVersion"
     implementation "com.google.android.gms:play-services-location:$playServicesLocationVersion"
 }

@@ -13,7 +13,7 @@ import { SelectedRouteService } from "./selected-route.service";
 import { RoutesFactory } from "./routes.factory";
 import { MapService } from "./map.service";
 import { RunningContextService } from "./running-context.service";
-import type { RouteData, ShareUrl } from "../models";
+import type { DataContainer, RouteData, ShareUrl } from "../models";
 
 describe("DataContainerService", () => {
     beforeEach(() => {
@@ -187,5 +187,59 @@ describe("DataContainerService", () => {
 
         expect(shareUrlsService.setShareUrl).toHaveBeenCalledWith(null);
         expect(toastService.error).toHaveBeenCalled();
+    }));
+
+    it("should check if container is empty when there are no routes", inject([DataContainerService], (service: DataContainerService) => {
+        const container = {
+            routes: []
+        } as any;
+        expect(service.isContainerEmpty(container)).toBe(true);
+    }));
+
+    it("should check if container is not empty when there are segments with latlngs", inject([DataContainerService], (service: DataContainerService) => {
+        const container: DataContainer = {
+            routes: [{
+                markers: [],
+                segments: [{
+                    latlngs: [{
+                        lat: 1,
+                        lng: 2
+                    }]
+                }]
+            }]
+        };
+        expect(service.isContainerEmpty(container)).toBe(false);
+    }));
+
+    it("should check if container is not empty when there are markers", inject([DataContainerService], (service: DataContainerService) => {
+        const container = {
+            routes: [{
+                markers: [{} as any],
+                segments: []
+            }]
+        } as any;
+        expect(service.isContainerEmpty(container)).toBe(false);
+    }));
+
+    it("should check if container is empty when there are no segments and no markers", inject([DataContainerService], (service: DataContainerService) => {
+        const container = {
+            routes: [{
+                markers: [],
+                segments: []
+            }]
+        } as any;
+        expect(service.isContainerEmpty(container)).toBe(true);
+    }));
+
+    it("should check if container is not empty when there are segments but no latlngs", inject([DataContainerService], (service: DataContainerService) => {
+        const container = {
+            routes: [{
+                markers: [],
+                segments: [{
+                    latlngs: []
+                }]
+            }]
+        } as any;
+        expect(service.isContainerEmpty(container)).toBe(true);
     }));
 });

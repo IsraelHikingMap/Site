@@ -472,10 +472,24 @@ export class SelectedRouteService {
         route: Immutable<RouteDataWithoutState>): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
         const features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
         const routeCoordinates = route.segments.map(s => s.latlngs).flat().map(l => SpatialService.toCoordinate(l));
+        const routeProperties = this.routeToProperties(route);
+        for (const marker of route.markers) {
+            const markerFeature = {
+                type: "Feature",
+                properties: {
+                    color: "transparent",
+                    strokeColor: routeProperties.color
+                },
+                geometry: {
+                    type: "Point",
+                    coordinates: SpatialService.toCoordinate(marker.latlng)
+                }
+            } as GeoJSON.Feature<GeoJSON.Point>;
+            features.push(markerFeature);
+        }
         if (routeCoordinates.length < 2) {
             return features;
         }
-        const routeProperties = this.routeToProperties(route);
         features.push({
             type: "Feature",
             id: routeProperties.id,
@@ -513,20 +527,6 @@ export class SelectedRouteService {
                 coordinates: routeCoordinates[routeCoordinates.length - 1]
             }
         });
-        for (const marker of route.markers) {
-            const markerFeature = {
-                type: "Feature",
-                properties: {
-                    color: "transparent",
-                    strokeColor: routeProperties.color
-                },
-                geometry: {
-                    type: "Point",
-                    coordinates: SpatialService.toCoordinate(marker.latlng)
-                }
-            } as GeoJSON.Feature<GeoJSON.Point>;
-            features.push(markerFeature);
-        }
         return features;
     }
 

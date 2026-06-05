@@ -66,6 +66,22 @@ export class DataContainerService {
         return container;
     }
 
+    public isContainerEmpty(container: DataContainer): boolean {
+        if (container.routes.length === 0) {
+            return true;
+        }
+        if (container.routes[0].markers?.length > 0) {
+            return false;
+        }
+        if (container.routes[0].segments.length === 0) {
+            return true;
+        }
+        if (container.routes[0].segments[0].latlngs.length === 0) {
+            return true;
+        }
+        return false;
+    }
+
     public async setFileUrlAfterNavigation(url: string, baseLayer: string) {
         if (this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState.fileUrl) === url) {
             return;
