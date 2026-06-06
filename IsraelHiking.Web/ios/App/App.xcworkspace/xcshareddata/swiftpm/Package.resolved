@@ -1,0 +1,15 @@
+{
+  "originHash" : "775e45fde9c60facfe4ff83455bb608ee92c715d14fcb50957bfbbb4baf8f19a",
+  "pins" : [
+    {
+      "identity" : "pmtiles-mobile",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/mapeak-com/pmtiles-mobile.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "a7d48a2397ba5a5fedf544f46573220813a5a58f"
+      }
+    }
+  ],
+  "version" : 3
+}

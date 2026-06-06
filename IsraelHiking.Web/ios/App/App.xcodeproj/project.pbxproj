@@ -7,6 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0D4587ED2FCCC8A300269001 /* CarStoreKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4587EC2FCCC8A300269001 /* CarStoreKeys.swift */; };
+		0D4587F02FCE3AAD00269001 /* PMTiles in Frameworks */ = {isa = PBXBuildFile; productRef = 0D4587EF2FCE3AAD00269001 /* PMTiles */; };
+		0D46EA052FCC509C0033E098 /* PMTiles in Frameworks */ = {isa = PBXBuildFile; productRef = 0D46EA042FCC509C0033E098 /* PMTiles */; };
+		0D46EA142FCC67830033E098 /* CarStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0F2FCC67830033E098 /* CarStatistics.swift */; };
+		0D46EA152FCC67830033E098 /* SliceURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA132FCC67830033E098 /* SliceURLProtocol.swift */; };
+		0D46EA162FCC67830033E098 /* CarMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0C2FCC67830033E098 /* CarMapViewController.swift */; };
+		0D46EA172FCC67830033E098 /* CarLocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0B2FCC67830033E098 /* CarLocationProvider.swift */; };
+		0D46EA182FCC67830033E098 /* ReactivePreferencesPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0D2FCC67830033E098 /* ReactivePreferencesPlugin.swift */; };
+		0D46EA192FCC67830033E098 /* CarRouteData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0E2FCC67830033E098 /* CarRouteData.swift */; };
+		0D46EA1A2FCC67830033E098 /* CapacitorStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA102FCC67830033E098 /* CapacitorStore.swift */; };
+		0D46EA1B2FCC67830033E098 /* PMTilesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA122FCC67830033E098 /* PMTilesService.swift */; };
+		0D46EA1C2FCC67830033E098 /* MapeakCarSceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA112FCC67830033E098 /* MapeakCarSceneDelegate.swift */; };
+		0D46EA1E2FCC68230033E098 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA1D2FCC68230033E098 /* SceneDelegate.swift */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
@@ -18,6 +31,17 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0D4587EC2FCCC8A300269001 /* CarStoreKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarStoreKeys.swift; sourceTree = "<group>"; };
+		0D46EA0B2FCC67830033E098 /* CarLocationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarLocationProvider.swift; sourceTree = "<group>"; };
+		0D46EA0C2FCC67830033E098 /* CarMapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarMapViewController.swift; sourceTree = "<group>"; };
+		0D46EA0D2FCC67830033E098 /* ReactivePreferencesPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactivePreferencesPlugin.swift; sourceTree = "<group>"; };
+		0D46EA0E2FCC67830033E098 /* CarRouteData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarRouteData.swift; sourceTree = "<group>"; };
+		0D46EA0F2FCC67830033E098 /* CarStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarStatistics.swift; sourceTree = "<group>"; };
+		0D46EA102FCC67830033E098 /* CapacitorStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapacitorStore.swift; sourceTree = "<group>"; };
+		0D46EA112FCC67830033E098 /* MapeakCarSceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapeakCarSceneDelegate.swift; sourceTree = "<group>"; };
+		0D46EA122FCC67830033E098 /* PMTilesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PMTilesService.swift; sourceTree = "<group>"; };
+		0D46EA132FCC67830033E098 /* SliceURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliceURLProtocol.swift; sourceTree = "<group>"; };
+		0D46EA1D2FCC68230033E098 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -38,13 +62,32 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0D4587F02FCE3AAD00269001 /* PMTiles in Frameworks */,
 				A084ECDBA7D38E1E42DFC39D /* Pods_App.framework in Frameworks */,
+				0D46EA052FCC509C0033E098 /* PMTiles in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0D46EA0A2FCC67430033E098 /* Car */ = {
+			isa = PBXGroup;
+			children = (
+				0D46EA0B2FCC67830033E098 /* CarLocationProvider.swift */,
+				0D46EA0C2FCC67830033E098 /* CarMapViewController.swift */,
+				0D46EA0D2FCC67830033E098 /* ReactivePreferencesPlugin.swift */,
+				0D46EA0E2FCC67830033E098 /* CarRouteData.swift */,
+				0D46EA0F2FCC67830033E098 /* CarStatistics.swift */,
+				0D46EA102FCC67830033E098 /* CapacitorStore.swift */,
+				0D4587EC2FCCC8A300269001 /* CarStoreKeys.swift */,
+				0D46EA112FCC67830033E098 /* MapeakCarSceneDelegate.swift */,
+				0D46EA122FCC67830033E098 /* PMTilesService.swift */,
+				0D46EA132FCC67830033E098 /* SliceURLProtocol.swift */,
+			);
+			path = Car;
+			sourceTree = "<group>";
+		};
 		27E2DDA53C4D2A4D1A88CE4A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -56,10 +99,10 @@
 		504EC2FB1FED79650016851F = {
 			isa = PBXGroup;
 			children = (
-				504EC3061FED79650016851F /* App */,
 				504EC3051FED79650016851F /* Products */,
 				7F8756D8B27F46E3366F6CEA /* Pods */,
 				27E2DDA53C4D2A4D1A88CE4A /* Frameworks */,
+				504EC3061FED79650016851F /* App */,
 			);
 			sourceTree = "<group>";
 		};
@@ -74,6 +117,8 @@
 		504EC3061FED79650016851F /* App */ = {
 			isa = PBXGroup;
 			children = (
+				0D46EA1D2FCC68230033E098 /* SceneDelegate.swift */,
+				0D46EA0A2FCC67430033E098 /* Car */,
 				F15F05A52935486900827848 /* App.entitlements */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
@@ -143,6 +188,9 @@
 				Base,
 			);
 			mainGroup = 504EC2FB1FED79650016851F;
+			packageReferences = (
+				0D4587EE2FCE3AAD00269001 /* XCRemoteSwiftPackageReference "pmtiles-mobile" */,
+			);
 			productRefGroup = 504EC3051FED79650016851F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -210,6 +258,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
+				0D46EA142FCC67830033E098 /* CarStatistics.swift in Sources */,
+				0D46EA152FCC67830033E098 /* SliceURLProtocol.swift in Sources */,
+				0D46EA162FCC67830033E098 /* CarMapViewController.swift in Sources */,
+				0D46EA172FCC67830033E098 /* CarLocationProvider.swift in Sources */,
+				0D46EA182FCC67830033E098 /* ReactivePreferencesPlugin.swift in Sources */,
+				0D46EA192FCC67830033E098 /* CarRouteData.swift in Sources */,
+				0D46EA1E2FCC68230033E098 /* SceneDelegate.swift in Sources */,
+				0D4587ED2FCCC8A300269001 /* CarStoreKeys.swift in Sources */,
+				0D46EA1A2FCC67830033E098 /* CapacitorStore.swift in Sources */,
+				0D46EA1B2FCC67830033E098 /* PMTilesService.swift in Sources */,
+				0D46EA1C2FCC67830033E098 /* MapeakCarSceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -430,6 +489,38 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0D4587EE2FCE3AAD00269001 /* XCRemoteSwiftPackageReference "pmtiles-mobile" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mapeak-com/pmtiles-mobile.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		0D46EA032FCC509C0033E098 /* XCRemoteSwiftPackageReference "swift-pmtiles" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sfomuseum/swift-pmtiles";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0D4587EF2FCE3AAD00269001 /* PMTiles */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0D4587EE2FCE3AAD00269001 /* XCRemoteSwiftPackageReference "pmtiles-mobile" */;
+			productName = PMTiles;
+		};
+		0D46EA042FCC509C0033E098 /* PMTiles */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0D46EA032FCC509C0033E098 /* XCRemoteSwiftPackageReference "swift-pmtiles" */;
+			productName = PMTiles;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 504EC2FC1FED79650016851F /* Project object */;
 }

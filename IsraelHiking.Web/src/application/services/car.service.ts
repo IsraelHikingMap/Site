@@ -31,8 +31,7 @@ export class CarService {
     private readonly layersService = inject(LayersService);
 
     public async initialize() {
-        if (!this.runningContextService.isCapacitor || this.runningContextService.isIos) {
-            // Only android is supported right now.
+        if (!this.runningContextService.isCapacitor) {
             return;
         }
 
