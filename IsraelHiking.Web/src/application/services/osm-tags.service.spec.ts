@@ -286,15 +286,15 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiCategory).toBe("Water");
     });
 
-    it("Should set icon color category for waterfall", () => {
+    it("Should set icon color category for a generic waterway", () => {
         // Arrange
-        const feature = createFeature({ waterway: "waterfall" });
+        const feature = createFeature({ waterway: "stream" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
         // Assert
         expect(poi.properties.poiIconColor).toBe("#1e80e3");
-        expect(poi.properties.poiIcon).toBe("icon-waterfall");
+        expect(poi.properties.poiIcon).toBe("icon-river");
         expect(poi.properties.poiCategory).toBe("Water");
     });
 
@@ -334,7 +334,7 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiCategory).toBe("Viewpoint");
     });
 
-    it("Should set icon color category for picnic_site", () => {
+    it("Should set icon color category for camp_site", () => {
         // Arrange
         const feature = createFeature({ tourism: "camp_site" });
         const poi = createPoi();
@@ -524,5 +524,161 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiCategory).toBe("Other");
         expect(poi.properties.poiIcon).toBe("icon-inature");
         expect(poi.properties.poiIconColor).toBe("#116C00");
+    });
+
+    it("Should set icon color category for national_park", () => {
+        // Arrange
+        const feature = createFeature({ boundary: "national_park" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("#008000");
+        expect(poi.properties.poiIcon).toBe("icon-leaf");
+        expect(poi.properties.poiCategory).toBe("Other");
+    });
+
+    it("Should set icon color category for nature_reserve", () => {
+        // Arrange
+        const feature = createFeature({ leisure: "nature_reserve" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("#008000");
+        expect(poi.properties.poiIcon).toBe("icon-leaf");
+        expect(poi.properties.poiCategory).toBe("Other");
+    });
+
+    it("Should set icon color category for route foot", () => {
+        // Arrange
+        const feature = createFeature({ route: "foot" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("black");
+        expect(poi.properties.poiIcon).toBe("icon-hike");
+        expect(poi.properties.poiCategory).toBe("Hiking");
+    });
+
+    it("Should set icon color category for route mtb", () => {
+        // Arrange
+        const feature = createFeature({ route: "mtb" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("black");
+        expect(poi.properties.poiIcon).toBe("icon-bike");
+        expect(poi.properties.poiCategory).toBe("Bicycle");
+    });
+
+    it("Should fall through to the default when route is road without scenic", () => {
+        // Arrange
+        const feature = createFeature({ route: "road" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("black");
+        expect(poi.properties.poiIcon).toBe("icon-search");
+        expect(poi.properties.poiCategory).toBe("Other");
+    });
+
+    it("Should set icon color category for historic monument", () => {
+        // Arrange
+        const feature = createFeature({ historic: "monument" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("#666666");
+        expect(poi.properties.poiIcon).toBe("icon-memorial");
+        expect(poi.properties.poiCategory).toBe("Historic");
+    });
+
+    it("Should set icon color category for picnic_site", () => {
+        // Arrange
+        const feature = createFeature({ tourism: "picnic_site" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("#734a08");
+        expect(poi.properties.poiIcon).toBe("icon-picnic");
+        expect(poi.properties.poiCategory).toBe("Camping");
+    });
+
+    it("Should set icon color category for amenity picnic", () => {
+        // Arrange
+        const feature = createFeature({ amenity: "picnic" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("#734a08");
+        expect(poi.properties.poiIcon).toBe("icon-picnic");
+        expect(poi.properties.poiCategory).toBe("Camping");
+    });
+
+    it("Should set icon color category for natural ridge", () => {
+        // Arrange
+        const feature = createFeature({ natural: "ridge" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("black");
+        expect(poi.properties.poiIcon).toBe("icon-peak");
+        expect(poi.properties.poiCategory).toBe("Other");
+    });
+
+    it("Should set icon color category for recreation_ground mtb", () => {
+        // Arrange
+        const feature = createFeature({ landuse: "recreation_ground", sport: "mtb" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("green");
+        expect(poi.properties.poiIcon).toBe("icon-bike");
+        expect(poi.properties.poiCategory).toBe("Bicycle");
+    });
+
+    it("Should set icon color category for landuse forest", () => {
+        // Arrange
+        const feature = createFeature({ landuse: "forest" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("#008000");
+        expect(poi.properties.poiIcon).toBe("icon-tree");
+        expect(poi.properties.poiCategory).toBe("Other");
+    });
+
+    it("Should set icon color category for wikidata", () => {
+        // Arrange
+        const feature = createFeature({ wikidata: "Q12345" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("black");
+        expect(poi.properties.poiIcon).toBe("icon-wikipedia-w");
+        expect(poi.properties.poiCategory).toBe("Other");
+    });
+
+    it("Should set the default icon color category for unrecognized tags", () => {
+        // Arrange
+        const feature = createFeature({ amenity: "bench" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("black");
+        expect(poi.properties.poiIcon).toBe("icon-search");
+        expect(poi.properties.poiCategory).toBe("Other");
     });
 });
