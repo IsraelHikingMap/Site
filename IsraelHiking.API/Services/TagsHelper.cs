@@ -31,6 +31,7 @@ public class TagsHelper : ITagsHelper
                 tagCombinations.Add([new("route", "bicycle")]);
                 tagCombinations.Add([new("route", "mtb")]);
                 tagCombinations.Add([new("highway", "cycleway")]);
+                tagCombinations.Add([new("landuse", "recreation_ground"), new("sport", "mtb")]);
                 return tagCombinations;
             case "icon-four-by-four":
                 // route=road AND scenic=yes
@@ -65,6 +66,7 @@ public class TagsHelper : ITagsHelper
                 return tagCombinations;
             case "icon-tree":
                 tagCombinations.Add([new("natural", "tree")]);
+                tagCombinations.Add([new("landuse", "forest")]);
                 return tagCombinations;
             case "icon-flowers":
                 tagCombinations.Add([new("natural", "flowers")]);
@@ -104,6 +106,7 @@ public class TagsHelper : ITagsHelper
                 return tagCombinations;
             case "icon-peak":
                 tagCombinations.Add([new("natural", "peak")]);
+                tagCombinations.Add([new("natural", "ridge")]);
                 return tagCombinations;
             case "icon-inature":
                 tagCombinations.Add([new("ref:IL:inature", "*")]);
@@ -257,6 +260,13 @@ public class TagsHelper : ITagsHelper
                         Icon = "icon-waterhole",
                         Category = Categories.WATER
                     };
+                case "ridge":
+                    return new IconColorCategory
+                    {
+                        Color = "black",
+                        Icon = "icon-peak",
+                        Category = Categories.OTHER
+                    };
             }
         }
 
@@ -302,7 +312,7 @@ public class TagsHelper : ITagsHelper
             };
         }
 
-        if ("waterway".Equals(GetString(attributes, "type")))
+        if (GetString(attributes, "waterway") != null || "waterway".Equals(GetString(attributes, "type")))
         {
             return new IconColorCategory
             {
@@ -364,6 +374,16 @@ public class TagsHelper : ITagsHelper
             }
         }
 
+        if (GetString(attributes, "mtb:name") != null)
+        {
+            return new IconColorCategory
+            {
+                Color = "gray",
+                Icon = "icon-bike",
+                Category = Categories.ROUTE_BIKE
+            };
+        }
+
         if ("peak".Equals(GetString(attributes, "natural")))
         {
             return new IconColorCategory
@@ -409,16 +429,6 @@ public class TagsHelper : ITagsHelper
             }
         }
 
-        if (GetString(attributes, "ref:IL:inature") != null)
-        {
-            return new IconColorCategory
-            {
-                Color = "#116C00",
-                Icon = "icon-inature",
-                Category = Categories.OTHER
-            };
-        }
-
         if ("place_of_worship".Equals(GetString(attributes, "amenity")) || "monastery".Equals(GetString(attributes, "amenity")))
         {
             var religion = GetString(attributes, "religion");
@@ -453,6 +463,46 @@ public class TagsHelper : ITagsHelper
                         Category = Categories.OTHER
                     };
             }
+        }
+
+        if ("recreation_ground".Equals(GetString(attributes, "landuse")) && "mtb".Equals(GetString(attributes, "sport")))
+        {
+            return new IconColorCategory
+            {
+                Color = "green",
+                Icon = "icon-bike",
+                Category = Categories.ROUTE_BIKE
+            };
+        }
+
+        if ("forest".Equals(GetString(attributes, "landuse")))
+        {
+            return new IconColorCategory
+            {
+                Color = "#008000",
+                Icon = "icon-tree",
+                Category = Categories.OTHER
+            };
+        }
+
+        if (GetString(attributes, "ref:IL:inature") != null)
+        {
+            return new IconColorCategory
+            {
+                Color = "#116C00",
+                Icon = "icon-inature",
+                Category = Categories.OTHER
+            };
+        }
+
+        if (GetString(attributes, "wikidata") != null || GetString(attributes, "wikipedia") != null)
+        {
+            return new IconColorCategory
+            {
+                Color = "black",
+                Icon = "icon-wikipedia-w",
+                Category = Categories.OTHER
+            };
         }
 
         return new IconColorCategory
