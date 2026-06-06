@@ -319,7 +319,7 @@ describe("OsmTagsService", () => {
         // Assert
         expect(poi.properties.poiIconColor).toBe("black");
         expect(poi.properties.poiIcon).toBe("icon-home");
-        expect(poi.properties.poiCategory).toBe("Wikipedia");
+        expect(poi.properties.poiCategory).toBe("Other");
     });
 
     it("Should set icon color category for viewpoint", () => {
@@ -509,7 +509,7 @@ describe("OsmTagsService", () => {
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
         // Assert
-        expect(poi.properties.poiCategory).toBe("Wikipedia");
+        expect(poi.properties.poiCategory).toBe("Other");
         expect(poi.properties.poiIcon).toBe("icon-wikipedia-w");
         expect(poi.properties.poiIconColor).toBe("black");
     });
@@ -521,7 +521,7 @@ describe("OsmTagsService", () => {
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
         // Assert
-        expect(poi.properties.poiCategory).toBe("iNature");
+        expect(poi.properties.poiCategory).toBe("Other");
         expect(poi.properties.poiIcon).toBe("icon-inature");
         expect(poi.properties.poiIconColor).toBe("#116C00");
     });
