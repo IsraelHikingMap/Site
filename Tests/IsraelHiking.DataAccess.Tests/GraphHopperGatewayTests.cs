@@ -31,4 +31,27 @@ public class GraphHopperGatewayTests
         var details = results.Attributes["details"];
         Assert.IsNotNull(details);
     }
+
+    [TestMethod]
+    public void GetRouteMatchWithInstruction()
+    {
+        var factory = Substitute.For<IHttpClientFactory>();
+        factory.CreateClient().Returns(new HttpClient());
+        var options = Substitute.For<IOptions<ConfigurationData>>();
+        options.Value.Returns(new ConfigurationData());
+        var gateway = new GraphHopperGateway(factory, options, Substitute.For<ILogger>());
+        var results = gateway.GetMapMatch(new MapMatchGatewayRequest
+        {
+            Points =
+            [
+                new Coordinate(35.24470233230383, 31.971396577420734),
+                new Coordinate(35.00963707334776, 31.926065209376176)
+            ],
+            Language = "he",
+            Profile = ProfileType.Foot
+        }).Result;
+        Assert.IsNotNull(results);
+        var instructions = results.Attributes["instructions"];
+        Assert.IsNotNull(instructions);
+    }
 }
