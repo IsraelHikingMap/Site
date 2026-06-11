@@ -8,7 +8,7 @@ import { LayersService } from "./layers.service";
 import { DefaultStyleService } from "./default-style.service";
 import type { ApplicationState } from "../models";
 
-type CarStoreKey = "style" | "route" | "config";
+type CarStoreKey = "style" | "route" | "config" | "route_instructions";
 
 type CarStoreMessage = {
     key: CarStoreKey;
@@ -44,26 +44,27 @@ export class CarService {
         this.store.select((state: ApplicationState) => state.routes.present).subscribe(() => {
             this.setRoutes();
         });
-        this.store.select((state: ApplicationState) => state.configuration.language).subscribe(() => {
-            this.setStyle();
-            this.setConfig();
+        this.store.select((state: ApplicationState) => state.configuration.language).subscribe(async () => {
+            await this.setStyle();
+            await this.setConfig();
+            await this.setRoutes();
         });
         this.store.select((state: ApplicationState) => state.configuration.units).subscribe(() => {
             this.setConfig();
         });
-        this.setConfig();
+        await this.setConfig();
         await this.setStyle();
-        this.setRoutes();
+        await this.setRoutes();
     }
 
     private async setStyle() {
         this.loggingService.info("[Car] Setting style");
         const layerData = this.layersService.getSelectedBaseLayer();
         const styleLike = await this.defaultStyleService.getSourcesAndLayers(layerData, true, "car");
-        ReactivePreferences.storeValue({ key: "style", value: styleLike });
+        await ReactivePreferences.storeValue({ key: "style", value: styleLike });
     }
 
-    private setRoutes() {
+    private async setRoutes() {
         this.loggingService.info("[Car] Setting routes");
         const routes = this.store.selectSnapshot((state: ApplicationState) => state.routes.present);
 
@@ -77,12 +78,13 @@ export class CarService {
                 name: route.name
             }));
 
-        ReactivePreferences.storeValue({ key: "route", value: { routes: routesValue } });
+        await ReactivePreferences.storeValue({ key: "route_instructions", value: {} });
+        await ReactivePreferences.storeValue({ key: "route", value: { routes: routesValue } });
     }
 
-    private setConfig() {
+    private async setConfig() {
         this.loggingService.info("[Car] Setting config");
-        ReactivePreferences.storeValue({
+        await ReactivePreferences.storeValue({
             key: "config",
             value: {
                 language: this.store.selectSnapshot((state: ApplicationState) => state.configuration.language).code,

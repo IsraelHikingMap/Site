@@ -81,6 +81,11 @@ class CarSearchScreen(carContext: CarContext, private val initialQuery: String?)
         return listBuilder.build()
     }
 
+    /**
+     * Runs a search for [query]. Coordinate strings are resolved locally first (the web client does
+     * the same before hitting the API); otherwise the backend search is used, and a response is
+     * ignored if the query has moved on while the request was in flight.
+     */
     private fun runSearch(query: String) {
         val term = query.trim()
         latestQuery = term
@@ -90,7 +95,6 @@ class CarSearchScreen(carContext: CarContext, private val initialQuery: String?)
             invalidate()
             return
         }
-        // Coordinates are resolved locally (the web client does the same before hitting the API).
         parseCoordinates(term)?.let { coordinate ->
             isSearching = false
             results = listOf(CarSearchResult(term, "", coordinate))
@@ -100,7 +104,6 @@ class CarSearchScreen(carContext: CarContext, private val initialQuery: String?)
         isSearching = true
         invalidate()
         backend.search(term, currentLocation(), currentZoom(), simplifiedLanguage()) { found ->
-            // Ignore stale responses if the query moved on while the request was in flight.
             if (latestQuery == term) {
                 results = found
                 isSearching = false
@@ -153,6 +156,7 @@ class CarSearchScreen(carContext: CarContext, private val initialQuery: String?)
                         .put("name", title)
         val value = JSObject()
         value.put("routes", JSONArray().put(route))
+        store.remove(CarStoreKeys.ROUTE_INSTRUCTIONS)
         store.save(CarStoreKeys.ROUTE, value)
     }
 

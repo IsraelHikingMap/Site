@@ -19,10 +19,13 @@ import androidx.car.app.navigation.model.Step
 import androidx.car.app.navigation.model.TravelEstimate
 import androidx.car.app.navigation.model.Trip
 import androidx.core.graphics.drawable.IconCompat
+import com.getcapacitor.JSObject
 import com.mapeak.R
 import java.util.TimeZone
 import kotlin.math.roundToInt
+import org.json.JSONArray
 import org.json.JSONException
+import org.maplibre.android.geometry.LatLng
 import org.maplibre.geojson.Point
 import org.maplibre.turf.TurfConstants
 import org.maplibre.turf.TurfMeasurement
@@ -34,10 +37,12 @@ import org.maplibre.turf.TurfMeasurement
  * - implements the "test drive" simulation triggered by
  * [NavigationManagerCallback.onAutoDriveEnabled] (NF-7).
  *
- * Turns are synthesized from the route geometry (see [CarManeuverGenerator]) because the routing
- * backend returns only a polyline. Everything reacts to the existing store keys (ROUTE/LOCATION),
- * and the simulator publishes synthetic locations through the same LOCATION key, so the map,
- * statistics and cluster all update with no extra wiring.
+ * Whenever the route changes we ask the map-match backend for real turn-by-turn instructions and
+ * cache them (keyed to the route) under [CarStoreKeys.ROUTE_INSTRUCTIONS] so navigation keeps the
+ * directions offline. Until/unless the backend answers we fall back to turns synthesized from the
+ * route geometry (see [CarManeuverGenerator]). Everything reacts to the existing store keys
+ * (ROUTE/LOCATION), and the simulator publishes synthetic locations through the same LOCATION key,
+ * so the map, statistics and cluster all update with no extra wiring.
  */
 class CarNavigation(
         private val carContext: CarContext,
@@ -50,9 +55,14 @@ class CarNavigation(
             carContext.getCarService(NavigationManager::class.java)
     private val handler = Handler(Looper.getMainLooper())
     private val notification = CarNavigationNotification(carContext)
+    private val backend = CarBackendService()
 
     private var routePoints: List<Point> = emptyList()
     private var maneuvers: List<CarManeuver> = emptyList()
+    /**
+     * Bumped on every route change so a late instructions fetch for an old route can be dropped.
+     */
+    private var routeEpoch: Int = 0
     private var totalLengthM: Double = 0.0
     private var destinationName: String? = null
     private var navigating: Boolean = false
@@ -110,7 +120,8 @@ class CarNavigation(
         destinationName = route?.name
         val lngLats = route?.lngLats ?: emptyList()
         routePoints = lngLats.map { Point.fromLngLat(it.longitude, it.latitude) }
-        maneuvers = CarManeuverGenerator.generate(lngLats)
+        routeEpoch++
+        maneuvers = loadCachedManeuvers() ?: CarManeuverGenerator.generate(lngLats)
         totalLengthM =
                 if (routePoints.size >= 2)
                         TurfMeasurement.length(routePoints, TurfConstants.UNIT_METERS)
@@ -122,8 +133,43 @@ class CarNavigation(
                 navigating = true
             }
             if (autoDrive) startSimulation()
+            fetchInstructions(lngLats, routeEpoch)
         } else {
             stopNavigation()
+        }
+    }
+
+    /**
+     * Ask the backend to map-match the route to the network and replace [maneuvers] with the real
+     * turn-by-turn instructions, caching them so they are available offline. On failure (e.g.
+     * offline) the locally-synthesized turns already in place are kept. A response that arrives
+     * after the route has changed ([epoch] no longer current) is dropped.
+     */
+    private fun fetchInstructions(lngLats: List<LatLng>, epoch: Int) {
+        backend.mapMatch(lngLats, DEFAULT_ROUTING_TYPE, language()) { fetched ->
+            if (epoch != routeEpoch || fetched.isEmpty()) return@mapMatch
+            maneuvers = fetched
+            cacheManeuvers(fetched)
+            onLocationChanged()
+        }
+    }
+
+    private fun cacheManeuvers(maneuvers: List<CarManeuver>) {
+        val array = JSONArray()
+        maneuvers.forEach { array.put(it.toJson()) }
+        val json = JSObject()
+        json.put("maneuvers", array)
+        store.save(CarStoreKeys.ROUTE_INSTRUCTIONS, json)
+    }
+
+    private fun loadCachedManeuvers(): List<CarManeuver>? {
+        val json = store.load(CarStoreKeys.ROUTE_INSTRUCTIONS) ?: return null
+        val array = json.optJSONArray("maneuvers") ?: return null
+        if (array.length() == 0) return null
+        return try {
+            List(array.length()) { i -> CarManeuver.fromJson(array.getJSONObject(i)) }
+        } catch (_: JSONException) {
+            null
         }
     }
 
@@ -146,7 +192,7 @@ class CarNavigation(
         if (!navigating || routePoints.size < 2 || maneuvers.isEmpty()) return
         val location: Location = store.getTransient(CarStoreKeys.LOCATION) ?: return
 
-        val traveled = distanceAlongRoute(location)
+        val traveled = CarRouteCalculator.distanceAlongRoute(routePoints, location)
         val currentIndex = maneuvers.indexOfFirst { it.distanceAlongRouteM > traveled + EPSILON_M }
         val current = if (currentIndex >= 0) maneuvers[currentIndex] else maneuvers.last()
         val next = if (currentIndex >= 0) maneuvers.getOrNull(currentIndex + 1) else null
@@ -192,8 +238,10 @@ class CarNavigation(
                         )
                         .setTint(CarColor.DEFAULT)
                         .build()
+        val maneuverBuilder = Maneuver.Builder(maneuver.type).setIcon(icon)
+        maneuver.roundaboutExitNumber?.let { maneuverBuilder.setRoundaboutExitNumber(it) }
         return Step.Builder(translations().getString(maneuver.cue))
-                .setManeuver(Maneuver.Builder(maneuver.type).setIcon(icon).build())
+                .setManeuver(maneuverBuilder.build())
                 .build()
     }
 
@@ -207,6 +255,8 @@ class CarNavigation(
                 Maneuver.TYPE_TURN_SHARP_RIGHT -> R.drawable.ic_maneuver_turn_right
                 Maneuver.TYPE_U_TURN_LEFT, Maneuver.TYPE_U_TURN_RIGHT ->
                         R.drawable.ic_maneuver_uturn
+                Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CW,
+                Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW -> R.drawable.ic_maneuver_roundabout
                 Maneuver.TYPE_DESTINATION -> R.drawable.ic_maneuver_destination
                 else -> R.drawable.ic_maneuver_straight
             }
@@ -256,12 +306,6 @@ class CarNavigation(
                 if (meters < METERS_PER_KILOMETER) Distance.create(meters, Distance.UNIT_METERS)
                 else Distance.create(meters / METERS_PER_KILOMETER, Distance.UNIT_KILOMETERS)
             }
-
-    private fun distanceAlongRoute(location: Location): Double =
-            CarRouteGeometry.distanceAlongLine(
-                    routePoints,
-                    Point.fromLngLat(location.longitude, location.latitude)
-            )
 
     // --- Test drive simulation (NF-7) ------------------------------------------------------------
 
@@ -340,6 +384,9 @@ class CarNavigation(
                     ?: DEFAULT_UNITS
 
     companion object {
+        // The car experience computes its routes with the 4WD profile (see CarSearchScreen), so
+        // map-match the active route with the same profile to get matching instructions.
+        private const val DEFAULT_ROUTING_TYPE = "4WD"
         private const val EPSILON_M = 1.0
         private const val MIN_SPEED_MPS = 0.5f
         private const val METERS_PER_KILOMETER = 1000.0
