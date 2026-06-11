@@ -73,6 +73,8 @@ internal class JsonInstructions
     public List<int> Interval { get; set; }
     [JsonPropertyName("sign")]
     public int Sign { get; set; }
+    [JsonPropertyName("exit_number")]
+    public int? ExitNumber { get; set; }
 }
 
 public class GraphHopperGateway(IHttpClientFactory httpClientFactory,
