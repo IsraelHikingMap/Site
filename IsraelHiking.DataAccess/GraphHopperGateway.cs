@@ -75,6 +75,8 @@ internal class JsonInstructions
     public int Sign { get; set; }
     [JsonPropertyName("exit_number")]
     public int? ExitNumber { get; set; }
+    [JsonPropertyName("turn_angle")]
+    public double? TurnAngle { get; set; }
 }
 
 public class GraphHopperGateway(IHttpClientFactory httpClientFactory,
