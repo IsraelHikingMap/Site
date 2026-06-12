@@ -1,2 +1,2 @@
-- Support CarPlay
+- Add support for CarPlay
 - Various bug fixes and performance improvements
