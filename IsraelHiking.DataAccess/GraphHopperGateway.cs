@@ -5,12 +5,17 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.IO;
 using System.Text.Json.Serialization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Text;
+using System.IO;
+using System;
 
 namespace IsraelHiking.DataAccess;
 
@@ -36,6 +41,8 @@ internal class JsonPath
     public JsonPoints Points { get; set; }
     [JsonPropertyName("details")]
     public JsonDetails Details { get; set; }
+    [JsonPropertyName("instructions")]
+    public List<JsonInstructions> Instructions { get; set; }
 }
 
 internal class JsonPoints
@@ -56,20 +63,29 @@ internal class JsonDetails
     public List<List<object>> TrackType { get; set; }
 }
 
-public class GraphHopperGateway : IGraphHopperGateway
+internal class JsonInstructions
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ConfigurationData _options;
-    private readonly ILogger _logger;
+    [JsonPropertyName("text")]
+    public string Text { get; set; }
+    [JsonPropertyName("distance")]
+    public double Distance { get; set; }
+    [JsonPropertyName("interval")]
+    public List<int> Interval { get; set; }
+    [JsonPropertyName("sign")]
+    public int Sign { get; set; }
+    [JsonPropertyName("exit_number")]
+    public int? ExitNumber { get; set; }
+    [JsonPropertyName("turn_angle")]
+    public double? TurnAngle { get; set; }
+}
 
-    public GraphHopperGateway(IHttpClientFactory httpClientFactory,
-        IOptions<ConfigurationData> options,
-        ILogger logger)
-    {
-        _httpClientFactory = httpClientFactory;
-        _options = options.Value;
-        _logger = logger;
-    }
+public class GraphHopperGateway(IHttpClientFactory httpClientFactory,
+    IOptions<ConfigurationData> options,
+    ILogger logger) : IGraphHopperGateway
+{
+    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+    private readonly ConfigurationData _options = options.Value;
+    private readonly ILogger _logger = logger;
 
     public async Task<Feature> GetRouting(RoutingGatewayRequest request)
     {
@@ -117,6 +133,55 @@ public class GraphHopperGateway : IGraphHopperGateway
 
     private Feature LineStringToFeature(LineString line, AttributesTable table = null)
     {
-        return new Feature(line, table ?? new AttributesTable());
+        return new Feature(line, table ?? []);
+    }
+
+    public async Task<Feature> GetMapMatch(MapMatchGatewayRequest request)
+    {
+        string profile = request.Profile switch
+        {
+            ProfileType.Foot => "hike",
+            ProfileType.Bike => "mtb",
+            ProfileType.Car4WheelDrive => "car4wd",
+            _ => "hike"
+        };
+        var httpClient = _httpClientFactory.CreateClient();
+        var requestAddress = $"{_options.GraphhopperServerAddress}match?instructions=true&elevation=false&points_encoded=false&profile={profile}&locale={request.Language.Replace("-", "_")}";
+        var gpx = new GpxFile()
+        {
+            Metadata = new GpxMetadata("Request")
+        };
+        var waypoints = request.Points.Select(p => new GpxWaypoint(new GpxLongitude(p.X), new GpxLatitude(p.Y))).ToList();
+        var track = new GpxTrack().WithSegments(
+            [new GpxTrackSegment().WithWaypoints(waypoints)]
+        );
+        gpx.Tracks.Add(track);
+        using var outputStream = new MemoryStream();
+        var xmlWriterSettings = new XmlWriterSettings
+        {
+            Indent = true,
+            IndentChars = "\t",
+            Encoding = Encoding.UTF8
+        };
+
+        using (var xmlWriter = XmlWriter.Create(outputStream, xmlWriterSettings))
+        {
+            gpx.WriteTo(xmlWriter, new GpxWriterSettings());
+            xmlWriter.Flush();
+        }
+        outputStream.Position = 0;
+        var requestContent = new StreamContent(outputStream);
+        requestContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/gpx+xml");
+        var response = await httpClient.PostAsync(requestAddress, requestContent);
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var jsonResponse = JsonSerializer.Deserialize<JsonGraphHopperResponse>(responseContent);
+        if (jsonResponse?.Paths == null || !jsonResponse.Paths.Any())
+        {
+            throw new Exception($"Problem with match response: {response.StatusCode} {responseContent}");
+        }
+        var path = jsonResponse.Paths.First();
+        var lineString = new LineString(path.Points.Coordinates.Select(c => new CoordinateZ(c[0], c[1], c.Count > 2 ? c[2] : 0.0)).ToArray());
+        var table = new AttributesTable { { "instructions", path.Instructions } };
+        return LineStringToFeature(lineString, table);
     }
 }

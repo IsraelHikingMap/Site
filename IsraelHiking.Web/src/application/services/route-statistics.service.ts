@@ -265,7 +265,7 @@ export class RouteStatisticsService {
             }
             let currentWeight = SpatialService.getDistanceFromPointToLine(latLng, [previousPoint.latlng, point.latlng]);
             if (heading != null) {
-                currentWeight += Math.abs(heading - SpatialService.getLineBearingInDegrees(previousPoint.latlng, point.latlng));
+                currentWeight += this.angleDifference(heading, SpatialService.getLineBearingInDegrees(previousPoint.latlng, point.latlng));
             }
             if (currentWeight < minimalWeight) {
                 minimalWeight = currentWeight;
@@ -274,5 +274,11 @@ export class RouteStatisticsService {
             previousPoint = point;
         }
         return bestPoint;
+    }
+
+    /** Smallest absolute difference between two bearings, in degrees within [0, 180]. */
+    private angleDifference(a: number, b: number): number {
+        const diff = Math.abs(a - b) % 360;
+        return diff > 180 ? 360 - diff : diff;
     }
 }

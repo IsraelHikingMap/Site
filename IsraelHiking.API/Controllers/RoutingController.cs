@@ -1,10 +1,12 @@
-﻿using IsraelHiking.Common.Api;
+﻿using IsraelHiking.Common;
+using IsraelHiking.Common.Api;
 using IsraelHiking.Common.DataContainer;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -47,14 +49,43 @@ public class RoutingController : ControllerBase
             return BadRequest(ModelState);
         }
         var feature = await _graphHopperGateway.GetRouting(new RoutingGatewayRequest
-            {
-                From = pointFrom,
-                To = pointTo,
-                Profile = profile,
-            });
+        {
+            From = pointFrom,
+            To = pointTo,
+            Profile = profile,
+        });
         feature.Attributes.AddOrUpdate("Name", $"Routing from {@from} to {to} profile type: {profile}");
         feature.Attributes.AddOrUpdate("Creator", "Mapeak");
-        return Ok(new FeatureCollection{ feature });
+        return Ok(new FeatureCollection { feature });
+    }
+
+    /// <summary>
+    /// Matches the given points to the road/trail network according to routing type
+    /// </summary>
+    /// <param name="points">The points of the track to match</param>
+    /// <param name="type">The type of routing: "Hike", "Bike", "4WD", "None"</param>
+    /// <param name="language">The language to use for the routing instructions</param>
+    /// <returns>The matched route</returns>
+    //POST /api/routing/?type=hike&language=he
+    [HttpPost()]
+    [ProducesResponseType(typeof(FeatureCollection), 200)]
+    public async Task<IActionResult> PostMapMatch([FromBody] List<LatLng> points, [FromQuery] string type, [FromQuery] string language)
+    {
+        var profile = ConvertProfile(type);
+        if (points == null || points.Count < 2)
+        {
+            ModelState.AddModelError("Points", "At least two points are required for map matching");
+            return BadRequest(ModelState);
+        }
+        var feature = await _graphHopperGateway.GetMapMatch(new MapMatchGatewayRequest
+        {
+            Points = [.. points.Select(p => p.ToCoordinate())],
+            Profile = profile,
+            Language = language,
+        });
+        feature.Attributes.AddOrUpdate("Name", $"Map match profile type: {profile}");
+        feature.Attributes.AddOrUpdate("Creator", "Mapeak");
+        return Ok(new FeatureCollection { feature });
     }
 
     private static ProfileType ConvertProfile(string type)

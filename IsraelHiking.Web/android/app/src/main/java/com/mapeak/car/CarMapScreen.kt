@@ -36,13 +36,15 @@ class CarMapScreen(
         lifecycle.addObserver(this)
     }
 
+    /**
+     * On a "navigate to X" intent ([pendingNavigationQuery] set), search is opened on top of the map
+     * so the driver sees results/route for X while the map remains the root they return to.
+     */
     override fun onCreate(owner: LifecycleOwner) {
         store.addListener(this)
         navigation.onNavigationInfoChanged = { invalidate() }
         loadRoutes()
         loadUnits()
-        // Launched from a "navigate to X" intent: open search on top of the map so the driver sees
-        // results/route for X, while the map remains the root they return to.
         if (!pendingNavigationQuery.isNullOrBlank()) {
             screenManager.push(CarSearchScreen(carContext, pendingNavigationQuery))
         }
@@ -69,7 +71,7 @@ class CarMapScreen(
 
     private fun recomputeStatistics() {
         val location: Location? = store.getTransient(CarStoreKeys.LOCATION)
-        val next = if (location == null) null else CarStatisticsCalculator.compute(routes, location)
+        val next = if (location == null) null else CarRouteCalculator.computeStatistics(routes, location)
         if (next != statistics) {
             statistics = next
             invalidate()
@@ -147,6 +149,10 @@ class CarMapScreen(
                     )
                     .build()
 
+    /**
+     * Builds an action button. The icon uses the default tint so it adapts to the host's day/night
+     * theme and the glyph stays legible in both modes.
+     */
     private fun iconAction(
             @DrawableRes iconRes: Int,
             persist: Boolean = true,
@@ -156,8 +162,6 @@ class CarMapScreen(
                 Action.Builder()
                         .setIcon(
                                 CarIcon.Builder(IconCompat.createWithResource(carContext, iconRes))
-                                        // Default tint adapts to the host's day/night theme so the
-                                        // glyph stays legible in both modes.
                                         .setTint(CarColor.DEFAULT)
                                         .build()
                         )

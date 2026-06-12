@@ -7,4 +7,5 @@ namespace IsraelHiking.DataAccessInterfaces;
 public interface IGraphHopperGateway
 {
     Task<Feature> GetRouting(RoutingGatewayRequest request);
+    Task<Feature> GetMapMatch(MapMatchGatewayRequest request);
 }

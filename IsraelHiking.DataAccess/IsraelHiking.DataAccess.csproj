@@ -25,6 +25,7 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
     <PackageReference Include="NEST" Version="7.17.5" />
     <PackageReference Include="NetTopologySuite" Version="2.5.0" />
+    <PackageReference Include="NetTopologySuite.IO.GPX" Version="1.1.1" />
     <PackageReference Include="OsmSharp" Version="7.0.0-pre022" />
   </ItemGroup>
 
