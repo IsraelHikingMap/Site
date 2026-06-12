@@ -5,6 +5,7 @@ import java.io.File
 import java.io.IOException
 import java.lang.AutoCloseable
 import com.mapeak.pmtiles.PmTilesReader
+import com.mapeak.pmtiles.PmTilesException
 
 
 class PmTilesService(context: Context) : AutoCloseable {
@@ -44,7 +45,11 @@ class PmTilesService(context: Context) : AutoCloseable {
     private fun getTileFromFile(fileName: String, z: Int, x: Int, y: Int): ByteArray? {
         val reader = getReader(fileName)
         synchronized(reader) {
-            return reader.getTile(z.toUByte(), x.toUInt(), y.toUInt())
+            try {
+                return reader.getTile(z.toUByte(), x.toUInt(), y.toUInt())
+            } catch (ex: PmTilesException) {
+                throw IOException("Failed to read tile $z/$x/$y from $fileName", ex)
+            }
         }
     }
 
@@ -59,7 +64,11 @@ class PmTilesService(context: Context) : AutoCloseable {
         if (!file.exists()) {
             throw IOException("PMTiles file not found: " + file.absolutePath)
         }
-        val reader = PmTilesReader.open(baseDir?.absolutePath + "/" + fileName)
+        val reader = try {
+            PmTilesReader.open(baseDir?.absolutePath + "/" + fileName)
+        } catch (ex: PmTilesException) {
+            throw IOException("Failed to open PMTiles file: " + file.absolutePath, ex)
+        }
         readerCache[fileName] = reader
         return reader
     }
