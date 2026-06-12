@@ -4,12 +4,13 @@ import android.content.Context
 import java.io.File
 import java.io.IOException
 import java.lang.AutoCloseable
-import com.mapeak.pmtiles.PMTilesReader
+import com.mapeak.pmtiles.PmTilesReader
+import com.mapeak.pmtiles.PmTilesException
 
 
 class PmTilesService(context: Context) : AutoCloseable {
     private val baseDir: File? = context.filesDir
-    private val readerCache: MutableMap<String?, PMTilesReader> = HashMap()
+    private val readerCache: MutableMap<String?, PmTilesReader> = HashMap()
 
     @Throws(IOException::class)
     fun getTileByType(z: Int, x: Int, y: Int, type: String): ByteArray? {
@@ -44,13 +45,17 @@ class PmTilesService(context: Context) : AutoCloseable {
     private fun getTileFromFile(fileName: String, z: Int, x: Int, y: Int): ByteArray? {
         val reader = getReader(fileName)
         synchronized(reader) {
-            return reader.getTile(z, x, y)
+            try {
+                return reader.getTile(z.toUByte(), x.toUInt(), y.toUInt())
+            } catch (ex: PmTilesException) {
+                throw IOException("Failed to read tile $z/$x/$y from $fileName", ex)
+            }
         }
     }
 
     @Synchronized
     @Throws(IOException::class)
-    private fun getReader(fileName: String): PMTilesReader {
+    private fun getReader(fileName: String): PmTilesReader {
         val cached = readerCache[fileName]
         if (cached != null) {
             return cached
@@ -59,7 +64,11 @@ class PmTilesService(context: Context) : AutoCloseable {
         if (!file.exists()) {
             throw IOException("PMTiles file not found: " + file.absolutePath)
         }
-        val reader = PMTilesReader(baseDir?.absolutePath + "/" + fileName)
+        val reader = try {
+            PmTilesReader.open(baseDir?.absolutePath + "/" + fileName)
+        } catch (ex: PmTilesException) {
+            throw IOException("Failed to open PMTiles file: " + file.absolutePath, ex)
+        }
         readerCache[fileName] = reader
         return reader
     }

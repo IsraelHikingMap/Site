@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mapeak-com/pmtiles-mobile.git",
       "state" : {
-        "branch" : "main",
-        "revision" : "a7d48a2397ba5a5fedf544f46573220813a5a58f"
+        "revision" : "8ba3dd13aeb2d0bf3ac86820ee17b17c4a4370e4",
+        "version" : "0.2.3"
       }
     }
   ],
