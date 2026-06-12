@@ -244,12 +244,12 @@ class CarNavigation(
 
     private fun maneuverCarIcon(maneuver: CarManeuver): CarIcon {
         val exitNumber = maneuver.roundaboutExitNumber
-        // The host doesn't overlay its roundabout exit number when a custom icon is set, so we draw
-        // the number into the hollow center of the roundabout icon ourselves.
         if (isRoundabout(maneuver.type) && exitNumber != null) {
             return roundaboutIcon(exitNumber)
         }
-        return CarIcon.Builder(IconCompat.createWithResource(carContext, maneuverIcon(maneuver.type)))
+        return CarIcon.Builder(
+                        IconCompat.createWithResource(carContext, maneuverIcon(maneuver.type))
+                )
                 .setTint(CarColor.DEFAULT)
                 .build()
     }
@@ -258,6 +258,10 @@ class CarNavigation(
             type == Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CW ||
                     type == Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW
 
+    /**
+     * The host doesn't overlay its roundabout exit number when a custom icon is set, so we draw the
+     * number into the hollow center of the roundabout icon ourselves.
+     */
     private fun roundaboutIcon(exitNumber: Int): CarIcon {
         val bitmap = Bitmap.createBitmap(ICON_BITMAP_PX, ICON_BITMAP_PX, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
@@ -272,11 +276,12 @@ class CarNavigation(
                     textSize = ICON_BITMAP_PX * ROUNDABOUT_EXIT_TEXT_RATIO
                     typeface = Typeface.DEFAULT_BOLD
                 }
-        // The roundabout ring is centered in the viewport, so center the text in the bitmap too.
         val centerX = ICON_BITMAP_PX / 2f
         val centerY = ICON_BITMAP_PX / 2f - (paint.descent() + paint.ascent()) / 2f
         canvas.drawText(exitNumber.toString(), centerX, centerY, paint)
-        return CarIcon.Builder(IconCompat.createWithBitmap(bitmap)).setTint(CarColor.DEFAULT).build()
+        return CarIcon.Builder(IconCompat.createWithBitmap(bitmap))
+                .setTint(CarColor.DEFAULT)
+                .build()
     }
 
     private fun maneuverIcon(type: Int): Int =
@@ -418,8 +423,6 @@ class CarNavigation(
                     ?: DEFAULT_UNITS
 
     companion object {
-        // The car experience computes its routes with the 4WD profile (see CarSearchScreen), so
-        // map-match the active route with the same profile to get matching instructions.
         private const val DEFAULT_ROUTING_TYPE = "4WD"
         private const val EPSILON_M = 1.0
         private const val MIN_SPEED_MPS = 0.5f
@@ -430,7 +433,6 @@ class CarNavigation(
         private const val DEFAULT_UNITS = "metric"
         private const val DEFAULT_LANGUAGE = "en-US"
 
-        // Roundabout icon is rendered to a bitmap so the exit number can be drawn into its center.
         private const val ICON_BITMAP_PX = 96
         private const val ROUNDABOUT_EXIT_TEXT_RATIO = 0.40f
 
