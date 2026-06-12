@@ -13,7 +13,7 @@ final class PMTilesService {
 
     private let baseDir: URL
     private let lock = NSLock()
-    private var readers: [String: PMTilesReader] = [:]
+    private var readers: [String: PmTilesReader] = [:]
 
     init() {
         baseDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
@@ -29,7 +29,7 @@ final class PMTilesService {
     func getTileByType(z: Int, x: Int, y: Int, type: String) -> Data? {
         let name = fileName(z: z, x: x, y: y, type: type)
         guard let reader = getReader(for: name) else { return nil }
-        return reader.tile(z: z, x: x, y: y)
+        return try? reader.getTile(z: UInt8(z), x: UInt32(x), y: UInt32(y))
     }
 
     private func fileName(z: Int, x: Int, y: Int, type: String) -> String {
@@ -40,12 +40,12 @@ final class PMTilesService {
         return "\(type)-\(Self.tilesZoom - 1).pmtiles"
     }
 
-    private func getReader(for name: String) -> PMTilesReader? {
+    private func getReader(for name: String) -> PmTilesReader? {
         lock.lock(); defer { lock.unlock() }
         if let cached = readers[name] { return cached }
         let url = baseDir.appendingPathComponent(name)
         guard FileManager.default.fileExists(atPath: url.path),
-              let reader = try? PMTilesReader(path: url.path)
+              let reader = try? PmTilesReader.open(path: url.path)
         else { return nil }
         readers[name] = reader
         return reader
