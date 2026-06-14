@@ -92,7 +92,7 @@ describe("DefaultStyleService", () => {
             minZoom: 5,
             maxZoom: 15,
             opacity: 0.5
-        }), true, "online");
+        }), true, "online-only");
 
         const layer = result.layers[0] as RasterLayerSpecification;
         const source = result.sources[layer.source] as RasterSourceSpecification;
@@ -117,7 +117,7 @@ describe("DefaultStyleService", () => {
             address: "https://tiles.example.com/{z}/{x}/{y}.png",
             minZoom: 1,
             maxZoom: 10
-        }), false, "online");
+        }), false, "online-only");
 
         const layer = result.layers[0] as RasterLayerSpecification;
         expect(layer.layout?.visibility).toBe("none");
@@ -129,7 +129,7 @@ describe("DefaultStyleService", () => {
             address: "https://server/arcgis/rest/MapServer",
             minZoom: 1,
             maxZoom: 10
-        }), true, "online");
+        }), true, "online-only");
 
         const layer = result.layers[0] as RasterLayerSpecification;
         const source = result.sources[layer.source] as RasterSourceSpecification;
@@ -144,7 +144,7 @@ describe("DefaultStyleService", () => {
             address: "https://server/arcgis/rest/MapServer/3",
             minZoom: 1,
             maxZoom: 10
-        }), true, "online");
+        }), true, "online-only");
 
         const layer = result.layers[0] as RasterLayerSpecification;
         const source = result.sources[layer.source] as RasterSourceSpecification;
@@ -157,7 +157,7 @@ describe("DefaultStyleService", () => {
             address: "https://tiles.example.com/{z}/{x}/{-y}.png",
             minZoom: 1,
             maxZoom: 10
-        }), true, "online");
+        }), true, "online-only");
 
         const layer = result.layers[0] as RasterLayerSpecification;
         const source = result.sources[layer.source] as RasterSourceSpecification;
@@ -171,13 +171,13 @@ describe("DefaultStyleService", () => {
             address: "https://tiles.example.com/a/{z}/{x}/{y}.png",
             minZoom: 1,
             maxZoom: 10
-        }), true, "online");
+        }), true, "online-only");
         const second = await service.getSourcesAndLayers(createLayer({
             key: "raster-key",
             address: "https://tiles.example.com/b/{z}/{x}/{y}.png",
             minZoom: 1,
             maxZoom: 10
-        }), true, "online");
+        }), true, "online-only");
 
         expect(first.layers[0].id).not.toBe(second.layers[0].id);
         expect(Object.keys(first.sources)[0]).not.toBe(Object.keys(second.sources)[0]);
@@ -204,7 +204,7 @@ describe("DefaultStyleService", () => {
         const result = await service.getSourcesAndLayers(createLayer({
             key: builtInLayerKey,
             address: "https://x/style.json"
-        }), true, "online");
+        }), true, "online-only");
 
         const asText = JSON.stringify(result);
         expect(asText).toContain("name:en");
@@ -223,7 +223,7 @@ describe("DefaultStyleService", () => {
         await service.getSourcesAndLayers(createLayer({
             key: builtInLayerKey,
             address: "https://x/style.json"
-        }), true, "online");
+        }), true, "online-only");
 
         expect(fileService.getStyleJsonContent).toHaveBeenCalledWith("https://x/style.json", false);
     }));
@@ -238,7 +238,7 @@ describe("DefaultStyleService", () => {
         await service.getSourcesAndLayers(createLayer({
             key: builtInLayerKey,
             address: "https://x/style.json"
-        }), true, "offline");
+        }), true, "allow-offline");
 
         expect(fileService.getStyleJsonContent).toHaveBeenCalledWith("https://x/style.json", true);
     }));
@@ -256,7 +256,7 @@ describe("DefaultStyleService", () => {
         const result = await service.getSourcesAndLayers(createLayer({
             key: builtInLayerKey,
             address: "https://x/style.json"
-        }), true, "offline");
+        }), true, "allow-offline");
 
         const vector = result.sources.test as VectorSourceSpecification;
         const dem = result.sources.dem as RasterDEMSourceSpecification;
@@ -301,7 +301,7 @@ describe("DefaultStyleService", () => {
         const result = await service.getSourcesAndLayers(createLayer({
             key: "not-a-builtin-layer",
             address: "https://x/style.json"
-        }), true, "offline");
+        }), true, "allow-offline");
 
         const source = result.sources.test as VectorSourceSpecification;
         expect(source.url).toBe("https://x/v.json");
@@ -320,7 +320,7 @@ describe("DefaultStyleService", () => {
         const result = await service.getSourcesAndLayers(createLayer({
             key: builtInLayerKey,
             address: "https://x/style.json"
-        }), true, "offline");
+        }), true, "allow-offline");
 
         const contour = result.sources.Contour as VectorSourceSpecification;
         expect(contour.url).toBeUndefined();
@@ -345,7 +345,7 @@ describe("DefaultStyleService", () => {
         const result = await service.getSourcesAndLayers(createLayer({
             key: builtInLayerKey,
             address: "https://x/style.json"
-        }), true, "offline");
+        }), true, "allow-offline");
 
         const contour = result.sources.Contour as VectorSourceSpecification;
         expect(contour.tiles?.[0]).toContain("multiplier=3.28084");
@@ -376,7 +376,7 @@ describe("DefaultStyleService", () => {
         await service.getSourcesAndLayers(createLayer({
             key: builtInLayerKey,
             address: "https://x/style.json?cache=123"
-        }), true, "online");
+        }), true, "online-only");
 
         expect(fileService.getStyleJsonContent).toHaveBeenCalled();
     }));
