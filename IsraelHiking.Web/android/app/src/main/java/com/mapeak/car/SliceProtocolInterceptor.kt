@@ -10,6 +10,13 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 
 class SliceProtocolInterceptor internal constructor(private val pmTilesService: PmTilesService) :
         Interceptor {
+    /**
+     * Generates contour vector tiles on the fly. Set after construction: the provider fetches DEM
+     * tiles through the OkHttpClient that wraps this interceptor, so the client must be built first.
+     * When null, contour-source requests fall through to the normal slice/PMTiles handling.
+     */
+    var contoursProvider: CarContourTilesProvider? = null
+
     @Throws(IOException::class)
     override fun intercept(chain: Interceptor.Chain): Response {
         val original = chain.request()
@@ -29,6 +36,28 @@ class SliceProtocolInterceptor internal constructor(private val pmTilesService: 
                                 .dropLastWhile { it.isEmpty() }
                                 .toTypedArray()[0]
                         .toInt()
+
+        // The contour source carries a `contour=<units>` marker (see useContourQuery on the web);
+        // there are no offline PMTiles for it, so we generate the MVT locally from the DEM, mirroring
+        // maplibre-contour on the web. The units in the URL also key MapLibre's cache, so a unit
+        // change naturally re-requests fresh tiles.
+        val contourUnits = original.url.queryParameter("contour")
+        val contoursProvider = this.contoursProvider
+        if (contoursProvider != null && contourUnits != null) {
+            val data =
+                    try {
+                        contoursProvider.getTile(z, x, y, contourUnits)
+                    } catch (ex: Exception) {
+                        throw IOException("Failed to generate contour tile $z/$x/$y", ex)
+                    }
+            return Response.Builder()
+                    .request(original)
+                    .protocol(Protocol.HTTP_1_1)
+                    .code(200)
+                    .message("OK")
+                    .body(data.toResponseBody("application/x-protobuf".toMediaType()))
+                    .build()
+        }
 
         val offlineAvailable = pmTilesService.isOfflineFileAvailable(z, x, y, type)
         val timeout: Int =
