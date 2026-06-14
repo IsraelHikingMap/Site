@@ -41,6 +41,11 @@ export class PurchaseService {
                 this.showPaywall();
             }
         });
+        this.store.select((state: ApplicationState) => state.configuration.language.code).subscribe(async (languageCode) => {
+            if (await Purchases.isConfigured()) {
+                await Purchases.overridePreferredUILocale({ locale: languageCode });
+            }
+        });
     }
 
     private async checkSubscription(): Promise<void> {
@@ -66,12 +71,12 @@ export class PurchaseService {
             const apiKey = this.runningContextService.isIos ? "appl_OKCoIjEkNVfloKjpNfNaAdgGOwO" : "goog_NEtHVocOwpDpmIcHEETTdUdrtpd";
             const isConfigured = (await Purchases.isConfigured()).isConfigured;
             if (!isConfigured && userId) {
+                const languageCode = this.store.selectSnapshot((s: ApplicationState) => s.configuration.language.code);
                 await Purchases.configure({
                     apiKey,
-                    appUserID: `${userId}`
+                    appUserID: `${userId}`,
+                    preferredUILocaleOverride: languageCode
                 });
-                const languageCode = this.store.selectSnapshot((s: ApplicationState) => s.configuration).language.code;
-                await Purchases.overridePreferredUILocale({ locale: languageCode });
             } else if (isConfigured) {
                 await Purchases.logIn({ appUserID: `${userId}` });
             }
