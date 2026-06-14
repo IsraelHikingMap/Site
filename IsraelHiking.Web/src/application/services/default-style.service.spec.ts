@@ -351,7 +351,7 @@ describe("DefaultStyleService", () => {
         expect(contour.tiles?.[0]).toContain("multiplier=3.28084");
     }));
 
-    it("should not manipulate the contour source when not offline", inject([DefaultStyleService, FileService], async (service: DefaultStyleService, fileService: FileService) => {
+    it("should append the slice query to the contour source in car mode", inject([DefaultStyleService, FileService], async (service: DefaultStyleService, fileService: FileService) => {
         (fileService.getStyleJsonContent as Mock).mockResolvedValue(JSON.stringify({
             version: 8,
             sources: {
@@ -366,7 +366,9 @@ describe("DefaultStyleService", () => {
         }), true, "car");
 
         const contour = result.sources.Contour as VectorSourceSpecification;
+        expect(contour.url).toBeUndefined();
         expect(contour.tiles?.[0]).not.toContain("dem-contour://");
+        expect(contour.tiles?.[0]).toBe("https://x/{z}/{x}/{y}.pbf?use=slice");
         expect(contour.maxzoom).toBe(14);
     }));
 
