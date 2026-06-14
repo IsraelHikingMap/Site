@@ -49,8 +49,9 @@ export class CarService {
             await this.setConfig();
             await this.setRoutes();
         });
-        this.store.select((state: ApplicationState) => state.configuration.units).subscribe(() => {
-            this.setConfig();
+        this.store.select((state: ApplicationState) => state.configuration.units).subscribe(async () => {
+            await this.setStyle();
+            await this.setConfig();
         });
         await this.setConfig();
         await this.setStyle();

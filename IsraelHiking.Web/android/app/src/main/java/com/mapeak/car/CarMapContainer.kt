@@ -451,11 +451,13 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
     @MainThread
     fun setupMap(pixelRatio: Float): View {
         MapLibre.getInstance(carContext)
-        HttpRequestUtil.setOkHttpClient(
-                OkHttpClient.Builder()
-                        .addInterceptor(SliceProtocolInterceptor(PmTilesService(carContext)))
-                        .build()
-        )
+        // One client serves MapLibre's tiles, the DEM fetches, and the PMTiles offline fallback. The
+        // contour provider fetches DEM tiles through this same client, so it is wired into the
+        // interceptor after the client is built.
+        val sliceInterceptor = SliceProtocolInterceptor(PmTilesService(carContext))
+        val tileHttpClient = OkHttpClient.Builder().addInterceptor(sliceInterceptor).build()
+        sliceInterceptor.contoursProvider = CarContourTilesProvider(tileHttpClient)
+        HttpRequestUtil.setOkHttpClient(tileHttpClient)
         routes = CarRouteData.listFromJson(store.load(CarStoreKeys.ROUTE))
 
         val mapView = createMapViewInstance(pixelRatio).apply { onStart() }

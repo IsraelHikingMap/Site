@@ -9,12 +9,14 @@ import Foundation
 final class SliceURLProtocol: URLProtocol {
 
     static let pmTiles = PMTilesService()
+    static let contours = CarContourTilesProvider()
 
     private static let handledKey = "SliceURLProtocolHandled"
     private static let onlineTimeoutMs = 60_000.0
     private static let onlineTimeoutOfflineAvailableMs = 2_000.0
 
     private var dataTask: URLSessionDataTask?
+    private var isStopped = false
     // One shared session for all tile fetches. Ephemeral config carries no custom protocols, so the
     // network fetch can't recurse back into us.
     private static let session = URLSession(configuration: .ephemeral)
@@ -33,6 +35,15 @@ final class SliceURLProtocol: URLProtocol {
     override func startLoading() {
         guard let url = request.url, let parsed = SliceURLProtocol.parse(url) else {
             client?.urlProtocol(self, didFailWithError: URLError(.badURL))
+            return
+        }
+
+        // The contour source carries a `contour=<units>` marker (see useContourQuery on the web);
+        // there are no offline PMTiles for it, so we generate the MVT locally from the DEM, mirroring
+        // maplibre-contour on the web. The units in the URL also key the tile cache, so a unit change
+        // naturally re-requests fresh tiles.
+        if let units = SliceURLProtocol.contourUnits(url) {
+            serveContour(parsed: parsed, units: units)
             return
         }
 
@@ -64,6 +75,7 @@ final class SliceURLProtocol: URLProtocol {
     }
 
     override func stopLoading() {
+        isStopped = true
         dataTask?.cancel()
         dataTask = nil
     }
@@ -85,6 +97,35 @@ final class SliceURLProtocol: URLProtocol {
         client?.urlProtocol(self, didReceive: offlineResponse, cacheStoragePolicy: .notAllowed)
         client?.urlProtocol(self, didLoad: data)
         client?.urlProtocolDidFinishLoading(self)
+    }
+
+    private func serveContour(parsed: (type: String, z: Int, x: Int, y: Int), units: String) {
+        // Generating is blocking (it fetches the DEM synchronously), so run it off the loading thread.
+        DispatchQueue.global().async { [weak self] in
+            guard let self = self else { return }
+            do {
+                let data = try SliceURLProtocol.contours.getTile(
+                    z: parsed.z, x: parsed.x, y: parsed.y, units: units)
+                guard !self.isStopped else { return }
+                let headers = ["Content-Type": "application/x-protobuf"]
+                let response = HTTPURLResponse(
+                    url: self.request.url!, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: headers)!
+                self.client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+                self.client?.urlProtocol(self, didLoad: data)
+                self.client?.urlProtocolDidFinishLoading(self)
+            } catch {
+                guard !self.isStopped else { return }
+                self.client?.urlProtocol(self, didFailWithError: error)
+            }
+        }
+    }
+
+    /// Reads the `contour=<units>` marker the web adds to the contour source tiles (see useContourQuery).
+    private static func contourUnits(_ url: URL) -> String? {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let items = components.queryItems
+        else { return nil }
+        return items.first { $0.name == "contour" }?.value
     }
 
     /// Parses `.../{type}/{z}/{x}/{y}.ext?use=slice` the same way `SliceProtocolInterceptor.kt` does.

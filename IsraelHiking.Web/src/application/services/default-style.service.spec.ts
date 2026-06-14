@@ -351,7 +351,7 @@ describe("DefaultStyleService", () => {
         expect(contour.tiles?.[0]).toContain("multiplier=3.28084");
     }));
 
-    it("should append the slice query to the contour source in car mode", inject([DefaultStyleService, FileService], async (service: DefaultStyleService, fileService: FileService) => {
+    it("should tag the contour source with the slice and units query in car mode", inject([DefaultStyleService, FileService], async (service: DefaultStyleService, fileService: FileService) => {
         (fileService.getStyleJsonContent as Mock).mockResolvedValue(JSON.stringify({
             version: 8,
             sources: {
@@ -368,8 +368,30 @@ describe("DefaultStyleService", () => {
         const contour = result.sources.Contour as VectorSourceSpecification;
         expect(contour.url).toBeUndefined();
         expect(contour.tiles?.[0]).not.toContain("dem-contour://");
-        expect(contour.tiles?.[0]).toBe("https://x/{z}/{x}/{y}.pbf?use=slice");
-        expect(contour.maxzoom).toBe(14);
+        expect(contour.tiles?.[0]).toBe("https://x/{z}/{x}/{y}.pbf?use=slice&contour=metric");
+        expect(contour.maxzoom).toBe(16);
+    }));
+
+    it("should tag the contour source with imperial units in car mode when configured", inject([DefaultStyleService, Store, FileService], async (service: DefaultStyleService, store: Store, fileService: FileService) => {
+        store.reset({
+            offlineState: { downloadedTiles: null },
+            configuration: { units: "imperial" }
+        });
+        (fileService.getStyleJsonContent as Mock).mockResolvedValue(JSON.stringify({
+            version: 8,
+            sources: {
+                Contour: { type: "vector", url: "https://x/c.json", tiles: ["https://x/{z}/{x}/{y}.pbf"], maxzoom: 14 }
+            },
+            layers: []
+        }));
+
+        const result = await service.getSourcesAndLayers(createLayer({
+            key: builtInLayerKey,
+            address: "https://x/style.json"
+        }), true, "car");
+
+        const contour = result.sources.Contour as VectorSourceSpecification;
+        expect(contour.tiles?.[0]).toBe("https://x/{z}/{x}/{y}.pbf?use=slice&contour=imperial");
     }));
 
     it("should treat a .json address with a query string as a vector style", inject([DefaultStyleService, FileService], async (service: DefaultStyleService, fileService: FileService) => {

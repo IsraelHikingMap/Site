@@ -153,6 +153,18 @@ export class DefaultStyleService {
         contourSource.maxzoom = 16;
     }
 
+    private useContourQuery(styleJson: StyleSpecification, units: "metric" | "imperial") {
+        if (styleJson.sources["Contour"]?.type !== "vector") {
+            return;
+        }
+        const contourSource = styleJson.sources["Contour"];
+        // The car generates contours natively (see CarContoursTilesProvider). useSliceQuery already
+        // tagged the tiles with ?use=slice; the units are appended so a unit change yields a distinct
+        // URL that busts the tile cache, mirroring the multiplier in the web dem-contour:// URL.
+        contourSource.tiles[0] += `&contour=${units}`;
+        contourSource.maxzoom = 16;
+    }
+
     public async getSourcesAndLayers(layerData: EditableLayer, isVisible: boolean, mode: "online-only" | "allow-offline" | "car"): Promise<StyleSpecification> {
         if (this.isRaster(layerData.address)) {
             return this.createRasterLayer(layerData, isVisible);
@@ -179,6 +191,8 @@ export class DefaultStyleService {
                 case "car":
                     if (isBuiltInBaseLayer) {
                         this.useSliceQuery(styleJson);
+                        this.useContourQuery(styleJson, units);
+                        console.log(styleJson);
                     }
                     break;
             }
