@@ -205,7 +205,7 @@ jobs:
 
       - name: Set up Git to use PAT for private match repo
         run: |
-          git config --global url."https://x-access-token:${{ secrets.FASTLANE_MATCH_PAT }}@github.com/".insteadOf "https://github.com/"
+          git config --global url."https://x-access-token:${{ secrets.FASTLANE_MATCH_PAT }}@github.com/IsraelHikingMap/fastlane-match".insteadOf "https://github.com/IsraelHikingMap/fastlane-match"
 
       - name: Build UI
         run: |
