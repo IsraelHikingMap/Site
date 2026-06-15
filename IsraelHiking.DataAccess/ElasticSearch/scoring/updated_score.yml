@@ -1,0 +1,456 @@
+script:
+  # Painless query-time relevance scoring.
+  source: |
+
+            // -- 1. PARAMETERS --
+            double w_text = params.weights.text;
+            double w_geo = params.weights.geo;
+            double w_prom = params.weights.prom;
+            double w_country = params.weights.country;
+            double w_pclass = params.weights.pclass;
+            double w_area = params.weights.area;
+            double intermittent_factor = params.intermittent_factor;  // down-weight (<1)
+
+            double k_text = params.normalization.k_text;
+
+            double beta_mid = params.geo_modifiers.beta_midpoint;
+            double beta_steep = params.geo_modifiers.beta_steepness;
+            double scale_base = params.geo_modifiers.scale_base;
+            double scale_factor = params.geo_modifiers.scale_factor;
+
+            double tiebreaker = params.tiebreaker_factor;
+
+            // -- 2. FEATURE EXTRACTION & NORMALIZATION --
+
+            // a) Text score normalization (BM25 -> 0..1)
+            double text_norm = _score / (_score + k_text);
+
+            // a2) Exact-name detection: painless cannot read matched_queries, so recompute it here —
+            // query string-equals a stored name.<l>.keyword value. Captured as a boolean and applied as
+            // a small additive term to main_score (not a floor on text_norm, which saturates in prod).
+            boolean is_exact_name = false;
+            if (params.containsKey('name_keyword_fields') && params.containsKey('query_norm')) {
+                String qn_base = params.query_norm.containsKey('base') ? (String)params.query_norm.base : null;
+                String qn_he = params.query_norm.containsKey('he') ? (String)params.query_norm.he : null;
+                for (String kw_field : params.name_keyword_fields) {
+                    if (!doc.containsKey(kw_field) || doc[kw_field].size() == 0) {
+                        continue;
+                    }
+                    String qn = kw_field == 'name.he.keyword' ? qn_he : qn_base;
+                    if (qn != null && doc[kw_field].value == qn) {
+                        is_exact_name = true;
+                        break;
+                    }
+                }
+            }
+
+            // b) Prominence (already 0..1; default 0 if field absent)
+            double prom_norm = doc.containsKey('prominence') ? doc['prominence'].value : 0.0;
+
+            // b2) Area signal (log-normalized 0..1 at index time): a large lake outranks a same-named
+            //     pond. Missing field (points/lines) -> 0, i.e. no boost.
+            double area_norm = (doc.containsKey('area_norm') && doc['area_norm'].size() > 0)
+                ? doc['area_norm'].value : 0.0;
+
+            // c) Geography (distance -> 0..1). Stays 1.0 when no map center: arcDistance(null,null)
+            //    throws and fails the whole script per shard, so guard on lat/lon != null.
+            double geo_norm = 1.0;
+            if (params.lat != null && params.lon != null
+                    && doc.containsKey(params.geo_field) && !doc[params.geo_field].empty) {
+                double distance_km = doc[params.geo_field].arcDistance(params.lat, params.lon) / 1000.0;
+                double scale_km = scale_base * Math.pow(scale_factor, params.zoom);  // zoom-scaled
+                geo_norm = Math.exp(-0.5 * Math.pow(distance_km / scale_km, 2));      // gaussian decay
+            }
+
+            // d) Feature-class similarity. No feature_class -> doc_class null -> similarity 0 (no boost,
+            //    no penalty).
+            double pclass_similarity = 0.0;
+            String doc_class = null;
+            if (doc.containsKey('feature_class') && doc['feature_class'].size() > 0) {
+                doc_class = doc['feature_class'].value;
+            }
+            if (doc_class != null) {
+                String doc_group = params.class_groups.get(doc_class);
+
+                if (doc_group != null) {
+                    for (String query_class : params.query_classes) {
+                        String query_group = params.class_groups.get(query_class);
+                        if (query_group != null) {
+                            Map group_sims = params.group_similarities.get(query_group);
+                            if (group_sims != null && group_sims.containsKey(doc_group)) {
+                                pclass_similarity = Math.max(pclass_similarity, (double)group_sims.get(doc_group));
+                            }
+                        }
+                    }
+                }
+            }
+            double pclass_term = w_pclass * pclass_similarity;
+
+
+            // e) Country boost
+            double country_boost = 0.0;
+            if (doc.containsKey('country_code') && !doc['country_code'].empty) {
+                if (params.target_country == doc['country_code'].value) {
+                    country_boost = 1.0;
+                }
+            }
+
+
+            // -- 3. DYNAMIC WEIGHT MODIFIERS --
+
+            // a) Alpha: prominence modifier by query type
+            double alpha = params.alpha_map.getOrDefault(params.qtype, params.alpha_map.DEFAULT);
+
+            // b) Beta: geo modifier by zoom (logistic)
+            double beta = 1.0 / (1.0 + Math.exp(-beta_steep * (params.zoom - beta_mid)));
+
+
+            // -- 4. FINAL SCORE CALCULATION --
+
+            // Modulate w_prom by pclass match strength
+            double effective_w_prom = w_prom * (1.0 - 0.5 * pclass_similarity);
+
+            // Small additive boost for docs inside the current viewport box (+0 outside, so a far
+            // famous match never loses points). Magnitude deliberately small (~0.15, ~ the prominence
+            // term's max). Disabled (vp_half_lat<=0) when caller supplies no viewport.
+            double vp_boost = 0.0;
+            double vp_half_lat = params.containsKey('vp_half_lat') ? params.vp_half_lat : 0.0;
+            if (vp_half_lat > 0 && params.lat != null && params.lon != null
+                    && doc.containsKey(params.geo_field) && !doc[params.geo_field].empty) {
+                double dlat = Math.abs(doc[params.geo_field].lat - params.vp_center_lat);
+                double dlon = Math.abs(doc[params.geo_field].lon - params.vp_center_lng);
+                if (dlat <= vp_half_lat && dlon <= params.vp_half_lng) {
+                    // Scale by beta^2 so the boost is ~0 at low zoom (where the box is huge/meaningless)
+                    // and near-full where the box is small; squared makes low-zoom suppression decisive.
+                    vp_boost = params.viewport_boost * beta * beta;
+                }
+            }
+
+            // Bounded additive exact-name bonus, applied inside main_score so it competes directly with
+            // the prominence term (independent of saturated text_norm). Gated by geo_norm so a far exact
+            // match gets ~0 bonus (far-noise safety); full strength when no map center. Defaults to 0.
+            double exact_name_bonus = params.containsKey('exact_name_bonus')
+                ? ((Number)params.exact_name_bonus).doubleValue() : 0.0;
+            double exact_term = (is_exact_name && exact_name_bonus > 0.0)
+                ? (exact_name_bonus * geo_norm) : 0.0;
+
+            double main_score =
+                  (w_text * text_norm)
+                + (w_geo * beta * geo_norm)
+                + (effective_w_prom * alpha * prom_norm)
+                + (w_area * area_norm)                  // bigger object outranks same-named small one
+                + (w_country * country_boost)
+                + pclass_term
+                + vp_boost                              // +0 outside viewport
+                + exact_term;                           // geo-gated exact-name bonus
+
+            // Down-weight seasonal/dry (intermittent) water bodies so they don't outrank real lakes
+            // of the same name.
+            if (doc.containsKey('intermittent') && doc['intermittent'].size() > 0 && doc['intermittent'].value) {
+                main_score = main_score * intermittent_factor;
+            }
+
+            // Tie-breaker on raw prominence
+            double final_score = main_score + (tiebreaker * prom_norm);
+
+            return final_score;
+          
+  params:
+      lat: 34.1339
+      lon: -101.9395
+      zoom: 10
+      qtype: GENERIC
+      query_classes:
+        - lake
+        - reservoir
+      geo_field: location
+      target_country: US
+      # Viewport boost. Defaults disabled (vp_half_lat: 0); the gateway fills the five vp_* params
+      # when a map center+zoom is present. Small on purpose (~ the prominence term).
+      viewport_boost: 0.15
+      vp_half_lat: 0.0
+      vp_half_lng: 0.0
+      vp_center_lat: 0.0
+      vp_center_lng: 0.0
+      weights:
+        text: 0.5
+        geo: 1.0
+        prom: 0.3
+        country: 0.1
+        pclass: 0.4
+        area: 0.15
+      intermittent_factor: 0.7
+      # Bounded additive exact-name bonus (geo-gated; see the a2/exact_term blocks). Independent of
+      # text_norm so it survives production BM25 saturation. Default 0.0 = disabled.
+      # Keep this value line free of an inline comment — the harness's YAML reader folds trailing
+      # comments into the scalar.
+      exact_name_bonus: 0.10
+      normalization:
+        # text_norm = _score/(_score+k_text). k_text=20 de-saturates the curve so the exact/fuzzy
+        # BM25 gap survives (at k=1 both an exact and a fuzzy match normalized to ~0.93-0.99 and the
+        # exact-name signal was erased); chosen by a planet-wide sweep, k>=50 over-corrected.
+        k_text: 20.0
+      geo_modifiers:
+        beta_midpoint: 8.0
+        beta_steepness: 0.7
+        # Tight geo decay: scale_km = 0.2*1.4^zoom (~18km at z11) so proximity dominates when centered
+        # on the target. Wider values let a far prominent feature outrank the near exact-name one.
+        scale_base: 0.2
+        scale_factor: 1.4
+      alpha_map:
+        SPECIFIC: 1.0
+        GENERIC: 0.25
+        DEFAULT: 0.5
+      tiebreaker_factor: 0.001
+      # class_groups maps a class string -> a coarse group. Both the doc's feature_class and the
+      # request's query_classes go through it; a class absent here scores 0 (no boost/penalty).
+      # Lower-case keys only.
+      # NOTE: keep value lines free of trailing inline comments — the harness's YAML reader does not
+      # strip them and would fold the comment into the group name.
+      class_groups:
+        # standing water
+        lake: WATER_BODY_LARGE
+        reservoir: WATER_BODY_LARGE
+        pond: WATER_BODY_SMALL
+        lagoon: WATER_BODY_SMALL
+        maar: WATER_BODY_SMALL
+        swamp: WATER_BODY_SMALL
+        wetland: WATER_BODY_SMALL
+        # flowing water
+        river: WATER_COURSE
+        stream: WATER_COURSE
+        creek: WATER_COURSE
+        canal: WATER_COURSE
+        waterway: WATER_COURSE
+        # water features
+        spring: WATER_FEATURE
+        hot_spring: WATER_FEATURE
+        geyser: WATER_FEATURE
+        waterfall: WATER_FEATURE
+        falls: WATER_FEATURE
+        rapids: WATER_FEATURE
+        # peaks / high ground
+        peak: TERRAIN_PEAK
+        summit: TERRAIN_PEAK
+        hill: TERRAIN_PEAK
+        mountain: TERRAIN_PEAK
+        volcano: TERRAIN_PEAK
+        nunatak: TERRAIN_PEAK
+        crater: TERRAIN_PEAK
+        # terrain relief
+        cliff: TERRAIN_RELIEF
+        rock: TERRAIN_RELIEF
+        arch: TERRAIN_RELIEF
+        pillar: TERRAIN_RELIEF
+        ridge: TERRAIN_RELIEF
+        range: TERRAIN_RELIEF
+        saddle: TERRAIN_RELIEF
+        pass: TERRAIN_RELIEF
+        gap: TERRAIN_RELIEF
+        canyon: TERRAIN_RELIEF
+        valley: TERRAIN_RELIEF
+        plateau: TERRAIN_RELIEF
+        cave: TERRAIN_RELIEF
+        arroyo: TERRAIN_RELIEF
+        # ice
+        glacier: TERRAIN_ICE
+        # coastal landforms
+        island: COAST_LANDFORM
+        cape: COAST_LANDFORM
+        beach: COAST_LANDFORM
+        # coastal water
+        bay: COAST_WATER
+        # land cover
+        forest: LANDCOVER
+        # outdoor POIs
+        viewpoint: OUTDOOR_POI
+        campsite: OUTDOOR_POI
+        attraction: OUTDOOR_POI
+        tourism: OUTDOOR_POI
+        # populated places (down-weighted vs outdoor; see group_similarities)
+        city: CIVIL_PLACE
+        town: CIVIL_PLACE
+        village: CIVIL_PLACE
+        hamlet: CIVIL_PLACE
+        suburb: CIVIL_PLACE
+        neighbourhood: CIVIL_PLACE
+        locality: CIVIL_PLACE
+        # unquoted on purpose — the key is everything before the first ':', so the space is fine
+        populated place: CIVIL_PLACE
+        # structures
+        dam: STRUCTURE
+        bridge: STRUCTURE
+        tunnel: STRUCTURE
+        historic: STRUCTURE
+        structure: STRUCTURE
+        man_made: STRUCTURE
+        # built / POI classes. Down-weighted vs outdoor like CIVIL_PLACE (0.1 affinity); they only
+        # score when the query intent itself is built/POI. POI_RECREATION is the semi-outdoor exception.
+        lodging: POI_LODGING
+        food: POI_FOOD
+        shop: POI_SHOP
+        museum: POI_CULTURE
+        religious: POI_CIVIC
+        education: POI_CIVIC
+        medical: POI_CIVIC
+        government: POI_CIVIC
+        sports: POI_RECREATION
+        park: POI_RECREATION
+        fuel: POI_TRANSPORT
+        parking: POI_TRANSPORT
+        transit: POI_TRANSPORT
+        office: POI_OFFICE
+        building: BUILT_GENERIC
+        # built catch-all: small same-group boost rather than a hard 0
+        amenity: BUILT_GENERIC
+        leisure: POI_RECREATION
+        # generic catch-alls: weak neutral group, small same-kind boost rather than a hard 0
+        natural: OUTDOOR_GENERIC
+        place: OUTDOOR_GENERIC
+      # Directional affinity: group_similarities[query_group][doc_group] in 0..1 (1.0 = same kind).
+      # CIVIL_PLACE is intentionally weak (0.1) to every outdoor group — a town shouldn't borrow an
+      # outdoor query's class boost.
+      group_similarities:
+        WATER_BODY_LARGE:
+          WATER_BODY_LARGE: 1.0
+          WATER_BODY_SMALL: 0.75
+          WATER_COURSE: 0.5
+          WATER_FEATURE: 0.4
+          COAST_WATER: 0.4
+          STRUCTURE: 0.2
+          CIVIL_PLACE: 0.1
+        WATER_BODY_SMALL:
+          WATER_BODY_LARGE: 0.75
+          WATER_BODY_SMALL: 1.0
+          WATER_COURSE: 0.5
+          WATER_FEATURE: 0.4
+          COAST_WATER: 0.4
+          CIVIL_PLACE: 0.1
+        TERRAIN_PEAK:
+          TERRAIN_PEAK: 1.0
+          TERRAIN_RELIEF: 0.5
+          TERRAIN_ICE: 0.5
+          OUTDOOR_POI: 0.3
+          CIVIL_PLACE: 0.1
+        TERRAIN_RELIEF:
+          TERRAIN_RELIEF: 1.0
+          TERRAIN_PEAK: 0.5
+          TERRAIN_ICE: 0.4
+          LANDCOVER: 0.3
+          COAST_LANDFORM: 0.3
+          OUTDOOR_POI: 0.3
+        TERRAIN_ICE:
+          TERRAIN_ICE: 1.0
+          TERRAIN_PEAK: 0.5
+          TERRAIN_RELIEF: 0.4
+        WATER_FEATURE:
+          WATER_FEATURE: 1.0
+          WATER_BODY_SMALL: 0.4
+          WATER_BODY_LARGE: 0.4
+          WATER_COURSE: 0.5
+          OUTDOOR_POI: 0.3
+        WATER_COURSE:
+          WATER_COURSE: 1.0
+          WATER_FEATURE: 0.5
+          WATER_BODY_SMALL: 0.5
+          WATER_BODY_LARGE: 0.5
+        COAST_LANDFORM:
+          COAST_LANDFORM: 1.0
+          COAST_WATER: 0.5
+          TERRAIN_RELIEF: 0.3
+          OUTDOOR_POI: 0.3
+          CIVIL_PLACE: 0.1
+        COAST_WATER:
+          COAST_WATER: 1.0
+          COAST_LANDFORM: 0.5
+          WATER_BODY_LARGE: 0.4
+          WATER_BODY_SMALL: 0.4
+          CIVIL_PLACE: 0.1
+        LANDCOVER:
+          LANDCOVER: 1.0
+          TERRAIN_RELIEF: 0.3
+          OUTDOOR_POI: 0.3
+          POI_RECREATION: 0.3
+        OUTDOOR_POI:
+          OUTDOOR_POI: 1.0
+          TERRAIN_PEAK: 0.3
+          TERRAIN_RELIEF: 0.3
+          WATER_FEATURE: 0.3
+          COAST_LANDFORM: 0.3
+          LANDCOVER: 0.3
+          POI_RECREATION: 0.3
+          POI_CULTURE: 0.3
+          CIVIL_PLACE: 0.1
+        OUTDOOR_GENERIC:
+          OUTDOOR_GENERIC: 0.5
+          TERRAIN_PEAK: 0.3
+          TERRAIN_RELIEF: 0.3
+          WATER_BODY_LARGE: 0.3
+          WATER_FEATURE: 0.3
+          OUTDOOR_POI: 0.3
+          POI_RECREATION: 0.3
+          CIVIL_PLACE: 0.1
+        CIVIL_PLACE:
+          CIVIL_PLACE: 1.0
+          STRUCTURE: 0.2
+        STRUCTURE:
+          STRUCTURE: 1.0
+          CIVIL_PLACE: 0.2
+          WATER_BODY_LARGE: 0.2
+          BUILT_GENERIC: 0.3
+        # Built / POI query groups: 1.0 to self, moderate to sibling POI groups, weak (0.1) to
+        # outdoor. POI_RECREATION is the semi-outdoor exception (cross-links to outdoor).
+        POI_LODGING:
+          POI_LODGING: 1.0
+          POI_FOOD: 0.5
+          POI_RECREATION: 0.4
+          BUILT_GENERIC: 0.3
+          CIVIL_PLACE: 0.2
+        POI_FOOD:
+          POI_FOOD: 1.0
+          POI_LODGING: 0.5
+          POI_SHOP: 0.4
+          BUILT_GENERIC: 0.3
+        POI_SHOP:
+          POI_SHOP: 1.0
+          POI_FOOD: 0.4
+          POI_OFFICE: 0.4
+          BUILT_GENERIC: 0.3
+        POI_CULTURE:
+          POI_CULTURE: 1.0
+          POI_CIVIC: 0.4
+          OUTDOOR_POI: 0.3
+          BUILT_GENERIC: 0.3
+        POI_CIVIC:
+          POI_CIVIC: 1.0
+          POI_CULTURE: 0.4
+          POI_OFFICE: 0.3
+          BUILT_GENERIC: 0.3
+        POI_RECREATION:
+          POI_RECREATION: 1.0
+          OUTDOOR_POI: 0.4
+          LANDCOVER: 0.4
+          OUTDOOR_GENERIC: 0.3
+          POI_CIVIC: 0.2
+          BUILT_GENERIC: 0.3
+        POI_TRANSPORT:
+          POI_TRANSPORT: 1.0
+          BUILT_GENERIC: 0.3
+          CIVIL_PLACE: 0.2
+        POI_OFFICE:
+          POI_OFFICE: 1.0
+          POI_SHOP: 0.4
+          POI_CIVIC: 0.3
+          BUILT_GENERIC: 0.3
+        BUILT_GENERIC:
+          BUILT_GENERIC: 1.0
+          POI_LODGING: 0.3
+          POI_FOOD: 0.3
+          POI_SHOP: 0.3
+          POI_CULTURE: 0.3
+          POI_CIVIC: 0.3
+          POI_RECREATION: 0.3
+          POI_TRANSPORT: 0.3
+          POI_OFFICE: 0.3
+          STRUCTURE: 0.3
+          CIVIL_PLACE: 0.2
