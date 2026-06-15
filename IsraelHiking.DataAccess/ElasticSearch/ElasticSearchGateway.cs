@@ -438,17 +438,38 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     private QueryContainer NameSearchWithScoring<T>(QueryContainerDescriptor<T> q, string searchTerm,
         double? lat, double? lng, double zoom, bool prefix) where T : PointDocument
     {
-        var scriptPath = Path.Combine(AppContext.BaseDirectory, "ElasticSearch", "scoring", "updated_score.yml");
-        var scriptQuery = _scoringYamlDeserializer.Deserialize<ScriptScoreQuery>(File.ReadAllText(scriptPath));
+        var scriptQuery = LoadScoringScript();
+        var scriptParams = BuildScriptParams(scriptQuery, searchTerm, lat, lng, zoom);
 
+        return q.ScriptScore(ss => ss
+            .Query(qq => DocumentNameSearchQuery(qq, searchTerm, prefix))
+            .Script(s => s
+                .Source(scriptQuery.Script.Source)
+                .Params(scriptParams)
+            )
+        );
+    }
+
+    /// <summary>Load + deserialize the bundled painless scoring script (source + default params) from disk.</summary>
+    private ScriptScoreQuery LoadScoringScript()
+    {
+        var scriptPath = Path.Combine(AppContext.BaseDirectory, "ElasticSearch", "scoring", "updated_score.yml");
+        return _scoringYamlDeserializer.Deserialize<ScriptScoreQuery>(File.ReadAllText(scriptPath));
+    }
+
+    /// <summary>Build the per-request painless params: the YAML defaults plus map-center / query-derived values.</summary>
+    private Dictionary<string, object> BuildScriptParams(
+        ScriptScoreQuery scriptQuery, string searchTerm, double? lat, double? lng, double zoom)
+    {
         // NEST renders YamlDotNet's object-keyed nested maps as an empty `{}` (dropping weights/class_groups/
         // group_similarities), which fails the painless on every shard; normalize them to Dictionary<string,object> first.
+        var scriptParams = (Dictionary<string, object>)NormalizeForNest(scriptQuery.Script.Params);
+
         // A zoom of 0 means "client sent no usable zoom" (the GetSearchResults default), NOT a real world
         // view: feed the painless geo decay the same DEFAULT_ZOOM the viewport math uses, so a missing zoom
         // can't collapse the decay radius to ~200 m and bury every non-adjacent hit.
         var effectiveZoom = zoom <= 0 ? DEFAULT_ZOOM : zoom;
 
-        var scriptParams = (Dictionary<string, object>)NormalizeForNest(scriptQuery.Script.Params);
         scriptParams[ScriptParam.Lat] = lat;
         scriptParams[ScriptParam.Lon] = lng;
         scriptParams[ScriptParam.Zoom] = effectiveZoom;
@@ -475,16 +496,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             scriptParams[ScriptParam.ViewportCenterLng] = lng.Value;
         }
 
-        Func<QueryContainerDescriptor<T>, QueryContainer> textQuery =
-            qq => DocumentNameSearchQuery(qq, searchTerm, prefix);
-
-        return q.ScriptScore(ss => ss
-            .Query(textQuery)
-            .Script(s => s
-                .Source(scriptQuery.Script.Source)
-                .Params(scriptParams)
-            )
-        );
+        return scriptParams;
     }
 
     /// <summary>Recursively convert YamlDotNet's untyped containers into NEST-serializable maps (Dictionary&lt;string,object&gt;) and lists.</summary>
@@ -657,7 +669,8 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     }
 
     /// <summary>Infer the feature_class(es) a query intends (primary first), or empty when no generic type token is present.</summary>
-    private List<string> InferQueryClass(string searchTerm)
+    // internal static for ES-free unit testing of the class-inference vocabulary.
+    internal static List<string> InferQueryClass(string searchTerm)
     {
         var tokens = ClassQueryTokens(searchTerm);
         if (tokens.Length == 0) return new List<string>();
@@ -688,7 +701,8 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     /// feature — "Denali", "Silver Lake"); drives the painless prominence weight. GENERIC only when
     /// EVERY token (or the whole-query phrase) is a known generic term; one non-type token => SPECIFIC.
     /// </summary>
-    private string InferQtype(string searchTerm)
+    // internal static for ES-free unit testing of GENERIC vs SPECIFIC classification.
+    internal static string InferQtype(string searchTerm)
     {
         var tokens = ClassQueryTokens(searchTerm);
         if (tokens.Length == 0) return "GENERIC";
