@@ -122,6 +122,9 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
 
     var config = new ConfigurationBuilder()
         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        // Allow env vars to override appsettings (e.g. ElasticsearchServerAddress in docker-compose),
+        // so the backend can be pointed at a containerized Elasticsearch without editing appsettings.
+        .AddEnvironmentVariables()
         .Build();
     services.Configure<ConfigurationData>(config);
     var nonPublicConfiguration = new ConfigurationBuilder();
