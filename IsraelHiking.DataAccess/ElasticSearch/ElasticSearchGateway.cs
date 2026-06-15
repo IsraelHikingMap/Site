@@ -330,8 +330,13 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         };
     }
 
-    // Tier-1 exact-keyword boost; kept above lower tiers (8/5/2) but small enough that prominence/distance break ties.
+    // Primary name-tier boosts, descending: exact keyword & edge-ngram prefix lead, then phrase-prefix,
+    // then per-language match, then fuzzy — all small enough that prominence/distance still break ties.
     private const double EXACT_KEYWORD_BOOST = 12;
+    private const double PREFIX_TIER_BOOST = 12;
+    private const double PHRASE_PREFIX_BOOST = 8;
+    private const double NAME_MATCH_BOOST = 5;
+    private const double FUZZY_TIER_BOOST = 2;
 
     // alt_name (variant-name) tier boosts, STRICTLY below their primary counterparts (6 < 12, 3 < 5).
     private const double EXACT_ALT_KEYWORD_BOOST = 6;
@@ -360,7 +365,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             prefix
                 ? sh => sh.DisMax(dm => dm
                     .TieBreaker(0.0)
-                    .Boost(12)
+                    .Boost(PREFIX_TIER_BOOST)
                     .Queries(Languages.ArrayWithDefault.Select<string, Func<QueryContainerDescriptor<T>, QueryContainer>>(
                         l => qq => qq.Match(m => m
                             .Field(new Field("name." + l + ".prefix"))
@@ -369,7 +374,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                     m.Type(TextQueryType.PhrasePrefix)
                     .Query(searchTerm)
                     .MaxExpansions(200)
-                    .Boost(8)
+                    .Boost(PHRASE_PREFIX_BOOST)
                     .Fields(f => f.Fields(
                         Languages.ArrayWithDefault.Select(l => new Field("name." + l)))))
         };
@@ -383,7 +388,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                 l => qq => qq.Match(m => m
                     .Field(new Field("name." + l))
                     .Query(searchTerm)
-                    .Boost(5)
+                    .Boost(NAME_MATCH_BOOST)
                     .Name(LanguageQueryName(l)))).ToArray())));
 
         // ---- alt_name tiers — searched over the separate alt_names.<l> field at boosts below the
@@ -418,7 +423,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                 m.Type(TextQueryType.BestFields)
                 .Query(searchTerm)
                 .Fuzziness(Fuzziness.Auto)
-                .Boost(2)
+                .Boost(FUZZY_TIER_BOOST)
                 .Fields(f => f.Fields(
                     Languages.ArrayWithDefault.Select(l => new Field("name." + l))))));
         }
@@ -438,17 +443,22 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
 
         // NEST renders YamlDotNet's object-keyed nested maps as an empty `{}` (dropping weights/class_groups/
         // group_similarities), which fails the painless on every shard; normalize them to Dictionary<string,object> first.
+        // A zoom of 0 means "client sent no usable zoom" (the GetSearchResults default), NOT a real world
+        // view: feed the painless geo decay the same DEFAULT_ZOOM the viewport math uses, so a missing zoom
+        // can't collapse the decay radius to ~200 m and bury every non-adjacent hit.
+        var effectiveZoom = zoom <= 0 ? DEFAULT_ZOOM : zoom;
+
         var scriptParams = (Dictionary<string, object>)NormalizeForNest(scriptQuery.Script.Params);
-        scriptParams["lat"] = lat;
-        scriptParams["lon"] = lng;
-        scriptParams["zoom"] = zoom;
-        scriptParams["qtype"] = InferQtype(searchTerm);
-        scriptParams["query_classes"] = InferQueryClass(searchTerm);
+        scriptParams[ScriptParam.Lat] = lat;
+        scriptParams[ScriptParam.Lon] = lng;
+        scriptParams[ScriptParam.Zoom] = effectiveZoom;
+        scriptParams[ScriptParam.QueryType] = InferQtype(searchTerm);
+        scriptParams[ScriptParam.QueryClasses] = InferQueryClass(searchTerm);
 
         // Exact-name bonus: painless can't read matched_queries, so pass the keyword field list + the query
         // normalized per each field's index normalizer ("base" universal, "he" hebrew+matres) for an in-script equality test.
-        scriptParams["name_keyword_fields"] = NameKeywordFields;
-        scriptParams["query_norm"] = new Dictionary<string, object>
+        scriptParams[ScriptParam.NameKeywordFields] = NameKeywordFields;
+        scriptParams[ScriptParam.QueryNorm] = new Dictionary<string, object>
         {
             ["base"] = NormalizeForKeyword(searchTerm, isHebrew: false),
             ["he"] = NormalizeForKeyword(searchTerm, isHebrew: true),
@@ -457,12 +467,12 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         // Supply the viewport box for the painless in-screen boost only when a map center exists.
         if (lat.HasValue && lng.HasValue)
         {
-            var (halfLatDeg, halfLngDeg) = ComputeViewportHalfExtentDeg(zoom, lat.Value);
-            scriptParams["viewport_boost"] = VIEWPORT_BOOST;
-            scriptParams["vp_half_lat"] = halfLatDeg;
-            scriptParams["vp_half_lng"] = halfLngDeg;
-            scriptParams["vp_center_lat"] = lat.Value;
-            scriptParams["vp_center_lng"] = lng.Value;
+            var (halfLatDeg, halfLngDeg) = ComputeViewportHalfExtentDeg(effectiveZoom, lat.Value);
+            scriptParams[ScriptParam.ViewportBoost] = VIEWPORT_BOOST;
+            scriptParams[ScriptParam.ViewportHalfLat] = halfLatDeg;
+            scriptParams[ScriptParam.ViewportHalfLng] = halfLngDeg;
+            scriptParams[ScriptParam.ViewportCenterLat] = lat.Value;
+            scriptParams[ScriptParam.ViewportCenterLng] = lng.Value;
         }
 
         Func<QueryContainerDescriptor<T>, QueryContainer> textQuery =
@@ -624,8 +634,17 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         ["camp ground"] = new[] { "campsite" }, ["salt lake"] = new[] { "lake", "reservoir" },
     };
 
+    // Syntax punctuation stripped from the query edges before class/type-token parsing.
     private static readonly char[] _classPunct =
         " \t\"'`.,;:!?()[]{}<>-".ToCharArray();
+
+    /// <summary>Lower-case the query, strip edge punctuation, and split into tokens (empty when none).</summary>
+    private static string[] ClassQueryTokens(string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm)) return Array.Empty<string>();
+        var q = searchTerm.Trim().Trim(_classPunct).ToLowerInvariant();
+        return q.Length == 0 ? Array.Empty<string>() : q.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    }
 
     /// <summary>Lower-case a token and fold a trailing plural to singular, unless the plural is itself an explicit key.</summary>
     private static string NormalizeClassToken(string tok)
@@ -640,12 +659,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     /// <summary>Infer the feature_class(es) a query intends (primary first), or empty when no generic type token is present.</summary>
     private List<string> InferQueryClass(string searchTerm)
     {
-        if (string.IsNullOrWhiteSpace(searchTerm)) return new List<string>();
-
-        var q = searchTerm.Trim().Trim(_classPunct).ToLowerInvariant();
-        if (q.Length == 0) return new List<string>();
-
-        var tokens = q.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var tokens = ClassQueryTokens(searchTerm);
         if (tokens.Length == 0) return new List<string>();
 
         // Multi-word phrase tokens at head or tail (longest wins).
@@ -676,11 +690,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     /// </summary>
     private string InferQtype(string searchTerm)
     {
-        if (string.IsNullOrWhiteSpace(searchTerm)) return "GENERIC";
-        var q = searchTerm.Trim().Trim(_classPunct).ToLowerInvariant();
-        if (q.Length == 0) return "GENERIC";
-
-        var tokens = q.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var tokens = ClassQueryTokens(searchTerm);
         if (tokens.Length == 0) return "GENERIC";
 
         var whole = string.Join(' ', tokens);
@@ -694,6 +704,24 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         return "GENERIC";
     }
 
+
+    // Readable C# names for the painless script param keys. The string VALUES are the contract with
+    // updated_score.yml (the painless reads params.<value>) — keep them in sync with that script.
+    private static class ScriptParam
+    {
+        public const string Lat = "lat";
+        public const string Lon = "lon";
+        public const string Zoom = "zoom";
+        public const string QueryType = "qtype";
+        public const string QueryClasses = "query_classes";
+        public const string NameKeywordFields = "name_keyword_fields";
+        public const string QueryNorm = "query_norm";
+        public const string ViewportBoost = "viewport_boost";
+        public const string ViewportHalfLat = "vp_half_lat";
+        public const string ViewportHalfLng = "vp_half_lng";
+        public const string ViewportCenterLat = "vp_center_lat";
+        public const string ViewportCenterLng = "vp_center_lng";
+    }
 
     private class ScriptScoreQuery
     {
@@ -710,23 +738,30 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     // Small additive in-viewport boost; must not dominate the O(1) score components (text/geo/prominence/pclass).
     private const double VIEWPORT_BOOST = 0.15;
 
-    // Half-width/height of the map viewport in degrees, derived from zoom (lat: 111 km/deg; lng: scaled by cos(lat)).
+    private const double KM_PER_DEGREE_LATITUDE = 111.0; // WGS84 approximation
+
+    // Half-width/height of the map viewport in degrees, derived from zoom (lng scaled by cos(lat)).
     private static (double halfLatDeg, double halfLngDeg) ComputeViewportHalfExtentDeg(double zoom, double lat)
     {
         var (_, offsetKm) = ComputeGeoDecayParams(zoom);
         var halfKm = Math.Clamp(offsetKm * 3.0, 5.0, 400.0); // a few × the plateau, bounded
-        var halfLatDeg = halfKm / 111.0;
+        var halfLatDeg = halfKm / KM_PER_DEGREE_LATITUDE;
         var cos = Math.Max(0.2, Math.Cos(lat * Math.PI / 180.0));
-        var halfLngDeg = halfKm / (111.0 * cos);
+        var halfLngDeg = halfKm / (KM_PER_DEGREE_LATITUDE * cos);
         return (halfLatDeg, halfLngDeg);
     }
 
+    // Default zoom when the client sends none (zoom <= 0). A bare 0 would otherwise make the painless
+    // geo decay collapse to a ~200 m radius (scale_base * scale_factor^0), burying every non-adjacent hit.
+    private const double DEFAULT_ZOOM = 12;
+
     // Tie the geo decay radius to zoom: offset = plateau (full score), scale = distance at which score halves.
-    private static (double scaleKm, double offsetKm) ComputeGeoDecayParams(double zoom)
+    // internal for unit testing the zoom<=0 -> DEFAULT_ZOOM guard without a live cluster.
+    internal static (double scaleKm, double offsetKm) ComputeGeoDecayParams(double zoom)
     {
         if (zoom <= 0)
         {
-            zoom = 12; // default when the client sends no usable zoom
+            zoom = DEFAULT_ZOOM;
         }
         var offsetKm = Math.Pow(2.2, 18 - zoom) * 0.1;
         var scaleKm = Math.Max(8.0, 0.4 * (zoom - 3));
