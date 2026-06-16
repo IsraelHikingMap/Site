@@ -45,12 +45,12 @@ script:
             }
 
             // b) Prominence (already 0..1; default 0 if field absent)
-            double prom_norm = doc.containsKey('prominence') ? doc['prominence'].value : 0.0;
+            double prom_norm = doc.containsKey('poiProminence') ? doc['poiProminence'].value : 0.0;
 
             // b2) Area signal (log-normalized 0..1 at index time): a large lake outranks a same-named
             //     pond. Missing field (points/lines) -> 0, i.e. no boost.
-            double area_norm = (doc.containsKey('area_norm') && doc['area_norm'].size() > 0)
-                ? doc['area_norm'].value : 0.0;
+            double area_norm = (doc.containsKey('poiAreaNorm') && doc['poiAreaNorm'].size() > 0)
+                ? doc['poiAreaNorm'].value : 0.0;
 
             // c) Geography (distance -> 0..1). Stays 1.0 when no map center: arcDistance(null,null)
             //    throws and fails the whole script per shard, so guard on lat/lon != null.
@@ -66,8 +66,8 @@ script:
             //    no penalty).
             double pclass_similarity = 0.0;
             String doc_class = null;
-            if (doc.containsKey('feature_class') && doc['feature_class'].size() > 0) {
-                doc_class = doc['feature_class'].value;
+            if (doc.containsKey('poiFeatureClass') && doc['poiFeatureClass'].size() > 0) {
+                doc_class = doc['poiFeatureClass'].value;
             }
             if (doc_class != null) {
                 String doc_group = params.class_groups.get(doc_class);

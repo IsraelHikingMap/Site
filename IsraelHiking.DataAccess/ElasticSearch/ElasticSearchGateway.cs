@@ -819,7 +819,9 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             .TrackScores()
             // Prominence is a deterministic tiebreak AFTER _score: the exact-keyword phrase match scores
             // every same-name doc identically, so without it the winner was arbitrary Lucene segment order.
-            .Sort(f => f.Descending("_score").Field(ff => ff.Field(p => p.Prominence).Descending()))
+            // Use the raw field name: NEST's lambda inferrer ignores [JsonPropertyName], so p => p.Prominence
+            // would resolve to "prominence" — the pre-rename name that no longer exists in the index.
+            .Sort(f => f.Descending("_score").Field(ff => ff.Field("poiProminence").Descending()))
             .Query(q =>
                 q.MultiMatch(m =>
                     m.Type(TextQueryType.Phrase)

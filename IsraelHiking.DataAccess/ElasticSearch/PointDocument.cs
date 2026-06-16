@@ -13,7 +13,7 @@ public class PointDocument
     public string PoiCategory { get; set; }
     // Coarse OSM-derived feature type ("peak", "lake", "river", ...); used for a type-specific
     // autocomplete icon. May be null for boundary-only features, which keep their indexed poiIcon.
-    [JsonPropertyName("feature_class")]
+    [JsonPropertyName("poiFeatureClass")]
     public string FeatureClass { get; set; }
     [JsonPropertyName("poiIcon")]
     public string PoiIcon { get; set; }
@@ -25,6 +25,6 @@ public class PointDocument
     public string Image { get; set; }
     [JsonPropertyName("location")]
     public double[] Location { get; set; }
-    [JsonPropertyName("prominence")]
+    [JsonPropertyName("poiProminence")]
     public float? Prominence { get; set; }
 }

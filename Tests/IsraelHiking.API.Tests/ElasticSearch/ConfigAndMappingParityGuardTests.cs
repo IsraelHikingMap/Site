@@ -132,57 +132,55 @@ public class ConfigAndMappingParityGuardTests
     public void HotPathQueryFields_ExistInTheEsMapping()
     {
         // The fields C# actually drives ranking with (text match + field_value_factor) must be in the
-        // explicit ES mapping so they're queryable: name.<lang>, location, prominence.
+        // explicit ES mapping so they're queryable: name.<lang>, location, poiProminence.
         var esMapping = EsHelperJava();
         Assert.IsTrue(Regex.IsMatch(esMapping, "\"name\\.\""),
             "ES mapping no longer declares the per-language name.<lang> text fields (NFR-7).");
         Assert.IsTrue(esMapping.Contains("\"location\""),
             "ES mapping no longer declares the geo_point 'location' field (NFR-7).");
-        Assert.IsTrue(esMapping.Contains("\"prominence\""),
-            "ES mapping no longer declares the 'prominence' field used by field_value_factor (NFR-7).");
+        Assert.IsTrue(esMapping.Contains("\"poiProminence\""),
+            "ES mapping no longer declares the 'poiProminence' field used by field_value_factor (NFR-7).");
     }
 
     [TestMethod]
-    public void RawComponents_AreIndexFalse_AndHotFields_AreIndexed()
+    public void EnrichmentSignals_AreIndexFalse_AndHotFields_AreIndexed()
     {
-        // Raw/debug components stay index:false (debuggable, not searchable); the hot-path searchable
-        // fields (prominence, population) must NOT be index:false. Flipping either way fails the guard.
+        // Query-time-only enrichment signals stay index:false (read by the script via doc_values, not
+        // searchable); the hot-path searchable fields (prominence, population) must NOT be index:false.
         var esMapping = EsHelperJava();
 
-        string[] rawComponents = { "prom_base", "prom_qrank_norm", "prom_meta", "ele_norm", "qrank_raw" };
-        foreach (var raw in rawComponents)
+        string[] indexFalseSignals = { "poiAreaNorm", "intermittent" };
+        foreach (var raw in indexFalseSignals)
         {
-            // e.g.  m.properties("prom_base", n -> n.float_(f -> f.index(false)));
             var declaredIndexFalse = Regex.IsMatch(esMapping,
                 $@"""{Regex.Escape(raw)}""[^;]*\.index\(\s*false\s*\)");
             Assert.IsTrue(declaredIndexFalse,
-                $"Raw component '{raw}' must be mapped with .index(false) (re-tunable, not searchable) " +
-                "— it is missing or was flipped to indexed (NFR-7).");
+                $"Enrichment signal '{raw}' must be mapped with .index(false) (script-only, not searchable).");
         }
 
-        // prominence/population are searchable hot-path fields: they must NOT be declared index:false.
-        foreach (var hot in new[] { "prominence", "population" })
+        // poiProminence/population are searchable hot-path fields: they must NOT be declared index:false.
+        foreach (var hot in new[] { "poiProminence", "population" })
         {
             var declaredIndexFalse = Regex.IsMatch(esMapping,
                 $@"""{Regex.Escape(hot)}""[^;]*\.index\(\s*false\s*\)");
             Assert.IsFalse(declaredIndexFalse,
-                $"'{hot}' was flipped to .index(false) — it must stay indexed/searchable (NFR-7).");
+                $"'{hot}' was flipped to .index(false) — it must stay indexed/searchable.");
         }
     }
 
     [TestMethod]
-    public void RankingAndRawFields_UseSnakeCase()
+    public void ComputedRankingFields_UsePoiPrefix()
     {
-        // The ranking/raw component fields this engagement added are snake_case in ES. (Pre-existing
-        // camelCase poi* fields are out of scope — do not force-rename them.)
+        // The computed (non-OSM) ranking fields this engagement added carry a poi* prefix so it's
+        // clear they are calculated, not raw OSM tags. (population/intermittent keep their OSM tag
+        // names and are exempt.)
         var esMapping = EsHelperJava();
-        string[] snakeCaseFields = { "prom_base", "prom_qrank_norm", "prom_meta", "ele_norm", "qrank_raw" };
-        foreach (var field in snakeCaseFields)
+        string[] computedFields = { "poiFeatureClass", "poiProminence", "poiAreaNorm" };
+        foreach (var field in computedFields)
         {
             Assert.IsTrue(esMapping.Contains($"\"{field}\""),
-                $"Expected snake_case ranking/raw field '{field}' in the ES mapping (NFR-7).");
-            // sanity: the snake_case name has no uppercase letters
-            Assert.IsFalse(Regex.IsMatch(field, "[A-Z]"), $"'{field}' should be snake_case.");
+                $"Expected computed ranking field '{field}' in the ES mapping.");
+            Assert.IsTrue(field.StartsWith("poi"), $"'{field}' should carry the poi prefix.");
         }
     }
 }
