@@ -211,6 +211,7 @@ script:
         # standing water
         lake: WATER_BODY_LARGE
         reservoir: WATER_BODY_LARGE
+        water: WATER_BODY_LARGE
         pond: WATER_BODY_SMALL
         lagoon: WATER_BODY_SMALL
         maar: WATER_BODY_SMALL
