@@ -1,13 +1,22 @@
 {
-  "originHash" : "775e45fde9c60facfe4ff83455bb608ee92c715d14fcb50957bfbbb4baf8f19a",
+  "originHash" : "7608cbab75537ac38f68475d09e70ac6e73fed2e2990687efd2d860d71766c04",
   "pins" : [
+    {
+      "identity" : "maplibre-contour-rs",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Mapeak-com/maplibre-contour-rs",
+      "state" : {
+        "revision" : "494aed8b694e8f75abc8958cdf9e05902bc46feb",
+        "version" : "0.4.1"
+      }
+    },
     {
       "identity" : "pmtiles-mobile",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mapeak-com/pmtiles-mobile.git",
       "state" : {
-        "revision" : "8fa64bdf47f25aaf08115f5639725b734f6a3b67",
-        "version" : "0.3.1"
+        "revision" : "50237542419cc5c3f61a520e653813c9db1ecc98",
+        "version" : "0.3.2"
       }
     }
   ],

@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		0D4587ED2FCCC8A300269001 /* CarStoreKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4587EC2FCCC8A300269001 /* CarStoreKeys.swift */; };
-		0D4587F02FCE3AAD00269001 /* PMTiles in Frameworks */ = {isa = PBXBuildFile; productRef = 0D4587EF2FCE3AAD00269001 /* PMTiles */; };
-		0D46EA052FCC509C0033E098 /* PMTiles in Frameworks */ = {isa = PBXBuildFile; productRef = 0D46EA042FCC509C0033E098 /* PMTiles */; };
 		0D46EA142FCC67830033E098 /* CarStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0F2FCC67830033E098 /* CarStatistics.swift */; };
 		0D46EA152FCC67830033E098 /* SliceURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA132FCC67830033E098 /* SliceURLProtocol.swift */; };
 		0D46EA162FCC67830033E098 /* CarMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0C2FCC67830033E098 /* CarMapViewController.swift */; };
@@ -20,7 +18,8 @@
 		0D46EA1B2FCC67830033E098 /* PMTilesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA122FCC67830033E098 /* PMTilesService.swift */; };
 		0D46EA1C2FCC67830033E098 /* MapeakCarSceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA112FCC67830033E098 /* MapeakCarSceneDelegate.swift */; };
 		0D46EA1E2FCC68230033E098 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA1D2FCC68230033E098 /* SceneDelegate.swift */; };
-		0DD5D9562FDBDAF700983BAA /* PMTiles in Frameworks */ = {isa = PBXBuildFile; productRef = 0DD5D9552FDBDAF700983BAA /* PMTiles */; };
+		0D6243222FDEC4F900B2C10A /* CarContourTilesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D6243212FDEC4F000B2C10A /* CarContourTilesProvider.swift */; };
+		0D6243252FDEC57E00B2C10A /* MaplibreContour in Frameworks */ = {isa = PBXBuildFile; productRef = 0D6243242FDEC57E00B2C10A /* MaplibreContour */; };
 		0DD5D9592FDBDBB300983BAA /* PMTiles in Frameworks */ = {isa = PBXBuildFile; productRef = 0DD5D9582FDBDBB300983BAA /* PMTiles */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
@@ -44,6 +43,7 @@
 		0D46EA122FCC67830033E098 /* PMTilesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PMTilesService.swift; sourceTree = "<group>"; };
 		0D46EA132FCC67830033E098 /* SliceURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliceURLProtocol.swift; sourceTree = "<group>"; };
 		0D46EA1D2FCC68230033E098 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		0D6243212FDEC4F000B2C10A /* CarContourTilesProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarContourTilesProvider.swift; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -64,11 +64,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0D4587F02FCE3AAD00269001 /* PMTiles in Frameworks */,
-				0DD5D9562FDBDAF700983BAA /* PMTiles in Frameworks */,
 				A084ECDBA7D38E1E42DFC39D /* Pods_App.framework in Frameworks */,
 				0DD5D9592FDBDBB300983BAA /* PMTiles in Frameworks */,
-				0D46EA052FCC509C0033E098 /* PMTiles in Frameworks */,
+				0D6243252FDEC57E00B2C10A /* MaplibreContour in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +76,7 @@
 		0D46EA0A2FCC67430033E098 /* Car */ = {
 			isa = PBXGroup;
 			children = (
+				0D6243212FDEC4F000B2C10A /* CarContourTilesProvider.swift */,
 				0D46EA0B2FCC67830033E098 /* CarLocationProvider.swift */,
 				0D46EA0C2FCC67830033E098 /* CarMapViewController.swift */,
 				0D46EA0D2FCC67830033E098 /* ReactivePreferencesPlugin.swift */,
@@ -194,6 +193,7 @@
 			mainGroup = 504EC2FB1FED79650016851F;
 			packageReferences = (
 				0DD5D9572FDBDBB300983BAA /* XCRemoteSwiftPackageReference "pmtiles-mobile" */,
+				0D6243232FDEC57E00B2C10A /* XCRemoteSwiftPackageReference "maplibre-contour-rs" */,
 			);
 			productRefGroup = 504EC3051FED79650016851F /* Products */;
 			projectDirPath = "";
@@ -261,6 +261,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0D6243222FDEC4F900B2C10A /* CarContourTilesProvider.swift in Sources */,
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				0D46EA142FCC67830033E098 /* CarStatistics.swift in Sources */,
 				0D46EA152FCC67830033E098 /* SliceURLProtocol.swift in Sources */,
@@ -495,55 +496,29 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		0D4587EE2FCE3AAD00269001 /* XCRemoteSwiftPackageReference "pmtiles-mobile" */ = {
+		0D6243232FDEC57E00B2C10A /* XCRemoteSwiftPackageReference "maplibre-contour-rs" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/mapeak-com/pmtiles-mobile.git";
+			repositoryURL = "https://github.com/Mapeak-com/maplibre-contour-rs";
 			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
-		0D46EA032FCC509C0033E098 /* XCRemoteSwiftPackageReference "swift-pmtiles" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/sfomuseum/swift-pmtiles";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
-		0DD5D9542FDBDAF700983BAA /* XCRemoteSwiftPackageReference "pmtiles-mobile" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/mapeak-com/pmtiles-mobile.git";
-			requirement = {
-				branch = v0.2.3;
-				kind = branch;
+				kind = exactVersion;
+				version = 0.4.1;
 			};
 		};
 		0DD5D9572FDBDBB300983BAA /* XCRemoteSwiftPackageReference "pmtiles-mobile" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/mapeak-com/pmtiles-mobile.git";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.2.3;
+				kind = exactVersion;
+				version = 0.3.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		0D4587EF2FCE3AAD00269001 /* PMTiles */ = {
+		0D6243242FDEC57E00B2C10A /* MaplibreContour */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 0D4587EE2FCE3AAD00269001 /* XCRemoteSwiftPackageReference "pmtiles-mobile" */;
-			productName = PMTiles;
-		};
-		0D46EA042FCC509C0033E098 /* PMTiles */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 0D46EA032FCC509C0033E098 /* XCRemoteSwiftPackageReference "swift-pmtiles" */;
-			productName = PMTiles;
-		};
-		0DD5D9552FDBDAF700983BAA /* PMTiles */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 0DD5D9542FDBDAF700983BAA /* XCRemoteSwiftPackageReference "pmtiles-mobile" */;
-			productName = PMTiles;
+			package = 0D6243232FDEC57E00B2C10A /* XCRemoteSwiftPackageReference "maplibre-contour-rs" */;
+			productName = MaplibreContour;
 		};
 		0DD5D9582FDBDBB300983BAA /* PMTiles */ = {
 			isa = XCSwiftPackageProductDependency;

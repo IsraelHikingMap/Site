@@ -8,8 +8,11 @@ import okhttp3.Protocol
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 
+/** Supports service "use=silce". It also routes the "contour=units" to the contour manager. */
 class SliceProtocolInterceptor internal constructor(private val pmTilesService: PmTilesService) :
         Interceptor {
+    var contoursProvider: CarContourTilesProvider? = null
+
     @Throws(IOException::class)
     override fun intercept(chain: Interceptor.Chain): Response {
         val original = chain.request()
@@ -29,6 +32,24 @@ class SliceProtocolInterceptor internal constructor(private val pmTilesService: 
                                 .dropLastWhile { it.isEmpty() }
                                 .toTypedArray()[0]
                         .toInt()
+
+        val contourUnits = original.url.queryParameter("contour")
+        val contoursProvider = this.contoursProvider
+        if (contoursProvider != null && contourUnits != null) {
+            val data =
+                    try {
+                        contoursProvider.getTile(z, x, y, contourUnits)
+                    } catch (ex: Exception) {
+                        throw IOException("Failed to generate contour tile $z/$x/$y", ex)
+                    }
+            return Response.Builder()
+                    .request(original)
+                    .protocol(Protocol.HTTP_1_1)
+                    .code(200)
+                    .message("OK")
+                    .body(data.toResponseBody("application/x-protobuf".toMediaType()))
+                    .build()
+        }
 
         val offlineAvailable = pmTilesService.isOfflineFileAvailable(z, x, y, type)
         val timeout: Int =

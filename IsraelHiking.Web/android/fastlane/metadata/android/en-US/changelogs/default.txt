@@ -1,2 +1,2 @@
-- Add support for Android Auto
+- Add support for Android Auto with dynamic contours
 - Various bug fixes and performance improvements

@@ -103,7 +103,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     }
 
     private async createLayer(layerData: EditableLayer) {
-        const styleLike = await this.defaultStyleService.getSourcesAndLayers(layerData, this.visible(), this.allowOffline() ? "offline" : "online");
+        const styleLike = await this.defaultStyleService.getSourcesAndLayers(layerData, this.visible(), this.allowOffline() ? "allow-offline" : "online-only");
         this.updateSourcesAndLayers(layerData, styleLike.sources, styleLike.layers);
 
         if (this.isBaselayer()) {
