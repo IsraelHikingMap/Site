@@ -10,19 +10,18 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 
 /**
- * Generates vector contour tiles on the fly from a terrain (DEM) source, mirroring what
- * maplibre-contour does on the web. The heavy lifting is done by the maplibre-contour-rs native
- * library: we hand it a [DemTileFetcher] that knows how to download a DEM tile, and it returns a
- * ready-to-render MVT for any `z/x/y`. [SliceProtocolInterceptor] is what routes contour tile
- * requests here, passing the units carried in the tile URL.
+ * Generates vector contour tiles on the fly from a terrain (DEM) source. The heavy lifting is done
+ * by the maplibre-contour-rs native library: we hand it a [DemTileFetcher] that knows how to
+ * download a DEM tile, and it returns a ready-to-render MVT for any `z/x/y`.
+ * [SliceProtocolInterceptor] is what routes contour tile requests here, passing the units carried
+ * in the tile URL.
  *
- * Units (metric/imperial) only change the elevation multiplier, so a manager is built and cached per
- * units string; the managers are thread-safe and shared across requests.
+ * Units (metric/imperial) only change the elevation multiplier, so a manager is built and cached
+ * per units string; the managers are thread-safe and shared across requests.
  */
 class CarContourTilesProvider internal constructor(private val okHttpClient: OkHttpClient) {
 
-    // The layer/attribute names and thresholds must match what the style's contour layers expect
-    // (see the web useContourProtocol in default-style.service.ts, which configures the same values).
+    private val managers = ConcurrentHashMap<String, DemManager>()
     private val config =
             defaultConfig()
                     .copy(
@@ -40,10 +39,6 @@ class CarContourTilesProvider internal constructor(private val okHttpClient: OkH
                             levelKey = "level",
                     )
 
-    // Called by the native library to download the raw DEM tile bytes for a fully-resolved URL.
-    // okHttpClient carries SliceProtocolInterceptor (the `use=slice` marker in demUrlPattern), so
-    // DEM fetches get the same offline (PMTiles) fallback the rest of the map enjoys. Returning null
-    // tells the library there is no data for that tile, which it renders as an empty contour tile.
     private val fetcher =
             object : DemTileFetcher {
                 override fun fetch(url: String): ByteArray? {
@@ -56,9 +51,6 @@ class CarContourTilesProvider internal constructor(private val okHttpClient: OkH
                     }
                 }
             }
-
-    // One manager per units string; metric and imperial differ only by the elevation multiplier.
-    private val managers = ConcurrentHashMap<String, DemManager>()
 
     fun getTile(z: Int, x: Int, y: Int, units: String): ByteArray {
         val manager =

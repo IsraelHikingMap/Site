@@ -10,11 +10,6 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 
 class SliceProtocolInterceptor internal constructor(private val pmTilesService: PmTilesService) :
         Interceptor {
-    /**
-     * Generates contour vector tiles on the fly. Set after construction: the provider fetches DEM
-     * tiles through the OkHttpClient that wraps this interceptor, so the client must be built
-     * first. When null, contour-source requests fall through to the normal slice/PMTiles handling.
-     */
     var contoursProvider: CarContourTilesProvider? = null
 
     @Throws(IOException::class)
