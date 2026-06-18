@@ -2,11 +2,9 @@ import Foundation
 import MaplibreContour
 
 /**
- * Generates vector contour tiles on the fly from a terrain (DEM) source, mirroring
- * `CarContoursTilesProvider.kt` and what maplibre-contour does on the web. The native
+ * Generates vector contour tiles on the fly from a terrain (DEM) source. The native
  * maplibre-contour-rs library does the heavy lifting: we hand it a `DemTileFetcher` that downloads a
- * DEM tile and it returns a ready-to-render MVT for any z/x/y. `SliceURLProtocol` routes contour tile
- * requests here, passing the units carried in the tile URL.
+ * DEM tile and it returns a ready-to-render MVT for any z/x/y.
  *
  * Units (metric/imperial) only change the elevation multiplier, so a manager is built and cached per
  * units string; the managers are thread-safe and shared across requests.
@@ -19,8 +17,6 @@ final class CarContourTilesProvider {
     private var managers: [String: DemManager] = [:]
 
     init() {
-        // The layer/attribute names and thresholds must match what the style's contour layers expect
-        // (see the web useContourProtocol in default-style.service.ts, which configures the same values).
         var config = defaultConfig()
         config.encoding = .terrarium
         config.demUrlPattern =
@@ -40,7 +36,7 @@ final class CarContourTilesProvider {
         try manager(for: units).tile(z: UInt8(z), x: UInt32(x), y: UInt32(y))
     }
 
-    // One manager per units string; metric and imperial differ only by the elevation multiplier.
+    /// Retrieves a DemManager instance for the given units, creating one if necessary.
     private func manager(for units: String) -> DemManager {
         lock.lock(); defer { lock.unlock() }
         if let cached = managers[units] { return cached }
@@ -68,8 +64,6 @@ final class CarContourTilesProvider {
  */
 private final class ContourDemTileFetcher: DemTileFetcher, @unchecked Sendable {
 
-    // Routes DEM requests through SliceURLProtocol (offline fallback). DEM URLs carry no `contour`
-    // marker, so SliceURLProtocol serves them as normal slice tiles — no recursion back into contours.
     private let session: URLSession
 
     init() {
@@ -80,7 +74,7 @@ private final class ContourDemTileFetcher: DemTileFetcher, @unchecked Sendable {
         session = URLSession(configuration: config)
     }
 
-    // Called synchronously by the native library; block until the tile request completes.
+    /// Called synchronously by the native library; block until the tile request completes.
     func fetch(url: String) -> Data? {
         guard let requestUrl = URL(string: url) else { return nil }
         let semaphore = DispatchSemaphore(value: 0)
