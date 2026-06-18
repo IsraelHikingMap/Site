@@ -12,8 +12,8 @@ class SliceProtocolInterceptor internal constructor(private val pmTilesService: 
         Interceptor {
     /**
      * Generates contour vector tiles on the fly. Set after construction: the provider fetches DEM
-     * tiles through the OkHttpClient that wraps this interceptor, so the client must be built first.
-     * When null, contour-source requests fall through to the normal slice/PMTiles handling.
+     * tiles through the OkHttpClient that wraps this interceptor, so the client must be built
+     * first. When null, contour-source requests fall through to the normal slice/PMTiles handling.
      */
     var contoursProvider: CarContourTilesProvider? = null
 
@@ -37,10 +37,6 @@ class SliceProtocolInterceptor internal constructor(private val pmTilesService: 
                                 .toTypedArray()[0]
                         .toInt()
 
-        // The contour source carries a `contour=<units>` marker (see useContourQuery on the web);
-        // there are no offline PMTiles for it, so we generate the MVT locally from the DEM, mirroring
-        // maplibre-contour on the web. The units in the URL also key MapLibre's cache, so a unit
-        // change naturally re-requests fresh tiles.
         val contourUnits = original.url.queryParameter("contour")
         val contoursProvider = this.contoursProvider
         if (contoursProvider != null && contourUnits != null) {

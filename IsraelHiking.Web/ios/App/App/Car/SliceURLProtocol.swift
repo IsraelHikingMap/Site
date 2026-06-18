@@ -38,10 +38,6 @@ final class SliceURLProtocol: URLProtocol {
             return
         }
 
-        // The contour source carries a `contour=<units>` marker (see useContourQuery on the web);
-        // there are no offline PMTiles for it, so we generate the MVT locally from the DEM, mirroring
-        // maplibre-contour on the web. The units in the URL also key the tile cache, so a unit change
-        // naturally re-requests fresh tiles.
         if let units = SliceURLProtocol.contourUnits(url) {
             serveContour(parsed: parsed, units: units)
             return
