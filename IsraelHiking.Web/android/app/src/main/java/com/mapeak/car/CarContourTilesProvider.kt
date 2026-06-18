@@ -39,6 +39,8 @@ class CarContourTilesProvider internal constructor(private val okHttpClient: OkH
                             levelKey = "level",
                     )
 
+    // This needs to be provided in order to force the Rust code to use the okhttp, so that
+    // "use=slice" will route back to pmtiles/online mode
     private val fetcher =
             object : DemTileFetcher {
                 override fun fetch(url: String): ByteArray? {
