@@ -8,6 +8,7 @@ import okhttp3.Protocol
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 
+/** Supports service "use=silce". It also routes the "contour=units" to the contour manager. */
 class SliceProtocolInterceptor internal constructor(private val pmTilesService: PmTilesService) :
         Interceptor {
     var contoursProvider: CarContourTilesProvider? = null
