@@ -1,6 +1,7 @@
 import { inject, Injectable } from "@angular/core";
 import { registerPlugin } from "@capacitor/core";
 import { Store } from "@ngxs/store";
+import { skip } from "rxjs";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
@@ -35,23 +36,23 @@ export class CarService {
             return;
         }
 
-        this.store.select((state: ApplicationState) => state.layersState.selectedBaseLayerKey).subscribe(() => {
+        this.store.select((state: ApplicationState) => state.layersState.selectedBaseLayerKey).pipe(skip(1)).subscribe(() => {
             this.setStyle();
         });
-        this.store.select((state: ApplicationState) => state.offlineState.downloadedTiles).subscribe(() => {
+        this.store.select((state: ApplicationState) => state.offlineState.downloadedTiles).pipe(skip(1)).subscribe(() => {
             this.setStyle();
         });
-        this.store.select((state: ApplicationState) => state.routes.present).subscribe(() => {
+        this.store.select((state: ApplicationState) => state.routes.present).pipe(skip(1)).subscribe(() => {
             this.setRoutes();
         });
-        this.store.select((state: ApplicationState) => state.configuration.language).subscribe(async () => {
-            await this.setStyle();
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(skip(1)).subscribe(async () => {
             await this.setConfig();
+            await this.setStyle();
             await this.setRoutes();
         });
-        this.store.select((state: ApplicationState) => state.configuration.units).subscribe(async () => {
-            await this.setStyle();
+        this.store.select((state: ApplicationState) => state.configuration.units).pipe(skip(1)).subscribe(async () => {
             await this.setConfig();
+            await this.setStyle();
         });
         await this.setConfig();
         await this.setStyle();
