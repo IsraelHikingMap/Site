@@ -76,7 +76,8 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
     /**
      * Centers the map on [location], pushing the GPS dot into the bottom third of the visible area
      * so what's ahead stays in view and the dot can't slip under another app docked on the Android
-     * Auto surface. Bearing rotates the map; the zoom follows the current speed (see [zoomForSpeed]).
+     * Auto surface. Bearing rotates the map; the zoom follows the current speed (see [zoomForSpeed]
+     * ).
      */
     private fun centerOnLocation(location: Location) {
         val bearing = if (location.hasBearing()) location.bearing.toDouble() else 0.0
@@ -178,8 +179,8 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
     /**
      * Eases the camera so that [lat]/[lng] appears at screen ([anchorX], [anchorY]) — the camera
      * target normally lands at the view's geometric center, so the target is shifted to compensate.
-     * Applies [bearing], and the optional [zoom] is folded into the same ease (leaving it null keeps
-     * the current zoom) so the speed zoom never fights the centering animation.
+     * Applies [bearing], and the optional [zoom] is folded into the same ease (leaving it null
+     * keeps the current zoom) so the speed zoom never fights the centering animation.
      */
     fun setCenter(
             lat: Double,
@@ -451,9 +452,6 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
     @MainThread
     fun setupMap(pixelRatio: Float): View {
         MapLibre.getInstance(carContext)
-        // One client serves MapLibre's tiles, the DEM fetches, and the PMTiles offline fallback. The
-        // contour provider fetches DEM tiles through this same client, so it is wired into the
-        // interceptor after the client is built.
         val sliceInterceptor = SliceProtocolInterceptor(PmTilesService(carContext))
         val tileHttpClient = OkHttpClient.Builder().addInterceptor(sliceInterceptor).build()
         sliceInterceptor.contoursProvider = CarContourTilesProvider(tileHttpClient)
