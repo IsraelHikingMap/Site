@@ -21,7 +21,7 @@
 		"AppUpdatePlugin",
 		"BackgroundGeolocation",
 		"CapgoCompassPlugin",
-		"InAppBrowserPlugin",
+		"CapgoInAppBrowserPlugin",
 		"PurchasesPlugin",
 		"RevenueCatUIPlugin",
 		"EmailComposerPlugin"
