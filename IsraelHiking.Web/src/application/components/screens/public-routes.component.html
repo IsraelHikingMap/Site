@@ -163,17 +163,18 @@
                 </button>
                 } @else {
                 <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).facebook" [target]="'_blank'"
-                    analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Share facebook poi">
+                    analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Share facebook route">
                     <i class="fa icon-facebook"></i>
                     {{resources.shareWithFacebook}}
                 </a>
                 <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).whatsapp" [target]="'_blank'"
-                    analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Share whatsapp poi">
+                    analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Share whatsapp route">
                     <i class="fa icon-whatsapp"></i>
                     {{resources.shareWithWhatsapp}}
                 </a>
                 <button mat-menu-item [cdkCopyToClipboard]="getShareLinks(selectedRoutePoint).poiLink"
-                    analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Share copy to clipboard poi">
+                    analyticsOn="click" analyticsCategory="Public routes"
+                    analyticsLabel="Share copy to clipboard route">
                     <i class="fa icon-clipboard"></i>
                     {{resources.copyToClipboard}}
                 </button>
@@ -235,6 +236,13 @@
                         analyticsCategory="Public routes" analyticsLabel="Edit OSM route from list">
                         <i class="fa icon-pencil"></i>
                         {{resources.editProperties}}
+                    </button>
+                    }
+                    @if (!isApp()) {
+                    <button mat-menu-item [cdkCopyToClipboard]="getShareLinks(route).poiLink" analyticsOn="click"
+                        analyticsCategory="Public routes" analyticsLabel="Share copy to clipboard route">
+                        <i class="fa icon-clipboard"></i>
+                        {{resources.share}} - {{resources.copyToClipboard}}
                     </button>
                     }
                 </mat-menu>
