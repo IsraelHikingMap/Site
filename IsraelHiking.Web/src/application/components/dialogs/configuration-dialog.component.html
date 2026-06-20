@@ -23,6 +23,24 @@
         </mat-radio-group>
       </div>
 
+      <div class="flex flex-col">
+        <label>{{resources.theme}}</label>
+        <mat-radio-group (change)=setTheme($event.value) [value]="theme$ | async">
+          <div>
+            <mat-radio-button value="light" color="primary" analyticsOn="click" analyticsCategory="Configuration"
+              analyticsLabel="Set theme light">
+              {{resources.themeLight}}
+            </mat-radio-button>
+          </div>
+          <div>
+            <mat-radio-button value="dark" color="primary" analyticsOn="click" analyticsCategory="Configuration"
+              analyticsLabel="Set theme dark">
+              {{resources.themeDark}}
+            </mat-radio-button>
+          </div>
+        </mat-radio-group>
+      </div>
+
       @if (isApp()) {
       <div class="flex flex-col">
         <label>{{resources.batteryOptimization}}</label>

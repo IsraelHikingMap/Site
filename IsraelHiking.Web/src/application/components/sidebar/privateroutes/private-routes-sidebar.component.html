@@ -1,4 +1,4 @@
-<div class="sidebar-header flex flex-row justify-center items-center sticky top-0 z-10 bg-white"
+<div class="sidebar-header flex flex-row justify-center items-center sticky top-0 z-10 bg-surface"
     [dir]="resources.direction">
     <div class="flex-1 text-center text-xl title">{{resources.privateRoutes}}</div>
     <button mat-button class="w-1/6" type="button" (click)="close()" tabindex="-1"><i
@@ -52,8 +52,8 @@
         <div cdkDropList (cdkDropListDropped)="drop($event)">
             @for (route of routes; track route.id) {
             <div cdkDrag
-                class="bg-white [&.cdk-drag-animating]:transition-transform [&.cdk-drag-animating]:duration-300 [&.cdk-drag-placeholder]:opacity-0">
-                <div class="flex flex-col w-full bg-white">
+                class="bg-surface [&.cdk-drag-animating]:transition-transform [&.cdk-drag-animating]:duration-300 [&.cdk-drag-placeholder]:opacity-0">
+                <div class="flex flex-col w-full bg-surface">
                     <div class="flex flex-row items-center">
                         <div matButton cdkDragHandle class="cursor-move text-gray-400! mx-3"><i
                                 class="fa fa-lg icon-th"></i>

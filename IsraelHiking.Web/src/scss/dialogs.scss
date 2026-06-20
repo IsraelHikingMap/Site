@@ -17,23 +17,6 @@
     height: 0 !important;
 }
 
-.item {
-    padding: 5px;
-}
-
-.item:nth-child(odd) {
-    background: #f1f1f1;
-}
-
-.item-image {
-    padding: 5px;
-    border: 1px solid #b7b7b7;
-    border-radius: 5px;
-    width: 64px;
-    min-width: 64px;
-    height: 64px;
-}
-
 @media (width <=768px) {
     .mat-mdc-dialog-container {
         margin: 0 auto;
@@ -42,13 +25,6 @@
 
     .mat-mdc-dialog-container .mat-mdc-button {
         white-space: normal;
-    }
-
-    .item-image {
-        padding: 0;
-        width: 48px;
-        min-width: 48px;
-        height: 48px;
     }
 }
 

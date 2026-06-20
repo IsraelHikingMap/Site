@@ -75,6 +75,7 @@ import { DefaultStyleService } from "./services/default-style.service";
 import { DatabaseService } from "./services/database.service";
 import { ApplicationExitService } from "./services/application-exit.service";
 import { ScreenService } from "./services/screen.service";
+import { ThemeService } from "./services/theme.service";
 import { PurchaseService } from "./services/purchase.service";
 import { DeviceOrientationService } from "./services/device-orientation.service";
 import { RecordedRouteService } from "./services/recorded-route.service";
@@ -203,6 +204,7 @@ export const appConfig: ApplicationConfig = {
         DatabaseService,
         ApplicationExitService,
         ScreenService,
+        ThemeService,
         PurchaseService,
         ApplicationInitializeService,
         DeviceOrientationService,

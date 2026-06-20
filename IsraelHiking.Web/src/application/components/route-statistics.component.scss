@@ -23,8 +23,27 @@ $buttons-margin: 5px;
 .chart-container {
     height: $container-height;
     padding: 0 36px;
-    background: white;
+    background: var(--app-surface);
+    color: var(--app-on-surface);
     position: relative;
+}
+
+// d3-drawn chart colors follow the theme tokens (this component uses
+// ViewEncapsulation.None, so these rules are global). Axis tick lines and the
+// domain path use currentColor, set via .chart-container's `color` above; the
+// rest is covered here. The route line / hover point are colored in the
+// component since their value is dynamic (and also fed to a MapLibre layer).
+.chart-container svg text {
+    fill: var(--app-on-surface);
+}
+
+.chart-container .hover-line {
+    stroke: var(--app-on-surface);
+}
+
+.chart-container .hover-box {
+    stroke: var(--app-on-surface);
+    fill: var(--app-surface);
 }
 
 .chart-table {
@@ -49,8 +68,8 @@ $buttons-margin: 5px;
     bottom: 0px;
     left: 50%;
     transform: translate(-50%, 0);
-    border: 1px solid black;
-    background: white;
+    border: 1px solid var(--app-on-surface);
+    background: var(--app-surface);
     display: inline;
 }
 
@@ -70,10 +89,10 @@ $buttons-margin: 5px;
 }
 
 .chart-buttons {
-    background: white;
+    background: var(--app-surface);
 }
 
-@media (width <= 550px) {
+@media (width <=550px) {
     .chart-control-container {
         width: calc(100vw - 2 * #{$control-border});
         height: $container-height-small-screen;
@@ -89,25 +108,27 @@ $buttons-margin: 5px;
 }
 
 @keyframes scale-in {
-  from {
-    transform: scale(0.2);
-  }
-  to {
-    transform: scale(1);
-  }
+    from {
+        transform: scale(0.2);
+    }
+
+    to {
+        transform: scale(1);
+    }
 }
 
 @keyframes scale-out {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(0.2);
-  }
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(0.2);
+    }
 }
 
 .chart-animated {
-  transform-origin: bottom left;
+    transform-origin: bottom left;
 }
 
 [dir=rtl] .chart-animated {
@@ -115,9 +136,9 @@ $buttons-margin: 5px;
 }
 
 .chart-enter {
-  animation: scale-in 200ms ease-out forwards;
+    animation: scale-in 200ms ease-out forwards;
 }
 
 .chart-leave {
-  animation: scale-out 200ms ease-out forwards;
+    animation: scale-out 200ms ease-out forwards;
 }

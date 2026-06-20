@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { ConfigurationState, Language, BatteryOptimizationType } from "../models";
+import type { ConfigurationState, Language, BatteryOptimizationType, Theme } from "../models";
 
 
 export class SetLanguageAction {
@@ -48,6 +48,11 @@ export class SetUnitsAction {
 export class SetDateFormatAction {
     public static type = this.prototype.constructor.name;
     constructor(public dateFormat: string) { }
+}
+
+export class SetThemeAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public theme: Theme) { }
 }
 
 @State<ConfigurationState>({
@@ -133,6 +138,14 @@ export class ConfigurationReducer {
     public setDateFormat(ctx: StateContext<ConfigurationState>, action: SetDateFormatAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.dateFormat = action.dateFormat;
+            return lastState;
+        }));
+    }
+
+    @Action(SetThemeAction)
+    public setTheme(ctx: StateContext<ConfigurationState>, action: SetThemeAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.theme = action.theme;
             return lastState;
         }));
     }

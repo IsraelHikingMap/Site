@@ -22,11 +22,12 @@ import { initialState } from "../../reducers/initial-state";
 import {
     SetBatteryOptimizationTypeAction,
     SetDateFormatAction,
+    SetThemeAction,
     SetUnitsAction,
     ToggleAutomaticRecordingUploadAction,
     ToggleGotLostWarningsAction
 } from "../../reducers/configuration.reducer";
-import type { ApplicationState, BatteryOptimizationType } from "../../models";
+import type { ApplicationState, BatteryOptimizationType, Theme } from "../../models";
 
 @Component({
     selector: "configuration-dialog",
@@ -39,6 +40,7 @@ export class ConfigurationDialogComponent {
     public isAutomaticRecordingUpload$: Observable<boolean>;
     public isGotLostWarnings$: Observable<boolean>;
     public units$: Observable<"metric" | "imperial">;
+    public theme$: Observable<Theme>;
     public dateFormat$: Observable<string>;
     public manageSubscriptions: string;
     public username: string;
@@ -57,6 +59,7 @@ export class ConfigurationDialogComponent {
         this.isAutomaticRecordingUpload$ = this.store.select((state: ApplicationState) => state.configuration.isAutomaticRecordingUpload);
         this.isGotLostWarnings$ = this.store.select((state: ApplicationState) => state.configuration.isGotLostWarnings);
         this.units$ = this.store.select((state: ApplicationState) => state.configuration.units);
+        this.theme$ = this.store.select((state: ApplicationState) => state.configuration.theme);
         this.dateFormat$ = this.store.select((state: ApplicationState) => state.configuration.dateFormat);
         this.manageSubscriptions = this.runningContextService.isIos
             ? "https://apps.apple.com/account/subscriptions"
@@ -70,6 +73,10 @@ export class ConfigurationDialogComponent {
 
     public setUnits(units: "metric" | "imperial") {
         this.store.dispatch(new SetUnitsAction(units));
+    }
+
+    public setTheme(theme: Theme) {
+        this.store.dispatch(new SetThemeAction(theme));
     }
 
     public toggleAutomaticRecordingUpload() {

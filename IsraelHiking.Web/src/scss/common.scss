@@ -4,7 +4,6 @@
 @use "../fonts/icons.css";
 @use "font-awesome/css/font-awesome.css";
 @use "maplibre-gl/dist/maplibre-gl.css";
-@use "sass:map";
 @use "import-tailwind";
 
 $app-primary: mat.m2-define-palette(mat.$m2-green-palette, 600);
@@ -17,11 +16,21 @@ $app-theme: mat.m2-define-light-theme((color: (primary: $app-primary,
             typography: mat.m2-define-typography-config(),
             density: 0,
         ));
-$app-background: map.get($app-theme, background);
+$app-dark-theme: mat.m2-define-dark-theme((color: (primary: $app-primary,
+                accent: $app-accent,
+                warn: $app-warm,
+            ),
+        ));
 
 @include mat.elevation-classes();
 @include mat.app-background();
 @include mat.all-component-themes($app-theme);
+
+// Dark theme - only the colors are overridden, density/typography stay shared.
+// Toggled by ThemeService which adds the `dark-theme` class to <body>.
+.dark-theme {
+    @include mat.all-component-colors($app-dark-theme);
+}
 
 .mat-mdc-snack-bar-container {
     margin-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)) !important;
@@ -79,13 +88,27 @@ body {
     left: 0;
     margin: 0;
     font-family: Roboto, sans-serif;
+
+    // Theme tokens - the single source of truth for app chrome colors.
+    // Overridden under body.dark-theme; everything else just references these.
+    --app-surface: #ffffff;
+    --app-on-surface: rgba(0, 0, 0, 0.87);
+}
+
+.bg-surface {
+    background-color: var(--app-surface);
+}
+
+.bg-unknown {
+    background-color: #d1d5db;
+    color: rgba(0, 0, 0, 0.87);
 }
 
 .side-control {
     position: relative;
     padding: 2px;
     clear: both;
-    background-color: white;
+    background-color: var(--app-surface);
     margin: 0 !important;
     border: 2px solid rgba(0, 0, 0, .2);
 
@@ -247,10 +270,49 @@ mgl-map {
     margin: 0 !important;
 }
 
+// MapLibre popups follow the theme surface (the tip is a CSS-triangle whose
+// colored side depends on the popup anchor). One set of rules covers both
+// themes since it references the --app-surface token.
+.maplibregl-popup-content {
+    background: var(--app-surface);
+}
+
+.maplibregl-popup-anchor-top .maplibregl-popup-tip,
+.maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+.maplibregl-popup-anchor-top-right .maplibregl-popup-tip {
+    border-bottom-color: var(--app-surface);
+}
+
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
+.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip {
+    border-top-color: var(--app-surface);
+}
+
+.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+    border-right-color: var(--app-surface);
+}
+
+.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+    border-left-color: var(--app-surface);
+}
+
 @media print {
 
     .mat-mdc-tooltip,
     .side-control {
         display: none !important;
+    }
+}
+
+body.dark-theme {
+    --app-surface: #1e1e1e;
+    --app-on-surface: rgba(255, 255, 255, 0.87);
+
+    background-color: #121212;
+    color: var(--app-on-surface);
+
+    .side-control {
+        border-color: rgba(255, 255, 255, 0.2);
     }
 }

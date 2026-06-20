@@ -2,8 +2,11 @@
 
 export type BatteryOptimizationType = "screen-on" | "dark" | "screen-off";
 
+export type Theme = "light" | "dark";
+
 export type ConfigurationState = {
     batteryOptimizationType: BatteryOptimizationType;
+    theme: Theme;
     isAutomaticRecordingUpload: boolean;
     isGotLostWarnings: boolean;
     isShowBatteryConfirmation: boolean;

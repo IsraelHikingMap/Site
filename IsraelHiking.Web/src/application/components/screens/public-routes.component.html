@@ -1,5 +1,5 @@
 <div class="flex flex-row relative h-dvh relative" [dir]="resources.direction">
-    <div class="hidden max-md:block fixed bottom-safe bg-white left-1/2 -translate-x-1/2 z-20">
+    <div class="hidden max-md:block fixed bottom-safe bg-surface left-1/2 -translate-x-1/2 z-20">
         <mat-button-toggle-group [(ngModel)]="showMap">
             <mat-button-toggle [value]="false" analyticsOn="click" analyticsCategory="Public routes"
                 analyticsLabel="Open list view">
@@ -82,8 +82,8 @@
             }
         </mgl-map>
         @if (selectedRoutePoint) {
-        <div class="hidden max-md:block fixed bottom-safe bg-white w-full z-30 max-h-1/2 overflow-y-auto">
-            <div class="flex flex-row justify-center items-center px-2 sticky top-0 bg-white z-10 w-full mb-2">
+        <div class="hidden max-md:block fixed bottom-safe bg-surface w-full z-30 max-h-1/2 overflow-y-auto">
+            <div class="flex flex-row justify-center items-center px-2 sticky top-0 bg-surface z-10 w-full mb-2">
                 <div class="flex-1 text-center text-xl">{{getTitle(selectedRoutePoint)}}</div>
                 <button mat-button class="w-1/6" type="button" (click)="selectedRoutePoint = null" tabindex="-1">
                     <i class="fa fa-lg icon-close"></i>
@@ -115,7 +115,7 @@
             </span>
             }
             @default {
-            <span class="rounded-full bg-gray-300 p-2">
+            <span class="rounded-full bg-unknown p-2">
                 <i class="fa {{getIconFromType(selectedRoutePoint)}}"></i>
             </span>
             }
@@ -272,7 +272,7 @@
                 </span>
                 }
                 @default {
-                <span class="rounded-full bg-gray-300 p-2">
+                <span class="rounded-full bg-unknown p-2">
                     <i class="fa {{getIconFromType(route)}}"></i>
                 </span>
                 }
