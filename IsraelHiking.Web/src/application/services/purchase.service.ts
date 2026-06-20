@@ -42,7 +42,7 @@ export class PurchaseService {
             }
         });
         this.store.select((state: ApplicationState) => state.configuration.language.code).subscribe(async (languageCode) => {
-            if (await Purchases.isConfigured()) {
+            if ((await Purchases.isConfigured()).isConfigured) {
                 await Purchases.overridePreferredUILocale({ locale: languageCode });
             }
         });
