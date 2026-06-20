@@ -189,7 +189,6 @@ export class DefaultStyleService {
                     if (isBuiltInBaseLayer) {
                         this.useSliceQuery(styleJson);
                         this.useContourQuery(styleJson, units);
-                        console.log(styleJson);
                     }
                     break;
             }
