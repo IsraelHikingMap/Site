@@ -130,6 +130,20 @@ export class SearchComponent {
     public displayResults(results: SearchResultsPointOfInterest) {
         return results ? results.displayName : "";
     }
+    /**
+     * Return the icon color for the given search result.
+     * In case the icon color is black (like in coordinate results, caves, etc.) 
+     * return the theme's on-surface color instead.
+     * @param result 
+     * @returns 
+     */
+
+    public getIconColor(result: SearchResultsPointOfInterest): string {
+        const color = result.iconColor;
+        return color === "black" || color === "#000000" || color === "#000"
+            ? "var(--mat-sys-on-surface)"
+            : color;
+    }
 
     public moveToResults(searchResults: SearchResultsPointOfInterest) {
         if (this.router.url === RouteStrings.ROUTE_PUBLIC_ROUTES) {
