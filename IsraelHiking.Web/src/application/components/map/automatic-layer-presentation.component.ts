@@ -56,6 +56,9 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
         this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.units).subscribe(() => {
             this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
         }));
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.theme).subscribe(() => {
+            this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
+        }));
     }
 
     public ngOnDestroy() {

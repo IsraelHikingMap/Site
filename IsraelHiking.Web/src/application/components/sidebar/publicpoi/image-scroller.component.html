@@ -3,8 +3,10 @@
   @if (canEdit()) {
   <label class="w-full" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
     <a mat-button imageCapture class="w-full h-[unset]!" (changed)="add($event)" analyticsOn="click"
-      analyticsCategory="OSM" analyticsLabel="Upload image first image"><i class="fa icon-camera fa-5x"></i> <i
-        class="fa icon-plus fa-3x"></i></a>
+      analyticsCategory="OSM" analyticsLabel="Upload image first image">
+      <i class="fa icon-camera fa-5x align-middle me-1"></i>
+      <i class="fa icon-plus fa-3x align-middle"></i>
+    </a>
     <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*;capture=camera" multiple />
   </label>
   } @else {

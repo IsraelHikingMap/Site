@@ -24,16 +24,14 @@
     <mat-menu #listFilterTypeMenu="matMenu">
         <span class="mx-2">{{resources.routeType}}</span>
         <div mat-menu-item (click)="$event.stopPropagation()">
-            <mat-checkbox (change)="onFilterCategoryChange('Hiking')"
-                [checked]="isCategorySelected('Hiking')" analyticsOn="click" analyticsCategory="Public routes"
-                analyticsLabel="Filter by hiking">
+            <mat-checkbox (change)="onFilterCategoryChange('Hiking')" [checked]="isCategorySelected('Hiking')"
+                analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Filter by hiking">
                 <i class="fa icon-hike"></i>
             </mat-checkbox>
         </div>
         <div mat-menu-item (click)="$event.stopPropagation()">
-            <mat-checkbox (change)="onFilterCategoryChange('Bicycle')"
-                [checked]="isCategorySelected('Bicycle')" analyticsOn="click" analyticsCategory="Public routes"
-                analyticsLabel="Filter by bicycle">
+            <mat-checkbox (change)="onFilterCategoryChange('Bicycle')" [checked]="isCategorySelected('Bicycle')"
+                analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Filter by bicycle">
                 <i class="fa icon-bike"></i>
             </mat-checkbox>
         </div>
@@ -69,30 +67,26 @@
     <mat-menu #listFilterDifficultyMenu="matMenu">
         <span class="mx-2">{{resources.difficulty}}</span>
         <div mat-menu-item (click)="$event.stopPropagation()">
-            <mat-checkbox (change)="onFilterDifficultyChange('Easy')"
-                [checked]="isDificultySelected('Easy')" analyticsOn="click" analyticsCategory="Public routes"
-                analyticsLabel="Filter by easy difficulty">
+            <mat-checkbox (change)="onFilterDifficultyChange('Easy')" [checked]="isDificultySelected('Easy')"
+                analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Filter by easy difficulty">
                 <span class="rounded-full bg-green-500 p-2">{{resources.easy}}</span>
             </mat-checkbox>
         </div>
         <div mat-menu-item (click)="$event.stopPropagation()">
-            <mat-checkbox (change)="onFilterDifficultyChange('Moderate')"
-                [checked]="isDificultySelected('Moderate')" analyticsOn="click" analyticsCategory="Public routes"
-                analyticsLabel="Filter by moderate difficulty">
+            <mat-checkbox (change)="onFilterDifficultyChange('Moderate')" [checked]="isDificultySelected('Moderate')"
+                analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Filter by moderate difficulty">
                 <span class="rounded-full bg-yellow-500 p-2">{{resources.moderate}}</span>
             </mat-checkbox>
         </div>
         <div mat-menu-item (click)="$event.stopPropagation()">
-            <mat-checkbox (change)="onFilterDifficultyChange('Hard')"
-                [checked]="isDificultySelected('Hard')" analyticsOn="click" analyticsCategory="Public routes"
-                analyticsLabel="Filter by hard difficulty">
+            <mat-checkbox (change)="onFilterDifficultyChange('Hard')" [checked]="isDificultySelected('Hard')"
+                analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Filter by hard difficulty">
                 <span class="rounded-full bg-red-500 p-2 text-white">{{resources.hard}}</span>
             </mat-checkbox>
         </div>
         <div mat-menu-item (click)="$event.stopPropagation()">
-            <mat-checkbox (change)="onFilterDifficultyChange('Very Hard')"
-                [checked]="isDificultySelected('Very Hard')" analyticsOn="click" analyticsCategory="Public routes"
-                analyticsLabel="Filter by very hard difficulty">
+            <mat-checkbox (change)="onFilterDifficultyChange('Very Hard')" [checked]="isDificultySelected('Very Hard')"
+                analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Filter by very hard difficulty">
                 <span class="rounded-full bg-black p-2 text-white">{{resources.veryHard}}</span>
             </mat-checkbox>
         </div>
@@ -100,7 +94,7 @@
 </div>
 @if (filterUserName) {
 <div class="flex flex-row justify-center">
-    <button mat-button class="mx-2 rounded-full! bg-gray-200! p-2" (click)="clearUserFilter()">
+    <button mat-button class="mx-2 rounded-full! bg-gray-200! p-2 text-black!" (click)="clearUserFilter()">
         {{filterUserName}}
         <i class="fa fa-times mx-2"></i>
     </button>
