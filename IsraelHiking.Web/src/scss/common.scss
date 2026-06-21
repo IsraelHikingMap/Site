@@ -141,12 +141,10 @@ body {
         }
     }
 
-    // M3 buttons use a pill-shaped hover/focus state layer; square it so it
-    // matches the square side-control buttons.
     .mat-mdc-button-persistent-ripple,
     .mat-mdc-button-persistent-ripple::before,
     .mat-mdc-button-ripple {
-        border-radius: 0;
+        border-radius: 0; // avoid pill-shaped hover state for side buttons
     }
 }
 
