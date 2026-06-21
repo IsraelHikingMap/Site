@@ -161,7 +161,6 @@ export class DrawingComponent {
     public getRouteColor(): string {
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null) {
-            // Inherit the button's themed text color (black in light, white in dark theme)
             return "unset";
         }
         return selectedRoute.color;
