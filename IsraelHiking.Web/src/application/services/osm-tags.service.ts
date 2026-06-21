@@ -111,9 +111,11 @@ export class OsmTagsService {
                     poi.properties.poiCategory = "Water";
                     return;
                 case "ridge":
-                    poi.properties.poiIcon = "icon-peak";
+                case "volcano":
+                case "peak":
                     poi.properties.poiIconColor = "black";
-                    poi.properties.poiCategory = "Other";
+                    poi.properties.poiIcon = "icon-peak";
+                    poi.properties.poiCategory = "Natural";
                     return;
             }
         }
@@ -196,13 +198,6 @@ export class OsmTagsService {
             poi.properties.poiIconColor = "gray";
             poi.properties.poiIcon = "icon-bike";
             poi.properties.poiCategory = "Bicycle";
-            return;
-        }
-
-        if (feature.properties.natural === "peak") {
-            poi.properties.poiIconColor = "black";
-            poi.properties.poiIcon = "icon-peak";
-            poi.properties.poiCategory = "Natural";
             return;
         }
 

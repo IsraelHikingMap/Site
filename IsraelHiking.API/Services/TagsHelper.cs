@@ -107,6 +107,7 @@ public class TagsHelper : ITagsHelper
             case "icon-peak":
                 tagCombinations.Add([new("natural", "peak")]);
                 tagCombinations.Add([new("natural", "ridge")]);
+                tagCombinations.Add([new("natural", "volcano")]);
                 return tagCombinations;
             case "icon-inature":
                 tagCombinations.Add([new("ref:IL:inature", "*")]);
@@ -261,11 +262,13 @@ public class TagsHelper : ITagsHelper
                         Category = Categories.WATER
                     };
                 case "ridge":
+                case "peak":
+                case "volcano":
                     return new IconColorCategory
                     {
                         Color = "black",
                         Icon = "icon-peak",
-                        Category = Categories.OTHER
+                        Category = Categories.NATURAL
                     };
             }
         }
@@ -384,15 +387,6 @@ public class TagsHelper : ITagsHelper
             };
         }
 
-        if ("peak".Equals(GetString(attributes, "natural")))
-        {
-            return new IconColorCategory
-            {
-                Color = "black",
-                Icon = "icon-peak",
-                Category = Categories.NATURAL
-            };
-        }
 
         if (GetString(attributes, "highway") != null)
         {
