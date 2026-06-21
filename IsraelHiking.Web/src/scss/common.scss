@@ -1,51 +1,69 @@
 @use "@angular/material" as mat;
 @use "variables" as v;
+@use "theme-colors";
 @use "dialogs";
 @use "../fonts/icons.css";
 @use "font-awesome/css/font-awesome.css";
 @use "maplibre-gl/dist/maplibre-gl.css";
 @use "import-tailwind";
 
-$app-primary: mat.m2-define-palette(mat.$m2-green-palette, 600);
-$app-accent: mat.m2-define-palette(mat.$m2-yellow-palette);
-$app-warm: mat.m2-define-palette(mat.$m2-red-palette);
-$app-theme: mat.m2-define-light-theme((color: (primary: $app-primary,
-                accent: $app-accent,
-                warn: $app-warm,
+$low-emphasis-button-labels: (
+    text-label-text-color: var(--mat-sys-on-surface),
+    outlined-label-text-color: var(--mat-sys-on-surface),
+    protected-label-text-color: var(--mat-sys-on-surface)
+);
+
+html {
+    @include mat.theme((color: (primary: theme-colors.$primary-palette,
+                tertiary: theme-colors.$tertiary-palette,
+                theme-type: light,
             ),
-            typography: mat.m2-define-typography-config(),
+            typography: (plain-family: ("Noto Sans Regular", sans-serif),
+                brand-family: ("Noto Sans Regular", sans-serif),
+            ),
             density: 0,
         ));
-$app-dark-theme: mat.m2-define-dark-theme((color: (primary: $app-primary,
-                accent: $app-accent,
-                warn: $app-warm,
+    color-scheme: light;
+    @include mat.button-overrides($low-emphasis-button-labels);
+
+    --brand-color: #32cd6d;
+    @include mat.theme-overrides((primary: var(--brand-color)));
+}
+
+.dark-theme {
+    @include mat.theme((color: (primary: theme-colors.$primary-palette,
+                tertiary: theme-colors.$tertiary-palette,
+                theme-type: dark,
             ),
         ));
+    color-scheme: dark;
+    @include mat.button-overrides($low-emphasis-button-labels);
+}
+
+.error-button {
+    @include mat.button-overrides((protected-container-color: var(--mat-sys-error),
+            protected-label-text-color: var(--mat-sys-on-error),
+            text-label-text-color: var(--mat-sys-error),
+            outlined-label-text-color: var(--mat-sys-error),
+        ));
+}
 
 @include mat.elevation-classes();
-@include mat.app-background();
-@include mat.all-component-themes($app-theme);
-
-// Dark theme - only the colors are overridden, density/typography stay shared.
-// Toggled by ThemeService which adds the `dark-theme` class to <body>.
-.dark-theme {
-    @include mat.all-component-colors($app-dark-theme);
-}
 
 .mat-mdc-snack-bar-container {
     margin-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)) !important;
 
     &.success-snackbar {
-        --mat-snack-bar-container-color: #32CD6D;
+        --mat-snack-bar-container-color: var(--brand-color);
     }
 
     &.warn-snackbar {
-        --mat-snack-bar-container-color: #{mat.m2-get-color-from-palette($app-accent)};
-        --mat-snack-bar-supporting-text-color: ##000;
+        --mat-snack-bar-container-color: #ffeb3b;
+        --mat-snack-bar-supporting-text-color: #000;
     }
 
     &.error-snackbar {
-        --mat-snack-bar-container-color: #{mat.m2-get-color-from-palette($app-warm)};
+        --mat-snack-bar-container-color: #f44336;
     }
 
     &.confirm-snackbar {
@@ -87,16 +105,13 @@ body {
     right: 0;
     left: 0;
     margin: 0;
-    font-family: Roboto, sans-serif;
-
-    // Theme tokens - the single source of truth for app chrome colors.
-    // Overridden under body.dark-theme; everything else just references these.
-    --app-surface: #ffffff;
-    --app-on-surface: rgba(0, 0, 0, 0.87);
+    font-family: "Noto Sans Regular", sans-serif;
+    background-color: var(--mat-sys-background);
+    color: var(--mat-sys-on-surface);
 }
 
 .bg-surface {
-    background-color: var(--app-surface);
+    background-color: var(--mat-sys-surface);
 }
 
 .bg-unknown {
@@ -108,9 +123,9 @@ body {
     position: relative;
     padding: 2px;
     clear: both;
-    background-color: var(--app-surface);
+    background-color: var(--mat-sys-surface);
     margin: 0 !important;
-    border: 2px solid rgba(0, 0, 0, .2);
+    border: 2px solid var(--mat-sys-outline-variant);
 
     & button,
     a {
@@ -119,10 +134,19 @@ body {
         display: block;
         width: v.$app-button-size;
         height: v.$app-button-size;
+        border-radius: 0;
 
         & i {
             vertical-align: middle !important;
         }
+    }
+
+    // M3 buttons use a pill-shaped hover/focus state layer; square it so it
+    // matches the square side-control buttons.
+    .mat-mdc-button-persistent-ripple,
+    .mat-mdc-button-persistent-ripple::before,
+    .mat-mdc-button-ripple {
+        border-radius: 0;
     }
 }
 
@@ -131,7 +155,7 @@ body {
 }
 
 .active {
-    outline: 3px solid #32CD6D !important;
+    outline: 3px solid var(--brand-color) !important;
 }
 
 .stack-icon-top {
@@ -196,16 +220,16 @@ body {
 
 /* Progressbar override */
 .ng-bar {
-    background-color: #32CD6D !important;
+    background-color: var(--brand-color) !important;
 }
 
 .ng-spinner-icon {
-    border-top-color: #32CD6D !important;
-    border-left-color: #32CD6D !important;
+    border-top-color: var(--brand-color) !important;
+    border-left-color: var(--brand-color) !important;
 }
 
 .ng-meteor {
-    box-shadow: 0 0 10px #32CD6D, 0 0 5px #32CD6D !important
+    box-shadow: 0 0 10px var(--brand-color), 0 0 5px var(--brand-color) !important
 }
 
 /* Progressbar override end */
@@ -224,11 +248,11 @@ body {
 
 .maplibregl-ctrl-top-left {
     margin-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0)) !important;
-    margin-top: calc(var(--mat-toolbar-mobile-height) + var(--safe-area-inset-top, env(safe-area-inset-top, 0))) !important;
+    margin-top: calc(var(--app-toolbar-height, 56px) + var(--safe-area-inset-top, env(safe-area-inset-top, 0))) !important;
 }
 
 .maplibregl-ctrl-top-right {
-    margin-top: calc(var(--mat-toolbar-mobile-height) + var(--safe-area-inset-top, env(safe-area-inset-top, 0))) !important;
+    margin-top: calc(var(--app-toolbar-height, 56px) + var(--safe-area-inset-top, env(safe-area-inset-top, 0))) !important;
 }
 
 .maplibregl-ctrl-bottom-right {
@@ -240,24 +264,8 @@ body {
     margin-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0)) !important;
 }
 
-@media (width >=600px) {
-    .maplibregl-ctrl-top-left {
-        margin-top: calc(var(--mat-toolbar-standard-height) + var(--safe-area-inset-top, env(safe-area-inset-top, 0))) !important;
-    }
-
-    .maplibregl-ctrl-top-right {
-        margin-top: calc(var(--mat-toolbar-standard-height) + var(--safe-area-inset-top, env(safe-area-inset-top, 0))) !important;
-    }
-}
-
 .magrin-top-with-toolbar {
-    margin-top: calc(var(--mat-toolbar-mobile-height) + var(--safe-area-inset-top, env(safe-area-inset-top, 0)));
-}
-
-@media (width >=600px) {
-    .magrin-top-with-toolbar {
-        margin-top: calc(var(--mat-toolbar-standard-height) + var(--safe-area-inset-top, env(safe-area-inset-top, 0)));
-    }
+    margin-top: calc(var(--app-toolbar-height, 56px) + var(--safe-area-inset-top, env(safe-area-inset-top, 0)));
 }
 
 mgl-map {
@@ -270,31 +278,28 @@ mgl-map {
     margin: 0 !important;
 }
 
-// MapLibre popups follow the theme surface (the tip is a CSS-triangle whose
-// colored side depends on the popup anchor). One set of rules covers both
-// themes since it references the --app-surface token.
 .maplibregl-popup-content {
-    background: var(--app-surface);
+    background: var(--mat-sys-surface);
 }
 
 .maplibregl-popup-anchor-top .maplibregl-popup-tip,
 .maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
 .maplibregl-popup-anchor-top-right .maplibregl-popup-tip {
-    border-bottom-color: var(--app-surface);
+    border-bottom-color: var(--mat-sys-surface);
 }
 
 .maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
 .maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
 .maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip {
-    border-top-color: var(--app-surface);
+    border-top-color: var(--mat-sys-surface);
 }
 
 .maplibregl-popup-anchor-left .maplibregl-popup-tip {
-    border-right-color: var(--app-surface);
+    border-right-color: var(--mat-sys-surface);
 }
 
 .maplibregl-popup-anchor-right .maplibregl-popup-tip {
-    border-left-color: var(--app-surface);
+    border-left-color: var(--mat-sys-surface);
 }
 
 @media print {
@@ -302,17 +307,5 @@ mgl-map {
     .mat-mdc-tooltip,
     .side-control {
         display: none !important;
-    }
-}
-
-body.dark-theme {
-    --app-surface: #1e1e1e;
-    --app-on-surface: rgba(255, 255, 255, 0.87);
-
-    background-color: #121212;
-    color: var(--app-on-surface);
-
-    .side-control {
-        border-color: rgba(255, 255, 255, 0.2);
     }
 }

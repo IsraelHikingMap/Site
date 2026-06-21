@@ -1,9 +1,5 @@
 [mat-dialog-title] [mat-dialog-close] {
     position: absolute;
-    min-width: 0;
-    min-height: 0;
-    line-height: initial;
-    padding: 5px;
     top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
     right: 5px;
 }

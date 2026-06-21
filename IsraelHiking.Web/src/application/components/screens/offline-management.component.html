@@ -93,7 +93,7 @@
         }
         @if (selectedTileXY && !isSelectedAvailableForOffline() && !downloadingTileXY()) {
         <div class="flex-1 m-1">
-            <button mat-raised-button class="w-full" color="primary" (click)="downloadSelected()" analyticsOn="click"
+            <button mat-flat-button class="w-full" (click)="downloadSelected()" analyticsOn="click"
                 analyticsCategory="Offline Management" analyticsLabel="Download">
                 <i class="fa fa-lg icon-download"></i>
                 {{resources.startDownload}}
@@ -102,14 +102,14 @@
         }
         @if (selectedTileXY && isSelectedAvailableForOffline() && !downloadingTileXY()) {
         <div class="flex-1 m-1">
-            <button mat-raised-button class="w-full" color="primary" (click)="downloadSelected()" analyticsOn="click"
+            <button mat-flat-button class="w-full" (click)="downloadSelected()" analyticsOn="click"
                 analyticsCategory="Offline Management" analyticsLabel="Update">
                 <i class="fa fa-lg icon-download"></i>
                 {{resources.update}}
             </button>
         </div>
         <div class="flex-1 m-1">
-            <button mat-raised-button class="w-full" color="warn" (click)="deleteSelected()" analyticsOn="click"
+            <button mat-raised-button class="w-full error-button" (click)="deleteSelected()" analyticsOn="click"
                 analyticsCategory="Offline Management" analyticsLabel="Delete">
                 <i class="fa fa-lg icon-trash"></i>
                 {{resources.delete}}
@@ -118,7 +118,7 @@
         }
         @if (downloadingTileXY()) {
         <div class="flex-1 m-1">
-            <button mat-raised-button class="w-full" color="primary" (click)="cancelDownload()" analyticsOn="click"
+            <button mat-flat-button class="w-full" (click)="cancelDownload()" analyticsOn="click"
                 analyticsCategory="Offline Management" analyticsLabel="Cancel">
                 <i class="fa fa-lg icon-close"></i>
                 {{resources.cancel}}

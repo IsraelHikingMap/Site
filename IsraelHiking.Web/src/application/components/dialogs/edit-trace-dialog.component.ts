@@ -4,7 +4,7 @@ import { FormsModule } from "@angular/forms";
 import { MatFormField } from "@angular/material/form-field";
 import { MatInput, MatLabel } from "@angular/material/input";
 import { MatOption, MatSelect } from "@angular/material/select";
-import { MatButton } from "@angular/material/button";
+import { MatButton , MatIconButton } from "@angular/material/button";
 import { Dir } from "@angular/cdk/bidi";
 
 import { ResourcesService } from "../../services/resources.service";
@@ -16,7 +16,7 @@ import type { Trace, TraceVisibility } from "../../models";
 @Component({
     selector: "edit-trace-dialog",
     templateUrl: "./edit-trace-dialog.component.html",
-    imports: [FormsModule, MatFormField, MatLabel, MatInput, MatOption, MatSelect, MatButton, MatDialogActions, MatDialogTitle, MatDialogContent, MatDialogClose, Dir]
+    imports: [MatIconButton, FormsModule, MatFormField, MatLabel, MatInput, MatOption, MatSelect, MatButton, MatDialogActions, MatDialogTitle, MatDialogContent, MatDialogClose, Dir]
 })
 export class EditTraceDialogComponent {
     public description = "";

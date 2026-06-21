@@ -1,6 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogClose, MatDialogContent } from "@angular/material/dialog";
-import { MatButton } from "@angular/material/button";
+import { MatIconButton } from "@angular/material/button";
 import { Dir } from "@angular/cdk/bidi";
 import type { Immutable } from "immer";
 
@@ -11,7 +11,7 @@ import type { ShareUrl } from "../../models";
 @Component({
     selector: "app-share-show-dialog",
     templateUrl: "./share-show-dialog.component.html",
-    imports: [MatDialogContent, MatButton, Dir, MatDialogClose, ShareItemComponent]
+    imports: [MatIconButton, MatDialogContent, Dir, MatDialogClose, ShareItemComponent]
 })
 export class ShareShowDialogComponent {
     public resources = inject(ResourcesService);

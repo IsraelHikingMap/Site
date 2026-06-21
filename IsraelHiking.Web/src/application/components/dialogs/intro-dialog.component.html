@@ -10,7 +10,7 @@
                 <mat-radio-group (change)=resources.setLanguage($event.value) [value]="getLanuguageCode()">
                     @for (language of availableLanguages; track language) {
                     <div>
-                        <mat-radio-button [value]="language.code" color="primary" analyticsOn="click"
+                        <mat-radio-button [value]="language.code" analyticsOn="click"
                             analyticsCategory="Intro"
                             analyticsLabel="Select language {{language.code}}">{{language.label}}</mat-radio-button>
                     </div>
@@ -22,7 +22,7 @@
                     <mat-label>{{resources.activityType}}</mat-label>
                 </div>
                 <div class="flex flex-row">
-                    <mat-radio-group (change)=setActivityType($event.value) [value]="activityType" color="primary">
+                    <mat-radio-group (change)=setActivityType($event.value) [value]="activityType">
                         <mat-radio-button value="Hiking"><i class="fa icon-hike"></i></mat-radio-button>
                         <mat-radio-button value="Biking"><i class="fa icon-bike"></i></mat-radio-button>
                         <mat-radio-button value="4x4"><i class="fa icon-four-by-four"></i></mat-radio-button>
@@ -70,12 +70,12 @@
             </div>
             @if (step !== 2) {
             <div class="flex-1">
-                <button mat-raised-button color="primary" class="w-full" (click)="step = step + 1" analyticsOn="click"
+                <button mat-flat-button class="w-full" (click)="step = step + 1" analyticsOn="click"
                     analyticsCategory="Intro" analyticsLabel="Intro next">{{resources.next}}</button>
             </div>
             } @else {
             <div class="flex-1">
-                <button mat-raised-button color="primary" class="w-full" (click)="close()" analyticsOn="click"
+                <button mat-flat-button class="w-full" (click)="close()" analyticsOn="click"
                     analyticsCategory="Intro" analyticsLabel="Intro close">{{resources.close}}</button>
             </div>
             }

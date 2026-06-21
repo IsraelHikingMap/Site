@@ -1,6 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
-import { MatButton, MatAnchor } from "@angular/material/button";
+import { MatButton, MatAnchor , MatIconButton } from "@angular/material/button";
 import { MatDialog, MatDialogTitle, MatDialogClose, MatDialogActions } from "@angular/material/dialog";
 
 import { Urls } from "../../urls";
@@ -11,7 +11,7 @@ import { RunningContextService } from "../../services/running-context.service";
 @Component({
     selector: "use-app-dialog",
     templateUrl: "./use-app-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, MatDialogActions, MatAnchor, AnalyticsDirective]
+    imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, MatDialogActions, MatAnchor, AnalyticsDirective]
 })
 export class UseAppDialogComponent {
     public appAddress: string;

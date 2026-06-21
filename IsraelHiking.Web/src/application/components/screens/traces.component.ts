@@ -20,7 +20,7 @@ import { SecuredImageComponent } from "../secured-image.component";
 import { LayersComponent } from "../map/layers.component";
 import { RoutesPathComponent } from "../map/routes-path.component";
 import { MissingPartOverlayComponent } from "../overlays/missing-part-overlay.component";
-import { EditTraceDialogComponent } from "../dialogs/edit-trece-dialog.component";
+import { EditTraceDialogComponent } from "../dialogs/edit-trace-dialog.component";
 import { OsmAttributionComponent } from "../osm-attribution.component";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { AnalyticsDirective } from "../../directives/analytics.directive";

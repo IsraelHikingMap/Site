@@ -1,14 +1,14 @@
 ﻿<div [dir]="resources.direction">
   <div mat-dialog-title>
     <div>{{resources.language}}</div>
-    <button mat-button type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
+    <button mat-icon-button aria-label="Close" type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
   </div>
   <div mat-dialog-content>
     <div class="flex flex-row">
       <div class="flex-1">
         <mat-radio-group [(ngModel)]="selectedLanguageCode" class="flex flex-col">
           @for (language of availableLanguages; track language) {
-          <mat-radio-button [value]="language.code" color="primary" analyticsOn="click" analyticsCategory="Language"
+          <mat-radio-button [value]="language.code" analyticsOn="click" analyticsCategory="Language"
             analyticsLabel="Select language {{language.code}}">{{language.label}}</mat-radio-button>
           }
         </mat-radio-group>

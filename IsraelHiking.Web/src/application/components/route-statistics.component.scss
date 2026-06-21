@@ -23,27 +23,22 @@ $buttons-margin: 5px;
 .chart-container {
     height: $container-height;
     padding: 0 36px;
-    background: var(--app-surface);
-    color: var(--app-on-surface);
+    background: var(--mat-sys-surface);
+    color: var(--mat-sys-on-surface);
     position: relative;
 }
 
-// d3-drawn chart colors follow the theme tokens (this component uses
-// ViewEncapsulation.None, so these rules are global). Axis tick lines and the
-// domain path use currentColor, set via .chart-container's `color` above; the
-// rest is covered here. The route line / hover point are colored in the
-// component since their value is dynamic (and also fed to a MapLibre layer).
 .chart-container svg text {
-    fill: var(--app-on-surface);
+    fill: var(--mat-sys-on-surface);
 }
 
 .chart-container .hover-line {
-    stroke: var(--app-on-surface);
+    stroke: var(--mat-sys-on-surface);
 }
 
 .chart-container .hover-box {
-    stroke: var(--app-on-surface);
-    fill: var(--app-surface);
+    stroke: var(--mat-sys-on-surface);
+    fill: var(--mat-sys-surface);
 }
 
 .chart-table {
@@ -68,8 +63,8 @@ $buttons-margin: 5px;
     bottom: 0px;
     left: 50%;
     transform: translate(-50%, 0);
-    border: 1px solid var(--app-on-surface);
-    background: var(--app-surface);
+    border: 1px solid var(--mat-sys-on-surface);
+    background: var(--mat-sys-surface);
     display: inline;
 }
 
@@ -89,7 +84,7 @@ $buttons-margin: 5px;
 }
 
 .chart-buttons {
-    background: var(--app-surface);
+    background: var(--mat-sys-surface);
 }
 
 @media (width <=550px) {

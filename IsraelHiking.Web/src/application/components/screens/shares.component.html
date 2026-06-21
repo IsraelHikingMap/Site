@@ -53,35 +53,35 @@
             </button>
             <mat-menu #filterMenu="matMenu">
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Very Hard')"
+                    <mat-checkbox (change)="onFilterChange('difficulty', 'Very Hard')"
                         [checked]="filter.difficulty.includes('Very Hard')" analyticsOn="click"
                         analyticsCategory="Shares" analyticsLabel="Filter by very hard difficulty">
                         {{resources.veryHard}}
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Hard')"
+                    <mat-checkbox (change)="onFilterChange('difficulty', 'Hard')"
                         [checked]="filter.difficulty.includes('Hard')" analyticsOn="click" analyticsCategory="Shares"
                         analyticsLabel="Filter by hard difficulty">
                         {{resources.hard}}
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Moderate')"
+                    <mat-checkbox (change)="onFilterChange('difficulty', 'Moderate')"
                         analyticsOn="click" analyticsCategory="Shares" analyticsLabel="Filter by moderate difficulty"
                         [checked]="filter.difficulty.includes('Moderate')">
                         {{resources.moderate}}
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Easy')" analyticsOn="click"
+                    <mat-checkbox (change)="onFilterChange('difficulty', 'Easy')" analyticsOn="click"
                         analyticsCategory="Shares" analyticsLabel="Filter by easy difficulty"
                         [checked]="filter.difficulty.includes('Easy')">
                         {{resources.easy}}
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('difficulty', 'Unknown')"
+                    <mat-checkbox (change)="onFilterChange('difficulty', 'Unknown')"
                         [checked]="filter.difficulty.includes('Unknown')" analyticsOn="click" analyticsCategory="Shares"
                         analyticsLabel="Filter by unknown difficulty">
                         {{resources.unknown}}
@@ -89,28 +89,28 @@
                 </div>
                 <mat-divider></mat-divider>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('type', 'Hiking')"
+                    <mat-checkbox (change)="onFilterChange('type', 'Hiking')"
                         [checked]="filter.type.includes('Hiking')" analyticsOn="click" analyticsCategory="Shares"
                         analyticsLabel="Filter by hiking">
                         <i class="fa icon-hike"></i>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('type', 'Biking')"
+                    <mat-checkbox (change)="onFilterChange('type', 'Biking')"
                         [checked]="filter.type.includes('Biking')" analyticsOn="click" analyticsCategory="Shares"
                         analyticsLabel="Filter by biking">
                         <i class="fa icon-bike"></i>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('type', '4x4')" analyticsOn="click"
+                    <mat-checkbox (change)="onFilterChange('type', '4x4')" analyticsOn="click"
                         analyticsCategory="Shares" analyticsLabel="Filter by 4x4"
                         [checked]="filter.type.includes('4x4')">
                         <i class="fa icon-four-by-four"></i>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox color="primary" (change)="onFilterChange('type', 'Unknown')"
+                    <mat-checkbox (change)="onFilterChange('type', 'Unknown')"
                         [checked]="filter.type.includes('Unknown')" analyticsOn="click" analyticsCategory="Shares"
                         analyticsLabel="Filter by unknown type">
                         <i class="fa icon-question"></i>
