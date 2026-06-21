@@ -162,6 +162,7 @@ export const initialState =
     {
         configuration: {
             batteryOptimizationType: "screen-on",
+            theme: "light",
             isAutomaticRecordingUpload: true,
             isGotLostWarnings: false,
             isShowBatteryConfirmation: true,

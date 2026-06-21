@@ -161,7 +161,7 @@ export class DrawingComponent {
     public getRouteColor(): string {
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null) {
-            return "black";
+            return "unset";
         }
         return selectedRoute.color;
     }

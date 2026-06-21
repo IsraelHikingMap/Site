@@ -1,5 +1,5 @@
 import { Component, inject } from "@angular/core";
-import { MatButton } from "@angular/material/button";
+import { MatIconButton } from "@angular/material/button";
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from "@angular/material/expansion";
 import { MAT_DIALOG_DATA, MatDialogClose, MatDialogContent, MatDialogTitle } from "@angular/material/dialog";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -22,7 +22,7 @@ export type LegendSection = {
 @Component({
     selector: "legend-dialog",
     templateUrl: "./legend-dialog.component.html",
-    imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, LegendItemComponent, MatDialogTitle, MatDialogClose, MatDialogContent, MatButton]
+    imports: [MatIconButton, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, LegendItemComponent, MatDialogTitle, MatDialogClose, MatDialogContent]
 })
 export class LegendDialogComponent {
     public readonly resources = inject(ResourcesService);

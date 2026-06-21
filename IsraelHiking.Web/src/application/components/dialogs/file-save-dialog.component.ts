@@ -1,6 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
-import { MatButton, MatAnchor } from "@angular/material/button";
+import { MatButton, MatAnchor , MatIconButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatDialogTitle, MatDialogClose, MatDialogContent, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
@@ -13,7 +13,7 @@ import type { DataContainer, RouteData } from "../../models";
 @Component({
     selector: "file-save-dialog",
     templateUrl: "./file-save-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, AnalyticsDirective, MatAnchor]
+    imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, AnalyticsDirective, MatAnchor]
 })
 export class FileSaveDialogComponent {
     public readonly resources = inject(ResourcesService);

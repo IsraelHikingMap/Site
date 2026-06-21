@@ -11,6 +11,12 @@ import type { ApplicationState, EditableLayer, LayerData } from "../models";
 @Injectable()
 export class DefaultStyleService {
     private static indexNumber = 0;
+    private static readonly NIGHT_LAND_COLOR = "#1B1B1B";
+    private static readonly NIGHT_FILL_COLORS: Record<string, string> = {
+        "area-residential": "#2B2B2B",
+        "area-landcover-low": "#1D2A1A",
+        "water-area": "#14202E"
+    }
 
     public style: StyleSpecification;
 
@@ -162,6 +168,25 @@ export class DefaultStyleService {
         contourSource.maxzoom = 16;
     }
 
+    private applyNightModeIfNeeded(styleJson: StyleSpecification): void {
+        const theme = this.store.selectSnapshot((s: ApplicationState) => s.configuration.theme);
+        if (theme !== "dark") {
+            return;
+        }
+        for (const layer of styleJson.layers) {
+            if (layer.type === "background") {
+                layer.paint["background-color"] = DefaultStyleService.NIGHT_LAND_COLOR;
+            }
+            if (layer.type !== "fill" ||
+                !layer.paint ||
+                !(layer.id in DefaultStyleService.NIGHT_FILL_COLORS) ||
+                !("fill-color" in layer.paint)) {
+                continue;
+            }
+            layer.paint["fill-color"] = DefaultStyleService.NIGHT_FILL_COLORS[layer.id];
+        }
+    }
+
     public async getSourcesAndLayers(layerData: EditableLayer, isVisible: boolean, mode: "online-only" | "allow-offline" | "car"): Promise<StyleSpecification> {
         if (this.isRaster(layerData.address)) {
             return this.createRasterLayer(layerData, isVisible);
@@ -178,12 +203,14 @@ export class DefaultStyleService {
             switch (mode) {
                 case "online-only":
                     this.useContourProtocol(styleJson, units);
+                    this.applyNightModeIfNeeded(styleJson);
                     break;
                 case "allow-offline":
                     if (isBuiltInBaseLayer) {
                         this.useSliceProtocol(styleJson);
                     }
                     this.useContourProtocol(styleJson, units);
+                    this.applyNightModeIfNeeded(styleJson);
                     break;
                 case "car":
                     if (isBuiltInBaseLayer) {

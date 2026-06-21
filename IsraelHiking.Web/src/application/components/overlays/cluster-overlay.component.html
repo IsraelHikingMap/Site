@@ -2,13 +2,12 @@
   @for (feature of features(); track feature) {
   <div class="flex flex-row relative w-full items-center" [dir]="resources.getDirection(getTitle(feature))">
     @if (hasExtraData(feature)) {
-    <span class="has-extra-data" [style.background]="feature.properties.poiIconColor"></span>
+    <span class="has-extra-data" [style.background]="getIconColor(feature)"></span>
     }
     <button mat-button class="break-button-text w-full justify-stretch!" (click)="clickOnItem(feature)"
       [ngClass]="resources.getTextAlignment(getTitle(feature))" analyticsOn="click" analyticsCategory="POI"
       analyticsLabel="Open POI sidebar from map cluster">
-      <i class="fa {{feature.properties.poiIcon}} w-6 text-center fa-lg"
-        [style.color]="feature.properties.poiIconColor"></i>
+      <i class="fa {{feature.properties.poiIcon}} w-6 text-center fa-lg" [style.color]="getIconColor(feature)"></i>
       {{getTitle(feature)}}
     </button>
     <br />

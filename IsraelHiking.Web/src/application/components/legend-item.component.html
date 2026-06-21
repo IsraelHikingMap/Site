@@ -1,4 +1,4 @@
-﻿<div class="border border-black mb-2 w-[201px]" [ngClass]="{'table' : item().type === 'POI'}">
+﻿<div class="border border-outline-variant mb-2 w-[201px]" [ngClass]="{'table' : item().type === 'POI'}">
   <div (click)="moveToLocation()" class="cursor-pointer h-[50px]"
     [ngClass]="{'w-[200px]': item().type === 'Way', 'w-[50px]': item().type === 'POI'}" dir="ltr" analyticsOn="click"
     analyticsCategory="Info" analyticsLabel="Legend move map">
@@ -7,10 +7,10 @@
   <div class="px-2" [ngClass]="{'w-full table-cell text-start align-middle' : item().type === 'POI'}"
     matTooltip="{{item().osmTags.join(', ')}}" matTooltipPosition="above">
     @if (item().link) {
-    <a [href]="getLink()" [target]="'_blank'" class="no-underline text-black" analyticsOn="click"
+    <a [href]="getLink()" [target]="'_blank'" class="no-underline text-on-surface" analyticsOn="click"
       analyticsCategory="Info" analyticsLabel="Legend text OSM link">{{item().title}}</a>
     } @else {
-    <span class="no-underline text-black">{{item().title}}</span>
+    <span class="no-underline text-on-surface">{{item().title}}</span>
     }
   </div>
 </div>

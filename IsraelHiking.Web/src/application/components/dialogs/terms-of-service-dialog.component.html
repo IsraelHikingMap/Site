@@ -1,7 +1,7 @@
 ﻿﻿<div [dir]="resources.direction">
     <div mat-dialog-title>
         <div>{{resources.termsOfService}}</div>
-        <button mat-button type="button" mat-dialog-close="false" tabindex="-1"><i class="fa icon-close"></i></button>
+        <button mat-icon-button aria-label="Close" type="button" mat-dialog-close="false" tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-content>
         <div>
@@ -23,13 +23,13 @@
                     target="_blank">{{resources.privacyPolicyTermsOfService}}</a>
             </div>
             <div class="flex flex-row">
-                <mat-checkbox color="primary" [(ngModel)]="iAgree">{{resources.iHaveReadAndAgree}}</mat-checkbox>
+                <mat-checkbox [(ngModel)]="iAgree">{{resources.iHaveReadAndAgree}}</mat-checkbox>
             </div>
             <br />
         </div>
     </div>
     <div mat-dialog-actions>
-        <button mat-dialog-close mat-raised-button color="primary" [disabled]="iAgree === false" (click)="submit()"
+        <button mat-dialog-close mat-flat-button [disabled]="iAgree === false" (click)="submit()"
             analyticsOn="click" analyticsCategory="Terms Of Service"
             analyticsLabel="Sumbit">{{resources.submit}}</button>
     </div>

@@ -1,6 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
-import { MatButton } from "@angular/material/button";
+import { MatButton , MatIconButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
 import { FormsModule } from "@angular/forms";
@@ -18,7 +18,7 @@ import languageAnimationData from "../../../content/lottie/dialog-language.json"
 @Component({
     selector: "language-dialog",
     templateUrl: "./language-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, FormsModule, MatRadioButton, AnalyticsDirective, MatDialogActions, MatTooltip, LottieComponent]
+    imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, FormsModule, MatRadioButton, AnalyticsDirective, MatDialogActions, MatTooltip, LottieComponent]
 })
 export class LanguageDialogComponent {
     public selectedLanguageCode: LanguageCode;

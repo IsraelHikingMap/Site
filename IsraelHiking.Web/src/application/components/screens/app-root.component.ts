@@ -1,4 +1,4 @@
-import { Component, HostListener, inject } from "@angular/core";
+import { Component, HostListener, inject, viewChild, ElementRef, DestroyRef, afterNextRender, DOCUMENT } from "@angular/core";
 import { MatToolbar } from "@angular/material/toolbar";
 import { RouterOutlet } from "@angular/router";
 import { Store } from "@ngxs/store";
@@ -22,6 +22,22 @@ export class AppRootComponent {
     public readonly resources = inject(ResourcesService);
     private readonly runningContextService = inject(RunningContextService)
     private readonly store = inject(Store);
+    private readonly document = inject(DOCUMENT);
+    private readonly destroyRef = inject(DestroyRef);
+    private readonly toolbar = viewChild.required("toolbar", { read: ElementRef });
+
+    constructor() {
+        afterNextRender(() => {
+            const element = this.toolbar().nativeElement as HTMLElement;
+            // Set the toolbar height as a CSS variable so the map controls can offset below it
+            const update = () => this.document.documentElement.style
+                .setProperty("--app-toolbar-height", `${element.offsetHeight}px`);
+            update();
+            const observer = new ResizeObserver(update);
+            observer.observe(element);
+            this.destroyRef.onDestroy(() => observer.disconnect());
+        });
+    }
 
     @HostListener("window:scroll", [])
     onWindowScroll() {

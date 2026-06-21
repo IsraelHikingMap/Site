@@ -23,8 +23,22 @@ $buttons-margin: 5px;
 .chart-container {
     height: $container-height;
     padding: 0 36px;
-    background: white;
+    background: var(--mat-sys-surface);
+    color: var(--mat-sys-on-surface);
     position: relative;
+}
+
+.chart-container svg text {
+    fill: var(--mat-sys-on-surface);
+}
+
+.chart-container .hover-line {
+    stroke: var(--mat-sys-on-surface);
+}
+
+.chart-container .hover-box {
+    stroke: var(--mat-sys-on-surface);
+    fill: var(--mat-sys-surface);
 }
 
 .chart-table {
@@ -49,8 +63,8 @@ $buttons-margin: 5px;
     bottom: 0px;
     left: 50%;
     transform: translate(-50%, 0);
-    border: 1px solid black;
-    background: white;
+    border: 1px solid var(--mat-sys-on-surface);
+    background: var(--mat-sys-surface);
     display: inline;
 }
 
@@ -70,10 +84,10 @@ $buttons-margin: 5px;
 }
 
 .chart-buttons {
-    background: white;
+    background: var(--mat-sys-surface);
 }
 
-@media (width <= 550px) {
+@media (width <=550px) {
     .chart-control-container {
         width: calc(100vw - 2 * #{$control-border});
         height: $container-height-small-screen;
@@ -89,25 +103,27 @@ $buttons-margin: 5px;
 }
 
 @keyframes scale-in {
-  from {
-    transform: scale(0.2);
-  }
-  to {
-    transform: scale(1);
-  }
+    from {
+        transform: scale(0.2);
+    }
+
+    to {
+        transform: scale(1);
+    }
 }
 
 @keyframes scale-out {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(0.2);
-  }
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(0.2);
+    }
 }
 
 .chart-animated {
-  transform-origin: bottom left;
+    transform-origin: bottom left;
 }
 
 [dir=rtl] .chart-animated {
@@ -115,9 +131,9 @@ $buttons-margin: 5px;
 }
 
 .chart-enter {
-  animation: scale-in 200ms ease-out forwards;
+    animation: scale-in 200ms ease-out forwards;
 }
 
 .chart-leave {
-  animation: scale-out 200ms ease-out forwards;
+    animation: scale-out 200ms ease-out forwards;
 }

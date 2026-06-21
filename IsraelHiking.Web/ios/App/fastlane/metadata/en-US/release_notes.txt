@@ -1,2 +1,4 @@
-- Add support for CarPlay with dynamic contours and private POIs
+- Add support for CarPlay with dynamic contours 
+- Add private POIs support to CarPlay
+- Add support for dark theme
 - Various bug fixes and performance improvements

@@ -1,7 +1,7 @@
 ﻿<div [dir]="resources.direction">
   <div mat-dialog-title>
     <div>{{resources.advancedSettings}} - {{username}}</div>
-    <button mat-button type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
+    <button mat-icon-button aria-label="Close" type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
   </div>
   <div mat-dialog-content>
     <div class="flex flex-wrap gap-4">
@@ -9,15 +9,33 @@
         <label>{{resources.units}}</label>
         <mat-radio-group (change)=setUnits($event.value) [value]="units$ | async">
           <div>
-            <mat-radio-button value="metric" color="primary" analyticsOn="click" analyticsCategory="Configuration"
+            <mat-radio-button value="metric" analyticsOn="click" analyticsCategory="Configuration"
               analyticsLabel="Set units metric">
               {{resources.metric}}
             </mat-radio-button>
           </div>
           <div>
-            <mat-radio-button value="imperial" color="primary" analyticsOn="click" analyticsCategory="Configuration"
+            <mat-radio-button value="imperial" analyticsOn="click" analyticsCategory="Configuration"
               analyticsLabel="Set units imperial">
               {{resources.imperial}}
+            </mat-radio-button>
+          </div>
+        </mat-radio-group>
+      </div>
+
+      <div class="flex flex-col">
+        <label>{{resources.theme}}</label>
+        <mat-radio-group (change)=setTheme($event.value) [value]="theme$ | async">
+          <div>
+            <mat-radio-button value="light" analyticsOn="click" analyticsCategory="Configuration"
+              analyticsLabel="Set theme light">
+              {{resources.themeLight}}
+            </mat-radio-button>
+          </div>
+          <div>
+            <mat-radio-button value="dark" analyticsOn="click" analyticsCategory="Configuration"
+              analyticsLabel="Set theme dark">
+              {{resources.themeDark}}
             </mat-radio-button>
           </div>
         </mat-radio-group>
@@ -28,19 +46,19 @@
         <label>{{resources.batteryOptimization}}</label>
         <mat-radio-group (change)=setBatteryOptimizationType($event.value) [value]="batteryOptimizationType$ | async">
           <div>
-            <mat-radio-button value="screen-on" color="primary" analyticsOn="click" analyticsCategory="Intro"
+            <mat-radio-button value="screen-on" analyticsOn="click" analyticsCategory="Intro"
               analyticsLabel="Set battery optimization on">
               {{resources.screenOn}}
             </mat-radio-button>
           </div>
           <div>
-            <mat-radio-button value="dark" color="primary" analyticsOn="click" analyticsCategory="Intro"
+            <mat-radio-button value="dark" analyticsOn="click" analyticsCategory="Intro"
               analyticsLabel="Set battery optimization dark">
               {{resources.screenDark}}
             </mat-radio-button>
           </div>
           <div>
-            <mat-radio-button value="screen-off" color="primary" analyticsOn="click" analyticsCategory="Intro"
+            <mat-radio-button value="screen-off" analyticsOn="click" analyticsCategory="Intro"
               analyticsLabel="Set battery optimization off">
               {{resources.screenOff}}
             </mat-radio-button>
@@ -50,7 +68,7 @@
       <div class="flex flex-row">
         <div class="flex-1">
           <mat-checkbox [checked]="isAutomaticRecordingUpload$ | async" (change)="toggleAutomaticRecordingUpload()"
-            color="primary" analyticsOn="click" analyticsCategory="Configuration"
+            analyticsOn="click" analyticsCategory="Configuration"
             analyticsLabel="Toggle automatic upload">
             {{resources.automaticRecordingUpload}}
           </mat-checkbox>
@@ -60,7 +78,7 @@
       </div>
       <div class="flex flex-row">
         <div class="flex-1">
-          <mat-checkbox [checked]="isGotLostWarnings$ | async" (change)="toggleGotLostWarnings()" color="primary"
+          <mat-checkbox [checked]="isGotLostWarnings$ | async" (change)="toggleGotLostWarnings()"
             analyticsOn="click" analyticsCategory="Configuration" analyticsLabel="Toggle got lost warnings">
             {{resources.gotLostWarnings}}
           </mat-checkbox>
@@ -90,12 +108,12 @@
   <div mat-dialog-actions>
     <div class="flex flex-row w-full gap-1">
       <div class="flex-1">
-        <button mat-raised-button class="w-full" (click)="clearData()" color="warn" analyticsOn="click"
+        <button mat-raised-button class="w-full error-button" (click)="clearData()" analyticsOn="click"
           analyticsCategory="Configuration" analyticsLabel="Reset data">{{resources.resetData}}</button>
       </div>
       <div class="flex-1">
-        <a mat-raised-button class="w-full" href="https://www.openstreetmap.org/account/deletion" target="_blank"
-          color="warn" analyticsOn="click" analyticsCategory="Configuration"
+        <a mat-raised-button class="w-full error-button" href="https://www.openstreetmap.org/account/deletion" target="_blank"
+          analyticsOn="click" analyticsCategory="Configuration"
           analyticsLabel="Delete account">{{resources.deleteAccount}}</a>
       </div>
     </div>

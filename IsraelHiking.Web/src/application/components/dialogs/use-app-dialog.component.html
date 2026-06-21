@@ -1,11 +1,11 @@
 ﻿﻿<div [dir]="resources.direction">
     <div mat-dialog-title>
         <div>{{resources.thereSoMuchMoreYouCanDoWithOurApp}}</div>
-        <button mat-button type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
+        <button mat-icon-button aria-label="Close" type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-actions>
         <div class="flex flex-row w-full">
-            <a mat-raised-button [href]="appAddress" class="w-full" color="primary" mat-dialog-close analyticsOn="click"
+            <a mat-flat-button [href]="appAddress" class="w-full" mat-dialog-close analyticsOn="click"
                 analyticsCategory="Application" analyticsLabel="Got to application store"><i
                     class="fa fa-lg icon-mobile"></i> {{resources.startDownload}}</a>
         </div>

@@ -471,7 +471,6 @@ export class RouteStatisticsComponent implements OnInit {
             .attr("transform", `translate(0,${this.chartElements.height})`)
             .call(d3.axisBottom(this.chartElements.xScale).ticks(5))
             .append("text")
-            .attr("fill", "#000")
             .attr("text-anchor", "middle")
             .attr("transform", `translate(${this.chartElements.width / 2},30)`)
             .attr("dir", this.resources.direction)
@@ -483,7 +482,6 @@ export class RouteStatisticsComponent implements OnInit {
             .attr("class", "y-axis")
             .call(d3.axisLeft(this.chartElements.yScale).ticks(5))
             .append("text")
-            .attr("fill", "#000")
             .attr("transform", `translate(-30, ${this.chartElements.height / 2}) rotate(-90)`)
             .attr("text-anchor", "middle")
             .attr("dir", this.resources.direction)
@@ -553,19 +551,18 @@ export class RouteStatisticsComponent implements OnInit {
             .attr("class", "hover-group")
             .style("display", "none");
         this.chartElements.hoverGroup.append("line")
+            .attr("class", "hover-line")
             .attr("y1", 0)
             .attr("x1", 0)
             .attr("x2", 0)
             .attr("y2", this.chartElements.height)
-            .attr("stroke", "black")
             .attr("stroke-width", 1);
 
         this.chartElements.hoverGroup.append("circle")
             .attr("class", "circle-point")
             .attr("cx", 0)
             .attr("cy", 0)
-            .attr("r", 3)
-            .attr("fill", "black");
+            .attr("r", 3);
 
         this.chartElements.hoverGroup.append("circle")
             .attr("class", "circle-point-aura")
@@ -577,12 +574,11 @@ export class RouteStatisticsComponent implements OnInit {
 
         this.chartElements.hoverGroup.append("g")
             .append("rect")
+            .attr("class", "hover-box")
             .attr("x", 0)
             .attr("y", 0)
             .attr("height", 70)
             .attr("width", RouteStatisticsComponent.HOVER_BOX_WIDTH)
-            .attr("stroke", "black")
-            .attr("fill", "white")
             .attr("fill-opacity", "0.9");
     }
 
@@ -664,7 +660,6 @@ export class RouteStatisticsComponent implements OnInit {
         }
         const text = this.chartElements.hoverGroup.select("g")
             .append("text")
-            .attr("fill", "black")
             .attr("transform", `translate(${x}, ${y})`)
             .attr("text-anchor", "start")
             .attr("direction", this.resources.direction)
