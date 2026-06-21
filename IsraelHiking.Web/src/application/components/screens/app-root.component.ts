@@ -27,12 +27,9 @@ export class AppRootComponent {
     private readonly toolbar = viewChild.required("toolbar", { read: ElementRef });
 
     constructor() {
-        // Publish the real toolbar height as --app-toolbar-height so the map
-        // controls can offset below it. Measuring the element keeps it correct
-        // across breakpoints, density and any Material version change, instead
-        // of hard-coding Material's internal toolbar height tokens.
         afterNextRender(() => {
             const element = this.toolbar().nativeElement as HTMLElement;
+            // Set the toolbar height as a CSS variable so the map controls can offset below it
             const update = () => this.document.documentElement.style
                 .setProperty("--app-toolbar-height", `${element.offsetHeight}px`);
             update();
