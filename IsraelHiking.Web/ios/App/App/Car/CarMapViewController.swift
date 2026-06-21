@@ -365,8 +365,8 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         // legibility. Endpoints carry no title, so they produce no label.
         let markerLabels = MLNSymbolStyleLayer(identifier: Const.routeMarkerLabelsLayer, source: pointSource)
         markerLabels.text = NSExpression(forKeyPath: "title")
-        markerLabels.fontNames = NSExpression(forConstantValue: ["Noto Sans Regular"])
-        markerLabels.fontSize = NSExpression(forConstantValue: 12)
+        markerLabels.textFontNames = NSExpression(forConstantValue: ["Noto Sans Regular"])
+        markerLabels.textFontSize = NSExpression(forConstantValue: 12)
         markerLabels.textColor = NSExpression(forKeyPath: "strokeColor")
         markerLabels.textHaloColor = NSExpression(forConstantValue: UIColor.white)
         markerLabels.textHaloWidth = NSExpression(forConstantValue: 1.5)
