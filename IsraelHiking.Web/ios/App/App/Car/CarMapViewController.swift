@@ -65,7 +65,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     override func viewDidLoad() {
         super.viewDidLoad()
         routes = CarRouteData.list(from: store.load(CarStoreKeys.route))
-        applyStyle(store.loadString(CarStoreKeys.style))
+        setStyle(store.loadString(CarStoreKeys.style))
         store.addListener(self)
     }
 
@@ -92,7 +92,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     func onCarStoreUpdated(_ key: String) {
         switch key {
         case CarStoreKeys.style:
-            applyStyle(store.loadString(CarStoreKeys.style))
+            setStyle(store.loadString(CarStoreKeys.style))
         case CarStoreKeys.route:
             routes = CarRouteData.list(from: store.load(CarStoreKeys.route))
             if let style = mapView.style { renderRoutes(style) }
@@ -132,11 +132,11 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         if let style = mapView.style { renderGpsLocation(style) }
         guard let location = currentLocation() else { return }
         if Date().timeIntervalSince(lastUserInteraction) >= Const.panSuppression {
-            centerOn(location)
+            centerOnLocation(location)
         }
     }
 
-    private func centerOn(_ location: CLLocation) {
+    private func centerOnLocation(_ location: CLLocation) {
         center(on: location.coordinate, course: location.course, zoom: zoomForSpeed(location))
     }
 
@@ -152,7 +152,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
 
     private func center(on coordinate: CLLocationCoordinate2D, course: CLLocationDirection, zoom: Double? = nil) {
         // Shift the camera target so the location lands in the bottom third (what's ahead stays in
-        // view), mirroring CarMapContainer.setCenter on Android: project the point against the current
+        // view), mirroring CarMapContainer.center on Android: project the point against the current
         // camera, offset it down by a sixth of the height in screen space, then unproject. A good
         // approximation even though the bearing changes during the animation.
         let bounds = mapView.bounds
@@ -456,7 +456,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     func recenter() {
         lastUserInteraction = .distantPast
         if let location = currentLocation() {
-            centerOn(location)
+            centerOnLocation(location)
         } else {
             center(on: loadLastKnownLocation(), course: -1)
         }
@@ -489,7 +489,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     /// back to the default remote style when nothing has been pushed yet. Asynchronous; completion
     /// arrives via mapView(_:didFinishLoading:), where the images and route/location layers are
     /// (re)added.
-    private func applyStyle(_ json: String?) {
+    private func setStyle(_ json: String?) {
         if let json = json {
             mapView.styleJSON = addLayeringAnchor(to: json)
         } else {
@@ -572,7 +572,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         static let zoomAtHighSpeed = 14.0
 
         static let defaultZoom = 14.0
-        // Cold-install fallbacks; see loadLastKnownLocation / applyStyle.
+        // Cold-install fallbacks; see loadLastKnownLocation / setStyle.
         static let defaultLat = 51.5074
         static let defaultLng = -0.1278
         static let defaultStyleUrl =

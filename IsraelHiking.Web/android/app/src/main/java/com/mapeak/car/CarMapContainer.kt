@@ -58,18 +58,18 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
     private var mapLibreMapInstance: MapLibreMap? = null
     private var scaleAnimator: Animator? = null
     private var routes: List<CarRouteData> = emptyList()
-    private var lastUserInteractionMs: Long = 0L
+    private var lastUserInteraction: Long = 0L
     private var lastSavedZoom: Double = Double.NaN
     private var visibleArea: Rect? = null
     private var nightMode: Boolean = carContext.isDarkMode
 
-    fun scrollBy(x: Float, y: Float) {
-        lastUserInteractionMs = System.currentTimeMillis()
-        mapLibreMapInstance?.scrollBy(-x, -y, 0)
+    fun scrollBy(dx: Float, dy: Float) {
+        lastUserInteraction = System.currentTimeMillis()
+        mapLibreMapInstance?.scrollBy(-dx, -dy, 0)
     }
 
     fun recenter() {
-        lastUserInteractionMs = 0L
+        lastUserInteraction = 0L
         currentLocation()?.let { centerOnLocation(it) }
     }
 
@@ -85,7 +85,7 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
         val area = visibleArea?.takeIf { !it.isEmpty } ?: Rect(0, 0, view.width, view.height)
         val anchorX = area.exactCenterX()
         val anchorY = area.exactCenterY() + area.height() / 6f
-        setCenter(
+        center(
                 location.latitude,
                 location.longitude,
                 bearing,
@@ -130,7 +130,7 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
     private fun handleLocationUpdate() {
         mapLibreMapInstance?.getStyle { style: Style? -> style?.let { renderGpsLocation(it) } }
         val location = currentLocation() ?: return
-        if (System.currentTimeMillis() - lastUserInteractionMs >= PAN_SUPPRESSION_MS) {
+        if (System.currentTimeMillis() - lastUserInteraction >= PAN_SUPPRESSION_MS) {
             centerOnLocation(location)
         }
     }
@@ -182,7 +182,7 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
      * Applies [bearing], and the optional [zoom] is folded into the same ease (leaving it null
      * keeps the current zoom) so the speed zoom never fights the centering animation.
      */
-    fun setCenter(
+    fun center(
             lat: Double,
             lng: Double,
             bearing: Double,
@@ -465,7 +465,7 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
     }
 
     fun onScale(focusX: Float, focusY: Float, scaleFactor: Float) {
-        lastUserInteractionMs = System.currentTimeMillis()
+        lastUserInteraction = System.currentTimeMillis()
         val focal = PointF(focusX, focusY)
         when (scaleFactor) {
             DOUBLE_CLICK_FACTOR -> {
