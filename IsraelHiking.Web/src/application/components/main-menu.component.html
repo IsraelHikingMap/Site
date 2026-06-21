@@ -65,16 +65,15 @@
     </button>
     }
     @if (isOfflineDownloadAvailable()) {
-    <button mat-menu-item routerLink="/offline-management"
-      routerLinkActive="bg-[#528CFA40]! border-s-4! border-brand!" analyticsOn="click" analyticsCategory="User Menu"
-      analyticsLabel="Download">
+    <button mat-menu-item routerLink="/offline-management" routerLinkActive="bg-[#528CFA40]! border-s-4! border-brand!"
+      analyticsOn="click" analyticsCategory="User Menu" analyticsLabel="Download">
       <i class="fa fa-lg icon-download mat-icon"></i>
       <span class="mx-1">{{resources.downloadMapForOfflineUse}}</span>
     </button>
     }
     <button mat-menu-item (click)="openConfigurationDialog()" analyticsOn="click" analyticsCategory="User Menu"
-      analyticsLabel="Advanced settings open">
-      <span><i class="fa fa-lg icon-cogs"></i> {{resources.advancedSettings}}</span>
+      analyticsLabel="Settings open">
+      <span><i class="fa fa-lg icon-cogs"></i> {{resources.settings}}</span>
     </button>
     <button mat-menu-item (click)="logout()" analyticsOn="click" analyticsCategory="User Menu" analyticsLabel="Logout">
       <span><i class="fa fa-lg icon-sign-out"></i> {{resources.logout}}</span>
