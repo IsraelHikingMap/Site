@@ -4,9 +4,9 @@ import UIKit
 
 /**
  * Hosts the MapLibre map shown on the CarPlay screen. Ports `CarMapContainer.kt`: loads the style
- * pushed from JS, renders the planned route (line + directional arrows + start/end points) and the
- * GPS location (heading arrow + accuracy circle), keeps the dot in the bottom third, auto-recenters
- * after a pan, and exposes pan/zoom/recenter for the CarPlay map buttons.
+ * pushed from JS, renders the planned route (line + directional arrows + start/end points + private
+ * route points) and the GPS location (heading arrow + accuracy circle), keeps the dot in the bottom
+ * third, auto-recenters after a pan, and exposes pan/zoom/recenter for the CarPlay map buttons.
  *
  * Layer ordering uses the hidden `car-layering-anchor` layer that `addLayeringAnchor` injects into
  * the style: route layers go below it, location layers above it.
@@ -34,6 +34,8 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     private var animToCenter = CLLocationCoordinate2D()
     private var animFromHeading: CLLocationDirection = 0
     private var animToHeading: CLLocationDirection = 0
+    private var animFromZoom: Double = 0
+    private var animToZoom: Double = 0
 
     // MARK: lifecycle
 
@@ -63,7 +65,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     override func viewDidLoad() {
         super.viewDidLoad()
         routes = CarRouteData.list(from: store.load(CarStoreKeys.route))
-        applyStyle(store.loadString(CarStoreKeys.style))
+        setStyle(store.loadString(CarStoreKeys.style))
         store.addListener(self)
     }
 
@@ -90,7 +92,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     func onCarStoreUpdated(_ key: String) {
         switch key {
         case CarStoreKeys.style:
-            applyStyle(store.loadString(CarStoreKeys.style))
+            setStyle(store.loadString(CarStoreKeys.style))
         case CarStoreKeys.route:
             routes = CarRouteData.list(from: store.load(CarStoreKeys.route))
             if let style = mapView.style { renderRoutes(style) }
@@ -130,17 +132,27 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         if let style = mapView.style { renderGpsLocation(style) }
         guard let location = currentLocation() else { return }
         if Date().timeIntervalSince(lastUserInteraction) >= Const.panSuppression {
-            centerOn(location)
+            centerOnLocation(location)
         }
     }
 
-    private func centerOn(_ location: CLLocation) {
-        center(on: location.coordinate, course: location.course)
+    private func centerOnLocation(_ location: CLLocation) {
+        center(on: location.coordinate, course: location.course, zoom: zoomForSpeed(location))
     }
 
-    private func center(on coordinate: CLLocationCoordinate2D, course: CLLocationDirection) {
+    /// Waze-like speed-adaptive zoom: the faster we go, the further out we zoom so more of the road
+    /// ahead stays visible. Returns nil when the fix has no valid speed (stationary/just acquired) so
+    /// the current zoom is left untouched. Mirrors zoomForSpeed in CarMapContainer.kt.
+    private func zoomForSpeed(_ location: CLLocation) -> Double? {
+        guard location.speed >= 0 else { return nil }
+        let raw = (location.speed - Const.speedMinMps) / (Const.speedMaxMps - Const.speedMinMps)
+        let t = min(1, max(0, raw))
+        return Const.zoomAtLowSpeed + (Const.zoomAtHighSpeed - Const.zoomAtLowSpeed) * t
+    }
+
+    private func center(on coordinate: CLLocationCoordinate2D, course: CLLocationDirection, zoom: Double? = nil) {
         // Shift the camera target so the location lands in the bottom third (what's ahead stays in
-        // view), mirroring CarMapContainer.setCenter on Android: project the point against the current
+        // view), mirroring CarMapContainer.center on Android: project the point against the current
         // camera, offset it down by a sixth of the height in screen space, then unproject. A good
         // approximation even though the bearing changes during the animation.
         let bounds = mapView.bounds
@@ -157,6 +169,8 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         animToCenter = target
         animFromHeading = mapView.direction
         animToHeading = course >= 0 ? course : mapView.direction
+        animFromZoom = mapView.zoomLevel
+        animToZoom = zoom ?? mapView.zoomLevel
         animStart = CACurrentMediaTime()
         startCameraAnimation()
     }
@@ -182,8 +196,9 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         let lat = animFromCenter.latitude + (animToCenter.latitude - animFromCenter.latitude) * e
         let lng = animFromCenter.longitude + (animToCenter.longitude - animFromCenter.longitude) * e
         let heading = animFromHeading + shortestHeadingDelta(animFromHeading, animToHeading) * e
+        let zoom = animFromZoom + (animToZoom - animFromZoom) * e
         mapView.setCenter(CLLocationCoordinate2D(latitude: lat, longitude: lng),
-                          zoomLevel: mapView.zoomLevel, animated: false)
+                          zoomLevel: zoom, animated: false)
         // setCenter's direction parameter doesn't rotate the map on the CarPlay display; set the
         // bearing explicitly so the map turns to face the direction of travel (heading-up).
         mapView.setDirection(heading, animated: false)
@@ -267,7 +282,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     private func renderRoutes(_ style: MLNStyle) {
         let valid = routes.filter { $0.coordinates.count >= 2 }
         let lineFeatures = valid.map { lineFeature(for: $0) }
-        let pointFeatures = valid.flatMap { endpointFeatures(for: $0) }
+        let pointFeatures = valid.flatMap { endpointFeatures(for: $0) } + valid.flatMap { markerFeatures(for: $0) }
         let lineCollection = MLNShapeCollectionFeature(shapes: lineFeatures)
         let pointCollection = MLNShapeCollectionFeature(shapes: pointFeatures)
 
@@ -308,6 +323,19 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         return [start, end]
     }
 
+    /// Private route points (POIs): a transparent circle outlined in the route color, plus the title
+    /// below it. Mirrors createFeaturesForRoute on the web (color "transparent", strokeColor = route
+    /// color); the title label has no web map equivalent (the web shows it via an HTML overlay).
+    private func markerFeatures(for route: CarRouteData) -> [MLNPointFeature] {
+        let color = route.color ?? Const.routeArrowFallbackColor
+        return route.markers.map { marker in
+            let feature = MLNPointFeature()
+            feature.coordinate = marker.coordinate
+            feature.attributes = ["color": "transparent", "strokeColor": color, "title": marker.title]
+            return feature
+        }
+    }
+
     private func addRouteLayers(_ style: MLNStyle, lineSource: MLNShapeSource, pointSource: MLNShapeSource) {
         let line = MLNLineStyleLayer(identifier: Const.routeLayer, source: lineSource)
         line.lineColor = NSExpression(forKeyPath: "color")
@@ -325,20 +353,39 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         arrows.iconAllowsOverlap = NSExpression(forConstantValue: true)
         arrows.iconIgnoresPlacement = NSExpression(forConstantValue: true)
 
+        // One circle layer for every point (endpoints + markers), differentiated only by the per-
+        // feature color/strokeColor — markers carry color "transparent". Mirrors the web.
         let points = MLNCircleStyleLayer(identifier: Const.routePointsLayer, source: pointSource)
         points.circleColor = NSExpression(forKeyPath: "color")
         points.circleRadius = NSExpression(forConstantValue: 7)
         points.circleStrokeColor = NSExpression(forKeyPath: "strokeColor")
         points.circleStrokeWidth = NSExpression(forConstantValue: 3)
 
+        // Marker titles sit below the circle (text anchored at its top), with a white halo for
+        // legibility. Endpoints carry no title, so they produce no label.
+        let markerLabels = MLNSymbolStyleLayer(identifier: Const.routeMarkerLabelsLayer, source: pointSource)
+        markerLabels.text = NSExpression(forKeyPath: "title")
+        markerLabels.textFontNames = NSExpression(forConstantValue: ["Noto Sans Regular"])
+        markerLabels.textFontSize = NSExpression(forConstantValue: 12)
+        markerLabels.textColor = NSExpression(forKeyPath: "strokeColor")
+        markerLabels.textHaloColor = NSExpression(forConstantValue: UIColor.white)
+        markerLabels.textHaloWidth = NSExpression(forConstantValue: 1.5)
+        markerLabels.textAnchor = NSExpression(forConstantValue: "top")
+        // Push the label below the circle (in ems). Offset stays screen-relative as the map rotates
+        // heading-up, unlike a map-anchored translation.
+        markerLabels.textOffset = NSExpression(forConstantValue: NSValue(cgVector: CGVector(dx: 0, dy: 0.7)))
+        markerLabels.textOptional = NSExpression(forConstantValue: true)
+
         // Routes render below the layering anchor (under labels), arrows/points just above the line.
         insertBelowAnchor(line, in: style)
         if let above = style.layer(withIdentifier: Const.routeLayer) {
             style.insertLayer(arrows, above: above)
             style.insertLayer(points, above: arrows)
+            style.insertLayer(markerLabels, above: points)
         } else {
             style.addLayer(arrows)
             style.addLayer(points)
+            style.addLayer(markerLabels)
         }
     }
 
@@ -409,7 +456,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     func recenter() {
         lastUserInteraction = .distantPast
         if let location = currentLocation() {
-            centerOn(location)
+            centerOnLocation(location)
         } else {
             center(on: loadLastKnownLocation(), course: -1)
         }
@@ -442,7 +489,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     /// back to the default remote style when nothing has been pushed yet. Asynchronous; completion
     /// arrives via mapView(_:didFinishLoading:), where the images and route/location layers are
     /// (re)added.
-    private func applyStyle(_ json: String?) {
+    private func setStyle(_ json: String?) {
         if let json = json {
             mapView.styleJSON = addLayeringAnchor(to: json)
         } else {
@@ -504,6 +551,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         static let routeLayer = "planned-route-layer"
         static let routeArrowsLayer = "planned-route-arrows-layer"
         static let routePointsLayer = "planned-route-points-layer"
+        static let routeMarkerLabelsLayer = "planned-route-marker-labels-layer"
         static let routeStartColor = "#43a047"
         static let routeEndColor = "red"
         static let routeArrowIconImage = "arrow"
@@ -517,8 +565,14 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         static let panSuppression: TimeInterval = 5
         static let cameraEase: TimeInterval = 0.25
 
+        // Speed-adaptive zoom (see zoomForSpeed); speeds in m/s. Mirrors CarMapContainer.kt.
+        static let speedMinMps = 0.0
+        static let speedMaxMps = 30.0
+        static let zoomAtLowSpeed = 16.5
+        static let zoomAtHighSpeed = 14.0
+
         static let defaultZoom = 14.0
-        // Cold-install fallbacks; see loadLastKnownLocation / applyStyle.
+        // Cold-install fallbacks; see loadLastKnownLocation / setStyle.
         static let defaultLat = 51.5074
         static let defaultLng = -0.1278
         static let defaultStyleUrl =

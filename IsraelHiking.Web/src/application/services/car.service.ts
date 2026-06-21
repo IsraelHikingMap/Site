@@ -77,7 +77,8 @@ export class CarService {
                 weight: route.weight,
                 color: route.color,
                 opacity: route.opacity,
-                name: route.name
+                name: route.name,
+                markers: (route.markers ?? []).map(m => ({ latlng: [m.latlng.lng, m.latlng.lat], title: m.title ?? "" }))
             }));
 
         await ReactivePreferences.storeValue({ key: "route_instructions", value: {} });
