@@ -137,7 +137,6 @@ export class SearchComponent {
      * @param result 
      * @returns 
      */
-
     public getIconColor(result: SearchResultsPointOfInterest): string {
         const color = result.iconColor;
         return color === "black" || color === "#000000" || color === "#000"
