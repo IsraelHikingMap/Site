@@ -406,6 +406,18 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiIconColor).toBe("black");
     });
 
+    it("Should set icon color category for natural volcano", () => {
+        // Arrange
+        const feature = createFeature({ natural: "volcano" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("Natural");
+        expect(poi.properties.poiIcon).toBe("icon-peak");
+        expect(poi.properties.poiIconColor).toBe("black");
+    });
+
     it("Should set icon color category for cycleway", () => {
         // Arrange
         const feature = createFeature({ highway: "cycleway" });
@@ -631,7 +643,7 @@ describe("OsmTagsService", () => {
         // Assert
         expect(poi.properties.poiIconColor).toBe("black");
         expect(poi.properties.poiIcon).toBe("icon-peak");
-        expect(poi.properties.poiCategory).toBe("Other");
+        expect(poi.properties.poiCategory).toBe("Natural");
     });
 
     it("Should set icon color category for recreation_ground mtb", () => {
