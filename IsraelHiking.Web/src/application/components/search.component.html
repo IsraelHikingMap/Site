@@ -13,10 +13,10 @@
     <mat-option [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']"
       [dir]="resources.getDirection(result.title)">
       @if (result.hasExtraData) {
-      <span class="has-extra-data" [style.background]="result.iconColor"></span>
+      <span class="has-extra-data" [style.background]="getIconColor(result)"></span>
       }
       @if (result.icon) {
-      <i class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
+      <i class="fa" [ngClass]="result.icon" [style.color]="getIconColor(result)"></i>
       }
       <span>{{result.displayName}}</span>
     </mat-option>

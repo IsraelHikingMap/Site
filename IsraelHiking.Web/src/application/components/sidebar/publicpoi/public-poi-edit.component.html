@@ -1,4 +1,4 @@
-﻿<div class="flex flex-row sticky top-0 z-10 bg-white">
+﻿<div class="flex flex-row sticky top-0 z-10 bg-surface">
   <div class="flex-1">
     <button mat-button class="w-full min-w-[unset]! p-0!" (click)="save()" [disabled]="isLoading"
       matTooltip="{{resources.save}}" matTooltipPosition="below" analyticsOn="click" analyticsCategory="POI"
@@ -10,7 +10,7 @@
       @if (isLoading) {
       <mat-spinner diameter="24"></mat-spinner>
       } @else {
-      <i class="fa icon-close"></i>
+      <i class="fa fa-lg icon-close"></i>
       }
     </button>
   </div>
@@ -83,7 +83,7 @@
   }
   @if (info().showLocationUpdate) {
   <div class="flex flex-row">
-    <mat-checkbox color="primary" [(ngModel)]="updateLocation">{{resources.updateLocation}}</mat-checkbox>
+    <mat-checkbox [(ngModel)]="updateLocation">{{resources.updateLocation}}</mat-checkbox>
   </div>
   }
 </mat-card>

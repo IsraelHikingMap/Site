@@ -9,7 +9,6 @@ import { Urls } from "../../urls";
 @Component({
     selector: "landing",
     templateUrl: "./landing.component.html",
-    styleUrls: ["./landing.component.scss"],
     imports: [RouterLink]
 })
 export class LandingComponent {

@@ -189,6 +189,9 @@ export class ResourcesService {
     public reportAnIssueSiteInstructions: string;
     public addPointToActiveRoute: string;
     public advancedSettings: string;
+    public theme: string;
+    public themeLight: string;
+    public themeDark: string;
     public batteryOptimization: string;
     public batteryOptimizationHint: string;
     public automaticRecordingUpload: string;
@@ -511,7 +514,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1777838898465");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1782026828777");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -675,6 +678,9 @@ export class ResourcesService {
         this.reportAnIssueSiteInstructions = this.gettextCatalog.getString("Report an issue site instructions");
         this.addPointToActiveRoute = this.gettextCatalog.getString("Add point to active route");
         this.advancedSettings = this.gettextCatalog.getString("Advanced Settings");
+        this.theme = this.gettextCatalog.getString("Theme");
+        this.themeLight = this.gettextCatalog.getString("Light");
+        this.themeDark = this.gettextCatalog.getString("Dark");
         this.batteryOptimization = this.gettextCatalog.getString("Battery optimization");
         this.batteryOptimizationHint = this.gettextCatalog.getString("Dims display when there's no user interaction");
         this.automaticRecordingUpload = this.gettextCatalog.getString("Automatic upload of recording");

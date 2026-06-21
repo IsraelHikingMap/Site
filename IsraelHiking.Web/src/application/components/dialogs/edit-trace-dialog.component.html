@@ -1,7 +1,7 @@
 <div [dir]="resources.direction">
     <div mat-dialog-title>
         <div>{{title}}</div>
-        <button mat-button type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
+        <button mat-icon-button aria-label="Close" type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-content>
         <div class="flex flex-row">
@@ -31,7 +31,7 @@
                 <button class="w-full" mat-button mat-dialog-close>{{resources.cancel}}</button>
             </div>
             <div class="flex-1">
-                <button class="w-full" color="primary" mat-raised-button mat-dialog-close
+                <button class="w-full" mat-flat-button mat-dialog-close
                     (click)="update()">{{resources.update}}</button>
             </div>
         </div>

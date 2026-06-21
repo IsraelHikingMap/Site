@@ -1,7 +1,7 @@
 ﻿<div [dir]="resources.direction">
   <div mat-dialog-title>
     <div>{{shareUrl.title}}</div>
-    <button mat-button type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
+    <button mat-icon-button aria-label="Close" type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
   </div>
   <div mat-dialog-content>
     <div class="flex flex-row justify-center">
@@ -45,12 +45,12 @@
     }
     @if (canUpdate) {
     <div class="flex flex-row">
-      <mat-checkbox color="primary" [(ngModel)]="updateCurrentShare"
+      <mat-checkbox [(ngModel)]="updateCurrentShare"
         (change)="updateCurrentShareChanged($event)">{{resources.updateCurrentShare}}</mat-checkbox>
     </div>
     }
     <div class="flex flex-row items-center">
-      <mat-radio-group [(ngModel)]="shareUrl.public" color="primary">
+      <mat-radio-group [(ngModel)]="shareUrl.public">
         <mat-radio-button [value]="false">{{resources.private}}</mat-radio-button>
         <mat-radio-button [value]="true" [disabled]="!canPublishPublic">{{resources.public}}</mat-radio-button>
       </mat-radio-group>
@@ -64,7 +64,7 @@
       <mat-label>{{resources.routeType}}</mat-label>
     </div>
     <div class="flex flex-row">
-      <mat-radio-group [value]="shareUrl.type" (change)="setActivityType($event.value)" color="primary">
+      <mat-radio-group [value]="shareUrl.type" (change)="setActivityType($event.value)">
         <mat-radio-button value="Hiking"><i class="fa fa-lg icon-hike me-3"></i></mat-radio-button>
         <mat-radio-button value="Biking"><i class="fa fa-lg icon-bike me-3"></i></mat-radio-button>
         <mat-radio-button value="4x4"><i class="fa fa-lg icon-four-by-four me-3"></i></mat-radio-button>
@@ -75,7 +75,7 @@
       <mat-label>{{resources.difficulty}}</mat-label>
     </div>
     <div class="flex flex-row">
-      <mat-radio-group [(ngModel)]="shareUrl.difficulty" color="primary">
+      <mat-radio-group [(ngModel)]="shareUrl.difficulty">
         <mat-radio-button value="Easy">
           <span class="rounded-full bg-green-500 p-2 me-2">{{resources.easy}}</span>
         </mat-radio-button>
@@ -89,7 +89,7 @@
           <span class="rounded-full bg-black p-2 text-white me-2">{{resources.veryHard}}</span>
         </mat-radio-button>
         <mat-radio-button value="Unknown">
-          <span class="rounded-full bg-gray-300 p-2 me-2">{{resources.unknown}}</span>
+          <span class="rounded-full bg-unknown p-2 me-2">{{resources.unknown}}</span>
         </mat-radio-button>
       </mat-radio-group>
     </div>
@@ -123,7 +123,7 @@
   </div>
   <div mat-dialog-actions>
     <div class="flex flex-row w-full">
-      <button mat-raised-button class="w-full" color="primary" (click)="uploadShareUrl()"
+      <button mat-flat-button class="w-full" (click)="uploadShareUrl()"
         [disabled]="isLoading || !canUpload()" analyticsOn="click" analyticsCategory="Share"
         analyticsLabel="Share {{updateCurrentShare ? 'update' : 'create'}}">{{updateCurrentShare ? resources.update :
         resources.generateUrlToShareWithYourFriends}}</button>

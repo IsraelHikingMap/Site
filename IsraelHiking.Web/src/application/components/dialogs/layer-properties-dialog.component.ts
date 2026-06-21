@@ -1,7 +1,7 @@
 import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions, MAT_DIALOG_DATA, MatDialog } from "@angular/material/dialog";
-import { MatButton } from "@angular/material/button";
+import { MatButton , MatIconButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatFormField, MatLabel, MatError } from "@angular/material/form-field";
 import { MatInput } from "@angular/material/input";
@@ -35,7 +35,7 @@ export type LayerPropertiesDialogComponentData = {
 @Component({
     selector: "layer-dialog",
     templateUrl: "./layer-properties-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, NameInUseValidatorDirective, MatError, MatSlider, MatSliderThumb, MapComponent, AutomaticLayerPresentationComponent, MatDialogActions, AnalyticsDirective, MatTooltip, AsyncPipe, CdkCopyToClipboard]
+    imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, NameInUseValidatorDirective, MatError, MatSlider, MatSliderThumb, MapComponent, AutomaticLayerPresentationComponent, MatDialogActions, AnalyticsDirective, MatTooltip, AsyncPipe, CdkCopyToClipboard]
 })
 export class LayerPropertiesDialogComponent {
     public title: string;

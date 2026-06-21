@@ -1,4 +1,4 @@
-<div class="sidebar-header flex flex-row justify-center items-center sticky top-0 z-10 bg-white"
+<div class="sidebar-header flex flex-row justify-center items-center sticky top-0 z-10 bg-surface"
     [dir]="resources.direction">
     <div class="flex-1 text-center text-xl title">{{resources.privateRoutes}}</div>
     <button mat-button class="w-1/6" type="button" (click)="close()" tabindex="-1"><i
@@ -52,13 +52,13 @@
         <div cdkDropList (cdkDropListDropped)="drop($event)">
             @for (route of routes; track route.id) {
             <div cdkDrag
-                class="bg-white [&.cdk-drag-animating]:transition-transform [&.cdk-drag-animating]:duration-300 [&.cdk-drag-placeholder]:opacity-0">
-                <div class="flex flex-col w-full bg-white">
+                class="bg-surface [&.cdk-drag-animating]:transition-transform [&.cdk-drag-animating]:duration-300 [&.cdk-drag-placeholder]:opacity-0">
+                <div class="flex flex-col w-full bg-surface">
                     <div class="flex flex-row items-center">
                         <div matButton cdkDragHandle class="cursor-move text-gray-400! mx-3"><i
                                 class="fa fa-lg icon-th"></i>
                         </div>
-                        <mat-radio-button [value]="route.id" color="primary" (click)="selectRoute($event, route)">
+                        <mat-radio-button [value]="route.id" (click)="selectRoute($event, route)">
                             <h3 [style.color]="route.color">{{route.name}}</h3>
                         </mat-radio-button>
                     </div>
@@ -139,7 +139,7 @@
                                 <div class="flex flex-row gap-1">
                                     @for (currentColor of colors; track currentColor; let i = $index) {
                                     <div class="flex-1" [hidden]="i % 3 !== rowIndex">
-                                        <button mat-mini-fab color="primary" class="w-full" type="button"
+                                        <button mat-mini-fab class="w-full" type="button"
                                             [style.backgroundColor]="currentColor"
                                             (click)="updateProperty(route, 'color', currentColor)">
                                             @if (currentColor === route.color) {
@@ -158,7 +158,7 @@
                         <label>{{resources.width}}</label>
                     </div>
                     <div class="flex flex-row w-full">
-                        <mat-slider class="w-full!" min="4" max="20" step="2" color="primary">
+                        <mat-slider class="w-full!" min="4" max="20" step="2">
                             <input [ngModel]="route.weight" (ngModelChange)="updateProperty(route, 'weight', $event)"
                                 matSliderThumb />
                         </mat-slider>
@@ -167,7 +167,7 @@
                         <label>{{resources.opacity}}</label>
                     </div>
                     <div class="flex flex-row w-full">
-                        <mat-slider class="w-full!" min="0" max="1.0" step="0.1" color="primary">
+                        <mat-slider class="w-full!" min="0" max="1.0" step="0.1">
                             <input [ngModel]="route.opacity" (ngModelChange)="updateProperty(route, 'opacity', $event)"
                                 matSliderThumb />
                         </mat-slider>

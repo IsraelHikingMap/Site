@@ -2,6 +2,8 @@ import { describe, beforeEach, vi, it, expect, Mock } from "vitest";
 import { inject, TestBed } from "@angular/core/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 import type {
+    BackgroundLayerSpecification,
+    FillLayerSpecification,
     RasterDEMSourceSpecification,
     RasterLayerSpecification,
     RasterSourceSpecification,
@@ -403,5 +405,61 @@ describe("DefaultStyleService", () => {
         }), true, "online-only");
 
         expect(fileService.getStyleJsonContent).toHaveBeenCalled();
+    }));
+
+    it("should recolor the background and palette fills, leaving others untouched, when the theme is dark", inject([DefaultStyleService, Store, FileService], async (service: DefaultStyleService, store: Store, fileService: FileService) => {
+        store.reset({ offlineState: { downloadedTiles: null }, configuration: { units: "metric", theme: "dark" } });
+        (fileService.getStyleJsonContent as Mock).mockResolvedValue(JSON.stringify({
+            version: 8,
+            sources: {},
+            layers: [
+                { id: "bg", type: "background", paint: { "background-color": "#FFFFFF" } },
+                { id: "water-area", type: "fill", paint: { "fill-color": "#AAD3DF" } },
+                { id: "area-residential", type: "fill", paint: { "fill-color": "#E0DFDF" } },
+                { id: "other-fill", type: "fill", paint: { "fill-color": "#123456" } },
+                { id: "area-landcover-low", type: "fill", paint: { "fill-opacity": 0.5 } }
+            ]
+        }));
+
+        const result = await service.getSourcesAndLayers(createLayer({ key: builtInLayerKey, address: "https://x/style.json" }), true, "online-only");
+
+        expect((result.layers[0] as BackgroundLayerSpecification).paint?.["background-color"]).toBe("#1B1B1B");
+        expect((result.layers[1] as FillLayerSpecification).paint?.["fill-color"]).toBe("#14202E");
+        expect((result.layers[2] as FillLayerSpecification).paint?.["fill-color"]).toBe("#2B2B2B");
+        expect((result.layers[3] as FillLayerSpecification).paint?.["fill-color"]).toBe("#123456"); // not in palette
+        expect((result.layers[4] as FillLayerSpecification).paint?.["fill-color"]).toBeUndefined(); // no fill-color to replace
+    }));
+
+    it("should not recolor any layer when the theme is not dark", inject([DefaultStyleService, FileService], async (service: DefaultStyleService, fileService: FileService) => {
+        (fileService.getStyleJsonContent as Mock).mockResolvedValue(JSON.stringify({
+            version: 8,
+            sources: {},
+            layers: [
+                { id: "bg", type: "background", paint: { "background-color": "#FFFFFF" } },
+                { id: "water-area", type: "fill", paint: { "fill-color": "#AAD3DF" } }
+            ]
+        }));
+
+        const result = await service.getSourcesAndLayers(createLayer({ key: builtInLayerKey, address: "https://x/style.json" }), true, "online-only");
+
+        expect((result.layers[0] as BackgroundLayerSpecification).paint?.["background-color"]).toBe("#FFFFFF");
+        expect((result.layers[1] as FillLayerSpecification).paint?.["fill-color"]).toBe("#AAD3DF");
+    }));
+
+    it("should not recolor any layer in car mode even when the theme is dark", inject([DefaultStyleService, Store, FileService], async (service: DefaultStyleService, store: Store, fileService: FileService) => {
+        store.reset({ offlineState: { downloadedTiles: null }, configuration: { units: "metric", theme: "dark" } });
+        (fileService.getStyleJsonContent as Mock).mockResolvedValue(JSON.stringify({
+            version: 8,
+            sources: {},
+            layers: [
+                { id: "bg", type: "background", paint: { "background-color": "#FFFFFF" } },
+                { id: "water-area", type: "fill", paint: { "fill-color": "#AAD3DF" } }
+            ]
+        }));
+
+        const result = await service.getSourcesAndLayers(createLayer({ key: builtInLayerKey, address: "https://x/style.json" }), true, "car");
+
+        expect((result.layers[0] as BackgroundLayerSpecification).paint?.["background-color"]).toBe("#FFFFFF");
+        expect((result.layers[1] as FillLayerSpecification).paint?.["fill-color"]).toBe("#AAD3DF");
     }));
 });

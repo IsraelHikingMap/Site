@@ -1,4 +1,4 @@
-<div class="flex flex-row items-center bg-white">
+<div class="flex flex-row items-center bg-surface">
     <span class="mx-2">{{resources.filter}}</span>
     <button mat-button class="flex-1" [matMenuTriggerFor]="listFilterTypeMenu" analyticsOn="click"
         analyticsCategory="Public routes" analyticsLabel="Open filter type menu">
@@ -24,21 +24,21 @@
     <mat-menu #listFilterTypeMenu="matMenu">
         <span class="mx-2">{{resources.routeType}}</span>
         <div mat-menu-item (click)="$event.stopPropagation()">
-            <mat-checkbox color="primary" (change)="onFilterCategoryChange('Hiking')"
+            <mat-checkbox (change)="onFilterCategoryChange('Hiking')"
                 [checked]="isCategorySelected('Hiking')" analyticsOn="click" analyticsCategory="Public routes"
                 analyticsLabel="Filter by hiking">
                 <i class="fa icon-hike"></i>
             </mat-checkbox>
         </div>
         <div mat-menu-item (click)="$event.stopPropagation()">
-            <mat-checkbox color="primary" (change)="onFilterCategoryChange('Bicycle')"
+            <mat-checkbox (change)="onFilterCategoryChange('Bicycle')"
                 [checked]="isCategorySelected('Bicycle')" analyticsOn="click" analyticsCategory="Public routes"
                 analyticsLabel="Filter by bicycle">
                 <i class="fa icon-bike"></i>
             </mat-checkbox>
         </div>
         <div mat-menu-item (click)="$event.stopPropagation()">
-            <mat-checkbox color="primary" (change)="onFilterCategoryChange('4x4')" [checked]="isCategorySelected('4x4')"
+            <mat-checkbox (change)="onFilterCategoryChange('4x4')" [checked]="isCategorySelected('4x4')"
                 analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Filter by 4x4">
                 <i class="fa icon-four-by-four"></i>
             </mat-checkbox>
@@ -69,28 +69,28 @@
     <mat-menu #listFilterDifficultyMenu="matMenu">
         <span class="mx-2">{{resources.difficulty}}</span>
         <div mat-menu-item (click)="$event.stopPropagation()">
-            <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Easy')"
+            <mat-checkbox (change)="onFilterDifficultyChange('Easy')"
                 [checked]="isDificultySelected('Easy')" analyticsOn="click" analyticsCategory="Public routes"
                 analyticsLabel="Filter by easy difficulty">
                 <span class="rounded-full bg-green-500 p-2">{{resources.easy}}</span>
             </mat-checkbox>
         </div>
         <div mat-menu-item (click)="$event.stopPropagation()">
-            <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Moderate')"
+            <mat-checkbox (change)="onFilterDifficultyChange('Moderate')"
                 [checked]="isDificultySelected('Moderate')" analyticsOn="click" analyticsCategory="Public routes"
                 analyticsLabel="Filter by moderate difficulty">
                 <span class="rounded-full bg-yellow-500 p-2">{{resources.moderate}}</span>
             </mat-checkbox>
         </div>
         <div mat-menu-item (click)="$event.stopPropagation()">
-            <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Hard')"
+            <mat-checkbox (change)="onFilterDifficultyChange('Hard')"
                 [checked]="isDificultySelected('Hard')" analyticsOn="click" analyticsCategory="Public routes"
                 analyticsLabel="Filter by hard difficulty">
                 <span class="rounded-full bg-red-500 p-2 text-white">{{resources.hard}}</span>
             </mat-checkbox>
         </div>
         <div mat-menu-item (click)="$event.stopPropagation()">
-            <mat-checkbox color="primary" (change)="onFilterDifficultyChange('Very Hard')"
+            <mat-checkbox (change)="onFilterDifficultyChange('Very Hard')"
                 [checked]="isDificultySelected('Very Hard')" analyticsOn="click" analyticsCategory="Public routes"
                 analyticsLabel="Filter by very hard difficulty">
                 <span class="rounded-full bg-black p-2 text-white">{{resources.veryHard}}</span>

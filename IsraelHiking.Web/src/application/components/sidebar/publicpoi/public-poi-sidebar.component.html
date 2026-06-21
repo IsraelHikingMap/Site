@@ -4,7 +4,7 @@
 </div>
 } @else {
 <div [dir]="resources.direction" [class.minimized]="isMinimized">
-  <div class="flex flex-row sticky top-0 z-10 bg-white">
+  <div class="flex flex-row sticky top-0 z-10 bg-surface">
     @if (!isHideEditMode()) {
     <div class="flex-1">
       <button mat-button class="w-full min-w-[unset]! p-0!" (click)="setEditMode()" matTooltip="{{resources.edit}}"
@@ -89,7 +89,7 @@
         @if (isLoading) {
         <mat-spinner diameter="24"></mat-spinner>
         } @else {
-        <i class="fa icon-close"></i>
+        <i class="fa fa-lg icon-close"></i>
         }
       </button>
     </div>

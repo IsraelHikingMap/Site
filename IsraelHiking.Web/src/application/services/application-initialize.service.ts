@@ -7,6 +7,7 @@ import { FacebookWarningDialogComponent } from "../components/dialogs/facebook-w
 import { IntroDialogComponent } from "../components/dialogs/intro-dialog.component";
 import { LoggingService } from "./logging.service";
 import { ScreenService } from "./screen.service";
+import { ThemeService } from "./theme.service";
 import { DatabaseService } from "./database.service";
 import { ApplicationExitService } from "./application-exit.service";
 import { OpenWithService } from "./open-with.service";
@@ -38,6 +39,7 @@ export class ApplicationInitializeService {
     private readonly resources = inject(ResourcesService);
     private readonly loggingService = inject(LoggingService);
     private readonly screenService = inject(ScreenService);
+    private readonly themeService = inject(ThemeService);
     private readonly databaseService = inject(DatabaseService);
     private readonly applicationExitService = inject(ApplicationExitService);
     private readonly openWithService = inject(OpenWithService);
@@ -70,6 +72,7 @@ export class ApplicationInitializeService {
             this.analyticsService.initialize();
             this.overpassTurboService.initialize();
             this.screenService.initialize();
+            this.themeService.initialize();
             await this.resources.initialize();
             this.applicationExitService.initialize();
             this.openWithService.initialize();
