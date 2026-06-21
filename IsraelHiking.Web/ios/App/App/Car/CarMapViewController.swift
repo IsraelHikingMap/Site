@@ -34,6 +34,8 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     private var animToCenter = CLLocationCoordinate2D()
     private var animFromHeading: CLLocationDirection = 0
     private var animToHeading: CLLocationDirection = 0
+    private var animFromZoom: Double = 0
+    private var animToZoom: Double = 0
 
     // MARK: lifecycle
 
@@ -135,10 +137,20 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     }
 
     private func centerOn(_ location: CLLocation) {
-        center(on: location.coordinate, course: location.course)
+        center(on: location.coordinate, course: location.course, zoom: zoomForSpeed(location))
     }
 
-    private func center(on coordinate: CLLocationCoordinate2D, course: CLLocationDirection) {
+    /// Waze-like speed-adaptive zoom: the faster we go, the further out we zoom so more of the road
+    /// ahead stays visible. Returns nil when the fix has no valid speed (stationary/just acquired) so
+    /// the current zoom is left untouched. Mirrors zoomForSpeed in CarMapContainer.kt.
+    private func zoomForSpeed(_ location: CLLocation) -> Double? {
+        guard location.speed >= 0 else { return nil }
+        let raw = (location.speed - Const.speedMinMps) / (Const.speedMaxMps - Const.speedMinMps)
+        let t = min(1, max(0, raw))
+        return Const.zoomAtLowSpeed + (Const.zoomAtHighSpeed - Const.zoomAtLowSpeed) * t
+    }
+
+    private func center(on coordinate: CLLocationCoordinate2D, course: CLLocationDirection, zoom: Double? = nil) {
         // Shift the camera target so the location lands in the bottom third (what's ahead stays in
         // view), mirroring CarMapContainer.setCenter on Android: project the point against the current
         // camera, offset it down by a sixth of the height in screen space, then unproject. A good
@@ -157,6 +169,8 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         animToCenter = target
         animFromHeading = mapView.direction
         animToHeading = course >= 0 ? course : mapView.direction
+        animFromZoom = mapView.zoomLevel
+        animToZoom = zoom ?? mapView.zoomLevel
         animStart = CACurrentMediaTime()
         startCameraAnimation()
     }
@@ -182,8 +196,9 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         let lat = animFromCenter.latitude + (animToCenter.latitude - animFromCenter.latitude) * e
         let lng = animFromCenter.longitude + (animToCenter.longitude - animFromCenter.longitude) * e
         let heading = animFromHeading + shortestHeadingDelta(animFromHeading, animToHeading) * e
+        let zoom = animFromZoom + (animToZoom - animFromZoom) * e
         mapView.setCenter(CLLocationCoordinate2D(latitude: lat, longitude: lng),
-                          zoomLevel: mapView.zoomLevel, animated: false)
+                          zoomLevel: zoom, animated: false)
         // setCenter's direction parameter doesn't rotate the map on the CarPlay display; set the
         // bearing explicitly so the map turns to face the direction of travel (heading-up).
         mapView.setDirection(heading, animated: false)
@@ -549,6 +564,12 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         static let circleSteps = 64
         static let panSuppression: TimeInterval = 5
         static let cameraEase: TimeInterval = 0.25
+
+        // Speed-adaptive zoom (see zoomForSpeed); speeds in m/s. Mirrors CarMapContainer.kt.
+        static let speedMinMps = 0.0
+        static let speedMaxMps = 30.0
+        static let zoomAtLowSpeed = 16.5
+        static let zoomAtHighSpeed = 14.0
 
         static let defaultZoom = 14.0
         // Cold-install fallbacks; see loadLastKnownLocation / applyStyle.
