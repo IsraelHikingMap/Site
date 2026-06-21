@@ -303,7 +303,24 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
                         addProperty("strokeColor", "white")
                     }
                 }
-        return listOf(routeFeature, startPointFeature, endPointFeature)
+        val markerColor = route.color ?: ROUTE_ARROW_FALLBACK_COLOR
+        val markerFeatures: List<Feature> =
+                route.markers.map { marker: CarMarkerData ->
+                    Feature.fromGeometry(
+                                    Point.fromLngLat(
+                                            marker.lngLat.longitude,
+                                            marker.lngLat.latitude
+                                    )
+                            )
+                            .apply {
+                                properties()!!.apply {
+                                    addProperty("color", "transparent")
+                                    addProperty("strokeColor", markerColor)
+                                    addProperty("title", marker.title)
+                                }
+                            }
+                }
+        return listOf(routeFeature, startPointFeature, endPointFeature) + markerFeatures
     }
 
     /**
@@ -382,14 +399,32 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
                     )
                 }
 
+        val routeMarkerLabelsLayer =
+                SymbolLayer(ROUTE_MARKER_LABELS_LAYER_ID, ROUTE_SOURCE_ID).apply {
+                    setFilter(isPoint)
+                    setProperties(
+                            PropertyFactory.textField(Expression.get("title")),
+                            PropertyFactory.textFont(arrayOf("Noto Sans Regular")),
+                            PropertyFactory.textSize(12f),
+                            PropertyFactory.textColor(Expression.get("strokeColor")),
+                            PropertyFactory.textHaloColor("white"),
+                            PropertyFactory.textHaloWidth(1.5f),
+                            PropertyFactory.textAnchor(Property.TEXT_ANCHOR_TOP),
+                            PropertyFactory.textOffset(arrayOf(0f, 0.7f)),
+                            PropertyFactory.textOptional(true)
+                    )
+                }
+
         if (style.getLayer(LAYERING_ANCHOR_ID) != null) {
             style.addLayerBelow(routeLayer, LAYERING_ANCHOR_ID)
             style.addLayerAbove(routeArrowsLayer, ROUTE_LAYER_ID)
             style.addLayerAbove(routePointsLayer, ROUTE_ARROWS_LAYER_ID)
+            style.addLayerAbove(routeMarkerLabelsLayer, ROUTE_POINTS_LAYER_ID)
         } else {
             style.addLayer(routeLayer)
             style.addLayer(routeArrowsLayer)
             style.addLayer(routePointsLayer)
+            style.addLayer(routeMarkerLabelsLayer)
         }
     }
 
@@ -619,6 +654,7 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
         private const val ROUTE_LAYER_ID = "planned-route-layer"
         private const val ROUTE_ARROWS_LAYER_ID = "planned-route-arrows-layer"
         private const val ROUTE_POINTS_LAYER_ID = "planned-route-points-layer"
+        private const val ROUTE_MARKER_LABELS_LAYER_ID = "planned-route-marker-labels-layer"
         private const val ROUTE_START_COLOR = "#43a047"
         private const val ROUTE_END_COLOR = "red"
         private const val ROUTE_ARROW_ICON_IMAGE = "arrow"

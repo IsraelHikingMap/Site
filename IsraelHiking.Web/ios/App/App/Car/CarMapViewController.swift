@@ -4,9 +4,9 @@ import UIKit
 
 /**
  * Hosts the MapLibre map shown on the CarPlay screen. Ports `CarMapContainer.kt`: loads the style
- * pushed from JS, renders the planned route (line + directional arrows + start/end points) and the
- * GPS location (heading arrow + accuracy circle), keeps the dot in the bottom third, auto-recenters
- * after a pan, and exposes pan/zoom/recenter for the CarPlay map buttons.
+ * pushed from JS, renders the planned route (line + directional arrows + start/end points + private
+ * route points) and the GPS location (heading arrow + accuracy circle), keeps the dot in the bottom
+ * third, auto-recenters after a pan, and exposes pan/zoom/recenter for the CarPlay map buttons.
  *
  * Layer ordering uses the hidden `car-layering-anchor` layer that `addLayeringAnchor` injects into
  * the style: route layers go below it, location layers above it.
@@ -267,7 +267,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     private func renderRoutes(_ style: MLNStyle) {
         let valid = routes.filter { $0.coordinates.count >= 2 }
         let lineFeatures = valid.map { lineFeature(for: $0) }
-        let pointFeatures = valid.flatMap { endpointFeatures(for: $0) }
+        let pointFeatures = valid.flatMap { endpointFeatures(for: $0) } + valid.flatMap { markerFeatures(for: $0) }
         let lineCollection = MLNShapeCollectionFeature(shapes: lineFeatures)
         let pointCollection = MLNShapeCollectionFeature(shapes: pointFeatures)
 
@@ -308,6 +308,19 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         return [start, end]
     }
 
+    /// Private route points (POIs): a transparent circle outlined in the route color, plus the title
+    /// below it. Mirrors createFeaturesForRoute on the web (color "transparent", strokeColor = route
+    /// color); the title label has no web map equivalent (the web shows it via an HTML overlay).
+    private func markerFeatures(for route: CarRouteData) -> [MLNPointFeature] {
+        let color = route.color ?? Const.routeArrowFallbackColor
+        return route.markers.map { marker in
+            let feature = MLNPointFeature()
+            feature.coordinate = marker.coordinate
+            feature.attributes = ["color": "transparent", "strokeColor": color, "title": marker.title]
+            return feature
+        }
+    }
+
     private func addRouteLayers(_ style: MLNStyle, lineSource: MLNShapeSource, pointSource: MLNShapeSource) {
         let line = MLNLineStyleLayer(identifier: Const.routeLayer, source: lineSource)
         line.lineColor = NSExpression(forKeyPath: "color")
@@ -325,20 +338,39 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         arrows.iconAllowsOverlap = NSExpression(forConstantValue: true)
         arrows.iconIgnoresPlacement = NSExpression(forConstantValue: true)
 
+        // One circle layer for every point (endpoints + markers), differentiated only by the per-
+        // feature color/strokeColor — markers carry color "transparent". Mirrors the web.
         let points = MLNCircleStyleLayer(identifier: Const.routePointsLayer, source: pointSource)
         points.circleColor = NSExpression(forKeyPath: "color")
         points.circleRadius = NSExpression(forConstantValue: 7)
         points.circleStrokeColor = NSExpression(forKeyPath: "strokeColor")
         points.circleStrokeWidth = NSExpression(forConstantValue: 3)
 
+        // Marker titles sit below the circle (text anchored at its top), with a white halo for
+        // legibility. Endpoints carry no title, so they produce no label.
+        let markerLabels = MLNSymbolStyleLayer(identifier: Const.routeMarkerLabelsLayer, source: pointSource)
+        markerLabels.text = NSExpression(forKeyPath: "title")
+        markerLabels.fontNames = NSExpression(forConstantValue: ["Noto Sans Regular"])
+        markerLabels.fontSize = NSExpression(forConstantValue: 12)
+        markerLabels.textColor = NSExpression(forKeyPath: "strokeColor")
+        markerLabels.textHaloColor = NSExpression(forConstantValue: UIColor.white)
+        markerLabels.textHaloWidth = NSExpression(forConstantValue: 1.5)
+        markerLabels.textAnchor = NSExpression(forConstantValue: "top")
+        // Push the label below the circle (in ems). Offset stays screen-relative as the map rotates
+        // heading-up, unlike a map-anchored translation.
+        markerLabels.textOffset = NSExpression(forConstantValue: NSValue(cgVector: CGVector(dx: 0, dy: 0.7)))
+        markerLabels.textOptional = NSExpression(forConstantValue: true)
+
         // Routes render below the layering anchor (under labels), arrows/points just above the line.
         insertBelowAnchor(line, in: style)
         if let above = style.layer(withIdentifier: Const.routeLayer) {
             style.insertLayer(arrows, above: above)
             style.insertLayer(points, above: arrows)
+            style.insertLayer(markerLabels, above: points)
         } else {
             style.addLayer(arrows)
             style.addLayer(points)
+            style.addLayer(markerLabels)
         }
     }
 
@@ -504,6 +536,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         static let routeLayer = "planned-route-layer"
         static let routeArrowsLayer = "planned-route-arrows-layer"
         static let routePointsLayer = "planned-route-points-layer"
+        static let routeMarkerLabelsLayer = "planned-route-marker-labels-layer"
         static let routeStartColor = "#43a047"
         static let routeEndColor = "red"
         static let routeArrowIconImage = "arrow"

@@ -10,7 +10,8 @@ data class CarRouteData(
         val weight: Double = 0.0,
         val color: String? = null,
         val opacity: Double = 0.0,
-        val name: String? = null
+        val name: String? = null,
+        val markers: List<CarMarkerData> = emptyList()
 ) {
     companion object {
         @Throws(JSONException::class)
@@ -21,12 +22,17 @@ data class CarRouteData(
                         val point = points.getJSONArray(i)
                         LatLng(point.getDouble(1), point.getDouble(0))
                     }
+            val markersJson = json.optJSONArray("markers")
+            val markers =
+                    if (markersJson == null) emptyList()
+                    else List(markersJson.length()) { i -> CarMarkerData.fromJson(markersJson.getJSONObject(i)) }
             return CarRouteData(
                     lngLats = lngLats,
                     weight = json.getDouble("weight"),
                     color = json.getString("color"),
                     opacity = json.getDouble("opacity"),
-                    name = json.optString("name").ifEmpty { null }
+                    name = json.optString("name").ifEmpty { null },
+                    markers = markers
             )
         }
 
