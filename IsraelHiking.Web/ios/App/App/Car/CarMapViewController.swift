@@ -106,11 +106,9 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     // MARK: MLNMapViewDelegate
 
     func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
-        // The PNGs are large (gps-arrow is 84x111px); load them at a higher scale so MapLibre draws
-        // them at a sane point size instead of filling the screen.
+
         loadStyleImage(style, resource: "gps-arrow", name: Const.locationIconImage, sdf: false, scale: 3.0)
-        // Arrow must be a template (SDF) image so the per-feature iconColor expression recolors it.
-        loadStyleImage(style, resource: "arrow", name: Const.routeArrowIconImage, sdf: true, scale: 2.0)
+        loadStyleImage(style, resource: "arrow", name: Const.routeArrowIconImage, sdf: true, scale: 3.0)
         applyInitialCameraIfNeeded()
         renderRoutes(style)
         renderGpsLocation(style)
