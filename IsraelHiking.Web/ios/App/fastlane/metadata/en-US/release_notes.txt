@@ -1,2 +1,2 @@
-- Add support for CarPlay with dynamic contours
+- Add support for CarPlay with dynamic contours and private POIs
 - Various bug fixes and performance improvements
