@@ -189,6 +189,15 @@ export class ResourcesService {
     public reportAnIssueSiteInstructions: string;
     public addPointToActiveRoute: string;
     public settings: string;
+    public connectedServices: string;
+    public connect: string;
+    public disconnect: string;
+    public sendToDevice: string;
+    public subscribeToSendToDevice: string;
+    public connectDeviceFirst: string;
+    public routeSentToDevice: string;
+    public unableToSendToDevice: string;
+    public unableToConnectToService: string;
     public theme: string;
     public themeLight: string;
     public themeDark: string;
@@ -514,7 +523,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1782066177541");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1782115523653");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -678,6 +687,15 @@ export class ResourcesService {
         this.reportAnIssueSiteInstructions = this.gettextCatalog.getString("Report an issue site instructions");
         this.addPointToActiveRoute = this.gettextCatalog.getString("Add point to active route");
         this.settings = this.gettextCatalog.getString("Settings");
+        this.connectedServices = this.gettextCatalog.getString("Connected services");
+        this.connect = this.gettextCatalog.getString("Connect");
+        this.disconnect = this.gettextCatalog.getString("Disconnect");
+        this.sendToDevice = this.gettextCatalog.getString("Send to device");
+        this.subscribeToSendToDevice = this.gettextCatalog.getString("Subscribe to send routes to your device");
+        this.connectDeviceFirst = this.gettextCatalog.getString("Connect a device in the settings first");
+        this.routeSentToDevice = this.gettextCatalog.getString("The route was sent to your device");
+        this.unableToSendToDevice = this.gettextCatalog.getString("Unable to send the route to your device");
+        this.unableToConnectToService = this.gettextCatalog.getString("Unable to connect to the service");
         this.theme = this.gettextCatalog.getString("Theme");
         this.themeLight = this.gettextCatalog.getString("Light");
         this.themeDark = this.gettextCatalog.getString("Dark");

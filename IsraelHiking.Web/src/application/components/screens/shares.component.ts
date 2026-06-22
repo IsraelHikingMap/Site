@@ -33,9 +33,10 @@ import { MapService } from "../../services/map.service";
 import { SpatialService } from "../../services/spatial.service";
 import { ToastService } from "../../services/toast.service";
 import { DataContainerService } from "../../services/data-container.service";
+import { DeviceServicesService } from "../../services/device-providers/device-services.service";
 import { RouteStrings } from "../../services/hash.service";
 import { SetSearchTermAction } from "../../reducers/in-memory.reducer";
-import type { ApplicationState, ShareUrl } from "../../models";
+import type { ApplicationState, DeviceServiceId, ShareUrl } from "../../models";
 
 @Component({
     selector: "shares",
@@ -67,6 +68,7 @@ export class SharesComponent implements OnInit {
     private readonly destroyRef = inject(DestroyRef);
     private readonly toastService = inject(ToastService);
     private readonly dataContainerService = inject(DataContainerService);
+    private readonly deviceServices = inject(DeviceServicesService);
     private readonly router = inject(Router);
     private readonly store = inject(Store);
 
@@ -204,6 +206,11 @@ export class SharesComponent implements OnInit {
             },
             type: "YesNo"
         });
+    }
+
+    public async sendShareUrlToDevice(shareUrl: Immutable<ShareUrl>, id: DeviceServiceId) {
+        const share = await this.shareUrlsService.getShareUrl(shareUrl.id);
+        await this.deviceServices.sendRouteGated(id, share.dataContainer.routes);
     }
 
     public async addShareUrlToRoutes(shareUrl: Immutable<ShareUrl>) {

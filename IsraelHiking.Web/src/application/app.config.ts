@@ -96,6 +96,9 @@ import { TranslationService } from "./services/translation.service";
 import { AnalyticsService } from "./services/analytics.service";
 import { NakebService } from "./services/nakeb.service";
 import { CarService } from "./services/car.service";
+import { DeviceOAuthService } from "./services/device-providers/device-oauth.service";
+import { WahooDeviceProvider } from "./services/device-providers/wahoo-device.provider";
+import { DeviceServicesService } from "./services/device-providers/device-services.service";
 // Map Interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
@@ -226,6 +229,9 @@ export const appConfig: ApplicationConfig = {
         AnalyticsService,
         NakebService,
         CarService,
+        DeviceOAuthService,
+        WahooDeviceProvider,
+        DeviceServicesService,
         RouteEditPoiInteraction,
         RouteEditRouteInteraction,
         { provide: ErrorHandler, useClass: GlobalErrorHandler },

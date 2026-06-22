@@ -5,6 +5,7 @@ export class Urls {
     public static readonly baseTilesAddress = environment.baseTilesAddress;
     public static readonly apiBase = environment.baseApiAddress;
     public static readonly emptyAuthHtml = Urls.baseAddress + "/empty-for-oauth.html";
+    public static readonly deviceAuthHtml = Urls.baseAddress + "/device-oauth.html";
     public static readonly mapeakAuthUrl = "mapeak://oauth_callback/";
     public static readonly translations = "translations/";
     public static readonly health = Urls.apiBase + "health/";
@@ -35,6 +36,11 @@ export class Urls {
     public static readonly osmAuth = Urls.osmBase + "/oauth2";
 
     public static readonly overpassApi = "https://mapeak.com/api/interpreter";
+
+    private static readonly deviceProxyBase = Urls.baseAddress + "/device-proxy";
+    public static readonly wahooAuthorize = "https://api.wahooligan.com/oauth/authorize";
+    public static readonly wahooToken = Urls.deviceProxyBase + "/wahoo/oauth/token";
+    public static readonly wahooRoutes = Urls.deviceProxyBase + "/wahoo/v1/routes";
 
     public static readonly facebook = "https://www.facebook.com/sharer/sharer.php?u=";
     public static readonly waze = "https://www.waze.com/ul?navigate=yes&zoom=17&ll=";

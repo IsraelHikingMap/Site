@@ -98,6 +98,27 @@
         </mat-select>
       </mat-form-field>
     </div>
+    @if (deviceProviders.length > 0) {
+    <div class="flex flex-row">
+      <div class="flex-1">
+        <label>{{resources.connectedServices}}</label>
+        @if (connectedDeviceServices$ | async; as connected) {
+        @for (provider of deviceProviders; track provider.id) {
+        <div class="flex flex-row items-center gap-2 my-1">
+          <span class="flex-1" dir="ltr">{{provider.displayName}}</span>
+          @if (connected[provider.id]) {
+          <button mat-button (click)="disconnectDevice(provider.id)" analyticsOn="click" analyticsCategory="Configuration"
+            analyticsLabel="Disconnect device {{provider.id}}">{{resources.disconnect}}</button>
+          } @else {
+          <button mat-raised-button (click)="connectDevice(provider.id)" analyticsOn="click" analyticsCategory="Configuration"
+            analyticsLabel="Connect device {{provider.id}}">{{resources.connect}}</button>
+          }
+        </div>
+        }
+        }
+      </div>
+    </div>
+    }
     <br />
     <p class="ms-2">
       {{resources.offlinePurchaseGraditude}}<br />

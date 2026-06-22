@@ -25,6 +25,7 @@
               "src/translations",
               "src/resource-not-found.html",
               "src/empty-for-oauth.html",
+              "src/device-oauth.html",
               "src/googlef59316cdb0845a8c.html",
               "src/robots.txt",
               {

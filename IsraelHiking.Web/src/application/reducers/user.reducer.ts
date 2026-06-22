@@ -3,11 +3,21 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { ActivityType, UserInfo, UserState } from "../models";
+import type { ActivityType, DeviceServiceId, DeviceServiceToken, UserInfo, UserState } from "../models";
 
 export class SetUserInfoAction {
     public static type = this.prototype.constructor.name;
     constructor(public userInfo: UserInfo) { }
+}
+
+export class SetDeviceServiceTokenAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public serviceId: DeviceServiceId, public token: DeviceServiceToken) { }
+}
+
+export class RemoveDeviceServiceAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public serviceId: DeviceServiceId) { }
 }
 
 export class SetTokenAction {
@@ -60,6 +70,24 @@ export class UserInfoReducer {
     public setActivityType(ctx: StateContext<UserState>, action: SetActivityTypeAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.prefferedActivityType = action.activityType;
+            return lastState;
+        }));
+    }
+
+    @Action(SetDeviceServiceTokenAction)
+    public setDeviceServiceToken(ctx: StateContext<UserState>, action: SetDeviceServiceTokenAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.connectedDeviceServices ??= {};
+            lastState.connectedDeviceServices[action.serviceId] = action.token;
+            return lastState;
+        }));
+    }
+
+    @Action(RemoveDeviceServiceAction)
+    public removeDeviceService(ctx: StateContext<UserState>, action: RemoveDeviceServiceAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.connectedDeviceServices ??= {};
+            delete lastState.connectedDeviceServices[action.serviceId];
             return lastState;
         }));
     }

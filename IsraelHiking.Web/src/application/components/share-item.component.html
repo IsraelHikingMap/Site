@@ -27,6 +27,13 @@
                 <i class="fa icon-plus"></i>
                 {{resources.addToRoutes}}
             </button>
+            @for (provider of deviceProviders; track provider.id) {
+            <button mat-menu-item (click)="sendToDevice.emit(provider.id)" analyticsOn="click" analyticsCategory="Share"
+                analyticsLabel="Share send to device {{provider.id}}">
+                <i class="fa icon-external-link"></i>
+                {{provider.displayName}}
+            </button>
+            }
             <button mat-menu-item (click)="delete.emit()" analyticsOn="click" analyticsCategory="Share"
                 analyticsLabel="Share delete">
                 <i class="fa icon-trash"></i>
