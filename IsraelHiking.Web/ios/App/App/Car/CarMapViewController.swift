@@ -366,7 +366,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         pointsCasing.circleColor = NSExpression(forConstantValue: "transparent")
         pointsCasing.circleRadius = NSExpression(forConstantValue: 10)
         pointsCasing.circleStrokeColor = NSExpression(forConstantValue: "white")
-        pointsCasing.CircleStrokeOpacity  = NSExpression(forKeyPath: 0.5)
+        pointsCasing.circleStrokeOpacity  = NSExpression(forKeyPath: 0.5)
         pointsCasing.circleStrokeWidth = NSExpression(forConstantValue: 1)
 
         // Marker titles sit below the circle (text anchored at its top), with a white halo for
