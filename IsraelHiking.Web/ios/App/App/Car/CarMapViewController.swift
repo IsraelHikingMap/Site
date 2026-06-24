@@ -362,7 +362,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         points.circleStrokeWidth = NSExpression(forConstantValue: 3)
 
         // One circle layer for every point (endpoints + markers).
-        let pointsCasing = MLNCircleStyleLayer(identifier: Const.routePointsLayer, source: pointSource)
+        let pointsCasing = MLNCircleStyleLayer(identifier: Const.routePointsCasingLayer, source: pointSource)
         pointsCasing.circleColor = NSExpression(forConstantValue: "transparent")
         pointsCasing.circleRadius = NSExpression(forConstantValue: 10)
         pointsCasing.circleStrokeColor = NSExpression(forConstantValue: "white")
@@ -561,6 +561,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         static let routeLayer = "planned-route-layer"
         static let routeArrowsLayer = "planned-route-arrows-layer"
         static let routePointsLayer = "planned-route-points-layer"
+        static let routePointsCasingLayer = "planned-route-points-casing-layer"
         static let routeMarkerLabelsLayer = "planned-route-marker-labels-layer"
         static let routeStartColor = "#43a047"
         static let routeEndColor = "red"
