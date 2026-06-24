@@ -361,6 +361,13 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         points.circleStrokeColor = NSExpression(forKeyPath: "strokeColor")
         points.circleStrokeWidth = NSExpression(forConstantValue: 3)
 
+        let pointsCasing = MLNCircleStyleLayer(identifier: Const.routePointsCasingLayer, source: pointSource)
+        pointsCasing.circleColor = NSExpression(forConstantValue: "transparent")
+        pointsCasing.circleRadius = NSExpression(forConstantValue: 10)
+        pointsCasing.circleStrokeColor = NSExpression(forConstantValue: "white")
+        pointsCasing.circleStrokeOpacity  = NSExpression(forConstantValue: 0.5)
+        pointsCasing.circleStrokeWidth = NSExpression(forConstantValue: 1)
+
         // Marker titles sit below the circle (text anchored at its top), with a white halo for
         // legibility. Endpoints carry no title, so they produce no label.
         let markerLabels = MLNSymbolStyleLayer(identifier: Const.routeMarkerLabelsLayer, source: pointSource)
@@ -381,10 +388,12 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         if let above = style.layer(withIdentifier: Const.routeLayer) {
             style.insertLayer(arrows, above: above)
             style.insertLayer(points, above: arrows)
-            style.insertLayer(markerLabels, above: points)
+            style.insertLayer(pointsCasing, above: points)
+            style.insertLayer(markerLabels, above: pointsCasing)
         } else {
             style.addLayer(arrows)
             style.addLayer(points)
+            style.addLayer(pointsCasing)
             style.addLayer(markerLabels)
         }
     }
@@ -551,6 +560,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         static let routeLayer = "planned-route-layer"
         static let routeArrowsLayer = "planned-route-arrows-layer"
         static let routePointsLayer = "planned-route-points-layer"
+        static let routePointsCasingLayer = "planned-route-points-casing-layer"
         static let routeMarkerLabelsLayer = "planned-route-marker-labels-layer"
         static let routeStartColor = "#43a047"
         static let routeEndColor = "red"
