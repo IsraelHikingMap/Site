@@ -1,6 +1,6 @@
 import { describe, beforeEach, vi, it, expect, type Mock } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
-import { HttpEventType, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 
 import { FileService, SaveAsFactory } from "./file.service";
