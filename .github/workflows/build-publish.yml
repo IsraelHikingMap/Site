@@ -38,10 +38,11 @@ jobs:
           node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Get version
-        uses: bbonkr/get-version-action@v1
         id: get-version
-        with:
-          project: 'IsraelHiking.Web/package.json'
+        run: |
+          version=$(node -p "require('./IsraelHiking.Web/package.json').version")
+          echo "major=${version%%.*}" >> "$GITHUB_OUTPUT"
+          echo "minor=$(echo "$version" | cut -d. -f2)" >> "$GITHUB_OUTPUT"
 
       - name: Set version code and string
         id: version-code
@@ -240,11 +241,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6.0.1
       - name: Tag commit and push
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_tag: ${{ needs.version.outputs.version_string }}
+        run: |
+          git tag "v${{ needs.version.outputs.version_string }}"
+          git push origin "v${{ needs.version.outputs.version_string }}"
       - name: Download artifacts
         uses: actions/download-artifact@v8
         with:
