@@ -1,0 +1,40 @@
+<Project>
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="Codecov" Version="1.13.0" />
+    <PackageVersion Include="coverlet.msbuild" Version="6.0.3" />
+    <PackageVersion Include="CsvHelper" Version="33.1.0" />
+    <PackageVersion Include="CXuesong.MW.WikiClientLibrary" Version="0.8.0" />
+    <PackageVersion Include="JunitXml.TestLogger" Version="5.0.0" />
+    <PackageVersion Include="LazyCache.AspNetCore" Version="2.4.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.17" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.17" />
+    <PackageVersion Include="Microsoft.Extensions.FileProviders.Physical" Version="9.0.17" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.17" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="9.0.17" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="3.7.0" />
+    <PackageVersion Include="MSTest.TestFramework" Version="3.7.0" />
+    <PackageVersion Include="NEST" Version="7.17.5" />
+    <PackageVersion Include="NeoSmart.Caching.Sqlite.AspNetCore" Version="9.0.1" />
+    <PackageVersion Include="NetTopologySuite" Version="2.6.0" />
+    <PackageVersion Include="NetTopologySuite.IO.GeoJSON4STJ" Version="4.0.0" />
+    <PackageVersion Include="NetTopologySuite.IO.GPX" Version="1.1.1" />
+    <PackageVersion Include="NLog.Web.AspNetCore" Version="5.3.15" />
+    <PackageVersion Include="NSubstitute" Version="5.3.0" />
+    <PackageVersion Include="OsmSharp" Version="7.0.0-pre022" />
+    <PackageVersion Include="OsmSharp.IO.API" Version="1.0.5" />
+    <PackageVersion Include="ProjNet" Version="2.1.0" />
+    <PackageVersion Include="SharpZipLib.NETStandard" Version="1.0.7" />
+    <PackageVersion Include="SixLabors.ImageSharp.Drawing" Version="2.1.5" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+    <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="7.2.0" />
+    <PackageVersion Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
+    <PackageVersion Include="Wangkanai.Detection" Version="8.20.0" />
+  </ItemGroup>
+
+</Project>

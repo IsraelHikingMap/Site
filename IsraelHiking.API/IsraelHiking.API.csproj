@@ -24,15 +24,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CsvHelper" Version="33.0.1" />
-    <PackageReference Include="NetTopologySuite" Version="2.5.0" />
-    <PackageReference Include="NetTopologySuite.IO.GPX" Version="1.1.1" />
-    <PackageReference Include="OsmSharp.IO.API" Version="1.0.4" />
-    <PackageReference Include="ProjNet" Version="2.0.0" />
-    <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
-    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.5" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-    <PackageReference Include="Wangkanai.Detection" Version="7.4.0" />
+    <PackageReference Include="CsvHelper" />
+    <PackageReference Include="NetTopologySuite" />
+    <PackageReference Include="NetTopologySuite.IO.GPX" />
+    <PackageReference Include="OsmSharp.IO.API" />
+    <PackageReference Include="ProjNet" />
+    <PackageReference Include="SharpZipLib.NETStandard" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
+    <PackageReference Include="Wangkanai.Detection" />
   </ItemGroup>
 
   <ItemGroup>
