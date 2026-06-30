@@ -15,7 +15,7 @@ WORKDIR /net/IsraelHiking.Web
 
 RUN echo "Building version $VERSION" && dotnet publish -p:"Version=$VERSION;AssemblyVersion=$VERSION"
 
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS release
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS release
 
 RUN apt-get update -y --allow-unauthenticated --allow-insecure-repositories && apt-get install -y curl
 
