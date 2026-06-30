@@ -6,7 +6,7 @@ COPY ./IsraelHiking.Web/ ./
 RUN npm ci
 RUN npm run build:prod -- --no-progress
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build-net
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build-net
 ARG VERSION=9.21.0
 WORKDIR /net
 COPY . .
