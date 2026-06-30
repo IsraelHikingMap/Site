@@ -1,8 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Elasticsearch.Net;
@@ -16,6 +18,9 @@ using Microsoft.Extensions.Options;
 using Nest;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
+using YamlDotNet.Serialization;
 
 namespace IsraelHiking.DataAccess.ElasticSearch;
 
@@ -38,7 +43,61 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     private const string POINTS = "points";
     private const string BBOX = "bbox";
 
+    // When set, the search path carries extra ranking signals as feature attributes for the debug response.
+    internal static bool DebugSearch { get; set; } =
+        (Environment.GetEnvironmentVariable("DEBUG_SEARCH") ?? "")
+            .Trim().ToLowerInvariant() is "true" or "1" or "yes";
+
     private IElasticClient _elasticClient;
+
+    // Infer double/long/bool from untyped scalars; default makes every param a string and fails painless casts.
+    private static readonly IDeserializer _scoringYamlDeserializer = new DeserializerBuilder()
+        .WithNamingConvention(YamlDotNet.Serialization.NamingConventions.LowerCaseNamingConvention.Instance)
+        .WithNodeDeserializer(new ScalarTypeInferringNodeDeserializer())
+        .Build();
+
+    // Infer numeric/bool CLR types from untyped YAML scalars into `object` targets; typed targets fall through.
+    private sealed class ScalarTypeInferringNodeDeserializer : YamlDotNet.Serialization.INodeDeserializer
+    {
+        public bool Deserialize(IParser parser, Type expectedType,
+            Func<IParser, Type, object> nestedObjectDeserializer, out object value,
+            ObjectDeserializer rootDeserializer)
+        {
+            if (expectedType != typeof(object) || !parser.TryConsume<Scalar>(out var scalar))
+            {
+                value = null;
+                return false;
+            }
+            // A quoted scalar is an explicit string.
+            if (scalar.Style is ScalarStyle.SingleQuoted or ScalarStyle.DoubleQuoted)
+            {
+                value = scalar.Value;
+                return true;
+            }
+            var s = scalar.Value;
+            if (s == "null" || s == "~" || s.Length == 0)
+            {
+                value = null;
+            }
+            else if (s == "true" || s == "false")
+            {
+                value = s == "true";
+            }
+            else if (long.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var l))
+            {
+                value = l;
+            }
+            else if (double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var d))
+            {
+                value = d;
+            }
+            else
+            {
+                value = s;
+            }
+            return true;
+        }
+    }
 
     public async Task Initialize()
     {
@@ -72,69 +131,116 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         return list;
     }
 
-    /// <summary>
-    /// This method is used to extract the field with the highest contribution to the score
-    /// It uses the explanation object to recursively find the field
-    /// </summary>
-    /// <param name="exp"></param>
-    /// <returns></returns>
-    private string FindBestField(ExplanationDetail exp)
+    /// <summary>Best matched language from the named "lang:&lt;l&gt;" sub-queries in hit.MatchedQueries, else fallback.</summary>
+    private string GetBestMatchLanguage(IReadOnlyCollection<string> matchedQueries, string fallbackLanguage)
+        => SearchLanguageDetector.GetBestMatchLanguage(matchedQueries, fallbackLanguage);
+
+    /// <summary>Named-query label for a per-language phrase clause, e.g. "lang:en".</summary>
+    private static string LanguageQueryName(string language) => SearchLanguageDetector.LanguageQueryName(language);
+
+    // feature_class -> autocomplete icon override at query time (more specific than the baked poiIcon,
+    // no reindex). Only glyphs present in the web font (src/fonts/icons.css) are used; missing types
+    // reuse the nearest glyph. Absent class keeps the baked poiIcon verbatim.
+    private static readonly Dictionary<string, (string Icon, string Color)> _featureClassIcon = new()
     {
-        // Extract the field from the explanation
-        var match = Regex.Match(exp.Description, @"weight\((.*)\)");
-        if (match.Success)
-        {
-            return match.Groups[1].Value;
-        }
-
-        // Recursively check child explanations
-        foreach (var child in exp.Details)
-        {
-            var childResult = FindBestField(child);
-            if (!string.IsNullOrEmpty(childResult))
-                return childResult;
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    /// This method is used to find the language with the highest contribution to the score
-    /// </summary>
-    /// <param name="explanation">The explanination object from the query results</param>
-    /// <param name="fallbackLanguage">The language to use in case no matching language was found</param>
-    /// <returns></returns>
-    private string GetBestMatchLanguage(Explanation explanation, string fallbackLanguage)
-    {
-        // Recursive method to find the field with the highest contribution to the score
-        foreach (var details in explanation?.Details ?? [])
-        {
-            var results = FindBestField(details);
-            if (!string.IsNullOrEmpty(results) && Languages.ArrayWithDefault.Any(l => results.Contains("." + l)))
-            {
-                return Languages.ArrayWithDefault.First(l => results.Contains("." + l));
-            }
-        }
-        return fallbackLanguage;
-    }
+        // peaks / high ground (black)
+        ["peak"] = ("icon-peak", "black"), ["hill"] = ("icon-peak", "black"),
+        ["ridge"] = ("icon-peak", "black"), ["saddle"] = ("icon-peak", "black"),
+        ["cliff"] = ("icon-peak", "black"), ["rock"] = ("icon-peak", "black"),
+        // terrain landforms — reuse icon-peak
+        ["canyon"] = ("icon-peak", "black"), ["plateau"] = ("icon-peak", "black"),
+        ["arch"] = ("icon-peak", "black"), ["cave"] = ("icon-peak", "black"),
+        // standing water (blue)
+        ["lake"] = ("icon-tint", "#1e80e3"), ["reservoir"] = ("icon-tint", "#1e80e3"),
+        ["pond"] = ("icon-tint", "#1e80e3"), ["spring"] = ("icon-tint", "#1e80e3"),
+        ["wetland"] = ("icon-tint", "#1e80e3"),
+        // flowing water (blue)
+        ["river"] = ("icon-river", "#1e80e3"), ["stream"] = ("icon-river", "#1e80e3"),
+        ["canal"] = ("icon-river", "#1e80e3"), ["rapids"] = ("icon-river", "#1e80e3"),
+        ["waterfall"] = ("icon-waterfall", "#1e80e3"),
+        // ice / coast (blue) — reuse nearest glyph
+        ["glacier"] = ("icon-tint", "#1e80e3"),
+        ["bay"] = ("icon-anchor", "#1e80e3"), ["cape"] = ("icon-anchor", "#1e80e3"),
+        ["beach"] = ("icon-anchor", "#1e80e3"), ["island"] = ("icon-anchor", "#1e80e3"),
+        // land cover (green)
+        ["forest"] = ("icon-tree", "#008000"),
+        // recreation / POI
+        ["viewpoint"] = ("icon-viewpoint", "#008000"), ["campsite"] = ("icon-campsite", "#734a08"),
+        ["attraction"] = ("icon-star", "#ffb800"),
+        // populated places (black)
+        ["city"] = ("icon-home", "black"), ["town"] = ("icon-home", "black"),
+        ["village"] = ("icon-home", "black"), ["hamlet"] = ("icon-home", "black"),
+        ["suburb"] = ("icon-home", "black"), ["neighbourhood"] = ("icon-home", "black"),
+        ["locality"] = ("icon-home", "black"),
+        // built / POI
+        ["lodging"] = ("icon-bed", "black"),
+        ["food"] = ("icon-cutlery", "black"),
+        ["shop"] = ("icon-shopping-cart", "black"),
+        ["museum"] = ("icon-camera", "black"),
+        ["religious"] = ("icon-church", "black"),
+        ["education"] = ("icon-graduation-cap", "black"),
+        ["medical"] = ("icon-medkit", "#d00"),
+        ["government"] = ("icon-bank", "black"),
+        ["sports"] = ("icon-flag", "#008000"),
+        ["park"] = ("icon-tree", "#008000"),
+        ["fuel"] = ("icon-automobile", "black"),
+        ["parking"] = ("icon-parking", "black"),
+        ["transit"] = ("icon-bus", "black"),
+        ["office"] = ("icon-building", "black"),
+        ["structure"] = ("icon-building", "black"),
+        ["building"] = ("icon-building", "black"),
+    };
 
     private IFeature HitToFeature(IHit<PointDocument> d, string language)
     {
+        var icon = d.Source.PoiIcon;
+        var iconColor = d.Source.PoiIconColor;
+        if (!string.IsNullOrWhiteSpace(d.Source.FeatureClass) &&
+            _featureClassIcon.TryGetValue(d.Source.FeatureClass, out var fc))
+        {
+            icon = fc.Icon;
+            iconColor = fc.Color;
+        }
         IFeature feature = new Feature(new Point(d.Source.Location[0], d.Source.Location[1]), new AttributesTable
         {
             { FeatureAttributes.NAME, d.Source.Name.GetValueOrDefault(Languages.DEFAULT, string.Empty) },
             { FeatureAttributes.POI_SOURCE, d.Source.PoiSource },
-            { FeatureAttributes.POI_ICON, d.Source.PoiIcon },
+            { FeatureAttributes.POI_ICON, icon },
             { FeatureAttributes.POI_CATEGORY, d.Source.PoiCategory },
-            { FeatureAttributes.POI_ICON_COLOR, d.Source.PoiIconColor },
+            { FeatureAttributes.POI_ICON_COLOR, iconColor },
             { FeatureAttributes.DESCRIPTION, d.Source.Description.GetValueOrDefault(Languages.DEFAULT, string.Empty) },
             { FeatureAttributes.POI_ID, d.Id },
             { FeatureAttributes.POI_LANGUAGE, Languages.ALL },
             { FeatureAttributes.ID, string.Join("_", d.Id.Split("_").Skip(1)) }
         });
-        var searchTermLanguage = GetBestMatchLanguage(d.Explanation, language);
-        // This is a bit of a hack to store the lagnuage that the search found on the feature itself...
+        var searchTermLanguage = GetBestMatchLanguage(d.MatchedQueries, language);
         feature.Attributes.AddOrUpdate(FeatureAttributes.SEARCH_LANGUAGE, searchTermLanguage);
+        // DEBUG_SEARCH only: surface raw ranking signals as feature attributes (off in production).
+        if (DebugSearch)
+        {
+            if (!string.IsNullOrWhiteSpace(d.Source.FeatureClass))
+            {
+                feature.Attributes.AddOrUpdate(FeatureAttributes.FEATURE_CLASS, d.Source.FeatureClass);
+            }
+            if (d.Source.Prominence.HasValue)
+            {
+                feature.Attributes.AddOrUpdate(FeatureAttributes.PROMINENCE, d.Source.Prominence.Value);
+            }
+            // Final script_score, raw BM25 sub-score, and the explain tree for the debug response.
+            if (d.Score.HasValue)
+            {
+                feature.Attributes.AddOrUpdate(FeatureAttributes.SCORE, d.Score.Value);
+            }
+            if (d.Explanation != null)
+            {
+                var bm25 = ExtractBm25(d.Explanation);
+                if (bm25.HasValue)
+                {
+                    feature.Attributes.AddOrUpdate(FeatureAttributes.BM25, bm25.Value);
+                }
+                feature.Attributes.AddOrUpdate(FeatureAttributes.EXPLAIN, ExplanationToObject(d.Explanation));
+            }
+        }
         foreach (var key in d.Source.Name.Keys.Where(k => k != Languages.DEFAULT))
         {
             feature.Attributes.AddOrUpdate("name:" + key, d.Source.Name[key]);
@@ -142,6 +248,14 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         foreach (var key in d.Source.Description.Keys.Where(k => k != Languages.DEFAULT))
         {
             feature.Attributes.AddOrUpdate("description:" + key, d.Source.Description[key]);
+        }
+        if (d.Source.AltNames != null)
+        {
+            foreach (var key in d.Source.AltNames.Keys)
+            {
+                var attrKey = key == Languages.DEFAULT ? "alt_name" : "alt_name:" + key;
+                feature.Attributes.AddOrUpdate(attrKey, string.Join("; ", d.Source.AltNames[key]));
+            }
         }
         if (!string.IsNullOrWhiteSpace(d.Source.Image))
         {
@@ -151,54 +265,525 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         return feature;
     }
 
-    private QueryContainer DocumentNameSearchQuery<T>(QueryContainerDescriptor<T> q, string searchTerm) where T : class
+    // Walk the explain tree to the script/function-score node and return its inner BM25 child; fall back to root.
+    private static double? ExtractBm25(Explanation explanation)
     {
-        return q.Bool(b => b
-            .Should(
-                // Tier 1: Exact keyword match — constant score, always wins
-                sh => sh.ConstantScore(cs => cs
-                    .Boost(100)
-                    .Filter(f => f.MultiMatch(m =>
-                        m.Type(TextQueryType.Phrase)
-                        .Query(searchTerm)
-                        .Fields(f2 => f2.Fields(
-                            Languages.ArrayWithDefault.Select(l => new Field("name." + l + ".keyword"))))
-                    ))
-                ),
+        if (explanation.Details == null)
+        {
+            return explanation.Value;
+        }
+        var rootDesc = explanation.Description ?? string.Empty;
+        if ((rootDesc.Contains("script", System.StringComparison.OrdinalIgnoreCase) ||
+             rootDesc.Contains("function score", System.StringComparison.OrdinalIgnoreCase)) &&
+            explanation.Details.Count > 0)
+        {
+            return explanation.Details.First().Value;
+        }
+        ExplanationDetail node = explanation.Details.FirstOrDefault();
+        for (var depth = 0; node != null && depth < 6; depth++)
+        {
+            var desc = node.Description ?? string.Empty;
+            if (desc.Contains("script", System.StringComparison.OrdinalIgnoreCase) ||
+                desc.Contains("function score", System.StringComparison.OrdinalIgnoreCase))
+            {
+                var inner = node.Details?.FirstOrDefault();
+                if (inner != null)
+                {
+                    return inner.Value;
+                }
+            }
+            node = node.Details?.FirstOrDefault();
+        }
+        return explanation.Value;  // best-effort fallback
+    }
 
-                // Tier 2: Prefix / "starts with"
-                sh => sh.MultiMatch(m =>
-                    m.Type(TextQueryType.PhrasePrefix)
-                    .Query(searchTerm)
-                    .Boost(8)
-                    .Fields(f => f.Fields(
-                        Languages.ArrayWithDefault.Select(l => new Field("name." + l))))
-                ),
+    // Convert the NEST explain tree into a plain nested {value, description, details} object (depth-bounded).
+    private static object ExplanationToObject(Explanation explanation, int depth = 0)
+    {
+        if (explanation == null || depth > 8)
+        {
+            return null;
+        }
+        return new
+        {
+            value = explanation.Value,
+            description = explanation.Description,
+            details = explanation.Details == null || explanation.Details.Count == 0
+                ? null
+                : explanation.Details.Select(c => DetailToObject(c, depth + 1)).ToList()
+        };
+    }
 
-                // Tier 3: Catches substrings that the standard analyzer tokenizes as words
-                sh => sh.MultiMatch(m =>
+    private static object DetailToObject(ExplanationDetail detail, int depth)
+    {
+        if (detail == null || depth > 8)
+        {
+            return null;
+        }
+        return new
+        {
+            value = detail.Value,
+            description = detail.Description,
+            details = detail.Details == null || detail.Details.Count == 0
+                ? null
+                : detail.Details.Select(c => DetailToObject(c, depth + 1)).ToList()
+        };
+    }
+
+    // Primary name-tier boosts, descending: exact keyword & edge-ngram prefix lead, then phrase-prefix,
+    // then per-language match, then fuzzy — all small enough that prominence/distance still break ties.
+    private const double EXACT_KEYWORD_BOOST = 12;
+    private const double PREFIX_TIER_BOOST = 12;
+    private const double PHRASE_PREFIX_BOOST = 8;
+    private const double NAME_MATCH_BOOST = 5;
+    private const double FUZZY_TIER_BOOST = 2;
+
+    // alt_name (variant-name) tier boosts, STRICTLY below their primary counterparts (6 < 12, 3 < 5).
+    private const double EXACT_ALT_KEYWORD_BOOST = 6;
+    private const double ALT_NAME_MATCH_BOOST = 3;
+
+    /// <summary>Tiered name query; when <paramref name="prefix"/> the starts-with tier is emphasised and fuzzy dropped.</summary>
+    private QueryContainer DocumentNameSearchQuery<T>(QueryContainerDescriptor<T> q, string searchTerm, bool prefix = false) where T : class
+    {
+        var shoulds = new List<Func<QueryContainerDescriptor<T>, QueryContainer>>
+        {
+            // Tier 1: Exact keyword match — modest lead so prominence/distance can break ties.
+            sh => sh.ConstantScore(cs => cs
+                .Boost(EXACT_KEYWORD_BOOST)
+                .Filter(f => f.MultiMatch(m =>
                     m.Type(TextQueryType.Phrase)
                     .Query(searchTerm)
-                    .Boost(5)
-                    .Fields(f => f.Fields(
-                        Languages.ArrayWithDefault.Select(l => new Field("name." + l))))
-                ),
+                    .Fields(f2 => f2.Fields(
+                        Languages.ArrayWithDefault.Select(l => new Field("name." + l + ".keyword"))))
+                ))
+            ),
 
-                // Tier 4: Fuzzy — only kicks in when nothing above matched
-                sh => sh.MultiMatch(m =>
-                    m.Type(TextQueryType.BestFields)
+            // Tier 2: Prefix / "starts with", mode-gated on `prefix`:
+            //   • prefix==true (mid-typing): edge-ngram match over name.<l>.prefix in a dis_max (best single lang).
+            //   • prefix==false (completed term): match_phrase_prefix over name.<l>, keeps token order so a
+            //     longer exact name isn't undercut by a shorter bag-of-words tie. MaxExpansions(200).
+            prefix
+                ? sh => sh.DisMax(dm => dm
+                    .TieBreaker(0.0)
+                    .Boost(PREFIX_TIER_BOOST)
+                    .Queries(Languages.ArrayWithDefault.Select<string, Func<QueryContainerDescriptor<T>, QueryContainer>>(
+                        l => qq => qq.Match(m => m
+                            .Field(new Field("name." + l + ".prefix"))
+                            .Query(searchTerm))).ToArray()))
+                : sh => sh.MultiMatch(m =>
+                    m.Type(TextQueryType.PhrasePrefix)
                     .Query(searchTerm)
-                    .Fuzziness(Fuzziness.Auto)
-                    .Boost(2)
+                    .MaxExpansions(200)
+                    .Boost(PHRASE_PREFIX_BOOST)
                     .Fields(f => f.Fields(
-                        Languages.ArrayWithDefault.Select(l => new Field("name." + l))))
-                )
-            )
+                        Languages.ArrayWithDefault.Select(l => new Field("name." + l)))))
+        };
+
+        // Tier 3: per-language name match in a dis_max (TieBreaker 0.0 = pure max), so a doc scores by its
+        // single best language, not N× for being populated in N subfields. Each clause is .Name("lang:<l>")
+        // so the matched language is recoverable from hit.MatchedQueries (dis_max reports all matched clauses).
+        shoulds.Add(sh => sh.DisMax(dm => dm
+            .TieBreaker(0.0)
+            .Queries(Languages.ArrayWithDefault.Select<string, Func<QueryContainerDescriptor<T>, QueryContainer>>(
+                l => qq => qq.Match(m => m
+                    .Field(new Field("name." + l))
+                    .Query(searchTerm)
+                    .Boost(NAME_MATCH_BOOST)
+                    .Name(LanguageQueryName(l)))).ToArray())));
+
+        // ---- alt_name tiers — searched over the separate alt_names.<l> field at boosts below the
+        // primary name, so a variant match (e.g. "IBT") surfaces a feature but never outranks a primary match.
+
+        // Alt Tier-1: exact-keyword on alt_names.<l>.keyword, ConstantScore boost 6 (< primary 12).
+        shoulds.Add(sh => sh.ConstantScore(cs => cs
+            .Boost(EXACT_ALT_KEYWORD_BOOST)
+            .Filter(f => f.MultiMatch(m =>
+                m.Type(TextQueryType.Phrase)
+                .Query(searchTerm)
+                .Fields(f2 => f2.Fields(
+                    Languages.ArrayWithDefault.Select(l => new Field("alt_names." + l + ".keyword"))))
+            ))
+        ));
+
+        // Alt Tier-3: per-language match on alt_names.<l>, boost 3 (< primary 5). Must be a dis_max (not a
+        // flat should) to avoid across-language SUM inflation. Intentionally unnamed: language capture is
+        // authoritative on the primary name only.
+        shoulds.Add(sh => sh.DisMax(dm => dm
+            .TieBreaker(0.0)
+            .Queries(Languages.ArrayWithDefault.Select<string, Func<QueryContainerDescriptor<T>, QueryContainer>>(
+                l => qq => qq.Match(m => m
+                    .Field(new Field("alt_names." + l))
+                    .Query(searchTerm)
+                    .Boost(ALT_NAME_MATCH_BOOST))).ToArray())));
+
+        // Tier 4: Fuzzy — only on a completed term, never while typing.
+        if (!prefix)
+        {
+            shoulds.Add(sh => sh.MultiMatch(m =>
+                m.Type(TextQueryType.BestFields)
+                .Query(searchTerm)
+                .Fuzziness(Fuzziness.Auto)
+                .Boost(FUZZY_TIER_BOOST)
+                .Fields(f => f.Fields(
+                    Languages.ArrayWithDefault.Select(l => new Field("name." + l))))));
+        }
+
+        return q.Bool(b => b
+            .Should(shoulds.ToArray())
             .MinimumShouldMatch(1)
         );
     }
 
-    public async Task<List<IFeature>> Search(string searchTerm, string language)
+    /// <summary>Wraps the tiered name query in a function_score so prominence and map-center proximity reorder tied text hits.</summary>
+    private QueryContainer NameSearchWithScoring<T>(QueryContainerDescriptor<T> q, string searchTerm,
+        double? lat, double? lng, double zoom, bool prefix) where T : PointDocument
+    {
+        var scriptQuery = LoadScoringScript();
+        var scriptParams = BuildScriptParams(scriptQuery, searchTerm, lat, lng, zoom);
+
+        return q.ScriptScore(ss => ss
+            .Query(qq => DocumentNameSearchQuery(qq, searchTerm, prefix))
+            .Script(s => s
+                .Source(scriptQuery.Script.Source)
+                .Params(scriptParams)
+            )
+        );
+    }
+
+    /// <summary>Load + deserialize the bundled painless scoring script (source + default params) from disk.</summary>
+    private ScriptScoreQuery LoadScoringScript()
+    {
+        var scriptPath = Path.Combine(AppContext.BaseDirectory, "ElasticSearch", "scoring", "updated_score.yml");
+        return _scoringYamlDeserializer.Deserialize<ScriptScoreQuery>(File.ReadAllText(scriptPath));
+    }
+
+    /// <summary>Build the per-request painless params: the YAML defaults plus map-center / query-derived values.</summary>
+    private Dictionary<string, object> BuildScriptParams(
+        ScriptScoreQuery scriptQuery, string searchTerm, double? lat, double? lng, double zoom)
+    {
+        // NEST renders YamlDotNet's object-keyed nested maps as an empty `{}` (dropping weights/class_groups/
+        // group_similarities), which fails the painless on every shard; normalize them to Dictionary<string,object> first.
+        var scriptParams = (Dictionary<string, object>)NormalizeForNest(scriptQuery.Script.Params);
+
+        // A zoom of 0 means "client sent no usable zoom" (the GetSearchResults default), NOT a real world
+        // view: feed the painless geo decay the same DEFAULT_ZOOM the viewport math uses, so a missing zoom
+        // can't collapse the decay radius to ~200 m and bury every non-adjacent hit.
+        var effectiveZoom = zoom <= 0 ? DEFAULT_ZOOM : zoom;
+
+        scriptParams[ScriptParam.Lat] = lat;
+        scriptParams[ScriptParam.Lon] = lng;
+        scriptParams[ScriptParam.Zoom] = effectiveZoom;
+        scriptParams[ScriptParam.QueryType] = InferQtype(searchTerm);
+        scriptParams[ScriptParam.QueryClasses] = InferQueryClass(searchTerm);
+
+        // Exact-name bonus: painless can't read matched_queries, so pass the keyword field list + the query
+        // normalized per each field's index normalizer ("base" universal, "he" hebrew+matres) for an in-script equality test.
+        scriptParams[ScriptParam.NameKeywordFields] = NameKeywordFields;
+        scriptParams[ScriptParam.QueryNorm] = new Dictionary<string, object>
+        {
+            ["base"] = NormalizeForKeyword(searchTerm, isHebrew: false),
+            ["he"] = NormalizeForKeyword(searchTerm, isHebrew: true),
+        };
+
+        // Supply the viewport box for the painless in-screen boost only when a map center exists.
+        if (lat.HasValue && lng.HasValue)
+        {
+            var (halfLatDeg, halfLngDeg) = ComputeViewportHalfExtentDeg(effectiveZoom, lat.Value);
+            scriptParams[ScriptParam.ViewportBoost] = VIEWPORT_BOOST;
+            scriptParams[ScriptParam.ViewportHalfLat] = halfLatDeg;
+            scriptParams[ScriptParam.ViewportHalfLng] = halfLngDeg;
+            scriptParams[ScriptParam.ViewportCenterLat] = lat.Value;
+            scriptParams[ScriptParam.ViewportCenterLng] = lng.Value;
+        }
+
+        return scriptParams;
+    }
+
+    /// <summary>Recursively convert YamlDotNet's untyped containers into NEST-serializable maps (Dictionary&lt;string,object&gt;) and lists.</summary>
+    private static object NormalizeForNest(object value)
+    {
+        switch (value)
+        {
+            case IDictionary<string, object> typed:
+            {
+                var result = new Dictionary<string, object>(typed.Count);
+                foreach (var kv in typed)
+                {
+                    result[kv.Key] = NormalizeForNest(kv.Value);
+                }
+                return result;
+            }
+            case System.Collections.IDictionary map:
+            {
+                var result = new Dictionary<string, object>(map.Count);
+                foreach (System.Collections.DictionaryEntry entry in map)
+                {
+                    var key = Convert.ToString(entry.Key, CultureInfo.InvariantCulture);
+                    result[key] = NormalizeForNest(entry.Value);
+                }
+                return result;
+            }
+            case string s:
+                return s; // string is IEnumerable — handle before the sequence case
+            case System.Collections.IEnumerable seq:
+            {
+                var list = new List<object>();
+                foreach (var item in seq)
+                {
+                    list.Add(NormalizeForNest(item));
+                }
+                return list;
+            }
+            default:
+                return value;
+        }
+    }
+
+    // Generic word -> ordered feature_class set (primary first). RHS must exist in updated_score.yml's
+    // class_groups or the boost is a no-op. Kept in lockstep with the relevance harness TYPE_TOKENS.
+    private static readonly Dictionary<string, string[]> _typeTokens = new()
+    {
+        // peaks / high ground
+        ["mountain"] = new[] { "peak" }, ["mount"] = new[] { "peak" }, ["mt"] = new[] { "peak" },
+        ["peak"] = new[] { "peak" }, ["summit"] = new[] { "peak" },
+        ["butte"] = new[] { "peak", "hill" }, ["pinnacle"] = new[] { "peak", "rock" },
+        ["dome"] = new[] { "peak" }, ["sugarloaf"] = new[] { "peak" },
+        ["hill"] = new[] { "hill", "peak" }, ["knob"] = new[] { "hill", "peak" },
+        ["knoll"] = new[] { "hill" }, ["mound"] = new[] { "hill" },
+        ["top"] = new[] { "hill", "peak" }, ["bald"] = new[] { "hill", "peak" },
+        ["ridge"] = new[] { "ridge" }, ["saddle"] = new[] { "saddle" },
+        ["gap"] = new[] { "saddle" }, ["notch"] = new[] { "saddle" }, ["pass"] = new[] { "saddle" },
+        // water: standing
+        ["lake"] = new[] { "lake", "reservoir", "pond" }, ["pond"] = new[] { "pond", "lake" },
+        ["reservoir"] = new[] { "reservoir", "lake" }, ["lagoon"] = new[] { "lake", "pond" },
+        ["millpond"] = new[] { "pond", "lake" },
+        // water: flowing
+        ["river"] = new[] { "river", "stream" }, ["creek"] = new[] { "stream", "river" },
+        ["brook"] = new[] { "stream" }, ["stream"] = new[] { "stream", "river" },
+        ["run"] = new[] { "stream" }, ["branch"] = new[] { "stream" },
+        ["fork"] = new[] { "stream", "river" }, ["kill"] = new[] { "stream" },
+        ["bayou"] = new[] { "stream", "river" }, ["rapids"] = new[] { "rapids" },
+        ["falls"] = new[] { "waterfall" }, ["waterfall"] = new[] { "waterfall" },
+        ["cascade"] = new[] { "waterfall" }, ["cascades"] = new[] { "waterfall" },
+        ["canal"] = new[] { "canal" },
+        // springs
+        ["spring"] = new[] { "spring" }, ["springs"] = new[] { "spring" }, ["geyser"] = new[] { "spring" },
+        // glacier
+        ["glacier"] = new[] { "glacier" }, ["icefield"] = new[] { "glacier" },
+        // coast / shore
+        ["island"] = new[] { "island" }, ["isle"] = new[] { "island" }, ["islet"] = new[] { "island" },
+        ["key"] = new[] { "island" }, ["cay"] = new[] { "island" },
+        ["bay"] = new[] { "bay" }, ["cove"] = new[] { "bay" }, ["harbor"] = new[] { "bay" },
+        ["harbour"] = new[] { "bay" }, ["inlet"] = new[] { "bay" }, ["sound"] = new[] { "bay" },
+        ["cape"] = new[] { "cape" }, ["point"] = new[] { "cape" }, ["head"] = new[] { "cape" },
+        ["neck"] = new[] { "cape" }, ["spit"] = new[] { "cape" },
+        ["beach"] = new[] { "beach" }, ["shore"] = new[] { "beach" }, ["shores"] = new[] { "beach" },
+        ["strand"] = new[] { "beach" },
+        // rock / cliff
+        ["rock"] = new[] { "rock", "cliff" }, ["rocks"] = new[] { "rock", "cliff" },
+        ["boulder"] = new[] { "rock" }, ["cliff"] = new[] { "cliff" }, ["cliffs"] = new[] { "cliff" },
+        ["bluff"] = new[] { "cliff" }, ["crag"] = new[] { "cliff", "rock" }, ["ledge"] = new[] { "cliff" },
+        ["palisades"] = new[] { "cliff" },
+        // valley / lowland
+        ["valley"] = new[] { "valley" }, ["hollow"] = new[] { "valley" }, ["canyon"] = new[] { "valley" },
+        ["gorge"] = new[] { "valley" }, ["ravine"] = new[] { "valley" }, ["glen"] = new[] { "valley" },
+        ["dale"] = new[] { "valley" }, ["coulee"] = new[] { "valley" },
+        // vegetation / land cover
+        ["forest"] = new[] { "forest" }, ["woods"] = new[] { "forest" }, ["wood"] = new[] { "forest" },
+        ["grove"] = new[] { "forest" },
+        // populated places
+        ["city"] = new[] { "city", "town" }, ["town"] = new[] { "town", "city" },
+        ["township"] = new[] { "town" }, ["village"] = new[] { "village", "town" },
+        ["hamlet"] = new[] { "hamlet", "village" }, ["borough"] = new[] { "town", "suburb" },
+        ["suburb"] = new[] { "suburb", "neighbourhood" },
+        ["neighborhood"] = new[] { "neighbourhood", "suburb" },
+        ["neighbourhood"] = new[] { "neighbourhood", "suburb" },
+        // recreation / POI
+        ["viewpoint"] = new[] { "viewpoint" }, ["overlook"] = new[] { "viewpoint" },
+        ["lookout"] = new[] { "viewpoint" }, ["vista"] = new[] { "viewpoint" },
+        ["campground"] = new[] { "campsite" }, ["campsite"] = new[] { "campsite" },
+        ["camp"] = new[] { "campsite" },
+        // built / POI
+        // lodging
+        ["hotel"] = new[] { "lodging" }, ["motel"] = new[] { "lodging" },
+        ["hostel"] = new[] { "lodging" }, ["inn"] = new[] { "lodging" },
+        ["lodge"] = new[] { "lodging" }, ["guesthouse"] = new[] { "lodging" },
+        // food
+        ["restaurant"] = new[] { "food" }, ["cafe"] = new[] { "food" },
+        ["bar"] = new[] { "food" }, ["pub"] = new[] { "food" }, ["diner"] = new[] { "food" },
+        // shop
+        ["shop"] = new[] { "shop" }, ["store"] = new[] { "shop" },
+        ["supermarket"] = new[] { "shop" }, ["market"] = new[] { "shop" },
+        ["mall"] = new[] { "shop" }, ["bakery"] = new[] { "shop" }, ["pharmacy"] = new[] { "medical" },
+        // culture
+        ["museum"] = new[] { "museum" }, ["gallery"] = new[] { "museum" },
+        ["theatre"] = new[] { "museum" }, ["theater"] = new[] { "museum" },
+        ["cinema"] = new[] { "museum" },
+        // civic
+        ["church"] = new[] { "religious" }, ["cathedral"] = new[] { "religious" },
+        ["chapel"] = new[] { "religious" }, ["mosque"] = new[] { "religious" },
+        ["synagogue"] = new[] { "religious" }, ["temple"] = new[] { "religious" },
+        ["monastery"] = new[] { "religious" },
+        ["school"] = new[] { "education" }, ["university"] = new[] { "education" },
+        ["college"] = new[] { "education" }, ["library"] = new[] { "education" },
+        ["hospital"] = new[] { "medical" }, ["clinic"] = new[] { "medical" },
+        ["townhall"] = new[] { "government" }, ["courthouse"] = new[] { "government" },
+        // transport ("station" deliberately omitted — too often a proper name)
+        ["airport"] = new[] { "transit" },
+        ["parking"] = new[] { "parking" },
+    };
+
+    // Multi-word generic phrases (checked before single tokens, at head OR tail).
+    private static readonly Dictionary<string, string[]> _phraseTokens = new()
+    {
+        ["hot spring"] = new[] { "spring" }, ["hot springs"] = new[] { "spring" },
+        ["warm spring"] = new[] { "spring" }, ["warm springs"] = new[] { "spring" },
+        ["mineral springs"] = new[] { "spring" },
+        ["state park"] = new[] { "tourism", "attraction" },
+        ["national park"] = new[] { "tourism", "attraction" },
+        ["view point"] = new[] { "viewpoint" }, ["scenic overlook"] = new[] { "viewpoint" },
+        ["scenic point"] = new[] { "viewpoint" },
+        ["camp ground"] = new[] { "campsite" }, ["salt lake"] = new[] { "lake", "reservoir" },
+    };
+
+    // Syntax punctuation stripped from the query edges before class/type-token parsing.
+    private static readonly char[] _classPunct =
+        " \t\"'`.,;:!?()[]{}<>-".ToCharArray();
+
+    /// <summary>Lower-case the query, strip edge punctuation, and split into tokens (empty when none).</summary>
+    private static string[] ClassQueryTokens(string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm)) return Array.Empty<string>();
+        var q = searchTerm.Trim().Trim(_classPunct).ToLowerInvariant();
+        return q.Length == 0 ? Array.Empty<string>() : q.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    }
+
+    /// <summary>Lower-case a token and fold a trailing plural to singular, unless the plural is itself an explicit key.</summary>
+    private static string NormalizeClassToken(string tok)
+    {
+        var t = tok.ToLowerInvariant();
+        if (_typeTokens.ContainsKey(t)) return t;
+        if (t.EndsWith("es") && _typeTokens.ContainsKey(t[..^2])) return t[..^2];
+        if (t.EndsWith("s") && _typeTokens.ContainsKey(t[..^1])) return t[..^1];
+        return t;
+    }
+
+    /// <summary>Infer the feature_class(es) a query intends (primary first), or empty when no generic type token is present.</summary>
+    // internal static for ES-free unit testing of the class-inference vocabulary.
+    internal static List<string> InferQueryClass(string searchTerm)
+    {
+        var tokens = ClassQueryTokens(searchTerm);
+        if (tokens.Length == 0) return new List<string>();
+
+        // Multi-word phrase tokens at head or tail (longest wins).
+        foreach (var n in new[] { 3, 2 })
+        {
+            if (tokens.Length < n) continue;
+            var tail = string.Join(' ', tokens[^n..]);
+            if (_phraseTokens.TryGetValue(tail, out var tailClasses)) return tailClasses.ToList();
+            var head = string.Join(' ', tokens[..n]);
+            if (_phraseTokens.TryGetValue(head, out var headClasses)) return headClasses.ToList();
+        }
+
+        // Trailing single type token ("X Lake").
+        var last = NormalizeClassToken(tokens[^1]);
+        if (_typeTokens.TryGetValue(last, out var lastClasses)) return lastClasses.ToList();
+
+        // Leading single type token ("Mount X").
+        var first = NormalizeClassToken(tokens[0]);
+        if (_typeTokens.TryGetValue(first, out var firstClasses)) return firstClasses.ToList();
+
+        return new List<string>();
+    }
+
+    /// <summary>
+    /// Classify a query as GENERIC (bare category word — "lake", "hot springs") vs SPECIFIC (a named
+    /// feature — "Denali", "Silver Lake"); drives the painless prominence weight. GENERIC only when
+    /// EVERY token (or the whole-query phrase) is a known generic term; one non-type token => SPECIFIC.
+    /// </summary>
+    // internal static for ES-free unit testing of GENERIC vs SPECIFIC classification.
+    internal static string InferQtype(string searchTerm)
+    {
+        var tokens = ClassQueryTokens(searchTerm);
+        if (tokens.Length == 0) return "GENERIC";
+
+        var whole = string.Join(' ', tokens);
+        if (_phraseTokens.ContainsKey(whole)) return "GENERIC";
+
+        // GENERIC only if every token is itself a generic type token.
+        foreach (var tok in tokens)
+        {
+            if (!_typeTokens.ContainsKey(NormalizeClassToken(tok))) return "SPECIFIC";
+        }
+        return "GENERIC";
+    }
+
+
+    // Readable C# names for the painless script param keys. The string VALUES are the contract with
+    // updated_score.yml (the painless reads params.<value>) — keep them in sync with that script.
+    private static class ScriptParam
+    {
+        public const string Lat = "lat";
+        public const string Lon = "lon";
+        public const string Zoom = "zoom";
+        public const string QueryType = "qtype";
+        public const string QueryClasses = "query_classes";
+        public const string NameKeywordFields = "name_keyword_fields";
+        public const string QueryNorm = "query_norm";
+        public const string ViewportBoost = "viewport_boost";
+        public const string ViewportHalfLat = "vp_half_lat";
+        public const string ViewportHalfLng = "vp_half_lng";
+        public const string ViewportCenterLat = "vp_center_lat";
+        public const string ViewportCenterLng = "vp_center_lng";
+    }
+
+    private class ScriptScoreQuery
+    {
+        public ScriptScore Script { get; set; }
+    }
+
+    private class ScriptScore
+    {
+        public string Source { get; set; }
+        public Dictionary<string, object> Params { get; set; }
+    }
+
+
+    // Small additive in-viewport boost; must not dominate the O(1) score components (text/geo/prominence/pclass).
+    private const double VIEWPORT_BOOST = 0.15;
+
+    private const double KM_PER_DEGREE_LATITUDE = 111.0; // WGS84 approximation
+
+    // Half-width/height of the map viewport in degrees, derived from zoom (lng scaled by cos(lat)).
+    private static (double halfLatDeg, double halfLngDeg) ComputeViewportHalfExtentDeg(double zoom, double lat)
+    {
+        var (_, offsetKm) = ComputeGeoDecayParams(zoom);
+        var halfKm = Math.Clamp(offsetKm * 3.0, 5.0, 400.0); // a few × the plateau, bounded
+        var halfLatDeg = halfKm / KM_PER_DEGREE_LATITUDE;
+        var cos = Math.Max(0.2, Math.Cos(lat * Math.PI / 180.0));
+        var halfLngDeg = halfKm / (KM_PER_DEGREE_LATITUDE * cos);
+        return (halfLatDeg, halfLngDeg);
+    }
+
+    // Default zoom when the client sends none (zoom <= 0). A bare 0 would otherwise make the painless
+    // geo decay collapse to a ~200 m radius (scale_base * scale_factor^0), burying every non-adjacent hit.
+    private const double DEFAULT_ZOOM = 12;
+
+    // Tie the geo decay radius to zoom: offset = plateau (full score), scale = distance at which score halves.
+    // internal for unit testing the zoom<=0 -> DEFAULT_ZOOM guard without a live cluster.
+    internal static (double scaleKm, double offsetKm) ComputeGeoDecayParams(double zoom)
+    {
+        if (zoom <= 0)
+        {
+            zoom = DEFAULT_ZOOM;
+        }
+        var offsetKm = Math.Pow(2.2, 18 - zoom) * 0.1;
+        var scaleKm = Math.Max(8.0, 0.4 * (zoom - 3));
+        return (Math.Round(scaleKm, 3), Math.Round(offsetKm, 3));
+    }
+
+    public async Task<List<IFeature>> Search(string searchTerm, string language,
+        double? lat = null, double? lng = null, double zoom = 0, bool prefix = false)
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -209,10 +794,16 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         var response = await _elasticClient.SearchAsync<PointDocument>(s => s.Index(POINTS)
             .Size(NUMBER_OF_RESULTS)
             .TrackScores()
+            // DEBUG_SEARCH only: ask ES to explain the inner name query (off in production, no explain cost).
+            .Explain(DebugSearch)
             .Sort(f => f.Descending("_score"))
-            .Query(q => DocumentNameSearchQuery(q, searchTerm))
-            .Explain()
+            .Query(q => NameSearchWithScoring(q, searchTerm, lat, lng, zoom, prefix))
         );
+        // A failed scored query otherwise returns [] silently (e.g. painless error -> 400); log so it's diagnosable.
+        if (!response.IsValid && response.ServerError != null)
+        {
+            logger.LogError("Scored Search('{Term}') failed: {Err}", searchTerm, response.ServerError.ToString());
+        }
         return response.Hits.Select(d => HitToFeature(d, language)).ToList();
     }
 
@@ -226,19 +817,24 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         var response = await _elasticClient.SearchAsync<PointDocument>(s => s.Index(POINTS)
             .Size(NUMBER_OF_RESULTS)
             .TrackScores()
-            .Sort(f => f.Descending("_score"))
+            // Prominence is a deterministic tiebreak AFTER _score: the exact-keyword phrase match scores
+            // every same-name doc identically, so without it the winner was arbitrary Lucene segment order.
+            // Use the raw field name: NEST's lambda inferrer ignores [JsonPropertyName], so p => p.Prominence
+            // would resolve to "prominence" — the pre-rename name that no longer exists in the index.
+            .Sort(f => f.Descending("_score").Field(ff => ff.Field("poiProminence").Descending()))
             .Query(q =>
                 q.MultiMatch(m =>
                     m.Type(TextQueryType.Phrase)
                         .Query(searchTerm)
                         .Fields(f => f.Fields(Languages.ArrayWithDefault.Select(l => new Field("name." + l + ".keyword"))))
                 )
-            ).Explain()
+            )
         );
         return response.Hits.Select(d => HitToFeature(d, language)).ToList();
     }
 
-    public async Task<List<IFeature>> SearchPlaces(string searchTerm, string language)
+    public async Task<List<IFeature>> SearchPlaces(string searchTerm, string language,
+        double? lat = null, double? lng = null, double zoom = 0, bool prefix = false)
     {
         var split = searchTerm.Split(',');
         var place = NormalizeSearchTerm(split.Last().Trim());
@@ -247,12 +843,29 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         {
             return [];
         }
+        // Container resolution: pull the phrase-matching candidates (the phrase filter drops the fuzzy
+        // long tail) then pick the LARGEST by polygon area — the canonical admin/park container, rather
+        // than the most text-relevant one (which can be a smaller polygon that excludes wanted features).
         var placesResponse = await _elasticClient.SearchAsync<BBoxDocument>(s => s.Index(BBOX)
-            .Size(1)
+            .Size(20)
             .TrackScores()
-            .Sort(f => f.Descending("_score"))
-            .Query(q => DocumentNameSearchQuery(q, place))
+            .Sort(f => f.Descending(a => a.Area))
+            .Query(q => q.MultiMatch(m => m
+                .Type(TextQueryType.Phrase)
+                .Query(place)
+                .Fields(f2 => f2.Fields(
+                    Languages.ArrayWithDefault.Select(l => new Field("name." + l))))))
         );
+        if (placesResponse.Documents.Count == 0)
+        {
+            // No phrase-match container — fall back to the text-relevance pick so a typo'd/partial name still resolves.
+            placesResponse = await _elasticClient.SearchAsync<BBoxDocument>(s => s.Index(BBOX)
+                .Size(1)
+                .TrackScores()
+                .Sort(f => f.Descending("_score"))
+                .Query(q => DocumentNameSearchQuery(q, place))
+            );
+        }
         if (placesResponse.Documents.Count == 0)
         {
             return [];
@@ -261,7 +874,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             .Size(NUMBER_OF_RESULTS)
             .TrackScores()
             .Sort(f => f.Descending("_score"))
-            .Query(q => DocumentNameSearchQuery(q, searchTerm) &&
+            .Query(q => NameSearchWithScoring(q, searchTerm, lat, lng, zoom, prefix) &&
                 q.GeoShape(b =>
                 {
                     b.Field(p => p.Location);
@@ -511,4 +1124,39 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         ).Normalize(NormalizationForm.FormC)
          .ToLowerInvariant();
     }
+
+    // Mirror of the index-time Hebrew keyword normalizer (doubled-matres fold only) so a query can be
+    // compared against a stored name.<l>.keyword value in the painless exact-name floor.
+    private const string HebrewVav = "\u05D5";
+    private const string HebrewYod = "\u05D9";
+
+    private static string ApplyHebrewMatresDoubledOnly(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+        return input
+            .Replace("\u05D5\u05D5", HebrewVav)
+            .Replace("\u05D9\u05D9", HebrewYod);
+    }
+
+    /// <summary>Normalize a query to match a stored name.&lt;l&gt;.keyword value; <paramref name="isHebrew"/> adds the doubled-matres fold.</summary>
+    internal static string NormalizeForKeyword(string input, bool isHebrew)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+        if (!isHebrew)
+        {
+            return NormalizeSearchTerm(input);
+        }
+        // Strip niqqud, fold matres, then the shared accent-fold + lowercase.
+        var niqqudStripped = string.Concat(
+            input.Normalize(NormalizationForm.FormD)
+                 .Where(c => c < '\u05B0' || c > '\u05C7')
+                 .Where(c => CharUnicodeInfo.GetUnicodeCategory(c)
+                             != UnicodeCategory.NonSpacingMark)
+        ).Normalize(NormalizationForm.FormC);
+        return ApplyHebrewMatresDoubledOnly(niqqudStripped).ToLowerInvariant();
+    }
+
+    // The name.<l>.keyword subfields the exact-name floor inspects (one per language + default).
+    private static readonly List<string> NameKeywordFields =
+        Languages.ArrayWithDefault.Select(l => "name." + l + ".keyword").ToList();
 }

@@ -27,10 +27,27 @@
     <PackageReference Include="NetTopologySuite" Version="2.5.0" />
     <PackageReference Include="NetTopologySuite.IO.GPX" Version="1.1.1" />
     <PackageReference Include="OsmSharp" Version="7.0.0-pre022" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+
+  <!-- Query-time relevance scoring script, read at runtime by ElasticSearchGateway. Copied next
+       to the assembly on publish so the load resolves from AppContext.BaseDirectory regardless of
+       the process working directory. YAML (not JSON) so the painless source is a readable block
+       scalar and YamlDotNet deserializes params straight into CLR doubles/maps (no JsonElement). -->
+  <ItemGroup>
+    <Content Include="ElasticSearch\scoring\updated_score.yml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\IsraelHiking.Common\IsraelHiking.Common.csproj" />
     <ProjectReference Include="..\IsraelHiking.DataAccessInterfaces\IsraelHiking.DataAccessInterfaces.csproj" />
+  </ItemGroup>
+
+  <!-- Expose internals (e.g. SearchLanguageDetector) to the DataAccess test assembly so the
+       MatchedQueries -> language mapping can be unit-tested without a live cluster (Story 0.6 / FR-5.1). -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="IsraelHiking.DataAccess.Tests" />
   </ItemGroup>
 </Project>

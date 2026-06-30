@@ -270,4 +270,117 @@ public class SearchControllerTests
         Assert.IsNotNull(results);
         Assert.IsTrue(results.First().DisplayName.Contains(place));
     }
+
+    [TestMethod]
+    public void GetSearchResults_WithMapCenterAndPrefix_ShouldForwardThemToTheRepository()
+    {
+        var searchTerm = "Bear Lake";
+        _searchRepository.Search(searchTerm, Languages.ENGLISH,
+            Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double>(), Arg.Any<bool>())
+            .Returns(new List<IFeature>());
+
+        _controller.GetSearchResults(searchTerm, Languages.ENGLISH,
+            lat: 40.3120, lng: -105.6457, zoom: 12, prefix: true).Wait();
+
+        // The controller must pass the map center / zoom / prefix straight through, so that proximity
+        // ranking and autocomplete behaviour actually take effect.
+        _searchRepository.Received(1).Search(searchTerm, Languages.ENGLISH, 40.3120, -105.6457, 12, true);
+    }
+
+    [TestMethod]
+    public void GetSearchResults_WithoutMapCenter_ShouldForwardDefaults()
+    {
+        var searchTerm = "Pikes Peak";
+        _searchRepository.Search(searchTerm, Languages.ENGLISH,
+            Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double>(), Arg.Any<bool>())
+            .Returns(new List<IFeature>());
+
+        _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Wait();
+
+        // No center supplied -> nulls and defaults, so the gateway falls back to today's behaviour.
+        _searchRepository.Received(1).Search(searchTerm, Languages.ENGLISH, null, null, 0, false);
+    }
+
+    private static IFeature DebugFeature(string container = null)
+    {
+        var loc = new Coordinate(0, 0);
+        var feature = new Feature(new Point(loc), new AttributesTable
+        {
+            {FeatureAttributes.NAME, "Humphreys Peak"},
+            {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
+            {FeatureAttributes.POI_SOURCE, Sources.OSM},
+            {FeatureAttributes.POI_ICON, string.Empty},
+            {FeatureAttributes.POI_ICON_COLOR, "black"},
+            {FeatureAttributes.ID, "node_123"},
+            {FeatureAttributes.SEARCH_LANGUAGE, Languages.ENGLISH},
+            // DEBUG_SEARCH attributes the gateway sets only when its own flag is on:
+            {FeatureAttributes.FEATURE_CLASS, "peak"},
+            {FeatureAttributes.PROMINENCE, 0.73f},
+            {FeatureAttributes.SCORE, 0.7517},
+            {FeatureAttributes.BM25, 211.842},
+            {FeatureAttributes.EXPLAIN, new { value = 0.7517, description = "script score" }},
+            {"alt_name:en", "Humphrey's Peak; San Francisco Peak"}
+        });
+        feature.SetLocation(loc);
+        return feature;
+    }
+
+    [TestMethod]
+    public void GetSearchResults_DebugSearchOn_ShouldPopulateDebugObject()
+    {
+        var prev = SearchController.DebugSearch;
+        try
+        {
+            SearchController.DebugSearch = true;
+            var searchTerm = "Humphreys Peak";
+            _searchRepository.Search(searchTerm, Languages.ENGLISH).Returns([DebugFeature()]);
+            _searchRepository.GetContainerName(Arg.Any<Coordinate[]>(), Arg.Any<string>())
+                .Returns("Coconino County");
+
+            var result = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result.First();
+
+            Assert.IsNotNull(result.Debug, "DEBUG_SEARCH on must attach a debug object");
+            Assert.AreEqual("peak", result.Debug.FeatureClass);
+            Assert.AreEqual(0.73f, result.Debug.Prominence);
+            Assert.AreEqual(Languages.ENGLISH, result.Debug.MatchedLanguage);
+            Assert.AreEqual("Coconino County", result.Debug.Container);
+            Assert.IsNotNull(result.Debug.AltNames);
+            CollectionAssert.AreEquivalent(
+                new[] { "Humphrey's Peak", "San Francisco Peak" },
+                result.Debug.AltNames["en"]);
+            // score diagnostics
+            Assert.AreEqual(0.7517, result.Debug.Score);
+            Assert.AreEqual(211.842, result.Debug.Bm25);
+            Assert.IsNotNull(result.Debug.ScoreBreakdown);
+            Assert.AreEqual(211.842 / 212.842, result.Debug.ScoreBreakdown["text_norm"], 1e-9);
+            Assert.AreEqual(0.73f, result.Debug.ScoreBreakdown["prom_input"], 1e-6);
+            Assert.IsNotNull(result.Debug.Explain);
+        }
+        finally
+        {
+            SearchController.DebugSearch = prev;
+        }
+    }
+
+    [TestMethod]
+    public void GetSearchResults_DebugSearchOff_ShouldNotAttachDebug()
+    {
+        var prev = SearchController.DebugSearch;
+        try
+        {
+            // Production contract: with the flag off, the response carries NO debug object even if the
+            // feature happens to hold the debug attributes — they must never leak to clients.
+            SearchController.DebugSearch = false;
+            var searchTerm = "Humphreys Peak";
+            _searchRepository.Search(searchTerm, Languages.ENGLISH).Returns([DebugFeature()]);
+
+            var result = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result.First();
+
+            Assert.IsNull(result.Debug, "DEBUG_SEARCH off must keep the production response debug-free");
+        }
+        finally
+        {
+            SearchController.DebugSearch = prev;
+        }
+    }
 }

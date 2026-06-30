@@ -5,10 +5,16 @@ public class PointDocument
 {
     [JsonPropertyName("name")]
     public Dictionary<string, string> Name { get; set; }
+    [JsonPropertyName("alt_names")]
+    public Dictionary<string, List<string>> AltNames { get; set; }
     [JsonPropertyName("description")]
     public Dictionary<string, string> Description { get; set; }
     [JsonPropertyName("poiCategory")]
     public string PoiCategory { get; set; }
+    // Coarse OSM-derived feature type ("peak", "lake", "river", ...); used for a type-specific
+    // autocomplete icon. May be null for boundary-only features, which keep their indexed poiIcon.
+    [JsonPropertyName("poiFeatureClass")]
+    public string FeatureClass { get; set; }
     [JsonPropertyName("poiIcon")]
     public string PoiIcon { get; set; }
     [JsonPropertyName("poiIconColor")]
@@ -19,4 +25,6 @@ public class PointDocument
     public string Image { get; set; }
     [JsonPropertyName("location")]
     public double[] Location { get; set; }
+    [JsonPropertyName("poiProminence")]
+    public float? Prominence { get; set; }
 }

@@ -45,6 +45,13 @@ public static class FeatureAttributes
     public const string NAME = "name";
     public const string MTB_NAME = "mtb:name";
     public const string SEARCH_LANGUAGE = "search:language";
+    // DEBUG_SEARCH (env-gated): feature_class/prominence/score etc. are carried as feature attributes
+    // only when the DEBUG_SEARCH env flag is on; never set on the production path.
+    public const string FEATURE_CLASS = "search:featureClass";
+    public const string PROMINENCE = "search:prominence";
+    public const string SCORE = "search:score";
+    public const string BM25 = "search:bm25";
+    public const string EXPLAIN = "search:explain";
     public const string DESCRIPTION = "description";
     public const string IMAGE_URL = "image";
     public const string WEBSITE = "website";
