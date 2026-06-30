@@ -42,13 +42,23 @@ public class INatureGateway : IINatureGateway
         _logger.LogInformation("Finished initializing iNature service");
     }
 
+    private static async Task<List<T>> CollectAsync<T>(IAsyncEnumerable<T> source)
+    {
+        var items = new List<T>();
+        await foreach (var item in source.ConfigureAwait(false))
+        {
+            items.Add(item);
+        }
+        return items;
+    }
+
     public async Task<List<IFeature>> GetAll()
     {
         var allpagesGenerator = new AllPagesGenerator(_wikiSite)
         {
             PaginationSize = 500
         };
-        var results = await allpagesGenerator.EnumItemsAsync().ToListAsync().ConfigureAwait(false);
+        var results = await CollectAsync(allpagesGenerator.EnumItemsAsync()).ConfigureAwait(false);
         _logger.LogInformation($"Got {results.Count} pages from iNature, fetching their content and images");
         var features = await GetFeaturesFromTitles(results.Select(r => r.Title).ToArray());
         return features.ToList();
@@ -206,7 +216,7 @@ public class INatureGateway : IINatureGateway
             LastRevisionsOnly = true,
             TypeFilters = RecentChangesFilterTypes.Create | RecentChangesFilterTypes.Edit
         };
-        var titles = await recentChangesGenerator.EnumItemsAsync().ToListAsync().ConfigureAwait(false);
+        var titles = await CollectAsync(recentChangesGenerator.EnumItemsAsync()).ConfigureAwait(false);
         _logger.LogInformation($"Got {titles.Count} updated pages from iNature, fetching their content and images");
         return await GetFeaturesFromTitles(titles.Select(i => i.Title).ToArray());
     }
