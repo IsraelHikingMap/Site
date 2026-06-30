@@ -42,7 +42,7 @@ jobs:
           npx ng lint
       - name: Codecov upload
         if: always()
-        uses: codecov/codecov-action@v5.5.2
+        uses: codecov/codecov-action@v7.0.0
         with:
           files: ./Tests/IsraelHiking.API.Tests/coverage.info,./IsraelHiking.Web/coverage/lcov.info
         env:
@@ -105,7 +105,7 @@ jobs:
           docker build . -t ghcr.io/israelhikingmap/website-mapeak
 
   build-ios:
-    runs-on: macos-latest
+    runs-on: macos-26
     steps:
       - name: Checkout code
         uses: actions/checkout@v6.0.1
@@ -114,16 +114,6 @@ jobs:
         uses: actions/setup-node@v6.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
-
-      - name: Setup xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: 26.1
-
-      - name: setup-cocoapods
-        uses: maxim-lobanov/setup-cocoapods@v1
-        with:
-          podfile-path: IsraelHiking.Web/ios/App/Podfile.lock
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1

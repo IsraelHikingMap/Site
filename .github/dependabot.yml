@@ -1,0 +1,35 @@
+# Dependabot version updates.
+# npm is intentionally omitted — JS deps are updated manually since they
+# need extra testing before they can be bumped.
+version: 2
+updates:
+  # GitHub Actions used in .github/workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      # Bundle all action bumps into a single PR to cut noise.
+      github-actions:
+        patterns:
+          - "*"
+
+  # Base image in the root Dockerfile
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # .NET dependencies (IsraelHiking.sln and its projects)
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      # Group minor/patch into one PR; majors get their own for review.
+      nuget-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
