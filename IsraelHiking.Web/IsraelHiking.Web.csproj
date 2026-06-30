@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <DebugType>portable</DebugType>
     <UserSecretsId>a21e53dc-017c-42f4-be3d-5dbe7eaf9433</UserSecretsId>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -78,8 +78,6 @@
     <PackageReference Include="Codecov" />
     <PackageReference Include="LazyCache.AspNetCore" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
-    <PackageReference Include="Microsoft.Extensions.Logging" />
-    <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="NeoSmart.Caching.Sqlite.AspNetCore" />
     <PackageReference Include="NLog.Web.AspNetCore" />
     <PackageReference Include="OsmSharp.IO.API" />

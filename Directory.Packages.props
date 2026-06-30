@@ -11,11 +11,11 @@
     <PackageVersion Include="CXuesong.MW.WikiClientLibrary" Version="0.8.0" />
     <PackageVersion Include="JunitXml.TestLogger" Version="5.0.0" />
     <PackageVersion Include="LazyCache.AspNetCore" Version="2.4.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.17" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.17" />
-    <PackageVersion Include="Microsoft.Extensions.FileProviders.Physical" Version="9.0.17" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.17" />
-    <PackageVersion Include="Microsoft.Extensions.Logging" Version="9.0.17" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.FileProviders.Physical" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.9" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageVersion Include="MSTest.TestAdapter" Version="3.7.0" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.7.0" />
@@ -33,7 +33,6 @@
     <PackageVersion Include="SixLabors.ImageSharp.Drawing" Version="2.1.5" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="7.2.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="7.2.0" />
-    <PackageVersion Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageVersion Include="Wangkanai.Detection" Version="8.20.0" />
   </ItemGroup>
 
