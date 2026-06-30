@@ -38,10 +38,11 @@ jobs:
           node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Get version
-        uses: bbonkr/get-version-action@v1
         id: get-version
-        with:
-          project: 'IsraelHiking.Web/package.json'
+        run: |
+          version=$(node -p "require('./IsraelHiking.Web/package.json').version")
+          echo "major=${version%%.*}" >> "$GITHUB_OUTPUT"
+          echo "minor=$(echo "$version" | cut -d. -f2)" >> "$GITHUB_OUTPUT"
 
       - name: Set version code and string
         id: version-code
@@ -56,7 +57,7 @@ jobs:
           echo "Version: $version_string" >> $GITHUB_STEP_SUMMARY
       - name: Get all milestones
         id: get_milestones
-        uses: octokit/request-action@v2.x
+        uses: octokit/request-action@v3.0.0
         with:
           route: GET /repos/${{ github.repository }}/milestones?state=open
         env:
@@ -175,7 +176,7 @@ jobs:
           VERSION: ${{ needs.version.outputs.version_string }}
 
   ios:
-    runs-on: macos-latest
+    runs-on: macos-26
     needs: version
     steps:
       - name: Checkout code
@@ -185,19 +186,6 @@ jobs:
         uses: actions/setup-node@v6.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
-
-      - name: Setup xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: 26.1
-
-      - name: Download iOS platform
-        run: xcodebuild -downloadPlatform iOS
-
-      - name: setup-cocoapods
-        uses: maxim-lobanov/setup-cocoapods@v1
-        with:
-          podfile-path: IsraelHiking.Web/ios/App/Podfile.lock
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -253,13 +241,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6.0.1
       - name: Tag commit and push
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_tag: ${{ needs.version.outputs.version_string }}
+        run: |
+          git tag "v${{ needs.version.outputs.version_string }}"
+          git push origin "v${{ needs.version.outputs.version_string }}"
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: ${{ github.workspace }}/artifacts
           merge-multiple: true
@@ -269,7 +255,7 @@ jobs:
           mv ${{ github.workspace }}/artifacts/*.aab ${{ github.workspace }}/Mapeak_signed_${{ needs.version.outputs.version_string }}.aab
           mv ${{ github.workspace }}/artifacts/*.apk ${{ github.workspace }}/Mapeak_signed_${{ needs.version.outputs.version_string }}.apk
       - name: Rename and close milestone
-        uses: octokit/request-action@v2.x
+        uses: octokit/request-action@v3.0.0
         with:
           route: PATCH /repos/${{ github.repository }}/milestones/${{ needs.version.outputs.milestone_id }}
           title: Version ${{ needs.version.outputs.version_string }}
@@ -277,14 +263,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create new "Next Release" milestone
-        uses: octokit/request-action@v2.x
+        uses: octokit/request-action@v3.0.0
         with:
           route: POST /repos/${{ github.repository }}/milestones
           title: Next Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ needs.version.outputs.version_string }}
           name: v${{ needs.version.outputs.version_string }}
