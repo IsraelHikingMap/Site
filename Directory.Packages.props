@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageVersion Include="Codecov" Version="1.13.0" />
-    <PackageVersion Include="coverlet.msbuild" Version="6.0.3" />
+    <PackageVersion Include="coverlet.msbuild" Version="10.0.1" />
     <PackageVersion Include="CsvHelper" Version="33.1.0" />
     <PackageVersion Include="CXuesong.MW.WikiClientLibrary" Version="0.8.0" />
     <PackageVersion Include="JunitXml.TestLogger" Version="5.0.0" />
