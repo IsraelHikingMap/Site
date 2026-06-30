@@ -158,36 +158,6 @@ describe("FileService", () => {
         expect(saveAsSpy).toHaveBeenCalled();
     }));
 
-    it("Should get file with progress", inject([FileService, HttpTestingController],
-        async (service: FileService, mockBackend: HttpTestingController) => {
-            const spy = vi.fn();
-            const url = "http://123.gpx";
-            const promise = service.getFileContentWithProgress(url, spy);
-
-            const req = mockBackend.expectOne(url);
-            req.event({ type: HttpEventType.DownloadProgress, loaded: 7, total: 10 });
-
-            expect(spy).toHaveBeenCalled();
-
-            req.event({ type: HttpEventType.Response, body: null, ok: true } as any);
-
-            return promise;
-        }
-    ));
-
-    it("Should reject if response is no OK", inject([FileService, HttpTestingController],
-        async (service: FileService, mockBackend: HttpTestingController) => {
-            const spy = vi.fn();
-            const url = "http://123.gpx";
-            const promise = service.getFileContentWithProgress(url, spy);
-
-            const req = mockBackend.expectOne(url);
-            req.event({ type: HttpEventType.Response, body: null, ok: false } as any);
-
-            await expect(promise).rejects.toThrow();
-        }
-    ));
-
     it("Should not download a file to cache due to network error", inject([FileService],
         async (service: FileService) => {
             const progressSpy = vi.fn();

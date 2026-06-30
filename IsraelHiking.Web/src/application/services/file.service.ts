@@ -273,35 +273,6 @@ export class FileService {
         return results.uri;
     }
 
-    /**
-     * Downloads a file while reporting progress
-     *
-     * @param url The url of the file
-     * @param progressCallback reports progress between 0 and 1
-     */
-    public async getFileContentWithProgress(url: string, progressCallback: (value: number) => void): Promise<Blob> {
-        return new Promise((resolve, reject) => {
-            this.httpClient.get(url, {
-                observe: "events",
-                responseType: "blob",
-                reportProgress: true
-            }).subscribe({
-                next: (event) => {
-                    if (event.type === HttpEventType.DownloadProgress) {
-                        progressCallback(event.loaded / event.total);
-                    }
-                    if (event.type === HttpEventType.Response) {
-                        if (event.ok) {
-                            resolve(event.body);
-                        } else {
-                            reject(new Error(event.statusText));
-                        }
-                    }
-                }, error: (error) => reject(error)
-            });
-        });
-    }
-
     public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void, abortController: AbortController): Promise<void> {
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
         let previousPercentage = 0;
