@@ -105,7 +105,7 @@ jobs:
           docker build . -t ghcr.io/israelhikingmap/website-mapeak
 
   build-ios:
-    runs-on: macos-latest
+    runs-on: macos-26
     steps:
       - name: Checkout code
         uses: actions/checkout@v6.0.1
@@ -114,19 +114,6 @@ jobs:
         uses: actions/setup-node@v6.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
-
-      - name: Setup xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: 26.1
-
-      - name: Download iOS platform
-        run: xcodebuild -downloadPlatform iOS
-
-      - name: setup-cocoapods
-        uses: maxim-lobanov/setup-cocoapods@v1
-        with:
-          podfile-path: IsraelHiking.Web/ios/App/Podfile.lock
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
