@@ -17,12 +17,12 @@ namespace IsraelHiking.API.Tests.Controllers;
 public class RoutingControllerTests
 {
     private RoutingController _controller;
-    private IGraphHopperGateway _graphHopperGateway;
+    private IRoutingGateway _graphHopperGateway;
 
     [TestInitialize]
     public void TestInitialize()
     {
-        _graphHopperGateway = Substitute.For<IGraphHopperGateway>();
+        _graphHopperGateway = Substitute.For<IRoutingGateway>();
         _controller = new RoutingController(_graphHopperGateway);
     }
 

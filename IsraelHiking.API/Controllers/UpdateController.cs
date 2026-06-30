@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace IsraelHiking.API.Controllers;
 
 /// <summary>
-/// This controller handles updates in elastic search and graphhopper
+/// This controller handles updates in elastic search
 /// </summary>
 [Route("api/[controller]")]
 public class UpdateController : ControllerBase

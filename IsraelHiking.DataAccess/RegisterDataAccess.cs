@@ -13,7 +13,7 @@ public static class RegisterDataAccess
         services.AddTransient<IRemoteFileSizeFetcherGateway, RemoteFileFetcherGateway>();
         services.AddTransient<IRemoteFileFetcherGateway, RemoteFileFetcherGateway>();
         services.AddTransient<IGpsBabelGateway, GpsBabelGateway>();
-        services.AddTransient<IGraphHopperGateway, GraphHopperGateway>();
+        services.AddTransient<IRoutingGateway, ValhallaGateway>();
         services.AddTransient<IImageCreationGateway, ImageCreationGateway>();
         services.AddSingleton<ElasticSearchGateway, ElasticSearchGateway>();
         services.AddSingleton<IPointsOfInterestRepository>(x => x.GetService<ElasticSearchGateway>());

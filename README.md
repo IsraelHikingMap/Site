@@ -14,7 +14,7 @@ The technology stack of this site is based on the following frameworks:
 ## Server Side
 * [Asp.Net core](https://docs.microsoft.com/en-us/aspnet/core/) - infrastructure
 * [NSubstitute](https://nsubstitute.github.io/) - for mocking in tests
-* [GraphHopper](https://graphhopper.com/) - for routing between points
+* [Valhalla](https://valhalla.github.io/valhalla/) - for routing between points
 * [Elastic Search and NEST](https://www.elastic.co/) - for database and search capabilities
 * [Net Topology Suite](https://github.com/NetTopologySuite/NetTopologySuite) - for spatial mathmatics
 * [OsmSharp](https://www.osmsharp.com/) - for OSM capabilities

@@ -15,19 +15,14 @@ namespace IsraelHiking.API.Controllers;
 /// <summary>
 /// This controller allows routing between two points
 /// </summary>
+/// <remarks>
+/// Controller's constructor
+/// </remarks>
+/// <param name="graphHopperGateway"></param>
 [Route("api/[controller]")]
-public class RoutingController : ControllerBase
+public class RoutingController(IRoutingGateway graphHopperGateway) : ControllerBase
 {
-    private readonly IGraphHopperGateway _graphHopperGateway;
-
-    /// <summary>
-    /// Controller's constructor
-    /// </summary>
-    /// <param name="graphHopperGateway"></param>
-    public RoutingController(IGraphHopperGateway graphHopperGateway)
-    {
-        _graphHopperGateway = graphHopperGateway;
-    }
+    private readonly IRoutingGateway _routingGateway = graphHopperGateway;
 
     /// <summary>
     /// Creates a route between the given points according to routing type
@@ -48,7 +43,7 @@ public class RoutingController : ControllerBase
         {
             return BadRequest(ModelState);
         }
-        var feature = await _graphHopperGateway.GetRouting(new RoutingGatewayRequest
+        var feature = await _routingGateway.GetRouting(new RoutingGatewayRequest
         {
             From = pointFrom,
             To = pointTo,
@@ -65,11 +60,12 @@ public class RoutingController : ControllerBase
     /// <param name="points">The points of the track to match</param>
     /// <param name="type">The type of routing: "Hike", "Bike", "4WD", "None"</param>
     /// <param name="language">The language to use for the routing instructions</param>
+    /// <param name="instructionsFormat">The turn-by-turn instructions format: "v2" for the normalized model, otherwise the legacy GraphHopper-compatible shape</param>
     /// <returns>The matched route</returns>
     //POST /api/routing/?type=hike&language=he
     [HttpPost()]
     [ProducesResponseType(typeof(FeatureCollection), 200)]
-    public async Task<IActionResult> PostMapMatch([FromBody] List<LatLng> points, [FromQuery] string type, [FromQuery] string language)
+    public async Task<IActionResult> PostMapMatch([FromBody] List<LatLng> points, [FromQuery] string type, [FromQuery] string language, [FromQuery] string instructionsFormat = null)
     {
         var profile = ConvertProfile(type);
         if (points == null || points.Count < 2)
@@ -77,11 +73,13 @@ public class RoutingController : ControllerBase
             ModelState.AddModelError("Points", "At least two points are required for map matching");
             return BadRequest(ModelState);
         }
-        var feature = await _graphHopperGateway.GetMapMatch(new MapMatchGatewayRequest
+        var feature = await _routingGateway.GetMapMatch(new MapMatchGatewayRequest
         {
             Points = [.. points.Select(p => p.ToCoordinate())],
             Profile = profile,
             Language = language,
+            // HM TODO: remove this parameter in 1.10.2026
+            Format = instructionsFormat?.ToLowerInvariant() == "v2" ? InstructionsFormat.V2 : InstructionsFormat.Legacy,
         });
         feature.Attributes.AddOrUpdate("Name", $"Map match profile type: {profile}");
         feature.Attributes.AddOrUpdate("Creator", "Mapeak");
@@ -110,6 +108,6 @@ public class RoutingController : ControllerBase
         }
         var lat = double.Parse(split.First());
         var lng = double.Parse(split.Last());
-        return new CoordinateZ(lng, lat);
+        return new Coordinate(lng, lat);
     }
 }

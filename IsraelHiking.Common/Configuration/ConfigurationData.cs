@@ -102,9 +102,10 @@ public class ConfigurationData
     /// </summary>
     public double ClosestNodeWithGate { get; set; }
     /// <summary>
-    /// GraphHopper server address
+    /// Valhalla server address
     /// </summary>
-    public string GraphhopperServerAddress { get; set; }
+    public string ValhallaServerAddress { get; set; }
+
     /// <summary>
     /// Elasticsearch server address
     /// </summary>
@@ -173,7 +174,7 @@ public class ConfigurationData
         ClosestHighwayForGates = 0.0003; // around 30m
         ClosestNodeForGates = 0.0001; // around 10m
         ClosestNodeWithGate = 30;
-        GraphhopperServerAddress = "http://localhost:8989/";
+        ValhallaServerAddress = "http://localhost:8002/"; // HM TODO: change this?
         ElasticsearchServerAddress = "http://localhost:9200/";
         GpsBabelServerAddress = "http://localhost:11987/";
         ImageCreatorServerAddress = "http://localhost:11223/";
@@ -189,6 +190,6 @@ public class ConfigurationData
             "jeepolog.com"
         ];
         OverpassAddresses = ["https://z.overpass-api.de/api/interpreter", "https://lz4.overpass-api.de/api/interpreter"];
-        CsvsDictionary = new Dictionary<string, string>();
+        CsvsDictionary = [];
     }
 }

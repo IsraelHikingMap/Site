@@ -4,7 +4,7 @@ using IsraelHiking.Common.Api;
 
 namespace IsraelHiking.DataAccessInterfaces;
 
-public interface IGraphHopperGateway
+public interface IRoutingGateway
 {
     Task<Feature> GetRouting(RoutingGatewayRequest request);
     Task<Feature> GetMapMatch(MapMatchGatewayRequest request);
