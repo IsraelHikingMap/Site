@@ -34,6 +34,8 @@ namespace IsraelHiking.API.Services.Poi;
 /// <param name="imageUrlStoreExecutor"></param>
 /// <param name="tagsHelper"></param>
 /// <param name="clientsFactory"></param>
+/// <param name="wikidataGateway"></param>
+/// <param name="shareUrlGateway"></param>
 /// <param name="logger"></param>
 public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
     IWikimediaCommonGateway wikimediaCommonGateway,
