@@ -2,12 +2,74 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text.Json.Nodes;
+using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess;
+
+class WikidataEntity
+{
+    [JsonPropertyName("sitelinks")]
+    public Dictionary<string, WikidataSitelink> Sitelinks { get; set; }
+    [JsonPropertyName("statements")]
+    public Dictionary<string, List<WikidataStatement>> Statements { get; set; }
+}
+
+class WikidataSitelink
+{
+    [JsonPropertyName("title")]
+    public string Title { get; set; }
+}
+
+class WikidataStatement
+{
+    [JsonPropertyName("value")]
+    public WikidataStatementValue Value { get; set; }
+}
+
+class WikidataStatementValue
+{
+    [JsonPropertyName("content")]
+    public string Content { get; set; }
+}
+
+class WikiQueryResponse
+{
+    [JsonPropertyName("query")]
+    public WikiQuery Query { get; set; }
+}
+
+class WikiQuery
+{
+    [JsonPropertyName("pages")]
+    public Dictionary<string, WikiPage> Pages { get; set; }
+}
+
+class WikiPage
+{
+    [JsonPropertyName("extract")]
+    public string Extract { get; set; }
+    [JsonPropertyName("original")]
+    public WikiImageSource Original { get; set; }
+    [JsonPropertyName("imageinfo")]
+    public List<WikiImageInfo> ImageInfo { get; set; }
+}
+
+class WikiImageSource
+{
+    [JsonPropertyName("source")]
+    public string Source { get; set; }
+}
+
+class WikiImageInfo
+{
+    [JsonPropertyName("url")]
+    public string Url { get; set; }
+}
 
 /// <summary>
 /// Fetches description and image for a POI from Wikidata + Wikipedia, mirroring what the client does.
@@ -21,14 +83,13 @@ public class WikidataGateway(IHttpClientFactory httpClientFactory, ILogger logge
         try
         {
             var client = httpClientFactory.CreateClient();
-            var entityJson = await client.GetStringAsync($"https://www.wikidata.org/w/rest.php/wikibase/v1/entities/items/{wikidataId}");
-            var entity = JsonNode.Parse(entityJson);
-            var sitelinks = entity?["sitelinks"]?.AsObject();
-            if (sitelinks != null)
+            var entity = await client.GetFromJsonAsync<WikidataEntity>(
+                $"https://www.wikidata.org/w/rest.php/wikibase/v1/entities/items/{wikidataId}");
+            if (entity?.Sitelinks != null)
             {
                 foreach (var language in Languages.Array)
                 {
-                    var title = sitelinks[$"{language}wiki"]?["title"]?.GetValue<string>();
+                    var title = entity.Sitelinks.GetValueOrDefault($"{language}wiki")?.Title;
                     if (string.IsNullOrEmpty(title))
                     {
                         continue;
@@ -46,7 +107,7 @@ public class WikidataGateway(IHttpClientFactory httpClientFactory, ILogger logge
             }
             if (string.IsNullOrWhiteSpace(result.ImageUrl))
             {
-                var imageFile = entity?["statements"]?["P18"]?[0]?["value"]?["content"]?.GetValue<string>();
+                var imageFile = entity?.Statements?.GetValueOrDefault("P18")?.FirstOrDefault()?.Value?.Content;
                 if (!string.IsNullOrEmpty(imageFile))
                 {
                     result.ImageUrl = await GetCommonsImageUrl(client, imageFile);
@@ -63,16 +124,16 @@ public class WikidataGateway(IHttpClientFactory httpClientFactory, ILogger logge
     private static async Task<(string description, string image)> GetWikipediaExtractAndImage(HttpClient client, string language, string title)
     {
         var url = $"https://{language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles={Uri.EscapeDataString(title)}";
-        var json = await client.GetStringAsync(url);
-        var page = JsonNode.Parse(json)?["query"]?["pages"]?.AsObject().Select(p => p.Value).FirstOrDefault();
-        return (page?["extract"]?.GetValue<string>(), page?["original"]?["source"]?.GetValue<string>());
+        var response = await client.GetFromJsonAsync<WikiQueryResponse>(url);
+        var page = response?.Query?.Pages?.Values.FirstOrDefault();
+        return (page?.Extract, page?.Original?.Source);
     }
 
     private static async Task<string> GetCommonsImageUrl(HttpClient client, string fileName)
     {
         var url = $"https://commons.wikimedia.org/w/api.php?action=query&titles=File:{Uri.EscapeDataString(fileName)}&prop=imageinfo&iiprop=url&redirects&format=json";
-        var json = await client.GetStringAsync(url);
-        var page = JsonNode.Parse(json)?["query"]?["pages"]?.AsObject().Select(p => p.Value).FirstOrDefault();
-        return page?["imageinfo"]?[0]?["url"]?.GetValue<string>();
+        var response = await client.GetFromJsonAsync<WikiQueryResponse>(url);
+        var page = response?.Query?.Pages?.Values.FirstOrDefault();
+        return page?.ImageInfo?.FirstOrDefault()?.Url;
     }
 }
