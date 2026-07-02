@@ -57,25 +57,6 @@ public class PointsOfInterestController : ControllerBase
     }
 
     /// <summary>
-    /// Get a point of interest
-    /// </summary>
-    /// <remarks>Returns a single point of interest by its source and id.</remarks>
-    /// <param name="source">The source</param>
-    /// <param name="id">The ID</param>
-    /// <returns></returns>
-    [Route("{source}/{id}")]
-    [HttpGet]
-    public async Task<IActionResult> GetPointOfInterest(string source, string id)
-    {
-        var poiItem = await _pointsOfInterestProvider.GetFeatureById(source, id);
-        if (poiItem == null)
-        {
-            return NotFound();
-        }
-        return Ok(poiItem);
-    }
-
-    /// <summary>
     /// Create a point of interest
     /// </summary>
     /// <remarks>Creates a new POI, uploading its image to Wikimedia Commons when needed.</remarks>

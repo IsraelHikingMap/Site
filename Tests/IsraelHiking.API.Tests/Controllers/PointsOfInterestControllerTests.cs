@@ -53,28 +53,6 @@ public class PointsOfInterestControllerTests
     }
 
     [TestMethod]
-    public void GetPointOfInterest_WrongSource_ShouldReturnBadRequest()
-    {
-        _pointsOfInterestProvider.GetFeatureById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
-
-        var result = _controller.GetPointOfInterest("wrong source", string.Empty).Result as NotFoundResult;
-
-        Assert.IsNotNull(result);
-    }
-
-    [TestMethod]
-    public void GetPointOfInterest_BySourceAndId_ShouldReturnIt()
-    {
-        var id = "way_1";
-        var source = "source";
-        _pointsOfInterestProvider.GetFeatureById(source, id).Returns(new Feature());
-
-        var result = _controller.GetPointOfInterest(source, id).Result as OkObjectResult;
-
-        Assert.IsNotNull(result);
-    }
-
-    [TestMethod]
     public void CreatePointOfInterest_WrongSource_ShouldReturnBadRequest()
     {
         var poi = new Feature(new Point(0, 0), new AttributesTable { { FeatureAttributes.POI_SOURCE, "wrong source" }, { FeatureAttributes.POI_ID, "1" } });
@@ -110,7 +88,6 @@ public class PointsOfInterestControllerTests
         });
         poi.SetLocation(new Coordinate());
         _persistentCache.Get(Arg.Any<string>()).Returns(Encoding.UTF8.GetBytes("the id in the cache"));
-        _pointsOfInterestProvider.GetFeatureById(Sources.OSM, "the id in the cache").Returns((Feature)null);
 
         var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as BadRequestObjectResult;
 

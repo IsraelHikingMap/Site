@@ -21,20 +21,14 @@ namespace IsraelHiking.DataAccess.ElasticSearch;
 
 public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger logger) :
     IInitializable,
-    IPointsOfInterestRepository,
     ISearchRepository,
-    IImagesRepository,
-    IExternalSourcesRepository
+    IImagesRepository
 {
     private readonly ConfigurationData _options = options.Value;
 
-    private const int PAGE_SIZE = 10000;
     private const int NUMBER_OF_RESULTS = 20;
 
-    private const string PROPERTIES = "properties";
-    private const string EXTERNAL_POIS = "external_pois";
     private const string IMAGES = "images";
-    private const string REBUILD_LOG = "rebuild_log";
     private const string POINTS = "points";
     private const string BBOX = "bbox";
 
@@ -47,7 +41,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         var connectionString = new ConnectionSettings(
                 pool,
                 new HttpConnection(),
-                (_, _) => new SystemTextJsonSerializer(GeoJsonExtensions.GeoJsonWritableFactory))
+                (_, _) => new SystemTextJsonSerializer())
             .PrettyJson();
         _elasticClient = new ElasticClient(connectionString);
         if ((await _elasticClient.Indices.ExistsAsync(IMAGES)).Exists == false)
@@ -55,21 +49,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             await CreateImagesIndex();
         }
         logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
-    }
-
-    private List<IHit<T>> GetAllItemsByScrolling<T>(ISearchResponse<T> response) where T : class
-    {
-        var list = new List<IHit<T>>();
-        list.AddRange(response.Hits.ToList());
-        var results = _elasticClient.Scroll<T>("10s", response.ScrollId);
-        list.AddRange(results.Hits.ToList());
-        while (results.Documents.Any())
-        {
-            results = _elasticClient.Scroll<T>("10s", results.ScrollId);
-            list.AddRange(results.Hits.ToList());
-        }
-        _elasticClient.ClearScroll(new ClearScrollRequest(response.ScrollId));
-        return list;
     }
 
     /// <summary>
@@ -314,128 +293,9 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         return document?.Name.GetValueOrDefault(language, document.Name.GetValueOrDefault(Languages.ENGLISH, document.Name.GetValueOrDefault(Languages.DEFAULT, string.Empty)));
     }
 
-    private async Task UpdateData(List<IFeature> features, string alias)
-    {
-        var result = await _elasticClient.BulkAsync(bulk =>
-        {
-            foreach (var feature in features)
-            {
-                bulk.Index<IFeature>(i => i.Index(alias).Document(feature).Id(feature.GetId()));
-            }
-            return bulk;
-        });
-        if (result.IsValid == false)
-        {
-            result.ItemsWithErrors.ToList().ForEach(i => logger.LogError($"Inserting {i.Id} failed with error: {i.Error?.Reason ?? string.Empty} caused by: {i.Error?.CausedBy?.Reason ?? string.Empty}"));
-        }
-    }
-
     private GeoCoordinate ConvertCoordinate(Coordinate coordinate)
     {
         return new GeoCoordinate(coordinate.Y, coordinate.X);
-    }
-
-    public async Task<IFeature> GetClosestPoint(Coordinate coordinate, string source, string language)
-    {
-        var distance = _options.ClosestPointsOfInterestThreshold;
-        var response = await _elasticClient.SearchAsync<PointDocument>(s =>
-            s.Index(POINTS)
-            .Size(1)
-            .Query(q =>
-            {
-                var query = q.GeoBoundingBox(b => b.BoundingBox(
-                        bb => bb.TopLeft(new GeoCoordinate(coordinate.Y + distance, coordinate.X - distance))
-                            .BottomRight(new GeoCoordinate(coordinate.Y - distance, coordinate.X + distance))
-                    ).Field(p => p.Location))
-                    && q.Bool(b => b.MustNot(mn => mn.Term(t => t.Field(p => p.PoiIcon).Value("icon-search"))));
-                if (!string.IsNullOrWhiteSpace(source))
-                {
-                    query = query && q.Term(t => t.Field(p => p.PoiSource).Value(source.ToLower()));
-                }
-                return query;
-            })
-            .Sort(ss => ss
-                .GeoDistance(g => g
-                    .Field(p => p.Location)
-                    .Points(new GeoCoordinate(coordinate.Y, coordinate.X))
-                    .Order(SortOrder.Ascending)
-                )
-            )
-        );
-        return response.Hits.Select(d => HitToFeature(d, language ?? Languages.DEFAULT)).FirstOrDefault();
-
-    }
-
-    public async Task<List<IFeature>> GetAllPointsOfInterest()
-    {
-        await _elasticClient.Indices.RefreshAsync(POINTS);
-        var response = await _elasticClient.SearchAsync<PointDocument>(s => s.Index(POINTS)
-            .Size(PAGE_SIZE)
-            .Scroll("10s")
-            .Query(q =>
-                q.Bool(b =>
-                    b.MustNot(mn =>
-                        mn.Term(t => t.Field(p => p.PoiIcon).Value("icon-search"))
-                    )
-                )
-            )
-        );
-        var list = GetAllItemsByScrolling(response);
-        return list.Select(h => HitToFeature(h, Languages.DEFAULT)).ToList();
-    }
-
-    public async Task<List<IFeature>> GetExternalPoisBySource(string source)
-    {
-        var response = await _elasticClient.SearchAsync<IFeature>(
-            s => s.Index(EXTERNAL_POIS)
-                .Size(10000)
-                .Scroll("10s")
-                .Query(q =>
-                    q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_SOURCE}").Value(source.ToLower()))
-                )
-        );
-        var features = GetAllItemsByScrolling(response);
-        logger.LogInformation($"Got {features.Count} features for source {source}");
-        return features.Select(f => f.Source).ToList();
-    }
-
-    public async Task<IFeature> GetExternalPoiById(string id, string source)
-    {
-        var response = await _elasticClient.GetAsync<IFeature>(GeoJsonExtensions.GetId(source, id), r => r.Index(EXTERNAL_POIS));
-        return response.Source;
-    }
-
-    public async Task AddExternalPois(List<IFeature> features)
-    {
-        if ((await _elasticClient.Indices.ExistsAsync(EXTERNAL_POIS)).Exists == false)
-        {
-            await CreateExternalPoisIndex();
-        }
-        await UpdateData(features, EXTERNAL_POIS);
-    }
-
-    public Task DeleteExternalPoisBySource(string source)
-    {
-        return _elasticClient.DeleteByQueryAsync<IFeature>(d =>
-            d.Index(EXTERNAL_POIS)
-                .Query(q =>
-                    q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_SOURCE}").Value(source.ToLower()))
-                )
-        );
-    }
-
-    private Task CreateExternalPoisIndex()
-    {
-        return _elasticClient.Indices.CreateAsync(EXTERNAL_POIS,
-            c => c.Map<IFeature>(m =>
-                m.Properties(fp =>
-                    fp.Object<IAttributesTable>(a => a
-                        .Name(PROPERTIES)
-                        .Properties(p => p.Keyword(s => s.Name(FeatureAttributes.ID)))
-                    )
-                )
-            ).Settings(s => s.Setting("index.mapping.total_fields.limit", 10000))
-        );
     }
 
     private Task CreateImagesIndex()
@@ -451,52 +311,15 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         );
     }
 
-    public async Task<ImageItem> GetImageByUrl(string url)
-    {
-        var response = await _elasticClient.SearchAsync<ImageItem>(s =>
-            s.Index(IMAGES)
-                .Query(q => q.Match(m => m.Field(i => i.ImageUrls).Query(url)))
-        );
-        return response.Documents.FirstOrDefault();
-    }
-
     public async Task<ImageItem> GetImageByHash(string hash)
     {
         var response = await _elasticClient.GetAsync<ImageItem>(hash, r => r.Index(IMAGES));
         return response.Source;
     }
-    public async Task<List<string>> GetAllUrls()
-    {
-        await _elasticClient.Indices.RefreshAsync(IMAGES);
-        var response = await _elasticClient.SearchAsync<ImageItem>(
-            s => s.Index(IMAGES)
-                .Size(10000)
-                .Scroll("10s")
-                .Source(sf => sf
-                    .Includes(i => i.Fields(f => f.ImageUrls, f => f.Hash))
-                ).Query(q => q.MatchAll())
-        );
-        var list = GetAllItemsByScrolling(response);
-        return list.SelectMany(i => i.Source.ImageUrls ?? []).ToList();
-    }
 
     public Task StoreImage(ImageItem imageItem)
     {
         return _elasticClient.IndexAsync(imageItem, r => r.Index(IMAGES).Id(imageItem.Hash));
-    }
-
-    public async Task DeleteImageByUrl(string url)
-    {
-        var imageItem = await GetImageByUrl(url);
-        if (imageItem != null)
-        {
-            await _elasticClient.DeleteAsync<IFeature>(imageItem.Hash, d => d.Index(IMAGES));
-        }
-    }
-
-    public Task StoreRebuildContext(RebuildContext context)
-    {
-        return _elasticClient.IndexAsync(context, r => r.Index(REBUILD_LOG).Id(context.StartTime.ToString("o")));
     }
 
     private static string NormalizeSearchTerm(string input)

@@ -1,162 +1,139 @@
+using IsraelHiking.Common;
+using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text.Json;
+using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using IsraelHiking.Common;
-using IsraelHiking.Common.Extensions;
-using IsraelHiking.DataAccessInterfaces;
-using Microsoft.Extensions.Logging;
-using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.IO;
 
 namespace IsraelHiking.DataAccess;
 
-internal class WikidataLiteral
+class WikidataEntity
 {
-    [JsonPropertyName("type")]
-    public string Type { get; set; }
+    [JsonPropertyName("sitelinks")]
+    public Dictionary<string, WikidataSitelink> Sitelinks { get; set; }
+    [JsonPropertyName("statements")]
+    public Dictionary<string, List<WikidataStatement>> Statements { get; set; }
+}
+
+class WikidataSitelink
+{
+    [JsonPropertyName("title")]
+    public string Title { get; set; }
+}
+
+class WikidataStatement
+{
     [JsonPropertyName("value")]
-    public string Value { get; set; }
+    public WikidataStatementValue Value { get; set; }
 }
 
-internal class WikidataBinding
+class WikidataStatementValue
 {
-    [JsonPropertyName("place")]
-    public WikidataLiteral Place { get; set; }
-    [JsonPropertyName("location")]
-    public WikidataLiteral Location { get; set; }
-    [JsonPropertyName("links")]
-    public WikidataLiteral WikipediaLinks { get; set; }
-    [JsonPropertyName("allLabels")]
-    public WikidataLiteral Labels { get; set; }
-    [JsonPropertyName("image")]
-    public WikidataLiteral Image { get; set; }
+    [JsonPropertyName("content")]
+    public string Content { get; set; }
 }
 
-internal class WikidataResult
+class WikiQueryResponse
 {
-    [JsonPropertyName("bindings")]
-    public WikidataBinding[] Bindings { get; set; }
+    [JsonPropertyName("query")]
+    public WikiQuery Query { get; set; }
 }
 
-internal class WikidataResults
+class WikiQuery
 {
-    [JsonPropertyName("results")]
-    public WikidataResult Results { get; set; }
+    [JsonPropertyName("pages")]
+    public Dictionary<string, WikiPage> Pages { get; set; }
 }
-public class WikidataGateway : IWikidataGateway
+
+class WikiPage
 {
-    private const string WIKIDATA_LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Wikidata-logo-en.svg/120px-Wikidata-logo-en.svg.png";
-    private const string QUERY_API = "https://query.wikidata.org/sparql?query=";
+    [JsonPropertyName("extract")]
+    public string Extract { get; set; }
+    [JsonPropertyName("original")]
+    public WikiImageSource Original { get; set; }
+    [JsonPropertyName("imageinfo")]
+    public List<WikiImageInfo> ImageInfo { get; set; }
+}
 
-    private readonly WKTReader _wktReader;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger _logger;
+class WikiImageSource
+{
+    [JsonPropertyName("source")]
+    public string Source { get; set; }
+}
 
-    public WikidataGateway(IHttpClientFactory httpClientFactory, ILogger logger)
+class WikiImageInfo
+{
+    [JsonPropertyName("url")]
+    public string Url { get; set; }
+}
+
+/// <summary>
+/// Fetches description and image for a POI from Wikidata + Wikipedia, mirroring what the client does.
+/// </summary>
+public class WikidataGateway(IHttpClientFactory httpClientFactory, ILogger logger) : IWikidataGateway
+{
+    /// <inheritdoc/>
+    public async Task<WikidataContent> GetContent(string wikidataId)
     {
-        _httpClientFactory = httpClientFactory;
-        _logger = logger;
-        _wktReader = new WKTReader();
+        var result = new WikidataContent();
+        try
+        {
+            var client = httpClientFactory.CreateClient();
+            var entity = await client.GetFromJsonAsync<WikidataEntity>(
+                $"https://www.wikidata.org/w/rest.php/wikibase/v1/entities/items/{wikidataId}");
+            if (entity?.Sitelinks != null)
+            {
+                foreach (var language in Languages.Array)
+                {
+                    var title = entity.Sitelinks.GetValueOrDefault($"{language}wiki")?.Title;
+                    if (string.IsNullOrEmpty(title))
+                    {
+                        continue;
+                    }
+                    var (description, image) = await GetWikipediaExtractAndImage(client, language, title);
+                    if (!string.IsNullOrWhiteSpace(description))
+                    {
+                        result.DescriptionByLanguage[language] = description;
+                    }
+                    if (string.IsNullOrWhiteSpace(result.ImageUrl) && !string.IsNullOrWhiteSpace(image))
+                    {
+                        result.ImageUrl = image;
+                    }
+                }
+            }
+            if (string.IsNullOrWhiteSpace(result.ImageUrl))
+            {
+                var imageFile = entity?.Statements?.GetValueOrDefault("P18")?.FirstOrDefault()?.Value?.Content;
+                if (!string.IsNullOrEmpty(imageFile))
+                {
+                    result.ImageUrl = await GetCommonsImageUrl(client, imageFile);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, $"Failed to fetch Wikidata content for {wikidataId}");
+        }
+        return result;
     }
 
-    public async Task<List<IFeature>> GetByBoundingBox(Coordinate southWest, Coordinate northEast)
+    private static async Task<(string description, string image)> GetWikipediaExtractAndImage(HttpClient client, string language, string title)
     {
-        _logger.LogInformation($"Starting getting Wikidata items for coordinates: ({southWest.X}, {southWest.Y}), ({northEast.X}, {northEast.Y})");
-        var query = "SELECT ?place ?location ?links ?image (GROUP_CONCAT(CONCAT(LANG(?label), \":\", ?label); SEPARATOR=\" | \") AS ?allLabels) WHERE {\n" +
-                    "  SERVICE wikibase:box {\n" +
-                    "    ?place wdt:P625 ?location.\n" +
-                    $"    bd:serviceParam wikibase:cornerWest \"Point({southWest.X} {southWest.Y})\"^^geo:wktLiteral.\n" +
-                    $"    bd:serviceParam wikibase:cornerEast \"Point({northEast.X} {northEast.Y})\"^^geo:wktLiteral.\n" +
-                    "  }\n" +
-                    "  OPTIONAL {\n" +
-                    "    ?place wdt:P18 ?image.\n" +
-                    "  }\n" +
-                    "  ?place rdfs:label ?label .\n";
+        var url = $"https://{language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles={Uri.EscapeDataString(title)}";
+        var response = await client.GetFromJsonAsync<WikiQueryResponse>(url);
+        var page = response?.Query?.Pages?.Values.FirstOrDefault();
+        return (page?.Extract, page?.Original?.Source);
+    }
 
-        foreach (var language in Languages.Array)
-        {
-            query += "  OPTIONAL {\n" +
-                "    SERVICE wikibase:label {\n" +
-                $"      bd:serviceParam wikibase:language \"{language}\".\n" +
-                "    }\n" +
-                $"    ?webRaw{language} schema:about ?place; schema:inLanguage \"{language}\"; schema:isPartOf <https://{language}.wikipedia.org/>;\n" +
-                $"    BIND(wikibase:decodeUri(STR(?webRaw{language})) AS ?{language}).\n" +
-                "  }\n\n";
-        }
-        var languagesCoalesce = Languages.Array.Select(l => "COALESCE(?" + l + ", \"\")");
-        query += "  BIND(CONCAT(" + string.Join(",\";\",", languagesCoalesce) + ") AS ?links).\n";
-        query += "}\nGROUP BY ?place ?location ?image ?links";
-        var client = _httpClientFactory.CreateClient();
-        client.DefaultRequestHeaders.Add("User-Agent", Branding.USER_AGENT);
-        client.DefaultRequestHeaders.Add("Accept", "application/sparql-results+json");
-        var response = await client.GetAsync(QUERY_API + Uri.EscapeDataString(query));
-        var content = await response.Content.ReadAsStringAsync();
-        if (!response.IsSuccessStatusCode)
-        {
-            _logger.LogError("Unable to get wikidata results:\n" + content);
-            throw new Exception("Unable to get wikidata results");
-        }
-        var results = JsonSerializer.Deserialize<WikidataResults>(content);
-        var features = results.Results.Bindings.Select(b =>
-        {
-            var point = _wktReader.Read(b.Location.Value);
-            if (string.IsNullOrEmpty(b.WikipediaLinks?.Value))
-            {
-                return null;
-            }
-            var links = b.WikipediaLinks.Value.Split(";").Where(s => !string.IsNullOrEmpty(s)).ToArray();
-            if (links.Length == 0)
-            {
-                return null;
-            }
-            var languagesTitlesAndLinks = links.Select(l =>
-            (
-                Language: l.Replace("https://", "").Split(".").First(),
-                Title: l.Split("/").Last().Replace("_", " "),
-                Link: l.Replace("_", "%20")
-            )).ToArray();
-            var feature = new Feature(point, new AttributesTable
-            {
-                {FeatureAttributes.ID, b.Place.Value.Split("/").Last()},
-                {FeatureAttributes.NAME, languagesTitlesAndLinks.First().Title},
-                {FeatureAttributes.POI_SOURCE, Sources.WIKIDATA},
-                {FeatureAttributes.POI_CATEGORY, Categories.OTHER},
-                {FeatureAttributes.POI_LANGUAGE, languagesTitlesAndLinks.First().Language},
-                {FeatureAttributes.POI_LANGUAGES, languagesTitlesAndLinks.Select(l => l.Language).ToArray()},
-                {FeatureAttributes.POI_ICON, "icon-wikipedia-w"},
-                {FeatureAttributes.POI_ICON_COLOR, "black"},
-                {FeatureAttributes.POI_SOURCE_IMAGE_URL, WIKIDATA_LOGO}
-            }) as IFeature;
-            if (!string.IsNullOrWhiteSpace(b.Image?.Value))
-            {
-                feature.Attributes.Add(FeatureAttributes.IMAGE_URL, b.Image.Value);
-                feature.Attributes[FeatureAttributes.POI_LANGUAGES] = Languages.Array;
-            }
-            foreach (var languageAndLabel in b.Labels.Value.Split("|").Where(l => l.Contains(':')))
-            {
-                var language = languageAndLabel.Split(":").First().Trim();
-                var label = languageAndLabel.Split(":").Last().Trim();
-                feature.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + language, label);
-            }
-            for (var index = 0; index < languagesTitlesAndLinks.Length; index++)
-            {
-                feature.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + languagesTitlesAndLinks[index].Language,
-                    languagesTitlesAndLinks[index].Title);
-                var posix = index > 0 ? index.ToString() : string.Empty;
-                feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + posix, languagesTitlesAndLinks[index].Link);
-                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL + posix, WIKIDATA_LOGO);
-            }
-            feature.SetLocation(point.Coordinate);
-            feature.SetId();
-            return feature;
-        }).Where(f => f != null).ToList();
-
-        _logger.LogInformation($"Finished getting Wikidata items, got {features.Count} items");
-        return features;
+    private static async Task<string> GetCommonsImageUrl(HttpClient client, string fileName)
+    {
+        var url = $"https://commons.wikimedia.org/w/api.php?action=query&titles=File:{Uri.EscapeDataString(fileName)}&prop=imageinfo&iiprop=url&redirects&format=json";
+        var response = await client.GetFromJsonAsync<WikiQueryResponse>(url);
+        var page = response?.Query?.Pages?.Values.FirstOrDefault();
+        return page?.ImageInfo?.FirstOrDefault()?.Url;
     }
 }
