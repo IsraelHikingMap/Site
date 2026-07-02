@@ -15,18 +15,16 @@ public class SystemTextJsonSerializer : IElasticsearchSerializer
 
     private IList<JsonConverter> BakedInConverters { get; } = new List<JsonConverter>
     {
-        {new DynamicDictionaryConverter()},
         {new DateTimeConverter()}
     };
 
-    public SystemTextJsonSerializer(JsonConverterFactory factory)
+    public SystemTextJsonSerializer()
     {
         var indentedOptions = new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             WriteIndented = true
         };
-        indentedOptions.Converters.Add(factory);
         foreach (var converter in BakedInConverters)
             indentedOptions.Converters.Add(converter);
         var noneIndentedOptions = new JsonSerializerOptions
@@ -34,7 +32,6 @@ public class SystemTextJsonSerializer : IElasticsearchSerializer
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             WriteIndented = false
         };
-        noneIndentedOptions.Converters.Add(factory);
         foreach (var converter in BakedInConverters)
             noneIndentedOptions.Converters.Add(converter);
         _indented = new Lazy<JsonSerializerOptions>(() => indentedOptions);

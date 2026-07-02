@@ -63,62 +63,11 @@ public class ElasticSearchGatewayTests
 
     [TestMethod]
     [Ignore]
-    public void GetClosestPoint_ShouldReturnResults()
-    {
-        var coordinate = new Coordinate(35.303488, 33.027086);
-        var results = _gateway.GetClosestPoint(coordinate, Sources.OSM, null).Result;
-        Assert.IsNotNull(results);
-    }
-    
-    [TestMethod]
-    [Ignore]
-    public void GetClosestPointWithmultiplePointsInBoundingBox_ShouldReturnResults()
-    {
-        var coordinate = new Coordinate(34.78588, 31.245418);
-        var results = _gateway.GetClosestPoint(coordinate, Sources.OSM, null).Result;
-        Assert.IsNotNull(results);
-    }
-        
-    [TestMethod]
-    [Ignore]
-    public void GetClosestPoint_NoSourceIsSpecified_ShouldReturnResults()
-    {
-        var coordinate = new Coordinate(35.23087, 32.93687);
-        var results = _gateway.GetClosestPoint(coordinate, null, Languages.HEBREW).Result;
-        Assert.IsNotNull(results);
-    }
-        
-    [TestMethod]
-    [Ignore]
-    public void GetClosestPoint_OSMSourceSpecified_ShouldNotReturnResults()
-    {
-        var coordinate = new Coordinate(35.23087, 32.93687);
-        var results = _gateway.GetClosestPoint(coordinate, Sources.OSM, Languages.HEBREW).Result;
-        Assert.IsNull(results);
-    }
-
-    [TestMethod]
-    [Ignore]
     public void GetContainerName_MultipleCoordinates_ShouldGetOne()
     {
         var name = _gateway.GetContainerName([new Coordinate(35.052338, 32.598071), new Coordinate(35.059919, 32.597458)], Languages.HEBREW).Result;
 
         Assert.AreEqual("רמות מנשה", name);
-    }
-
-    [TestMethod]
-    [Ignore]
-    public void GetPoisBySource_ShouldGetThem()
-    {
-        var tasks = new List<Task<List<IFeature>>>
-        {
-            _gateway.GetExternalPoisBySource(Sources.INATURE),
-            _gateway.GetExternalPoisBySource(Sources.NAKEB),
-            _gateway.GetExternalPoisBySource(Sources.WIKIPEDIA)
-        };
-        Task.WhenAll(tasks).Wait();
-
-        Assert.IsTrue(tasks.Last().Result.Count > 10000);
     }
 
     [TestMethod]
@@ -148,30 +97,6 @@ public class ElasticSearchGatewayTests
         Assert.IsNotNull(imageItem);
     }
 
-    [TestMethod]
-    [Ignore]
-    public void GetAllPointsOfInterest_ShouldGetThem()
-    {
-        var results = _gateway.GetAllPointsOfInterest().Result;
-
-        Assert.IsNotNull(results);
-    }
-
-    [TestMethod]
-    [Ignore]
-    public void StoreRebuildContext_ShouldStore()
-    {
-        _gateway.StoreRebuildContext(new RebuildContext
-        {
-            StartTime = DateTime.Now.AddDays(-5),
-            Succeeded = true,
-            ErrorMessage = string.Empty,
-            Request = new UpdateRequest
-            {
-                AllExternalSources = true,
-            }
-        }).Wait();
-    }
         
     [TestMethod]
     [Ignore]

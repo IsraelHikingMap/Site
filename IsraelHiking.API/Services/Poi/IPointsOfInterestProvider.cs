@@ -35,14 +35,4 @@ public interface IPointsOfInterestProvider
     /// <param name="language">The relevant language</param>
     /// <returns></returns>
     Task<IFeature> UpdateFeature(IFeature partialFeature, IAuthClient osmGateway, string language);
-
-    /// <summary>
-    /// Get the closest point to the given location, only for the given source
-    /// Empty source means all sources
-    /// </summary>
-    /// <param name="location"></param>
-    /// <param name="source"></param>
-    /// <param name="language"></param>
-    /// <returns></returns>
-    public Task<IFeature> GetClosestPoint(Coordinate location, string source, string language);
 }

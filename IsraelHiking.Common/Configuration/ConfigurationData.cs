@@ -88,7 +88,6 @@ public class ConfigurationData
     /// <summary>
     /// This threshold in degrees that is used to determine if two points of interest are close enough to be suggested when updating
     /// </summary>
-    public double ClosestPointsOfInterestThreshold { get; set; }
     /// <summary>
     /// This distance to the closest highway for adding gates in degrees
     /// </summary>
@@ -170,7 +169,6 @@ public class ConfigurationData
         SearchFactor = 1;
         MergePointsOfInterestThreshold = 0.001; // around 100m
         MergeExternalPointsOfInterestThreshold = 1 / 60.0; // 1 minute
-        ClosestPointsOfInterestThreshold = 0.001; // around 100m
         ClosestHighwayForGates = 0.0003; // around 30m
         ClosestNodeForGates = 0.0001; // around 10m
         ClosestNodeWithGate = 30;

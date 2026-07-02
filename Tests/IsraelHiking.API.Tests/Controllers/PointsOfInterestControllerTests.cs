@@ -53,28 +53,6 @@ public class PointsOfInterestControllerTests
     }
 
     [TestMethod]
-    public void GetPointOfInterest_WrongSource_ShouldReturnBadRequest()
-    {
-        _pointsOfInterestProvider.GetFeatureById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
-
-        var result = _controller.GetPointOfInterest("wrong source", string.Empty).Result as NotFoundResult;
-
-        Assert.IsNotNull(result);
-    }
-
-    [TestMethod]
-    public void GetPointOfInterest_BySourceAndId_ShouldReturnIt()
-    {
-        var id = "way_1";
-        var source = "source";
-        _pointsOfInterestProvider.GetFeatureById(source, id).Returns(new Feature());
-
-        var result = _controller.GetPointOfInterest(source, id).Result as OkObjectResult;
-
-        Assert.IsNotNull(result);
-    }
-
-    [TestMethod]
     public void CreatePointOfInterest_WrongSource_ShouldReturnBadRequest()
     {
         var poi = new Feature(new Point(0, 0), new AttributesTable { { FeatureAttributes.POI_SOURCE, "wrong source" }, { FeatureAttributes.POI_ID, "1" } });

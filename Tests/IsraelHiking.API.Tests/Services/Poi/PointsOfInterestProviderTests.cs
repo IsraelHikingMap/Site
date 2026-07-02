@@ -26,13 +26,11 @@ using IsraelHiking.API.Gpx;
 namespace IsraelHiking.API.Tests.Services.Poi;
 
 [TestClass]
-public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHelper
+public class PointsOfInterestProviderTests
 {
     private PointsOfInterestProvider _adapter;
     private IClientsFactory _clientsFactory;
     private IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
-    private IPointsOfInterestRepository _pointsOfInterestRepository;
-    private IExternalSourcesRepository _externalSourcesRepository;
     private IWikimediaCommonGateway _wikimediaCommonGateway;
     private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
     private ITagsHelper _tagsHelper;
@@ -40,23 +38,42 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
     [TestInitialize]
     public void TestInitialize()
     {
-        InitializeSubstitutes();
         _clientsFactory = Substitute.For<IClientsFactory>();
         _tagsHelper = new TagsHelper();
         _osmGeoJsonPreprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(),
             new OsmGeoJsonConverter(new GeometryFactory()), _tagsHelper);
-        _pointsOfInterestRepository = Substitute.For<IPointsOfInterestRepository>();
-        _externalSourcesRepository = Substitute.For<IExternalSourcesRepository>();
         _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
         _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
-        _adapter = new PointsOfInterestProvider(_pointsOfInterestRepository,
-            _externalSourcesRepository,
-            _osmGeoJsonPreprocessorExecutor,
+        _adapter = new PointsOfInterestProvider(_osmGeoJsonPreprocessorExecutor,
             _wikimediaCommonGateway,
             new Base64ImageStringToFileConverter(),
             _imagesUrlsStorageExecutor,
             _tagsHelper, _clientsFactory,
             Substitute.For<ILogger>());
+    }
+
+    private static Feature GetValidFeature(string someId, string source)
+    {
+        var feature = new Feature
+        {
+            Geometry = new LineString([
+                new CoordinateZ(0, 0, double.NaN),
+                new CoordinateZ(1, 1, double.NaN)
+            ]),
+            Attributes = new AttributesTable
+            {
+                {FeatureAttributes.POI_CATEGORY, FeatureAttributes.POI_CATEGORY},
+                {FeatureAttributes.NAME, FeatureAttributes.NAME},
+                {FeatureAttributes.ID, someId},
+                {FeatureAttributes.POI_SOURCE, source},
+                {FeatureAttributes.POI_ICON, FeatureAttributes.POI_ICON},
+                {FeatureAttributes.POI_ICON_COLOR, FeatureAttributes.POI_ICON_COLOR},
+                {FeatureAttributes.POI_ALT, 11.1},
+            }
+        };
+        feature.SetLocation(new Coordinate(2.2, 1.1));
+        feature.SetId();
+        return feature;
     }
 
     private IAuthClient SetupOsmAuthClient()
@@ -104,47 +121,14 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
     }
         
     [TestMethod]
-    public void GetFeatureById_FeatureDoesNotExist_ShouldReturnNull()
+    public void GetFeatureById_NonOsmSource_ShouldReturnNull()
     {
-        _externalSourcesRepository.GetExternalPoiById("42", Sources.INATURE).Returns(Task.FromResult<IFeature>(null));
-
         var result = _adapter.GetFeatureById(Sources.INATURE, "42").Result;
 
         Assert.IsNull(result);
     }
         
         
-    [TestMethod]
-    public void GetFeatureById_NonOsmWithNoElevation_ShouldNotAddElevation()
-    {
-        var someId = "some-id";
-        var featureStr =
-            "{ " +
-            "\"type\": \"FeatureCollection\"," +
-            "\"features\": [" +
-            "   { " +
-            "       \"type\": \"Feature\", " +
-            "       \"properties\": {}, " +
-            "       \"geometry\": {" +
-            "           \"type\": \"LineString\", " +
-            "           \"coordinates\": [[0,0], [0,1]] " +
-            "       } " +
-            "   }]" +
-            "}";
-        var col = Encoding.UTF8.GetBytes(featureStr).ToFeatureCollection();
-        col.First().Attributes[FeatureAttributes.ID] = "42";
-        col.First().Attributes[FeatureAttributes.POI_SOURCE] = Sources.INATURE;
-        col.First().Attributes[FeatureAttributes.POI_ICON] = null;
-
-        var feature = col.First();
-            
-        _externalSourcesRepository.GetExternalPoiById(someId, Sources.INATURE).Returns(feature);
-
-        var result = _adapter.GetFeatureById(Sources.INATURE, someId).Result;
-
-        Assert.IsNotNull(result);
-        Assert.AreEqual(double.NaN, result.Geometry.Coordinates.First().Z);
-    }
 
     [TestMethod]
     public void AddFeature_ShouldUpdateOsm()
@@ -374,19 +358,6 @@ public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHel
         gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(c => !c.Tags.ContainsKey("place")));
     }
 
-    [TestMethod]
-    public void GetClosestPoint_ShouldGetTheClosesOsmPoint()
-    {
-        var feature = new Feature(new LineString([]), new AttributesTable
-        {
-            { FeatureAttributes.POI_SOURCE, Sources.OSM }
-        });
-        _pointsOfInterestRepository.GetClosestPoint(Arg.Any<Coordinate>(), Arg.Any<string>(), Arg.Any<string>()).Returns(feature);
-
-        var results = _adapter.GetClosestPoint(new Coordinate(0,0), Sources.OSM, null).Result;
-
-        Assert.AreEqual(feature, results);
-    }
 
     [TestMethod]
     public void UpdateFeature_WithImageIdExists_ShouldUpdate()
