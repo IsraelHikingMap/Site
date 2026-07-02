@@ -18,8 +18,6 @@ using OsmSharp.Tags;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
-using IsraelHiking.API.Gpx;
 
 namespace IsraelHiking.API.Tests.Services.Poi;
 

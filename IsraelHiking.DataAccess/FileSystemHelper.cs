@@ -1,5 +1,4 @@
-﻿using System.IO;
-using IsraelHiking.DataAccessInterfaces;
+﻿using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.FileProviders;
 
 namespace IsraelHiking.DataAccess;
