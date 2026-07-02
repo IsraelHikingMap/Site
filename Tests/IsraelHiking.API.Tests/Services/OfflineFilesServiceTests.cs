@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces;

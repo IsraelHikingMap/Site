@@ -1,15 +1,9 @@
 ﻿using IsraelHiking.Common;
-using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using IsraelHiking.DataAccess.ElasticSearch;
 
 namespace IsraelHiking.DataAccess.Tests.ElasticSearch;
@@ -24,7 +18,7 @@ public class ElasticSearchGatewayTests
     {
         var options = Substitute.For<IOptions<ConfigurationData>>();
         options.Value.Returns(new ConfigurationData());
-        _gateway = new ElasticSearchGateway(options, new TraceLogger()); 
+        _gateway = new ElasticSearchGateway(options, new TraceLogger());
         _gateway.Initialize().Wait();
     }
 
@@ -35,7 +29,7 @@ public class ElasticSearchGatewayTests
         var results = _gateway.Search("מנות", Languages.HEBREW).Result;
         Assert.AreEqual(20, results.Count);
     }
-    
+
     [TestMethod]
     [Ignore]
     public void SearchRussian_ShouldReturnResults()
@@ -44,7 +38,7 @@ public class ElasticSearchGatewayTests
         var results = _gateway.Search("Кейсария", Languages.HEBREW).Result;
         Assert.AreEqual(20, results.Count);
     }
-        
+
     [TestMethod]
     [Ignore]
     public void GetContainerName_ShouldReturnResults()

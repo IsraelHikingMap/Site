@@ -1,6 +1,4 @@
-﻿using IsraelHiking.Common;
-using IsraelHiking.DataAccessInterfaces;
-using Microsoft.Extensions.Logging;
+﻿using IsraelHiking.DataAccessInterfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;

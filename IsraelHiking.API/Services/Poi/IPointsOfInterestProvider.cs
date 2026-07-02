@@ -1,5 +1,4 @@
 ﻿using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using OsmSharp.IO.API;
 using System.Threading.Tasks;
 
