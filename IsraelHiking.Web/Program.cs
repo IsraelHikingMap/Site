@@ -100,7 +100,7 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
         options.JsonSerializerOptions.Converters.Add(GeoJsonExtensions.GeoJsonWritableFactory);
         options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
         options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
-    }).AddApplicationPart(typeof(IsraelHiking.API.Controllers.PointsOfInterestController).Assembly);
+    }).AddApplicationPart(typeof(RegisterApi).Assembly);
     services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
