@@ -174,7 +174,7 @@ public class ConfigurationData
         ClosestHighwayForGates = 0.0003; // around 30m
         ClosestNodeForGates = 0.0001; // around 10m
         ClosestNodeWithGate = 30;
-        ValhallaServerAddress = "http://localhost:8002/"; // HM TODO: change this?
+        ValhallaServerAddress = "http://localhost:8002/";
         ElasticsearchServerAddress = "http://localhost:9200/";
         GpsBabelServerAddress = "http://localhost:11987/";
         ImageCreatorServerAddress = "http://localhost:11223/";
