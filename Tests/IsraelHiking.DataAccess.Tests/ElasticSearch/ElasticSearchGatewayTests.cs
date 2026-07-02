@@ -72,15 +72,6 @@ public class ElasticSearchGatewayTests
 
     [TestMethod]
     [Ignore]
-    public void GetImageByUrl_ShouldGetIt()
-    {
-        var imageItem = _gateway.GetImageByUrl("https://upload.wikimedia.org/wikipedia/commons/0/05/Israel_Hiking_Map_%D7%97%D7%95%D7%A8%D7%91%D7%AA_%D7%97%D7%A0%D7%95%D7%AA_2.jpeg").Result;
-
-        Assert.IsNotNull(imageItem);
-    }
-
-    [TestMethod]
-    [Ignore]
     public void GetImageHash_ShouldGetIt()
     {
         var imageItem = _gateway.GetImageByHash("7F4E8F16362FD1E527FFBC516E0197C7").Result;
@@ -88,16 +79,6 @@ public class ElasticSearchGatewayTests
         Assert.IsNotNull(imageItem);
     }
 
-    [TestMethod]
-    [Ignore]
-    public void GetAllUrls_ShouldGetThem()
-    {
-        var imageItem = _gateway.GetAllUrls().Result;
-
-        Assert.IsNotNull(imageItem);
-    }
-
-        
     [TestMethod]
     [Ignore]
     public void SearchExact_ShouldSGetAnExactMatch()

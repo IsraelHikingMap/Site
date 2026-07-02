@@ -51,21 +51,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
     }
 
-    private List<IHit<T>> GetAllItemsByScrolling<T>(ISearchResponse<T> response) where T : class
-    {
-        var list = new List<IHit<T>>();
-        list.AddRange(response.Hits.ToList());
-        var results = _elasticClient.Scroll<T>("10s", response.ScrollId);
-        list.AddRange(results.Hits.ToList());
-        while (results.Documents.Any())
-        {
-            results = _elasticClient.Scroll<T>("10s", results.ScrollId);
-            list.AddRange(results.Hits.ToList());
-        }
-        _elasticClient.ClearScroll(new ClearScrollRequest(response.ScrollId));
-        return list;
-    }
-
     /// <summary>
     /// This method is used to extract the field with the highest contribution to the score
     /// It uses the explanation object to recursively find the field
@@ -326,47 +311,15 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         );
     }
 
-    public async Task<ImageItem> GetImageByUrl(string url)
-    {
-        var response = await _elasticClient.SearchAsync<ImageItem>(s =>
-            s.Index(IMAGES)
-                .Query(q => q.Match(m => m.Field(i => i.ImageUrls).Query(url)))
-        );
-        return response.Documents.FirstOrDefault();
-    }
-
     public async Task<ImageItem> GetImageByHash(string hash)
     {
         var response = await _elasticClient.GetAsync<ImageItem>(hash, r => r.Index(IMAGES));
         return response.Source;
     }
-    public async Task<List<string>> GetAllUrls()
-    {
-        await _elasticClient.Indices.RefreshAsync(IMAGES);
-        var response = await _elasticClient.SearchAsync<ImageItem>(
-            s => s.Index(IMAGES)
-                .Size(10000)
-                .Scroll("10s")
-                .Source(sf => sf
-                    .Includes(i => i.Fields(f => f.ImageUrls, f => f.Hash))
-                ).Query(q => q.MatchAll())
-        );
-        var list = GetAllItemsByScrolling(response);
-        return list.SelectMany(i => i.Source.ImageUrls ?? []).ToList();
-    }
 
     public Task StoreImage(ImageItem imageItem)
     {
         return _elasticClient.IndexAsync(imageItem, r => r.Index(IMAGES).Id(imageItem.Hash));
-    }
-
-    public async Task DeleteImageByUrl(string url)
-    {
-        var imageItem = await GetImageByUrl(url);
-        if (imageItem != null)
-        {
-            await _elasticClient.DeleteAsync<IFeature>(imageItem.Hash, d => d.Index(IMAGES));
-        }
     }
 
     private static string NormalizeSearchTerm(string input)

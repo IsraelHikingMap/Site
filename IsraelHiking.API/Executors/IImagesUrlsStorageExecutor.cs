@@ -1,6 +1,4 @@
-﻿using IsraelHiking.Common;
-using System.Collections.Generic;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Executors;
@@ -11,13 +9,6 @@ namespace IsraelHiking.API.Executors;
 public interface IImagesUrlsStorageExecutor
 {
     /// <summary>
-    /// Downloads the content from the urls, calculates hash and stores to database
-    /// </summary>
-    /// <param name="imagesUrls"></param>
-    /// <returns></returns>
-    Task DownloadAndStoreUrls(List<string> imagesUrls);
-
-    /// <summary>
     /// Get an image url if it exists in the repository
     /// </summary>
     /// <param name="md5"></param>
@@ -25,12 +16,6 @@ public interface IImagesUrlsStorageExecutor
     /// <returns>The image url or null</returns>
     Task<string> GetImageUrlIfExists(MD5 md5, byte[] content);
 
-    /// <summary>
-    /// Gets all the images by the required urls
-    /// </summary>
-    /// <param name="imageUrls"></param>
-    /// <returns></returns>
-    Task<ImageItem[]> GetAllImagesForUrls(string[] imageUrls);
     /// <summary>
     /// This method stores images in the repository after computing hash and resizing them
     /// </summary>

@@ -37,7 +37,6 @@ public static class RegisterApi
         services.AddTransient<IOfflineFilesService, OfflineFilesService>();
         services.AddTransient<IImagesUrlsStorageExecutor, ImagesUrlsStorageExecutor>();
         services.AddTransient<ISimplePointAdderExecutor, SimplePointAdderExecutor>();
-        services.AddTransient<IUnauthorizedImageUrlsRemover, UnauthorizedImageUrlsRemover>();
 
         // registration here is what determines the order of which to merge points:
         // last one is the least important

@@ -10,7 +10,6 @@ public static class RegisterDataAccess
     public static IServiceCollection AddIHMDataAccess(this IServiceCollection services)
     {
         services.AddTransient<IFileSystemHelper, FileSystemHelper>();
-        services.AddTransient<IRemoteFileSizeFetcherGateway, RemoteFileFetcherGateway>();
         services.AddTransient<IRemoteFileFetcherGateway, RemoteFileFetcherGateway>();
         services.AddTransient<IGpsBabelGateway, GpsBabelGateway>();
         services.AddTransient<IRoutingGateway, ValhallaGateway>();

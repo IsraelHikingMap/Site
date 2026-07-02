@@ -8,7 +8,7 @@ using IsraelHiking.Common.Api;
 
 namespace IsraelHiking.DataAccess;
 
-public class RemoteFileFetcherGateway : IRemoteFileSizeFetcherGateway
+public class RemoteFileFetcherGateway : IRemoteFileFetcherGateway
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger _logger;
@@ -43,12 +43,5 @@ public class RemoteFileFetcherGateway : IRemoteFileSizeFetcherGateway
             Content = content,
             FileName = fileName
         };
-    }
-    public async Task<long> GetFileSize(string url)
-    {
-        var client = _httpClientFactory.CreateClient();
-        client.DefaultRequestHeaders.UserAgent.ParseAdd(Branding.USER_AGENT);
-        var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
-        return response.Content.Headers.ContentLength ?? 0;
     }
 }
