@@ -29,7 +29,7 @@ public class SpaDefaultHtmlMiddleware
     /// <param name="context"></param>
     public async Task InvokeAsync(HttpContext context)
     {
-        if (context.Request.Path.StartsWithSegments("/api") || context.GetEndpoint() != null)
+        if (context.GetEndpoint() != null)
         {
             await _next.Invoke(context);
             return;
