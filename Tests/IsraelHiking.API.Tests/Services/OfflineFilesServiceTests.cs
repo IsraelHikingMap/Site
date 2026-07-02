@@ -51,7 +51,6 @@ public class OfflineFilesServiceTests
         var files = new List<IFileInfo> { fileInfo } as IEnumerable<IFileInfo>;
         directory.GetEnumerator().Returns(_ => files.GetEnumerator());
         _fileProvider.GetDirectoryContents(Arg.Any<string>()).Returns(directory);
-        _fileSystemHelper.IsHidden(Arg.Any<string>()).Returns(false);
 
         var results = _service.GetUpdatedFilesList(lastModified, 1, 2);
 
@@ -69,7 +68,6 @@ public class OfflineFilesServiceTests
         var files = new List<IFileInfo> { fileInfo } as IEnumerable<IFileInfo>;
         directory.GetEnumerator().Returns(_ => files.GetEnumerator());
         _fileProvider.GetDirectoryContents(Arg.Any<string>()).Returns(directory);
-        _fileSystemHelper.IsHidden(Arg.Any<string>()).Returns(false);
 
         var results = _service.GetUpdatedFilesList(lastModified, 1, 2);
 
