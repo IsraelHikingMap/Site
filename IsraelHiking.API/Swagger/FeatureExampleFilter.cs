@@ -1,10 +1,10 @@
-﻿using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using NetTopologySuite.IO.Converters;
 
 namespace IsraelHiking.API.Swagger;
@@ -20,13 +20,13 @@ public class FeatureExampleFilter : ISchemaFilter
     /// </summary>
     /// <param name="context"></param>
     /// <param name="schema"></param>
-    public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+    public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
     {
-        if (context == null)
+        if (context?.Type != typeof(Feature))
         {
             return;
         }
-        if (context.Type != typeof(Feature))
+        if (schema is not OpenApiSchema concreteSchema)
         {
             return;
         }
@@ -39,7 +39,7 @@ public class FeatureExampleFilter : ISchemaFilter
                 ]),
                 new AttributesTable { { "key", "value" } })
             , options);
-        schema.Example = new OpenApiString(exampleFeatureString);
-        schema.Default = new OpenApiString(exampleFeatureString);
+        concreteSchema.Example = JsonNode.Parse(exampleFeatureString);
+        concreteSchema.Default = JsonNode.Parse(exampleFeatureString);
     }
 }

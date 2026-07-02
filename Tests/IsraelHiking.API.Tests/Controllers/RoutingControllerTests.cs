@@ -96,7 +96,7 @@ public class RoutingControllerTests
             r.To.X == 35.5 && r.To.Y == 32.1));
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(RoutingType.HIKE, ProfileType.Foot)]
     [DataRow(RoutingType.BIKE, ProfileType.Bike)]
     [DataRow(RoutingType.FOUR_WHEEL_DRIVE, ProfileType.Car4WheelDrive)]

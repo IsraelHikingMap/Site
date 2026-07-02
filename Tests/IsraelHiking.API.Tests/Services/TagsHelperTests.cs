@@ -1,10 +1,6 @@
 ﻿using IsraelHiking.API.Services;
-using IsraelHiking.Common;
-using IsraelHiking.Common.Configuration;
-using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
-using NSubstitute;
 
 namespace IsraelHiking.API.Tests.Services;
 
@@ -21,30 +17,6 @@ public class TagsHelperTests
 
     [TestMethod]
     [DataRow("icon-leaf")]
-    [DataRow("icon-hike")]
-    [DataRow("icon-bike")]
-    [DataRow("icon-four-by-four")]
-    [DataRow("icon-ruins")]
-    [DataRow("icon-archaeological")]
-    [DataRow("icon-memorial")]
-    [DataRow("icon-cave")]
-    [DataRow("icon-picnic")]
-    [DataRow("icon-tint")]
-    [DataRow("icon-tree")]
-    [DataRow("icon-flowers")]
-    [DataRow("icon-waterhole")]
-    [DataRow("icon-water-well")]
-    [DataRow("icon-cistern")]
-    [DataRow("icon-waterfall")]
-    [DataRow("icon-river")]
-    [DataRow("icon-home")]
-    [DataRow("icon-viewpoint")]
-    [DataRow("icon-campsite")]
-    [DataRow("icon-star")]
-    [DataRow("icon-artwork")]
-    [DataRow("icon-alpinehut")]
-    [DataRow("icon-peak")]
-    [DataRow("icon-inature")]
     [DataRow("icon-hike")]
     [DataRow("icon-bike")]
     [DataRow("icon-four-by-four")]
