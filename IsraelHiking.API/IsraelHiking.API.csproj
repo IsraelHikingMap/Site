@@ -30,7 +30,8 @@
     <PackageReference Include="OsmSharp.IO.API" />
     <PackageReference Include="ProjNet" />
     <PackageReference Include="SharpZipLib.NETStandard" />
-    <PackageReference Include="SixLabors.ImageSharp.Drawing" />
+    <PackageReference Include="SkiaSharp" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
     <PackageReference Include="Wangkanai.Detection" />
   </ItemGroup>
