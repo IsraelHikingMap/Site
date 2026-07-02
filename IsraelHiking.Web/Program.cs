@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using IsraelHiking.API;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Middleware;
-using IsraelHiking.API.Swagger;
+using IsraelHiking.API.OpenApi;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccess;
@@ -22,8 +22,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi;
 using NeoSmart.Caching.Sqlite;
+using Scalar.AspNetCore;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NLog.Web;
@@ -58,11 +58,8 @@ void SetupApplication(WebApplication app)
             Mappings = { { ".pbf", "application/x-protobuf" } } // for the fonts files
         }
     });
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Mapeak API V1");
-    });
+    app.MapOpenApi();
+    app.MapScalarApiReference("/openapi", options => options.AddPreferredSecuritySchemes("Bearer"));
     app.UseMiddleware<CrawlersMiddleware>();
     // This should be the last middleware
     app.UseMiddleware<SpaDefaultHtmlMiddleware>();
@@ -81,9 +78,10 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     services.AddIHMApi();
     if (Directory.Exists("./Cache") == false)
     {
-        Directory.CreateDirectory("./Cache");    
+        Directory.CreateDirectory("./Cache");
     }
-    services.AddSqliteCache(options => {
+    services.AddSqliteCache(options =>
+    {
         options.CachePath = "./Cache/cache.sqlite";
     });
     services.AddSingleton<OsmAccessTokenEventsHelper>();
@@ -97,11 +95,12 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     services.AddControllers(options =>
     {
         options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));
-    }).AddJsonOptions(options => {
+    }).AddJsonOptions(options =>
+    {
         options.JsonSerializerOptions.Converters.Add(GeoJsonExtensions.GeoJsonWritableFactory);
         options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
         options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
-    });
+    }).AddApplicationPart(typeof(IsraelHiking.API.Controllers.PointsOfInterestController).Assembly);
     services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -136,24 +135,11 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     services.Configure<NonPublicConfigurationData>(nonPublicConfiguration.Build());
 
     services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Mapeak"));
-    services.AddSwaggerGen(c =>
+    services.AddOpenApi(options =>
     {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Mapeak API", Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() });
-        c.SchemaFilter<FeatureExampleFilter>();
-        c.SchemaFilter<FeatureCollectionExampleFilter>();
-        c.AddSecurityDefinition("Bearer",
-            new OpenApiSecurityScheme
-            {
-                Description = "JWT Authorization header using the Bearer scheme - need OSM token and secret joined by ';'",
-                Type = SecuritySchemeType.Http,
-                Scheme = "bearer",
-                In = ParameterLocation.Header
-            }
-        );
-        c.OperationFilter<AssignOAuthSecurityRequirements>();
-        var xmlFile = "IsraelHiking.API.xml";
-        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-        c.IncludeXmlComments(xmlPath);
+        options.AddDocumentTransformer<ApiInfoDocumentTransformer>();
+        options.AddSchemaTransformer<FeatureExampleSchemaTransformer>();
+        options.AddOperationTransformer<AssignOAuthSecurityOperationTransformer>();
     });
 }
 

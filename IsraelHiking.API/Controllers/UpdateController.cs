@@ -13,6 +13,7 @@ namespace IsraelHiking.API.Controllers;
 /// This controller handles updates in elastic search
 /// </summary>
 [Route("api/[controller]")]
+[ApiController]
 public class UpdateController : ControllerBase
 {
     private static readonly Semaphore RebuildSemaphore = new(1, 1);
@@ -34,11 +35,13 @@ public class UpdateController : ControllerBase
     }
 
     /// <summary>
-    /// This operation updates elastic search and graph hopper with data stored in osm pbf file.
-    /// If OsmFile is set to false it will download and use the daily file without updating it to latest version.
-    /// This operation should have minimal downtime.
-    /// This operation can only be run from the hosting server.
+    /// Update search databases
     /// </summary>
+    /// <remarks>
+    /// Updates Elasticsearch and GraphHopper from the OSM PBF file. If OsmFile is false, downloads and uses
+    /// the daily file without updating it to the latest version. Runs with minimal downtime and can only be
+    /// invoked from the hosting server.
+    /// </remarks>
     /// <returns></returns>
     [HttpPost]
     [Route("")]

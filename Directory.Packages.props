@@ -35,7 +35,10 @@
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.148.0" />
     <!-- Transitively pins NeoSmart's native SQLite binary (was 2.1.10) to patch GHSA-2m69-gcr7-jv3q. Managed stack stays 2.1.x (stable C ABI). -->
     <PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.50.3" />
-    <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+    <!-- Transitively pins Microsoft.AspNetCore.OpenApi's Microsoft.OpenApi (was 2.0.0) to patch GHSA-v5pm-xwqc-g5wc. -->
+    <PackageVersion Include="Microsoft.OpenApi" Version="2.9.0" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.16.7" />
     <PackageVersion Include="Wangkanai.Detection" Version="8.20.0" />
   </ItemGroup>
 

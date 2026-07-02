@@ -11,6 +11,7 @@ namespace IsraelHiking.API.Controllers;
 /// This contoller is responsible for external sourcing mirroning
 /// </summary>
 [Route("api/[controller]")]
+[ApiController]
 public class ExternalSourcesController : ControllerBase
 {
     private readonly IPointsOfInterestAdapterFactory _adaptersFactory;
@@ -29,8 +30,9 @@ public class ExternalSourcesController : ControllerBase
     }
 
     /// <summary>
-    /// Get all the available external sources
+    /// Get external sources
     /// </summary>
+    /// <remarks>Returns the list of all external sources currently available for mirroring.</remarks>
     /// <returns></returns>
     [HttpGet]
     public IEnumerable<string> GetSources()
@@ -39,8 +41,9 @@ public class ExternalSourcesController : ControllerBase
     }
 
     /// <summary>
-    /// Extracts an extarnal source.
+    /// Rebuild an external source
     /// </summary>
+    /// <remarks>Fully re-extracts the given external source, replacing its mirrored data.</remarks>
     /// <param name="source"></param>
     /// <returns></returns>
     [HttpPost]
@@ -55,8 +58,9 @@ public class ExternalSourcesController : ControllerBase
     }
 
     /// <summary>
-    /// Updates an external source from the last time it was updated.
+    /// Update an external source
     /// </summary>
+    /// <remarks>Fetches and applies changes for the given external source since it was last updated.</remarks>
     /// <param name="source"></param>
     /// <returns></returns>
     [HttpPut]
