@@ -92,10 +92,7 @@ public static class FeatureAttributes
 public static class Sources
 {
     public const string OSM = "OSM";
-    public const string NAKEB = "Nakeb";
-    public const string WIKIPEDIA = "Wikipedia";
-    public const string WIKIDATA = "Wikidata";
-    public const string INATURE = "iNature";
+    public const string USERS = "Users";
 }
 
 public static class Languages

@@ -41,6 +41,8 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
     IImagesUrlsStorageExecutor imageUrlStoreExecutor,
     ITagsHelper tagsHelper,
     IClientsFactory clientsFactory,
+    IWikidataGateway wikidataGateway,
+    IShareUrlGateway shareUrlGateway,
     ILogger logger) : IPointsOfInterestProvider
 {
     /// <summary>
@@ -51,6 +53,8 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
     private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
     private readonly ITagsHelper _tagsHelper = tagsHelper;
     private readonly IClientsFactory _clientsFactory = clientsFactory;
+    private readonly IWikidataGateway _wikidataGateway = wikidataGateway;
+    private readonly IShareUrlGateway _shareUrlGateway = shareUrlGateway;
     private readonly IWikimediaCommonGateway _wikimediaCommonGateway = wikimediaCommonGateway;
     private readonly IBase64ImageStringToFileConverter _base64ImageConverter = base64ImageConverter;
     private readonly IImagesUrlsStorageExecutor _imageUrlStoreExecutor = imageUrlStoreExecutor;
@@ -204,12 +208,19 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
     }
 
     /// <inheritdoc/>
-    public async Task<IFeature> GetFeatureById(string source, string id)
+    public async Task<PointOfInterestBasicInfo> GetBasicInfo(string source, string id, string language)
     {
-        if (source != Sources.OSM)
+        language = string.IsNullOrWhiteSpace(language) ? Languages.ENGLISH : language;
+        return source switch
         {
-            return null;
-        }
+            Sources.OSM => await GetOsmBasicInfo(id, language),
+            Sources.USERS => await GetShareBasicInfo(id),
+            _ => null
+        };
+    }
+
+    private async Task<PointOfInterestBasicInfo> GetOsmBasicInfo(string id, string language)
+    {
         var client = _clientsFactory.CreateNonAuthClient();
         var osmElement = await client.GetCompleteElement(GeoJsonExtensions.GetOsmId(id), GeoJsonExtensions.GetOsmType(id));
         var feature = ConvertOsmToFeature(osmElement);
@@ -217,11 +228,65 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
         {
             return null;
         }
-        if (string.IsNullOrWhiteSpace(feature.Attributes[FeatureAttributes.POI_ICON]?.ToString()))
+        await EnrichWithWikidata(feature);
+        return new PointOfInterestBasicInfo
         {
-            feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, SEARCH_ICON);
+            Title = feature.GetTitle(language),
+            Description = feature.GetDescriptionWithExternal(language),
+            ImageUrl = feature.Attributes.GetNames()
+                .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
+                .Select(p => feature.Attributes[p].ToString())
+                .FirstOrDefault() ?? string.Empty
+        };
+    }
+
+    /// <summary>
+    /// When the OSM feature links to a Wikidata entity, fill in a missing description/image from
+    /// Wikidata/Wikipedia - just enough for the crawler (title/description/single image).
+    /// </summary>
+    private async Task EnrichWithWikidata(IFeature feature)
+    {
+        if (!feature.Attributes.Exists(FeatureAttributes.WIKIDATA))
+        {
+            return;
         }
-        return feature;
+        var hasImage = feature.Attributes.GetNames()
+            .Any(n => n.StartsWith(FeatureAttributes.IMAGE_URL) && !string.IsNullOrWhiteSpace(feature.Attributes[n]?.ToString()));
+        var hasDescription = feature.Attributes.GetNames()
+            .Any(n => (n == FeatureAttributes.DESCRIPTION || n.StartsWith(FeatureAttributes.POI_EXTERNAL_DESCRIPTION))
+                && !string.IsNullOrWhiteSpace(feature.Attributes[n]?.ToString()));
+        if (hasImage && hasDescription)
+        {
+            return;
+        }
+        var content = await _wikidataGateway.GetContent(feature.Attributes[FeatureAttributes.WIKIDATA].ToString());
+        if (!hasImage && !string.IsNullOrWhiteSpace(content.ImageUrl))
+        {
+            feature.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, content.ImageUrl);
+        }
+        foreach (var (language, description) in content.DescriptionByLanguage)
+        {
+            var key = FeatureAttributes.POI_EXTERNAL_DESCRIPTION + ":" + language;
+            if (!feature.Attributes.Exists(key))
+            {
+                feature.Attributes.AddOrUpdate(key, description);
+            }
+        }
+    }
+
+    private async Task<PointOfInterestBasicInfo> GetShareBasicInfo(string id)
+    {
+        var shareUrl = await _shareUrlGateway.GetUrlById(id);
+        if (shareUrl == null)
+        {
+            return null;
+        }
+        return new PointOfInterestBasicInfo
+        {
+            Title = shareUrl.Title ?? string.Empty,
+            Description = shareUrl.Description ?? string.Empty,
+            ImageUrl = $"{Branding.BASE_URL}/api/urls/{shareUrl.Id}/thumbnail"
+        };
     }
 
 

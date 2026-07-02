@@ -34,6 +34,8 @@ public class PointsOfInterestProviderTests
     private IWikimediaCommonGateway _wikimediaCommonGateway;
     private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
     private ITagsHelper _tagsHelper;
+    private IWikidataGateway _wikidataGateway;
+    private IShareUrlGateway _shareUrlGateway;
 
     [TestInitialize]
     public void TestInitialize()
@@ -44,11 +46,15 @@ public class PointsOfInterestProviderTests
             new OsmGeoJsonConverter(new GeometryFactory()), _tagsHelper);
         _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
         _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
+        _wikidataGateway = Substitute.For<IWikidataGateway>();
+        _wikidataGateway.GetContent(Arg.Any<string>()).Returns(new WikidataContent());
+        _shareUrlGateway = Substitute.For<IShareUrlGateway>();
         _adapter = new PointsOfInterestProvider(_osmGeoJsonPreprocessorExecutor,
             _wikimediaCommonGateway,
             new Base64ImageStringToFileConverter(),
             _imagesUrlsStorageExecutor,
             _tagsHelper, _clientsFactory,
+            _wikidataGateway, _shareUrlGateway,
             Substitute.For<ILogger>());
     }
 
@@ -91,7 +97,7 @@ public class PointsOfInterestProviderTests
     }
 
     [TestMethod]
-    public void GetFeatureById_RouteWithMultipleAttributes_ShouldReturnIt()
+    public void GetBasicInfo_RouteWithMultipleAttributes_ShouldReturnFirstImageAndDescription()
     {
         var someId = "node_123";
         var gateway = SetupOsmNonAuthClient();
@@ -100,32 +106,60 @@ public class PointsOfInterestProviderTests
             Id = 123,
             Tags = new TagsCollection()
         };
-        node.Tags.Add(new Tag(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL));
-        node.Tags.Add(new Tag(FeatureAttributes.IMAGE_URL+ "1", FeatureAttributes.IMAGE_URL+ "1"));
+        node.Tags.Add(new Tag(FeatureAttributes.IMAGE_URL, "first-image"));
+        node.Tags.Add(new Tag(FeatureAttributes.IMAGE_URL+ "1", "second-image"));
         node.Tags.Add(new Tag(FeatureAttributes.DESCRIPTION, FeatureAttributes.DESCRIPTION));
         node.Tags.Add(new Tag(FeatureAttributes.WIKIPEDIA + ":" + Languages.ENGLISH, "page with space"));
         gateway.GetNode(node.Id.Value).Returns(node);
-            
-        var result = _adapter.GetFeatureById(Sources.OSM, someId).Result;
+
+        var result = _adapter.GetBasicInfo(Sources.OSM, someId, Languages.ENGLISH).Result;
 
         Assert.IsNotNull(result);
-        Assert.AreEqual(string.Empty, result.GetTitle(Languages.ENGLISH));
-        Assert.AreEqual(FeatureAttributes.DESCRIPTION, result.GetDescription(Languages.ENGLISH));
-        var imagesUrls = result.Attributes.GetNames()
-            .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
-            .Select(p => node.Tags.GetValue(p).ToString())
-            .ToArray();
-        Assert.AreEqual(2, imagesUrls.Length);
-        Assert.AreEqual(FeatureAttributes.IMAGE_URL, imagesUrls.First());
-        Assert.IsTrue(result.Attributes[FeatureAttributes.WIKIPEDIA + ":" + Languages.ENGLISH].ToString()?.Contains("page with space"));
+        Assert.AreEqual(string.Empty, result.Title);
+        Assert.AreEqual(FeatureAttributes.DESCRIPTION, result.Description);
+        Assert.AreEqual("first-image", result.ImageUrl);
     }
-        
+
     [TestMethod]
-    public void GetFeatureById_NonOsmSource_ShouldReturnNull()
+    public void GetBasicInfo_NonOsmSource_ShouldReturnNull()
     {
-        var result = _adapter.GetFeatureById(Sources.INATURE, "42").Result;
+        var result = _adapter.GetBasicInfo("SomeUnsupportedSource", "42", Languages.ENGLISH).Result;
 
         Assert.IsNull(result);
+    }
+
+    [TestMethod]
+    public void GetBasicInfo_OsmWithWikidata_ShouldEnrichMissingDescriptionAndImage()
+    {
+        var someId = "node_123";
+        var gateway = SetupOsmNonAuthClient();
+        var node = new Node { Id = 123, Tags = new TagsCollection() };
+        node.Tags.Add(new Tag(FeatureAttributes.NAME, "name"));
+        node.Tags.Add(new Tag(FeatureAttributes.WIKIDATA, "Q42"));
+        gateway.GetNode(node.Id.Value).Returns(node);
+        var content = new WikidataContent { ImageUrl = "https://example.com/image.jpg" };
+        content.DescriptionByLanguage[Languages.HEBREW] = "external description";
+        _wikidataGateway.GetContent("Q42").Returns(content);
+
+        var result = _adapter.GetBasicInfo(Sources.OSM, someId, Languages.HEBREW).Result;
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual("https://example.com/image.jpg", result.ImageUrl);
+        Assert.AreEqual("external description", result.Description);
+    }
+
+    [TestMethod]
+    public void GetBasicInfo_UsersSource_ShouldReturnShareInfo()
+    {
+        var shareUrl = new ShareUrl { Id = "share1", Title = "My Route", Description = "route description" };
+        _shareUrlGateway.GetUrlById("share1").Returns(shareUrl);
+
+        var result = _adapter.GetBasicInfo(Sources.USERS, "share1", Languages.ENGLISH).Result;
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual("My Route", result.Title);
+        Assert.AreEqual("route description", result.Description);
+        Assert.IsTrue(result.ImageUrl.Contains("share1/thumbnail"));
     }
         
         

@@ -10,8 +10,6 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using NSubstitute;
 using Wangkanai.Detection.Services;
 
@@ -130,15 +128,14 @@ public class CrawlersMiddlewareTests
         const string description = "description";
         const string url = "https://upload.wikimedia.org/wikipedia/commons/6/66/Israel_Hiking_Map_%D7%A2%D7%99%D7%9F_%D7%A0%D7%98%D7%A3.jpeg";
 
-        _pointsOfInterestProvider.GetFeatureById(source, id).Returns(new Feature(new Point(0, 0),
-            new AttributesTable
-            {
-                { FeatureAttributes.NAME, name },
-                { FeatureAttributes.DESCRIPTION, description },
-                { FeatureAttributes.IMAGE_URL, url }
-            }));
+        _pointsOfInterestProvider.GetBasicInfo(source, id, Languages.ENGLISH).Returns(new PointOfInterestBasicInfo
+        {
+            Title = name,
+            Description = description,
+            ImageUrl = url
+        });
         var detectionService = SetupDetectionService();
-        _homePageHelper.Render(name, description, Arg.Any<string>(), Languages.HEBREW).Returns("OUT");
+        _homePageHelper.Render(name, description, Arg.Any<string>(), Languages.ENGLISH).Returns("OUT");
 
         _middleware.InvokeAsync(context, detectionService).Wait();
 
@@ -160,41 +157,12 @@ public class CrawlersMiddlewareTests
             }
         };
         var detectionService = SetupDetectionService();
-        _pointsOfInterestProvider.GetFeatureById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
+        _pointsOfInterestProvider.GetBasicInfo(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(null as PointOfInterestBasicInfo);
 
         _middleware.InvokeAsync(context, detectionService).Wait();
 
         _homePageHelper.DidNotReceive().Render(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
         _next.Received().Invoke(context);
-    }
-
-    [TestMethod]
-    public void TestCrawler_PoiWithExternalDescription_ShouldReturnExternal()
-    {
-        const string source = "source";
-        const string id = "id";
-        var context = new DefaultHttpContext();
-        var stream = new MemoryStream();
-        context.Response.Body = stream;
-        context.Request.Path = new PathString($"/poi/{source}/{id}");
-
-        const string name = "Jabel Wadi";
-        const string externalDescription = "This feature only has an external description";
-        const string url = "https://upload.wikimedia.org/wikipedia/commons/6/66/Israel_Hiking_Map_%D7%A2%D7%99%D7%9F_%D7%A0%D7%98%D7%A3.jpeg";
-
-        _pointsOfInterestProvider.GetFeatureById(source, id).Returns(new Feature(new Point(0, 0),
-            new AttributesTable
-            {
-                { FeatureAttributes.NAME, name },
-                { FeatureAttributes.POI_EXTERNAL_DESCRIPTION, externalDescription },
-                { FeatureAttributes.IMAGE_URL, url }
-            }));
-        var detectionService = SetupDetectionService();
-
-        _middleware.InvokeAsync(context, detectionService).Wait();
-
-        _homePageHelper.Received().Render(name, externalDescription, Arg.Any<string>(), Languages.HEBREW);
-        _next.DidNotReceive().Invoke(context);
     }
 
     [TestMethod]

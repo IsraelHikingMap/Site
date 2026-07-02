@@ -6,17 +6,37 @@ using System.Threading.Tasks;
 namespace IsraelHiking.API.Services.Poi;
 
 /// <summary>
+/// The minimal information a crawler needs to render a preview of a point of interest
+/// </summary>
+public class PointOfInterestBasicInfo
+{
+    /// <summary>
+    /// The title of the point of interest
+    /// </summary>
+    public string Title { get; set; }
+    /// <summary>
+    /// The description of the point of interest
+    /// </summary>
+    public string Description { get; set; }
+    /// <summary>
+    /// A single image URL representing the point of interest
+    /// </summary>
+    public string ImageUrl { get; set; }
+}
+
+/// <summary>
 /// This class is responsible to get the points of interest from the repository
 /// </summary>
 public interface IPointsOfInterestProvider
 {
     /// <summary>
-    /// This get a specific point of interest its ID and source
+    /// Gets the basic information (title, description and a single image) of a point of interest by its source and ID
     /// </summary>
-    /// <param name="id"></param>
     /// <param name="source"></param>
+    /// <param name="id"></param>
+    /// <param name="language">The language to get the title and description in, defaults to English</param>
     /// <returns></returns>
-    Task<IFeature> GetFeatureById(string source, string id);
+    Task<PointOfInterestBasicInfo> GetBasicInfo(string source, string id, string language);
 
     /// <summary>
     /// Adds a POI
