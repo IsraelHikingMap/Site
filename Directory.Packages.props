@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- Allows a PackageVersion below to override a transitive dependency's version (e.g. security patches). -->
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,7 +32,10 @@
     <PackageVersion Include="OsmSharp.IO.API" Version="1.0.5" />
     <PackageVersion Include="ProjNet" Version="2.1.0" />
     <PackageVersion Include="SharpZipLib.NETStandard" Version="1.0.7" />
-    <PackageVersion Include="SixLabors.ImageSharp.Drawing" Version="2.1.5" />
+    <PackageVersion Include="SkiaSharp" Version="4.148.0" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.148.0" />
+    <!-- Transitively pins NeoSmart's native SQLite binary (was 2.1.10) to patch GHSA-2m69-gcr7-jv3q. Managed stack stays 2.1.x (stable C ABI). -->
+    <PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.50.3" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="7.2.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="7.2.0" />
     <PackageVersion Include="Wangkanai.Detection" Version="8.20.0" />

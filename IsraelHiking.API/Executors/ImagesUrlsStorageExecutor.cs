@@ -3,8 +3,7 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -42,7 +41,7 @@ public class ImagesUrlsStorageExecutor : IImagesUrlsStorageExecutor
         var exitingUrls = await _imagesRepository.GetAllUrls();
         var needToRemove = exitingUrls.Except(imagesUrls).ToList();
         _logger.LogInformation($"Need to remove {needToRemove.Count} images that are no longer relevant");
-        foreach(var imageUrlToRemove in needToRemove)
+        foreach (var imageUrlToRemove in needToRemove)
         {
             _logger.LogInformation($"Removing image since it does not exist in the OSM file or in the POIs database: {imageUrlToRemove}");
             await _imagesRepository.DeleteImageByUrl(imageUrlToRemove);
@@ -89,8 +88,8 @@ public class ImagesUrlsStorageExecutor : IImagesUrlsStorageExecutor
                 {
                     _logger.LogInformation($"Removing image since getting it failed in 3 retries: {imageUrl}");
                     await _imagesRepository.DeleteImageByUrl(imageUrl);
-                } 
-                else 
+                }
+                else
                 {
                     await StoreImage(md5, content, imageUrl);
                 }
@@ -102,24 +101,24 @@ public class ImagesUrlsStorageExecutor : IImagesUrlsStorageExecutor
         }
     }
 
-    private byte[] ResizeImage(Image originalImage, int newSizeInPixels)
+    private byte[] ResizeImage(byte[] content, int newSizeInPixels)
     {
-        var ratio = originalImage.Width > originalImage.Height
-            ? newSizeInPixels * 1.0 / originalImage.Width
-            : newSizeInPixels * 1.0 / originalImage.Height;
-        var newSize = new Size((int)(originalImage.Width * ratio), (int)(originalImage.Height * ratio));
-        originalImage.Metadata.ExifProfile = null;
-        originalImage.Mutate(x => x.Resize(newSize));
-        using var memoryStream = new MemoryStream();
-        originalImage.SaveAsJpeg(memoryStream);
-        return memoryStream.ToArray();
+        using var original = SKBitmap.Decode(content);
+        var ratio = original.Width > original.Height
+            ? newSizeInPixels * 1.0 / original.Width
+            : newSizeInPixels * 1.0 / original.Height;
+        var info = new SKImageInfo((int)(original.Width * ratio), (int)(original.Height * ratio));
+        // Decoding to raw pixels and re-encoding drops any EXIF metadata.
+        using var resized = original.Resize(info, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear));
+        using var image = SKImage.FromBitmap(resized);
+        using var data = image.Encode(SKEncodedImageFormat.Jpeg, 90);
+        return data.ToArray();
     }
 
     /// <inheritdoc/>
     public async Task StoreImage(MD5 md5, byte[] content, string imageUrl)
     {
         var hash = md5.ComputeHash(content).ToHashString();
-        var image = Image.Load(content);
         var imageItemInDatabase = await _imagesRepository.GetImageByHash(hash);
         if (imageItemInDatabase != null && !imageItemInDatabase.ImageUrls.Contains(imageUrl))
         {
@@ -127,7 +126,7 @@ public class ImagesUrlsStorageExecutor : IImagesUrlsStorageExecutor
             await _imagesRepository.StoreImage(imageItemInDatabase);
             return;
         }
-        content = ResizeImage(image, 100);
+        content = ResizeImage(content, 100);
         await _imagesRepository.StoreImage(new ImageItem
         {
             ImageUrls = [imageUrl],
