@@ -18,11 +18,11 @@ namespace IsraelHiking.API.Controllers;
 /// <remarks>
 /// Controller's constructor
 /// </remarks>
-/// <param name="graphHopperGateway"></param>
+/// <param name="routingGateway"></param>
 [Route("api/[controller]")]
-public class RoutingController(IRoutingGateway graphHopperGateway) : ControllerBase
+public class RoutingController(IRoutingGateway routingGateway) : ControllerBase
 {
-    private readonly IRoutingGateway _routingGateway = graphHopperGateway;
+    private readonly IRoutingGateway _routingGateway = routingGateway;
 
     /// <summary>
     /// Creates a route between the given points according to routing type
