@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageVersion Include="Codecov" Version="1.13.0" />
     <PackageVersion Include="coverlet.msbuild" Version="10.0.1" />
     <PackageVersion Include="CsvHelper" Version="33.1.0" />
     <PackageVersion Include="CXuesong.MW.WikiClientLibrary" Version="0.8.0" />
@@ -37,7 +36,6 @@
     <!-- Transitively pins NeoSmart's native SQLite binary (was 2.1.10) to patch GHSA-2m69-gcr7-jv3q. Managed stack stays 2.1.x (stable C ABI). -->
     <PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.50.3" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.2.3" />
-    <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="10.2.3" />
     <PackageVersion Include="Wangkanai.Detection" Version="8.20.0" />
   </ItemGroup>
 
