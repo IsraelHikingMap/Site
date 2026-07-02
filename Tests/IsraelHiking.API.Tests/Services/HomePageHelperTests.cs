@@ -33,15 +33,10 @@ public class HomePageHelperTests
     {
         var s = _homePageHelper.Render("@TITLE@", "@DESC@", "@THUMB@");
 
-        void Check(string needle)
-        {
-            StringAssert.Contains(s, needle, null, null);
-        }
-
-        Check("<title>@TITLE@");
-        Check("<meta property=\"og:title\" content=\"@TITLE@");
-        Check("<meta property=\"og:description\" content=\"@DESC@\"");
-        Check("<meta property=\"og:image\" content=\"@THUMB@\"");
+        StringAssert.Contains(s, "<title>@TITLE@");
+        StringAssert.Contains(s, "<meta property=\"og:title\" content=\"@TITLE@");
+        StringAssert.Contains(s, "<meta property=\"og:description\" content=\"@DESC@\"");
+        StringAssert.Contains(s, "<meta property=\"og:image\" content=\"@THUMB@\"");
     }
 
     [TestMethod]
@@ -49,14 +44,9 @@ public class HomePageHelperTests
     {
         var s = _homePageHelper.Render("1<>\"2", "3<>\"4", "@THUMB@");
 
-        void Check(string needle)
-        {
-            StringAssert.Contains(s, needle, null, null);
-        }
-
-        Check("<title>1&lt;&gt;&quot;2");
-        Check("<meta property=\"og:title\" content=\"1&lt;&gt;&quot;2");
-        Check("<meta property=\"og:description\" content=\"3&lt;&gt;&quot;4\"");
-        Check("<meta property=\"og:image\" content=\"@THUMB@\"");
+        StringAssert.Contains(s, "<title>1&lt;&gt;&quot;2");
+        StringAssert.Contains(s, "<meta property=\"og:title\" content=\"1&lt;&gt;&quot;2");
+        StringAssert.Contains(s, "<meta property=\"og:description\" content=\"3&lt;&gt;&quot;4\"");
+        StringAssert.Contains(s, "<meta property=\"og:image\" content=\"@THUMB@\"");
     }
 }

@@ -75,14 +75,13 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Codecov" />
     <PackageReference Include="LazyCache.AspNetCore" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Scalar.AspNetCore" />
     <PackageReference Include="NeoSmart.Caching.Sqlite.AspNetCore" />
     <PackageReference Include="NLog.Web.AspNetCore" />
     <PackageReference Include="OsmSharp.IO.API" />
-    <PackageReference Include="Swashbuckle.AspNetCore" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" />
     <PackageReference Include="Wangkanai.Detection" />
   </ItemGroup>
   <ItemGroup>

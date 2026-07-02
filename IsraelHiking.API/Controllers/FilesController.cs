@@ -15,6 +15,7 @@ namespace IsraelHiking.API.Controllers;
 /// This controller allows fetching of remote files, opening of files and converting files
 /// </summary>
 [Route("api/[controller]")]
+[ApiController]
 public class FilesController : ControllerBase
 {
     private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
@@ -45,8 +46,9 @@ public class FilesController : ControllerBase
     }
 
     /// <summary>
-    /// Gets a file from an external Url and converts it to <see cref="DataContainerPoco"/>
+    /// Fetch a remote file
     /// </summary>
+    /// <remarks>Downloads a file from an external URL and converts it to a <see cref="DataContainerPoco"/>.</remarks>
     /// <param name="url">The url to fetch the file from</param>
     /// <returns>A data container after conversion</returns>
     [HttpGet]
@@ -59,8 +61,9 @@ public class FilesController : ControllerBase
     }
 
     /// <summary>
-    /// Converts <see cref="DataContainerPoco"/> (client side presentation) to any given format.
+    /// Convert to a file format
     /// </summary>
+    /// <remarks>Converts a client-side <see cref="DataContainerPoco"/> to the requested format and returns the file bytes.</remarks>
     /// <param name="format">The format to convert to</param>
     /// <param name="dataContainer">The container to convert</param>
     /// <returns>A byte representation of file in the converted format</returns>
@@ -76,8 +79,9 @@ public class FilesController : ControllerBase
     }
 
     /// <summary>
-    /// Reads the uploaded file and converts it to <see cref="DataContainerPoco"/>
+    /// Open an uploaded file
     /// </summary>
+    /// <remarks>Reads an uploaded file and converts it to a <see cref="DataContainerPoco"/>.</remarks>
     /// <returns>A <see cref="DataContainerPoco"/> after conversion of the file uploaded</returns>
     [HttpPost]
     [Route("open")]
@@ -103,8 +107,9 @@ public class FilesController : ControllerBase
     }
 
     /// <summary>
-    /// Get a list of files that need to be downloaded since they are out dated
+    /// List outdated offline files
     /// </summary>
+    /// <remarks>Returns the offline files that need downloading because they changed after the given last-modified time. Requires an entitled (subscribed) user.</remarks>
     /// <param name="lastModified">The last time this tile was downloaded</param>
     /// <param name="tileX">The tile's X coordinates, null for root</param>
     /// <param name="tileY">The tile's Y coordinates, null for root</param>
@@ -124,8 +129,9 @@ public class FilesController : ControllerBase
     }
 
     /// <summary>
-    /// Get a specific file
+    /// Download an offline file
     /// </summary>
+    /// <remarks>Returns the content stream of a specific offline file. Requires an entitled (subscribed) user.</remarks>
     /// <param name="id"></param>
     /// <param name="tileX">The tile's X coordinates, null for root</param>
     /// <param name="tileY">The tile's Y coordinates, null for root</param>
@@ -152,8 +158,9 @@ public class FilesController : ControllerBase
     }
 
     /// <summary>
-    /// Check if user is subscribed
+    /// Check subscription
     /// </summary>
+    /// <remarks>Returns true when the current user has an active (entitled) subscription.</remarks>
     /// <returns>true if the user is subscribed, false otherwise</returns>
     [HttpGet]
     [Route("subscribed")]

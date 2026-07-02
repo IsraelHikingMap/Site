@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <PackageReference Include="CsvHelper" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="NetTopologySuite" />
     <PackageReference Include="NetTopologySuite.IO.GPX" />
     <PackageReference Include="OsmSharp.IO.API" />
@@ -32,7 +33,6 @@
     <PackageReference Include="SharpZipLib.NETStandard" />
     <PackageReference Include="SkiaSharp" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
-    <PackageReference Include="Swashbuckle.AspNetCore" />
     <PackageReference Include="Wangkanai.Detection" />
   </ItemGroup>
 

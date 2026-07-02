@@ -70,7 +70,7 @@ public class SimplePointAdderExecutorTests
     [TestMethod]
     public void AddInvalidValue_ShouldThrow()
     {
-        Assert.ThrowsException<AggregateException>(() => _executor.Add(_authClient, new AddSimplePointOfInterestRequest
+        Assert.ThrowsExactly<AggregateException>(() => _executor.Add(_authClient, new AddSimplePointOfInterestRequest
         {
             LatLng = new LatLng(1, 1),
             PointType = SimplePointType.None
@@ -341,7 +341,7 @@ public class SimplePointAdderExecutorTests
             new Coordinate(1,-1)
         ]]);
 
-        Assert.ThrowsException<AggregateException>(() => _executor.Add(_authClient, new AddSimplePointOfInterestRequest
+        Assert.ThrowsExactly<AggregateException>(() => _executor.Add(_authClient, new AddSimplePointOfInterestRequest
         {
             LatLng = new LatLng(0.0001, 1.0001),
             PointType = SimplePointType.ClosedGate
