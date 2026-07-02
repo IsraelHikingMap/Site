@@ -17,13 +17,13 @@ namespace IsraelHiking.API.Tests.Controllers;
 public class RoutingControllerTests
 {
     private RoutingController _controller;
-    private IGraphHopperGateway _graphHopperGateway;
+    private IRoutingGateway _routingGateway;
 
     [TestInitialize]
     public void TestInitialize()
     {
-        _graphHopperGateway = Substitute.For<IGraphHopperGateway>();
-        _controller = new RoutingController(_graphHopperGateway);
+        _routingGateway = Substitute.For<IRoutingGateway>();
+        _controller = new RoutingController(_routingGateway);
     }
 
     private static Feature CreateLineStringFeature()
@@ -57,13 +57,13 @@ public class RoutingControllerTests
         var results = _controller.GetRouting("1,1,1", "2,2", RoutingType.HIKE).Result as BadRequestObjectResult;
 
         Assert.IsNotNull(results);
-        _graphHopperGateway.DidNotReceive().GetRouting(Arg.Any<RoutingGatewayRequest>());
+        _routingGateway.DidNotReceive().GetRouting(Arg.Any<RoutingGatewayRequest>());
     }
 
     [TestMethod]
     public void GetRouting_Car_ShouldReturnLineStringFromGateway()
     {
-        _graphHopperGateway.GetRouting(Arg.Any<RoutingGatewayRequest>())
+        _routingGateway.GetRouting(Arg.Any<RoutingGatewayRequest>())
             .Returns(CreateLineStringFeature());
 
         var results = _controller.GetRouting("1,1", "2,2", RoutingType.FOUR_WHEEL_DRIVE).Result as OkObjectResult;
@@ -85,13 +85,13 @@ public class RoutingControllerTests
     [TestMethod]
     public void GetRouting_ShouldParseCoordinatesAsLatLngAndPassThemToTheGateway()
     {
-        _graphHopperGateway.GetRouting(Arg.Any<RoutingGatewayRequest>())
+        _routingGateway.GetRouting(Arg.Any<RoutingGatewayRequest>())
             .Returns(CreateLineStringFeature());
 
         // Position string is "lat,lng"; the coordinate that reaches the gateway is (X = lng, Y = lat).
         _controller.GetRouting("31.8,35.0", "32.1,35.5", RoutingType.HIKE).Wait();
 
-        _graphHopperGateway.Received(1).GetRouting(Arg.Is<RoutingGatewayRequest>(r =>
+        _routingGateway.Received(1).GetRouting(Arg.Is<RoutingGatewayRequest>(r =>
             r.From.X == 35.0 && r.From.Y == 31.8 &&
             r.To.X == 35.5 && r.To.Y == 32.1));
     }
@@ -104,12 +104,12 @@ public class RoutingControllerTests
     [DataRow("Unknown", ProfileType.Foot)]
     public void GetRouting_ShouldConvertRoutingTypeToProfile(string routingType, ProfileType expectedProfile)
     {
-        _graphHopperGateway.GetRouting(Arg.Any<RoutingGatewayRequest>())
+        _routingGateway.GetRouting(Arg.Any<RoutingGatewayRequest>())
             .Returns(CreateLineStringFeature());
 
         _controller.GetRouting("1,1", "2,2", routingType).Wait();
 
-        _graphHopperGateway.Received(1).GetRouting(Arg.Is<RoutingGatewayRequest>(r => r.Profile == expectedProfile));
+        _routingGateway.Received(1).GetRouting(Arg.Is<RoutingGatewayRequest>(r => r.Profile == expectedProfile));
     }
 
     [TestMethod]
@@ -118,7 +118,7 @@ public class RoutingControllerTests
         var results = _controller.PostMapMatch(null, RoutingType.HIKE, "en").Result as BadRequestObjectResult;
 
         Assert.IsNotNull(results);
-        _graphHopperGateway.DidNotReceive().GetMapMatch(Arg.Any<MapMatchGatewayRequest>());
+        _routingGateway.DidNotReceive().GetMapMatch(Arg.Any<MapMatchGatewayRequest>());
     }
 
     [TestMethod]
@@ -129,13 +129,13 @@ public class RoutingControllerTests
         var results = _controller.PostMapMatch(points, RoutingType.HIKE, "en").Result as BadRequestObjectResult;
 
         Assert.IsNotNull(results);
-        _graphHopperGateway.DidNotReceive().GetMapMatch(Arg.Any<MapMatchGatewayRequest>());
+        _routingGateway.DidNotReceive().GetMapMatch(Arg.Any<MapMatchGatewayRequest>());
     }
 
     [TestMethod]
     public void PostMapMatch_TwoPoints_ShouldReturnLineStringFromGateway()
     {
-        _graphHopperGateway.GetMapMatch(Arg.Any<MapMatchGatewayRequest>())
+        _routingGateway.GetMapMatch(Arg.Any<MapMatchGatewayRequest>())
             .Returns(CreateLineStringFeature());
         var points = new List<LatLng> { new(31.8, 35.0), new(32.1, 35.5) };
 
@@ -151,14 +151,14 @@ public class RoutingControllerTests
     [TestMethod]
     public void PostMapMatch_ShouldPassConvertedPointsProfileAndLanguageToTheGateway()
     {
-        _graphHopperGateway.GetMapMatch(Arg.Any<MapMatchGatewayRequest>())
+        _routingGateway.GetMapMatch(Arg.Any<MapMatchGatewayRequest>())
             .Returns(CreateLineStringFeature());
         var points = new List<LatLng> { new(31.8, 35.0), new(32.1, 35.5) };
 
         _controller.PostMapMatch(points, RoutingType.BIKE, "he").Wait();
 
         // LatLng (lat, lng) becomes a coordinate of (X = lng, Y = lat).
-        _graphHopperGateway.Received(1).GetMapMatch(Arg.Is<MapMatchGatewayRequest>(r =>
+        _routingGateway.Received(1).GetMapMatch(Arg.Is<MapMatchGatewayRequest>(r =>
             r.Profile == ProfileType.Bike &&
             r.Language == "he" &&
             r.Points.Count == 2 &&
