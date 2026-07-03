@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess;
 
-// DTOs for the Wikidata REST entity response (https://www.wikidata.org/w/rest.php/wikibase/v1/entities/items/{Q})
 class WikidataEntity
 {
     [JsonPropertyName("sitelinks")]
@@ -38,7 +37,6 @@ class WikidataStatementValue
     public string Content { get; set; }
 }
 
-// DTOs for the MediaWiki action=query response (Wikipedia and Commons), whose pages are keyed by a dynamic page id
 class MediaWikiQueryResponse
 {
     [JsonPropertyName("query")]
