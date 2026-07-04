@@ -113,6 +113,10 @@ export class LayersReducer {
         ctx.setState(produce(ctx.getState(), lastState => {
             const overlays = lastState.overlays;
             overlays.splice(overlays.indexOf(overlays.find(o => o.key === action.key)), 1);
+            const visibleIndex = lastState.visibleOverlays.indexOf(action.key);
+            if (visibleIndex !== -1) {
+                lastState.visibleOverlays.splice(visibleIndex, 1);
+            }
             return lastState;
         }));
     }
@@ -133,6 +137,10 @@ export class LayersReducer {
             const overlays = lastState.overlays;
             overlays.splice(overlays.indexOf(overlays.find(o => o.key === action.key)), 1, action.layerData);
             lastState.overlays = this.sort(overlays) as EditableLayer[];
+            const visibleIndex = lastState.visibleOverlays.indexOf(action.key);
+            if (visibleIndex !== -1 && action.key !== action.layerData.key) {
+                lastState.visibleOverlays.splice(visibleIndex, 1, action.layerData.key);
+            }
             return lastState;
         }));
     }

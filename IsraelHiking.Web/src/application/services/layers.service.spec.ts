@@ -368,6 +368,27 @@ describe("LayersService", () => {
         expect(data.overlays[0]).toEqual(overlay1);
     }));
 
+    it("should get data container without null overlays when a visible overlay key is stale", inject([LayersService, Store], (service: LayersService, store: Store) => {
+        const overlay1: EditableLayer = { key: "overlay1" } as EditableLayer;
+        store.reset({
+            layersState: {
+                baseLayers: [],
+                overlays: [overlay1],
+                selectedBaseLayerKey: "base",
+                visibleOverlays: [overlay1.key, "removed-overlay"]
+            },
+            userState: {
+                userInfo: null
+            }
+        });
+
+        const data = service.getData();
+
+        expect(data.overlays.length).toBe(1);
+        expect(data.overlays.every(o => o != null)).toBeTruthy();
+        expect(data.overlays[0]).toEqual(overlay1);
+    }));
+
     it("should add base layer for non logged-in user", inject([LayersService, Store], (service: LayersService, store: Store) => {
         const spy = vi.spyOn(store, "dispatch");
         const layerData = {
