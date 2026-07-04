@@ -158,6 +158,49 @@ public class PointsOfInterestProviderTests
     }
 
     [TestMethod]
+    public void GetBasicInfo_UsersSourceNotFound_ShouldReturnNull()
+    {
+        _shareUrlGateway.GetUrlById("missing").Returns((ShareUrl)null);
+
+        var result = _adapter.GetBasicInfo(Sources.USERS, "missing", Languages.ENGLISH).Result;
+
+        Assert.IsNull(result);
+    }
+
+    [TestMethod]
+    public void GetBasicInfo_OsmElementWithoutTags_ShouldReturnNull()
+    {
+        var someId = "node_123";
+        var gateway = SetupOsmNonAuthClient();
+        // A node without tags cannot be converted to a feature, so no basic info can be returned.
+        gateway.GetNode(123).Returns(new Node { Id = 123, Tags = new TagsCollection() });
+
+        // An empty language should fall back to the default language rather than fail.
+        var result = _adapter.GetBasicInfo(Sources.OSM, someId, string.Empty).Result;
+
+        Assert.IsNull(result);
+    }
+
+    [TestMethod]
+    public void GetBasicInfo_OsmWithWikidataAlreadyHasImageAndDescription_ShouldNotEnrich()
+    {
+        var someId = "node_123";
+        var gateway = SetupOsmNonAuthClient();
+        var node = new Node { Id = 123, Tags = new TagsCollection() };
+        node.Tags.Add(new Tag(FeatureAttributes.WIKIDATA, "Q42"));
+        node.Tags.Add(new Tag(FeatureAttributes.IMAGE_URL, "existing-image"));
+        node.Tags.Add(new Tag(FeatureAttributes.DESCRIPTION, "existing description"));
+        gateway.GetNode(node.Id.Value).Returns(node);
+
+        var result = _adapter.GetBasicInfo(Sources.OSM, someId, Languages.ENGLISH).Result;
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual("existing-image", result.ImageUrl);
+        Assert.AreEqual("existing description", result.Description);
+        _wikidataGateway.DidNotReceive().GetContent(Arg.Any<string>());
+    }
+
+    [TestMethod]
     public void AddFeature_ShouldUpdateOsm()
     {
         var user = new User { DisplayName = "DisplayName" };
