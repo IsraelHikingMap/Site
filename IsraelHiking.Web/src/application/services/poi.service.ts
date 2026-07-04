@@ -1,5 +1,5 @@
 import { Injectable, inject } from "@angular/core";
-import { HttpClient, HttpParams } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { cloneDeep } from "lodash-es";
 import { firstValueFrom } from "rxjs";
 import { timeout } from "rxjs/operators";
@@ -363,10 +363,7 @@ export class PoiService {
                     return poi;
                 }
                 default: {
-                    const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
-                    const poi = await firstValueFrom(this.httpClient.get<GeoJSON.Feature>(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000)));
-                    this.poisCache.splice(0, 0, poi);
-                    return poi;
+                    throw new Error(`Unsupported POI source: ${source}`);
                 }
             }
         } catch (ex) {

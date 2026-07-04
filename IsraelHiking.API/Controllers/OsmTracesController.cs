@@ -26,6 +26,7 @@ namespace IsraelHiking.API.Controllers;
 /// </summary>
 [Route("api/osm/trace")]
 [Authorize]
+[ApiController]
 public class OsmTracesController : ControllerBase
 {
     private readonly IClientsFactory _clientsFactory;
@@ -60,8 +61,9 @@ public class OsmTracesController : ControllerBase
     }
 
     /// <summary>
-    /// Get OSM user trace
+    /// Get an OSM trace
     /// </summary>
+    /// <remarks>Returns the given OSM GPS trace converted to a data container.</remarks>
     /// <param name="id">The trace id</param>
     /// <returns>A trace converted to data container</returns>
     [HttpGet("{id}")]
@@ -77,8 +79,9 @@ public class OsmTracesController : ControllerBase
     }
 
     /// <summary>
-    /// Creates an image for a trace
+    /// Get a trace image
     /// </summary>
+    /// <remarks>Generates and returns a 128x128 PNG preview image for the given OSM trace.</remarks>
     /// <param name="id"></param>
     /// <returns></returns>
     [ResponseCache(Duration = 31536000)]
@@ -92,8 +95,9 @@ public class OsmTracesController : ControllerBase
     }
 
     /// <summary>
-    /// Allows upload of traces to OSM
+    /// Upload a trace to OSM
     /// </summary>
+    /// <remarks>Uploads the given route data to OpenStreetMap as a GPS trace on behalf of the authenticated user.</remarks>
     /// <returns></returns>
     [HttpPost]
     [Route("route")]

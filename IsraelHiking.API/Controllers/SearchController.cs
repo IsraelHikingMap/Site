@@ -7,7 +7,7 @@ using NetTopologySuite.Features;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using IsraelHiking.API.Services.Poi;
+using IsraelHiking.API.Services;
 
 namespace IsraelHiking.API.Controllers;
 
@@ -15,6 +15,7 @@ namespace IsraelHiking.API.Controllers;
 /// This controller allows search of geolocations
 /// </summary>
 [Route("api/[controller]")]
+[ApiController]
 public class SearchController : ControllerBase
 {
     private readonly ISearchRepository _searchRepository;
@@ -29,8 +30,9 @@ public class SearchController : ControllerBase
     }
 
     /// <summary>
-    /// Gets a geolocation by search term
+    /// Search locations
     /// </summary>
+    /// <remarks>Searches for geolocations (points of interest) matching the given term in the given language.</remarks>
     /// <param name="term">A string to search for</param>
     /// <param name="language">The language to search in</param>
     /// <returns></returns>

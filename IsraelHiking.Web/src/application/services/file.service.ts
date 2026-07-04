@@ -1,5 +1,5 @@
 import { inject, Injectable, InjectionToken } from "@angular/core";
-import { HttpClient, HttpEventType } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
@@ -271,35 +271,6 @@ export class FileService {
             encoding: isBase64 ? undefined : Encoding.UTF8
         });
         return results.uri;
-    }
-
-    /**
-     * Downloads a file while reporting progress
-     *
-     * @param url The url of the file
-     * @param progressCallback reports progress between 0 and 1
-     */
-    public async getFileContentWithProgress(url: string, progressCallback: (value: number) => void): Promise<Blob> {
-        return new Promise((resolve, reject) => {
-            this.httpClient.get(url, {
-                observe: "events",
-                responseType: "blob",
-                reportProgress: true
-            }).subscribe({
-                next: (event) => {
-                    if (event.type === HttpEventType.DownloadProgress) {
-                        progressCallback(event.loaded / event.total);
-                    }
-                    if (event.type === HttpEventType.Response) {
-                        if (event.ok) {
-                            resolve(event.body);
-                        } else {
-                            reject(new Error(event.statusText));
-                        }
-                    }
-                }, error: (error) => reject(error)
-            });
-        });
     }
 
     public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void, abortController: AbortController): Promise<void> {

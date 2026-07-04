@@ -21,18 +21,24 @@ services:
       - 9200:9200
       - 9300:9300
     restart: always
-  graphhopper:
-    image: israelhikingmap/graphhopper:10.2
-    container_name: graphhopper
+  valhalla:
+    image: ghcr.io/valhalla/valhalla-scripted:latest
+    container_name: valhalla
+    # On first start the image downloads the OSM extract below and builds the routing tiles into
+    # the named volume; later starts reuse them (set force_rebuild=True or run valhalla-update.sh
+    # to refresh). The HTTP API (route, trace_route, ...) is served on port 8002.
+    environment:
+      - tile_urls=https://download.geofabrik.de/asia/israel-and-palestine-latest.osm.pbf
+      - build_elevation=True
+      - build_admins=True
+      - build_time_zones=True
+      - use_tiles_ignore_pbf=True
+      - force_rebuild=False
+      - server_threads=2
     volumes:
-      - ghdata:/data:rw
-      - type: bind
-        source: ./gh-config.yml
-        target: /data/gh-config.yml
+      - valhalladata:/custom_files
     ports:
-      - 8989:8989
-    entrypoint: ./graphhopper.sh -c /data/gh-config.yml
-    command: --host 0.0.0.0 -o /data/default-gh/ 
+      - 8002:8002
     restart: always
   gpsbabel:
     image: israelhikingmap/gpsbabelwebapi
@@ -82,7 +88,7 @@ services:
 volumes:
   esdata:
     driver: local
-  ghdata:
+  valhalladata:
     driver: local
   tldata:
     driver: local

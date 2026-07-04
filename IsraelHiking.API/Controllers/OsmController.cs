@@ -23,6 +23,7 @@ namespace IsraelHiking.API.Controllers;
 /// </summary>
 [Route("api/[controller]")]
 [Authorize]
+[ApiController]
 public class OsmController : ControllerBase
 {
     private readonly IClientsFactory _clientsFactory;
@@ -59,8 +60,9 @@ public class OsmController : ControllerBase
     }
 
     /// <summary>
-    /// Adds a missing route part to OSM
+    /// Add a route part to OSM
     /// </summary>
+    /// <remarks>Adds a missing route segment (as a line) to OpenStreetMap on behalf of the authenticated user.</remarks>
     /// <param name="feature"></param>
     /// <returns></returns>
     [HttpPut]
@@ -72,8 +74,9 @@ public class OsmController : ControllerBase
     }
 
     /// <summary>
-    /// Finds unmapped parts of a given route
+    /// Find unmapped route parts
     /// </summary>
+    /// <remarks>Analyzes the given OSM GPS trace and returns the parts that are not yet mapped in OpenStreetMap.</remarks>
     /// <param name="traceId">The id of the osm trace</param>
     /// <returns></returns>
     [HttpPost]

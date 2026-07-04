@@ -1,8 +1,6 @@
 ﻿using IsraelHiking.Common;
 using NetTopologySuite.Features;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace IsraelHiking.API.Services;
 
@@ -110,7 +108,7 @@ public class TagsHelper : ITagsHelper
                 tagCombinations.Add([new("natural", "volcano")]);
                 return tagCombinations;
             case "icon-inature":
-                tagCombinations.Add([new("ref:IL:inature", "*")]);
+                tagCombinations.Add([new(FeatureAttributes.INATURE_REF, "*")]);
                 return tagCombinations;
             case "icon-synagogue":
                 tagCombinations.Add([new("amenity", "place_of_worship"), new("religion", "jewish")]);
@@ -479,7 +477,7 @@ public class TagsHelper : ITagsHelper
             };
         }
 
-        if (GetString(attributes, "ref:IL:inature") != null)
+        if (GetString(attributes, FeatureAttributes.INATURE_REF) != null)
         {
             return new IconColorCategory
             {

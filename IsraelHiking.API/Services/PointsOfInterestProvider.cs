@@ -4,7 +4,6 @@ using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
-using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -20,60 +19,47 @@ using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace IsraelHiking.API.Services.Poi;
+namespace IsraelHiking.API.Services;
 
 /// <summary>
 /// Points of interest provider
 /// </summary>
-public class PointsOfInterestProvider : IPointsOfInterestProvider
+/// <remarks>
+/// Class constructor
+/// </remarks>
+/// <param name="osmGeoJsonPreprocessorExecutor"></param>
+/// <param name="wikimediaCommonGateway"></param>
+/// <param name="base64ImageConverter"></param>
+/// <param name="imageUrlStoreExecutor"></param>
+/// <param name="tagsHelper"></param>
+/// <param name="clientsFactory"></param>
+/// <param name="wikidataGateway"></param>
+/// <param name="shareUrlGateway"></param>
+/// <param name="logger"></param>
+public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
+    IWikimediaCommonGateway wikimediaCommonGateway,
+    IBase64ImageStringToFileConverter base64ImageConverter,
+    IImagesUrlsStorageExecutor imageUrlStoreExecutor,
+    ITagsHelper tagsHelper,
+    IClientsFactory clientsFactory,
+    IWikidataGateway wikidataGateway,
+    IShareUrlGateway shareUrlGateway,
+    ILogger logger) : IPointsOfInterestProvider
 {
     /// <summary>
     /// This icon is the default icon when no icon was used
     /// </summary>
     public const string SEARCH_ICON = "icon-search";
 
-    private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
-    private readonly ITagsHelper _tagsHelper;
-    private readonly IClientsFactory _clientsFactory;
-    private readonly IPointsOfInterestRepository _pointsOfInterestRepository;
-    private readonly IExternalSourcesRepository _externalSourcesRepository;
-    private readonly IWikimediaCommonGateway _wikimediaCommonGateway;
-    private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
-    private readonly IImagesUrlsStorageExecutor _imageUrlStoreExecutor;
-    private readonly ILogger _logger;
-
-    /// <summary>
-    /// Class constructor
-    /// </summary>
-    /// <param name="pointsOfInterestRepository"></param>
-    /// <param name="externalSourcesRepository"></param>
-    /// <param name="osmGeoJsonPreprocessorExecutor"></param>
-    /// <param name="wikimediaCommonGateway"></param>
-    /// <param name="base64ImageConverter"></param>
-    /// <param name="imageUrlStoreExecutor"></param>
-    /// <param name="tagsHelper"></param>
-    /// <param name="clientsFactory"></param>
-    /// <param name="logger"></param>
-    public PointsOfInterestProvider(IPointsOfInterestRepository pointsOfInterestRepository,
-        IExternalSourcesRepository externalSourcesRepository,
-        IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
-        IWikimediaCommonGateway wikimediaCommonGateway,
-        IBase64ImageStringToFileConverter base64ImageConverter,
-        IImagesUrlsStorageExecutor imageUrlStoreExecutor,
-        ITagsHelper tagsHelper,
-        IClientsFactory clientsFactory,
-        ILogger logger)
-    {
-        _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
-        _tagsHelper = tagsHelper;
-        _clientsFactory = clientsFactory;
-        _pointsOfInterestRepository = pointsOfInterestRepository;
-        _externalSourcesRepository = externalSourcesRepository;
-        _wikimediaCommonGateway = wikimediaCommonGateway;
-        _base64ImageConverter = base64ImageConverter;
-        _imageUrlStoreExecutor = imageUrlStoreExecutor;
-        _logger = logger;
-    }
+    private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
+    private readonly ITagsHelper _tagsHelper = tagsHelper;
+    private readonly IClientsFactory _clientsFactory = clientsFactory;
+    private readonly IWikidataGateway _wikidataGateway = wikidataGateway;
+    private readonly IShareUrlGateway _shareUrlGateway = shareUrlGateway;
+    private readonly IWikimediaCommonGateway _wikimediaCommonGateway = wikimediaCommonGateway;
+    private readonly IBase64ImageStringToFileConverter _base64ImageConverter = base64ImageConverter;
+    private readonly IImagesUrlsStorageExecutor _imageUrlStoreExecutor = imageUrlStoreExecutor;
+    private readonly ILogger _logger = logger;
 
     /// <summary>
     /// Updates the location in case the OSM element is of type node and the location change is not too little
@@ -223,37 +209,87 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
     }
 
     /// <inheritdoc/>
-    public async Task<IFeature> GetClosestPoint(Coordinate location, string source, string language)
+    public async Task<PointOfInterestBasicInfo> GetBasicInfo(string source, string id, string language)
     {
-        return await _pointsOfInterestRepository.GetClosestPoint(location, source, language);
+        language = string.IsNullOrWhiteSpace(language) ? Languages.ENGLISH : language;
+        return source switch
+        {
+            Sources.OSM => await GetOsmBasicInfo(id, language),
+            Sources.USERS => await GetShareBasicInfo(id),
+            _ => null
+        };
     }
 
-    /// <inheritdoc/>
-    public async Task<IFeature> GetFeatureById(string source, string id)
+    private async Task<PointOfInterestBasicInfo> GetOsmBasicInfo(string id, string language)
     {
-        IFeature feature;
-        if (source == Sources.OSM)
-        {
-            var client = _clientsFactory.CreateNonAuthClient();
-            var osmElement = await client.GetCompleteElement(GeoJsonExtensions.GetOsmId(id), GeoJsonExtensions.GetOsmType(id));
-            feature = ConvertOsmToFeature(osmElement);    
-        }
-        else
-        {
-            feature = await _externalSourcesRepository.GetExternalPoiById(id, source);
-        }
-
+        var client = _clientsFactory.CreateNonAuthClient();
+        var osmElement = await client.GetCompleteElement(GeoJsonExtensions.GetOsmId(id), GeoJsonExtensions.GetOsmType(id));
+        var feature = ConvertOsmToFeature(osmElement);
         if (feature == null)
         {
             return null;
         }
-        if (string.IsNullOrWhiteSpace(feature.Attributes[FeatureAttributes.POI_ICON]?.ToString()))
+        await EnrichWithWikidata(feature);
+        return new PointOfInterestBasicInfo
         {
-            feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, SEARCH_ICON);
-        }
-        return feature;
+            Title = feature.GetTitle(language),
+            Description = feature.GetDescriptionWithExternal(language),
+            ImageUrl = feature.Attributes.GetNames()
+                .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
+                .Select(p => feature.Attributes[p].ToString())
+                .FirstOrDefault() ?? string.Empty
+        };
     }
-        
+
+    /// <summary>
+    /// When the OSM feature links to a Wikidata entity, fill in a missing description/image from
+    /// Wikidata/Wikipedia - just enough for the crawler (title/description/single image).
+    /// </summary>
+    private async Task EnrichWithWikidata(IFeature feature)
+    {
+        if (!feature.Attributes.Exists(FeatureAttributes.WIKIDATA))
+        {
+            return;
+        }
+        var hasImage = feature.Attributes.GetNames()
+            .Any(n => n.StartsWith(FeatureAttributes.IMAGE_URL) && !string.IsNullOrWhiteSpace(feature.Attributes[n]?.ToString()));
+        var hasDescription = feature.Attributes.GetNames()
+            .Any(n => (n == FeatureAttributes.DESCRIPTION || n.StartsWith(FeatureAttributes.POI_EXTERNAL_DESCRIPTION))
+                && !string.IsNullOrWhiteSpace(feature.Attributes[n]?.ToString()));
+        if (hasImage && hasDescription)
+        {
+            return;
+        }
+        var content = await _wikidataGateway.GetContent(feature.Attributes[FeatureAttributes.WIKIDATA].ToString());
+        if (!hasImage && !string.IsNullOrWhiteSpace(content.ImageUrl))
+        {
+            feature.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, content.ImageUrl);
+        }
+        foreach (var (language, description) in content.DescriptionByLanguage)
+        {
+            var key = FeatureAttributes.POI_EXTERNAL_DESCRIPTION + ":" + language;
+            if (!feature.Attributes.Exists(key))
+            {
+                feature.Attributes.AddOrUpdate(key, description);
+            }
+        }
+    }
+
+    private async Task<PointOfInterestBasicInfo> GetShareBasicInfo(string id)
+    {
+        var shareUrl = await _shareUrlGateway.GetUrlById(id);
+        if (shareUrl == null)
+        {
+            return null;
+        }
+        return new PointOfInterestBasicInfo
+        {
+            Title = shareUrl.Title ?? string.Empty,
+            Description = shareUrl.Description ?? string.Empty,
+            ImageUrl = $"{Branding.BASE_URL}/api/urls/{shareUrl.Id}/thumbnail"
+        };
+    }
+
 
     /// <inheritdoc/>
     public async Task<IFeature> AddFeature(IFeature feature, IAuthClient osmGateway, string language)
@@ -359,7 +395,7 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
             .Select(p => featureAfterTagsUpdates.Attributes[p].ToString())
             .ToList();
         if (partialFeature.Attributes.Exists(FeatureAttributes.POI_ADDED_URLS))
-        {    
+        {
             foreach (var url in partialFeature.Attributes[FeatureAttributes.POI_ADDED_URLS] as IEnumerable<object>)
             {
                 existingUrls.Add(url.ToString());
@@ -372,7 +408,7 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
                 .ToList();
             var wikipediaTagsToRemove = new TagsCollection();
             SetWebsiteAndWikiTags(wikipediaTagsToRemove, urlsToRemove);
-            foreach(var urlToRemove in urlsToRemove)
+            foreach (var urlToRemove in urlsToRemove)
             {
                 existingUrls.Remove(urlToRemove);
             }
@@ -430,14 +466,14 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
             ? icon.Replace("icon-", "")
             : title;
     }
-        
+
     private string GetNonEmptyDescription(string description, string nonEmptyTitle)
     {
         return string.IsNullOrWhiteSpace(description)
             ? nonEmptyTitle
             : description;
     }
-        
+
     private async Task<string> UploadImageIfNeeded(string imageUrl,
         IFeature feature, string language, string userDisplayName)
     {

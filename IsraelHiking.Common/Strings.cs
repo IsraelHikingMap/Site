@@ -1,12 +1,9 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 namespace IsraelHiking.Common;
 
 public static class Categories
 {
-    public const string POINTS_OF_INTEREST = "Points of Interest";
-
     public const string WATER = "Water";
     public const string VIEWPOINT = "Viewpoint";
     public const string HISTORIC = "Historic";
@@ -15,28 +12,9 @@ public static class Categories
     public const string OTHER = "Other";
     public const string NONE = "None";
 
-    public static readonly string[] Points =
-    [
-        WATER,
-        VIEWPOINT,
-        HISTORIC,
-        CAMPING,
-        NATURAL,
-        OTHER
-    ];
-
-    public const string ROUTES = "Routes";
-
     public const string ROUTE_HIKE = "Hiking";
     public const string ROUTE_BIKE = "Bicycle";
     public const string ROUTE_4X4 = "4x4";
-
-    public static readonly string[] Routes =
-    [
-        ROUTE_HIKE,
-        ROUTE_BIKE,
-        ROUTE_4X4
-    ];
 }
 
 public static class FeatureAttributes
@@ -58,7 +36,6 @@ public static class FeatureAttributes
     public const string POI_LANGUAGE = POI_PREFIX + "Language";
     public const string POI_LANGUAGES = POI_PREFIX + "Languages";
     public const string POI_CONTAINER = POI_PREFIX + "Container";
-    public const string POI_SHARE_REFERENCE = POI_PREFIX + "ShareReference";
     public const string POI_LAST_MODIFIED = POI_PREFIX + "LastModified";
     public const string POI_USER_NAME = POI_PREFIX + "UserName";
     public const string POI_USER_ADDRESS = POI_PREFIX + "UserAddress";
@@ -76,7 +53,6 @@ public static class FeatureAttributes
     public const string POI_REMOVED_URLS = POI_PREFIX + "RemovedUrls";
     public const string POI_ADDED_IMAGES = POI_PREFIX + "AddedImages";
     public const string POI_REMOVED_IMAGES = POI_PREFIX + "RemovedImages";
-    public const string POI_MERGED = POI_PREFIX + "Merged";
 
     public static readonly string[] POI_DESCRIPTION_KEYS =
     [
@@ -86,16 +62,12 @@ public static class FeatureAttributes
 
     public const string LAT = "lat";
     public const string LNG = "lng";
-    public const double INVALID_LOCATION = -9999;
 }
 
 public static class Sources
 {
     public const string OSM = "OSM";
-    public const string NAKEB = "Nakeb";
-    public const string WIKIPEDIA = "Wikipedia";
-    public const string WIKIDATA = "Wikidata";
-    public const string INATURE = "iNature";
+    public const string USERS = "Users";
 }
 
 public static class Languages
