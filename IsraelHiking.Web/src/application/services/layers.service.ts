@@ -298,7 +298,10 @@ export class LayersService {
 
         container.baseLayer = this.getSelectedBaseLayer();
         for (const overlayKey of this.store.selectSnapshot((state: ApplicationState) => state.layersState.visibleOverlays)) {
-            container.overlays.push(this.allOverlays.find(o => this.compareKeys(o.key, overlayKey)));
+            const overlay = this.allOverlays.find(o => this.compareKeys(o.key, overlayKey));
+            if (overlay != null) {
+                container.overlays.push(overlay);
+            }
         }
         return container;
     }
