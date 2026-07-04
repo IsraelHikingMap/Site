@@ -12,11 +12,44 @@ import type { ApplicationState, EditableLayer, LayerData } from "../models";
 export class DefaultStyleService {
     private static indexNumber = 0;
     private static readonly NIGHT_LAND_COLOR = "#1B1B1B";
+    private static readonly NIGHT_URBAN_COLOR = "#2B2B2B";
+    private static readonly NIGHT_LANDCOVER_COLOR = "#1D2A1A";
+    private static readonly NIGHT_WATER_COLOR = "#14202E";
     private static readonly NIGHT_FILL_COLORS: Record<string, string> = {
-        "area-residential": "#2B2B2B",
-        "area-landcover-low": "#1D2A1A",
-        "water-area": "#14202E"
+        // Hike style layer ids
+        "area-residential": DefaultStyleService.NIGHT_URBAN_COLOR,
+        "area-landcover-low": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "water-area": DefaultStyleService.NIGHT_WATER_COLOR,
+        // Bike style layer ids - urban / man made
+        "land-residential": DefaultStyleService.NIGHT_URBAN_COLOR,
+        "land-construction": DefaultStyleService.NIGHT_URBAN_COLOR,
+        "land-cemetery": DefaultStyleService.NIGHT_URBAN_COLOR,
+        "land-industrial": DefaultStyleService.NIGHT_URBAN_COLOR,
+        "land-quarry": DefaultStyleService.NIGHT_URBAN_COLOR,
+        "military_base_fill": DefaultStyleService.NIGHT_URBAN_COLOR,
+        "bridge_area": DefaultStyleService.NIGHT_URBAN_COLOR,
+        "breakwater": DefaultStyleService.NIGHT_URBAN_COLOR,
+        // Bike style layer ids - landcover
+        "land_sand": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "land_farm": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "land_scrub_solid": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "land_wood_solid": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "land_grass": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "land_pitch": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "land_wetland": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "water_riverbed": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "water_intermittent": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        // Bike style layer ids - water
+        "water": DefaultStyleService.NIGHT_WATER_COLOR
     }
+    // Decorative landcover pattern layers (bright sprite icons / fill patterns) that have no
+    // dark equivalent - hidden altogether in night mode so they don't stay bright over the dark map.
+    private static readonly NIGHT_HIDDEN_LAYERS = new Set<string>([
+        "land_wood_pattern",
+        "land_scrub_pattern",
+        "land_orchard",
+        "land_vineyard"
+    ]);
 
     public style: StyleSpecification;
 
@@ -177,6 +210,10 @@ export class DefaultStyleService {
             if (layer.type === "background") {
                 layer.paint["background-color"] = DefaultStyleService.NIGHT_LAND_COLOR;
             }
+            if (DefaultStyleService.NIGHT_HIDDEN_LAYERS.has(layer.id)) {
+                layer.layout = { ...layer.layout, visibility: "none" };
+                continue;
+            }
             if (layer.type !== "fill" ||
                 !layer.paint ||
                 !(layer.id in DefaultStyleService.NIGHT_FILL_COLORS) ||
@@ -184,6 +221,8 @@ export class DefaultStyleService {
                 continue;
             }
             layer.paint["fill-color"] = DefaultStyleService.NIGHT_FILL_COLORS[layer.id];
+            // Drop any pattern so the dark fill-color is actually rendered instead of the bright sprite pattern.
+            delete layer.paint["fill-pattern"];
         }
     }
 
