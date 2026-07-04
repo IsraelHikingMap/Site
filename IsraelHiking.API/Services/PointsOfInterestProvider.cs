@@ -19,7 +19,7 @@ using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace IsraelHiking.API.Services.Poi;
+namespace IsraelHiking.API.Services;
 
 /// <summary>
 /// Points of interest provider

@@ -4,7 +4,6 @@ using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
-using IsraelHiking.API.Services.Poi;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace IsraelHiking.API;

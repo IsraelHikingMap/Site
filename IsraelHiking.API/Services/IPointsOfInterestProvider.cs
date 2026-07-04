@@ -2,7 +2,7 @@
 using OsmSharp.IO.API;
 using System.Threading.Tasks;
 
-namespace IsraelHiking.API.Services.Poi;
+namespace IsraelHiking.API.Services;
 
 /// <summary>
 /// The minimal information a crawler needs to render a preview of a point of interest

@@ -3,7 +3,6 @@ using System.IO;
 using System.Text;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Middleware;
-using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces;

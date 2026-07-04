@@ -1,6 +1,5 @@
 ﻿using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
-using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Extensions;
