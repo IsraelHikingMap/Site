@@ -1,6 +1,6 @@
 ﻿<ng-progress ngProgressHttp [ngStyle]="{'z-index':1500}"></ng-progress>
 <mat-sidenav-container [dir]="resources.direction" [hasBackdrop]="false" [autosize]="false">
-  <mat-sidenav [opened]="sidenavVisible()" position="end" class="magrin-top-with-toolbar pb-safe">
+  <mat-sidenav [opened]="sidenavVisible()" position="end" class="magrin-top-with-toolbar pb-safe" autoFocus="dialog">
     @switch (sidenavViewName) {
     @case ('layers') {
     <layers-sidebar></layers-sidebar>
