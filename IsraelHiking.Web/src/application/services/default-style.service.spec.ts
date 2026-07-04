@@ -417,7 +417,13 @@ describe("DefaultStyleService", () => {
                 { id: "water-area", type: "fill", paint: { "fill-color": "#AAD3DF" } },
                 { id: "area-residential", type: "fill", paint: { "fill-color": "#E0DFDF" } },
                 { id: "other-fill", type: "fill", paint: { "fill-color": "#123456" } },
-                { id: "area-landcover-low", type: "fill", paint: { "fill-opacity": 0.5 } }
+                { id: "area-landcover-low", type: "fill", paint: { "fill-opacity": 0.5 } },
+                { id: "land-residential", type: "fill", paint: { "fill-color": "rgb(224, 224, 224)" } },
+                { id: "land_wood_solid", type: "fill", paint: { "fill-color": "rgb(200, 217, 174)" } },
+                { id: "water", type: "fill", paint: { "fill-color": "rgb(148, 193, 225)" } },
+                { id: "water_riverbed", type: "fill", paint: { "fill-color": "rgb(200, 217, 174)", "fill-pattern": "stones_pattern" } },
+                { id: "land_wood_pattern", type: "symbol", layout: { "icon-image": "forest_pattern" } },
+                { id: "land_orchard", type: "fill", paint: { "fill-pattern": "orchard_pattern" } }
             ]
         }));
 
@@ -428,6 +434,13 @@ describe("DefaultStyleService", () => {
         expect((result.layers[2] as FillLayerSpecification).paint?.["fill-color"]).toBe("#2B2B2B");
         expect((result.layers[3] as FillLayerSpecification).paint?.["fill-color"]).toBe("#123456"); // not in palette
         expect((result.layers[4] as FillLayerSpecification).paint?.["fill-color"]).toBeUndefined(); // no fill-color to replace
+        expect((result.layers[5] as FillLayerSpecification).paint?.["fill-color"]).toBe("#2B2B2B"); // bike urban
+        expect((result.layers[6] as FillLayerSpecification).paint?.["fill-color"]).toBe("#1D2A1A"); // bike landcover
+        expect((result.layers[7] as FillLayerSpecification).paint?.["fill-color"]).toBe("#14202E"); // bike water
+        expect((result.layers[8] as FillLayerSpecification).paint?.["fill-color"]).toBe("#1D2A1A"); // recolored...
+        expect((result.layers[8] as FillLayerSpecification).paint?.["fill-pattern"]).toBeUndefined(); // ...and pattern stripped
+        expect(result.layers[9].layout?.visibility).toBe("none"); // decorative forest pattern hidden
+        expect(result.layers[10].layout?.visibility).toBe("none"); // decorative orchard pattern hidden
     }));
 
     it("should not recolor any layer when the theme is not dark", inject([DefaultStyleService, FileService], async (service: DefaultStyleService, fileService: FileService) => {
