@@ -570,20 +570,12 @@ describe("Poi Service", () => {
         expect(data.originalFeature).toEqual(feature);
     }));
 
-    it("Should get a point by id and source from the server", inject(
-        [PoiService, HttpTestingController],
-        async (poiService: PoiService, mockBackend: HttpTestingController) => {
-            const id = "42";
-            const source = "source";
+    it("Should throw for invalid source", inject([PoiService], async (poiService: PoiService) => {
+        const id = "42";
+        const source = "source";
 
-            const promise = poiService.getBasicInfo(id, source);
-
-            mockBackend.expectOne(request => request.url.includes(id) && request.url.includes(source)).flush({});
-
-            const res = await promise;
-            expect(res).not.toBeNull();
-        }
-    ));
+        await expect(poiService.getBasicInfo(id, source)).rejects.toThrow();
+    }));
 
     it("Should get a point by id and source from iNature", inject([PoiService],
         async (poiService: PoiService) => {
@@ -783,10 +775,11 @@ describe("Poi Service", () => {
         }
     ));
 
-    it("Should get a point by id and source from the tiles in case the server is not available", inject([PoiService, HttpTestingController, MapService],
-        async (poiService: PoiService, mockBackend: HttpTestingController, mapServiceMock: MapService) => {
+    it("Should get a point by id and source from the tiles in case the server is not available", inject([PoiService, MapService, OverpassTurboService],
+        async (poiService: PoiService, mapServiceMock: MapService, overpassTurboService: OverpassTurboService) => {
             const id = "node_42";
-            const source = "source";
+            const source = "OSM";
+            overpassTurboService.getFeature = () => Promise.reject();
             const spy = vi
                 .spyOn(mapServiceMock, "getFeaturesFromTiles")
                 .mockReturnValue([
@@ -799,24 +792,20 @@ describe("Poi Service", () => {
 
             const promise = poiService.getBasicInfo(id, source);
 
-            mockBackend.expectOne(request => request.url.includes(id) && request.url.includes(source))
-                .flush("Some error", { status: 500, statusText: "Time out" });
-
             const res = await promise;
             expect(res).not.toBeNull();
             expect(spy).toHaveBeenCalled();
         }
     ));
 
-    it("Should not fail on map not initialized when trying to get a point by id and source from the tiles in case the server is not available", inject([PoiService, HttpTestingController, MapService],
-        async (poiService: PoiService, mockBackend: HttpTestingController) => {
+    it("Should not fail on map not initialized when trying to get a point by id and source from the tiles in case the server is not available", inject([PoiService, MapService, OverpassTurboService],
+        async (poiService: PoiService, overpassTurboService: OverpassTurboService) => {
             const id = "node_42";
-            const source = "source";
+            const source = "OSM";
+            overpassTurboService.getFeature = () => Promise.reject();
 
             const promise = poiService.getBasicInfo(id, source);
 
-            mockBackend.expectOne(request => request.url.includes(id) && request.url.includes(source))
-                .flush("Some error", { status: 500, statusText: "Time out" });
 
             await expect(promise).rejects.toThrow(
                 /Failed to load POI .* from offline or in-memory tiles after .*/
@@ -824,33 +813,34 @@ describe("Poi Service", () => {
         }
     ));
 
-    it("Should throw when trying to get a point by id and source and it is not available in the server and in the tiles", inject([PoiService, HttpTestingController, MapService],
-        async (poiService: PoiService, mockBackend: HttpTestingController, mapServiceMock: MapService) => {
+    it("Should throw when trying to get a point by id and source and it is not available in the server and in the tiles", inject([PoiService, MapService, OverpassTurboService],
+        async (poiService: PoiService, mapServiceMock: MapService, overpassTurboService: OverpassTurboService) => {
             const id = "42";
-            const source = "source";
+            const source = "OSM";
+
             const spy = vi
                 .spyOn(mapServiceMock, "getFeaturesFromTiles")
                 .mockReturnValue([]);
+            overpassTurboService.getFeature = () => Promise.reject();
 
             const promise = poiService.getBasicInfo(id, source);
-
-            mockBackend.expectOne(request => request.url.includes(id) && request.url.includes(source))
-                .flush("Some error", { status: 500, statusText: "Time out" });
 
             await expect(promise).rejects.toThrow();
             expect(spy).toHaveBeenCalled();
         }
     ));
 
-    it("Should get a point by id and source from the cache after the first load", inject([PoiService, HttpTestingController],
-        async (poiService: PoiService, mockBackend: HttpTestingController) => {
+    it("Should get a point by id and source from the cache after the first load", inject([PoiService, OverpassTurboService],
+        async (poiService: PoiService, overpassTurboService: OverpassTurboService) => {
             const id = "42";
-            const source = "source";
+            const source = "OSM";
+            overpassTurboService.getFeature = () => Promise.resolve({
+                type: "Feature",
+                geometry: { type: "Point", coordinates: [0, 0] },
+                properties: { poiId: id, source }
+            } as any);
 
             const promise = poiService.getBasicInfo(id, source);
-
-            mockBackend.expectOne(request => request.url.includes(id) && request.url.includes(source))
-                .flush({ properties: { poiId: id, source } });
 
             const res = await promise;
             expect(res).not.toBeNull();

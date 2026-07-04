@@ -93,7 +93,9 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         });
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(), skip(1)).subscribe(() => {
             const sourceIdAndLanguage = this.getRouteUrlInfo();
-            const queryParams: Record<string, boolean> = {};
+            const queryParams: Record<string, string | boolean> = {
+                [RouteStrings.LANGUAGE]: this.resources.getCurrentLanguageCodeSimplified()
+            }; // this is needed for the crawler to get the right language
             if (sourceIdAndLanguage.editMode) {
                 queryParams.edit = true;
             }

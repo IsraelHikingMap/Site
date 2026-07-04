@@ -1,6 +1,5 @@
 ﻿using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
-using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Extensions;
@@ -54,25 +53,6 @@ public class PointsOfInterestController : ControllerBase
         _simplePointAdderExecutor = simplePointAdderExecutor;
         _persistentCache = persistentCache;
         _logger = logger;
-    }
-
-    /// <summary>
-    /// Get a point of interest
-    /// </summary>
-    /// <remarks>Returns a single point of interest by its source and id.</remarks>
-    /// <param name="source">The source</param>
-    /// <param name="id">The ID</param>
-    /// <returns></returns>
-    [Route("{source}/{id}")]
-    [HttpGet]
-    public async Task<IActionResult> GetPointOfInterest(string source, string id)
-    {
-        var poiItem = await _pointsOfInterestProvider.GetFeatureById(source, id);
-        if (poiItem == null)
-        {
-            return NotFound();
-        }
-        return Ok(poiItem);
     }
 
     /// <summary>
