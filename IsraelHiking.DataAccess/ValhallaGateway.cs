@@ -26,8 +26,53 @@ class ValhallaRequest
 
     [JsonPropertyName("units")]
     public string Units { get; set; }
+
     [JsonPropertyName("elevation_interval")]
     public double? ElevationInterval { get; set; }
+
+    [JsonPropertyName("costing_options")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, ValhallaCostingOptions> CostingOptions { get; set; }
+}
+
+class ValhallaCostingOptions
+{
+    [JsonPropertyName("shortest")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? Shortest { get; set; }
+
+    [JsonPropertyName("use_hills")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? UseHills { get; set; }
+
+    [JsonPropertyName("max_hiking_difficulty")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? MaxHikingDifficulty { get; set; }
+
+    /// <summary>Propensity to use track-grade roads (0 avoids, 1 fully allows). Valhalla defaults to 0 for autos.</summary>
+    [JsonPropertyName("use_tracks")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? UseTracks { get; set; }
+
+    [JsonPropertyName("gate_penalty")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? GatePenalty { get; set; }
+
+    [JsonPropertyName("gate_cost")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? GateCost { get; set; }
+
+    [JsonPropertyName("private_access_penalty")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? PrivateAccessPenalty { get; set; }
+
+    [JsonPropertyName("destination_only_penalty")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? DestinationOnlyPenalty { get; set; }
+
+    [JsonPropertyName("service_penalty")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? ServicePenalty { get; set; }
 }
 
 public class ValhallaResponse
@@ -126,7 +171,6 @@ public class ValhallaManeuver
     public int RoundaboutExitCount { get; set; }
 }
 
-/// <summary>Valhalla trace_route (map matching) request.</summary>
 class ValhallaTraceRouteRequest
 {
     [JsonPropertyName("shape")]
@@ -134,6 +178,10 @@ class ValhallaTraceRouteRequest
 
     [JsonPropertyName("costing")]
     public string Costing { get; set; }
+
+    [JsonPropertyName("costing_options")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, ValhallaCostingOptions> CostingOptions { get; set; }
 
     [JsonPropertyName("shape_match")]
     public string ShapeMatch { get; set; }
@@ -203,6 +251,7 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
                 }
             },
             Costing = ToCosting(request.Profile),
+            CostingOptions = ToCostingOptions(request.Profile),
             Units = "m",
             ElevationInterval = 30
         };
@@ -243,6 +292,7 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
                 Type = index == 0 || index == request.Points.Count - 1 ? "break" : "via"
             }).ToList(),
             Costing = ToCosting(request.Profile),
+            CostingOptions = ToCostingOptions(request.Profile),
             ShapeMatch = "map_snap",
             DirectionsOptions = new ValhallaDirectionsOptions
             {
@@ -282,6 +332,35 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
         ProfileType.Car4WheelDrive => "truck",
         _ => "pedestrian"
     };
+
+    private static Dictionary<string, ValhallaCostingOptions> ToCostingOptions(ProfileType profile)
+    {
+        var options = profile switch
+        {
+            ProfileType.Foot => new ValhallaCostingOptions
+            {
+                Shortest = true,
+                MaxHikingDifficulty = 6, // allow the full SAC scale up to T6
+                UseHills = 1.0
+            },
+            ProfileType.Bike => new ValhallaCostingOptions
+            {
+                Shortest = true,
+                UseHills = 1.0
+            },
+            ProfileType.Car4WheelDrive => new ValhallaCostingOptions
+            {
+                UseTracks = 1.0,
+                GatePenalty = 0,
+                GateCost = 0,
+                PrivateAccessPenalty = 0,
+                DestinationOnlyPenalty = 0,
+                ServicePenalty = 0
+            },
+            _ => new ValhallaCostingOptions { Shortest = true }
+        };
+        return new Dictionary<string, ValhallaCostingOptions> { [ToCosting(profile)] = options };
+    }
 
     private static object BuildInstructions(List<ValhallaManeuver> maneuvers, InstructionsFormat format)
     {
