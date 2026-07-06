@@ -118,6 +118,11 @@ export class OsmTagsService {
                     poi.properties.poiIcon = "icon-peak";
                     poi.properties.poiCategory = "Natural";
                     return;
+                case "water":
+                    poi.properties.poiIconColor = "#1e80e3";
+                    poi.properties.poiIcon = "icon-tint";
+                    poi.properties.poiCategory = "Water";
+                    return;
             }
         }
 

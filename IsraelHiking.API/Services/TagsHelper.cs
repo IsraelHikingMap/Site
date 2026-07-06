@@ -57,6 +57,7 @@ public class TagsHelper : ITagsHelper
                 return tagCombinations;
             case "icon-tint":
                 tagCombinations.Add([new("natural", "spring")]);
+                tagCombinations.Add([new("natural", "water")]);
                 tagCombinations.Add([new("water", "reservoir")]);
                 tagCombinations.Add([new("water", "pond")]);
                 tagCombinations.Add([new("water", "lake")]);
@@ -278,6 +279,13 @@ public class TagsHelper : ITagsHelper
                         Color = "black",
                         Icon = "icon-peak",
                         Category = Categories.NATURAL
+                    };
+                case "water":
+                    return new IconColorCategory
+                    {
+                        Color = "#1e80e3",
+                        Icon = "icon-tint",
+                        Category = Categories.WATER
                     };
             }
         }

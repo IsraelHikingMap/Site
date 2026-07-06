@@ -166,6 +166,18 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiCategory).toBe("Water");
     });
 
+    it("Should set icon color category for water", () => {
+        // Arrange
+        const feature = createFeature({ natural: "water" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("#1e80e3");
+        expect(poi.properties.poiIcon).toBe("icon-tint");
+        expect(poi.properties.poiCategory).toBe("Water");
+    });
+
     it("Should set icon color category for tree", () => {
         // Arrange
         const feature = createFeature({ natural: "tree" });
