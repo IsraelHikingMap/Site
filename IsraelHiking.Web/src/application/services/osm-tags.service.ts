@@ -111,6 +111,7 @@ export class OsmTagsService {
                     poi.properties.poiCategory = "Water";
                     return;
                 case "ridge":
+                case "valley":
                 case "volcano":
                 case "peak":
                     poi.properties.poiIconColor = "black";
@@ -191,6 +192,11 @@ export class OsmTagsService {
                     poi.properties.poiIcon = "icon-alpinehut";
                     poi.properties.poiCategory = "Camping";
                     return;
+                case "hotel":
+                    poi.properties.poiIcon = "icon-bed";
+                    poi.properties.poiIconColor = "#734a08";
+                    poi.properties.poiCategory = "Other";
+                    return;
             }
         }
 
@@ -256,12 +262,6 @@ export class OsmTagsService {
             poi.properties.poiIconColor = "#008000";
             poi.properties.poiCategory = "Other";
             return;
-        }
-
-        if (feature.properties.amenity === "hotel") {
-            poi.properties.poiIcon = "icon-bed";
-            poi.properties.poiIconColor = "#734a08";
-            poi.properties.poiCategory = "Other";
         }
 
         if (feature.properties["ref:IL:inature"]) {

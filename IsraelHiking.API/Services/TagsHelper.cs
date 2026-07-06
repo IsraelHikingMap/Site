@@ -124,7 +124,7 @@ public class TagsHelper : ITagsHelper
                 tagCombinations.Add([new("amenity", "place_of_worship")]);
                 return tagCombinations;
             case "icon-bed":
-                tagCombinations.Add([new("amenity", "hotel")]);
+                tagCombinations.Add([new("tourism", "hotel")]);
                 return tagCombinations;
             case "icon-search":
             default:
@@ -377,6 +377,13 @@ public class TagsHelper : ITagsHelper
                         Icon = "icon-alpinehut",
                         Category = Categories.CAMPING
                     };
+                case "hotel":
+                    return new IconColorCategory
+                    {
+                        Color = "#734a08",
+                        Icon = "icon-bed",
+                        Category = Categories.OTHER
+                    };
             }
         }
 
@@ -474,16 +481,6 @@ public class TagsHelper : ITagsHelper
             {
                 Color = "#008000",
                 Icon = "icon-tree",
-                Category = Categories.OTHER
-            };
-        }
-
-        if ("hotel".Equals(GetString(attributes, "amenity")))
-        {
-            return new IconColorCategory
-            {
-                Color = "#734a08",
-                Icon = "icon-bed",
                 Category = Categories.OTHER
             };
         }

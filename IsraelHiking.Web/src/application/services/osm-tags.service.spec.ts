@@ -516,7 +516,7 @@ describe("OsmTagsService", () => {
 
     it("Should set icon color category for hotel", () => {
         // Arrange
-        const feature = createFeature({ amenity: "hotel" });
+        const feature = createFeature({ tourism: "hotel" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -649,6 +649,18 @@ describe("OsmTagsService", () => {
     it("Should set icon color category for natural ridge", () => {
         // Arrange
         const feature = createFeature({ natural: "ridge" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("black");
+        expect(poi.properties.poiIcon).toBe("icon-peak");
+        expect(poi.properties.poiCategory).toBe("Natural");
+    });
+
+    it("Should set icon color category for natural valley", () => {
+        // Arrange
+        const feature = createFeature({ natural: "valley" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
