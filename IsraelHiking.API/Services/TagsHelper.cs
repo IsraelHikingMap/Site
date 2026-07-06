@@ -106,6 +106,7 @@ public class TagsHelper : ITagsHelper
                 tagCombinations.Add([new("natural", "peak")]);
                 tagCombinations.Add([new("natural", "ridge")]);
                 tagCombinations.Add([new("natural", "volcano")]);
+                tagCombinations.Add([new("natural", "valley")]);
                 return tagCombinations;
             case "icon-inature":
                 tagCombinations.Add([new(FeatureAttributes.INATURE_REF, "*")]);
@@ -121,6 +122,9 @@ public class TagsHelper : ITagsHelper
                 return tagCombinations;
             case "icon-holy-place":
                 tagCombinations.Add([new("amenity", "place_of_worship")]);
+                return tagCombinations;
+            case "icon-bed":
+                tagCombinations.Add([new("amenity", "hotel")]);
                 return tagCombinations;
             case "icon-search":
             default:
@@ -262,6 +266,7 @@ public class TagsHelper : ITagsHelper
                 case "ridge":
                 case "peak":
                 case "volcano":
+                case "valley":
                     return new IconColorCategory
                     {
                         Color = "black",
@@ -424,37 +429,33 @@ public class TagsHelper : ITagsHelper
         if ("place_of_worship".Equals(GetString(attributes, "amenity")) || "monastery".Equals(GetString(attributes, "amenity")))
         {
             var religion = GetString(attributes, "religion");
-            switch (religion)
+            return religion switch
             {
-                case "jewish":
-                    return new IconColorCategory
-                    {
-                        Color = "black",
-                        Icon = "icon-synagogue",
-                        Category = Categories.OTHER
-                    };
-                case "christian":
-                    return new IconColorCategory
-                    {
-                        Color = "black",
-                        Icon = "icon-church",
-                        Category = Categories.OTHER
-                    };
-                case "muslim":
-                    return new IconColorCategory
-                    {
-                        Color = "black",
-                        Icon = "icon-mosque",
-                        Category = Categories.OTHER
-                    };
-                default:
-                    return new IconColorCategory
-                    {
-                        Color = "black",
-                        Icon = "icon-holy-place",
-                        Category = Categories.OTHER
-                    };
-            }
+                "jewish" => new IconColorCategory
+                {
+                    Color = "black",
+                    Icon = "icon-synagogue",
+                    Category = Categories.OTHER
+                },
+                "christian" => new IconColorCategory
+                {
+                    Color = "black",
+                    Icon = "icon-church",
+                    Category = Categories.OTHER
+                },
+                "muslim" => new IconColorCategory
+                {
+                    Color = "black",
+                    Icon = "icon-mosque",
+                    Category = Categories.OTHER
+                },
+                _ => new IconColorCategory
+                {
+                    Color = "black",
+                    Icon = "icon-holy-place",
+                    Category = Categories.OTHER
+                },
+            };
         }
 
         if ("recreation_ground".Equals(GetString(attributes, "landuse")) && "mtb".Equals(GetString(attributes, "sport")))
@@ -473,6 +474,16 @@ public class TagsHelper : ITagsHelper
             {
                 Color = "#008000",
                 Icon = "icon-tree",
+                Category = Categories.OTHER
+            };
+        }
+
+        if ("hotel".Equals(GetString(attributes, "amenity")))
+        {
+            return new IconColorCategory
+            {
+                Color = "#734a08",
+                Icon = "icon-bed",
                 Category = Categories.OTHER
             };
         }

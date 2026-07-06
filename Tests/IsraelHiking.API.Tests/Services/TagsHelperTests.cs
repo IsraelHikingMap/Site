@@ -45,6 +45,7 @@ public class TagsHelperTests
     [DataRow("icon-church")]
     [DataRow("icon-mosque")]
     [DataRow("icon-holy-place")]
+    [DataRow("icon-bed")]
     public void SymmetricalTagsCheck_ShouldPass(string icon)
     {
         var tagCombinations = _tagsHelper.FindTagsForIcon(icon);

@@ -258,6 +258,12 @@ export class OsmTagsService {
             return;
         }
 
+        if (feature.properties.amenity === "hotel") {
+            poi.properties.poiIcon = "icon-bed";
+            poi.properties.poiIconColor = "#734a08";
+            poi.properties.poiCategory = "Other";
+        }
+
         if (feature.properties["ref:IL:inature"]) {
             poi.properties.poiIconColor = "#116C00";
             poi.properties.poiIcon = "icon-inature";
