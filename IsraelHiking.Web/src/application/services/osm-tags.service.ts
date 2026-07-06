@@ -193,6 +193,12 @@ export class OsmTagsService {
                     poi.properties.poiCategory = "Camping";
                     return;
                 case "hotel":
+                case "motel":
+                case "hostel":
+                case "chalet":
+                case "guest_house":
+                case "bed_and_breakfast":
+                case "dormitory":
                     poi.properties.poiIcon = "icon-bed";
                     poi.properties.poiIconColor = "#734a08";
                     poi.properties.poiCategory = "Other";

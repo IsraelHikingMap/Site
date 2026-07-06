@@ -125,6 +125,12 @@ public class TagsHelper : ITagsHelper
                 return tagCombinations;
             case "icon-bed":
                 tagCombinations.Add([new("tourism", "hotel")]);
+                tagCombinations.Add([new("tourism", "motel")]);
+                tagCombinations.Add([new("tourism", "hostel")]);
+                tagCombinations.Add([new("tourism", "chalet")]);
+                tagCombinations.Add([new("tourism", "guest_house")]);
+                tagCombinations.Add([new("tourism", "bed_and_breakfast")]);
+                tagCombinations.Add([new("tourism", "dormitory")]);
                 return tagCombinations;
             case "icon-search":
             default:
@@ -378,6 +384,12 @@ public class TagsHelper : ITagsHelper
                         Category = Categories.CAMPING
                     };
                 case "hotel":
+                case "motel":
+                case "hostel":
+                case "chalet":
+                case "guest_house":
+                case "bed_and_breakfast":
+                case "dormitory":
                     return new IconColorCategory
                     {
                         Color = "#734a08",

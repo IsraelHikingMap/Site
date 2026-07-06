@@ -526,6 +526,30 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiIconColor).toBe("#734a08");
     });
 
+    it("Should set icon color category for motel", () => {
+        // Arrange
+        const feature = createFeature({ tourism: "motel" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("Other");
+        expect(poi.properties.poiIcon).toBe("icon-bed");
+        expect(poi.properties.poiIconColor).toBe("#734a08");
+    });
+
+    it("Should set icon color category for hostel", () => {
+        // Arrange
+        const feature = createFeature({ tourism: "hostel" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("Other");
+        expect(poi.properties.poiIcon).toBe("icon-bed");
+        expect(poi.properties.poiIconColor).toBe("#734a08");
+    });
+
     it("Should set icon color category for wikipedia", () => {
         // Arrange
         const feature = createFeature({ wikipedia: "page" });
