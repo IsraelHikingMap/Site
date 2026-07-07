@@ -136,6 +136,8 @@ export class TracesComponent implements OnInit {
             trace.dataContainer.routes[0].description = trace.name;
         }
         this.router.navigate([RouteStrings.MAP]);
+        // This is to let the route change to the map so that the relevant map will be used for fit bounds.
+        await new Promise((resolve) => setTimeout(resolve, 100));
         this.dataContainerService.setData(trace.dataContainer, true);
     }
 
