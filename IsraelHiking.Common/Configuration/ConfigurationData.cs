@@ -84,7 +84,10 @@ public class ConfigurationData
     /// Valhalla server address
     /// </summary>
     public string ValhallaServerAddress { get; set; }
-
+    /// <summary>
+    /// GraphHopper server address
+    /// </summary>
+    public string GraphhopperServerAddress { get; set; }
     /// <summary>
     /// Elasticsearch server address
     /// </summary>
@@ -139,6 +142,7 @@ public class ConfigurationData
         ClosestHighwayForGates = 0.0003; // around 30m
         ClosestNodeForGates = 0.0001; // around 10m
         ClosestNodeWithGate = 30;
+        GraphhopperServerAddress = "http://localhost:8989/";
         ValhallaServerAddress = "http://localhost:8002/";
         ElasticsearchServerAddress = "http://localhost:9200/";
         GpsBabelServerAddress = "http://localhost:11987/";
