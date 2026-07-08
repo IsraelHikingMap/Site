@@ -329,7 +329,7 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
     {
         ProfileType.Foot => "pedestrian",
         ProfileType.Bike => "bicycle",
-        ProfileType.Car4WheelDrive => "truck",
+        ProfileType.Car4WheelDrive => "auto",
         _ => "pedestrian"
     };
 
@@ -355,7 +355,8 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
                 GateCost = 0,
                 PrivateAccessPenalty = 0,
                 DestinationOnlyPenalty = 0,
-                ServicePenalty = 0
+                ServicePenalty = 0,
+                Shortest = true
             },
             _ => new ValhallaCostingOptions { Shortest = true }
         };
