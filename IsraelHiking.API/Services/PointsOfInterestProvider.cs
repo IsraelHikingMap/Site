@@ -314,6 +314,7 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
         SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, feature.GetDescription(language), language);
         AddTagsByIcon(node.Tags, feature.Attributes[FeatureAttributes.POI_ICON].ToString());
         RemoveEmptyTagsAndWhiteSpaces(node.Tags);
+        AddFixMeToTouristAttraction(node.Tags);
         await osmGateway.UploadToOsmWithRetries(
             $"Added {feature.GetTitle(language)} using {Branding.BASE_URL}",
             async changeSetId =>
@@ -496,5 +497,13 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
         var wikiImageUrl = await _wikimediaCommonGateway.UploadImage(file.FileName, nonEmptyDescription, userDisplayName, memoryStream, feature.GetLocation());
         await _imageUrlStoreExecutor.StoreImage(md5, file.Content, wikiImageUrl);
         return wikiImageUrl;
+    }
+
+    private void AddFixMeToTouristAttraction(TagsCollectionBase tags)
+    {
+        if (tags.Contains(new Tag("tourism", "attraction")) && !tags.ContainsKey("fixme"))
+        {
+            tags.Add("fixme", "Consider adding more specific tags");
+        }
     }
 }

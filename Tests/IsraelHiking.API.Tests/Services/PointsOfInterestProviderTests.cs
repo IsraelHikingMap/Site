@@ -266,6 +266,21 @@ public class PointsOfInterestProviderTests
     }
 
     [TestMethod]
+    public void AddFeature_TouristAttraction_ShouldAddFixMeTag()
+    {
+        var gateway = SetupOsmAuthClient();
+        var language = Languages.HEBREW;
+        gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
+        var feature = GetValidFeature("42", Sources.OSM);
+        feature.Attributes[FeatureAttributes.POI_ICON] = "icon-star";
+
+        var results = _adapter.AddFeature(feature, gateway, language).Result;
+
+        Assert.IsNotNull(results);
+        gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => x.Tags["fixme"] != null));
+    }
+
+    [TestMethod]
     public void UpdateFeature_CreateWikipediaTag()
     {
         var gateway = SetupOsmAuthClient();
