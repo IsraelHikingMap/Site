@@ -270,4 +270,31 @@ public class SearchControllerTests
         Assert.IsNotNull(results);
         Assert.IsTrue(results.First().DisplayName.Contains(place));
     }
+
+    [TestMethod]
+    public void GetSearchResults_WithMapCenterAndPrefix_ShouldForwardThemToTheRepository()
+    {
+        var searchTerm = "Bear Lake";
+        _searchRepository.Search(searchTerm, Languages.ENGLISH,
+            Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<bool>())
+            .Returns(new List<IFeature>());
+
+        _controller.GetSearchResults(searchTerm, Languages.ENGLISH,
+            lat: 40.3120, lng: -105.6457, zoom: 12, prefix: true).Wait();
+
+        _searchRepository.Received(1).Search(searchTerm, Languages.ENGLISH, 40.3120, -105.6457, 12, true);
+    }
+
+    [TestMethod]
+    public void GetSearchResults_WithoutMapCenter_ShouldForwardDefaults()
+    {
+        var searchTerm = "Pikes Peak";
+        _searchRepository.Search(searchTerm, Languages.ENGLISH,
+            Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<bool>())
+            .Returns(new List<IFeature>());
+
+        _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Wait();
+
+        _searchRepository.Received(1).Search(searchTerm, Languages.ENGLISH, null, null, null, false);
+    }
 }

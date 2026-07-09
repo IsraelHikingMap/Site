@@ -33,4 +33,8 @@
     <ProjectReference Include="..\IsraelHiking.Common\IsraelHiking.Common.csproj" />
     <ProjectReference Include="..\IsraelHiking.DataAccessInterfaces\IsraelHiking.DataAccessInterfaces.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="IsraelHiking.DataAccess.Tests" />
+  </ItemGroup>
 </Project>
