@@ -121,6 +121,7 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
 
     var config = new ConfigurationBuilder()
         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .AddEnvironmentVariables()
         .Build();
     services.Configure<ConfigurationData>(config);
     var nonPublicConfiguration = new ConfigurationBuilder();
