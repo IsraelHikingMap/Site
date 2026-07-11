@@ -27,6 +27,7 @@
     "@capgo/background-geolocation": "^8.1.1",
     "@capgo/capacitor-compass": "^8.1.17",
     "@capgo/capacitor-inappbrowser": "^8.6.30",
+    "@garmin/fitsdk": "^21.208.0",
     "@mapbox/mapbox-gl-rtl-text": "^0.4.0",
     "@mapbox/vector-tile": "^2.0.4",
     "@maplibre/ngx-maplibre-gl": "^21.0.2",

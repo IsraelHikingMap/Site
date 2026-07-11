@@ -18,6 +18,7 @@ import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { LoggingService } from "../../services/logging.service";
 import { DatabaseService } from "../../services/database.service";
+import { DeviceServicesService } from "../../services/device-providers/device-services.service";
 import { initialState } from "../../reducers/initial-state";
 import {
     SetBatteryOptimizationTypeAction,
@@ -27,7 +28,8 @@ import {
     ToggleAutomaticRecordingUploadAction,
     ToggleGotLostWarningsAction
 } from "../../reducers/configuration.reducer";
-import type { ApplicationState, BatteryOptimizationType, Theme } from "../../models";
+import type { DeviceProvider } from "../../services/device-providers/device-provider";
+import type { ApplicationState, BatteryOptimizationType, DeviceServiceId, DeviceServiceToken, Theme } from "../../models";
 
 @Component({
     selector: "configuration-dialog",
@@ -42,6 +44,8 @@ export class ConfigurationDialogComponent {
     public units$: Observable<"metric" | "imperial">;
     public theme$: Observable<Theme>;
     public dateFormat$: Observable<string>;
+    public connectedDeviceServices$: Observable<Partial<Record<DeviceServiceId, DeviceServiceToken>>>;
+    public deviceProviders: DeviceProvider[];
     public manageSubscriptions: string;
     public username: string;
 
@@ -52,9 +56,12 @@ export class ConfigurationDialogComponent {
     private readonly toastService = inject(ToastService);
     private readonly logginService = inject(LoggingService);
     private readonly databaseService = inject(DatabaseService);
+    private readonly deviceServices = inject(DeviceServicesService);
     private readonly store = inject(Store);
 
     constructor() {
+        this.deviceProviders = this.deviceServices.getProviders();
+        this.connectedDeviceServices$ = this.store.select((state: ApplicationState) => state.userState.connectedDeviceServices);
         this.batteryOptimizationType$ = this.store.select((state: ApplicationState) => state.configuration.batteryOptimizationType);
         this.isAutomaticRecordingUpload$ = this.store.select((state: ApplicationState) => state.configuration.isAutomaticRecordingUpload);
         this.isGotLostWarnings$ = this.store.select((state: ApplicationState) => state.configuration.isGotLostWarnings);
@@ -112,5 +119,17 @@ export class ConfigurationDialogComponent {
             return;
         }
         this.store.dispatch(new SetDateFormatAction(dateFormat.replaceAll("Y", "y").replaceAll("D", "d")));
+    }
+
+    public async connectDevice(id: DeviceServiceId) {
+        try {
+            await this.deviceServices.connect(id);
+        } catch (ex) {
+            this.toastService.error(ex, this.resources.unableToConnectToService);
+        }
+    }
+
+    public disconnectDevice(id: DeviceServiceId) {
+        this.deviceServices.disconnect(id);
     }
 }

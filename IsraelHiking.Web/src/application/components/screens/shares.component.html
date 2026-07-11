@@ -122,7 +122,8 @@
         <div [id]="'share-url-' + shareUrl.id">
             <share-item [shareUrl]="shareUrl" [showMenu]="true" (delete)="deleteShareUrl(shareUrl)"
                 (editProperties)="openEditShareUrlDialog(shareUrl)" (open)="openShareUrl(shareUrl)"
-                (addToRoutes)="addShareUrlToRoutes(shareUrl)" (moveToRoute)="moveToShare(shareUrl)"></share-item>
+                (addToRoutes)="addShareUrlToRoutes(shareUrl)" (moveToRoute)="moveToShare(shareUrl)"
+                (sendToDevice)="sendShareUrlToDevice(shareUrl, $event)"></share-item>
         </div>
         } @empty {
         <p class="mx-2">{{resources.noShares}}</p>
