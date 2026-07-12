@@ -272,14 +272,13 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     private static Func<QueryContainerDescriptor<T>, QueryContainer> BuildExactNameFilter<T>(string searchTerm)
         where T : PointDocument
     {
-        var normalized = NormalizeSearchTerm(searchTerm);
-        if (string.IsNullOrEmpty(normalized))
+        if (string.IsNullOrEmpty(searchTerm))
         {
             return null;
         }
         var exactNameClauses = Languages.ArrayWithDefault
             .Select<string, Func<QueryContainerDescriptor<T>, QueryContainer>>(
-                language => f => f.Term("name." + language + ".keyword", normalized))
+                language => f => f.Term("name." + language + ".keyword", searchTerm))
             .ToArray();
         return f => f.Bool(b => b.Should(exactNameClauses).MinimumShouldMatch(1));
     }
@@ -377,8 +376,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         {
             return [];
         }
-        searchTerm = NormalizeSearchTerm(searchTerm);
-
         var response = await _elasticClient.SearchAsync<PointDocument>(s => s.Index(POINTS)
             .Size(NUMBER_OF_RESULTS)
             .TrackScores()
@@ -415,7 +412,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         {
             return [];
         }
-        searchTerm = NormalizeSearchTerm(searchTerm);
         var response = await _elasticClient.SearchAsync<PointDocument>(s => s.Index(POINTS)
             .Size(NUMBER_OF_RESULTS)
             .TrackScores()
@@ -433,8 +429,8 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         double? lat = null, double? lng = null, double? zoom = null, bool prefix = false)
     {
         var split = searchTerm.Split(',');
-        var place = NormalizeSearchTerm(split.Last().Trim());
-        searchTerm = NormalizeSearchTerm(string.Join(",", split.Take(split.Length - 1)).Trim());
+        var place = split.Last().Trim();
+        searchTerm = string.Join(",", split.Take(split.Length - 1)).Trim();
         if (string.IsNullOrWhiteSpace(searchTerm) || string.IsNullOrWhiteSpace(place))
         {
             return [];
@@ -566,19 +562,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     public Task StoreImage(ImageItem imageItem)
     {
         return _elasticClient.IndexAsync(imageItem, r => r.Index(IMAGES).Id(imageItem.Hash));
-    }
-
-    private static string NormalizeSearchTerm(string input)
-    {
-        if (string.IsNullOrEmpty(input)) return input;
-        // Strip niqqud (U+05B0-U+05C7) and other non-spacing marks (accents etc.)
-        return string.Concat(
-            input.Normalize(NormalizationForm.FormD)
-                 .Where(c => c < '\u05B0' || c > '\u05C7')
-                 .Where(c => CharUnicodeInfo.GetUnicodeCategory(c)
-                             != UnicodeCategory.NonSpacingMark)
-        ).Normalize(NormalizationForm.FormC)
-         .ToLowerInvariant();
     }
 
 }
