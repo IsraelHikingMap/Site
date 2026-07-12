@@ -1,4 +1,4 @@
-FROM node:26.4 AS build-node
+FROM node:26.5 AS build-node
 
 WORKDIR /angular
 COPY ./IsraelHiking.Web/ ./
