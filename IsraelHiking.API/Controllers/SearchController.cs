@@ -20,10 +20,7 @@ public class SearchController : ControllerBase
 {
     private readonly ISearchRepository _searchRepository;
 
-    /// <summary>
-    /// Controller's constructor
-    /// </summary>
-    /// <param name="searchRepository"></param>
+    /// <summary>Controller's constructor</summary>
     public SearchController(ISearchRepository searchRepository)
     {
         _searchRepository = searchRepository;
@@ -35,13 +32,19 @@ public class SearchController : ControllerBase
     /// <remarks>Searches for geolocations (points of interest) matching the given term in the given language.</remarks>
     /// <param name="term">A string to search for</param>
     /// <param name="language">The language to search in</param>
+    /// <param name="lat">Optional map center latitude — biases results toward this point</param>
+    /// <param name="lng">Optional map center longitude — biases results toward this point</param>
+    /// <param name="zoom">Optional map zoom level — controls how tight the proximity bias is</param>
+    /// <param name="prefix">True when the user is mid-typing (autocomplete) — favours prefix matches</param>
     /// <returns></returns>
-    // GET api/search/abc&language=en
     [HttpGet]
     [Route("{term}")]
-    public async Task<IEnumerable<SearchResultsPointOfInterest>> GetSearchResults(string term, string language)
+    public async Task<IEnumerable<SearchResultsPointOfInterest>> GetSearchResults(string term, string language,
+        [FromQuery] double? lat = null, [FromQuery] double? lng = null,
+        [FromQuery] double? zoom = null, [FromQuery] bool prefix = false)
     {
-        if ((term.StartsWith("\"") || term.StartsWith("״")) &&
+        if (term.Length >= 2 &&
+            (term.StartsWith("\"") || term.StartsWith("״")) &&
             (term.EndsWith("\"") || term.EndsWith("״")))
         {
             var exactFeatures = await _searchRepository.SearchExact(term.Substring(1, term.Length - 2), language);
@@ -50,7 +53,7 @@ public class SearchController : ControllerBase
 
         if (term.Count(c => c == ',') == 1)
         {
-            var featuresWithinPlaces = await _searchRepository.SearchPlaces(term, language);
+            var featuresWithinPlaces = await _searchRepository.SearchPlaces(term, language, lat, lng, zoom, prefix);
             if (featuresWithinPlaces.Count != 0)
             {
                 return await Task.WhenAll(featuresWithinPlaces.ToList().Select(ConvertFromFeature));
@@ -58,7 +61,7 @@ public class SearchController : ControllerBase
             term = term.Split(",").First().Trim();
         }
 
-        var features = await _searchRepository.Search(term, language);
+        var features = await _searchRepository.Search(term, language, lat, lng, zoom, prefix);
         return await Task.WhenAll(features.ToList().Select(ConvertFromFeature));
     }
 
