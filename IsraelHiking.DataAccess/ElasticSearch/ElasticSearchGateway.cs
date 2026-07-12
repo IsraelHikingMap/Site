@@ -81,11 +81,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
     }
 
-    private List<IFeature> HitsToFeatures(ISearchResponse<PointDocument> response, string language)
-    {
-        return response.Hits.Select(d => HitToFeature(d, language)).ToList();
-    }
-
     private IFeature HitToFeature(IHit<PointDocument> d, string language)
     {
         IFeature feature = new Feature(new Point(d.Source.Location[0], d.Source.Location[1]), new AttributesTable
@@ -392,7 +387,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             .Query(q => NameSearchWithScoring(q, searchTerm, lat, lng, zoom, prefix))
         );
         LogIfScoredQueryFailed(response, nameof(Search), searchTerm);
-        return HitsToFeatures(response, language);
+        return response.Hits.Select(d => HitToFeature(d, language)).ToList();
     }
 
     // HM TODO: remove this once we see that the new search is working as expected in production
@@ -432,7 +427,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                 .Name(SearchLanguageDetector.LanguageQueryName(l)))))
         );
         LogIfScoredQueryFailed(response, nameof(SearchExact), searchTerm);
-        return HitsToFeatures(response, language);
+        return response.Hits.Select(d => HitToFeature(d, language)).ToList();
     }
 
     public async Task<List<IFeature>> SearchPlaces(string searchTerm, string language,
@@ -512,7 +507,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
             )
         );
         LogIfScoredQueryFailed(response, nameof(SearchPlaces), searchTerm);
-        return HitsToFeatures(response, language);
+        return response.Hits.Select(d => HitToFeature(d, language)).ToList();
     }
 
     public async Task<string> GetContainerName(Coordinate[] coordinates, string language)
