@@ -66,11 +66,11 @@ export class PublicPointOfInterestEditComponent implements OnInit {
             selectedCategory = this.categories.find(categoryToFind => categoryToFind.name === "Other");
         }
 
-        if (this.info().id && selectedIcon == null) {
+        if (this.isNew() && selectedIcon == null) {
+            selectedIcon = selectedCategory.selectableItems[0];
+        } else if (!this.isNew() && selectedIcon == null) {
             selectedIcon = { icon: this.info().icon, color: "black", label: this.resources.other } as IconColorLabel;
             selectedCategory.selectableItems.push(selectedIcon);
-        } else if (!this.info().id && selectedIcon == null) {
-            selectedIcon = selectedCategory.selectableItems[0];
         }
         this.selectCategory({ value: selectedCategory } as MatSelectChange);
         this.selectIcon(selectedIcon);
@@ -109,10 +109,10 @@ export class PublicPointOfInterestEditComponent implements OnInit {
     public async save() {
         this.isLoading = true;
         try {
-            if (this.info().id && !validateUuid(this.info().id)) {
-                await this.poiService.updateComplexPoi(this.info(), this.updateLocation);
-            } else {
+            if (this.isNew()) {
                 await this.poiService.addComplexPoi(this.info());
+            } else {
+                await this.poiService.updateComplexPoi(this.info(), this.updateLocation);
             }
             this.toastService.success(this.resources.dataUpdatedSuccessfullyItWillTakeTimeToSeeIt);
             this.close();
@@ -121,5 +121,9 @@ export class PublicPointOfInterestEditComponent implements OnInit {
         } finally {
             this.isLoading = false;
         }
+    }
+
+    private isNew(): boolean {
+        return !this.info().id || validateUuid(this.info().id);
     }
 }
