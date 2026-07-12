@@ -19,4 +19,6 @@ public class PointDocument
     public string Image { get; set; }
     [JsonPropertyName("location")]
     public double[] Location { get; set; }
+    [JsonPropertyName("poiProminence")]
+    public float? Prominence { get; set; }
 }
