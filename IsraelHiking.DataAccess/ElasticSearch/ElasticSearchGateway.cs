@@ -266,7 +266,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     {
         fns.FieldValueFactor(fv => fv
             .Field(PROMINENCE_FIELD)
-            .Missing(0)
             .Factor(WEIGHT_PROMINENCE));
     }
 
@@ -420,7 +419,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         var response = await _elasticClient.SearchAsync<PointDocument>(s => s.Index(POINTS)
             .Size(NUMBER_OF_RESULTS)
             .TrackScores()
-            .Sort(f => f.Descending("_score").Field(ff => ff.Field("poiProminence").Descending().UnmappedType(FieldType.Float)))
+            .Sort(f => f.Descending("_score").Field(ff => ff.Field("poiProminence").Descending()))
             .Query(q => LanguageDisMax(q, null, (qq, l) => qq.MatchPhrase(mp => mp
                 .Field(new Field("name." + l + ".keyword"))
                 .Query(searchTerm)

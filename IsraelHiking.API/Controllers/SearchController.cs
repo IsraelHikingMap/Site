@@ -20,7 +20,10 @@ public class SearchController : ControllerBase
 {
     private readonly ISearchRepository _searchRepository;
 
-    /// <summary>Controller's constructor</summary>
+    /// <summary>
+    /// Controller's constructor
+    /// </summary>
+    /// <param name="searchRepository"></param>
     public SearchController(ISearchRepository searchRepository)
     {
         _searchRepository = searchRepository;
@@ -37,6 +40,7 @@ public class SearchController : ControllerBase
     /// <param name="zoom">Optional map zoom level — controls how tight the proximity bias is</param>
     /// <param name="prefix">True when the user is mid-typing (autocomplete) — favours prefix matches</param>
     /// <returns></returns>
+    // GET api/search/abc&language=en
     [HttpGet]
     [Route("{term}")]
     public async Task<IEnumerable<SearchResultsPointOfInterest>> GetSearchResults(string term, string language,
