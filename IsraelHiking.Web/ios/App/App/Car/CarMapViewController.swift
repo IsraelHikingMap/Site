@@ -362,9 +362,9 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         points.circleStrokeWidth = NSExpression(forConstantValue: 3)
 
         let pointsCasing = MLNCircleStyleLayer(identifier: Const.routePointsCasingLayer, source: pointSource)
-        pointsCasing.circleColor = NSExpression(forConstantValue: "transparent")
+        pointsCasing.circleColor = NSExpression(forConstantValue: UIColor.clear)
         pointsCasing.circleRadius = NSExpression(forConstantValue: 10)
-        pointsCasing.circleStrokeColor = NSExpression(forConstantValue: "white")
+        pointsCasing.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
         pointsCasing.circleStrokeOpacity  = NSExpression(forConstantValue: 0.5)
         pointsCasing.circleStrokeWidth = NSExpression(forConstantValue: 1)
 
