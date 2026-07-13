@@ -25,6 +25,33 @@ public class SearchControllerTests
     }
 
     [TestMethod]
+    public void GetSearchResults_LoneQuoteTerm_ShouldSearchInsteadOfThrowing()
+    {
+        _searchRepository.Search(Arg.Any<string>(), Languages.ENGLISH).Returns(new List<IFeature>());
+
+        var quoteResults = _controller.GetSearchResults("\"", Languages.ENGLISH).Result;
+        var gershayimResults = _controller.GetSearchResults("״", Languages.ENGLISH).Result;
+
+        Assert.IsNotNull(quoteResults);
+        Assert.AreEqual(0, quoteResults.Count());
+        Assert.IsNotNull(gershayimResults);
+        Assert.AreEqual(0, gershayimResults.Count());
+        _searchRepository.DidNotReceive().SearchExact(Arg.Any<string>(), Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void GetSearchResults_UsingGershayim_ShouldGetExactMatch()
+    {
+        var searchTerm = "״שלום״";
+        _searchRepository.SearchExact("שלום", Languages.HEBREW).Returns(new List<IFeature>());
+
+        var results = _controller.GetSearchResults(searchTerm, Languages.HEBREW).Result;
+
+        Assert.IsNotNull(results);
+        _searchRepository.Received(1).SearchExact("שלום", Languages.HEBREW);
+    }
+
+    [TestMethod]
     public void GetSearchResults_ShouldPassRequestToGateway_NoResultsFound()
     {
         var list = new List<IFeature>();
@@ -269,5 +296,49 @@ public class SearchControllerTests
 
         Assert.IsNotNull(results);
         Assert.IsTrue(results.First().DisplayName.Contains(place));
+    }
+
+    [TestMethod]
+    public void GetSearchResults_WithMapCenterAndPrefix_ShouldForwardThemToTheRepository()
+    {
+        var searchTerm = "Bear Lake";
+        _searchRepository.Search(searchTerm, Languages.ENGLISH,
+            Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<bool>())
+            .Returns(new List<IFeature>());
+
+        _controller.GetSearchResults(searchTerm, Languages.ENGLISH,
+            lat: 40.3120, lng: -105.6457, zoom: 12, prefix: true).Wait();
+
+        _searchRepository.Received(1).Search(searchTerm, Languages.ENGLISH, 40.3120, -105.6457, 12, true);
+    }
+
+    [TestMethod]
+    public void GetSearchResults_WithoutMapCenter_ShouldForwardDefaults()
+    {
+        var searchTerm = "Pikes Peak";
+        _searchRepository.Search(searchTerm, Languages.ENGLISH,
+            Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<bool>())
+            .Returns(new List<IFeature>());
+
+        _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Wait();
+
+        _searchRepository.Received(1).Search(searchTerm, Languages.ENGLISH, null, null, null, false);
+    }
+
+    [TestMethod]
+    public void GetSearchResults_CommaTermWithMapCenterAndPrefix_ShouldForwardThemToSearchPlaces()
+    {
+        var searchTerm = "trailhead, mesa";
+        _searchRepository.SearchPlaces(searchTerm, Languages.ENGLISH,
+            Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<bool>())
+            .Returns(new List<IFeature>());
+        _searchRepository.Search(Arg.Any<string>(), Arg.Any<string>(),
+            Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<bool>())
+            .Returns(new List<IFeature>());
+
+        _controller.GetSearchResults(searchTerm, Languages.ENGLISH,
+            lat: 33.4152, lng: -111.8315, zoom: 13, prefix: true).Wait();
+
+        _searchRepository.Received(1).SearchPlaces(searchTerm, Languages.ENGLISH, 33.4152, -111.8315, 13, true);
     }
 }
