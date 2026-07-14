@@ -128,7 +128,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         }
         var response = await SearchTemplate<PointDocument>(POINTS, POINTS_SEARCH_TEMPLATE,
             PointsSearchParameters(searchTerm, lat, lng, zoom, prefix));
-        LogIfScoredQueryFailed(response, nameof(Search), searchTerm);
         return response.Hits.Select(d => HitToFeature(d, language)).ToList();
     }
 
@@ -140,7 +139,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         }
         var response = await SearchTemplate<PointDocument>(POINTS, POINTS_SEARCH_EXACT_TEMPLATE,
             new Dictionary<string, object> { ["searchTerm"] = searchTerm });
-        LogIfScoredQueryFailed(response, nameof(SearchExact), searchTerm);
         return response.Hits.Select(d => HitToFeature(d, language)).ToList();
     }
 
@@ -160,7 +158,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                 ["place"] = place,
                 ["prefix"] = prefix
             });
-        LogIfScoredQueryFailed(placesResponse, nameof(SearchPlaces) + ".container", place);
         if (placesResponse.Documents.Count == 0)
         {
             return [];
@@ -169,7 +166,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         parameters["hasPlaceShape"] = true;
         parameters["placeShape"] = ToShapeParameter(placesResponse.Documents.First().BBox);
         var response = await SearchTemplate<PointDocument>(POINTS, POINTS_SEARCH_TEMPLATE, parameters);
-        LogIfScoredQueryFailed(response, nameof(SearchPlaces), searchTerm);
         return response.Hits.Select(d => HitToFeature(d, language)).ToList();
     }
 
@@ -204,26 +200,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         MultiPolygonBBoxShape multiPolygon => new() { ["type"] = shape.Type, ["coordinates"] = multiPolygon.Coordinates },
         _ => throw new Exception("Unsupported shape type")
     };
-
-    // HM TODO: remove this once we see that the new search is working as expected in production
-    private void LogIfScoredQueryFailed<T>(ISearchResponse<T> response, string operation, string searchTerm) where T : class
-    {
-        if (!response.IsValid)
-        {
-            var reason = response.ServerError?.ToString()
-                ?? response.OriginalException?.ToString()
-                ?? "unknown failure (no ServerError, no OriginalException)";
-            logger.LogError("Scored {Operation}('{Term}') failed: {Err}", operation, searchTerm, reason);
-            return;
-        }
-        var shards = response.Shards;
-        if (shards is not null && shards.Failed > 0)
-        {
-            logger.LogWarning(
-                "Scored {Operation}('{Term}') succeeded on {Successful}/{Total} shards; {Failed} failed, results are partial",
-                operation, searchTerm, shards.Successful, shards.Total, shards.Failed);
-        }
-    }
 
     public async Task<string> GetContainerName(Coordinate[] coordinates, string language)
     {
