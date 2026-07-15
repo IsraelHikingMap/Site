@@ -20,7 +20,7 @@ export class SearchResultsProvider {
 
     private requestsQueue: string[] = [];
 
-    public async getResults(searchTerm: string, isPrefix: boolean): Promise<SearchResultsPointOfInterest[]> {
+    public async getResults(searchTerm: string, isPrefix: boolean, useMapCenter: boolean): Promise<SearchResultsPointOfInterest[]> {
         const searchWithoutBadCharacters = searchTerm.replace("/", " ").replace("\t", " ").trim();
         if (searchWithoutBadCharacters.length <= 2) {
             return [];
@@ -43,13 +43,16 @@ export class SearchResultsProvider {
                     hasExtraData: false
                 }];
             }
-            const location = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
-            const params = new HttpParams()
+            let params = new HttpParams()
                 .set("language", this.resources.getCurrentLanguageCodeSimplified())
-                .set("lat", location.latitude)
-                .set("lng", location.longitude)
-                .set("zoom", location.zoom)
                 .set("prefix", isPrefix);
+            if (useMapCenter) {
+                const location = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
+                params = params
+                    .set("lat", location.latitude)
+                    .set("lng", location.longitude)
+                    .set("zoom", location.zoom);
+            }
             const results = await firstValueFrom(this.httpClient.get<SearchResultsPointOfInterest[]>(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
                 params
             }).pipe(timeout(5000)));

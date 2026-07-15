@@ -113,7 +113,7 @@ export class SearchComponent {
 
     public async search(searchContext: SearchContext, isPrefix: boolean) {
         try {
-            const results = await this.searchResultsProvider.getResults(searchContext.searchTerm, isPrefix);
+            const results = await this.searchResultsProvider.getResults(searchContext.searchTerm, isPrefix, this.shouldUseMapCenter());
             if (results == null) {
                 return;
             }
@@ -203,6 +203,16 @@ export class SearchComponent {
     public isPoisSearch() {
         const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
         return currentUrl !== RouteStrings.ROUTE_SHARES && currentUrl !== RouteStrings.ROUTE_TRACES;
+    }
+
+    /** 
+     * Use map center only when the map is visible
+     */
+    private shouldUseMapCenter(): boolean {
+        const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
+        return currentUrl !== RouteStrings.ROUTE_ROOT &&
+            currentUrl !== RouteStrings.ROUTE_LANDING &&
+            currentUrl !== RouteStrings.ROUTE_ABOUT;
     }
 
     public updateSearchTerm(searchTerm: string) {

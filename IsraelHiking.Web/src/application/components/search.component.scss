@@ -21,6 +21,11 @@
     padding-bottom: 5px !important;
 }
 
+.search-result-option .mdc-list-item__primary-text {
+    flex: 1 1 auto;
+    margin-right: 0;
+}
+
 .search-result-option i {
     padding: 0 5px 0 0;
 }
