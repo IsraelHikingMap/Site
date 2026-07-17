@@ -1,13 +1,9 @@
-﻿using IsraelHiking.Common;
-using IsraelHiking.Common.Extensions;
-using IsraelHiking.Common.Poi;
+﻿using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using NetTopologySuite.Features;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using IsraelHiking.API.Services;
 
 namespace IsraelHiking.API.Controllers;
 
@@ -51,57 +47,19 @@ public class SearchController : ControllerBase
             (term.StartsWith("\"") || term.StartsWith("״")) &&
             (term.EndsWith("\"") || term.EndsWith("״")))
         {
-            var exactFeatures = await _searchRepository.SearchExact(term.Substring(1, term.Length - 2), language);
-            return await Task.WhenAll(exactFeatures.ToList().Select(ConvertFromFeature));
+            return await _searchRepository.SearchExact(term.Substring(1, term.Length - 2), language);
         }
 
-        if (term.Count(c => c == ',') == 1)
+        if (term.Contains(','))
         {
-            var featuresWithinPlaces = await _searchRepository.SearchPlaces(term, language, lat, lng, zoom, prefix);
-            if (featuresWithinPlaces.Count != 0)
+            var resultsWithinPlaces = await _searchRepository.SearchPlaces(term, language, lat, lng, zoom, prefix);
+            if (resultsWithinPlaces.Count != 0)
             {
-                return await Task.WhenAll(featuresWithinPlaces.ToList().Select(ConvertFromFeature));
+                return resultsWithinPlaces;
             }
             term = term.Split(",").First().Trim();
         }
 
-        var features = await _searchRepository.Search(term, language, lat, lng, zoom, prefix);
-        return await Task.WhenAll(features.ToList().Select(ConvertFromFeature));
-    }
-
-    private async Task<SearchResultsPointOfInterest> ConvertFromFeature(IFeature feature)
-    {
-        string language = feature.Attributes[FeatureAttributes.SEARCH_LANGUAGE].ToString();
-        var title = feature.GetTitle(language);
-        var geoLocation = feature.GetLocation();
-        var latLng = new LatLng(geoLocation.Y, geoLocation.X);
-        var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
-        if (string.IsNullOrWhiteSpace(icon))
-        {
-            icon = PointsOfInterestProvider.SEARCH_ICON;
-        }
-        var searchResultsPoi = new SearchResultsPointOfInterest
-        {
-            Id = feature.Attributes[FeatureAttributes.ID].ToString(),
-            Title = title,
-            Icon = icon,
-            IconColor = feature.Attributes[FeatureAttributes.POI_ICON_COLOR].ToString(),
-            Source = feature.Attributes[FeatureAttributes.POI_SOURCE].ToString(),
-            Location = latLng,
-            HasExtraData = feature.HasExtraData(language)
-        };
-        searchResultsPoi.DisplayName = await GetDisplayName(feature, language, searchResultsPoi.Title);
-        return searchResultsPoi;
-    }
-
-    private async Task<string> GetDisplayName(IFeature feature, string language, string title)
-    {
-        var displayName = title;
-        var containerTitle = await _searchRepository.GetContainerName([feature.Geometry.Coordinate], language);
-        if (!string.IsNullOrWhiteSpace(containerTitle))
-        {
-            displayName += ", " + containerTitle;
-        }
-        return displayName;
+        return await _searchRepository.Search(term, language, lat, lng, zoom, prefix);
     }
 }

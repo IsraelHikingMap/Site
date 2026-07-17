@@ -13,6 +13,10 @@ public static class SearchLanguageDetector
     public static string LanguageQueryName(string language, string tier) =>
         LANGUAGE_QUERY_PREFIX + language + ":" + tier;
 
+    /// <summary>
+    /// The language actually matched by the query drives which localized name/description/place
+    /// we show, so the result reads in the language the user searched in.
+    /// </summary>
     public static string GetBestMatchLanguage(IReadOnlyCollection<string> matchedQueries, string fallbackLanguage)
     {
         if (matchedQueries == null || matchedQueries.Count == 0)
