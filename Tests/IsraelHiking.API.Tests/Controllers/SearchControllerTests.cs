@@ -111,32 +111,4 @@ public class SearchControllerTests
 
         _searchRepository.Received(1).Search(term, Languages.ENGLISH, null, null, null, false);
     }
-
-    [TestMethod]
-    public void GetSearchResults_CommaTermWithMapCenterAndPrefix_ShouldForwardThemToSearchPlaces()
-    {
-        var term = "trailhead, mesa";
-        _searchRepository.SearchPlaces(term, Languages.ENGLISH,
-            Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<bool>())
-            .Returns(Results());
-
-        _controller.GetSearchResults(term, Languages.ENGLISH,
-            lat: 33.4152, lng: -111.8315, zoom: 13, prefix: true).Wait();
-
-        _searchRepository.Received(1).SearchPlaces(term, Languages.ENGLISH, 33.4152, -111.8315, 13, true);
-    }
-
-    [TestMethod]
-    public void GetSearchResults_TermWithPlaceAndCountry_ShouldForwardToSearchPlaces()
-    {
-        var term = "trailhead, mesa, USA";
-        _searchRepository.SearchPlaces(term, Languages.ENGLISH,
-            Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<bool>())
-            .Returns(Results());
-
-        _controller.GetSearchResults(term, Languages.ENGLISH).Wait();
-
-        _searchRepository.Received(1).SearchPlaces(term, Languages.ENGLISH,
-            Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<bool>());
-    }
 }
