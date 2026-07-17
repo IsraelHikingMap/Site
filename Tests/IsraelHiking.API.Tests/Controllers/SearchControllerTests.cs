@@ -1,10 +1,8 @@
-﻿using IsraelHiking.API.Controllers;
+using IsraelHiking.API.Controllers;
 using IsraelHiking.Common;
-using IsraelHiking.Common.Extensions;
+using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using NSubstitute;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,321 +22,121 @@ public class SearchControllerTests
         _controller = new SearchController(_searchRepository);
     }
 
+    private static List<SearchResultsPointOfInterest> Results(params string[] ids) =>
+        ids.Select(id => new SearchResultsPointOfInterest { Id = id }).ToList();
+
     [TestMethod]
-    public void GetSearchResults_LoneQuoteTerm_ShouldSearchInsteadOfThrowing()
+    public void GetSearchResults_LoneQuoteTerm_ShouldSearchInsteadOfExactMatch()
     {
-        _searchRepository.Search(Arg.Any<string>(), Languages.ENGLISH).Returns(new List<IFeature>());
+        _searchRepository.Search(Arg.Any<string>(), Languages.ENGLISH).Returns(Results());
 
         var quoteResults = _controller.GetSearchResults("\"", Languages.ENGLISH).Result;
         var gershayimResults = _controller.GetSearchResults("״", Languages.ENGLISH).Result;
 
-        Assert.IsNotNull(quoteResults);
         Assert.AreEqual(0, quoteResults.Count());
-        Assert.IsNotNull(gershayimResults);
         Assert.AreEqual(0, gershayimResults.Count());
         _searchRepository.DidNotReceive().SearchExact(Arg.Any<string>(), Arg.Any<string>());
     }
 
     [TestMethod]
-    public void GetSearchResults_UsingGershayim_ShouldGetExactMatch()
+    public void GetSearchResults_QuotedTerm_ShouldGetExactMatch()
     {
-        var searchTerm = "״שלום״";
-        _searchRepository.SearchExact("שלום", Languages.HEBREW).Returns(new List<IFeature>());
+        _searchRepository.SearchExact("שלום", Languages.HEBREW).Returns(Results("1"));
 
-        var results = _controller.GetSearchResults(searchTerm, Languages.HEBREW).Result;
+        var results = _controller.GetSearchResults("״שלום״", Languages.HEBREW).Result;
 
-        Assert.IsNotNull(results);
+        Assert.AreEqual(1, results.Count());
         _searchRepository.Received(1).SearchExact("שלום", Languages.HEBREW);
     }
 
     [TestMethod]
-    public void GetSearchResults_ShouldPassRequestToGateway_NoResultsFound()
+    public void GetSearchResults_RegularTerm_ShouldReturnSearchResults()
     {
-        var list = new List<IFeature>();
-        var searchTerm = "searchTerm";
-        _searchRepository.Search(searchTerm, Languages.ENGLISH).Returns(list);
+        _searchRepository.Search("searchTerm", Languages.ENGLISH).Returns(Results("1", "2"));
 
-        var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result;
+        var results = _controller.GetSearchResults("searchTerm", Languages.ENGLISH).Result;
 
-        Assert.IsNotNull(results);
-        Assert.AreEqual(list.Count, results.Count());
+        Assert.AreEqual(2, results.Count());
     }
 
     [TestMethod]
-    public void GetSearchResults_SearchWillReturnedDifferentLanguage_UseIt()
+    public void GetSearchResults_PlaceTermWithResults_ShouldReturnThePlaceResults()
     {
-        var featureLocation = new Coordinate(0, 0);
-        var feature = new Feature(new Point(featureLocation), new AttributesTable
-        {
-            {FeatureAttributes.NAME, "name"},
-            {FeatureAttributes.NAME + ":ru", "name-russian"},
-            {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
-            {FeatureAttributes.POI_SOURCE, Sources.OSM},
-            {FeatureAttributes.POI_ICON, string.Empty},
-            {FeatureAttributes.POI_ICON_COLOR, "black"},
-            {FeatureAttributes.ID, "id"},
-            {FeatureAttributes.SEARCH_LANGUAGE, Languages.RUSSIAN}
-        });
-        feature.SetLocation(featureLocation);
-        var list = new List<IFeature> { feature };
-        var searchTerm = "searchTerm";
-        _searchRepository.Search(searchTerm, Languages.ENGLISH).Returns(list);
+        const string term = "searchTerm, place";
+        _searchRepository.SearchPlaces(term, Languages.ENGLISH).Returns(Results("1"));
 
-        var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result;
+        var results = _controller.GetSearchResults(term, Languages.ENGLISH).Result;
 
-        Assert.IsNotNull(results);
-        Assert.AreEqual(list.Count, results.Count());
-        Assert.AreEqual("name-russian", results.First().Title);
+        Assert.AreEqual(1, results.Count());
+        _searchRepository.DidNotReceive().Search(Arg.Any<string>(), Arg.Any<string>(),
+            Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<bool>());
     }
 
     [TestMethod]
-    public void GetSearchResults_SearchWillReturnedDefaultLanguage_UseIt()
+    public void GetSearchResults_PlaceTermWithoutResults_ShouldFallBackToRegularSearch()
     {
-        var featureLocation = new Coordinate(0, 0);
-        var feature = new Feature(new Point(featureLocation), new AttributesTable
-        {
-            {FeatureAttributes.NAME, "name"},
-            {FeatureAttributes.NAME + ":ru", "name-russian"},
-            {FeatureAttributes.NAME + ":en", "name-english"},
-            {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
-            {FeatureAttributes.POI_SOURCE, Sources.OSM},
-            {FeatureAttributes.POI_ICON, string.Empty},
-            {FeatureAttributes.POI_ICON_COLOR, "black"},
-            {FeatureAttributes.ID, "id"},
-            {FeatureAttributes.SEARCH_LANGUAGE, Languages.DEFAULT}
-        });
-        feature.SetLocation(featureLocation);
-        var list = new List<IFeature> { feature };
-        var searchTerm = "searchTerm";
-        _searchRepository.Search(searchTerm, Languages.ENGLISH).Returns(list);
+        const string term = "searchTerm, place";
+        _searchRepository.SearchPlaces(term, Languages.ENGLISH).Returns(Results());
+        _searchRepository.Search("searchTerm", Languages.ENGLISH).Returns(Results("1"));
 
-        var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result;
+        var results = _controller.GetSearchResults(term, Languages.ENGLISH).Result;
 
-        Assert.IsNotNull(results);
-        Assert.AreEqual(list.Count, results.Count());
-        Assert.AreEqual("name", results.First().Title);
+        Assert.AreEqual(1, results.Count());
+        _searchRepository.Received(1).Search("searchTerm", Languages.ENGLISH);
     }
 
     [TestMethod]
-    public void GetSearchResults_UsingQuotes_ShouldGetExactMatch()
+    public void GetSearchResults_WithMapCenterAndPrefix_ShouldForwardThemToSearch()
     {
-        var list = new List<IFeature>();
-        var searchTerm = "\"searchTerm\"";
-        _searchRepository.SearchExact(Arg.Any<string>(), Languages.ENGLISH).Returns(list);
-
-        var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result;
-
-        Assert.IsNotNull(results);
-        Assert.AreEqual(list.Count, results.Count());
-        _searchRepository.Received(1).SearchExact(Arg.Any<string>(), Languages.ENGLISH);
-    }
-
-    [TestMethod]
-    public void GetSearchResults_WithPlaceNameThatDoNotExist_ShouldReturnRegularResults()
-    {
-        const string place = "place";
-        const string searchTerm = "searchTerm, " + place;
-        var featureLocation = new Coordinate(0.5, 0.5);
-        var featureInPlace = new Feature(new Point(featureLocation), new AttributesTable
-        {
-            {FeatureAttributes.NAME, "name"},
-            {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
-            {FeatureAttributes.POI_SOURCE, Sources.OSM},
-            {FeatureAttributes.POI_ICON, string.Empty},
-            {FeatureAttributes.POI_ICON_COLOR, "black"},
-            {FeatureAttributes.ID, "id"},
-            {FeatureAttributes.SEARCH_LANGUAGE, Languages.ENGLISH}
-        });
-        featureInPlace.SetLocation(featureLocation);
-        var featuresInsidePlace = new List<Feature> { featureInPlace };
-        _searchRepository.SearchPlaces(searchTerm, Languages.ENGLISH).Returns([]);
-        _searchRepository.Search("searchTerm", Languages.ENGLISH).Returns([featureInPlace]);
-        _searchRepository.GetContainerName([featureLocation], Languages.ENGLISH).Returns(string.Empty);
-
-        var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result.ToList();
-
-        Assert.IsNotNull(results);
-        Assert.AreEqual(featuresInsidePlace.Count, results.Count);
-        Assert.IsFalse(results.First().DisplayName.Contains(place));
-    }
-
-    [TestMethod]
-    public void GetSearchResults_WithPlaceName_ShouldSearchOnlyPlacesInThatPlace()
-    {
-        const string place = "place";
-        const string searchTerm = "searchTerm, " + place;
-        var placeFeature = new Feature(new Polygon(new LinearRing([
-            new Coordinate(0, 0),
-            new Coordinate(0, 1),
-            new Coordinate(2, 0),
-            new Coordinate(0, 0)
-        ])), new AttributesTable
-        {
-            {FeatureAttributes.NAME, place},
-            {FeatureAttributes.ID, "place_id" }
-        });
-        var featureLocation = new Coordinate(0.5, 0.5);
-        var featureInPlace = new Feature(new Point(featureLocation), new AttributesTable
-        {
-            {FeatureAttributes.NAME, "name"},
-            {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
-            {FeatureAttributes.POI_SOURCE, Sources.OSM},
-            {FeatureAttributes.POI_ICON, string.Empty},
-            {FeatureAttributes.POI_ICON_COLOR, "black"},
-            {FeatureAttributes.ID, "id"},
-            {FeatureAttributes.SEARCH_LANGUAGE, Languages.ENGLISH}
-        });
-        featureInPlace.SetLocation(featureLocation);
-        var featuresInsidePlace = new List<IFeature> { featureInPlace };
-        _searchRepository.SearchPlaces(searchTerm, Languages.ENGLISH).Returns(featuresInsidePlace);
-        _searchRepository.GetContainerName(Arg.Any<Coordinate[]>(), Languages.ENGLISH).Returns(placeFeature.GetTitle(Languages.ENGLISH));
-
-        var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result.ToList();
-
-        Assert.IsNotNull(results);
-        Assert.AreEqual(featuresInsidePlace.Count, results.Count);
-        Assert.IsTrue(results.First().DisplayName.Contains(place));
-    }
-
-    [TestMethod]
-    public void GetSearchResults_GeometryCollection_ShouldNotFail()
-    {
-        const string place = "place";
-        const string searchTerm = "searchTerm, " + place;
-        var placeFeature = new Feature(new Polygon(new LinearRing([
-            new Coordinate(0, 0),
-            new Coordinate(0, 1),
-            new Coordinate(2, 0),
-            new Coordinate(0, 0)
-        ])), new AttributesTable
-        {
-            {FeatureAttributes.NAME, place},
-            {FeatureAttributes.ID, "place_id" }
-        });
-        var featureLocation = new Coordinate(0.5, 0.5);
-        var featureInPlace = new Feature(new GeometryCollection([
-                new Point(featureLocation)
-            ]), new AttributesTable
-            {
-                {FeatureAttributes.NAME, "name"},
-                {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
-                {FeatureAttributes.POI_SOURCE, Sources.OSM},
-                {FeatureAttributes.POI_ICON, string.Empty},
-                {FeatureAttributes.POI_ICON_COLOR, "black"},
-                {FeatureAttributes.ID, "id"},
-                {FeatureAttributes.SEARCH_LANGUAGE, Languages.ENGLISH}
-            }
-        );
-        featureInPlace.SetLocation(featureLocation);
-        var featuresInsidePlace = new List<IFeature> { featureInPlace };
-        _searchRepository.SearchPlaces(searchTerm, Languages.ENGLISH).Returns(featuresInsidePlace);
-        _searchRepository.GetContainerName(Arg.Any<Coordinate[]>(), Arg.Any<string>()).Returns(placeFeature.GetTitle(Languages.ENGLISH));
-
-        var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result.ToList();
-
-        Assert.IsNotNull(results);
-        Assert.AreEqual(featuresInsidePlace.Count, results.Count);
-        Assert.IsTrue(results.First().DisplayName.Contains(place));
-    }
-
-    [TestMethod]
-    public void GetSearchResults_GeometryCollectionNoContainers_ShouldNotFail()
-    {
-        const string place = "place";
-        const string searchTerm = "searchTerm, " + place;
-        var featureLocation = new Coordinate(0.5, 0.5);
-        var featureInPlace = new Feature(new GeometryCollection([
-                new Point(featureLocation),
-                new LineString([new Coordinate(0,0), new Coordinate(3,3)])
-            ]), new AttributesTable
-            {
-                {FeatureAttributes.NAME, "name"},
-                {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
-                {FeatureAttributes.POI_SOURCE, Sources.OSM},
-                {FeatureAttributes.POI_ICON, string.Empty},
-                {FeatureAttributes.POI_ICON_COLOR, "black"},
-                {FeatureAttributes.ID, "id"},
-                {FeatureAttributes.SEARCH_LANGUAGE, Languages.ENGLISH}
-            }
-        );
-        featureInPlace.SetLocation(featureLocation);
-        var featuresInsidePlace = new List<IFeature> { featureInPlace };
-        _searchRepository.SearchPlaces(searchTerm, Languages.ENGLISH).Returns(featuresInsidePlace);
-
-        var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result.ToList();
-
-        Assert.IsNotNull(results);
-        Assert.AreEqual(featuresInsidePlace.Count, results.Count);
-        Assert.IsFalse(results.First().DisplayName.Contains(place));
-    }
-
-    [TestMethod]
-    public void GetSearchResults_ContainerHasNoName_ShouldNotIAddItToDisplayName()
-    {
-        const string place = "place";
-        const string searchTerm = "searchTerm";
-        var featureLocation = new Coordinate(0.5, 0.5);
-        var featureInPlace = new Feature(new Point(featureLocation), new AttributesTable
-        {
-            {FeatureAttributes.NAME, "name"},
-            {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
-            {FeatureAttributes.POI_SOURCE, Sources.OSM},
-            {FeatureAttributes.POI_ICON, string.Empty},
-            {FeatureAttributes.POI_ICON_COLOR, "black"},
-            {FeatureAttributes.ID, "id"},
-            {FeatureAttributes.SEARCH_LANGUAGE, Languages.ENGLISH}
-        });
-        featureInPlace.SetLocation(featureLocation);
-        _searchRepository.Search(searchTerm, Languages.ENGLISH).Returns([featureInPlace]);
-        _searchRepository.GetContainerName(Arg.Any<Coordinate[]>(), Arg.Any<string>()).Returns(place);
-
-        var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result;
-
-        Assert.IsNotNull(results);
-        Assert.IsTrue(results.First().DisplayName.Contains(place));
-    }
-
-    [TestMethod]
-    public void GetSearchResults_WithMapCenterAndPrefix_ShouldForwardThemToTheRepository()
-    {
-        var searchTerm = "Bear Lake";
-        _searchRepository.Search(searchTerm, Languages.ENGLISH,
+        var term = "Bear Lake";
+        _searchRepository.Search(term, Languages.ENGLISH,
             Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<bool>())
-            .Returns(new List<IFeature>());
+            .Returns(Results());
 
-        _controller.GetSearchResults(searchTerm, Languages.ENGLISH,
+        _controller.GetSearchResults(term, Languages.ENGLISH,
             lat: 40.3120, lng: -105.6457, zoom: 12, prefix: true).Wait();
 
-        _searchRepository.Received(1).Search(searchTerm, Languages.ENGLISH, 40.3120, -105.6457, 12, true);
+        _searchRepository.Received(1).Search(term, Languages.ENGLISH, 40.3120, -105.6457, 12, true);
     }
 
     [TestMethod]
     public void GetSearchResults_WithoutMapCenter_ShouldForwardDefaults()
     {
-        var searchTerm = "Pikes Peak";
-        _searchRepository.Search(searchTerm, Languages.ENGLISH,
+        var term = "Pikes Peak";
+        _searchRepository.Search(term, Languages.ENGLISH,
             Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<bool>())
-            .Returns(new List<IFeature>());
+            .Returns(Results());
 
-        _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Wait();
+        _controller.GetSearchResults(term, Languages.ENGLISH).Wait();
 
-        _searchRepository.Received(1).Search(searchTerm, Languages.ENGLISH, null, null, null, false);
+        _searchRepository.Received(1).Search(term, Languages.ENGLISH, null, null, null, false);
     }
 
     [TestMethod]
     public void GetSearchResults_CommaTermWithMapCenterAndPrefix_ShouldForwardThemToSearchPlaces()
     {
-        var searchTerm = "trailhead, mesa";
-        _searchRepository.SearchPlaces(searchTerm, Languages.ENGLISH,
+        var term = "trailhead, mesa";
+        _searchRepository.SearchPlaces(term, Languages.ENGLISH,
             Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<bool>())
-            .Returns(new List<IFeature>());
-        _searchRepository.Search(Arg.Any<string>(), Arg.Any<string>(),
-            Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<bool>())
-            .Returns(new List<IFeature>());
+            .Returns(Results());
 
-        _controller.GetSearchResults(searchTerm, Languages.ENGLISH,
+        _controller.GetSearchResults(term, Languages.ENGLISH,
             lat: 33.4152, lng: -111.8315, zoom: 13, prefix: true).Wait();
 
-        _searchRepository.Received(1).SearchPlaces(searchTerm, Languages.ENGLISH, 33.4152, -111.8315, 13, true);
+        _searchRepository.Received(1).SearchPlaces(term, Languages.ENGLISH, 33.4152, -111.8315, 13, true);
+    }
+
+    [TestMethod]
+    public void GetSearchResults_TermWithPlaceAndCountry_ShouldForwardToSearchPlaces()
+    {
+        var term = "trailhead, mesa, USA";
+        _searchRepository.SearchPlaces(term, Languages.ENGLISH,
+            Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<bool>())
+            .Returns(Results());
+
+        _controller.GetSearchResults(term, Languages.ENGLISH).Wait();
+
+        _searchRepository.Received(1).SearchPlaces(term, Languages.ENGLISH,
+            Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<double?>(), Arg.Any<bool>());
     }
 }

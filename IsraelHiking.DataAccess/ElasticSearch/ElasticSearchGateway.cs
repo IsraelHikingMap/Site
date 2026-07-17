@@ -5,13 +5,12 @@ using System.Threading.Tasks;
 using Elasticsearch.Net;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
-using IsraelHiking.Common.Extensions;
+using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Nest;
-using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.DataAccess.ElasticSearch;
@@ -32,7 +31,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     // versioned and benchmarked together there. Here we only send the parameters each one declares.
     private const string POINTS_SEARCH_TEMPLATE = "points_search";
     private const string POINTS_SEARCH_EXACT_TEMPLATE = "points_search_exact";
-    private const string BBOX_CONTAINER_TEMPLATE = "bbox_container";
     private const string BBOX_CONTAINS_TEMPLATE = "bbox_contains";
 
     private const double MIN_LATITUDE = -90;
@@ -59,36 +57,58 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
     }
 
-    private IFeature HitToFeature(IHit<PointDocument> d, string language)
+    private static SearchResultsPointOfInterest HitToSearchResult(IHit<PointDocument> d, string language)
     {
-        IFeature feature = new Feature(new Point(d.Source.Location[0], d.Source.Location[1]), new AttributesTable
-        {
-            { FeatureAttributes.NAME, d.Source.Name.GetValueOrDefault(Languages.DEFAULT, string.Empty) },
-            { FeatureAttributes.POI_SOURCE, d.Source.PoiSource },
-            { FeatureAttributes.POI_ICON, d.Source.PoiIcon },
-            { FeatureAttributes.POI_CATEGORY, d.Source.PoiCategory },
-            { FeatureAttributes.POI_ICON_COLOR, d.Source.PoiIconColor },
-            { FeatureAttributes.DESCRIPTION, d.Source.Description.GetValueOrDefault(Languages.DEFAULT, string.Empty) },
-            { FeatureAttributes.POI_ID, d.Id },
-            { FeatureAttributes.POI_LANGUAGE, Languages.ALL },
-            { FeatureAttributes.ID, string.Join("_", d.Id.Split("_").Skip(1)) }
-        });
+        var source = d.Source;
+        // The language actually matched by the query drives which localized name/description/place
+        // we show, so the result reads in the language the user searched in.
         var searchTermLanguage = SearchLanguageDetector.GetBestMatchLanguage(d.MatchedQueries, language);
-        feature.Attributes.AddOrUpdate(FeatureAttributes.SEARCH_LANGUAGE, searchTermLanguage);
-        foreach (var key in d.Source.Name.Keys.Where(k => k != Languages.DEFAULT))
+        var title = ResolveLocalized(source.Name, searchTermLanguage);
+        var description = ResolveLocalized(source.Description, searchTermLanguage);
+        return new SearchResultsPointOfInterest
         {
-            feature.Attributes.AddOrUpdate("name:" + key, d.Source.Name[key]);
-        }
-        foreach (var key in d.Source.Description.Keys.Where(k => k != Languages.DEFAULT))
+            // The indexed id is "<type>_<osmId>"; the leading source segment is dropped for the id.
+            Id = string.Join("_", d.Id.Split("_").Skip(1)),
+            Title = title,
+            DisplayName = BuildDisplayName(title, source, searchTermLanguage),
+            Source = source.PoiSource,
+            Icon = string.IsNullOrWhiteSpace(source.PoiIcon) ? FeatureAttributes.SEARCH_ICON : source.PoiIcon,
+            IconColor = source.PoiIconColor,
+            Location = new LatLng(source.Location[1], source.Location[0]),
+            HasExtraData = !string.IsNullOrEmpty(description) || !string.IsNullOrWhiteSpace(source.Image)
+        };
+    }
+
+    /// <summary>Builds "Title, Container, Country", skipping the container and country when absent.</summary>
+    private static string BuildDisplayName(string title, PointDocument source, string language)
+    {
+        var parts = new List<string> { title };
+        var container = ResolveLocalized(source.PoiContainer, language);
+        if (!string.IsNullOrWhiteSpace(container))
         {
-            feature.Attributes.AddOrUpdate("description:" + key, d.Source.Description[key]);
+            parts.Add(container);
         }
-        if (!string.IsNullOrWhiteSpace(d.Source.Image))
+        var country = ResolveLocalized(source.PoiCountry, language);
+        if (!string.IsNullOrWhiteSpace(country))
         {
-            feature.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, d.Source.Image);
+            parts.Add(country);
         }
-        feature.SetLocation(new Coordinate(d.Source.Location[0], d.Source.Location[1]));
-        return feature;
+        return string.Join(", ", parts);
+    }
+
+    /// <summary>
+    /// Resolves a per-language value to the result's language, falling back to English then the
+    /// default. Returns an empty string when the map is null or has none of these.
+    /// </summary>
+    private static string ResolveLocalized(Dictionary<string, string> localizedValues, string language)
+    {
+        if (localizedValues is not { } values)
+        {
+            return string.Empty;
+        }
+        return values.GetValueOrDefault(language,
+            values.GetValueOrDefault(Languages.ENGLISH,
+                values.GetValueOrDefault(Languages.DEFAULT, string.Empty)));
     }
 
     /// <summary>
@@ -119,7 +139,7 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         return (latitude, longitude);
     }
 
-    public async Task<List<IFeature>> Search(string searchTerm, string language,
+    public async Task<List<SearchResultsPointOfInterest>> Search(string searchTerm, string language,
         double? lat = null, double? lng = null, double? zoom = null, bool prefix = false)
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
@@ -128,10 +148,10 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         }
         var response = await SearchTemplate<PointDocument>(POINTS, POINTS_SEARCH_TEMPLATE,
             PointsSearchParameters(searchTerm, lat, lng, zoom, prefix));
-        return response.Hits.Select(d => HitToFeature(d, language)).ToList();
+        return response.Hits.Select(d => HitToSearchResult(d, language)).ToList();
     }
 
-    public async Task<List<IFeature>> SearchExact(string searchTerm, string language)
+    public async Task<List<SearchResultsPointOfInterest>> SearchExact(string searchTerm, string language)
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -139,34 +159,26 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         }
         var response = await SearchTemplate<PointDocument>(POINTS, POINTS_SEARCH_EXACT_TEMPLATE,
             new Dictionary<string, object> { ["searchTerm"] = searchTerm });
-        return response.Hits.Select(d => HitToFeature(d, language)).ToList();
+        return response.Hits.Select(d => HitToSearchResult(d, language)).ToList();
     }
 
-    public async Task<List<IFeature>> SearchPlaces(string searchTerm, string language,
+    public async Task<List<SearchResultsPointOfInterest>> SearchPlaces(string searchTerm, string language,
         double? lat = null, double? lng = null, double? zoom = null, bool prefix = false)
     {
+        // "name, place[, country, ...]" - the name is the first part and the immediate enclosing
+        // place is the second. Any further parts (e.g. the country now shown in the display name)
+        // are already implied by the place, so they are ignored.
         var split = searchTerm.Split(',');
-        var place = split.Last().Trim();
-        searchTerm = string.Join(",", split.Take(split.Length - 1)).Trim();
-        if (string.IsNullOrWhiteSpace(searchTerm) || string.IsNullOrWhiteSpace(place))
+        var name = split[0].Trim();
+        var place = split.Length > 1 ? split[1].Trim() : string.Empty;
+        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(place))
         {
             return [];
         }
-        var placesResponse = await SearchTemplate<BBoxDocument>(BBOX, BBOX_CONTAINER_TEMPLATE,
-            new Dictionary<string, object>
-            {
-                ["place"] = place,
-                ["prefix"] = prefix
-            });
-        if (placesResponse.Documents.Count == 0)
-        {
-            return [];
-        }
-        var parameters = PointsSearchParameters(searchTerm, lat, lng, zoom, prefix);
-        parameters["hasPlaceShape"] = true;
-        parameters["placeShape"] = ToShapeParameter(placesResponse.Documents.First().BBox);
+        var parameters = PointsSearchParameters(name, lat, lng, zoom, prefix);
+        parameters["place"] = place;
         var response = await SearchTemplate<PointDocument>(POINTS, POINTS_SEARCH_TEMPLATE, parameters);
-        return response.Hits.Select(d => HitToFeature(d, language)).ToList();
+        return response.Hits.Select(d => HitToSearchResult(d, language)).ToList();
     }
 
     private static Dictionary<string, object> PointsSearchParameters(string searchTerm,
@@ -188,18 +200,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         parameters["zoom"] = zoom is { } value && !double.IsNaN(value) && value > 0 ? value : 0.0;
         return parameters;
     }
-
-    /// <summary>
-    /// An indexed shape as GeoJSON, passed through in the [longitude, latitude] order it is stored
-    /// in, for the templates that hand it to a geo_shape query using {{#toJson}}.
-    /// </summary>
-    private static Dictionary<string, object> ToShapeParameter(BaseBBoxShape shape) => shape switch
-    {
-        EnvelopeBBoxShape envelope => new() { ["type"] = shape.Type, ["coordinates"] = envelope.Coordinates },
-        PolygonBBoxShape polygon => new() { ["type"] = shape.Type, ["coordinates"] = polygon.Coordinates },
-        MultiPolygonBBoxShape multiPolygon => new() { ["type"] = shape.Type, ["coordinates"] = multiPolygon.Coordinates },
-        _ => throw new Exception("Unsupported shape type")
-    };
 
     public async Task<string> GetContainerName(Coordinate[] coordinates, string language)
     {

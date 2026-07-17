@@ -46,11 +46,6 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
     IShareUrlGateway shareUrlGateway,
     ILogger logger) : IPointsOfInterestProvider
 {
-    /// <summary>
-    /// This icon is the default icon when no icon was used
-    /// </summary>
-    public const string SEARCH_ICON = "icon-search";
-
     private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
     private readonly ITagsHelper _tagsHelper = tagsHelper;
     private readonly IClientsFactory _clientsFactory = clientsFactory;
@@ -344,7 +339,7 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
         if (partialFeature.Attributes.Exists(FeatureAttributes.POI_ICON))
         {
             var icon = partialFeature.Attributes[FeatureAttributes.POI_ICON].ToString();
-            if (icon != oldIcon && icon != SEARCH_ICON)
+            if (icon != oldIcon && icon != FeatureAttributes.SEARCH_ICON)
             {
                 RemoveTagsByIcon(completeOsmGeo.Tags, oldIcon);
                 AddTagsByIcon(completeOsmGeo.Tags, icon);

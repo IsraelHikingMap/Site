@@ -22,7 +22,6 @@ public static class FeatureAttributes
     public const string ID = "identifier";
     public const string NAME = "name";
     public const string MTB_NAME = "mtb:name";
-    public const string SEARCH_LANGUAGE = "search:language";
     public const string DESCRIPTION = "description";
     public const string IMAGE_URL = "image";
     public const string WEBSITE = "website";
@@ -35,7 +34,6 @@ public static class FeatureAttributes
     public const string POI_CATEGORY = POI_PREFIX + "Category";
     public const string POI_LANGUAGE = POI_PREFIX + "Language";
     public const string POI_LANGUAGES = POI_PREFIX + "Languages";
-    public const string POI_CONTAINER = POI_PREFIX + "Container";
     public const string POI_LAST_MODIFIED = POI_PREFIX + "LastModified";
     public const string POI_USER_NAME = POI_PREFIX + "UserName";
     public const string POI_USER_ADDRESS = POI_PREFIX + "UserAddress";
@@ -62,6 +60,7 @@ public static class FeatureAttributes
 
     public const string LAT = "lat";
     public const string LNG = "lng";
+    public const string SEARCH_ICON = "icon-search";
 }
 
 public static class Sources
