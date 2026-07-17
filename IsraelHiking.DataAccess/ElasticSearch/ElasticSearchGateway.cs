@@ -60,8 +60,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     private static SearchResultsPointOfInterest HitToSearchResult(IHit<PointDocument> d, string language)
     {
         var source = d.Source;
-        // The language actually matched by the query drives which localized name/description/place
-        // we show, so the result reads in the language the user searched in.
         var searchTermLanguage = SearchLanguageDetector.GetBestMatchLanguage(d.MatchedQueries, language);
         var title = ResolveLocalized(source.Name, searchTermLanguage);
         var description = ResolveLocalized(source.Description, searchTermLanguage);
