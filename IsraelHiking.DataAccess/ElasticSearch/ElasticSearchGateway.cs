@@ -77,7 +77,9 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         };
     }
 
-    /// <summary>Builds "Title, Container, Country", skipping the container and country when absent.</summary>
+    /// <summary>
+    /// Builds "Title, Container, Country", skipping the container and country when absent.
+    /// </summary>
     private static string BuildDisplayName(string title, PointDocument source, string language)
     {
         var parts = new List<string> { title };
