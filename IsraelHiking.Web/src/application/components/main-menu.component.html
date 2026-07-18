@@ -71,15 +71,15 @@
       <span class="mx-1">{{resources.downloadMapForOfflineUse}}</span>
     </button>
     }
-    <button mat-menu-item (click)="openConfigurationDialog()" analyticsOn="click" analyticsCategory="User Menu"
-      analyticsLabel="Settings open">
-      <span><i class="fa fa-lg icon-cogs"></i> {{resources.settings}}</span>
-    </button>
     <button mat-menu-item (click)="logout()" analyticsOn="click" analyticsCategory="User Menu" analyticsLabel="Logout">
       <span><i class="fa fa-lg icon-sign-out"></i> {{resources.logout}}</span>
     </button>
     <hr />
     }
+    <button mat-menu-item (click)="openConfigurationDialog()" analyticsOn="click" analyticsCategory="User Menu"
+      analyticsLabel="Settings open">
+      <span><i class="fa fa-lg icon-cogs"></i> {{resources.settings}}</span>
+    </button>
     <button mat-menu-item (click)="openLanguage()" analyticsOn="click" analyticsCategory="Menu"
       analyticsLabel="Open language selection">
       <i class="fa fa-lg icon-language mat-icon"></i>

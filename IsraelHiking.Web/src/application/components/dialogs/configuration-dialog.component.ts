@@ -1,15 +1,13 @@
 import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
-import { MatButton, MatAnchor , MatIconButton } from "@angular/material/button";
+import { MatButton, MatAnchor, MatIconButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatFormField, MatLabel } from "@angular/material/input";
-import { AsyncPipe } from "@angular/common";
 import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { FormsModule } from "@angular/forms";
 import { MatOption, MatSelect } from "@angular/material/select";
 import { MatDialogRef, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
-import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
 import { AnalyticsDirective } from "../../directives/analytics.directive";
@@ -32,16 +30,10 @@ import type { ApplicationState, BatteryOptimizationType, Theme } from "../../mod
 @Component({
     selector: "configuration-dialog",
     templateUrl: "./configuration-dialog.component.html",
-    imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, MatRadioButton, AnalyticsDirective, MatCheckbox, MatDialogActions, MatAnchor, AsyncPipe, FormsModule, MatFormField, MatSelect, MatOption, MatLabel]
+    imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, MatRadioButton, AnalyticsDirective, MatCheckbox, MatDialogActions, MatAnchor, FormsModule, MatFormField, MatSelect, MatOption, MatLabel]
 })
 export class ConfigurationDialogComponent {
 
-    public batteryOptimizationType$: Observable<BatteryOptimizationType>;
-    public isAutomaticRecordingUpload$: Observable<boolean>;
-    public isGotLostWarnings$: Observable<boolean>;
-    public units$: Observable<"metric" | "imperial">;
-    public theme$: Observable<Theme>;
-    public dateFormat$: Observable<string>;
     public manageSubscriptions: string;
     public username: string;
 
@@ -54,17 +46,20 @@ export class ConfigurationDialogComponent {
     private readonly databaseService = inject(DatabaseService);
     private readonly store = inject(Store);
 
+    public isLoggedIn = this.store.selectSignal((state: ApplicationState) => state.userState.userInfo !== null);
+    public units = this.store.selectSignal((state: ApplicationState) => state.configuration.units);
+    public theme = this.store.selectSignal((state: ApplicationState) => state.configuration.theme);
+    public dateFormat = this.store.selectSignal((state: ApplicationState) => state.configuration.dateFormat);
+    public isAutomaticRecordingUpload = this.store.selectSignal((state: ApplicationState) => state.configuration.isAutomaticRecordingUpload);
+    public isGotLostWarnings = this.store.selectSignal((state: ApplicationState) => state.configuration.isGotLostWarnings);
+    public batteryOptimizationType = this.store.selectSignal((state: ApplicationState) => state.configuration.batteryOptimizationType);
+    public isSubscribed = this.store.selectSignal((state: ApplicationState) => state.offlineState.isSubscribed);
+
     constructor() {
-        this.batteryOptimizationType$ = this.store.select((state: ApplicationState) => state.configuration.batteryOptimizationType);
-        this.isAutomaticRecordingUpload$ = this.store.select((state: ApplicationState) => state.configuration.isAutomaticRecordingUpload);
-        this.isGotLostWarnings$ = this.store.select((state: ApplicationState) => state.configuration.isGotLostWarnings);
-        this.units$ = this.store.select((state: ApplicationState) => state.configuration.units);
-        this.theme$ = this.store.select((state: ApplicationState) => state.configuration.theme);
-        this.dateFormat$ = this.store.select((state: ApplicationState) => state.configuration.dateFormat);
         this.manageSubscriptions = this.runningContextService.isIos
             ? "https://apps.apple.com/account/subscriptions"
             : "https://play.google.com/store/account/subscriptions";
-        this.username = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo.displayName);
+        this.username = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo)?.displayName;
     }
 
     public isApp() {

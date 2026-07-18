@@ -8,7 +8,7 @@
     <div class="flex flex-wrap gap-4">
       <div class="flex flex-col">
         <label>{{resources.units}}</label>
-        <mat-radio-group (change)=setUnits($event.value) [value]="units$ | async">
+        <mat-radio-group (change)=setUnits($event.value) [value]="units()">
           <div>
             <mat-radio-button value="metric" analyticsOn="click" analyticsCategory="Configuration"
               analyticsLabel="Set units metric">
@@ -26,7 +26,7 @@
 
       <div class="flex flex-col">
         <label>{{resources.theme}}</label>
-        <mat-radio-group (change)=setTheme($event.value) [value]="theme$ | async">
+        <mat-radio-group (change)=setTheme($event.value) [value]="theme()">
           <div>
             <mat-radio-button value="light" analyticsOn="click" analyticsCategory="Configuration"
               analyticsLabel="Set theme light">
@@ -45,7 +45,7 @@
       @if (isApp()) {
       <div class="flex flex-col">
         <label>{{resources.batteryOptimization}}</label>
-        <mat-radio-group (change)=setBatteryOptimizationType($event.value) [value]="batteryOptimizationType$ | async">
+        <mat-radio-group (change)=setBatteryOptimizationType($event.value) [value]="batteryOptimizationType()">
           <div>
             <mat-radio-button value="screen-on" analyticsOn="click" analyticsCategory="Intro"
               analyticsLabel="Set battery optimization on">
@@ -66,9 +66,10 @@
           </div>
         </mat-radio-group>
       </div>
+      @if (isLoggedIn()) {
       <div class="flex flex-row">
         <div class="flex-1">
-          <mat-checkbox [checked]="isAutomaticRecordingUpload$ | async" (change)="toggleAutomaticRecordingUpload()"
+          <mat-checkbox [checked]="isAutomaticRecordingUpload()" (change)="toggleAutomaticRecordingUpload()"
             analyticsOn="click" analyticsCategory="Configuration" analyticsLabel="Toggle automatic upload">
             {{resources.automaticRecordingUpload}}
           </mat-checkbox>
@@ -76,9 +77,10 @@
           <span class="text-sm">{{resources.automaticRecordingUploadHint}}</span>
         </div>
       </div>
+      }
       <div class="flex flex-row">
         <div class="flex-1">
-          <mat-checkbox [checked]="isGotLostWarnings$ | async" (change)="toggleGotLostWarnings()" analyticsOn="click"
+          <mat-checkbox [checked]="isGotLostWarnings()" (change)="toggleGotLostWarnings()" analyticsOn="click"
             analyticsCategory="Configuration" analyticsLabel="Toggle got lost warnings">
             {{resources.gotLostWarnings}}
           </mat-checkbox>
@@ -91,7 +93,7 @@
     <div class="flex flex-row">
       <mat-form-field class="w-full">
         <mat-label>{{resources.dateFormat}}</mat-label>
-        <mat-select [ngModel]="dateFormat$ | async" (ngModelChange)="setDateFormat($event)">
+        <mat-select [ngModel]="dateFormat()" (ngModelChange)="setDateFormat($event)">
           <mat-option value="yyyy-MM-dd">yyyy-MM-dd</mat-option>
           <mat-option value="dd/MM/yyyy">dd/MM/yyyy</mat-option>
           <mat-option value="MM/dd/yyyy">MM/dd/yyyy</mat-option>
@@ -99,11 +101,13 @@
       </mat-form-field>
     </div>
     <br />
+    @if (isSubscribed()) {
     <p class="ms-2">
       {{resources.offlinePurchaseGraditude}}<br />
       <a [href]="manageSubscriptions" target="_blank" analyticsOn="click" analyticsCategory="Configuration"
         analyticsLabel="Manage subscriptions">{{resources.manageSubscriptions}}</a>
     </p>
+    }
   </div>
   <div mat-dialog-actions>
     <div class="flex flex-row w-full gap-1">
@@ -111,10 +115,12 @@
         <button mat-raised-button class="w-full error-button" (click)="clearData()" analyticsOn="click"
           analyticsCategory="Configuration" analyticsLabel="Reset data">{{resources.resetData}}</button>
       </div>
+      @if (isLoggedIn()) {
       <div class="flex-1">
         <a mat-raised-button class="w-full error-button" href="https://www.openstreetmap.org/account/deletion"
           target="_blank" analyticsOn="click" analyticsCategory="Configuration"
           analyticsLabel="Delete account">{{resources.deleteAccount}}</a>
       </div>
+      }
     </div>
   </div>
