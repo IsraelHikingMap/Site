@@ -25,7 +25,7 @@
     <PackageVersion Include="NetTopologySuite.IO.GeoJSON4STJ" Version="4.0.0" />
     <PackageVersion Include="NetTopologySuite.IO.GPX" Version="1.1.1" />
     <PackageVersion Include="NLog.Web.AspNetCore" Version="6.1.4" />
-    <PackageVersion Include="NSubstitute" Version="5.3.0" />
+    <PackageVersion Include="NSubstitute" Version="6.0.0" />
     <PackageVersion Include="OsmSharp" Version="7.0.0-pre027" />
     <PackageVersion Include="OsmSharp.IO.API" Version="1.0.5" />
     <PackageVersion Include="ProjNet" Version="2.1.0" />
