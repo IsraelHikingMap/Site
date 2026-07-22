@@ -148,13 +148,13 @@ public class FilesController : ControllerBase
         }
 
         _logger.LogInformation($"Getting the offline file for user: {User.Identity?.Name}, file: {id}, tileX: {tileX}, tileY: {tileY}");
-        var fullPath = id;
-        if (tileX.HasValue && tileY.HasValue)
+        var (content, length) = await _offlineFilesService.GetFileContent(id, tileX, tileY);
+        // Forward the content length so the client can report download progress, also for proxied (non-seekable) streams.
+        if (length.HasValue)
         {
-            fullPath = $"7/{tileX}/{tileY}/{id}";
+            Response.ContentLength = length;
         }
-        var file = _offlineFilesService.GetFileContent(fullPath);
-        return File(file, "application/octet-stream", id);
+        return File(content, "application/octet-stream", id);
     }
 
     /// <summary>

@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services;
 
@@ -10,11 +11,13 @@ namespace IsraelHiking.API.Services;
 public interface IOfflineFilesService
 {
     /// <summary>
-    /// Get the file's content 
+    /// Get the file's content
     /// </summary>
-    /// <param name="fileRelativePath">The file to get</param>
-    /// <returns>a read stream of the file</returns>
-    Stream GetFileContent(string fileRelativePath);
+    /// <param name="fileName">The file to get</param>
+    /// <param name="tileX">The tile's X coordinates, null for root</param>
+    /// <param name="tileY">The tile's Y coordinates, null for root</param>
+    /// <returns>a read stream of the file and its length when known</returns>
+    Task<(Stream Content, long? Length)> GetFileContent(string fileName, long? tileX, long? tileY);
 
     /// <summary>
     /// Get a list of files that have been updated since a given date

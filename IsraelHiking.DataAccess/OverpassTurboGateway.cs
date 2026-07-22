@@ -69,6 +69,12 @@ public class OverpassTurboGateway(
         return list.OfType<Way>().Select(w => w.CreateComplete(db)).ToList();
     }
 
+    /// <summary>
+    /// Get the closest barrier ID to the given center.
+    /// </summary>
+    /// <param name="center">The center coordinate</param>
+    /// <param name="distance">The distance to search for the closest barrier in meters</param>
+    /// <returns>The ID of the closest barrier</returns>
     public async Task<long> GetClosestBarrierId(Coordinate center, double distance)
     {
         var query = $"[out:json];\nnode[\"barrier\"](around:{distance}, {center.Y}, {center.X});\nout ids 1;";

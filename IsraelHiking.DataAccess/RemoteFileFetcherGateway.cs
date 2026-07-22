@@ -1,6 +1,7 @@
 ﻿using IsraelHiking.DataAccessInterfaces;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using System.IO;
 using System.Net.Http;
 using System;
 using IsraelHiking.Common;
@@ -43,5 +44,17 @@ public class RemoteFileFetcherGateway : IRemoteFileFetcherGateway
             Content = content,
             FileName = fileName
         };
+    }
+
+    public async Task<(Stream Content, long? Length)> GetFileStream(string url)
+    {
+        var client = _httpClientFactory.CreateClient();
+        client.Timeout = TimeSpan.FromMinutes(20);
+        client.DefaultRequestHeaders.UserAgent.ParseAdd(Branding.USER_AGENT);
+        // Read only the headers so the body is streamed (proxied) instead of being buffered in memory.
+        var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+        response.EnsureSuccessStatusCode();
+        var length = response.Content.Headers.ContentLength;
+        return (await response.Content.ReadAsStreamAsync(), length);
     }
 }
