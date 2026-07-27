@@ -36,7 +36,7 @@ import type { ApplicationState, LocationState } from "../../models";
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgProgressbar, NgProgressHttp, NgStyle, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent, MatSidenavContainer, MatSidenav, MatSidenavContent, LayersSidebarComponent, PublicPoiSidebarComponent, PrivateRoutesSidebarComponent]
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent, MatSidenavContainer, MatSidenav, LayersSidebarComponent, PublicPoiSidebarComponent, PrivateRoutesSidebarComponent]
 })
 export class MainMapComponent {
 
