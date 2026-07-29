@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
 import { ResourcesService } from "../../services/resources.service";
@@ -7,7 +7,6 @@ import { PurchaseService } from "../../services/purchase.service";
 import { Urls } from "../../urls";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "landing",
     templateUrl: "./landing.component.html",
     imports: [RouterLink]

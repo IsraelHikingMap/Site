@@ -1,4 +1,4 @@
-import { Component, OnChanges, SimpleChanges, input, inject, output, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnChanges, SimpleChanges, input, inject, output, signal } from "@angular/core";
 import { MatAnchor, MatButton } from "@angular/material/button";
 import { Dir } from "@angular/cdk/bidi";
 import { AnimationOptions, LottieComponent } from "ngx-lottie";
@@ -13,7 +13,6 @@ import { ImageResizeService } from "../../../services/image-resize.service";
 import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.json";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "image-scroller",
     templateUrl: "./image-scroller.component.html",
     imports: [LottieComponent, MatAnchor, ImageCaptureDirective, AnalyticsDirective, MatButton, Dir, ImageAttributionComponent]
@@ -23,7 +22,7 @@ export class ImageScrollerComponent implements OnChanges {
         animationData: sceneryPlaceholder
     };
 
-    private currentIndex = 0;
+    private currentIndex = signal(0);
 
     public images = input<string[]>();
     public canEdit = input<boolean>();
@@ -38,36 +37,36 @@ export class ImageScrollerComponent implements OnChanges {
 
     public ngOnChanges(changes: SimpleChanges<ImageScrollerComponent>): void {
         if (changes.images) {
-            this.currentIndex = 0;
+            this.currentIndex.set(0);
         }
     }
 
     public next() {
-        this.currentIndex++;
-        if (this.currentIndex >= this.images().length) {
-            this.currentIndex = this.images().length - 1;
+        this.currentIndex.set(this.currentIndex() + 1);
+        if (this.currentIndex() >= this.images().length) {
+            this.currentIndex.set(this.images().length - 1);
         }
         this.currentImageChanged.emit(this.getCurrentValue());
     }
 
     public previous() {
-        this.currentIndex--;
-        if (this.currentIndex < 0) {
-            this.currentIndex = 0;
+        this.currentIndex.set(this.currentIndex() - 1);
+        if (this.currentIndex() < 0) {
+            this.currentIndex.set(0);
         }
         this.currentImageChanged.emit(this.getCurrentValue());
     }
 
     public hasNext(): boolean {
-        return this.currentIndex < this.images().length - 1;
+        return this.currentIndex() < this.images().length - 1;
     }
 
     public hasPrevious(): boolean {
-        return this.currentIndex > 0;
+        return this.currentIndex() > 0;
     }
 
     public remove(): void {
-        this.images().splice(this.currentIndex, 1);
+        this.images().splice(this.currentIndex(), 1);
         this.previous();
     }
 
@@ -79,7 +78,7 @@ export class ImageScrollerComponent implements OnChanges {
         for (const file of files) {
             const data = await this.imageResizeService.resizeImage(file);
             this.images().push(data);
-            this.currentIndex = this.images().length - 1;
+            this.currentIndex.set(this.images().length - 1);
             this.currentImageChanged.emit(this.getCurrentValue());
         }
     }
@@ -88,7 +87,7 @@ export class ImageScrollerComponent implements OnChanges {
         if (this.images().length === 0) {
             return null;
         }
-        return this.images()[this.currentIndex];
+        return this.images()[this.currentIndex()];
     }
 
     public getCurrentImage() {
@@ -105,10 +104,10 @@ export class ImageScrollerComponent implements OnChanges {
             const imageUrlToPush = this.resources.getResizedImageUrl(imageUrl, 1920);
             imagesUrls.push(imageUrlToPush);
         }
-        this.imageGalleryService.open(imagesUrls, this.currentIndex);
+        this.imageGalleryService.open(imagesUrls, this.currentIndex());
     }
 
     public getIndexString() {
-        return `${this.currentIndex + 1} / ${this.images().length}`;
+        return `${this.currentIndex() + 1} / ${this.images().length}`;
     }
 }
