@@ -6,6 +6,7 @@ import {
     withEventReplay,
     withNoIncrementalHydration
 } from "@angular/platform-browser";
+import { provideMaplibreWorker } from "@maplibre/ngx-maplibre-gl/config"
 import { appConfig } from "./application/app.config";
 import { AppRootComponent } from "./application/components/screens/app-root.component";
 
@@ -18,6 +19,7 @@ bootstrapApplication(AppRootComponent, {
     providers: [
         provideZoneChangeDetection(),
         ...appConfig.providers,
-        provideClientHydration(withEventReplay(), withNoIncrementalHydration())
+        provideClientHydration(withEventReplay(), withNoIncrementalHydration()),
+        provideMaplibreWorker("maplibre-gl-worker.mjs")
     ]
 });
