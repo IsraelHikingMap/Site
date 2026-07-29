@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject, input, signal, OnInit } from "@angular/core";
 import { DecimalPipe } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 
@@ -9,7 +9,6 @@ import { CoordinatesService } from "../services/coordinates.service";
 import type { LatLngAltTime, NorthEast } from "../models";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "coordinates",
     templateUrl: "./coordinates.component.html",
     imports: [Dir, DecimalPipe, DistancePipe]
@@ -18,7 +17,8 @@ export class CoordinatesComponent implements OnInit {
 
     public latlng = input<LatLngAltTime>();
 
-    public itmCoordinates: NorthEast;
+    public itmCoordinates = signal<NorthEast>(null);
+    public alt = signal<number>(undefined);
 
     public readonly resources = inject(ResourcesService);
 
@@ -28,8 +28,9 @@ export class CoordinatesComponent implements OnInit {
     public async ngOnInit(): Promise<void> {
         const coordinates = this.itmCoordinatesService.toItm(this.latlng());
         if (coordinates.east > 100_000 && coordinates.north > 100_000 && coordinates.east < 300_000 && coordinates.north < 800_000) {
-            this.itmCoordinates = coordinates;
+            this.itmCoordinates.set(coordinates);
         }
         await this.elevationProvider.updateHeights([this.latlng()]);
+        this.alt.set(this.latlng().alt);
     }
 }

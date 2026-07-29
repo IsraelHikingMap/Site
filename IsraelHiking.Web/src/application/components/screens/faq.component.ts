@@ -1,4 +1,4 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { MarkdownComponent } from "ngx-markdown";
 import { skip } from "rxjs";
 
@@ -8,7 +8,6 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ApplicationState } from "../../models";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "faq",
     templateUrl: "./faq.component.html",
     imports: [MarkdownComponent]

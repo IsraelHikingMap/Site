@@ -1,4 +1,4 @@
-import { Component, inject, input, SimpleChanges, OnInit, OnChanges, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject, input, signal, SimpleChanges, OnInit, OnChanges } from "@angular/core";
 import { MatButton } from "@angular/material/button";
 import { Store } from "@ngxs/store";
 
@@ -9,7 +9,6 @@ import { SetPublicRoutesFilterAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, PublicRoutesFilter } from "../models";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "image-attribution",
     templateUrl: "./image-attribution.component.html",
     imports: [MatButton, AnalyticsDirective]
@@ -19,7 +18,7 @@ export class ImageAttributionComponent implements OnInit, OnChanges {
     public imageUrl = input.required<string>();
     public allowFiltering = input<boolean>(false);
 
-    public imageAttribution: ImageAttribution = null;
+    public imageAttribution = signal<ImageAttribution>(null);
 
     public readonly resources = inject(ResourcesService);
 
@@ -27,14 +26,14 @@ export class ImageAttributionComponent implements OnInit, OnChanges {
     private readonly store = inject(Store);
 
     async ngOnInit(): Promise<void> {
-        this.imageAttribution = await this.imageAttributionService.getAttributionForImage(this.imageUrl());
+        this.imageAttribution.set(await this.imageAttributionService.getAttributionForImage(this.imageUrl()));
     }
 
     async ngOnChanges(changes: SimpleChanges<ImageAttributionComponent>): Promise<void> {
         if (changes.imageUrl.currentValue) {
-            this.imageAttribution = await this.imageAttributionService.getAttributionForImage(changes.imageUrl.currentValue);
+            this.imageAttribution.set(await this.imageAttributionService.getAttributionForImage(changes.imageUrl.currentValue));
         } else {
-            this.imageAttribution = null;
+            this.imageAttribution.set(null);
         }
     }
 
