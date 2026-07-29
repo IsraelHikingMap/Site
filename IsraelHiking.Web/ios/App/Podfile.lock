@@ -32,21 +32,21 @@ PODS:
     - Capacitor
   - IONCameraLib (1.0.4)
   - IONFilesystemLib (1.1.2)
-  - MapLibre (6.27.0)
-  - PurchasesHybridCommon (18.15.1):
-    - RevenueCat (= 5.78.0)
-  - PurchasesHybridCommonUI (18.15.1):
-    - PurchasesHybridCommon (= 18.15.1)
-    - RevenueCatUI (= 5.78.0)
-  - RevenueCat (5.78.0)
-  - RevenuecatPurchasesCapacitor (13.2.0):
+  - MapLibre (6.28.0)
+  - PurchasesHybridCommon (18.22.2):
+    - RevenueCat (= 5.81.1)
+  - PurchasesHybridCommonUI (18.22.2):
+    - PurchasesHybridCommon (= 18.22.2)
+    - RevenueCatUI (= 5.81.1)
+  - RevenueCat (5.81.1)
+  - RevenuecatPurchasesCapacitor (13.2.4):
     - Capacitor
-    - PurchasesHybridCommon (= 18.15.1)
-  - RevenuecatPurchasesCapacitorUi (13.2.0):
+    - PurchasesHybridCommon (= 18.22.2)
+  - RevenuecatPurchasesCapacitorUi (13.2.4):
     - Capacitor
-    - PurchasesHybridCommonUI (= 18.15.1)
-  - RevenueCatUI (5.78.0):
-    - RevenueCat (= 5.78.0)
+    - PurchasesHybridCommonUI (= 18.22.2)
+  - RevenueCatUI (5.81.1):
+    - RevenueCat (= 5.81.1)
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -132,13 +132,13 @@ SPEC CHECKSUMS:
   CapgoCapacitorInappbrowser: d976bd9297b1e2957ea484dfd519fb69e786ae71
   IONCameraLib: f2349804460bd9e3f892e42109b8d996ab3fa19d
   IONFilesystemLib: 21a63377696b2d8fab5632ecfb7d2ac67bddb68a
-  MapLibre: 96726270455ffd183688cf0bd2a3881b0212a57e
-  PurchasesHybridCommon: eed735a411c1aee8c05d62933fa7c4a40ede4009
-  PurchasesHybridCommonUI: 4f0efc542177185a0d38080bbc42210d4ac15f4a
-  RevenueCat: f3641992451c1426da8d8d1466cec3bbdb765962
-  RevenuecatPurchasesCapacitor: 180e7d224124f97c23eaae9d590a90a510115f70
-  RevenuecatPurchasesCapacitorUi: 1a974121358fa37f729d3bba030b22159dee5d71
-  RevenueCatUI: 32998f100fe73f1d0172df7eef4f0dd1bc781a05
+  MapLibre: 502506f9abd57330f11c19328217be3b121c3f13
+  PurchasesHybridCommon: e47bc4f611e86fcf8295bf1c984f187982270f02
+  PurchasesHybridCommonUI: e6756576ad454c6c15a4679f57446115382ff791
+  RevenueCat: 693b033863262f9776130cc6c1f9255a74ab23ff
+  RevenuecatPurchasesCapacitor: cfbab60a6bcc32d5050f6802e49b884beb2d936c
+  RevenuecatPurchasesCapacitorUi: f6c60a6466f873b15f9a4492bf9f7a62edabe938
+  RevenueCatUI: 2c7092fa0a485454d2a474e80f241e6db591dd36
 
 PODFILE CHECKSUM: c9a4e28a63a0c1322e90c818f4d8312198fee191
 
