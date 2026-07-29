@@ -1,11 +1,8 @@
 import { inject, Injectable } from "@angular/core";
-import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { ResourcesService } from "./resources.service";
 import { ConfirmDialogComponent, ConfirmType } from "../components/dialogs/confirm-dialog.component";
-import { ProgressDialogComponent, IProgressDialogConfig } from "../components/dialogs/progress-dialog.component";
 import { LoggingService } from "./logging.service";
-import { firstValueFrom } from "rxjs";
 
 export interface IConfirmOptions {
     message: string;
@@ -23,7 +20,6 @@ export class ToastService {
     private static readonly DURATION = 6000;
 
     private readonly resources = inject(ResourcesService);
-    private readonly matDialog = inject(MatDialog);
     private readonly snackbar = inject(MatSnackBar);
     private readonly loggingService = inject(LoggingService);
 
@@ -107,10 +103,5 @@ export class ToastService {
         }
         componentRef.instance.confirmIcon = options.confirmIcon;
         componentRef.instance.declineIcon = options.declineIcon;
-    }
-
-    public progress(config: IProgressDialogConfig): Promise<any> {
-        const dialogRef = ProgressDialogComponent.openDialog(this.matDialog, config);
-        return firstValueFrom(dialogRef.afterClosed());
     }
 }

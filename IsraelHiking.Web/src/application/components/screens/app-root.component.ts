@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, viewChild, ElementRef, DestroyRef, afterNextRender, DOCUMENT, ChangeDetectionStrategy } from "@angular/core";
+import { Component, HostListener, inject, viewChild, ElementRef, DestroyRef, afterNextRender, DOCUMENT, signal, computed } from "@angular/core";
 import { MatToolbar } from "@angular/material/toolbar";
 import { RouterOutlet } from "@angular/router";
 import { Store } from "@ngxs/store";
@@ -11,14 +11,13 @@ import { RouteStrings } from "../../services/hash.service";
 import type { ApplicationState } from "../../models";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "app-root",
     templateUrl: "./app-root.component.html",
     styleUrls: ["./app-root.component.scss"],
     imports: [MatToolbar, RouterOutlet, MainMenuComponent, SearchComponent]
 })
 export class AppRootComponent {
-    public isScrolled = false;
+    public isScrolled = signal(false);
 
     public readonly resources = inject(ResourcesService);
     private readonly runningContextService = inject(RunningContextService)
@@ -26,6 +25,13 @@ export class AppRootComponent {
     private readonly document = inject(DOCUMENT);
     private readonly destroyRef = inject(DestroyRef);
     private readonly toolbar = viewChild.required("toolbar", { read: ElementRef });
+
+    private readonly currentUrl = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.currentUrl);
+
+    public isHome = computed(() =>
+        this.currentUrl() === RouteStrings.ROUTE_ROOT ||
+        this.currentUrl() === RouteStrings.ROUTE_LANDING ||
+        this.currentUrl() === RouteStrings.ROUTE_ABOUT);
 
     constructor() {
         afterNextRender(() => {
@@ -42,15 +48,10 @@ export class AppRootComponent {
 
     @HostListener("window:scroll", [])
     onWindowScroll() {
-        this.isScrolled = typeof window !== "undefined" && window.scrollY > 50;
+        this.isScrolled.set(typeof window !== "undefined" && window.scrollY > 50);
     }
 
     public isIFrame() {
         return this.runningContextService.isIFrame;
-    }
-
-    public isHome() {
-        const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
-        return currentUrl === RouteStrings.ROUTE_ROOT || currentUrl === RouteStrings.ROUTE_LANDING || currentUrl === RouteStrings.ROUTE_ABOUT;
     }
 }
