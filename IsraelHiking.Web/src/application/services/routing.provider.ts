@@ -5,7 +5,7 @@ import { firstValueFrom } from "rxjs";
 import { VectorTile } from "@mapbox/vector-tile";
 import { Store } from "@ngxs/store";
 import PathFinder from "geojson-path-finder";
-import Protobuf from "pbf";
+import { PbfReader } from "pbf";
 import QuickLRU from "quick-lru";
 
 import { ResourcesService } from "./resources.service";
@@ -143,7 +143,7 @@ export class RoutingProvider {
                     features: []
                 } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
                 const arrayBuffer = await this.pmTilesService.getTileByType(zoom, tileX, tileY, RoutingProvider.ROUTING_SCHEMA);
-                const tile = new VectorTile(new Protobuf(arrayBuffer));
+                const tile = new VectorTile(new PbfReader(arrayBuffer));
                 for (const layerKey of Object.keys(tile.layers)) {
                     const layer = tile.layers[layerKey];
                     for (let featureIndex = 0; featureIndex < layer.length; featureIndex++) {

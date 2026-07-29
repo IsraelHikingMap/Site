@@ -28,7 +28,7 @@ export class MapService {
         if (typeof window === "undefined") {
             return;
         }
-        const maplibregl = (await import("maplibre-gl")).default;
+        const maplibregl = await import("maplibre-gl");
         maplibregl.setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
         this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
             this.cancelableTimeoutService.clearTimeoutByName("panned");
