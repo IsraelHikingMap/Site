@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, inject, input, output, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ViewEncapsulation, inject, input, output, signal } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
@@ -14,7 +14,6 @@ import { Urls } from "../../urls";
 import type { LatLngAltTime } from "../../models";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "missing-part-overlay",
     templateUrl: "./missing-part-overlay.component.html",
     styleUrls: ["./missing-part-overlay.component.scss"],
@@ -29,7 +28,7 @@ export class MissingPartOverlayComponent {
 
     public removed = output();
 
-    public hideCoordinates = true;
+    public hideCoordinates = signal(true);
 
     public readonly resources = inject(ResourcesService);
 
