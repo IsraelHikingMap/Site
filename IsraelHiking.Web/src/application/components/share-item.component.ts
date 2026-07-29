@@ -1,5 +1,5 @@
 
-import { Component, inject, input, OnInit, output } from "@angular/core";
+import { Component, inject, input, OnInit, output, ChangeDetectionStrategy } from "@angular/core";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { MatTooltip } from "@angular/material/tooltip";
 import { DatePipe, NgClass } from "@angular/common";
@@ -16,6 +16,7 @@ import { RunningContextService } from "../services/running-context.service";
 import type { ShareUrl } from "../models/";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "share-item",
     templateUrl: "./share-item.component.html",
     imports: [DatePipe, DistancePipe, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger, MatButton, CdkCopyToClipboard, AnalyticsDirective, NgClass]

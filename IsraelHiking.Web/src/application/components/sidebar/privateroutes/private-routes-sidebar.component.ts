@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { MatButton, MatMiniFabButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from "@angular/material/expansion";
@@ -37,6 +37,7 @@ import { SetOpacityAction, SetSelectedRouteAction, SetWeightAction } from "../..
 import type { ApplicationState, LatLngAltTime, RouteData, ShareUrl } from "../../../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "private-routes-sidebar",
     templateUrl: "./private-routes-sidebar.component.html",
     styleUrls: ["./private-routes-sidebar.component.scss"],

@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton , MatIconButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
@@ -16,6 +16,7 @@ import { ApplicationState, LanguageCode } from "../../models";
 import languageAnimationData from "../../../content/lottie/dialog-language.json";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "language-dialog",
     templateUrl: "./language-dialog.component.html",
     imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, FormsModule, MatRadioButton, AnalyticsDirective, MatDialogActions, MatTooltip, LottieComponent]

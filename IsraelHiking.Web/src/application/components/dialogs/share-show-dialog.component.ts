@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogClose, MatDialogContent } from "@angular/material/dialog";
 import { MatIconButton } from "@angular/material/button";
 import { Dir } from "@angular/cdk/bidi";
@@ -9,6 +9,7 @@ import { ResourcesService } from "../../services/resources.service";
 import type { ShareUrl } from "../../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "app-share-show-dialog",
     templateUrl: "./share-show-dialog.component.html",
     imports: [MatIconButton, MatDialogContent, Dir, MatDialogClose, ShareItemComponent]

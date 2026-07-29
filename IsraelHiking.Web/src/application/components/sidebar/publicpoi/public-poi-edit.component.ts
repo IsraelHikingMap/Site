@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit } from "@angular/core";
+import { Component, inject, input, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { MatSelectChange, MatSelect } from "@angular/material/select";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
@@ -23,6 +23,7 @@ import { POINTS_OF_INTEREST_CATEGORIES } from "../../../reducers/initial-state";
 import type { EditablePublicPointData, IconColorLabel } from "../../../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "public-poi-edit",
     templateUrl: "./public-poi-edit.component.html",
     imports: [Dir, MatCard, MatCardHeader, MatCardTitle, NgClass, MatFormField, MatLabel, MatInput, FormsModule, ImageScrollerComponent, MatIconButton, MatSuffix, MatButton, MatSelect, MatOption, MatTooltip, MatCheckbox, MatProgressSpinner, ScrollToDirective]

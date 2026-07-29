@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { MatIconButton } from "@angular/material/button";
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from "@angular/material/expansion";
 import { MAT_DIALOG_DATA, MatDialogClose, MatDialogContent, MatDialogTitle } from "@angular/material/dialog";
@@ -20,6 +20,7 @@ export type LegendSection = {
 };
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "legend-dialog",
     templateUrl: "./legend-dialog.component.html",
     imports: [MatIconButton, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, LegendItemComponent, MatDialogTitle, MatDialogClose, MatDialogContent]

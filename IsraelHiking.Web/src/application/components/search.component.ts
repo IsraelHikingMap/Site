@@ -5,8 +5,7 @@ import {
     ElementRef,
     inject,
     viewChild,
-    viewChildren
-} from "@angular/core";
+    viewChildren, ChangeDetectionStrategy } from "@angular/core";
 import { Router } from "@angular/router";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
@@ -33,6 +32,7 @@ export type SearchContext = {
 };
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "search",
     templateUrl: "./search.component.html",
     styleUrls: ["./search.component.scss"],

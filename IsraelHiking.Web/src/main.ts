@@ -3,7 +3,8 @@ import { environment } from "./environments/environment";
 import {
     bootstrapApplication,
     provideClientHydration,
-    withEventReplay
+    withEventReplay,
+    withNoIncrementalHydration
 } from "@angular/platform-browser";
 import { appConfig } from "./application/app.config";
 import { AppRootComponent } from "./application/components/screens/app-root.component";
@@ -17,6 +18,6 @@ bootstrapApplication(AppRootComponent, {
     providers: [
         provideZoneChangeDetection(),
         ...appConfig.providers,
-        provideClientHydration(withEventReplay())
+        provideClientHydration(withEventReplay(), withNoIncrementalHydration())
     ]
 });

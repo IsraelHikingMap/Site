@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { AsyncPipe } from "@angular/common";
 import { Observable, combineLatest, throttleTime } from "rxjs";
@@ -13,6 +13,7 @@ import { SpatialService } from "../../services/spatial.service";
 import { ApplicationState, LatLngAltTime, RecordedRoute } from "../../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "recorded-route",
     templateUrl: "./recorded-route.component.html",
     imports: [SourceDirective, GeoJSONSourceComponent, LayerComponent, MarkerComponent, PrivatePoiOverlayComponent, AsyncPipe]

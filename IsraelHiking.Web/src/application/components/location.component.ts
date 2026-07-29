@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
@@ -25,6 +25,7 @@ import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer"
 import type { LatLngAltTime, ApplicationState } from "../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "location",
     templateUrl: "./location.component.html",
     styleUrls: ["./location.component.scss"],

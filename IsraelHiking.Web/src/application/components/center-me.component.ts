@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 
 import { MatButton } from "@angular/material/button";
 import { Store } from "@ngxs/store";
@@ -10,6 +10,7 @@ import { SetPannedAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState } from "../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "center-me",
     templateUrl: "./center-me.component.html",
     imports: [MatButton, AnalyticsDirective]

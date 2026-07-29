@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 
 import { MatButton , MatIconButton } from "@angular/material/button";
@@ -27,6 +27,7 @@ interface IPrivatePoiShowDialogData {
 }
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "private-poi-show-dialog",
     templateUrl: "private-poi-show-dialog.component.html",
     imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, CoordinatesComponent, MatDialogActions, AnalyticsDirective, MatTooltip]

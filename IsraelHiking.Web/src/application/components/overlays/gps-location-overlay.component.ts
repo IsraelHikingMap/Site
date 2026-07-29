@@ -1,4 +1,4 @@
-import { Component, inject, input, output } from "@angular/core";
+import { Component, inject, input, output, ChangeDetectionStrategy } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
@@ -24,6 +24,7 @@ import { AddRecordingPoiAction } from "../../reducers/recorded-route.reducer";
 import type { ApplicationState, LatLngAltTime, LinkData, MarkerData } from "../../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "gps-location-overlay",
     templateUrl: "./gps-location-overlay.component.html",
     imports: [Dir, MatButton, AnalyticsDirective, MatTooltip, CoordinatesComponent, AsyncPipe]

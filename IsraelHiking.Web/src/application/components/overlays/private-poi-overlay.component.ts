@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, inject, input, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
@@ -10,6 +10,7 @@ import { SelectedRouteService } from "../../services/selected-route.service";
 import type { MarkerData, LinkData } from "../../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "private-poi-overlay",
     templateUrl: "./private-poi-overlay.component.html",
     styleUrls: ["./private-poi-overlay.component.scss"],

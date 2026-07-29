@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions, MAT_DIALOG_DATA, MatDialog } from "@angular/material/dialog";
 import { MatButton , MatIconButton } from "@angular/material/button";
@@ -33,6 +33,7 @@ export type LayerPropertiesDialogComponentData = {
 };
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "layer-dialog",
     templateUrl: "./layer-properties-dialog.component.html",
     imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, NameInUseValidatorDirective, MatError, MatSlider, MatSliderThumb, MapComponent, AutomaticLayerPresentationComponent, MatDialogActions, AnalyticsDirective, MatTooltip, AsyncPipe, CdkCopyToClipboard]

@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, OnInit, ElementRef, ChangeDetectorRef, DestroyRef, inject, viewChild, signal } from "@angular/core";
+import { Component, ViewEncapsulation, OnInit, ElementRef, ChangeDetectorRef, DestroyRef, inject, viewChild, signal, ChangeDetectionStrategy } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
@@ -62,6 +62,7 @@ interface IChartElements {
 }
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "route-statistics",
     templateUrl: "./route-statistics.component.html",
     styleUrls: ["./route-statistics.component.scss"],

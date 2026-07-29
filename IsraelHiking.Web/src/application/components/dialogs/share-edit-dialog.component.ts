@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatDialogTitle, MatDialogClose, MatDialogContent, MAT_DIALOG_DATA, MatDialogActions, MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { MatAnchor, MatButtonModule } from "@angular/material/button";
@@ -43,6 +43,7 @@ export type ShareEditDialogComponentData = {
 };
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "share-edit-dialog",
     templateUrl: "./share-edit-dialog.component.html",
     imports: [Dir, MatDialogTitle, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, AnalyticsDirective, MatAnchor, MapComponent, LayersComponent, MatRadioGroup, MatRadioButton, MatDialogActions, MatFormField, ControlComponent, MatButtonModule, MatTooltip, RoutesPathComponent, DistancePipe, CdkTextareaAutosize]

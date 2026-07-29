@@ -43,7 +43,10 @@ export default defineConfig([
                 },
             ],
             "@typescript-eslint/consistent-type-definitions": "off",
-            "comma-dangle": ["error", "never"]
+            "comma-dangle": ["error", "never"],
+            // Angular 22 migration added ChangeDetectionStrategy.Eager to preserve existing
+            // CheckAlways behavior; opting into OnPush per-component is a separate, larger effort.
+            "@angular-eslint/prefer-on-push-component-change-detection": "off"
         },
     },
     {

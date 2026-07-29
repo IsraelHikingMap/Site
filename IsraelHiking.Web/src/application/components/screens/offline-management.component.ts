@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { type Map, type MapMouseEvent, MercatorCoordinate, type StyleSpecification } from "maplibre-gl";
@@ -17,6 +17,7 @@ import { DEFAULT_BASE_LAYERS, HIKING_MAP, MTB_MAP } from "../../reducers/initial
 import type { ApplicationState, EditableLayer } from "../../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "offline-management",
     templateUrl: "./offline-management.component.html",
     imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent]

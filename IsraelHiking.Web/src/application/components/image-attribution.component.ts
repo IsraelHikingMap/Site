@@ -1,4 +1,4 @@
-import { Component, inject, input, SimpleChanges, OnInit, OnChanges } from "@angular/core";
+import { Component, inject, input, SimpleChanges, OnInit, OnChanges, ChangeDetectionStrategy } from "@angular/core";
 import { MatButton } from "@angular/material/button";
 import { Store } from "@ngxs/store";
 
@@ -9,6 +9,7 @@ import { SetPublicRoutesFilterAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, PublicRoutesFilter } from "../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "image-attribution",
     templateUrl: "./image-attribution.component.html",
     imports: [MatButton, AnalyticsDirective]

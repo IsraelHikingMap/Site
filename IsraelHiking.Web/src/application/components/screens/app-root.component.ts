@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, viewChild, ElementRef, DestroyRef, afterNextRender, DOCUMENT } from "@angular/core";
+import { Component, HostListener, inject, viewChild, ElementRef, DestroyRef, afterNextRender, DOCUMENT, ChangeDetectionStrategy } from "@angular/core";
 import { MatToolbar } from "@angular/material/toolbar";
 import { RouterOutlet } from "@angular/router";
 import { Store } from "@ngxs/store";
@@ -11,6 +11,7 @@ import { RouteStrings } from "../../services/hash.service";
 import type { ApplicationState } from "../../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "app-root",
     templateUrl: "./app-root.component.html",
     styleUrls: ["./app-root.component.scss"],

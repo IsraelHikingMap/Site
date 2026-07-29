@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit } from "@angular/core";
+import { Component, inject, input, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { DecimalPipe } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 
@@ -9,6 +9,7 @@ import { CoordinatesService } from "../services/coordinates.service";
 import type { LatLngAltTime, NorthEast } from "../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "coordinates",
     templateUrl: "./coordinates.component.html",
     imports: [Dir, DecimalPipe, DistancePipe]

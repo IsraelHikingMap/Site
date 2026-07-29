@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatButton } from "@angular/material/button";
 
@@ -6,6 +6,7 @@ import { SidebarService } from "../services/sidebar.service";
 import { ResourcesService } from "../services/resources.service";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "layers-button",
     templateUrl: "./layers-button.component.html",
     imports: [MatTooltipModule, MatButton]

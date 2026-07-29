@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { MatExpansionPanel, MatExpansionPanelHeader } from "@angular/material/expansion";
 import { MatButton } from "@angular/material/button";
 import { NgClass } from "@angular/common";
@@ -16,6 +16,7 @@ import { POINTS_OF_INTEREST, POINTS_OF_INTEREST_CATEGORIES } from "../../../redu
 import type { ApplicationState, Category } from "../../../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "points-of-interest-categories",
     templateUrl: "./points-of-interest-categories.component.html",
     imports: [MatExpansionPanel, MatExpansionPanelHeader, MatButton, AnalyticsDirective, NgClass]

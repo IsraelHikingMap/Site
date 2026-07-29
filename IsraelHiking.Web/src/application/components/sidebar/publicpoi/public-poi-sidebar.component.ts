@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, ViewEncapsulation } from "@angular/core";
+import { Component, inject, OnDestroy, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
@@ -49,6 +49,7 @@ export type SourceImageUrlPair = {
 };
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "public-poi-sidebar",
     templateUrl: "./public-poi-sidebar.component.html",
     encapsulation: ViewEncapsulation.None,

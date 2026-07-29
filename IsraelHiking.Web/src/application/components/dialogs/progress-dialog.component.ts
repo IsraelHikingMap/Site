@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatProgressBar } from "@angular/material/progress-bar";
@@ -19,6 +19,7 @@ export interface IProgressDialogConfig {
 }
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "progress-dialog",
     templateUrl: "progress-dialog.component.html",
     imports: [Dir, CdkScrollable, MatDialogContent, MatProgressBar, MatDialogActions, MatButton, MatDialogClose, AnalyticsDirective, DecimalPipe]

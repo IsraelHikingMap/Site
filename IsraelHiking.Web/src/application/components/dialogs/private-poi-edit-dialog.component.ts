@@ -1,4 +1,4 @@
-import { Component, ElementRef, AfterViewInit, HostListener, inject, viewChild } from "@angular/core";
+import { Component, ElementRef, AfterViewInit, HostListener, inject, viewChild, ChangeDetectionStrategy } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { NgStyle } from "@angular/common";
 import { MatButton, MatAnchor, MatIconButton } from "@angular/material/button";
@@ -41,6 +41,7 @@ interface PrivatePoiEditDialogData {
 }
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "private-poi-edit-dialog",
     templateUrl: "private-poi-edit-dialog.component.html",
     imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatAnchor, ImageCaptureDirective, AnalyticsDirective, MatTooltip, NgStyle, MatIconButton, MatSuffix, CoordinatesComponent, MatDialogActions, MatMenu, MatMenuItem, MatMenuTrigger]

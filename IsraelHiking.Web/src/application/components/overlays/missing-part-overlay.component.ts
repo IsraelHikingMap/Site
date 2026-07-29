@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, inject, input, output } from "@angular/core";
+import { Component, ViewEncapsulation, inject, input, output, ChangeDetectionStrategy } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
@@ -14,6 +14,7 @@ import { Urls } from "../../urls";
 import type { LatLngAltTime } from "../../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "missing-part-overlay",
     templateUrl: "./missing-part-overlay.component.html",
     styleUrls: ["./missing-part-overlay.component.scss"],

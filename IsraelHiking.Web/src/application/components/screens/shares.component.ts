@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
 import { NgClass } from "@angular/common";
 import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
@@ -38,6 +38,7 @@ import { SetSearchTermAction } from "../../reducers/in-memory.reducer";
 import type { ApplicationState, ShareUrl } from "../../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "shares",
     templateUrl: "./shares.component.html",
     encapsulation: ViewEncapsulation.None,

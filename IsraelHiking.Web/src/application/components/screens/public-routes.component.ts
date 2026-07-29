@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject } from "@angular/core";
+import { Component, DestroyRef, inject, ChangeDetectionStrategy } from "@angular/core";
 import { Router } from "@angular/router";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
@@ -40,6 +40,7 @@ import type { ApplicationState } from "../../models";
 import sceneryPlaceholder from "../../../content/lottie/placeholder-scenery.json";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "public-routes",
     templateUrl: "./public-routes.component.html",
     styleUrls: ["./public-routes.component.scss"],

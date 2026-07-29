@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject } from "@angular/core";
+import { Component, DestroyRef, inject, ChangeDetectionStrategy } from "@angular/core";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatButton } from "@angular/material/button";
@@ -13,6 +13,7 @@ import { initialState } from "../reducers/initial-state";
 import type { ApplicationState, CategoryType, Difficulty, PublicRoutesFilter } from "../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "public-routes-filter",
     templateUrl: "./public-routes-filter.component.html",
     imports: [MatCheckbox, MatMenu, MatMenuItem, MatSliderRangeThumb, MatSlider, MatMenuTrigger, MatButton]

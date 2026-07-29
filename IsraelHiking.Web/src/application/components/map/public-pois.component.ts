@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, signal } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit, signal, ChangeDetectionStrategy } from "@angular/core";
 
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
@@ -29,6 +29,7 @@ import type { ApplicationState, LatLngAltTime, LinkData, MarkerData } from "../.
 import { skip } from "rxjs";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "public-pois",
     templateUrl: "public-pois.component.html",
     styleUrls: ["public-pois.component.scss"],

@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, ViewEncapsulation, inject } from "@angular/core";
+import { Component, DestroyRef, OnInit, ViewEncapsulation, inject, ChangeDetectionStrategy } from "@angular/core";
 import { Router } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
@@ -40,6 +40,7 @@ import type { ApplicationState, LatLngAltTime, Trace, TraceVisibility } from "..
 import { ZoomComponent } from "../zoom.component";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "traces",
     templateUrl: "./traces.component.html",
     styleUrls: ["./traces.component.scss"],

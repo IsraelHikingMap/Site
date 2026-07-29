@@ -1,4 +1,4 @@
-import { Component, HostListener, inject } from "@angular/core";
+import { Component, HostListener, inject, ChangeDetectionStrategy } from "@angular/core";
 import { NgClass, NgStyle, AsyncPipe } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
@@ -31,6 +31,7 @@ import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import type { RoutingType, ApplicationState, RouteData, ShareUrl } from "../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "drawing",
     templateUrl: "./drawing.component.html",
     imports: [Dir, MatButton, AnalyticsDirective, NgClass, NgStyle, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger, AsyncPipe]

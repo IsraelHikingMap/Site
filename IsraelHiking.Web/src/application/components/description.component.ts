@@ -1,4 +1,4 @@
-import { Component, inject, input, OnChanges } from "@angular/core";
+import { Component, inject, input, OnChanges, ChangeDetectionStrategy } from "@angular/core";
 import { NgClass } from "@angular/common";
 import { Store } from "@ngxs/store";
 
@@ -7,6 +7,7 @@ import { TranslationService } from "../services/translation.service";
 import type { ApplicationState } from "../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "description",
     templateUrl: "description.component.html",
     imports: [NgClass]

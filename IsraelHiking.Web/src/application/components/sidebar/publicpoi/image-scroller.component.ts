@@ -1,4 +1,4 @@
-import { Component, OnChanges, SimpleChanges, input, inject, output } from "@angular/core";
+import { Component, OnChanges, SimpleChanges, input, inject, output, ChangeDetectionStrategy } from "@angular/core";
 import { MatAnchor, MatButton } from "@angular/material/button";
 import { Dir } from "@angular/cdk/bidi";
 import { AnimationOptions, LottieComponent } from "ngx-lottie";
@@ -13,6 +13,7 @@ import { ImageResizeService } from "../../../services/image-resize.service";
 import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.json";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "image-scroller",
     templateUrl: "./image-scroller.component.html",
     imports: [LottieComponent, MatAnchor, ImageCaptureDirective, AnalyticsDirective, MatButton, Dir, ImageAttributionComponent]

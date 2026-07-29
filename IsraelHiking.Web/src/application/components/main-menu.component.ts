@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatButton } from "@angular/material/button";
@@ -30,6 +30,7 @@ import { SetAgreeToTermsAction } from "../reducers/user.reducer";
 import type { UserInfo, ApplicationState } from "../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "main-menu",
     templateUrl: "./main-menu.component.html",
     imports: [MatButton, AnalyticsDirective, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, RouterLinkActive]

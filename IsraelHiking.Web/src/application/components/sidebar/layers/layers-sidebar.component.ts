@@ -1,4 +1,4 @@
-import { Component, inject, ViewEncapsulation } from "@angular/core";
+import { Component, inject, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
@@ -22,6 +22,7 @@ import { DEFAULT_BASE_LAYERS, DEFAULT_OVERLAYS } from "../../../reducers/initial
 import type { ApplicationState, EditableLayer } from "../../../models";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "layers-sidebar",
     templateUrl: "./layers-sidebar.component.html",
     styleUrls: ["./layers-sidebar.component.scss"],

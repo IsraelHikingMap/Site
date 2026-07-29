@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { MatLabel } from "@angular/material/input";
 import { Dir } from "@angular/cdk/bidi";
 import { CdkScrollable } from "@angular/cdk/scrolling";
@@ -24,6 +24,7 @@ import planAnimationData from "../../../content/lottie/dialog-plan.json";
 import moreAnimationData from "../../../content/lottie/dialog-more.json";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "intro-dialog",
     templateUrl: "./intro-dialog.component.html",
     styleUrls: ["./intro-dialog.component.scss"],

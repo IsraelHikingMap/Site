@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { MatTooltip } from "@angular/material/tooltip";
 
 import { AnalyticsDirective } from "../directives/analytics.directive";
@@ -8,6 +8,7 @@ import { RunningContextService } from "../services/running-context.service";
 import { Urls } from "../urls";
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "mapeak-link",
     templateUrl: "./mapeak-link.component.html",
     imports: [AnalyticsDirective, MatTooltip]

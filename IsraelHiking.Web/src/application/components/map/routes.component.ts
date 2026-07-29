@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ViewEncapsulation, inject } from "@angular/core";
+import { Component, AfterViewInit, ViewEncapsulation, inject, ChangeDetectionStrategy } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 import { Dir } from "@angular/cdk/bidi";
@@ -25,6 +25,7 @@ interface RoutePointViewData {
 }
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "routes",
     templateUrl: "./routes.component.html",
     encapsulation: ViewEncapsulation.None,
