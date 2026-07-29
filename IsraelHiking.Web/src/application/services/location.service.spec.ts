@@ -266,17 +266,17 @@ describe("LocationService", () => {
         }
     ));
 
-    it("Should not move to gps position when editing route", inject([LocationService, Store, MapService, DeviceOrientationService],
-        async (service: LocationService, store: Store, mapService: MapService, deviceOrientationService: DeviceOrientationService) => {
+    it("Should not move to gps position when editing route", inject([LocationService, Store, SelectedRouteService, MapService, DeviceOrientationService],
+        async (service: LocationService, store: Store, selectedRouteService: SelectedRouteService, mapService: MapService, deviceOrientationService: DeviceOrientationService) => {
             store.reset({
                 gpsState: {
                     currentPosition: null,
                     tracking: "tracking"
                 },
-                inMemoryState: { following: true, distance: true },
-                routes: { present: [{ id: "route1", state: "Route" }] },
-                routeEditingState: { selectedRouteId: "route1" }
+                inMemoryState: { following: true, distance: true }
             });
+            // isFollowing is a computed; set the mock before initialize() so its first (memoized) evaluation sees it.
+            (selectedRouteService as any).isEditingRoute = () => true;
             await service.initialize();
             mapService.moveToWithCurrentZoom = vi.fn();
 
