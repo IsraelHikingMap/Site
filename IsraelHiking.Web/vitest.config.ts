@@ -10,7 +10,6 @@ export default defineConfig({
         }),
     ],
     test: {
-        fileParallelism: false,
         browser: {
             screenshotFailures: false
         }
