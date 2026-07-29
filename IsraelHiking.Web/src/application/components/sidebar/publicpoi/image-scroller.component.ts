@@ -70,11 +70,16 @@ export class ImageScrollerComponent implements OnChanges {
         this.previous();
     }
 
-    public async add(e: any) {
+    public onFileInputChanged(event: any) {
+        this.onFileDrop(event);
+    }
+
+    public async onFileDrop(event: Event | InputEvent | DragEvent) {
+        event.preventDefault();
         if (this.canEdit() === false) {
             return;
         }
-        const files = this.fileService.getFilesFromEvent(e);
+        const files = this.fileService.getFilesFromEvent(event);
         for (const file of files) {
             const data = await this.imageResizeService.resizeImage(file);
             this.images().push(data);

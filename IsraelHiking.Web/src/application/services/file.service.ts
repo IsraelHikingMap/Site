@@ -73,18 +73,15 @@ export class FileService {
         }
     ];
 
-    public getFileFromEvent(e: any): File {
-        const file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
-        if (!file) {
-            return null;
-        }
-        const target = e.target || e.srcElement;
-        target.value = "";
-        return file;
-    }
+    public getFilesFromEvent(e: Event | DragEvent): File[] {
+        let files: FileList | null | undefined = null;
 
-    public getFilesFromEvent(e: any): File[] {
-        const files: FileList = e.dataTransfer ? e.dataTransfer.files : e.target.files;
+        if ("dataTransfer" in e && e.dataTransfer) {
+            files = e.dataTransfer.files;
+        } else {
+            const target = e.target as HTMLInputElement | null;
+            files = target?.files;
+        }
         if (!files || files.length === 0) {
             return [];
         }
@@ -93,8 +90,10 @@ export class FileService {
         for (const file of files) {
             filesToReturn.push(file);
         }
-        const target = e.target || e.srcElement;
-        target.value = ""; // this will reset files so we need to clone the array.
+        const target = e.target as HTMLInputElement | null;
+        if (target) {
+            target.value = "";
+        }
         return filesToReturn;
     }
 

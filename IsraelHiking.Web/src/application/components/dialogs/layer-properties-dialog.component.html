@@ -1,7 +1,8 @@
 ﻿<div [dir]="resources.direction">
   <div mat-dialog-title>
     <div>{{title}}</div>
-    <button mat-icon-button aria-label="Close" type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
+    <button mat-icon-button aria-label="Close" type="button" mat-dialog-close tabindex="-1"><i
+        class="fa icon-close"></i></button>
   </div>
   <div mat-dialog-content>
     <div class="flex flex-row">
@@ -47,7 +48,7 @@
     </div>
     <div class="flex flex-row">
       <div class="w-full h-[138px]">
-        <mgl-map [zoom]="[(layerData.minZoom + layerData.maxZoom) / 2]"
+        <mgl-map [zoom]="(layerData.minZoom + layerData.maxZoom) / 2"
           [center]="[location()?.longitude, location()?.latitude]"
           [mapStyle]='{"version": 8, "sources": {}, "layers": [] }' [attributionControl]="false">
           <auto-layer [layerData]="layerData" [visible]="true" [isBaselayer]="!isOverlay" [allowOffline]="false">

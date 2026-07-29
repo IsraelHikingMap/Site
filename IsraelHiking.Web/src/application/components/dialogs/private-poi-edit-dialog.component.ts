@@ -174,12 +174,17 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
         }
     }
 
-    public async addImage(e: any) {
-        const file = this.fileService.getFileFromEvent(e);
-        if (!file) {
+    public onFileInputChanged(event: any) {
+        this.onFileDrop(event);
+    }
+
+    public async onFileDrop(event: DragEvent) {
+        event.preventDefault();
+        const files = this.fileService.getFilesFromEvent(event);
+        if (files.length !== 1) {
             return;
         }
-        const container = await this.imageResizeService.resizeImageAndConvert(file, false);
+        const container = await this.imageResizeService.resizeImageAndConvert(files[0], false);
         this.imageLink.set(container.routes[0].markers[0].urls[0]);
     }
 

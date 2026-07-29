@@ -1,6 +1,6 @@
-import { LatLngAltTime, MarkerDataWithoutId } from ".";
+import { LatLngAltTime, MarkerData } from ".";
 
 export type RecordedRoute = {
-    markers: MarkerDataWithoutId[];
+    markers: MarkerData[];
     latlngs: LatLngAltTime[];
 };

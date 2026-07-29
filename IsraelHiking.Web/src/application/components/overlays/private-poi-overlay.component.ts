@@ -2,6 +2,7 @@ import { Component, inject, input, OnInit, ViewEncapsulation } from "@angular/co
 import { MatDialog } from "@angular/material/dialog";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
+import type { Immutable } from "immer";
 
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { PrivatePoiShowDialogComponent } from "../dialogs/private-poi-show-dialog.component";
@@ -18,7 +19,7 @@ import type { MarkerData, LinkData } from "../../models";
 })
 export class PrivatePoiOverlayComponent implements OnInit {
 
-    public marker = input<MarkerData>();
+    public marker = input<Immutable<MarkerData>>();
     public routeId? = input<string>();
     public index = input<number>();
     public color = input<string>();

@@ -49,9 +49,9 @@
                 <mat-slider class="w-full" min="0" max="50" step="1" analyticsOn="click"
                     analyticsCategory="Public routes" analyticsLabel="Filter by length">
                     <input [value]="filterLengthStart" matSliderStartThumb
-                        (input)="onFilterLengthStartChange($event.srcElement.value)">
+                        (input)="onFilterLengthStartChange($event.target.value)">
                     <input [value]="filterLengthEnd" matSliderEndThumb
-                        (input)="onFilterLengthEndChange($event.srcElement.value)">
+                        (input)="onFilterLengthEndChange($event.target.value)">
                 </mat-slider>
             </div>
             <div class="flex flex-row">

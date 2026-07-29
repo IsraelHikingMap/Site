@@ -65,7 +65,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     public imagesUrls: string[] = [];
     public urls: string[] = [];
     public osmEditableInfo: EditablePublicPointData;
-    public fullFeature: Immutable<GeoJSON.Feature>;
+    public fullFeature: GeoJSON.Feature;
 
     private editMode: boolean;
 
@@ -170,7 +170,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     }
 
     private async initFromFeature(feature: Immutable<GeoJSON.Feature>) {
-        this.fullFeature = feature;
+        this.fullFeature = feature as GeoJSON.Feature;
         this.sourceImageUrls = this.getSourceImageUrls(feature);
         this.shareLinks = this.poiService.getPoiSocialLinks(feature);
         this.imagesUrls = await this.poiService.getImagesThatHaveAttribution(feature);

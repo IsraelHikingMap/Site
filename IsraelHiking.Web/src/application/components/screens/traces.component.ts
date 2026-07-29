@@ -185,10 +185,11 @@ export class TracesComponent implements OnInit {
     }
 
     public async uploadToOsm(e: any) {
-        const file = this.fileService.getFileFromEvent(e);
-        if (!file) {
+        const files = this.fileService.getFilesFromEvent(e);
+        if (files.length !== 1) {
             return;
         }
+        const file = files[0];
         try {
             await this.tracesService.uploadTrace(file);
             this.toastService.success(this.resources.fileUploadedSuccessfullyItWillTakeTime);

@@ -1,7 +1,7 @@
 import { Component, inject, signal } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 
-import { MatButton , MatIconButton } from "@angular/material/button";
+import { MatButton, MatIconButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
@@ -65,7 +65,7 @@ export class PrivatePoiShowDialogComponent {
         this.url = this.marker.urls.find(u => !u.mimeType.startsWith("image"));
     }
 
-    public static openDialog(dialog: MatDialog, marker: MarkerData, routeId: string, index: number) {
+    public static openDialog(dialog: MatDialog, marker: Immutable<MarkerData>, routeId: string, index: number) {
         setTimeout(() => {
             // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
             dialog.open(PrivatePoiShowDialogComponent,

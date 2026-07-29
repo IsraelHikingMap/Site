@@ -42,7 +42,7 @@ export class PublicPoisComponent implements OnInit {
 
     public poiGeoJsonData = signal<GeoJSON.FeatureCollection<GeoJSON.Point>>(null);
     public selectedPoiFeature = signal<GeoJSON.Feature<GeoJSON.Point> | null>(null);
-    public selectedPoiGeoJson = signal<Immutable<GeoJSON.FeatureCollection>>({
+    public selectedPoiGeoJson = signal<GeoJSON.FeatureCollection>({
         type: "FeatureCollection",
         features: []
     });
@@ -93,7 +93,7 @@ export class PublicPoisComponent implements OnInit {
         });
         this.selectedPoiGeoJson.set({
             type: "FeatureCollection",
-            features: poi == null ? [] : [poi]
+            features: poi == null ? [] : [poi as GeoJSON.Feature]
         });
         if (this.isCoordinatesFeature(poi)) {
             this.isShowCoordinatesPopup.set(true);

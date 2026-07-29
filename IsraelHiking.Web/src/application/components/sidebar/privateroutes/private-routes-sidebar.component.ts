@@ -130,10 +130,11 @@ export class PrivateRoutesSidebarComponent {
     }
 
     public async openFile(event: Event) {
-        const file = this.fileService.getFileFromEvent(event);
-        if (!file) {
+        const files = this.fileService.getFilesFromEvent(event);
+        if (files.length !== 1) {
             return;
         }
+        const file = files[0];
         if (file.name.endsWith(".json")) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
             await this.fileService.writeStyle(file.name, await file.text());

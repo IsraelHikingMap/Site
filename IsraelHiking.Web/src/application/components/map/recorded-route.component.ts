@@ -1,9 +1,8 @@
 import { Component, inject, signal } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Observable, combineLatest, throttleTime } from "rxjs";
+import { combineLatest, throttleTime } from "rxjs";
 import { Store } from "@ngxs/store";
 import { SourceDirective, GeoJSONSourceComponent, LayerComponent, MarkerComponent } from "@maplibre/ngx-maplibre-gl";
-import type { Immutable } from "immer";
 
 import { PrivatePoiOverlayComponent } from "../overlays/private-poi-overlay.component";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
@@ -30,9 +29,6 @@ export class RecordedRouteComponent {
         },
         properties: {}
     });
-    private recordedRoute$: Observable<Immutable<RecordedRoute>>;
-
-    private currentPosition$: Observable<Immutable<GeolocationPosition>>;
     private lastSplit = 0;
 
     public readonly resources = inject(ResourcesService);
@@ -45,11 +41,11 @@ export class RecordedRouteComponent {
     public isRecording = this.store.selectSignal((state: ApplicationState) => state.recordedRouteState.isRecording);
 
     constructor() {
-        this.recordedRoute$ = this.store.select((state: ApplicationState) => state.recordedRouteState.route);
-        this.currentPosition$ = this.store.select((state: ApplicationState) => state.gpsState.currentPosition);
+        const recordedRoute$ = this.store.select((state: ApplicationState) => state.recordedRouteState.route);
+        const currentPosition$ = this.store.select((state: ApplicationState) => state.gpsState.currentPosition);
 
         // Combine streams to work when both current location and recorded route changes, added throttle to avoid a double update of the UI
-        combineLatest([this.recordedRoute$, this.currentPosition$]).pipe(throttleTime(50, undefined, { trailing: true }), takeUntilDestroyed())
+        combineLatest([recordedRoute$, currentPosition$]).pipe(throttleTime(50, undefined, { trailing: true }), takeUntilDestroyed())
             .subscribe(() => this.handleRecordingChanges());
     }
 
