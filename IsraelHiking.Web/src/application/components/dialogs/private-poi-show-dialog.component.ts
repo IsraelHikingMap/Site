@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 
 import { MatButton , MatIconButton } from "@angular/material/button";
@@ -27,7 +27,6 @@ interface IPrivatePoiShowDialogData {
 }
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "private-poi-show-dialog",
     templateUrl: "private-poi-show-dialog.component.html",
     imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, CoordinatesComponent, MatDialogActions, AnalyticsDirective, MatTooltip]
@@ -42,7 +41,7 @@ export class PrivatePoiShowDialogComponent {
     public url: LinkData;
     public title: string;
     public description: string;
-    public showCoordinates = false;
+    public showCoordinates = signal(false);
 
     public readonly resources = inject(ResourcesService);
 
@@ -82,7 +81,7 @@ export class PrivatePoiShowDialogComponent {
     }
 
     public toggleCoordinates() {
-        this.showCoordinates = !this.showCoordinates;
+        this.showCoordinates.set(!this.showCoordinates());
     }
 
     public showImage() {
