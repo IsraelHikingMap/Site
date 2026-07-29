@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, signal, ChangeDetectionStrategy } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit, signal } from "@angular/core";
 
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
@@ -29,7 +29,6 @@ import type { ApplicationState, LatLngAltTime, LinkData, MarkerData } from "../.
 import { skip } from "rxjs";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "public-pois",
     templateUrl: "public-pois.component.html",
     styleUrls: ["public-pois.component.scss"],
@@ -41,16 +40,16 @@ export class PublicPoisComponent implements OnInit {
 
     public poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
 
-    public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point>;
+    public poiGeoJsonData = signal<GeoJSON.FeatureCollection<GeoJSON.Point>>(null);
     public selectedPoiFeature = signal<GeoJSON.Feature<GeoJSON.Point> | null>(null);
-    public selectedPoiGeoJson: Immutable<GeoJSON.FeatureCollection> = {
+    public selectedPoiGeoJson = signal<Immutable<GeoJSON.FeatureCollection>>({
         type: "FeatureCollection",
         features: []
-    };
-    public selectedCluster: GeoJSON.Feature<GeoJSON.Point> = null;
-    public clusterFeatures: GeoJSON.Feature<GeoJSON.Point>[];
-    public hoverFeature: GeoJSON.Feature<GeoJSON.Point> = null;
-    public isShowCoordinatesPopup = false;
+    });
+    public selectedCluster = signal<GeoJSON.Feature<GeoJSON.Point>>(null);
+    public clusterFeatures = signal<GeoJSON.Feature<GeoJSON.Point>[]>(null);
+    public hoverFeature = signal<GeoJSON.Feature<GeoJSON.Point>>(null);
+    public isShowCoordinatesPopup = signal(false);
 
     public readonly resources = inject(ResourcesService);
 
@@ -64,20 +63,20 @@ export class PublicPoisComponent implements OnInit {
     private readonly mapComponent = inject(MapComponent);
 
     public ngOnInit() {
-        this.poiGeoJsonData = this.poiService.getPoisGeoJson();
+        this.poiGeoJsonData.set(this.poiService.getPoisGeoJson());
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(this.destroyRef), skip(1)).subscribe(() => {
-            this.poiGeoJsonData = this.poiService.getPoisGeoJson();
+            this.poiGeoJsonData.set(this.poiService.getPoisGeoJson());
         });
         this.store.select((state: ApplicationState) => state.layersState.visiblePoisCategories).pipe(takeUntilDestroyed(this.destroyRef), skip(1)).subscribe(() => {
-            this.poiGeoJsonData = this.poiService.getPoisGeoJson();
+            this.poiGeoJsonData.set(this.poiService.getPoisGeoJson());
         });
         this.mapComponent.sourceData.subscribe((sourceData) => {
             if (sourceData.sourceId === this.poisSrouceId) {
-                this.poiGeoJsonData = this.poiService.getPoisGeoJson();
+                this.poiGeoJsonData.set(this.poiService.getPoisGeoJson());
             }
         });
         this.mapComponent.moveEnd.subscribe(() => {
-            this.poiGeoJsonData = this.poiService.getPoisGeoJson();
+            this.poiGeoJsonData.set(this.poiService.getPoisGeoJson());
         });
 
         this.store.select((state: ApplicationState) => state.poiState.selectedPointOfInterest).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(poi => this.onSelectedPoiChanged(poi));
@@ -92,21 +91,21 @@ export class PublicPoisComponent implements OnInit {
                 coordinates: [poi.properties.poiGeolocation.lng, poi.properties.poiGeolocation.lat]
             }
         });
-        this.selectedPoiGeoJson = {
+        this.selectedPoiGeoJson.set({
             type: "FeatureCollection",
             features: poi == null ? [] : [poi]
-        };
+        });
         if (this.isCoordinatesFeature(poi)) {
-            this.isShowCoordinatesPopup = true;
+            this.isShowCoordinatesPopup.set(true);
         }
     }
 
     public openPoi(feature: GeoJSON.Feature<GeoJSON.Point>, e: Event) {
         e.stopPropagation();
-        this.selectedCluster = null;
-        this.hoverFeature = null;
+        this.selectedCluster.set(null);
+        this.hoverFeature.set(null);
         if (this.isCoordinatesFeature(feature)) {
-            this.isShowCoordinatesPopup = !this.isShowCoordinatesPopup;
+            this.isShowCoordinatesPopup.set(!this.isShowCoordinatesPopup());
             return;
         }
         const sourceAndId = this.getSourceAndId(this.poiService.getFeatureId(feature));
@@ -115,9 +114,9 @@ export class PublicPoisComponent implements OnInit {
 
     public async toggleClusterPopup(event: MouseEvent, feature: GeoJSON.Feature<GeoJSON.Point>, sourceComponent: GeoJSONSourceComponent) {
         event.stopPropagation();
-        if (this.selectedCluster != null && feature.properties.id === this.selectedCluster.properties.id) {
-            this.selectedCluster = null;
-            this.clusterFeatures = [];
+        if (this.selectedCluster() != null && feature.properties.id === this.selectedCluster().properties.id) {
+            this.selectedCluster.set(null);
+            this.clusterFeatures.set([]);
             return;
         }
         const features = await sourceComponent.getClusterLeaves(feature.properties.cluster_id,
@@ -129,8 +128,8 @@ export class PublicPoisComponent implements OnInit {
             }
             return GeoJSONUtils.getTitle(a, language).localeCompare(GeoJSONUtils.getTitle(b, language));
         });
-        this.clusterFeatures = features;
-        this.selectedCluster = feature;
+        this.clusterFeatures.set(features);
+        this.selectedCluster.set(feature);
     }
 
     private getSourceAndId(sourceAndId: string): { source: string; id: string } {
@@ -143,12 +142,12 @@ export class PublicPoisComponent implements OnInit {
     }
 
     public clearSelectedClusterPopup() {
-        this.selectedCluster = null;
+        this.selectedCluster.set(null);
     }
 
     public setHoverFeature(selectedPoi: GeoJSON.Feature<GeoJSON.Point>) {
         if (this.getTitle(selectedPoi)) {
-            this.hoverFeature = selectedPoi;
+            this.hoverFeature.set(selectedPoi);
         }
     }
 
@@ -186,7 +185,7 @@ export class PublicPoisComponent implements OnInit {
 
     public clearSelected() {
         this.store.dispatch(new SetSelectedPoiAction(null));
-        this.hoverFeature = null;
+        this.hoverFeature.set(null);
     }
 
     public getSelectedFeatureLatlng(): LatLngAltTime {

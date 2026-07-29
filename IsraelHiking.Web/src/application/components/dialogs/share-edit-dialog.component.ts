@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatDialogTitle, MatDialogClose, MatDialogContent, MAT_DIALOG_DATA, MatDialogActions, MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { MatAnchor, MatButtonModule } from "@angular/material/button";
@@ -43,7 +43,6 @@ export type ShareEditDialogComponentData = {
 };
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "share-edit-dialog",
     templateUrl: "./share-edit-dialog.component.html",
     imports: [Dir, MatDialogTitle, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, AnalyticsDirective, MatAnchor, MapComponent, LayersComponent, MatRadioGroup, MatRadioButton, MatDialogActions, MatFormField, ControlComponent, MatButtonModule, MatTooltip, RoutesPathComponent, DistancePipe, CdkTextareaAutosize]
@@ -51,14 +50,14 @@ export type ShareEditDialogComponentData = {
 export class ShareEditDialogComponent {
     public shareUrl: ShareUrl;
 
-    public isLoading = false;
+    public isLoading = signal(false);
     public canUpdate = false;
     public updateCurrentShare = false;
     public hasHiddenRoutes = false;
     public style: StyleSpecification;
-    public copiedToClipboard = false;
+    public base64Preview = signal<string>(null);
     public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = { type: "FeatureCollection", features: [] };
-    public canPublishPublic = false;
+    public canPublishPublic = signal(false);
 
     public readonly resources = inject(ResourcesService);
 
@@ -91,6 +90,7 @@ export class ShareEditDialogComponent {
             this.shareUrl.type = this.shareUrl.type || activityType;
             this.shareUrl.difficulty = this.shareUrl.difficulty || "Unknown";
             this.shareUrl.base64Preview = this.shareUrlsService.getImageUrlFromShareId(this.shareUrl.id);
+            this.base64Preview.set(this.shareUrl.base64Preview);
             this.canUpdate = true;
             this.shareUrl.dataContainer = this.data.dataContainer ?? this.shareUrl.dataContainer;
             this.updateCurrentShare = true;
@@ -114,8 +114,13 @@ export class ShareEditDialogComponent {
         this.routesGeoJson = geojson;
         this.updateStatistics();
         this.shareUrlsService.getUserPermissions().then((permissions) => {
-            this.canPublishPublic = permissions.canPublishPublic;
+            this.canPublishPublic.set(permissions.canPublishPublic);
         });
+    }
+
+    private setPreview(value: string) {
+        this.base64Preview.set(value);
+        this.shareUrl.base64Preview = value;
     }
 
     public async mapLoaded(map: Map) {
@@ -135,13 +140,13 @@ export class ShareEditDialogComponent {
      * @returns true if the map is loaded
      */
     public canUpload(): boolean {
-        return this.map != null || this.shareUrl.base64Preview != null;
+        return this.map != null || this.base64Preview() != null;
     }
 
     public async uploadShareUrl() {
-        this.isLoading = true;
-        if (this.shareUrl.base64Preview == null) {
-            this.shareUrl.base64Preview = this.map.getCanvas().toDataURL("image/png")
+        this.isLoading.set(true);
+        if (this.base64Preview() == null) {
+            this.setPreview(this.map.getCanvas().toDataURL("image/png"));
         }
         this.shareUrl.title = this.shareUrl.title.trim();
         this.shareUrl.description = this.shareUrl.description.trim();
@@ -160,7 +165,7 @@ export class ShareEditDialogComponent {
         } catch (ex) {
             this.toastService.error(ex, this.resources.unableToGenerateUrl);
         } finally {
-            this.isLoading = false;
+            this.isLoading.set(false);
         }
     }
 
@@ -193,16 +198,16 @@ export class ShareEditDialogComponent {
         if (file == null) {
             return;
         }
-        this.shareUrl.base64Preview = await this.imageResizeService.resizeImage(file, 1920);
+        this.setPreview(await this.imageResizeService.resizeImage(file, 1920));
     }
 
     public removeImage() {
-        this.shareUrl.base64Preview = null;
+        this.setPreview(null);
     }
 
     public updateCurrentShareChanged(event: MatCheckboxChange) {
         if (event.checked) {
-            this.shareUrl.base64Preview = this.shareUrlsService.getImageUrlFromShareId(this.shareUrl.id);
+            this.setPreview(this.shareUrlsService.getImageUrlFromShareId(this.shareUrl.id));
         } else {
             this.removeImage();
         }
@@ -224,7 +229,7 @@ export class ShareEditDialogComponent {
                     continue;
                 }
                 const blob = await item.getType(imageType);
-                this.shareUrl.base64Preview = await this.imageResizeService.resizeImage(blob as File, 1920);
+                this.setPreview(await this.imageResizeService.resizeImage(blob as File, 1920));
             }
         } catch {
             // ignore

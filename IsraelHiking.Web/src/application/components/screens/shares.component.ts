@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit, ViewEncapsulation, signal } from "@angular/core";
 import { NgClass } from "@angular/common";
 import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
@@ -38,19 +38,18 @@ import { SetSearchTermAction } from "../../reducers/in-memory.reducer";
 import type { ApplicationState, ShareUrl } from "../../models";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "shares",
     templateUrl: "./shares.component.html",
     encapsulation: ViewEncapsulation.None,
     imports: [MapComponent, LayersComponent, MatButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, ShareItemComponent, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, ControlComponent, MatButtonToggle, MatButtonToggleGroup, NgClass]
 })
 export class SharesComponent implements OnInit {
-    public loading = false;
-    public showMap = false;
+    public loading = signal(false);
+    public showMap = signal(false);
     public mapStyle: StyleSpecification;
-    public selectedShareUrl: Immutable<ShareUrl> = null;
-    public filteredShareUrls: Immutable<ShareUrl[]> = [];
-    public routesGeoJson: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
+    public selectedShareUrl = signal<Immutable<ShareUrl>>(null);
+    public filteredShareUrls = signal<Immutable<ShareUrl[]>>([]);
+    public routesGeoJson = signal<GeoJSON.FeatureCollection>({ type: "FeatureCollection", features: [] });
     public sortBy: keyof ShareUrl = "lastModifiedDate";
     public sortDirection: "asc" | "desc" = "desc";
     public filter: Record<string, string[]> = {
@@ -90,9 +89,9 @@ export class SharesComponent implements OnInit {
     }
 
     public async ngOnInit(): Promise<void> {
-        this.loading = true;
+        this.loading.set(true);
         await this.shareUrlsService.syncShareUrls();
-        this.loading = false;
+        this.loading.set(false);
     }
 
     public mapLoaded(map: Map) {
@@ -146,7 +145,7 @@ export class SharesComponent implements OnInit {
                 })] as any;
                 break;
         }
-        this.filteredShareUrls = orderBy(filteredShareUrls, sortBy, this.sortDirection);
+        this.filteredShareUrls.set(orderBy(filteredShareUrls, sortBy, this.sortDirection));
     }
 
 
@@ -159,15 +158,15 @@ export class SharesComponent implements OnInit {
     }
 
     public async moveToShare(shareUrl: Immutable<ShareUrl>) {
-        this.showMap = true;
+        this.showMap.set(true);
         const share = await this.shareUrlsService.getShareUrl(shareUrl.id);
-        this.selectedShareUrl = share;
+        this.selectedShareUrl.set(share);
         const features: GeoJSON.Feature[] = [];
         for (const route of share.dataContainer.routes) {
             features.push(...this.selectedRouteService.createFeaturesForRoute(route));
         }
-        this.routesGeoJson = { type: "FeatureCollection", features };
-        const bounds = SpatialService.getBoundsForFeatureCollection(this.routesGeoJson);
+        this.routesGeoJson.set({ type: "FeatureCollection", features });
+        const bounds = SpatialService.getBoundsForFeatureCollection(this.routesGeoJson());
         this.mapService.fitBounds(bounds, 100, { top: 150, left: 50, bottom: window.innerHeight / 2, right: 50 });
     }
 
@@ -251,11 +250,11 @@ export class SharesComponent implements OnInit {
     }
 
     private clearShareUrlIfSelected(id: string): boolean {
-        if (this.selectedShareUrl?.id !== id) {
+        if (this.selectedShareUrl()?.id !== id) {
             return false;
         }
-        this.selectedShareUrl = null;
-        this.routesGeoJson = { type: "FeatureCollection", features: [] };
+        this.selectedShareUrl.set(null);
+        this.routesGeoJson.set({ type: "FeatureCollection", features: [] });
         return true;
     }
 }

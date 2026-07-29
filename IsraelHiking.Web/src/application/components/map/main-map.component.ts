@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, ElementRef, inject, viewChildren, DestroyRef, signal, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ViewEncapsulation, ElementRef, inject, viewChildren, DestroyRef, signal } from "@angular/core";
 import { NgStyle } from "@angular/common";
 import { MatSidenavContainer, MatSidenav } from "@angular/material/sidenav";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
@@ -32,7 +32,6 @@ import { SidebarService } from "../../services/sidebar.service";
 import type { ApplicationState, LocationState } from "../../models";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "main-map",
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
@@ -47,7 +46,7 @@ export class MainMapComponent {
     public bottomStartControls = viewChildren("bottomStartControl", { read: ElementRef });
 
     public sidenavVisible = signal(false);
-    public sidenavViewName = "";
+    public sidenavViewName = signal("");
     public location: LocationState;
     public initialStyle: StyleSpecification;
 
@@ -75,10 +74,10 @@ export class MainMapComponent {
             this.map = null;
         });
         this.sidebarService.sideBarStateChanged.pipe(takeUntilDestroyed()).subscribe(() => {
-            this.sidenavViewName = this.sidebarService.viewName;
+            this.sidenavViewName.set(this.sidebarService.viewName);
             this.sidenavVisible.set(this.sidebarService.isSidebarOpen());
         });
-        this.sidenavViewName = this.sidebarService.viewName;
+        this.sidenavViewName.set(this.sidebarService.viewName);
         this.sidenavVisible.set(this.sidebarService.isSidebarOpen());
     }
 

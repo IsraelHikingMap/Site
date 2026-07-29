@@ -1,6 +1,6 @@
 <div class="flex flex-row h-dvh relative" [dir]="resources.direction">
     <div class="hidden max-md:block absolute bottom-safe bg-surface left-1/2 -translate-x-1/2 z-10">
-        <mat-button-toggle-group [(ngModel)]="showMap">
+        <mat-button-toggle-group [ngModel]="showMap()" (ngModelChange)="showMap.set($event)">
             <mat-button-toggle [value]="false" analyticsOn="click" analyticsCategory="Shares"
                 analyticsLabel="Open list view">
                 <i class="fa icon-list"></i>
@@ -13,7 +13,7 @@
             </mat-button-toggle>
         </mat-button-toggle-group>
     </div>
-    <div [ngClass]="{'max-md:hidden': showMap, 'max-md:w-full': !showMap}"
+    <div [ngClass]="{'max-md:hidden': showMap(), 'max-md:w-full': !showMap()}"
         class="w-1/3 overflow-y-auto magrin-top-with-toolbar pb-safe-w-button">
         <div class="flex flex-row sticky top-0 z-10 bg-surface">
             <mat-form-field subscriptSizing="dynamic">
@@ -118,7 +118,7 @@
                 </div>
             </mat-menu>
         </div>
-        @for (shareUrl of filteredShareUrls; track shareUrl.id) {
+        @for (shareUrl of filteredShareUrls(); track shareUrl.id) {
         <div [id]="'share-url-' + shareUrl.id">
             <share-item [shareUrl]="shareUrl" [showMenu]="true" (delete)="deleteShareUrl(shareUrl)"
                 (editProperties)="openEditShareUrlDialog(shareUrl)" (open)="openShareUrl(shareUrl)"
@@ -127,21 +127,21 @@
         } @empty {
         <p class="mx-2">{{resources.noShares}}</p>
         }
-        @if (loading) {
+        @if (loading()) {
         <mat-spinner></mat-spinner>
         }
     </div>
-    <div [ngClass]="{'max-md:w-full': showMap, 'max-md:hidden': !showMap}" class="w-2/3">
+    <div [ngClass]="{'max-md:w-full': showMap(), 'max-md:hidden': !showMap()}" class="w-2/3">
         <mgl-map [mapStyle]="mapStyle" [attributionControl]="false" (mapLoad)="mapLoaded($event)">
             <layers [allowOffline]="true"></layers>
-            <routes-path [routesGeoJson]="routesGeoJson"></routes-path>
+            <routes-path [routesGeoJson]="routesGeoJson()"></routes-path>
             <mgl-control [position]="resources.direction === 'rtl' ? 'top-left' : 'top-right'">
                 <zoom></zoom>
             </mgl-control>
             <mgl-control [position]="resources.direction === 'rtl' ? 'top-right' : 'top-left'">
                 <osm-attribution></osm-attribution>
             </mgl-control>
-            @for (shareUrl of filteredShareUrls; track shareUrl.id) {
+            @for (shareUrl of filteredShareUrls(); track shareUrl.id) {
             <mgl-marker [lngLat]="shareUrl.start">
                 <span class="fa-stack fa-lg cursor-pointer selected-marker-icon" (click)="onStartPointClick(shareUrl)"
                     analyticsOn="click" analyticsCategory="Shares" analyticsLabel="Open share from map">
@@ -152,38 +152,38 @@
             </mgl-marker>
             }
         </mgl-map>
-        @if (selectedShareUrl) {
+        @if (selectedShareUrl()) {
         <div class="hidden max-md:block fixed bottom-safe bg-surface w-full z-30 animate-slide-in-up">
             <div class="flex flex-row justify-center items-center mx-2">
-                <div class="flex-1 text-center text-xl">{{selectedShareUrl.title}}</div>
-                <button mat-button class="w-1/6" type="button" (click)="onStartPointClick(selectedShareUrl)"
+                <div class="flex-1 text-center text-xl">{{selectedShareUrl().title}}</div>
+                <button mat-button class="w-1/6" type="button" (click)="onStartPointClick(selectedShareUrl())"
                     tabindex="-1">
                     <i class="fa fa-lg icon-close"></i>
                 </button>
             </div>
             <div class="flex flex-row">
-                <button mat-menu-item (click)="openEditShareUrlDialog(selectedShareUrl)" analyticsOn="click"
+                <button mat-menu-item (click)="openEditShareUrlDialog(selectedShareUrl())" analyticsOn="click"
                     analyticsCategory="Shares" analyticsLabel="Edit share from map">
                     <i class="fa icon-pencil"></i>
                     {{resources.editProperties}}
                 </button>
             </div>
             <div class="flex flex-row">
-                <button mat-menu-item (click)="openShareUrl(selectedShareUrl)" analyticsOn="click"
+                <button mat-menu-item (click)="openShareUrl(selectedShareUrl())" analyticsOn="click"
                     analyticsCategory="Shares" analyticsLabel="Open share from map">
                     <i class="fa icon-external-link-square"></i>
                     {{resources.openCloudSave}}
                 </button>
             </div>
             <div class="flex flex-row">
-                <button mat-menu-item (click)="addShareUrlToRoutes(selectedShareUrl)" analyticsOn="click"
+                <button mat-menu-item (click)="addShareUrlToRoutes(selectedShareUrl())" analyticsOn="click"
                     analyticsCategory="Shares" analyticsLabel="Add share to routes from map">
                     <i class="fa icon-plus"></i>
                     {{resources.addToRoutes}}
                 </button>
             </div>
             <div class="flex flex-row">
-                <button mat-menu-item (click)="deleteShareUrl(selectedShareUrl)" analyticsOn="click"
+                <button mat-menu-item (click)="deleteShareUrl(selectedShareUrl())" analyticsOn="click"
                     analyticsCategory="Shares" analyticsLabel="Delete share from map">
                     <i class="fa icon-trash"></i>
                     {{resources.delete}}
