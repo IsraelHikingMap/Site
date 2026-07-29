@@ -48,7 +48,7 @@
     <div class="flex flex-row">
       <div class="w-full h-[138px]">
         <mgl-map [zoom]="[(layerData.minZoom + layerData.maxZoom) / 2]"
-          [center]="[(location$ | async)?.longitude, (location$ | async)?.latitude]"
+          [center]="[location()?.longitude, location()?.latitude]"
           [mapStyle]='{"version": 8, "sources": {}, "layers": [] }' [attributionControl]="false">
           <auto-layer [layerData]="layerData" [visible]="true" [isBaselayer]="!isOverlay" [allowOffline]="false">
           </auto-layer>
@@ -67,10 +67,10 @@
         </button>
         } @else {
         <button mat-button class="w-full" type="button" [cdkCopyToClipboard]="getShareLayerAddress()"
-          (click)="copiedToClipboard = true" [matTooltip]="resources.copyUrl" matTooltipPosition="above"
+          (click)="copiedToClipboard.set(true)" [matTooltip]="resources.copyUrl" matTooltipPosition="above"
           analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Share layer from web">
           <i class="fa fa-lg icon-clipboard"></i>
-          @if (copiedToClipboard) {
+          @if (copiedToClipboard()) {
           <i class="fa fa-lg icon-check-circle" [style.color]="'green'"></i>
           }
         </button>

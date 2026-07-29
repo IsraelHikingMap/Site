@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject, input, signal, OnInit } from "@angular/core";
 import { MatSelectChange, MatSelect } from "@angular/material/select";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
@@ -23,7 +23,6 @@ import { POINTS_OF_INTEREST_CATEGORIES } from "../../../reducers/initial-state";
 import type { EditablePublicPointData, IconColorLabel } from "../../../models";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "public-poi-edit",
     templateUrl: "./public-poi-edit.component.html",
     imports: [Dir, MatCard, MatCardHeader, MatCardTitle, NgClass, MatFormField, MatLabel, MatInput, FormsModule, ImageScrollerComponent, MatIconButton, MatSuffix, MatButton, MatSelect, MatOption, MatTooltip, MatCheckbox, MatProgressSpinner, ScrollToDirective]
@@ -32,7 +31,7 @@ export class PublicPointOfInterestEditComponent implements OnInit {
 
     public info = input<EditablePublicPointData>();
 
-    public isLoading = false;
+    public isLoading = signal(false);
     public categories: SelectableCategory[] = [];
     public selectedCategory: SelectableCategory = null;
     public updateLocation = false;
@@ -108,7 +107,7 @@ export class PublicPointOfInterestEditComponent implements OnInit {
     }
 
     public async save() {
-        this.isLoading = true;
+        this.isLoading.set(true);
         try {
             if (this.isNew()) {
                 await this.poiService.addComplexPoi(this.info());
@@ -120,7 +119,7 @@ export class PublicPointOfInterestEditComponent implements OnInit {
         } catch {
             this.toastService.confirm({ message: this.resources.unableToSaveData, type: "Ok" });
         } finally {
-            this.isLoading = false;
+            this.isLoading.set(false);
         }
     }
 

@@ -1,6 +1,5 @@
-import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { RouterLink, RouterLinkActive } from "@angular/router";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatButton } from "@angular/material/button";
 import { MatMenuTrigger, MatMenu, MatMenuItem } from "@angular/material/menu";
 import { MatDialog } from "@angular/material/dialog";
@@ -30,14 +29,12 @@ import { SetAgreeToTermsAction } from "../reducers/user.reducer";
 import type { UserInfo, ApplicationState } from "../models";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "main-menu",
     templateUrl: "./main-menu.component.html",
     imports: [MatButton, AnalyticsDirective, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, RouterLinkActive]
 })
 export class MainMenuComponent {
 
-    public userInfo: UserInfo = null;
     public drawingVisible = false;
 
     public readonly resources = inject(ResourcesService);
@@ -53,8 +50,10 @@ export class MainMenuComponent {
     private readonly purchaseService = inject(PurchaseService);
     private readonly store = inject(Store);
 
+    public userInfo = this.store.selectSignal((state: ApplicationState) => state.userState.userInfo);
+    private readonly isSubscribed = this.store.selectSignal((state: ApplicationState) => state.offlineState.isSubscribed);
+
     constructor() {
-        this.store.select((state: ApplicationState) => state.userState.userInfo).pipe(takeUntilDestroyed()).subscribe(userInfo => this.userInfo = userInfo);
         if (this.runningContextService.isCapacitor) {
             App.getInfo().then((info) => {
                 this.loggingService.info(`App version: ${info.version}`);
@@ -63,7 +62,7 @@ export class MainMenuComponent {
     }
 
     public isLoggedIn() {
-        return this.userInfo != null;
+        return this.userInfo() != null;
     }
 
     public isApp() {
@@ -102,7 +101,7 @@ export class MainMenuComponent {
             this.toastService.info(this.resources.notYet);
         });
         const logs = await this.loggingService.getLog();
-        const userInfo = this.userInfo || {
+        const userInfo = this.userInfo() || {
             displayName: "non-registered user",
             id: "----"
         } as UserInfo;
@@ -173,8 +172,7 @@ export class MainMenuComponent {
     }
 
     public isOfflineDownloadAvailable() {
-        return this.runningContextService.isCapacitor &&
-            this.store.selectSnapshot((s: ApplicationState) => s.offlineState).isSubscribed;
+        return this.runningContextService.isCapacitor && this.isSubscribed();
     }
 
     public isPurchaseAvailable() {

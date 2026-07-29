@@ -1,13 +1,13 @@
 ﻿<div class="flex flex-row sticky top-0 z-10 bg-surface">
   <div class="flex-1">
-    <button mat-button class="w-full min-w-[unset]! p-0!" (click)="save()" [disabled]="isLoading"
+    <button mat-button class="w-full min-w-[unset]! p-0!" (click)="save()" [disabled]="isLoading()"
       matTooltip="{{resources.save}}" matTooltipPosition="below" analyticsOn="click" analyticsCategory="POI"
       analyticsLabel="Save POI"><i class="fa icon-check"></i></button>
   </div>
   <div class="flex-1">
     <button mat-button class="w-full min-w-[unset]! p-0!" (click)="close()" matTooltip="{{resources.close}}"
       matTooltipPosition="below">
-      @if (isLoading) {
+      @if (isLoading()) {
       <mat-spinner diameter="24"></mat-spinner>
       } @else {
       <i class="fa fa-lg icon-close"></i>

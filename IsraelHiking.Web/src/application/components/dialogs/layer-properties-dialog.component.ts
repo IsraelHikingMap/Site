@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions, MAT_DIALOG_DATA, MatDialog } from "@angular/material/dialog";
 import { MatButton , MatIconButton } from "@angular/material/button";
@@ -6,13 +6,12 @@ import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatFormField, MatLabel, MatError } from "@angular/material/form-field";
 import { MatInput } from "@angular/material/input";
 import { FormsModule } from "@angular/forms";
-import { AsyncPipe } from "@angular/common";
 import { MatSlider, MatSliderThumb } from "@angular/material/slider";
 import { MatTooltip } from "@angular/material/tooltip";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { HttpClient } from "@angular/common/http";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
-import { Observable, firstValueFrom } from "rxjs";
+import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
 import { Share } from "@capacitor/share";
 import type { Immutable } from "immer";
@@ -23,7 +22,7 @@ import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
-import type { LayerData, ApplicationState, EditableLayer, LocationState } from "../../models";
+import type { LayerData, ApplicationState, EditableLayer } from "../../models";
 
 export type LayerPropertiesDialogType = "add-overlay" | "add-baseLayer" | "edit-overlay" | "edit-baseLayer";
 
@@ -33,10 +32,9 @@ export type LayerPropertiesDialogComponentData = {
 };
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "layer-dialog",
     templateUrl: "./layer-properties-dialog.component.html",
-    imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, NameInUseValidatorDirective, MatError, MatSlider, MatSliderThumb, MapComponent, AutomaticLayerPresentationComponent, MatDialogActions, AnalyticsDirective, MatTooltip, AsyncPipe, CdkCopyToClipboard]
+    imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, NameInUseValidatorDirective, MatError, MatSlider, MatSliderThumb, MapComponent, AutomaticLayerPresentationComponent, MatDialogActions, AnalyticsDirective, MatTooltip, CdkCopyToClipboard]
 })
 export class LayerPropertiesDialogComponent {
     public title: string;
@@ -44,8 +42,7 @@ export class LayerPropertiesDialogComponent {
     public isApp: boolean;
     public isOverlay: boolean;
     public layerData: EditableLayer;
-    public location$: Observable<Immutable<LocationState>>;
-    public copiedToClipboard = false;
+    public copiedToClipboard = signal(false);
 
     public readonly resources = inject(ResourcesService);
 
@@ -53,6 +50,8 @@ export class LayerPropertiesDialogComponent {
     private readonly runningContextService = inject(RunningContextService);
     private readonly http = inject(HttpClient);
     private readonly store = inject(Store);
+
+    public location = this.store.selectSignal((state: ApplicationState) => state.locationState);
 
     private backupLayer: EditableLayer;
     private readonly data = inject<LayerPropertiesDialogComponentData>(MAT_DIALOG_DATA);
@@ -71,7 +70,6 @@ export class LayerPropertiesDialogComponent {
             isEditable: true
         } as EditableLayer;
 
-        this.location$ = this.store.select((state: ApplicationState) => state.locationState);
         this.isApp = this.runningContextService.isCapacitor;
 
         switch (this.data.dialogType) {

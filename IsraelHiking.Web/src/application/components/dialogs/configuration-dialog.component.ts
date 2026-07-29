@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton, MatAnchor, MatIconButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
@@ -28,7 +28,6 @@ import {
 import type { ApplicationState, BatteryOptimizationType, Theme } from "../../models";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "configuration-dialog",
     templateUrl: "./configuration-dialog.component.html",
     imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, MatRadioButton, AnalyticsDirective, MatCheckbox, MatDialogActions, MatAnchor, FormsModule, MatFormField, MatSelect, MatOption, MatLabel]

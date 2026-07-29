@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { MatLabel } from "@angular/material/input";
 import { Dir } from "@angular/cdk/bidi";
 import { CdkScrollable } from "@angular/cdk/scrolling";
@@ -24,7 +24,6 @@ import planAnimationData from "../../../content/lottie/dialog-plan.json";
 import moreAnimationData from "../../../content/lottie/dialog-more.json";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "intro-dialog",
     templateUrl: "./intro-dialog.component.html",
     styleUrls: ["./intro-dialog.component.scss"],
@@ -37,14 +36,16 @@ export class IntroDialogComponent {
     public lottiePlan: AnimationOptions = { animationData: planAnimationData };
     public lottieMore: AnimationOptions = { animationData: moreAnimationData };
 
-    public activityType: ActivityType = "Hiking";
-    public step = 0;
+    public activityType = signal<ActivityType>("Hiking");
+    public step = signal(0);
     public availableLanguages = AVAILABLE_LANGUAGES;
 
     public readonly resources = inject(ResourcesService);
 
     private readonly dialogRef = inject(MatDialogRef);
     private readonly store = inject(Store);
+
+    public languageCode = this.store.selectSignal((s) => s.configuration.language.code);
 
     public static openDialog(dialog: MatDialog, runningContextSerivce: RunningContextService) {
         const options: MatDialogConfig = {};
@@ -66,7 +67,7 @@ export class IntroDialogComponent {
     }
 
     public close() {
-        if (this.getLanuguageCode() == "en-US") {
+        if (this.languageCode() == "en-US") {
             this.store.dispatch(new SetDateFormatAction("MM/dd/yyyy"));
             this.store.dispatch(new SetUnitsAction("imperial"));
         } else {
@@ -77,14 +78,10 @@ export class IntroDialogComponent {
         this.dialogRef.close();
     }
 
-    public getLanuguageCode(): string {
-        return this.store.selectSnapshot((s) => s.configuration.language.code);
-    }
-
     public setActivityType(activityType: ActivityType) {
-        this.activityType = activityType;
+        this.activityType.set(activityType);
         this.store.dispatch(new SetActivityTypeAction(activityType));
-        switch (this.activityType) {
+        switch (activityType) {
             case "Hiking":
                 this.store.dispatch(new SelectBaseLayerAction(HIKING_MAP));
                 this.store.dispatch(new SetRoutingTypeAction("Hike"));
