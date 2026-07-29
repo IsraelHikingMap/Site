@@ -8,7 +8,7 @@ import { PrivatePoiOverlayComponent } from "../overlays/private-poi-overlay.comp
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { ResourcesService } from "../../services/resources.service";
 import { SpatialService } from "../../services/spatial.service";
-import { ApplicationState, LatLngAltTime, RecordedRoute } from "../../models";
+import { ApplicationState, LatLngAltTime } from "../../models";
 
 @Component({
     selector: "recorded-route",

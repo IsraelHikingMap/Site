@@ -74,7 +74,7 @@ export class FileService {
     ];
 
     public getFilesFromEvent(e: Event | DragEvent): File[] {
-        let files: FileList | null | undefined = null;
+        let files: FileList | null | undefined;
 
         if ("dataTransfer" in e && e.dataTransfer) {
             files = e.dataTransfer.files;
