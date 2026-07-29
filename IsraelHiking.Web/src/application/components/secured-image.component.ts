@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnChanges, inject, input, AfterViewInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ElementRef, OnChanges, inject, input, AfterViewInit } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 import { HttpClient } from "@angular/common/http";
 import { BehaviorSubject, Observable, of } from "rxjs";
@@ -6,7 +6,6 @@ import { switchMap, map, filter, take, catchError } from "rxjs/operators";
 import { AsyncPipe } from "@angular/common";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "secured-image",
     template: `
     <img [src]="dataUrl$|async" loading="lazy" alt="" class="float-end w-1/6 h-auto object-cover block ps-2 rounded-2xl"/>

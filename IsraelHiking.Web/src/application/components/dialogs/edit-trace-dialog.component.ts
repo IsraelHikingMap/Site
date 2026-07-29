@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle } from "@angular/material/dialog";
 import { FormsModule } from "@angular/forms";
 import { MatFormField } from "@angular/material/form-field";
@@ -14,7 +14,6 @@ import type { Trace, TraceVisibility } from "../../models";
 
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "edit-trace-dialog",
     templateUrl: "./edit-trace-dialog.component.html",
     imports: [MatIconButton, FormsModule, MatFormField, MatLabel, MatInput, MatOption, MatSelect, MatButton, MatDialogActions, MatDialogTitle, MatDialogContent, MatDialogClose, Dir]

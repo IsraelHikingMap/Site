@@ -1,4 +1,4 @@
-import { Component, inject, input, output, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject, input, output } from "@angular/core";
 import { Router } from "@angular/router";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
@@ -10,7 +10,6 @@ import { RouteStrings } from "../../services/hash.service";
 import { GeoJSONUtils } from "../../services/geojson-utils";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "cluster-overlay",
     templateUrl: "./cluster-overlay.component.html",
     styleUrls: ["./cluster-overlay.component.scss"],

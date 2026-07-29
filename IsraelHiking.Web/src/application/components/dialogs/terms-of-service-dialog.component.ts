@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
 import { MatButton , MatIconButton } from "@angular/material/button";
@@ -12,7 +12,6 @@ import { AuthorizationService } from "../../services/authorization.service";
 import { ToastService } from "../../services/toast.service";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "terms-of-service-dialog",
     templateUrl: "./terms-of-service-dialog.component.html",
     imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatCheckbox, FormsModule, MatDialogActions, AnalyticsDirective]

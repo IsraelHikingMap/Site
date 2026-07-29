@@ -1,4 +1,4 @@
-import { Component, OnInit, OnChanges, SimpleChanges, OnDestroy, OutputRefSubscription, inject, input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnInit, OnChanges, SimpleChanges, OnDestroy, OutputRefSubscription, inject, input } from "@angular/core";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { Subject, mergeMap } from "rxjs";
 import { Store } from "@ngxs/store";
@@ -9,7 +9,6 @@ import { DefaultStyleService } from "../../services/default-style.service";
 import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "auto-layer",
     templateUrl: "./automatic-layer-presentation.component.html"
 })

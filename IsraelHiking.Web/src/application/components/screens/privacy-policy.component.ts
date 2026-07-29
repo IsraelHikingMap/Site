@@ -1,7 +1,6 @@
-import { Component, ChangeDetectionStrategy } from "@angular/core";
+import { Component } from "@angular/core";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "privacy-policy",
     templateUrl: "./privacy-policy.component.html"
 })

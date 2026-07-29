@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton , MatIconButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
@@ -23,7 +23,6 @@ export type AddSimplePoiDialogData = {
 };
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "add-simple-poi-doalog",
     templateUrl: "./add-simple-poi-dialog.component.html",
     imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, AnalyticsDirective]

@@ -1,4 +1,4 @@
-import { Component, inject, input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject, input } from "@angular/core";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { MatTooltip } from "@angular/material/tooltip";
@@ -23,7 +23,6 @@ export interface ILegendItem {
 }
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "legend-item",
     templateUrl: "./legend-item.component.html",
     imports: [NgClass, Dir, AnalyticsDirective, MatTooltip]

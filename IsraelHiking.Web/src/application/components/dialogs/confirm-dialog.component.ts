@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 
@@ -8,7 +8,6 @@ import { ResourcesService } from "../../services/resources.service";
 export type ConfirmType = "YesNo" | "OkCancel" | "Ok" | "Custom";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "confirm-dialog",
     templateUrl: "confirm-dialog.component.html",
     imports: [Dir, MatButton]

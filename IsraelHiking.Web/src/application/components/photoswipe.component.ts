@@ -1,4 +1,4 @@
-import { Component, ElementRef, AfterViewInit, InjectionToken, ViewEncapsulation, EventEmitter, viewChild, inject, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ElementRef, AfterViewInit, InjectionToken, ViewEncapsulation, EventEmitter, viewChild, inject } from "@angular/core";
 import PhotoSwipe from "photoswipe";
 
 import { ResourcesService } from "../services/resources.service";
@@ -11,7 +11,6 @@ export type PhotoSwipeData = {
 };
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "photoswipe",
     templateUrl: "./photoswipe.component.html",
     styleUrls: ["./photoswipe.component.scss"],

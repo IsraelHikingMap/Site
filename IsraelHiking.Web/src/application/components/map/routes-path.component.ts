@@ -1,11 +1,10 @@
-import { Component, inject, input, output, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject, input, output } from "@angular/core";
 
 import { ResourcesService } from "../../services/resources.service";
 import { GeoJSONSourceComponent, LayerComponent } from "@maplibre/ngx-maplibre-gl";
 import { MapLayerMouseEvent } from "maplibre-gl";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "routes-path",
     templateUrl: "./routes-path.component.html",
     imports: [GeoJSONSourceComponent, LayerComponent]
