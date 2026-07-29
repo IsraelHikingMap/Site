@@ -5,7 +5,7 @@ import {
     ElementRef,
     inject,
     viewChild,
-    viewChildren, ChangeDetectionStrategy } from "@angular/core";
+    viewChildren, signal } from "@angular/core";
 import { Router } from "@angular/router";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
@@ -25,14 +25,7 @@ import { SearchResultsProvider } from "../services/search-results.provider";
 import { SetSearchTermAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, SearchResultsPointOfInterest } from "../models";
 
-export type SearchContext = {
-    searchTerm: string;
-    searchResults: SearchResultsPointOfInterest[];
-    selectedSearchResults: SearchResultsPointOfInterest;
-};
-
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "search",
     templateUrl: "./search.component.html",
     styleUrls: ["./search.component.scss"],
@@ -41,14 +34,13 @@ export type SearchContext = {
 })
 export class SearchComponent {
 
-    public fromContext: SearchContext = {
-        searchTerm: "",
-        searchResults: [],
-        selectedSearchResults: null
-    };
+    public searchResults = signal<SearchResultsPointOfInterest[]>([]);
+    public searchTerm = signal("");
+    private selectedSearchResults: SearchResultsPointOfInterest = null;
     public searchFrom = new FormControl<string | SearchResultsPointOfInterest>("");
 
     private selectFirstSearchResults = false;
+    private searchRequestId = 0;
 
     public searchFromInput = viewChild<ElementRef>("searchFromInput");
     public matAutocompleteTriggers = viewChildren(MatAutocompleteTrigger);
@@ -60,19 +52,22 @@ export class SearchComponent {
     private readonly store = inject(Store);
     private readonly mapService = inject(MapService);
 
+    private readonly currentUrl = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.currentUrl);
+    private readonly userInfo = this.store.selectSignal((s: ApplicationState) => s.userState.userInfo);
+
     constructor() {
-        this.configureInputFormControl(this.searchFrom, this.fromContext);
+        this.configureInputFormControl(this.searchFrom);
     }
 
     public isLoggedIn(): boolean {
-        return this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo) != null;
+        return this.userInfo() != null;
     }
 
-    private configureInputFormControl(input: FormControl<string | SearchResultsPointOfInterest>, context: SearchContext) {
+    private configureInputFormControl(input: FormControl<string | SearchResultsPointOfInterest>) {
         const stringValues$ = input.valueChanges.pipe(
             tap(x => {
                 if (typeof x !== "string") {
-                    this.selectResults(context, x);
+                    this.selectResults(x);
                 } else {
                     this.selectFirstSearchResults = false;
                 }
@@ -86,9 +81,9 @@ export class SearchComponent {
             debounceTime(200),
             distinctUntilChanged()
         ).subscribe(x => {
-            context.searchTerm = x;
-            context.selectedSearchResults = null;
-            this.search(context, true);
+            this.searchTerm.set(x);
+            this.selectedSearchResults = null;
+            this.search(true);
         });
 
         // Full term: only fires after typing genuinely stops
@@ -96,9 +91,9 @@ export class SearchComponent {
             debounceTime(1000),
             distinctUntilChanged()
         ).subscribe(x => {
-            context.searchTerm = x;
-            context.selectedSearchResults = null;
-            this.search(context, false);
+            this.searchTerm.set(x);
+            this.selectedSearchResults = null;
+            this.search(false);
         });
     }
 
@@ -111,15 +106,21 @@ export class SearchComponent {
 
     }
 
-    public async search(searchContext: SearchContext, isPrefix: boolean) {
+    public async search(isPrefix: boolean) {
+        const requestId = ++this.searchRequestId;
         try {
-            const results = await this.searchResultsProvider.getResults(searchContext.searchTerm, isPrefix, this.shouldUseMapCenter());
+            const results = await this.searchResultsProvider.getResults(this.searchTerm(), isPrefix, this.shouldUseMapCenter());
+            if (requestId !== this.searchRequestId) {
+                // A newer search was started while this request was in flight - ignore this stale response
+                // so the displayed results always reflect the most recent query.
+                return;
+            }
             if (results == null) {
                 return;
             }
-            searchContext.searchResults = results;
-            if (this.selectFirstSearchResults && searchContext.searchResults.length > 0) {
-                this.selectResults(searchContext, searchContext.searchResults[0]);
+            this.searchResults.set(results);
+            if (this.selectFirstSearchResults && this.searchResults().length > 0) {
+                this.selectResults(this.searchResults()[0]);
             }
             this.selectFirstSearchResults = false;
         } catch {
@@ -153,8 +154,8 @@ export class SearchComponent {
         this.router.navigate([RouteStrings.ROUTE_POI, searchResults.source, searchResults.id]);
     }
 
-    private selectResults(searchContext: SearchContext, searchResult: SearchResultsPointOfInterest) {
-        searchContext.selectedSearchResults = searchResult;
+    private selectResults(searchResult: SearchResultsPointOfInterest) {
+        this.selectedSearchResults = searchResult;
         this.moveToResults(searchResult);
     }
 
@@ -192,8 +193,8 @@ export class SearchComponent {
         if (this.matAutocompleteTriggers()[0].activeOption != null) {
             return true;
         }
-        if (this.fromContext.selectedSearchResults == null && this.fromContext.searchResults.length > 0) {
-            this.selectResults(this.fromContext, this.fromContext.searchResults[0]);
+        if (this.selectedSearchResults == null && this.searchResults().length > 0) {
+            this.selectResults(this.searchResults()[0]);
             return false;
         }
         this.selectFirstSearchResults = true;
@@ -201,7 +202,7 @@ export class SearchComponent {
     }
 
     public isPoisSearch() {
-        const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
+        const currentUrl = this.currentUrl();
         return currentUrl !== RouteStrings.ROUTE_SHARES && currentUrl !== RouteStrings.ROUTE_TRACES;
     }
 
@@ -220,7 +221,7 @@ export class SearchComponent {
     }
 
     public placeholder() {
-        const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
+        const currentUrl = this.currentUrl();
         if (currentUrl === RouteStrings.ROUTE_SHARES) {
             return this.resources.searchSharesPlaceHolder;
         }
