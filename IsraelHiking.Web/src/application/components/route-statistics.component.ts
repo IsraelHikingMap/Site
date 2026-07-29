@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, OnInit, ElementRef, ChangeDetectorRef, DestroyRef, inject, viewChild, signal, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ViewEncapsulation, OnInit, ElementRef, ChangeDetectorRef, DestroyRef, inject, viewChild, signal } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
@@ -7,7 +7,7 @@ import { MatTooltip } from "@angular/material/tooltip";
 import { MatButton } from "@angular/material/button";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { SourceDirective, GeoJSONSourceComponent, LayerComponent } from "@maplibre/ngx-maplibre-gl";
-import { interval, switchMap, distinctUntilChanged, EMPTY, combineLatest, map } from "rxjs";
+import { interval, switchMap, distinctUntilChanged, EMPTY } from "rxjs";
 import { regressionLoess } from "d3-regression";
 import { LineLayerSpecification } from "maplibre-gl";
 import { Store } from "@ngxs/store";
@@ -62,7 +62,6 @@ interface IChartElements {
 }
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "route-statistics",
     templateUrl: "./route-statistics.component.html",
     styleUrls: ["./route-statistics.component.scss"],
@@ -73,38 +72,37 @@ export class RouteStatisticsComponent implements OnInit {
     private static readonly HOVER_BOX_WIDTH = 110;
     private static readonly MAX_SLOPE = 20;
 
-    public length = 0;
-    public gain = 0;
-    public loss = 0;
-    public duration = "--:--";
-    public durationUnits = "";
-    public averageSpeed: number | null = null;
-    public currentSpeed: number | null = null;
-    public speedUnitString = "";
-    public remainingDistance = 0;
-    public traveledDistance = 0;
-    public ETA = "--:--";
-    public isKmMarkersOn = false;
-    public isSlopeOn = false;
-    public isExpanded = false;
-    public isTable = false;
+    public length = signal(0);
+    public gain = signal(0);
+    public loss = signal(0);
+    public duration = signal("--:--");
+    public durationUnits = signal("");
+    public averageSpeed = signal<number | null>(null);
+    public currentSpeed = signal<number | null>(null);
+    public speedUnitString = signal("");
+    public remainingDistance = signal(0);
+    public traveledDistance = signal(0);
+    public ETA = signal("--:--");
+    public isKmMarkersOn = signal(false);
+    public isSlopeOn = signal(false);
+    public isExpanded = signal(false);
+    public isTable = signal(false);
     public isOpen = signal(false);
-    public isFollowing = false;
-    public isVisible = false;
-    public kmMarkersSource: GeoJSON.FeatureCollection<GeoJSON.Point> = {
+    public isFollowing = signal(false);
+    public kmMarkersSource = signal<GeoJSON.FeatureCollection<GeoJSON.Point>>({
         type: "FeatureCollection",
         features: []
-    };
-    public chartHoverSource: GeoJSON.FeatureCollection<GeoJSON.Point> = {
+    });
+    public chartHoverSource = signal<GeoJSON.FeatureCollection<GeoJSON.Point>>({
         type: "FeatureCollection",
         features: []
-    };
-    public slopeRouteSource: GeoJSON.FeatureCollection<GeoJSON.LineString> = {
+    });
+    public slopeRouteSource = signal<GeoJSON.FeatureCollection<GeoJSON.LineString>>({
         type: "FeatureCollection",
         features: []
-    };
-    public subRouteRange: IChartSubRouteRange;
-    public slopeRoutePaint: LineLayerSpecification["paint"] = {};
+    });
+    public subRouteRange = signal<IChartSubRouteRange>(null);
+    public slopeRoutePaint = signal<LineLayerSpecification["paint"]>({});
 
     public lineChartContainer = viewChild<ElementRef>("lineChartContainer");
 
@@ -126,6 +124,9 @@ export class RouteStatisticsComponent implements OnInit {
     private readonly store = inject(Store);
     private readonly destroyRef = inject(DestroyRef);
 
+    public isVisible = this.store.selectSignal((state: ApplicationState) => state.recordedRouteState.isRecording || state.routes.present.length > 0);
+    private readonly configurationUnits = this.store.selectSignal((state: ApplicationState) => state.configuration.units);
+
     constructor() {
         this.store.select((state: ApplicationState) => state.locationState.zoom).pipe(takeUntilDestroyed()).subscribe((zoom) => {
             this.zoom = zoom;
@@ -139,21 +140,21 @@ export class RouteStatisticsComponent implements OnInit {
 
     private setViewStatisticsValues(statistics: RouteStatistics): void {
         if (statistics == null) {
-            this.length = 0;
-            this.gain = 0;
-            this.loss = 0;
-            this.remainingDistance = 0;
-            this.traveledDistance = 0;
-            this.averageSpeed = null;
+            this.length.set(0);
+            this.gain.set(0);
+            this.loss.set(0);
+            this.remainingDistance.set(0);
+            this.traveledDistance.set(0);
+            this.averageSpeed.set(null);
             this.updateDurationString(null);
-            this.ETA = "--:--";
+            this.ETA.set("--:--");
         } else {
-            this.length = statistics.length;
-            this.gain = statistics.gain;
-            this.loss = statistics.loss;
-            this.remainingDistance = statistics.remainingDistance;
-            this.averageSpeed = statistics.averageSpeed;
-            this.traveledDistance = statistics.traveledDistance;
+            this.length.set(statistics.length);
+            this.gain.set(statistics.gain);
+            this.loss.set(statistics.loss);
+            this.remainingDistance.set(statistics.remainingDistance);
+            this.averageSpeed.set(statistics.averageSpeed);
+            this.traveledDistance.set(statistics.traveledDistance);
             this.updateDurationString(statistics.duration);
             this.updateETAString();
         }
@@ -161,21 +162,21 @@ export class RouteStatisticsComponent implements OnInit {
 
     private updateDurationString(duration: number) {
         if (!duration) {
-            this.duration = "--:--";
-            this.durationUnits = "";
+            this.duration.set("--:--");
+            this.durationUnits.set("");
         } else {
             const HOUR = 60 * 60;
             const MINUTE = 60;
             if (duration > HOUR) {
                 const hours = Math.floor(duration / (HOUR));
                 const minutes = Math.floor((duration % (HOUR)) / MINUTE);
-                this.duration = this.toTwoDigits(hours) + ":" + this.toTwoDigits(minutes);
-                this.durationUnits = this.resources.hourUnit;
+                this.duration.set(this.toTwoDigits(hours) + ":" + this.toTwoDigits(minutes));
+                this.durationUnits.set(this.resources.hourUnit);
             } else {
                 const minutes = Math.floor(duration / MINUTE);
                 const seconds = Math.floor(duration % MINUTE);
-                this.duration = this.toTwoDigits(minutes) + ":" + this.toTwoDigits(seconds);
-                this.durationUnits = this.resources.minuteUnit;
+                this.duration.set(this.toTwoDigits(minutes) + ":" + this.toTwoDigits(seconds));
+                this.durationUnits.set(this.resources.minuteUnit);
             }
         }
     }
@@ -184,16 +185,16 @@ export class RouteStatisticsComponent implements OnInit {
         let speed = null;
         if (this.statistics.averageSpeed) {
             speed = this.statistics.averageSpeed;
-        } else if (this.currentSpeed) {
-            speed = this.currentSpeed;
+        } else if (this.currentSpeed()) {
+            speed = this.currentSpeed();
         }
         if (speed && this.statistics.remainingDistance) {
             const timeLeftInMilliseconds = Math.floor(this.statistics.remainingDistance * 3600 / speed);
             const finishDate = new Date(new Date().getTime() + timeLeftInMilliseconds);
-            this.ETA = finishDate.getHours().toString().padStart(2, "0") + ":" +
-                finishDate.getMinutes().toString().padStart(2, "0");
+            this.ETA.set(finishDate.getHours().toString().padStart(2, "0") + ":" +
+                finishDate.getMinutes().toString().padStart(2, "0"));
         } else {
-            this.ETA = "--:--";
+            this.ETA.set("--:--");
         }
     }
 
@@ -216,7 +217,7 @@ export class RouteStatisticsComponent implements OnInit {
             this.redrawChart();
         });
         this.store.select((state: ApplicationState) => state.configuration.units).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((units) => {
-            this.speedUnitString = this.resources.getSpeedUnitString(units);
+            this.speedUnitString.set(this.resources.getSpeedUnitString(units));
             this.redrawChart();
             this.updateKmMarkers();
         });
@@ -224,19 +225,13 @@ export class RouteStatisticsComponent implements OnInit {
             this.onGeolocationChanged(p);
         });
         this.store.select((state: ApplicationState) => state.configuration.isShowSlope).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(showSlope => {
-            this.isSlopeOn = showSlope;
+            this.isSlopeOn.set(showSlope);
             this.redrawChart();
             this.updateSlopeRoute();
         });
         this.store.select((state: ApplicationState) => state.configuration.isShowKmMarker).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(showKmMarkers => {
-            this.isKmMarkersOn = showKmMarkers;
+            this.isKmMarkersOn.set(showKmMarkers);
             this.updateKmMarkers();
-        });
-        combineLatest([this.store.select((s: ApplicationState) => s.recordedRouteState.isRecording), this.store.select((state: ApplicationState) => state.routes.present)]).pipe(
-            map(([isRecording, routes]) => isRecording || routes.length > 0),
-            takeUntilDestroyed(this.destroyRef)
-        ).subscribe((isVisible) => {
-            this.isVisible = isVisible;
         });
         this.routeChanged();
         this.store.select((s: ApplicationState) => s.recordedRouteState.isRecording).pipe(
@@ -253,17 +248,17 @@ export class RouteStatisticsComponent implements OnInit {
     public changeState(state: string) {
         switch (state) {
             case "table":
-                if (this.isTable) {
+                if (this.isTable()) {
                     this.toggle();
                 } else {
-                    this.isTable = true;
+                    this.isTable.set(true);
                 }
                 break;
             case "graph":
-                if (!this.isTable) {
+                if (!this.isTable()) {
                     this.toggle();
                 } else {
-                    this.isTable = false;
+                    this.isTable.set(false);
                     this.redrawChart();
                 }
         }
@@ -328,10 +323,10 @@ export class RouteStatisticsComponent implements OnInit {
 
     private hideChartHover() {
         this.chartElements.hoverGroup.style("display", "none");
-        this.chartHoverSource = {
+        this.chartHoverSource.set({
             type: "FeatureCollection",
             features: []
-        };
+        });
     }
 
     private showChartHover(point: RouteStatisticsPoint) {
@@ -355,7 +350,7 @@ export class RouteStatisticsComponent implements OnInit {
     }
 
     private updatePointOnMap(point: RouteStatisticsPoint) {
-        this.chartHoverSource = {
+        this.chartHoverSource.set({
             type: "FeatureCollection",
             features: [{
                 type: "Feature",
@@ -365,16 +360,16 @@ export class RouteStatisticsComponent implements OnInit {
                     coordinates: [point.latlng.lng, point.latlng.lat]
                 }
             }]
-        };
+        });
     }
 
     private onMouseDown = (e: Event) => {
         this.chartElements.dragState = "start";
-        this.subRouteRange = {
+        this.subRouteRange.set({
             xStart: this.getMouseOrTouchChartXPosition(e),
             xEnd: null,
             rangeSelectionSource: { type: "FeatureCollection", features: [] }
-        };
+        });
     };
 
     private onMouseMove = (e: Event) => {
@@ -390,7 +385,7 @@ export class RouteStatisticsComponent implements OnInit {
             this.chartElements.dragState = "drag";
         }
         if (this.chartElements.dragState === "drag") {
-            this.subRouteRange.xEnd = xPosition;
+            this.subRouteRange.update(r => ({ ...r, xEnd: xPosition }));
             this.updateRangeSelectionSource(point);
             this.updateSubRouteSelectionOnChart();
             this.hideChartHover();
@@ -405,23 +400,26 @@ export class RouteStatisticsComponent implements OnInit {
     private updateRangeSelectionSource(point: RouteStatisticsPoint) {
         const latlngs = this.getRouteForChart() ? this.getRouteForChart().latlngs : [];
         let endPoint = point;
-        let startPoint = this.routeStatisticsService.interpolateStatistics(this.statistics, this.subRouteRange.xStart);
-        if (this.subRouteRange.xStart > this.subRouteRange.xEnd) {
+        let startPoint = this.routeStatisticsService.interpolateStatistics(this.statistics, this.subRouteRange().xStart);
+        if (this.subRouteRange().xStart > this.subRouteRange().xEnd) {
             endPoint = startPoint;
             startPoint = point;
         }
         const statistics = this.routeStatisticsService.getStatisticsByRange(latlngs, startPoint, endPoint);
-        this.subRouteRange.rangeSelectionSource = {
-            type: "FeatureCollection",
-            features: [{
-                type: "Feature",
-                properties: {},
-                geometry: {
-                    type: "LineString",
-                    coordinates: statistics.points.map(p => [p.latlng.lng, p.latlng.lat])
-                }
-            }]
-        };
+        this.subRouteRange.update(r => ({
+            ...r,
+            rangeSelectionSource: {
+                type: "FeatureCollection",
+                features: [{
+                    type: "Feature",
+                    properties: {},
+                    geometry: {
+                        type: "LineString",
+                        coordinates: statistics.points.map(p => [p.latlng.lng, p.latlng.lat])
+                    }
+                }]
+            }
+        }));
     }
 
     private onMouseUp() {
@@ -623,7 +621,7 @@ export class RouteStatisticsComponent implements OnInit {
             .on("mousemove touchmove", (e: Event) => {
                 // Only handle hover/drag for single touch / mouse
                 if (this.isTouchEvent(e) && e.touches.length !== 1) {
-                    this.subRouteRange = null;
+                    this.subRouteRange.set(null);
                     this.chartElements.dragState = "none";
                     return;
                 }
@@ -774,15 +772,15 @@ export class RouteStatisticsComponent implements OnInit {
     }
 
     private updateKmMarkers() {
-        this.kmMarkersSource = {
+        this.kmMarkersSource.set({
             type: "FeatureCollection",
             features: []
-        };
+        });
         const route = this.getRouteForChart();
         if (route == null) {
             return;
         }
-        if (this.isKmMarkersOn === false) {
+        if (this.isKmMarkersOn() === false) {
             return;
         }
         if (route.latlngs.length <= 0) {
@@ -801,10 +799,10 @@ export class RouteStatisticsComponent implements OnInit {
                 }
             });
         }
-        this.kmMarkersSource = {
+        this.kmMarkersSource.set({
             type: "FeatureCollection",
             features
-        };
+        });
     }
 
     private getDistancePoints(latlngs: Immutable<LatLngAltTime[]>): LatLngAltTime[] {
@@ -854,17 +852,17 @@ export class RouteStatisticsComponent implements OnInit {
     }
 
     public toggleExpand() {
-        this.isExpanded = !this.isExpanded;
+        this.isExpanded.set(!this.isExpanded());
         this.redrawChart();
     }
 
     private updateSubRouteSelectionOnChart() {
-        if (this.subRouteRange == null) {
+        if (this.subRouteRange() == null) {
             this.clearSubRouteSelection();
             return;
         }
-        const xStart = this.chartElements.xScale(Math.min(this.subRouteRange.xStart, this.subRouteRange.xEnd));
-        const xEnd = this.chartElements.xScale(Math.max(this.subRouteRange.xStart, this.subRouteRange.xEnd));
+        const xStart = this.chartElements.xScale(Math.min(this.subRouteRange().xStart, this.subRouteRange().xEnd));
+        const xEnd = this.chartElements.xScale(Math.max(this.subRouteRange().xStart, this.subRouteRange().xEnd));
         this.chartElements.dragSelectionRect.style("display", null)
             .attr("width", xEnd - xStart)
             .attr("x", xStart);
@@ -878,7 +876,7 @@ export class RouteStatisticsComponent implements OnInit {
 
     public clearSubRouteSelection() {
         this.chartElements.dragSelectionRect.style("display", "none");
-        this.subRouteRange = null;
+        this.subRouteRange.set(null);
         this.setViewStatisticsValues(this.statistics);
     }
 
@@ -892,15 +890,15 @@ export class RouteStatisticsComponent implements OnInit {
 
     private onGeolocationChanged(position: GeolocationPosition) {
         if (position == null) {
-            this.currentSpeed = null;
+            this.currentSpeed.set(null);
             this.heading = null;
             return;
         }
-        this.currentSpeed = position.coords.speed * 3.6;
+        this.currentSpeed.set(position.coords.speed * 3.6);
         this.heading = position.coords.heading;
         this.cancelableTimeoutService.setTimeoutByName(() => {
             // if there are no location updates reset speed.
-            this.currentSpeed = null;
+            this.currentSpeed.set(null);
             this.heading = null;
         }, 5000, "currentSpeedTimeout");
         this.onRouteDataChanged();
@@ -1018,20 +1016,20 @@ export class RouteStatisticsComponent implements OnInit {
 
     private updateIsFollowing() {
         const newIsFollowing = this.statistics.remainingDistance != null;
-        if (this.isFollowing === newIsFollowing) {
+        if (this.isFollowing() === newIsFollowing) {
             return;
         }
-        this.isFollowing = newIsFollowing;
+        this.isFollowing.set(newIsFollowing);
     }
 
     private updateSlopeRoute() {
         const route = this.getRouteForChart();
-        this.slopeRouteSource = {
+        this.slopeRouteSource.set({
             type: "FeatureCollection",
             features: []
-        };
-        this.slopeRoutePaint = {};
-        if (!this.isSlopeOn ||
+        });
+        this.slopeRoutePaint.set({});
+        if (!this.isSlopeOn() ||
             route == null ||
             route.latlngs.length === 0 ||
             this.statistics == null ||
@@ -1039,13 +1037,16 @@ export class RouteStatisticsComponent implements OnInit {
             return;
         }
 
-        this.slopeRouteSource.features.push({
-            type: "Feature",
-            properties: {},
-            geometry: {
-                type: "LineString",
-                coordinates: this.statistics.points.map(p => SpatialService.toCoordinate(p.latlng))
-            }
+        this.slopeRouteSource.set({
+            type: "FeatureCollection",
+            features: [{
+                type: "Feature",
+                properties: {},
+                geometry: {
+                    type: "LineString",
+                    coordinates: this.statistics.points.map(p => SpatialService.toCoordinate(p.latlng))
+                }
+            }]
         });
 
         const stops = [0, this.routeSlopeToColor(this.statistics.points[0].slope)];
@@ -1053,7 +1054,7 @@ export class RouteStatisticsComponent implements OnInit {
             stops.push(this.statistics.points[pointIndex].coordinate[0] * 1000 / this.statistics.length);
             stops.push(this.routeSlopeToColor(this.statistics.points[pointIndex].slope));
         }
-        this.slopeRoutePaint = {
+        this.slopeRoutePaint.set({
             "line-width": route.weight,
             "line-gradient": [
                 "interpolate",
@@ -1061,7 +1062,7 @@ export class RouteStatisticsComponent implements OnInit {
                 ["line-progress"],
                 ...stops
             ]
-        };
+        });
     }
 
     private routeSlopeToColor(slope: number): string {
@@ -1119,7 +1120,7 @@ export class RouteStatisticsComponent implements OnInit {
         if (speed == null) {
             return "";
         }
-        const units = this.store.selectSnapshot((state: ApplicationState) => state.configuration.units);
+        const units = this.configurationUnits();
         const factor = units === "metric" ? 1 : 1.60934;
         const speedInUnits = speed / factor;
         if (speedInUnits > 100) {

@@ -1,11 +1,10 @@
-import { Component, inject, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
-import { NgClass, AsyncPipe } from "@angular/common";
+import { NgClass } from "@angular/common";
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from "@angular/material/expansion";
 import { MatTooltip } from "@angular/material/tooltip";
-import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
@@ -22,19 +21,16 @@ import { DEFAULT_BASE_LAYERS, DEFAULT_OVERLAYS } from "../../../reducers/initial
 import type { ApplicationState, EditableLayer } from "../../../models";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "layers-sidebar",
     templateUrl: "./layers-sidebar.component.html",
     styleUrls: ["./layers-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, AnalyticsDirective, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatTooltip, PointsOfInterestCategoriesComponent, AsyncPipe]
+    imports: [Dir, MatButton, AnalyticsDirective, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatTooltip, PointsOfInterestCategoriesComponent]
 })
 export class LayersSidebarComponent {
 
     public readonly defaultBaseLayers = DEFAULT_BASE_LAYERS;
     public readonly defaultOverlays = DEFAULT_OVERLAYS;
-    public baseLayers$: Observable<Immutable<EditableLayer[]>>;
-    public overlays$: Observable<Immutable<EditableLayer[]>>;
 
     public readonly resources = inject(ResourcesService);
 
@@ -45,10 +41,9 @@ export class LayersSidebarComponent {
 
     private readonly store = inject(Store);
 
-    constructor() {
-        this.baseLayers$ = this.store.select((state: ApplicationState) => state.layersState.baseLayers);
-        this.overlays$ = this.store.select((state: ApplicationState) => state.layersState.overlays);
-    }
+    public baseLayers = this.store.selectSignal((state: ApplicationState) => state.layersState.baseLayers);
+    public overlays = this.store.selectSignal((state: ApplicationState) => state.layersState.overlays);
+    private readonly expanded = this.store.selectSignal((state: ApplicationState) => state.layersState.expanded);
 
     public close() {
         this.sidebarService.hide();
@@ -73,7 +68,7 @@ export class LayersSidebarComponent {
     }
 
     public getExpandState(groupName: string): boolean {
-        return this.store.selectSnapshot((s: ApplicationState) => s.layersState).expanded.find(l => l === groupName) != null;
+        return this.expanded().find(l => l === groupName) != null;
     }
 
     public addOverlay(event: Event) {

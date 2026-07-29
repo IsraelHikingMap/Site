@@ -48,19 +48,19 @@
             <div class="flex flex-row">
                 <mat-slider class="w-full" min="0" max="50" step="1" analyticsOn="click"
                     analyticsCategory="Public routes" analyticsLabel="Filter by length">
-                    <input [value]="filterLengthStart" matSliderStartThumb
+                    <input [value]="filterLengthStart()" matSliderStartThumb
                         (input)="onFilterLengthStartChange($event.target.value)">
-                    <input [value]="filterLengthEnd" matSliderEndThumb
+                    <input [value]="filterLengthEnd()" matSliderEndThumb
                         (input)="onFilterLengthEndChange($event.target.value)">
                 </mat-slider>
             </div>
             <div class="flex flex-row">
-                <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthStart}}
-                    {{unitString}}</span>
+                <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthStart()}}
+                    {{unitString()}}</span>
                 <span class="flex-grow"></span>
-                <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthEnd === 50 ?
-                    "\u200E+50" : filterLengthEnd}}
-                    {{unitString}}</span>
+                <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthEnd() === 50 ?
+                    "\u200E+50" : filterLengthEnd()}}
+                    {{unitString()}}</span>
             </div>
         </div>
     </mat-menu>
@@ -92,10 +92,10 @@
         </div>
     </mat-menu>
 </div>
-@if (filterUserName) {
+@if (filterUserName()) {
 <div class="flex flex-row justify-center">
     <button mat-button class="mx-2 rounded-full! bg-gray-200! p-2 text-black!" (click)="clearUserFilter()">
-        {{filterUserName}}
+        {{filterUserName()}}
         <i class="fa fa-times mx-2"></i>
     </button>
 </div>

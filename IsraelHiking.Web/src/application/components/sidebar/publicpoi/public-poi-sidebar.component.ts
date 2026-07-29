@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject, OnDestroy, ViewEncapsulation, signal } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
@@ -49,25 +49,24 @@ export type SourceImageUrlPair = {
 };
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "public-poi-sidebar",
     templateUrl: "./public-poi-sidebar.component.html",
     encapsulation: ViewEncapsulation.None,
     imports: [Dir, MatButton, AnalyticsDirective, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, MatCard, PublicPointOfInterestEditComponent, FormsModule, MatCardHeader, MatCardTitle, NgClass, MatCardContent, ImageScrollerComponent, DistancePipe, DescriptionComponent]
 })
 export class PublicPoiSidebarComponent implements OnDestroy {
-    public isLoading = true;
-    public isMinimized = false;
-    public sourceImageUrls: SourceImageUrlPair[];
-    public shareLinks = {} as PoiSocialLinks;
-    public length: number = null;
-    public title = "";
-    public imagesUrls: string[] = [];
-    public urls: string[] = [];
-    public osmEditableInfo: EditablePublicPointData;
-    public fullFeature: GeoJSON.Feature;
+    public isLoading = signal(true);
+    public isMinimized = signal(false);
+    public sourceImageUrls = signal<SourceImageUrlPair[]>(undefined);
+    public shareLinks = signal({} as PoiSocialLinks);
+    public length = signal<number>(null);
+    public title = signal("");
+    public imagesUrls = signal<string[]>([]);
+    public urls = signal<string[]>([]);
+    public osmEditableInfo = signal<EditablePublicPointData>(undefined);
+    public fullFeature = signal<GeoJSON.Feature>(undefined);
 
-    private editMode: boolean;
+    private editMode = signal<boolean>(undefined);
 
     public readonly resources = inject(ResourcesService);
 
@@ -84,12 +83,14 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     private readonly translationService = inject(TranslationService);
     private readonly store = inject(Store);
 
+    private readonly userInfo = this.store.selectSignal((state: ApplicationState) => state.userState.userInfo);
+
     constructor() {
         this.router.events.pipe(
             takeUntilDestroyed(),
             filter(event => event instanceof NavigationEnd && event.url.startsWith(RouteStrings.ROUTE_POI))
         ).subscribe(async () => {
-            this.isLoading = true;
+            this.isLoading.set(true);
             await this.initOrUpdate();
         });
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(), skip(1)).subscribe(() => {
@@ -121,12 +122,12 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         await this.fillUiWithData(routeUrlInfo);
         // change this only after we get the full data
         // so that the edit dialog will have all the necessary data to decide
-        this.editMode = routeUrlInfo.editMode;
+        this.editMode.set(routeUrlInfo.editMode);
     }
 
     public ngOnDestroy() {
         this.titleService.clear();
-        if (this.fullFeature) {
+        if (this.fullFeature()) {
             this.store.dispatch(new SetSelectedPoiAction(null));
         }
     }
@@ -142,7 +143,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
                 return;
             }
             let clonedFeature = cloneDeep(feature);
-            this.osmEditableInfo = await this.poiService.createEditableDataAndMerge(clonedFeature);
+            this.osmEditableInfo.set(await this.poiService.createEditableDataAndMerge(clonedFeature));
             this.store.dispatch(new SetSelectedPoiAction(clonedFeature));
 
             await this.initFromFeature(clonedFeature);
@@ -158,27 +159,27 @@ export class PublicPoiSidebarComponent implements OnDestroy {
             const bounds = SpatialService.getBoundsForFeature(clonedFeature);
             this.mapService.fitBounds(bounds, 100, { top: 100, left: 50, bottom: window.innerHeight / 2, right: 50 });
             if (data.source === RouteStrings.COORDINATES) {
-                this.fullFeature = null;
+                this.fullFeature.set(null);
                 this.close();
             }
         } catch {
             this.toastService.warning(this.resources.unableToFindPoi);
             this.close();
         } finally {
-            this.isLoading = false;
+            this.isLoading.set(false);
         }
     }
 
     private async initFromFeature(feature: Immutable<GeoJSON.Feature>) {
-        this.fullFeature = feature as GeoJSON.Feature;
-        this.sourceImageUrls = this.getSourceImageUrls(feature);
-        this.shareLinks = this.poiService.getPoiSocialLinks(feature);
-        this.imagesUrls = await this.poiService.getImagesThatHaveAttribution(feature);
-        this.urls = GeoJSONUtils.getUrls(feature);
-        this.length = this.poiService.getLengthInMeters(feature);
+        this.fullFeature.set(feature as GeoJSON.Feature);
+        this.sourceImageUrls.set(this.getSourceImageUrls(feature));
+        this.shareLinks.set(this.poiService.getPoiSocialLinks(feature));
+        this.imagesUrls.set(await this.poiService.getImagesThatHaveAttribution(feature));
+        this.urls.set(GeoJSONUtils.getUrls(feature));
+        this.length.set(this.poiService.getLengthInMeters(feature));
         const language = this.resources.getCurrentLanguageCodeSimplified();
         this.titleService.set(GeoJSONUtils.getTitle(feature, language));
-        this.title = GeoJSONUtils.getTitle(feature, language);
+        this.title.set(GeoJSONUtils.getTitle(feature, language));
     }
 
     private getSourceImageUrls(feature: Immutable<GeoJSON.Feature>): SourceImageUrlPair[] {
@@ -208,49 +209,49 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     }
 
     public isHideEditMode(): boolean {
-        const isLoggedOut = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo) == null;
+        const isLoggedOut = this.userInfo() == null;
         return isLoggedOut ||
-            !this.fullFeature ||
+            !this.fullFeature() ||
             !this.isEditable() ||
-            this.editMode;
+            this.editMode();
     }
 
     public isEditMode(): boolean {
-        return this.editMode;
+        return this.editMode();
     }
 
     public setEditMode() {
-        const isLoggedOut = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo) == null;
+        const isLoggedOut = this.userInfo() == null;
         if (isLoggedOut) {
             this.toastService.info(this.resources.loginRequired);
             return;
         }
-        this.router.navigate([RouteStrings.ROUTE_POI, this.fullFeature.properties.poiSource, this.fullFeature.properties.identifier],
+        this.router.navigate([RouteStrings.ROUTE_POI, this.fullFeature().properties.poiSource, this.fullFeature().properties.identifier],
             { queryParams: { edit: true } });
     }
 
     public isEditable() {
-        return this.fullFeature && this.fullFeature.properties.poiSource === "OSM";
+        return this.fullFeature() && this.fullFeature().properties.poiSource === "OSM";
     }
 
     public isShowSeeAlso() {
-        return this.fullFeature && this.fullFeature.properties.poiSource !== RouteStrings.COORDINATES && (this.sourceImageUrls.length > 0 || this.getElementOsmAddress() != null);
+        return this.fullFeature() && this.fullFeature().properties.poiSource !== RouteStrings.COORDINATES && (this.sourceImageUrls().length > 0 || this.getElementOsmAddress() != null);
     }
 
     public isRoute() {
-        return this.fullFeature && (this.fullFeature.geometry.type === "LineString" ||
-            this.fullFeature.geometry.type === "MultiLineString");
+        return this.fullFeature() && (this.fullFeature().geometry.type === "LineString" ||
+            this.fullFeature().geometry.type === "MultiLineString");
     }
 
     public getIcon() {
         if (!this.isEditable()) {
-            return this.fullFeature.properties.poiIcon;
+            return this.fullFeature().properties.poiIcon;
         }
         return "icon-camera";
     }
 
     public async convertToRoute() {
-        this.selectedRouteService.convertToRoute(this.fullFeature, this.translationService.getBestDescription(this.fullFeature));
+        this.selectedRouteService.convertToRoute(this.fullFeature(), this.translationService.getBestDescription(this.fullFeature()));
         this.close();
     }
 
@@ -258,38 +259,38 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         const urls = this.getLinkDataUrls();
         this.store.dispatch(new AddPrivatePoiAction(selectedRoute.id, {
-            id: this.fullFeature.properties.identifier,
-            latlng: GeoJSONUtils.getLocation(this.fullFeature),
-            title: this.title,
-            description: this.translationService.getBestDescription(this.fullFeature),
-            type: this.fullFeature.properties.poiIcon.replace("icon-", ""),
+            id: this.fullFeature().properties.identifier,
+            latlng: GeoJSONUtils.getLocation(this.fullFeature()),
+            title: this.title(),
+            description: this.translationService.getBestDescription(this.fullFeature()),
+            type: this.fullFeature().properties.poiIcon.replace("icon-", ""),
             urls
         }));
         this.close();
     }
 
     public navigateHere() {
-        const location = GeoJSONUtils.getLocation(this.fullFeature);
-        const title = GeoJSONUtils.getTitle(this.fullFeature, this.resources.getCurrentLanguageCodeSimplified());
+        const location = GeoJSONUtils.getLocation(this.fullFeature());
+        const title = GeoJSONUtils.getTitle(this.fullFeature(), this.resources.getCurrentLanguageCodeSimplified());
         this.navigateHereService.addNavigationSegment(location, title);
         this.close();
     }
 
     private getLinkDataUrls(): LinkData[] {
         const urls: LinkData[] = [];
-        for (const url of this.urls) {
+        for (const url of this.urls()) {
             urls.push({
                 mimeType: "text/html",
-                text: this.title,
+                text: this.title(),
                 url
             });
         }
-        if (!this.fullFeature) {
+        if (!this.fullFeature()) {
             return urls;
         }
-        const imageUrls = Object.keys(this.fullFeature.properties)
+        const imageUrls = Object.keys(this.fullFeature().properties)
             .filter(k => k.startsWith("image"))
-            .map(k => this.fullFeature.properties[k]);
+            .map(k => this.fullFeature().properties[k]);
         for (const imageUrl of imageUrls) {
             urls.push({
                 mimeType: `image/${imageUrl.split(".").pop().replace("jpg", "jpeg")}`,
@@ -305,18 +306,18 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     }
 
     public getElementOsmAddress(): string {
-        if (!this.fullFeature) {
+        if (!this.fullFeature()) {
             return null;
         }
         if (!this.isEditable()) {
             return null;
         }
-        return this.osmAddressesService.getElementOsmAddress(this.fullFeature.properties.identifier);
+        return this.osmAddressesService.getElementOsmAddress(this.fullFeature().properties.identifier);
     }
 
     public share() {
         Share.share({
-            url: this.shareLinks.poiLink
+            url: this.shareLinks().poiLink
         });
     }
 
@@ -325,7 +326,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     }
 
     public getUrl(): string {
-        return this.urls.find(u => !this.isBadWikipediaUrl(u));
+        return this.urls().find(u => !this.isBadWikipediaUrl(u));
     }
 
     private isBadWikipediaUrl(url: string) {

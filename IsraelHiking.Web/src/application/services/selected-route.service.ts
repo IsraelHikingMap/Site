@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter, inject } from "@angular/core";
+import { Injectable, EventEmitter, inject, computed } from "@angular/core";
 import { some } from "lodash-es";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
@@ -68,6 +68,15 @@ export class SelectedRouteService {
     private readonly toastService = inject(ToastService);
     private readonly sidebarService = inject(SidebarService);
     private readonly store = inject(Store);
+
+    // Signal-backed so callers binding to isEditingRoute() react under OnPush.
+    private readonly presentRoutesSignal = this.store.selectSignal((state: ApplicationState) => state.routes.present);
+    private readonly selectedRouteIdSignal = this.store.selectSignal((state: ApplicationState) => state.routeEditingState.selectedRouteId);
+
+    public readonly isEditingRoute = computed(() => {
+        const selectedRoute = this.presentRoutesSignal().find(r => r.id === this.selectedRouteIdSignal());
+        return selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route");
+    });
     private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly geoJsonParser = inject(GeoJsonParser);
     private readonly elevationProvider = inject(ElevationProvider);
@@ -414,11 +423,6 @@ export class SelectedRouteService {
 
     public getLatlngs(route: Immutable<RouteDataWithoutState>): LatLngAltTime[] {
         return route ? route.segments.map(s => s.latlngs).flat() : null;
-    }
-
-    public isEditingRoute(): boolean {
-        const selectedRoute = this.getSelectedRoute();
-        return selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route");
     }
 
     public createSegmentId(route: Immutable<RouteData>, index: number) {

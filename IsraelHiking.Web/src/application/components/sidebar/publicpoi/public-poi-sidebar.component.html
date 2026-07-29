@@ -1,9 +1,9 @@
 ﻿@if (isEditMode()) {
 <div [dir]="resources.direction">
-  <public-poi-edit [info]="osmEditableInfo"></public-poi-edit>
+  <public-poi-edit [info]="osmEditableInfo()"></public-poi-edit>
 </div>
 } @else {
-<div [dir]="resources.direction" [class.minimized]="isMinimized">
+<div [dir]="resources.direction" [class.minimized]="isMinimized()">
   <div class="flex flex-row sticky top-0 z-10 bg-surface">
     @if (!isHideEditMode()) {
     <div class="flex-1">
@@ -30,16 +30,16 @@
         analyticsCategory="POI" analyticsLabel="Convert POI to point"><i class="fa icon-plus"></i></button>
     </div>
     }
-    @if (shareLinks.poiLink) {
+    @if (shareLinks().poiLink) {
     <div class="flex-1">
       <mat-menu #appMenu="matMenu">
         <div mat-menu-item disableRipple="true">
           <div class="flex flex-row">
-            <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks.waze" [target]="'_blank'"
+            <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks().waze" [target]="'_blank'"
                 matTooltip="{{resources.navigateWithWaze}}" matTooltipPosition="below" analyticsOn="click"
                 analyticsCategory="Share" analyticsLabel="Navigate with waze"><i class="fa icon-waze"></i></a>
             </div>
-            <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks.googleMaps" [target]="'_blank'"
+            <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks().googleMaps" [target]="'_blank'"
                 matTooltip="{{resources.navigateWithGoogleMaps}}" matTooltipPosition="below" analyticsOn="click"
                 analyticsCategory="Share" analyticsLabel="Navigate with google maps"><i
                   class="fa icon-map-marker"></i></a>
@@ -49,15 +49,15 @@
                 matTooltipPosition="below" analyticsOn="click" analyticsCategory="Share"
                 analyticsLabel="Share with os capabilities"><i class="fa icon-ellipsis-v"></i></button></div>
             } @else {
-            <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks.facebook" [target]="'_blank'"
+            <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks().facebook" [target]="'_blank'"
                 matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="below" analyticsOn="click"
                 analyticsCategory="Share" analyticsLabel="Share facebook poi"><i class="fa icon-facebook"></i></a>
             </div>
-            <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks.whatsapp" [target]="'_blank'"
+            <div class="flex-1"><a mat-button class="w-full" [href]="shareLinks().whatsapp" [target]="'_blank'"
                 matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="below" analyticsOn="click"
                 analyticsCategory="Share" analyticsLabel="Share whatsapp poi"><i class="fa icon-whatsapp"></i></a>
             </div>
-            <div class="flex-1"><button mat-button class="w-full" [cdkCopyToClipboard]="shareLinks.poiLink"
+            <div class="flex-1"><button mat-button class="w-full" [cdkCopyToClipboard]="shareLinks().poiLink"
                 matTooltip="{{resources.copyUrl}}" matTooltipPosition="below" analyticsOn="click"
                 analyticsCategory="Share" analyticsLabel="Share copy to clipboard poi"><i
                   class="fa icon-clipboard"></i></button></div>
@@ -69,16 +69,16 @@
         matTooltip="{{resources.share}}" matTooltipPosition="below"><i class="fa icon-share-alt"></i></button>
     </div>
     }
-    @if (!isMinimized && isApp()) {
+    @if (!isMinimized() && isApp()) {
     <div class="flex-1">
-      <button mat-button class="w-full min-w-[unset]! p-0!" (click)="isMinimized = !isMinimized"
+      <button mat-button class="w-full min-w-[unset]! p-0!" (click)="isMinimized.set(!isMinimized())"
         matTooltip="{{resources.minimize}}" matTooltipPosition="below" analyticsOn="click" analyticsCategory="POI"
         analyticsLabel="Minimize POI window"><i class="fa icon-chevron-down"></i></button>
     </div>
     }
-    @if (isMinimized && isApp()) {
+    @if (isMinimized() && isApp()) {
     <div class="flex-1">
-      <button mat-button class="w-full min-w-[unset]! p-0!" (click)="isMinimized = !isMinimized"
+      <button mat-button class="w-full min-w-[unset]! p-0!" (click)="isMinimized.set(!isMinimized())"
         matTooltip="{{resources.restore}}" matTooltipPosition="below" analyticsOn="click" analyticsCategory="POI"
         analyticsLabel="Restore POI window"><i class="fa icon-chevron-up"></i></button>
     </div>
@@ -86,7 +86,7 @@
     <div class="flex-1">
       <button mat-button class="w-full min-w-[unset]! p-0!" (click)="close()" matTooltip="{{resources.close}}"
         matTooltipPosition="below">
-        @if (isLoading) {
+        @if (isLoading()) {
         <mat-spinner diameter="24"></mat-spinner>
         } @else {
         <i class="fa fa-lg icon-close"></i>
@@ -96,23 +96,23 @@
   </div>
   <mat-card appearance="outlined" class="mat-elevation-z0">
     <mat-card-header>
-      <mat-card-title [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)">
+      <mat-card-title [ngClass]="resources.getTextAlignment(title())" [dir]="resources.getDirection(title())">
         @if (hasUrl()) {
         <a [href]="getUrl()" [target]="'_blank'" analyticsOn="click" analyticsCategory="POI"
           analyticsLabel="View extended POI data outside site from title">
-          <span class="text-xl">{{title}}</span>
+          <span class="text-xl">{{title()}}</span>
         </a>
         } @else {
-        <span class="text-xl">{{title}}</span>
+        <span class="text-xl">{{title()}}</span>
         }
       </mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <image-scroller [images]="imagesUrls" [canEdit]="false"></image-scroller>
-      @if (length && isRoute()) {
-      <p class="text-center">{{resources.length}}: {{length | distance}}</p>
+      <image-scroller [images]="imagesUrls()" [canEdit]="false"></image-scroller>
+      @if (length() && isRoute()) {
+      <p class="text-center">{{resources.length}}: {{length() | distance}}</p>
       }
-      <description [feature]="fullFeature" [isEditable]="isEditable()"></description>
+      <description [feature]="fullFeature()" [isEditable]="isEditable()"></description>
       @if (isShowSeeAlso()) {
       <div class="flex flex-row max-sm:hidden">
         <h4>{{resources.seeAlso}}</h4>
@@ -125,7 +125,7 @@
           <img src="content/openstreetmap-logo.png" height="32" width="32" />
         </a>
         }
-        @for (urlPair of sourceImageUrls; track urlPair) {
+        @for (urlPair of sourceImageUrls(); track urlPair) {
         <a [href]="urlPair.url" [target]="'_blank'" class="me-2" analyticsOn="click" analyticsCategory="POI"
           analyticsLabel="View extended POI data outside site">
           @if (!urlPair.imageUrl) {
@@ -133,7 +133,7 @@
             <i class="fa fa-2x icon-external-link"></i>
           </div>
           } @else {
-          <img [src]="urlPair.imageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(title)" />
+          <img [src]="urlPair.imageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(title())" />
           }
         </a>
         }

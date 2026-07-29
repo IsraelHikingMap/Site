@@ -14,14 +14,14 @@
             </button>
         </div>
         <div class="flex-1">
-            <button mat-button class="w-full" [disabled]="routes.length === 0" (click)="share()"
+            <button mat-button class="w-full" [disabled]="routes().length === 0" (click)="share()"
                 matTooltip="{{resources.share}}" matTooltipPosition="below" analyticsOn="click"
                 analyticsCategory="Private Routes" analyticsLabel="Share">
                 <i class="fa fa-lg icon-share-alt"></i>
                 @if (hiddenRoutesCount() === 0) {
-                <span class="mx-1">({{routes.length}})</span>
+                <span class="mx-1">({{routes().length}})</span>
                 } @else {
-                <span class="mx-1">({{routes.length - hiddenRoutesCount()}}/{{routes.length}})</span>
+                <span class="mx-1">({{routes().length - hiddenRoutesCount()}}/{{routes().length}})</span>
                 }
             </button>
         </div>
@@ -50,7 +50,7 @@
     </div>
     <mat-radio-group [value]="selectedRouteId()">
         <div cdkDropList (cdkDropListDropped)="drop($event)">
-            @for (route of routes; track route.id) {
+            @for (route of routes(); track route.id) {
             <div cdkDrag
                 class="bg-surface [&.cdk-drag-animating]:transition-transform [&.cdk-drag-animating]:duration-300 [&.cdk-drag-placeholder]:opacity-0">
                 <div class="flex flex-col w-full bg-surface">

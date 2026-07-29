@@ -54,7 +54,7 @@ export class LegendItemComponent {
     }
 
     public getImageAddress() {
-        const styleKey = this.layersService.getSelectedBaseLayer().key;
+        const styleKey = this.layersService.selectedBaseLayer().key;
         return `content/legend/${styleKey === HIKING_MAP ? "hike" : "bike"}_${this.item().key}.png`;
     }
 }

@@ -1,11 +1,10 @@
-import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject } from "@angular/core";
 
 import { OsmAddressesService } from "../services/osm-addresses.service";
 import { RunningContextService } from "../services/running-context.service";
 import { ResourcesService } from "../services/resources.service";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "osm-attribution",
     templateUrl: "./osm-attribution.component.html",
     imports: []
@@ -16,7 +15,7 @@ export class OsmAttributionComponent {
     private readonly runningContextService = inject(RunningContextService);
 
     public getEditAddress(): string {
-        return this.osmAddressService.getOsmAddress();
+        return this.osmAddressService.osmAddress();
     }
 
     public isMobile(): boolean {

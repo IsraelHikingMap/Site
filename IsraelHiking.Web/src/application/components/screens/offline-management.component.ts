@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { type Map, type MapMouseEvent, MercatorCoordinate, type StyleSpecification } from "maplibre-gl";
@@ -17,19 +17,18 @@ import { DEFAULT_BASE_LAYERS, HIKING_MAP, MTB_MAP } from "../../reducers/initial
 import type { ApplicationState, EditableLayer } from "../../models";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "offline-management",
     templateUrl: "./offline-management.component.html",
     imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent]
 })
 export class OfflineManagementComponent {
     public offlineMapStyle: StyleSpecification;
-    public selectedTile: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
-    public inProgressTile: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
-    public downloadedTiles: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
+    public selectedTile = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
+    public inProgressTile = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
+    public downloadedTiles = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
     public currentLocation: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
     public baseLayerData: EditableLayer;
-    public selectedTileXY: { tileX: number; tileY: number } = null;
+    public selectedTileXY = signal<{ tileX: number; tileY: number }>(null);
 
     private map: Map;
 
@@ -38,11 +37,12 @@ export class OfflineManagementComponent {
     private readonly layersService = inject(LayersService);
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
+    private readonly downloadedTilesState = this.store.selectSignal((s: ApplicationState) => s.offlineState.downloadedTiles);
     public readonly resources = inject(ResourcesService);
 
     constructor() {
         this.offlineMapStyle = this.defaultStyleService.getStyleWithPlaceholders();
-        this.baseLayerData = this.layersService.getSelectedBaseLayer();
+        this.baseLayerData = this.layersService.selectedBaseLayer();
         if (this.baseLayerData.key !== HIKING_MAP && this.baseLayerData.key !== MTB_MAP) {
             this.baseLayerData = { ...DEFAULT_BASE_LAYERS[0] };
         }
@@ -99,12 +99,12 @@ export class OfflineManagementComponent {
 
     public async downloadSelected() {
         this.toastService.info(this.resources.dontSwitchApps);
-        const { tileX, tileY } = this.selectedTileXY;
+        const { tileX, tileY } = this.selectedTileXY();
         this.map.flyTo({
             center: SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX + 0.5, y: tileY + 0.5 }, TILES_ZOOM)),
             zoom: TILES_ZOOM - 1
         });
-        this.selectedTileXY = null;
+        this.selectedTileXY.set(null);
         this.updateDownloadedTiles();
         this.updateSelectedTile();
         const status = await this.offlineFilesDownloadService.downloadTile(tileX, tileY);
@@ -116,11 +116,11 @@ export class OfflineManagementComponent {
                 this.toastService.success(this.resources.downloadFinishedSuccessfully);
                 break;
             case "error":
-                this.selectedTileXY = { tileX, tileY };
+                this.selectedTileXY.set({ tileX, tileY });
                 this.toastService.warning(this.resources.unexpectedErrorPleaseTryAgainLater);
                 break;
             case "aborted":
-                this.selectedTileXY = { tileX, tileY };
+                this.selectedTileXY.set({ tileX, tileY });
                 break;
         }
 
@@ -166,7 +166,7 @@ export class OfflineManagementComponent {
             if (this.downloadingTileXY()?.tileX === tileXDownloaded && this.downloadingTileXY()?.tileY === tileYDownloaded) {
                 continue; // Skip tiles that are in progress
             }
-            const { tileX, tileY } = this.selectedTileXY || { tileX: null, tileY: null };
+            const { tileX, tileY } = this.selectedTileXY() || { tileX: null, tileY: null };
             if (this.downloadingTileXY() == null && tileXDownloaded === tileX && tileYDownloaded === tileY) {
                 continue; // Skip the center tile if not downloading
             }
@@ -180,23 +180,23 @@ export class OfflineManagementComponent {
             features.push(feature);
         }
 
-        this.downloadedTiles = {
+        this.downloadedTiles.set({
             type: "FeatureCollection",
             features: features
-        };
+        });
     }
 
     private updateSelectedTile() {
-        const { tileX, tileY } = this.selectedTileXY || { tileX: null, tileY: null };
-        this.selectedTile = {
+        const { tileX, tileY } = this.selectedTileXY() || { tileX: null, tileY: null };
+        this.selectedTile.set({
             type: "FeatureCollection",
-            features: this.downloadingTileXY() != null || this.selectedTileXY == null ? [] : [this.tileCoordinatesToPolygon(tileX, tileY, this.resources.clickBelow)]
-        };
+            features: this.downloadingTileXY() != null || this.selectedTileXY() == null ? [] : [this.tileCoordinatesToPolygon(tileX, tileY, this.resources.clickBelow)]
+        });
     }
 
     private updateInProgressTile(progress: number) {
         if (this.downloadingTileXY() == null) {
-            this.inProgressTile = { type: "FeatureCollection", features: [] };
+            this.inProgressTile.set({ type: "FeatureCollection", features: [] });
             return;
         }
         const fillFeature = this.tileCoordinatesToPolygon(
@@ -212,10 +212,10 @@ export class OfflineManagementComponent {
             progress.toFixed(2) + "%"
         );
         strokeFeature.properties.stroke = "true";
-        this.inProgressTile = {
+        this.inProgressTile.set({
             type: "FeatureCollection",
             features: [fillFeature, strokeFeature]
-        };
+        });
     }
 
     public cancelDownload() {
@@ -230,7 +230,7 @@ export class OfflineManagementComponent {
         const mercator = MercatorCoordinate.fromLngLat(event.lngLat);
         const tileX = Math.floor((mercator.x * tileCount));
         const tileY = Math.floor((mercator.y * tileCount));
-        this.selectedTileXY = { tileX, tileY };
+        this.selectedTileXY.set({ tileX, tileY });
         this.updateSelectedTile();
         this.updateDownloadedTiles();
         this.map.flyTo({
@@ -247,23 +247,23 @@ export class OfflineManagementComponent {
     }
 
     public isSelectedAvailableForOffline(): boolean {
-        if (!this.selectedTileXY) {
+        if (!this.selectedTileXY()) {
             return false;
         }
-        const downloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.offlineState.downloadedTiles);
-        return downloadedTiles != null && downloadedTiles[`${this.selectedTileXY.tileX}-${this.selectedTileXY.tileY}`] != null;
+        const downloadedTiles = this.downloadedTilesState();
+        return downloadedTiles != null && downloadedTiles[`${this.selectedTileXY().tileX}-${this.selectedTileXY().tileY}`] != null;
     }
 
     public async deleteSelected() {
-        if (!this.selectedTileXY) {
+        if (!this.selectedTileXY()) {
             return;
         }
         this.toastService.confirm({
             message: this.resources.areYouSure,
             type: "YesNo",
             confirmAction: async () => {
-                await this.offlineFilesDownloadService.deleteTile(this.selectedTileXY.tileX, this.selectedTileXY.tileY);
-                this.selectedTileXY = null;
+                await this.offlineFilesDownloadService.deleteTile(this.selectedTileXY().tileX, this.selectedTileXY().tileY);
+                this.selectedTileXY.set(null);
                 this.updateSelectedTile();
                 this.updateDownloadedTiles();
             }

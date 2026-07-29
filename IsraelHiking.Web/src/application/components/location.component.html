@@ -33,8 +33,8 @@
   }
 </div>
 
-<mgl-geojson-source id="location-source" [data]="locationFeatures"></mgl-geojson-source>
-@if (locationFeatures.features.length > 0) {
+<mgl-geojson-source id="location-source" [data]="locationFeatures()"></mgl-geojson-source>
+@if (locationFeatures().features.length > 0) {
 <mgl-layer [id]="resources.locationIcon" type="symbol" source="location-source" [filter]="['==', '$type', 'Point']"
   [layout]="{
                 'icon-image': 'gps-arrow',
@@ -58,14 +58,14 @@
             }">
 </mgl-layer>
 }
-@if (locationLatLng) {
-<mgl-popup [lngLat]="locationLatLng" (popupClose)="locationLatLng = null">
-  <gps-location-overlay [latlng]="locationLatLng" (closed)="locationLatLng = null"></gps-location-overlay>
+@if (locationLatLng()) {
+<mgl-popup [lngLat]="locationLatLng()" (popupClose)="locationLatLng.set(null)">
+  <gps-location-overlay [latlng]="locationLatLng()" (closed)="locationLatLng.set(null)"></gps-location-overlay>
 </mgl-popup>
 }
 
-<mgl-geojson-source id="distance-source" [data]="distanceFeatures"></mgl-geojson-source>
-@if (showDistance) {
+<mgl-geojson-source id="distance-source" [data]="distanceFeatures()"></mgl-geojson-source>
+@if (showDistance()) {
 <mgl-layer id="distance-line" type="line" source="distance-source" [filter]="['==', '$type', 'LineString']" [layout]="{
                 'line-cap': 'round',
                 'line-join': 'bevel'

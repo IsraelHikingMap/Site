@@ -1,4 +1,4 @@
-import { Component, inject, input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, inject, input } from "@angular/core";
 
 import { AutomaticLayerPresentationComponent } from "./automatic-layer-presentation.component";
 import { LayersService } from "../../services/layers.service";
@@ -6,7 +6,6 @@ import { ResourcesService } from "../../services/resources.service";
 import type { EditableLayer } from "../../models";
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
     selector: "layers",
     templateUrl: "layers.component.html",
     imports: [AutomaticLayerPresentationComponent]
@@ -20,7 +19,7 @@ export class LayersComponent {
     private readonly layersService = inject(LayersService);
 
     public getBaseLayer() {
-        return this.layersService.getSelectedBaseLayer();
+        return this.layersService.selectedBaseLayer();
     }
 
     public isOverlayVisible(overlay: EditableLayer) {
@@ -28,6 +27,6 @@ export class LayersComponent {
     }
 
     public getAllOverlays() {
-        return this.layersService.getAllOverlays();
+        return this.layersService.allOverlays();
     }
 }
