@@ -1,4 +1,4 @@
-import { Component, inject, signal } from "@angular/core";
+import { Component, inject, signal, computed } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
@@ -49,6 +49,18 @@ export class LocationComponent {
     private readonly inMemoryState = this.store.selectSignal((s: ApplicationState) => s.inMemoryState);
     private readonly recordedRouteState = this.store.selectSignal((s: ApplicationState) => s.recordedRouteState);
     private readonly mapComponent = inject(MapComponent);
+
+    public readonly isKeepNorthUp = computed(() => this.inMemoryState().keepNorthUp);
+
+    public readonly getRotationAngle = computed(() => `rotate(${-this.bearing()}deg)`);
+
+    public readonly isDisabled = computed(() => this.gpsState().tracking === "disabled");
+
+    public readonly isActive = computed(() => this.gpsState().tracking === "tracking");
+
+    public readonly isLoading = computed(() => this.gpsState().tracking === "searching");
+
+    public readonly isAddingRecordingPoi = computed(() => this.recordedRouteState().isAddingPoi);
 
     constructor() {
         this.clearLocationFeatureCollection();
@@ -105,19 +117,11 @@ export class LocationComponent {
         }
     }
 
-    public isKeepNorthUp() {
-        return this.inMemoryState().keepNorthUp;
-    }
-
     public toggleKeepNorthUp() {
         this.store.dispatch(new ToggleKeepNorthUpAction());
         if (this.isKeepNorthUp()) {
             this.mapComponent.mapInstance.rotateTo(0);
         }
-    }
-
-    public getRotationAngle() {
-        return `rotate(${-this.bearing()}deg)`;
     }
 
     public toggleTracking() {
@@ -194,22 +198,6 @@ export class LocationComponent {
             }
             this.recordedRouteService.startRecording();
         }
-    }
-
-    public isDisabled() {
-        return this.gpsState().tracking === "disabled";
-    }
-
-    public isActive() {
-        return this.gpsState().tracking === "tracking";
-    }
-
-    public isLoading() {
-        return this.gpsState().tracking === "searching";
-    }
-
-    public isAddingRecordingPoi() {
-        return this.recordedRouteState().isAddingPoi;
     }
 
     public toggleAddRecordingPoi() {

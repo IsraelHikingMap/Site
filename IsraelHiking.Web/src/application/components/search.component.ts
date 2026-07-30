@@ -5,7 +5,7 @@ import {
     ElementRef,
     inject,
     viewChild,
-    viewChildren, signal } from "@angular/core";
+    viewChildren, signal, computed } from "@angular/core";
 import { Router } from "@angular/router";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
@@ -55,12 +55,15 @@ export class SearchComponent {
     private readonly currentUrl = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.currentUrl);
     private readonly userInfo = this.store.selectSignal((s: ApplicationState) => s.userState.userInfo);
 
+    public readonly isLoggedIn = computed(() => this.userInfo() != null);
+
+    public readonly isPoisSearch = computed(() => {
+        const currentUrl = this.currentUrl();
+        return currentUrl !== RouteStrings.ROUTE_SHARES && currentUrl !== RouteStrings.ROUTE_TRACES;
+    });
+
     constructor() {
         this.configureInputFormControl(this.searchFrom);
-    }
-
-    public isLoggedIn(): boolean {
-        return this.userInfo() != null;
     }
 
     private configureInputFormControl(input: FormControl<string | SearchResultsPointOfInterest>) {
@@ -199,11 +202,6 @@ export class SearchComponent {
         }
         this.selectFirstSearchResults = true;
         return false;
-    }
-
-    public isPoisSearch() {
-        const currentUrl = this.currentUrl();
-        return currentUrl !== RouteStrings.ROUTE_SHARES && currentUrl !== RouteStrings.ROUTE_TRACES;
     }
 
     /** 

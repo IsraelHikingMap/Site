@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, signal } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit, signal, computed } from "@angular/core";
 
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
@@ -25,7 +25,7 @@ import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import { GeoJSONUtils } from "../../services/geojson-utils";
 import { Urls } from "../../urls";
-import type { ApplicationState, LatLngAltTime, LinkData, MarkerData } from "../../models";
+import type { ApplicationState, LinkData, MarkerData } from "../../models";
 import { skip } from "rxjs";
 
 @Component({
@@ -61,6 +61,8 @@ export class PublicPoisComponent implements OnInit {
     private readonly store = inject(Store);
     private readonly destroyRef = inject(DestroyRef);
     private readonly mapComponent = inject(MapComponent);
+
+    public readonly getSelectedFeatureLatlng = computed(() => SpatialService.toLatLng(this.selectedPoiFeature().geometry.coordinates as [number, number]));
 
     public ngOnInit() {
         this.poiGeoJsonData.set(this.poiService.getPoisGeoJson());
@@ -186,10 +188,6 @@ export class PublicPoisComponent implements OnInit {
     public clearSelected() {
         this.store.dispatch(new SetSelectedPoiAction(null));
         this.hoverFeature.set(null);
-    }
-
-    public getSelectedFeatureLatlng(): LatLngAltTime {
-        return SpatialService.toLatLng(this.selectedPoiFeature().geometry.coordinates as [number, number]);
     }
 
     public navigateHere() {

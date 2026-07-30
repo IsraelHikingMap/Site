@@ -51,7 +51,7 @@ export class SharesComponent implements OnInit {
     public filteredShareUrls = signal<Immutable<ShareUrl[]>>([]);
     public routesGeoJson = signal<GeoJSON.FeatureCollection>({ type: "FeatureCollection", features: [] });
     public readonly sortBy = signal<keyof ShareUrl>("lastModifiedDate");
-    public readonly sortDirection = signal<"asc" | "desc">("desc");
+    private readonly sortDirection = signal<"asc" | "desc">("desc");
     public readonly filter: Record<string, string[]> = {
         difficulty: ["Easy", "Moderate", "Hard", "Unknown"],
         type: ["Biking", "Hiking", "4x4", "Unknown"]

@@ -1,4 +1,4 @@
-import { Component, inject, model, signal, OnInit } from "@angular/core";
+import { Component, inject, model, signal, OnInit, computed } from "@angular/core";
 import { MatSelectChange, MatSelect } from "@angular/material/select";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
@@ -41,6 +41,8 @@ export class PublicPointOfInterestEditComponent implements OnInit {
     private readonly poiService: PoiService = inject(PoiService);
     private readonly sidebarService = inject(SidebarService);
     private readonly toastService = inject(ToastService);
+
+    public readonly isPoint = computed(() => this.info != null && this.info().isPoint);
 
     private initializeCategories() {
         this.categories.set(structuredClone(POINTS_OF_INTEREST_CATEGORIES) as SelectableCategory[]);
@@ -115,10 +117,6 @@ export class PublicPointOfInterestEditComponent implements OnInit {
 
     public updateUrl(i: number, url: string) {
         this.info.update(info => ({ ...info, urls: info.urls.map((u, index) => index === i ? url : u) }));
-    }
-
-    public isPoint(): boolean {
-        return this.info != null && this.info().isPoint;
     }
 
     public close() {

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from "@angular/core";
+import { Component, inject, signal, computed } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { type Map, type MapMouseEvent, MercatorCoordinate, type StyleSpecification } from "maplibre-gl";
@@ -39,6 +39,14 @@ export class OfflineManagementComponent {
     private readonly store = inject(Store);
     private readonly downloadedTilesState = this.store.selectSignal((s: ApplicationState) => s.offlineState.downloadedTiles);
     public readonly resources = inject(ResourcesService);
+
+    public readonly isSelectedAvailableForOffline = computed(() => {
+        if (!this.selectedTileXY()) {
+            return false;
+        }
+        const downloadedTiles = this.downloadedTilesState();
+        return downloadedTiles != null && downloadedTiles[`${this.selectedTileXY().tileX}-${this.selectedTileXY().tileY}`] != null;
+    });
 
     constructor() {
         this.offlineMapStyle = this.defaultStyleService.getStyleWithPlaceholders();
@@ -244,14 +252,6 @@ export class OfflineManagementComponent {
         this.map.dragRotate.disable();
         this.map.touchZoomRotate.disableRotation();
         this.initializeCenterAndZoomFromDownloadingTile();
-    }
-
-    public isSelectedAvailableForOffline(): boolean {
-        if (!this.selectedTileXY()) {
-            return false;
-        }
-        const downloadedTiles = this.downloadedTilesState();
-        return downloadedTiles != null && downloadedTiles[`${this.selectedTileXY().tileX}-${this.selectedTileXY().tileY}`] != null;
     }
 
     public async deleteSelected() {

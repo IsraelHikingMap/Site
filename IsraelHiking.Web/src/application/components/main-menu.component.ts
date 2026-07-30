@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, computed } from "@angular/core";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 import { MatButton } from "@angular/material/button";
 import { MatMenuTrigger, MatMenu, MatMenuItem } from "@angular/material/menu";
@@ -51,16 +51,14 @@ export class MainMenuComponent {
     public userInfo = this.store.selectSignal((state: ApplicationState) => state.userState.userInfo);
     private readonly isSubscribed = this.store.selectSignal((state: ApplicationState) => state.offlineState.isSubscribed);
 
+    public readonly isLoggedIn = computed(() => this.userInfo() != null);
+
     constructor() {
         if (this.runningContextService.isCapacitor) {
             App.getInfo().then((info) => {
                 this.loggingService.info(`App version: ${info.version}`);
             });
         }
-    }
-
-    public isLoggedIn() {
-        return this.userInfo() != null;
     }
 
     public isApp() {

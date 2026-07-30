@@ -1,19 +1,19 @@
-import { Directive, HostListener, Input } from "@angular/core";
+import { Directive, HostListener, input } from "@angular/core";
 
 @Directive({
     selector: "[scrollToOnClick]"
 })
 export class ScrollToDirective {
-    @Input("scrollToOnClick") targetId: string | undefined;
-    @Input("scrollToOnClickOffset") offset = 0;
+    public readonly targetId = input<string>(undefined, { alias: "scrollToOnClick" });
+    public readonly offset = input(0, { alias: "scrollToOnClickOffset" });
 
     @HostListener("click")
     onClick(): void {
-        if (!this.targetId) {
+        if (!this.targetId()) {
             console.warn("targetId parameter is missing");
             return;
         }
-        ScrollToDirective.scrollTo(this.targetId, this.offset)
+        ScrollToDirective.scrollTo(this.targetId(), this.offset())
     }
 
     /**

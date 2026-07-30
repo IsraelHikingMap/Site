@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, computed } from "@angular/core";
 import { MatExpansionPanel, MatExpansionPanelHeader } from "@angular/material/expansion";
 import { MatButton } from "@angular/material/button";
 import { NgClass } from "@angular/common";
@@ -30,16 +30,16 @@ export class PointsOfInterestCategoriesComponent {
 
     private readonly layersState = this.store.selectSignal((s: ApplicationState) => s.layersState);
 
+    public readonly getExpandState = computed(() => this.layersState().expanded.find(l => l === POINTS_OF_INTEREST) != null);
+
+    public readonly isCategoryGroupVisible = computed(() => this.layersState().visiblePoisCategories.length > 0);
+
     public expand() {
         this.store.dispatch(new ExpandGroupAction(POINTS_OF_INTEREST));
     }
 
     public collapse() {
         this.store.dispatch(new CollapseGroupAction(POINTS_OF_INTEREST));
-    }
-
-    public getExpandState(): boolean {
-        return this.layersState().expanded.find(l => l === POINTS_OF_INTEREST) != null;
     }
 
     public toggleCategory(category: Category) {
@@ -53,9 +53,5 @@ export class PointsOfInterestCategoriesComponent {
 
     public isCategoryVisible(category: Category): boolean {
         return this.layersState().visiblePoisCategories.includes(category.name);
-    }
-
-    public isCategoryGroupVisible(): boolean {
-        return this.layersState().visiblePoisCategories.length > 0;
     }
 }

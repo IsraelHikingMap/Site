@@ -1,4 +1,4 @@
-import { Component, OnChanges, SimpleChanges, input, inject, model, output, signal } from "@angular/core";
+import { Component, OnChanges, SimpleChanges, input, inject, model, output, signal, computed } from "@angular/core";
 import { MatAnchor, MatButton } from "@angular/material/button";
 import { Dir } from "@angular/cdk/bidi";
 import { AnimationOptions, LottieComponent } from "ngx-lottie";
@@ -35,6 +35,19 @@ export class ImageScrollerComponent implements OnChanges {
     private readonly imageGalleryService = inject(ImageGalleryService);
     private readonly imageResizeService = inject(ImageResizeService);
 
+    public readonly hasNext = computed(() => this.currentIndex() < this.images().length - 1);
+
+    public readonly hasPrevious = computed(() => this.currentIndex() > 0);
+
+    public readonly getCurrentValue = computed(() => {
+        if (this.images().length === 0) {
+            return null;
+        }
+        return this.images()[this.currentIndex()];
+    });
+
+    public readonly getIndexString = computed(() => `${this.currentIndex() + 1} / ${this.images().length}`);
+
     public ngOnChanges(changes: SimpleChanges<ImageScrollerComponent>): void {
         if (changes.images) {
             this.currentIndex.set(0);
@@ -55,14 +68,6 @@ export class ImageScrollerComponent implements OnChanges {
             this.currentIndex.set(0);
         }
         this.currentImageChanged.emit(this.getCurrentValue());
-    }
-
-    public hasNext(): boolean {
-        return this.currentIndex() < this.images().length - 1;
-    }
-
-    public hasPrevious(): boolean {
-        return this.currentIndex() > 0;
     }
 
     public remove(): void {
@@ -89,13 +94,6 @@ export class ImageScrollerComponent implements OnChanges {
         }
     }
 
-    public getCurrentValue(): string {
-        if (this.images().length === 0) {
-            return null;
-        }
-        return this.images()[this.currentIndex()];
-    }
-
     public getCurrentImage() {
         const imageUrl = this.getCurrentValue();
         if (imageUrl == null) {
@@ -111,9 +109,5 @@ export class ImageScrollerComponent implements OnChanges {
             imagesUrls.push(imageUrlToPush);
         }
         this.imageGalleryService.open(imagesUrls, this.currentIndex());
-    }
-
-    public getIndexString() {
-        return `${this.currentIndex() + 1} / ${this.images().length}`;
     }
 }

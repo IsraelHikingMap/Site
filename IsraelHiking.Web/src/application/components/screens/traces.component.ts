@@ -50,7 +50,7 @@ export class TracesComponent implements OnInit {
 
     public showMap = signal(false);
     public sortBy = signal<"timeStamp" | "name">("timeStamp");
-    public readonly sortDirection = signal<"asc" | "desc">("desc");
+    private readonly sortDirection = signal<"asc" | "desc">("desc");
     public readonly mapStyle: StyleSpecification;
     public filteredTraces = signal<Immutable<Trace[]>>([]);
     public loadingTraces = signal(false);

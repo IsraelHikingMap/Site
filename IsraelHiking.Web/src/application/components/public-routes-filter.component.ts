@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal } from "@angular/core";
+import { Component, DestroyRef, inject, signal, computed } from "@angular/core";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatButton } from "@angular/material/button";
@@ -30,6 +30,12 @@ export class PublicRoutesFilterComponent {
     public filterUserName = signal<string>(null);
 
     private readonly publicRoutesFilter = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.publicRoutesFilter);
+
+    public readonly isCategoryFiltered = computed(() => this.publicRoutesFilter().categories.length !== initialState.inMemoryState.publicRoutesFilter.categories.length);
+
+    public readonly isDifficultyFiltered = computed(() => this.publicRoutesFilter().difficulty.length !== initialState.inMemoryState.publicRoutesFilter.difficulty.length);
+
+    public readonly isLengthFiltered = computed(() => this.filterLengthStart() > 0 || this.filterLengthEnd() < 50);
 
     constructor() {
         this.store.select((state: ApplicationState) => state.configuration.units).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((units) => {
@@ -66,14 +72,6 @@ export class PublicRoutesFilterComponent {
         return this.publicRoutesFilter().categories.includes(category);
     }
 
-    public isCategoryFiltered() {
-        return this.publicRoutesFilter().categories.length !== initialState.inMemoryState.publicRoutesFilter.categories.length;
-    }
-
-    public isDifficultyFiltered() {
-        return this.publicRoutesFilter().difficulty.length !== initialState.inMemoryState.publicRoutesFilter.difficulty.length;
-    }
-
     public isDificultySelected(difficulty: Difficulty) {
         return this.publicRoutesFilter().difficulty.includes(difficulty);
     }
@@ -90,10 +88,6 @@ export class PublicRoutesFilterComponent {
         filters.lengthRange[1] = +value;
         this.filterLengthEnd.set(+value);
         this.store.dispatch(new SetPublicRoutesFilterAction(filters));
-    }
-
-    public isLengthFiltered() {
-        return this.filterLengthStart() > 0 || this.filterLengthEnd() < 50
     }
 
     public hasUserFilter() {

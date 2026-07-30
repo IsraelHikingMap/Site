@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, inject, input, model, output, signal } from "@angular/core";
+import { Component, ViewEncapsulation, inject, input, model, output, signal, computed } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
@@ -35,16 +35,12 @@ export class MissingPartOverlayComponent {
     private readonly httpClient = inject(HttpClient);
     private readonly toastService = inject(ToastService);
 
-    public getHighwayType(): string {
-        return this.feature().properties.highway || "track";
-    }
+    public readonly getHighwayType = computed(() => this.feature().properties.highway || "track");
+
+    public readonly getColor = computed(() => this.feature().properties.colour || "none");
 
     public setHighwayType(highwayType: string) {
         this.feature.update(feature => ({ ...feature, properties: { ...feature.properties, highway: highwayType } }));
-    }
-
-    public getColor(): string {
-        return this.feature().properties.colour || "none";
     }
 
     public setColor(color: string) {

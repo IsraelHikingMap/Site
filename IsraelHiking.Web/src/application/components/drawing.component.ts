@@ -51,6 +51,20 @@ export class DrawingComponent {
     private readonly presentRoutes = this.store.selectSignal((state: ApplicationState) => state.routes.present);
     private readonly selectedRoute = computed(() => this.presentRoutes().find(r => r.id === this.routeEditingState().selectedRouteId));
 
+    public readonly isPoiEditActive = computed(() => {
+        const selectedRoute = this.selectedRoute();
+        return selectedRoute && selectedRoute.state === "Poi";
+    });
+
+    public readonly isRouteEditActive = computed(() => {
+        const selectedRoute = this.selectedRoute();
+        return selectedRoute != null && selectedRoute.state === "Route";
+    });
+
+    public readonly canDeleteAllRoutes = computed(() => this.presentRoutes().length > 0);
+
+    public readonly hasMultipleRoutes = computed(() => this.presentRoutes().length > 1);
+
     @HostListener("window:keydown", ["$event"])
     public onDrawingShortcutKeys($event: KeyboardEvent) {
         if (($event.ctrlKey && $event.code === "KeyY") ||
@@ -88,16 +102,6 @@ export class DrawingComponent {
     public clearBoth() {
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         this.store.dispatch(new ClearPoisAndRouteAction(selectedRoute.id));
-    }
-
-    public isPoiEditActive() {
-        const selectedRoute = this.selectedRoute();
-        return selectedRoute && selectedRoute.state === "Poi";
-    }
-
-    public isRouteEditActive() {
-        const selectedRoute = this.selectedRoute();
-        return selectedRoute != null && selectedRoute.state === "Route";
     }
 
     public isEditActive() {
@@ -193,10 +197,6 @@ export class DrawingComponent {
         this.store.dispatch(new ClearHistoryAction());
     }
 
-    public canDeleteAllRoutes() {
-        return this.presentRoutes().length > 0;
-    }
-
     public togglePrivateRoutes() {
         this.sidebarService.toggle("private-routes");
     }
@@ -231,10 +231,6 @@ export class DrawingComponent {
         if (inMemeoryState.following && tracking === "tracking") {
             this.toastService.warning(this.resources.trackingIsDisabledWhileEditing);
         }
-    }
-
-    public hasMultipleRoutes() {
-        return this.presentRoutes().length > 1;
     }
 
     public allXRoutesText() {

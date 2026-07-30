@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, ViewEncapsulation, signal } from "@angular/core";
+import { Component, inject, OnDestroy, ViewEncapsulation, signal, computed } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
@@ -62,7 +62,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     public length = signal<number>(null);
     public title = signal("");
     public imagesUrls = signal<string[]>([]);
-    public urls = signal<string[]>([]);
+    private urls = signal<string[]>([]);
     public osmEditableInfo = signal<EditablePublicPointData>(undefined);
     public fullFeature = signal<GeoJSON.Feature>(undefined);
 
@@ -84,6 +84,25 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     private readonly store = inject(Store);
 
     private readonly userInfo = this.store.selectSignal((state: ApplicationState) => state.userState.userInfo);
+
+    public readonly isHideEditMode = computed(() => {
+        const isLoggedOut = this.userInfo() == null;
+        return isLoggedOut ||
+            !this.fullFeature() ||
+            !this.isEditable() ||
+            this.editMode();
+    });
+
+    public readonly isEditMode = computed(() => this.editMode());
+
+    public readonly isEditable = computed(() => this.fullFeature() && this.fullFeature().properties.poiSource === "OSM");
+
+    public readonly isShowSeeAlso = computed(() => this.fullFeature() && this.fullFeature().properties.poiSource !== RouteStrings.COORDINATES && (this.sourceImageUrls().length > 0 || this.getElementOsmAddress() != null));
+
+    public readonly isRoute = computed(() => this.fullFeature() && (this.fullFeature().geometry.type === "LineString" ||
+            this.fullFeature().geometry.type === "MultiLineString"));
+
+    public readonly getUrl = computed(() => this.urls().find(u => !this.isBadWikipediaUrl(u)));
 
     constructor() {
         this.router.events.pipe(
@@ -208,18 +227,6 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         }).filter(iup => iup.url != null);
     }
 
-    public isHideEditMode(): boolean {
-        const isLoggedOut = this.userInfo() == null;
-        return isLoggedOut ||
-            !this.fullFeature() ||
-            !this.isEditable() ||
-            this.editMode();
-    }
-
-    public isEditMode(): boolean {
-        return this.editMode();
-    }
-
     public setEditMode() {
         const isLoggedOut = this.userInfo() == null;
         if (isLoggedOut) {
@@ -228,19 +235,6 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         }
         this.router.navigate([RouteStrings.ROUTE_POI, this.fullFeature().properties.poiSource, this.fullFeature().properties.identifier],
             { queryParams: { edit: true } });
-    }
-
-    public isEditable() {
-        return this.fullFeature() && this.fullFeature().properties.poiSource === "OSM";
-    }
-
-    public isShowSeeAlso() {
-        return this.fullFeature() && this.fullFeature().properties.poiSource !== RouteStrings.COORDINATES && (this.sourceImageUrls().length > 0 || this.getElementOsmAddress() != null);
-    }
-
-    public isRoute() {
-        return this.fullFeature() && (this.fullFeature().geometry.type === "LineString" ||
-            this.fullFeature().geometry.type === "MultiLineString");
     }
 
     public getIcon() {
@@ -323,10 +317,6 @@ export class PublicPoiSidebarComponent implements OnDestroy {
 
     public hasUrl(): boolean {
         return this.getUrl() != null;
-    }
-
-    public getUrl(): string {
-        return this.urls().find(u => !this.isBadWikipediaUrl(u));
     }
 
     private isBadWikipediaUrl(url: string) {

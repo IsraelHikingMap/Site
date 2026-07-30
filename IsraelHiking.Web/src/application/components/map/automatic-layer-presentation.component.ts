@@ -4,7 +4,6 @@ import { Subject, mergeMap } from "rxjs";
 import { Store } from "@ngxs/store";
 import type { SourceSpecification, LayerSpecification } from "maplibre-gl";
 
-import { ResourcesService } from "../../services/resources.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models";
 
@@ -26,7 +25,6 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     private currentLanguageCode: LanguageCode;
     private readonly recreateQueue = new Subject<() => Promise<void>>();
 
-    public readonly resources = inject(ResourcesService);
 
     private readonly mapComponent = inject(MapComponent);
     private readonly defaultStyleService = inject(DefaultStyleService);
