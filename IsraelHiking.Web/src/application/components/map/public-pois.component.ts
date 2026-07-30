@@ -38,7 +38,7 @@ export class PublicPoisComponent implements OnInit {
     private static readonly MAX_MENU_POINTS_IN_CLUSTER = 50;
     public readonly poisSrouceId = "points-of-interest";
 
-    public poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
+    public readonly poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
 
     public poiGeoJsonData = signal<GeoJSON.FeatureCollection<GeoJSON.Point>>(null);
     public selectedPoiFeature = signal<GeoJSON.Feature<GeoJSON.Point> | null>(null);

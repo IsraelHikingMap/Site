@@ -23,7 +23,7 @@ export class ImageCaptureDirective implements OnDestroy {
     private readonly fileService = inject(FileService);
     private readonly elementRef = inject(ElementRef);
 
-    private unsbscribeFn: () => void;
+    private readonly unsbscribeFn: () => void;
 
     constructor() {
 

@@ -22,7 +22,7 @@ import type { ApplicationState, Category } from "../../../models";
 })
 export class PointsOfInterestCategoriesComponent {
 
-    public categories = POINTS_OF_INTEREST_CATEGORIES
+    public readonly categories = POINTS_OF_INTEREST_CATEGORIES
 
     public readonly resources = inject(ResourcesService);
 

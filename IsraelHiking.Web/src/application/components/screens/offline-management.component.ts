@@ -22,12 +22,12 @@ import type { ApplicationState, EditableLayer } from "../../models";
     imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent]
 })
 export class OfflineManagementComponent {
-    public offlineMapStyle: StyleSpecification;
+    public readonly offlineMapStyle: StyleSpecification;
     public selectedTile = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
     public inProgressTile = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
     public downloadedTiles = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
-    public currentLocation: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
-    public baseLayerData: EditableLayer;
+    public readonly currentLocation: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
+    public readonly baseLayerData: EditableLayer;
     public selectedTileXY = signal<{ tileX: number; tileY: number }>(null);
 
     private map: Map;

@@ -19,7 +19,7 @@ export type LocationWithBearing = {
 @Injectable()
 export class LocationService {
 
-    public changed = new EventEmitter<LocationWithBearing | null>();
+    public readonly changed = new EventEmitter<LocationWithBearing | null>();
     private lastSpeed: number = null;
     private lastSpeedTime: number = null;
     private locationWithBearing: LocationWithBearing | null = null;

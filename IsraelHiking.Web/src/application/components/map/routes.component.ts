@@ -91,7 +91,7 @@ export class RoutesComponent implements AfterViewInit {
         this.routeEditRouteInteraction.setData(this.editingRouteGeoJson());
     }
 
-    private handleRoutePointClick = (pointIndex: number) => {
+    private readonly handleRoutePointClick = (pointIndex: number) => {
         if (pointIndex == null || (this.routePointPopupData() != null && this.routePointPopupData().segmentIndex === pointIndex)) {
             this.routePointPopupData.set(null);
             return;

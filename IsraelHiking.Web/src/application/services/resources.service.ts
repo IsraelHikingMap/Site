@@ -36,16 +36,16 @@ export class ResourcesService {
     public direction: Direction;
     public start: string;
     public end: string;
-    public endOfBaseLayer = "end-of-base-layer";
-    public endOfOverlays = "end-of-overlays";
-    public endOfClusters = "end-of-clusters";
-    public endOfRoutes = "end-of-routes";
-    public editRoutePoints = "editing-route-layer-points";
-    public editRouteLines = "editing-route-layer-lines";
-    public editRouteSource = "editing-route-source";
-    public locationIcon = "location-icon-layer";
-    public globalPointsLayer = "global-points-layer";
-    public globalPointsExternalLayer = "global-points-external-layer";
+    public readonly endOfBaseLayer = "end-of-base-layer";
+    public readonly endOfOverlays = "end-of-overlays";
+    public readonly endOfClusters = "end-of-clusters";
+    public readonly endOfRoutes = "end-of-routes";
+    public readonly editRoutePoints = "editing-route-layer-points";
+    public readonly editRouteLines = "editing-route-layer-lines";
+    public readonly editRouteSource = "editing-route-source";
+    public readonly locationIcon = "location-icon-layer";
+    public readonly globalPointsLayer = "global-points-layer";
+    public readonly globalPointsExternalLayer = "global-points-external-layer";
     public readonly recordedRouteColor = "#FF6600";
     // All the text in the app //
     /////////////////////////////

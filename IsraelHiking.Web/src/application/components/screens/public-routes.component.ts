@@ -49,11 +49,11 @@ export class PublicRoutesComponent {
     public readonly lottieScenery: AnimationOptions = {
         animationData: sceneryPlaceholder
     };
-    public mapStyle: StyleSpecification;
+    public readonly mapStyle: StyleSpecification;
     public showMap = signal(true);
     public readonly routesSrouceId = "routes-of-interest";
 
-    public poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
+    public readonly poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
     public poiGeoJsonData = signal<GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties>>({
         type: "FeatureCollection",
         features: []

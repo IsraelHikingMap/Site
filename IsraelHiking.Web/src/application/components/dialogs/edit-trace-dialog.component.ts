@@ -4,7 +4,7 @@ import { FormsModule } from "@angular/forms";
 import { MatFormField } from "@angular/material/form-field";
 import { MatInput, MatLabel } from "@angular/material/input";
 import { MatOption, MatSelect } from "@angular/material/select";
-import { MatButton , MatIconButton } from "@angular/material/button";
+import { MatButton, MatIconButton } from "@angular/material/button";
 import { Dir } from "@angular/cdk/bidi";
 
 import { ResourcesService } from "../../services/resources.service";
@@ -22,9 +22,9 @@ export class EditTraceDialogComponent {
     public description = "";
     public tagsString = "";
     public visibility: TraceVisibility = "trackable";
-    public title = "";
+    public readonly title: string;
 
-    public resources = inject(ResourcesService);
+    public readonly resources = inject(ResourcesService);
     private readonly tracesService = inject(TracesService);
     private readonly toastService = inject(ToastService);
     private readonly data = inject<Trace>(MAT_DIALOG_DATA);

@@ -33,14 +33,14 @@ interface IPrivatePoiShowDialogData {
 })
 export class PrivatePoiShowDialogComponent {
 
-    private routeId: string;
-    private index: number;
+    private readonly routeId: string;
+    private readonly index: number;
 
-    public marker: MarkerData;
-    public imageLink: LinkData;
-    public url: LinkData;
-    public title: string;
-    public description: string;
+    public readonly marker: MarkerData;
+    public readonly imageLink: LinkData;
+    public readonly url: LinkData;
+    public readonly title: string;
+    public readonly description: string;
     public showCoordinates = signal(false);
 
     public readonly resources = inject(ResourcesService);

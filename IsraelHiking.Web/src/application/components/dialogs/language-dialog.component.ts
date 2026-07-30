@@ -22,8 +22,8 @@ import languageAnimationData from "../../../content/lottie/dialog-language.json"
 })
 export class LanguageDialogComponent {
     public selectedLanguageCode: LanguageCode;
-    public availableLanguages = AVAILABLE_LANGUAGES;
-    lottieLanguage: AnimationOptions = { animationData: languageAnimationData };
+    public readonly availableLanguages = AVAILABLE_LANGUAGES;
+    readonly lottieLanguage: AnimationOptions = { animationData: languageAnimationData };
 
     public readonly resources = inject(ResourcesService);
 

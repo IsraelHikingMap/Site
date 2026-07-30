@@ -14,7 +14,7 @@ import type { ApplicationState, Bounds, LatLngAltTime } from "../models";
 export class MapService {
     private static readonly NOT_FOLLOWING_TIMEOUT = 20000;
     private resolve: (value?: void | PromiseLike<void>) => void;
-    private missingImagesArray: string[] = [];
+    private readonly missingImagesArray: string[] = [];
     private currentMap: Map;
 
     private readonly cancelableTimeoutService = inject(CancelableTimeoutService);
@@ -102,11 +102,11 @@ export class MapService {
         return linkEl.href;
     }
 
-    private onDragstart = () => {
+    private readonly onDragstart = () => {
         this.store.dispatch(new SetPannedAction(new Date()));
     }
 
-    private onStyleImageMissing = async (e: { id: string }) => {
+    private readonly onStyleImageMissing = async (e: { id: string }) => {
         if (!/^http/.test(e.id)) {
             return;
         }
@@ -118,14 +118,14 @@ export class MapService {
         this.currentMap.addImage(e.id, image.data);
     }
 
-    private onError = (e: ErrorEvent) => {
+    private readonly onError = (e: ErrorEvent) => {
         if (e?.error?.message?.includes("418")) {
             return;
         }
         this.loggingService.error("[Map] Error: " + e?.error?.message);
     }
 
-    public onMoveEnd = (e: DragEvent) => {
+    public readonly onMoveEnd = (e: DragEvent) => {
         if (!e || !this.currentMap) {
             return;
         }

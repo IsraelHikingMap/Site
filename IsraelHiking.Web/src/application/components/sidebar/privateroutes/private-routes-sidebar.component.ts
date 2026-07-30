@@ -59,7 +59,7 @@ export class PrivateRoutesSidebarComponent {
     private readonly dataContainerService = inject(DataContainerService);
 
     public routes = this.store.selectSignal((state: ApplicationState) => state.routes.present);
-    public colors = this.routesFactory.colors;
+    public readonly colors = this.routesFactory.colors;
     public selectedRouteId = this.store.selectSignal((state: ApplicationState) => state.routeEditingState.selectedRouteId);
     public hiddenRoutesCount = this.store.selectSignal((state: ApplicationState) => state.routes.present.filter(route => route.state === "Hidden").length);
     public isAllRoutesHidden = this.store.selectSignal((state: ApplicationState) => state.routes.present.every(route => route.state === "Hidden"));

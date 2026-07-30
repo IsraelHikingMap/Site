@@ -31,14 +31,14 @@ import moreAnimationData from "../../../content/lottie/dialog-more.json";
 })
 export class IntroDialogComponent {
 
-    public lottieLanguage: AnimationOptions = { animationData: languageAnimationData };
-    public lottieMaps: AnimationOptions = { animationData: mapsAnimationData };
-    public lottiePlan: AnimationOptions = { animationData: planAnimationData };
-    public lottieMore: AnimationOptions = { animationData: moreAnimationData };
+    public readonly lottieLanguage: AnimationOptions = { animationData: languageAnimationData };
+    public readonly lottieMaps: AnimationOptions = { animationData: mapsAnimationData };
+    public readonly lottiePlan: AnimationOptions = { animationData: planAnimationData };
+    public readonly lottieMore: AnimationOptions = { animationData: moreAnimationData };
 
     public activityType = signal<ActivityType>("Hiking");
     public step = signal(0);
-    public availableLanguages = AVAILABLE_LANGUAGES;
+    public readonly availableLanguages = AVAILABLE_LANGUAGES;
 
     public readonly resources = inject(ResourcesService);
 

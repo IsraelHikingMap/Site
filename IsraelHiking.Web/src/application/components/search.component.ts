@@ -37,7 +37,7 @@ export class SearchComponent {
     public searchResults = signal<SearchResultsPointOfInterest[]>([]);
     public searchTerm = signal("");
     private selectedSearchResults: SearchResultsPointOfInterest = null;
-    public searchFrom = new FormControl<string | SearchResultsPointOfInterest>("");
+    public readonly searchFrom = new FormControl<string | SearchResultsPointOfInterest>("");
 
     private selectFirstSearchResults = false;
     private searchRequestId = 0;

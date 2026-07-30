@@ -26,7 +26,7 @@ declare type EditMouseState = "none" | "down" | "dragging" | "canceled";
 @Injectable()
 export class RouteEditRouteInteraction {
 
-    public onRoutePointClick = new EventEmitter<number>();
+    public readonly onRoutePointClick = new EventEmitter<number>();
 
     private state: EditMouseState = "none";
     private mouseDownPoint: Point = null;
@@ -115,13 +115,13 @@ export class RouteEditRouteInteraction {
         }
     }
 
-    private cancelInteraction = () => {
+    private readonly cancelInteraction = () => {
         this.selectedRoutePoint = null;
         this.selectedRouteSegments = [];
         this.state = "canceled";
     };
 
-    private handleDown = (event: MapMouseEvent) => {
+    private readonly handleDown = (event: MapMouseEvent) => {
         this.mouseDownPoint = event.point;
         if (this.isTouchesBiggerThan(event.originalEvent, 1)) {
             this.cancelInteraction();
@@ -166,7 +166,7 @@ export class RouteEditRouteInteraction {
         }
     };
 
-    private handleMove = (event: MapMouseEvent) => {
+    private readonly handleMove = (event: MapMouseEvent) => {
         if (this.mouseDownPoint != null && event.point &&
             Math.abs((this.mouseDownPoint.x - event.point.x) + (this.mouseDownPoint.y - event.point.y)) < DRAG_PIXEL_TOLERANCE) {
             return;
@@ -226,7 +226,7 @@ export class RouteEditRouteInteraction {
         return this.selectedRoutePoint != null || this.selectedRouteSegments.length > 0;
     }
 
-    private handleUp = (event: MapMouseEvent) => {
+    private readonly handleUp = (event: MapMouseEvent) => {
         this.mouseDownPoint = null;
         if (this.isTouchesBiggerThan(event.originalEvent, 0)) {
             // more than zero touches - no need to do any thing.
@@ -252,7 +252,7 @@ export class RouteEditRouteInteraction {
         }
     };
 
-    private handleClick = (event: MapMouseEvent) => {
+    private readonly handleClick = (event: MapMouseEvent) => {
         const latlng = event.lngLat;
         if (!this.isUpdating()) {
             // new point
@@ -268,7 +268,7 @@ export class RouteEditRouteInteraction {
         }
     };
 
-    private addPointToEndOfRoute = async (latlng: LatLngAltTime) => {
+    private readonly addPointToEndOfRoute = async (latlng: LatLngAltTime) => {
         const newSegment = this.createRouteSegment(latlng, [latlng, latlng]);
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute.segments.length === 0) {
@@ -283,7 +283,7 @@ export class RouteEditRouteInteraction {
         this.store.dispatch(new AddSegmentAction(selectedRoute.id, newSegment));
     };
 
-    private createRouteSegment = (latlng: LatLngAltTime, latlngs: LatLngAltTime[]): RouteSegmentData => {
+    private readonly createRouteSegment = (latlng: LatLngAltTime, latlngs: LatLngAltTime[]): RouteSegmentData => {
         const routeSegment = {
             routePoint: latlng,
             latlngs: latlngs,
@@ -292,7 +292,7 @@ export class RouteEditRouteInteraction {
         return routeSegment;
     };
 
-    private runRouting = async (startLatLng: LatLngAltTime, segment: RouteSegmentData): Promise<void> => {
+    private readonly runRouting = async (startLatLng: LatLngAltTime, segment: RouteSegmentData): Promise<void> => {
         segment.routePoint = this.getSnappingForRoute(segment.routePoint, []);
         const latLngs = await this.routingProvider.getRoute(startLatLng, segment.routePoint, segment.routingType);
         segment.latlngs = latLngs;

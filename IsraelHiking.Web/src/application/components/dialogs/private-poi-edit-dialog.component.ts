@@ -48,10 +48,10 @@ interface PrivatePoiEditDialogData {
 export class PrivatePoiEditDialogComponent implements AfterViewInit {
     private static readonly NUMBER_OF_ICONS_PER_ROW = 4;
 
-    private routeId?: string;
-    private markerIndex: number;
+    private readonly routeId?: string;
+    private readonly markerIndex: number;
 
-    public marker: MarkerData;
+    public readonly marker: MarkerData;
     public url = signal<LinkData>(null);
     public imageLink = signal<LinkData>(null);
     public showIcons = signal(false);
@@ -60,7 +60,7 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
     public title: string;
     public markerType = signal<string>(null);
     public description: string;
-    public iconsGroups: IIconsGroup[] = [];
+    public readonly iconsGroups: IIconsGroup[] = [];
 
     public titleInput = viewChild<ElementRef>("titleInput");
 

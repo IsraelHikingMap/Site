@@ -12,8 +12,8 @@ import { Urls } from "../../urls";
     imports: [RouterLink]
 })
 export class LandingComponent {
-    public androidAppUrl: string = Urls.ANDROID_APP_URL;
-    public iosAppUrl: string = Urls.IOS_APP_URL;
+    public readonly androidAppUrl: string = Urls.ANDROID_APP_URL;
+    public readonly iosAppUrl: string = Urls.IOS_APP_URL;
 
     public readonly resources = inject(ResourcesService);
 

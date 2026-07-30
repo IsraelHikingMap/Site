@@ -24,7 +24,7 @@ export class RoutingProvider {
     private static readonly ROUTING_SCHEMA = "IHM-schema";
     private static readonly ROUTING_CLASS_PROPERTY_NAME = "ihm_class";
 
-    private featuresCache = new QuickLRU<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>({ maxSize: 100 });
+    private readonly featuresCache = new QuickLRU<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>({ maxSize: 100 });
 
     private readonly httpClient = inject(HttpClient);
     private readonly resources = inject(ResourcesService);

@@ -107,7 +107,7 @@ export class RouteStatisticsComponent implements OnInit {
     public lineChartContainer = viewChild<ElementRef>("lineChartContainer");
 
     private statistics: RouteStatistics;
-    private chartElements: IChartElements = {
+    private readonly chartElements: IChartElements = {
         margin: { top: 10, right: 10, bottom: 40, left: 50 },
         zoomTransform: d3.zoomIdentity
     };
@@ -283,7 +283,7 @@ export class RouteStatisticsComponent implements OnInit {
         this.onRouteDataChanged();
     }
 
-    private onRouteDataChanged = () => {
+    private readonly onRouteDataChanged = () => {
         this.updateStatistics();
         this.updateKmMarkers();
         this.updateSlopeRoute();
@@ -363,7 +363,7 @@ export class RouteStatisticsComponent implements OnInit {
         });
     }
 
-    private onMouseDown = (e: Event) => {
+    private readonly onMouseDown = (e: Event) => {
         this.chartElements.dragState = "start";
         this.subRouteRange.set({
             xStart: this.getMouseOrTouchChartXPosition(e),
@@ -372,7 +372,7 @@ export class RouteStatisticsComponent implements OnInit {
         });
     };
 
-    private onMouseMove = (e: Event) => {
+    private readonly onMouseMove = (e: Event) => {
         e.stopPropagation();
         const xPosition = this.getMouseOrTouchChartXPosition(e);
         const point = this.routeStatisticsService.interpolateStatistics(this.statistics, xPosition);
@@ -880,7 +880,7 @@ export class RouteStatisticsComponent implements OnInit {
         this.setViewStatisticsValues(this.statistics);
     }
 
-    private onSelectedRouteHover = (latlng: LatLngAltTime) => {
+    private readonly onSelectedRouteHover = (latlng: LatLngAltTime) => {
         if (!this.isOpen()) {
             return;
         }

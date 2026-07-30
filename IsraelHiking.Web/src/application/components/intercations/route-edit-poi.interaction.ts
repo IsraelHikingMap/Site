@@ -31,7 +31,7 @@ export class RouteEditPoiInteraction {
         }
     }
 
-    private handleClick = (event: MapMouseEvent) => {
+    private readonly handleClick = (event: MapMouseEvent) => {
         if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "tracking") {
             const latLng = event.lngLat;
             const point = event.target.project(latLng);

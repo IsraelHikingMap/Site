@@ -37,10 +37,10 @@ export type LayerPropertiesDialogComponentData = {
     imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, NameInUseValidatorDirective, MatError, MatSlider, MatSliderThumb, MapComponent, AutomaticLayerPresentationComponent, MatDialogActions, AnalyticsDirective, MatTooltip, CdkCopyToClipboard]
 })
 export class LayerPropertiesDialogComponent {
-    public title: string;
-    public isNew: boolean;
-    public isApp: boolean;
-    public isOverlay: boolean;
+    public readonly title: string;
+    public readonly isNew: boolean;
+    public readonly isApp: boolean;
+    public readonly isOverlay: boolean;
     public layerData: EditableLayer;
     public copiedToClipboard = signal(false);
 
@@ -53,7 +53,7 @@ export class LayerPropertiesDialogComponent {
 
     public location = this.store.selectSignal((state: ApplicationState) => state.locationState);
 
-    private backupLayer: EditableLayer;
+    private readonly backupLayer: EditableLayer;
     private readonly data = inject<LayerPropertiesDialogComponentData>(MAT_DIALOG_DATA);
 
     public static openDialog(dialog: MatDialog, layerData: EditableLayer, dialogType: LayerPropertiesDialogType) {

@@ -20,8 +20,8 @@ export class PhotoSwpieComponent implements AfterViewInit {
 
     public readonly resources = inject(ResourcesService);
     public photoswipe = viewChild<ElementRef>("photoswipe");
-    public closed = new EventEmitter();
-    private data = inject(PHOTO_SWIPE_DATA);
+    public readonly closed = new EventEmitter();
+    private readonly data = inject(PHOTO_SWIPE_DATA);
 
     public ngAfterViewInit(): void {
         const pswpElement = this.photoswipe().nativeElement;

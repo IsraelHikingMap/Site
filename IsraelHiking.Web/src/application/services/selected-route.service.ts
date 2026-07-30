@@ -55,12 +55,12 @@ const END_COLOR = "red";
 
 @Injectable()
 export class SelectedRouteService {
-    private static MERGE_THRESHOLD = 50; // meter.
+    private static readonly MERGE_THRESHOLD = 50; // meter.
 
     private routes: Immutable<RouteData[]> = [];
     private selectedRouteId: string;
 
-    public selectedRouteHover = new EventEmitter<LatLngAltTime>();
+    public readonly selectedRouteHover = new EventEmitter<LatLngAltTime>();
 
     private readonly resources = inject(ResourcesService);
     private readonly routesFactory = inject(RoutesFactory);

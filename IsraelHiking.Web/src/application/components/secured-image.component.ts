@@ -19,15 +19,15 @@ export class SecuredImageComponent implements OnChanges, AfterViewInit {
     // So basically turn src into src$
     public src = input<string>("");
 
-    private src$ = new BehaviorSubject(this.src());
+    private readonly src$ = new BehaviorSubject(this.src());
 
-    private isVisible$ = new BehaviorSubject<boolean>(false);
-    private el = inject(ElementRef);
+    private readonly isVisible$ = new BehaviorSubject<boolean>(false);
+    private readonly el = inject(ElementRef);
 
     // this stream will contain the actual url that our img tag will load
     // everytime the src changes, the previous call would be canceled and the
     // new resource would be loaded, it will do it when the component is visible and only once
-    dataUrl$ = this.isVisible$.pipe(
+    readonly dataUrl$ = this.isVisible$.pipe(
         filter(visible => visible), // Wait until visible
         take(1),                    // Load only once per component lifecycle
         switchMap(() => this.src$),

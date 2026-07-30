@@ -48,15 +48,15 @@ export type ShareEditDialogComponentData = {
     imports: [Dir, MatDialogTitle, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox, MatHint, AnalyticsDirective, MatAnchor, MapComponent, LayersComponent, MatRadioGroup, MatRadioButton, MatDialogActions, MatFormField, ControlComponent, MatButtonModule, MatTooltip, RoutesPathComponent, DistancePipe, CdkTextareaAutosize]
 })
 export class ShareEditDialogComponent {
-    public shareUrl: ShareUrl;
+    public readonly shareUrl: ShareUrl;
 
     public isLoading = signal(false);
-    public canUpdate = false;
+    public readonly canUpdate: boolean;
     public updateCurrentShare = false;
-    public hasHiddenRoutes = false;
-    public style: StyleSpecification;
+    public readonly hasHiddenRoutes: boolean;
+    public readonly style: StyleSpecification;
     public base64Preview = signal<string>(null);
-    public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = { type: "FeatureCollection", features: [] };
+    public readonly routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
     public canPublishPublic = signal(false);
 
     public readonly resources = inject(ResourcesService);

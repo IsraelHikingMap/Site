@@ -17,7 +17,7 @@ import { ToastService } from "../../services/toast.service";
     imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatCheckbox, FormsModule, MatDialogActions, AnalyticsDirective]
 })
 export class TermsOfServiceDialogComponent {
-    public wikimediaTermsOfServiceUrl: string;
+    public readonly wikimediaTermsOfServiceUrl: string;
     public iAgree = false;
 
     public readonly resources = inject(ResourcesService);

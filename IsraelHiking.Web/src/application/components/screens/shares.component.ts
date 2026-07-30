@@ -46,13 +46,13 @@ import type { ApplicationState, ShareUrl } from "../../models";
 export class SharesComponent implements OnInit {
     public loading = signal(false);
     public showMap = signal(false);
-    public mapStyle: StyleSpecification;
+    public readonly mapStyle: StyleSpecification;
     public selectedShareUrl = signal<Immutable<ShareUrl>>(null);
     public filteredShareUrls = signal<Immutable<ShareUrl[]>>([]);
     public routesGeoJson = signal<GeoJSON.FeatureCollection>({ type: "FeatureCollection", features: [] });
     public sortBy: keyof ShareUrl = "lastModifiedDate";
     public sortDirection: "asc" | "desc" = "desc";
-    public filter: Record<string, string[]> = {
+    public readonly filter: Record<string, string[]> = {
         difficulty: ["Easy", "Moderate", "Hard", "Unknown"],
         type: ["Biking", "Hiking", "4x4", "Unknown"]
     };

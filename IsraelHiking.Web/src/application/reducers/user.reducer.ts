@@ -6,23 +6,23 @@ import { initialState } from "./initial-state";
 import type { ActivityType, UserInfo, UserState } from "../models";
 
 export class SetUserInfoAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public userInfo: UserInfo) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly userInfo: UserInfo) { }
 }
 
 export class SetTokenAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public token: string) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly token: string) { }
 }
 
 export class SetAgreeToTermsAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public agree: boolean) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly agree: boolean) { }
 }
 
 export class SetActivityTypeAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public activityType: ActivityType) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly activityType: ActivityType) { }
 }
 
 @State<UserState>({

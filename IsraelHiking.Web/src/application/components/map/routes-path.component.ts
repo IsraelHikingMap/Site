@@ -22,5 +22,5 @@ export class RoutesPathComponent {
     public pointsLayerClick = output<MapLayerMouseEvent>();
 
 
-    public resources = inject(ResourcesService);
+    public readonly resources = inject(ResourcesService);
 }

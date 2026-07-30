@@ -47,8 +47,8 @@ export class MainMapComponent {
 
     public sidenavVisible = signal(false);
     public sidenavViewName = signal("");
-    public location: LocationState;
-    public initialStyle: StyleSpecification;
+    public readonly location: LocationState;
+    public readonly initialStyle: StyleSpecification;
 
     public readonly resources = inject(ResourcesService);
 

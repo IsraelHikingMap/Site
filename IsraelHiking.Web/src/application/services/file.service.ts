@@ -40,7 +40,7 @@ export class FileService {
     private readonly elevationProvider = inject(ElevationProvider);
     private readonly saveAs = inject(SaveAsFactory);
 
-    public formats: FormatViewModel[] = [
+    public readonly formats: FormatViewModel[] = [
         {
             label: "GPX version 1.1 (.gpx)",
             extension: "gpx",

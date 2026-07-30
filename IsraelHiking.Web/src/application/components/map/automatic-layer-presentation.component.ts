@@ -19,12 +19,12 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     public layerData = input<EditableLayer>();
     public allowOffline = input<boolean>();
 
-    private subscriptions: OutputRefSubscription[] = [];
+    private readonly subscriptions: OutputRefSubscription[] = [];
     private jsonSourcesIds: string[] = [];
     private jsonLayersIds: string[] = [];
-    private mapLoadedPromise: Promise<void>;
+    private readonly mapLoadedPromise: Promise<void>;
     private currentLanguageCode: LanguageCode;
-    private recreateQueue = new Subject<() => Promise<void>>();
+    private readonly recreateQueue = new Subject<() => Promise<void>>();
 
     public readonly resources = inject(ResourcesService);
 

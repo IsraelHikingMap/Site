@@ -7,67 +7,67 @@ import { initialState, POINTS_OF_INTEREST_CATEGORIES } from "./initial-state";
 import type { LayersState, EditableLayer } from "../models";
 
 export class AddBaseLayerAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public layerData: EditableLayer) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly layerData: EditableLayer) { }
 }
 
 export class AddOverlayAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public layerData: EditableLayer) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly layerData: EditableLayer) { }
 }
 
 export class RemoveBaseLayerAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public key: string) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly key: string) { }
 }
 
 export class RemoveOverlayAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public key: string) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly key: string) { }
 }
 
 export class UpdateBaseLayerAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public key: string, public layerData: EditableLayer) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly key: string, public readonly layerData: EditableLayer) { }
 }
 
 export class UpdateOverlayAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public key: string, public layerData: EditableLayer) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly key: string, public readonly layerData: EditableLayer) { }
 }
 
 export class SelectBaseLayerAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public key: string) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly key: string) { }
 }
 
 export class SetOverlaysVisibilityAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public key: string, public visible: boolean) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly key: string, public readonly visible: boolean) { }
 }
 
 export class HideAllOverlaysAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = this.prototype.constructor.name;
 }
 
 export class ExpandGroupAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public name: string) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly name: string) { }
 }
 
 export class CollapseGroupAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public name: string) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly name: string) { }
 }
 
 export class TogglePoisCategoriesVisibilityAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = this.prototype.constructor.name;
     constructor() { }
 }
 
 export class ToggleCategoryVisibilityAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public name: string) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly name: string) { }
 }
 
 @State({
