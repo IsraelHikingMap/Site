@@ -41,7 +41,7 @@ export class LayerPropertiesDialogComponent {
     public readonly isNew: boolean;
     public readonly isApp: boolean;
     public readonly isOverlay: boolean;
-    public layerData: EditableLayer;
+    public readonly layerData = signal<EditableLayer>(null);
     public copiedToClipboard = signal(false);
 
     public readonly resources = inject(ResourcesService);
@@ -61,14 +61,14 @@ export class LayerPropertiesDialogComponent {
     }
 
     constructor() {
-        this.layerData = {
+        this.layerData.set({
             minZoom: 1,
             maxZoom: 16,
             key: "",
             address: "",
             opacity: 1.0,
             isEditable: true
-        } as EditableLayer;
+        } as EditableLayer);
 
         this.isApp = this.runningContextService.isCapacitor;
 
@@ -82,7 +82,7 @@ export class LayerPropertiesDialogComponent {
                 this.title = this.resources.baseLayerProperties;
                 this.isNew = false;
                 this.isOverlay = false;
-                this.layerData = { ...this.data.layerData };
+                this.layerData.set({ ...this.data.layerData });
                 this.backupLayer = this.data.layerData;
                 break;
             case "add-overlay":
@@ -94,33 +94,44 @@ export class LayerPropertiesDialogComponent {
                 this.title = this.resources.overlayProperties;
                 this.isNew = false;
                 this.isOverlay = true;
-                this.layerData = {
+                this.layerData.set({
                     ...this.data.layerData,
                     opacity: this.data.layerData.opacity || 1.0
-                };
+                });
                 this.backupLayer = this.data.layerData;
                 break;
         }
     }
 
     public onAddressChanged(address: string) {
-        // in order to cuase changes in child component
-        this.layerData = {
-            ...this.layerData,
+        this.layerData.update(layerData => ({
+            ...layerData,
             address: decodeURI(address).replace("{zoom}", "{z}").trim()
-        };
+        }));
         this.updateLayerKeyIfPossible();
     }
 
     public onOpacityChanged(opacity: number) {
-        this.layerData.opacity = opacity;
+        this.layerData.update(layerData => ({ ...layerData, opacity }));
+    }
+
+    public onKeyChanged(key: string) {
+        this.layerData.update(layerData => ({ ...layerData, key }));
+    }
+
+    public onMinZoomChanged(minZoom: number) {
+        this.layerData.update(layerData => ({ ...layerData, minZoom }));
+    }
+
+    public onMaxZoomChanged(maxZoom: number) {
+        this.layerData.update(layerData => ({ ...layerData, maxZoom }));
     }
 
     public saveLayer() {
         const layerData = {
-            ...this.layerData,
-            minZoom: +this.layerData.minZoom, // fix issue with variable saved as string...
-            maxZoom: +this.layerData.maxZoom
+            ...this.layerData(),
+            minZoom: +this.layerData().minZoom, // fix issue with variable saved as string...
+            maxZoom: +this.layerData().maxZoom
         } as LayerData;
         this.internalSave(layerData);
     }
@@ -143,7 +154,7 @@ export class LayerPropertiesDialogComponent {
             case "edit-overlay":
                 this.layersService.updateOverlay(this.backupLayer, {
                     ...layerData,
-                    id: this.layerData.id,
+                    id: this.layerData().id,
                     isEditable: true
                 });
                 break;
@@ -166,15 +177,15 @@ export class LayerPropertiesDialogComponent {
     }
 
     private async updateLayerKeyIfPossible() {
-        if (this.layerData.key) {
+        if (this.layerData().key) {
             return;
         }
         try {
-            let address = `${this.layerData.address}/?f=json`;
+            let address = `${this.layerData().address}/?f=json`;
             address = address.replace("//?f", "/?f"); // in case the address the user set ends with "/".
             const response = await firstValueFrom(this.http.get(address)) as { name: string };
             if (response && response.name) {
-                this.layerData.key = response.name;
+                this.layerData.update(layerData => ({ ...layerData, key: response.name }));
             }
         } catch {
             // ignore error
@@ -186,6 +197,6 @@ export class LayerPropertiesDialogComponent {
     }
 
     public getShareLayerAddress() {
-        return this.layersService.layerDataToAddress(this.layerData, this.isOverlay);
+        return this.layersService.layerDataToAddress(this.layerData(), this.isOverlay);
     }
 }
