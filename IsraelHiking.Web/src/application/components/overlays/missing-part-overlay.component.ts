@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, inject, input, output, signal } from "@angular/core";
+import { Component, ViewEncapsulation, inject, input, model, output, signal } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
@@ -24,7 +24,7 @@ export class MissingPartOverlayComponent {
 
     public latlng = input<LatLngAltTime>();
 
-    public feature = input<GeoJSON.Feature<GeoJSON.LineString>>();
+    public readonly feature = model<GeoJSON.Feature<GeoJSON.LineString>>();
 
     public removed = output();
 
@@ -40,7 +40,7 @@ export class MissingPartOverlayComponent {
     }
 
     public setHighwayType(highwayType: string) {
-        this.feature().properties.highway = highwayType;
+        this.feature.update(feature => ({ ...feature, properties: { ...feature.properties, highway: highwayType } }));
     }
 
     public getColor(): string {
@@ -48,10 +48,13 @@ export class MissingPartOverlayComponent {
     }
 
     public setColor(color: string) {
-        this.feature().properties.colour = color;
-        if (color === "none") {
-            delete this.feature().properties.colour;
-        }
+        this.feature.update(feature => {
+            const properties = { ...feature.properties, colour: color };
+            if (color === "none") {
+                delete properties.colour;
+            }
+            return { ...feature, properties };
+        });
     }
 
     public async addMissingPartToOsm() {

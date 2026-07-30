@@ -97,17 +97,17 @@
     } @else {
     <div class="flex flex-row">
         <div class="flex-1">
-            <a mat-button class="w-full" [href]="facebookShareAddress" [target]="'_blank'"
+            <a mat-button class="w-full" [href]="facebookShareAddress()" [target]="'_blank'"
                 matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="above" analyticsOn="click"
                 analyticsCategory="Share" analyticsLabel="Share facebook"><i class="fa icon-facebook fa-lg"></i></a>
         </div>
         <div class="flex-1">
-            <a mat-button class="w-full" [href]="whatsappShareAddress" [target]="'_blank'"
+            <a mat-button class="w-full" [href]="whatsappShareAddress()" [target]="'_blank'"
                 matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="above" analyticsOn="click"
                 analyticsCategory="Share" analyticsLabel="Share whatsapp"><i class="fa icon-whatsapp fa-lg"></i></a>
         </div>
         <div class="flex-1">
-            <button mat-button class="w-full" [cdkCopyToClipboard]="shareAddress" (click)="copiedToClipboard.set(true)"
+            <button mat-button class="w-full" [cdkCopyToClipboard]="shareAddress()" (click)="copiedToClipboard.set(true)"
                 matTooltip="{{resources.copyUrl}}" matTooltipPosition="above" analyticsOn="click"
                 analyticsCategory="Share" analyticsLabel="Share copy to clipboard">
                 <i class="fa icon-clipboard fa-lg"></i>

@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle } from "@angular/material/dialog";
 import { FormsModule } from "@angular/forms";
 import { MatFormField } from "@angular/material/form-field";
@@ -19,9 +19,9 @@ import type { Trace, TraceVisibility } from "../../models";
     imports: [MatIconButton, FormsModule, MatFormField, MatLabel, MatInput, MatOption, MatSelect, MatButton, MatDialogActions, MatDialogTitle, MatDialogContent, MatDialogClose, Dir]
 })
 export class EditTraceDialogComponent {
-    public description = "";
-    public tagsString = "";
-    public visibility: TraceVisibility = "trackable";
+    public readonly description = signal("");
+    public readonly tagsString = signal("");
+    public readonly visibility = signal<TraceVisibility>("trackable");
     public readonly title: string;
 
     public readonly resources = inject(ResourcesService);
@@ -31,17 +31,17 @@ export class EditTraceDialogComponent {
 
     constructor() {
         this.title = this.data.visibility === "local" ? this.data.name : this.data.description;
-        this.description = this.data.description;
-        this.tagsString = this.data.tagsString;
-        this.visibility = this.data.visibility;
+        this.description.set(this.data.description);
+        this.tagsString.set(this.data.tagsString);
+        this.visibility.set(this.data.visibility);
     }
 
     public async update() {
         const updatedTrace = {
             ...structuredClone(this.data),
-            tagsString: this.tagsString,
-            description: this.description,
-            visibility: this.visibility
+            tagsString: this.tagsString(),
+            description: this.description(),
+            visibility: this.visibility()
         }
         await this.tracesService.updateTrace(updatedTrace);
         this.toastService.success(this.resources.dataUpdatedSuccessfully);

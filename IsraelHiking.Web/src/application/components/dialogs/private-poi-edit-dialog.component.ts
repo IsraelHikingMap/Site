@@ -57,10 +57,10 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
     public showIcons = signal(false);
     public showCoordinates = signal(false);
     public showUrl = signal(false);
-    public title: string;
+    public readonly title = signal("");
     public markerType = signal<string>(null);
-    public description: string;
-    public readonly iconsGroups: IIconsGroup[] = [];
+    public readonly description = signal("");
+    public readonly iconsGroups: IIconsGroup[];
 
     public titleInput = viewChild<ElementRef>("titleInput");
 
@@ -99,8 +99,8 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
         this.markerIndex = this.data.index;
         this.marker = structuredClone(this.data.marker) as MarkerData;
         this.markerType.set(this.marker.type);
-        this.title = this.marker.title;
-        this.description = this.marker.description;
+        this.title.set(this.marker.title);
+        this.description.set(this.marker.description);
         this.imageLink.set(this.marker.urls.find(u => u.mimeType.startsWith("image")));
         this.url.set(this.marker.urls.find(u => !u.mimeType.startsWith("image")));
         this.showUrl.set(this.url() != null);
@@ -155,13 +155,12 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
             urls.push(this.imageLink());
         }
         if (this.url() && this.url().url) {
-            this.url().text = this.title;
-            urls.push(this.url());
+            urls.push({ ...this.url(), text: this.title() });
         }
         const updatedMarker: MarkerData = {
             id: this.marker.id,
-            title: this.title,
-            description: this.description,
+            title: this.title(),
+            description: this.description(),
             latlng: this.marker.latlng,
             type: this.markerType(),
             urls
@@ -197,21 +196,21 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
             this.toastService.warning(this.resources.loginRequired);
             return;
         }
-        if (this.title || this.description || this.imageLink()) {
+        if (this.title() || this.description() || this.imageLink()) {
             await this.privatePoiUploaderService.uploadPoint(
                 this.marker.id,
                 this.marker.latlng,
                 this.imageLink(),
-                this.title,
-                this.description,
+                this.title(),
+                this.description(),
                 this.markerType());
         } else {
             AddSimplePoiDialogComponent.openDialog(this.matDialog, {
                 id: this.marker.id,
                 latlng: this.marker.latlng,
                 imageLink: this.imageLink(),
-                title: this.title,
-                description: this.description,
+                title: this.title(),
+                description: this.description(),
                 markerType: this.markerType()
             });
         }
@@ -227,11 +226,15 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
         }
     }
 
+    public updateUrlValue(url: string) {
+        this.url.update(link => ({ ...link, url }));
+    }
+
     public addUrl() {
         this.showUrl.set(true);
         if (this.url() == null) {
             this.url.set({
-                text: this.title,
+                text: this.title(),
                 mimeType: "text/html",
                 url: ""
             });
@@ -244,7 +247,7 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
     }
 
     public async navigateHere() {
-        await this.navigateHereService.addNavigationSegment(this.marker.latlng, this.title);
+        await this.navigateHereService.addNavigationSegment(this.marker.latlng, this.title());
     }
 
     public canShareLocation() {

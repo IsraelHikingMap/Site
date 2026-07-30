@@ -1,4 +1,4 @@
-import { Component, inject, input, signal, OnInit } from "@angular/core";
+import { Component, inject, model, signal, OnInit } from "@angular/core";
 import { MatSelectChange, MatSelect } from "@angular/material/select";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
@@ -29,12 +29,12 @@ import type { EditablePublicPointData, IconColorLabel } from "../../../models";
 })
 export class PublicPointOfInterestEditComponent implements OnInit {
 
-    public info = input<EditablePublicPointData>();
+    public readonly info = model<EditablePublicPointData>();
 
     public isLoading = signal(false);
-    public categories: SelectableCategory[] = [];
-    public selectedCategory: SelectableCategory = null;
-    public updateLocation = false;
+    public readonly categories = signal<SelectableCategory[]>([]);
+    public readonly selectedCategory = signal<SelectableCategory>(null);
+    public readonly updateLocation = signal(false);
 
     public readonly resources = inject(ResourcesService);
 
@@ -43,7 +43,7 @@ export class PublicPointOfInterestEditComponent implements OnInit {
     private readonly toastService = inject(ToastService);
 
     private initializeCategories() {
-        this.categories = structuredClone(POINTS_OF_INTEREST_CATEGORIES) as SelectableCategory[];
+        this.categories.set(structuredClone(POINTS_OF_INTEREST_CATEGORIES) as SelectableCategory[]);
     }
 
     public ngOnInit() {
@@ -51,9 +51,9 @@ export class PublicPointOfInterestEditComponent implements OnInit {
         if (this.info().urls.length === 0) {
             this.addEmptyUrl();
         }
-        let selectedIcon = null;
-        let selectedCategory = null;
-        for (const category of this.categories) {
+        let selectedIcon: IconColorLabel = null;
+        let selectedCategory: SelectableCategory = null;
+        for (const category of this.categories()) {
             const icon = category.selectableItems.find(iconToFind => iconToFind.icon === this.info().icon);
             if (icon) {
                 selectedCategory = category;
@@ -63,39 +63,58 @@ export class PublicPointOfInterestEditComponent implements OnInit {
         }
 
         if (selectedCategory == null) {
-            selectedCategory = this.categories.find(categoryToFind => categoryToFind.name === "Other");
+            selectedCategory = this.categories().find(categoryToFind => categoryToFind.name === "Other");
         }
 
         if (this.isNew() && selectedIcon == null) {
             selectedIcon = selectedCategory.selectableItems[0];
         } else if (!this.isNew() && selectedIcon == null) {
             selectedIcon = { icon: this.info().icon, color: "black", label: this.resources.other } as IconColorLabel;
-            selectedCategory.selectableItems.push(selectedIcon);
+            const previousCategory = selectedCategory;
+            selectedCategory = { ...previousCategory, selectableItems: [...previousCategory.selectableItems, selectedIcon] };
+            this.categories.update(categories => categories.map(c => c === previousCategory ? selectedCategory : c));
         }
         this.selectCategory({ value: selectedCategory } as MatSelectChange);
         this.selectIcon(selectedIcon);
     }
 
     public selectCategory(e: MatSelectChange) {
-        this.categories.forEach(c => c.isSelected = false);
-        this.selectedCategory = e.value;
-        this.selectedCategory.isSelected = true;
-        if (this.selectedCategory.selectedIcon == null) {
-            this.selectIcon(this.selectedCategory.selectableItems[0]);
+        this.selectedCategory.set(e.value);
+        if (this.selectedCategory().selectedIcon == null) {
+            this.selectIcon(this.selectedCategory().selectableItems[0]);
         }
     }
 
     public selectIcon(icon: IconColorLabel) {
-        this.selectedCategory.selectedIcon = icon;
-        this.info().icon = icon.icon;
+        const previousCategory = this.selectedCategory();
+        const categoryWithIcon = { ...previousCategory, selectedIcon: icon };
+        this.categories.update(categories => categories.map(c => c === previousCategory ? categoryWithIcon : c));
+        this.selectedCategory.set(categoryWithIcon);
+        this.info.update(info => ({ ...info, icon: icon.icon }));
     }
 
     public addEmptyUrl() {
-        this.info().urls.push("");
+        this.info.update(info => ({ ...info, urls: [...info.urls, ""] }));
     }
 
     public removeUrl(i: number) {
-        this.info().urls.splice(i, 1);
+        this.info.update(info => ({ ...info, urls: info.urls.filter((_, index) => index !== i) }));
+    }
+
+    public updateTitle(title: string) {
+        this.info.update(info => ({ ...info, title }));
+    }
+
+    public updateDescription(description: string) {
+        this.info.update(info => ({ ...info, description }));
+    }
+
+    public updateImages(imagesUrls: string[]) {
+        this.info.update(info => ({ ...info, imagesUrls }));
+    }
+
+    public updateUrl(i: number, url: string) {
+        this.info.update(info => ({ ...info, urls: info.urls.map((u, index) => index === i ? url : u) }));
     }
 
     public isPoint(): boolean {
@@ -112,7 +131,7 @@ export class PublicPointOfInterestEditComponent implements OnInit {
             if (this.isNew()) {
                 await this.poiService.addComplexPoi(this.info());
             } else {
-                await this.poiService.updateComplexPoi(this.info(), this.updateLocation);
+                await this.poiService.updateComplexPoi(this.info(), this.updateLocation());
             }
             this.toastService.success(this.resources.dataUpdatedSuccessfullyItWillTakeTimeToSeeIt);
             this.close();

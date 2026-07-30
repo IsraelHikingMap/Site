@@ -2,11 +2,11 @@
   <div mat-dialog-title>
     @if (!url()) {
     <div>
-      {{title}}
+      {{title()}}
     </div>
     } @else {
     <a href="{{url().url}}" target="_blank">
-      {{title}}
+      {{title()}}
     </a>
     }
     <button mat-icon-button aria-label="Close" type="button" mat-dialog-close tabindex="-1">
@@ -19,14 +19,14 @@
         <div class="flex flex-row">
           <mat-form-field class="w-full">
             <mat-label>{{resources.title}}</mat-label>
-            <input matInput #titleInput class="w-full" type="text" [dir]="resources.getDirection(title)"
+            <input matInput #titleInput class="w-full" type="text" [dir]="resources.getDirection(title())"
               [(ngModel)]="title" />
           </mat-form-field>
         </div>
         <div class="flex flex-row">
           <mat-form-field class="w-full">
             <mat-label>{{resources.description}}</mat-label>
-            <textarea class="w-full" rows="4" maxlength="255" matInput [dir]="resources.getDirection(description)"
+            <textarea class="w-full" rows="4" maxlength="255" matInput [dir]="resources.getDirection(description())"
               [(ngModel)]="description"></textarea>
           </mat-form-field>
         </div>
@@ -75,7 +75,7 @@
     <div class="flex flex-row">
       <mat-form-field class="w-full">
         <mat-label>{{resources.aLinkToAWebsite}}</mat-label>
-        <input matInput class="w-full" type="text" dir="ltr" [(ngModel)]="url().url" />
+        <input matInput class="w-full" type="text" dir="ltr" [ngModel]="url().url" (ngModelChange)="updateUrlValue($event)" />
         <button matSuffix mat-icon-button (click)="removeUrl()"><i class="fa icon-trash"></i></button>
       </mat-form-field>
     </div>

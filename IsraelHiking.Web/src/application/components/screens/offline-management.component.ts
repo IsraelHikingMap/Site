@@ -26,7 +26,7 @@ export class OfflineManagementComponent {
     public selectedTile = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
     public inProgressTile = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
     public downloadedTiles = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
-    public readonly currentLocation: GeoJSON.FeatureCollection = { features: [], type: "FeatureCollection" };
+    public readonly currentLocation: GeoJSON.FeatureCollection;
     public readonly baseLayerData: EditableLayer;
     public selectedTileXY = signal<{ tileX: number; tileY: number }>(null);
 

@@ -50,7 +50,7 @@ export class TracesComponent implements OnInit {
 
     public showMap = signal(false);
     public sortBy = signal<"timeStamp" | "name">("timeStamp");
-    public sortDirection: "asc" | "desc" = "desc";
+    public readonly sortDirection = signal<"asc" | "desc">("desc");
     public readonly mapStyle: StyleSpecification;
     public filteredTraces = signal<Immutable<Trace[]>>([]);
     public loadingTraces = signal(false);
@@ -125,7 +125,7 @@ export class TracesComponent implements OnInit {
     }
 
     public onSortDirectionChange() {
-        this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+        this.sortDirection.set(this.sortDirection() === "asc" ? "desc" : "asc");
         this.runFilter();
     }
 
@@ -201,7 +201,7 @@ export class TracesComponent implements OnInit {
     private runFilter() {
         const searchTerm = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.searchTerm).trim();
         const traces = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces;
-        this.filteredTraces.set(orderBy(traces.filter((t) => this.findInTrace(t, searchTerm)), [this.sortBy()], [this.sortDirection]));
+        this.filteredTraces.set(orderBy(traces.filter((t) => this.findInTrace(t, searchTerm)), [this.sortBy()], [this.sortDirection()]));
         this.tracesGeoJson.set({
             type: "FeatureCollection",
             features: this.filteredTraces().map(t => ({
@@ -328,6 +328,19 @@ export class TracesComponent implements OnInit {
             features: [this.selectedFeature()]
         });
         event.stopPropagation();
+    }
+
+    public updateSelectedFeature(feature: GeoJSON.Feature<GeoJSON.LineString>) {
+        const previousFeature = this.selectedFeature();
+        this.missingParts.update(missingParts => ({
+            ...missingParts,
+            features: missingParts.features.map(f => f === previousFeature ? feature : f)
+        }));
+        this.selectedFeature.set(feature);
+        this.selectedFeatureSource.set({
+            type: "FeatureCollection",
+            features: [feature]
+        });
     }
 
     public removeMissingPart() {

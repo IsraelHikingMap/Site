@@ -52,7 +52,7 @@ export class ShareEditDialogComponent {
 
     public isLoading = signal(false);
     public readonly canUpdate: boolean;
-    public updateCurrentShare = false;
+    public readonly updateCurrentShare = signal(false);
     public readonly hasHiddenRoutes: boolean;
     public readonly style: StyleSpecification;
     public base64Preview = signal<string>(null);
@@ -93,7 +93,7 @@ export class ShareEditDialogComponent {
             this.base64Preview.set(this.shareUrl.base64Preview);
             this.canUpdate = true;
             this.shareUrl.dataContainer = this.data.dataContainer ?? this.shareUrl.dataContainer;
-            this.updateCurrentShare = true;
+            this.updateCurrentShare.set(true);
         } else {
             this.shareUrl = {
                 id: "",
@@ -151,7 +151,7 @@ export class ShareEditDialogComponent {
         this.shareUrl.title = this.shareUrl.title.trim();
         this.shareUrl.description = this.shareUrl.description.trim();
         try {
-            const shareUrl = this.updateCurrentShare
+            const shareUrl = this.updateCurrentShare()
                 ? await this.shareUrlsService.updateShareUrl(this.shareUrl)
                 : await this.shareUrlsService.createShareUrl(this.shareUrl);
 

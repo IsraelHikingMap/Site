@@ -1,6 +1,6 @@
 <div class="flex flex-row h-dvh relative" [dir]="resources.direction">
     <div class="hidden max-md:block absolute bottom-safe bg-surface left-1/2 -translate-x-1/2 z-10">
-        <mat-button-toggle-group [ngModel]="showMap()" (ngModelChange)="showMap.set($event)">
+        <mat-button-toggle-group [(ngModel)]="showMap">
             <mat-button-toggle [value]="false" analyticsOn="click" analyticsCategory="Shares"
                 analyticsLabel="Open list view">
                 <i class="fa icon-list"></i>

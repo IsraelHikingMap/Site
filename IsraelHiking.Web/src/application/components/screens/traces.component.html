@@ -1,6 +1,6 @@
 <div class="flex flex-row relative h-dvh" [dir]="resources.direction">
     <div class="hidden max-md:block absolute bottom-safe bg-surface left-1/2 -translate-x-1/2 z-10">
-        <mat-button-toggle-group [ngModel]="showMap()" (ngModelChange)="showMap.set($event)">
+        <mat-button-toggle-group [(ngModel)]="showMap">
             <mat-button-toggle [value]="false" analyticsOn="click" analyticsCategory="Traces"
                 analyticsLabel="Open list view">
                 <i class="fa icon-list"></i>
@@ -18,7 +18,7 @@
         <div class="flex flex-row sticky top-0 z-10 bg-surface">
             <mat-form-field subscriptSizing="dynamic">
                 <mat-label>{{resources.sort}}</mat-label>
-                <mat-select [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)" (selectionChange)="onSortChange()" analyticsOn="click"
+                <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()" analyticsOn="click"
                     analyticsCategory="Traces" analyticsLabel="Open sort menu">
                     <mat-option value="timeStamp" analyticsOn="click" analyticsCategory="Traces"
                         analyticsLabel="Sort by date">
@@ -154,7 +154,7 @@
             </mgl-layer>
             @if (missingCoordinates()) {
             <mgl-popup [lngLat]="missingCoordinates()" [offset]="[0, -30]" (popupClose)="clearSelection()">
-                <missing-part-overlay [feature]="selectedFeature()" [latlng]="missingCoordinates()"
+                <missing-part-overlay [feature]="selectedFeature()" (featureChange)="updateSelectedFeature($event)" [latlng]="missingCoordinates()"
                     (removed)="removeMissingPart()"></missing-part-overlay>
             </mgl-popup>
             }

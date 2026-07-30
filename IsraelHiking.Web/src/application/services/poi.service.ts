@@ -50,7 +50,6 @@ export type PoiSocialLinks = {
 };
 
 export type SelectableCategory = Category & {
-    isSelected: boolean;
     selectedIcon: IconColorLabel;
 }
 

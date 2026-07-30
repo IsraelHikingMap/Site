@@ -1,4 +1,4 @@
-import { Component, OnChanges, SimpleChanges, input, inject, output, signal } from "@angular/core";
+import { Component, OnChanges, SimpleChanges, input, inject, model, output, signal } from "@angular/core";
 import { MatAnchor, MatButton } from "@angular/material/button";
 import { Dir } from "@angular/cdk/bidi";
 import { AnimationOptions, LottieComponent } from "ngx-lottie";
@@ -24,7 +24,7 @@ export class ImageScrollerComponent implements OnChanges {
 
     private currentIndex = signal(0);
 
-    public images = input<string[]>();
+    public readonly images = model<string[]>();
     public canEdit = input<boolean>();
 
     public currentImageChanged = output<string>();
@@ -66,7 +66,8 @@ export class ImageScrollerComponent implements OnChanges {
     }
 
     public remove(): void {
-        this.images().splice(this.currentIndex(), 1);
+        const indexToRemove = this.currentIndex();
+        this.images.update(images => images.filter((_, index) => index !== indexToRemove));
         this.previous();
     }
 
@@ -82,7 +83,7 @@ export class ImageScrollerComponent implements OnChanges {
         const files = this.fileService.getFilesFromEvent(event);
         for (const file of files) {
             const data = await this.imageResizeService.resizeImage(file);
-            this.images().push(data);
+            this.images.update(images => [...images, data]);
             this.currentIndex.set(this.images().length - 1);
             this.currentImageChanged.emit(this.getCurrentValue());
         }

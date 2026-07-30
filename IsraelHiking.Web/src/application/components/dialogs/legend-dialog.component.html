@@ -5,7 +5,7 @@
     </div>
     <div mat-dialog-content>
         <mat-accordion>
-            @for (section of legendSections; track section) {
+            @for (section of legendSections(); track section) {
             <mat-expansion-panel [id]="section.key" (opened)="openSection(section)"
                 (afterExpand)="scrollTo(section.key)">
                 <mat-expansion-panel-header>

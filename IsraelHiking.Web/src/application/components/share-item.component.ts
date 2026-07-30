@@ -30,9 +30,9 @@ export class ShareItemComponent implements OnInit {
     public moveToRoute = output<void>();
 
     public copiedToClipboard = signal(false);
-    public shareAddress: string;
-    public whatsappShareAddress: string;
-    public facebookShareAddress: string;
+    public readonly shareAddress = signal<string>(null);
+    public readonly whatsappShareAddress = signal<string>(null);
+    public readonly facebookShareAddress = signal<string>(null);
 
     public readonly resources = inject(ResourcesService);
 
@@ -41,9 +41,9 @@ export class ShareItemComponent implements OnInit {
 
     public ngOnInit(): void {
         const links = this.shareUrlsService.getShareSocialLinks(this.shareUrl());
-        this.shareAddress = links.app;
-        this.whatsappShareAddress = links.whatsapp;
-        this.facebookShareAddress = links.facebook;
+        this.shareAddress.set(links.app);
+        this.whatsappShareAddress.set(links.whatsapp);
+        this.facebookShareAddress.set(links.facebook);
     }
 
     public getImageFromShareId(width: number, height: number) {
@@ -60,7 +60,7 @@ export class ShareItemComponent implements OnInit {
 
     public share() {
         Share.share({
-            url: this.shareAddress
+            url: this.shareAddress()
         });
     }
 }

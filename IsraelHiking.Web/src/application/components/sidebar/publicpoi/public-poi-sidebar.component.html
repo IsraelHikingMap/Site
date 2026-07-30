@@ -1,6 +1,6 @@
 ﻿@if (isEditMode()) {
 <div [dir]="resources.direction">
-  <public-poi-edit [info]="osmEditableInfo()"></public-poi-edit>
+  <public-poi-edit [(info)]="osmEditableInfo"></public-poi-edit>
 </div>
 } @else {
 <div [dir]="resources.direction" [class.minimized]="isMinimized()">

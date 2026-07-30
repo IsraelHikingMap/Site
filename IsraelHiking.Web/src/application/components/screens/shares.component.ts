@@ -50,8 +50,8 @@ export class SharesComponent implements OnInit {
     public selectedShareUrl = signal<Immutable<ShareUrl>>(null);
     public filteredShareUrls = signal<Immutable<ShareUrl[]>>([]);
     public routesGeoJson = signal<GeoJSON.FeatureCollection>({ type: "FeatureCollection", features: [] });
-    public sortBy: keyof ShareUrl = "lastModifiedDate";
-    public sortDirection: "asc" | "desc" = "desc";
+    public readonly sortBy = signal<keyof ShareUrl>("lastModifiedDate");
+    public readonly sortDirection = signal<"asc" | "desc">("desc");
     public readonly filter: Record<string, string[]> = {
         difficulty: ["Easy", "Moderate", "Hard", "Unknown"],
         type: ["Biking", "Hiking", "4x4", "Unknown"]
@@ -104,7 +104,7 @@ export class SharesComponent implements OnInit {
     }
 
     public onSortDirectionChange() {
-        this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+        this.sortDirection.set(this.sortDirection() === "asc" ? "desc" : "asc");
         this.runFilter();
     }
 
@@ -130,7 +130,7 @@ export class SharesComponent implements OnInit {
             return true;
         }).filter((share) => this.findInShareUrl(share, searchTerm));
 
-        let sortBy = this.sortBy;
+        let sortBy = this.sortBy();
         switch (sortBy) {
             case "length":
                 sortBy = [((share: ShareUrl) => share.length ?? 0)] as any;
@@ -145,7 +145,7 @@ export class SharesComponent implements OnInit {
                 })] as any;
                 break;
         }
-        this.filteredShareUrls.set(orderBy(filteredShareUrls, sortBy, this.sortDirection));
+        this.filteredShareUrls.set(orderBy(filteredShareUrls, sortBy, this.sortDirection()));
     }
 
 
