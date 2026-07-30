@@ -68,7 +68,7 @@ export class ToastService {
 
     public confirm(options: IConfirmOptions) {
         const componentRef = this.snackbar.openFromComponent(ConfirmDialogComponent, { panelClass: ["confirm-snackbar"]});
-        componentRef.instance.confirmMessage = options.message;
+        componentRef.instance.confirmMessage.set(options.message);
         componentRef.instance.confirmAction = () => {
             if (options.confirmAction != null) {
                 options.confirmAction();
@@ -81,27 +81,27 @@ export class ToastService {
             }
             this.snackbar.dismiss();
         };
-        componentRef.instance.hasTwoButtons = options.type !== "Ok";
+        componentRef.instance.hasTwoButtons.set(options.type !== "Ok");
         switch (options.type) {
             case "Ok":
-                componentRef.instance.confirmButtonText = this.resources.ok;
+                componentRef.instance.confirmButtonText.set(this.resources.ok);
                 break;
             case "YesNo":
-                componentRef.instance.confirmButtonText = this.resources.yes;
-                componentRef.instance.declineButtonText = this.resources.no;
+                componentRef.instance.confirmButtonText.set(this.resources.yes);
+                componentRef.instance.declineButtonText.set(this.resources.no);
                 break;
             case "OkCancel":
-                componentRef.instance.confirmButtonText = this.resources.ok;
-                componentRef.instance.declineButtonText = this.resources.cancel;
+                componentRef.instance.confirmButtonText.set(this.resources.ok);
+                componentRef.instance.declineButtonText.set(this.resources.cancel);
                 break;
             case "Custom":
-                componentRef.instance.confirmButtonText = options.customConfirmText;
-                componentRef.instance.declineButtonText = options.customDeclineText;
+                componentRef.instance.confirmButtonText.set(options.customConfirmText);
+                componentRef.instance.declineButtonText.set(options.customDeclineText);
                 break;
             default:
                 throw new Error("Invalid confirm type!");
         }
-        componentRef.instance.confirmIcon = options.confirmIcon;
-        componentRef.instance.declineIcon = options.declineIcon;
+        componentRef.instance.confirmIcon.set(options.confirmIcon);
+        componentRef.instance.declineIcon.set(options.declineIcon);
     }
 }
