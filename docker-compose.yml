@@ -72,7 +72,7 @@ services:
       - "5001:80"
     volumes:
       - ./nginx:/etc/nginx/conf.d:ro
-    restart: unless-stopped
+    restart: always
   tileserver-gl:
     image: "maptiler/tileserver-gl"
     build:

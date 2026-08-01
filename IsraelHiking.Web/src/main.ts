@@ -1,4 +1,4 @@
-import { enableProdMode, provideZoneChangeDetection } from "@angular/core";
+import { enableProdMode, provideZonelessChangeDetection } from "@angular/core";
 import { environment } from "./environments/environment";
 import {
     bootstrapApplication,
@@ -17,7 +17,7 @@ if (environment.production) {
 bootstrapApplication(AppRootComponent, {
     ...appConfig,
     providers: [
-        provideZoneChangeDetection(),
+        provideZonelessChangeDetection(),
         ...appConfig.providers,
         provideClientHydration(withEventReplay(), withNoIncrementalHydration()),
         provideMaplibreWorker("maplibre-gl-worker.mjs")

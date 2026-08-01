@@ -28,7 +28,7 @@ import { provideRouter } from "@angular/router";
 import { DragDropModule } from "@angular/cdk/drag-drop";
 import { NgxMapLibreGLModule } from "@maplibre/ngx-maplibre-gl";
 import { provideNgIdle } from "@ng-idle/core";
-import { NgxsModule } from "@ngxs/store";
+import { NgxsModule, withNgxsNoopExecutionStrategy } from "@ngxs/store";
 import { InfiniteScrollDirective } from "ngx-infinite-scroll";
 import { progressInterceptor } from "ngx-progressbar/http";
 import { provideLottieOptions } from "ngx-lottie";
@@ -167,6 +167,9 @@ export const appConfig: ApplicationConfig = {
                 PaywallReducer
             ])
         ),
+        // The default strategy re-enters NgZone for every select/dispatch callback, which is
+        // pointless (and an extra hop) now that change detection is zoneless.
+        withNgxsNoopExecutionStrategy(),
         AuthorizationService,
         GetTextCatalogService,
         MapService,
