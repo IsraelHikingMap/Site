@@ -27,6 +27,12 @@ export type FormatViewModel = {
     extension: string;
 };
 
+export type HTMLElementInputChangeEvent = {
+    dataTransfer: { files: File[] };
+    target: any;
+    preventDefault(): void;
+};
+
 @Injectable()
 export class FileService {
 
@@ -73,8 +79,8 @@ export class FileService {
         }
     ];
 
-    public getFilesFromEvent(e: Event | DragEvent): File[] {
-        let files: FileList | null | undefined;
+    public getFilesFromEvent(e: Event | DragEvent | HTMLElementInputChangeEvent): File[] {
+        let files: File[] | FileList | null | undefined;
 
         if ("dataTransfer" in e && e.dataTransfer) {
             files = e.dataTransfer.files;

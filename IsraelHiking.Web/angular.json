@@ -58,19 +58,13 @@
             },
             "scripts": [],
             "allowedCommonJsDependencies": [
-              "photoswipe",
               "lottie-web",
-              "maplibre-gl",
-              "@mapbox/vector-tile",
-              "pbf",
               "linear-interpolator",
               "deepmerge",
               "xml-beautify",
-              "d3-regression",
               "platform",
-              "osm2geojson-lite",
               "piexif-ts",
-              "isomorphic-xml2js"
+              "rbush"
             ],
             "extractLicenses": false,
             "sourceMap": true,

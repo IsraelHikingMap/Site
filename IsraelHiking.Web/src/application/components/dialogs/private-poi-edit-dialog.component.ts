@@ -18,7 +18,7 @@ import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
 import { ImageCaptureDirective } from "../../directives/image-capture.directive";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
-import { FileService } from "../../services/file.service";
+import { FileService, HTMLElementInputChangeEvent } from "../../services/file.service";
 import { ImageResizeService } from "../../services/image-resize.service";
 import { NavigateHereService } from "../../services/navigate-here.service";
 import { RunningContextService } from "../../services/running-context.service";
@@ -173,11 +173,11 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
         }
     }
 
-    public onFileInputChanged(event: any) {
+    public onFileInputChanged(event: Event | HTMLElementInputChangeEvent) {
         this.onFileDrop(event);
     }
 
-    public async onFileDrop(event: DragEvent) {
+    public async onFileDrop(event: DragEvent | Event | HTMLElementInputChangeEvent) {
         event.preventDefault();
         const files = this.fileService.getFilesFromEvent(event);
         if (files.length !== 1) {

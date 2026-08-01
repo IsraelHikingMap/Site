@@ -1,15 +1,10 @@
 import { Directive, output, ElementRef, Renderer2, OnDestroy, NgZone, inject } from "@angular/core";
-import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { Camera, MediaTypeSelection } from "@capacitor/camera";
 
 import { environment } from "../../environments/environment";
-import { FileService } from "../services/file.service";
+import { FileService, HTMLElementInputChangeEvent } from "../services/file.service";
 import { ResourcesService } from "../services/resources.service";
 import { ToastService } from "../services/toast.service";
-
-interface HTMLElementInputChangeEvent {
-    dataTransfer: { files: File[] };
-    target: any;
-}
 
 @Directive({ selector: "[imageCapture]" })
 export class ImageCaptureDirective implements OnDestroy {
@@ -47,22 +42,21 @@ export class ImageCaptureDirective implements OnDestroy {
     }
 
     private async getPictureFromCamera() {
-        const data = await Camera.getPhoto({
-            correctOrientation: true,
-            resultType: CameraResultType.DataUrl,
-            source: CameraSource.Camera
+        const media = await Camera.takePhoto({
+            correctOrientation: true
         });
-        const blob = await fetch(data.dataUrl).then(r => r.blob()) as File;
-        this.raiseChangedEvent([blob]);
+        this.raiseChangedEvent([await this.fileService.getFileFromUrl(media.uri)]);
     }
 
     private async getPicturesFromGallery() {
-        const response = await Camera.pickImages({
-            correctOrientation: true
+        const response = await Camera.chooseFromGallery({
+            correctOrientation: true,
+            mediaType: MediaTypeSelection.Photo,
+            allowMultipleSelection: true
         });
         const files = [];
-        for (const photo of response.photos) {
-            files.push(await this.fileService.getFileFromUrl(photo.path));
+        for (const media of response.results) {
+            files.push(await this.fileService.getFileFromUrl(media.uri));
         }
         this.raiseChangedEvent(files);
     }
@@ -70,7 +64,8 @@ export class ImageCaptureDirective implements OnDestroy {
     private raiseChangedEvent(files: File[]) {
         const changeEvent = {
             dataTransfer: { files },
-            target: {}
+            target: {},
+            preventDefault: () => { },
         };
         this.ngZone.run(() => this.changed.emit(changeEvent));
     }

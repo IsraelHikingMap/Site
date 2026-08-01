@@ -7,7 +7,7 @@ import { ImageAttributionComponent } from "../../image-attribution.component";
 import { ImageCaptureDirective } from "../../../directives/image-capture.directive";
 import { AnalyticsDirective } from "../../../directives/analytics.directive";
 import { ResourcesService } from "../../../services/resources.service";
-import { FileService } from "../../../services/file.service";
+import { FileService, HTMLElementInputChangeEvent } from "../../../services/file.service";
 import { ImageGalleryService } from "../../../services/image-gallery.service";
 import { ImageResizeService } from "../../../services/image-resize.service";
 import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.json";
@@ -76,11 +76,11 @@ export class ImageScrollerComponent implements OnChanges {
         this.previous();
     }
 
-    public onFileInputChanged(event: any) {
+    public onFileInputChanged(event: Event | HTMLElementInputChangeEvent) {
         this.onFileDrop(event);
     }
 
-    public async onFileDrop(event: Event | InputEvent | DragEvent) {
+    public async onFileDrop(event: DragEvent | Event | HTMLElementInputChangeEvent) {
         event.preventDefault();
         if (this.canEdit() === false) {
             return;
