@@ -27,9 +27,14 @@ export type FormatViewModel = {
     extension: string;
 };
 
+/**
+ * A synthetic stand-in for a file `<input>` change / drop event, used when files are
+ * obtained outside the DOM (e.g. from the native camera). `target` is null because
+ * there is no input element to read files from or to reset afterwards.
+ */
 export type HTMLElementInputChangeEvent = {
     dataTransfer: { files: File[] };
-    target: any;
+    target: HTMLInputElement | null;
     preventDefault(): void;
 };
 

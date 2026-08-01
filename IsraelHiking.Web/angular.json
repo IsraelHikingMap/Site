@@ -64,6 +64,7 @@
               "xml-beautify",
               "platform",
               "piexif-ts",
+              "isomorphic-xml2js",
               "rbush"
             ],
             "extractLicenses": false,
