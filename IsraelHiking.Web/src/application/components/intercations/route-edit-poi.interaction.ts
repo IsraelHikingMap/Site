@@ -1,8 +1,8 @@
 import { inject, Injectable, NgZone } from "@angular/core";
-import { MapMouseEvent, Map } from "maplibre-gl";
 import { MatDialog } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
+import type { MapMouseEvent, Map } from "maplibre-gl";
 
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";

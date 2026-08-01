@@ -3,7 +3,6 @@ import { HttpClient, HttpResponse } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { firstValueFrom } from "rxjs";
 import { debounceTime, timeout } from "rxjs/operators";
-import { addProtocol } from "maplibre-gl";
 import Dexie from "dexie";
 import deepmerge from "deepmerge";
 
@@ -79,7 +78,7 @@ export class DatabaseService {
             this.store.reset(initialState);
             return;
         }
-        this.initCustomTileLoadFunction();
+        await this.initCustomTileLoadFunction();
         let storedState = initialState;
         const dbState = await this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).get(DatabaseService.STATE_DOC_ID);
         if (dbState != null) {
@@ -104,7 +103,8 @@ export class DatabaseService {
         })
     }
 
-    private initCustomTileLoadFunction() {
+    private async initCustomTileLoadFunction() {
+        const { addProtocol } = await import("maplibre-gl");
         addProtocol("custom", async (params, _abortController) => {
             const data = await this.pmTilesService.getTileByUrl(params.url);
             return { data };

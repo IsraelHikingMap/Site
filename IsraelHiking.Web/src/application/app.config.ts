@@ -2,7 +2,6 @@ import { provideAppInitializer, ErrorHandler, importProvidersFrom, inject, Appli
 import { provideHttpClient, withFetch, withInterceptors } from "@angular/common/http";
 import { Title, BrowserModule } from "@angular/platform-browser";
 import { provideRouter } from "@angular/router";
-import { NgxMapLibreGLModule } from "@maplibre/ngx-maplibre-gl";
 import { provideNgIdle } from "@ng-idle/core";
 import { NgxsModule, withNgxsNoopExecutionStrategy } from "@ngxs/store";
 import { progressInterceptor } from "ngx-progressbar/http";
@@ -97,7 +96,6 @@ export const appConfig: ApplicationConfig = {
         }),
         importProvidersFrom(
             BrowserModule,
-            NgxMapLibreGLModule,
             NgxsModule.forRoot([
                 ConfigurationReducer,
                 LocationReducer,

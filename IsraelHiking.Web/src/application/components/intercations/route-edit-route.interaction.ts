@@ -1,7 +1,7 @@
 import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
-import { MapMouseEvent, Map, GeoJSONSource, type Point } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
+import type { MapMouseEvent, Map, GeoJSONSource, Point } from "maplibre-gl";
 import type { Immutable } from "immer";
 
 import { SEGMENT, SEGMENT_POINT, SelectedRouteService } from "../../services/selected-route.service";
