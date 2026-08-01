@@ -37,7 +37,6 @@ import { PoiProperties } from "../../services/osm-tags.service";
 import { RouteStrings } from "../../services/hash.service";
 import { Urls } from "../../urls";
 import type { ApplicationState } from "../../models";
-import sceneryPlaceholder from "../../../content/lottie/placeholder-scenery.json";
 
 @Component({
     selector: "public-routes",
@@ -47,7 +46,7 @@ import sceneryPlaceholder from "../../../content/lottie/placeholder-scenery.json
 })
 export class PublicRoutesComponent {
     public readonly lottieScenery: AnimationOptions = {
-        animationData: sceneryPlaceholder
+        path: "content/lottie/placeholder-scenery.json"
     };
     public readonly mapStyle: StyleSpecification;
     public showMap = signal(true);

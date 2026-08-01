@@ -10,7 +10,6 @@ import { ResourcesService } from "../../../services/resources.service";
 import { FileService, HTMLElementInputChangeEvent } from "../../../services/file.service";
 import { ImageGalleryService } from "../../../services/image-gallery.service";
 import { ImageResizeService } from "../../../services/image-resize.service";
-import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.json";
 
 @Component({
     selector: "image-scroller",
@@ -19,7 +18,7 @@ import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.j
 })
 export class ImageScrollerComponent implements OnChanges {
     public readonly lottiePOI: AnimationOptions = {
-        animationData: sceneryPlaceholder
+        path: "content/lottie/placeholder-scenery.json"
     };
 
     private currentIndex = signal(0);

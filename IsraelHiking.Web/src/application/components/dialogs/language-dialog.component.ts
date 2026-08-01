@@ -13,7 +13,6 @@ import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { AVAILABLE_LANGUAGES } from "../../reducers/initial-state";
 import { ApplicationState, LanguageCode } from "../../models";
-import languageAnimationData from "../../../content/lottie/dialog-language.json";
 
 @Component({
     selector: "language-dialog",
@@ -23,7 +22,7 @@ import languageAnimationData from "../../../content/lottie/dialog-language.json"
 export class LanguageDialogComponent {
     public readonly selectedLanguageCode = signal<LanguageCode>(null);
     public readonly availableLanguages = AVAILABLE_LANGUAGES;
-    readonly lottieLanguage: AnimationOptions = { animationData: languageAnimationData };
+    readonly lottieLanguage: AnimationOptions = { path: "content/lottie/dialog-language.json" };
 
     public readonly resources = inject(ResourcesService);
 

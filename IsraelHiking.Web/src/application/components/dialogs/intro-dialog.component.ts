@@ -18,10 +18,6 @@ import { SelectBaseLayerAction } from "../../reducers/layers.reducer";
 import { SetRoutingTypeAction } from "../../reducers/route-editing.reducer";
 import type { ActivityType } from "../../models";
 
-import languageAnimationData from "../../../content/lottie/dialog-language.json";
-import mapsAnimationData from "../../../content/lottie/dialog-maps.json";
-import planAnimationData from "../../../content/lottie/dialog-plan.json";
-import moreAnimationData from "../../../content/lottie/dialog-more.json";
 
 @Component({
     selector: "intro-dialog",
@@ -31,10 +27,10 @@ import moreAnimationData from "../../../content/lottie/dialog-more.json";
 })
 export class IntroDialogComponent {
 
-    public readonly lottieLanguage: AnimationOptions = { animationData: languageAnimationData };
-    public readonly lottieMaps: AnimationOptions = { animationData: mapsAnimationData };
-    public readonly lottiePlan: AnimationOptions = { animationData: planAnimationData };
-    public readonly lottieMore: AnimationOptions = { animationData: moreAnimationData };
+    public readonly lottieLanguage: AnimationOptions = { path: "content/lottie/dialog-language.json" };
+    public readonly lottieMaps: AnimationOptions = { path: "content/lottie/dialog-maps.json" };
+    public readonly lottiePlan: AnimationOptions = { path: "content/lottie/dialog-plan.json" };
+    public readonly lottieMore: AnimationOptions = { path: "content/lottie/dialog-more.json" };
 
     public activityType = signal<ActivityType>("Hiking");
     public step = signal(0);

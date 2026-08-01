@@ -34,7 +34,6 @@ import { progressInterceptor } from "ngx-progressbar/http";
 import { provideLottieOptions } from "ngx-lottie";
 import { saveAs } from "file-saver-es";
 import { provideMarkdown } from "ngx-markdown";
-import player from "lottie-web";
 // Services
 import { AuthorizationService } from "./services/authorization.service";
 import { osmTokenInterceptor } from "./services/osm-token.interceptor";
@@ -239,7 +238,7 @@ export const appConfig: ApplicationConfig = {
         ),
         provideNgIdle(),
         provideRouter(routes),
-        provideLottieOptions({ player: () => player }),
+        provideLottieOptions({ player: () => import("lottie-web") }),
         provideMarkdown()
     ]
 }
