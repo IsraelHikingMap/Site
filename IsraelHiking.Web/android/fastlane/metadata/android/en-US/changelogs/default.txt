@@ -1,4 +1,2 @@
-- Add support for Android Auto with dynamic contours 
-- Add private POIs support to Android Auto
-- Add support for dark theme
+- Improve perfromance and update dependencies
 - Various bug fixes and performance improvements
