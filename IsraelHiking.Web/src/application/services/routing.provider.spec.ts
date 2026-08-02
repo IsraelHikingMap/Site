@@ -271,7 +271,7 @@ describe("RoutingProvider", () => {
         )
     );
 
-    it("Should return a route when getting error response from server and offline is available only through one line",
+    it("Should return a route when getting error response from server and offline is available only through one line for IHM schema",
         inject([RoutingProvider, HttpTestingController, PmTilesService],
             async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
                 const featureCollection = {
@@ -308,7 +308,56 @@ describe("RoutingProvider", () => {
                     ]
                 } as GeoJSON.FeatureCollection;
 
-                db.isOfflineFileAvailable = () => Promise.resolve(true);
+                db.isOfflineFileAvailable = (_z, _x, _y, type) => Promise.resolve(type === "IHM-schema");
+                db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
+
+                const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike");
+
+                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+                const data = await promise;
+                expect(data.length).toBe(3);
+            }
+        )
+    );
+
+    it("Should return a route when getting error response from server and offline is available only through one line for mapeak schema",
+        inject([RoutingProvider, HttpTestingController, PmTilesService],
+            async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
+                const featureCollection = {
+                    type: "FeatureCollection",
+                    features: [
+                        {
+                            type: "Feature",
+                            geometry: {
+                                type: "LineString",
+                                coordinates: [
+                                    [35.0001, 32.0001],
+                                    [35.0001, 32.0002],
+                                    [35.0001, 32.0003]
+                                ]
+                            },
+                            properties: {
+                                hike_class: "track"
+                            }
+                        },
+                        {
+                            type: "Feature",
+                            geometry: {
+                                type: "LineString",
+                                coordinates: [
+                                    [35.0001, 32.0003],
+                                    [35.0002, 32.0003],
+                                    [35.0003, 32.0003]
+                                ]
+                            },
+                            properties: {
+                                hike_class: "steps"
+                            }
+                        }
+                    ]
+                } as GeoJSON.FeatureCollection;
+
+                db.isOfflineFileAvailable = (_z, _x, _y, type) => Promise.resolve(type === "mapeak-schema");
                 db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
                 const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike");
