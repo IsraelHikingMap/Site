@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable, inject } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { firstValueFrom } from "rxjs";
 
 export type NakebMarker = {
@@ -28,7 +28,7 @@ export type NakebItem = {
     markers: NakebMarker[];
 }
 
-@Injectable()
+@Service()
 export class NakebService {
     private readonly NAKEB_BASE_ADDRESS = "https://www.nakeb.co.il/api/hikes";
     private readonly NAKEB_LOGO = "https://www.nakeb.co.il/static/images/hikes/logo_1000x667.jpg";

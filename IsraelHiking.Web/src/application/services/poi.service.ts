@@ -1,4 +1,4 @@
-import { Injectable, inject } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { cloneDeep } from "lodash-es";
 import { firstValueFrom } from "rxjs";
@@ -53,7 +53,7 @@ export type SelectableCategory = Category & {
     selectedIcon: IconColorLabel;
 }
 
-@Injectable()
+@Service()
 export class PoiService {
     private poisCache: GeoJSON.Feature[] = [];
     private queueIsProcessing = false;

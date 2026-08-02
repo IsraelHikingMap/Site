@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter, inject } from "@angular/core";
+import { EventEmitter, inject, Service } from "@angular/core";
 import { App } from "@capacitor/app";
 import { Store } from "@ngxs/store";
 import { CapgoCompass } from "@capgo/capacitor-compass";
@@ -7,7 +7,7 @@ import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import type { ApplicationState } from "../models";
 
-@Injectable()
+@Service()
 export class DeviceOrientationService {
     public readonly orientationChanged = new EventEmitter<number>();
 

@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { Directory, Filesystem } from "@capacitor/filesystem";
 import { Source, RangeResponse, PMTiles } from "pmtiles";
 import { Store } from "@ngxs/store";
@@ -28,7 +28,7 @@ class CapacitorSource implements Source {
     getKey() { return this.path }
 }
 
-@Injectable()
+@Service()
 export class PmTilesService {
 
     private readonly sourcesCache = new Map<string, CapacitorSource>;

@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { Idle, DEFAULT_INTERRUPTSOURCES } from "@ng-idle/core";
 import { TextZoom } from "@capacitor/text-zoom";
 import { KeepAwake } from "@capacitor-community/keep-awake";
@@ -11,7 +11,7 @@ import { LoggingService } from "./logging.service";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
 import type { ApplicationState } from "../models";
 
-@Injectable()
+@Service()
 export class ScreenService {
     private originalBrightness: number;
 

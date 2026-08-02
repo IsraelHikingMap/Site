@@ -1,4 +1,4 @@
-import { EventEmitter, inject, Injectable, computed } from "@angular/core";
+import { EventEmitter, inject, computed, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 
 import { GeoLocationService } from "./geo-location.service";
@@ -16,7 +16,7 @@ export type LocationWithBearing = {
     accuracy: number;
 };
 
-@Injectable()
+@Service()
 export class LocationService {
 
     public readonly changed = new EventEmitter<LocationWithBearing | null>();

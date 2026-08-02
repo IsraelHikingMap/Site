@@ -1,4 +1,4 @@
-import { inject, Injectable, InjectionToken } from "@angular/core";
+import { inject, InjectionToken, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
@@ -38,7 +38,7 @@ export type HTMLElementInputChangeEvent = {
     preventDefault(): void;
 };
 
-@Injectable()
+@Service()
 export class FileService {
 
     private readonly httpClient = inject(HttpClient);

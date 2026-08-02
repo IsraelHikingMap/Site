@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
@@ -13,7 +13,7 @@ import type { ApplicationState, SearchResultsPointOfInterest } from "../models";
 const PREFIX_RANK = 0;
 const FULL_RANK = 1;
 
-@Injectable()
+@Service()
 export class SearchResultsProvider {
 
     private readonly httpClient = inject(HttpClient);

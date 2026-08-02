@@ -1,10 +1,10 @@
-import { inject, Injectable, computed } from "@angular/core";
+import { inject, computed, Service } from "@angular/core";
 import { Urls } from "../urls";
 import { Store } from "@ngxs/store";
 
 import type { ApplicationState } from "../models";
 
-@Injectable()
+@Service()
 export class OsmAddressesService {
 
     private readonly store = inject(Store);

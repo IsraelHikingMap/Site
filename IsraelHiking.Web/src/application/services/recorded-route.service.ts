@@ -1,4 +1,4 @@
-import { inject, Injectable, computed } from "@angular/core";
+import { inject, computed, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
@@ -18,7 +18,7 @@ import { AddRouteAction } from "../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import type { TraceVisibility, DataContainer, ApplicationState, RouteData, LatLngAltTime, RecordedRoute, MarkerData } from "../models";
 
-@Injectable()
+@Service()
 export class RecordedRouteService {
     private static readonly MAX_SPPED = 55; // meters / seconds =~ 200 Km/hs
     private static readonly MIN_ACCURACY = 100; // meters
