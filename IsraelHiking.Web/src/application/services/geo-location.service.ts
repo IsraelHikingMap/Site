@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
+import { EventEmitter, NgZone, inject, Service } from "@angular/core";
 import { BackgroundGeolocation, Location, CallbackError } from "@capgo/background-geolocation";
 import { App } from "@capacitor/app";
 import { Store } from "@ngxs/store";
@@ -12,7 +12,7 @@ import { SpatialService } from "./spatial.service";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models";
 
-@Injectable()
+@Service()
 export class GeoLocationService {
     private isBackground = false;
     private wasInitialized = false;

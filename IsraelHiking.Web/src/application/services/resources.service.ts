@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from "@angular/core";
+import { inject, signal, Service } from "@angular/core";
 import { Direction } from "@angular/cdk/bidi";
 import { Store } from "@ngxs/store";
 
@@ -8,7 +8,7 @@ import { AVAILABLE_LANGUAGES } from "../reducers/initial-state";
 import { Urls } from "../urls";
 import type { ApplicationState, Language, LanguageCode } from "../models";
 
-@Injectable()
+@Service()
 export class ResourcesService {
 
     private readonly gettextCatalog = inject(GetTextCatalogService);

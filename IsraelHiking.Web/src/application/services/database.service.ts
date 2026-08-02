@@ -1,4 +1,4 @@
-import { inject, Injectable, NgZone } from "@angular/core";
+import { inject, NgZone, Service } from "@angular/core";
 import { HttpClient, HttpResponse } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { firstValueFrom } from "rxjs";
@@ -21,7 +21,7 @@ export type ImageUrlAndData = {
     data: string;
 };
 
-@Injectable()
+@Service()
 export class DatabaseService {
     private static readonly STATE_DB_NAME = "State";
     private static readonly STATE_TABLE_NAME = "state";

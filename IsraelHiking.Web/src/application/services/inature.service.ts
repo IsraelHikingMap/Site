@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { firstValueFrom, timeout } from "rxjs";
 
 import { GeoJSONUtils } from "./geojson-utils";
@@ -18,7 +18,7 @@ type INatureRsponse = {
     };
 }
 
-@Injectable()
+@Service()
 export class INatureService {
     private readonly API_URL = "https://inature.info/w/api.php";
     private readonly TIMEOUT = 3000;

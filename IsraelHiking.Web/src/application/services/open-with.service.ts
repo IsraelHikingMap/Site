@@ -1,4 +1,4 @@
-import { inject, Injectable, NgZone } from "@angular/core";
+import { inject, NgZone, Service } from "@angular/core";
 import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { App } from "@capacitor/app";
@@ -11,7 +11,7 @@ import { LoggingService } from "./logging.service";
 import { getIdFromLatLng, RouteStrings } from "./hash.service";
 import { SpatialService } from "./spatial.service";
 
-@Injectable()
+@Service()
 export class OpenWithService {
     private readonly resources = inject(ResourcesService);
     private readonly runningContextService = inject(RunningContextService);

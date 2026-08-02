@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
@@ -16,7 +16,7 @@ import { SetFileUrlAndBaseLayerAction } from "../reducers/in-memory.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import type { DataContainer, ApplicationState, LayerData, RouteData, RouteDataWithoutState } from "../models";
 
-@Injectable()
+@Service()
 export class DataContainerService {
 
     private readonly shareUrlsService = inject(ShareUrlsService);

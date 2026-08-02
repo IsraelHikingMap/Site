@@ -1,6 +1,6 @@
-import { Injectable } from "@angular/core";
+import { Service } from "@angular/core";
 
-@Injectable()
+@Service()
 export class CancelableTimeoutService {
     private readonly idForName = new Map<string, ReturnType<typeof setTimeout>>;
 

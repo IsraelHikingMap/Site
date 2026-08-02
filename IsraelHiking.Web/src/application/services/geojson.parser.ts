@@ -1,9 +1,9 @@
-import { Injectable } from "@angular/core";
+import { Service } from "@angular/core";
 
 import { SpatialService } from "./spatial.service";
 import type { LatLngAltTime } from "../models";
 
-@Injectable()
+@Service()
 export class GeoJsonParser {
     public toRoutes(feature: GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString>, language?: string): { latlngs: LatLngAltTime[]; name: string }[] {
         const name = this.getPropertyValue(feature.properties, "name", language);

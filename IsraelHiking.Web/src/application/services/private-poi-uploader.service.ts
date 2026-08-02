@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { Router } from "@angular/router";
 import { flatten } from "lodash-es";
 import { Store } from "@ngxs/store";
@@ -12,7 +12,7 @@ import { SetUploadMarkerDataAction } from "../reducers/poi.reducer";
 import { POINTS_OF_INTEREST_CATEGORIES } from "../reducers/initial-state";
 import type { LinkData, LatLngAltTime, MarkerData } from "../models";
 
-@Injectable()
+@Service()
 export class PrivatePoiUploaderService {
 
     private readonly router = inject(Router);

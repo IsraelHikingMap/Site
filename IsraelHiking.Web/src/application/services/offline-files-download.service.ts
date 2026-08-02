@@ -1,4 +1,4 @@
-import { EventEmitter, inject, Injectable } from "@angular/core";
+import { EventEmitter, inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { timeout } from "rxjs/operators";
@@ -19,7 +19,7 @@ import { RouteStrings } from "./hash.service";
 import { DeleteOfflineMapsTileAction, SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
 import type { ApplicationState, FileNameDateVersion, TileMetadataPerFile } from "../models";
 
-@Injectable()
+@Service()
 export class OfflineFilesDownloadService {
     private readonly resources = inject(ResourcesService);
     private readonly fileService = inject(FileService);
