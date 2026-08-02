@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Service } from "@angular/core";
 import { minBy, maxBy, flatten, last, escape } from "lodash-es";
 import { parseString, Builder } from "isomorphic-xml2js";
 import { encode } from "base64-arraybuffer";
@@ -76,7 +76,7 @@ type Gpx = {
     $: { version: string; creator: string; xmlns: string };
 }
 
-@Injectable()
+@Service()
 export class GpxDataContainerConverterService {
     public static getSegmentsFromLatlngs(latlngs: Immutable<LatLngAltTime[]>, routingType: RoutingType): RouteSegmentData[] {
         const segments = [];

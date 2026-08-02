@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { timeout } from "rxjs/operators";
@@ -23,7 +23,7 @@ interface IShareUrlSocialLinks {
     app: string;
 }
 
-@Injectable()
+@Service()
 export class ShareUrlsService {
     private syncing = false;
 

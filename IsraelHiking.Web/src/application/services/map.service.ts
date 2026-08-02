@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import type { ErrorEvent, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, SourceSpecification } from "maplibre-gl";
 
@@ -12,7 +12,7 @@ import { OverpassTurboService } from "./overpass-turbo.service";
 import { SetLocationAction } from "../reducers/location.reducer";
 import type { ApplicationState, Bounds, LatLngAltTime } from "../models";
 
-@Injectable()
+@Service()
 export class MapService {
     private static readonly NOT_FOLLOWING_TIMEOUT = 20000;
     private resolve: (value?: void | PromiseLike<void>) => void;

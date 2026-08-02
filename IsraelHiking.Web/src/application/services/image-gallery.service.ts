@@ -1,11 +1,11 @@
-import { inject, Injectable, Injector } from "@angular/core";
+import { inject, Injector, Service } from "@angular/core";
 import { Overlay, OverlayRef } from "@angular/cdk/overlay";
 import { ComponentPortal } from "@angular/cdk/portal";
 
 import { PhotoSwpieComponent, PHOTO_SWIPE_DATA } from "../components/photoswipe.component";
 import { ResourcesService } from "./resources.service";
 
-@Injectable()
+@Service()
 export class ImageGalleryService {
     private overlayRef: OverlayRef = null;
 

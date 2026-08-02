@@ -1,11 +1,11 @@
-import { Injectable } from "@angular/core";
+import { Service } from "@angular/core";
 import { load, dump, insert, GPSHelper, TagValues, type IExif } from "piexif-ts";
 import { encode } from "base64-arraybuffer";
 import { v4 as uuidv4 } from "uuid";
 
 import type { LatLngAltTime, DataContainer, RouteSegmentData, MarkerData, RouteData } from "../models";
 
-@Injectable()
+@Service()
 export class ImageResizeService {
     public static readonly JPEG = "image/jpeg";
 

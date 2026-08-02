@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
+import { EventEmitter, NgZone, inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
 import type { MapMouseEvent, Map, GeoJSONSource, Point } from "maplibre-gl";
@@ -23,7 +23,7 @@ const DRAG_PIXEL_TOLERANCE = 3;
 
 declare type EditMouseState = "none" | "down" | "dragging" | "canceled";
 
-@Injectable()
+@Service()
 export class RouteEditRouteInteraction {
 
     public readonly onRoutePointClick = new EventEmitter<number>();

@@ -1,8 +1,8 @@
-import { afterNextRender, DOCUMENT, inject, Injectable, Injector, NgZone, RendererFactory2 } from "@angular/core";
+import { afterNextRender, DOCUMENT, inject, Injector, NgZone, RendererFactory2, Service } from "@angular/core";
 
 declare let gtag: (event: string, action: string, params: { event_category: string }) => void;
 
-@Injectable()
+@Service()
 export class AnalyticsService {
     private readonly document = inject(DOCUMENT);
     private readonly rendererFactory = inject(RendererFactory2);

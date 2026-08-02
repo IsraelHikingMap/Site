@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { ResourcesService } from "./resources.service";
 import { ConfirmDialogComponent, ConfirmType } from "../components/dialogs/confirm-dialog.component";
@@ -15,7 +15,7 @@ export interface IConfirmOptions {
     declineIcon?: string;
 }
 
-@Injectable()
+@Service()
 export class ToastService {
     private static readonly DURATION = 6000;
 

@@ -1,10 +1,10 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 
 import { FileService } from "./file.service";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 
-@Injectable()
+@Service()
 export class DragAndDropService {
 
     private readonly resources = inject(ResourcesService);

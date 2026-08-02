@@ -1,4 +1,4 @@
-import { inject, Injectable, NgZone } from "@angular/core";
+import { inject, NgZone, Service } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
@@ -13,7 +13,7 @@ import { AddPrivatePoiAction, UpdatePrivatePoiAction } from "../../reducers/rout
 import { AddRecordingPoiAction, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
 import type { ApplicationState, MarkerData, LatLngAltTime } from "../../models";
 
-@Injectable()
+@Service()
 export class RouteEditPoiInteraction {
 
     private readonly matDialog = inject(MatDialog);

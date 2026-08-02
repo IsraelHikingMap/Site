@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Service } from "@angular/core";
 import Proj from "proj4";
 
 import { LatLngAltTime, NorthEast } from "../models";
@@ -13,7 +13,7 @@ const ANY_DEGREES_REGEX_STRING = "([\\d\\.°" + MINUTES_SYMBOLS_STRING + SECONDS
 const NORTH_SOUTH_REGEX_STRING = ANY_DEGREES_REGEX_STRING + "([NS])";
 const EAST_WEST_REGEX_STRING = ANY_DEGREES_REGEX_STRING + "([EW])";
 
-@Injectable()
+@Service()
 export class CoordinatesService {
     static readonly ITM_WKT = "PROJCS[\"ITM\", GEOGCS[\"ITM\", DATUM[\"Isreal 1993\", SPHEROID[\"GRS 1980\", 6378137, 298.257222101, " +
         "AUTHORITY[\"EPSG\", \"7019\"]], TOWGS84[-24.0024, -17.1032, -17.8444, -0.33077, -1.85269, 1.66969, 5.4248]], " +

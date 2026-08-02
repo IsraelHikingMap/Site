@@ -1,9 +1,9 @@
-import { Injectable } from "@angular/core";
+import { Service } from "@angular/core";
 import { Capacitor } from "@capacitor/core";
 
 import { environment } from "../../environments/environment";
 
-@Injectable()
+@Service()
 export class RunningContextService {
     public readonly isMobile: boolean;
     public readonly isIFrame = typeof window !== "undefined" && window.self !== window.top;
