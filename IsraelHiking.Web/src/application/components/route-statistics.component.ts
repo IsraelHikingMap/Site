@@ -72,39 +72,39 @@ export class RouteStatisticsComponent implements OnInit {
     private static readonly HOVER_BOX_WIDTH = 110;
     private static readonly MAX_SLOPE = 20;
 
-    public length = signal(0);
-    public gain = signal(0);
-    public loss = signal(0);
-    public duration = signal("--:--");
-    public durationUnits = signal("");
-    public averageSpeed = signal<number | null>(null);
-    public currentSpeed = signal<number | null>(null);
-    public speedUnitString = signal("");
-    public remainingDistance = signal(0);
-    public traveledDistance = signal(0);
-    public ETA = signal("--:--");
-    public isKmMarkersOn = signal(false);
-    public isSlopeOn = signal(false);
-    public isExpanded = signal(false);
-    public isTable = signal(false);
-    public isOpen = signal(false);
-    public isFollowing = signal(false);
-    public kmMarkersSource = signal<GeoJSON.FeatureCollection<GeoJSON.Point>>({
+    public readonly length = signal(0);
+    public readonly gain = signal(0);
+    public readonly loss = signal(0);
+    public readonly duration = signal("--:--");
+    public readonly durationUnits = signal("");
+    public readonly averageSpeed = signal<number | null>(null);
+    public readonly currentSpeed = signal<number | null>(null);
+    public readonly speedUnitString = signal("");
+    public readonly remainingDistance = signal(0);
+    public readonly traveledDistance = signal(0);
+    public readonly ETA = signal("--:--");
+    public readonly isKmMarkersOn = signal(false);
+    public readonly isSlopeOn = signal(false);
+    public readonly isExpanded = signal(false);
+    public readonly isTable = signal(false);
+    public readonly isOpen = signal(false);
+    public readonly isFollowing = signal(false);
+    public readonly kmMarkersSource = signal<GeoJSON.FeatureCollection<GeoJSON.Point>>({
         type: "FeatureCollection",
         features: []
     });
-    public chartHoverSource = signal<GeoJSON.FeatureCollection<GeoJSON.Point>>({
+    public readonly chartHoverSource = signal<GeoJSON.FeatureCollection<GeoJSON.Point>>({
         type: "FeatureCollection",
         features: []
     });
-    public slopeRouteSource = signal<GeoJSON.FeatureCollection<GeoJSON.LineString>>({
+    public readonly slopeRouteSource = signal<GeoJSON.FeatureCollection<GeoJSON.LineString>>({
         type: "FeatureCollection",
         features: []
     });
-    public subRouteRange = signal<IChartSubRouteRange>(null);
-    public slopeRoutePaint = signal<LineLayerSpecification["paint"]>({});
+    public readonly subRouteRange = signal<IChartSubRouteRange>(null);
+    public readonly slopeRoutePaint = signal<LineLayerSpecification["paint"]>({});
 
-    public lineChartContainer = viewChild<ElementRef>("lineChartContainer");
+    public readonly lineChartContainer = viewChild<ElementRef>("lineChartContainer");
 
     private statistics: RouteStatistics;
     private readonly chartElements: IChartElements = {

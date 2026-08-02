@@ -24,10 +24,10 @@ export class PublicRoutesFilterComponent {
     private readonly destroyRef = inject(DestroyRef);
     private readonly imageAttributionService = inject(ImageAttributionService);
 
-    public unitString = signal("km");
-    public filterLengthStart = signal<number>(0);
-    public filterLengthEnd = signal<number>(0);
-    public filterUserName = signal<string>(null);
+    public readonly unitString = signal("km");
+    public readonly filterLengthStart = signal<number>(0);
+    public readonly filterLengthEnd = signal<number>(0);
+    public readonly filterUserName = signal<string>(null);
 
     private readonly publicRoutesFilter = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.publicRoutesFilter);
 

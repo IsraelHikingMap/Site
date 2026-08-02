@@ -49,20 +49,20 @@ export class PublicRoutesComponent {
         path: "content/lottie/placeholder-scenery.json"
     };
     public readonly mapStyle: StyleSpecification;
-    public showMap = signal(true);
+    public readonly showMap = signal(true);
     public readonly routesSrouceId = "routes-of-interest";
 
     public readonly poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
-    public poiGeoJsonData = signal<GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties>>({
+    public readonly poiGeoJsonData = signal<GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties>>({
         type: "FeatureCollection",
         features: []
     });
-    public hoverFeature = signal<GeoJSON.Feature<GeoJSON.Point>>(null);
-    public selectedRouteGeoJson = signal<GeoJSON.FeatureCollection>({
+    public readonly hoverFeature = signal<GeoJSON.Feature<GeoJSON.Point>>(null);
+    public readonly selectedRouteGeoJson = signal<GeoJSON.FeatureCollection>({
         type: "FeatureCollection",
         features: []
     });
-    public selectedRoutePoint = signal<GeoJSON.Feature<GeoJSON.Point, PoiProperties>>(null);
+    public readonly selectedRoutePoint = signal<GeoJSON.Feature<GeoJSON.Point, PoiProperties>>(null);
 
     public readonly resources = inject(ResourcesService);
 

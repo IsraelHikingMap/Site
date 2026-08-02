@@ -52,17 +52,17 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
     private readonly markerIndex: number;
 
     public readonly marker: MarkerData;
-    public url = signal<LinkData>(null);
-    public imageLink = signal<LinkData>(null);
-    public showIcons = signal(false);
-    public showCoordinates = signal(false);
-    public showUrl = signal(false);
+    public readonly url = signal<LinkData>(null);
+    public readonly imageLink = signal<LinkData>(null);
+    public readonly showIcons = signal(false);
+    public readonly showCoordinates = signal(false);
+    public readonly showUrl = signal(false);
     public readonly title = signal("");
-    public markerType = signal<string>(null);
+    public readonly markerType = signal<string>(null);
     public readonly description = signal("");
     public readonly iconsGroups: IIconsGroup[];
 
-    public titleInput = viewChild<ElementRef>("titleInput");
+    public readonly titleInput = viewChild<ElementRef>("titleInput");
 
     public readonly resources = inject(ResourcesService);
 

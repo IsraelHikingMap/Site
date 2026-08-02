@@ -12,11 +12,11 @@ import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from ".
     templateUrl: "./automatic-layer-presentation.component.html"
 })
 export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, OnDestroy {
-    public visible = input<boolean>();
-    public before = input<string>();
-    public isBaselayer = input<boolean>();
-    public layerData = input<EditableLayer>();
-    public allowOffline = input<boolean>();
+    public readonly visible = input<boolean>();
+    public readonly before = input<string>();
+    public readonly isBaselayer = input<boolean>();
+    public readonly layerData = input<EditableLayer>();
+    public readonly allowOffline = input<boolean>();
 
     private readonly subscriptions: OutputRefSubscription[] = [];
     private jsonSourcesIds: string[] = [];

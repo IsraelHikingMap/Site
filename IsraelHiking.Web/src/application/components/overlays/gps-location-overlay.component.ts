@@ -28,11 +28,11 @@ import type { ApplicationState, LatLngAltTime, LinkData, MarkerData } from "../.
 })
 export class GpsLocationOverlayComponent {
 
-    public latlng = input<LatLngAltTime>();
+    public readonly latlng = input<LatLngAltTime>();
 
     public closed = output();
 
-    public hideCoordinates = signal(true);
+    public readonly hideCoordinates = signal(true);
 
     public readonly resources = inject(ResourcesService);
 

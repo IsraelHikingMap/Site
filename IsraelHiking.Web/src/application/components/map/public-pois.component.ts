@@ -40,16 +40,16 @@ export class PublicPoisComponent implements OnInit {
 
     public readonly poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
 
-    public poiGeoJsonData = signal<GeoJSON.FeatureCollection<GeoJSON.Point>>(null);
-    public selectedPoiFeature = signal<GeoJSON.Feature<GeoJSON.Point> | null>(null);
-    public selectedPoiGeoJson = signal<GeoJSON.FeatureCollection>({
+    public readonly poiGeoJsonData = signal<GeoJSON.FeatureCollection<GeoJSON.Point>>(null);
+    public readonly selectedPoiFeature = signal<GeoJSON.Feature<GeoJSON.Point> | null>(null);
+    public readonly selectedPoiGeoJson = signal<GeoJSON.FeatureCollection>({
         type: "FeatureCollection",
         features: []
     });
-    public selectedCluster = signal<GeoJSON.Feature<GeoJSON.Point>>(null);
-    public clusterFeatures = signal<GeoJSON.Feature<GeoJSON.Point>[]>(null);
-    public hoverFeature = signal<GeoJSON.Feature<GeoJSON.Point>>(null);
-    public isShowCoordinatesPopup = signal(false);
+    public readonly selectedCluster = signal<GeoJSON.Feature<GeoJSON.Point>>(null);
+    public readonly clusterFeatures = signal<GeoJSON.Feature<GeoJSON.Point>[]>(null);
+    public readonly hoverFeature = signal<GeoJSON.Feature<GeoJSON.Point>>(null);
+    public readonly isShowCoordinatesPopup = signal(false);
 
     public readonly resources = inject(ResourcesService);
 

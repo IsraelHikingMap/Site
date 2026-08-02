@@ -19,9 +19,9 @@ export class RecordedRouteComponent {
 
     static readonly NUMBER_OF_POINTS_IN_ROUTE_SPLIT = 4000;
 
-    public recordedRouteSegments = signal<GeoJSON.Feature<GeoJSON.LineString>[]>([]);
-    public lastRouteSegment = signal<GeoJSON.Feature<GeoJSON.LineString>>(null);
-    public startPointGeoJson = signal<GeoJSON.Feature<GeoJSON.Point>>({
+    public readonly recordedRouteSegments = signal<GeoJSON.Feature<GeoJSON.LineString>[]>([]);
+    public readonly lastRouteSegment = signal<GeoJSON.Feature<GeoJSON.LineString>>(null);
+    public readonly startPointGeoJson = signal<GeoJSON.Feature<GeoJSON.Point>>({
         type: "Feature",
         geometry: {
             type: "Point",

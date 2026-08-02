@@ -17,7 +17,7 @@ export class SecuredImageComponent implements OnChanges, AfterViewInit {
     // this makes sure that we can handle source changes
     // or even when the component gets destroyed
     // So basically turn src into src$
-    public src = input<string>("");
+    public readonly src = input<string>("");
 
     private readonly src$ = new BehaviorSubject(this.src());
 

@@ -23,12 +23,12 @@ import type { ApplicationState, EditableLayer } from "../../models";
 })
 export class OfflineManagementComponent {
     public readonly offlineMapStyle: StyleSpecification;
-    public selectedTile = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
-    public inProgressTile = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
-    public downloadedTiles = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
+    public readonly selectedTile = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
+    public readonly inProgressTile = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
+    public readonly downloadedTiles = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
     public readonly currentLocation: GeoJSON.FeatureCollection;
     public readonly baseLayerData: EditableLayer;
-    public selectedTileXY = signal<{ tileX: number; tileY: number }>(null);
+    public readonly selectedTileXY = signal<{ tileX: number; tileY: number }>(null);
 
     private map: Map;
 

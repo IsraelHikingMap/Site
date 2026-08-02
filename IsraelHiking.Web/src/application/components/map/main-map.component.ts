@@ -40,13 +40,13 @@ import type { ApplicationState, LocationState } from "../../models";
 })
 export class MainMapComponent {
 
-    public topStartControls = viewChildren("topStartControl", { read: ElementRef });
-    public topEndControls = viewChildren("topEndControl", { read: ElementRef });
-    public bottomEndControls = viewChildren("bottomEndControl", { read: ElementRef });
-    public bottomStartControls = viewChildren("bottomStartControl", { read: ElementRef });
+    public readonly topStartControls = viewChildren("topStartControl", { read: ElementRef });
+    public readonly topEndControls = viewChildren("topEndControl", { read: ElementRef });
+    public readonly bottomEndControls = viewChildren("bottomEndControl", { read: ElementRef });
+    public readonly bottomStartControls = viewChildren("bottomStartControl", { read: ElementRef });
 
-    public sidenavVisible = signal(false);
-    public sidenavViewName = signal("");
+    public readonly sidenavVisible = signal(false);
+    public readonly sidenavViewName = signal("");
     public readonly location: LocationState;
     public readonly initialStyle: StyleSpecification;
 

@@ -21,15 +21,15 @@ import type { ShareUrl } from "../models/";
     imports: [DatePipe, DistancePipe, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger, MatButton, CdkCopyToClipboard, AnalyticsDirective, NgClass]
 })
 export class ShareItemComponent implements OnInit {
-    public shareUrl = input<Immutable<ShareUrl>>();
-    public showMenu = input<boolean>(false);
+    public readonly shareUrl = input<Immutable<ShareUrl>>();
+    public readonly showMenu = input<boolean>(false);
     public delete = output<void>();
     public editProperties = output<void>();
     public open = output<void>();
     public addToRoutes = output<void>();
     public moveToRoute = output<void>();
 
-    public copiedToClipboard = signal(false);
+    public readonly copiedToClipboard = signal(false);
     public readonly shareAddress = signal<string>(null);
     public readonly whatsappShareAddress = signal<string>(null);
     public readonly facebookShareAddress = signal<string>(null);

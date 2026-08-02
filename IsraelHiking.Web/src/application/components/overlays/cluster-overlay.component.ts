@@ -17,7 +17,7 @@ import { GeoJSONUtils } from "../../services/geojson-utils";
 })
 export class ClusterOverlayComponent {
 
-    public features = input<GeoJSON.Feature[]>();
+    public readonly features = input<GeoJSON.Feature[]>();
 
     public closed = output();
     public readonly resources = inject(ResourcesService);

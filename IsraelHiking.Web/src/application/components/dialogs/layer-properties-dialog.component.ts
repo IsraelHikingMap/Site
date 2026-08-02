@@ -42,7 +42,7 @@ export class LayerPropertiesDialogComponent {
     public readonly isApp: boolean;
     public readonly isOverlay: boolean;
     public readonly layerData = signal<EditableLayer>(null);
-    public copiedToClipboard = signal(false);
+    public readonly copiedToClipboard = signal(false);
 
     public readonly resources = inject(ResourcesService);
 

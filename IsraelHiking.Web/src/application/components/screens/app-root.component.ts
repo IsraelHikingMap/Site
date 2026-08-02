@@ -17,7 +17,7 @@ import type { ApplicationState } from "../../models";
     imports: [MatToolbar, RouterOutlet, MainMenuComponent, SearchComponent]
 })
 export class AppRootComponent {
-    public isScrolled = signal(false);
+    public readonly isScrolled = signal(false);
 
     public readonly resources = inject(ResourcesService);
     private readonly runningContextService = inject(RunningContextService)
@@ -28,7 +28,7 @@ export class AppRootComponent {
 
     private readonly currentUrl = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.currentUrl);
 
-    public isHome = computed(() =>
+    public readonly isHome = computed(() =>
         this.currentUrl() === RouteStrings.ROUTE_ROOT ||
         this.currentUrl() === RouteStrings.ROUTE_LANDING ||
         this.currentUrl() === RouteStrings.ROUTE_ABOUT);

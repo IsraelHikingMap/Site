@@ -44,12 +44,12 @@ import type { ApplicationState, ShareUrl } from "../../models";
     imports: [MapComponent, LayersComponent, MatButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, ShareItemComponent, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, ControlComponent, MatButtonToggle, MatButtonToggleGroup, NgClass]
 })
 export class SharesComponent implements OnInit {
-    public loading = signal(false);
-    public showMap = signal(false);
+    public readonly loading = signal(false);
+    public readonly showMap = signal(false);
     public readonly mapStyle: StyleSpecification;
-    public selectedShareUrl = signal<Immutable<ShareUrl>>(null);
-    public filteredShareUrls = signal<Immutable<ShareUrl[]>>([]);
-    public routesGeoJson = signal<GeoJSON.FeatureCollection>({ type: "FeatureCollection", features: [] });
+    public readonly selectedShareUrl = signal<Immutable<ShareUrl>>(null);
+    public readonly filteredShareUrls = signal<Immutable<ShareUrl[]>>([]);
+    public readonly routesGeoJson = signal<GeoJSON.FeatureCollection>({ type: "FeatureCollection", features: [] });
     public readonly sortBy = signal<keyof ShareUrl>("lastModifiedDate");
     private readonly sortDirection = signal<"asc" | "desc">("desc");
     public readonly filter: Record<string, string[]> = {

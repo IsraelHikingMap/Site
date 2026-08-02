@@ -19,10 +19,10 @@ import type { MarkerData, LinkData } from "../../models";
 })
 export class PrivatePoiOverlayComponent implements OnInit {
 
-    public marker = input<Immutable<MarkerData>>();
-    public routeId? = input<string>();
-    public index = input<number>();
-    public color = input<string>();
+    public readonly marker = input<Immutable<MarkerData>>();
+    public readonly routeId? = input<string>();
+    public readonly index = input<number>();
+    public readonly color = input<string>();
 
     public readonly imageLink = signal<LinkData>(null);
 

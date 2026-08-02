@@ -22,13 +22,13 @@ import type { LatLngAltTime } from "../../models";
 })
 export class MissingPartOverlayComponent {
 
-    public latlng = input<LatLngAltTime>();
+    public readonly latlng = input<LatLngAltTime>();
 
     public readonly feature = model<GeoJSON.Feature<GeoJSON.LineString>>();
 
     public removed = output();
 
-    public hideCoordinates = signal(true);
+    public readonly hideCoordinates = signal(true);
 
     public readonly resources = inject(ResourcesService);
 

@@ -32,8 +32,8 @@ export class IntroDialogComponent {
     public readonly lottiePlan: AnimationOptions = { path: "content/lottie/dialog-plan.json" };
     public readonly lottieMore: AnimationOptions = { path: "content/lottie/dialog-more.json" };
 
-    public activityType = signal<ActivityType>("Hiking");
-    public step = signal(0);
+    public readonly activityType = signal<ActivityType>("Hiking");
+    public readonly step = signal(0);
     public readonly availableLanguages = AVAILABLE_LANGUAGES;
 
     public readonly resources = inject(ResourcesService);

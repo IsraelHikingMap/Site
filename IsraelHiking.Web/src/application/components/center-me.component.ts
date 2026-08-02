@@ -26,7 +26,7 @@ export class CenterMeComponent {
         return selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route");
     });
 
-    public showButton = computed(() =>
+    public readonly showButton = computed(() =>
         this.inMemoryState().pannedTimestamp != null &&
         this.inMemoryState().following &&
         this.tracking() === "tracking" &&

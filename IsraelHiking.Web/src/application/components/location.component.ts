@@ -31,10 +31,10 @@ import type { LatLngAltTime, ApplicationState } from "../models";
     imports: [MatButton, AnalyticsDirective, MatTooltip, MatProgressSpinner, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, GpsLocationOverlayComponent]
 })
 export class LocationComponent {
-    public locationFeatures = signal<GeoJSON.FeatureCollection<GeoJSON.Geometry>>({ type: "FeatureCollection", features: [] });
-    public distanceFeatures = signal<GeoJSON.FeatureCollection<GeoJSON.Geometry>>({ type: "FeatureCollection", features: [] });
-    public locationLatLng = signal<LatLngAltTime>(null);
-    public showDistance = signal(false);
+    public readonly locationFeatures = signal<GeoJSON.FeatureCollection<GeoJSON.Geometry>>({ type: "FeatureCollection", features: [] });
+    public readonly distanceFeatures = signal<GeoJSON.FeatureCollection<GeoJSON.Geometry>>({ type: "FeatureCollection", features: [] });
+    public readonly locationLatLng = signal<LatLngAltTime>(null);
+    public readonly showDistance = signal(false);
     private readonly bearing = signal(0);
 
     public readonly resources = inject(ResourcesService);

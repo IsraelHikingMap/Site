@@ -63,7 +63,7 @@ export class PrivateRoutesSidebarComponent {
     public selectedRouteId = this.store.selectSignal((state: ApplicationState) => state.routeEditingState.selectedRouteId);
     public hiddenRoutesCount = this.store.selectSignal((state: ApplicationState) => state.routes.present.filter(route => route.state === "Hidden").length);
     public isAllRoutesHidden = this.store.selectSignal((state: ApplicationState) => state.routes.present.every(route => route.state === "Hidden"));
-    private routeStatistics = computed(() => {
+    private readonly routeStatistics = computed(() => {
         const result: Record<string, RouteStatistics> = {};
         for (const route of this.routes()) {
             const latlngs = this.selectedRouteService.getLatlngs(route);

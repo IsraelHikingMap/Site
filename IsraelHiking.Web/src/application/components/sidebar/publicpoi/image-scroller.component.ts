@@ -21,10 +21,10 @@ export class ImageScrollerComponent implements OnChanges {
         path: "content/lottie/placeholder-scenery.json"
     };
 
-    private currentIndex = signal(0);
+    private readonly currentIndex = signal(0);
 
     public readonly images = model<string[]>();
-    public canEdit = input<boolean>();
+    public readonly canEdit = input<boolean>();
 
     public currentImageChanged = output<string>();
 

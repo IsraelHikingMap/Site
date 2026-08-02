@@ -48,28 +48,28 @@ import { ZoomComponent } from "../zoom.component";
 })
 export class TracesComponent implements OnInit {
 
-    public showMap = signal(false);
-    public sortBy = signal<"timeStamp" | "name">("timeStamp");
+    public readonly showMap = signal(false);
+    public readonly sortBy = signal<"timeStamp" | "name">("timeStamp");
     private readonly sortDirection = signal<"asc" | "desc">("desc");
     public readonly mapStyle: StyleSpecification;
-    public filteredTraces = signal<Immutable<Trace[]>>([]);
-    public loadingTraces = signal(false);
-    public selectedTrace = signal<Immutable<Trace> | undefined>(undefined);
-    public tracesGeoJson = signal<GeoJSON.FeatureCollection<GeoJSON.Point> | undefined>({
+    public readonly filteredTraces = signal<Immutable<Trace[]>>([]);
+    public readonly loadingTraces = signal(false);
+    public readonly selectedTrace = signal<Immutable<Trace> | undefined>(undefined);
+    public readonly tracesGeoJson = signal<GeoJSON.FeatureCollection<GeoJSON.Point> | undefined>({
         type: "FeatureCollection",
         features: []
     });
-    public selectedTraceGeoJson = signal<GeoJSON.FeatureCollection | undefined>({
+    public readonly selectedTraceGeoJson = signal<GeoJSON.FeatureCollection | undefined>({
         type: "FeatureCollection",
         features: []
     });
-    public selectedFeature = signal<GeoJSON.Feature<GeoJSON.LineString>>(null);
-    public missingCoordinates = signal<LatLngAltTime>(null);
-    public missingParts = signal<GeoJSON.FeatureCollection<GeoJSON.LineString>>({
+    public readonly selectedFeature = signal<GeoJSON.Feature<GeoJSON.LineString>>(null);
+    public readonly missingCoordinates = signal<LatLngAltTime>(null);
+    public readonly missingParts = signal<GeoJSON.FeatureCollection<GeoJSON.LineString>>({
         type: "FeatureCollection",
         features: []
     });
-    public selectedFeatureSource = signal<GeoJSON.FeatureCollection<GeoJSON.LineString>>({
+    public readonly selectedFeatureSource = signal<GeoJSON.FeatureCollection<GeoJSON.LineString>>({
         type: "FeatureCollection",
         features: []
     });

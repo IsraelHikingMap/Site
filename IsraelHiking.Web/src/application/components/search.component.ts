@@ -34,16 +34,16 @@ import type { ApplicationState, SearchResultsPointOfInterest } from "../models";
 })
 export class SearchComponent {
 
-    public searchResults = signal<SearchResultsPointOfInterest[]>([]);
-    public searchTerm = signal("");
+    public readonly searchResults = signal<SearchResultsPointOfInterest[]>([]);
+    public readonly searchTerm = signal("");
     private selectedSearchResults: SearchResultsPointOfInterest = null;
     public readonly searchFrom = new FormControl<string | SearchResultsPointOfInterest>("");
 
     private selectFirstSearchResults = false;
     private searchRequestId = 0;
 
-    public searchFromInput = viewChild<ElementRef>("searchFromInput");
-    public matAutocompleteTriggers = viewChildren(MatAutocompleteTrigger);
+    public readonly searchFromInput = viewChild<ElementRef>("searchFromInput");
+    public readonly matAutocompleteTriggers = viewChildren(MatAutocompleteTrigger);
 
     public readonly resources = inject(ResourcesService);
     private readonly searchResultsProvider = inject(SearchResultsProvider);

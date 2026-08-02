@@ -15,10 +15,10 @@ import type { LatLngAltTime, NorthEast } from "../models";
 })
 export class CoordinatesComponent implements OnInit {
 
-    public latlng = input<LatLngAltTime>();
+    public readonly latlng = input<LatLngAltTime>();
 
-    public itmCoordinates = signal<NorthEast>(null);
-    public alt = signal<number>(undefined);
+    public readonly itmCoordinates = signal<NorthEast>(null);
+    public readonly alt = signal<number>(undefined);
 
     public readonly resources = inject(ResourcesService);
 

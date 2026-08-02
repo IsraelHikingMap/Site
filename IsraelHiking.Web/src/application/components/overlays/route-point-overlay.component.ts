@@ -19,9 +19,9 @@ export class RoutePointOverlayComponent implements OnChanges {
     public readonly isMiddle = signal(false);
     public readonly hideCoordinates = signal(true);
 
-    public latlng = input<LatLngAltTime>();
+    public readonly latlng = input<LatLngAltTime>();
 
-    public segmentIndex = input<number>();
+    public readonly segmentIndex = input<number>();
 
     public closed = output();
 

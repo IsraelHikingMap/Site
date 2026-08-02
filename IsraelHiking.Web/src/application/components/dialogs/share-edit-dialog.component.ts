@@ -50,14 +50,14 @@ export type ShareEditDialogComponentData = {
 export class ShareEditDialogComponent {
     public readonly shareUrl: ShareUrl;
 
-    public isLoading = signal(false);
+    public readonly isLoading = signal(false);
     public readonly canUpdate: boolean;
     public readonly updateCurrentShare = signal(false);
     public readonly hasHiddenRoutes: boolean;
     public readonly style: StyleSpecification;
-    public base64Preview = signal<string>(null);
+    public readonly base64Preview = signal<string>(null);
     public readonly routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
-    public canPublishPublic = signal(false);
+    public readonly canPublishPublic = signal(false);
 
     public readonly resources = inject(ResourcesService);
 

@@ -13,8 +13,8 @@ import { ApplicationState } from "../../models";
     imports: [MarkdownComponent]
 })
 export class FaqComponent {
-    public direction = signal<string>("ltr");
-    public markdownFilePath = signal<string>("content/faq/en-US.md");
+    public readonly direction = signal<string>("ltr");
+    public readonly markdownFilePath = signal<string>("content/faq/en-US.md");
 
     private readonly router = inject(Router);
     private readonly store = inject(Store);

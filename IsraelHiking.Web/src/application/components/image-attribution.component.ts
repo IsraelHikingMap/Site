@@ -15,10 +15,10 @@ import type { ApplicationState, PublicRoutesFilter } from "../models";
 })
 export class ImageAttributionComponent implements OnInit, OnChanges {
 
-    public imageUrl = input.required<string>();
-    public allowFiltering = input<boolean>(false);
+    public readonly imageUrl = input.required<string>();
+    public readonly allowFiltering = input<boolean>(false);
 
-    public imageAttribution = signal<ImageAttribution>(null);
+    public readonly imageAttribution = signal<ImageAttribution>(null);
 
     public readonly resources = inject(ResourcesService);
 

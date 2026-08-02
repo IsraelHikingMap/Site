@@ -32,17 +32,17 @@ interface RoutePointViewData {
 })
 export class RoutesComponent implements AfterViewInit {
 
-    public routePointPopupData = signal<RoutePointViewData>(null);
-    public nonEditRoutePointPopupData = signal<{ latlng: LatLngAltTime; wazeAddress: string; googleMapsAddress: string; routeId: string }>(null);
-    public editingRouteGeoJson = signal<GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>>({
+    public readonly routePointPopupData = signal<RoutePointViewData>(null);
+    public readonly nonEditRoutePointPopupData = signal<{ latlng: LatLngAltTime; wazeAddress: string; googleMapsAddress: string; routeId: string }>(null);
+    public readonly editingRouteGeoJson = signal<GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>>({
         type: "FeatureCollection",
         features: []
     });
-    public routesGeoJson = signal<GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>>({
+    public readonly routesGeoJson = signal<GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>>({
         type: "FeatureCollection",
         features: []
     });
-    public routes = signal<Immutable<RouteData[]>>([]);
+    public readonly routes = signal<Immutable<RouteData[]>>([]);
 
     public readonly resources = inject(ResourcesService);
 

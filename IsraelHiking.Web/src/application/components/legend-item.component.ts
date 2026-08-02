@@ -32,7 +32,7 @@ export class LegendItemComponent {
     public static readonly OSM_TAG_LINK = "osm-tag-link";
     public static readonly OSM_KEY_LINK = "osm-key-link";
 
-    public item = input<ILegendItem>();
+    public readonly item = input<ILegendItem>();
 
 
     private readonly mapService = inject(MapService);

@@ -17,7 +17,7 @@ export type PhotoSwipeData = {
 })
 export class PhotoSwpieComponent implements AfterViewInit {
 
-    public photoswipe = viewChild<ElementRef>("photoswipe");
+    public readonly photoswipe = viewChild<ElementRef>("photoswipe");
     public readonly closed = new EventEmitter();
     private readonly data = inject(PHOTO_SWIPE_DATA);
 

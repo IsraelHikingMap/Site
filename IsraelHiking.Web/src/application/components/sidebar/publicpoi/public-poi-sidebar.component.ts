@@ -55,18 +55,18 @@ export type SourceImageUrlPair = {
     imports: [Dir, MatButton, AnalyticsDirective, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, MatCard, PublicPointOfInterestEditComponent, FormsModule, MatCardHeader, MatCardTitle, NgClass, MatCardContent, ImageScrollerComponent, DistancePipe, DescriptionComponent]
 })
 export class PublicPoiSidebarComponent implements OnDestroy {
-    public isLoading = signal(true);
-    public isMinimized = signal(false);
-    public sourceImageUrls = signal<SourceImageUrlPair[]>(undefined);
-    public shareLinks = signal({} as PoiSocialLinks);
-    public length = signal<number>(null);
-    public title = signal("");
-    public imagesUrls = signal<string[]>([]);
-    private urls = signal<string[]>([]);
-    public osmEditableInfo = signal<EditablePublicPointData>(undefined);
-    public fullFeature = signal<GeoJSON.Feature>(undefined);
+    public readonly isLoading = signal(true);
+    public readonly isMinimized = signal(false);
+    public readonly sourceImageUrls = signal<SourceImageUrlPair[]>(undefined);
+    public readonly shareLinks = signal({} as PoiSocialLinks);
+    public readonly length = signal<number>(null);
+    public readonly title = signal("");
+    public readonly imagesUrls = signal<string[]>([]);
+    private readonly urls = signal<string[]>([]);
+    public readonly osmEditableInfo = signal<EditablePublicPointData>(undefined);
+    public readonly fullFeature = signal<GeoJSON.Feature>(undefined);
 
-    private editMode = signal<boolean>(undefined);
+    private readonly editMode = signal<boolean>(undefined);
 
     public readonly resources = inject(ResourcesService);
 

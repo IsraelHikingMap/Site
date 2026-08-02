@@ -31,7 +31,7 @@ export class PublicPointOfInterestEditComponent implements OnInit {
 
     public readonly info = model<EditablePublicPointData>();
 
-    public isLoading = signal(false);
+    public readonly isLoading = signal(false);
     public readonly categories = signal<SelectableCategory[]>([]);
     public readonly selectedCategory = signal<SelectableCategory>(null);
     public readonly updateLocation = signal(false);
