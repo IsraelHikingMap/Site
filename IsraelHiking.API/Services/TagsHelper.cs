@@ -133,6 +133,9 @@ public class TagsHelper : ITagsHelper
                 tagCombinations.Add([new("tourism", "bed_and_breakfast")]);
                 tagCombinations.Add([new("tourism", "dormitory")]);
                 return tagCombinations;
+            case "icon-map-signs":
+                tagCombinations.Add([new("highway", "*")]);
+                return tagCombinations;
             case "icon-search":
             default:
                 // Default icon - could represent any unmatched tags
@@ -449,6 +452,13 @@ public class TagsHelper : ITagsHelper
                         Color = "black",
                         Category = Categories.ROUTE_4X4,
                         Icon = "icon-four-by-four"
+                    };
+                default:
+                    return new IconColorCategory
+                    {
+                        Color = "black",
+                        Category = Categories.OTHER,
+                        Icon = "icon-map-signs"
                     };
             }
         }

@@ -240,6 +240,11 @@ export class OsmTagsService {
                     poi.properties.poiCategory = "4x4";
                     poi.properties.poiIcon = "icon-four-by-four";
                     return;
+                default:
+                    poi.properties.poiIconColor = "black";
+                    poi.properties.poiCategory = "Other";
+                    poi.properties.poiIcon = "icon-map-signs";
+                    return;
             }
         }
 
