@@ -6,22 +6,22 @@ import { initialState } from "./initial-state";
 import type { ActivityType, UserInfo, UserState } from "../models";
 
 export class SetUserInfoAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[User] SetUserInfoAction";
     constructor(public readonly userInfo: UserInfo) { }
 }
 
 export class SetTokenAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[User] SetTokenAction";
     constructor(public readonly token: string) { }
 }
 
 export class SetAgreeToTermsAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[User] SetAgreeToTermsAction";
     constructor(public readonly agree: boolean) { }
 }
 
 export class SetActivityTypeAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[User] SetActivityTypeAction";
     constructor(public readonly activityType: ActivityType) { }
 }
 

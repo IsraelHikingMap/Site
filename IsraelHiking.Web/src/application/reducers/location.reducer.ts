@@ -6,7 +6,7 @@ import { initialState } from "./initial-state";
 import type { LocationState } from "../models";
 
 export class SetLocationAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Location] SetLocationAction";
     constructor(public readonly longitude: number, public readonly latitude: number, public readonly zoom: number) {}
 }
 

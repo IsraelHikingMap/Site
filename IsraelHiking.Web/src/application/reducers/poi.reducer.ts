@@ -7,12 +7,12 @@ import type { PointsOfInterestState, MarkerData } from "../models";
 
 
 export class SetSelectedPoiAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[POI] SetSelectedPoiAction";
     constructor(public readonly poi: GeoJSON.Feature) { }
 }
 
 export class SetUploadMarkerDataAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[POI] SetUploadMarkerDataAction";
     constructor(public readonly markerData: MarkerData) { }
 }
 

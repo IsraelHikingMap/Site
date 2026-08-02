@@ -6,45 +6,45 @@ import { initialState } from "./initial-state";
 import type { ShareUrl, InMemoryState, PublicRoutesFilter } from "../models";
 
 export class ToggleDistanceAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[In Memory] ToggleDistanceAction";
 }
 
 export class SetFollowingAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[In Memory] SetFollowingAction";
     constructor(public readonly following: boolean) { }
 }
 
 export class SetPannedAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[In Memory] SetPannedAction";
     constructor(public readonly pannedTimestamp: Date) { }
 }
 
 export class ToggleKeepNorthUpAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[In Memory] ToggleKeepNorthUpAction";
 }
 
 export class SetShareUrlAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[In Memory] SetShareUrlAction";
     constructor(public readonly shareUrl: ShareUrl) { }
 }
 
 export class SetFileUrlAndBaseLayerAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[In Memory] SetFileUrlAndBaseLayerAction";
     constructor(public readonly fileUrl: string, public readonly baseLayer: string) { }
 }
 
 export class SetSearchTermAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[In Memory] SetSearchTermAction";
     constructor(public readonly searchTerm: string) { }
 }
 
 export class SetUrlAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[In Memory] SetUrlAction";
     constructor(public readonly url: string) { }
 }
 
 export class SetPublicRoutesFilterAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[In Memory] SetPublicRoutesFilterAction";
     constructor(public readonly filters: PublicRoutesFilter) { }
 }
 
