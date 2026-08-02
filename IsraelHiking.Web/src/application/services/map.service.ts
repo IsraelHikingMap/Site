@@ -48,10 +48,7 @@ export class MapService {
             return;
         }
         const maplibregl = await import("maplibre-gl");
-        // maplibre only falls back to a worker url next to its own bundle when that bundle is served over http(s).
-        // In the app the origin is capacitor://localhost, so the fallback yields an empty url and every worker dies on
-        // creation. ngx-maplibre-gl sets this url too, but only once the first map is created, which is too late since
-        // the workers are already needed here for the contour protocol below.
+        // This is needs to be specific since capacitor is not http protocol
         maplibregl.setWorkerUrl(this.getFullUrl(this.maplibreWorkerUrl ?? "maplibre-gl-worker.mjs"));
         maplibregl.setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
         maplibregl.addProtocol("custom", (params) => this.databaseService.getCustomTile(params.url));
