@@ -1,5 +1,6 @@
 import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
+import { MAPLIBRE_WORKER_URL } from "@maplibre/ngx-maplibre-gl/config";
 import type { ErrorEvent, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, SourceSpecification } from "maplibre-gl";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
@@ -25,6 +26,7 @@ export class MapService {
     private readonly databaseService = inject(DatabaseService);
     private readonly overpassTurboService = inject(OverpassTurboService);
     private readonly store = inject(Store);
+    private readonly maplibreWorkerUrl = inject(MAPLIBRE_WORKER_URL, { optional: true });
 
     public initializationPromise = new Promise<void>((resolve) => { this.resolve = resolve; });
 
@@ -46,6 +48,11 @@ export class MapService {
             return;
         }
         const maplibregl = await import("maplibre-gl");
+        // maplibre only falls back to a worker url next to its own bundle when that bundle is served over http(s).
+        // In the app the origin is capacitor://localhost, so the fallback yields an empty url and every worker dies on
+        // creation. ngx-maplibre-gl sets this url too, but only once the first map is created, which is too late since
+        // the workers are already needed here for the contour protocol below.
+        maplibregl.setWorkerUrl(this.getFullUrl(this.maplibreWorkerUrl ?? "maplibre-gl-worker.mjs"));
         maplibregl.setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
         maplibregl.addProtocol("custom", (params) => this.databaseService.getCustomTile(params.url));
         maplibregl.addProtocol("slice", (params) => this.databaseService.getSliceTile(params.url));
