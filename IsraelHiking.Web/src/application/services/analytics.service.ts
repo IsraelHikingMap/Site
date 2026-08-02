@@ -13,6 +13,21 @@ export class AnalyticsService {
     initialize() {
         if (!isPlatformBrowser(this.platformId)) return;
 
+        // Analytics is not needed for the first paint, so it is loaded once the browser is idle
+        // instead of competing with the fonts and images for bandwidth while the page is rendering.
+        this.whenIdle(() => this.injectGoogleTagScripts());
+    }
+
+    private whenIdle(callback: () => void) {
+        const scheduler = (window as any).requestIdleCallback as ((cb: () => void, options?: { timeout: number }) => void) | undefined;
+        if (scheduler) {
+            scheduler(callback, { timeout: 5000 });
+        } else {
+            setTimeout(callback, 3000);
+        }
+    }
+
+    private injectGoogleTagScripts() {
         this.ngZone.runOutsideAngular(() => {
             const renderer = this.rendererFactory.createRenderer(null, null);
             const script = renderer.createElement("script");
