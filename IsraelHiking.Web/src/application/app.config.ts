@@ -113,8 +113,6 @@ export const appConfig: ApplicationConfig = {
                 PaywallReducer
             ])
         ),
-        // The default strategy re-enters NgZone for every select/dispatch callback, which is
-        // pointless (and an extra hop) now that change detection is zoneless.
         withNgxsNoopExecutionStrategy(),
         AuthorizationService,
         GetTextCatalogService,
