@@ -105,7 +105,7 @@ public class ConfigurationData
     /// </summary>
     public string OfflineFilesFolder { get; set; }
     /// <summary>
-    /// The base address of the "on-the-fly" service that generates and serves offline files (IHM-schema, IHM-code, global_points)
+    /// The base address of the "on-the-fly" service that generates and serves offline files
     /// </summary>
     public string OnTheFlyFilesAddress { get; set; }
     /// <summary>

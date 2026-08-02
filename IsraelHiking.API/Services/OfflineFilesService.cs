@@ -181,7 +181,7 @@ public class OfflineFilesService : IOfflineFilesService
 
     /// <summary>
     /// Extracts the sources names from a style's json content, a source name is the file name of its url, with or
-    /// without an extension, for example: "https://mapeak.com/vector/data/IHM-schema.json" translates to "IHM-schema"
+    /// without an extension, for example: "https://mapeak.com/vector/data/mapeak-schema.json" translates to "mapeak-schema"
     /// and "https://mapeak.com/vector/data/raster-dem" translates to "raster-dem".
     /// </summary>
     private List<string> GetSourceNamesFromStyle(byte[] styleContent)
@@ -228,7 +228,7 @@ public class OfflineFilesService : IOfflineFilesService
     /// <summary>
     /// Extracts the layer name from an offline file name, dropping the zoom/tile suffix.
     /// Tile files look like "name+7-x-y.pmtiles" and root files look like "name-6.pmtiles",
-    /// where the layer name itself may contain '-' (e.g. "IHM-schema", "jaxa_terrarium0-11_v2").
+    /// where the layer name itself may contain '-'.
     /// </summary>
     private static string FileNameToSourceName(string fileName)
     {
