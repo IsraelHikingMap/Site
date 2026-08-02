@@ -5,10 +5,10 @@ declare let gtag: (event: string, action: string, params: { event_category: stri
 
 @Injectable()
 export class AnalyticsService {
-    private document = inject(DOCUMENT);
-    private rendererFactory = inject(RendererFactory2);
-    private ngZone = inject(NgZone);
-    private platformId = inject(PLATFORM_ID);
+    private readonly document = inject(DOCUMENT);
+    private readonly rendererFactory = inject(RendererFactory2);
+    private readonly ngZone = inject(NgZone);
+    private readonly platformId = inject(PLATFORM_ID);
 
     initialize() {
         if (!isPlatformBrowser(this.platformId)) return;

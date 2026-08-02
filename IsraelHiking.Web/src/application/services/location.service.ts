@@ -1,4 +1,4 @@
-import { EventEmitter, inject, Injectable } from "@angular/core";
+import { EventEmitter, inject, Injectable, computed } from "@angular/core";
 import { Store } from "@ngxs/store";
 
 import { GeoLocationService } from "./geo-location.service";
@@ -18,18 +18,31 @@ export type LocationWithBearing = {
 
 @Injectable()
 export class LocationService {
+
+    public readonly changed = new EventEmitter<LocationWithBearing | null>();
+    private lastSpeed: number = null;
+    private lastSpeedTime: number = null;
+    private locationWithBearing: LocationWithBearing | null = null;
+
     private readonly geoLocationService = inject(GeoLocationService);
     private readonly deviceOrientationService = inject(DeviceOrientationService);
     private readonly mapService = inject(MapService);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly loggingService = inject(LoggingService);
     private readonly store = inject(Store);
+    private readonly inMemoryStateSignal = this.store.selectSignal((state: ApplicationState) => state.inMemoryState);
+    private readonly pannedTimestampSignal = this.store.selectSignal((state: ApplicationState) => state.inMemoryState.pannedTimestamp);
+    private readonly isPanned = computed(() => this.pannedTimestampSignal() != null);
 
-    public changed = new EventEmitter<LocationWithBearing | null>();
-    private lastSpeed: number = null;
-    private lastSpeedTime: number = null;
-    private locationWithBearing: LocationWithBearing | null = null;
-    private isPanned = false;
+    public readonly isFollowing = computed(() => {
+        const inMemoryState = this.inMemoryStateSignal();
+        return inMemoryState.following &&
+            !this.isPanned() &&
+            !this.selectedRouteService.isEditingRoute() &&
+            inMemoryState.currentUrl !== RouteStrings.ROUTE_SHARES &&
+            inMemoryState.currentUrl !== RouteStrings.ROUTE_TRACES &&
+            inMemoryState.currentUrl !== RouteStrings.ROUTE_PUBLIC_ROUTES;
+    });
 
     public async initialize() {
         await this.mapService.initializationPromise;
@@ -55,8 +68,7 @@ export class LocationService {
         });
 
         this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
-            this.isPanned = pannedTimestamp != null;
-            if (this.isPanned) {
+            if (pannedTimestamp != null) {
                 return;
             }
             if (!this.isActive()) {
@@ -97,16 +109,6 @@ export class LocationService {
 
     public getLocationCenter(): LatLngAltTime | null {
         return this.locationWithBearing?.center;
-    }
-
-    public isFollowing(): boolean {
-        const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
-        return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).following &&
-            !this.isPanned &&
-            !this.selectedRouteService.isEditingRoute() &&
-            currentUrl !== RouteStrings.ROUTE_SHARES &&
-            currentUrl !== RouteStrings.ROUTE_TRACES &&
-            currentUrl !== RouteStrings.ROUTE_PUBLIC_ROUTES;
     }
 
     public moveMapToGpsPosition() {

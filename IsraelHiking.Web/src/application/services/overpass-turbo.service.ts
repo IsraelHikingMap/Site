@@ -1,7 +1,6 @@
 import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, timeout } from "rxjs";
-import { addProtocol } from "maplibre-gl";
 import osmtogeojson from "osm2geojson-lite";
 
 import { SpatialService } from "./spatial.service";
@@ -18,7 +17,8 @@ export class OverpassTurboService {
 
     private readonly httpClient = inject(HttpClient);
 
-    public initialize() {
+    public async initialize() {
+        const { addProtocol } = await import("maplibre-gl");
         addProtocol("overpass", async (params, _abortController) => {
             let url = params.url;
             if (url.startsWith("overpass://s/")) {
@@ -122,15 +122,15 @@ export class OverpassTurboService {
 
     public async getPlaceGeometry(nodeId: string): Promise<GeoJSON.Feature> {
         const query = `
-        node(${nodeId});
+        node(${nodeId}) -> .p;
+        (
+        rel(bn.p)[name][type~"^(boundary|multipolygon)$"]
+            (if: t["name"] == p.u(t["name"]));
 
-        node._ -> .p;
-        .p is_in;
-        area._[place]
-        (if: t["name"] == p.u(t["name"]))
-        (if: t["place"] == p.u(t["place"]))
-        ;
-        wr(pivot);`
+        wr(around.p:50000)[name][place]
+            (if: t["name"]  == p.u(t["name"]))
+            (if: t["place"] == p.u(t["place"]));
+        );`
         return await this.getFeatureFromQuery(query);
     }
 

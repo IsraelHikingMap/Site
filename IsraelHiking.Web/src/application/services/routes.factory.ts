@@ -8,10 +8,10 @@ import type { RouteDataWithoutState, ApplicationState, RouteData } from "../mode
 @Injectable()
 export class RoutesFactory {
 
-    private invertedColorsCache = new Map<string, string>();
+    private readonly invertedColorsCache = new Map<string, string>();
 
     // default values - in case the response from server takes too long.
-    public colors: string[] = [
+    public readonly colors: string[] = [
         "#0000FF", // blue
         "#FF6600", // orange
         "#B700FF", // purple

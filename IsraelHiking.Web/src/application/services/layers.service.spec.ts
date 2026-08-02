@@ -143,7 +143,7 @@ describe("LayersService", () => {
             }
         });
 
-        expect(service.getSelectedBaseLayer()).toEqual(layer2);
+        expect(service.selectedBaseLayer()).toEqual(layer2);
     }));
 
     it("should return first base layer when selected layer not found", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -158,7 +158,7 @@ describe("LayersService", () => {
             }
         });
 
-        expect(service.getSelectedBaseLayer()).toEqual(DEFAULT_BASE_LAYERS[0]);
+        expect(service.selectedBaseLayer()).toEqual(DEFAULT_BASE_LAYERS[0]);
     }));
 
     it("should return the base layer address when it contains '{x}'", inject([LayersService, Store], (service: LayersService, store: Store) => {

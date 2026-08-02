@@ -13,8 +13,8 @@ export type ImageAttribution = {
 
 @Injectable()
 export class ImageAttributionService {
-    private attributionImageCache = new Map<string, Promise<ImageAttribution>>();
-    private userIdToNameCache = new Map<string, string>();
+    private readonly attributionImageCache = new Map<string, Promise<ImageAttribution>>();
+    private readonly userIdToNameCache = new Map<string, string>();
 
     private readonly httpClient = inject(HttpClient);
 

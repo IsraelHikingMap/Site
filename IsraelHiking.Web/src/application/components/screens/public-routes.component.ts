@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject } from "@angular/core";
+import { Component, DestroyRef, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
@@ -37,7 +37,6 @@ import { PoiProperties } from "../../services/osm-tags.service";
 import { RouteStrings } from "../../services/hash.service";
 import { Urls } from "../../urls";
 import type { ApplicationState } from "../../models";
-import sceneryPlaceholder from "../../../content/lottie/placeholder-scenery.json";
 
 @Component({
     selector: "public-routes",
@@ -47,23 +46,23 @@ import sceneryPlaceholder from "../../../content/lottie/placeholder-scenery.json
 })
 export class PublicRoutesComponent {
     public readonly lottieScenery: AnimationOptions = {
-        animationData: sceneryPlaceholder
+        path: "content/lottie/placeholder-scenery.json"
     };
-    public mapStyle: StyleSpecification;
-    public showMap = true;
+    public readonly mapStyle: StyleSpecification;
+    public readonly showMap = signal(true);
     public readonly routesSrouceId = "routes-of-interest";
 
-    public poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
-    public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> = {
+    public readonly poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
+    public readonly poiGeoJsonData = signal<GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties>>({
         type: "FeatureCollection",
         features: []
-    };
-    public hoverFeature: GeoJSON.Feature<GeoJSON.Point> = null;
-    public selectedRouteGeoJson: GeoJSON.FeatureCollection = {
+    });
+    public readonly hoverFeature = signal<GeoJSON.Feature<GeoJSON.Point>>(null);
+    public readonly selectedRouteGeoJson = signal<GeoJSON.FeatureCollection>({
         type: "FeatureCollection",
         features: []
-    };
-    public selectedRoutePoint: GeoJSON.Feature<GeoJSON.Point, PoiProperties> = null;
+    });
+    public readonly selectedRoutePoint = signal<GeoJSON.Feature<GeoJSON.Point, PoiProperties>>(null);
 
     public readonly resources = inject(ResourcesService);
 
@@ -112,21 +111,21 @@ export class PublicRoutesComponent {
         let features = this.poiService.getPublicRoutes(filters).features;
         const sortBy = [(f: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) => f.properties.poiLength];
         features = orderBy(features, sortBy, ["desc"]);
-        this.poiGeoJsonData = {
+        this.poiGeoJsonData.set({
             type: "FeatureCollection",
             features
-        }
+        });
     }
 
     public async onStartPointClick(feature: GeoJSON.Feature<GeoJSON.Point, PoiProperties>, event: MouseEvent) {
         event.stopPropagation();
-        if (this.selectedRoutePoint?.properties.poiId === feature.properties.poiId) {
-            this.selectedRoutePoint = null;
-            this.selectedRouteGeoJson = {
+        if (this.selectedRoutePoint()?.properties.poiId === feature.properties.poiId) {
+            this.selectedRoutePoint.set(null);
+            this.selectedRouteGeoJson.set({
                 type: "FeatureCollection",
                 features: []
-            };
-            this.hoverFeature = null;
+            });
+            this.hoverFeature.set(null);
             return;
         }
         ScrollToDirective.scrollTo(`route-${feature.properties.poiId}`, 60);
@@ -134,20 +133,20 @@ export class PublicRoutesComponent {
     }
 
     public async moveToFeature(feature: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
-        this.showMap = true;
-        this.selectedRoutePoint = feature;
-        this.hoverFeature = null;
+        this.showMap.set(true);
+        this.selectedRoutePoint.set(feature);
+        this.hoverFeature.set(null);
         const fullFeature = await this.poiService.getBasicInfo(feature.properties.identifier, feature.properties.poiSource, this.resources.getCurrentLanguageCodeSimplified());
-        this.selectedRouteGeoJson = {
+        this.selectedRouteGeoJson.set({
             type: "FeatureCollection",
             features: [fullFeature]
-        };
+        });
         if (feature.properties.poiSource === "OSM") {
             await this.poiService.updateExtendedInfo(fullFeature, this.resources.getCurrentLanguageCodeSimplified());
-            this.selectedRouteGeoJson = {
+            this.selectedRouteGeoJson.set({
                 type: "FeatureCollection",
                 features: [fullFeature]
-            };
+            });
         }
         const bounds = SpatialService.getBoundsForFeature(fullFeature);
         this.mapService.fitBounds(bounds, 100, { top: 100, left: 50, bottom: window.innerHeight / 2, right: 50 });
@@ -158,7 +157,7 @@ export class PublicRoutesComponent {
     }
 
     public hover(feature: GeoJSON.Feature<GeoJSON.Point>) {
-        this.hoverFeature = feature;
+        this.hoverFeature.set(feature);
     }
 
     public onSortChange() {

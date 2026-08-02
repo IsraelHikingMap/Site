@@ -1,4 +1,4 @@
-import { Component, inject, input, OnChanges } from "@angular/core";
+import { Component, inject, input, signal, OnChanges } from "@angular/core";
 import { NgClass } from "@angular/common";
 import { Store } from "@ngxs/store";
 
@@ -21,24 +21,24 @@ export class DescriptionComponent implements OnChanges {
     private readonly translationService = inject(TranslationService);
     private readonly store = inject(Store);
 
-    public description: string;
-    public showToggleTranslation = false;
-    public showingTranslated = true;
+    public readonly description = signal<string>("");
+    public readonly showToggleTranslation = signal(false);
+    public readonly showingTranslated = signal(true);
 
     public async ngOnChanges(): Promise<void> {
         if (!this.feature()) {
             return;
         }
-        this.description = await this.getDescription();
-        this.showToggleTranslation = this.translationService.isTranslationPossibleAndNeeded(this.feature()) &&
-            this.description !== this.translationService.getBestDescription(this.feature());
+        this.description.set(await this.getDescription());
+        this.showToggleTranslation.set(this.translationService.isTranslationPossibleAndNeeded(this.feature()) &&
+            this.description() !== this.translationService.getBestDescription(this.feature()));
     }
 
     private async getDescription(): Promise<string> {
         if (!this.feature()) {
             return "";
         }
-        const description = this.showingTranslated && this.translationService.isTranslationPossibleAndNeeded(this.feature())
+        const description = this.showingTranslated() && this.translationService.isTranslationPossibleAndNeeded(this.feature())
             ? await this.translationService.getTranslatedDescription(this.feature())
             : this.translationService.getBestDescription(this.feature());
 
@@ -56,7 +56,7 @@ export class DescriptionComponent implements OnChanges {
     }
 
     public async toggleTranslation(): Promise<void> {
-        this.showingTranslated = !this.showingTranslated;
-        this.description = await this.getDescription();
+        this.showingTranslated.set(!this.showingTranslated());
+        this.description.set(await this.getDescription());
     }
 }

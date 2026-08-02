@@ -7,52 +7,52 @@ import type { ConfigurationState, Language, BatteryOptimizationType, Theme } fro
 
 
 export class SetLanguageAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public language: Language) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly language: Language) { }
 }
 
 export class SetBatteryOptimizationTypeAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public batteryOptimizationType: BatteryOptimizationType) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly batteryOptimizationType: BatteryOptimizationType) { }
 }
 
 export class ToggleAutomaticRecordingUploadAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = this.prototype.constructor.name;
 }
 
 export class ToggleGotLostWarningsAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = this.prototype.constructor.name;
 }
 
 export class ToggleIsShowSlopeAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = this.prototype.constructor.name;
 }
 
 export class ToggleIsShowKmMarkersAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = this.prototype.constructor.name;
 }
 
 export class StopShowingBatteryConfirmationAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = this.prototype.constructor.name;
 }
 
 export class StopShowingIntroAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = this.prototype.constructor.name;
 }
 
 export class SetUnitsAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public units: "metric" | "imperial") { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly units: "metric" | "imperial") { }
 }
 
 export class SetDateFormatAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public dateFormat: string) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly dateFormat: string) { }
 }
 
 export class SetThemeAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public theme: Theme) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly theme: Theme) { }
 }
 
 @State<ConfigurationState>({

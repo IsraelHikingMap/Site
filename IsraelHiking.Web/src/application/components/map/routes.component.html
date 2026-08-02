@@ -1,7 +1,7 @@
-﻿<routes-path [routesGeoJson]="routesGeoJson" (lineLayerMouseEnter)="routeLineMouseEnter($event)"
+﻿<routes-path [routesGeoJson]="routesGeoJson()" (lineLayerMouseEnter)="routeLineMouseEnter($event)"
   (lineLayerMouseMove)="routeLineMouseOver($event)" (lineLayerMouseLeave)="routeLineMouseLeave()"
   (lineLayerClick)="routeLineClick($event)" (pointsLayerClick)="nonEditRoutePointClick($event)"></routes-path>
-<mgl-geojson-source [id]="resources.editRouteSource" [data]="editingRouteGeoJson"></mgl-geojson-source>
+<mgl-geojson-source [id]="resources.editRouteSource" [data]="editingRouteGeoJson()"></mgl-geojson-source>
 <mgl-layer [id]="resources.editRouteLines" type="line" [source]="resources.editRouteSource"
   [filter]="['==', '$type', 'LineString']" [before]="resources.endOfRoutes" [layout]="{
                 'line-cap': 'butt',
@@ -33,29 +33,29 @@
             }">
 </mgl-layer>
 
-@if (routePointPopupData) {
-<mgl-popup [lngLat]="[routePointPopupData.latlng.lng, routePointPopupData.latlng.lat]"
+@if (routePointPopupData()) {
+<mgl-popup [lngLat]="[routePointPopupData().latlng.lng, routePointPopupData().latlng.lat]"
   (popupClose)="closeRoutePointPopup()">
-  <route-point-overlay [latlng]="routePointPopupData.latlng" [segmentIndex]="routePointPopupData.segmentIndex"
+  <route-point-overlay [latlng]="routePointPopupData().latlng" [segmentIndex]="routePointPopupData().segmentIndex"
     (closed)="closeRoutePointPopup()"></route-point-overlay>
 </mgl-popup>
 }
 
-@if (nonEditRoutePointPopupData) {
-<mgl-popup [lngLat]="[nonEditRoutePointPopupData.latlng.lng, nonEditRoutePointPopupData.latlng.lat]"
-  (popupClose)="nonEditRoutePointPopupData = null">
+@if (nonEditRoutePointPopupData()) {
+<mgl-popup [lngLat]="[nonEditRoutePointPopupData().latlng.lng, nonEditRoutePointPopupData().latlng.lat]"
+  (popupClose)="nonEditRoutePointPopupData.set(null)">
   <div [dir]="resources.direction">
     <div class="flex flex-row gap-1">
       <div class="flex-1">
         <div class="flex flex-col text-center">
-          <a mat-button class="w-full" [href]="nonEditRoutePointPopupData.wazeAddress" target="_blank"
+          <a mat-button class="w-full" [href]="nonEditRoutePointPopupData().wazeAddress" target="_blank"
             matTooltip="{{resources.navigateWithWaze}}" matTooltipPosition="above"><i class="fa icon-waze"></i></a>
           {{resources.navigateWithWaze}}
         </div>
       </div>
       <div class="flex-1">
         <div class="flex flex-col text-center">
-          <a mat-button class="w-full" [href]="nonEditRoutePointPopupData.googleMapsAddress" target="_blank"
+          <a mat-button class="w-full" [href]="nonEditRoutePointPopupData().googleMapsAddress" target="_blank"
             matTooltip="{{resources.navigateWithGoogleMaps}}" matTooltipPosition="above"><i
               class="fa icon-map-marker"></i>
           </a>
@@ -64,7 +64,7 @@
       </div>
       <div class="flex-1">
         <div class="flex flex-col text-center">
-          <button mat-button class="w-full" (click)="switchToEditMode(nonEditRoutePointPopupData.routeId)"
+          <button mat-button class="w-full" (click)="switchToEditMode(nonEditRoutePointPopupData().routeId)"
             matTooltip="{{resources.edit}}" matTooltipPosition="above"><i class="fa icon-pencil"></i></button>
           {{resources.edit}}
         </div>
@@ -75,7 +75,7 @@
 }
 
 
-@for (route of routes; track route) {
+@for (route of routes(); track route) {
 @if (route.state !== 'Hidden') {
 @for (marker of route.markers; track marker; let idx = $index) {
 <mgl-marker anchor="bottom" [draggable]="isRouteInEditPoiMode(route)" [lngLat]="marker.latlng"

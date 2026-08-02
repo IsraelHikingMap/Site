@@ -1,6 +1,5 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, computed } from "@angular/core";
 import { RouterLink, RouterLinkActive } from "@angular/router";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatButton } from "@angular/material/button";
 import { MatMenuTrigger, MatMenu, MatMenuItem } from "@angular/material/menu";
 import { MatDialog } from "@angular/material/dialog";
@@ -36,9 +35,6 @@ import type { UserInfo, ApplicationState } from "../models";
 })
 export class MainMenuComponent {
 
-    public userInfo: UserInfo = null;
-    public drawingVisible = false;
-
     public readonly resources = inject(ResourcesService);
 
     private readonly authorizationService = inject(AuthorizationService);
@@ -52,17 +48,17 @@ export class MainMenuComponent {
     private readonly purchaseService = inject(PurchaseService);
     private readonly store = inject(Store);
 
+    public userInfo = this.store.selectSignal((state: ApplicationState) => state.userState.userInfo);
+    private readonly isSubscribed = this.store.selectSignal((state: ApplicationState) => state.offlineState.isSubscribed);
+
+    public readonly isLoggedIn = computed(() => this.userInfo() != null);
+
     constructor() {
-        this.store.select((state: ApplicationState) => state.userState.userInfo).pipe(takeUntilDestroyed()).subscribe(userInfo => this.userInfo = userInfo);
         if (this.runningContextService.isCapacitor) {
             App.getInfo().then((info) => {
                 this.loggingService.info(`App version: ${info.version}`);
             });
         }
-    }
-
-    public isLoggedIn() {
-        return this.userInfo != null;
     }
 
     public isApp() {
@@ -95,13 +91,13 @@ export class MainMenuComponent {
 
     public async reportAnIssue() {
         this.toastService.info(this.resources.preparingDataForIssueReport);
-        const baseLayer = this.layersService.getSelectedBaseLayer();
+        const baseLayer = this.layersService.selectedBaseLayer();
         this.loggingService.info("--- Reporting an issue ---");
         const subscription = timer(8000, 8000).subscribe(() => {
             this.toastService.info(this.resources.notYet);
         });
         const logs = await this.loggingService.getLog();
-        const userInfo = this.userInfo || {
+        const userInfo = this.userInfo() || {
             displayName: "non-registered user",
             id: "----"
         } as UserInfo;
@@ -110,7 +106,7 @@ export class MainMenuComponent {
             `Username: ${userInfo.displayName}`,
             `Map Location: ${this.hashService.getMapAddress()}`,
             `Baselayer: ${baseLayer.key}, ${baseLayer.address}`,
-            `Visible overlays: ${JSON.stringify(this.layersService.getAllOverlays().filter(o => this.layersService.isOverlayVisible(o)))}`,
+            `Visible overlays: ${JSON.stringify(this.layersService.allOverlays().filter(o => this.layersService.isOverlayVisible(o)))}`,
             ""
         ].join("\n");
         const subject = "Issue reported by " + userInfo.displayName;
@@ -172,8 +168,7 @@ export class MainMenuComponent {
     }
 
     public isOfflineDownloadAvailable() {
-        return this.runningContextService.isCapacitor &&
-            this.store.selectSnapshot((s: ApplicationState) => s.offlineState).isSubscribed;
+        return this.runningContextService.isCapacitor && this.isSubscribed();
     }
 
     public isPurchaseAvailable() {

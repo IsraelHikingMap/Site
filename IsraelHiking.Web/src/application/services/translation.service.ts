@@ -14,7 +14,7 @@ export type TranslationResponse = {
 export class TranslationService {
     private readonly httpClient = inject(HttpClient);
     private readonly resources = inject(ResourcesService);
-    private translationCache = new Map<string, string>();
+    private readonly translationCache = new Map<string, string>();
 
     public isTranslationPossibleAndNeeded(feature: Immutable<GeoJSON.Feature>): boolean {
         const language = this.resources.getCurrentLanguageCodeSimplified();

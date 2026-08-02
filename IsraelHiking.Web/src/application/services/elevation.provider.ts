@@ -17,7 +17,7 @@ export class ElevationProvider {
     private readonly transparentPngUrl =
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=";
 
-    private elevationCache = new QuickLRU<string, Uint8ClampedArray>({ maxSize: 100 });
+    private readonly elevationCache = new QuickLRU<string, Uint8ClampedArray>({ maxSize: 100 });
 
     private readonly httpClient = inject(HttpClient);
     private readonly loggingService = inject(LoggingService);

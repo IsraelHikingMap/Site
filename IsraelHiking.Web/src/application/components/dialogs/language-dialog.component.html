@@ -19,7 +19,7 @@
     <div mat-dialog-actions>
       <div class="flex flex-row w-full">
         <button class="w-full" mat-dialog-close mat-button (click)="saveLanguage()" analyticsOn="click"
-          analyticsCategory="Language" analyticsLabel="Save language {{selectedLanguageCode}}"
+          analyticsCategory="Language" analyticsLabel="Save language {{selectedLanguageCode()}}"
           matTooltip="{{resources.save}}" matTooltipPosition="above"><i class="fa icon-check"></i></button>
       </div>
     </div>

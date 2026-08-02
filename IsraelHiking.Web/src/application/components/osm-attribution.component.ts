@@ -15,7 +15,7 @@ export class OsmAttributionComponent {
     private readonly runningContextService = inject(RunningContextService);
 
     public getEditAddress(): string {
-        return this.osmAddressService.getOsmAddress();
+        return this.osmAddressService.osmAddress();
     }
 
     public isMobile(): boolean {

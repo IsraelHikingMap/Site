@@ -34,8 +34,8 @@ import type { ApplicationState, BatteryOptimizationType, Theme } from "../../mod
 })
 export class ConfigurationDialogComponent {
 
-    public manageSubscriptions: string;
-    public username: string;
+    public readonly manageSubscriptions: string;
+    public readonly username: string;
 
     public readonly resources = inject(ResourcesService);
 

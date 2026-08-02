@@ -18,8 +18,8 @@ export class GeoLocationService {
     private wasInitialized = false;
     private lastReceivedPosition: GeolocationPosition | null = null;
 
-    public positionWhileInBackground = new EventEmitter<GeolocationPosition>();
-    public backToForeground = new EventEmitter<void>();
+    public readonly positionWhileInBackground = new EventEmitter<GeolocationPosition>();
+    public readonly backToForeground = new EventEmitter<void>();
 
     private readonly resources = inject(ResourcesService);
     private readonly selectedRouteService = inject(SelectedRouteService);

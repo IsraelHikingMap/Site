@@ -1,8 +1,8 @@
 import { inject, Injectable, NgZone } from "@angular/core";
-import { MapMouseEvent, Map } from "maplibre-gl";
 import { MatDialog } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
+import type { MapMouseEvent, Map } from "maplibre-gl";
 
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
@@ -31,7 +31,7 @@ export class RouteEditPoiInteraction {
         }
     }
 
-    private handleClick = (event: MapMouseEvent) => {
+    private readonly handleClick = (event: MapMouseEvent) => {
         if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "tracking") {
             const latLng = event.lngLat;
             const point = event.target.project(latLng);

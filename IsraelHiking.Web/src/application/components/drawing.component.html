@@ -35,7 +35,7 @@
     <i class="fa icon-none fa-lg"></i>
   </button>
   }
-  <button mat-button (click)="undo()" [disabled]="(undoQueueLength$ | async) === 0" matTooltip="{{resources.undo}}"
+  <button mat-button (click)="undo()" [disabled]="undoQueueLength() === 0" matTooltip="{{resources.undo}}"
     matTooltipPosition="left" analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Draw undo">
     <i class="fa icon-mail-reply fa-lg"></i>
   </button>

@@ -107,25 +107,15 @@ describe("FileService", () => {
     ));
 
     it("Should not get a file from event when there's no files", inject([FileService], (service: FileService) => {
-        const file = service.getFileFromEvent({ target: { files: [] } });
+        const files = service.getFilesFromEvent({ target: { files: [] } } as any);
 
-        expect(file).toBe(null);
-    }));
-
-    it("Should get a file from event and clear input", inject([FileService], (service: FileService) => {
-        const event = {
-            target: { files: [{}], value: "123" }
-        };
-        const file = service.getFileFromEvent(event);
-
-        expect(file).not.toBe(null);
-        expect(event.target.value).toBe("");
+        expect(files).toHaveLength(0);
     }));
 
     it("Should not get a files from event", inject([FileService], (service: FileService) => {
         const event = {
             target: { dataTransfer: [] as any[] }
-        };
+        } as any;
         const files = service.getFilesFromEvent(event);
 
         expect(files.length).toBe(0);
@@ -134,7 +124,7 @@ describe("FileService", () => {
     it("Should get a files from event and clear input", inject([FileService], (service: FileService) => {
         const event = {
             target: { files: [{}], value: "123" }
-        };
+        } as any;
         const files = service.getFilesFromEvent(event);
 
         expect(files.length).toBe(1);

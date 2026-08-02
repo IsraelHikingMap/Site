@@ -35,7 +35,7 @@ export class OfflineFilesDownloadService {
     private downloadedFilesInCurrentSession: string[] = [];
     private _currentDownloadedTile: { tileX: number, tileY: number, progress: Record<number, number> } | null = null;
 
-    public tilesProgressChanged = new EventEmitter<{ tileX: number, tileY: number, progressValue: number }>();
+    public readonly tilesProgressChanged = new EventEmitter<{ tileX: number, tileY: number, progressValue: number }>();
     public get currentDownloadedTile() {
         return this._currentDownloadedTile;
     }

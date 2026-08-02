@@ -23,7 +23,7 @@
         class="whitespace-pre-line {{resources.getTextAlignment(description)}}">
         {{description}}</p>
     </div>
-    @if (showCoordinates) {
+    @if (showCoordinates()) {
     <div class="flex flex-row">
       <coordinates [latlng]="marker.latlng"></coordinates>
     </div>

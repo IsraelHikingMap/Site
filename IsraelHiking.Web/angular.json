@@ -17,9 +17,7 @@
             },
             "index": "src/index.html",
             "tsConfig": "./tsconfig.app.json",
-            "polyfills": [
-              "src/polyfills.ts"
-            ],
+            "polyfills": [],
             "assets": [
               "src/content",
               "src/translations",
@@ -36,6 +34,16 @@
                 "glob": "**/add-protocol-worker.js",
                 "input": "./node_modules/maplibre-contour/dist",
                 "output": "./"
+              },
+              {
+                "glob": "maplibre-gl-worker.mjs",
+                "input": "node_modules/maplibre-gl/dist",
+                "output": "./"
+              },
+              {
+                "glob": "maplibre-gl-shared.mjs",
+                "input": "node_modules/maplibre-gl/dist",
+                "output": "./"
               }
             ],
             "styles": [
@@ -48,19 +56,14 @@
             },
             "scripts": [],
             "allowedCommonJsDependencies": [
-              "photoswipe",
               "lottie-web",
-              "maplibre-gl",
-              "@mapbox/vector-tile",
-              "pbf",
               "linear-interpolator",
               "deepmerge",
               "xml-beautify",
-              "d3-regression",
               "platform",
-              "osm2geojson-lite",
+              "isomorphic-xml2js",
               "piexif-ts",
-              "isomorphic-xml2js"
+              "rbush"
             ],
             "extractLicenses": false,
             "sourceMap": true,
