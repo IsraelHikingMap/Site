@@ -21,8 +21,10 @@ import type { ApplicationState, LatLngAltTime, RoutingType } from "../models";
 @Injectable()
 export class RoutingProvider {
     private static readonly MAX_ROUTING_ZOOM = 14;
-    private static readonly ROUTING_SCHEMA = "IHM-schema";
-    private static readonly ROUTING_CLASS_PROPERTY_NAME = "ihm_class";
+    private static readonly IHM_ROUTING_SCHEMA = "IHM-schema";
+    private static readonly MAPEAK_ROUTING_SCHEMA = "mapeak-schema";
+    private static readonly IHM_ROUTING_CLASS_PROPERTY_NAME = "ihm_class";
+    private static readonly MAPEAK_ROUTING_CLASS_PROPERTY_NAME = "hike_class";
 
     private readonly featuresCache = new QuickLRU<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>({ maxSize: 100 });
 
@@ -80,9 +82,14 @@ export class RoutingProvider {
         if (tileXmax - tileXmin > 2 || tileYmax - tileYmin > 2) {
             throw new Error("Offline routing is only supported for adjecent tiles maximum...");
         }
+        let schema = RoutingProvider.IHM_ROUTING_SCHEMA;
         for (const tile of tiles) {
-            if (!await this.pmTilesService.isOfflineFileAvailable(zoom, tile.x, tile.y, RoutingProvider.ROUTING_SCHEMA)) {
+            if (!await this.pmTilesService.isOfflineFileAvailable(zoom, tile.x, tile.y, RoutingProvider.IHM_ROUTING_SCHEMA)
+                && !await this.pmTilesService.isOfflineFileAvailable(zoom, tile.x, tile.y, RoutingProvider.MAPEAK_ROUTING_SCHEMA)) {
                 throw new Error("Unable to find offline route, some tiles are missing");
+            }
+            if (await this.pmTilesService.isOfflineFileAvailable(zoom, tile.x, tile.y, RoutingProvider.MAPEAK_ROUTING_SCHEMA)) {
+                schema = RoutingProvider.MAPEAK_ROUTING_SCHEMA;
             }
         }
         // increase the chance of getting a route by adding more tiles
@@ -92,20 +99,8 @@ export class RoutingProvider {
         if (tileYmax === tileYmin) {
             tileYmax += 1;
         }
-        let features = await this.updateCacheAndGetFeatures(tileXmin, tileXmax, tileYmin, tileYmax, zoom);
-        if (routinType === "4WD") {
-            features = features.filter(f =>
-                f.properties.ihm_class !== "footway" &&
-                f.properties.ihm_class !== "pedestrian" &&
-                f.properties.ihm_class !== "path" &&
-                f.properties.ihm_class !== "cycleway" &&
-                f.properties.ihm_class !== "steps");
-        } else if (routinType === "Bike") {
-            features = features.filter(
-                f => f.properties.ihm_class !== "footway" &&
-                    f.properties.ihm_class !== "pedestrian" &&
-                    f.properties.ihm_class !== "steps");
-        }
+        let features = await this.updateCacheAndGetFeatures(tileXmin, tileXmax, tileYmin, tileYmax, zoom, schema);
+        features = this.filterFeaturesByRoutingType(features, routinType, schema);
         const startFeature = SpatialService.insertProjectedPointToClosestLineAndReplaceIt(latlngStart, features);
         const endFeature = SpatialService.insertProjectedPointToClosestLineAndReplaceIt(latlngEnd, features);
 
@@ -129,7 +124,9 @@ export class RoutingProvider {
         tileXmax: number,
         tileYmin: number,
         tileYmax: number,
-        zoom: number): Promise<GeoJSON.Feature<GeoJSON.LineString>[]> {
+        zoom: number,
+        schema: string
+    ): Promise<GeoJSON.Feature<GeoJSON.LineString>[]> {
         const allCollection = [];
         for (let tileX = tileXmin; tileX <= tileXmax; tileX++) {
             for (let tileY = tileYmin; tileY <= tileYmax; tileY++) {
@@ -142,13 +139,13 @@ export class RoutingProvider {
                     type: "FeatureCollection",
                     features: []
                 } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
-                const arrayBuffer = await this.pmTilesService.getTileByType(zoom, tileX, tileY, RoutingProvider.ROUTING_SCHEMA);
+                const arrayBuffer = await this.pmTilesService.getTileByType(zoom, tileX, tileY, schema);
                 const tile = new VectorTile(new PbfReader(arrayBuffer));
                 for (const layerKey of Object.keys(tile.layers)) {
                     const layer = tile.layers[layerKey];
                     for (let featureIndex = 0; featureIndex < layer.length; featureIndex++) {
                         const feature = layer.feature(featureIndex);
-                        const isHighway = Object.keys(feature.properties).find(k => k === RoutingProvider.ROUTING_CLASS_PROPERTY_NAME) != null;
+                        const isHighway = Object.keys(feature.properties).find(k => k === RoutingProvider.IHM_ROUTING_CLASS_PROPERTY_NAME || k === RoutingProvider.MAPEAK_ROUTING_CLASS_PROPERTY_NAME) != null;
                         if (!isHighway) {
                             continue;
                         }
@@ -174,7 +171,27 @@ export class RoutingProvider {
                 allCollection.push(collection);
             }
         }
-
         return allCollection.map(c => c.features).flat();
+    }
+
+    private filterFeaturesByRoutingType(features: GeoJSON.Feature<GeoJSON.LineString>[], routingType: RoutingType, schema: string): GeoJSON.Feature<GeoJSON.LineString>[] {
+        let className = RoutingProvider.IHM_ROUTING_CLASS_PROPERTY_NAME;
+        if (schema === RoutingProvider.MAPEAK_ROUTING_SCHEMA) {
+            className = RoutingProvider.MAPEAK_ROUTING_CLASS_PROPERTY_NAME;
+        }
+        if (routingType === "4WD") {
+            return features.filter(f =>
+                f.properties[className] !== "footway" &&
+                f.properties[className] !== "pedestrian" &&
+                f.properties[className] !== "path" &&
+                f.properties[className] !== "cycleway" &&
+                f.properties[className] !== "steps");
+        } else if (routingType === "Bike") {
+            return features.filter(
+                f => f.properties[className] !== "footway" &&
+                    f.properties[className] !== "pedestrian" &&
+                    f.properties[className] !== "steps");
+        }
+        return features;
     }
 }

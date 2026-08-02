@@ -125,7 +125,7 @@ public class FilesController : ControllerBase
             return Forbid();
         }
         _logger.LogInformation($"Getting the list of offline files for user: {User.Identity?.Name}, date: {lastModified}");
-        return Ok(_offlineFilesService.GetUpdatedFilesList(lastModified, tileX, tileY));
+        return Ok(await _offlineFilesService.GetUpdatedFilesList(lastModified, tileX, tileY));
     }
 
     /// <summary>
