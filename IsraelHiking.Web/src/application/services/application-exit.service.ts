@@ -1,4 +1,4 @@
-import { inject, Injectable, NgZone } from "@angular/core";
+import { inject, NgZone, Service } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { App } from "@capacitor/app";
 
@@ -14,7 +14,7 @@ import { ImageGalleryService } from "./image-gallery.service";
 
 type ExitState = "None" | "FirstClick" | "SecondClick";
 
-@Injectable()
+@Service()
 export class ApplicationExitService {
     private state: ExitState = "None";
     private readonly resources = inject(ResourcesService);

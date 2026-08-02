@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter, inject, computed } from "@angular/core";
+import { EventEmitter, inject, computed, Service } from "@angular/core";
 import { some } from "lodash-es";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
@@ -53,7 +53,7 @@ export const SEGMENT_POINT = "_segmentpoint_";
 const START_COLOR = "#43a047";
 const END_COLOR = "red";
 
-@Injectable()
+@Service()
 export class SelectedRouteService {
     private static readonly MERGE_THRESHOLD = 50; // meter.
 

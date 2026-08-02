@@ -1,4 +1,4 @@
-import { Injectable, inject } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
 
@@ -30,7 +30,7 @@ import { SelectedRouteService } from "./selected-route.service";
 import { CarService } from "./car.service";
 import type { ApplicationState } from "../models";
 
-@Injectable()
+@Service()
 export class ApplicationInitializeService {
 
     private readonly dialog = inject(MatDialog);

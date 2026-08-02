@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, timeout } from "rxjs";
 import osmtogeojson from "osm2geojson-lite";
@@ -13,7 +13,7 @@ type OsmResponse = {
 }
 
 
-@Injectable()
+@Service()
 export class OverpassTurboService {
 
     private readonly httpClient = inject(HttpClient);

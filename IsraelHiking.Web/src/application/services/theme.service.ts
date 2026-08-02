@@ -1,9 +1,9 @@
-import { DOCUMENT, inject, Injectable } from "@angular/core";
+import { DOCUMENT, inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 
 import type { ApplicationState, Theme } from "../models";
 
-@Injectable()
+@Service()
 export class ThemeService {
     public static readonly DARK_THEME_CLASS = "dark-theme";
 

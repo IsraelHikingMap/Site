@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { Store } from "@ngxs/store";
@@ -30,7 +30,7 @@ type OsmTraces = {
     traces: OsmTrace[];
 }
 
-@Injectable()
+@Service()
 export class TracesService {
 
     private readonly resources = inject(ResourcesService);

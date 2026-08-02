@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import type { RasterLayerSpecification, RasterSourceSpecification, StyleSpecification } from "maplibre-gl";
 
@@ -8,7 +8,7 @@ import { FileService } from "./file.service";
 import { DEFAULT_BASE_LAYERS } from "../reducers/initial-state";
 import type { ApplicationState, EditableLayer, LayerData } from "../models";
 
-@Injectable()
+@Service()
 export class DefaultStyleService {
     private static indexNumber = 0;
     private static readonly NIGHT_LAND_COLOR = "#1B1B1B";

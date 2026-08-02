@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 
 import { ResourcesService } from "./resources.service";
 import { firstValueFrom, timeout } from "rxjs";
@@ -40,7 +40,7 @@ export type WikiPage = {
     }
 }
 
-@Injectable()
+@Service()
 export class WikidataService {
 
     private readonly resources: ResourcesService = inject(ResourcesService);

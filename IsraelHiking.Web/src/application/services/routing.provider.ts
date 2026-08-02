@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
@@ -18,7 +18,7 @@ import { ElevationProvider } from "./elevation.provider";
 import { Urls } from "../urls";
 import type { ApplicationState, LatLngAltTime, RoutingType } from "../models";
 
-@Injectable()
+@Service()
 export class RoutingProvider {
     private static readonly MAX_ROUTING_ZOOM = 14;
     private static readonly ROUTING_SCHEMA = "IHM-schema";

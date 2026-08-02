@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import type { Immutable } from "immer";
 
 import { SpatialService } from "./spatial.service";
@@ -10,7 +10,7 @@ export type SnappingPointResponse = {
     markerData: Immutable<MarkerData>;
 };
 
-@Injectable()
+@Service()
 export class SnappingService {
     private static readonly SENSITIVITY = 30;
 

@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 import QuickLRU from "quick-lru";
@@ -8,7 +8,7 @@ import { SpatialService } from "./spatial.service";
 import { PmTilesService } from "./pmtiles.service";
 import type { LatLngAltTime } from "../models";
 
-@Injectable()
+@Service()
 export class ElevationProvider {
 
     static readonly MAX_ELEVATION_ZOOM = 11;

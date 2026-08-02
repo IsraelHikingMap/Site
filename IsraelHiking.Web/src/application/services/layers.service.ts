@@ -1,4 +1,4 @@
-import { inject, Injectable, computed } from "@angular/core";
+import { inject, computed, Service } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Params } from "@angular/router";
 import { firstValueFrom } from "rxjs";
@@ -38,7 +38,7 @@ type UserLayer = EditableLayer & {
     osmUserId: string;
 }
 
-@Injectable()
+@Service()
 export class LayersService {
     private userInfo: Immutable<UserInfo>;
 

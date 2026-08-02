@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { registerPlugin } from "@capacitor/core";
 import { Store } from "@ngxs/store";
 import { skip } from "rxjs";
@@ -22,7 +22,7 @@ interface ReactivePreferencesPlugin {
 
 const ReactivePreferences = registerPlugin<ReactivePreferencesPlugin>("ReactivePreferences");
 
-@Injectable()
+@Service()
 export class CarService {
 
     private readonly store = inject(Store);
