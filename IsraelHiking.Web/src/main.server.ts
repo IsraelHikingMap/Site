@@ -1,7 +1,8 @@
 import {
     BootstrapContext,
     bootstrapApplication,
-    provideClientHydration
+    provideClientHydration,
+    withNoIncrementalHydration
 } from "@angular/platform-browser";
 import { AppRootComponent } from "./application/components/screens/app-root.component";
 import { config } from "./application/app.config.server";
@@ -11,7 +12,7 @@ const bootstrap = (context: BootstrapContext) =>
         ...config,
         providers: [
             ...config.providers,
-            provideClientHydration()]
+            provideClientHydration(withNoIncrementalHydration())]
     }, context);
 
 export default bootstrap;

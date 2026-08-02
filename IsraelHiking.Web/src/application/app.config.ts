@@ -1,40 +1,13 @@
 import { provideAppInitializer, ErrorHandler, importProvidersFrom, inject, ApplicationConfig } from "@angular/core";
 import { provideHttpClient, withFetch, withInterceptors } from "@angular/common/http";
 import { Title, BrowserModule } from "@angular/platform-browser";
-import { CommonModule } from "@angular/common";
-import { MatDialogModule } from "@angular/material/dialog";
-import { MatButtonModule } from "@angular/material/button";
-import { MatInputModule } from "@angular/material/input";
-import { MatSnackBarModule } from "@angular/material/snack-bar";
-import { MatSliderModule } from "@angular/material/slider";
-import { MatAutocompleteModule } from "@angular/material/autocomplete";
-import { MatSlideToggleModule } from "@angular/material/slide-toggle";
-import { MatTooltipModule } from "@angular/material/tooltip";
-import { MatSelectModule } from "@angular/material/select";
-import { MatProgressBarModule } from "@angular/material/progress-bar";
-import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
-import { MatTabsModule } from "@angular/material/tabs";
-import { MatRadioModule } from "@angular/material/radio";
-import { MatCheckboxModule } from "@angular/material/checkbox";
-import { MatToolbarModule } from "@angular/material/toolbar";
-import { MatMenuModule } from "@angular/material/menu";
-import { MatExpansionModule } from "@angular/material/expansion";
-import { MatDividerModule } from "@angular/material/divider";
-import { MatCardModule } from "@angular/material/card";
-import { MatGridListModule } from "@angular/material/grid-list";
-import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { ClipboardModule } from "@angular/cdk/clipboard";
 import { provideRouter } from "@angular/router";
-import { DragDropModule } from "@angular/cdk/drag-drop";
-import { NgxMapLibreGLModule } from "@maplibre/ngx-maplibre-gl";
 import { provideNgIdle } from "@ng-idle/core";
-import { NgxsModule } from "@ngxs/store";
-import { InfiniteScrollDirective } from "ngx-infinite-scroll";
+import { NgxsModule, withNgxsNoopExecutionStrategy } from "@ngxs/store";
 import { progressInterceptor } from "ngx-progressbar/http";
 import { provideLottieOptions } from "ngx-lottie";
 import { saveAs } from "file-saver-es";
 import { provideMarkdown } from "ngx-markdown";
-import player from "lottie-web";
 // Services
 import { AuthorizationService } from "./services/authorization.service";
 import { osmTokenInterceptor } from "./services/osm-token.interceptor";
@@ -122,34 +95,7 @@ export const appConfig: ApplicationConfig = {
             await inject(ApplicationInitializeService).initialize();
         }),
         importProvidersFrom(
-            CommonModule,
             BrowserModule,
-            MatDialogModule,
-            MatButtonModule,
-            MatInputModule,
-            MatSnackBarModule,
-            MatSliderModule,
-            MatAutocompleteModule,
-            MatSlideToggleModule,
-            MatTooltipModule,
-            MatSelectModule,
-            MatProgressBarModule,
-            MatProgressSpinnerModule,
-            MatTabsModule,
-            MatRadioModule,
-            MatCheckboxModule,
-            MatToolbarModule,
-            MatMenuModule,
-            MatExpansionModule,
-            MatDividerModule,
-            MatCardModule,
-            MatGridListModule,
-            FormsModule,
-            ReactiveFormsModule,
-            ClipboardModule,
-            NgxMapLibreGLModule,
-            InfiniteScrollDirective,
-            DragDropModule,
             NgxsModule.forRoot([
                 ConfigurationReducer,
                 LocationReducer,
@@ -167,6 +113,7 @@ export const appConfig: ApplicationConfig = {
                 PaywallReducer
             ])
         ),
+        withNgxsNoopExecutionStrategy(),
         AuthorizationService,
         GetTextCatalogService,
         MapService,
@@ -236,7 +183,7 @@ export const appConfig: ApplicationConfig = {
         ),
         provideNgIdle(),
         provideRouter(routes),
-        provideLottieOptions({ player: () => player }),
+        provideLottieOptions({ player: () => import("lottie-web") }),
         provideMarkdown()
     ]
 }

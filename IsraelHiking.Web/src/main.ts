@@ -1,10 +1,12 @@
-import { enableProdMode, provideZoneChangeDetection } from "@angular/core";
+import { enableProdMode, provideZonelessChangeDetection } from "@angular/core";
 import { environment } from "./environments/environment";
 import {
     bootstrapApplication,
     provideClientHydration,
-    withEventReplay
+    withEventReplay,
+    withNoIncrementalHydration
 } from "@angular/platform-browser";
+import { provideMaplibreWorker } from "@maplibre/ngx-maplibre-gl/config"
 import { appConfig } from "./application/app.config";
 import { AppRootComponent } from "./application/components/screens/app-root.component";
 
@@ -15,8 +17,9 @@ if (environment.production) {
 bootstrapApplication(AppRootComponent, {
     ...appConfig,
     providers: [
-        provideZoneChangeDetection(),
+        provideZonelessChangeDetection(),
         ...appConfig.providers,
-        provideClientHydration(withEventReplay())
+        provideClientHydration(withEventReplay(), withNoIncrementalHydration()),
+        provideMaplibreWorker("maplibre-gl-worker.mjs")
     ]
 });

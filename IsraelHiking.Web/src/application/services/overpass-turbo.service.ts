@@ -1,7 +1,6 @@
 import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, timeout } from "rxjs";
-import { addProtocol } from "maplibre-gl";
 import osmtogeojson from "osm2geojson-lite";
 
 import { SpatialService } from "./spatial.service";
@@ -18,7 +17,8 @@ export class OverpassTurboService {
 
     private readonly httpClient = inject(HttpClient);
 
-    public initialize() {
+    public async initialize() {
+        const { addProtocol } = await import("maplibre-gl");
         addProtocol("overpass", async (params, _abortController) => {
             let url = params.url;
             if (url.startsWith("overpass://s/")) {

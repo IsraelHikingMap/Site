@@ -275,8 +275,9 @@ describe("LocationService", () => {
                 },
                 inMemoryState: { following: true, distance: true }
             });
+            // isFollowing is a computed; set the mock before initialize() so its first (memoized) evaluation sees it.
+            (selectedRouteService as any).isEditingRoute = () => true;
             await service.initialize();
-            selectedRouteService.isEditingRoute = () => true;
             mapService.moveToWithCurrentZoom = vi.fn();
 
             store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 4 } } as any));

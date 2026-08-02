@@ -13,7 +13,7 @@
             </mat-button-toggle>
         </mat-button-toggle-group>
     </div>
-    <div class="w-2/3" [ngClass]="{'max-md:hidden': !showMap, 'max-md:w-full': showMap}">
+    <div class="w-2/3" [ngClass]="{'max-md:hidden': !showMap(), 'max-md:w-full': showMap()}">
         <div class="absolute w-full top-0 magrin-top-with-toolbar z-10 hidden max-md:block">
             <public-routes-filter></public-routes-filter>
         </div>
@@ -35,7 +35,7 @@
             <mgl-layer [id]="resources.globalPointsExternalLayer" [source]="routesSrouceId" type="circle"
                 sourceLayer="external" [paint]="{'circle-color': 'transparent'}"
                 [before]="resources.endOfBaseLayer"></mgl-layer>
-            @for (feature of poiGeoJsonData.features; track feature.properties.poiId) {
+            @for (feature of poiGeoJsonData().features; track feature.properties.poiId) {
             <mgl-marker [lngLat]="feature.geometry.coordinates">
                 <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="onStartPointClick(feature, $event)"
                     (mouseenter)="hover(feature)" (mouseleave)="hover(null)" analyticsOn="click"
@@ -48,7 +48,7 @@
                 </span>
             </mgl-marker>
             }
-            <mgl-geojson-source id="selected-route" [data]="selectedRouteGeoJson"></mgl-geojson-source>
+            <mgl-geojson-source id="selected-route" [data]="selectedRouteGeoJson()"></mgl-geojson-source>
             <mgl-layer id="selected-route-left" type="line" source="selected-route" [paint]="{
                 'line-color': 'magenta',
                 'line-offset': -5,
@@ -74,55 +74,55 @@
                 'icon-color': 'magenta'
             }">
             </mgl-layer>
-            @if (hoverFeature) {
-            <mgl-popup [lngLat]="hoverFeature.geometry.coordinates" [closeButton]="false" [offset]="[0, -30]"
+            @if (hoverFeature()) {
+            <mgl-popup [lngLat]="hoverFeature().geometry.coordinates" [closeButton]="false" [offset]="[0, -30]"
                 class="text-right">
-                <div [dir]="resources.getDirection(getTitle(hoverFeature))">{{getTitle(hoverFeature)}}</div>
+                <div [dir]="resources.getDirection(getTitle(hoverFeature()))">{{getTitle(hoverFeature())}}</div>
             </mgl-popup>
             }
         </mgl-map>
-        @if (selectedRoutePoint) {
+        @if (selectedRoutePoint()) {
         <div class="hidden max-md:block fixed bottom-safe bg-surface w-full z-30 max-h-1/2 overflow-y-auto">
             <div class="flex flex-row justify-center items-center px-2 sticky top-0 bg-surface z-10 w-full mb-2">
-                <div class="flex-1 text-center text-xl">{{getTitle(selectedRoutePoint)}}</div>
-                <button mat-button class="w-1/6" type="button" (click)="selectedRoutePoint = null" tabindex="-1">
+                <div class="flex-1 text-center text-xl">{{getTitle(selectedRoutePoint())}}</div>
+                <button mat-button class="w-1/6" type="button" (click)="selectedRoutePoint.set(null)" tabindex="-1">
                     <i class="fa fa-lg icon-close"></i>
                 </button>
             </div>
-            @switch (selectedRoutePoint.properties.poiDifficulty) {
+            @switch (selectedRoutePoint().properties.poiDifficulty) {
             @case ("Easy") {
             <span class="rounded-full bg-green-500 p-2">
-                <i class="fa {{getIconFromType(selectedRoutePoint)}}"></i>
+                <i class="fa {{getIconFromType(selectedRoutePoint())}}"></i>
                 {{resources.easy}}
             </span>
             }
             @case ("Moderate") {
             <span class="rounded-full bg-yellow-500 p-2">
-                <i class="fa {{getIconFromType(selectedRoutePoint)}}"></i>
+                <i class="fa {{getIconFromType(selectedRoutePoint())}}"></i>
                 {{resources.legendModerate}}
             </span>
             }
             @case ("Hard") {
             <span class="rounded-full bg-red-500 p-2 text-white">
-                <i class="fa {{getIconFromType(selectedRoutePoint)}}"></i>
+                <i class="fa {{getIconFromType(selectedRoutePoint())}}"></i>
                 {{resources.legendAdvanced}}
             </span>
             }
             @case ("Very Hard") {
             <span class="rounded-full bg-black p-2 text-white">
-                <i class="fa {{getIconFromType(selectedRoutePoint)}}"></i>
+                <i class="fa {{getIconFromType(selectedRoutePoint())}}"></i>
                 {{resources.veryHard}}
             </span>
             }
             @default {
             <span class="rounded-full bg-unknown p-2">
-                <i class="fa {{getIconFromType(selectedRoutePoint)}}"></i>
+                <i class="fa {{getIconFromType(selectedRoutePoint())}}"></i>
             </span>
             }
             }
-            <span class="mx-2">{{selectedRoutePoint.properties.poiLength | distance}}</span>
+            <span class="mx-2">{{selectedRoutePoint().properties.poiLength | distance}}</span>
             <div class="flex flex-row">
-                <button class="mt-2" mat-button (click)="convertToRoute(selectedRoutePoint)" analyticsOn="click"
+                <button class="mt-2" mat-button (click)="convertToRoute(selectedRoutePoint())" analyticsOn="click"
                     analyticsCategory="Public routes" analyticsLabel="Add to routes">
                     <i class="fa icon-plus"></i>
                     {{resources.addToRoutes}}
@@ -135,9 +135,9 @@
                     {{resources.share}}
                 </button>
             </div>
-            @if (isEditable(selectedRoutePoint)) {
+            @if (isEditable(selectedRoutePoint())) {
             <div class="flex flex-row">
-                <button class="mt-2" (click)="navigateToEditPoi(selectedRoutePoint)" analyticsOn="click"
+                <button class="mt-2" (click)="navigateToEditPoi(selectedRoutePoint())" analyticsOn="click"
                     analyticsCategory="Public routes" analyticsLabel="Edit OSM route">
                     <i class="fa icon-pencil"></i>
                     {{resources.editProperties}}
@@ -145,34 +145,34 @@
             </div>
             }
             <mat-menu #shareMenu="matMenu">
-                <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).waze" [target]="'_blank'" analyticsOn="click"
+                <a mat-menu-item [href]="getShareLinks(selectedRoutePoint()).waze" [target]="'_blank'" analyticsOn="click"
                     analyticsCategory="Public routes" analyticsLabel="Navigate with waze">
                     <i class="fa icon-waze"></i>
                     {{resources.navigateWithWaze}}
                 </a>
-                <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).googleMaps" [target]="'_blank'"
+                <a mat-menu-item [href]="getShareLinks(selectedRoutePoint()).googleMaps" [target]="'_blank'"
                     analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Navigate with google maps">
                     <i class="fa icon-map-marker"></i>
                     {{resources.navigateWithGoogleMaps}}
                 </a>
                 @if (isApp()) {
-                <button mat-menu-item (click)=share(getShareLinks(selectedRoutePoint).poiLink) analyticsOn="click"
+                <button mat-menu-item (click)=share(getShareLinks(selectedRoutePoint()).poiLink) analyticsOn="click"
                     analyticsCategory="Public routes" analyticsLabel="Share with os capabilities">
                     <i class="fa icon-ellipsis-v"></i>
                     {{resources.share}}
                 </button>
                 } @else {
-                <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).facebook" [target]="'_blank'"
+                <a mat-menu-item [href]="getShareLinks(selectedRoutePoint()).facebook" [target]="'_blank'"
                     analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Share facebook route">
                     <i class="fa icon-facebook"></i>
                     {{resources.shareWithFacebook}}
                 </a>
-                <a mat-menu-item [href]="getShareLinks(selectedRoutePoint).whatsapp" [target]="'_blank'"
+                <a mat-menu-item [href]="getShareLinks(selectedRoutePoint()).whatsapp" [target]="'_blank'"
                     analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Share whatsapp route">
                     <i class="fa icon-whatsapp"></i>
                     {{resources.shareWithWhatsapp}}
                 </a>
-                <button mat-menu-item [cdkCopyToClipboard]="getShareLinks(selectedRoutePoint).poiLink"
+                <button mat-menu-item [cdkCopyToClipboard]="getShareLinks(selectedRoutePoint()).poiLink"
                     analyticsOn="click" analyticsCategory="Public routes"
                     analyticsLabel="Share copy to clipboard route">
                     <i class="fa icon-clipboard"></i>
@@ -182,29 +182,29 @@
             </mat-menu>
             <div class="flex flex-row mx-2">
                 <div class="relative w-full h-[200px] overflow-hidden">
-                    @if (selectedRoutePoint.properties.image) {
-                    <img class="w-full object-contain img-center" [src]="selectedRoutePoint.properties.image" alt="">
+                    @if (selectedRoutePoint().properties.image) {
+                    <img class="w-full object-contain img-center" [src]="selectedRoutePoint().properties.image" alt="">
                     } @else {
                     <ng-lottie class="max-w-full img-center" [options]="lottieScenery"></ng-lottie>
                     }
                 </div>
             </div>
             <div class="flex flex-row" class="text-center text-sm">
-                <image-attribution [imageUrl]="selectedRoutePoint.properties.image"
+                <image-attribution [imageUrl]="selectedRoutePoint().properties.image"
                     [allowFiltering]="true"></image-attribution>
             </div>
             <div class="mx-2">
-                <description [feature]="selectedRoutePoint" [isEditable]="false"></description>
+                <description [feature]="selectedRoutePoint()" [isEditable]="false"></description>
             </div>
         </div>
         }
     </div>
-    <div [ngClass]="{'max-md:hidden': showMap, 'max-md:w-full': !showMap}"
+    <div [ngClass]="{'max-md:hidden': showMap(), 'max-md:w-full': !showMap()}"
         class="overflow-y-auto z-10 w-1/3 magrin-top-with-toolbar pb-safe-w-button">
         <div class="sticky top-0 z-10">
             <public-routes-filter></public-routes-filter>
         </div>
-        @for (route of poiGeoJsonData.features; track route.properties.poiId) {
+        @for (route of poiGeoJsonData().features; track route.properties.poiId) {
         <div (mouseenter)="hover(route)" (mouseleave)="hover(null)" id="route-{{route.properties.poiId}}">
             <div class="flex flex-row mx-10 max-md:mx-2">
                 @if (route.properties.website) {

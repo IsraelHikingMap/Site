@@ -152,4 +152,40 @@ describe("SearchResultsProvider", () => {
             expect(results2.length).toBe(1);
         }
     )));
+
+    it("Should return null for an older search term that returned after a newer one had already finished",
+        (inject([SearchResultsProvider, HttpTestingController, Store],
+            async (provider: SearchResultsProvider, mockBackend: HttpTestingController, store: Store) => {
+                store.reset({
+                    locationState: {}
+                });
+                const promise1 = provider.getResults("searchTer", true, false);
+                const promise2 = provider.getResults("searchTerm", true, false);
+
+                mockBackend.match(url => url.url.endsWith("searchTerm"))[0].flush([{ id: "43" } as SearchResultsPointOfInterest]);
+                const results2 = await promise2;
+                mockBackend.match(url => url.url.endsWith("searchTer"))[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
+                const results1 = await promise1;
+
+                expect(results2.length).toBe(1);
+                expect(results1).toBeNull();
+            }
+        )));
+
+    it("Should return null for a search term that was shortened below the minimal length while in flight",
+        (inject([SearchResultsProvider, HttpTestingController, Store],
+            async (provider: SearchResultsProvider, mockBackend: HttpTestingController, store: Store) => {
+                store.reset({
+                    locationState: {}
+                });
+                const promise1 = provider.getResults("searchTerm", true, false);
+                const results2 = await provider.getResults("se", true, false);
+
+                mockBackend.match(url => url.url.endsWith("searchTerm"))[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
+                const results1 = await promise1;
+
+                expect(results2.length).toBe(0);
+                expect(results1).toBeNull();
+            }
+        )));
 });

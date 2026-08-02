@@ -27,6 +27,17 @@ export type FormatViewModel = {
     extension: string;
 };
 
+/**
+ * A synthetic stand-in for a file `<input>` change / drop event, used when files are
+ * obtained outside the DOM (e.g. from the native camera). `target` is null because
+ * there is no input element to read files from or to reset afterwards.
+ */
+export type HTMLElementInputChangeEvent = {
+    dataTransfer: { files: File[] };
+    target: HTMLInputElement | null;
+    preventDefault(): void;
+};
+
 @Injectable()
 export class FileService {
 
@@ -40,7 +51,7 @@ export class FileService {
     private readonly elevationProvider = inject(ElevationProvider);
     private readonly saveAs = inject(SaveAsFactory);
 
-    public formats: FormatViewModel[] = [
+    public readonly formats: FormatViewModel[] = [
         {
             label: "GPX version 1.1 (.gpx)",
             extension: "gpx",
@@ -73,18 +84,15 @@ export class FileService {
         }
     ];
 
-    public getFileFromEvent(e: any): File {
-        const file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
-        if (!file) {
-            return null;
-        }
-        const target = e.target || e.srcElement;
-        target.value = "";
-        return file;
-    }
+    public getFilesFromEvent(e: Event | DragEvent | HTMLElementInputChangeEvent): File[] {
+        let files: File[] | FileList | null | undefined;
 
-    public getFilesFromEvent(e: any): File[] {
-        const files: FileList = e.dataTransfer ? e.dataTransfer.files : e.target.files;
+        if ("dataTransfer" in e && e.dataTransfer) {
+            files = e.dataTransfer.files;
+        } else {
+            const target = e.target as HTMLInputElement | null;
+            files = target?.files;
+        }
         if (!files || files.length === 0) {
             return [];
         }
@@ -93,8 +101,10 @@ export class FileService {
         for (const file of files) {
             filesToReturn.push(file);
         }
-        const target = e.target || e.srcElement;
-        target.value = ""; // this will reset files so we need to clone the array.
+        const target = e.target as HTMLInputElement | null;
+        if (target) {
+            target.value = "";
+        }
         return filesToReturn;
     }
 

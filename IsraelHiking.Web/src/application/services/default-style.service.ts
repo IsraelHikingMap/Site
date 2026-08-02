@@ -51,7 +51,7 @@ export class DefaultStyleService {
         "land_vineyard"
     ]);
 
-    public style: StyleSpecification;
+    public readonly style: StyleSpecification;
 
     private readonly mapService = inject(MapService);
     private readonly resources = inject(ResourcesService);

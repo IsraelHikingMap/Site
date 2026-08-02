@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
 import { MatButton , MatIconButton } from "@angular/material/button";
@@ -17,8 +17,8 @@ import { ToastService } from "../../services/toast.service";
     imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatCheckbox, FormsModule, MatDialogActions, AnalyticsDirective]
 })
 export class TermsOfServiceDialogComponent {
-    public wikimediaTermsOfServiceUrl: string;
-    public iAgree = false;
+    public readonly wikimediaTermsOfServiceUrl: string;
+    public readonly iAgree = signal(false);
 
     public readonly resources = inject(ResourcesService);
 

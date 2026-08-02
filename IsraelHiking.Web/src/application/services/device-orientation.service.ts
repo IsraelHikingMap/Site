@@ -9,7 +9,7 @@ import type { ApplicationState } from "../models";
 
 @Injectable()
 export class DeviceOrientationService {
-    public orientationChanged = new EventEmitter<number>();
+    public readonly orientationChanged = new EventEmitter<number>();
 
     private eventHandler: { remove: () => Promise<void> } = null;
 

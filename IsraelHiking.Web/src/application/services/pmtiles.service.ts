@@ -12,7 +12,7 @@ export const TILES_ZOOM = 7;
 
 class CapacitorSource implements Source {
 
-    constructor(private path: string) { }
+    constructor(private readonly path: string) { }
 
     async getBytes(offset: number, length: number): Promise<RangeResponse> {
         const content = await Filesystem.readFile({
@@ -31,7 +31,7 @@ class CapacitorSource implements Source {
 @Injectable()
 export class PmTilesService {
 
-    private sourcesCache = new Map<string, CapacitorSource>;
+    private readonly sourcesCache = new Map<string, CapacitorSource>;
 
     private readonly loggingService = inject(LoggingService);
     private readonly store = inject(Store);

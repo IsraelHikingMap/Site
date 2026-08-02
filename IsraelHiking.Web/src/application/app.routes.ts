@@ -1,24 +1,51 @@
 import { Route } from "@angular/router";
 import { environment } from "../environments/environment";
-import { LandingComponent } from "./components/screens/landing.component";
-import { MainMapComponent } from "./components/map/main-map.component";
-import { PrivacyPolicyComponent } from "./components/screens/privacy-policy.component";
-import { FaqComponent } from "./components/screens/faq.component";
-import { AttributionComponent } from "./components/screens/attribution.component";
-import { SharesComponent } from "./components/screens/shares.component";
-import { TracesComponent } from "./components/screens/traces.component";
-import { OfflineManagementComponent } from "./components/screens/offline-management.component";
-import { PublicRoutesComponent } from "./components/screens/public-routes.component";
 
 export const routes: Route[] = [
     { path: "", redirectTo: environment.isCapacitor ? "/map" : "/about", pathMatch: "full", title: "Mapeak" },
-    { path: "about", component: LandingComponent, title: "Mapeak" },
-    { path: "attribution", component: AttributionComponent, title: "Mapeak - Attribution" },
-    { path: ":lang/faq", component: FaqComponent, title: "Mapeak - FAQ" },
-    { path: "offline-management", component: OfflineManagementComponent, title: "Mapeak - Offline Management" },
-    { path: "public-routes", component: PublicRoutesComponent, title: "Mapeak - Public Routes" },
-    { path: "privacy-policy", component: PrivacyPolicyComponent, title: "Mapeak - Privacy Policy" },
-    { path: "shares", component: SharesComponent, title: "Mapeak - Cloud Saves" },
-    { path: "traces", component: TracesComponent, title: "Mapeak - Traces" },
-    { path: "**", component: MainMapComponent, title: "Mapeak" }
+    {
+        path: "about",
+        loadComponent: () => import("./components/screens/landing.component").then(m => m.LandingComponent),
+        title: "Mapeak"
+    },
+    {
+        path: "attribution",
+        loadComponent: () => import("./components/screens/attribution.component").then(m => m.AttributionComponent),
+        title: "Mapeak - Attribution"
+    },
+    {
+        path: ":lang/faq",
+        loadComponent: () => import("./components/screens/faq.component").then(m => m.FaqComponent),
+        title: "Mapeak - FAQ"
+    },
+    {
+        path: "offline-management",
+        loadComponent: () => import("./components/screens/offline-management.component").then(m => m.OfflineManagementComponent),
+        title: "Mapeak - Offline Management"
+    },
+    {
+        path: "public-routes",
+        loadComponent: () => import("./components/screens/public-routes.component").then(m => m.PublicRoutesComponent),
+        title: "Mapeak - Public Routes"
+    },
+    {
+        path: "privacy-policy",
+        loadComponent: () => import("./components/screens/privacy-policy.component").then(m => m.PrivacyPolicyComponent),
+        title: "Mapeak - Privacy Policy"
+    },
+    {
+        path: "shares",
+        loadComponent: () => import("./components/screens/shares.component").then(m => m.SharesComponent),
+        title: "Mapeak - Cloud Saves"
+    },
+    {
+        path: "traces",
+        loadComponent: () => import("./components/screens/traces.component").then(m => m.TracesComponent),
+        title: "Mapeak - Traces"
+    },
+    {
+        path: "**",
+        loadComponent: () => import("./components/map/main-map.component").then(m => m.MainMapComponent),
+        title: "Mapeak"
+    }
 ];

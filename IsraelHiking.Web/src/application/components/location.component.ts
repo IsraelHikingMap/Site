@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, signal, computed } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
@@ -31,10 +31,11 @@ import type { LatLngAltTime, ApplicationState } from "../models";
     imports: [MatButton, AnalyticsDirective, MatTooltip, MatProgressSpinner, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, GpsLocationOverlayComponent]
 })
 export class LocationComponent {
-    public locationFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
-    public distanceFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
-    public locationLatLng: LatLngAltTime = null;
-    public showDistance = false;
+    public readonly locationFeatures = signal<GeoJSON.FeatureCollection<GeoJSON.Geometry>>({ type: "FeatureCollection", features: [] });
+    public readonly distanceFeatures = signal<GeoJSON.FeatureCollection<GeoJSON.Geometry>>({ type: "FeatureCollection", features: [] });
+    public readonly locationLatLng = signal<LatLngAltTime>(null);
+    public readonly showDistance = signal(false);
+    private readonly bearing = signal(0);
 
     public readonly resources = inject(ResourcesService);
     private readonly toastService = inject(ToastService);
@@ -44,7 +45,22 @@ export class LocationComponent {
     private readonly mapService = inject(MapService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly store = inject(Store);
+    private readonly gpsState = this.store.selectSignal((s: ApplicationState) => s.gpsState);
+    private readonly inMemoryState = this.store.selectSignal((s: ApplicationState) => s.inMemoryState);
+    private readonly recordedRouteState = this.store.selectSignal((s: ApplicationState) => s.recordedRouteState);
     private readonly mapComponent = inject(MapComponent);
+
+    public readonly isKeepNorthUp = computed(() => this.inMemoryState().keepNorthUp);
+
+    public readonly getRotationAngle = computed(() => `rotate(${-this.bearing()}deg)`);
+
+    public readonly isDisabled = computed(() => this.gpsState().tracking === "disabled");
+
+    public readonly isActive = computed(() => this.gpsState().tracking === "tracking");
+
+    public readonly isLoading = computed(() => this.gpsState().tracking === "searching");
+
+    public readonly isAddingRecordingPoi = computed(() => this.recordedRouteState().isAddingPoi);
 
     constructor() {
         this.clearLocationFeatureCollection();
@@ -58,7 +74,7 @@ export class LocationComponent {
         });
 
         this.store.select((state: ApplicationState) => state.inMemoryState.distance).pipe(takeUntilDestroyed()).subscribe(distance => {
-            this.showDistance = distance;
+            this.showDistance.set(distance);
             this.updateDistanceFeatureCollection();
         });
 
@@ -66,6 +82,10 @@ export class LocationComponent {
             const fullUrl = this.mapService.getFullUrl("content/gps-arrow.png");
             const image = await this.mapComponent.mapInstance.loadImage(fullUrl);
             this.mapComponent.mapInstance.addImage("gps-arrow", image.data);
+            this.bearing.set(this.mapComponent.mapInstance.getBearing());
+            this.mapComponent.mapInstance.on("rotate", () => {
+                this.bearing.set(this.mapComponent.mapInstance.getBearing());
+            });
             this.mapComponent.mapInstance.on("move", () => {
                 this.updateDistanceFeatureCollection();
             });
@@ -83,8 +103,8 @@ export class LocationComponent {
     }
 
     public openLocationPopup() {
-        if (this.locationLatLng != null) {
-            this.locationLatLng = null;
+        if (this.locationLatLng() != null) {
+            this.locationLatLng.set(null);
             return;
         }
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
@@ -93,12 +113,8 @@ export class LocationComponent {
         }
         const center = this.locationService.getLocationCenter();
         if (center !== null) {
-            this.locationLatLng = center;
+            this.locationLatLng.set(center);
         }
-    }
-
-    public isKeepNorthUp() {
-        return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).keepNorthUp;
     }
 
     public toggleKeepNorthUp() {
@@ -106,13 +122,6 @@ export class LocationComponent {
         if (this.isKeepNorthUp()) {
             this.mapComponent.mapInstance.rotateTo(0);
         }
-    }
-
-    public getRotationAngle() {
-        if (this.mapComponent.mapInstance == null) {
-            return "rotate(0deg)";
-        }
-        return `rotate(${-this.mapComponent.mapInstance.getBearing()}deg)`;
     }
 
     public toggleTracking() {
@@ -128,7 +137,7 @@ export class LocationComponent {
         if (!this.isFollowingLocation()) {
             this.store.dispatch(new SetFollowingAction(true));
             this.store.dispatch(new SetPannedAction(null));
-            if (this.showDistance) {
+            if (this.showDistance()) {
                 this.store.dispatch(new ToggleDistanceAction());
             }
             this.locationService.moveMapToGpsPosition();
@@ -191,22 +200,6 @@ export class LocationComponent {
         }
     }
 
-    public isDisabled() {
-        return this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "disabled";
-    }
-
-    public isActive() {
-        return this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "tracking";
-    }
-
-    public isLoading() {
-        return this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "searching";
-    }
-
-    public isAddingRecordingPoi() {
-        return this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isAddingPoi;
-    }
-
     public toggleAddRecordingPoi() {
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
@@ -216,10 +209,10 @@ export class LocationComponent {
     }
 
     private clearLocationFeatureCollection() {
-        this.locationFeatures = {
+        this.locationFeatures.set({
             type: "FeatureCollection",
             features: []
-        };
+        });
         this.clearDistanceFeatureCollection();
     }
 
@@ -235,23 +228,23 @@ export class LocationComponent {
         if (radius != null) {
             features.push(SpatialService.getCirclePolygonFeature(center, radius));
         }
-        this.locationFeatures = {
+        this.locationFeatures.set({
             type: "FeatureCollection",
             features
-        };
+        });
         this.updateDistanceFeatureCollection();
     }
 
     private clearDistanceFeatureCollection() {
-        this.distanceFeatures = {
+        this.distanceFeatures.set({
             type: "FeatureCollection",
             features: []
-        };
+        });
     }
 
     private updateDistanceFeatureCollection() {
         const gps = this.locationService.getLocationCenter();
-        if (!this.isActive() || !this.showDistance || gps == null) {
+        if (!this.isActive() || !this.showDistance() || gps == null) {
             this.clearDistanceFeatureCollection();
             return;
         }
@@ -260,7 +253,7 @@ export class LocationComponent {
         const distance = SpatialService.getDistanceInMeters(center, gps);
         const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration).units;
         const factor = units === "metric" ? 1000.0 : 1609.344;
-        this.distanceFeatures = {
+        this.distanceFeatures.set({
             type: "FeatureCollection",
             features: [{
                 type: "Feature",
@@ -280,6 +273,6 @@ export class LocationComponent {
                     coordinates: SpatialService.toCoordinate(center)
                 }
             }]
-        };
+        });
     }
 }

@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, ViewEncapsulation, inject } from "@angular/core";
+import { Component, DestroyRef, OnInit, ViewEncapsulation, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
@@ -48,31 +48,31 @@ import { ZoomComponent } from "../zoom.component";
 })
 export class TracesComponent implements OnInit {
 
-    public showMap = false;
-    public sortBy: "timeStamp" | "name" = "timeStamp";
-    public sortDirection: "asc" | "desc" = "desc";
-    public mapStyle: StyleSpecification;
-    public filteredTraces: Immutable<Trace[]>;
-    public loadingTraces = false;
-    public selectedTrace: Immutable<Trace> | undefined;
-    public tracesGeoJson: GeoJSON.FeatureCollection<GeoJSON.Point> | undefined = {
+    public readonly showMap = signal(false);
+    public readonly sortBy = signal<"timeStamp" | "name">("timeStamp");
+    private readonly sortDirection = signal<"asc" | "desc">("desc");
+    public readonly mapStyle: StyleSpecification;
+    public readonly filteredTraces = signal<Immutable<Trace[]>>([]);
+    public readonly loadingTraces = signal(false);
+    public readonly selectedTrace = signal<Immutable<Trace> | undefined>(undefined);
+    public readonly tracesGeoJson = signal<GeoJSON.FeatureCollection<GeoJSON.Point> | undefined>({
         type: "FeatureCollection",
         features: []
-    };
-    public selectedTraceGeoJson: GeoJSON.FeatureCollection | undefined = {
+    });
+    public readonly selectedTraceGeoJson = signal<GeoJSON.FeatureCollection | undefined>({
         type: "FeatureCollection",
         features: []
-    };
-    public selectedFeature: GeoJSON.Feature<GeoJSON.LineString>;
-    public missingCoordinates: LatLngAltTime = null;
-    public missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString> = {
+    });
+    public readonly selectedFeature = signal<GeoJSON.Feature<GeoJSON.LineString>>(null);
+    public readonly missingCoordinates = signal<LatLngAltTime>(null);
+    public readonly missingParts = signal<GeoJSON.FeatureCollection<GeoJSON.LineString>>({
         type: "FeatureCollection",
         features: []
-    };
-    public selectedFeatureSource: GeoJSON.FeatureCollection<GeoJSON.LineString> = {
+    });
+    public readonly selectedFeatureSource = signal<GeoJSON.FeatureCollection<GeoJSON.LineString>>({
         type: "FeatureCollection",
         features: []
-    };
+    });
 
     public readonly resources = inject(ResourcesService);
 
@@ -99,7 +99,7 @@ export class TracesComponent implements OnInit {
             this.runFilter();
         });
         this.store.select((state: ApplicationState) => state.tracesState.traces).pipe(takeUntilDestroyed()).subscribe(() => {
-            if (!this.loadingTraces) {
+            if (!this.loadingTraces()) {
                 this.runFilter();
             }
         });
@@ -109,9 +109,9 @@ export class TracesComponent implements OnInit {
     }
 
     public async ngOnInit() {
-        this.loadingTraces = true;
+        this.loadingTraces.set(true);
         await this.tracesService.syncTraces();
-        this.loadingTraces = false;
+        this.loadingTraces.set(false);
         this.runFilter();
     }
 
@@ -125,7 +125,7 @@ export class TracesComponent implements OnInit {
     }
 
     public onSortDirectionChange() {
-        this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+        this.sortDirection.set(this.sortDirection() === "asc" ? "desc" : "asc");
         this.runFilter();
     }
 
@@ -168,14 +168,14 @@ export class TracesComponent implements OnInit {
             const geoJson = await this.tracesService.getMissingParts(shallowTrace.id);
             if (geoJson.features.length === 0) {
                 this.toastService.confirm({ message: this.resources.noUnmappedRoutes, type: "Ok" });
-                this.missingParts = {
+                this.missingParts.set({
                     type: "FeatureCollection",
                     features: []
-                };
+                });
                 return;
             }
-            this.missingParts = geoJson;
-            this.showMap = true;
+            this.missingParts.set(geoJson);
+            this.showMap.set(true);
             const bounds = SpatialService.getBoundsForFeatureCollection(geoJson);
             this.mapService.fitBounds(bounds);
         } catch (ex) {
@@ -184,10 +184,11 @@ export class TracesComponent implements OnInit {
     }
 
     public async uploadToOsm(e: any) {
-        const file = this.fileService.getFileFromEvent(e);
-        if (!file) {
+        const files = this.fileService.getFilesFromEvent(e);
+        if (files.length !== 1) {
             return;
         }
+        const file = files[0];
         try {
             await this.tracesService.uploadTrace(file);
             this.toastService.success(this.resources.fileUploadedSuccessfullyItWillTakeTime);
@@ -200,10 +201,10 @@ export class TracesComponent implements OnInit {
     private runFilter() {
         const searchTerm = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.searchTerm).trim();
         const traces = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces;
-        this.filteredTraces = orderBy(traces.filter((t) => this.findInTrace(t, searchTerm)), [this.sortBy], [this.sortDirection]);
-        this.tracesGeoJson = {
+        this.filteredTraces.set(orderBy(traces.filter((t) => this.findInTrace(t, searchTerm)), [this.sortBy()], [this.sortDirection()]));
+        this.tracesGeoJson.set({
             type: "FeatureCollection",
-            features: this.filteredTraces.map(t => ({
+            features: this.filteredTraces().map(t => ({
                 type: "Feature",
                 geometry: {
                     type: "Point",
@@ -216,7 +217,7 @@ export class TracesComponent implements OnInit {
                     timeStamp: t.timeStamp
                 }
             }))
-        };
+        });
     }
 
     private findInTrace(trace: Immutable<Trace>, searchTerm: string) {
@@ -282,9 +283,9 @@ export class TracesComponent implements OnInit {
     }
 
     public async moveToTrace(traceId: string) {
-        this.showMap = true;
+        this.showMap.set(true);
         const fullTrace = await this.tracesService.getTraceById(traceId);
-        this.selectedTrace = fullTrace;
+        this.selectedTrace.set(fullTrace);
         const features: GeoJSON.Feature[] = [];
         for (const route of fullTrace.dataContainer.routes) {
             route.color = "magenta";
@@ -292,16 +293,16 @@ export class TracesComponent implements OnInit {
             route.opacity = 0.7;
             features.push(...this.selectedRouteService.createFeaturesForRoute(route));
         }
-        this.selectedTraceGeoJson = { type: "FeatureCollection", features };
-        const bounds = SpatialService.getBoundsForFeatureCollection(this.selectedTraceGeoJson);
+        this.selectedTraceGeoJson.set({ type: "FeatureCollection", features });
+        const bounds = SpatialService.getBoundsForFeatureCollection(this.selectedTraceGeoJson());
         this.mapService.fitBounds(bounds, 100, { top: 100, left: 50, bottom: window.innerHeight / 2, right: 50 });
     }
 
     public onStartPointClick(traceId: string, event?: Event) {
         event?.stopPropagation();
-        if (this.selectedTrace?.id === traceId) {
-            this.selectedTrace = null;
-            this.selectedTraceGeoJson = { type: "FeatureCollection", features: [] };
+        if (this.selectedTrace()?.id === traceId) {
+            this.selectedTrace.set(null);
+            this.selectedTraceGeoJson.set({ type: "FeatureCollection", features: [] });
             return;
         }
         this.moveToTrace(traceId);
@@ -319,30 +320,43 @@ export class TracesComponent implements OnInit {
     }
 
     public setSelectedFeature(feature: GeoJSON.Feature<GeoJSON.LineString>, event: Event) {
-        this.selectedFeature = feature;
-        const coordinates = this.getLatLngLikeForFeature(this.selectedFeature);
-        this.missingCoordinates = { lat: coordinates[1], lng: coordinates[0] };
-        this.selectedFeatureSource = {
+        this.selectedFeature.set(feature);
+        const coordinates = this.getLatLngLikeForFeature(this.selectedFeature());
+        this.missingCoordinates.set({ lat: coordinates[1], lng: coordinates[0] });
+        this.selectedFeatureSource.set({
             type: "FeatureCollection",
-            features: [this.selectedFeature]
-        };
+            features: [this.selectedFeature()]
+        });
         event.stopPropagation();
     }
 
-    public removeMissingPart() {
-        this.missingParts = {
+    public updateSelectedFeature(feature: GeoJSON.Feature<GeoJSON.LineString>) {
+        const previousFeature = this.selectedFeature();
+        this.missingParts.update(missingParts => ({
+            ...missingParts,
+            features: missingParts.features.map(f => f === previousFeature ? feature : f)
+        }));
+        this.selectedFeature.set(feature);
+        this.selectedFeatureSource.set({
             type: "FeatureCollection",
-            features: this.missingParts.features.filter(f => f !== this.selectedFeature)
-        }
+            features: [feature]
+        });
+    }
+
+    public removeMissingPart() {
+        this.missingParts.set({
+            type: "FeatureCollection",
+            features: this.missingParts().features.filter(f => f !== this.selectedFeature())
+        });
         this.clearSelection();
     }
 
     public clearSelection() {
-        this.selectedFeature = null;
-        this.missingCoordinates = null;
-        this.selectedFeatureSource = {
+        this.selectedFeature.set(null);
+        this.missingCoordinates.set(null);
+        this.selectedFeatureSource.set({
             type: "FeatureCollection",
             features: []
-        };
+        });
     }
 }

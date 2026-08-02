@@ -1,6 +1,6 @@
 <ng-progress ngProgressHttp [ngStyle]="{'z-index':1500}"></ng-progress>
 <div class="flex flex-row w-full h-dvh">
-  <mgl-map [zoom]="[location.zoom]" [center]="[location.longitude, location.latitude]" [mapStyle]="initialStyle"
+  <mgl-map [zoom]="location.zoom" [center]="[location.longitude, location.latitude]" [mapStyle]="initialStyle"
     (mapLoad)="mapLoaded($event)" (pitchEvt)="pitchChanged()" [doubleClickZoom]="false" [attributionControl]="false">
     <layers [allowOffline]="true"></layers>
     @if (!isIFrame()) {
@@ -29,7 +29,7 @@
 <mat-sidenav-container class="main-map-sidenav-overlay" [dir]="resources.direction" [hasBackdrop]="false"
   [autosize]="false">
   <mat-sidenav [opened]="sidenavVisible()" position="end" class="magrin-top-with-toolbar pb-safe" autoFocus="dialog">
-    @switch (sidenavViewName) {
+    @switch (sidenavViewName()) {
     @case ('layers') {
     <layers-sidebar></layers-sidebar>
     }

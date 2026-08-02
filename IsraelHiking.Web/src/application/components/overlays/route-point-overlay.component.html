@@ -5,26 +5,26 @@
         matTooltipPosition="above"><i class="fa icon-trash"></i></button>
     </div>
     <div class="flex-1">
-      <button mat-button class="w-full min-w-[unset]!" (click)="hideCoordinates = !hideCoordinates"
+      <button mat-button class="w-full min-w-[unset]!" (click)="hideCoordinates.set(!hideCoordinates())"
         matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
     </div>
-    @if (!isMiddle) {
+    @if (!isMiddle()) {
     <div class="flex-1">
       <button mat-button class="w-full min-w-[unset]!" (click)="reverse()" matTooltip="{{resources.reverseRoute}}"
         matTooltipPosition="above"><i class="fa icon-arrows-h"></i></button>
     </div>
     }
     <div class="flex-1">
-      @if (isMiddle) {
+      @if (isMiddle()) {
       <button mat-button class="w-full min-w-[unset]!" (click)="split()" matTooltip="{{resources.split}}"
         matTooltipPosition="above"><i class="fa icon-cut"></i></button>
       } @else {
-      <button mat-button class="w-full min-w-[unset]!" [disabled]="!canMerge" (click)="merge()"
+      <button mat-button class="w-full min-w-[unset]!" [disabled]="!canMerge()" (click)="merge()"
         matTooltip="{{resources.merge}}" matTooltipPosition="above"><i class="fa icon-merge"></i></button>
       }
     </div>
   </div>
-  @if (!hideCoordinates) {
+  @if (!hideCoordinates()) {
   <coordinates [latlng]="latlng()"></coordinates>
   }
 </div>

@@ -47,8 +47,8 @@ export class CoordinatesService {
     static readonly DEGREES_MINUTES = new RegExp("^\\s*(\\d{1,3})(?:[:°\\s]\\s*)(\\d{1,2}(?:\\.\\d+)?)[:" +
         MINUTES_SYMBOLS_STRING + "]?\\s*$");
 
-    private itmConverter = Proj(CoordinatesService.ITM_WKT);
-    private coordinatesParserMap: { matcher: RegExp; parser: (match: RegExpMatchArray) => LatLngAltTime }[];
+    private readonly itmConverter = Proj(CoordinatesService.ITM_WKT);
+    private readonly coordinatesParserMap: { matcher: RegExp; parser: (match: RegExpMatchArray) => LatLngAltTime }[];
 
     constructor() {
         this.coordinatesParserMap = [

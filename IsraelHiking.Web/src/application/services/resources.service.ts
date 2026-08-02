@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Injectable, signal } from "@angular/core";
 import { Direction } from "@angular/cdk/bidi";
 import { Store } from "@ngxs/store";
 
@@ -14,19 +14,38 @@ export class ResourcesService {
     private readonly gettextCatalog = inject(GetTextCatalogService);
     private readonly store = inject(Store);
 
+    /**
+     * Bumped whenever the language is (re)loaded, i.e. whenever any translated member
+     * below changes. The Proxy in the constructor makes every read of this service
+     * register a dependency on this signal, so OnPush components re-render on a language
+     * change without needing a full page refresh (replaces the old CheckAlways reliance).
+     */
+    public readonly languageChanged = signal(0);
+
+    constructor() {
+        // Wrap the service so any `resources.*` read (property or method) taken inside a
+        // reactive/template context depends on `languageChanged` and refreshes when it bumps.
+        return new Proxy(this, {
+            get: (target, prop, receiver) => {
+                target.languageChanged();
+                return Reflect.get(target, prop, receiver);
+            }
+        });
+    }
+
     public direction: Direction;
     public start: string;
     public end: string;
-    public endOfBaseLayer = "end-of-base-layer";
-    public endOfOverlays = "end-of-overlays";
-    public endOfClusters = "end-of-clusters";
-    public endOfRoutes = "end-of-routes";
-    public editRoutePoints = "editing-route-layer-points";
-    public editRouteLines = "editing-route-layer-lines";
-    public editRouteSource = "editing-route-source";
-    public locationIcon = "location-icon-layer";
-    public globalPointsLayer = "global-points-layer";
-    public globalPointsExternalLayer = "global-points-external-layer";
+    public readonly endOfBaseLayer = "end-of-base-layer";
+    public readonly endOfOverlays = "end-of-overlays";
+    public readonly endOfClusters = "end-of-clusters";
+    public readonly endOfRoutes = "end-of-routes";
+    public readonly editRoutePoints = "editing-route-layer-points";
+    public readonly editRouteLines = "editing-route-layer-lines";
+    public readonly editRouteSource = "editing-route-source";
+    public readonly locationIcon = "location-icon-layer";
+    public readonly globalPointsLayer = "global-points-layer";
+    public readonly globalPointsExternalLayer = "global-points-external-layer";
     public readonly recordedRouteColor = "#FF6600";
     // All the text in the app //
     /////////////////////////////
@@ -1009,6 +1028,7 @@ export class ResourcesService {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
         this.store.dispatch(new SetLanguageAction(language));
+        this.languageChanged.update(v => v + 1);
     }
 
     public async setLanguage(code: LanguageCode) {

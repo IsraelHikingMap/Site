@@ -10,7 +10,7 @@ import { MapLayerMouseEvent } from "maplibre-gl";
     imports: [GeoJSONSourceComponent, LayerComponent]
 })
 export class RoutesPathComponent {
-    public routesGeoJson = input<GeoJSON.FeatureCollection>({
+    public readonly routesGeoJson = input<GeoJSON.FeatureCollection>({
         type: "FeatureCollection",
         features: []
     });
@@ -22,5 +22,5 @@ export class RoutesPathComponent {
     public pointsLayerClick = output<MapLayerMouseEvent>();
 
 
-    public resources = inject(ResourcesService);
+    public readonly resources = inject(ResourcesService);
 }

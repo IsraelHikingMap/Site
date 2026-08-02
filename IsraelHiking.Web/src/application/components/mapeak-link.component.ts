@@ -14,18 +14,12 @@ import { Urls } from "../urls";
 })
 export class MapeakLinkComponent {
 
-    public target = "";
-
     public readonly resources = inject(ResourcesService);
 
     private readonly hashService = inject(HashService);
     private readonly runningContextService = inject(RunningContextService);
 
-    constructor() {
-        if (this.runningContextService.isIFrame) {
-            this.target = "_blank";
-        }
-    }
+    public readonly target = this.runningContextService.isIFrame ? "_blank" : "";
 
     public getHref(): string {
         if (this.runningContextService.isIFrame) {

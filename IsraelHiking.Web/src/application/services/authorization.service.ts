@@ -68,7 +68,7 @@ export class AuthorizationService {
         return response.access_token;
     }
 
-    private updateUserDetails = async () => {
+    private readonly updateUserDetails = async () => {
         const detailJson = await firstValueFrom(this.httpClient.get<OsmUserDetails>(Urls.osmUser));
         const userInfo = {
             displayName: detailJson.user.display_name,

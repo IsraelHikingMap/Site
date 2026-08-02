@@ -6,23 +6,23 @@ import { initialState } from "./initial-state";
 import type { TracesState, Trace } from "../models";
 
 export class AddTraceAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public trace: Trace) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly trace: Trace) { }
 }
 
 export class UpdateTraceAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public trace: Trace) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly trace: Trace) { }
 }
 
 export class RemoveTraceAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public traceId: string) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly traceId: string) { }
 }
 
 export class BulkReplaceTracesAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public traces: Trace[]) { }
+    public static readonly type = this.prototype.constructor.name;
+    constructor(public readonly traces: Trace[]) { }
 }
 
 @State<TracesState>({

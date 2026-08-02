@@ -1,4 +1,4 @@
-import { Component, HostListener, OnChanges, inject, output, input } from "@angular/core";
+import { Component, HostListener, OnChanges, inject, output, input, signal } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
@@ -15,28 +15,28 @@ import type { LatLngAltTime } from "../../models";
     imports: [Dir, MatButton, MatTooltip, CoordinatesComponent]
 })
 export class RoutePointOverlayComponent implements OnChanges {
-    public canMerge = false;
-    public isMiddle = false;
+    public readonly canMerge = signal(false);
+    public readonly isMiddle = signal(false);
+    public readonly hideCoordinates = signal(true);
 
-    public latlng = input<LatLngAltTime>();
+    public readonly latlng = input<LatLngAltTime>();
 
-    public segmentIndex = input<number>();
+    public readonly segmentIndex = input<number>();
 
     public closed = output();
 
-    public hideCoordinates = true;
 
     public readonly resources = inject(ResourcesService);
 
     private readonly selectedRouteService = inject(SelectedRouteService);
 
     public ngOnChanges(): void {
-        this.isMiddle = this.isFirst() === false && this.isLast() === false;
-        if (this.isMiddle) {
-            this.canMerge = false;
+        this.isMiddle.set(this.isFirst() === false && this.isLast() === false);
+        if (this.isMiddle()) {
+            this.canMerge.set(false);
             return;
         }
-        this.canMerge = this.selectedRouteService.getClosestRouteToSelected(this.isFirst()) != null;
+        this.canMerge.set(this.selectedRouteService.getClosestRouteToSelected(this.isFirst()) != null);
     }
 
     public split(): void {
