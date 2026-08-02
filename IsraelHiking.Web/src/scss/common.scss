@@ -3,7 +3,6 @@
 @use "theme-colors";
 @use "dialogs";
 @use "../fonts/icons.css";
-@use "font-awesome/css/font-awesome.css";
 @use "maplibre-gl/dist/maplibre-gl.css";
 @use "import-tailwind";
 
@@ -91,7 +90,7 @@ html {
     font-family: 'Noto Sans Cond Bold';
     font-style: normal;
     font-display: swap;
-    src: url('../fonts/noto-sans-condensed-bold.ttf') format('truetype');
+    src: url('../fonts/noto-sans-condensed-bold.woff2') format('woff2');
 }
 
 html {
@@ -163,6 +162,71 @@ body {
 
 .stack-icon-large {
     font-size: 1.25em !important;
+}
+
+/* Icon helpers, ported from font-awesome 4.7 when that dependency was dropped.
+   Every icon in the app comes from icomoon, so only the sizing and stacking helpers were kept.
+   The family is repeated here on purpose: icons.css assigns it through an attribute selector, which
+   the critical css extractor does not carry into the inlined styles, and without it the icons fall
+   back to whatever the surrounding text uses until the full stylesheet arrives. */
+.fa {
+    display: inline-block;
+    font-family: "icomoon";
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    font-size: inherit;
+    line-height: 1;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.fa-lg {
+    font-size: 1.33333333em;
+    line-height: 0.75em;
+    vertical-align: -15%;
+}
+
+.fa-2x {
+    font-size: 2em;
+}
+
+.fa-3x {
+    font-size: 3em;
+}
+
+.fa-4x {
+    font-size: 4em;
+}
+
+.fa-5x {
+    font-size: 5em;
+}
+
+.fa-stack {
+    position: relative;
+    display: inline-block;
+    width: 2em;
+    height: 2em;
+    line-height: 2em;
+    vertical-align: middle;
+}
+
+.fa-stack-1x,
+.fa-stack-2x {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.fa-stack-1x {
+    line-height: inherit;
+}
+
+.fa-stack-2x {
+    font-size: 2em;
 }
 
 .fa.mat-icon {
