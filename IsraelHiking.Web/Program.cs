@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using IsraelHiking.API;
 using IsraelHiking.API.Services;
@@ -56,7 +57,8 @@ void SetupApplication(WebApplication app)
         ContentTypeProvider = new FileExtensionContentTypeProvider
         {
             Mappings = { { ".pbf", "application/x-protobuf" } } // for the fonts files
-        }
+        },
+        OnPrepareResponse = SetStaticFileCacheHeaders
     });
     app.MapOpenApi();
     app.MapScalarApiReference("/openapi", options => options.AddPreferredSecuritySchemes("Bearer"));
@@ -141,6 +143,26 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
         options.AddSchemaTransformer<FeatureExampleSchemaTransformer>();
         options.AddOperationTransformer<AssignOAuthSecurityOperationTransformer>();
     });
+}
+
+/// <summary>
+/// Files built by the angular CLI carry a content hash in their name, so they can be cached forever.
+/// Everything else keeps its name across deployments and is only cached for a day.
+/// HTML is never cached since it points at the hashed file names.
+/// </summary>
+void SetStaticFileCacheHeaders(StaticFileResponseContext context)
+{
+    var path = context.Context.Request.Path.Value ?? string.Empty;
+    if (path.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
+    {
+        context.Context.Response.Headers.CacheControl = "no-cache";
+        return;
+    }
+    var isHashed = path.StartsWith("/media/", StringComparison.OrdinalIgnoreCase) ||
+                   Regex.IsMatch(path, @"-[A-Z0-9]{8}\.(js|mjs|css)$", RegexOptions.IgnoreCase);
+    context.Context.Response.Headers.CacheControl = isHashed
+        ? "public, max-age=31536000, immutable"
+        : "public, max-age=86400";
 }
 
 void InitializeServices(IServiceProvider serviceProvider)

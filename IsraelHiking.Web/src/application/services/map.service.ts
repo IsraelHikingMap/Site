@@ -7,6 +7,8 @@ import { LoggingService } from "./logging.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
 import { SpatialService } from "./spatial.service";
 import { ResourcesService } from "./resources.service";
+import { DatabaseService } from "./database.service";
+import { OverpassTurboService } from "./overpass-turbo.service";
 import { SetLocationAction } from "../reducers/location.reducer";
 import type { ApplicationState, Bounds, LatLngAltTime } from "../models";
 
@@ -20,16 +22,34 @@ export class MapService {
     private readonly cancelableTimeoutService = inject(CancelableTimeoutService);
     private readonly loggingService = inject(LoggingService);
     private readonly resourcesService = inject(ResourcesService)
+    private readonly databaseService = inject(DatabaseService);
+    private readonly overpassTurboService = inject(OverpassTurboService);
     private readonly store = inject(Store);
 
     public initializationPromise = new Promise<void>((resolve) => { this.resolve = resolve; });
 
-    public async initialize() {
+    private initializeOncePromise: Promise<void> | null = null;
+
+    /**
+     * Loads maplibre, its workers and the protocols used by the map styles.
+     * This is deliberately not part of the application initialization since screens that do not show
+     * a map (landing, faq, etc.) should not pay for it - maplibre alone is around 200kb.
+     * Routes that do show a map wait for this using the map resolver in the routes definition.
+     */
+    public initialize(): Promise<void> {
+        this.initializeOncePromise ??= this.initializeOnce();
+        return this.initializeOncePromise;
+    }
+
+    private async initializeOnce() {
         if (typeof window === "undefined") {
             return;
         }
         const maplibregl = await import("maplibre-gl");
         maplibregl.setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
+        maplibregl.addProtocol("custom", (params) => this.databaseService.getCustomTile(params.url));
+        maplibregl.addProtocol("slice", (params) => this.databaseService.getSliceTile(params.url));
+        maplibregl.addProtocol("overpass", (params) => this.overpassTurboService.getOverpassResults(params.url));
         this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
             this.cancelableTimeoutService.clearTimeoutByName("panned");
             if (pannedTimestamp) {

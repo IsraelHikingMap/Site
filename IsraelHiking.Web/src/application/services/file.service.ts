@@ -119,11 +119,11 @@ export class FileService {
             return await firstValueFrom(this.httpClient.get(url, { responseType: "text" }).pipe(timeout(5000)));
         } catch (ex) {
             this.loggingService.error(`[Files] Unable to get style file, tryLocalStyle: ${tryLocalStyle}, ${url}, ${(ex as Error).message}`);
-            return `{
-                version: 8.0,
+            return JSON.stringify({
+                version: 8,
                 layers: [],
                 sources: {}
-            }`;
+            });
         }
     }
 

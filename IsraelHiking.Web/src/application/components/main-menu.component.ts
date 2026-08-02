@@ -1,4 +1,4 @@
-import { Component, inject, computed } from "@angular/core";
+import { Component, inject, computed, signal, afterNextRender } from "@angular/core";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 import { MatButton } from "@angular/material/button";
 import { MatMenuTrigger, MatMenu, MatMenuItem } from "@angular/material/menu";
@@ -53,7 +53,17 @@ export class MainMenuComponent {
 
     public readonly isLoggedIn = computed(() => this.userInfo() != null);
 
+    /**
+     * Whether the signed in user is known yet. The content routes are prerendered at build time,
+     * where there is never a user, so the prerendered html must not claim the visitor is signed out -
+     * otherwise a signed in visitor stares at a "sign in" button until the persisted state is read
+     * out of indexeddb. This stays false through hydration so the client's first render still matches
+     * the prerendered markup, and flips right after it.
+     */
+    public readonly isUserKnown = signal(false);
+
     constructor() {
+        afterNextRender(() => this.isUserKnown.set(true));
         if (this.runningContextService.isCapacitor) {
             App.getInfo().then((info) => {
                 this.loggingService.info(`App version: ${info.version}`);

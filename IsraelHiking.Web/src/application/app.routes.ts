@@ -1,5 +1,15 @@
-import { Route } from "@angular/router";
+import { inject } from "@angular/core";
+import { ResolveFn, Route } from "@angular/router";
 import { environment } from "../environments/environment";
+import { MapService } from "./services/map.service";
+
+/**
+ * Maplibre, its workers and the protocols used by the map styles are only loaded for routes that
+ * actually show a map, so that content-only screens (landing, faq, etc.) do not download them.
+ * The router waits for this resolver before activating the component, so maplibre is always ready
+ * before a style starts loading.
+ */
+const initializeMapResolver: ResolveFn<void> = () => inject(MapService).initialize();
 
 export const routes: Route[] = [
     { path: "", redirectTo: environment.isCapacitor ? "/map" : "/about", pathMatch: "full", title: "Mapeak" },
@@ -21,12 +31,14 @@ export const routes: Route[] = [
     {
         path: "offline-management",
         loadComponent: () => import("./components/screens/offline-management.component").then(m => m.OfflineManagementComponent),
-        title: "Mapeak - Offline Management"
+        title: "Mapeak - Offline Management",
+        resolve: { map: initializeMapResolver }
     },
     {
         path: "public-routes",
         loadComponent: () => import("./components/screens/public-routes.component").then(m => m.PublicRoutesComponent),
-        title: "Mapeak - Public Routes"
+        title: "Mapeak - Public Routes",
+        resolve: { map: initializeMapResolver }
     },
     {
         path: "privacy-policy",
@@ -36,16 +48,19 @@ export const routes: Route[] = [
     {
         path: "shares",
         loadComponent: () => import("./components/screens/shares.component").then(m => m.SharesComponent),
-        title: "Mapeak - Cloud Saves"
+        title: "Mapeak - Cloud Saves",
+        resolve: { map: initializeMapResolver }
     },
     {
         path: "traces",
         loadComponent: () => import("./components/screens/traces.component").then(m => m.TracesComponent),
-        title: "Mapeak - Traces"
+        title: "Mapeak - Traces",
+        resolve: { map: initializeMapResolver }
     },
     {
         path: "**",
         loadComponent: () => import("./components/map/main-map.component").then(m => m.MainMapComponent),
-        title: "Mapeak"
+        title: "Mapeak",
+        resolve: { map: initializeMapResolver }
     }
 ];

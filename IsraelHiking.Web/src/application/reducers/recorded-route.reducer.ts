@@ -6,43 +6,43 @@ import { initialState } from "./initial-state";
 import type { LatLngAltTime, MarkerData, RecordedRouteState } from "../models";
 
 export class StartRecordingAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Recorded Route] StartRecordingAction";
 }
 
 export class StopRecordingAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Recorded Route] StopRecordingAction";
 }
 
 export class ToggleAddRecordingPoiAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Recorded Route] ToggleAddRecordingPoiAction";
 }
 
 export class AddRecordingRoutePointsAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Recorded Route] AddRecordingRoutePointsAction";
     constructor(public readonly latlngs: LatLngAltTime[]) { }
 }
 
 export class AddPendingProcessingRoutePointAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Recorded Route] AddPendingProcessingRoutePointAction";
     constructor(public readonly position: GeolocationPosition) { }
 }
 
 export class ClearPendingProcessingRoutePointsAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Recorded Route] ClearPendingProcessingRoutePointsAction";
 }
 
 export class AddRecordingPoiAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Recorded Route] AddRecordingPoiAction";
     constructor(public readonly markerData: MarkerData) { }
 }
 
 export class UpdateRecordingPoiAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Recorded Route] UpdateRecordingPoiAction";
     constructor(public readonly index: number, public readonly markerData: MarkerData) { }
 }
 
 export class DeleteRecordingPoiAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Recorded Route] DeleteRecordingPoiAction";
     constructor(public readonly index: number) { }
 }
 

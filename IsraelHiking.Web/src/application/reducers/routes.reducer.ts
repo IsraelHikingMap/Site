@@ -6,118 +6,118 @@ import { initialState } from "./initial-state";
 import type { RouteData, MarkerData, RouteSegmentData, RouteEditStateType, StateWithHistory } from "../models";
 
 export class UndoAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] UndoAction";
 }
 
 export class RedoAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] RedoAction";
 }
 
 export class ClearHistoryAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] ClearHistoryAction";
 }
 
 export class RestoreHistoryAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] RestoreHistoryAction";
     constructor(public readonly history: RouteData[][]) { }
 }
 
 export class AddRouteAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] AddRouteAction";
     constructor(public readonly routeData: RouteData) { }
 }
 
 export class DeleteRouteAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] DeleteRouteAction";
     constructor(public readonly routeId: string) { }
 }
 
 export class ChangeRoutePropertiesAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] ChangeRoutePropertiesAction";
     constructor(public readonly routeId: string, public readonly routeData: RouteData) { }
 }
 
 export class AddPrivatePoiAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] AddPrivatePoiAction";
     constructor(public readonly routeId: string, public readonly markerData: MarkerData) { }
 }
 
 export class UpdatePrivatePoiAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] UpdatePrivatePoiAction";
     constructor(public readonly routeId: string, public readonly index: number, public readonly markerData: MarkerData) { }
 }
 
 export class DeletePrivatePoiAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] DeletePrivatePoiAction";
     constructor(public readonly routeId: string, public readonly index: number) { }
 }
 
 export class DeletePrivatePoiByIdAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] DeletePrivatePoiByIdAction";
     constructor(public readonly id: string) { }
 }
 
 export class AddSegmentAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] AddSegmentAction";
     constructor(public readonly routeId: string, public readonly segmentData: RouteSegmentData) { }
 }
 
 export class UpdateSegmentsAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] UpdateSegmentsAction";
     constructor(public readonly routeId: string, public readonly indices: number[], public readonly segmentsData: RouteSegmentData[]) { }
 }
 
 export class ReplaceSegmentsAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] ReplaceSegmentsAction";
     constructor(public readonly routeId: string, public readonly segmentsData: RouteSegmentData[]) { }
 }
 
 export class DeleteSegmentAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] DeleteSegmentAction";
     constructor(public readonly routeId: string, public readonly index: number) { }
 }
 
 export class ChangeRouteStateAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] ChangeRouteStateAction";
     constructor(public readonly routeId: string, public readonly state: RouteEditStateType) { }
 }
 
 export class ReplaceRouteAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] ReplaceRouteAction";
     constructor(public readonly routeId: string, public readonly routeData: RouteData) { }
 }
 
 export class SplitRouteAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] SplitRouteAction";
     constructor(public readonly routeId: string, public readonly routeData: RouteData, public readonly splitRouteData: RouteData) { }
 }
 
 export class MergeRoutesAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] MergeRoutesAction";
     constructor(public readonly routeId: string, public readonly secondaryRouteId: string, public readonly mergedRouteData: RouteData) { }
 }
 
 export class BulkReplaceRoutesAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] BulkReplaceRoutesAction";
     constructor(public readonly routesData: RouteData[]) { }
 }
 
 export class ClearPoisAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] ClearPoisAction";
     constructor(public readonly routeId: string) { }
 }
 
 export class ClearPoisAndRouteAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] ClearPoisAndRouteAction";
     constructor(public readonly routeId: string) { }
 }
 
 export class DeleteAllRoutesAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] DeleteAllRoutesAction";
 }
 
 export class ToggleAllRoutesAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Routes] ToggleAllRoutesAction";
 }
 
 @State<StateWithHistory<RouteData[]>>({

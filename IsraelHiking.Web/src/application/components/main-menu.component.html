@@ -10,15 +10,18 @@
   <span class="mx-1">{{resources.findRoutes}}</span>
 </button>
 }
-@if (!isIFrame() && !isLoggedIn()) {
+@if (isUserKnown() && !isIFrame() && !isLoggedIn()) {
 <button mat-raised-button (click)="login()">{{resources.signIn}}</button>
 }
 <button mat-button [matMenuTriggerFor]="appMenu" analyticsOn="click" analyticsCategory="Menu"
   analyticsLabel="Toggle main menu" class="!h-[56px] text-white!">
   <span class="flex flex-row justify-center items-center">
-    @if (isLoggedIn()) {
+    @if (!isUserKnown()) {
+    <!-- Holds the avatar's place until we know who the user is, so the toolbar does not jump -->
+    <span class="max-h-[48px] w-[48px] me-4"></span>
+    } @else if (isLoggedIn()) {
     @if (userInfo()?.imageUrl) {
-    <img [src]="userInfo()?.imageUrl" alt="" class="max-h-[48px] me-4 rounded-full" />
+    <img [src]="userInfo()?.imageUrl" alt="" class="max-h-[48px] w-[48px] me-4 rounded-full" />
     } @else {
     <i class="fa icon-user-circle fa-lg me-4"></i>
     }

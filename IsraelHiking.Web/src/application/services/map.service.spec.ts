@@ -7,6 +7,8 @@ import { MapService } from "./map.service";
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
+import { DatabaseService } from "./database.service";
+import { OverpassTurboService } from "./overpass-turbo.service";
 import { InMemoryReducer } from "../reducers/in-memory.reducer";
 import { SetLocationAction } from "../reducers/location.reducer";
 
@@ -18,6 +20,8 @@ describe("MapService", () => {
                 MapService,
                 CancelableTimeoutService,
                 { provide: ResourcesService, useValue: {} },
+                { provide: DatabaseService, useValue: {} },
+                { provide: OverpassTurboService, useValue: {} },
                 {
                     provide: LoggingService,
                     useValue: {
