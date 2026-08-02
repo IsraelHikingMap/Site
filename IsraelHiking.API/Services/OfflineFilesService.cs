@@ -151,8 +151,9 @@ public class OfflineFilesService : IOfflineFilesService
     }
 
     /// <summary>
-    /// Extracts the sources names from a style's json content, a source name is the file name of its url,
-    /// for example: "https://mapeak.com/vector/data/IHM-schema.json" translates to "IHM-schema".
+    /// Extracts the sources names from a style's json content, a source name is the file name of its url, with or
+    /// without an extension, for example: "https://mapeak.com/vector/data/IHM-schema.json" translates to "IHM-schema"
+    /// and "https://mapeak.com/vector/data/raster-dem" translates to "raster-dem".
     /// </summary>
     private List<string> GetSourceNamesFromStyle(byte[] styleContent)
     {

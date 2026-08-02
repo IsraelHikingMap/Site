@@ -36,8 +36,8 @@ public class OfflineFilesServiceTests
             "IHM": { "url": "https://mapeak.com/vector/data/IHM-schema.json" },
             "IHM-code": { "url": "https://mapeak.com/vector/data/IHM-code.json" },
             "DEM": {
-                "url": "https://mapeak.com/raster-dem.json",
-                "tiles": [ "https://mapeak.com/raster-dem/{z}/{x}/{y}.webp" ]
+                "url": "https://mapeak.com/vector/data/raster-dem",
+                "tiles": [ "https://mapeak.com/vector/data/raster-dem/{z}/{x}/{y}.webp" ]
             },
             "Contour": { "url": "https://global.israelhikingmap.workers.dev/JAXA_AW3D30_2024_contour_z5-Z12_vector.json" }
         }
