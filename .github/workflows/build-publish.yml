@@ -5,7 +5,8 @@ name: Build and Publish
 # 2. android - Builds the Android app and uploads it to Google Play (if requested)
 # 3. docker - Builds the Docker image and pushes it to GitHub Container Registry
 # 4. ios - Builds the iOS app and uploads it to App Store (if requested)
-# 5. github-release - Tags the commit and creates a Github release with the apps' binaries (if requested)
+# 5. tag - Tags the built commit with the version string
+# 6. github-release - Creates a Github release with the apps' binaries (if requested)
 
 on:
   workflow_dispatch:
@@ -52,9 +53,21 @@ jobs:
           PATCH: ${{ github.run_number }}
         run: |
           version_string=$MAJOR.$MINOR.$(($PATCH % 1000))
-          echo "version_code=$(($MAJOR * 100000 + $MINOR * 1000 + $PATCH % 1000))" >> $GITHUB_OUTPUT
+          version_code=$(($MAJOR * 100000 + $MINOR * 1000 + $PATCH % 1000))
+          echo "version_code=$version_code" >> $GITHUB_OUTPUT
           echo "version_string=$version_string" >> $GITHUB_OUTPUT
-          echo "Version: $version_string" >> $GITHUB_STEP_SUMMARY
+          commit_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
+          {
+            echo "### Build and Publish $version_string"
+            echo ""
+            echo "| | |"
+            echo "| --- | --- |"
+            echo "| Version | \`$version_string\` |"
+            echo "| Version code | \`$version_code\` |"
+            echo "| Commit | [\`$(git rev-parse --short HEAD)\`]($commit_url) - $(git log -1 --pretty=%s) |"
+            echo "| Ref | \`$GITHUB_REF_NAME\` |"
+            echo "| Docker image | \`ghcr.io/israelhikingmap/website-mapeak:$version_string\` |"
+          } >> $GITHUB_STEP_SUMMARY
       - name: Get all milestones
         id: get_milestones
         uses: octokit/request-action@v3.0.0
@@ -233,17 +246,32 @@ jobs:
         env:
           APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
 
-  github-release:
-    if: ${{ github.event.inputs.production == 'true' }}
+  tag:
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     needs: [version, ios, android]
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
       - name: Tag commit and push
+        env:
+          VERSION: ${{ needs.version.outputs.version_string }}
         run: |
-          git tag "v${{ needs.version.outputs.version_string }}"
-          git push origin "v${{ needs.version.outputs.version_string }}"
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+          tag_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/tree/v$VERSION"
+          commit_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
+          echo "Tagged [\`v$VERSION\`]($tag_url) at [\`$(git rev-parse --short HEAD)\`]($commit_url)" >> $GITHUB_STEP_SUMMARY
+
+  github-release:
+    if: ${{ github.event.inputs.production == 'true' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    needs: [version, ios, android, tag]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
       - name: Download artifacts
         uses: actions/download-artifact@v8
         with:
