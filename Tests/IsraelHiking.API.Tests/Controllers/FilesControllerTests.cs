@@ -211,11 +211,12 @@ public class FilesControllerTests
     {
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
-        _offlineFilesService.GetFileContent("file", null, null).Returns(((Stream)new MemoryStream(), (long?)null));
+        _offlineFilesService.GetFileContent("file", null, null).Returns(((Stream)new MemoryStream(), (long?)10));
 
         var results = _controller.GetOfflineFile("file", null, null).Result as FileResult;
 
         Assert.IsNotNull(results);
+        Assert.AreEqual(10, _controller.Response.ContentLength);
     }
 
     [TestMethod]
