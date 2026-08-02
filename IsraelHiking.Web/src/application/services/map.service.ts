@@ -7,7 +7,7 @@ import { LoggingService } from "./logging.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
 import { SpatialService } from "./spatial.service";
 import { ResourcesService } from "./resources.service";
-import { DatabaseService } from "./database.service";
+import { DatabaseService, NO_OFFLINE_FILE_MESSAGE } from "./database.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
 import { SetLocationAction } from "../reducers/location.reducer";
 import type { ApplicationState, Bounds, LatLngAltTime } from "../models";
@@ -140,6 +140,10 @@ export class MapService {
 
     private readonly onError = (e: ErrorEvent) => {
         if (e?.error?.message?.includes("418")) {
+            return;
+        }
+        if (e?.error?.message?.includes(NO_OFFLINE_FILE_MESSAGE)) {
+            this.loggingService.warning("[Map] " + e.error.message);
             return;
         }
         this.loggingService.error("[Map] Error: " + e?.error?.message);

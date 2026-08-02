@@ -21,6 +21,12 @@ export type ImageUrlAndData = {
     data: string;
 };
 
+/**
+ * Prefix of the error thrown when a tile can't be fetched and there's no offline file to fall back to.
+ * This is expected when the device is offline and the relevant area was not downloaded, so it is logged as a warning.
+ */
+export const NO_OFFLINE_FILE_MESSAGE = "There's no offline file";
+
 @Service()
 export class DatabaseService {
     private static readonly STATE_DB_NAME = "State";
@@ -137,7 +143,8 @@ export class DatabaseService {
                 if (!this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)) {
                     this.store.dispatch(new SetLastOfflineDetectedDate(new Date()));
                 }
-                throw new Error(`Failed to get ${url}: ${(ex as Error).message}`, { cause: ex });
+                throw new Error(`${NO_OFFLINE_FILE_MESSAGE} for tile ${z}/${x}/${y} of ${type}, ` +
+                    `and the server could not be reached: ${(ex as Error).message}`, { cause: ex });
             }
             const data = await this.pmTilesService.getTileByType(z, x, y, type);
             return { data };

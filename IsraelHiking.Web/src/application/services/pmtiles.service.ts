@@ -73,14 +73,15 @@ export class PmTilesService {
         }
     }
 
+    /**
+     * A pmtiles file is sparse - tiles without any data are simply not stored in it,
+     * so a missing tile is returned as an empty tile and not as an error.
+     */
     private async getTileFromFile(fileName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {
         const source = await this.getSource(fileName);
         const pmTilesProvider = new PMTiles(source);
         const response = await pmTilesProvider.getZxy(z, x, y);
-        if (response == null) {
-            throw new Error(`Response is null for tile ${z}/${x}/${y} from file ${fileName}`);
-        }
-        return response.data;
+        return response?.data ?? new ArrayBuffer(0);
     }
 
     public async isOfflineFileAvailable(z: number, x: number, y: number, type: string): Promise<boolean> {
