@@ -116,7 +116,7 @@ export class DatabaseService {
      * Falls back to the offline files when the server can not be reached.
      */
     public async getSliceTile(url: string): Promise<GetResourceResponse<ArrayBuffer>> {
-        // slice://mapeak.com/vector/data/IHM-schema/{z}/{x}/{y}.mvt
+        // slice://mapeak.com/vector/data/mapeak-schema/{z}/{x}/{y}.mvt
         const splitUrl = url.split("/");
         const type = splitUrl[splitUrl.length - 4];
         const z = +splitUrl[splitUrl.length - 3];

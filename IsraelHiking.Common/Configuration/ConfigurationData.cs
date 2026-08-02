@@ -105,6 +105,10 @@ public class ConfigurationData
     /// </summary>
     public string OfflineFilesFolder { get; set; }
     /// <summary>
+    /// The base address of the "on-the-fly" service that generates and serves offline files
+    /// </summary>
+    public string OnTheFlyFilesAddress { get; set; }
+    /// <summary>
     /// OSM server base address
     /// </summary>
     public string OsmBaseAddress { get; set; }
@@ -148,6 +152,7 @@ public class ConfigurationData
         GpsBabelServerAddress = "http://localhost:11987/";
         ImageCreatorServerAddress = "http://localhost:11223/";
         OfflineFilesFolder = "./";
+        OnTheFlyFilesAddress = "https://mapeak.com/serve-extract/";
         OsmBaseAddress = "https://www.openstreetmap.org";
         ShareUrlApiAddress = "https://israelhiking.osm.org.il/api/urls/";
         ImageUrlsAllowList =
