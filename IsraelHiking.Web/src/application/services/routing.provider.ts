@@ -21,6 +21,7 @@ import type { ApplicationState, LatLngAltTime, RoutingType } from "../models";
 @Injectable()
 export class RoutingProvider {
     private static readonly MAX_ROUTING_ZOOM = 14;
+    // HM TODO: remove this in 1.2027
     private static readonly IHM_ROUTING_SCHEMA = "IHM-schema";
     private static readonly MAPEAK_ROUTING_SCHEMA = "mapeak-schema";
     private static readonly IHM_ROUTING_CLASS_PROPERTY_NAME = "ihm_class";
