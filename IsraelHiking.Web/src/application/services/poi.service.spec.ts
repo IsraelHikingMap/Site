@@ -2,7 +2,7 @@ import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
 import type { GeoJSONFeature } from "maplibre-gl";
 
@@ -56,14 +56,12 @@ describe("Poi Service", () => {
             debug: () => { }
         };
         TestBed.configureTestingModule({
-            imports: [
-                NgxsModule.forRoot([
+            providers: [
+                provideStore([
                     LayersReducer,
                     OfflineReducer,
                     ConfigurationReducer
-                ])
-            ],
-            providers: [
+                ]),
                 {
                     provide: ResourcesService,
                     useValue: {

@@ -1,6 +1,6 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 
 import { ResourcesService } from "./resources.service";
 import { GetTextCatalogService } from "./gettext-catalog.service";
@@ -8,8 +8,8 @@ import { GetTextCatalogService } from "./gettext-catalog.service";
 describe("ResourcesService", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([])],
             providers: [
+                provideStore([]),
                 {
                     provide: GetTextCatalogService,
                     useValue: {

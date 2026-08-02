@@ -1,7 +1,7 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
 import { EventEmitter } from "@angular/core";
 import { inject, TestBed } from "@angular/core/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 
 import { LocationService } from "./location.service";
 import { GeoLocationService } from "./geo-location.service";
@@ -33,8 +33,8 @@ describe("LocationService", () => {
             moveToWithCurrentZoom: vi.fn()
         };
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([InMemoryReducer, GpsReducer])],
             providers: [
+                provideStore([InMemoryReducer, GpsReducer]),
                 { provide: GeoLocationService, useValue: geoLocationService },
                 {
                     provide: DeviceOrientationService,

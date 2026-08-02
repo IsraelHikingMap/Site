@@ -2,7 +2,7 @@ import { describe, beforeEach, vi, it, expect, type Mock } from "vitest";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { inject, TestBed } from "@angular/core/testing";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 
 import { Urls } from "../urls";
 import { ResourcesService } from "./resources.service";
@@ -16,8 +16,8 @@ import type { EditableLayer, LayerData } from "../models";
 describe("LayersService", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([LayersReducer, UserInfoReducer])],
             providers: [
+                provideStore([LayersReducer, UserInfoReducer]),
                 LayersService,
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),

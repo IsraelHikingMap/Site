@@ -2,7 +2,7 @@ import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 
 import { TracesService } from "./traces.service";
 import { LoggingService } from "./logging.service";
@@ -19,8 +19,8 @@ describe("Traces Service", () => {
             error: () => { }
         };
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([])],
             providers: [
+                provideStore([]),
                 TracesService,
                 {
                     provide: ResourcesService,

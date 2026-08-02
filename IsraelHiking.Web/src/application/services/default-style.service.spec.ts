@@ -1,6 +1,6 @@
 import { describe, beforeEach, vi, it, expect, Mock } from "vitest";
 import { inject, TestBed } from "@angular/core/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 import type {
     BackgroundLayerSpecification,
     FillLayerSpecification,
@@ -24,8 +24,8 @@ describe("DefaultStyleService", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([])],
             providers: [
+                provideStore([]),
                 DefaultStyleService,
                 {
                     provide: MapService,

@@ -1,6 +1,6 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
 import { inject, TestBed } from "@angular/core/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 
 import { RoutesReducer } from "../reducers/routes.reducer";
 import { DataContainerService } from "./data-container.service";
@@ -18,8 +18,8 @@ import type { DataContainer, RouteData, ShareUrl } from "../models";
 describe("DataContainerService", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([RoutesReducer])],
             providers: [
+                provideStore([RoutesReducer]),
                 DataContainerService,
                 RoutesFactory,
                 {

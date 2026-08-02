@@ -2,7 +2,7 @@ import { describe, beforeEach, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 
 import { SearchResultsProvider } from "./search-results.provider";
 import { GeoJsonParser } from "./geojson.parser";
@@ -15,8 +15,8 @@ import type { SearchResultsPointOfInterest } from "../models";
 describe("SearchResultsProvider", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot()],
             providers: [
+                provideStore([]),
                 GeoJsonParser,
                 SearchResultsProvider,
                 CoordinatesService,

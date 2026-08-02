@@ -1,6 +1,6 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
 import { NavigationEnd, provideRouter, Router, UrlTree } from "@angular/router";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 import { TestBed, inject } from "@angular/core/testing";
 import { Subject } from "rxjs";
 
@@ -26,8 +26,8 @@ describe("HashService", () => {
             url: ""
         };
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([InMemoryReducer])],
             providers: [
+                provideStore([InMemoryReducer]),
                 provideRouter([]),
                 { provide: Router, useValue: routerMock },
                 { provide: MapService, useValue: {} },

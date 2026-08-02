@@ -1,6 +1,6 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 import type { Map, ErrorEvent } from "maplibre-gl";
 
 import { MapService } from "./map.service";
@@ -15,8 +15,8 @@ import { SetLocationAction } from "../reducers/location.reducer";
 describe("MapService", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([InMemoryReducer])],
             providers: [
+                provideStore([InMemoryReducer]),
                 MapService,
                 CancelableTimeoutService,
                 { provide: ResourcesService, useValue: {} },
