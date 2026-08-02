@@ -6,22 +6,22 @@ import { initialState } from "./initial-state";
 import type { ShareUrl, ShareUrlsState } from "../models";
 
 export class AddShareUrlAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Share Urls] AddShareUrlAction";
     constructor(public readonly shareUrl: ShareUrl) { }
 }
 
 export class RemoveShareUrlAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Share Urls] RemoveShareUrlAction";
     constructor(public readonly shareUrlId: string) { }
 }
 
 export class UpdateShareUrlAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Share Urls] UpdateShareUrlAction";
     constructor(public readonly shareUrl: ShareUrl) { }
 }
 
 export class SetShareUrlsLastModifiedDateAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Share Urls] SetShareUrlsLastModifiedDateAction";
     constructor(public readonly lastModifiedDate: Date) { }
 }
 

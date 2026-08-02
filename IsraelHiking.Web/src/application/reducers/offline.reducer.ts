@@ -6,32 +6,32 @@ import { initialState } from "./initial-state";
 import type { OfflineState, TileMetadataPerFile } from "../models";
 
 export class SetOfflineSubscribedAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Offline] SetOfflineSubscribedAction";
     constructor(public readonly isSubscribed: boolean) { }
 }
 
 export class SetOfflineMapsLastModifiedDateAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Offline] SetOfflineMapsLastModifiedDateAction";
     constructor(public readonly data: TileMetadataPerFile, public readonly tileX: number, public readonly tileY: number) { }
 }
 
 export class DeleteOfflineMapsTileAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Offline] DeleteOfflineMapsTileAction";
     constructor(public readonly tileX: number, public readonly tileY: number) { }
 }
 
 export class AddToPoiQueueAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Offline] AddToPoiQueueAction";
     constructor(public readonly featureId: string) { }
 }
 
 export class RemoveFromPoiQueueAction {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Offline] RemoveFromPoiQueueAction";
     constructor(public readonly featureId: string) { }
 }
 
 export class SetLastOfflineDetectedDate {
-    public static readonly type = this.prototype.constructor.name;
+    public static readonly type = "[Offline] SetLastOfflineDetectedDate";
     constructor(public readonly lastOfflineDetectedDate: Date | null) { }
 }
 
