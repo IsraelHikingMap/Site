@@ -15,27 +15,52 @@ namespace IsraelHiking.API.Services;
 /// <inheritdoc/>
 public class OfflineFilesService : IOfflineFilesService
 {
-    // The zoom level at which the map is split into tiles - matches the folder structure of the offline files.
+    /// <summary>
+    /// The zoom level at which the map is split into tiles - matches the folder structure of the offline files.
+    /// </summary>
     private const int SLICE_TILE_ZOOM = 7;
-    // The zoom level of the root (non-tiled) overview files.
+
+    /// <summary>
+    /// The zoom level of the root (non-tiled) overview files.
+    /// </summary>
     private const int ROOT_ZOOM = 6;
-    // The style that defines which sources (i.e. offline files) the client needs.
+
+    /// <summary>
+    /// The style that defines which sources (i.e. offline files) the client needs.
+    /// </summary>
     private const string STYLE_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json";
-    // Sources whose name contains this are not downloaded for offline usage.
+
+    /// <summary>
+    /// Sources whose name contains this are not downloaded for offline usage.
+    /// </summary>
     private const string CONTOUR = "contour";
-    // This source is not a part of the style but is still needed for offline usage.
+
+    /// <summary>
+    /// This source is not a part of the style but is still needed for offline usage.
+    /// </summary>
     private const string GLOBAL_POINTS = "global_points";
-    // How long the sources list taken from the style is reused before fetching the style again.
+
+    /// <summary>
+    /// How long the sources list taken from the style is reused before fetching the style again.
+    /// </summary>
     private static readonly TimeSpan STYLE_CACHE_DURATION = TimeSpan.FromMinutes(10);
+
     private const int STYLE_FETCH_ATTEMPTS = 3;
     private static readonly TimeSpan STYLE_FETCH_RETRY_DELAY = TimeSpan.FromSeconds(1);
 
-    // The DEM (jaxa) is the only source that is not generated on the fly but sliced in advance and served from the
-    // file system. It only exists at the tile level, and its file name in the style might be an alias to the file
-    // name on disk, in which case the alias is the name reported to and used by the client.
+    /// <summary>
+    /// The DEM (jaxa) is the only source that is not generated on the fly but sliced in advance and served from the
+    /// file system. It only exists at the tile level, and its file name in the style might be an alias to the file
+    /// name on disk, in which case the alias is the name reported to and used by the client.
+    /// </summary>
     private const string DEM_FILE_NAME = "jaxa_terrarium0-11_v2";
+
+    /// <inheritdoc cref="DEM_FILE_NAME"/>
     private const string DEM_ALIAS_FILE_NAME = "raster-dem";
-    // The fixed last modified date reported for the DEM, bumped whenever the underlying data changes.
+
+    /// <summary>
+    /// The fixed last modified date reported for the DEM, bumped whenever the underlying data changes.
+    /// </summary>
     private static readonly DateTime DEM_MODIFIED_DATE = DateTimeOffset.Parse("2026-04-09T10:36:08.8024764Z", CultureInfo.InvariantCulture).UtcDateTime;
 
     private readonly IFileProvider _fileProvider;
@@ -71,10 +96,13 @@ public class OfflineFilesService : IOfflineFilesService
     }
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// The on-the-fly files are generated on demand, so they are always reported with today's date,
+    /// while the DEM file has a fixed date and only exists at the tile level.
+    /// </remarks>
     public async Task<Dictionary<string, DateTime>> GetUpdatedFilesList(DateTime lastModifiedDate, long? tileX, long? tileY)
     {
         var filesDictionary = new Dictionary<string, DateTime>();
-        // The on-the-fly files are generated on demand, so they are always reported with today's date.
         var today = DateTime.UtcNow.Date;
         foreach (var name in await GetSourceNames())
         {
@@ -86,7 +114,6 @@ public class OfflineFilesService : IOfflineFilesService
 
             if (tileX.HasValue && tileY.HasValue)
             {
-                // The DEM file only exists at the tile level.
                 AddIfUpdated(filesDictionary, SourceNameToFileName(name, tileX, tileY), DEM_MODIFIED_DATE, lastModifiedDate);
             }
         }
@@ -94,6 +121,9 @@ public class OfflineFilesService : IOfflineFilesService
     }
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// The DEM might be requested by its alias name, but it is stored on disk under its original name.
+    /// </remarks>
     public async Task<(Stream Content, long? Length)> GetFileContent(string fileName, long? tileX, long? tileY)
     {
         var sourceName = FileNameToSourceName(fileName);
@@ -101,7 +131,6 @@ public class OfflineFilesService : IOfflineFilesService
         {
             return await _remoteFileFetcherGateway.GetFileStream(_options.OnTheFlyFilesAddress + fileName);
         }
-        // The DEM might be requested by its alias name, but it is stored on disk under its original name.
         var demFileName = DEM_FILE_NAME + fileName[sourceName.Length..];
         var relativePath = tileX.HasValue && tileY.HasValue
             ? $"{SLICE_TILE_ZOOM}/{tileX}/{tileY}/{demFileName}"
