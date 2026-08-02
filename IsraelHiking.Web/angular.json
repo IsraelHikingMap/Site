@@ -61,8 +61,8 @@
               "deepmerge",
               "xml-beautify",
               "platform",
-              "piexif-ts",
               "isomorphic-xml2js",
+              "piexif-ts",
               "rbush"
             ],
             "extractLicenses": false,
