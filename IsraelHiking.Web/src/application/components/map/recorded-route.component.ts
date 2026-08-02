@@ -41,11 +41,11 @@ export class RecordedRouteComponent {
     public isRecording = this.store.selectSignal((state: ApplicationState) => state.recordedRouteState.isRecording);
 
     constructor() {
-        const recordedRoute$ = this.store.select((state: ApplicationState) => state.recordedRouteState.route);
-        const currentPosition$ = this.store.select((state: ApplicationState) => state.gpsState.currentPosition);
+        const recordedRouteStream = this.store.select((state: ApplicationState) => state.recordedRouteState.route);
+        const currentPositionStream = this.store.select((state: ApplicationState) => state.gpsState.currentPosition);
 
         // Combine streams to work when both current location and recorded route changes, added throttle to avoid a double update of the UI
-        combineLatest([recordedRoute$, currentPosition$]).pipe(throttleTime(50, undefined, { trailing: true }), takeUntilDestroyed())
+        combineLatest([recordedRouteStream, currentPositionStream]).pipe(throttleTime(50, undefined, { trailing: true }), takeUntilDestroyed())
             .subscribe(() => this.handleRecordingChanges());
     }
 
