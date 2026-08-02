@@ -4,8 +4,8 @@ import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import { VectorTile } from "@mapbox/vector-tile";
 import { Store } from "@ngxs/store";
-import PathFinder from "geojson-path-finder";
 import { PbfReader } from "pbf";
+import PathFinder from "geojson-path-finder";
 import QuickLRU from "quick-lru";
 
 import { ResourcesService } from "./resources.service";

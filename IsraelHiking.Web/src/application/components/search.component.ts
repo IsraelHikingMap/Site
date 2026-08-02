@@ -40,7 +40,6 @@ export class SearchComponent {
     public readonly searchFrom = new FormControl<string | SearchResultsPointOfInterest>("");
 
     private selectFirstSearchResults = false;
-    private searchRequestId = 0;
 
     public readonly searchFromInput = viewChild<ElementRef>("searchFromInput");
     public readonly matAutocompleteTriggers = viewChildren(MatAutocompleteTrigger);
@@ -110,15 +109,10 @@ export class SearchComponent {
     }
 
     public async search(isPrefix: boolean) {
-        const requestId = ++this.searchRequestId;
         try {
             const results = await this.searchResultsProvider.getResults(this.searchTerm(), isPrefix, this.shouldUseMapCenter());
-            if (requestId !== this.searchRequestId) {
-                // A newer search was started while this request was in flight - ignore this stale response
-                // so the displayed results always reflect the most recent query.
-                return;
-            }
             if (results == null) {
+                // A stale response, a newer search superseded it - keep the currently displayed results
                 return;
             }
             this.searchResults.set(results);
