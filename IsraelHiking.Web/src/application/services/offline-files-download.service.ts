@@ -240,6 +240,7 @@ export class OfflineFilesDownloadService {
             for (const fileName of fileNames) {
                 this.loggingService.info(`[Offline Download] Deleting file ${fileName}`);
                 await this.fileService.deleteFileInDataDirectory(fileName);
+                this.pmtilesService.invalidateFile(fileName);
             }
         }
         downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.offlineState.downloadedTiles);

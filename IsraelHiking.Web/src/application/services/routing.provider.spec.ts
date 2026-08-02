@@ -369,6 +369,53 @@ describe("RoutingProvider", () => {
         )
     );
 
+    it("Should fall back to the older schema when the newer schema is missing for one of the tiles",
+        inject([RoutingProvider, HttpTestingController, PmTilesService],
+            async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
+                const featureCollection = {
+                    type: "FeatureCollection",
+                    features: [
+                        {
+                            type: "Feature",
+                            geometry: {
+                                type: "LineString",
+                                coordinates: [
+                                    [35.0001, 32.0001],
+                                    [35.0001, 32.0003],
+                                    [35.0003, 32.0003]
+                                ]
+                            },
+                            properties: {
+                                ihm_class: "track"
+                            }
+                        }
+                    ]
+                } as GeoJSON.FeatureCollection;
+
+                let mapeakAvailabilityCalls = 0;
+                db.isOfflineFileAvailable = (_z, _x, _y, type) => {
+                    if (type !== "mapeak-schema") {
+                        return Promise.resolve(true);
+                    }
+                    mapeakAvailabilityCalls++;
+                    return Promise.resolve(mapeakAvailabilityCalls === 1);
+                };
+                const usedSchemas: string[] = [];
+                db.getTileByType = (_z, _x, _y, type) => {
+                    usedSchemas.push(type);
+                    return Promise.resolve(createTileFromFeatureCollection(featureCollection));
+                };
+
+                const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0003, lng: 35.0003 }, "Hike");
+
+                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+                const data = await promise;
+                expect(data.length).toBeGreaterThan(1);
+                expect(usedSchemas.every(s => s === "IHM-schema")).toBe(true);
+            }
+        )
+    );
+
     it("Should return start and end point when all lines are filtered out",
         inject([RoutingProvider, HttpTestingController, PmTilesService, Store],
             async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {

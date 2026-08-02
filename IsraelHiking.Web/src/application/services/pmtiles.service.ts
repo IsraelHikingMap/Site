@@ -36,13 +36,25 @@ export class PmTilesService {
     private readonly loggingService = inject(LoggingService);
     private readonly store = inject(Store);
 
+    /**
+     * Creates a source for the given file, throws when the file does not exist.
+     * Only existing files are cached, so a file that was downloaded later will be picked up.
+     */
     private async getSource(filePath: string): Promise<Source> {
         if (this.sourcesCache.has(filePath)) {
             return this.sourcesCache.get(filePath);
         }
+        await Filesystem.stat({ path: filePath, directory: Directory.Data });
         const source = new CapacitorSource(filePath);
         this.sourcesCache.set(filePath, source);
         return source;
+    }
+
+    /**
+     * Removes a file from the sources cache, should be called when a file is deleted.
+     */
+    public invalidateFile(fileName: string): void {
+        this.sourcesCache.delete(fileName);
     }
 
     /**
@@ -100,7 +112,7 @@ export class PmTilesService {
         try {
             await this.getSource(fileName);
         } catch (ex) {
-            this.loggingService.error(`Failed to open file ${fileName} for tile ${tileX}-${tileY} type ${type} and ${z}/${x}/${y}: ${(ex as Error).message}`);
+            this.loggingService.debug(`Failed to open file ${fileName} for tile ${tileX}-${tileY} type ${type} and ${z}/${x}/${y}: ${(ex as Error).message}`);
             return false;
         }
         return true;

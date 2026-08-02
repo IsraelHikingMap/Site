@@ -83,15 +83,18 @@ export class RoutingProvider {
         if (tileXmax - tileXmin > 2 || tileYmax - tileYmin > 2) {
             throw new Error("Offline routing is only supported for adjecent tiles maximum...");
         }
-        let schema = RoutingProvider.IHM_ROUTING_SCHEMA;
-        for (const tile of tiles) {
-            if (!await this.pmTilesService.isOfflineFileAvailable(zoom, tile.x, tile.y, RoutingProvider.IHM_ROUTING_SCHEMA)
-                && !await this.pmTilesService.isOfflineFileAvailable(zoom, tile.x, tile.y, RoutingProvider.MAPEAK_ROUTING_SCHEMA)) {
-                throw new Error("Unable to find offline route, some tiles are missing");
+        // A schema is usable only when all the relevant tiles are available in it, prefer the newer schema.
+        let schema: string = null;
+        for (const schemaCandidate of [RoutingProvider.MAPEAK_ROUTING_SCHEMA, RoutingProvider.IHM_ROUTING_SCHEMA]) {
+            const availability = await Promise.all(
+                tiles.map(tile => this.pmTilesService.isOfflineFileAvailable(zoom, tile.x, tile.y, schemaCandidate)));
+            if (availability.every(available => available)) {
+                schema = schemaCandidate;
+                break;
             }
-            if (await this.pmTilesService.isOfflineFileAvailable(zoom, tile.x, tile.y, RoutingProvider.MAPEAK_ROUTING_SCHEMA)) {
-                schema = RoutingProvider.MAPEAK_ROUTING_SCHEMA;
-            }
+        }
+        if (schema == null) {
+            throw new Error("Unable to find offline route, some tiles are missing");
         }
         // increase the chance of getting a route by adding more tiles
         if (tileXmax === tileXmin) {
@@ -134,6 +137,10 @@ export class RoutingProvider {
                 const key = `${tileX}/${tileY}`;
                 if (this.featuresCache.has(key)) {
                     allCollection.push(this.featuresCache.get(key));
+                    continue;
+                }
+                // The tiles range is extended beyond the start and end tiles, so some of them might not be available.
+                if (!await this.pmTilesService.isOfflineFileAvailable(zoom, tileX, tileY, schema)) {
                     continue;
                 }
                 const collection = {
