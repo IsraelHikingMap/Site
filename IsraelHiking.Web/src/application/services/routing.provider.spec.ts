@@ -360,7 +360,7 @@ describe("RoutingProvider", () => {
                 db.isOfflineFileAvailable = (_z, _x, _y, type) => Promise.resolve(type === "mapeak-schema");
                 db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
-                const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike");
+                const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "4WD");
 
                 mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
                 const data = await promise;
