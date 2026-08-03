@@ -1,10 +1,7 @@
-// Generates the ui icon font and its css from svg folders.
-// Add or replace an svg in one of the folders below, run this script, commit the result.
-//
-// The folders are the definition of what the font contains - every svg becomes a glyph named after
-// its file. font-SVGs holds icons that only exist for the ui, the sprite folder is shared with the
-// map, and the artwork listed in spriteOnlyArtwork is skipped since it is never a ui icon.
+// Generates the ui icon font and its css from the svg folders below - every svg becomes a glyph
+// named after its file. Add or replace an svg, run this script, commit the result.
 // Folders are in priority order, so if the same name appears twice the first folder wins.
+// The output is deterministic: regenerating without changing an svg produces no diff.
 import { SVGIcons2SVGFontStream } from 'svgicons2svgfont';
 import svg2ttf from 'svg2ttf';
 import { compress } from 'wawoff2';
@@ -19,9 +16,8 @@ const svgFolders = [
 /** Map artwork that is never a ui icon, regardless of what the file happens to be called. */
 const spriteOnlyArtwork = [/pattern/, /^arrowline$/, /^arrowhead$/, /^triangle$/, /^dot$/];
 /**
- * Icon classes that are drawn by an svg filed under a different name. The map keeps both names
- * working - class names appear in saved user data, so they cannot simply be renamed - while the
- * artwork lives in exactly one place.
+ * Icon classes drawn by an svg filed under a different name. Keeps both names working, since class
+ * names appear in saved user data and cannot simply be renamed.
  */
 const aliases: Record<string, string> = {
     archaeological: 'jar',
@@ -36,15 +32,17 @@ const aliases: Record<string, string> = {
 const fontName = 'mapeak';
 const outputFont = `./src/fonts/${fontName}.woff2`;
 const outputCss = './src/fonts/icons.css';
-/** Private use area. Codepoints are an implementation detail - the css maps names to them. */
+/**
+ * Private use area. Codepoints are an implementation detail - the css maps names to them - and are
+ * assigned in name order so that regenerating produces a readable diff.
+ */
 const firstCodepoint = 0xe900;
 
-/** Every svg in every folder, keyed by icon name, first folder wins. */
+/** Every svg in every folder, keyed by icon name, first folder wins. Underscores become dashes. */
 function collectAllSvgs(): Map<string, string> {
     const all = new Map<string, string>();
     for (const folder of svgFolders) {
         for (const file of fs.readdirSync(folder).filter(f => f.endsWith('.svg')).sort()) {
-            // The sprite folder uses underscores, the css classes use dashes.
             const name = path.basename(file, '.svg').replace(/_/g, '-');
             if (!all.has(name)) {
                 all.set(name, path.join(folder, file));
@@ -54,6 +52,7 @@ function collectAllSvgs(): Map<string, string> {
     return all;
 }
 
+/** The glyphs to build, with aliases resolved to the artwork they borrow. */
 function collectIcons(): Map<string, string> {
     const allSvgs = collectAllSvgs();
     const icons = new Map<string, string>();
@@ -62,30 +61,20 @@ function collectIcons(): Map<string, string> {
             icons.set(name, file);
         }
     }
-    // Aliases borrow another icon's artwork, so the target may well be map artwork that is skipped
-    // above and has no glyph of its own.
     for (const [name, target] of Object.entries(aliases)) {
         icons.set(name, allSvgs.get(target));
     }
     return icons;
 }
 
-/**
- * A font glyph has no colour of its own, it is painted with the surrounding text colour. Sprite
- * icons do carry fills - white ones would come out invisible - so they are stripped on the way in.
- */
+/** Strips fills so that a white sprite icon does not become an invisible glyph. */
 function readMonochromeSvg(file: string): string {
     return fs.readFileSync(file, 'utf8')
         .replace(/\s(fill|stroke)="(?!none)[^"]*"/g, '')
         .replace(/(fill|stroke)\s*:\s*(?!none)[^;"]*;?/g, '');
 }
 
-/**
- * Pads the view box out to a square, leaving the artwork centred inside it. The icons are drawn at
- * whatever proportions suit the map - cave is 15x8, for instance - and a glyph keeps the aspect
- * ratio of its source, so without this a wide icon becomes a glyph two ems wide and the icons stop
- * lining up with each other in the fixed size buttons they sit in.
- */
+/** Pads the view box out to a square so that a wide icon does not become a glyph wider than one em. */
 function squareUpSvg(svg: string): string {
     const viewBox = svg.match(/viewBox="([-\d.]+)\s+([-\d.]+)\s+([\d.]+)\s+([\d.]+)"/);
     if (viewBox == null) {
@@ -98,14 +87,15 @@ function squareUpSvg(svg: string): string {
         .replace(/\s(width|height)="[\d.]+"/g, ` $1="${side}"`);
 }
 
+/**
+ * Builds the intermediate svg font. Glyphs are given a single shared advance width so that the
+ * icons line up with each other in the fixed size buttons they sit in.
+ */
 function buildSvgFont(icons: Map<string, string>, codepoints: Map<string, number>): Promise<string> {
     return new Promise((resolve, reject) => {
         const stream = new SVGIcons2SVGFontStream({
             fontName,
             normalize: true,
-            // Every glyph gets the same advance width and sits centred inside it. Without this a
-            // wide icon such as cattle-grid ends up over two ems wide and nothing lines up in the
-            // fixed size buttons the icons are used in.
             fixedWidth: true,
             centerHorizontally: true,
             centerVertically: true,
@@ -156,11 +146,9 @@ function buildCss(codepoints: Map<string, number>): string {
 }
 
 const icons = collectIcons();
-// Sorting by name keeps codepoints stable so regenerating produces a readable diff.
 const codepoints = new Map([...icons.keys()].sort().map((name, index) => [name, firstCodepoint + index] as const));
 
 const svgFont = await buildSvgFont(icons, codepoints);
-// A fixed timestamp keeps the output byte for byte identical when nothing changed.
 const ttf = Buffer.from(svg2ttf(svgFont, { description: 'Mapeak icons', url: 'https://mapeak.com', ts: 0 }).buffer);
 fs.writeFileSync(outputFont, await compress(ttf));
 fs.writeFileSync(outputCss, buildCss(codepoints));
