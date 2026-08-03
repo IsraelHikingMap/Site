@@ -80,11 +80,34 @@ function readMonochromeSvg(file: string): string {
         .replace(/(fill|stroke)\s*:\s*(?!none)[^;"]*;?/g, '');
 }
 
+/**
+ * Pads the view box out to a square, leaving the artwork centred inside it. The icons are drawn at
+ * whatever proportions suit the map - cave is 15x8, for instance - and a glyph keeps the aspect
+ * ratio of its source, so without this a wide icon becomes a glyph two ems wide and the icons stop
+ * lining up with each other in the fixed size buttons they sit in.
+ */
+function squareUpSvg(svg: string): string {
+    const viewBox = svg.match(/viewBox="([-\d.]+)\s+([-\d.]+)\s+([\d.]+)\s+([\d.]+)"/);
+    if (viewBox == null) {
+        return svg;
+    }
+    const [minX, minY, width, height] = viewBox.slice(1).map(Number);
+    const side = Math.max(width, height);
+    const squared = `viewBox="${minX - (side - width) / 2} ${minY - (side - height) / 2} ${side} ${side}"`;
+    return svg.replace(viewBox[0], squared)
+        .replace(/\s(width|height)="[\d.]+"/g, ` $1="${side}"`);
+}
+
 function buildSvgFont(icons: Map<string, string>, codepoints: Map<string, number>): Promise<string> {
     return new Promise((resolve, reject) => {
         const stream = new SVGIcons2SVGFontStream({
             fontName,
             normalize: true,
+            // Every glyph gets the same advance width and sits centred inside it. Without this a
+            // wide icon such as cattle-grid ends up over two ems wide and nothing lines up in the
+            // fixed size buttons the icons are used in.
+            fixedWidth: true,
+            centerHorizontally: true,
             centerVertically: true,
             fontHeight: 1000
         });
@@ -93,7 +116,7 @@ function buildSvgFont(icons: Map<string, string>, codepoints: Map<string, number
         stream.on('end', () => resolve(svgFont));
         stream.on('error', reject);
         for (const [name, file] of icons) {
-            const glyph = Readable.from([readMonochromeSvg(file)]) as Readable & { metadata?: unknown };
+            const glyph = Readable.from([squareUpSvg(readMonochromeSvg(file))]) as Readable & { metadata?: unknown };
             glyph.metadata = { unicode: [String.fromCodePoint(codepoints.get(name))], name };
             stream.write(glyph);
         }
