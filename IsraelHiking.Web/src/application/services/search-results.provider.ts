@@ -42,7 +42,7 @@ export class SearchResultsProvider {
             return [];
         }
 
-        const latlng = this.coordinatesService.parseCoordinates(searchWithoutBadCharacters);
+        const latlng = await this.coordinatesService.parseCoordinates(searchWithoutBadCharacters);
         if (latlng) {
             const id = getIdFromLatLng(latlng);
             return [{

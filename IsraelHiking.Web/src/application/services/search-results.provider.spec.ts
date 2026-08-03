@@ -12,6 +12,9 @@ import { CoordinatesService } from "./coordinates.service";
 import { ResourcesService } from "./resources.service";
 import type { SearchResultsPointOfInterest } from "../models";
 
+/** getResults parses coordinates asynchronously, so the http call is issued a tick later. */
+const flushMicrotasks = () => new Promise(resolve => setTimeout(resolve));
+
 describe("SearchResultsProvider", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -74,6 +77,7 @@ describe("SearchResultsProvider", () => {
             })
             const promise = provider.getResults("searchTerm", false, false);
 
+            await flushMicrotasks();
             const request = mockBackend.match(() => true)[0];
             expect(request.request.params.has("lat")).toBe(false);
             expect(request.request.params.has("lng")).toBe(false);
@@ -91,6 +95,7 @@ describe("SearchResultsProvider", () => {
             })
             const promise = provider.getResults("searchTerm", false, true);
 
+            await flushMicrotasks();
             const request = mockBackend.match(() => true)[0];
             expect(request.request.params.get("lat")).toBe("32.1");
             expect(request.request.params.get("lng")).toBe("35.2");
@@ -109,6 +114,7 @@ describe("SearchResultsProvider", () => {
             const promise1 = provider.getResults("searchTerm1", true, false);
             const promise2 = provider.getResults("searchTerm2", false, false);
 
+            await flushMicrotasks();
             mockBackend.match(url => url.url.endsWith("searchTerm1"))[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
             mockBackend.match(url => url.url.endsWith("searchTerm2"))[0].flush([{ id: "43" } as SearchResultsPointOfInterest]);
             const results1 = await promise1;
@@ -126,6 +132,7 @@ describe("SearchResultsProvider", () => {
             const promise1 = provider.getResults("searchTerm", true, false);
             const promise2 = provider.getResults("searchTerm", false, false);
 
+            await flushMicrotasks();
             mockBackend.match(url => url.url.endsWith("searchTerm") && url.params.get("prefix") === "true")[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
             mockBackend.match(url => url.url.endsWith("searchTerm") && url.params.get("prefix") === "false")[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
             const results1 = await promise1;
@@ -143,6 +150,7 @@ describe("SearchResultsProvider", () => {
             const promise1 = provider.getResults("searchTerm", true, false);
             const promise2 = provider.getResults("searchTerm", false, false);
 
+            await flushMicrotasks();
             mockBackend.match(url => url.url.endsWith("searchTerm") && url.params.get("prefix") === "false")[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
             mockBackend.match(url => url.url.endsWith("searchTerm") && url.params.get("prefix") === "true")[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
             const results1 = await promise1;
@@ -162,6 +170,7 @@ describe("SearchResultsProvider", () => {
                 const promise1 = provider.getResults("searchTer", true, false);
                 const promise2 = provider.getResults("searchTerm", true, false);
 
+                await flushMicrotasks();
                 mockBackend.match(url => url.url.endsWith("searchTerm"))[0].flush([{ id: "43" } as SearchResultsPointOfInterest]);
                 const results2 = await promise2;
                 mockBackend.match(url => url.url.endsWith("searchTer"))[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
@@ -181,6 +190,7 @@ describe("SearchResultsProvider", () => {
                 const promise1 = provider.getResults("searchTerm", true, false);
                 const results2 = await provider.getResults("se", true, false);
 
+                await flushMicrotasks();
                 mockBackend.match(url => url.url.endsWith("searchTerm"))[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
                 const results1 = await promise1;
 

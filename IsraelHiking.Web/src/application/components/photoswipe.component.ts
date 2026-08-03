@@ -1,5 +1,4 @@
 import { Component, ElementRef, AfterViewInit, InjectionToken, ViewEncapsulation, EventEmitter, viewChild, inject } from "@angular/core";
-import PhotoSwipe from "photoswipe";
 
 
 export const PHOTO_SWIPE_DATA = new InjectionToken<PhotoSwipeData>("PHOTO_SWIPE_DATA");
@@ -21,7 +20,9 @@ export class PhotoSwpieComponent implements AfterViewInit {
     public readonly closed = new EventEmitter();
     private readonly data = inject(PHOTO_SWIPE_DATA);
 
-    public ngAfterViewInit(): void {
+    public async ngAfterViewInit(): Promise<void> {
+        // photoswipe is only worth downloading once an image gallery is actually opened.
+        const { default: PhotoSwipe } = await import("photoswipe");
         const pswpElement = this.photoswipe().nativeElement;
 
         const dataSource = this.data.imageUrls.map(imageUrl => ({

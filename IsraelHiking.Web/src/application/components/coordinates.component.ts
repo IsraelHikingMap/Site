@@ -26,7 +26,7 @@ export class CoordinatesComponent implements OnInit {
     private readonly elevationProvider = inject(ElevationProvider);
 
     public async ngOnInit(): Promise<void> {
-        const coordinates = this.itmCoordinatesService.toItm(this.latlng());
+        const coordinates = await this.itmCoordinatesService.toItm(this.latlng());
         if (coordinates.east > 100_000 && coordinates.north > 100_000 && coordinates.east < 300_000 && coordinates.north < 800_000) {
             this.itmCoordinates.set(coordinates);
         }
