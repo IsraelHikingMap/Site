@@ -46,6 +46,7 @@ export class LocationService {
 
     public async initialize() {
         await this.mapService.initializationPromise;
+        this.geoLocationService.restoreTracking();
         this.deviceOrientationService.orientationChanged.subscribe((bearing: number) => {
             if (!this.isActive() || this.locationWithBearing == null) {
                 return;

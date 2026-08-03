@@ -41,12 +41,19 @@ export class GeoLocationService {
         };
     }
 
-    public initialize() {
+    /**
+     * Picks tracking back up where the last session left it. Deliberately not part of initialize:
+     * it asks for the location permission, which should only happen once there is a map to show the
+     * position on, never to someone who just opened a content page.
+     */
+    public restoreTracking() {
         if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking !== "disabled") {
             this.store.dispatch(new SetTrackingStateAction("disabled"));
             this.enable();
         }
+    }
 
+    public initialize() {
         this.store.select((s: ApplicationState) => s.routes.present).subscribe(() => {
             this.sendPlannedRouteToPluginIfNeeded();
         });

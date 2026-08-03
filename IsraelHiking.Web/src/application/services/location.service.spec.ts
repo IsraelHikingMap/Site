@@ -20,7 +20,8 @@ describe("LocationService", () => {
                 subscribe: () => { }
             },
             enable: vi.fn(),
-            disable: vi.fn()
+            disable: vi.fn(),
+            restoreTracking: vi.fn()
         };
         const deviceOrientationService = {
             orientationChanged: new EventEmitter<number>(),
