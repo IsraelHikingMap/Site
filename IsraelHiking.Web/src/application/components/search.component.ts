@@ -78,20 +78,28 @@ export class SearchComponent {
             share()
         );
 
-        // Prefix: fires on each keystroke (no debounce)
-        stringValues$.pipe(
+        // Prefix: fires shortly after each keystroke for fast results
+        const terms$ = stringValues$.pipe(
             debounceTime(200),
-            distinctUntilChanged()
-        ).subscribe(x => {
+            distinctUntilChanged(),
+            share()
+        );
+
+        terms$.subscribe(x => {
             this.searchTerm.set(x);
             this.selectedSearchResults = null;
             this.search(true);
         });
 
-        // Full term: only fires after typing genuinely stops
-        stringValues$.pipe(
-            debounceTime(1000),
-            distinctUntilChanged()
+        /*
+         * Full term: only fires after typing genuinely stops.
+         * It is chained after the prefix stream on purpose - debouncing the raw input again would
+         * hide intermediate terms from this stream, so a term that is deleted and retyped quickly
+         * (i.e. "abcd" -> "abc" -> "abcd") would look unchanged here and never be searched in full,
+         * even though the prefix stream already replaced the results with prefix ones.
+         */
+        terms$.pipe(
+            debounceTime(800)
         ).subscribe(x => {
             this.searchTerm.set(x);
             this.selectedSearchResults = null;
