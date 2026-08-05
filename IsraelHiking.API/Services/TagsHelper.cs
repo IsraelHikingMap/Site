@@ -1,8 +1,6 @@
 ﻿using IsraelHiking.Common;
 using NetTopologySuite.Features;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace IsraelHiking.API.Services;
 
@@ -31,6 +29,7 @@ public class TagsHelper : ITagsHelper
                 tagCombinations.Add([new("route", "bicycle")]);
                 tagCombinations.Add([new("route", "mtb")]);
                 tagCombinations.Add([new("highway", "cycleway")]);
+                tagCombinations.Add([new("landuse", "recreation_ground"), new("sport", "mtb")]);
                 return tagCombinations;
             case "icon-four-by-four":
                 // route=road AND scenic=yes
@@ -58,6 +57,7 @@ public class TagsHelper : ITagsHelper
                 return tagCombinations;
             case "icon-tint":
                 tagCombinations.Add([new("natural", "spring")]);
+                tagCombinations.Add([new("natural", "water")]);
                 tagCombinations.Add([new("water", "reservoir")]);
                 tagCombinations.Add([new("water", "pond")]);
                 tagCombinations.Add([new("water", "lake")]);
@@ -65,6 +65,7 @@ public class TagsHelper : ITagsHelper
                 return tagCombinations;
             case "icon-tree":
                 tagCombinations.Add([new("natural", "tree")]);
+                tagCombinations.Add([new("landuse", "forest")]);
                 return tagCombinations;
             case "icon-flowers":
                 tagCombinations.Add([new("natural", "flowers")]);
@@ -104,9 +105,12 @@ public class TagsHelper : ITagsHelper
                 return tagCombinations;
             case "icon-peak":
                 tagCombinations.Add([new("natural", "peak")]);
+                tagCombinations.Add([new("natural", "ridge")]);
+                tagCombinations.Add([new("natural", "volcano")]);
+                tagCombinations.Add([new("natural", "valley")]);
                 return tagCombinations;
             case "icon-inature":
-                tagCombinations.Add([new("ref:IL:inature", "*")]);
+                tagCombinations.Add([new(FeatureAttributes.INATURE_REF, "*")]);
                 return tagCombinations;
             case "icon-synagogue":
                 tagCombinations.Add([new("amenity", "place_of_worship"), new("religion", "jewish")]);
@@ -119,6 +123,18 @@ public class TagsHelper : ITagsHelper
                 return tagCombinations;
             case "icon-holy-place":
                 tagCombinations.Add([new("amenity", "place_of_worship")]);
+                return tagCombinations;
+            case "icon-bed":
+                tagCombinations.Add([new("tourism", "hotel")]);
+                tagCombinations.Add([new("tourism", "motel")]);
+                tagCombinations.Add([new("tourism", "hostel")]);
+                tagCombinations.Add([new("tourism", "chalet")]);
+                tagCombinations.Add([new("tourism", "guest_house")]);
+                tagCombinations.Add([new("tourism", "bed_and_breakfast")]);
+                tagCombinations.Add([new("tourism", "dormitory")]);
+                return tagCombinations;
+            case "icon-map-signs":
+                tagCombinations.Add([new("highway", "*")]);
                 return tagCombinations;
             case "icon-search":
             default:
@@ -257,6 +273,23 @@ public class TagsHelper : ITagsHelper
                         Icon = "icon-waterhole",
                         Category = Categories.WATER
                     };
+                case "ridge":
+                case "peak":
+                case "volcano":
+                case "valley":
+                    return new IconColorCategory
+                    {
+                        Color = "black",
+                        Icon = "icon-peak",
+                        Category = Categories.NATURAL
+                    };
+                case "water":
+                    return new IconColorCategory
+                    {
+                        Color = "#1e80e3",
+                        Icon = "icon-tint",
+                        Category = Categories.WATER
+                    };
             }
         }
 
@@ -302,7 +335,7 @@ public class TagsHelper : ITagsHelper
             };
         }
 
-        if ("waterway".Equals(GetString(attributes, "type")))
+        if (GetString(attributes, "waterway") != null || "waterway".Equals(GetString(attributes, "type")))
         {
             return new IconColorCategory
             {
@@ -361,18 +394,32 @@ public class TagsHelper : ITagsHelper
                         Icon = "icon-alpinehut",
                         Category = Categories.CAMPING
                     };
+                case "hotel":
+                case "motel":
+                case "hostel":
+                case "chalet":
+                case "guest_house":
+                case "bed_and_breakfast":
+                case "dormitory":
+                    return new IconColorCategory
+                    {
+                        Color = "#734a08",
+                        Icon = "icon-bed",
+                        Category = Categories.OTHER
+                    };
             }
         }
 
-        if ("peak".Equals(GetString(attributes, "natural")))
+        if (GetString(attributes, "mtb:name") != null)
         {
             return new IconColorCategory
             {
-                Color = "black",
-                Icon = "icon-peak",
-                Category = Categories.NATURAL
+                Color = "gray",
+                Icon = "icon-bike",
+                Category = Categories.ROUTE_BIKE
             };
         }
+
 
         if (GetString(attributes, "highway") != null)
         {
@@ -406,10 +453,69 @@ public class TagsHelper : ITagsHelper
                         Category = Categories.ROUTE_4X4,
                         Icon = "icon-four-by-four"
                     };
+                default:
+                    return new IconColorCategory
+                    {
+                        Color = "black",
+                        Category = Categories.OTHER,
+                        Icon = "icon-map-signs"
+                    };
             }
         }
 
-        if (GetString(attributes, "ref:IL:inature") != null)
+        if ("place_of_worship".Equals(GetString(attributes, "amenity")) || "monastery".Equals(GetString(attributes, "amenity")))
+        {
+            var religion = GetString(attributes, "religion");
+            return religion switch
+            {
+                "jewish" => new IconColorCategory
+                {
+                    Color = "black",
+                    Icon = "icon-synagogue",
+                    Category = Categories.OTHER
+                },
+                "christian" => new IconColorCategory
+                {
+                    Color = "black",
+                    Icon = "icon-church",
+                    Category = Categories.OTHER
+                },
+                "muslim" => new IconColorCategory
+                {
+                    Color = "black",
+                    Icon = "icon-mosque",
+                    Category = Categories.OTHER
+                },
+                _ => new IconColorCategory
+                {
+                    Color = "black",
+                    Icon = "icon-holy-place",
+                    Category = Categories.OTHER
+                },
+            };
+        }
+
+        if ("recreation_ground".Equals(GetString(attributes, "landuse")) && "mtb".Equals(GetString(attributes, "sport")))
+        {
+            return new IconColorCategory
+            {
+                Color = "green",
+                Icon = "icon-bike",
+                Category = Categories.ROUTE_BIKE
+            };
+        }
+
+        if ("forest".Equals(GetString(attributes, "landuse")))
+        {
+            return new IconColorCategory
+            {
+                Color = "#008000",
+                Icon = "icon-tree",
+                Category = Categories.OTHER
+            };
+        }
+
+        if (GetString(attributes, FeatureAttributes.INATURE_REF) != null)
         {
             return new IconColorCategory
             {
@@ -419,40 +525,14 @@ public class TagsHelper : ITagsHelper
             };
         }
 
-        if ("place_of_worship".Equals(GetString(attributes, "amenity")) || "monastery".Equals(GetString(attributes, "amenity")))
+        if (GetString(attributes, "wikidata") != null || GetString(attributes, "wikipedia") != null)
         {
-            var religion = GetString(attributes, "religion");
-            switch (religion)
+            return new IconColorCategory
             {
-                case "jewish":
-                    return new IconColorCategory
-                    {
-                        Color = "black",
-                        Icon = "icon-synagogue",
-                        Category = Categories.OTHER
-                    };
-                case "christian":
-                    return new IconColorCategory
-                    {
-                        Color = "black",
-                        Icon = "icon-church",
-                        Category = Categories.OTHER
-                    };
-                case "muslim":
-                    return new IconColorCategory
-                    {
-                        Color = "black",
-                        Icon = "icon-mosque",
-                        Category = Categories.OTHER
-                    };
-                default:
-                    return new IconColorCategory
-                    {
-                        Color = "black",
-                        Icon = "icon-holy-place",
-                        Category = Categories.OTHER
-                    };
-            }
+                Color = "black",
+                Icon = "icon-wikipedia-w",
+                Category = Categories.OTHER
+            };
         }
 
         return new IconColorCategory

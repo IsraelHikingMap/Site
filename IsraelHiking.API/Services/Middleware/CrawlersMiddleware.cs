@@ -1,9 +1,8 @@
 ﻿using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using IsraelHiking.API.Services.Poi;
+using IsraelHiking.API.Services;
 using IsraelHiking.Common;
-using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Wangkanai.Detection.Services;
@@ -85,24 +84,21 @@ public class CrawlersMiddleware
         else if (context.Request.Path.StartsWithSegments("/poi"))
         {
             var split = context.Request.Path.Value.Split("/");
-            var feature = await _pointsOfInterestProvider.GetFeatureById(split[split.Length - 2], split.Last());
-            if (feature == null)
+            context.Request.Query.TryGetValue("language", out var languages);
+            language = languages.FirstOrDefault() ?? Languages.ENGLISH;
+            var basicInfo = await _pointsOfInterestProvider.GetBasicInfo(split[split.Length - 2], split.Last(), language);
+            if (basicInfo == null)
             {
                 await _next.Invoke(context);
                 return;
             }
-            thumbnailUrl = feature.Attributes.GetNames()
-                .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
-                .Select(p => feature.Attributes[p].ToString())
-                .FirstOrDefault() ?? string.Empty;
+            thumbnailUrl = basicInfo.ImageUrl;
             if (isWhatsApp)
             {
                 thumbnailUrl = Regex.Replace(thumbnailUrl, @"(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)", "$1thumb/$2$3/250px-$3");
             }
-            context.Request.Query.TryGetValue("language", out var languages);
-            language = languages.FirstOrDefault() ?? Languages.HEBREW;
-            title = feature.GetTitle(language);
-            description = feature.GetDescriptionWithExternal(language);
+            title = basicInfo.Title;
+            description = basicInfo.Description;
         }
         await WriteHomePage(context, title, thumbnailUrl, description, language);
     }

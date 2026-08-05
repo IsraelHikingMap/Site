@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, computed, Service } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Params } from "@angular/router";
 import { firstValueFrom } from "rxjs";
@@ -38,12 +38,9 @@ type UserLayer = EditableLayer & {
     osmUserId: string;
 }
 
-@Injectable()
+@Service()
 export class LayersService {
-    private allBaseLayers: Immutable<EditableLayer[]> = [];
-    private allOverlays: Immutable<EditableLayer[]> = [];
     private userInfo: Immutable<UserInfo>;
-    private selectedBaseLayerKey: Immutable<string>;
 
     private readonly resources = inject(ResourcesService);
     private readonly httpClient = inject(HttpClient);
@@ -51,14 +48,20 @@ export class LayersService {
     private readonly store = inject(Store);
     private syncingPromise = Promise.resolve();
 
+    // Reactive views over the layers state; the getters below read these so that components binding
+    // to LayersService methods stay up to date under OnPush change detection.
+    private readonly userBaseLayers = this.store.selectSignal((state: ApplicationState) => state.layersState.baseLayers);
+    private readonly userOverlays = this.store.selectSignal((state: ApplicationState) => state.layersState.overlays);
+    private readonly selectedBaseLayerKey = this.store.selectSignal((state: ApplicationState) => state.layersState.selectedBaseLayerKey);
+    private readonly visibleOverlays = this.store.selectSignal((state: ApplicationState) => state.layersState.visibleOverlays);
+    private readonly allBaseLayers = computed<Immutable<EditableLayer[]>>(() => [...DEFAULT_BASE_LAYERS, ...this.userBaseLayers()]);
+    // Reactive derived state exposed as signals (explicit reactive contract; parameterized predicates
+    // isBaseLayerSelected()/isOverlayVisible() stay methods since a signal can't take an argument).
+    public readonly allOverlays = computed<Immutable<EditableLayer[]>>(() => [...DEFAULT_OVERLAYS, ...this.userOverlays()]);
+    public readonly selectedBaseLayer = computed<EditableLayer>(() => this.allBaseLayers().find(bl => this.compareKeys(bl.key, this.selectedBaseLayerKey())) || this.allBaseLayers()[0]);
+    public readonly isAllOverlaysHidden = computed(() => this.visibleOverlays().length === 0);
+
     constructor() {
-        this.store.select((state: ApplicationState) => state.layersState.baseLayers).subscribe(userBaseLayers => {
-            this.allBaseLayers = [...DEFAULT_BASE_LAYERS, ...userBaseLayers];
-        });
-        this.store.select((state: ApplicationState) => state.layersState.overlays).subscribe(userOverlays => {
-            this.allOverlays = [...DEFAULT_OVERLAYS, ...userOverlays];
-        });
-        this.store.select((state: ApplicationState) => state.layersState.selectedBaseLayerKey).subscribe(k => this.selectedBaseLayerKey = k);
         this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe((userInfo) => {
             this.userInfo = userInfo;
             this.syncingPromise = this.syncUserLayers();
@@ -66,19 +69,11 @@ export class LayersService {
     }
 
     public isBaseLayerSelected(layer: EditableLayer): boolean {
-        return this.compareKeys(layer.key, this.selectedBaseLayerKey);
-    }
-
-    public getSelectedBaseLayer(): EditableLayer {
-        return this.allBaseLayers.find(bl => this.compareKeys(bl.key, this.selectedBaseLayerKey)) || this.allBaseLayers[0];
-    }
-
-    public getAllOverlays(): Immutable<EditableLayer[]> {
-        return this.allOverlays;
+        return this.compareKeys(layer.key, this.selectedBaseLayerKey());
     }
 
     public getSelectedBaseLayerAddressForOSM(): string {
-        const baseLayerAddress = this.getSelectedBaseLayer().address;
+        const baseLayerAddress = this.selectedBaseLayer().address;
         if (baseLayerAddress.indexOf("{x}") !== -1) {
             return baseLayerAddress;
         }
@@ -148,7 +143,7 @@ export class LayersService {
     }
 
     public addBaseLayer(layerData: LayerData) {
-        let layer = this.allBaseLayers.find((layerToFind) => this.compareKeys(layerToFind.key, layerData.key));
+        let layer = this.allBaseLayers().find((layerToFind) => this.compareKeys(layerToFind.key, layerData.key));
         if (layer != null) {
             return;
         }
@@ -201,7 +196,7 @@ export class LayersService {
     }
 
     public addOverlay(layerData: LayerData): EditableLayer {
-        let overlay = this.allOverlays.find((overlayToFind) => this.compareKeys(overlayToFind.key, layerData.key));
+        let overlay = this.allOverlays().find((overlayToFind) => this.compareKeys(overlayToFind.key, layerData.key));
         if (overlay != null) {
             return overlay; // overlay exists
         }
@@ -238,7 +233,7 @@ export class LayersService {
     }
 
     public isNameAvailable(key: string, newName: string, isOverlay: boolean): boolean {
-        const layers: Immutable<EditableLayer[]> = isOverlay ? this.allOverlays : this.allBaseLayers;
+        const layers: Immutable<EditableLayer[]> = isOverlay ? this.allOverlays() : this.allBaseLayers();
         return layers.find(l => this.compareKeys(l.key, newName)) == null;
     }
 
@@ -254,8 +249,8 @@ export class LayersService {
     }
 
     public removeBaseLayer(baseLayer: EditableLayer) {
-        if (this.compareKeys(baseLayer.key, this.selectedBaseLayerKey)) {
-            this.store.dispatch(new SelectBaseLayerAction(this.allBaseLayers[0].key));
+        if (this.compareKeys(baseLayer.key, this.selectedBaseLayerKey())) {
+            this.store.dispatch(new SelectBaseLayerAction(this.allBaseLayers()[0].key));
         }
         this.store.dispatch(new RemoveBaseLayerAction(baseLayer.key));
         this.deleteUserLayerFromDatabase(baseLayer.id);
@@ -272,18 +267,14 @@ export class LayersService {
     }
 
     public toggleOverlay(overlay: EditableLayer) {
-        const visibleOverlays = this.store.selectSnapshot((state: ApplicationState) => state.layersState.visibleOverlays);
+        const visibleOverlays = this.visibleOverlays();
         const isLayerVisible = visibleOverlays.includes(overlay.key);
         this.loggingService.info(`[Layers] Changing visibility of ${overlay.key} to ${!isLayerVisible ? "visible" : "hidden"}`);
         this.store.dispatch(new SetOverlaysVisibilityAction(overlay.key, !isLayerVisible));
     }
 
     public isOverlayVisible(overlay: EditableLayer): boolean {
-        return this.store.selectSnapshot((state: ApplicationState) => state.layersState.visibleOverlays).includes(overlay.key);
-    }
-
-    public isAllOverlaysHidden() {
-        return this.store.selectSnapshot((state: ApplicationState) => state.layersState.visibleOverlays).length === 0;
+        return this.visibleOverlays().includes(overlay.key);
     }
 
     public hideAllOverlays() {
@@ -296,9 +287,12 @@ export class LayersService {
             overlays: []
         } as DataContainer;
 
-        container.baseLayer = this.getSelectedBaseLayer();
-        for (const overlayKey of this.store.selectSnapshot((state: ApplicationState) => state.layersState.visibleOverlays)) {
-            container.overlays.push(this.allOverlays.find(o => this.compareKeys(o.key, overlayKey)));
+        container.baseLayer = this.selectedBaseLayer();
+        for (const overlayKey of this.visibleOverlays()) {
+            const overlay = this.allOverlays().find(o => this.compareKeys(o.key, overlayKey));
+            if (overlay != null) {
+                container.overlays.push(overlay);
+            }
         }
         return container;
     }

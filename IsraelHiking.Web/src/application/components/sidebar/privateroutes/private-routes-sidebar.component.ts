@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, computed } from "@angular/core";
 import { MatButton, MatMiniFabButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from "@angular/material/expansion";
@@ -45,8 +45,6 @@ import type { ApplicationState, LatLngAltTime, RouteData, ShareUrl } from "../..
 export class PrivateRoutesSidebarComponent {
     public readonly resources = inject(ResourcesService);
 
-    private routeStatistics: Record<string, RouteStatistics> = {};
-
     private readonly store = inject(Store);
     private readonly dialog = inject(MatDialog);
     private readonly routesFactory = inject(RoutesFactory);
@@ -60,22 +58,19 @@ export class PrivateRoutesSidebarComponent {
     private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly dataContainerService = inject(DataContainerService);
 
-    public routes: Immutable<RouteData[]>;
-    public colors = this.routesFactory.colors;
+    public routes = this.store.selectSignal((state: ApplicationState) => state.routes.present);
+    public readonly colors = this.routesFactory.colors;
     public selectedRouteId = this.store.selectSignal((state: ApplicationState) => state.routeEditingState.selectedRouteId);
     public hiddenRoutesCount = this.store.selectSignal((state: ApplicationState) => state.routes.present.filter(route => route.state === "Hidden").length);
     public isAllRoutesHidden = this.store.selectSignal((state: ApplicationState) => state.routes.present.every(route => route.state === "Hidden"));
-
-    constructor() {
-        this.store.select((state: ApplicationState) => state.routes.present).subscribe(routes => {
-            this.routes = routes;
-            this.routeStatistics = {};
-            for (const route of routes) {
-                const latlngs = this.selectedRouteService.getLatlngs(route);
-                this.routeStatistics[route.id] = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
-            }
-        });
-    }
+    private readonly routeStatistics = computed(() => {
+        const result: Record<string, RouteStatistics> = {};
+        for (const route of this.routes()) {
+            const latlngs = this.selectedRouteService.getLatlngs(route);
+            result[route.id] = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
+        }
+        return result;
+    });
 
     public close() {
         this.sidebarService.hide();
@@ -129,10 +124,11 @@ export class PrivateRoutesSidebarComponent {
     }
 
     public async openFile(event: Event) {
-        const file = this.fileService.getFileFromEvent(event);
-        if (!file) {
+        const files = this.fileService.getFilesFromEvent(event);
+        if (files.length !== 1) {
             return;
         }
+        const file = files[0];
         if (file.name.endsWith(".json")) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
             await this.fileService.writeStyle(file.name, await file.text());
@@ -156,7 +152,7 @@ export class PrivateRoutesSidebarComponent {
         event.stopPropagation();
         this.toastService.confirm({
             message: this.resources.areYouSureYouWantToDeleteAllRoutes
-                .replace("{{count}}", `${this.routes.length}`),
+                .replace("{{count}}", `${this.routes().length}`),
             type: "YesNo",
             confirmAction: () => {
                 this.store.dispatch(new DeleteAllRoutesAction());
@@ -166,7 +162,7 @@ export class PrivateRoutesSidebarComponent {
     }
 
     public getStatistics(routeData: Immutable<RouteData>): RouteStatistics {
-        return this.routeStatistics[routeData.id];
+        return this.routeStatistics()[routeData.id];
     }
 
     public getCheckIconColor(color: string) {
@@ -212,9 +208,8 @@ export class PrivateRoutesSidebarComponent {
             this.toastService.warning(this.resources.loginRequired);
             return;
         }
-        const dataContainer = this.dataContainerService.getContainerForRoutes(this.routes.filter(r => r.state !== "Hidden"));
-        if (dataContainer.routes.length === 0 || dataContainer.routes[0].segments.length == 0 ||
-            dataContainer.routes[0].segments[0].latlngs.length === 0) {
+        const dataContainer = this.dataContainerService.getContainerForRoutes(this.routes().filter(r => r.state !== "Hidden"));
+        if (this.dataContainerService.isContainerEmpty(dataContainer)) {
             this.toastService.warning(this.resources.unableToSaveAnEmptyRoute);
             return;
         }
@@ -223,7 +218,7 @@ export class PrivateRoutesSidebarComponent {
             data: {
                 fullShareUrl: structuredClone(this.shareUrlsService.getSelectedShareUrl()) as ShareUrl,
                 dataContainer,
-                hasHiddenRoutes: this.routes.some(r => r.state === "Hidden")
+                hasHiddenRoutes: this.routes().some(r => r.state === "Hidden")
             }
         });
     }

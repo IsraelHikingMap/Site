@@ -1,17 +1,17 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
 
 import type { RouteDataWithoutState, ApplicationState, RouteData } from "../models";
 
-@Injectable()
+@Service()
 export class RoutesFactory {
 
-    private invertedColorsCache = new Map<string, string>();
+    private readonly invertedColorsCache = new Map<string, string>();
 
     // default values - in case the response from server takes too long.
-    public colors: string[] = [
+    public readonly colors: string[] = [
         "#0000FF", // blue
         "#FF6600", // orange
         "#B700FF", // purple

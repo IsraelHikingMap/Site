@@ -1,16 +1,16 @@
-﻿<div class="flex flex-row sticky top-0 z-10 bg-white">
+﻿<div class="flex flex-row sticky top-0 z-10 bg-surface">
   <div class="flex-1">
-    <button mat-button class="w-full min-w-[unset]! p-0!" (click)="save()" [disabled]="isLoading"
+    <button mat-button class="w-full min-w-[unset]! p-0!" (click)="save()" [disabled]="isLoading()"
       matTooltip="{{resources.save}}" matTooltipPosition="below" analyticsOn="click" analyticsCategory="POI"
       analyticsLabel="Save POI"><i class="fa icon-check"></i></button>
   </div>
   <div class="flex-1">
     <button mat-button class="w-full min-w-[unset]! p-0!" (click)="close()" matTooltip="{{resources.close}}"
       matTooltipPosition="below">
-      @if (isLoading) {
+      @if (isLoading()) {
       <mat-spinner diameter="24"></mat-spinner>
       } @else {
-      <i class="fa icon-close"></i>
+      <i class="fa fa-lg icon-close"></i>
       }
     </button>
   </div>
@@ -27,24 +27,24 @@
     <mat-form-field class="w-full">
       <mat-label>{{resources.nameInLanguage}}</mat-label>
       <input matInput type="text" class="w-full" [dir]="resources.getDirection(info().title)"
-        [(ngModel)]="info().title" />
+        [ngModel]="info().title" (ngModelChange)="updateTitle($event)" />
     </mat-form-field>
   </div>
   }
-  <image-scroller [images]="info().imagesUrls" [canEdit]="true"></image-scroller>
+  <image-scroller [images]="info().imagesUrls" (imagesChange)="updateImages($event)" [canEdit]="true"></image-scroller>
   <div class="flex flex-row">
     <mat-form-field class="w-full">
       <mat-label>{{resources.descriptionInLanguage}}</mat-label>
-      <textarea id="description" scrollToOnClick="description" scrollToOnClickOffset="56" rows="4" maxlength="255"
+      <textarea id="description" scrollToOnClick="description" [scrollToOnClickOffset]="56" rows="4" maxlength="255"
         matInput class="w-full" [dir]="resources.getDirection(info().description)"
-        [(ngModel)]="info().description"></textarea>
+        [ngModel]="info().description" (ngModelChange)="updateDescription($event)"></textarea>
     </mat-form-field>
   </div>
-  @for (url of info().urls; track url; let i = $index) {
+  @for (url of info().urls; track $index; let i = $index) {
   <div class="flex flex-row">
     <mat-form-field class="w-full">
       <mat-label>{{resources.aLinkToAWebsite}}</mat-label>
-      <input matInput class="w-full" maxlength="255" type="text" dir="ltr" [(ngModel)]="info().urls[i]" />
+      <input matInput class="w-full" maxlength="255" type="text" dir="ltr" [ngModel]="info().urls[i]" (ngModelChange)="updateUrl(i, $event)" />
       <button matSuffix mat-icon-button (click)="removeUrl(i)"><i class="fa icon-trash"></i></button>
     </mat-form-field>
   </div>
@@ -58,8 +58,8 @@
   <div class="flex flex-row">
     <mat-form-field class="w-full">
       <mat-label>{{resources.categories}}</mat-label>
-      <mat-select class="w-full" [ngModel]="selectedCategory" (selectionChange)="selectCategory($event)">
-        @for (category of categories; track category) {
+      <mat-select class="w-full" [ngModel]="selectedCategory()" (selectionChange)="selectCategory($event)">
+        @for (category of categories(); track category) {
         <mat-option [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i>
           {{resources.translate(category.name)}}</mat-option>
         }
@@ -67,11 +67,11 @@
     </mat-form-field>
   </div>
   <br />
-  @if (selectedCategory) {
+  @if (selectedCategory()) {
   <div class="flex flex-row flex-wrap">
-    @for (icon of selectedCategory.selectableItems; track icon) {
+    @for (icon of selectedCategory().selectableItems; track icon) {
     <button mat-button (click)="selectIcon(icon)" class="flex-1 h-[unset]!"
-      [class.active]="icon === selectedCategory.selectedIcon">
+      [class.active]="icon === selectedCategory().selectedIcon">
       <i class="fa fa-lg" [ngClass]="icon.icon" [style.color]="icon.color"></i>
       <br />
       <span class="break-words whitespace-normal">{{resources.translate(icon.label)}}</span>
@@ -83,7 +83,7 @@
   }
   @if (info().showLocationUpdate) {
   <div class="flex flex-row">
-    <mat-checkbox color="primary" [(ngModel)]="updateLocation">{{resources.updateLocation}}</mat-checkbox>
+    <mat-checkbox [(ngModel)]="updateLocation">{{resources.updateLocation}}</mat-checkbox>
   </div>
   }
 </mat-card>

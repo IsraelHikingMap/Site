@@ -1,5 +1,5 @@
 
-import { Component, inject, input, OnInit, output } from "@angular/core";
+import { Component, inject, input, OnInit, output, signal } from "@angular/core";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { MatTooltip } from "@angular/material/tooltip";
 import { DatePipe, NgClass } from "@angular/common";
@@ -21,18 +21,18 @@ import type { ShareUrl } from "../models/";
     imports: [DatePipe, DistancePipe, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger, MatButton, CdkCopyToClipboard, AnalyticsDirective, NgClass]
 })
 export class ShareItemComponent implements OnInit {
-    public shareUrl = input<Immutable<ShareUrl>>();
-    public showMenu = input<boolean>(false);
+    public readonly shareUrl = input<Immutable<ShareUrl>>();
+    public readonly showMenu = input<boolean>(false);
     public delete = output<void>();
     public editProperties = output<void>();
     public open = output<void>();
     public addToRoutes = output<void>();
     public moveToRoute = output<void>();
 
-    public copiedToClipboard = false;
-    public shareAddress: string;
-    public whatsappShareAddress: string;
-    public facebookShareAddress: string;
+    public readonly copiedToClipboard = signal(false);
+    public readonly shareAddress = signal<string>(null);
+    public readonly whatsappShareAddress = signal<string>(null);
+    public readonly facebookShareAddress = signal<string>(null);
 
     public readonly resources = inject(ResourcesService);
 
@@ -41,9 +41,9 @@ export class ShareItemComponent implements OnInit {
 
     public ngOnInit(): void {
         const links = this.shareUrlsService.getShareSocialLinks(this.shareUrl());
-        this.shareAddress = links.app;
-        this.whatsappShareAddress = links.whatsapp;
-        this.facebookShareAddress = links.facebook;
+        this.shareAddress.set(links.app);
+        this.whatsappShareAddress.set(links.whatsapp);
+        this.facebookShareAddress.set(links.facebook);
     }
 
     public getImageFromShareId(width: number, height: number) {
@@ -60,7 +60,7 @@ export class ShareItemComponent implements OnInit {
 
     public share() {
         Share.share({
-            url: this.shareAddress
+            url: this.shareAddress()
         });
     }
 }

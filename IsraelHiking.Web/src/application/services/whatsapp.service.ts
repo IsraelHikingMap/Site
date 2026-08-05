@@ -1,9 +1,9 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
 
 import { RunningContextService } from "./running-context.service";
 
-@Injectable()
+@Service()
 export class WhatsAppService {
 
     private readonly sanitizer = inject(DomSanitizer);

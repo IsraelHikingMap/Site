@@ -1,7 +1,7 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
 import { EventEmitter } from "@angular/core";
 import { inject, TestBed } from "@angular/core/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 
 import { LocationService } from "./location.service";
 import { GeoLocationService } from "./geo-location.service";
@@ -20,7 +20,8 @@ describe("LocationService", () => {
                 subscribe: () => { }
             },
             enable: vi.fn(),
-            disable: vi.fn()
+            disable: vi.fn(),
+            restoreTracking: vi.fn()
         };
         const deviceOrientationService = {
             orientationChanged: new EventEmitter<number>(),
@@ -33,8 +34,8 @@ describe("LocationService", () => {
             moveToWithCurrentZoom: vi.fn()
         };
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([InMemoryReducer, GpsReducer])],
             providers: [
+                provideStore([InMemoryReducer, GpsReducer]),
                 { provide: GeoLocationService, useValue: geoLocationService },
                 {
                     provide: DeviceOrientationService,
@@ -275,8 +276,9 @@ describe("LocationService", () => {
                 },
                 inMemoryState: { following: true, distance: true }
             });
+            // isFollowing is a computed; set the mock before initialize() so its first (memoized) evaluation sees it.
+            (selectedRouteService as any).isEditingRoute = () => true;
             await service.initialize();
-            selectedRouteService.isEditingRoute = () => true;
             mapService.moveToWithCurrentZoom = vi.fn();
 
             store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 4 } } as any));

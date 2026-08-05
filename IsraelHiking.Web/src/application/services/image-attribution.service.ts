@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { firstValueFrom, timeout } from "rxjs";
 import { Urls } from "../urls";
 import type { WikiMetadata, WikiPage } from "./wikidata.service";
@@ -11,10 +11,10 @@ export type ImageAttribution = {
     userId?: string;
 };
 
-@Injectable()
+@Service()
 export class ImageAttributionService {
-    private attributionImageCache = new Map<string, Promise<ImageAttribution>>();
-    private userIdToNameCache = new Map<string, string>();
+    private readonly attributionImageCache = new Map<string, Promise<ImageAttribution>>();
+    private readonly userIdToNameCache = new Map<string, string>();
 
     private readonly httpClient = inject(HttpClient);
 

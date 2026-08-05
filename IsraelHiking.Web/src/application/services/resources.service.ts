@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, signal, Service } from "@angular/core";
 import { Direction } from "@angular/cdk/bidi";
 import { Store } from "@ngxs/store";
 
@@ -8,25 +8,44 @@ import { AVAILABLE_LANGUAGES } from "../reducers/initial-state";
 import { Urls } from "../urls";
 import type { ApplicationState, Language, LanguageCode } from "../models";
 
-@Injectable()
+@Service()
 export class ResourcesService {
 
     private readonly gettextCatalog = inject(GetTextCatalogService);
     private readonly store = inject(Store);
 
+    /**
+     * Bumped whenever the language is (re)loaded, i.e. whenever any translated member
+     * below changes. The Proxy in the constructor makes every read of this service
+     * register a dependency on this signal, so OnPush components re-render on a language
+     * change without needing a full page refresh (replaces the old CheckAlways reliance).
+     */
+    public readonly languageChanged = signal(0);
+
+    constructor() {
+        // Wrap the service so any `resources.*` read (property or method) taken inside a
+        // reactive/template context depends on `languageChanged` and refreshes when it bumps.
+        return new Proxy(this, {
+            get: (target, prop, receiver) => {
+                target.languageChanged();
+                return Reflect.get(target, prop, receiver);
+            }
+        });
+    }
+
     public direction: Direction;
     public start: string;
     public end: string;
-    public endOfBaseLayer = "end-of-base-layer";
-    public endOfOverlays = "end-of-overlays";
-    public endOfClusters = "end-of-clusters";
-    public endOfRoutes = "end-of-routes";
-    public editRoutePoints = "editing-route-layer-points";
-    public editRouteLines = "editing-route-layer-lines";
-    public editRouteSource = "editing-route-source";
-    public locationIcon = "location-icon-layer";
-    public globalPointsLayer = "global-points-layer";
-    public globalPointsExternalLayer = "global-points-external-layer";
+    public readonly endOfBaseLayer = "end-of-base-layer";
+    public readonly endOfOverlays = "end-of-overlays";
+    public readonly endOfClusters = "end-of-clusters";
+    public readonly endOfRoutes = "end-of-routes";
+    public readonly editRoutePoints = "editing-route-layer-points";
+    public readonly editRouteLines = "editing-route-layer-lines";
+    public readonly editRouteSource = "editing-route-source";
+    public readonly locationIcon = "location-icon-layer";
+    public readonly globalPointsLayer = "global-points-layer";
+    public readonly globalPointsExternalLayer = "global-points-external-layer";
     public readonly recordedRouteColor = "#FF6600";
     // All the text in the app //
     /////////////////////////////
@@ -188,7 +207,10 @@ export class ResourcesService {
     public reportAnIssueInstructions: string;
     public reportAnIssueSiteInstructions: string;
     public addPointToActiveRoute: string;
-    public advancedSettings: string;
+    public settings: string;
+    public theme: string;
+    public themeLight: string;
+    public themeDark: string;
     public batteryOptimization: string;
     public batteryOptimizationHint: string;
     public automaticRecordingUpload: string;
@@ -305,6 +327,8 @@ export class ResourcesService {
     public unableToSendRoute: string;
     public noUnmappedRoutes: string;
     public unableToFindYourLocation: string;
+    public calculatingRoute: string;
+    public noResultsFound: string;
     public routeAddedSuccessfullyItWillTakeTime: string;
     public fileUploadedSuccessfullyItWillTakeTime: string;
     public unableToUploadFile: string;
@@ -509,7 +533,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1777838898465");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1782066177541");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -672,7 +696,10 @@ export class ResourcesService {
         this.reportAnIssueInstructions = this.gettextCatalog.getString("Report an issue instructions");
         this.reportAnIssueSiteInstructions = this.gettextCatalog.getString("Report an issue site instructions");
         this.addPointToActiveRoute = this.gettextCatalog.getString("Add point to active route");
-        this.advancedSettings = this.gettextCatalog.getString("Advanced Settings");
+        this.settings = this.gettextCatalog.getString("Settings");
+        this.theme = this.gettextCatalog.getString("Theme");
+        this.themeLight = this.gettextCatalog.getString("Light");
+        this.themeDark = this.gettextCatalog.getString("Dark");
         this.batteryOptimization = this.gettextCatalog.getString("Battery optimization");
         this.batteryOptimizationHint = this.gettextCatalog.getString("Dims display when there's no user interaction");
         this.automaticRecordingUpload = this.gettextCatalog.getString("Automatic upload of recording");
@@ -792,6 +819,8 @@ export class ResourcesService {
         this.unableToSendRoute = this.gettextCatalog.getString("Unable to send route...");
         this.noUnmappedRoutes = this.gettextCatalog.getString("No unmapped routes! :-)");
         this.unableToFindYourLocation = this.gettextCatalog.getString("Unable to find your location...");
+        this.calculatingRoute = this.gettextCatalog.getString("Calculating route...");
+        this.noResultsFound = this.gettextCatalog.getString("No results found");
         this.routeAddedSuccessfullyItWillTakeTime = this.gettextCatalog
             .getString("Route added successfully, It will take some time for the map to update.");
         this.fileUploadedSuccessfullyItWillTakeTime = this.gettextCatalog
@@ -849,7 +878,7 @@ export class ResourcesService {
             "Would you like to open the app settings?");
         this.noLocationPermission = this.gettextCatalog.getString("There's no permission to use your location.");
         this.tracesAreOnlySavedLocally = this.gettextCatalog.getString("Traces are only saved locally. " +
-            "You can change that in the configuration settings");
+            "You can change that in the settings");
         this.unexpectedErrorPleaseTryAgainLater = this.gettextCatalog.getString("Oops, something went wrong. Please try again later");
         this.trackingIsDisabledWhileEditing = this.gettextCatalog.getString("GPS tracking is disabled while editing.");
         this.loginTokenExpiredPleaseLoginAgain = this.gettextCatalog.getString("Login token expired, please login again");
@@ -999,6 +1028,7 @@ export class ResourcesService {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
         this.store.dispatch(new SetLanguageAction(language));
+        this.languageChanged.update(v => v + 1);
     }
 
     public async setLanguage(code: LanguageCode) {

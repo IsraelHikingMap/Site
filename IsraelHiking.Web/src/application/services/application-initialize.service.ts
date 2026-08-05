@@ -1,4 +1,4 @@
-import { Injectable, inject } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
 
@@ -7,6 +7,7 @@ import { FacebookWarningDialogComponent } from "../components/dialogs/facebook-w
 import { IntroDialogComponent } from "../components/dialogs/intro-dialog.component";
 import { LoggingService } from "./logging.service";
 import { ScreenService } from "./screen.service";
+import { ThemeService } from "./theme.service";
 import { DatabaseService } from "./database.service";
 import { ApplicationExitService } from "./application-exit.service";
 import { OpenWithService } from "./open-with.service";
@@ -21,22 +22,22 @@ import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { GeoLocationService } from "./geo-location.service";
-import { OverpassTurboService } from "./overpass-turbo.service";
 import { ApplicationUpdateService } from "./application-update.service";
 import { LocationService } from "./location.service";
 import { HashService } from "./hash.service";
 import { AnalyticsService } from "./analytics.service";
-import { MapService } from "./map.service";
 import { SelectedRouteService } from "./selected-route.service";
+import { CarService } from "./car.service";
 import type { ApplicationState } from "../models";
 
-@Injectable()
+@Service()
 export class ApplicationInitializeService {
 
     private readonly dialog = inject(MatDialog);
     private readonly resources = inject(ResourcesService);
     private readonly loggingService = inject(LoggingService);
     private readonly screenService = inject(ScreenService);
+    private readonly themeService = inject(ThemeService);
     private readonly databaseService = inject(DatabaseService);
     private readonly applicationExitService = inject(ApplicationExitService);
     private readonly openWithService = inject(OpenWithService);
@@ -50,24 +51,24 @@ export class ApplicationInitializeService {
     private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
     private readonly geoLocationService = inject(GeoLocationService);
-    private readonly overpassTurboService = inject(OverpassTurboService);
     private readonly applicationUpdateService = inject(ApplicationUpdateService);
     private readonly locationService = inject(LocationService);
     private readonly hashService = inject(HashService);
     private readonly analyticsService = inject(AnalyticsService);
-    private readonly mapService = inject(MapService);
     private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly carService = inject(CarService);
     private readonly store = inject(Store);
 
     public async initialize() {
         try {
+            const timeToBootstrap = Math.round(performance.now());
             await this.loggingService.initialize();
             this.loggingService.info("---------------------------------------");
-            this.loggingService.info("Starting Mapeak Application Initialization");
+            this.loggingService.info(`Starting Mapeak Application Initialization, ${timeToBootstrap} ms after the page started loading`);
             await this.databaseService.initialize();
             this.analyticsService.initialize();
-            this.overpassTurboService.initialize();
             this.screenService.initialize();
+            this.themeService.initialize();
             await this.resources.initialize();
             this.applicationExitService.initialize();
             this.openWithService.initialize();
@@ -75,7 +76,7 @@ export class ApplicationInitializeService {
             this.geoLocationService.initialize();
             this.hashService.initialize();
             this.dragAndDropService.initialize();
-            await this.mapService.initialize();
+            this.carService.initialize();
             if (this.runningContextService.isMobile
                 && !this.runningContextService.isCapacitor
                 && !this.runningContextService.isIFrame) {
@@ -94,10 +95,10 @@ export class ApplicationInitializeService {
             this.deviceOrientationService.initialize();
             this.tracesService.initialize(); // no need to wait for it to complete
             this.shareUrlsService.initialize(); // no need to wait for it to complete
-            await this.offlineFilesDownloadService.initialize();
+            this.offlineFilesDownloadService.initialize(); // no need to wait for it to complete
             this.locationService.initialize();
-            await this.applicationUpdateService.initialize(); // Needs to be last to make sure app gets updated
-            this.loggingService.info("Finished Mapeak Application Initialization");
+            this.applicationUpdateService.initialize(); // no need to wait for it to complete
+            this.loggingService.info(`Finished Mapeak Application Initialization, ${Math.round(performance.now())} ms after the page started loading`);
         } catch (ex) {
             if (this.runningContextService.isIFrame) {
                 return;

@@ -1,23 +1,27 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 import type { Map, ErrorEvent } from "maplibre-gl";
 
 import { MapService } from "./map.service";
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
+import { DatabaseService } from "./database.service";
+import { OverpassTurboService } from "./overpass-turbo.service";
 import { InMemoryReducer } from "../reducers/in-memory.reducer";
 import { SetLocationAction } from "../reducers/location.reducer";
 
 describe("MapService", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([InMemoryReducer])],
             providers: [
+                provideStore([InMemoryReducer]),
                 MapService,
                 CancelableTimeoutService,
                 { provide: ResourcesService, useValue: {} },
+                { provide: DatabaseService, useValue: {} },
+                { provide: OverpassTurboService, useValue: {} },
                 {
                     provide: LoggingService,
                     useValue: {

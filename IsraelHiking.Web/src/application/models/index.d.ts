@@ -29,7 +29,7 @@ export type { RecordedRoute } from "./recorded-route";
 export type { CategoryType, PublicRoutesFilter } from "./public-routes-filter";
 // states:
 export type { ApplicationState, MutableApplicationState } from "./state/application-state";
-export type { ConfigurationState, BatteryOptimizationType } from "./state/configuration-state";
+export type { ConfigurationState, BatteryOptimizationType, Theme } from "./state/configuration-state";
 export type { TracesState } from "./state/traces-state";
 export type { LayersState } from "./state/layers-state";
 export type { ShareUrlsState } from "./state/share-urls-state";

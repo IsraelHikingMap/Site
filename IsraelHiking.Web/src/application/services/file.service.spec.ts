@@ -1,8 +1,7 @@
 import { describe, beforeEach, vi, it, expect, type Mock } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
-import { HttpEventType, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { StyleSpecification } from "maplibre-gl";
 
 import { FileService, SaveAsFactory } from "./file.service";
 import { ImageResizeService } from "./image-resize.service";
@@ -108,25 +107,15 @@ describe("FileService", () => {
     ));
 
     it("Should not get a file from event when there's no files", inject([FileService], (service: FileService) => {
-        const file = service.getFileFromEvent({ target: { files: [] } });
+        const files = service.getFilesFromEvent({ target: { files: [] } } as any);
 
-        expect(file).toBe(null);
-    }));
-
-    it("Should get a file from event and clear input", inject([FileService], (service: FileService) => {
-        const event = {
-            target: { files: [{}], value: "123" }
-        };
-        const file = service.getFileFromEvent(event);
-
-        expect(file).not.toBe(null);
-        expect(event.target.value).toBe("");
+        expect(files).toHaveLength(0);
     }));
 
     it("Should not get a files from event", inject([FileService], (service: FileService) => {
         const event = {
             target: { dataTransfer: [] as any[] }
-        };
+        } as any;
         const files = service.getFilesFromEvent(event);
 
         expect(files.length).toBe(0);
@@ -135,7 +124,7 @@ describe("FileService", () => {
     it("Should get a files from event and clear input", inject([FileService], (service: FileService) => {
         const event = {
             target: { files: [{}], value: "123" }
-        };
+        } as any;
         const files = service.getFilesFromEvent(event);
 
         expect(files.length).toBe(1);
@@ -149,7 +138,7 @@ describe("FileService", () => {
             mockBackend.expectOne("s.json").flush({});
 
             const response = await promise;
-            expect(response).toEqual({} as StyleSpecification);
+            expect(response).toEqual("{}");
         }
     ));
 
@@ -158,36 +147,6 @@ describe("FileService", () => {
 
         expect(saveAsSpy).toHaveBeenCalled();
     }));
-
-    it("Should get file with progress", inject([FileService, HttpTestingController],
-        async (service: FileService, mockBackend: HttpTestingController) => {
-            const spy = vi.fn();
-            const url = "http://123.gpx";
-            const promise = service.getFileContentWithProgress(url, spy);
-
-            const req = mockBackend.expectOne(url);
-            req.event({ type: HttpEventType.DownloadProgress, loaded: 7, total: 10 });
-
-            expect(spy).toHaveBeenCalled();
-
-            req.event({ type: HttpEventType.Response, body: null, ok: true } as any);
-
-            return promise;
-        }
-    ));
-
-    it("Should reject if response is no OK", inject([FileService, HttpTestingController],
-        async (service: FileService, mockBackend: HttpTestingController) => {
-            const spy = vi.fn();
-            const url = "http://123.gpx";
-            const promise = service.getFileContentWithProgress(url, spy);
-
-            const req = mockBackend.expectOne(url);
-            req.event({ type: HttpEventType.Response, body: null, ok: false } as any);
-
-            await expect(promise).rejects.toThrow();
-        }
-    ));
 
     it("Should not download a file to cache due to network error", inject([FileService],
         async (service: FileService) => {

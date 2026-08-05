@@ -110,6 +110,19 @@ export class OsmTagsService {
                     poi.properties.poiIcon = "icon-waterhole";
                     poi.properties.poiCategory = "Water";
                     return;
+                case "ridge":
+                case "valley":
+                case "volcano":
+                case "peak":
+                    poi.properties.poiIconColor = "black";
+                    poi.properties.poiIcon = "icon-peak";
+                    poi.properties.poiCategory = "Natural";
+                    return;
+                case "water":
+                    poi.properties.poiIconColor = "#1e80e3";
+                    poi.properties.poiIcon = "icon-tint";
+                    poi.properties.poiCategory = "Water";
+                    return;
             }
         }
 
@@ -153,7 +166,7 @@ export class OsmTagsService {
         if (feature.properties.place) {
             poi.properties.poiIconColor = "black";
             poi.properties.poiIcon = "icon-home";
-            poi.properties.poiCategory = "Wikipedia";
+            poi.properties.poiCategory = "Other";
             return;
         }
 
@@ -184,6 +197,17 @@ export class OsmTagsService {
                     poi.properties.poiIcon = "icon-alpinehut";
                     poi.properties.poiCategory = "Camping";
                     return;
+                case "hotel":
+                case "motel":
+                case "hostel":
+                case "chalet":
+                case "guest_house":
+                case "bed_and_breakfast":
+                case "dormitory":
+                    poi.properties.poiIcon = "icon-bed";
+                    poi.properties.poiIconColor = "#734a08";
+                    poi.properties.poiCategory = "Other";
+                    return;
             }
         }
 
@@ -191,13 +215,6 @@ export class OsmTagsService {
             poi.properties.poiIconColor = "gray";
             poi.properties.poiIcon = "icon-bike";
             poi.properties.poiCategory = "Bicycle";
-            return;
-        }
-
-        if (feature.properties.natural === "peak") {
-            poi.properties.poiIconColor = "black";
-            poi.properties.poiIcon = "icon-peak";
-            poi.properties.poiCategory = "Natural";
             return;
         }
 
@@ -223,6 +240,11 @@ export class OsmTagsService {
                     poi.properties.poiCategory = "4x4";
                     poi.properties.poiIcon = "icon-four-by-four";
                     return;
+                default:
+                    poi.properties.poiIconColor = "black";
+                    poi.properties.poiCategory = "Other";
+                    poi.properties.poiIcon = "icon-map-signs";
+                    return;
             }
         }
 
@@ -245,17 +267,30 @@ export class OsmTagsService {
             }
         }
 
+        if ((feature.properties.landuse === "recreation_ground" && feature.properties.sport === "mtb")) {
+            poi.properties.poiIcon = "icon-bike";
+            poi.properties.poiIconColor = "green";
+            poi.properties.poiCategory = "Bicycle";
+            return;
+        }
+        if (feature.properties.landuse === "forest") {
+            poi.properties.poiIcon = "icon-tree";
+            poi.properties.poiIconColor = "#008000";
+            poi.properties.poiCategory = "Other";
+            return;
+        }
+
         if (feature.properties["ref:IL:inature"]) {
             poi.properties.poiIconColor = "#116C00";
             poi.properties.poiIcon = "icon-inature";
-            poi.properties.poiCategory = "iNature";
+            poi.properties.poiCategory = "Other";
             return;
         }
 
         if (feature.properties.wikidata || feature.properties.wikipedia) {
             poi.properties.poiIconColor = "black";
             poi.properties.poiIcon = "icon-wikipedia-w";
-            poi.properties.poiCategory = "Wikipedia";
+            poi.properties.poiCategory = "Other";
             return;
         }
 

@@ -1,5 +1,5 @@
 @if (isRecording()) {
-  @for (recordedReouteSegment of recordedRouteSegments; track recordedReouteSegment; let idx = $index) {
+  @for (recordedReouteSegment of recordedRouteSegments(); track recordedReouteSegment; let idx = $index) {
     <mgl-geojson-source id="{{'recorded-route-segment-geojson-' + idx}}" [data]="recordedReouteSegment"></mgl-geojson-source>
     <mgl-layer id="{{'recorded-route-line-' + idx}}"
       type="line"
@@ -30,7 +30,7 @@
         }">
     </mgl-layer>
   }
-  <mgl-geojson-source id="recorded-route-last-segment-geojson" [data]="lastRouteSegment"></mgl-geojson-source>
+  <mgl-geojson-source id="recorded-route-last-segment-geojson" [data]="lastRouteSegment()"></mgl-geojson-source>
   <mgl-layer id="recorded-route-last-line"
     type="line"
     source="recorded-route-last-segment-geojson"
@@ -59,8 +59,8 @@
           'icon-color': 'black'
       }">
   </mgl-layer>
-  @if (startPointGeoJson) {
-    <mgl-geojson-source id="recorded-route-start-geojson" [data]="startPointGeoJson"></mgl-geojson-source>
+  @if (startPointGeoJson()) {
+    <mgl-geojson-source id="recorded-route-start-geojson" [data]="startPointGeoJson()"></mgl-geojson-source>
     <mgl-layer
       id="recorded-route-start-point"
       type="circle"
@@ -75,10 +75,10 @@
   }
 }
 
-@if ((recordedRoute$ | async)) {
-  @for (marker of (recordedRoute$ | async).markers; track marker; let idx = $index) {
+@if (recordedRoute()) {
+  @for (marker of recordedRoute().markers; track marker; let idx = $index) {
     <mgl-marker anchor="bottom"
-      [draggable]="isAddingPoi$ | async"
+      [draggable]="isAddingPoi()"
       [lngLat]="marker.latlng"
       (markerDragEnd)="markerDragEnd(idx, $event)">
       <private-poi-overlay [marker]="marker" [index]="idx" [color]="resources.recordedRouteColor"></private-poi-overlay>

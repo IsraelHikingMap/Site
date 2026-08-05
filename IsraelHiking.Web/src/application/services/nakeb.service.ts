@@ -1,8 +1,14 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable, inject } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { firstValueFrom } from "rxjs";
 
-type NakebItem = {
+export type NakebMarker = {
+    lat: number;
+    lng: number;
+    title: string;
+}
+
+export type NakebItem = {
     id: string;
     title: string;
     last_modified: string;
@@ -19,14 +25,10 @@ type NakebItem = {
         lat: number;
         lng: number;
     }[];
-    markers: {
-        lat: number;
-        lng: number;
-        title: string;
-    }[];
+    markers: NakebMarker[];
 }
 
-@Injectable()
+@Service()
 export class NakebService {
     private readonly NAKEB_BASE_ADDRESS = "https://www.nakeb.co.il/api/hikes";
     private readonly NAKEB_LOGO = "https://www.nakeb.co.il/static/images/hikes/logo_1000x667.jpg";

@@ -107,7 +107,6 @@ public class OsmGeoJsonPreprocessorExecutor : IOsmGeoJsonPreprocessorExecutor
         feature.Attributes.Add(FeatureAttributes.POI_SOURCE, Sources.OSM);
         feature.Attributes.Add(FeatureAttributes.POI_LANGUAGE, Languages.ALL);
         feature.Attributes.Add(FeatureAttributes.POI_LANGUAGES, Languages.Array);
-        feature.Attributes.Add(FeatureAttributes.POI_CONTAINER, feature.IsValidContainer());
         foreach (var key in feature.Attributes.GetNames().Where(k => k.Contains(FeatureAttributes.NAME) && !string.IsNullOrWhiteSpace(feature.Attributes[k]?.ToString())).ToList())
         {
             feature.Attributes[key] = feature.Attributes[key].ToString().Trim();

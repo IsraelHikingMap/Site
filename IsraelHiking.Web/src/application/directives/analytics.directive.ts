@@ -14,9 +14,9 @@ import { AnalyticsService } from "../services/analytics.service";
 })
 // HM TODO: rename this!
 export class AnalyticsDirective implements AfterViewInit {
-    analyticsOn = input<string>()
-    analyticsLabel = input.required<string>()
-    analyticsCategory = input.required<string>()
+    readonly analyticsOn = input<string>()
+    readonly analyticsLabel = input.required<string>()
+    readonly analyticsCategory = input.required<string>()
 
     private readonly renderer = inject(Renderer2);
     private readonly el = inject(ElementRef);

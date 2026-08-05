@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { firstValueFrom, timeout } from "rxjs";
@@ -14,7 +14,7 @@ import type { ApplicationState } from "../models";
 
 const OFFLINE_MAPS_SUBSCRIPTION = "offline_map";
 
-@Injectable()
+@Service()
 export class PurchaseService {
 
     private readonly runningContextService = inject(RunningContextService);
@@ -39,6 +39,11 @@ export class PurchaseService {
 
             if (this.shouldShowPaywall()) {
                 this.showPaywall();
+            }
+        });
+        this.store.select((state: ApplicationState) => state.configuration.language.code).subscribe(async (languageCode) => {
+            if ((await Purchases.isConfigured()).isConfigured) {
+                await Purchases.overridePreferredUILocale({ locale: languageCode });
             }
         });
     }
@@ -66,12 +71,12 @@ export class PurchaseService {
             const apiKey = this.runningContextService.isIos ? "appl_OKCoIjEkNVfloKjpNfNaAdgGOwO" : "goog_NEtHVocOwpDpmIcHEETTdUdrtpd";
             const isConfigured = (await Purchases.isConfigured()).isConfigured;
             if (!isConfigured && userId) {
+                const languageCode = this.store.selectSnapshot((s: ApplicationState) => s.configuration.language.code);
                 await Purchases.configure({
                     apiKey,
-                    appUserID: `${userId}`
+                    appUserID: `${userId}`,
+                    preferredUILocaleOverride: languageCode
                 });
-                const languageCode = this.store.selectSnapshot((s: ApplicationState) => s.configuration).language.code;
-                await Purchases.overridePreferredUILocale({ locale: languageCode });
             } else if (isConfigured) {
                 await Purchases.logIn({ appUserID: `${userId}` });
             }

@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 import QuickLRU from "quick-lru";
@@ -8,7 +8,7 @@ import { SpatialService } from "./spatial.service";
 import { PmTilesService } from "./pmtiles.service";
 import type { LatLngAltTime } from "../models";
 
-@Injectable()
+@Service()
 export class ElevationProvider {
 
     static readonly MAX_ELEVATION_ZOOM = 11;
@@ -17,7 +17,7 @@ export class ElevationProvider {
     private readonly transparentPngUrl =
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=";
 
-    private elevationCache = new QuickLRU<string, Uint8ClampedArray>({ maxSize: 100 });
+    private readonly elevationCache = new QuickLRU<string, Uint8ClampedArray>({ maxSize: 100 });
 
     private readonly httpClient = inject(HttpClient);
     private readonly loggingService = inject(LoggingService);

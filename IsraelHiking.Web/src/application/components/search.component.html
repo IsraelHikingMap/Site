@@ -5,18 +5,18 @@
   }
   @else {
   <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom"
-    [matAutocomplete]="autoFrom" [placeholder]="placeholder()" [dir]="resources.getDirection(fromContext.searchTerm)"
+    [matAutocomplete]="autoFrom" [placeholder]="placeholder()" [dir]="resources.getDirection(searchTerm())"
     (focus)="focusOnSearchInput()">
   <mat-autocomplete positionY="below" autoActiveFirstOption="true" #autoFrom="matAutocomplete"
     [displayWith]="displayResults">
-    @for (result of fromContext.searchResults; track result.id) {
+    @for (result of searchResults(); track result.id) {
     <mat-option [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']"
       [dir]="resources.getDirection(result.title)">
       @if (result.hasExtraData) {
-      <span class="has-extra-data" [style.background]="result.iconColor"></span>
+      <span class="has-extra-data" [style.background]="getIconColor(result)"></span>
       }
       @if (result.icon) {
-      <i class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
+      <i class="fa" [ngClass]="result.icon" [style.color]="getIconColor(result)"></i>
       }
       <span>{{result.displayName}}</span>
     </mat-option>

@@ -3,7 +3,7 @@ import { EventEmitter } from "@angular/core";
 import { provideHttpClientTesting } from "@angular/common/http/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { TestBed, inject } from "@angular/core/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 
 import { RecordedRouteService } from "./recorded-route.service";
 import { GeoLocationService } from "./geo-location.service";
@@ -35,8 +35,8 @@ describe("Recorded Route Service", () => {
             isCapacitor: true
         };
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([GpsReducer, RecordedRouteReducer])],
             providers: [
+                provideStore([GpsReducer, RecordedRouteReducer]),
                 { provide: ResourcesService, useValue: {} },
                 {
                     provide: ToastService,

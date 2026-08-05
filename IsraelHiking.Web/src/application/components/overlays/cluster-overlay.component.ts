@@ -17,7 +17,7 @@ import { GeoJSONUtils } from "../../services/geojson-utils";
 })
 export class ClusterOverlayComponent {
 
-    public features = input<GeoJSON.Feature[]>();
+    public readonly features = input<GeoJSON.Feature[]>();
 
     public closed = output();
     public readonly resources = inject(ResourcesService);
@@ -36,5 +36,18 @@ export class ClusterOverlayComponent {
         this.closed.emit();
         this.router.navigate([RouteStrings.POI, feature.properties.poiSource, feature.properties.identifier],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+    }
+
+    /**
+     * Return the icon color for the given a feature.
+     * In case the icon color is black return the theme's on-surface color instead.
+     * @param feature 
+     * @returns 
+     */
+    public getIconColor(feature: GeoJSON.Feature): string {
+        const color = feature.properties.poiIconColor;
+        return color === "black" || color === "#000000" || color === "#000"
+            ? "var(--mat-sys-on-surface)"
+            : color;
     }
 }

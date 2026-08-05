@@ -1,5 +1,5 @@
 import { describe, beforeEach, it, expect } from "vitest";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 import { TestBed, inject } from "@angular/core/testing";
 
 import { RoutesFactory } from "./routes.factory";
@@ -9,10 +9,8 @@ import type { RouteData } from "../models";
 describe("RoutesFactory", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [
-                NgxsModule.forRoot([RouteEditingReducer])
-            ],
             providers: [
+                provideStore([RouteEditingReducer]),
                 RoutesFactory
             ]
         });

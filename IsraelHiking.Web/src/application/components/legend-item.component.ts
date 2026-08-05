@@ -1,13 +1,13 @@
-import { Component, inject, input } from "@angular/core";
+import { Component, inject, input, computed } from "@angular/core";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { MatTooltip } from "@angular/material/tooltip";
 
 import { AnalyticsDirective } from "../directives/analytics.directive";
 import { LayersService } from "../services/layers.service";
-import { ResourcesService } from "../services/resources.service";
 import { MapService } from "../services/map.service";
 import { HIKING_MAP } from "../reducers/initial-state";
+import type { ResourcesService } from "../services/resources.service";
 import type { LatLngAltTime } from "../models";
 
 type LegendItemType = "POI" | "Way";
@@ -32,18 +32,13 @@ export class LegendItemComponent {
     public static readonly OSM_TAG_LINK = "osm-tag-link";
     public static readonly OSM_KEY_LINK = "osm-key-link";
 
-    public item = input<ILegendItem>();
+    public readonly item = input<ILegendItem>();
 
-    public readonly resources = inject(ResourcesService);
 
     private readonly mapService = inject(MapService);
     private readonly layersService = inject(LayersService);
 
-    public moveToLocation() {
-        this.mapService.moveTo(this.item().latlng, this.item().zoom, 0);
-    }
-
-    public getLink() {
+    public readonly getLink = computed(() => {
         if (this.item().link === LegendItemComponent.OSM_KEY_LINK) {
             return `https://wiki.openstreetmap.org/wiki/Key:${this.item().osmTags[0].split("=")[0]}`;
         }
@@ -51,10 +46,14 @@ export class LegendItemComponent {
             return `https://wiki.openstreetmap.org/wiki/Tag:${this.item().osmTags[0].split(" ")[0]}`;
         }
         return this.item().link;
+    });
+
+    public moveToLocation() {
+        this.mapService.moveTo(this.item().latlng, this.item().zoom, 0);
     }
 
     public getImageAddress() {
-        const styleKey = this.layersService.getSelectedBaseLayer().key;
+        const styleKey = this.layersService.selectedBaseLayer().key;
         return `content/legend/${styleKey === HIKING_MAP ? "hike" : "bike"}_${this.item().key}.png`;
     }
 }

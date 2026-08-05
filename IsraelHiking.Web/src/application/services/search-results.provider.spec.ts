@@ -2,7 +2,7 @@ import { describe, beforeEach, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 
 import { SearchResultsProvider } from "./search-results.provider";
 import { GeoJsonParser } from "./geojson.parser";
@@ -12,11 +12,14 @@ import { CoordinatesService } from "./coordinates.service";
 import { ResourcesService } from "./resources.service";
 import type { SearchResultsPointOfInterest } from "../models";
 
+/** getResults parses coordinates asynchronously, so the http call is issued a tick later. */
+const flushMicrotasks = () => new Promise(resolve => setTimeout(resolve));
+
 describe("SearchResultsProvider", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot()],
             providers: [
+                provideStore([]),
                 GeoJsonParser,
                 SearchResultsProvider,
                 CoordinatesService,
@@ -35,7 +38,7 @@ describe("SearchResultsProvider", () => {
 
     it("Should get empty array in case of short search term", (inject([SearchResultsProvider, HttpTestingController],
         async (provider: SearchResultsProvider, mockBackend: HttpTestingController) => {
-            const promise = provider.getResults("a", false);
+            const promise = provider.getResults("a", false, false);
 
             mockBackend.expectNone(_ => true);
             const results = await promise;
@@ -45,7 +48,7 @@ describe("SearchResultsProvider", () => {
 
     it("Should get empty array in case of whitespace search term", (inject([SearchResultsProvider, HttpTestingController],
         async (provider: SearchResultsProvider, mockBackend: HttpTestingController) => {
-            const promise = provider.getResults("   ", false);
+            const promise = provider.getResults("   ", false, false);
 
             mockBackend.expectNone(_ => true);
             const results = await promise;
@@ -58,7 +61,7 @@ describe("SearchResultsProvider", () => {
             store.reset({
                 locationState: {}
             })
-            const promise = provider.getResults("32 35", false);
+            const promise = provider.getResults("32 35", false, false);
 
             mockBackend.expectNone(_ => true);
             const results = await promise;
@@ -70,11 +73,34 @@ describe("SearchResultsProvider", () => {
     it("Should get results for search term", (inject([SearchResultsProvider, HttpTestingController, Store],
         async (provider: SearchResultsProvider, mockBackend: HttpTestingController, store: Store) => {
             store.reset({
-                locationState: {}
+                locationState: { latitude: 32.1, longitude: 35.2, zoom: 12 }
             })
-            const promise = provider.getResults("searchTerm", false);
+            const promise = provider.getResults("searchTerm", false, false);
 
-            mockBackend.match(() => true)[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
+            await flushMicrotasks();
+            const request = mockBackend.match(() => true)[0];
+            expect(request.request.params.has("lat")).toBe(false);
+            expect(request.request.params.has("lng")).toBe(false);
+            expect(request.request.params.has("zoom")).toBe(false);
+            request.flush([{ id: "42" } as SearchResultsPointOfInterest]);
+            const results = await promise;
+            expect(results.length).toBe(1);
+        }
+    )));
+
+    it("Should send the map center when useMapCenter is true", (inject([SearchResultsProvider, HttpTestingController, Store],
+        async (provider: SearchResultsProvider, mockBackend: HttpTestingController, store: Store) => {
+            store.reset({
+                locationState: { latitude: 32.1, longitude: 35.2, zoom: 12 }
+            })
+            const promise = provider.getResults("searchTerm", false, true);
+
+            await flushMicrotasks();
+            const request = mockBackend.match(() => true)[0];
+            expect(request.request.params.get("lat")).toBe("32.1");
+            expect(request.request.params.get("lng")).toBe("35.2");
+            expect(request.request.params.get("zoom")).toBe("12");
+            request.flush([{ id: "42" } as SearchResultsPointOfInterest]);
             const results = await promise;
             expect(results.length).toBe(1);
         }
@@ -85,9 +111,10 @@ describe("SearchResultsProvider", () => {
             store.reset({
                 locationState: {}
             })
-            const promise1 = provider.getResults("searchTerm1", true);
-            const promise2 = provider.getResults("searchTerm2", false);
+            const promise1 = provider.getResults("searchTerm1", true, false);
+            const promise2 = provider.getResults("searchTerm2", false, false);
 
+            await flushMicrotasks();
             mockBackend.match(url => url.url.endsWith("searchTerm1"))[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
             mockBackend.match(url => url.url.endsWith("searchTerm2"))[0].flush([{ id: "43" } as SearchResultsPointOfInterest]);
             const results1 = await promise1;
@@ -102,9 +129,10 @@ describe("SearchResultsProvider", () => {
             store.reset({
                 locationState: {}
             });
-            const promise1 = provider.getResults("searchTerm", true);
-            const promise2 = provider.getResults("searchTerm", false);
+            const promise1 = provider.getResults("searchTerm", true, false);
+            const promise2 = provider.getResults("searchTerm", false, false);
 
+            await flushMicrotasks();
             mockBackend.match(url => url.url.endsWith("searchTerm") && url.params.get("prefix") === "true")[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
             mockBackend.match(url => url.url.endsWith("searchTerm") && url.params.get("prefix") === "false")[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
             const results1 = await promise1;
@@ -119,9 +147,10 @@ describe("SearchResultsProvider", () => {
             store.reset({
                 locationState: {}
             });
-            const promise1 = provider.getResults("searchTerm", true);
-            const promise2 = provider.getResults("searchTerm", false);
+            const promise1 = provider.getResults("searchTerm", true, false);
+            const promise2 = provider.getResults("searchTerm", false, false);
 
+            await flushMicrotasks();
             mockBackend.match(url => url.url.endsWith("searchTerm") && url.params.get("prefix") === "false")[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
             mockBackend.match(url => url.url.endsWith("searchTerm") && url.params.get("prefix") === "true")[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
             const results1 = await promise1;
@@ -131,4 +160,42 @@ describe("SearchResultsProvider", () => {
             expect(results2.length).toBe(1);
         }
     )));
+
+    it("Should return null for an older search term that returned after a newer one had already finished",
+        (inject([SearchResultsProvider, HttpTestingController, Store],
+            async (provider: SearchResultsProvider, mockBackend: HttpTestingController, store: Store) => {
+                store.reset({
+                    locationState: {}
+                });
+                const promise1 = provider.getResults("searchTer", true, false);
+                const promise2 = provider.getResults("searchTerm", true, false);
+
+                await flushMicrotasks();
+                mockBackend.match(url => url.url.endsWith("searchTerm"))[0].flush([{ id: "43" } as SearchResultsPointOfInterest]);
+                const results2 = await promise2;
+                mockBackend.match(url => url.url.endsWith("searchTer"))[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
+                const results1 = await promise1;
+
+                expect(results2.length).toBe(1);
+                expect(results1).toBeNull();
+            }
+        )));
+
+    it("Should return null for a search term that was shortened below the minimal length while in flight",
+        (inject([SearchResultsProvider, HttpTestingController, Store],
+            async (provider: SearchResultsProvider, mockBackend: HttpTestingController, store: Store) => {
+                store.reset({
+                    locationState: {}
+                });
+                const promise1 = provider.getResults("searchTerm", true, false);
+                const results2 = await provider.getResults("se", true, false);
+
+                await flushMicrotasks();
+                mockBackend.match(url => url.url.endsWith("searchTerm"))[0].flush([{ id: "42" } as SearchResultsPointOfInterest]);
+                const results1 = await promise1;
+
+                expect(results2.length).toBe(0);
+                expect(results1).toBeNull();
+            }
+        )));
 });

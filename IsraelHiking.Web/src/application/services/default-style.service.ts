@@ -1,15 +1,62 @@
-import { inject, Injectable } from "@angular/core";
-import { StyleSpecification } from "maplibre-gl";
+import { inject, Service } from "@angular/core";
+import { Store } from "@ngxs/store";
+import type { RasterLayerSpecification, RasterSourceSpecification, StyleSpecification } from "maplibre-gl";
 
 import { MapService } from "./map.service";
 import { ResourcesService } from "./resources.service";
+import { FileService } from "./file.service";
+import { DEFAULT_BASE_LAYERS } from "../reducers/initial-state";
+import type { ApplicationState, EditableLayer, LayerData } from "../models";
 
-@Injectable()
+@Service()
 export class DefaultStyleService {
-    public style: StyleSpecification;
+    private static indexNumber = 0;
+    private static readonly NIGHT_LAND_COLOR = "#1B1B1B";
+    private static readonly NIGHT_URBAN_COLOR = "#2B2B2B";
+    private static readonly NIGHT_LANDCOVER_COLOR = "#1D2A1A";
+    private static readonly NIGHT_WATER_COLOR = "#14202E";
+    private static readonly NIGHT_FILL_COLORS: Record<string, string> = {
+        // Hike style layer ids
+        "area-residential": DefaultStyleService.NIGHT_URBAN_COLOR,
+        "area-landcover-low": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "water-area": DefaultStyleService.NIGHT_WATER_COLOR,
+        // Bike style layer ids - urban / man made
+        "land-residential": DefaultStyleService.NIGHT_URBAN_COLOR,
+        "land-construction": DefaultStyleService.NIGHT_URBAN_COLOR,
+        "land-cemetery": DefaultStyleService.NIGHT_URBAN_COLOR,
+        "land-industrial": DefaultStyleService.NIGHT_URBAN_COLOR,
+        "land-quarry": DefaultStyleService.NIGHT_URBAN_COLOR,
+        "military_base_fill": DefaultStyleService.NIGHT_URBAN_COLOR,
+        "bridge_area": DefaultStyleService.NIGHT_URBAN_COLOR,
+        "breakwater": DefaultStyleService.NIGHT_URBAN_COLOR,
+        // Bike style layer ids - landcover
+        "land_sand": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "land_farm": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "land_scrub_solid": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "land_wood_solid": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "land_grass": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "land_pitch": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "land_wetland": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "water_riverbed": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        "water_intermittent": DefaultStyleService.NIGHT_LANDCOVER_COLOR,
+        // Bike style layer ids - water
+        "water": DefaultStyleService.NIGHT_WATER_COLOR
+    }
+    // Decorative landcover pattern layers (bright sprite icons / fill patterns) that have no
+    // dark equivalent - hidden altogether in night mode so they don't stay bright over the dark map.
+    private static readonly NIGHT_HIDDEN_LAYERS = new Set<string>([
+        "land_wood_pattern",
+        "land_scrub_pattern",
+        "land_orchard",
+        "land_vineyard"
+    ]);
+
+    public readonly style: StyleSpecification;
 
     private readonly mapService = inject(MapService);
     private readonly resources = inject(ResourcesService);
+    private readonly store = inject(Store);
+    private readonly fileService = inject(FileService);
 
     constructor() {
         this.style = {
@@ -62,5 +109,156 @@ export class DefaultStyleService {
             }
         ];
         return styleWithPlaceholder;
+    }
+
+    private isRaster(address: string) {
+        return address.match(/\.json(\?.+)?$/i) == null;
+    }
+
+    private createRasterLayer(layerData: LayerData, isVisible: boolean): StyleSpecification {
+        const layerIndex = DefaultStyleService.indexNumber++;
+        const rasterLayerId = `raster-layer-${layerIndex}`;
+        const rasterSourceId = `raster-source-${layerIndex}`;
+        let address = layerData.address;
+        let scheme: "xyz" | "tms" = "xyz";
+        if (layerData.address.match(/\/MapServer(\/\d+)?$/i) != null) {
+            address += "/export?dpi=96&transparent=true&format=png32&bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&f=image";
+        } else if (layerData.address.indexOf("{-y}") !== -1) {
+            address = address.replace("{-y}", "{y}");
+            scheme = "tms";
+        }
+        const source: RasterSourceSpecification = {
+            type: "raster",
+            tiles: [address],
+            minzoom: Math.max(layerData.minZoom - 1, 0),
+            maxzoom: layerData.maxZoom,
+            scheme,
+            tileSize: 256
+        };
+        const layer: RasterLayerSpecification = {
+            id: rasterLayerId,
+            type: "raster",
+            source: rasterSourceId,
+            layout: {
+                visibility: (isVisible ? "visible" : "none") as "visible" | "none"
+            },
+            paint: {
+                "raster-opacity": layerData.opacity || 1.0
+            }
+        };
+        return {
+            version: 8,
+            sources: {
+                [rasterSourceId]: source
+            },
+            layers: [layer]
+        }
+    }
+
+    private useSliceQuery(styleJson: StyleSpecification) {
+        for (const source of Object.values(styleJson.sources)) {
+            if (source.type === "vector") {
+                delete source.url;
+                source.tiles[0] += "?use=slice";
+            }
+            if (source.type === "raster-dem") {
+                delete source.url;
+                source.tiles[0] += "?use=slice";
+            }
+        }
+    }
+
+    private useSliceProtocol(styleJson: StyleSpecification) {
+        for (const source of Object.values(styleJson.sources)) {
+            if (source.type === "vector") {
+                delete source.url;
+                source.tiles[0] = source.tiles[0].replace("https://", "slice://");
+            }
+            if (source.type === "raster-dem") {
+                delete source.url;
+                source.tiles[0] = source.tiles[0].replace("https://", "slice://");
+            }
+        }
+    }
+
+    private useContourProtocol(styleJson: StyleSpecification, units: "metric" | "imperial") {
+        if (styleJson.sources["Contour"]?.type !== "vector") {
+            return;
+        }
+        const contourSource = styleJson.sources["Contour"];
+        const multiplier = units === "metric" ? 1 : 3.28084;
+        delete contourSource.url;
+        contourSource.tiles[0] = `dem-contour://{z}/{x}/{y}?contourLayer=contours&elevationKey=ele&levelKey=level&multiplier=${multiplier}&overzoom=1&thresholds=11*200*1000~12*10*100~13*10*100~14*10*100~15*10*100`
+        contourSource.maxzoom = 16;
+    }
+
+    private useContourQuery(styleJson: StyleSpecification, units: "metric" | "imperial") {
+        if (styleJson.sources["Contour"]?.type !== "vector") {
+            return;
+        }
+        const contourSource = styleJson.sources["Contour"];
+        contourSource.tiles[0] += `&contour=${units}`;
+        contourSource.maxzoom = 16;
+    }
+
+    private applyNightModeIfNeeded(styleJson: StyleSpecification): void {
+        const theme = this.store.selectSnapshot((s: ApplicationState) => s.configuration.theme);
+        if (theme !== "dark") {
+            return;
+        }
+        for (const layer of styleJson.layers) {
+            if (layer.type === "background") {
+                layer.paint["background-color"] = DefaultStyleService.NIGHT_LAND_COLOR;
+            }
+            if (DefaultStyleService.NIGHT_HIDDEN_LAYERS.has(layer.id)) {
+                layer.layout = { ...layer.layout, visibility: "none" };
+                continue;
+            }
+            if (layer.type !== "fill" ||
+                !layer.paint ||
+                !(layer.id in DefaultStyleService.NIGHT_FILL_COLORS) ||
+                !("fill-color" in layer.paint)) {
+                continue;
+            }
+            layer.paint["fill-color"] = DefaultStyleService.NIGHT_FILL_COLORS[layer.id];
+            // Drop any pattern so the dark fill-color is actually rendered instead of the bright sprite pattern.
+            delete layer.paint["fill-pattern"];
+        }
+    }
+
+    public async getSourcesAndLayers(layerData: EditableLayer, isVisible: boolean, mode: "online-only" | "allow-offline" | "car"): Promise<StyleSpecification> {
+        if (this.isRaster(layerData.address)) {
+            return this.createRasterLayer(layerData, isVisible);
+        } else {
+            const isBuiltInBaseLayer = DEFAULT_BASE_LAYERS.some(l => l.key === layerData.key);
+            const tryLocalStyle = mode !== "online-only" && isBuiltInBaseLayer && this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles != null;
+            const language = this.resources.getCurrentLanguageCodeSimplified();
+            const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration.units);
+
+            let styleAsText = await this.fileService.getStyleJsonContent(layerData.address, tryLocalStyle);
+            styleAsText = styleAsText.replace(/name:he/g, `name:${language}`);
+            styleAsText = styleAsText.replaceAll("Open Sans", "Noto Sans");
+            const styleJson = JSON.parse(styleAsText) as StyleSpecification;
+            switch (mode) {
+                case "online-only":
+                    this.useContourProtocol(styleJson, units);
+                    this.applyNightModeIfNeeded(styleJson);
+                    break;
+                case "allow-offline":
+                    if (isBuiltInBaseLayer) {
+                        this.useSliceProtocol(styleJson);
+                    }
+                    this.useContourProtocol(styleJson, units);
+                    this.applyNightModeIfNeeded(styleJson);
+                    break;
+                case "car":
+                    if (isBuiltInBaseLayer) {
+                        this.useSliceQuery(styleJson);
+                        this.useContourQuery(styleJson, units);
+                    }
+                    break;
+            }
+            return styleJson;
+        }
     }
 }

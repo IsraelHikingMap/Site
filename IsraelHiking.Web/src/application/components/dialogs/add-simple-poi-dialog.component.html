@@ -1,13 +1,15 @@
 ﻿﻿<div [dir]="resources.direction">
     <div mat-dialog-title>
         <div>{{resources.uploadPoint}}</div>
-        <button mat-button type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
+        <button mat-icon-button aria-label="Close" type="button" mat-dialog-close tabindex="-1">
+            <i class="fa icon-close"></i>
+        </button>
     </div>
     <div mat-dialog-content>
         <div class="flex flex-row">
             <div class="w-1/2">
                 <button mat-button mat-dialog-close class="w-full p-0! h-[unset]!" (click)="addSimplePoint('Tap')"
-                    analyticsOn="click" analyticsCategory="POI" analyticsLabel="Add cattle grid to OSM">
+                    analyticsOn="click" analyticsCategory="POI" analyticsLabel="Add tap to OSM">
                     <i class="fa icon-tap" [style.color]="'blue'"></i><br />
                     {{resources.legendDrinkingWater}}
                 </button>

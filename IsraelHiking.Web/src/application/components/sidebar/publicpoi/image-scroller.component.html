@@ -1,11 +1,14 @@
 ﻿@if (images().length === 0) {
 <div class="flex flex-row">
   @if (canEdit()) {
-  <label class="w-full" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
-    <a mat-button imageCapture class="w-full h-[unset]!" (changed)="add($event)" analyticsOn="click"
-      analyticsCategory="OSM" analyticsLabel="Upload image first image"><i class="fa icon-camera fa-5x"></i> <i
-        class="fa icon-plus fa-3x"></i></a>
-    <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*;capture=camera" multiple />
+  <label class="w-full" (dragover)="$event.preventDefault()" (drop)="onFileDrop($event)">
+    <a mat-button imageCapture class="w-full h-[unset]!" (changed)="onFileInputChanged($event)" analyticsOn="click"
+      analyticsCategory="OSM" analyticsLabel="Upload image first image">
+      <i class="fa icon-camera fa-5x align-middle me-1"></i>
+      <i class="fa icon-plus fa-3x align-middle"></i>
+    </a>
+    <input type="file" (change)="onFileInputChanged($event)" [style.display]="'none'" accept="image/*;capture=camera"
+      multiple />
   </label>
   } @else {
   <div class="relative w-full h-[200px] overflow-hidden">
@@ -15,7 +18,7 @@
 </div>
 } @else {
 <div class="flex flex-row">
-  <div class="relative w-full h-[200px]" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
+  <div class="relative w-full h-[200px]" (dragover)="$event.preventDefault()" (drop)="onFileDrop($event)">
     <img [src]="getCurrentImage()" class="w-full object-contain cursor-zoom-in img-center" (click)="showImage()" />
   </div>
 </div>
@@ -34,9 +37,10 @@
   @if (canEdit()) {
   <div class="flex-1">
     <label class="w-full">
-      <a mat-button imageCapture class="w-full" (changed)="add($event)" analyticsOn="click" analyticsCategory="OSM"
-        analyticsLabel="Upload non first image"><i class="fa icon-plus"></i></a>
-      <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*;capture=camera" multiple />
+      <a mat-button imageCapture class="w-full" (changed)="onFileInputChanged($event)" analyticsOn="click"
+        analyticsCategory="OSM" analyticsLabel="Upload non first image"><i class="fa icon-plus"></i></a>
+      <input type="file" (change)="onFileInputChanged($event)" [style.display]="'none'" accept="image/*;capture=camera"
+        multiple />
     </label>
   </div>
   <div class="flex-1">

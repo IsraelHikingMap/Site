@@ -1,6 +1,6 @@
 import { Component, ViewEncapsulation, ElementRef, inject, viewChildren, DestroyRef, signal } from "@angular/core";
 import { NgStyle } from "@angular/common";
-import { MatSidenavContainer, MatSidenav, MatSidenavContent } from "@angular/material/sidenav";
+import { MatSidenavContainer, MatSidenav } from "@angular/material/sidenav";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
 import { type StyleSpecification, type Map, ScaleControl, IControl, ControlPosition, type RasterDEMSourceSpecification } from "maplibre-gl";
 import { NgProgressbar } from "ngx-progressbar";
@@ -36,19 +36,19 @@ import type { ApplicationState, LocationState } from "../../models";
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgProgressbar, NgProgressHttp, NgStyle, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent, MatSidenavContainer, MatSidenav, MatSidenavContent, LayersSidebarComponent, PublicPoiSidebarComponent, PrivateRoutesSidebarComponent]
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent, MatSidenavContainer, MatSidenav, LayersSidebarComponent, PublicPoiSidebarComponent, PrivateRoutesSidebarComponent]
 })
 export class MainMapComponent {
 
-    public topStartControls = viewChildren("topStartControl", { read: ElementRef });
-    public topEndControls = viewChildren("topEndControl", { read: ElementRef });
-    public bottomEndControls = viewChildren("bottomEndControl", { read: ElementRef });
-    public bottomStartControls = viewChildren("bottomStartControl", { read: ElementRef });
+    public readonly topStartControls = viewChildren("topStartControl", { read: ElementRef });
+    public readonly topEndControls = viewChildren("topEndControl", { read: ElementRef });
+    public readonly bottomEndControls = viewChildren("bottomEndControl", { read: ElementRef });
+    public readonly bottomStartControls = viewChildren("bottomStartControl", { read: ElementRef });
 
-    public sidenavVisible = signal(false);
-    public sidenavViewName = "";
-    public location: LocationState;
-    public initialStyle: StyleSpecification;
+    public readonly sidenavVisible = signal(false);
+    public readonly sidenavViewName = signal("");
+    public readonly location: LocationState;
+    public readonly initialStyle: StyleSpecification;
 
     public readonly resources = inject(ResourcesService);
 
@@ -74,10 +74,10 @@ export class MainMapComponent {
             this.map = null;
         });
         this.sidebarService.sideBarStateChanged.pipe(takeUntilDestroyed()).subscribe(() => {
-            this.sidenavViewName = this.sidebarService.viewName;
+            this.sidenavViewName.set(this.sidebarService.viewName);
             this.sidenavVisible.set(this.sidebarService.isSidebarOpen());
         });
-        this.sidenavViewName = this.sidebarService.viewName;
+        this.sidenavViewName.set(this.sidebarService.viewName);
         this.sidenavVisible.set(this.sidebarService.isSidebarOpen());
     }
 

@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
@@ -16,7 +16,7 @@ import { SetFileUrlAndBaseLayerAction } from "../reducers/in-memory.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import type { DataContainer, ApplicationState, LayerData, RouteData, RouteDataWithoutState } from "../models";
 
-@Injectable()
+@Service()
 export class DataContainerService {
 
     private readonly shareUrlsService = inject(ShareUrlsService);
@@ -64,6 +64,22 @@ export class DataContainerService {
             southWest: bounds.southWest
         };
         return container;
+    }
+
+    public isContainerEmpty(container: DataContainer): boolean {
+        if (container.routes.length === 0) {
+            return true;
+        }
+        if (container.routes[0].markers?.length > 0) {
+            return false;
+        }
+        if (container.routes[0].segments.length === 0) {
+            return true;
+        }
+        if (container.routes[0].segments[0].latlngs.length === 0) {
+            return true;
+        }
+        return false;
     }
 
     public async setFileUrlAfterNavigation(url: string, baseLayer: string) {

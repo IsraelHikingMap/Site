@@ -1,1 +1,2 @@
+- Improve perfromance and update dependencies
 - Various bug fixes and performance improvements

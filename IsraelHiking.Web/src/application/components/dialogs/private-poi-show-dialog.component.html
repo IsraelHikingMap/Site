@@ -9,7 +9,7 @@
       {{title}}
     </a>
     }
-    <button mat-button type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
+    <button mat-icon-button aria-label="Close" type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
   </div>
   <div mat-dialog-content>
     <div class="flex flex-row">
@@ -23,7 +23,7 @@
         class="whitespace-pre-line {{resources.getTextAlignment(description)}}">
         {{description}}</p>
     </div>
-    @if (showCoordinates) {
+    @if (showCoordinates()) {
     <div class="flex flex-row">
       <coordinates [latlng]="marker.latlng"></coordinates>
     </div>

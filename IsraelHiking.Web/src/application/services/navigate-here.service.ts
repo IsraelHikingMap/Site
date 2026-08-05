@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "./resources.service";
@@ -11,7 +11,7 @@ import { RoutesFactory } from "./routes.factory";
 import { AddRouteAction } from "../reducers/routes.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models";
 
-@Injectable()
+@Service()
 export class NavigateHereService {
 
     private readonly resources = inject(ResourcesService);

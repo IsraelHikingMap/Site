@@ -1,4 +1,4 @@
-﻿<div class="sidebar-header flex flex-row justify-center items-center sticky top-0 z-10 bg-white"
+﻿<div class="sidebar-header flex flex-row justify-center items-center sticky top-0 z-10 bg-surface"
   [dir]="resources.direction">
   <div class="flex-1 text-center text-xl">{{resources.layers}}</div>
   <button mat-button class="w-1/6" type="button" (click)="close()" tabindex="-1"><i
@@ -30,7 +30,7 @@
         </div>
       </div>
       }
-      @for (baseLayer of (baseLayers$ | async); track baseLayer.key) {
+      @for (baseLayer of baseLayers(); track baseLayer.key) {
       <div class="flex flex-row">
         <button mat-button class="row-button flex-1 justify-start!" (click)="selectBaseLayer(baseLayer)"
           analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Select base layer {{baseLayer.key}}">
@@ -72,7 +72,7 @@
         </button>
       </div>
       }
-      @for (overlay of (overlays$ | async); track overlay.key) {
+      @for (overlay of overlays(); track overlay.key) {
       <div class="flex flex-row">
         <button mat-button class="row-button flex-1 justify-start!" (click)="toggleVisibility(overlay)"
           analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Toggle overlay visibility {{overlay.key}}">

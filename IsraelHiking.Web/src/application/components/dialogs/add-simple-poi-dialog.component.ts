@@ -1,6 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
-import { MatButton } from "@angular/material/button";
+import { MatButton , MatIconButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MAT_DIALOG_DATA, MatDialog, MatDialogTitle, MatDialogClose, MatDialogContent } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
@@ -25,7 +25,7 @@ export type AddSimplePoiDialogData = {
 @Component({
     selector: "add-simple-poi-doalog",
     templateUrl: "./add-simple-poi-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, AnalyticsDirective]
+    imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, AnalyticsDirective]
 })
 export class AddSimplePoiDialogComponent {
 

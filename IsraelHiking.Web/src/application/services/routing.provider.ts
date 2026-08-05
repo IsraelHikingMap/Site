@@ -1,11 +1,11 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import { VectorTile } from "@mapbox/vector-tile";
 import { Store } from "@ngxs/store";
+import { PbfReader } from "pbf";
 import PathFinder from "geojson-path-finder";
-import Protobuf from "pbf";
 import QuickLRU from "quick-lru";
 
 import { ResourcesService } from "./resources.service";
@@ -18,13 +18,16 @@ import { ElevationProvider } from "./elevation.provider";
 import { Urls } from "../urls";
 import type { ApplicationState, LatLngAltTime, RoutingType } from "../models";
 
-@Injectable()
+@Service()
 export class RoutingProvider {
     private static readonly MAX_ROUTING_ZOOM = 14;
-    private static readonly ROUTING_SCHEMA = "IHM-schema";
-    private static readonly ROUTING_CLASS_PROPERTY_NAME = "ihm_class";
+    // HM TODO: remove this in 1.2027
+    private static readonly IHM_ROUTING_SCHEMA = "IHM-schema";
+    private static readonly MAPEAK_ROUTING_SCHEMA = "mapeak-schema";
+    private static readonly IHM_ROUTING_CLASS_PROPERTY_NAME = "ihm_class";
+    private static readonly MAPEAK_ROUTING_CLASS_PROPERTY_NAME = "hike_class";
 
-    private featuresCache = new QuickLRU<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>({ maxSize: 100 });
+    private readonly featuresCache = new QuickLRU<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>({ maxSize: 100 });
 
     private readonly httpClient = inject(HttpClient);
     private readonly resources = inject(ResourcesService);
@@ -80,10 +83,18 @@ export class RoutingProvider {
         if (tileXmax - tileXmin > 2 || tileYmax - tileYmin > 2) {
             throw new Error("Offline routing is only supported for adjecent tiles maximum...");
         }
-        for (const tile of tiles) {
-            if (!await this.pmTilesService.isOfflineFileAvailable(zoom, tile.x, tile.y, RoutingProvider.ROUTING_SCHEMA)) {
-                throw new Error("Unable to find offline route, some tiles are missing");
+        // A schema is usable only when all the relevant tiles are available in it, prefer the newer schema.
+        let schema: string = null;
+        for (const schemaCandidate of [RoutingProvider.MAPEAK_ROUTING_SCHEMA, RoutingProvider.IHM_ROUTING_SCHEMA]) {
+            const availability = await Promise.all(
+                tiles.map(tile => this.pmTilesService.isOfflineFileAvailable(zoom, tile.x, tile.y, schemaCandidate)));
+            if (availability.every(available => available)) {
+                schema = schemaCandidate;
+                break;
             }
+        }
+        if (schema == null) {
+            throw new Error("Unable to find offline route, some tiles are missing");
         }
         // increase the chance of getting a route by adding more tiles
         if (tileXmax === tileXmin) {
@@ -92,20 +103,8 @@ export class RoutingProvider {
         if (tileYmax === tileYmin) {
             tileYmax += 1;
         }
-        let features = await this.updateCacheAndGetFeatures(tileXmin, tileXmax, tileYmin, tileYmax, zoom);
-        if (routinType === "4WD") {
-            features = features.filter(f =>
-                f.properties.ihm_class !== "footway" &&
-                f.properties.ihm_class !== "pedestrian" &&
-                f.properties.ihm_class !== "path" &&
-                f.properties.ihm_class !== "cycleway" &&
-                f.properties.ihm_class !== "steps");
-        } else if (routinType === "Bike") {
-            features = features.filter(
-                f => f.properties.ihm_class !== "footway" &&
-                    f.properties.ihm_class !== "pedestrian" &&
-                    f.properties.ihm_class !== "steps");
-        }
+        let features = await this.updateCacheAndGetFeatures(tileXmin, tileXmax, tileYmin, tileYmax, zoom, schema);
+        features = this.filterFeaturesByRoutingType(features, routinType, schema);
         const startFeature = SpatialService.insertProjectedPointToClosestLineAndReplaceIt(latlngStart, features);
         const endFeature = SpatialService.insertProjectedPointToClosestLineAndReplaceIt(latlngEnd, features);
 
@@ -129,7 +128,9 @@ export class RoutingProvider {
         tileXmax: number,
         tileYmin: number,
         tileYmax: number,
-        zoom: number): Promise<GeoJSON.Feature<GeoJSON.LineString>[]> {
+        zoom: number,
+        schema: string
+    ): Promise<GeoJSON.Feature<GeoJSON.LineString>[]> {
         const allCollection = [];
         for (let tileX = tileXmin; tileX <= tileXmax; tileX++) {
             for (let tileY = tileYmin; tileY <= tileYmax; tileY++) {
@@ -138,17 +139,21 @@ export class RoutingProvider {
                     allCollection.push(this.featuresCache.get(key));
                     continue;
                 }
+                // The tiles range is extended beyond the start and end tiles, so some of them might not be available.
+                if (!await this.pmTilesService.isOfflineFileAvailable(zoom, tileX, tileY, schema)) {
+                    continue;
+                }
                 const collection = {
                     type: "FeatureCollection",
                     features: []
                 } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
-                const arrayBuffer = await this.pmTilesService.getTileByType(zoom, tileX, tileY, RoutingProvider.ROUTING_SCHEMA);
-                const tile = new VectorTile(new Protobuf(arrayBuffer));
+                const arrayBuffer = await this.pmTilesService.getTileByType(zoom, tileX, tileY, schema);
+                const tile = new VectorTile(new PbfReader(arrayBuffer));
                 for (const layerKey of Object.keys(tile.layers)) {
                     const layer = tile.layers[layerKey];
                     for (let featureIndex = 0; featureIndex < layer.length; featureIndex++) {
                         const feature = layer.feature(featureIndex);
-                        const isHighway = Object.keys(feature.properties).find(k => k === RoutingProvider.ROUTING_CLASS_PROPERTY_NAME) != null;
+                        const isHighway = Object.keys(feature.properties).find(k => k === RoutingProvider.IHM_ROUTING_CLASS_PROPERTY_NAME || k === RoutingProvider.MAPEAK_ROUTING_CLASS_PROPERTY_NAME) != null;
                         if (!isHighway) {
                             continue;
                         }
@@ -174,7 +179,27 @@ export class RoutingProvider {
                 allCollection.push(collection);
             }
         }
-
         return allCollection.map(c => c.features).flat();
+    }
+
+    private filterFeaturesByRoutingType(features: GeoJSON.Feature<GeoJSON.LineString>[], routingType: RoutingType, schema: string): GeoJSON.Feature<GeoJSON.LineString>[] {
+        let className = RoutingProvider.IHM_ROUTING_CLASS_PROPERTY_NAME;
+        if (schema === RoutingProvider.MAPEAK_ROUTING_SCHEMA) {
+            className = RoutingProvider.MAPEAK_ROUTING_CLASS_PROPERTY_NAME;
+        }
+        if (routingType === "4WD") {
+            return features.filter(f =>
+                f.properties[className] !== "footway" &&
+                f.properties[className] !== "pedestrian" &&
+                f.properties[className] !== "path" &&
+                f.properties[className] !== "cycleway" &&
+                f.properties[className] !== "steps");
+        } else if (routingType === "Bike") {
+            return features.filter(
+                f => f.properties[className] !== "footway" &&
+                    f.properties[className] !== "pedestrian" &&
+                    f.properties[className] !== "steps");
+        }
+        return features;
     }
 }

@@ -2,7 +2,7 @@ import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 import geojsonVt from "geojson-vt";
 import vtpbf from "vt-pbf";
 
@@ -33,8 +33,8 @@ const createTileFromFeatureCollection = (featureCollection: GeoJSON.FeatureColle
 describe("RoutingProvider", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([])],
             providers: [
+                provideStore([]),
                 { provide: ResourcesService, useValue: {} },
                 {
                     provide: ToastService,
@@ -271,7 +271,7 @@ describe("RoutingProvider", () => {
         )
     );
 
-    it("Should return a route when getting error response from server and offline is available only through one line",
+    it("Should return a route when getting error response from server and offline is available only through one line for IHM schema",
         inject([RoutingProvider, HttpTestingController, PmTilesService],
             async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
                 const featureCollection = {
@@ -308,7 +308,7 @@ describe("RoutingProvider", () => {
                     ]
                 } as GeoJSON.FeatureCollection;
 
-                db.isOfflineFileAvailable = () => Promise.resolve(true);
+                db.isOfflineFileAvailable = (_z, _x, _y, type) => Promise.resolve(type === "IHM-schema");
                 db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
                 const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike");
@@ -316,6 +316,102 @@ describe("RoutingProvider", () => {
                 mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
                 const data = await promise;
                 expect(data.length).toBe(3);
+            }
+        )
+    );
+
+    it("Should return a route when getting error response from server and offline is available only through one line for mapeak schema",
+        inject([RoutingProvider, HttpTestingController, PmTilesService],
+            async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
+                const featureCollection = {
+                    type: "FeatureCollection",
+                    features: [
+                        {
+                            type: "Feature",
+                            geometry: {
+                                type: "LineString",
+                                coordinates: [
+                                    [35.0001, 32.0001],
+                                    [35.0001, 32.0002],
+                                    [35.0001, 32.0003]
+                                ]
+                            },
+                            properties: {
+                                hike_class: "track"
+                            }
+                        },
+                        {
+                            type: "Feature",
+                            geometry: {
+                                type: "LineString",
+                                coordinates: [
+                                    [35.0001, 32.0003],
+                                    [35.0002, 32.0003],
+                                    [35.0003, 32.0003]
+                                ]
+                            },
+                            properties: {
+                                hike_class: "steps"
+                            }
+                        }
+                    ]
+                } as GeoJSON.FeatureCollection;
+
+                db.isOfflineFileAvailable = (_z, _x, _y, type) => Promise.resolve(type === "mapeak-schema");
+                db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
+
+                const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "4WD");
+
+                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+                const data = await promise;
+                expect(data.length).toBe(3);
+            }
+        )
+    );
+
+    it("Should fall back to the older schema when the newer schema is missing for one of the tiles",
+        inject([RoutingProvider, HttpTestingController, PmTilesService],
+            async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
+                const featureCollection = {
+                    type: "FeatureCollection",
+                    features: [
+                        {
+                            type: "Feature",
+                            geometry: {
+                                type: "LineString",
+                                coordinates: [
+                                    [35.0001, 32.0001],
+                                    [35.0001, 32.0003],
+                                    [35.0003, 32.0003]
+                                ]
+                            },
+                            properties: {
+                                ihm_class: "track"
+                            }
+                        }
+                    ]
+                } as GeoJSON.FeatureCollection;
+
+                let mapeakAvailabilityCalls = 0;
+                db.isOfflineFileAvailable = (_z, _x, _y, type) => {
+                    if (type !== "mapeak-schema") {
+                        return Promise.resolve(true);
+                    }
+                    mapeakAvailabilityCalls++;
+                    return Promise.resolve(mapeakAvailabilityCalls === 1);
+                };
+                const usedSchemas: string[] = [];
+                db.getTileByType = (_z, _x, _y, type) => {
+                    usedSchemas.push(type);
+                    return Promise.resolve(createTileFromFeatureCollection(featureCollection));
+                };
+
+                const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0003, lng: 35.0003 }, "Hike");
+
+                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+                const data = await promise;
+                expect(data.length).toBeGreaterThan(1);
+                expect(usedSchemas.every(s => s === "IHM-schema")).toBe(true);
             }
         )
     );

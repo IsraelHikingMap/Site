@@ -4,11 +4,12 @@ using System.IO;
 using System.Net.Http;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using IsraelHiking.API;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Middleware;
-using IsraelHiking.API.Swagger;
+using IsraelHiking.API.OpenApi;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccess;
@@ -22,8 +23,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
 using NeoSmart.Caching.Sqlite;
+using Scalar.AspNetCore;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NLog.Web;
@@ -56,13 +57,11 @@ void SetupApplication(WebApplication app)
         ContentTypeProvider = new FileExtensionContentTypeProvider
         {
             Mappings = { { ".pbf", "application/x-protobuf" } } // for the fonts files
-        }
+        },
+        OnPrepareResponse = SetStaticFileCacheHeaders
     });
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Mapeak API V1");
-    });
+    app.MapOpenApi();
+    app.MapScalarApiReference("/openapi", options => options.AddPreferredSecuritySchemes("Bearer"));
     app.UseMiddleware<CrawlersMiddleware>();
     // This should be the last middleware
     app.UseMiddleware<SpaDefaultHtmlMiddleware>();
@@ -81,9 +80,10 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     services.AddIHMApi();
     if (Directory.Exists("./Cache") == false)
     {
-        Directory.CreateDirectory("./Cache");    
+        Directory.CreateDirectory("./Cache");
     }
-    services.AddSqliteCache(options => {
+    services.AddSqliteCache(options =>
+    {
         options.CachePath = "./Cache/cache.sqlite";
     });
     services.AddSingleton<OsmAccessTokenEventsHelper>();
@@ -97,11 +97,12 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     services.AddControllers(options =>
     {
         options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));
-    }).AddJsonOptions(options => {
+    }).AddJsonOptions(options =>
+    {
         options.JsonSerializerOptions.Converters.Add(GeoJsonExtensions.GeoJsonWritableFactory);
         options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
         options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
-    });
+    }).AddApplicationPart(typeof(RegisterApi).Assembly);
     services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -136,25 +137,32 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     services.Configure<NonPublicConfigurationData>(nonPublicConfiguration.Build());
 
     services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Mapeak"));
-    services.AddSwaggerGen(c =>
+    services.AddOpenApi(options =>
     {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Mapeak API", Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() });
-        c.SchemaFilter<FeatureExampleFilter>();
-        c.SchemaFilter<FeatureCollectionExampleFilter>();
-        c.AddSecurityDefinition("Bearer",
-            new OpenApiSecurityScheme
-            {
-                Description = "JWT Authorization header using the Bearer scheme - need OSM token and secret joined by ';'",
-                Type = SecuritySchemeType.Http,
-                Scheme = "bearer",
-                In = ParameterLocation.Header
-            }
-        );
-        c.OperationFilter<AssignOAuthSecurityRequirements>();
-        var xmlFile = "IsraelHiking.API.xml";
-        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-        c.IncludeXmlComments(xmlPath);
+        options.AddDocumentTransformer<ApiInfoDocumentTransformer>();
+        options.AddSchemaTransformer<FeatureExampleSchemaTransformer>();
+        options.AddOperationTransformer<AssignOAuthSecurityOperationTransformer>();
     });
+}
+
+/// <summary>
+/// Files built by the angular CLI carry a content hash in their name, so they can be cached forever.
+/// Everything else keeps its name across deployments and is only cached for a day.
+/// HTML is never cached since it points at the hashed file names.
+/// </summary>
+void SetStaticFileCacheHeaders(StaticFileResponseContext context)
+{
+    var path = context.Context.Request.Path.Value ?? string.Empty;
+    if (path.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
+    {
+        context.Context.Response.Headers.CacheControl = "no-cache";
+        return;
+    }
+    var isHashed = path.StartsWith("/media/", StringComparison.OrdinalIgnoreCase) ||
+                   Regex.IsMatch(path, @"-[A-Z0-9]{8}\.(js|mjs|css)$", RegexOptions.IgnoreCase);
+    context.Context.Response.Headers.CacheControl = isHashed
+        ? "public, max-age=31536000, immutable"
+        : "public, max-age=86400";
 }
 
 void InitializeServices(IServiceProvider serviceProvider)

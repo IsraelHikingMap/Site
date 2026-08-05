@@ -1,4 +1,4 @@
-import { inject } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, timeout } from "rxjs";
 
@@ -11,10 +11,11 @@ export type TranslationResponse = {
     detectedSourceLanguage: string;
 };
 
+@Service()
 export class TranslationService {
     private readonly httpClient = inject(HttpClient);
     private readonly resources = inject(ResourcesService);
-    private translationCache = new Map<string, string>();
+    private readonly translationCache = new Map<string, string>();
 
     public isTranslationPossibleAndNeeded(feature: Immutable<GeoJSON.Feature>): boolean {
         const language = this.resources.getCurrentLanguageCodeSimplified();

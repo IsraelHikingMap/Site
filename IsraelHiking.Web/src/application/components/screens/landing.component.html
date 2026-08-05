@@ -1,10 +1,19 @@
-<header class="relative h-screen min-h-screen w-full bg-cover bg-center bg-no-repeat"
-    style="background-image: url('content/hero-mountain.jpg');">
+<header class="relative h-screen min-h-screen w-full overflow-hidden">
+    <picture>
+        <source type="image/avif" sizes="100vw"
+            srcset="content/hero-mountain-640.avif 640w, content/hero-mountain-960.avif 960w, content/hero-mountain-1280.avif 1280w, content/hero-mountain-1920.avif 1920w">
+        <source type="image/webp" sizes="100vw"
+            srcset="content/hero-mountain-640.webp 640w, content/hero-mountain-960.webp 960w, content/hero-mountain-1280.webp 1280w, content/hero-mountain-1920.webp 1920w">
+        <!-- An img rather than a css background so the preload scanner finds it while parsing the
+             html, and can pick a size that fits the screen instead of always sending the full one. -->
+        <img src="content/hero-mountain-1280.jpg" alt="" width="1920" height="1080" fetchpriority="high"
+            class="absolute inset-0 h-full w-full object-cover object-center">
+    </picture>
     <div class="absolute inset-0 bg-black/10"></div>
     <div class="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center text-white">
         <h1 class="mb-6 text-5xl font-extrabold leading-tight tracking-tight md:text-7xl">
             Built for <br />
-            <span class="green-text">Real Adventures</span>
+            <span class="text-brand">Real Adventures</span>
         </h1>
         <p class="mb-10 max-w-3xl text-lg font-light md:text-2xl text-gray-100">
             Whether you're summiting peaks or exploring backroads, <br />
@@ -14,18 +23,18 @@
         <div class="flex flex-col gap-4 sm:flex-row">
             <a [href]="androidAppUrl" analyticsLabel="Download from google play store"
                 class="group flex items-center gap-3 rounded-lg transition-all hover:scale-105">
-                <img src="content/google-play-badge.png" alt="Google Play" width="200">
+                <img src="content/google-play-badge.png" alt="Google Play" width="200" height="59">
             </a>
 
             <a [href]="iosAppUrl" analyticsLabel="Download from app store"
                 class="group flex items-center gap-3 rounded-lg transition-all hover:scale-105">
-                <img src="content/app-store-badge.png" alt="App Store" width="200">
+                <img src="content/app-store-badge.png" alt="App Store" width="200" height="59">
             </a>
         </div>
         }
     </div>
     <div class="absolute bottom-16 left-1/2 -translate-x-1/2 animate-bounce text-gray-100">
-        <i class="fa fa-chevron-down fa-lg"></i>
+        <i class="fa icon-chevron-down fa-lg"></i>
     </div>
 </header>
 
@@ -110,20 +119,20 @@
                 <h3 class="text-xl font-bold text-gray-900 uppercase tracking-wide">Mapeak Free</h3>
                 <p class="mt-2 text-sm text-gray-500">For home planning and online use.</p>
                 <ul class="mt-8 space-y-4">
-                    <li class="flex items-start gap-3"><span class="green-text">✓</span> <span>Unlimited Route
+                    <li class="flex items-start gap-3"><span class="text-brand">✓</span> <span>Unlimited Route
                             Planning</span></li>
-                    <li class="flex items-start gap-3"><span class="green-text">✓</span> <span>Elevation Gain & Loss
+                    <li class="flex items-start gap-3"><span class="text-brand">✓</span> <span>Elevation Gain & Loss
                             Analysis</span></li>
-                    <li class="flex items-start gap-3"><span class="green-text">✓</span> <span>Community-Curated
+                    <li class="flex items-start gap-3"><span class="text-brand">✓</span> <span>Community-Curated
                             Routes</span></li>
-                    <li class="flex items-start gap-3"><span class="green-text">✓</span> <span>Search Points of
+                    <li class="flex items-start gap-3"><span class="text-brand">✓</span> <span>Search Points of
                             Interest</span></li>
                 </ul>
             </div>
 
-            <div class="relative rounded-2xl border-2 green-border bg-white p-8 text-left shadow-2xl">
+            <div class="relative rounded-2xl border-2 border-brand bg-white p-8 text-left shadow-2xl">
                 <div
-                    class="absolute -top-4 right-6 green-bg text-white text-xs font-black px-3 py-1 rounded-full uppercase">
+                    class="absolute -top-4 right-6 bg-brand text-white text-xs font-black px-3 py-1 rounded-full uppercase">
                     Most Popular</div>
                 <h3 class="text-xl font-bold text-gray-900 uppercase tracking-wide">Mapeak Pro</h3>
                 <p class="mt-2 text-sm text-gray-500">For when the signal disappears.</p>
@@ -149,7 +158,7 @@
                     </li>
                     <li class="flex items-center gap-3 font-semibold text-gray-900">
                         <span
-                            class="fa fa-battery-full border-2 border-solid border-gray-200 p-1 rounded-full aspect-square flex! items-center"></span>
+                            class="fa icon-battery border-2 border-solid border-gray-200 p-1 rounded-full aspect-square flex! items-center"></span>
                         <span>Save Battery on Long Trails</span>
                     </li>
                 </ul>
@@ -165,7 +174,7 @@
                     </p>
                     } @else {
                     <span
-                        class="inline-block rounded-full green-bg px-4 py-2 text-xs font-bold uppercase tracking-widest text-gray-600"
+                        class="inline-block rounded-full bg-brand px-4 py-2 text-xs font-bold uppercase tracking-widest text-gray-600"
                         (click)="order()">
                         Subscribe now!
                     </span>
@@ -187,20 +196,20 @@
             <div class="rounded-lg bg-gray-800 p-8 text-left">
                 <p class="mb-4 italic text-gray-300">"The offline maps saved me when I lost signal deep in the
                     mountains. The elevation profiles are spot on for planning my day."</p>
-                <span class="font-bold green-text">- Sarah, Hiker</span>
+                <span class="font-bold text-brand">- Sarah, Hiker</span>
             </div>
 
             <div class="rounded-lg bg-gray-800 p-8 text-left">
                 <p class="mb-4 italic text-gray-300">"The community routes are insanely accurate. If a path changes or
                     a new detour pops up, it’s usually reflected before my next ride."</p>
-                <span class="font-bold green-text">- David, Cyclist</span>
+                <span class="font-bold text-brand">- David, Cyclist</span>
             </div>
 
             <div class="rounded-lg bg-gray-800 p-8 text-left">
                 <p class="mb-4 italic text-gray-300">"Finally, an app with robust planning for backcountry tracks.
                     "Knowing the tracks come from other offroaders — not some outdated database — gives me way more
                     confidence heading into remote terrain."</p>
-                <span class="font-bold green-text">- Mike, Offroad Driver</span>
+                <span class="font-bold text-brand">- Mike, Offroad Driver</span>
             </div>
         </div>
     </div>

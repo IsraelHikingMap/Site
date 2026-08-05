@@ -1,4 +1,3 @@
-import { LngLatBounds, LngLatLike } from "maplibre-gl";
 import { lineString, featureCollection, point, Units } from "@turf/helpers";
 import simplify from "@turf/simplify";
 import distance from "@turf/distance";
@@ -11,6 +10,7 @@ import pointToLineDistance from "@turf/point-to-line-distance";
 import lineSplit from "@turf/line-split";
 import lineIntersect from "@turf/line-intersect";
 import booleanWithin from "@turf/boolean-within";
+import type { LngLatBounds, LngLatLike } from "maplibre-gl";
 import type { Immutable } from "immer";
 
 import type { LatLngAltTime, Bounds } from "../models";

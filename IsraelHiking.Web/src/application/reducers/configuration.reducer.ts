@@ -3,51 +3,56 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { ConfigurationState, Language, BatteryOptimizationType } from "../models";
+import type { ConfigurationState, Language, BatteryOptimizationType, Theme } from "../models";
 
 
 export class SetLanguageAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public language: Language) { }
+    public static readonly type = "[Configuration] SetLanguageAction";
+    constructor(public readonly language: Language) { }
 }
 
 export class SetBatteryOptimizationTypeAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public batteryOptimizationType: BatteryOptimizationType) { }
+    public static readonly type = "[Configuration] SetBatteryOptimizationTypeAction";
+    constructor(public readonly batteryOptimizationType: BatteryOptimizationType) { }
 }
 
 export class ToggleAutomaticRecordingUploadAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[Configuration] ToggleAutomaticRecordingUploadAction";
 }
 
 export class ToggleGotLostWarningsAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[Configuration] ToggleGotLostWarningsAction";
 }
 
 export class ToggleIsShowSlopeAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[Configuration] ToggleIsShowSlopeAction";
 }
 
 export class ToggleIsShowKmMarkersAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[Configuration] ToggleIsShowKmMarkersAction";
 }
 
 export class StopShowingBatteryConfirmationAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[Configuration] StopShowingBatteryConfirmationAction";
 }
 
 export class StopShowingIntroAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[Configuration] StopShowingIntroAction";
 }
 
 export class SetUnitsAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public units: "metric" | "imperial") { }
+    public static readonly type = "[Configuration] SetUnitsAction";
+    constructor(public readonly units: "metric" | "imperial") { }
 }
 
 export class SetDateFormatAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public dateFormat: string) { }
+    public static readonly type = "[Configuration] SetDateFormatAction";
+    constructor(public readonly dateFormat: string) { }
+}
+
+export class SetThemeAction {
+    public static readonly type = "[Configuration] SetThemeAction";
+    constructor(public readonly theme: Theme) { }
 }
 
 @State<ConfigurationState>({
@@ -133,6 +138,14 @@ export class ConfigurationReducer {
     public setDateFormat(ctx: StateContext<ConfigurationState>, action: SetDateFormatAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.dateFormat = action.dateFormat;
+            return lastState;
+        }));
+    }
+
+    @Action(SetThemeAction)
+    public setTheme(ctx: StateContext<ConfigurationState>, action: SetThemeAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.theme = action.theme;
             return lastState;
         }));
     }

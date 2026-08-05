@@ -1,12 +1,12 @@
-import { Injectable, EventEmitter } from "@angular/core";
+import { EventEmitter, Service } from "@angular/core";
 
 export type SidebarView = "layers" | "public-poi" | "private-routes" | "";
 
-@Injectable()
+@Service()
 export class SidebarService {
 
     public viewName: SidebarView = "";
-    public sideBarStateChanged = new EventEmitter<void>();
+    public readonly sideBarStateChanged = new EventEmitter<void>();
 
     public toggle(viewName: SidebarView) {
         if (this.viewName === viewName) {

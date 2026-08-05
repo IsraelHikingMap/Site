@@ -5,8 +5,7 @@ import {
     ElementRef,
     inject,
     viewChild,
-    viewChildren
-} from "@angular/core";
+    viewChildren, signal, computed } from "@angular/core";
 import { Router } from "@angular/router";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
@@ -26,12 +25,6 @@ import { SearchResultsProvider } from "../services/search-results.provider";
 import { SetSearchTermAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, SearchResultsPointOfInterest } from "../models";
 
-export type SearchContext = {
-    searchTerm: string;
-    searchResults: SearchResultsPointOfInterest[];
-    selectedSearchResults: SearchResultsPointOfInterest;
-};
-
 @Component({
     selector: "search",
     templateUrl: "./search.component.html",
@@ -41,17 +34,15 @@ export type SearchContext = {
 })
 export class SearchComponent {
 
-    public fromContext: SearchContext = {
-        searchTerm: "",
-        searchResults: [],
-        selectedSearchResults: null
-    };
-    public searchFrom = new FormControl<string | SearchResultsPointOfInterest>("");
+    public readonly searchResults = signal<SearchResultsPointOfInterest[]>([]);
+    public readonly searchTerm = signal("");
+    private selectedSearchResults: SearchResultsPointOfInterest = null;
+    public readonly searchFrom = new FormControl<string | SearchResultsPointOfInterest>("");
 
     private selectFirstSearchResults = false;
 
-    public searchFromInput = viewChild<ElementRef>("searchFromInput");
-    public matAutocompleteTriggers = viewChildren(MatAutocompleteTrigger);
+    public readonly searchFromInput = viewChild<ElementRef>("searchFromInput");
+    public readonly matAutocompleteTriggers = viewChildren(MatAutocompleteTrigger);
 
     public readonly resources = inject(ResourcesService);
     private readonly searchResultsProvider = inject(SearchResultsProvider);
@@ -60,19 +51,25 @@ export class SearchComponent {
     private readonly store = inject(Store);
     private readonly mapService = inject(MapService);
 
+    private readonly currentUrl = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.currentUrl);
+    private readonly userInfo = this.store.selectSignal((s: ApplicationState) => s.userState.userInfo);
+
+    public readonly isLoggedIn = computed(() => this.userInfo() != null);
+
+    public readonly isPoisSearch = computed(() => {
+        const currentUrl = this.currentUrl();
+        return currentUrl !== RouteStrings.ROUTE_SHARES && currentUrl !== RouteStrings.ROUTE_TRACES;
+    });
+
     constructor() {
-        this.configureInputFormControl(this.searchFrom, this.fromContext);
+        this.configureInputFormControl(this.searchFrom);
     }
 
-    public isLoggedIn(): boolean {
-        return this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo) != null;
-    }
-
-    private configureInputFormControl(input: FormControl<string | SearchResultsPointOfInterest>, context: SearchContext) {
+    private configureInputFormControl(input: FormControl<string | SearchResultsPointOfInterest>) {
         const stringValues$ = input.valueChanges.pipe(
             tap(x => {
                 if (typeof x !== "string") {
-                    this.selectResults(context, x);
+                    this.selectResults(x);
                 } else {
                     this.selectFirstSearchResults = false;
                 }
@@ -81,24 +78,32 @@ export class SearchComponent {
             share()
         );
 
-        // Prefix: fires on each keystroke (no debounce)
-        stringValues$.pipe(
+        // Prefix: fires shortly after each keystroke for fast results
+        const terms$ = stringValues$.pipe(
             debounceTime(200),
-            distinctUntilChanged()
-        ).subscribe(x => {
-            context.searchTerm = x;
-            context.selectedSearchResults = null;
-            this.search(context, true);
+            distinctUntilChanged(),
+            share()
+        );
+
+        terms$.subscribe(x => {
+            this.searchTerm.set(x);
+            this.selectedSearchResults = null;
+            this.search(true);
         });
 
-        // Full term: only fires after typing genuinely stops
-        stringValues$.pipe(
-            debounceTime(1000),
-            distinctUntilChanged()
+        /*
+         * Full term: only fires after typing genuinely stops.
+         * It is chained after the prefix stream on purpose - debouncing the raw input again would
+         * hide intermediate terms from this stream, so a term that is deleted and retyped quickly
+         * (i.e. "abcd" -> "abc" -> "abcd") would look unchanged here and never be searched in full,
+         * even though the prefix stream already replaced the results with prefix ones.
+         */
+        terms$.pipe(
+            debounceTime(800)
         ).subscribe(x => {
-            context.searchTerm = x;
-            context.selectedSearchResults = null;
-            this.search(context, false);
+            this.searchTerm.set(x);
+            this.selectedSearchResults = null;
+            this.search(false);
         });
     }
 
@@ -111,15 +116,16 @@ export class SearchComponent {
 
     }
 
-    public async search(searchContext: SearchContext, isPrefix: boolean) {
+    public async search(isPrefix: boolean) {
         try {
-            const results = await this.searchResultsProvider.getResults(searchContext.searchTerm, isPrefix);
+            const results = await this.searchResultsProvider.getResults(this.searchTerm(), isPrefix, this.shouldUseMapCenter());
             if (results == null) {
+                // A stale response, a newer search superseded it - keep the currently displayed results
                 return;
             }
-            searchContext.searchResults = results;
-            if (this.selectFirstSearchResults && searchContext.searchResults.length > 0) {
-                this.selectResults(searchContext, searchContext.searchResults[0]);
+            this.searchResults.set(results);
+            if (this.selectFirstSearchResults && this.searchResults().length > 0) {
+                this.selectResults(this.searchResults()[0]);
             }
             this.selectFirstSearchResults = false;
         } catch {
@@ -129,6 +135,19 @@ export class SearchComponent {
 
     public displayResults(results: SearchResultsPointOfInterest) {
         return results ? results.displayName : "";
+    }
+    /**
+     * Return the icon color for the given search result.
+     * In case the icon color is black (like in coordinate results, caves, etc.) 
+     * return the theme's on-surface color instead.
+     * @param result 
+     * @returns 
+     */
+    public getIconColor(result: SearchResultsPointOfInterest): string {
+        const color = result.iconColor;
+        return color === "black" || color === "#000000" || color === "#000"
+            ? "var(--mat-sys-on-surface)"
+            : color;
     }
 
     public moveToResults(searchResults: SearchResultsPointOfInterest) {
@@ -140,8 +159,8 @@ export class SearchComponent {
         this.router.navigate([RouteStrings.ROUTE_POI, searchResults.source, searchResults.id]);
     }
 
-    private selectResults(searchContext: SearchContext, searchResult: SearchResultsPointOfInterest) {
-        searchContext.selectedSearchResults = searchResult;
+    private selectResults(searchResult: SearchResultsPointOfInterest) {
+        this.selectedSearchResults = searchResult;
         this.moveToResults(searchResult);
     }
 
@@ -179,17 +198,22 @@ export class SearchComponent {
         if (this.matAutocompleteTriggers()[0].activeOption != null) {
             return true;
         }
-        if (this.fromContext.selectedSearchResults == null && this.fromContext.searchResults.length > 0) {
-            this.selectResults(this.fromContext, this.fromContext.searchResults[0]);
+        if (this.selectedSearchResults == null && this.searchResults().length > 0) {
+            this.selectResults(this.searchResults()[0]);
             return false;
         }
         this.selectFirstSearchResults = true;
         return false;
     }
 
-    public isPoisSearch() {
+    /** 
+     * Use map center only when the map is visible
+     */
+    private shouldUseMapCenter(): boolean {
         const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
-        return currentUrl !== RouteStrings.ROUTE_SHARES && currentUrl !== RouteStrings.ROUTE_TRACES;
+        return currentUrl !== RouteStrings.ROUTE_ROOT &&
+            currentUrl !== RouteStrings.ROUTE_LANDING &&
+            currentUrl !== RouteStrings.ROUTE_ABOUT;
     }
 
     public updateSearchTerm(searchTerm: string) {
@@ -197,7 +221,7 @@ export class SearchComponent {
     }
 
     public placeholder() {
-        const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
+        const currentUrl = this.currentUrl();
         if (currentUrl === RouteStrings.ROUTE_SHARES) {
             return this.resources.searchSharesPlaceHolder;
         }

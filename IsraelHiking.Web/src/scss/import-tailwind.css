@@ -2,3 +2,14 @@
 
 @import 'tailwindcss/theme' layer(theme);
 @import 'tailwindcss/utilities' layer(utilities);
+
+/* Expose the app's design tokens (Material M3 system colors + brand) as Tailwind
+   color utilities so chrome can use bg-surface / text-on-surface / bg-brand /
+   border-brand etc. `inline` emits the var() reference directly into each
+   utility, so they resolve per element and adapt to the light/dark theme. */
+@theme inline {
+    --color-surface: var(--mat-sys-surface);
+    --color-on-surface: var(--mat-sys-on-surface);
+    --color-outline-variant: var(--mat-sys-outline-variant);
+    --color-brand: var(--brand-color);
+}

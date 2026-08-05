@@ -1,4 +1,4 @@
-import { Component, HostListener, inject } from "@angular/core";
+import { Component, HostListener, inject, viewChild, ElementRef, DestroyRef, afterNextRender, DOCUMENT, signal, computed } from "@angular/core";
 import { MatToolbar } from "@angular/material/toolbar";
 import { RouterOutlet } from "@angular/router";
 import { Store } from "@ngxs/store";
@@ -17,23 +17,41 @@ import type { ApplicationState } from "../../models";
     imports: [MatToolbar, RouterOutlet, MainMenuComponent, SearchComponent]
 })
 export class AppRootComponent {
-    public isScrolled = false;
+    public readonly isScrolled = signal(false);
 
     public readonly resources = inject(ResourcesService);
     private readonly runningContextService = inject(RunningContextService)
     private readonly store = inject(Store);
+    private readonly document = inject(DOCUMENT);
+    private readonly destroyRef = inject(DestroyRef);
+    private readonly toolbar = viewChild.required("toolbar", { read: ElementRef });
+
+    private readonly currentUrl = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.currentUrl);
+
+    public readonly isHome = computed(() =>
+        this.currentUrl() === RouteStrings.ROUTE_ROOT ||
+        this.currentUrl() === RouteStrings.ROUTE_LANDING ||
+        this.currentUrl() === RouteStrings.ROUTE_ABOUT);
+
+    constructor() {
+        afterNextRender(() => {
+            const element = this.toolbar().nativeElement as HTMLElement;
+            // Set the toolbar height as a CSS variable so the map controls can offset below it
+            const update = () => this.document.documentElement.style
+                .setProperty("--app-toolbar-height", `${element.offsetHeight}px`);
+            update();
+            const observer = new ResizeObserver(update);
+            observer.observe(element);
+            this.destroyRef.onDestroy(() => observer.disconnect());
+        });
+    }
 
     @HostListener("window:scroll", [])
     onWindowScroll() {
-        this.isScrolled = typeof window !== "undefined" && window.scrollY > 50;
+        this.isScrolled.set(typeof window !== "undefined" && window.scrollY > 50);
     }
 
     public isIFrame() {
         return this.runningContextService.isIFrame;
-    }
-
-    public isHome() {
-        const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
-        return currentUrl === RouteStrings.ROUTE_ROOT || currentUrl === RouteStrings.ROUTE_LANDING || currentUrl === RouteStrings.ROUTE_ABOUT;
     }
 }

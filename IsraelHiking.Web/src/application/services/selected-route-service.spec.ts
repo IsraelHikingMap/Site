@@ -1,6 +1,6 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
 import { inject, TestBed } from "@angular/core/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { SEGMENT, SEGMENT_POINT, SelectedRouteService } from "./selected-route.service";
@@ -38,8 +38,8 @@ describe("Selected Route Service", () => {
             confirm: (options: any) => options.declineAction()
         };
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([RoutesReducer, RouteEditingReducer])],
             providers: [
+                provideStore([RoutesReducer, RouteEditingReducer]),
                 { provide: ResourcesService, useValue: resourceService },
                 { provide: RoutingProvider, useValue: routingProviderMock },
                 { provide: ToastService, useValue: toastServiceMock },
@@ -1259,8 +1259,8 @@ describe("Selected Route Service", () => {
             };
 
             const features = selectedRouteService.createFeaturesForRoute(route);
-            expect(features.some((f) => f.properties.id.toString().includes("start"))).toBeTruthy();
-            expect(features.some((f) => f.properties.id.toString().includes("end"))).toBeTruthy();
+            expect(features.some((f) => f.properties.id?.toString().includes("start"))).toBeTruthy();
+            expect(features.some((f) => f.properties.id?.toString().includes("end"))).toBeTruthy();
             expect(features.every((f) => f.properties.id?.toString() === f.id)).toBeTruthy();
         }
     ));

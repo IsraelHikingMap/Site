@@ -2,7 +2,7 @@
     height: 64px;
 }
 
-@media (width <= 550px) {
+@media (width <=550px) {
     .img-placeholder {
         display: none;
     }
@@ -10,12 +10,14 @@
 
 .popup-like-marker .maplibregl-popup-content {
     margin-bottom: 10px;
-    background: #fffb !important;
+    background: var(--mat-sys-surface) !important;
+    opacity: 0.75;
 }
 
 .popup-like-marker .maplibregl-popup-tip {
     position: absolute;
-    transform: translate(-50%, -100%);
+    transform: translate(-50%, -50%);
     left: 50%;
-    border-top-color: #fffb !important;
+    border-top-color: var(--mat-sys-surface) !important;
+    opacity: 0.75;
 }

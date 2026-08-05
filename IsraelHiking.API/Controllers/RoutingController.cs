@@ -1,10 +1,12 @@
-﻿using IsraelHiking.Common.Api;
+﻿using IsraelHiking.Common;
+using IsraelHiking.Common.Api;
 using IsraelHiking.Common.DataContainer;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,19 +15,14 @@ namespace IsraelHiking.API.Controllers;
 /// <summary>
 /// This controller allows routing between two points
 /// </summary>
+/// <remarks>
+/// Controller's constructor
+/// </remarks>
+/// <param name="routingGateway"></param>
 [Route("api/[controller]")]
-public class RoutingController : ControllerBase
+public class RoutingController(IRoutingGateway routingGateway) : ControllerBase
 {
-    private readonly IGraphHopperGateway _graphHopperGateway;
-
-    /// <summary>
-    /// Controller's constructor
-    /// </summary>
-    /// <param name="graphHopperGateway"></param>
-    public RoutingController(IGraphHopperGateway graphHopperGateway)
-    {
-        _graphHopperGateway = graphHopperGateway;
-    }
+    private readonly IRoutingGateway _routingGateway = routingGateway;
 
     /// <summary>
     /// Creates a route between the given points according to routing type
@@ -46,15 +43,47 @@ public class RoutingController : ControllerBase
         {
             return BadRequest(ModelState);
         }
-        var feature = await _graphHopperGateway.GetRouting(new RoutingGatewayRequest
-            {
-                From = pointFrom,
-                To = pointTo,
-                Profile = profile,
-            });
+        var feature = await _routingGateway.GetRouting(new RoutingGatewayRequest
+        {
+            From = pointFrom,
+            To = pointTo,
+            Profile = profile,
+        });
         feature.Attributes.AddOrUpdate("Name", $"Routing from {@from} to {to} profile type: {profile}");
         feature.Attributes.AddOrUpdate("Creator", "Mapeak");
-        return Ok(new FeatureCollection{ feature });
+        return Ok(new FeatureCollection { feature });
+    }
+
+    /// <summary>
+    /// Matches the given points to the road/trail network according to routing type
+    /// </summary>
+    /// <param name="points">The points of the track to match</param>
+    /// <param name="type">The type of routing: "Hike", "Bike", "4WD", "None"</param>
+    /// <param name="language">The language to use for the routing instructions</param>
+    /// <param name="instructionsFormat">The turn-by-turn instructions format: "v2" for the normalized model, otherwise the legacy GraphHopper-compatible shape</param>
+    /// <returns>The matched route</returns>
+    //POST /api/routing/?type=hike&language=he
+    [HttpPost()]
+    [ProducesResponseType(typeof(FeatureCollection), 200)]
+    public async Task<IActionResult> PostMapMatch([FromBody] List<LatLng> points, [FromQuery] string type, [FromQuery] string language, [FromQuery] string instructionsFormat = null)
+    {
+        var profile = ConvertProfile(type);
+        if (points == null || points.Count < 2)
+        {
+            ModelState.AddModelError("Points", "At least two points are required for map matching");
+            return BadRequest(ModelState);
+        }
+        var feature = await _routingGateway.GetMapMatch(new MapMatchGatewayRequest
+        {
+            Points = [.. points.Select(p => p.ToCoordinate())],
+            Profile = profile,
+            Language = language,
+            // HM TODO: remove this parameter in 1.10.2026
+            Format = instructionsFormat?.ToLowerInvariant() == "v2" ? InstructionsFormat.V2 : InstructionsFormat.Legacy,
+        });
+        feature.Attributes.AddOrUpdate("Name", $"Map match profile type: {profile}");
+        feature.Attributes.AddOrUpdate("Creator", "Mapeak");
+        return Ok(new FeatureCollection { feature });
     }
 
     private static ProfileType ConvertProfile(string type)
@@ -79,6 +108,6 @@ public class RoutingController : ControllerBase
         }
         var lat = double.Parse(split.First());
         var lng = double.Parse(split.Last());
-        return new CoordinateZ(lng, lat);
+        return new Coordinate(lng, lat);
     }
 }

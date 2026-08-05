@@ -9,12 +9,11 @@ import { Urls } from "../../urls";
 @Component({
     selector: "landing",
     templateUrl: "./landing.component.html",
-    styleUrls: ["./landing.component.scss"],
     imports: [RouterLink]
 })
 export class LandingComponent {
-    public androidAppUrl: string = Urls.ANDROID_APP_URL;
-    public iosAppUrl: string = Urls.IOS_APP_URL;
+    public readonly androidAppUrl: string = Urls.ANDROID_APP_URL;
+    public readonly iosAppUrl: string = Urls.IOS_APP_URL;
 
     public readonly resources = inject(ResourcesService);
 

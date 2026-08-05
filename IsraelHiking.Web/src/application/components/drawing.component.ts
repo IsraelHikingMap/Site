@@ -1,11 +1,10 @@
-import { Component, HostListener, inject } from "@angular/core";
-import { NgClass, NgStyle, AsyncPipe } from "@angular/common";
+import { Component, HostListener, inject, computed } from "@angular/core";
+import { NgClass, NgStyle } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatDialog } from "@angular/material/dialog";
-import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
 import { ShareEditDialogComponent, ShareEditDialogComponentData } from "./dialogs/share-edit-dialog.component";
@@ -33,11 +32,9 @@ import type { RoutingType, ApplicationState, RouteData, ShareUrl } from "../mode
 @Component({
     selector: "drawing",
     templateUrl: "./drawing.component.html",
-    imports: [Dir, MatButton, AnalyticsDirective, NgClass, NgStyle, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger, AsyncPipe]
+    imports: [Dir, MatButton, AnalyticsDirective, NgClass, NgStyle, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger]
 })
 export class DrawingComponent {
-
-    public undoQueueLength$: Observable<number>;
 
     public readonly resources = inject(ResourcesService);
 
@@ -49,9 +46,24 @@ export class DrawingComponent {
     private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly dataContainerService = inject(DataContainerService);
 
-    constructor() {
-        this.undoQueueLength$ = this.store.select((state: ApplicationState) => state.routes.past.length);
-    }
+    public undoQueueLength = this.store.selectSignal((state: ApplicationState) => state.routes.past.length);
+    private readonly routeEditingState = this.store.selectSignal((state: ApplicationState) => state.routeEditingState);
+    private readonly presentRoutes = this.store.selectSignal((state: ApplicationState) => state.routes.present);
+    private readonly selectedRoute = computed(() => this.presentRoutes().find(r => r.id === this.routeEditingState().selectedRouteId));
+
+    public readonly isPoiEditActive = computed(() => {
+        const selectedRoute = this.selectedRoute();
+        return selectedRoute && selectedRoute.state === "Poi";
+    });
+
+    public readonly isRouteEditActive = computed(() => {
+        const selectedRoute = this.selectedRoute();
+        return selectedRoute != null && selectedRoute.state === "Route";
+    });
+
+    public readonly canDeleteAllRoutes = computed(() => this.presentRoutes().length > 0);
+
+    public readonly hasMultipleRoutes = computed(() => this.presentRoutes().length > 1);
 
     @HostListener("window:keydown", ["$event"])
     public onDrawingShortcutKeys($event: KeyboardEvent) {
@@ -90,16 +102,6 @@ export class DrawingComponent {
     public clearBoth() {
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         this.store.dispatch(new ClearPoisAndRouteAction(selectedRoute.id));
-    }
-
-    public isPoiEditActive() {
-        const selectedRoute = this.selectedRouteService.getSelectedRoute();
-        return selectedRoute && selectedRoute.state === "Poi";
-    }
-
-    public isRouteEditActive() {
-        const selectedRoute = this.selectedRouteService.getSelectedRoute();
-        return selectedRoute != null && selectedRoute.state === "Route";
     }
 
     public isEditActive() {
@@ -155,13 +157,13 @@ export class DrawingComponent {
         if (this.selectedRouteService.getSelectedRoute() == null) {
             return "None";
         }
-        return this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
+        return this.routeEditingState().routingType;
     }
 
     public getRouteColor(): string {
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null) {
-            return "black";
+            return "unset";
         }
         return selectedRoute.color;
     }
@@ -195,10 +197,6 @@ export class DrawingComponent {
         this.store.dispatch(new ClearHistoryAction());
     }
 
-    public canDeleteAllRoutes() {
-        return this.store.selectSnapshot((s: ApplicationState) => s.routes).present.length > 0;
-    }
-
     public togglePrivateRoutes() {
         this.sidebarService.toggle("private-routes");
     }
@@ -213,8 +211,7 @@ export class DrawingComponent {
         const allRoutes = this.store.selectSnapshot((s: ApplicationState) => s.routes).present;
         const relevantRoutes = mode === "current" ? [selectedRoute] : allRoutes.filter(r => r.state !== "Hidden");
         const dataContainer = this.dataContainerService.getContainerForRoutes(relevantRoutes);
-        if (dataContainer.routes.length === 0 || dataContainer.routes[0].segments.length == 0 ||
-            dataContainer.routes[0].segments[0].latlngs.length === 0) {
+        if (this.dataContainerService.isContainerEmpty(dataContainer)) {
             this.toastService.warning(this.resources.unableToSaveAnEmptyRoute);
             return;
         }
@@ -236,11 +233,7 @@ export class DrawingComponent {
         }
     }
 
-    public hasMultipleRoutes() {
-        return this.store.selectSnapshot((s: ApplicationState) => s.routes).present.length > 1;
-    }
-
     public allXRoutesText() {
-        return this.resources.allXRoutes.replace("{{count}}", this.store.selectSnapshot((s: ApplicationState) => s.routes).present.length.toString());
+        return this.resources.allXRoutes.replace("{{count}}", this.presentRoutes().length.toString());
     }
 }

@@ -1,7 +1,7 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 
-import { MatButton } from "@angular/material/button";
+import { MatButton, MatIconButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
@@ -29,19 +29,19 @@ interface IPrivatePoiShowDialogData {
 @Component({
     selector: "private-poi-show-dialog",
     templateUrl: "private-poi-show-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, CoordinatesComponent, MatDialogActions, AnalyticsDirective, MatTooltip]
+    imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, CoordinatesComponent, MatDialogActions, AnalyticsDirective, MatTooltip]
 })
 export class PrivatePoiShowDialogComponent {
 
-    private routeId: string;
-    private index: number;
+    private readonly routeId: string;
+    private readonly index: number;
 
-    public marker: MarkerData;
-    public imageLink: LinkData;
-    public url: LinkData;
-    public title: string;
-    public description: string;
-    public showCoordinates = false;
+    public readonly marker: MarkerData;
+    public readonly imageLink: LinkData;
+    public readonly url: LinkData;
+    public readonly title: string;
+    public readonly description: string;
+    public readonly showCoordinates = signal(false);
 
     public readonly resources = inject(ResourcesService);
 
@@ -65,7 +65,7 @@ export class PrivatePoiShowDialogComponent {
         this.url = this.marker.urls.find(u => !u.mimeType.startsWith("image"));
     }
 
-    public static openDialog(dialog: MatDialog, marker: MarkerData, routeId: string, index: number) {
+    public static openDialog(dialog: MatDialog, marker: Immutable<MarkerData>, routeId: string, index: number) {
         setTimeout(() => {
             // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
             dialog.open(PrivatePoiShowDialogComponent,
@@ -81,7 +81,7 @@ export class PrivatePoiShowDialogComponent {
     }
 
     public toggleCoordinates() {
-        this.showCoordinates = !this.showCoordinates;
+        this.showCoordinates.set(!this.showCoordinates());
     }
 
     public showImage() {

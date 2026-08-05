@@ -6,15 +6,15 @@
         analyticsLabel="Convert location to point"><i class="fa icon-plus"></i></button>
     </div>
     <div class="w-1/2">
-      <button mat-button class="w-full" type="button" (click)="toggleDistance()" [class.active]="distance$ | async"
+      <button mat-button class="w-full" type="button" (click)="toggleDistance()" [class.active]="distance()"
         matTooltip="{{resources.measureDistanceFromCurrentLocation}}" matTooltipPosition="above" analyticsOn="click"
         analyticsCategory="Location" analyticsLabel="Measure distance"><i class="fa icon-measure"></i></button>
     </div>
   </div>
   <div class="flex flex-row">
     <div class="w-1/2">
-      <button mat-button class="w-full" type="button" (click)="hideCoordinates = !hideCoordinates"
-        [class.active]="!hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"
+      <button mat-button class="w-full" type="button" (click)="hideCoordinates.set(!hideCoordinates())"
+        [class.active]="!hideCoordinates()" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"
         analyticsOn="click" analyticsCategory="Location" analyticsLabel="Toggle coordinates"><i
           class="fa icon-globe"></i></button>
     </div>
@@ -34,7 +34,7 @@
     </div>
   </div>
   }
-  @if (!hideCoordinates) {
+  @if (!hideCoordinates()) {
   <coordinates [latlng]="latlng()"></coordinates>
   }
 </div>

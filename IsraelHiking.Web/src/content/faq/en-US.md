@@ -35,7 +35,7 @@ Yes. Plan your route on the web, save it to the cloud, and open it in the app. Y
 Open the route in the route editor and use the Reverse Route option in the route menu. You can also drag route points, add new segments, or split and merge routes.
 
 ## Can I record my own tracks and upload them?
-Yes. Start a recording from the app and when you finish, you can upload it to OSM or save it locally. Enable automatic upload in the advanced settings.
+Yes. Start a recording from the app and when you finish, you can upload it to OSM or save it locally. Enable automatic upload in the settings.
 
 ## Where does Mapeak's map data come from?
 Mapeak is built on OpenStreetMap (OSM) data — a global, community-maintained map that anyone can edit. Millions of contributors add and verify trails, roads, and points of interest.
