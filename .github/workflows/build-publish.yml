@@ -60,10 +60,9 @@ jobs:
           {
             echo "### Build and Publish $version_string"
             echo ""
-            echo "| --- | --- |"
-            echo "| Version | \`$version_string\` |"
-            echo "| Commit | [\`$(git rev-parse --short HEAD)\`]($commit_url) - $(git log -1 --pretty=%s) |"
-            echo "| Ref | \`$GITHUB_REF_NAME\` |"
+            echo "Version: \`$version_string\`"
+            echo "Branch: \`$GITHUB_REF_NAME\`"
+            echo "Commit: [\`$(git rev-parse --short HEAD)\`]($commit_url) - $(git log -1 --pretty=%s)"
           } >> $GITHUB_STEP_SUMMARY
       - name: Get all milestones
         id: get_milestones
