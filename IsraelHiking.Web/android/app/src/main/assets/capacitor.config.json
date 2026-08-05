@@ -8,5 +8,10 @@
 	"ios": {
 		"preferredContentMode": "mobile"
 	},
-	"android": {}
+	"android": {},
+	"plugins": {
+		"CapacitorShareTarget": {
+			"appGroupId": "group.com.mapeak"
+		}
+	}
 }

@@ -26,6 +26,7 @@
     "@capgo/background-geolocation": "^8.3.1",
     "@capgo/capacitor-compass": "^8.1.17",
     "@capgo/capacitor-inappbrowser": "^8.13.2",
+    "@capgo/capacitor-share-target": "^8.0.44",
     "@mapbox/mapbox-gl-rtl-text": "^0.4.0",
     "@mapbox/vector-tile": "^3.0.0",
     "@maplibre/ngx-maplibre-gl": "^22.1.0",

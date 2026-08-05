@@ -30,6 +30,8 @@ PODS:
     - Capacitor
   - CapgoCapacitorInappbrowser (8.13.2):
     - Capacitor
+  - CapgoCapacitorShareTarget (8.0.44):
+    - Capacitor
   - IONCameraLib (1.0.4)
   - IONFilesystemLib (1.1.2)
   - MapLibre (6.28.0)
@@ -64,6 +66,7 @@ DEPENDENCIES:
   - "CapgoBackgroundGeolocation (from `../../node_modules/@capgo/background-geolocation`)"
   - "CapgoCapacitorCompass (from `../../node_modules/@capgo/capacitor-compass`)"
   - "CapgoCapacitorInappbrowser (from `../../node_modules/@capgo/capacitor-inappbrowser`)"
+  - "CapgoCapacitorShareTarget (from `../../node_modules/@capgo/capacitor-share-target`)"
   - MapLibre
   - "RevenuecatPurchasesCapacitor (from `../../node_modules/@revenuecat/purchases-capacitor`)"
   - "RevenuecatPurchasesCapacitorUi (from `../../node_modules/@revenuecat/purchases-capacitor-ui`)"
@@ -109,6 +112,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capgo/capacitor-compass"
   CapgoCapacitorInappbrowser:
     :path: "../../node_modules/@capgo/capacitor-inappbrowser"
+  CapgoCapacitorShareTarget:
+    :path: "../../node_modules/@capgo/capacitor-share-target"
   RevenuecatPurchasesCapacitor:
     :path: "../../node_modules/@revenuecat/purchases-capacitor"
   RevenuecatPurchasesCapacitorUi:
@@ -130,6 +135,7 @@ SPEC CHECKSUMS:
   CapgoBackgroundGeolocation: aab4c496d9f36285e5e64561884f9725d141765e
   CapgoCapacitorCompass: 6a192ae5df3586da6e1fd7c2fd54f00d9a434bd5
   CapgoCapacitorInappbrowser: d976bd9297b1e2957ea484dfd519fb69e786ae71
+  CapgoCapacitorShareTarget: 4dad3ae2af080f990d3c4c0638aa1e528979dd2c
   IONCameraLib: f2349804460bd9e3f892e42109b8d996ab3fa19d
   IONFilesystemLib: 21a63377696b2d8fab5632ecfb7d2ac67bddb68a
   MapLibre: 502506f9abd57330f11c19328217be3b121c3f13
@@ -140,6 +146,6 @@ SPEC CHECKSUMS:
   RevenuecatPurchasesCapacitorUi: f6c60a6466f873b15f9a4492bf9f7a62edabe938
   RevenueCatUI: 2c7092fa0a485454d2a474e80f241e6db591dd36
 
-PODFILE CHECKSUM: c9a4e28a63a0c1322e90c818f4d8312198fee191
+PODFILE CHECKSUM: f49ab92980e1a6ae634552865ad3f2cbb56c9afc
 
 COCOAPODS: 1.16.2

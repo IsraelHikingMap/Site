@@ -9,6 +9,11 @@
 		"preferredContentMode": "mobile"
 	},
 	"android": {},
+	"plugins": {
+		"CapacitorShareTarget": {
+			"appGroupId": "group.com.mapeak"
+		}
+	},
 	"packageClassList": [
 		"KeepAwakePlugin",
 		"ScreenBrightnessPlugin",
@@ -22,6 +27,7 @@
 		"BackgroundGeolocation",
 		"CapgoCompassPlugin",
 		"CapgoInAppBrowserPlugin",
+		"CapacitorShareTargetPlugin",
 		"PurchasesPlugin",
 		"RevenueCatUIPlugin",
 		"EmailComposerPlugin"
