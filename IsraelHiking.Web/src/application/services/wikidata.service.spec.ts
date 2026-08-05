@@ -210,7 +210,7 @@ describe("WikidataService", () => {
             },
             properties: {
                 wikidata: wikidataId
-            } as any
+            }
         };
         const promise = serive.enritchFeatureFromWikimedia(feature, language);
 

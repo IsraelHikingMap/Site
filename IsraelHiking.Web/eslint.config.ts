@@ -48,13 +48,6 @@ export default defineConfig([
         },
     },
     {
-        // Tests build partial mocks and reach into private members, "any" is the pragmatic tool for that
-        files: ["**/*.spec.ts"],
-        rules: {
-            "@typescript-eslint/no-explicit-any": "off",
-        },
-    },
-    {
         files: ["**/*.html"],
         extends: [angular.configs.templateRecommended], //angular.configs.templateAccessibility
         rules: {},

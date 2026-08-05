@@ -5,7 +5,7 @@ import type { Immutable } from "immer";
 
 import { SEGMENT, SEGMENT_POINT, SelectedRouteService } from "./selected-route.service";
 import { ResourcesService } from "./resources.service";
-import { ToastService } from "./toast.service";
+import { IConfirmOptions, ToastService } from "./toast.service";
 import { SidebarService } from "./sidebar.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { GeoJsonParser } from "./geojson.parser";
@@ -35,7 +35,7 @@ describe("Selected Route Service", () => {
             getRoute: () => Promise.resolve([])
         };
         const toastServiceMock = {
-            confirm: (options: any) => options.declineAction()
+            confirm: (options: IConfirmOptions) => options.declineAction()
         };
         TestBed.configureTestingModule({
             providers: [
@@ -55,7 +55,7 @@ describe("Selected Route Service", () => {
 
     it("Should issue a toast if there are too many routes, and show the sidebar when user declines", inject([SelectedRouteService, Store, SidebarService],
         (selectedRouteService: SelectedRouteService, store: Store, sidebarService: SidebarService) => {
-            setupRoutes(store, Array.from({ length: 100 }, (_, i) => ({ id: i.toString() } as any)));
+            setupRoutes(store, Array.from({ length: 100 }, (_, i) => ({ id: i.toString() } as unknown as RouteData)));
             selectedRouteService.initialize();
             expect(sidebarService.show).toHaveBeenCalled();
         }
@@ -70,7 +70,7 @@ describe("Selected Route Service", () => {
     it("Should sync selected route with editing route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             store.dispatch = vi.fn();
-            setupRoutes(store, [{ id: "42", state: "Poi" } as any]);
+            setupRoutes(store, [{ id: "42", state: "Poi" } as unknown as RouteData]);
             setupSelectedRoute(store, "1");
 
             selectedRouteService.syncSelectedRouteWithEditingRoute();
@@ -101,7 +101,7 @@ describe("Selected Route Service", () => {
 
     it("Should select the first route if selected route it null and there are routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{ id: "42" } as any]);
+            setupRoutes(store, [{ id: "42" } as unknown as RouteData]);
             setupSelectedRoute(store, null);
 
             const selectedRoute = selectedRouteService.getOrCreateSelectedRoute();
@@ -112,7 +112,7 @@ describe("Selected Route Service", () => {
 
     it("Should select the first route if selected route it null and change its visibility if hidden", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{ id: "42", state: "Hidden" } as any]);
+            setupRoutes(store, [{ id: "42", state: "Hidden" } as unknown as RouteData]);
             setupSelectedRoute(store, null);
 
             const selectedRoute = selectedRouteService.getOrCreateSelectedRoute();
@@ -151,7 +151,7 @@ describe("Selected Route Service", () => {
 
     it("Should not return empty routes where there are routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            setupRoutes(store, [{ id: "42" } as any]);
+            setupRoutes(store, [{ id: "42" } as unknown as RouteData]);
 
             expect(selectedRouteService.areRoutesEmpty()).toBeFalsy();
         }
@@ -207,7 +207,7 @@ describe("Selected Route Service", () => {
     it("Should create route name when there's a route with that name", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             const routeName = selectedRouteService.createRouteName();
-            setupRoutes(store, [{ id: "42", name: routeName } as any]);
+            setupRoutes(store, [{ id: "42", name: routeName } as unknown as RouteData]);
 
             expect(selectedRouteService.createRouteName()).not.toBe(routeName);
             expect(selectedRouteService.isNameAvailable(routeName)).toBeFalsy();

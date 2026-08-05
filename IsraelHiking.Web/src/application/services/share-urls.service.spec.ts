@@ -376,7 +376,7 @@ describe("Share Urls Service", () => {
 
     it("Should set share Url to store", inject([ShareUrlsService, Store], (shareUrlsService: ShareUrlsService, store: Store) => {
         store.dispatch = vi.fn();
-        shareUrlsService.setShareUrl({} as any);
+        shareUrlsService.setShareUrl({} as unknown as ShareUrl);
         expect(store.dispatch).toHaveBeenCalled();
     }));
 

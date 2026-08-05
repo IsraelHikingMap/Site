@@ -13,7 +13,7 @@ import { SelectedRouteService } from "./selected-route.service";
 import { RoutesFactory } from "./routes.factory";
 import { MapService } from "./map.service";
 import { RunningContextService } from "./running-context.service";
-import type { DataContainer, RouteData, ShareUrl } from "../models";
+import type { DataContainer, MarkerData, RouteData, ShareUrl } from "../models";
 
 describe("DataContainerService", () => {
     beforeEach(() => {
@@ -57,7 +57,7 @@ describe("DataContainerService", () => {
                 {
                     provide: SelectedRouteService,
                     useValue: {
-                        getSelectedRoute: () => null as any
+                        getSelectedRoute: () => null as RouteData
                     }
                 },
                 {
@@ -96,7 +96,7 @@ describe("DataContainerService", () => {
                 id: "2",
                 name: "name2",
                 description: "description2",
-                markers: [{} as any],
+                markers: [{} as MarkerData],
                 segments: []
             }
         ];
@@ -105,7 +105,7 @@ describe("DataContainerService", () => {
     }));
 
     it("should return if the share URL is already selected", inject([DataContainerService, ShareUrlsService], async (service: DataContainerService, shareUrlsService: ShareUrlsService) => {
-        vi.spyOn(shareUrlsService, "getSelectedShareUrl").mockReturnValue({ id: "123" } as any);
+        vi.spyOn(shareUrlsService, "getSelectedShareUrl").mockReturnValue({ id: "123" } as ShareUrl);
         vi.spyOn(shareUrlsService, "setShareUrlById");
 
         await service.setShareUrlAfterNavigation("123");
@@ -127,7 +127,7 @@ describe("DataContainerService", () => {
         vi.spyOn(shareUrlsService, "getSelectedShareUrl").mockReturnValue(null);
         vi.spyOn(shareUrlsService, "setShareUrlById").mockReturnValue(Promise.resolve(shareUrl));
         vi.spyOn(toastService, "info");
-        (runningContextService as any).isIFrame = false;
+        (runningContextService as { isIFrame: boolean }).isIFrame = false;
         await service.setShareUrlAfterNavigation("42");
 
         expect(shareUrlsService.setShareUrlById).toHaveBeenCalledWith("42");
@@ -136,7 +136,7 @@ describe("DataContainerService", () => {
     }));
 
     it("should set file url after navigation", inject([DataContainerService, FileService, ToastService, Store], async (service: DataContainerService, fileService: FileService, toastService: ToastService, store: Store) => {
-        vi.spyOn(fileService, "openFromUrl").mockReturnValue(Promise.resolve({} as any));
+        vi.spyOn(fileService, "openFromUrl").mockReturnValue(Promise.resolve({} as DataContainer));
         vi.spyOn(toastService, "warning");
         store.reset({
             inMemoryState: {}
@@ -159,7 +159,7 @@ describe("DataContainerService", () => {
     }));
 
     it("should set share URL and not show toast message if in iframe and select base layer", inject([DataContainerService, ShareUrlsService, ToastService, RunningContextService, LayersService], async (service: DataContainerService, shareUrlsService: ShareUrlsService, toastService: ToastService, runningContextService: RunningContextService, layerService: LayersService) => {
-        (runningContextService as any).isIFrame = true;
+        (runningContextService as { isIFrame: boolean }).isIFrame = true;
         const shareUrl = {
             id: "123",
             dataContainer: { baseLayer: "baseLayer", routes: [] },
@@ -192,7 +192,7 @@ describe("DataContainerService", () => {
     it("should check if container is empty when there are no routes", inject([DataContainerService], (service: DataContainerService) => {
         const container = {
             routes: []
-        } as any;
+        } as DataContainer;
         expect(service.isContainerEmpty(container)).toBe(true);
     }));
 
@@ -214,10 +214,10 @@ describe("DataContainerService", () => {
     it("should check if container is not empty when there are markers", inject([DataContainerService], (service: DataContainerService) => {
         const container = {
             routes: [{
-                markers: [{} as any],
+                markers: [{} as MarkerData],
                 segments: []
             }]
-        } as any;
+        } as DataContainer;
         expect(service.isContainerEmpty(container)).toBe(false);
     }));
 
@@ -227,7 +227,7 @@ describe("DataContainerService", () => {
                 markers: [],
                 segments: []
             }]
-        } as any;
+        } as DataContainer;
         expect(service.isContainerEmpty(container)).toBe(true);
     }));
 
@@ -239,7 +239,7 @@ describe("DataContainerService", () => {
                     latlngs: []
                 }]
             }]
-        } as any;
+        } as DataContainer;
         expect(service.isContainerEmpty(container)).toBe(true);
     }));
 });
