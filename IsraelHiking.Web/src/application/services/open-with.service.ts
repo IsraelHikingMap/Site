@@ -17,13 +17,26 @@ import type { LatLngAltTime } from "../models";
 
 /** Hosts used by Google Maps short links, which need to be resolved before coordinates can be read */
 const GOOGLE_SHORT_LINK_HOSTS = ["maps.app.goo.gl", "goo.gl", "g.co"];
-const GOOGLE_MAPS_HOSTS = ["www.google.com", "google.com", "maps.google.com", ...GOOGLE_SHORT_LINK_HOSTS];
+/**
+ * `maps.apple` is the host of Apple's short share links, which hold no coordinates and cannot be
+ * resolved into any - their redirect chain ends at `maps.apple.com/unsupported`. They are listed so
+ * that they fail with a message rather than being downloaded as a route file. On iOS the share
+ * extension sidesteps them entirely by reading the structured map item Apple Maps attaches.
+ */
+const APPLE_MAPS_HOSTS = ["maps.apple.com", "maps.apple"];
+const MAP_SERVICE_HOSTS = ["www.google.com", "google.com", "maps.google.com",
+    ...GOOGLE_SHORT_LINK_HOSTS, ...APPLE_MAPS_HOSTS];
 
 const NUMBER = "(-?\\d+(?:\\.\\d+)?)";
 /** The place itself, as encoded in the `data=` protobuf of a resolved Google Maps place link */
 const PLACE_COORDINATES = new RegExp(`!3d${NUMBER}!4d${NUMBER}`);
-/** `?q=`, `?query=`, `?daddr=` and `?destination=` all carry an explicit "this is the point" coordinate */
-const QUERY_COORDINATES = new RegExp(`[?&](?:q|query|daddr|destination)=${NUMBER},${NUMBER}`);
+/**
+ * Parameters that carry an explicit "this is the point" coordinate: `q`, `query`, `daddr` and
+ * `destination` from Google, `ll`, `sll`, `near` and `coordinate` from Apple. The ones that may also
+ * hold a place name simply do not match unless the value looks like a coordinate pair.
+ */
+const QUERY_COORDINATES =
+    new RegExp(`[?&](?:query|q|daddr|destination|coordinate|sll|ll|near)=${NUMBER},${NUMBER}`);
 /** The map viewport centre - only a rough hint, so it is used as a last resort */
 const VIEWPORT_COORDINATES = new RegExp(`/@${NUMBER},${NUMBER}`);
 const URL_IN_TEXT = /https?:\/\/\S+/;
@@ -96,11 +109,11 @@ export class OpenWithService {
     }
 
     /**
-     * Resolves a Google Maps link to a coordinate. Short links carry no coordinates at all, so they
-     * are followed first - this needs the native http client since the browser cannot read a
+     * Resolves a map service link to a coordinate. Google short links carry no coordinates at all, so
+     * they are followed first - this needs the native http client since the browser cannot read a
      * cross-origin redirect.
      */
-    private async handleGoogleMapsUrl(href: string) {
+    private async handleMapServiceUrl(href: string) {
         let resolved = href;
         if (GOOGLE_SHORT_LINK_HOSTS.includes(new URL(href).host.toLowerCase())) {
             try {
@@ -113,7 +126,7 @@ export class OpenWithService {
                 return;
             }
         }
-        const latLng = OpenWithService.parseGoogleMapsCoordinates(resolved);
+        const latLng = OpenWithService.parseMapUrlCoordinates(resolved);
         if (latLng != null) {
             this.moveToLatLng(latLng);
             return;
@@ -123,10 +136,11 @@ export class OpenWithService {
     }
 
     /**
-     * Extracts the shared point out of a Google Maps URL. A single URL can hold several coordinates -
-     * the place, the search query and the viewport centre - which is why they are tried in that order.
+     * Extracts the shared point out of a Google or Apple Maps URL. A single URL can hold several
+     * coordinates - the place, the search query and the viewport centre - so they are tried in that
+     * order, most specific first.
      */
-    public static parseGoogleMapsCoordinates(href: string): LatLngAltTime | null {
+    public static parseMapUrlCoordinates(href: string): LatLngAltTime | null {
         const decoded = decodeURIComponent(href);
         for (const matcher of [PLACE_COORDINATES, QUERY_COORDINATES, VIEWPORT_COORDINATES]) {
             const match = matcher.exec(decoded);
@@ -235,8 +249,8 @@ export class OpenWithService {
             return;
         }
         this.loggingService.info("[OpenWith] Opening an external url: " + href);
-        if (GOOGLE_MAPS_HOSTS.includes(url.host.toLocaleLowerCase())) {
-            this.handleGoogleMapsUrl(href);
+        if (MAP_SERVICE_HOSTS.includes(url.host.toLocaleLowerCase())) {
+            this.handleMapServiceUrl(href);
             return;
         }
         this.router.navigate([RouteStrings.ROUTE_URL, href]);

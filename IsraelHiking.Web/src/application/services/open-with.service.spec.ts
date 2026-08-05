@@ -4,46 +4,66 @@ import { OpenWithService } from "./open-with.service";
 describe("Open With Service", () => {
     it("Should prefer the place coordinates over the viewport centre", () => {
         const href = "https://www.google.com/maps/place/Masada/@31.3151,35.3411,17z/data=!3m1!4b1!4m6!3m5!8m2!3d31.3156!4d35.3535";
-        expect(OpenWithService.parseGoogleMapsCoordinates(href)).toEqual({ lat: 31.3156, lng: 35.3535 });
+        expect(OpenWithService.parseMapUrlCoordinates(href)).toEqual({ lat: 31.3156, lng: 35.3535 });
     });
 
     it("Should parse the query coordinates of a shared point", () => {
-        expect(OpenWithService.parseGoogleMapsCoordinates("https://maps.google.com/?q=31.7683,35.2137&z=17"))
+        expect(OpenWithService.parseMapUrlCoordinates("https://maps.google.com/?q=31.7683,35.2137&z=17"))
             .toEqual({ lat: 31.7683, lng: 35.2137 });
-        expect(OpenWithService.parseGoogleMapsCoordinates("https://www.google.com/maps/search/?api=1&query=31.7683,35.2137"))
+        expect(OpenWithService.parseMapUrlCoordinates("https://www.google.com/maps/search/?api=1&query=31.7683,35.2137"))
             .toEqual({ lat: 31.7683, lng: 35.2137 });
     });
 
     it("Should parse the query coordinates without a trailing zoom parameter", () => {
-        expect(OpenWithService.parseGoogleMapsCoordinates("https://maps.google.com/?q=31.7683,35.2137"))
+        expect(OpenWithService.parseMapUrlCoordinates("https://maps.google.com/?q=31.7683,35.2137"))
             .toEqual({ lat: 31.7683, lng: 35.2137 });
     });
 
     it("Should fall back to the viewport centre when there is nothing better", () => {
-        expect(OpenWithService.parseGoogleMapsCoordinates("https://www.google.com/maps/@31.7683,35.2137,15z"))
+        expect(OpenWithService.parseMapUrlCoordinates("https://www.google.com/maps/@31.7683,35.2137,15z"))
             .toEqual({ lat: 31.7683, lng: 35.2137 });
     });
 
     it("Should parse negative coordinates", () => {
-        expect(OpenWithService.parseGoogleMapsCoordinates("https://www.google.com/maps/@-33.8688,-151.2093,15z"))
+        expect(OpenWithService.parseMapUrlCoordinates("https://www.google.com/maps/@-33.8688,-151.2093,15z"))
             .toEqual({ lat: -33.8688, lng: -151.2093 });
-        expect(OpenWithService.parseGoogleMapsCoordinates("https://maps.google.com/?q=-33.8688,-151.2093"))
+        expect(OpenWithService.parseMapUrlCoordinates("https://maps.google.com/?q=-33.8688,-151.2093"))
             .toEqual({ lat: -33.8688, lng: -151.2093 });
     });
 
     it("Should parse whole number coordinates", () => {
-        expect(OpenWithService.parseGoogleMapsCoordinates("https://maps.google.com/?q=31,35"))
+        expect(OpenWithService.parseMapUrlCoordinates("https://maps.google.com/?q=31,35"))
             .toEqual({ lat: 31, lng: 35 });
     });
 
     it("Should parse url encoded coordinates", () => {
-        expect(OpenWithService.parseGoogleMapsCoordinates("https://www.google.com/maps/search/?api=1&query=31.7683%2C35.2137"))
+        expect(OpenWithService.parseMapUrlCoordinates("https://www.google.com/maps/search/?api=1&query=31.7683%2C35.2137"))
             .toEqual({ lat: 31.7683, lng: 35.2137 });
     });
 
     it("Should return null for a url without coordinates", () => {
-        expect(OpenWithService.parseGoogleMapsCoordinates("https://maps.app.goo.gl/abc123")).toBeNull();
-        expect(OpenWithService.parseGoogleMapsCoordinates("https://www.google.com/maps/place/Masada")).toBeNull();
+        expect(OpenWithService.parseMapUrlCoordinates("https://maps.app.goo.gl/abc123")).toBeNull();
+        expect(OpenWithService.parseMapUrlCoordinates("https://www.google.com/maps/place/Masada")).toBeNull();
+    });
+
+    it("Should parse an Apple Maps url", () => {
+        expect(OpenWithService.parseMapUrlCoordinates("https://maps.apple.com/?ll=31.7683,35.2137&q=Jerusalem"))
+            .toEqual({ lat: 31.7683, lng: 35.2137 });
+        expect(OpenWithService.parseMapUrlCoordinates("https://maps.apple.com/?sll=31.7683,35.2137&z=15"))
+            .toEqual({ lat: 31.7683, lng: 35.2137 });
+        expect(OpenWithService.parseMapUrlCoordinates("https://maps.apple.com/place?coordinate=31.7683%2C35.2137&name=Old+City"))
+            .toEqual({ lat: 31.7683, lng: 35.2137 });
+    });
+
+    it("Should not mistake an Apple Maps place name for a coordinate", () => {
+        expect(OpenWithService.parseMapUrlCoordinates("https://maps.apple.com/?q=Masada&ll=31.3156,35.3535"))
+            .toEqual({ lat: 31.3156, lng: 35.3535 });
+        expect(OpenWithService.parseMapUrlCoordinates("https://maps.apple.com/?address=Jaffa+Street&q=Cafe"))
+            .toBeNull();
+    });
+
+    it("Should return null for an Apple Maps short link, which holds no coordinates", () => {
+        expect(OpenWithService.parseMapUrlCoordinates("https://maps.apple/p/abc123")).toBeNull();
     });
 
     it("Should parse a plain geo url", () => {
