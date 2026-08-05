@@ -61,9 +61,10 @@ export class ApplicationInitializeService {
 
     public async initialize() {
         try {
+            const timeToBootstrap = Math.round(performance.now());
             await this.loggingService.initialize();
             this.loggingService.info("---------------------------------------");
-            this.loggingService.info("Starting Mapeak Application Initialization");
+            this.loggingService.info(`Starting Mapeak Application Initialization, ${timeToBootstrap} ms after the page started loading`);
             await this.databaseService.initialize();
             this.analyticsService.initialize();
             this.screenService.initialize();
@@ -94,10 +95,10 @@ export class ApplicationInitializeService {
             this.deviceOrientationService.initialize();
             this.tracesService.initialize(); // no need to wait for it to complete
             this.shareUrlsService.initialize(); // no need to wait for it to complete
-            await this.offlineFilesDownloadService.initialize();
+            this.offlineFilesDownloadService.initialize(); // no need to wait for it to complete
             this.locationService.initialize();
-            await this.applicationUpdateService.initialize(); // Needs to be last to make sure app gets updated
-            this.loggingService.info("Finished Mapeak Application Initialization");
+            this.applicationUpdateService.initialize(); // no need to wait for it to complete
+            this.loggingService.info(`Finished Mapeak Application Initialization, ${Math.round(performance.now())} ms after the page started loading`);
         } catch (ex) {
             if (this.runningContextService.isIFrame) {
                 return;
