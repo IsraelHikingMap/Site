@@ -172,9 +172,8 @@ export class FileService {
         const base64Content = fileResponse.data as string;
         const fileName = await this.getFileName(url, base64Content);
         type = type || this.getTypeFromUrl(fileName);
-        const blob = await this.base64StringToBlob(base64Content, type) as any;
-        blob.name = fileName;
-        return blob;
+        const blob = await this.base64StringToBlob(base64Content, type);
+        return new File([blob], fileName, { type });
     }
 
     private async getFileName(url: string, base64Content: string): Promise<string> {

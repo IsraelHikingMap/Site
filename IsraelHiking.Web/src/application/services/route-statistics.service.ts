@@ -112,7 +112,7 @@ export class RouteStatisticsService {
         return routeStatistics;
     }
 
-    private median(numbers: any[]) {
+    private median(numbers: number[]) {
         const sorted = numbers.slice().sort((a, b) => a - b);
         const middle = Math.floor(sorted.length / 2);
         if (sorted.length % 2 === 0) {

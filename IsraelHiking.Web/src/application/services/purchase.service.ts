@@ -82,7 +82,7 @@ export class PurchaseService {
             }
             this.checkAndUpdateOfflineAvailability();
         } catch (error) {
-            this.loggingService.error("[Store] Failed to initialize purchases connection: " + (error as any).message);
+            this.loggingService.error("[Store] Failed to initialize purchases connection: " + (error as Error).message);
         }
     }
 

@@ -420,13 +420,13 @@ export class GpxDataContainerConverterService {
         });
     }
 
-    private convertExtensionAfterXmlnsRemoval<T>(extensions: any, defaultValue: T): T {
-        extensions = Object.assign(defaultValue, extensions);
-        for (const key in extensions) {
-            if (typeof extensions[key] === "string") {
-                extensions[key] = { _: extensions[key] };
+    private convertExtensionAfterXmlnsRemoval<T>(extensions: unknown, defaultValue: T): T {
+        const merged = Object.assign(defaultValue, extensions) as Record<string, unknown>;
+        for (const key in merged) {
+            if (typeof merged[key] === "string") {
+                merged[key] = { _: merged[key] };
             }
         }
-        return extensions;
+        return merged as T;
     }
 }

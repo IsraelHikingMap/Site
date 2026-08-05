@@ -6,7 +6,7 @@ import { Store } from "@ngxs/store";
 import { Urls } from "../urls";
 import type { ApplicationState } from "../models";
 
-export function osmTokenInterceptor(request: HttpRequest<any>, next: HttpHandlerFn): Observable<HttpEvent<any>> {
+export function osmTokenInterceptor(request: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> {
     const store = inject(Store);
     let token = "";
     try {

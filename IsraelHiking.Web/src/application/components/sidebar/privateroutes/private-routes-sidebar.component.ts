@@ -169,13 +169,13 @@ export class PrivateRoutesSidebarComponent {
         return this.routesFactory.invertColorToBW(color);
     }
 
-    public updateProperty(routeData: Immutable<RouteData>, property: any, value: any) {
-        const newRouteData = structuredClone(routeData) as any;
+    public updateProperty<TProperty extends keyof RouteData>(routeData: Immutable<RouteData>, property: TProperty, value: RouteData[TProperty]) {
+        const newRouteData = structuredClone(routeData) as RouteData;
         newRouteData[property] = value;
         if (property === "opacity") {
-            this.store.dispatch(new SetOpacityAction(value));
+            this.store.dispatch(new SetOpacityAction(value as number));
         } else if (property === "weight") {
-            this.store.dispatch(new SetWeightAction(value));
+            this.store.dispatch(new SetWeightAction(value as number));
         }
         this.store.dispatch(new ChangeRoutePropertiesAction(routeData.id, newRouteData));
     }

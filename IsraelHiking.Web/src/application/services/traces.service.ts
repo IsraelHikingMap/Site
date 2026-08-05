@@ -89,7 +89,7 @@ export class TracesService {
                     lng: traceJson.lon
                 }
             } as Trace));
-            const allTraces = serverTraces.concat(existingTraces.filter(t => t.visibility === "local") as any as Trace[]);
+            const allTraces = serverTraces.concat(existingTraces.filter(t => t.visibility === "local").map(t => structuredClone(t) as Trace));
             const serverTracesMap = serverTraces.reduce((acc, trace) => {
                 acc[trace.id] = trace;
                 return acc;
@@ -146,7 +146,7 @@ export class TracesService {
         return traceToStore;
     }
 
-    public uploadTrace(file: File): Promise<any> {
+    public uploadTrace(file: File): Promise<{ id: string }> {
         const formData = new FormData();
         formData.append("file", file, file.name);
         const filenameWithoutExtension = file.name.split(".");
@@ -154,7 +154,7 @@ export class TracesService {
         formData.append("description", filenameWithoutExtension.join("."));
         formData.append("visibility", "trackable");
         this.loggingService.info(`[Traces] Uploading a trace with file name ${file.name}`);
-        return firstValueFrom(this.httpClient.post(Urls.osmGpx, formData).pipe(timeout(3 * 60 * 1000)));
+        return firstValueFrom(this.httpClient.post<{ id: string }>(Urls.osmGpx, formData).pipe(timeout(3 * 60 * 1000)));
     }
 
     public async uploadRouteAsTrace(route: Immutable<RouteDataWithoutState>): Promise<void> {

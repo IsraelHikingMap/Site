@@ -7,7 +7,12 @@ import { GeoJSONUtils } from "./geojson-utils";
 
 type WikiDataPage = {
     sitelinks: Record<string, { site: string, title: string }>;
-    statements: Record<string, { value: { content: any } }[]>;
+    statements: {
+        /** Coordinate location */
+        P625?: { value: { content: { latitude: number, longitude: number } } }[];
+        /** Image file name in wikimedia commons */
+        P18?: { value: { content: string } }[];
+    };
     labels?: Record<string, string>;
     descriptions?: Record<string, string>;
 }

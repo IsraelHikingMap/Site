@@ -92,7 +92,7 @@ export class ShareUrlsService {
         }
     }
 
-    public async syncShareUrls(): Promise<any> {
+    public async syncShareUrls(): Promise<void> {
         if (this.syncing) {
             this.loggingService.info("[Shares] Already syncing...");
             return;

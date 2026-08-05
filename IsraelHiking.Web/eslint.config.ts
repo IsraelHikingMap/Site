@@ -35,7 +35,7 @@ export default defineConfig([
                 },
             ],
             "@angular-eslint/prefer-signals": "error",
-            "@typescript-eslint/no-explicit-any": "off", // HM TODO: fix this?
+            "@typescript-eslint/no-explicit-any": "error",
             "@typescript-eslint/no-empty-function": "off",
             "@typescript-eslint/no-unused-vars": [
                 "error",
@@ -45,6 +45,13 @@ export default defineConfig([
             ],
             "@typescript-eslint/consistent-type-definitions": "off",
             "comma-dangle": ["error", "never"]
+        },
+    },
+    {
+        // Tests build partial mocks and reach into private members, "any" is the pragmatic tool for that
+        files: ["**/*.spec.ts"],
+        rules: {
+            "@typescript-eslint/no-explicit-any": "off",
         },
     },
     {

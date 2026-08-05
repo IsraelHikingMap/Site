@@ -1,5 +1,5 @@
 import { inject, NgZone, Service } from "@angular/core";
-import { HttpClient, HttpResponse } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { firstValueFrom } from "rxjs";
 import { debounceTime, timeout } from "rxjs/operators";
@@ -131,7 +131,7 @@ export class DatabaseService {
         const offlineAvailable = await this.pmTilesService.isOfflineFileAvailable(z, x, y, type);
         try {
             const response = await firstValueFrom(this.httpClient.get(url.replace("slice://", "https://"), { observe: "response", responseType: "arraybuffer" })
-                .pipe(offlineAvailable ? timeout(2000) : timeout(60000))) as any as HttpResponse<any>;
+                .pipe(offlineAvailable ? timeout(2000) : timeout(60000)));
             if (!response.ok) {
                 throw new Error(`Failed to get ${url}: ${response.status}`);
             }
@@ -176,8 +176,8 @@ export class DatabaseService {
         }
     }
 
-    public addPoiToUploadQueue(feature: GeoJSON.Feature): Promise<any> {
-        return this.uploadQueueDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).put(feature);
+    public async addPoiToUploadQueue(feature: GeoJSON.Feature): Promise<void> {
+        await this.uploadQueueDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).put(feature);
     }
 
     public getPoiFromUploadQueue(featureId: string): Promise<GeoJSON.Feature> {
@@ -188,8 +188,8 @@ export class DatabaseService {
         return this.uploadQueueDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).delete(featureId);
     }
 
-    public storeImages(images: ImageUrlAndData[]): Promise<any> {
-        return this.imagesDatabase.table(DatabaseService.IMAGES_TABLE_NAME).bulkPut(images);
+    public async storeImages(images: ImageUrlAndData[]): Promise<void> {
+        await this.imagesDatabase.table(DatabaseService.IMAGES_TABLE_NAME).bulkPut(images);
     }
 
     public async getImageByUrl(imageUrl: string): Promise<string> {
@@ -200,8 +200,8 @@ export class DatabaseService {
         return null;
     }
 
-    public storeShareUrl(shareUrl: ShareUrl): Promise<any> {
-        return this.shareUrlsDatabase.table(DatabaseService.SHARE_URLS_TABLE_NAME).put(shareUrl);
+    public async storeShareUrl(shareUrl: ShareUrl): Promise<void> {
+        await this.shareUrlsDatabase.table(DatabaseService.SHARE_URLS_TABLE_NAME).put(shareUrl);
     }
 
     public getShareUrlById(id: string): Promise<ShareUrl> {
@@ -212,8 +212,8 @@ export class DatabaseService {
         return this.shareUrlsDatabase.table(DatabaseService.SHARE_URLS_TABLE_NAME).delete(id);
     }
 
-    public storeTrace(trace: Trace): Promise<any> {
-        return this.tracesDatabase.table(DatabaseService.TRACES_TABLE_NAME).put(trace);
+    public async storeTrace(trace: Trace): Promise<void> {
+        await this.tracesDatabase.table(DatabaseService.TRACES_TABLE_NAME).put(trace);
     }
 
     public getTraceById(id: string): Promise<Trace> {
