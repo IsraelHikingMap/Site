@@ -1,16 +1,16 @@
 PODS:
-  - Capacitor (8.4.2):
+  - Capacitor (8.5.0):
     - CapacitorCordova
   - CapacitorApp (8.1.1):
     - Capacitor
-  - CapacitorCamera (8.2.1):
+  - CapacitorCamera (8.2.2):
     - Capacitor
-    - IONCameraLib (~> 1.0.4)
+    - IONCameraLib (~> 1.0.5)
   - CapacitorCommunityKeepAwake (8.0.1):
     - Capacitor
   - CapacitorCommunityScreenBrightness (8.0.0):
     - Capacitor
-  - CapacitorCordova (8.4.2)
+  - CapacitorCordova (8.5.0)
   - CapacitorDevice (8.0.3):
     - Capacitor
   - CapacitorEmailComposer (8.0.0):
@@ -24,31 +24,31 @@ PODS:
     - Capacitor
   - CapawesomeCapacitorAppUpdate (8.0.3):
     - Capacitor
-  - CapgoBackgroundGeolocation (8.3.1):
+  - CapgoBackgroundGeolocation (8.3.2):
     - Capacitor
   - CapgoCapacitorCompass (8.1.17):
     - Capacitor
-  - CapgoCapacitorInappbrowser (8.13.2):
+  - CapgoCapacitorInappbrowser (8.14.0):
     - Capacitor
   - CapgoCapacitorShareTarget (8.0.44):
     - Capacitor
-  - IONCameraLib (1.0.4)
+  - IONCameraLib (1.0.5)
   - IONFilesystemLib (1.1.2)
   - MapLibre (6.28.0)
-  - PurchasesHybridCommon (18.22.2):
-    - RevenueCat (= 5.81.1)
-  - PurchasesHybridCommonUI (18.22.2):
-    - PurchasesHybridCommon (= 18.22.2)
-    - RevenueCatUI (= 5.81.1)
-  - RevenueCat (5.81.1)
-  - RevenuecatPurchasesCapacitor (13.2.4):
+  - PurchasesHybridCommon (18.29.0):
+    - RevenueCat (= 5.83.0)
+  - PurchasesHybridCommonUI (18.29.0):
+    - PurchasesHybridCommon (= 18.29.0)
+    - RevenueCatUI (= 5.83.0)
+  - RevenueCat (5.83.0)
+  - RevenuecatPurchasesCapacitor (13.4.0):
     - Capacitor
-    - PurchasesHybridCommon (= 18.22.2)
-  - RevenuecatPurchasesCapacitorUi (13.2.4):
+    - PurchasesHybridCommon (= 18.29.0)
+  - RevenuecatPurchasesCapacitorUi (13.4.0):
     - Capacitor
-    - PurchasesHybridCommonUI (= 18.22.2)
-  - RevenueCatUI (5.81.1):
-    - RevenueCat (= 5.81.1)
+    - PurchasesHybridCommonUI (= 18.29.0)
+  - RevenueCatUI (5.83.0):
+    - RevenueCat (= 5.83.0)
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -120,31 +120,31 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@revenuecat/purchases-capacitor-ui"
 
 SPEC CHECKSUMS:
-  Capacitor: 52f999235b8bd6a7d01694753f4f4d54d182e3a3
+  Capacitor: 00b87168591cc006ea6f5c0de681ec5c39a2c8eb
   CapacitorApp: 305bd13c44f6f9d164e2ee66a4faa956ed8c0e06
-  CapacitorCamera: 1b9dde3aaffbd1f051486f4cee2b4cdd962662ae
+  CapacitorCamera: a8e5798460aa967d0636d34d3a0bf1f69a5b5a39
   CapacitorCommunityKeepAwake: d41922812644562e94a79acaf7f41e6d9413af8c
   CapacitorCommunityScreenBrightness: e4075e1181f7e88259edb8b1e3b9a209e1144d45
-  CapacitorCordova: 345eacdc4c8282415446aea4acd8c77d82480bd4
+  CapacitorCordova: 9d3acbb574048e7167d2af127a0af2123e619f2f
   CapacitorDevice: 708e742b60a61572cd593e44c809592e8f31da14
   CapacitorEmailComposer: cf36b8e16e43ce51eeb03994645a864ded9b40b4
   CapacitorFilesystem: 2db285a1ac6e475cc27cae2e1bea999000f9e2be
   CapacitorShare: 0c58305114538568059bfc07111f22dcb9cb2a82
   CapacitorTextZoom: b3c80b09abef831245bc3434b1c03aa898ad4762
   CapawesomeCapacitorAppUpdate: 3a7537c6a6696837b51d06f26b2e909fd7b9226f
-  CapgoBackgroundGeolocation: aab4c496d9f36285e5e64561884f9725d141765e
+  CapgoBackgroundGeolocation: acd7ac8ace79410e50224ccce4267d07685276a7
   CapgoCapacitorCompass: 6a192ae5df3586da6e1fd7c2fd54f00d9a434bd5
-  CapgoCapacitorInappbrowser: d976bd9297b1e2957ea484dfd519fb69e786ae71
+  CapgoCapacitorInappbrowser: 663eaeeae907140aeda7a2b7c7d44d0b774b1e94
   CapgoCapacitorShareTarget: 4dad3ae2af080f990d3c4c0638aa1e528979dd2c
-  IONCameraLib: f2349804460bd9e3f892e42109b8d996ab3fa19d
+  IONCameraLib: ecbd8ef0077d481df429cee267bbeb1a7b9bddd0
   IONFilesystemLib: 21a63377696b2d8fab5632ecfb7d2ac67bddb68a
   MapLibre: 502506f9abd57330f11c19328217be3b121c3f13
-  PurchasesHybridCommon: e47bc4f611e86fcf8295bf1c984f187982270f02
-  PurchasesHybridCommonUI: e6756576ad454c6c15a4679f57446115382ff791
-  RevenueCat: 693b033863262f9776130cc6c1f9255a74ab23ff
-  RevenuecatPurchasesCapacitor: cfbab60a6bcc32d5050f6802e49b884beb2d936c
-  RevenuecatPurchasesCapacitorUi: f6c60a6466f873b15f9a4492bf9f7a62edabe938
-  RevenueCatUI: 2c7092fa0a485454d2a474e80f241e6db591dd36
+  PurchasesHybridCommon: 94a0fde86cfecdc487fb64667b68f527af930265
+  PurchasesHybridCommonUI: f502ea0b5aefe81e8054af70be64688c8a51fd51
+  RevenueCat: a83de0391a1061302699cb55eb1ff0662f5768b5
+  RevenuecatPurchasesCapacitor: 9205ff494ad81e19bccef77a88a34599c11ed319
+  RevenuecatPurchasesCapacitorUi: dc4363081fbff7fcfca07c9985096614e9ed1ac6
+  RevenueCatUI: 6f819d25fe953112c3722e33d0879bd590d78810
 
 PODFILE CHECKSUM: f49ab92980e1a6ae634552865ad3f2cbb56c9afc
 
