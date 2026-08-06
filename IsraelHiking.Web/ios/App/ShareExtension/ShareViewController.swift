@@ -17,19 +17,24 @@ final class ShareViewController: UIViewController {
 
     private static let appGroupId = "group.com.mapeak"
     private static let sharedDataKey = "share-target-data"
-    private static let hostAppUrl = "mapeak://share"
     /** Apple Maps attaches the shared place as an `MKMapItem` under this type identifier */
     private static let mapItemTypeIdentifier = "com.apple.mapkit.map-item"
 
     override func viewDidLoad() {
         super.viewDidLoad()
         Task {
-            let texts = await collectSharedTexts()
-            if !texts.isEmpty {
-                store(texts: texts)
-                openHostApp()
+            let items = (extensionContext?.inputItems as? [NSExtensionItem]) ?? []
+            NSLog("[ShareExtension] Started with \(items.count) item(s), " +
+                  "types: \(items.flatMap { ($0.attachments ?? []).flatMap(\.registeredTypeIdentifiers) })")
+            let texts = await collectSharedTexts(from: items)
+            if texts.isEmpty {
+                NSLog("[ShareExtension] Nothing usable was shared")
+                extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
+                return
             }
-            extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
+            NSLog("[ShareExtension] Handing over: \(texts)")
+            store(texts: texts)
+            confirmAndDismiss()
         }
     }
 
@@ -37,8 +42,7 @@ final class ShareViewController: UIViewController {
      * Google Maps attaches the location as a URL, while a few apps share the very same link as plain
      * text, so both representations are collected and the app decides what to make of them.
      */
-    private func collectSharedTexts() async -> [String] {
-        let items = (extensionContext?.inputItems as? [NSExtensionItem]) ?? []
+    private func collectSharedTexts(from items: [NSExtensionItem]) async -> [String] {
         var texts: [String] = []
         for item in items {
             for provider in item.attachments ?? [] {
@@ -68,42 +72,66 @@ final class ShareViewController: UIViewController {
         var mapItem = item as? MKMapItem
         if mapItem == nil, let data = item as? Data {
             mapItem = try? NSKeyedUnarchiver.unarchivedObject(ofClass: MKMapItem.self, from: data)
+            NSLog("[ShareExtension] The map item arrived archived, decoded: \(mapItem != nil)")
         }
-        guard let coordinate = mapItem?.placemark.coordinate, CLLocationCoordinate2DIsValid(coordinate) else {
-            NSLog("[ShareExtension] A map item was shared but held no usable coordinate")
+        guard let placemark = mapItem?.placemark else {
+            NSLog("[ShareExtension] A map item was shared but could not be read as one")
+            return nil
+        }
+        // A placemark can carry its location in either of these, and an empty one answers both
+        guard let coordinate = Self.usableCoordinate(placemark.location?.coordinate)
+            ?? Self.usableCoordinate(placemark.coordinate) else {
+            NSLog("[ShareExtension] The shared map item \"\(placemark.name ?? "")\" holds no coordinate")
             return nil
         }
         // Formatted without a locale so the separator stays a dot, which is what the app parses
         return String(format: "%.6f, %.6f", coordinate.latitude, coordinate.longitude)
     }
 
+    /**
+     * Null Island is what an unpopulated placemark reports, and it passes `CLLocationCoordinate2DIsValid`
+     * because both of its values are in range - so it has to be rejected by name, or a share with no
+     * location in it silently sends the user to the middle of the Atlantic.
+     */
+    private static func usableCoordinate(_ coordinate: CLLocationCoordinate2D?) -> CLLocationCoordinate2D? {
+        guard let coordinate, CLLocationCoordinate2DIsValid(coordinate),
+              coordinate.latitude != 0 || coordinate.longitude != 0 else {
+            return nil
+        }
+        return coordinate
+    }
+
     private func store(texts: [String]) {
         guard let userDefaults = UserDefaults(suiteName: Self.appGroupId) else {
-            NSLog("[ShareExtension] Unable to open the app group \(Self.appGroupId)")
+            NSLog("[ShareExtension] Unable to open the app group \(Self.appGroupId) - it is most " +
+                  "likely missing from the entitlements this build was signed with")
             return
         }
         userDefaults.set(["title": "", "texts": texts, "files": []], forKey: Self.sharedDataKey)
+        // A write that never lands leaves the app waiting for something that is not there, and the two
+        // processes have no other way of noticing, so it is worth confirming.
+        if userDefaults.dictionary(forKey: Self.sharedDataKey) == nil {
+            NSLog("[ShareExtension] The share was written to the app group but cannot be read back")
+        }
     }
 
     /**
-     * Brings the app to the front so the shared location opens straight away. An extension has no
-     * `UIApplication.shared`, hence walking the responder chain. Failing to open is not fatal - the
-     * plugin also reads the app group when the app next becomes active.
+     * Tells the user the location was taken, since the app cannot be brought to the front to show it:
+     * iOS has no supported way for a share extension to launch its own app, and the responder chain
+     * trick that used to manage it is refused outright from iOS 18 on - and risks rejection at review.
+     * The plugin picks the location up from the app group the next time the app becomes active.
      */
-    private func openHostApp() {
-        guard let url = URL(string: Self.hostAppUrl) else {
-            return
-        }
-        var responder: UIResponder? = self
-        while let current = responder {
-            if let application = current as? UIApplication {
-                application.perform(#selector(openURL(_:)), with: url)
-                return
-            }
-            responder = current.next
-        }
+    private func confirmAndDismiss() {
+        let isHebrew = Bundle.main.preferredLocalizations.first?.hasPrefix("he") ?? false
+        // The extension is a separate process with no access to the app's translations, so the two
+        // languages it ships in are spelled out here.
+        let message = isHebrew
+            ? "המיקום נשמר. פתחו את Mapeak כדי לראות אותו על המפה."
+            : "The location was saved. Open Mapeak to see it on the map."
+        let alert = UIAlertController(title: "Mapeak", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: isHebrew ? "אישור" : "OK", style: .default) { _ in
+            self.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
+        })
+        present(alert, animated: true)
     }
-
-    /** Only declared so that `#selector` above resolves - `UIApplication` provides the implementation. */
-    @objc private func openURL(_ url: URL) {}
 }

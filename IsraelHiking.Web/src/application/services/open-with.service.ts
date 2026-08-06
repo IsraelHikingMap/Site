@@ -42,9 +42,10 @@ const VIEWPORT_COORDINATES = new RegExp(`/@${NUMBER},${NUMBER}`);
 /**
  * The first half of a Google feature id is the S2 cell the place sits in, at level 30 - accurate to
  * centimetres. It is the only location some place links carry, see
- * {@link OpenWithService.parseFeatureIdCoordinates}.
+ * {@link OpenWithService.parseFeatureIdCoordinates}. It appears either as `!1s` inside the `data`
+ * protobuf of a place link or as the `ftid` parameter of a search link.
  */
-const FEATURE_ID_S2_CELL = /!1s0x([0-9a-f]+):0x[0-9a-f]+/i;
+const FEATURE_ID_S2_CELL = /(?:!1s|[?&]ftid=)0x([0-9a-f]+):0x[0-9a-f]+/i;
 const URL_IN_TEXT = /https?:\/\/\S+/;
 
 @Service()

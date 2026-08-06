@@ -74,6 +74,19 @@ describe("Open With Service", () => {
         expect(latLng.lng).toBeCloseTo(-121.695662, 5);
     });
 
+    it("Should recover the place from the feature id of a search link", async () => {
+        const href = "https://www.google.com/maps?q=108,+Ramot+Menashe&ftid=0x151da83e244b3a6d:0xcaac348095b6c17d" +
+            "&entry=gps&shh=CAE&g_st=com.mapeak";
+        const latLng = await OpenWithService.parseFeatureIdCoordinates(href);
+        expect(latLng.lat).toBeCloseTo(32.595814, 5);
+        expect(latLng.lng).toBeCloseTo(35.061285, 5);
+    });
+
+    it("Should not mistake a house number in a search query for a coordinate", () => {
+        expect(OpenWithService.parseMapUrlCoordinates("https://www.google.com/maps?q=108,+Ramot+Menashe&entry=gps"))
+            .toBeNull();
+    });
+
     it("Should return null for a feature id without a usable cell", async () => {
         expect(await OpenWithService.parseFeatureIdCoordinates("https://www.google.com/maps/place/Masada"))
             .toBeNull();
