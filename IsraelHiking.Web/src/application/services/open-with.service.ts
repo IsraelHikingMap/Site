@@ -39,6 +39,12 @@ const QUERY_COORDINATES =
     new RegExp(`[?&](?:query|q|daddr|destination|coordinate|sll|ll|near)=${NUMBER},${NUMBER}`);
 /** The map viewport centre - only a rough hint, so it is used as a last resort */
 const VIEWPORT_COORDINATES = new RegExp(`/@${NUMBER},${NUMBER}`);
+/**
+ * The first half of a Google feature id is the S2 cell the place sits in, at level 30 - accurate to
+ * centimetres. It is the only location some place links carry, see
+ * {@link OpenWithService.parseFeatureIdCoordinates}.
+ */
+const FEATURE_ID_S2_CELL = /!1s0x([0-9a-f]+):0x[0-9a-f]+/i;
 const URL_IN_TEXT = /https?:\/\/\S+/;
 
 @Service()
@@ -126,7 +132,8 @@ export class OpenWithService {
                 return;
             }
         }
-        const latLng = OpenWithService.parseMapUrlCoordinates(resolved);
+        const latLng = OpenWithService.parseMapUrlCoordinates(resolved)
+            ?? await OpenWithService.parseFeatureIdCoordinates(resolved);
         if (latLng != null) {
             this.moveToLatLng(latLng);
             return;
@@ -149,6 +156,33 @@ export class OpenWithService {
             }
         }
         return null;
+    }
+
+    /**
+     * Recovers the place from the S2 cell in a Google feature id. Some shares - areas and addresses
+     * rather than businesses - expand to a link holding no coordinates at all, and this is then the
+     * only thing pinning the place down. It is used only as a fallback because an explicit coordinate,
+     * where one exists, states the place directly rather than the cell that contains it.
+     *
+     * nodes2ts is only needed for these links and is a sizable dependency, so it is loaded on demand
+     * instead of with the app, the same way proj4 is in the coordinates service.
+     */
+    public static async parseFeatureIdCoordinates(href: string): Promise<LatLngAltTime | null> {
+        const cellHex = FEATURE_ID_S2_CELL.exec(href)?.[1];
+        if (cellHex == null || /^0+$/.test(cellHex)) {
+            return null;
+        }
+        try {
+            const { S2CellId } = await import("nodes2ts");
+            const cellId = new S2CellId(BigInt(`0x${cellHex}`));
+            if (!cellId.isValid()) {
+                return null;
+            }
+            const latLng = cellId.toLatLng();
+            return SpatialService.toLatLng([latLng.lngDegrees, latLng.latDegrees]);
+        } catch {
+            return null;
+        }
     }
 
     /**

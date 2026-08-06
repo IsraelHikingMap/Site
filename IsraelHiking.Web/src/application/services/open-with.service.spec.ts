@@ -66,6 +66,21 @@ describe("Open With Service", () => {
         expect(OpenWithService.parseMapUrlCoordinates("https://maps.apple/p/abc123")).toBeNull();
     });
 
+    it("Should recover the place from the S2 cell of a feature id", async () => {
+        const href = "https://www.google.com/maps/place/Mt+Hood,+Oregon+97041,+United+States/" +
+            "data=!4m2!3m1!1s0x54be1c5501719a05:0x831d76c0b7aea9ea!18m1!1e1?utm_source=mstt_1&entry=gps";
+        const latLng = await OpenWithService.parseFeatureIdCoordinates(href);
+        expect(latLng.lat).toBeCloseTo(45.373444, 5);
+        expect(latLng.lng).toBeCloseTo(-121.695662, 5);
+    });
+
+    it("Should return null for a feature id without a usable cell", async () => {
+        expect(await OpenWithService.parseFeatureIdCoordinates("https://www.google.com/maps/place/Masada"))
+            .toBeNull();
+        expect(await OpenWithService.parseFeatureIdCoordinates("https://www.google.com/maps/place/X/data=!1s0x0:0x831d76c0"))
+            .toBeNull();
+    });
+
     it("Should parse a plain geo url", () => {
         expect(OpenWithService.parseGeoUrlCoordinates("geo:31.7683,35.2137")).toEqual({ lat: 31.7683, lng: 35.2137 });
         expect(OpenWithService.parseGeoUrlCoordinates("geo:31.7683,35.2137?z=15")).toEqual({ lat: 31.7683, lng: 35.2137 });
