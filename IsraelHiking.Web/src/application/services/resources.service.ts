@@ -319,6 +319,7 @@ export class ResourcesService {
     public unableToSaveToFile: string;
     public unableToLoadFromFile: string;
     public unableToLoadFromUrl: string;
+    public locationSavedOpenTheApp: string;
     public routeNameAlreadyInUse: string;
     public unableToGenerateUrl: string;
     public routingFailedTryShorterRoute: string;
@@ -533,7 +534,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1782066177541");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1786002995565");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -811,6 +812,7 @@ export class ResourcesService {
         this.unableToSaveToFile = this.gettextCatalog.getString("Unable to save to file...");
         this.unableToLoadFromFile = this.gettextCatalog.getString("Unable to extract geographic information from the file...");
         this.unableToLoadFromUrl = this.gettextCatalog.getString("Unable to load from URL...");
+        this.locationSavedOpenTheApp = this.gettextCatalog.getString("The location was shared, open the app to see it on the map.");
         this.routeNameAlreadyInUse = this.gettextCatalog.getString("The route's name was altered since it is in use...");
         this.unableToGenerateUrl = this.gettextCatalog.getString("Unable to generate URL, please try again later...");
         this.routingFailedTryShorterRoute = this.gettextCatalog.getString("Routing failed, please try a shorter route...");

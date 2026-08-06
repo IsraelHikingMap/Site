@@ -122,14 +122,12 @@ final class ShareViewController: UIViewController {
      * The plugin picks the location up from the app group the next time the app becomes active.
      */
     private func confirmAndDismiss() {
-        let isHebrew = Bundle.main.preferredLocalizations.first?.hasPrefix("he") ?? false
-        // The extension is a separate process with no access to the app's translations, so the two
-        // languages it ships in are spelled out here.
-        let message = isHebrew
-            ? "המיקום נשמר. פתחו את Mapeak כדי לראות אותו על המפה."
-            : "The location was saved. Open Mapeak to see it on the map."
-        let alert = UIAlertController(title: "Mapeak", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: isHebrew ? "אישור" : "OK", style: .default) { _ in
+        let translations = Translations.load(language: Translations.deviceLanguage())
+        let alert = UIAlertController(
+            title: "Mapeak",
+            message: translations.getString("The location was shared, open the app to see it on the map."),
+            preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: translations.getString("OK"), style: .default) { _ in
             self.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
         })
         present(alert, animated: true)

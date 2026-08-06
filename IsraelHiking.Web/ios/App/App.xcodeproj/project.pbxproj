@@ -18,6 +18,8 @@
 		0D46EA1B2FCC67830033E098 /* PMTilesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA122FCC67830033E098 /* PMTilesService.swift */; };
 		0D46EA1C2FCC67830033E098 /* MapeakCarSceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA112FCC67830033E098 /* MapeakCarSceneDelegate.swift */; };
 		0D46EA1E2FCC68230033E098 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA1D2FCC68230033E098 /* SceneDelegate.swift */; };
+		0DAA0112000000000000AA12 /* Translations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DAA0113000000000000AA13 /* Translations.swift */; };
+		0DAA0114000000000000AA14 /* Translations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DAA0113000000000000AA13 /* Translations.swift */; };
 		0D6243222FDEC4F900B2C10A /* CarContourTilesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D6243212FDEC4F000B2C10A /* CarContourTilesProvider.swift */; };
 		0D6243252FDEC57E00B2C10A /* MaplibreContour in Frameworks */ = {isa = PBXBuildFile; productRef = 0D6243242FDEC57E00B2C10A /* MaplibreContour */; };
 		0DD5D9592FDBDBB300983BAA /* PMTiles in Frameworks */ = {isa = PBXBuildFile; productRef = 0DD5D9582FDBDBB300983BAA /* PMTiles */; };
@@ -45,6 +47,7 @@
 		0D46EA122FCC67830033E098 /* PMTilesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PMTilesService.swift; sourceTree = "<group>"; };
 		0D46EA132FCC67830033E098 /* SliceURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliceURLProtocol.swift; sourceTree = "<group>"; };
 		0D46EA1D2FCC68230033E098 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		0DAA0113000000000000AA13 /* Translations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Translations.swift; sourceTree = "<group>"; };
 		0D6243212FDEC4F000B2C10A /* CarContourTilesProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarContourTilesProvider.swift; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
@@ -146,6 +149,7 @@
 			isa = PBXGroup;
 			children = (
 				0D46EA1D2FCC68230033E098 /* SceneDelegate.swift */,
+				0DAA0113000000000000AA13 /* Translations.swift */,
 				0D46EA0A2FCC67430033E098 /* Car */,
 				F15F05A52935486900827848 /* App.entitlements */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
@@ -349,6 +353,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0DAA0102000000000000AA02 /* ShareViewController.swift in Sources */,
+				0DAA0114000000000000AA14 /* Translations.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -365,6 +370,7 @@
 				0D46EA182FCC67830033E098 /* ReactivePreferencesPlugin.swift in Sources */,
 				0D46EA192FCC67830033E098 /* CarRouteData.swift in Sources */,
 				0D46EA1E2FCC68230033E098 /* SceneDelegate.swift in Sources */,
+				0DAA0112000000000000AA12 /* Translations.swift in Sources */,
 				0D4587ED2FCCC8A300269001 /* CarStoreKeys.swift in Sources */,
 				0D46EA1A2FCC67830033E098 /* CapacitorStore.swift in Sources */,
 				0D46EA1B2FCC67830033E098 /* PMTilesService.swift in Sources */,
