@@ -41,6 +41,9 @@ project(':capgo-capacitor-compass').projectDir = new File('../node_modules/@capg
 include ':capgo-capacitor-inappbrowser'
 project(':capgo-capacitor-inappbrowser').projectDir = new File('../node_modules/@capgo/capacitor-inappbrowser/android')
 
+include ':capgo-capacitor-share-target'
+project(':capgo-capacitor-share-target').projectDir = new File('../node_modules/@capgo/capacitor-share-target/android')
+
 include ':revenuecat-purchases-capacitor'
 project(':revenuecat-purchases-capacitor').projectDir = new File('../node_modules/@revenuecat/purchases-capacitor/android')
 

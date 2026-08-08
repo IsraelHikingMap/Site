@@ -56,6 +56,10 @@
 		"classpath": "ee.forgr.capacitor_inappbrowser.InAppBrowserPlugin"
 	},
 	{
+		"pkg": "@capgo/capacitor-share-target",
+		"classpath": "app.capgo.sharetarget.CapacitorShareTargetPlugin"
+	},
+	{
 		"pkg": "@revenuecat/purchases-capacitor",
 		"classpath": "com.revenuecat.purchases.capacitor.PurchasesPlugin"
 	},

@@ -25,9 +25,13 @@ const project = new MobileProject(".", config);
 await project.load();
 await project.android?.setVersionName(version);
 await project.android?.setVersionCode(buildNumber);
-for (const bundleName of ["Debug", "Release"]) {
-    await project.ios?.setBuild(null, bundleName, version);
-    await project.ios?.setVersion(null, bundleName, version);
+// The App Store rejects an extension whose version differs from the app it is embedded in,
+// so every iOS target has to be bumped, not just the main one (null targets the main one).
+for (const targetName of [null, "ShareExtension"]) {
+    for (const bundleName of ["Debug", "Release"]) {
+        await project.ios?.setBuild(targetName, bundleName, version);
+        await project.ios?.setVersion(targetName, bundleName, version);
+    }
 }
 await project.commit();
 

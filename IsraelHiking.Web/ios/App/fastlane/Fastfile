@@ -19,8 +19,18 @@ platform :ios do
   desc "Build the iOS app only"
   lane :build_ios do
     setup_ci
-    sync_code_signing(type: "appstore")
-    build_app(workspace: "App.xcworkspace", scheme: "App")
+    # The share extension is a second target with its own app id, so it needs its own profile.
+    sync_code_signing(type: "appstore", app_identifier: ["com.mapeak", "com.mapeak.ShareExtension"])
+    build_app(
+      workspace: "App.xcworkspace",
+      scheme: "App",
+      export_options: {
+        provisioningProfiles: {
+          "com.mapeak" => "match AppStore com.mapeak",
+          "com.mapeak.ShareExtension" => "match AppStore com.mapeak.ShareExtension"
+        }
+      }
+    )
   end
   desc "Upload the previously built IPA to TestFlight"
   lane :upload_to_testers do
