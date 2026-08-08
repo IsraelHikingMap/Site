@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { OsmTagsService, PoiProperties } from "./osm-tags.service";
 
-function createFeature(properties: any): GeoJSON.Feature {
+function createFeature(properties: GeoJSON.GeoJsonProperties): GeoJSON.Feature {
     return {
         type: "Feature",
         properties: properties,
@@ -12,10 +12,10 @@ function createFeature(properties: any): GeoJSON.Feature {
     };
 }
 
-function createPoi(properties: any = {}): GeoJSON.Feature<GeoJSON.Geometry, PoiProperties> {
+function createPoi(properties: Partial<PoiProperties> = {}): GeoJSON.Feature<GeoJSON.Geometry, PoiProperties> {
     return {
         properties
-    } as any;
+    } as unknown as GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>;
 }
 
 describe("OsmTagsService", () => {

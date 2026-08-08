@@ -34,7 +34,7 @@ export class OverpassTurboService {
         if (!query.match(/out.*geom;/)) {
             query += "out geom;";
         }
-        const content = await firstValueFrom(this.httpClient.post<string | Record<string, any>>(Urls.overpassApi, query).pipe(timeout(20000)));
+        const content = await firstValueFrom(this.httpClient.post<string | Record<string, unknown>>(Urls.overpassApi, query).pipe(timeout(20000)));
         const geojson = osmtogeojson(content, { completeFeature: true, excludeWay: false }) as GeoJSON.FeatureCollection;
         return { data: geojson };
     }
@@ -73,14 +73,14 @@ export class OverpassTurboService {
 
     private async getFeatureFromQuery(query: string, timeoutInMilliseconds = 2000): Promise<GeoJSON.Feature> {
         try {
-            const json = await firstValueFrom(this.httpClient.post<Record<string, any>>(Urls.overpassApi, `[out: json];${query}out geom;`).pipe(timeout(timeoutInMilliseconds)));
+            const json = await firstValueFrom(this.httpClient.post<Record<string, unknown>>(Urls.overpassApi, `[out: json];${query}out geom;`).pipe(timeout(timeoutInMilliseconds)));
             return this.processFeature(json);
         } catch {
             return null;
         }
     }
 
-    private processFeature(content: Record<string, any>): GeoJSON.Feature {
+    private processFeature(content: Record<string, unknown>): GeoJSON.Feature {
         const geojson = osmtogeojson(content, { completeFeature: true, excludeWay: false });
         if (geojson.features.length === 1 && geojson.features[0].geometry.type !== "MultiLineString") {
             return geojson.features[0];
@@ -141,7 +141,7 @@ export class OverpassTurboService {
         node(${latLng.lat - distanceInDegrees}, ${latLng.lng - distanceInDegrees}, ${latLng.lat + distanceInDegrees}, ${latLng.lng + distanceInDegrees})(if:count_tags() > 0);
         out geom qt;
         `;
-        const json = await firstValueFrom(this.httpClient.post<Record<string, any>>(Urls.overpassApi, query).pipe(timeout(3000)));
+        const json = await firstValueFrom(this.httpClient.post<Record<string, unknown>>(Urls.overpassApi, query).pipe(timeout(3000)));
         return osmtogeojson(json, { completeFeature: true, excludeWay: false }) as GeoJSON.FeatureCollection<GeoJSON.Point>;
     }
 }

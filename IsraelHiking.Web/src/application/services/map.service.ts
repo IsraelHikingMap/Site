@@ -62,10 +62,15 @@ export class MapService {
                 }, MapService.NOT_FOLLOWING_TIMEOUT, "panned");
             }
         });
-        const globalDispatcher = maplibregl.getGlobalDispatcher();
+        // "contour-worker" is a custom message added by maplibre-contour and is not a part of maplibre's
+        // closed message types enum, so the dispatcher needs to be seen as accepting a free form message.
+        const globalDispatcher = maplibregl.getGlobalDispatcher() as unknown as {
+            registerMessageHandler: (type: string, handler: () => Promise<void>) => void;
+            broadcast: (type: string, data: unknown) => Promise<unknown[]>;
+        };
         const promise = new Promise<void>(resolve => {
-            globalDispatcher.registerMessageHandler("contour-worker" as any, async () => {
-                await globalDispatcher.broadcast("contour-worker" as any, {
+            globalDispatcher.registerMessageHandler("contour-worker", async () => {
+                await globalDispatcher.broadcast("contour-worker", {
                     demUrlPattern: "slice://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.webp",
                     encoding: "terrarium",
                     maxzoom: 11

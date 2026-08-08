@@ -1,7 +1,7 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideStore, Store } from "@ngxs/store";
-import type { Map, ErrorEvent } from "maplibre-gl";
+import type { ErrorEvent, LayerSpecification, Map, SourceSpecification } from "maplibre-gl";
 
 import { MapService } from "./map.service";
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
@@ -34,14 +34,14 @@ describe("MapService", () => {
     });
 
     it("Should resolve promise when setting the map", inject([MapService], async (service: MapService) => {
-        service.setMap({ on: () => { } } as any as Map);
+        service.setMap({ on: () => { } } as unknown as Map);
         await service.initializationPromise;
         expect(true).toBeTruthy();
     }));
 
     it("Should unset the map and remove listeners", inject([MapService], async (service: MapService) => {
         const spy = vi.fn();
-        service.setMap({ on: () => { }, off: spy } as any as Map);
+        service.setMap({ on: () => { }, off: spy } as unknown as Map);
         await service.initializationPromise;
         service.unsetMap();
         expect(spy).toHaveBeenCalled();
@@ -58,10 +58,10 @@ describe("MapService", () => {
             const spy = vi.fn();
             const mapMock = {
                 loadImage: spy,
-                on: (event: string, callback: (e: any) => void) => {
+                on: (event: string, callback: (e: unknown) => void) => {
                     if (event == "styleimagemissing") callback({ id: "123" });
                 }
-            } as any as Map;
+            } as unknown as Map;
             service.setMap(mapMock);
             await service.initializationPromise;
             expect(spy).not.toHaveBeenCalled();
@@ -75,12 +75,12 @@ describe("MapService", () => {
             const mapMock = {
                 loadImage: spy,
                 addImage: addImageSpy,
-                on: (event: string, callback: (e: any) => void) => {
+                on: (event: string, callback: (e: unknown) => void) => {
                     if (event == "styleimagemissing") {
                         callback({ id: "http://123.png" });
                     }
                 }
-            } as any as Map;
+            } as unknown as Map;
             service.setMap(mapMock);
             await service.initializationPromise;
             expect(spy).toHaveBeenCalledTimes(1);
@@ -92,17 +92,17 @@ describe("MapService", () => {
         async (service: MapService) => {
             const spy = vi.fn().mockReturnValue(Promise.resolve({ data: "123" }));
             const addImageSpy = vi.fn();
-            let storedCallback = (_e: any) => { };
+            let storedCallback = (_e: unknown) => { };
             const mapMock = {
                 loadImage: spy,
                 addImage: addImageSpy,
-                on: (event: string, callback: (e: any) => void) => {
+                on: (event: string, callback: (e: unknown) => void) => {
                     if (event == "styleimagemissing") {
                         storedCallback = callback;
                         callback({ id: "http://123.png" });
                     }
                 }
-            } as any as Map;
+            } as unknown as Map;
             service.setMap(mapMock);
             await service.initializationPromise;
             storedCallback({ id: "http://123.png" });
@@ -116,9 +116,9 @@ describe("MapService", () => {
         service.setMap({
             on: (event: string, callback: (error: ErrorEvent) => void) => {
                 if (event == "error")
-                    callback({ error: new Error("418") } as any as ErrorEvent);
+                    callback({ error: new Error("418") } as unknown as ErrorEvent);
             }
-        } as any as Map);
+        } as unknown as Map);
         await service.initializationPromise;
         expect(loggingService.error).not.toHaveBeenCalled();
     }));
@@ -128,9 +128,9 @@ describe("MapService", () => {
         service.setMap({
             on: (event: string, callback: (error: ErrorEvent) => void) => {
                 if (event == "error")
-                    callback({ error: new Error("other") } as any as ErrorEvent);
+                    callback({ error: new Error("other") } as unknown as ErrorEvent);
             }
-        } as any as Map);
+        } as unknown as Map);
         await service.initializationPromise;
         expect(loggingService.error).toHaveBeenCalled();
     }));
@@ -146,12 +146,12 @@ describe("MapService", () => {
             }
         });
         service.setMap({
-            on: (event: string, callback: (error: ErrorEvent) => void) => {
-                if (event == "moveend") callback({} as any);
+            on: (event: string, callback: (e: unknown) => void) => {
+                if (event == "moveend") callback({});
             },
             getCenter: () => ({ lng: 1, lat: 2 }),
             getZoom: () => 1
-        } as any as Map);
+        } as unknown as Map);
         await service.initializationPromise;
         expect(spy).toHaveBeenCalled();
         expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(SetLocationAction);
@@ -168,24 +168,24 @@ describe("MapService", () => {
             }
         });
         service.setMap({
-            on: (event: string, callback: (error: ErrorEvent) => void) => {
-                if (event == "moveend") callback({} as any);
+            on: (event: string, callback: (e: unknown) => void) => {
+                if (event == "moveend") callback({});
             },
             getCenter: () => ({ lng: 1, lat: 2 }),
             getZoom: () => 1
-        } as any as Map);
+        } as unknown as Map);
         await service.initializationPromise;
         expect(spy).not.toHaveBeenCalled();
     }));
 
     it("should not throw if moveend is called after map removal", inject([MapService], async (service: MapService) => {
-        let moveendCallback: (e: any) => void;
+        let moveendCallback: (e: unknown) => void;
         service.setMap({
-            on: (event: string, callback: (error: ErrorEvent) => void) => {
+            on: (event: string, callback: (e: unknown) => void) => {
                 if (event == "moveend") moveendCallback = callback;
             },
             off: () => { }
-        } as any as Map);
+        } as unknown as Map);
         await service.initializationPromise;
         service.unsetMap();
         expect(() => moveendCallback(null)).not.toThrow();
@@ -198,7 +198,7 @@ describe("MapService", () => {
                 getNorthEast: () => ({ lat: 1, lng: 1 }),
                 getSouthWest: () => ({ lat: 2, lng: 2 })
             })
-        } as any as Map);
+        } as unknown as Map);
         const bounds = service.getMapBounds();
         expect(bounds).toEqual({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } });
     }));
@@ -207,7 +207,7 @@ describe("MapService", () => {
         service.setMap({
             on: () => { },
             project: () => ({ x: 1, y: 2 })
-        } as any as Map);
+        } as unknown as Map);
         const point = service.project({ lng: 1, lat: 2 });
         expect(point.x).toEqual(1);
         expect(point.y).toEqual(2);
@@ -223,7 +223,7 @@ describe("MapService", () => {
             on: () => { },
             queryRenderedFeatures: () => [{ id: "42" }, { id: "43" }],
             getLayer: () => true
-        } as any as Map);
+        } as unknown as Map);
         const features = service.getFeaturesFromTiles();
         expect(features.length).toEqual(2);
     }));
@@ -232,7 +232,7 @@ describe("MapService", () => {
         service.setMap({
             on: () => { },
             isMoving: () => true
-        } as any as Map);
+        } as unknown as Map);
         expect(service.isMoving()).toEqual(true);
     }));
 
@@ -243,7 +243,7 @@ describe("MapService", () => {
                 fitBounds: spy,
                 on: () => { },
                 getZoom: () => 1
-            } as any as Map);
+            } as unknown as Map);
             await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } });
             expect(vi.mocked(spy).mock.calls[0][1].padding).toBe(50);
         }
@@ -256,11 +256,11 @@ describe("MapService", () => {
                 fitBounds: spy,
                 on: () => { },
                 getZoom: () => 1
-            } as any as Map);
-            const originalInnerWidth = (window as any).innerWidth;
-            (window as any).innerWidth = 500;
+            } as unknown as Map);
+            const originalInnerWidth = (window as { innerWidth: number }).innerWidth;
+            (window as { innerWidth: number }).innerWidth = 500;
             await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } }, 0, { bottom: window.innerHeight / 2 });
-            (window as any).innerWidth = originalInnerWidth;
+            (window as { innerWidth: number }).innerWidth = originalInnerWidth;
             expect(vi.mocked(spy).mock.calls[0][1].padding.bottom).toBe(window.innerHeight / 2);
         }
     ));
@@ -272,11 +272,11 @@ describe("MapService", () => {
                 fitBounds: spy,
                 on: () => { },
                 getZoom: () => 1
-            } as any as Map);
-            const originalInnerWidth = (window as any).innerWidth;
-            (window as any).innerWidth = 1000;
+            } as unknown as Map);
+            const originalInnerWidth = (window as { innerWidth: number }).innerWidth;
+            (window as { innerWidth: number }).innerWidth = 1000;
             await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } }, 0, { bottom: 100 });
-            (window as any).innerWidth = originalInnerWidth;
+            (window as { innerWidth: number }).innerWidth = originalInnerWidth;
             expect(vi.mocked(spy).mock.calls[0][1].padding).toBe(0);
         }
     ));
@@ -291,7 +291,7 @@ describe("MapService", () => {
                 flyTo: spy,
                 on: () => { },
                 getZoom: () => 1
-            } as any as Map);
+            } as unknown as Map);
             await service.flyTo({ lng: 1, lat: 1 }, 1);
             expect(spy).not.toHaveBeenCalled();
         }
@@ -306,7 +306,7 @@ describe("MapService", () => {
                 },
                 flyTo: spy,
                 on: () => { }
-            } as any as Map);
+            } as unknown as Map);
             await service.flyTo({ lng: 2, lat: 2 }, 1);
             expect(spy).toHaveBeenCalled();
         }
@@ -322,7 +322,7 @@ describe("MapService", () => {
                 flyTo: spy,
                 on: () => { },
                 getZoom: () => 1
-            } as any as Map);
+            } as unknown as Map);
             await service.flyTo({ lng: 2, lat: 2 });
             expect(spy).toHaveBeenCalled();
             expect(vi.mocked(spy).mock.calls[0][0].zoom).toBe(1);
@@ -336,7 +336,7 @@ describe("MapService", () => {
                 easeTo: spy,
                 on: () => { },
                 getZoom: () => 1
-            } as any as Map);
+            } as unknown as Map);
             await service.moveToWithCurrentZoom({ lng: 2, lat: 2 }, 1);
             expect(spy).toHaveBeenCalled();
             expect(vi.mocked(spy).mock.calls[0][0].zoom).toBe(1);
@@ -351,7 +351,7 @@ describe("MapService", () => {
                 on: () => { },
                 getZoom: () => 1,
                 off: () => { }
-            } as any as Map);
+            } as unknown as Map);
             service.unsetMap();
             await service.moveToWithCurrentZoom({ lng: 2, lat: 2 }, 1);
             expect(spy).not.toHaveBeenCalled();
@@ -364,8 +364,8 @@ describe("MapService", () => {
             service.setMap({
                 on: () => { },
                 addLayer: spy
-            } as any as Map);
-            service.addLayer({ id: "layer1" } as any);
+            } as unknown as Map);
+            service.addLayer({ id: "layer1" } as unknown as LayerSpecification);
             expect(spy).toHaveBeenCalled();
         }
     ));
@@ -376,8 +376,8 @@ describe("MapService", () => {
             service.setMap({
                 on: () => { },
                 addSource: spy
-            } as any as Map);
-            service.addSource("source1", {} as any);
+            } as unknown as Map);
+            service.addSource("source1", {} as unknown as SourceSpecification);
             expect(spy).toHaveBeenCalled();
         }
     ));

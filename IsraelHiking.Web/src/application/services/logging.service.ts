@@ -131,7 +131,7 @@ export class LoggingService {
         return dateString + " | " + logLine.level.padStart(5).toUpperCase() + " | " + logLine.message;
     }
 
-    public getErrorTypeAndMessage(ex: any): ErrorTypeAndMessage {
+    public getErrorTypeAndMessage(ex: unknown): ErrorTypeAndMessage {
         const typeAndMessage: ErrorTypeAndMessage = {
             type: "server",
             message: (ex as Error).message

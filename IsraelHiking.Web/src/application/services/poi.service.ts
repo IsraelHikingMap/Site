@@ -558,7 +558,7 @@ export class PoiService {
         return null;
     }
 
-    public addSimplePoint(latlng: LatLngAltTime, pointType: SimplePointType, id: string): Promise<any> {
+    public addSimplePoint(latlng: LatLngAltTime, pointType: SimplePointType, id: string): Promise<void> {
         const feature = {
             id,
             type: "Feature",
@@ -604,7 +604,7 @@ export class PoiService {
                 poiId: originalId,
                 identifier: originalFeature.properties.identifier,
                 poiSource: originalFeature.properties.poiSource
-            } as any
+            }
         } as GeoJSON.Feature;
 
         if (this.store.selectSnapshot((state: ApplicationState) => state.offlineState.uploadPoiQueue).indexOf(originalId) !== -1) {
@@ -719,16 +719,17 @@ export class PoiService {
     }
 
     public getFeatureFromEditableData(info: EditablePublicPointData): GeoJSON.Feature {
-        const feature = {
+        const feature: GeoJSON.Feature = {
             id: info.id,
             type: "Feature",
+            geometry: undefined, // the geometry is calculated by the server from the location in the properties
             properties: {
                 poiId: info.id,
                 poiCategory: info.category,
                 poiIcon: info.icon,
                 poiIconColor: info.iconColor
-            } as any
-        } as GeoJSON.Feature;
+            }
+        };
         for (const imageUrl of info.imagesUrls) {
             GeoJSONUtils.setProperty(feature, "image", imageUrl);
         }

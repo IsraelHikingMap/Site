@@ -88,7 +88,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             this.jsonSourcesIds.push(sourceKey);
         }
         for (const layer of layers) {
-            if (!this.isBaselayer() && layer.metadata && !(layer.metadata as any)["IHM:overlay"]) {
+            if (!this.isBaselayer() && layer.metadata && !(layer.metadata as Record<string, unknown>)["IHM:overlay"]) {
                 continue;
             }
             if (!this.isBaselayer() && layer.type === "background") {

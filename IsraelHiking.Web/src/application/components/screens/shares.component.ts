@@ -122,30 +122,30 @@ export class SharesComponent implements OnInit {
         const searchTerm = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.searchTerm);
         const filteredShareUrls = shareUrls.filter((share: Immutable<ShareUrl>) => {
             for (const key in this.filter) {
-                const propValue = share[key as any as keyof ShareUrl];
-                if (this.filter[key] && !this.filter[key].includes(propValue as any)) {
+                const propValue = share[key as keyof ShareUrl] as string;
+                if (this.filter[key] && !this.filter[key].includes(propValue)) {
                     return false;
                 }
             }
             return true;
         }).filter((share) => this.findInShareUrl(share, searchTerm));
 
-        let sortBy = this.sortBy();
+        let sortBy: keyof ShareUrl | ((share: Immutable<ShareUrl>) => number) = this.sortBy();
         switch (sortBy) {
             case "length":
-                sortBy = [((share: ShareUrl) => share.length ?? 0)] as any;
+                sortBy = (share: Immutable<ShareUrl>) => share.length ?? 0;
                 break;
             case "difficulty":
-                sortBy = [((share: ShareUrl) => {
+                sortBy = (share: Immutable<ShareUrl>) => {
                     if (share.difficulty === "Easy") return 1;
                     if (share.difficulty === "Moderate") return 2;
                     if (share.difficulty === "Hard") return 3;
                     if (share.difficulty === "Very Hard") return 4;
                     return 0;
-                })] as any;
+                };
                 break;
         }
-        this.filteredShareUrls.set(orderBy(filteredShareUrls, sortBy, this.sortDirection()));
+        this.filteredShareUrls.set(orderBy(filteredShareUrls, [sortBy], this.sortDirection()));
     }
 
 

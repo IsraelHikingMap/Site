@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { combineLatest, throttleTime } from "rxjs";
 import { Store } from "@ngxs/store";
 import { SourceDirective, GeoJSONSourceComponent, LayerComponent, MarkerComponent } from "@maplibre/ngx-maplibre-gl";
+import type { Marker } from "maplibre-gl";
 
 import { PrivatePoiOverlayComponent } from "../overlays/private-poi-overlay.component";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
@@ -49,8 +50,8 @@ export class RecordedRouteComponent {
             .subscribe(() => this.handleRecordingChanges());
     }
 
-    public markerDragEnd(index: number, event: any) {
-        this.routeEditPoiInteraction.handleDragEnd(event.getLngLat(), index);
+    public markerDragEnd(index: number, marker: Marker) {
+        this.routeEditPoiInteraction.handleDragEnd(marker.getLngLat(), index);
     }
 
     private handleRecordingChanges() {

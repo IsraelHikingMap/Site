@@ -43,17 +43,17 @@ interface IChartSubRouteRange {
 }
 
 interface IChartElements {
-    svg?: Selection<SVGSVGElement, any, null, undefined>;
-    chartArea?: Selection<SVGGElement, any, null, undefined>;
-    chartClipArea?: Selection<SVGSVGElement, any, null, undefined>;
-    path?: Selection<SVGPathElement, any, null, undefined>;
-    hoverGroup?: Selection<SVGGElement, any, null, undefined>;
-    dragSelectionRect?: Selection<SVGRectElement, any, null, undefined>;
-    locationGroup?: Selection<SVGGElement, any, null, undefined>;
+    svg?: Selection<SVGSVGElement, unknown, null, undefined>;
+    chartArea?: Selection<SVGGElement, unknown, null, undefined>;
+    chartClipArea?: Selection<SVGSVGElement, unknown, null, undefined>;
+    path?: Selection<SVGPathElement, unknown, null, undefined>;
+    hoverGroup?: Selection<SVGGElement, unknown, null, undefined>;
+    dragSelectionRect?: Selection<SVGRectElement, unknown, null, undefined>;
+    locationGroup?: Selection<SVGGElement, unknown, null, undefined>;
     xScale?: ScaleContinuousNumeric<number, number>;
     xScaleOriginal?: ScaleContinuousNumeric<number, number>;
     yScale?: ScaleContinuousNumeric<number, number>;
-    slopeLinearGradient?: Selection<SVGLinearGradientElement, any, null, undefined>;
+    slopeLinearGradient?: Selection<SVGLinearGradientElement, unknown, null, undefined>;
     zoomTransform?: ZoomTransform;
     margin: IMargin;
     width?: number;
@@ -707,11 +707,11 @@ export class RouteStatisticsComponent implements OnInit {
             .domain(this.chartElements.xScale.domain().map(d => d / kmToDistance));
         const distanceTicks = distanceScale.ticks(5);
 
-        chartTransition.select(".x-axis")
+        chartTransition.select<SVGGElement>(".x-axis")
             .duration(duration)
-            .call((d3.axisBottom(this.chartElements.xScale)
-                .tickValues(distanceTicks.map(d => d * kmToDistance)) as any)
-                .tickFormat((_d: any, i: number) => distanceTicks[i])
+            .call(d3.axisBottom(this.chartElements.xScale)
+                .tickValues(distanceTicks.map(d => d * kmToDistance))
+                .tickFormat((_d, i) => distanceTicks[i].toString())
             );
 
         const mToHeight = units === "imperial" ? 3.28084 : 1;
@@ -719,11 +719,11 @@ export class RouteStatisticsComponent implements OnInit {
             .domain(this.chartElements.yScale.domain().map(d => d * mToHeight));
         const heightTicks = heightScale.ticks(5);
 
-        chartTransition.select(".y-axis")
+        chartTransition.select<SVGGElement>(".y-axis")
             .duration(duration)
-            .call((d3.axisLeft(this.chartElements.yScale)
-                .tickValues(heightTicks.map(d => d / mToHeight)) as any)
-                .tickFormat((_d: any, i: number) => heightTicks[i])
+            .call(d3.axisLeft(this.chartElements.yScale)
+                .tickValues(heightTicks.map(d => d / mToHeight))
+                .tickFormat((_d, i) => heightTicks[i].toString())
             );
         let slopeData = [] as [number, number][];
         if (data.length > 0) {

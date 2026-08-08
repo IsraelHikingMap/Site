@@ -23,7 +23,7 @@ describe("RouteStatisticsService", () => {
             { lat: 20, lng: 20, alt: 20 }, { lat: 30, lng: 30, alt: 30 },
             { lat: 20, lng: 20, alt: 20 }, { lat: 10, lng: 10, alt: 10 }];
 
-        const statistics = service.getStatisticsForStandAloneRoute(latlngs as any);
+        const statistics = service.getStatisticsForStandAloneRoute(latlngs);
 
         expect(statistics.gain).toBeCloseTo(20);
         expect(statistics.loss).toBeCloseTo(-20);
@@ -36,7 +36,7 @@ describe("RouteStatisticsService", () => {
             { lat: 20, lng: 20, alt: 20 }, { lat: 30, lng: 30, alt: 30 },
             { lat: 30, lng: 30, alt: 30 }, { lat: 10, lng: 10, alt: 10 }];
 
-        const statistics = service.getStatisticsForStandAloneRoute(latlngs as any);
+        const statistics = service.getStatisticsForStandAloneRoute(latlngs);
 
         expect(statistics.gain).toBeCloseTo(10);
         expect(statistics.loss).toBeCloseTo(-20);
@@ -50,7 +50,7 @@ describe("RouteStatisticsService", () => {
             { lat: 30, lng: 30, alt: null }, { lat: 40, lng: 40, alt: 40 },
             { lat: 40, lng: 40, alt: 40 }, { lat: 10, lng: 10, alt: 10 }];
 
-        const statistics = service.getStatisticsForStandAloneRoute(latlngs as any);
+        const statistics = service.getStatisticsForStandAloneRoute(latlngs);
 
         expect(statistics.gain).toBeCloseTo(30);
         expect(statistics.loss).toBeCloseTo(-30);

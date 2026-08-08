@@ -1,7 +1,7 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
 import { signal } from "@angular/core";
 import { inject, TestBed } from "@angular/core/testing";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { MatSnackBar, MatSnackBarRef, TextOnlySnackBar } from "@angular/material/snack-bar";
 import { MatDialog } from "@angular/material/dialog";
 
 import { IConfirmOptions, ToastService } from "./toast.service";
@@ -19,14 +19,14 @@ describe("ToastService", () => {
             confirmButtonText: signal<string>(null),
             declineIcon: signal<string>(null),
             declineButtonText: signal<string>(null)
-        } as any;
+        } as unknown as ConfirmDialogComponent;
         const snackBar = {
-            open: () => null as any,
+            open: () => null as unknown as MatSnackBarRef<TextOnlySnackBar>,
             dismiss: vi.fn(),
             openFromComponent: () => {
                 return { instance: confirmDialog };
             }
-        } as any;
+        } as unknown as MatSnackBar;
         const resourceServiceMock = {
             yes: "yes",
             no: "no",
@@ -142,7 +142,7 @@ describe("ToastService", () => {
                 const undoAction = vi.fn();
                 const snackbarRef = {
                     onAction: () => ({ subscribe: (callback: () => void) => callback() })
-                } as any;
+                } as unknown as MatSnackBarRef<TextOnlySnackBar>;
                 vi.spyOn(snackBar, "open").mockReturnValue(snackbarRef);
                 service.undo("message", undoAction);
                 expect(undoAction).toHaveBeenCalled();

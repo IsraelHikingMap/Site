@@ -5,8 +5,8 @@ import { Dir } from "@angular/cdk/bidi";
 import { MatAnchor, MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MapComponent, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, MarkerComponent } from "@maplibre/ngx-maplibre-gl";
-import { MapLayerMouseEvent } from "maplibre-gl";
 import { Store } from "@ngxs/store";
+import type { MapLayerMouseEvent, Marker } from "maplibre-gl";
 import type { Immutable } from "immer";
 
 import { RoutePointOverlayComponent } from "../overlays/route-point-overlay.component";
@@ -130,8 +130,8 @@ export class RoutesComponent implements AfterViewInit {
         }
     }
 
-    public markerDragEnd(index: number, event: any) {
-        this.routeEditPoiInteraction.handleDragEnd(event.getLngLat(), index);
+    public markerDragEnd(index: number, marker: Marker) {
+        this.routeEditPoiInteraction.handleDragEnd(marker.getLngLat(), index);
     }
 
     public ngAfterViewInit(): void {
@@ -150,12 +150,12 @@ export class RoutesComponent implements AfterViewInit {
         return selectedRoute != null && selectedRoute.id === route.id && selectedRoute.state === "Poi";
     }
 
-    public routeLineMouseEnter(event: any) {
+    public routeLineMouseEnter(event: MapLayerMouseEvent) {
         this.mapComponent.mapInstance.getCanvas().style.cursor = "pointer";
         this.routeLineMouseOver(event);
     }
 
-    public routeLineMouseOver(event: any) {
+    public routeLineMouseOver(event: MapLayerMouseEvent) {
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null) {
             return;

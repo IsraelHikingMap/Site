@@ -11,7 +11,7 @@ describe("SidebarService", () => {
         const hashServiceMock = {
             setApplicationState: () => { },
             resetAddressbar: () => { }
-        } as any as HashService;
+        } as unknown as HashService;
         TestBed.configureTestingModule({
             providers: [
                 provideStore([]),

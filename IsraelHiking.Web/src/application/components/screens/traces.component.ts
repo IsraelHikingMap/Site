@@ -183,7 +183,7 @@ export class TracesComponent implements OnInit {
         }
     }
 
-    public async uploadToOsm(e: any) {
+    public async uploadToOsm(e: Event) {
         const files = this.fileService.getFilesFromEvent(e);
         if (files.length !== 1) {
             return;
