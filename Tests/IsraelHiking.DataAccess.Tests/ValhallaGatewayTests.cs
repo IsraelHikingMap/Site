@@ -38,7 +38,8 @@ public class ValhallaGatewayTests
         {
             ValhallaServerAddress = "https://mapeak.com/valhalla/"
         });
-        gateway = new ValhallaGateway(factory, options, Substitute.For<ILogger>());
+        var logger = Substitute.For<ILogger>();
+        gateway = new ValhallaGateway(factory, options, new ValhallaProfilesProvider(options, logger), logger);
     }
 
     [TestMethod]
