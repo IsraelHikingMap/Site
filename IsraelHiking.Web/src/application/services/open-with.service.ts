@@ -70,7 +70,15 @@ export class OpenWithService {
             }
 
             if (data.url.startsWith("mapeak://")) {
-                // no need to do anything as this is part of the login flow
+                // The iOS share extension hands the shared text over in the url itself, since a value
+                // written to the app group is flushed lazily and the app can look before it lands.
+                // The scheme is shared with the login callback, hence matching on the host too.
+                const url = new URL(data.url);
+                const sharedText = url.host === "share" ? url.searchParams.get("sharedText") : null;
+                if (sharedText) {
+                    this.handleSharedText(sharedText);
+                }
+                // anything else on this scheme is part of the login flow, which needs nothing done here
                 return;
             }
 
