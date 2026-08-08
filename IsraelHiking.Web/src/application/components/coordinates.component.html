@@ -6,7 +6,7 @@
     <span dir="ltr">{{itmCoordinates().east.toFixed(0) }} / {{itmCoordinates().north.toFixed(0) }}</span><br />
     }
     @if (alt()) {
-    <span>{{resources.elevation}}: <span dir="ltr">{{alt() | distance }}</span></span>
+    <span>{{resources.elevation}}: <span dir="ltr">{{alt() | distance:'elevation' }}</span></span>
     }
   </p>
 </div>

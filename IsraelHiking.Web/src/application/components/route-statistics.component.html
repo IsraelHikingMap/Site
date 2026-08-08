@@ -10,13 +10,13 @@
         <mat-grid-tile matTooltip="{{resources.gain}}" matTooltipPosition="below">
           <div class="flex flex-col items-center">
             <i class="fa icon-arrow-up"></i>
-            <span class="mx-1">{{gain() | distance}}</span>
+            <span class="mx-1">{{gain() | distance:'elevation'}}</span>
           </div>
         </mat-grid-tile>
         <mat-grid-tile matTooltip="{{resources.loss}}" matTooltipPosition="below">
           <div class="flex flex-col items-center">
             <i class="fa icon-arrow-down"></i>
-            <span class="mx-1">{{loss() | distance}}</span>
+            <span class="mx-1">{{loss() | distance:'elevation'}}</span>
           </div>
         </mat-grid-tile>
         <mat-grid-tile matTooltip="{{resources.length}}" matTooltipPosition="below">
@@ -84,11 +84,11 @@
             analyticsLabel="Clear sub route selection"><i class="fa icon-close fa-lg"></i></button>
           <span class="label-margin">
             <i class="fa icon-arrow-up"></i>
-            <span class="mx-1">{{gain() | distance}}</span>
+            <span class="mx-1">{{gain() | distance:'elevation'}}</span>
           </span>
           <span class="label-margin">
             <i class="fa icon-arrow-down"></i>
-            <span class="mx-1">{{loss() | distance}}</span>
+            <span class="mx-1">{{loss() | distance:'elevation'}}</span>
           </span>
           <span class="label-margin">
             <i class="fa icon-arrow-right"></i>
@@ -143,13 +143,13 @@
     <div matTooltip="{{resources.gain}}" matTooltipPosition="above">
       <span class="control-container-item">
         <i class="fa icon-arrow-up"></i>
-        <span class="mx-1">{{gain() | distance}}</span>
+        <span class="mx-1">{{gain() | distance:'elevation'}}</span>
       </span>
     </div>
     <div matTooltip="{{resources.loss}}" matTooltipPosition="above">
       <span class="control-container-item">
         <i class="fa icon-arrow-down"></i>
-        <span class="mx-1">{{loss() | distance}}</span>
+        <span class="mx-1">{{loss() | distance:'elevation'}}</span>
       </span>
     </div>
     <div matTooltip="{{resources.length}}" matTooltipPosition="above">

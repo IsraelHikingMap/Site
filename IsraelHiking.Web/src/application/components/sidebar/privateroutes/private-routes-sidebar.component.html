@@ -65,11 +65,11 @@
                     <div class="flex flex-row w-full mb-1">
                         <div matTooltip="{{resources.gain}}" matTooltipPosition="above" class="mx-2">
                             <i class="fa icon-arrow-up"></i>
-                            <span class="mx-1">{{getStatistics(route).gain | distance}}</span>
+                            <span class="mx-1">{{getStatistics(route).gain | distance:'elevation'}}</span>
                         </div>
                         <div matTooltip="{{resources.loss}}" matTooltipPosition="above" class="mx-2">
                             <i class="fa icon-arrow-down"></i>
-                            <span class="mx-1">{{getStatistics(route).loss | distance}}</span>
+                            <span class="mx-1">{{getStatistics(route).loss | distance:'elevation'}}</span>
                         </div>
                         <div matTooltip="{{resources.length}}" matTooltipPosition="above" class="mx-2">
                             <i class="fa icon-arrow-right"></i>
