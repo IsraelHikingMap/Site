@@ -335,12 +335,12 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
                 AllowTrailingCommas = true
             })
                 ?? throw new InvalidOperationException("The file is empty");
-            _logger.LogInformation($"Loaded {profiles.Count} Valhalla profiles from {filePath}");
+            _logger.LogInformation($"Loaded {profiles.Count} Valhalla profiles from {_options.ValhallaProfilesFilePath}");
             return new Dictionary<string, ValhallaProfile>(profiles, StringComparer.OrdinalIgnoreCase);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Failed to read the Valhalla profiles from {filePath}, falling back to Valhalla's default costing options");
+            _logger.LogError(ex, $"Failed to read the Valhalla profiles from {_options.ValhallaProfilesFilePath}, falling back to Valhalla's default costing options");
             return [];
         }
     }
