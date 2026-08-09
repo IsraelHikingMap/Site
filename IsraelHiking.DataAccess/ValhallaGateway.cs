@@ -316,13 +316,6 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
         throw new Exception("Unable to map match the given points using Valhalla after 3 retries.");
     }
 
-    private static ValhallaProfile GetProfileByKey(Dictionary<string, ValhallaProfile> profiles, string key)
-    {
-        return profiles.TryGetValue(key, out var profile) && !string.IsNullOrWhiteSpace(profile?.Costing)
-            ? profile
-            : null;
-    }
-
     private Dictionary<string, ValhallaProfile> ReadProfiles()
     {
         try
