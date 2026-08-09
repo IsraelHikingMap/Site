@@ -1,3 +1,4 @@
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using IsraelHiking.Common.Api;
@@ -33,6 +34,26 @@ class ValhallaRequest
     [JsonPropertyName("costing_options")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Dictionary<string, JsonElement> CostingOptions { get; set; }
+}
+
+/// <summary>
+/// A single Valhalla routing profile, as defined in the profiles file
+/// </summary>
+public class ValhallaProfile
+{
+    /// <summary>
+    /// The Valhalla costing model, i.e. "pedestrian", "bicycle", "auto"
+    /// </summary>
+    [JsonPropertyName("costing")]
+    public string Costing { get; set; }
+
+    /// <summary>
+    /// Free-form Valhalla costing options, they are sent to Valhalla as-is under the costing name, so any
+    /// option Valhalla supports can be set without changing the code, see
+    /// https://valhalla.github.io/valhalla/api/turn-by-turn/api-reference/#costing-options
+    /// </summary>
+    [JsonPropertyName("costingOptions")]
+    public JsonElement? CostingOptions { get; set; }
 }
 
 public class ValhallaResponse
@@ -186,18 +207,39 @@ class GraphHopperCompatibleInstruction
 
 public class ValhallaGateway(IHttpClientFactory httpClientFactory,
     IOptions<ConfigurationData> options,
-    ValhallaProfilesProvider profilesProvider,
     ILogger logger) : IRoutingGateway
 {
+    /// <summary>
+    /// The profile used when the requested profile is not defined in the profiles file
+    /// </summary>
+    private const string DefaultProfileKey = "default";
+
+    private static readonly JsonSerializerOptions ProfilesJsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        AllowTrailingCommas = true
+    };
+
+    /// <summary>
+    /// Used when the profiles file is missing or invalid, so that routing keeps working using Valhalla's own defaults
+    /// </summary>
+    private static readonly ValhallaProfile FallbackProfile = new() { Costing = "pedestrian" };
+
+    // This gateway is transient while the profiles file is shared, so the profiles are cached statically
+    private static readonly object ProfilesSyncRoot = new();
+    private static Dictionary<string, ValhallaProfile> _profiles;
+    private static string _profilesFilePath;
+    private static DateTime _profilesLastWriteTimeUtc;
+
     private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
     private readonly ConfigurationData _options = options.Value;
-    private readonly ValhallaProfilesProvider _profilesProvider = profilesProvider;
     private readonly ILogger _logger = logger;
 
     public async Task<Feature> GetRouting(RoutingGatewayRequest request)
     {
         var httpClient = _httpClientFactory.CreateClient();
-        var profile = _profilesProvider.GetProfile(request.Profile);
+        var profile = GetProfile(request.Profile);
         var requestJson = new ValhallaRequest
         {
             Locations = new List<ValhallaLocation>
@@ -244,7 +286,7 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
     public async Task<Feature> GetMapMatch(MapMatchGatewayRequest request)
     {
         var httpClient = _httpClientFactory.CreateClient();
-        var profile = _profilesProvider.GetProfile(request.Profile);
+        var profile = GetProfile(request.Profile);
         var traceRequest = new ValhallaTraceRouteRequest
         {
             // Only the endpoints are "break" points (so there is a single leg with a clean
@@ -287,6 +329,62 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
             return new Feature(new LineString(coordinates), table);
         }
         throw new Exception("Unable to map match the given points using Valhalla after 3 retries.");
+    }
+
+    /// <summary>
+    /// Gets the profile definition from the profiles file, which can be mounted into the container in order
+    /// to tune the routing behavior without rebuilding the site.
+    /// The file is read again whenever it changes on disk, so a restart is not needed.
+    /// </summary>
+    /// <param name="profileType">The requested profile</param>
+    /// <returns>The profile definition, never null</returns>
+    public ValhallaProfile GetProfile(ProfileType profileType)
+    {
+        var profiles = GetProfiles();
+        return GetProfileByKey(profiles, profileType.ToString()) ??
+               GetProfileByKey(profiles, DefaultProfileKey) ??
+               FallbackProfile;
+    }
+
+    private static ValhallaProfile GetProfileByKey(Dictionary<string, ValhallaProfile> profiles, string key)
+    {
+        return profiles.TryGetValue(key, out var profile) && !string.IsNullOrWhiteSpace(profile?.Costing)
+            ? profile
+            : null;
+    }
+
+    private Dictionary<string, ValhallaProfile> GetProfiles()
+    {
+        var filePath = _options.ValhallaProfilesFilePath;
+        var lastWriteTimeUtc = File.Exists(filePath) ? File.GetLastWriteTimeUtc(filePath) : DateTime.MinValue;
+        lock (ProfilesSyncRoot)
+        {
+            if (_profiles != null && _profilesFilePath == filePath && _profilesLastWriteTimeUtc == lastWriteTimeUtc)
+            {
+                return _profiles;
+            }
+            _profiles = ReadProfiles(filePath);
+            _profilesFilePath = filePath;
+            _profilesLastWriteTimeUtc = lastWriteTimeUtc;
+            return _profiles;
+        }
+    }
+
+    private Dictionary<string, ValhallaProfile> ReadProfiles(string filePath)
+    {
+        try
+        {
+            var content = File.ReadAllText(filePath);
+            var profiles = JsonSerializer.Deserialize<Dictionary<string, ValhallaProfile>>(content, ProfilesJsonOptions)
+                ?? throw new InvalidOperationException("The file is empty");
+            _logger.LogInformation($"Loaded {profiles.Count} Valhalla profiles from {filePath}");
+            return new Dictionary<string, ValhallaProfile>(profiles, StringComparer.OrdinalIgnoreCase);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Failed to read the Valhalla profiles from {filePath}, falling back to Valhalla's default costing options");
+            return [];
+        }
     }
 
     /// <summary>

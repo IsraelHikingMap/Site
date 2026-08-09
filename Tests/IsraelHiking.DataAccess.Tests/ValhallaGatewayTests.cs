@@ -36,10 +36,10 @@ public class ValhallaGatewayTests
         var options = Substitute.For<IOptions<ConfigurationData>>();
         options.Value.Returns(new ConfigurationData
         {
-            ValhallaServerAddress = "https://mapeak.com/valhalla/"
+            ValhallaServerAddress = "https://mapeak.com/valhalla/",
+            ValhallaProfilesFilePath = "./valhalla-profiles.json"
         });
-        var logger = Substitute.For<ILogger>();
-        gateway = new ValhallaGateway(factory, options, new ValhallaProfilesProvider(options, logger), logger);
+        gateway = new ValhallaGateway(factory, options, Substitute.For<ILogger>());
     }
 
     [TestMethod]
