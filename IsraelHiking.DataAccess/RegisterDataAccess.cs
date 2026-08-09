@@ -12,7 +12,8 @@ public static class RegisterDataAccess
         services.AddTransient<IFileSystemHelper, FileSystemHelper>();
         services.AddTransient<IRemoteFileFetcherGateway, RemoteFileFetcherGateway>();
         services.AddTransient<IGpsBabelGateway, GpsBabelGateway>();
-        services.AddSingleton<IRoutingGateway, ValhallaGateway>();
+        services.AddSingleton<ValhallaGateway, ValhallaGateway>();
+        services.AddSingleton<IRoutingGateway>(x => x.GetService<ValhallaGateway>());
         services.AddTransient<IImageCreationGateway, ImageCreationGateway>();
         services.AddSingleton<ElasticSearchGateway, ElasticSearchGateway>();
         services.AddSingleton<ISearchRepository>(x => x.GetService<ElasticSearchGateway>());
@@ -24,6 +25,7 @@ public static class RegisterDataAccess
         services.AddTransient<IShareUrlGateway, ShareUrlGateway>();
         // Initializables
         services.AddSingleton<IInitializable>(x => x.GetService<ElasticSearchGateway>());
+        services.AddSingleton<IInitializable>(x => x.GetService<ValhallaGateway>());
 
         return services;
     }

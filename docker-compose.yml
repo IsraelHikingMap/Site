@@ -11,7 +11,7 @@ services:
 #      # The Valhalla routing profiles - the keys are the profile names, "default" is used for any profile
 #      # that is not listed, and "costingOptions" is sent to Valhalla as-is, see
 #      # https://valhalla.github.io/valhalla/api/turn-by-turn/api-reference/#costing-options
-#      # Changes to this file are picked up without restarting the container.
+#      # The file is read on startup, so restart the container after changing it.
 #      - ./IsraelHiking.Web/valhalla-profiles.json:/israelhiking/valhalla-profiles.json
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.8
