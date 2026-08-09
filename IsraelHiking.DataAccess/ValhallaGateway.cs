@@ -207,39 +207,24 @@ class GraphHopperCompatibleInstruction
 
 public class ValhallaGateway(IHttpClientFactory httpClientFactory,
     IOptions<ConfigurationData> options,
-    ILogger logger) : IRoutingGateway
+    ILogger logger) : IRoutingGateway, IInitializable
 {
-    /// <summary>
-    /// The profile used when the requested profile is not defined in the profiles file
-    /// </summary>
-    private const string DefaultProfileKey = "default";
-
-    private static readonly JsonSerializerOptions ProfilesJsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        ReadCommentHandling = JsonCommentHandling.Skip,
-        AllowTrailingCommas = true
-    };
-
-    /// <summary>
-    /// Used when the profiles file is missing or invalid, so that routing keeps working using Valhalla's own defaults
-    /// </summary>
-    private static readonly ValhallaProfile FallbackProfile = new() { Costing = "pedestrian" };
-
-    // This gateway is transient while the profiles file is shared, so the profiles are cached statically
-    private static readonly object ProfilesSyncRoot = new();
-    private static Dictionary<string, ValhallaProfile> _profiles;
-    private static string _profilesFilePath;
-    private static DateTime _profilesLastWriteTimeUtc;
+    private Dictionary<string, ValhallaProfile> _profiles;
 
     private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
     private readonly ConfigurationData _options = options.Value;
     private readonly ILogger _logger = logger;
 
+    public Task Initialize()
+    {
+        _profiles = ReadProfiles();
+        return Task.CompletedTask;
+    }
+
     public async Task<Feature> GetRouting(RoutingGatewayRequest request)
     {
         var httpClient = _httpClientFactory.CreateClient();
-        var profile = GetProfile(request.Profile);
+        var profile = _profiles[request.Profile.ToString()];
         var requestJson = new ValhallaRequest
         {
             Locations = new List<ValhallaLocation>
@@ -286,7 +271,7 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
     public async Task<Feature> GetMapMatch(MapMatchGatewayRequest request)
     {
         var httpClient = _httpClientFactory.CreateClient();
-        var profile = GetProfile(request.Profile);
+        var profile = _profiles[request.Profile.ToString()];
         var traceRequest = new ValhallaTraceRouteRequest
         {
             // Only the endpoints are "break" points (so there is a single leg with a clean
@@ -331,21 +316,6 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
         throw new Exception("Unable to map match the given points using Valhalla after 3 retries.");
     }
 
-    /// <summary>
-    /// Gets the profile definition from the profiles file, which can be mounted into the container in order
-    /// to tune the routing behavior without rebuilding the site.
-    /// The file is read again whenever it changes on disk, so a restart is not needed.
-    /// </summary>
-    /// <param name="profileType">The requested profile</param>
-    /// <returns>The profile definition, never null</returns>
-    public ValhallaProfile GetProfile(ProfileType profileType)
-    {
-        var profiles = GetProfiles();
-        return GetProfileByKey(profiles, profileType.ToString()) ??
-               GetProfileByKey(profiles, DefaultProfileKey) ??
-               FallbackProfile;
-    }
-
     private static ValhallaProfile GetProfileByKey(Dictionary<string, ValhallaProfile> profiles, string key)
     {
         return profiles.TryGetValue(key, out var profile) && !string.IsNullOrWhiteSpace(profile?.Costing)
@@ -353,29 +323,17 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
             : null;
     }
 
-    private Dictionary<string, ValhallaProfile> GetProfiles()
-    {
-        var filePath = _options.ValhallaProfilesFilePath;
-        var lastWriteTimeUtc = File.Exists(filePath) ? File.GetLastWriteTimeUtc(filePath) : DateTime.MinValue;
-        lock (ProfilesSyncRoot)
-        {
-            if (_profiles != null && _profilesFilePath == filePath && _profilesLastWriteTimeUtc == lastWriteTimeUtc)
-            {
-                return _profiles;
-            }
-            _profiles = ReadProfiles(filePath);
-            _profilesFilePath = filePath;
-            _profilesLastWriteTimeUtc = lastWriteTimeUtc;
-            return _profiles;
-        }
-    }
-
-    private Dictionary<string, ValhallaProfile> ReadProfiles(string filePath)
+    private Dictionary<string, ValhallaProfile> ReadProfiles()
     {
         try
         {
-            var content = File.ReadAllText(filePath);
-            var profiles = JsonSerializer.Deserialize<Dictionary<string, ValhallaProfile>>(content, ProfilesJsonOptions)
+            var content = File.ReadAllText(_options.ValhallaProfilesFilePath);
+            var profiles = JsonSerializer.Deserialize<Dictionary<string, ValhallaProfile>>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                ReadCommentHandling = JsonCommentHandling.Skip,
+                AllowTrailingCommas = true
+            })
                 ?? throw new InvalidOperationException("The file is empty");
             _logger.LogInformation($"Loaded {profiles.Count} Valhalla profiles from {filePath}");
             return new Dictionary<string, ValhallaProfile>(profiles, StringComparer.OrdinalIgnoreCase);
