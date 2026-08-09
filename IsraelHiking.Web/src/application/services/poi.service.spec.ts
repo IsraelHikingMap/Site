@@ -568,6 +568,68 @@ describe("Poi Service", () => {
         expect(data.originalFeature).toEqual(feature);
     }));
 
+    it("Should keep the description of an existing point when merging a private marker with no description",
+        inject([PoiService, Store], async (poiService: PoiService, store: Store) => {
+            store.reset({
+                poiState: {
+                    uploadMarkerData: {
+                        description: "",
+                        title: "title",
+                        type: "some-type",
+                        urls: [],
+                        latlng: { lng: 1, lat: 2 }
+                    }
+                }
+            });
+
+            const feature: GeoJSON.Feature = {
+                type: "Feature",
+                geometry: {
+                    type: "Point",
+                    coordinates: [3, 4]
+                },
+                properties: {
+                    poiId: "poi-42",
+                    poiSource: "OSM",
+                    "description:he": "the description of the point"
+                }
+            };
+
+            const data = await poiService.createEditableDataAndMerge(feature);
+            expect(data.description).toBe("the description of the point");
+        }));
+
+    it("Should keep the language-less description of an existing point when merging a private marker with no description",
+        inject([PoiService, Store], async (poiService: PoiService, store: Store) => {
+            store.reset({
+                poiState: {
+                    uploadMarkerData: {
+                        description: "",
+                        title: "title",
+                        type: "some-type",
+                        urls: [],
+                        latlng: { lng: 1, lat: 2 }
+                    }
+                }
+            });
+
+            const feature: GeoJSON.Feature = {
+                type: "Feature",
+                geometry: {
+                    type: "Point",
+                    coordinates: [3, 4]
+                },
+                properties: {
+                    poiId: "poi-42",
+                    poiSource: "OSM",
+                    description: "the description of the point"
+                }
+            };
+
+            const data = await poiService.createEditableDataAndMerge(feature);
+            expect(data.description).toBe("the description of the point");
+        }));
+
     it("Should throw for invalid source", inject([PoiService], async (poiService: PoiService) => {
         const id = "42";
         const source = "source";
