@@ -256,7 +256,7 @@
     "No routes found, zoom in the map or change the filters...": "No se encontraron rutas, acerca el mapa o cambia los filtros...",
     "No shares, now is the time to start sharing your work!": "No se encontraron guardados en la nube...",
     "No Tags": "Sin etiquetas",
-    "No traces, you should really upload some to OSM.": "Sin trazas, deberías subir algunas a OSM.",
+    "No traces, you should really upload some to OSM.": "Aún no tienes trazas. Subir algunas a OSM ayuda a mejorar el mapa para todos.",
     "No unmapped routes! :-)": "¡No hay rutas sin mapear! 😊",
     "Non-Marked Trail": "Sendero no señalizado",
     "North-Up": "Norte arriba",
@@ -289,7 +289,7 @@
     "Please add points to route...": "Por favor, añade puntos a la ruta...",
     "Please allow location tracking": "Por favor, permite el rastreo de ubicación",
     "Please fill in the details of the issue in the e-mail message that will be shown soon and send it": "Por favor, rellena los detalles del problema en el correo electrónico que aparecerá en breve y envíalo",
-    "Please make sure the battery optimization is turned off for this application. Go to application setting to do so.": "Asegúrate de que la optimización de batería esté desactivada para esta aplicación. Ve a la configuración de la aplicación para hacerlo.",
+    "Please make sure the battery optimization is turned off for this application. Go to application setting to do so.": "Para un seguimiento fiable, desactiva la optimización de batería para esta aplicación en la configuración del dispositivo.",
     "Please select from...": "Por favor, selecciona desde...",
     "Please select to...": "Por favor, selecciona hasta...",
     "Points of Interest": "Puntos de interés",
@@ -458,8 +458,8 @@
     "You are about to download large files, you can change to wifi before clicking continue...": "Estás a punto de descargar archivos grandes, puedes conectarte a Wi-Fi antes de hacer clic en continuar...",
     "You can't edit while offline...": "No puedes editar sin conexión...",
     "You have more than 10 routes which can cause performance issues.": "Tienes más de 10 rutas, lo que puede causar problemas de rendimiento.",
-    "You need to login in order to see your traces, click the frowning face at the top": "Debes iniciar sesión para ver tus trazas, haz clic en la cara de tristeza en la parte superior",
-    "You should add your description here! Click the edit button above.": "¡Deberías añadir tu descripción aquí! Haz clic en el botón de editar de arriba.",
+    "You need to login in order to see your traces, click the frowning face at the top": "Inicia sesión para ver tus trazas: haz clic en la cara triste en la parte superior.",
+    "You should add your description here! Click the edit button above.": "Añade tu descripción aquí haciendo clic en el botón de editar de arriba.",
     "Zoom In": "Acercar",
     "Zoom Out": "Alejar"
 }
