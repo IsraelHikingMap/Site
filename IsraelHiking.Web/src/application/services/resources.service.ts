@@ -337,13 +337,12 @@ export class ResourcesService {
     public legendBlackMarkedTrail: string;
     public legendUnmarkedTrail: string;
     public legendIsraelTrail: string;
-    public legendRegionalTrail: string;
-    public legendTrails: string;
+    public legendTracksAndPaths: string;
     public legendPavedRoad: string;
     public legendAllVehicles: string;
-    public legendLight4WDVehicles: string;
-    public legendStrong4WDVehicles: string;
-    public legendDifficult4WD: string;
+    public legend4WDTrack: string;
+    public legendDifficult4WDTrack: string;
+    public legendChallenging4WDTrack: string;
     public legendPath: string;
     public legendFootPath: string;
     public legendBicyclePath: string;
@@ -367,7 +366,6 @@ export class ResourcesService {
     public legendSecondary: string;
     public legendTertiary: string;
     public legendUnclassified: string;
-    public legendLowSpeedStreet: string;
     public legendResidential: string;
     public legendBridge: string;
     public legendTunnel: string;
@@ -388,7 +386,7 @@ export class ResourcesService {
     public legendConvenienceStore: string;
     public legendLodging: string;
     public legendToilettes: string;
-    public legendInformationCenter: string;
+    public legendTravelInformation: string;
     public legendGuidepost: string;
     public legendConstructionSite: string;
     public legendViewpoint: string;
@@ -409,9 +407,9 @@ export class ResourcesService {
     public legendPowerLine: string;
     public legendPlayground: string;
     public legendBarriers: string;
-    public legendGate: string;
-    public legendClosedGate: string;
-    public legendBlock: string;
+    public legendOpenEntrance: string;
+    public legendNoEntry: string;
+    public legendVehicleBlock: string;
     public legendCattleGrid: string;
     public legendFence: string;
     public legendWall: string;
@@ -431,22 +429,18 @@ export class ResourcesService {
     public legendBikeShop: string;
     public legendFirstAid: string;
     public legendRegionalTrails: string;
-    public legendJerusalemTrail: string;
     public legendGolanTrail: string;
     public legendKinneretTrail: string;
     public legendHaifaWadisTrail: string;
-    public legendKinneretBicycleTrail: string;
     public legendPurpleRegionalTrail: string;
     public legendOrangeRegionalTrail: string;
-    public legendSingles: string;
+    public legendCyclingDifficulty: string;
     public legendUnknownScale: string;
     public legendEasyWithDirection: string;
     public legendModerate: string;
     public legendAdvanced: string;
     public legendChallengingWithDirection: string;
     public legendBicycleTrails: string;
-    public legendLocalTrail: string;
-    public legendNationalTrail: string;
     public legendAreas: string;
     public legendCitySettlement: string;
     public legendOrchard: string;
@@ -461,7 +455,6 @@ export class ResourcesService {
     public legendQuarry: string;
     public legendBench: string;
     public legendAlpinehut: string;
-    public legendEmpty: string;
 
     public async initialize() {
         await this.setLanguageInternal(this.store.selectSnapshot((s: ApplicationState) => s.configuration).language);
@@ -480,7 +473,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1786485285267");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1786485692345");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -788,13 +781,12 @@ export class ResourcesService {
         this.legendBlackMarkedTrail = this.gettextCatalog.getString("Black Marked Trail");
         this.legendUnmarkedTrail = this.gettextCatalog.getString("Unmarked Trail");
         this.legendIsraelTrail = this.gettextCatalog.getString("Israel Trail");
-        this.legendRegionalTrail = this.gettextCatalog.getString("Regional Trail");
-        this.legendTrails = this.gettextCatalog.getString("Tracks and Paths");
+        this.legendTracksAndPaths = this.gettextCatalog.getString("Tracks and Paths");
         this.legendPavedRoad = this.gettextCatalog.getString("Paved Road");
         this.legendAllVehicles = this.gettextCatalog.getString("All Vehicles");
-        this.legendLight4WDVehicles = this.gettextCatalog.getString("4WD Track");
-        this.legendStrong4WDVehicles = this.gettextCatalog.getString("Difficult 4WD Track");
-        this.legendDifficult4WD = this.gettextCatalog.getString("Challenging 4WD Track");
+        this.legend4WDTrack = this.gettextCatalog.getString("4WD Track");
+        this.legendDifficult4WDTrack = this.gettextCatalog.getString("Difficult 4WD Track");
+        this.legendChallenging4WDTrack = this.gettextCatalog.getString("Challenging 4WD Track");
         this.legendPath = this.gettextCatalog.getString("Path");
         this.legendFootPath = this.gettextCatalog.getString("Foot Path");
         this.legendBicyclePath = this.gettextCatalog.getString("Bicycle Path");
@@ -818,7 +810,6 @@ export class ResourcesService {
         this.legendSecondary = this.gettextCatalog.getString("Secondary");
         this.legendTertiary = this.gettextCatalog.getString("Tertiary");
         this.legendUnclassified = this.gettextCatalog.getString("Unclassified");
-        this.legendLowSpeedStreet = this.gettextCatalog.getString("Low-Speed Street");
         this.legendResidential = this.gettextCatalog.getString("Residential");
         this.legendBridge = this.gettextCatalog.getString("Bridge");
         this.legendTunnel = this.gettextCatalog.getString("Tunnel");
@@ -839,7 +830,7 @@ export class ResourcesService {
         this.legendConvenienceStore = this.gettextCatalog.getString("Convenience Store");
         this.legendLodging = this.gettextCatalog.getString("Lodging");
         this.legendToilettes = this.gettextCatalog.getString("Toilettes");
-        this.legendInformationCenter = this.gettextCatalog.getString("Travel Information");
+        this.legendTravelInformation = this.gettextCatalog.getString("Travel Information");
         this.legendGuidepost = this.gettextCatalog.getString("Guidepost");
         this.legendViewpoint = this.gettextCatalog.getString("Viewpoint");
         this.legendPeak = this.gettextCatalog.getString("Peak");
@@ -859,9 +850,9 @@ export class ResourcesService {
         this.legendPowerLine = this.gettextCatalog.getString("Power Line");
         this.legendPlayground = this.gettextCatalog.getString("Playground");
         this.legendBarriers = this.gettextCatalog.getString("Barriers");
-        this.legendGate = this.gettextCatalog.getString("Open Entrance");
-        this.legendClosedGate = this.gettextCatalog.getString("No Entry");
-        this.legendBlock = this.gettextCatalog.getString("Vehicle Block");
+        this.legendOpenEntrance = this.gettextCatalog.getString("Open Entrance");
+        this.legendNoEntry = this.gettextCatalog.getString("No Entry");
+        this.legendVehicleBlock = this.gettextCatalog.getString("Vehicle Block");
         this.legendCattleGrid = this.gettextCatalog.getString("Cattle Grid");
         this.legendFence = this.gettextCatalog.getString("Fence");
         this.legendWall = this.gettextCatalog.getString("Wall");
@@ -881,22 +872,18 @@ export class ResourcesService {
         this.legendBikeShop = this.gettextCatalog.getString("Bike Shop");
         this.legendFirstAid = this.gettextCatalog.getString("First Aid");
         this.legendRegionalTrails = this.gettextCatalog.getString("Regional Trails");
-        this.legendJerusalemTrail = this.gettextCatalog.getString("Jerusalem Trail");
         this.legendGolanTrail = this.gettextCatalog.getString("Golan Trail");
         this.legendKinneretTrail = this.gettextCatalog.getString("Kinneret Trail");
         this.legendHaifaWadisTrail = this.gettextCatalog.getString("Haifa Wadis Trail");
-        this.legendKinneretBicycleTrail = this.gettextCatalog.getString("Kinneret Bicycle Trail");
         this.legendPurpleRegionalTrail = this.gettextCatalog.getString("Purple Regional Trail");
         this.legendOrangeRegionalTrail = this.gettextCatalog.getString("Orange Regional Trail");
-        this.legendSingles = this.gettextCatalog.getString("Cycling technical difficulty");
+        this.legendCyclingDifficulty = this.gettextCatalog.getString("Cycling technical difficulty");
         this.legendUnknownScale = this.gettextCatalog.getString("Unknown Scale");
         this.legendEasyWithDirection = this.gettextCatalog.getString("Easy");
         this.legendModerate = this.gettextCatalog.getString("Moderate");
         this.legendAdvanced = this.gettextCatalog.getString("Advanced");
         this.legendChallengingWithDirection = this.gettextCatalog.getString("Challenging");
         this.legendBicycleTrails = this.gettextCatalog.getString("Bicycle Trails");
-        this.legendLocalTrail = this.gettextCatalog.getString("Local Trail");
-        this.legendNationalTrail = this.gettextCatalog.getString("National Trail");
         this.legendAreas = this.gettextCatalog.getString("Areas");
         this.legendCitySettlement = this.gettextCatalog.getString("City, Settlement");
         this.legendOrchard = this.gettextCatalog.getString("Orchard");
@@ -912,7 +899,6 @@ export class ResourcesService {
         this.legendConstructionSite = this.gettextCatalog.getString("Construction Site");
         this.legendBench = this.gettextCatalog.getString("Bench");
         this.legendAlpinehut = this.gettextCatalog.getString("Alpine Hut");
-        this.legendEmpty = this.gettextCatalog.getString("No legend for this map...");
 
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
