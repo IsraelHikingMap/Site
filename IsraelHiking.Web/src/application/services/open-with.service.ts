@@ -48,6 +48,14 @@ const VIEWPORT_COORDINATES = new RegExp(`/@${NUMBER},${NUMBER}`);
 const FEATURE_ID_S2_CELL = /(?:!1s|[?&]ftid=)0x([0-9a-f]+):0x[0-9a-f]+/i;
 const URL_IN_TEXT = /https?:\/\/\S+/;
 
+/**
+ * A location stated as plain parameters, the way most sites that are not a map service link to a
+ * place - `lat` with either `lon` or `lng`. They are matched anywhere in the url so that sites
+ * keeping them in the fragment rather than in the query string are handled too.
+ */
+const LAT_PARAM = new RegExp(`[?&#]lat(?:itude)?=${NUMBER}`, "i");
+const LNG_PARAM = new RegExp(`[?&#]l(?:ng|on)(?:gitude)?=${NUMBER}`, "i");
+
 @Service()
 export class OpenWithService {
     private readonly resources = inject(ResourcesService);
@@ -195,6 +203,26 @@ export class OpenWithService {
     }
 
     /**
+     * Extracts a location from the parameters of a url that is not a known map service - a site
+     * linking to a place with `lat` and `lon`/`lng`. Any zoom the url states is ignored: the point
+     * is shown as a coordinates marker, which matters more when sharing than the view around it.
+     */
+    public static parseParametersCoordinates(href: string): LatLngAltTime | null {
+        let decoded = href;
+        try {
+            decoded = decodeURIComponent(href);
+        } catch {
+            // a url holding a stray percent sign is still worth reading, just as it was given
+        }
+        const lat = +LAT_PARAM.exec(decoded)?.[1];
+        const lng = +LNG_PARAM.exec(decoded)?.[1];
+        if (isNaN(lat) || isNaN(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+            return null;
+        }
+        return SpatialService.toLatLng([lng, lat]);
+    }
+
+    /**
      * Handles a `geo:` intent. Both `geo:lat,lng` and the `geo:0,0?q=lat,lng(Label)` form that Google
      * Maps emits are supported, the latter taking precedence since its `0,0` prefix is a placeholder.
      */
@@ -294,6 +322,12 @@ export class OpenWithService {
         this.loggingService.info("[OpenWith] Opening an external url: " + href);
         if (MAP_SERVICE_HOSTS.includes(url.host.toLocaleLowerCase())) {
             this.handleMapServiceUrl(href);
+            return;
+        }
+        const latLng = OpenWithService.parseParametersCoordinates(href);
+        if (latLng != null) {
+            this.loggingService.info(`[OpenWith] Opening a location taken from the url parameters: ${href}`);
+            this.moveToLatLng(latLng);
             return;
         }
         this.router.navigate([RouteStrings.ROUTE_URL, href]);
