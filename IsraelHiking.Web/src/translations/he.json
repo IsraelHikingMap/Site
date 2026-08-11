@@ -256,7 +256,7 @@
     "No routes found, zoom in the map or change the filters...": "לא נמצאו מסלולים, הגדילו את המפה או שנו את הסינונים...",
     "No shares, now is the time to start sharing your work!": "לא נמצאו שמירות בענן...",
     "No Tags": "אין תגיות",
-    "No traces, you should really upload some to OSM.": "אין הקלטות, כדאי לך להעלות כמה ל- OSM.",
+    "No traces, you should really upload some to OSM.": "אין הקלטות עדיין. העלאת הקלטות ל-OSM עוזרת לשפר את המפה לכולם.",
     "No unmapped routes! :-)": "אין מסלולים לא ממופים! 😊",
     "Non-Marked Trail": "שביל לא מסומן",
     "North-Up": "הצפן",
@@ -289,7 +289,7 @@
     "Please add points to route...": "יש להוסיף נקודות למסלול...",
     "Please allow location tracking": "אנא אשרו את הרשאות המיקום",
     "Please fill in the details of the issue in the e-mail message that will be shown soon and send it": "אנא מלאו את פרטי המקרה בהודעת המייל שתופיע מייד ושלחו אותה",
-    "Please make sure the battery optimization is turned off for this application. Go to application setting to do so.": "אנא וודאו כי שיפור ביצועי הסוללה מכובים עבור יישום זה. יש להיכנס למאפייני היישום על מנת לשנות זאת.",
+    "Please make sure the battery optimization is turned off for this application. Go to application setting to do so.": "לרישום מיקום מדויק, כבו את שיפור ביצועי הסוללה עבור האפליקציה בהגדרות המכשיר.",
     "Please select from...": "יש לבחור מוצא...",
     "Please select to...": "יש לבחור יעד...",
     "Points of Interest": "נקודות עניין",
@@ -458,8 +458,8 @@
     "You are about to download large files, you can change to wifi before clicking continue...": "אתם עומדים להוריד קבצים גדולים, באפשרותכם לעבור לוויפי לפני לחיצה על המשך...",
     "You can't edit while offline...": "אין אפשרות לערוך ללא חיבור רשת",
     "You have more than 10 routes which can cause performance issues.": "יש לך יותר מעשרה מסלולים בתכנון, מה שיכול לגרום לבעיות ביצועים.",
-    "You need to login in order to see your traces, click the frowning face at the top": "על מנת לראות את ההקלטות שלך יש להתחבר לחשבון, הפרצוף העצוב למעלה מאפשר זאת",
-    "You should add your description here! Click the edit button above.": "כדאי שתוסיפו תיאור כאן! לחצו על כפתור העריכה למעלה.",
+    "You need to login in order to see your traces, click the frowning face at the top": "כדי לראות את ההקלטות שלך, התחברו לחשבון - הפרצוף העצוב למעלה מאפשר זאת.",
+    "You should add your description here! Click the edit button above.": "הוסיפו כאן תיאור בעזרת כפתור העריכה למעלה.",
     "Zoom In": "הגדלת המפה",
     "Zoom Out": "הקטנת המפה"
 }
