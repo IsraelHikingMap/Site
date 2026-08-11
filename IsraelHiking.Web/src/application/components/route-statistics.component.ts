@@ -484,7 +484,7 @@ export class RouteStatisticsComponent implements OnInit {
             .attr("transform", `translate(-30, ${this.chartElements.height / 2}) rotate(-90)`)
             .attr("text-anchor", "middle")
             .attr("dir", this.resources.direction)
-            .text(`${this.resources.height} (${this.getHeightUnitText()})`);
+            .text(`${this.resources.elevation} (${this.getElevationUnitText()})`);
     }
 
     private addChartPath() {
@@ -640,9 +640,9 @@ export class RouteStatisticsComponent implements OnInit {
         this.chartElements.hoverGroup.selectAll("text").remove();
         const units = this.store.selectSnapshot((state: ApplicationState) => state.configuration.units);
         const distanceText = (point.coordinate[0] / (units === "metric" ? 1 : 1.60934)).toFixed(2);
-        const heightText = (point.coordinate[1] * (units === "metric" ? 1 : 3.28084)).toFixed(0);
+        const elevationText = (point.coordinate[1] * (units === "metric" ? 1 : 3.28084)).toFixed(0);
         this.createHoverBoxText(this.resources.distance, distanceText, " " + this.getDistanceUnitText(), 20);
-        this.createHoverBoxText(this.resources.height, heightText, " " + this.getHeightUnitText(), 40, true);
+        this.createHoverBoxText(this.resources.elevation, elevationText, " " + this.getElevationUnitText(), 40, true);
         if (this.resources.direction === "rtl") {
             // the following is a hack due to bad svg presentation...
             this.createHoverBoxText(this.resources.slope, Math.abs(point.slope).toFixed(0) + "%", point.slope < 0 ? "-" : "", 60);
@@ -1111,7 +1111,7 @@ export class RouteStatisticsComponent implements OnInit {
         return this.resources.getLongDistanceUnitString(units);
     }
 
-    private getHeightUnitText(): string {
+    private getElevationUnitText(): string {
         const units = this.store.selectSnapshot((state: ApplicationState) => state.configuration.units);
         return this.resources.getShortDistanceUnitString(units);
     }

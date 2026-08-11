@@ -46,7 +46,7 @@
     @if (canUpdate) {
     <div class="flex flex-row">
       <mat-checkbox [(ngModel)]="updateCurrentShare"
-        (change)="updateCurrentShareChanged($event)">{{resources.updateCurrentShare}}</mat-checkbox>
+        (change)="updateCurrentShareChanged($event)">{{resources.updateCurrentCloudSave}}</mat-checkbox>
     </div>
     }
     <div class="flex flex-row items-center">
@@ -126,7 +126,7 @@
       <button mat-flat-button class="w-full" (click)="uploadShareUrl()"
         [disabled]="isLoading() || !canUpload()" analyticsOn="click" analyticsCategory="Share"
         analyticsLabel="Share {{updateCurrentShare() ? 'update' : 'create'}}">{{updateCurrentShare() ? resources.update :
-        resources.generateUrlToShareWithYourFriends}}</button>
+        resources.saveInCloudAndShareWithYourFriends}}</button>
     </div>
   </div>
 </div>

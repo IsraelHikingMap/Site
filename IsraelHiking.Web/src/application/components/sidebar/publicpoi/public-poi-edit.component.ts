@@ -134,7 +134,7 @@ export class PublicPointOfInterestEditComponent implements OnInit {
             this.toastService.success(this.resources.dataUpdatedSuccessfullyItWillTakeTimeToSeeIt);
             this.close();
         } catch {
-            this.toastService.confirm({ message: this.resources.unableToSaveData, type: "Ok" });
+            this.toastService.confirm({ message: this.resources.unableToUploadPoint, type: "Ok" });
         } finally {
             this.isLoading.set(false);
         }

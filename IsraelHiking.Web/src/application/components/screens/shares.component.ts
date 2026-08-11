@@ -185,7 +185,7 @@ export class SharesComponent implements OnInit {
                     await this.shareUrlsService.deleteShareUrl(shareUrl);
                     this.runFilter();
                 } catch (ex) {
-                    this.toastService.error(ex, this.resources.unableToDeleteShare);
+                    this.toastService.error(ex, this.resources.unableToDeleteCloudSave);
                 }
             },
             type: "YesNo"
@@ -198,7 +198,7 @@ export class SharesComponent implements OnInit {
             return;
         }
         this.toastService.confirm({
-            message: this.resources.thisWillDeteleAllCurrentRoutesAreYouSure,
+            message: this.resources.thisWillDeleteAllCurrentRoutesAreYouSure,
             confirmAction: async () => {
                 this.router.navigate([RouteStrings.ROUTE_SHARE, shareUrl.id]);
             },
