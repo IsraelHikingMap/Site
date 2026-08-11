@@ -1,6 +1,5 @@
 ﻿using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
-using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Extensions;
@@ -22,6 +21,7 @@ namespace IsraelHiking.API.Controllers;
 /// This controller allows viewing, editing and filtering of points of interest (POI)
 /// </summary>
 [Route("api/points")]
+[ApiController]
 public class PointsOfInterestController : ControllerBase
 {
     private readonly IClientsFactory _clientsFactory;
@@ -56,26 +56,9 @@ public class PointsOfInterestController : ControllerBase
     }
 
     /// <summary>
-    /// Get a POI by id and source
+    /// Create a point of interest
     /// </summary>
-    /// <param name="source">The source</param>
-    /// <param name="id">The ID</param>
-    /// <returns></returns>
-    [Route("{source}/{id}")]
-    [HttpGet]
-    public async Task<IActionResult> GetPointOfInterest(string source, string id)
-    {
-        var poiItem = await _pointsOfInterestProvider.GetFeatureById(source, id);
-        if (poiItem == null)
-        {
-            return NotFound();
-        }
-        return Ok(poiItem);
-    }
-
-    /// <summary>
-    /// Creates a POI by id and source, upload the image to wikimedia commons if needed.
-    /// </summary>
+    /// <remarks>Creates a new POI, uploading its image to Wikimedia Commons when needed.</remarks>
     /// <param name="feature"></param>
     /// <param name="language">The language code</param>
     /// <returns></returns>
@@ -114,8 +97,9 @@ public class PointsOfInterestController : ControllerBase
     }
 
     /// <summary>
-    /// Creates a POI by id and source, upload the image to wikimedia commons if needed.
+    /// Update a point of interest
     /// </summary>
+    /// <remarks>Updates an existing POI by id, uploading its image to Wikimedia Commons when needed.</remarks>
     /// <param name="id">The feature ID</param>
     /// <param name="feature"></param>
     /// <param name="language">The language code</param>

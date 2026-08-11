@@ -54,8 +54,8 @@ dependencies {
     implementation "org.maplibre.gl:android-sdk:$maplibreSdkVersion"
     implementation "org.maplibre.gl:android-sdk-turf:$maplibreTurfVersion"
     implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
-    implementation "com.github.mapeak-com:pmtiles-mobile:v0.3.2"
-    implementation "com.github.mapeak-com:maplibre-contour-rs:v0.4.1"
+    implementation "com.github.mapeak-com:pmtiles-mobile:v$pmtilesMobileVersion"
+    implementation "com.github.mapeak-com:maplibre-contour-rs:v$maplibreContourVersion"
     implementation "androidx.core:core-ktx:$androidxCoreKtxVersion"
     implementation "com.google.android.gms:play-services-location:$playServicesLocationVersion"
     // Valhalla offline routing POC (native engine + models for the request/response types)

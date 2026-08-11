@@ -1,26 +1,31 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, computed, Service } from "@angular/core";
 import { Urls } from "../urls";
 import { Store } from "@ngxs/store";
 
 import type { ApplicationState } from "../models";
 
-@Injectable()
+@Service()
 export class OsmAddressesService {
 
     private readonly store = inject(Store);
 
-    public getOsmAddress() {
-        const poiState = this.store.selectSnapshot((s: ApplicationState) => s.poiState);
+    // Signal-backed so callers binding to getOsmAddress() (e.g. the OSM attribution link) react to
+    // POI selection / map location changes under OnPush.
+    private readonly poiState = this.store.selectSignal((s: ApplicationState) => s.poiState);
+    private readonly locationState = this.store.selectSignal((s: ApplicationState) => s.locationState);
+
+    public readonly osmAddress = computed(() => {
+        const poiState = this.poiState();
         if (poiState.selectedPointOfInterest != null &&
             poiState.selectedPointOfInterest.properties.poiSource.toLocaleLowerCase() === "osm") {
             return this.getEditElementOsmAddress(poiState.selectedPointOfInterest.properties.identifier);
         }
-        const currentLocation = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
+        const currentLocation = this.locationState();
         return this.getEditOsmLocationAddress(
             currentLocation.zoom + 1,
             currentLocation.latitude,
             currentLocation.longitude);
-    }
+    });
 
     private getEditOsmLocationAddress(zoom: number, latitude: number, longitude: number): string {
         return `${Urls.osmBase}/edit#map=${zoom}/${latitude}/${longitude}`;

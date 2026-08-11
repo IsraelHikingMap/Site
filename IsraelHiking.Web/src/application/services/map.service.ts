@@ -1,5 +1,6 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
+import { MAPLIBRE_WORKER_URL } from "@maplibre/ngx-maplibre-gl/config";
 import type { ErrorEvent, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, SourceSpecification } from "maplibre-gl";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
@@ -7,29 +8,52 @@ import { LoggingService } from "./logging.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
 import { SpatialService } from "./spatial.service";
 import { ResourcesService } from "./resources.service";
+import { DatabaseService, NO_OFFLINE_FILE_MESSAGE } from "./database.service";
+import { OverpassTurboService } from "./overpass-turbo.service";
 import { SetLocationAction } from "../reducers/location.reducer";
 import type { ApplicationState, Bounds, LatLngAltTime } from "../models";
 
-@Injectable()
+@Service()
 export class MapService {
     private static readonly NOT_FOLLOWING_TIMEOUT = 20000;
     private resolve: (value?: void | PromiseLike<void>) => void;
-    private missingImagesArray: string[] = [];
+    private readonly missingImagesArray: string[] = [];
     private currentMap: Map;
 
     private readonly cancelableTimeoutService = inject(CancelableTimeoutService);
     private readonly loggingService = inject(LoggingService);
     private readonly resourcesService = inject(ResourcesService)
+    private readonly databaseService = inject(DatabaseService);
+    private readonly overpassTurboService = inject(OverpassTurboService);
     private readonly store = inject(Store);
+    private readonly maplibreWorkerUrl = inject(MAPLIBRE_WORKER_URL, { optional: true });
 
     public initializationPromise = new Promise<void>((resolve) => { this.resolve = resolve; });
 
-    public async initialize() {
+    private initializeOncePromise: Promise<void> | null = null;
+
+    /**
+     * Loads maplibre, its workers and the protocols used by the map styles.
+     * This is deliberately not part of the application initialization since screens that do not show
+     * a map (landing, faq, etc.) should not pay for it - maplibre alone is around 200kb.
+     * Routes that do show a map wait for this using the map resolver in the routes definition.
+     */
+    public initialize(): Promise<void> {
+        this.initializeOncePromise ??= this.initializeOnce();
+        return this.initializeOncePromise;
+    }
+
+    private async initializeOnce() {
         if (typeof window === "undefined") {
             return;
         }
-        const maplibregl = (await import("maplibre-gl")).default;
+        const maplibregl = await import("maplibre-gl");
+        // This is needs to be specific since capacitor is not http protocol
+        maplibregl.setWorkerUrl(this.getFullUrl(this.maplibreWorkerUrl ?? "maplibre-gl-worker.mjs"));
         maplibregl.setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
+        maplibregl.addProtocol("custom", (params) => this.databaseService.getCustomTile(params.url));
+        maplibregl.addProtocol("slice", (params) => this.databaseService.getSliceTile(params.url));
+        maplibregl.addProtocol("overpass", (params) => this.overpassTurboService.getOverpassResults(params.url));
         this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
             this.cancelableTimeoutService.clearTimeoutByName("panned");
             if (pannedTimestamp) {
@@ -38,10 +62,15 @@ export class MapService {
                 }, MapService.NOT_FOLLOWING_TIMEOUT, "panned");
             }
         });
-        const globalDispatcher = maplibregl.getGlobalDispatcher();
+        // "contour-worker" is a custom message added by maplibre-contour and is not a part of maplibre's
+        // closed message types enum, so the dispatcher needs to be seen as accepting a free form message.
+        const globalDispatcher = maplibregl.getGlobalDispatcher() as unknown as {
+            registerMessageHandler: (type: string, handler: () => Promise<void>) => void;
+            broadcast: (type: string, data: unknown) => Promise<unknown[]>;
+        };
         const promise = new Promise<void>(resolve => {
-            globalDispatcher.registerMessageHandler("contour-worker" as any, async () => {
-                await globalDispatcher.broadcast("contour-worker" as any, {
+            globalDispatcher.registerMessageHandler("contour-worker", async () => {
+                await globalDispatcher.broadcast("contour-worker", {
                     demUrlPattern: "slice://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.webp",
                     encoding: "terrarium",
                     maxzoom: 11
@@ -102,11 +131,11 @@ export class MapService {
         return linkEl.href;
     }
 
-    private onDragstart = () => {
+    private readonly onDragstart = () => {
         this.store.dispatch(new SetPannedAction(new Date()));
     }
 
-    private onStyleImageMissing = async (e: { id: string }) => {
+    private readonly onStyleImageMissing = async (e: { id: string }) => {
         if (!/^http/.test(e.id)) {
             return;
         }
@@ -118,14 +147,18 @@ export class MapService {
         this.currentMap.addImage(e.id, image.data);
     }
 
-    private onError = (e: ErrorEvent) => {
+    private readonly onError = (e: ErrorEvent) => {
         if (e?.error?.message?.includes("418")) {
+            return;
+        }
+        if (e?.error?.message?.includes(NO_OFFLINE_FILE_MESSAGE)) {
+            this.loggingService.warning("[Map] " + e.error.message);
             return;
         }
         this.loggingService.error("[Map] Error: " + e?.error?.message);
     }
 
-    public onMoveEnd = (e: DragEvent) => {
+    public readonly onMoveEnd = (e: DragEvent) => {
         if (!e || !this.currentMap) {
             return;
         }

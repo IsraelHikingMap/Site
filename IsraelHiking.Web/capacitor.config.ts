@@ -10,7 +10,12 @@ const config: CapacitorConfig = {
   ios: {
     preferredContentMode: "mobile"
   },
-  android: {}
+  android: {},
+  plugins: {
+    CapacitorShareTarget: {
+      appGroupId: "group.com.mapeak"
+    }
+  }
 };
 
 export default config;

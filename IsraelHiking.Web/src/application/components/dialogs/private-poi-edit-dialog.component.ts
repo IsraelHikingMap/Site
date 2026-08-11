@@ -1,4 +1,4 @@
-import { Component, ElementRef, AfterViewInit, HostListener, inject, viewChild } from "@angular/core";
+import { Component, ElementRef, AfterViewInit, HostListener, inject, viewChild, signal } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { NgStyle } from "@angular/common";
 import { MatButton, MatAnchor, MatIconButton } from "@angular/material/button";
@@ -18,7 +18,7 @@ import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
 import { ImageCaptureDirective } from "../../directives/image-capture.directive";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
-import { FileService } from "../../services/file.service";
+import { FileService, HTMLElementInputChangeEvent } from "../../services/file.service";
 import { ImageResizeService } from "../../services/image-resize.service";
 import { NavigateHereService } from "../../services/navigate-here.service";
 import { RunningContextService } from "../../services/running-context.service";
@@ -48,21 +48,21 @@ interface PrivatePoiEditDialogData {
 export class PrivatePoiEditDialogComponent implements AfterViewInit {
     private static readonly NUMBER_OF_ICONS_PER_ROW = 4;
 
-    private routeId?: string;
-    private markerIndex: number;
+    private readonly routeId?: string;
+    private readonly markerIndex: number;
 
-    public marker: MarkerData;
-    public url: LinkData;
-    public imageLink: LinkData;
-    public showIcons = false;
-    public showCoordinates = false;
-    public showUrl: boolean;
-    public title: string;
-    public markerType: string;
-    public description: string;
-    public iconsGroups: IIconsGroup[] = [];
+    public readonly marker: MarkerData;
+    public readonly url = signal<LinkData>(null);
+    public readonly imageLink = signal<LinkData>(null);
+    public readonly showIcons = signal(false);
+    public readonly showCoordinates = signal(false);
+    public readonly showUrl = signal(false);
+    public readonly title = signal("");
+    public readonly markerType = signal<string>(null);
+    public readonly description = signal("");
+    public readonly iconsGroups: IIconsGroup[];
 
-    public titleInput = viewChild<ElementRef>("titleInput");
+    public readonly titleInput = viewChild<ElementRef>("titleInput");
 
     public readonly resources = inject(ResourcesService);
 
@@ -98,12 +98,12 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
         this.routeId = this.data.routeId;
         this.markerIndex = this.data.index;
         this.marker = structuredClone(this.data.marker) as MarkerData;
-        this.markerType = this.marker.type;
-        this.title = this.marker.title;
-        this.description = this.marker.description;
-        this.imageLink = this.marker.urls.find(u => u.mimeType.startsWith("image"));
-        this.url = this.marker.urls.find(u => !u.mimeType.startsWith("image"));
-        this.showUrl = this.url != null;
+        this.markerType.set(this.marker.type);
+        this.title.set(this.marker.title);
+        this.description.set(this.marker.description);
+        this.imageLink.set(this.marker.urls.find(u => u.mimeType.startsWith("image")));
+        this.url.set(this.marker.urls.find(u => !u.mimeType.startsWith("image")));
+        this.showUrl.set(this.url() != null);
     }
 
     /**
@@ -136,7 +136,7 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
     }
 
     public toggleCoordinates() {
-        this.showCoordinates = !this.showCoordinates;
+        this.showCoordinates.set(!this.showCoordinates());
     }
 
     private focusTitle() {
@@ -146,24 +146,23 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
     }
 
     public setMarkerType(markerType: string): void {
-        this.markerType = markerType;
+        this.markerType.set(markerType);
     }
 
     public save() {
         const urls = [];
-        if (this.imageLink) {
-            urls.push(this.imageLink);
+        if (this.imageLink()) {
+            urls.push(this.imageLink());
         }
-        if (this.url && this.url.url) {
-            this.url.text = this.title;
-            urls.push(this.url);
+        if (this.url() && this.url().url) {
+            urls.push({ ...this.url(), text: this.title() });
         }
         const updatedMarker: MarkerData = {
             id: this.marker.id,
-            title: this.title,
-            description: this.description,
+            title: this.title(),
+            description: this.description(),
             latlng: this.marker.latlng,
-            type: this.markerType,
+            type: this.markerType(),
             urls
         };
 
@@ -174,17 +173,22 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
         }
     }
 
-    public async addImage(e: any) {
-        const file = this.fileService.getFileFromEvent(e);
-        if (!file) {
+    public onFileInputChanged(event: Event | HTMLElementInputChangeEvent) {
+        this.onFileDrop(event);
+    }
+
+    public async onFileDrop(event: DragEvent | Event | HTMLElementInputChangeEvent) {
+        event.preventDefault();
+        const files = this.fileService.getFilesFromEvent(event);
+        if (files.length !== 1) {
             return;
         }
-        const container = await this.imageResizeService.resizeImageAndConvert(file, false);
-        this.imageLink = container.routes[0].markers[0].urls[0];
+        const container = await this.imageResizeService.resizeImageAndConvert(files[0], false);
+        this.imageLink.set(container.routes[0].markers[0].urls[0]);
     }
 
     public clearImage() {
-        this.imageLink = null;
+        this.imageLink.set(null);
     }
 
     public async uploadPoint() {
@@ -192,22 +196,22 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
             this.toastService.warning(this.resources.loginRequired);
             return;
         }
-        if (this.title || this.description || this.imageLink) {
+        if (this.title() || this.description() || this.imageLink()) {
             await this.privatePoiUploaderService.uploadPoint(
                 this.marker.id,
                 this.marker.latlng,
-                this.imageLink,
-                this.title,
-                this.description,
-                this.markerType);
+                this.imageLink(),
+                this.title(),
+                this.description(),
+                this.markerType());
         } else {
             AddSimplePoiDialogComponent.openDialog(this.matDialog, {
                 id: this.marker.id,
                 latlng: this.marker.latlng,
-                imageLink: this.imageLink,
-                title: this.title,
-                description: this.description,
-                markerType: this.markerType
+                imageLink: this.imageLink(),
+                title: this.title(),
+                description: this.description(),
+                markerType: this.markerType()
             });
         }
 
@@ -222,24 +226,28 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
         }
     }
 
+    public updateUrlValue(url: string) {
+        this.url.update(link => ({ ...link, url }));
+    }
+
     public addUrl() {
-        this.showUrl = true;
-        if (this.url == null) {
-            this.url = {
-                text: this.title,
+        this.showUrl.set(true);
+        if (this.url() == null) {
+            this.url.set({
+                text: this.title(),
                 mimeType: "text/html",
                 url: ""
-            };
+            });
         }
 
     }
 
     public removeUrl() {
-        this.url = null;
+        this.url.set(null);
     }
 
     public async navigateHere() {
-        await this.navigateHereService.addNavigationSegment(this.marker.latlng, this.title);
+        await this.navigateHereService.addNavigationSegment(this.marker.latlng, this.title());
     }
 
     public canShareLocation() {

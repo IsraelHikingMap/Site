@@ -1,5 +1,5 @@
-import { Injectable } from "@angular/core";
-import Proj from "proj4";
+import { Service } from "@angular/core";
+import type { Converter } from "proj4";
 
 import { LatLngAltTime, NorthEast } from "../models";
 
@@ -13,7 +13,7 @@ const ANY_DEGREES_REGEX_STRING = "([\\d\\.°" + MINUTES_SYMBOLS_STRING + SECONDS
 const NORTH_SOUTH_REGEX_STRING = ANY_DEGREES_REGEX_STRING + "([NS])";
 const EAST_WEST_REGEX_STRING = ANY_DEGREES_REGEX_STRING + "([EW])";
 
-@Injectable()
+@Service()
 export class CoordinatesService {
     static readonly ITM_WKT = "PROJCS[\"ITM\", GEOGCS[\"ITM\", DATUM[\"Isreal 1993\", SPHEROID[\"GRS 1980\", 6378137, 298.257222101, " +
         "AUTHORITY[\"EPSG\", \"7019\"]], TOWGS84[-24.0024, -17.1032, -17.8444, -0.33077, -1.85269, 1.66969, 5.4248]], " +
@@ -47,8 +47,15 @@ export class CoordinatesService {
     static readonly DEGREES_MINUTES = new RegExp("^\\s*(\\d{1,3})(?:[:°\\s]\\s*)(\\d{1,2}(?:\\.\\d+)?)[:" +
         MINUTES_SYMBOLS_STRING + "]?\\s*$");
 
-    private itmConverter = Proj(CoordinatesService.ITM_WKT);
-    private coordinatesParserMap: { matcher: RegExp; parser: (match: RegExpMatchArray) => LatLngAltTime }[];
+    /**
+     * proj4 is only needed to convert to and from ITM, which happens when the user asks for it -
+     * it is a sizable dependency, so it is loaded on demand instead of with the app.
+     */
+    private itmConverter: Promise<Converter> | null = null;
+    private readonly coordinatesParserMap: {
+        matcher: RegExp;
+        parser: (match: RegExpMatchArray) => LatLngAltTime | Promise<LatLngAltTime>;
+    }[];
 
     constructor() {
         this.coordinatesParserMap = [
@@ -75,23 +82,30 @@ export class CoordinatesService {
         ];
     }
 
-    public toItm(latLng: LatLngAltTime): NorthEast {
-        const coords = this.itmConverter.forward([latLng.lng, latLng.lat]);
+    private getItmConverter(): Promise<Converter> {
+        this.itmConverter ??= import("proj4").then(proj4 => proj4.default(CoordinatesService.ITM_WKT));
+        return this.itmConverter;
+    }
+
+    public async toItm(latLng: LatLngAltTime): Promise<NorthEast> {
+        const converter = await this.getItmConverter();
+        const coords = converter.forward([latLng.lng, latLng.lat]);
         return {
             north: coords[1],
             east: coords[0]
         };
     }
 
-    public fromItm(northEast: NorthEast): LatLngAltTime {
-        const coords = this.itmConverter.inverse([northEast.east, northEast.north]);
+    public async fromItm(northEast: NorthEast): Promise<LatLngAltTime> {
+        const converter = await this.getItmConverter();
+        const coords = converter.inverse([northEast.east, northEast.north]);
         return {
             lat: coords[1],
             lng: coords[0]
         };
     }
 
-    public parseCoordinates(term: string): LatLngAltTime {
+    public async parseCoordinates(term: string): Promise<LatLngAltTime> {
         for (const item of this.coordinatesParserMap) {
             const matchArray = term.trim().match(item.matcher);
             if (matchArray && matchArray.length > 0) {
@@ -101,7 +115,7 @@ export class CoordinatesService {
         return null;
     }
 
-    private parseItmIcsCoordinates(match: RegExpMatchArray): LatLngAltTime {
+    private async parseItmIcsCoordinates(match: RegExpMatchArray): Promise<LatLngAltTime> {
         let east = parseInt(match[1], 10);
         let north = parseInt(match[2], 10);
         if (north >= 1350000) {

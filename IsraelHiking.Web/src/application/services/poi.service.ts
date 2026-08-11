@@ -1,5 +1,5 @@
-import { Injectable, inject } from "@angular/core";
-import { HttpClient, HttpParams } from "@angular/common/http";
+import { inject, Service } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
 import { cloneDeep } from "lodash-es";
 import { firstValueFrom } from "rxjs";
 import { timeout } from "rxjs/operators";
@@ -50,11 +50,10 @@ export type PoiSocialLinks = {
 };
 
 export type SelectableCategory = Category & {
-    isSelected: boolean;
     selectedIcon: IconColorLabel;
 }
 
-@Injectable()
+@Service()
 export class PoiService {
     private poisCache: GeoJSON.Feature[] = [];
     private queueIsProcessing = false;
@@ -363,10 +362,7 @@ export class PoiService {
                     return poi;
                 }
                 default: {
-                    const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
-                    const poi = await firstValueFrom(this.httpClient.get<GeoJSON.Feature>(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000)));
-                    this.poisCache.splice(0, 0, poi);
-                    return poi;
+                    throw new Error(`Unsupported POI source: ${source}`);
                 }
             }
         } catch (ex) {
@@ -562,7 +558,7 @@ export class PoiService {
         return null;
     }
 
-    public addSimplePoint(latlng: LatLngAltTime, pointType: SimplePointType, id: string): Promise<any> {
+    public addSimplePoint(latlng: LatLngAltTime, pointType: SimplePointType, id: string): Promise<void> {
         const feature = {
             id,
             type: "Feature",
@@ -608,7 +604,7 @@ export class PoiService {
                 poiId: originalId,
                 identifier: originalFeature.properties.identifier,
                 poiSource: originalFeature.properties.poiSource
-            } as any
+            }
         } as GeoJSON.Feature;
 
         if (this.store.selectSnapshot((state: ApplicationState) => state.offlineState.uploadPoiQueue).indexOf(originalId) !== -1) {
@@ -723,16 +719,17 @@ export class PoiService {
     }
 
     public getFeatureFromEditableData(info: EditablePublicPointData): GeoJSON.Feature {
-        const feature = {
+        const feature: GeoJSON.Feature = {
             id: info.id,
             type: "Feature",
+            geometry: undefined, // the geometry is calculated by the server from the location in the properties
             properties: {
                 poiId: info.id,
                 poiCategory: info.category,
                 poiIcon: info.icon,
                 poiIconColor: info.iconColor
-            } as any
-        } as GeoJSON.Feature;
+            }
+        };
         for (const imageUrl of info.imagesUrls) {
             GeoJSONUtils.setProperty(feature, "image", imageUrl);
         }

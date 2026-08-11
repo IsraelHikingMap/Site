@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
@@ -57,7 +57,7 @@ const VALHALLA_TILES_DIR = "valhalla_tiles";
 const VALHALLA_DEFAULT_AREA = "israel";
 const VALHALLA_ELEVATION_INTERVAL_METERS = 30;
 
-@Injectable()
+@Service()
 export class RoutingProvider {
     private readonly httpClient = inject(HttpClient);
     private readonly resources = inject(ResourcesService);

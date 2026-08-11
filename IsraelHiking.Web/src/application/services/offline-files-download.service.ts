@@ -1,4 +1,4 @@
-import { EventEmitter, inject, Injectable } from "@angular/core";
+import { EventEmitter, inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { timeout } from "rxjs/operators";
@@ -19,7 +19,7 @@ import { RouteStrings } from "./hash.service";
 import { DeleteOfflineMapsTileAction, SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
 import type { ApplicationState, FileNameDateVersion, TileMetadataPerFile } from "../models";
 
-@Injectable()
+@Service()
 export class OfflineFilesDownloadService {
     private readonly resources = inject(ResourcesService);
     private readonly fileService = inject(FileService);
@@ -35,7 +35,7 @@ export class OfflineFilesDownloadService {
     private downloadedFilesInCurrentSession: string[] = [];
     private _currentDownloadedTile: { tileX: number, tileY: number, progress: Record<number, number> } | null = null;
 
-    public tilesProgressChanged = new EventEmitter<{ tileX: number, tileY: number, progressValue: number }>();
+    public readonly tilesProgressChanged = new EventEmitter<{ tileX: number, tileY: number, progressValue: number }>();
     public get currentDownloadedTile() {
         return this._currentDownloadedTile;
     }
@@ -57,7 +57,7 @@ export class OfflineFilesDownloadService {
             }
             this.toastService.confirm({
                 type: "YesNo",
-                message: this.resources.reccomendOfflineDownload,
+                message: this.resources.recommendOfflineDownload,
                 confirmAction: async () => {
                     this.router.navigate([RouteStrings.ROUTE_OFFLINE_MANAGEMENT]);
                 }
@@ -240,6 +240,7 @@ export class OfflineFilesDownloadService {
             for (const fileName of fileNames) {
                 this.loggingService.info(`[Offline Download] Deleting file ${fileName}`);
                 await this.fileService.deleteFileInDataDirectory(fileName);
+                this.pmtilesService.invalidateFile(fileName);
             }
         }
         downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.offlineState.downloadedTiles);

@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
@@ -10,7 +10,7 @@ import { SetTokenAction, SetUserInfoAction } from "../reducers/user.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState, OsmUserDetails } from "../models";
 
-@Injectable()
+@Service()
 export class AuthorizationService {
 
     private static readonly OAUTH_CODE = "code";
@@ -68,7 +68,7 @@ export class AuthorizationService {
         return response.access_token;
     }
 
-    private updateUserDetails = async () => {
+    private readonly updateUserDetails = async () => {
         const detailJson = await firstValueFrom(this.httpClient.get<OsmUserDetails>(Urls.osmUser));
         const userInfo = {
             displayName: detailJson.user.display_name,

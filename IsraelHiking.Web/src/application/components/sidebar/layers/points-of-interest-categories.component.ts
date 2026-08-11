@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, computed } from "@angular/core";
 import { MatExpansionPanel, MatExpansionPanelHeader } from "@angular/material/expansion";
 import { MatButton } from "@angular/material/button";
 import { NgClass } from "@angular/common";
@@ -22,11 +22,17 @@ import type { ApplicationState, Category } from "../../../models";
 })
 export class PointsOfInterestCategoriesComponent {
 
-    public categories = POINTS_OF_INTEREST_CATEGORIES
+    public readonly categories = POINTS_OF_INTEREST_CATEGORIES
 
     public readonly resources = inject(ResourcesService);
 
     private readonly store = inject(Store);
+
+    private readonly layersState = this.store.selectSignal((s: ApplicationState) => s.layersState);
+
+    public readonly getExpandState = computed(() => this.layersState().expanded.find(l => l === POINTS_OF_INTEREST) != null);
+
+    public readonly isCategoryGroupVisible = computed(() => this.layersState().visiblePoisCategories.length > 0);
 
     public expand() {
         this.store.dispatch(new ExpandGroupAction(POINTS_OF_INTEREST));
@@ -34,11 +40,6 @@ export class PointsOfInterestCategoriesComponent {
 
     public collapse() {
         this.store.dispatch(new CollapseGroupAction(POINTS_OF_INTEREST));
-    }
-
-    public getExpandState(): boolean {
-        return this.store.selectSnapshot((s: ApplicationState) => s.layersState)
-            .expanded.find(l => l === POINTS_OF_INTEREST) != null;
     }
 
     public toggleCategory(category: Category) {
@@ -51,12 +52,6 @@ export class PointsOfInterestCategoriesComponent {
     }
 
     public isCategoryVisible(category: Category): boolean {
-        const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
-        return layersState.visiblePoisCategories.includes(category.name);
-    }
-
-    public isCategoryGroupVisible(): boolean {
-        const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
-        return layersState.visiblePoisCategories.length > 0;
+        return this.layersState().visiblePoisCategories.includes(category.name);
     }
 }

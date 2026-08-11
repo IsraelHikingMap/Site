@@ -1,6 +1,6 @@
 import { describe, beforeEach, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
-import { NgxsModule } from "@ngxs/store";
+import { provideStore } from "@ngxs/store";
 
 import { SidebarService } from "./sidebar.service";
 import { HashService } from "./hash.service";
@@ -11,10 +11,10 @@ describe("SidebarService", () => {
         const hashServiceMock = {
             setApplicationState: () => { },
             resetAddressbar: () => { }
-        } as any as HashService;
+        } as unknown as HashService;
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([])],
             providers: [
+                provideStore([]),
                 { provide: HashService, useValue: hashServiceMock },
                 SidebarService
             ]

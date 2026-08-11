@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading.Tasks;
 using IsraelHiking.API.Services.Middleware;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -24,7 +25,7 @@ public class SpaDefaultHtmlMiddlewareTests
     }
     
     [TestMethod]
-    public void TestAPI_ShouldPassThrough()
+    public void TestMatchedEndpoint_ShouldPassThrough()
     {
         var context = new DefaultHttpContext
         {
@@ -37,6 +38,7 @@ public class SpaDefaultHtmlMiddlewareTests
                 Scheme = "http"
             }
         };
+        context.SetEndpoint(new Endpoint(_ => Task.CompletedTask, EndpointMetadataCollection.Empty, "test"));
 
         _middleware.InvokeAsync(context).Wait();
 

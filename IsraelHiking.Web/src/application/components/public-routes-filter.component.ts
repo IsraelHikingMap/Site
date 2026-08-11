@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject } from "@angular/core";
+import { Component, DestroyRef, inject, signal, computed } from "@angular/core";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatButton } from "@angular/material/button";
@@ -24,19 +24,27 @@ export class PublicRoutesFilterComponent {
     private readonly destroyRef = inject(DestroyRef);
     private readonly imageAttributionService = inject(ImageAttributionService);
 
-    public unitString = "km";
-    public filterLengthStart: number;
-    public filterLengthEnd: number;
-    public filterUserName: string;
+    public readonly unitString = signal("km");
+    public readonly filterLengthStart = signal<number>(0);
+    public readonly filterLengthEnd = signal<number>(0);
+    public readonly filterUserName = signal<string>(null);
+
+    private readonly publicRoutesFilter = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.publicRoutesFilter);
+
+    public readonly isCategoryFiltered = computed(() => this.publicRoutesFilter().categories.length !== initialState.inMemoryState.publicRoutesFilter.categories.length);
+
+    public readonly isDifficultyFiltered = computed(() => this.publicRoutesFilter().difficulty.length !== initialState.inMemoryState.publicRoutesFilter.difficulty.length);
+
+    public readonly isLengthFiltered = computed(() => this.filterLengthStart() > 0 || this.filterLengthEnd() < 50);
 
     constructor() {
         this.store.select((state: ApplicationState) => state.configuration.units).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((units) => {
-            this.unitString = this.resources.getLongDistanceUnitString(units);
+            this.unitString.set(this.resources.getLongDistanceUnitString(units));
         });
         this.store.select((state: ApplicationState) => state.inMemoryState.publicRoutesFilter).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(async (filters) => {
-            this.filterLengthStart = filters.lengthRange[0];
-            this.filterLengthEnd = filters.lengthRange[1];
-            this.filterUserName = filters.userId ? await this.imageAttributionService.getUserName(filters.userId) : null;
+            this.filterLengthStart.set(filters.lengthRange[0]);
+            this.filterLengthEnd.set(filters.lengthRange[1]);
+            this.filterUserName.set(filters.userId ? await this.imageAttributionService.getUserName(filters.userId) : null);
         });
     }
 
@@ -61,41 +69,25 @@ export class PublicRoutesFilterComponent {
     }
 
     public isCategorySelected(category: CategoryType) {
-        const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter)) as PublicRoutesFilter;
-        return filters.categories.includes(category);
-    }
-
-    public isCategoryFiltered() {
-        const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter)) as PublicRoutesFilter;
-        return filters.categories.length !== initialState.inMemoryState.publicRoutesFilter.categories.length;
-    }
-
-    public isDifficultyFiltered() {
-        const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter)) as PublicRoutesFilter;
-        return filters.difficulty.length !== initialState.inMemoryState.publicRoutesFilter.difficulty.length;
+        return this.publicRoutesFilter().categories.includes(category);
     }
 
     public isDificultySelected(difficulty: Difficulty) {
-        const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter)) as PublicRoutesFilter;
-        return filters.difficulty.includes(difficulty);
+        return this.publicRoutesFilter().difficulty.includes(difficulty);
     }
 
     public onFilterLengthStartChange(value: string) {
         const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter)) as PublicRoutesFilter;
         filters.lengthRange[0] = +value;
-        this.filterLengthStart = +value;
+        this.filterLengthStart.set(+value);
         this.store.dispatch(new SetPublicRoutesFilterAction(filters));
     }
 
     public onFilterLengthEndChange(value: string) {
         const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter)) as PublicRoutesFilter;
         filters.lengthRange[1] = +value;
-        this.filterLengthEnd = +value;
+        this.filterLengthEnd.set(+value);
         this.store.dispatch(new SetPublicRoutesFilterAction(filters));
-    }
-
-    public isLengthFiltered() {
-        return this.filterLengthStart > 0 || this.filterLengthEnd < 50
     }
 
     public hasUserFilter() {

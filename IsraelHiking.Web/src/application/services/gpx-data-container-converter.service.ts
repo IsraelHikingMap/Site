@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Service } from "@angular/core";
 import { minBy, maxBy, flatten, last, escape } from "lodash-es";
 import { parseString, Builder } from "isomorphic-xml2js";
 import { encode } from "base64-arraybuffer";
@@ -76,7 +76,7 @@ type Gpx = {
     $: { version: string; creator: string; xmlns: string };
 }
 
-@Injectable()
+@Service()
 export class GpxDataContainerConverterService {
     public static getSegmentsFromLatlngs(latlngs: Immutable<LatLngAltTime[]>, routingType: RoutingType): RouteSegmentData[] {
         const segments = [];
@@ -420,13 +420,13 @@ export class GpxDataContainerConverterService {
         });
     }
 
-    private convertExtensionAfterXmlnsRemoval<T>(extensions: any, defaultValue: T): T {
-        extensions = Object.assign(defaultValue, extensions);
-        for (const key in extensions) {
-            if (typeof extensions[key] === "string") {
-                extensions[key] = { _: extensions[key] };
+    private convertExtensionAfterXmlnsRemoval<T>(extensions: unknown, defaultValue: T): T {
+        const merged = Object.assign(defaultValue, extensions) as Record<string, unknown>;
+        for (const key in merged) {
+            if (typeof merged[key] === "string") {
+                merged[key] = { _: merged[key] };
             }
         }
-        return extensions;
+        return merged as T;
     }
 }

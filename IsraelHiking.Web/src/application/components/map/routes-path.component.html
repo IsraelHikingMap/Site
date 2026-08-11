@@ -30,3 +30,12 @@
                 'circle-stroke-width': 3
             }" (layerClick)="pointsLayerClick.emit($event)">
 </mgl-layer>
+<mgl-layer id="non-edit-route-points-casing" type="circle" source="non-edit-routes-geojson" [before]="resources.endOfRoutes"
+    [filter]="['==', '$type', 'Point']" [paint]="{
+                'circle-color': 'transparent',
+                'circle-radius': 10,
+                'circle-stroke-color': 'white',
+                'circle-stroke-opacity': 0.5,
+                'circle-stroke-width': 1
+            }">
+</mgl-layer>

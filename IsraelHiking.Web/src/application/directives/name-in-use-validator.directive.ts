@@ -10,9 +10,9 @@ import { SelectedRouteService } from "../services/selected-route.service";
 })
 export class NameInUseValidatorDirective implements Validator, AfterViewInit {
 
-    public nameInUse = input<string>();
-    public isOverlay = input<boolean>();
-    public isRoute = input<boolean>();
+    public readonly nameInUse = input<string>();
+    public readonly isOverlay = input<boolean>();
+    public readonly isRoute = input<boolean>();
 
     private initialKey: string;
 

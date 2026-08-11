@@ -111,11 +111,17 @@ export class OsmTagsService {
                     poi.properties.poiCategory = "Water";
                     return;
                 case "ridge":
+                case "valley":
                 case "volcano":
                 case "peak":
                     poi.properties.poiIconColor = "black";
                     poi.properties.poiIcon = "icon-peak";
                     poi.properties.poiCategory = "Natural";
+                    return;
+                case "water":
+                    poi.properties.poiIconColor = "#1e80e3";
+                    poi.properties.poiIcon = "icon-tint";
+                    poi.properties.poiCategory = "Water";
                     return;
             }
         }
@@ -191,6 +197,17 @@ export class OsmTagsService {
                     poi.properties.poiIcon = "icon-alpinehut";
                     poi.properties.poiCategory = "Camping";
                     return;
+                case "hotel":
+                case "motel":
+                case "hostel":
+                case "chalet":
+                case "guest_house":
+                case "bed_and_breakfast":
+                case "dormitory":
+                    poi.properties.poiIcon = "icon-bed";
+                    poi.properties.poiIconColor = "#734a08";
+                    poi.properties.poiCategory = "Other";
+                    return;
             }
         }
 
@@ -222,6 +239,11 @@ export class OsmTagsService {
                     poi.properties.poiIconColor = "black";
                     poi.properties.poiCategory = "4x4";
                     poi.properties.poiIcon = "icon-four-by-four";
+                    return;
+                default:
+                    poi.properties.poiIconColor = "black";
+                    poi.properties.poiCategory = "Other";
+                    poi.properties.poiIcon = "icon-map-signs";
                     return;
             }
         }

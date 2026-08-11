@@ -1,11 +1,11 @@
-import { inject, Injectable, NgZone } from "@angular/core";
-import { HttpClient, HttpResponse } from "@angular/common/http";
+import { inject, NgZone, Service } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { firstValueFrom } from "rxjs";
 import { debounceTime, timeout } from "rxjs/operators";
-import { addProtocol } from "maplibre-gl";
 import Dexie from "dexie";
 import deepmerge from "deepmerge";
+import type { GetResourceResponse } from "maplibre-gl";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
@@ -21,7 +21,13 @@ export type ImageUrlAndData = {
     data: string;
 };
 
-@Injectable()
+/**
+ * Prefix of the error thrown when a tile can't be fetched and there's no offline file to fall back to.
+ * This is expected when the device is offline and the relevant area was not downloaded, so it is logged as a warning.
+ */
+export const NO_OFFLINE_FILE_MESSAGE = "There's no offline file";
+
+@Service()
 export class DatabaseService {
     private static readonly STATE_DB_NAME = "State";
     private static readonly STATE_TABLE_NAME = "state";
@@ -79,7 +85,6 @@ export class DatabaseService {
             this.store.reset(initialState);
             return;
         }
-        this.initCustomTileLoadFunction();
         let storedState = initialState;
         const dbState = await this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).get(DatabaseService.STATE_DOC_ID);
         if (dbState != null) {
@@ -104,39 +109,46 @@ export class DatabaseService {
         })
     }
 
-    private initCustomTileLoadFunction() {
-        addProtocol("custom", async (params, _abortController) => {
-            const data = await this.pmTilesService.getTileByUrl(params.url);
-            return { data };
-        });
-        addProtocol("slice", async (params, _abortController) => {
-            // slice://mapeak.com/vector/data/IHM-schema/{z}/{x}/{y}.mvt
-            const splitUrl = params.url.split("/");
-            const type = splitUrl[splitUrl.length - 4];
-            const z = +splitUrl[splitUrl.length - 3];
-            const x = +splitUrl[splitUrl.length - 2];
-            const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
-            const offlineAvailable = await this.pmTilesService.isOfflineFileAvailable(z, x, y, type);
-            try {
-                const response = await firstValueFrom(this.httpClient.get(params.url.replace("slice://", "https://"), { observe: "response", responseType: "arraybuffer" })
-                    .pipe(offlineAvailable ? timeout(2000) : timeout(60000))) as any as HttpResponse<any>;
-                if (!response.ok) {
-                    throw new Error(`Failed to get ${params.url}: ${response.status}`);
-                }
-                const data = response.body ?? new ArrayBuffer(0);
-                return { data, cacheControl: response.headers.get("Cache-Control"), expires: response.headers.get("Expires") };
-            } catch (ex) {
-                // Timeout or other error
-                if (offlineAvailable === false) {
-                    if (!this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)) {
-                        this.store.dispatch(new SetLastOfflineDetectedDate(new Date()));
-                    }
-                    throw new Error(`Failed to get ${params.url}: ${(ex as Error).message}`, { cause: ex });
-                }
-                const data = await this.pmTilesService.getTileByType(z, x, y, type);
-                return { data };
+    /**
+     * Handles the "custom" protocol, registered by the map service.
+     */
+    public async getCustomTile(url: string): Promise<GetResourceResponse<ArrayBuffer>> {
+        const data = await this.pmTilesService.getTileByUrl(url);
+        return { data };
+    }
+
+    /**
+     * Handles the "slice" protocol, registered by the map service.
+     * Falls back to the offline files when the server can not be reached.
+     */
+    public async getSliceTile(url: string): Promise<GetResourceResponse<ArrayBuffer>> {
+        // slice://mapeak.com/vector/data/mapeak-schema/{z}/{x}/{y}.mvt
+        const splitUrl = url.split("/");
+        const type = splitUrl[splitUrl.length - 4];
+        const z = +splitUrl[splitUrl.length - 3];
+        const x = +splitUrl[splitUrl.length - 2];
+        const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
+        const offlineAvailable = await this.pmTilesService.isOfflineFileAvailable(z, x, y, type);
+        try {
+            const response = await firstValueFrom(this.httpClient.get(url.replace("slice://", "https://"), { observe: "response", responseType: "arraybuffer" })
+                .pipe(offlineAvailable ? timeout(2000) : timeout(60000)));
+            if (!response.ok) {
+                throw new Error(`Failed to get ${url}: ${response.status}`);
             }
-        });
+            const data = response.body ?? new ArrayBuffer(0);
+            return { data, cacheControl: response.headers.get("Cache-Control"), expires: response.headers.get("Expires") };
+        } catch (ex) {
+            // Timeout or other error
+            if (offlineAvailable === false) {
+                if (!this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)) {
+                    this.store.dispatch(new SetLastOfflineDetectedDate(new Date()));
+                }
+                throw new Error(`${NO_OFFLINE_FILE_MESSAGE} for tile ${z}/${x}/${y} of ${type}, ` +
+                    `and the server could not be reached: ${(ex as Error).message}`, { cause: ex });
+            }
+            const data = await this.pmTilesService.getTileByType(z, x, y, type);
+            return { data };
+        }
     }
 
     public async uninitialize() {
@@ -164,8 +176,8 @@ export class DatabaseService {
         }
     }
 
-    public addPoiToUploadQueue(feature: GeoJSON.Feature): Promise<any> {
-        return this.uploadQueueDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).put(feature);
+    public async addPoiToUploadQueue(feature: GeoJSON.Feature): Promise<void> {
+        await this.uploadQueueDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).put(feature);
     }
 
     public getPoiFromUploadQueue(featureId: string): Promise<GeoJSON.Feature> {
@@ -176,8 +188,8 @@ export class DatabaseService {
         return this.uploadQueueDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).delete(featureId);
     }
 
-    public storeImages(images: ImageUrlAndData[]): Promise<any> {
-        return this.imagesDatabase.table(DatabaseService.IMAGES_TABLE_NAME).bulkPut(images);
+    public async storeImages(images: ImageUrlAndData[]): Promise<void> {
+        await this.imagesDatabase.table(DatabaseService.IMAGES_TABLE_NAME).bulkPut(images);
     }
 
     public async getImageByUrl(imageUrl: string): Promise<string> {
@@ -188,8 +200,8 @@ export class DatabaseService {
         return null;
     }
 
-    public storeShareUrl(shareUrl: ShareUrl): Promise<any> {
-        return this.shareUrlsDatabase.table(DatabaseService.SHARE_URLS_TABLE_NAME).put(shareUrl);
+    public async storeShareUrl(shareUrl: ShareUrl): Promise<void> {
+        await this.shareUrlsDatabase.table(DatabaseService.SHARE_URLS_TABLE_NAME).put(shareUrl);
     }
 
     public getShareUrlById(id: string): Promise<ShareUrl> {
@@ -200,8 +212,8 @@ export class DatabaseService {
         return this.shareUrlsDatabase.table(DatabaseService.SHARE_URLS_TABLE_NAME).delete(id);
     }
 
-    public storeTrace(trace: Trace): Promise<any> {
-        return this.tracesDatabase.table(DatabaseService.TRACES_TABLE_NAME).put(trace);
+    public async storeTrace(trace: Trace): Promise<void> {
+        await this.tracesDatabase.table(DatabaseService.TRACES_TABLE_NAME).put(trace);
     }
 
     public getTraceById(id: string): Promise<Trace> {

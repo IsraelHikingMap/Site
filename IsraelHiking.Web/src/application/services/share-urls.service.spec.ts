@@ -2,7 +2,7 @@ import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 
 import { ShareUrlsService } from "./share-urls.service";
 import { WhatsAppService } from "./whatsapp.service";
@@ -31,8 +31,8 @@ describe("Share Urls Service", () => {
             warning: () => { }
         };
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([ShareUrlsReducer])],
             providers: [
+                provideStore([ShareUrlsReducer]),
                 { provide: HashService, useValue: hashService },
                 { provide: LoggingService, useValue: loggingService },
                 { provide: DatabaseService, useValue: databaseService },
@@ -376,7 +376,7 @@ describe("Share Urls Service", () => {
 
     it("Should set share Url to store", inject([ShareUrlsService, Store], (shareUrlsService: ShareUrlsService, store: Store) => {
         store.dispatch = vi.fn();
-        shareUrlsService.setShareUrl({} as any);
+        shareUrlsService.setShareUrl({} as unknown as ShareUrl);
         expect(store.dispatch).toHaveBeenCalled();
     }));
 

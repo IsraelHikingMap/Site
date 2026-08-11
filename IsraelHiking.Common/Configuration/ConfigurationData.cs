@@ -5,10 +5,6 @@ namespace IsraelHiking.Common.Configuration;
 public class ConfigurationData
 {
     /// <summary>
-    /// True if you would like to write the merge report, false otherwise
-    /// </summary>
-    public bool WriteMergeReport { get; set; }
-    /// <summary>
     /// The maximal number of points per line for splitting
     /// </summary>
     public int MaxNumberOfPointsPerLine { get; set; }
@@ -73,23 +69,6 @@ public class ConfigurationData
     /// </summary>
     public double MinimalAreaSize { get; set; }
     /// <summary>
-    /// The default factor of less relevant OSM features
-    /// </summary>
-    public double SearchFactor { get; set; }
-    /// <summary>
-    /// This threshold in degrees that is used to determine if two points of interest are close enough to be merged
-    /// </summary>
-    public double MergePointsOfInterestThreshold { get; set; }
-    /// <summary>
-    /// This threshold in degrees that is used to determine if two points of interest are close enough to be merged
-    /// assuming one is from an external source
-    /// </summary>
-    public double MergeExternalPointsOfInterestThreshold { get; set; }
-    /// <summary>
-    /// This threshold in degrees that is used to determine if two points of interest are close enough to be suggested when updating
-    /// </summary>
-    public double ClosestPointsOfInterestThreshold { get; set; }
-    /// <summary>
     /// This distance to the closest highway for adding gates in degrees
     /// </summary>
     public double ClosestHighwayForGates { get; set; }
@@ -101,6 +80,10 @@ public class ConfigurationData
     /// This distance to the closest node to search for an existing gate in meters
     /// </summary>
     public double ClosestNodeWithGate { get; set; }
+    /// <summary>
+    /// Valhalla server address
+    /// </summary>
+    public string ValhallaServerAddress { get; set; }
     /// <summary>
     /// GraphHopper server address
     /// </summary>
@@ -122,9 +105,9 @@ public class ConfigurationData
     /// </summary>
     public string OfflineFilesFolder { get; set; }
     /// <summary>
-    /// A location where offline files are saved in order to allow them to be downloaded
+    /// The base address of the "on-the-fly" service that generates and serves offline files
     /// </summary>
-    public string ExternalFilesFolder { get; set; }
+    public string OnTheFlyFilesAddress { get; set; }
     /// <summary>
     /// OSM server base address
     /// </summary>
@@ -142,14 +125,8 @@ public class ConfigurationData
     /// </summary>
     public List<string> ImageUrlsAllowList { get; set; }
 
-    /// <summary>
-    /// A list of external sources - address and file name
-    /// </summary>
-    public Dictionary<string, string> CsvsDictionary { get; set; }
-
     public ConfigurationData()
     {
-        WriteMergeReport = false;
         MaxSegmentsNumber = 40;
         InitialSplitSimplificationDistanceTolerance = 50;
         MaxDistanceToExistingLineForMerge = 5;
@@ -166,19 +143,16 @@ public class ConfigurationData
         MaxNumberOfPointsPerLine = 1000;
         MaxLengthPerLine = 3000;
         RadialSimplificationAngle = 90;
-        SearchFactor = 1;
-        MergePointsOfInterestThreshold = 0.001; // around 100m
-        MergeExternalPointsOfInterestThreshold = 1 / 60.0; // 1 minute
-        ClosestPointsOfInterestThreshold = 0.001; // around 100m
         ClosestHighwayForGates = 0.0003; // around 30m
         ClosestNodeForGates = 0.0001; // around 10m
         ClosestNodeWithGate = 30;
         GraphhopperServerAddress = "http://localhost:8989/";
+        ValhallaServerAddress = "http://localhost:8002/";
         ElasticsearchServerAddress = "http://localhost:9200/";
         GpsBabelServerAddress = "http://localhost:11987/";
         ImageCreatorServerAddress = "http://localhost:11223/";
         OfflineFilesFolder = "./";
-        ExternalFilesFolder = "./";
+        OnTheFlyFilesAddress = "https://mapeak.com/serve-extract/";
         OsmBaseAddress = "https://www.openstreetmap.org";
         ShareUrlApiAddress = "https://israelhiking.osm.org.il/api/urls/";
         ImageUrlsAllowList =
@@ -189,6 +163,5 @@ public class ConfigurationData
             "jeepolog.com"
         ];
         OverpassAddresses = ["https://z.overpass-api.de/api/interpreter", "https://lz4.overpass-api.de/api/interpreter"];
-        CsvsDictionary = new Dictionary<string, string>();
     }
 }

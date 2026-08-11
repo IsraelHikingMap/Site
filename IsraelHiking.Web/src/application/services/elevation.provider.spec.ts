@@ -2,7 +2,7 @@ import { describe, beforeEach, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { NgxsModule } from "@ngxs/store";
+import { provideStore } from "@ngxs/store";
 
 import { ElevationProvider } from "./elevation.provider";
 import { LoggingService } from "./logging.service";
@@ -32,10 +32,8 @@ describe("ElevationProvider", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [
-                NgxsModule.forRoot([])
-            ],
             providers: [
+                provideStore([]),
                 { provide: LoggingService, useValue: { warning: () => { } } },
                 {
                     provide: PmTilesService, useValue: {

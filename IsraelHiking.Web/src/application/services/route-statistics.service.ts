@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Service } from "@angular/core";
 import linearInterpolator from "linear-interpolator";
 import type { Immutable } from "immer";
 
@@ -49,7 +49,7 @@ export type RouteStatistics = {
     traveledDistance: number;
 };
 
-@Injectable()
+@Service()
 export class RouteStatisticsService {
     public getStatisticsByRange(latlngs: Immutable<LatLngAltTime[]>, start: RouteStatisticsPoint, end: RouteStatisticsPoint): RouteStatistics {
         const routeStatistics = {
@@ -112,7 +112,7 @@ export class RouteStatisticsService {
         return routeStatistics;
     }
 
-    private median(numbers: any[]) {
+    private median(numbers: number[]) {
         const sorted = numbers.slice().sort((a, b) => a - b);
         const middle = Math.floor(sorted.length / 2);
         if (sorted.length % 2 === 0) {

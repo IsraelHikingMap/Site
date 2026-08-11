@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit, ViewEncapsulation, signal } from "@angular/core";
 import { NgClass } from "@angular/common";
 import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
@@ -44,15 +44,15 @@ import type { ApplicationState, ShareUrl } from "../../models";
     imports: [MapComponent, LayersComponent, MatButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, ShareItemComponent, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, ControlComponent, MatButtonToggle, MatButtonToggleGroup, NgClass]
 })
 export class SharesComponent implements OnInit {
-    public loading = false;
-    public showMap = false;
-    public mapStyle: StyleSpecification;
-    public selectedShareUrl: Immutable<ShareUrl> = null;
-    public filteredShareUrls: Immutable<ShareUrl[]> = [];
-    public routesGeoJson: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
-    public sortBy: keyof ShareUrl = "lastModifiedDate";
-    public sortDirection: "asc" | "desc" = "desc";
-    public filter: Record<string, string[]> = {
+    public readonly loading = signal(false);
+    public readonly showMap = signal(false);
+    public readonly mapStyle: StyleSpecification;
+    public readonly selectedShareUrl = signal<Immutable<ShareUrl>>(null);
+    public readonly filteredShareUrls = signal<Immutable<ShareUrl[]>>([]);
+    public readonly routesGeoJson = signal<GeoJSON.FeatureCollection>({ type: "FeatureCollection", features: [] });
+    public readonly sortBy = signal<keyof ShareUrl>("lastModifiedDate");
+    private readonly sortDirection = signal<"asc" | "desc">("desc");
+    public readonly filter: Record<string, string[]> = {
         difficulty: ["Easy", "Moderate", "Hard", "Unknown"],
         type: ["Biking", "Hiking", "4x4", "Unknown"]
     };
@@ -89,9 +89,9 @@ export class SharesComponent implements OnInit {
     }
 
     public async ngOnInit(): Promise<void> {
-        this.loading = true;
+        this.loading.set(true);
         await this.shareUrlsService.syncShareUrls();
-        this.loading = false;
+        this.loading.set(false);
     }
 
     public mapLoaded(map: Map) {
@@ -104,7 +104,7 @@ export class SharesComponent implements OnInit {
     }
 
     public onSortDirectionChange() {
-        this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+        this.sortDirection.set(this.sortDirection() === "asc" ? "desc" : "asc");
         this.runFilter();
     }
 
@@ -122,30 +122,30 @@ export class SharesComponent implements OnInit {
         const searchTerm = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.searchTerm);
         const filteredShareUrls = shareUrls.filter((share: Immutable<ShareUrl>) => {
             for (const key in this.filter) {
-                const propValue = share[key as any as keyof ShareUrl];
-                if (this.filter[key] && !this.filter[key].includes(propValue as any)) {
+                const propValue = share[key as keyof ShareUrl] as string;
+                if (this.filter[key] && !this.filter[key].includes(propValue)) {
                     return false;
                 }
             }
             return true;
         }).filter((share) => this.findInShareUrl(share, searchTerm));
 
-        let sortBy = this.sortBy;
+        let sortBy: keyof ShareUrl | ((share: Immutable<ShareUrl>) => number) = this.sortBy();
         switch (sortBy) {
             case "length":
-                sortBy = [((share: ShareUrl) => share.length ?? 0)] as any;
+                sortBy = (share: Immutable<ShareUrl>) => share.length ?? 0;
                 break;
             case "difficulty":
-                sortBy = [((share: ShareUrl) => {
+                sortBy = (share: Immutable<ShareUrl>) => {
                     if (share.difficulty === "Easy") return 1;
                     if (share.difficulty === "Moderate") return 2;
                     if (share.difficulty === "Hard") return 3;
                     if (share.difficulty === "Very Hard") return 4;
                     return 0;
-                })] as any;
+                };
                 break;
         }
-        this.filteredShareUrls = orderBy(filteredShareUrls, sortBy, this.sortDirection);
+        this.filteredShareUrls.set(orderBy(filteredShareUrls, [sortBy], this.sortDirection()));
     }
 
 
@@ -158,15 +158,15 @@ export class SharesComponent implements OnInit {
     }
 
     public async moveToShare(shareUrl: Immutable<ShareUrl>) {
-        this.showMap = true;
+        this.showMap.set(true);
         const share = await this.shareUrlsService.getShareUrl(shareUrl.id);
-        this.selectedShareUrl = share;
+        this.selectedShareUrl.set(share);
         const features: GeoJSON.Feature[] = [];
         for (const route of share.dataContainer.routes) {
             features.push(...this.selectedRouteService.createFeaturesForRoute(route));
         }
-        this.routesGeoJson = { type: "FeatureCollection", features };
-        const bounds = SpatialService.getBoundsForFeatureCollection(this.routesGeoJson);
+        this.routesGeoJson.set({ type: "FeatureCollection", features });
+        const bounds = SpatialService.getBoundsForFeatureCollection(this.routesGeoJson());
         this.mapService.fitBounds(bounds, 100, { top: 150, left: 50, bottom: window.innerHeight / 2, right: 50 });
     }
 
@@ -185,7 +185,7 @@ export class SharesComponent implements OnInit {
                     await this.shareUrlsService.deleteShareUrl(shareUrl);
                     this.runFilter();
                 } catch (ex) {
-                    this.toastService.error(ex, this.resources.unableToDeleteShare);
+                    this.toastService.error(ex, this.resources.unableToDeleteCloudSave);
                 }
             },
             type: "YesNo"
@@ -198,7 +198,7 @@ export class SharesComponent implements OnInit {
             return;
         }
         this.toastService.confirm({
-            message: this.resources.thisWillDeteleAllCurrentRoutesAreYouSure,
+            message: this.resources.thisWillDeleteAllCurrentRoutesAreYouSure,
             confirmAction: async () => {
                 this.router.navigate([RouteStrings.ROUTE_SHARE, shareUrl.id]);
             },
@@ -250,11 +250,11 @@ export class SharesComponent implements OnInit {
     }
 
     private clearShareUrlIfSelected(id: string): boolean {
-        if (this.selectedShareUrl?.id !== id) {
+        if (this.selectedShareUrl()?.id !== id) {
             return false;
         }
-        this.selectedShareUrl = null;
-        this.routesGeoJson = { type: "FeatureCollection", features: [] };
+        this.selectedShareUrl.set(null);
+        this.routesGeoJson.set({ type: "FeatureCollection", features: [] });
         return true;
     }
 }

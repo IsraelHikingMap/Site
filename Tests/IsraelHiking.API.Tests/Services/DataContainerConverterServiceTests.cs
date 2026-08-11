@@ -356,12 +356,11 @@ public class DataContainerConverterServiceTests
     }
 
     [TestMethod]
-    [ExpectedException(typeof(AggregateException))]
     public void ConvertCustomToDataContainer_ShouldNotConvertToDataContainerDueToSecurityReasons()
     {
         _gpsBabelGateway.ConvertFileFromat(_randomBytes, "kuku", Arg.Any<string>()).Returns(_simpleGpx.ToBytes());
 
-        _converterService.ToDataContainer(_randomBytes, "kuku").Wait();
+        Assert.ThrowsExactly<AggregateException>(() => _converterService.ToDataContainer(_randomBytes, "kuku").Wait());
     }
 
     [TestMethod]

@@ -1,6 +1,7 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
+import { signal } from "@angular/core";
 import { inject, TestBed } from "@angular/core/testing";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { MatSnackBar, MatSnackBarRef, TextOnlySnackBar } from "@angular/material/snack-bar";
 import { MatDialog } from "@angular/material/dialog";
 
 import { IConfirmOptions, ToastService } from "./toast.service";
@@ -11,14 +12,21 @@ import { LoggingService } from "./logging.service";
 describe("ToastService", () => {
     let confirmDialog: ConfirmDialogComponent;
     beforeEach(() => {
-        confirmDialog = {} as any;
+        confirmDialog = {
+            hasTwoButtons: signal(false),
+            confirmMessage: signal<string>(null),
+            confirmIcon: signal<string>(null),
+            confirmButtonText: signal<string>(null),
+            declineIcon: signal<string>(null),
+            declineButtonText: signal<string>(null)
+        } as unknown as ConfirmDialogComponent;
         const snackBar = {
-            open: () => null as any,
+            open: () => null as unknown as MatSnackBarRef<TextOnlySnackBar>,
             dismiss: vi.fn(),
             openFromComponent: () => {
                 return { instance: confirmDialog };
             }
-        } as any;
+        } as unknown as MatSnackBar;
         const resourceServiceMock = {
             yes: "yes",
             no: "no",
@@ -58,7 +66,7 @@ describe("ToastService", () => {
                 confirmDialog.confirmAction();
 
                 expect(snackBar.dismiss).toHaveBeenCalled();
-                expect(confirmDialog.confirmButtonText).toBe(resourcesService.ok);
+                expect(confirmDialog.confirmButtonText()).toBe(resourcesService.ok);
             }
         )
     );
@@ -78,8 +86,8 @@ describe("ToastService", () => {
                 confirmDialog.declineAction();
 
                 expect(snackBar.dismiss).toHaveBeenCalled();
-                expect(confirmDialog.confirmButtonText).toBe(resourcesService.ok);
-                expect(confirmDialog.declineButtonText).toBe(resourcesService.cancel);
+                expect(confirmDialog.confirmButtonText()).toBe(resourcesService.ok);
+                expect(confirmDialog.declineButtonText()).toBe(resourcesService.cancel);
             }
         )
     );
@@ -99,8 +107,8 @@ describe("ToastService", () => {
                 confirmDialog.declineAction();
 
                 expect(snackBar.dismiss).toHaveBeenCalled();
-                expect(confirmDialog.confirmButtonText).toBe(resourcesService.yes);
-                expect(confirmDialog.declineButtonText).toBe(resourcesService.no);
+                expect(confirmDialog.confirmButtonText()).toBe(resourcesService.yes);
+                expect(confirmDialog.declineButtonText()).toBe(resourcesService.no);
             }
         )
     );
@@ -122,8 +130,8 @@ describe("ToastService", () => {
                 confirmDialog.confirmAction();
 
                 expect(snackBar.dismiss).toHaveBeenCalled();
-                expect(confirmDialog.confirmButtonText).toBe(options.customConfirmText);
-                expect(confirmDialog.declineButtonText).toBe(options.customDeclineText);
+                expect(confirmDialog.confirmButtonText()).toBe(options.customConfirmText);
+                expect(confirmDialog.declineButtonText()).toBe(options.customDeclineText);
             }
         )
     );
@@ -134,7 +142,7 @@ describe("ToastService", () => {
                 const undoAction = vi.fn();
                 const snackbarRef = {
                     onAction: () => ({ subscribe: (callback: () => void) => callback() })
-                } as any;
+                } as unknown as MatSnackBarRef<TextOnlySnackBar>;
                 vi.spyOn(snackBar, "open").mockReturnValue(snackbarRef);
                 service.undo("message", undoAction);
                 expect(undoAction).toHaveBeenCalled();

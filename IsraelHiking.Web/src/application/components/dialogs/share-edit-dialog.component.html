@@ -6,7 +6,7 @@
   <div mat-dialog-content>
     <div class="flex flex-row justify-center">
       <div class="w-[256px] h-[256px]" (keydown.meta.v)="pasteImage()" (keydown.ctrl.v)="pasteImage()">
-        @if (!shareUrl.base64Preview) {
+        @if (!base64Preview()) {
         <mgl-map [interactive]="false" [mapStyle]="style" [attributionControl]="false"
           [canvasContextAttributes]="{ preserveDrawingBuffer: true }" (mapLoad)="mapLoaded($event)">
           <layers [allowOffline]="true"></layers>
@@ -23,7 +23,7 @@
         </mgl-map>
         } @else {
         <div class="relative w-full h-[200px]">
-          <img [src]="shareUrl.base64Preview" class="w-full object-contain img-center" (error)="removeImage()" />
+          <img [src]="base64Preview()" class="w-full object-contain img-center" (error)="removeImage()" />
           <button matMiniFab color="" class="absolute! top-2 end-2" (click)="removeImage()" analyticsOn="click"
             analyticsCategory="Share" analyticsLabel="Remove image">
             <i class="fa icon-trash fa-2x pt-1"></i>
@@ -46,15 +46,15 @@
     @if (canUpdate) {
     <div class="flex flex-row">
       <mat-checkbox [(ngModel)]="updateCurrentShare"
-        (change)="updateCurrentShareChanged($event)">{{resources.updateCurrentShare}}</mat-checkbox>
+        (change)="updateCurrentShareChanged($event)">{{resources.updateCurrentCloudSave}}</mat-checkbox>
     </div>
     }
     <div class="flex flex-row items-center">
       <mat-radio-group [(ngModel)]="shareUrl.public">
         <mat-radio-button [value]="false">{{resources.private}}</mat-radio-button>
-        <mat-radio-button [value]="true" [disabled]="!canPublishPublic">{{resources.public}}</mat-radio-button>
+        <mat-radio-button [value]="true" [disabled]="!canPublishPublic()">{{resources.public}}</mat-radio-button>
       </mat-radio-group>
-      @if (!canPublishPublic) {
+      @if (!canPublishPublic()) {
       <span class="m-2">
         <i class="fa icon-info-circle" [matTooltip]="resources.contactUsToPublishAPublicRoute"></i>
       </span>
@@ -109,11 +109,11 @@
     <div class="inline-flex flex-row gap-1 text-sm mx-2">
       <div matTooltip="{{resources.gain}}" matTooltipPosition="above">
         <i class="fa icon-arrow-up"></i>
-        <span class="mx-1">{{shareUrl.gain | distance}}</span>
+        <span class="mx-1">{{shareUrl.gain | distance:'elevation'}}</span>
       </div>
       <div matTooltip="{{resources.loss}}" matTooltipPosition="above">
         <i class="fa icon-arrow-down"></i>
-        <span class="mx-1">{{shareUrl.loss | distance}}</span>
+        <span class="mx-1">{{shareUrl.loss | distance:'elevation'}}</span>
       </div>
       <div matTooltip="{{resources.length}}" matTooltipPosition="above">
         <i class="fa icon-arrow-right"></i>
@@ -124,9 +124,9 @@
   <div mat-dialog-actions>
     <div class="flex flex-row w-full">
       <button mat-flat-button class="w-full" (click)="uploadShareUrl()"
-        [disabled]="isLoading || !canUpload()" analyticsOn="click" analyticsCategory="Share"
-        analyticsLabel="Share {{updateCurrentShare ? 'update' : 'create'}}">{{updateCurrentShare ? resources.update :
-        resources.generateUrlToShareWithYourFriends}}</button>
+        [disabled]="isLoading() || !canUpload()" analyticsOn="click" analyticsCategory="Share"
+        analyticsLabel="Share {{updateCurrentShare() ? 'update' : 'create'}}">{{updateCurrentShare() ? resources.update :
+        resources.saveInCloudAndShareWithYourFriends}}</button>
     </div>
   </div>
 </div>

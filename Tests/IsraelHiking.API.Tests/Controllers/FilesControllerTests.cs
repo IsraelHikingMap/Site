@@ -175,7 +175,7 @@ public class FilesControllerTests
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Throws(new Exception("some text"));
 
-        Assert.ThrowsException<AggregateException>(() => _controller.GetOfflineFiles(DateTime.Now, 0, 0).Result);
+        Assert.ThrowsExactly<AggregateException>(() => _controller.GetOfflineFiles(DateTime.Now, 0, 0).Result);
     }
 
     [TestMethod]
@@ -211,11 +211,12 @@ public class FilesControllerTests
     {
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
-        _offlineFilesService.GetFileContent("file").Returns(new MemoryStream());
+        _offlineFilesService.GetFileContent("file", null, null).Returns(((Stream)new MemoryStream(), (long?)10));
 
         var results = _controller.GetOfflineFile("file", null, null).Result as FileResult;
 
         Assert.IsNotNull(results);
+        Assert.AreEqual(10, _controller.Response.ContentLength);
     }
 
     [TestMethod]
@@ -223,7 +224,7 @@ public class FilesControllerTests
     {
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
-        _offlineFilesService.GetFileContent("7/1/2/file.extension").Returns(new MemoryStream());
+        _offlineFilesService.GetFileContent("file.extension", 1, 2).Returns(((Stream)new MemoryStream(), (long?)null));
 
         var results = _controller.GetOfflineFile("file.extension", 1, 2).Result as FileResult;
 

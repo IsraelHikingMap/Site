@@ -1,9 +1,9 @@
 import { describe, beforeEach, vi, it, expect, type Mock } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
-import { HttpEventType, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 
-import { FileService, SaveAsFactory } from "./file.service";
+import { FileService, SaveAsFactory, type HTMLElementInputChangeEvent } from "./file.service";
 import { ImageResizeService } from "./image-resize.service";
 import { RunningContextService } from "./running-context.service";
 import { SelectedRouteService } from "./selected-route.service";
@@ -26,13 +26,13 @@ describe("FileService", () => {
                     southWest: { lat: 1, lng: 1 },
                     routes: [{ markers: [{} as MarkerData] }] as RouteData[]
                 } as DataContainer)
-        } as any as ImageResizeService;
+        } as unknown as ImageResizeService;
         const selectedRouteService = {
             addRoutes: vi.fn()
-        } as any as SelectedRouteService;
+        } as unknown as SelectedRouteService;
         const mapService = {
             fitBounds: vi.fn()
-        } as any as MapService;
+        } as unknown as MapService;
         const loggingServiceMock = {
             info: () => { },
             error: () => { }
@@ -107,25 +107,15 @@ describe("FileService", () => {
     ));
 
     it("Should not get a file from event when there's no files", inject([FileService], (service: FileService) => {
-        const file = service.getFileFromEvent({ target: { files: [] } });
+        const files = service.getFilesFromEvent({ target: { files: [] } } as unknown as Event);
 
-        expect(file).toBe(null);
-    }));
-
-    it("Should get a file from event and clear input", inject([FileService], (service: FileService) => {
-        const event = {
-            target: { files: [{}], value: "123" }
-        };
-        const file = service.getFileFromEvent(event);
-
-        expect(file).not.toBe(null);
-        expect(event.target.value).toBe("");
+        expect(files).toHaveLength(0);
     }));
 
     it("Should not get a files from event", inject([FileService], (service: FileService) => {
         const event = {
-            target: { dataTransfer: [] as any[] }
-        };
+            target: { dataTransfer: [] as DataTransferItem[] }
+        } as unknown as Event;
         const files = service.getFilesFromEvent(event);
 
         expect(files.length).toBe(0);
@@ -134,7 +124,7 @@ describe("FileService", () => {
     it("Should get a files from event and clear input", inject([FileService], (service: FileService) => {
         const event = {
             target: { files: [{}], value: "123" }
-        };
+        } as unknown as HTMLElementInputChangeEvent;
         const files = service.getFilesFromEvent(event);
 
         expect(files.length).toBe(1);
@@ -158,36 +148,6 @@ describe("FileService", () => {
         expect(saveAsSpy).toHaveBeenCalled();
     }));
 
-    it("Should get file with progress", inject([FileService, HttpTestingController],
-        async (service: FileService, mockBackend: HttpTestingController) => {
-            const spy = vi.fn();
-            const url = "http://123.gpx";
-            const promise = service.getFileContentWithProgress(url, spy);
-
-            const req = mockBackend.expectOne(url);
-            req.event({ type: HttpEventType.DownloadProgress, loaded: 7, total: 10 });
-
-            expect(spy).toHaveBeenCalled();
-
-            req.event({ type: HttpEventType.Response, body: null, ok: true } as any);
-
-            return promise;
-        }
-    ));
-
-    it("Should reject if response is no OK", inject([FileService, HttpTestingController],
-        async (service: FileService, mockBackend: HttpTestingController) => {
-            const spy = vi.fn();
-            const url = "http://123.gpx";
-            const promise = service.getFileContentWithProgress(url, spy);
-
-            const req = mockBackend.expectOne(url);
-            req.event({ type: HttpEventType.Response, body: null, ok: false } as any);
-
-            await expect(promise).rejects.toThrow();
-        }
-    ));
-
     it("Should not download a file to cache due to network error", inject([FileService],
         async (service: FileService) => {
             const progressSpy = vi.fn();
@@ -195,7 +155,7 @@ describe("FileService", () => {
 
             const mockResponse = { ok: false };
 
-            const fetchSpy = vi.spyOn(window, "fetch").mockReturnValue(Promise.resolve(mockResponse as any));
+            const fetchSpy = vi.spyOn(window, "fetch").mockReturnValue(Promise.resolve(mockResponse as unknown as Response));
 
             await expect(service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, new AbortController())).rejects.toThrow();
 
@@ -230,7 +190,7 @@ describe("FileService", () => {
             // Mock fetch
             const fetchSpy = vi
                 .spyOn(window, "fetch")
-                .mockReturnValue(Promise.resolve(mockResponse as any));
+                .mockReturnValue(Promise.resolve(mockResponse as unknown as Response));
 
             await service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, new AbortController());
 
@@ -264,7 +224,7 @@ describe("FileService", () => {
             };
 
             // Mock fetch
-            const fetchSpy = vi.spyOn(window, "fetch").mockReturnValue(Promise.resolve(mockResponse as any));
+            const fetchSpy = vi.spyOn(window, "fetch").mockReturnValue(Promise.resolve(mockResponse as unknown as Response));
 
             const abortController = new AbortController();
             const promise = service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, abortController);

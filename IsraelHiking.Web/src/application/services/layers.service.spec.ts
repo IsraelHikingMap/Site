@@ -2,7 +2,7 @@ import { describe, beforeEach, vi, it, expect, type Mock } from "vitest";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { inject, TestBed } from "@angular/core/testing";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 
 import { Urls } from "../urls";
 import { ResourcesService } from "./resources.service";
@@ -16,8 +16,8 @@ import type { EditableLayer, LayerData } from "../models";
 describe("LayersService", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([LayersReducer, UserInfoReducer])],
             providers: [
+                provideStore([LayersReducer, UserInfoReducer]),
                 LayersService,
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
@@ -143,7 +143,7 @@ describe("LayersService", () => {
             }
         });
 
-        expect(service.getSelectedBaseLayer()).toEqual(layer2);
+        expect(service.selectedBaseLayer()).toEqual(layer2);
     }));
 
     it("should return first base layer when selected layer not found", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -158,7 +158,7 @@ describe("LayersService", () => {
             }
         });
 
-        expect(service.getSelectedBaseLayer()).toEqual(DEFAULT_BASE_LAYERS[0]);
+        expect(service.selectedBaseLayer()).toEqual(DEFAULT_BASE_LAYERS[0]);
     }));
 
     it("should return the base layer address when it contains '{x}'", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -365,6 +365,27 @@ describe("LayersService", () => {
 
         expect(data.baseLayer).toEqual(baseLayer);
         expect(data.overlays.length).toBe(1);
+        expect(data.overlays[0]).toEqual(overlay1);
+    }));
+
+    it("should get data container without null overlays when a visible overlay key is stale", inject([LayersService, Store], (service: LayersService, store: Store) => {
+        const overlay1: EditableLayer = { key: "overlay1" } as EditableLayer;
+        store.reset({
+            layersState: {
+                baseLayers: [],
+                overlays: [overlay1],
+                selectedBaseLayerKey: "base",
+                visibleOverlays: [overlay1.key, "removed-overlay"]
+            },
+            userState: {
+                userInfo: null
+            }
+        });
+
+        const data = service.getData();
+
+        expect(data.overlays.length).toBe(1);
+        expect(data.overlays.every(o => o != null)).toBeTruthy();
         expect(data.overlays[0]).toEqual(overlay1);
     }));
 

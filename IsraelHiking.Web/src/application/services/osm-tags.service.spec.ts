@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { OsmTagsService, PoiProperties } from "./osm-tags.service";
 
-function createFeature(properties: any): GeoJSON.Feature {
+function createFeature(properties: GeoJSON.GeoJsonProperties): GeoJSON.Feature {
     return {
         type: "Feature",
         properties: properties,
@@ -12,10 +12,10 @@ function createFeature(properties: any): GeoJSON.Feature {
     };
 }
 
-function createPoi(properties: any = {}): GeoJSON.Feature<GeoJSON.Geometry, PoiProperties> {
+function createPoi(properties: Partial<PoiProperties> = {}): GeoJSON.Feature<GeoJSON.Geometry, PoiProperties> {
     return {
         properties
-    } as any;
+    } as unknown as GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>;
 }
 
 describe("OsmTagsService", () => {
@@ -157,6 +157,18 @@ describe("OsmTagsService", () => {
     it("Should set icon color category for spring", () => {
         // Arrange
         const feature = createFeature({ natural: "spring" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("#1e80e3");
+        expect(poi.properties.poiIcon).toBe("icon-tint");
+        expect(poi.properties.poiCategory).toBe("Water");
+    });
+
+    it("Should set icon color category for water", () => {
+        // Arrange
+        const feature = createFeature({ natural: "water" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);
@@ -514,6 +526,42 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiIconColor).toBe("black");
     });
 
+    it("Should set icon color category for hotel", () => {
+        // Arrange
+        const feature = createFeature({ tourism: "hotel" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("Other");
+        expect(poi.properties.poiIcon).toBe("icon-bed");
+        expect(poi.properties.poiIconColor).toBe("#734a08");
+    });
+
+    it("Should set icon color category for motel", () => {
+        // Arrange
+        const feature = createFeature({ tourism: "motel" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("Other");
+        expect(poi.properties.poiIcon).toBe("icon-bed");
+        expect(poi.properties.poiIconColor).toBe("#734a08");
+    });
+
+    it("Should set icon color category for hostel", () => {
+        // Arrange
+        const feature = createFeature({ tourism: "hostel" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("Other");
+        expect(poi.properties.poiIcon).toBe("icon-bed");
+        expect(poi.properties.poiIconColor).toBe("#734a08");
+    });
+
     it("Should set icon color category for wikipedia", () => {
         // Arrange
         const feature = createFeature({ wikipedia: "page" });
@@ -637,6 +685,18 @@ describe("OsmTagsService", () => {
     it("Should set icon color category for natural ridge", () => {
         // Arrange
         const feature = createFeature({ natural: "ridge" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("black");
+        expect(poi.properties.poiIcon).toBe("icon-peak");
+        expect(poi.properties.poiCategory).toBe("Natural");
+    });
+
+    it("Should set icon color category for natural valley", () => {
+        // Arrange
+        const feature = createFeature({ natural: "valley" });
         const poi = createPoi();
         // Act
         OsmTagsService.setIconColorCategory(feature, poi);

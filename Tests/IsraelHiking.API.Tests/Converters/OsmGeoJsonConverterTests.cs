@@ -62,7 +62,7 @@ public class OsmGeoJsonConverterTests
         var feature = _converter.ToGeoJson(node);
         var point = feature.Geometry as Point;
 
-        Assert.AreEqual(feature.Attributes[NAME], NAME);
+        Assert.AreEqual(NAME, feature.Attributes[NAME]);
         Assert.IsNotNull(point);
         var position = point.Coordinate;
         Assert.IsNotNull(position);
@@ -106,7 +106,7 @@ public class OsmGeoJsonConverterTests
         var feature = _converter.ToGeoJson(way);
         var lineString = feature.Geometry as LineString;
 
-        Assert.AreEqual(feature.Attributes[NAME], NAME);
+        Assert.AreEqual(NAME, feature.Attributes[NAME]);
         Assert.IsNotNull(lineString);
         Assert.AreEqual(node1.Latitude, lineString.Coordinates.First().Y);
         Assert.AreEqual(node2.Longitude, lineString.Coordinates.Last().X);
@@ -130,7 +130,7 @@ public class OsmGeoJsonConverterTests
         var feature = _converter.ToGeoJson(way);
         var polygon = feature.Geometry as Polygon;
 
-        Assert.AreEqual(feature.Attributes[NAME], NAME);
+        Assert.AreEqual(NAME, feature.Attributes[NAME]);
         Assert.IsNotNull(polygon);
         Assert.AreEqual(node1.Latitude, polygon.Coordinates.First().Y);
         Assert.AreEqual(node1.Longitude, polygon.Coordinates.Last().X);

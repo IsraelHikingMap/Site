@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { firstValueFrom, timeout } from "rxjs";
@@ -14,7 +14,7 @@ import type { ApplicationState } from "../models";
 
 const OFFLINE_MAPS_SUBSCRIPTION = "offline_map";
 
-@Injectable()
+@Service()
 export class PurchaseService {
 
     private readonly runningContextService = inject(RunningContextService);
@@ -82,7 +82,7 @@ export class PurchaseService {
             }
             this.checkAndUpdateOfflineAvailability();
         } catch (error) {
-            this.loggingService.error("[Store] Failed to initialize purchases connection: " + (error as any).message);
+            this.loggingService.error("[Store] Failed to initialize purchases connection: " + (error as Error).message);
         }
     }
 

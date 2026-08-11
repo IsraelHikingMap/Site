@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
+import { EventEmitter, NgZone, inject, Service } from "@angular/core";
 import { BackgroundGeolocation, Location, CallbackError } from "@capgo/background-geolocation";
 import { App } from "@capacitor/app";
 import { Store } from "@ngxs/store";
@@ -12,14 +12,14 @@ import { SpatialService } from "./spatial.service";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models";
 
-@Injectable()
+@Service()
 export class GeoLocationService {
     private isBackground = false;
     private wasInitialized = false;
     private lastReceivedPosition: GeolocationPosition | null = null;
 
-    public positionWhileInBackground = new EventEmitter<GeolocationPosition>();
-    public backToForeground = new EventEmitter<void>();
+    public readonly positionWhileInBackground = new EventEmitter<GeolocationPosition>();
+    public readonly backToForeground = new EventEmitter<void>();
 
     private readonly resources = inject(ResourcesService);
     private readonly selectedRouteService = inject(SelectedRouteService);
@@ -41,12 +41,19 @@ export class GeoLocationService {
         };
     }
 
-    public initialize() {
+    /**
+     * Picks tracking back up where the last session left it. Deliberately not part of initialize:
+     * it asks for the location permission, which should only happen once there is a map to show the
+     * position on, never to someone who just opened a content page.
+     */
+    public restoreTracking() {
         if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking !== "disabled") {
             this.store.dispatch(new SetTrackingStateAction("disabled"));
             this.enable();
         }
+    }
 
+    public initialize() {
         this.store.select((s: ApplicationState) => s.routes.present).subscribe(() => {
             this.sendPlannedRouteToPluginIfNeeded();
         });

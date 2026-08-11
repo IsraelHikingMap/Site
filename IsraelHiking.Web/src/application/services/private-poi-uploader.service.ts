@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { Router } from "@angular/router";
 import { flatten } from "lodash-es";
 import { Store } from "@ngxs/store";
@@ -12,7 +12,7 @@ import { SetUploadMarkerDataAction } from "../reducers/poi.reducer";
 import { POINTS_OF_INTEREST_CATEGORIES } from "../reducers/initial-state";
 import type { LinkData, LatLngAltTime, MarkerData } from "../models";
 
-@Injectable()
+@Service()
 export class PrivatePoiUploaderService {
 
     private readonly router = inject(Router);
@@ -33,9 +33,15 @@ export class PrivatePoiUploaderService {
         if (imageLink) {
             urls = [imageLink];
         }
+        const isCopyOfPublicOSMPoi = !!id && !validate(id) && (
+            id.toLocaleLowerCase().startsWith("way") ||
+            id.toLocaleLowerCase().startsWith("node") ||
+            id.toLocaleLowerCase().startsWith("relation")
+        );
+        const descriptionToUpload = isCopyOfPublicOSMPoi || !description ? "" : description.substring(0, 255);
         const markerData: MarkerData = {
             id,
-            description: description ? description.substring(0, 255) : "",
+            description: descriptionToUpload,
             title,
             latlng: latLng,
             type: markerType,
@@ -44,12 +50,7 @@ export class PrivatePoiUploaderService {
 
         this.store.dispatch(new SetUploadMarkerDataAction(markerData));
 
-        if (id && !validate(id) && (
-            id.toLocaleLowerCase().startsWith("way") ||
-            id.toLocaleLowerCase().startsWith("node") ||
-            id.toLocaleLowerCase().startsWith("relation")
-        )) {
-            // id is of an existing OSM POI:
+        if (isCopyOfPublicOSMPoi) {
             this.router.navigate([RouteStrings.ROUTE_POI, "OSM", id],
                 { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
             return;
@@ -83,7 +84,7 @@ export class PrivatePoiUploaderService {
             confirmAction: () => {
                 const updateMarkerData: MarkerData = {
                     id: results.id,
-                    description: description ? description.substring(0, 255) : "",
+                    description: descriptionToUpload,
                     title,
                     latlng: latLng,
                     type: markerType,

@@ -20,9 +20,9 @@ export class FileSaveDialogComponent {
 
     private readonly fileService = inject(FileService);
     private readonly toastService = inject(ToastService);
-    private data = inject<RouteData>(MAT_DIALOG_DATA)
+    private readonly data = inject<RouteData>(MAT_DIALOG_DATA)
 
-    public formats: FormatViewModel[] = this.fileService.formats;
+    public readonly formats: FormatViewModel[] = this.fileService.formats;
 
     public async saveAs(format: FormatViewModel) {
         const outputFormat = format.outputFormat;
@@ -32,7 +32,7 @@ export class FileSaveDialogComponent {
         try {
             await this.fileService.saveToFile(`${this.getName(data)}.${format.extension}`, outputFormat, data);
         } catch (ex) {
-            this.toastService.error(ex as Error, this.resources.unableToSaveToFile);
+            this.toastService.error(ex as Error, this.resources.unableToExport);
         }
     }
 

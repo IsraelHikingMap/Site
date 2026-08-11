@@ -127,9 +127,10 @@ class CarBackendService {
 
     /**
      * Fetch turn-by-turn instructions for an existing route by map-matching its [points] to the
-     * network. Mirrors POST /api/routing (the map-match action) with the routing [routingType] and
-     * [language] as query parameters and the points as the JSON body. Returns an empty list (so the
-     * caller can keep its locally-synthesized turns) if the call fails or carries no instructions.
+     * network. Mirrors POST /api/routing (the map-match action) with the routing [routingType],
+     * [language] and the v2 instructions format as query parameters and the points as the JSON body.
+     * Returns an empty list (so the caller can keep its locally-synthesized turns) if the call fails
+     * or carries no instructions.
      */
     fun mapMatch(
             points: List<LatLng>,
@@ -147,6 +148,7 @@ class CarBackendService {
                         .addPathSegment("routing")
                         .addQueryParameter("type", routingType)
                         .addQueryParameter("language", language)
+                        .addQueryParameter("instructionsFormat", "v2")
                         .build()
         val body =
                 JSONArray().apply {

@@ -4,7 +4,6 @@ import { Subject, mergeMap } from "rxjs";
 import { Store } from "@ngxs/store";
 import type { SourceSpecification, LayerSpecification } from "maplibre-gl";
 
-import { ResourcesService } from "../../services/resources.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models";
 
@@ -13,20 +12,19 @@ import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from ".
     templateUrl: "./automatic-layer-presentation.component.html"
 })
 export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, OnDestroy {
-    public visible = input<boolean>();
-    public before = input<string>();
-    public isBaselayer = input<boolean>();
-    public layerData = input<EditableLayer>();
-    public allowOffline = input<boolean>();
+    public readonly visible = input<boolean>();
+    public readonly before = input<string>();
+    public readonly isBaselayer = input<boolean>();
+    public readonly layerData = input<EditableLayer>();
+    public readonly allowOffline = input<boolean>();
 
-    private subscriptions: OutputRefSubscription[] = [];
+    private readonly subscriptions: OutputRefSubscription[] = [];
     private jsonSourcesIds: string[] = [];
     private jsonLayersIds: string[] = [];
-    private mapLoadedPromise: Promise<void>;
+    private readonly mapLoadedPromise: Promise<void>;
     private currentLanguageCode: LanguageCode;
-    private recreateQueue = new Subject<() => Promise<void>>();
+    private readonly recreateQueue = new Subject<() => Promise<void>>();
 
-    public readonly resources = inject(ResourcesService);
 
     private readonly mapComponent = inject(MapComponent);
     private readonly defaultStyleService = inject(DefaultStyleService);
@@ -90,7 +88,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             this.jsonSourcesIds.push(sourceKey);
         }
         for (const layer of layers) {
-            if (!this.isBaselayer() && layer.metadata && !(layer.metadata as any)["IHM:overlay"]) {
+            if (!this.isBaselayer() && layer.metadata && !(layer.metadata as Record<string, unknown>)["IHM:overlay"]) {
                 continue;
             }
             if (!this.isBaselayer() && layer.type === "background") {

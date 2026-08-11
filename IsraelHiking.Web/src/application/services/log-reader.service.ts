@@ -1,8 +1,8 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { MapService } from "./map.service";
 import { SpatialService } from "./spatial.service";
 
-@Injectable()
+@Service()
 export class LogReaderService {
 
     private readonly mapService = inject(MapService);

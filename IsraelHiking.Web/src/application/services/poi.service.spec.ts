@@ -2,7 +2,7 @@ import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
 import type { GeoJSONFeature } from "maplibre-gl";
 
@@ -19,7 +19,7 @@ import { MapService } from "./map.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
 import { INatureService } from "./inature.service";
 import { WikidataService } from "./wikidata.service";
-import { ImageAttributionService } from "./image-attribution.service";
+import { ImageAttributionService, type ImageAttribution } from "./image-attribution.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { GeoJSONUtils } from "./geojson-utils";
 import { GeoJsonParser } from "./geojson.parser";
@@ -45,7 +45,7 @@ describe("Poi Service", () => {
             deletePois: vi.fn().mockReturnValue(Promise.resolve()),
             storePois: vi.fn().mockReturnValue(Promise.resolve()),
             storeImages: vi.fn().mockReturnValue(Promise.resolve())
-        } as any;
+        } as unknown as DatabaseService;
         const mapServiceMock = {
             getFeaturesFromTiles: () => [] as GeoJSONFeature[],
             initializationPromise: Promise.resolve()
@@ -56,14 +56,12 @@ describe("Poi Service", () => {
             debug: () => { }
         };
         TestBed.configureTestingModule({
-            imports: [
-                NgxsModule.forRoot([
+            providers: [
+                provideStore([
                     LayersReducer,
                     OfflineReducer,
                     ConfigurationReducer
-                ])
-            ],
-            providers: [
+                ]),
                 {
                     provide: ResourcesService,
                     useValue: {
@@ -150,7 +148,7 @@ describe("Poi Service", () => {
                 }
             });
 
-            (runningContextService as any).isIFrame = false;
+            (runningContextService as { isIFrame: boolean }).isIFrame = false;
             mapServiceMock.getFeaturesFromTiles = () => [
                 {
                     id: "11",
@@ -174,7 +172,7 @@ describe("Poi Service", () => {
                         "name:ru": "name"
                     }
                 }
-            ] as any;
+            ] as unknown as GeoJSONFeature[];
 
             expect(poiService.getPoisGeoJson().features.length).toBe(1);
         }
@@ -194,7 +192,7 @@ describe("Poi Service", () => {
                 }
             });
 
-            (runningContextService as any).isIFrame = false;
+            (runningContextService as { isIFrame: boolean }).isIFrame = false;
             mapServiceMock.getFeaturesFromTiles = () => [
                 {
                     id: "11",
@@ -220,7 +218,7 @@ describe("Poi Service", () => {
                         poiGeolocation: "{\"lat\": 1.1, \"lng\": 1.1 }"
                     }
                 }
-            ] as any;
+            ] as unknown as GeoJSONFeature[];
 
             expect(poiService.getPoisGeoJson().features.length).toBe(2);
             expect(poiService.getPoisGeoJson().features.every((f) => f.geometry.type === "Point")).toBeTruthy();
@@ -253,7 +251,7 @@ describe("Poi Service", () => {
                         "name:he": "line"
                     }
                 }
-            ] as any;
+            ] as unknown as GeoJSONFeature[];
 
             expect(poiService.getPublicRoutes({ categories: [], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "" }).features.length).toBe(0);
         }
@@ -284,7 +282,7 @@ describe("Poi Service", () => {
                         "name:he": "line"
                     }
                 }
-            ] as any;
+            ] as unknown as GeoJSONFeature[];
             expect(poiService.getPublicRoutes({ categories: ["Bicycle"], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "" }).features.length).toBe(0);
         }
     ));
@@ -314,7 +312,7 @@ describe("Poi Service", () => {
                         "name:he": "line"
                     }
                 }
-            ] as any;
+            ] as unknown as GeoJSONFeature[];
             expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [0, 50], difficulty: ["Easy"], userId: "" }).features.length).toBe(0);
         }
     ));
@@ -345,7 +343,7 @@ describe("Poi Service", () => {
                         "name:he": "line"
                     }
                 }
-            ] as any;
+            ] as unknown as GeoJSONFeature[];
             expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [15, 50], difficulty: ["Hard"], userId: "" }).features.length).toBe(0);
         }
     ));
@@ -376,7 +374,7 @@ describe("Poi Service", () => {
                         "name:he": "line"
                     }
                 }
-            ] as any;
+            ] as unknown as GeoJSONFeature[];
             expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [0, 5], difficulty: ["Hard"], userId: "" }).features.length).toBe(0);
         }
     ));
@@ -407,7 +405,7 @@ describe("Poi Service", () => {
                         "name:he": "line"
                     }
                 }
-            ] as any;
+            ] as unknown as GeoJSONFeature[];
             expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "42" }).features.length).toBe(0);
         }
     ));
@@ -437,7 +435,7 @@ describe("Poi Service", () => {
                         "name:he": "line"
                     }
                 }
-            ] as any;
+            ] as unknown as GeoJSONFeature[];
             expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "" }).features.length).toBe(1);
         }
     ));
@@ -570,20 +568,74 @@ describe("Poi Service", () => {
         expect(data.originalFeature).toEqual(feature);
     }));
 
-    it("Should get a point by id and source from the server", inject(
-        [PoiService, HttpTestingController],
-        async (poiService: PoiService, mockBackend: HttpTestingController) => {
-            const id = "42";
-            const source = "source";
+    it("Should keep the description of an existing point when merging a private marker with no description",
+        inject([PoiService, Store], async (poiService: PoiService, store: Store) => {
+            store.reset({
+                poiState: {
+                    uploadMarkerData: {
+                        description: "",
+                        title: "title",
+                        type: "some-type",
+                        urls: [],
+                        latlng: { lng: 1, lat: 2 }
+                    }
+                }
+            });
 
-            const promise = poiService.getBasicInfo(id, source);
+            const feature: GeoJSON.Feature = {
+                type: "Feature",
+                geometry: {
+                    type: "Point",
+                    coordinates: [3, 4]
+                },
+                properties: {
+                    poiId: "poi-42",
+                    poiSource: "OSM",
+                    "description:he": "the description of the point"
+                }
+            };
 
-            mockBackend.expectOne(request => request.url.includes(id) && request.url.includes(source)).flush({});
+            const data = await poiService.createEditableDataAndMerge(feature);
+            expect(data.description).toBe("the description of the point");
+        }));
 
-            const res = await promise;
-            expect(res).not.toBeNull();
-        }
-    ));
+    it("Should keep the language-less description of an existing point when merging a private marker with no description",
+        inject([PoiService, Store], async (poiService: PoiService, store: Store) => {
+            store.reset({
+                poiState: {
+                    uploadMarkerData: {
+                        description: "",
+                        title: "title",
+                        type: "some-type",
+                        urls: [],
+                        latlng: { lng: 1, lat: 2 }
+                    }
+                }
+            });
+
+            const feature: GeoJSON.Feature = {
+                type: "Feature",
+                geometry: {
+                    type: "Point",
+                    coordinates: [3, 4]
+                },
+                properties: {
+                    poiId: "poi-42",
+                    poiSource: "OSM",
+                    description: "the description of the point"
+                }
+            };
+
+            const data = await poiService.createEditableDataAndMerge(feature);
+            expect(data.description).toBe("the description of the point");
+        }));
+
+    it("Should throw for invalid source", inject([PoiService], async (poiService: PoiService) => {
+        const id = "42";
+        const source = "source";
+
+        await expect(poiService.getBasicInfo(id, source)).rejects.toThrow();
+    }));
 
     it("Should get a point by id and source from iNature", inject([PoiService],
         async (poiService: PoiService) => {
@@ -649,7 +701,7 @@ describe("Poi Service", () => {
             const id = "42";
             const source = "Nakeb";
 
-            nakebService.getRoute = () => Promise.resolve({} as any);
+            nakebService.getRoute = () => Promise.resolve({} as unknown as GeoJSON.Feature);
 
             const feature = await poiService.getBasicInfo(id, source);
             expect(feature).not.toBeNull();
@@ -783,10 +835,11 @@ describe("Poi Service", () => {
         }
     ));
 
-    it("Should get a point by id and source from the tiles in case the server is not available", inject([PoiService, HttpTestingController, MapService],
-        async (poiService: PoiService, mockBackend: HttpTestingController, mapServiceMock: MapService) => {
+    it("Should get a point by id and source from the tiles in case the server is not available", inject([PoiService, MapService, OverpassTurboService],
+        async (poiService: PoiService, mapServiceMock: MapService, overpassTurboService: OverpassTurboService) => {
             const id = "node_42";
-            const source = "source";
+            const source = "OSM";
+            overpassTurboService.getFeature = () => Promise.reject();
             const spy = vi
                 .spyOn(mapServiceMock, "getFeaturesFromTiles")
                 .mockReturnValue([
@@ -794,13 +847,10 @@ describe("Poi Service", () => {
                         id: "421",
                         properties: {},
                         geometry: { type: "Point", coordinates: [0, 0] }
-                    } as any
+                    } as unknown as GeoJSONFeature
                 ]);
 
             const promise = poiService.getBasicInfo(id, source);
-
-            mockBackend.expectOne(request => request.url.includes(id) && request.url.includes(source))
-                .flush("Some error", { status: 500, statusText: "Time out" });
 
             const res = await promise;
             expect(res).not.toBeNull();
@@ -808,15 +858,14 @@ describe("Poi Service", () => {
         }
     ));
 
-    it("Should not fail on map not initialized when trying to get a point by id and source from the tiles in case the server is not available", inject([PoiService, HttpTestingController, MapService],
-        async (poiService: PoiService, mockBackend: HttpTestingController) => {
+    it("Should not fail on map not initialized when trying to get a point by id and source from the tiles in case the server is not available", inject([PoiService, MapService, OverpassTurboService],
+        async (poiService: PoiService, overpassTurboService: OverpassTurboService) => {
             const id = "node_42";
-            const source = "source";
+            const source = "OSM";
+            overpassTurboService.getFeature = () => Promise.reject();
 
             const promise = poiService.getBasicInfo(id, source);
 
-            mockBackend.expectOne(request => request.url.includes(id) && request.url.includes(source))
-                .flush("Some error", { status: 500, statusText: "Time out" });
 
             await expect(promise).rejects.toThrow(
                 /Failed to load POI .* from offline or in-memory tiles after .*/
@@ -824,33 +873,34 @@ describe("Poi Service", () => {
         }
     ));
 
-    it("Should throw when trying to get a point by id and source and it is not available in the server and in the tiles", inject([PoiService, HttpTestingController, MapService],
-        async (poiService: PoiService, mockBackend: HttpTestingController, mapServiceMock: MapService) => {
+    it("Should throw when trying to get a point by id and source and it is not available in the server and in the tiles", inject([PoiService, MapService, OverpassTurboService],
+        async (poiService: PoiService, mapServiceMock: MapService, overpassTurboService: OverpassTurboService) => {
             const id = "42";
-            const source = "source";
+            const source = "OSM";
+
             const spy = vi
                 .spyOn(mapServiceMock, "getFeaturesFromTiles")
                 .mockReturnValue([]);
+            overpassTurboService.getFeature = () => Promise.reject();
 
             const promise = poiService.getBasicInfo(id, source);
-
-            mockBackend.expectOne(request => request.url.includes(id) && request.url.includes(source))
-                .flush("Some error", { status: 500, statusText: "Time out" });
 
             await expect(promise).rejects.toThrow();
             expect(spy).toHaveBeenCalled();
         }
     ));
 
-    it("Should get a point by id and source from the cache after the first load", inject([PoiService, HttpTestingController],
-        async (poiService: PoiService, mockBackend: HttpTestingController) => {
+    it("Should get a point by id and source from the cache after the first load", inject([PoiService, OverpassTurboService],
+        async (poiService: PoiService, overpassTurboService: OverpassTurboService) => {
             const id = "42";
-            const source = "source";
+            const source = "OSM";
+            overpassTurboService.getFeature = () => Promise.resolve({
+                type: "Feature",
+                geometry: { type: "Point", coordinates: [0, 0] },
+                properties: { poiId: id, source }
+            } as GeoJSON.Feature);
 
             const promise = poiService.getBasicInfo(id, source);
-
-            mockBackend.expectOne(request => request.url.includes(id) && request.url.includes(source))
-                .flush({ properties: { poiId: id, source } });
 
             const res = await promise;
             expect(res).not.toBeNull();
@@ -914,7 +964,7 @@ describe("Poi Service", () => {
         async (poiService: PoiService, dbMock: DatabaseService, store: Store) => {
             store.reset({
                 offlineState: {
-                    uploadPoiQueue: [] as any[]
+                    uploadPoiQueue: [] as string[]
                 }
             });
             store.dispatch = vi.fn();
@@ -934,13 +984,14 @@ describe("Poi Service", () => {
                     showLocationUpdate: true,
                     location: { lat: 1, lng: 2 } as LatLngAltTime,
                     originalFeature: {
+                        type: "Feature",
                         properties: {
                             poiSource: "OSM",
                             poiId: "poiId",
                             identifier: "id",
                             imageUrl: "wikimedia.org/some-old-image-url",
                             website: "some-old-url"
-                        } as any,
+                        },
                         geometry: {
                             type: "Point",
                             coordinates: [0, 0]
@@ -977,7 +1028,7 @@ describe("Poi Service", () => {
         async (poiService: PoiService, dbMock: DatabaseService, store: Store) => {
             store.reset({
                 offlineState: {
-                    uploadPoiQueue: [] as any[]
+                    uploadPoiQueue: [] as string[]
                 }
             });
             const spy = vi.spyOn(dbMock, "addPoiToUploadQueue");
@@ -996,6 +1047,7 @@ describe("Poi Service", () => {
                     showLocationUpdate: false,
                     location: { lat: 0, lng: 0 } as LatLngAltTime,
                     originalFeature: {
+                        type: "Feature",
                         properties: {
                             poiSource: "OSM",
                             poiId: "poiId",
@@ -1007,7 +1059,7 @@ describe("Poi Service", () => {
                             poiIcon: "icon-spring",
                             poiIconColor: "#1e80e3",
                             name: "title"
-                        } as any,
+                        },
                         geometry: {
                             type: "Point",
                             coordinates: [0, 0]
@@ -1024,11 +1076,12 @@ describe("Poi Service", () => {
     it("Should add properties when update point is in the queue already", inject([PoiService, DatabaseService, Store],
         async (poiService: PoiService, dbMock: DatabaseService, store: Store) => {
             const featureInQueue = {
+                type: "Feature",
                 properties: {
                     poiSource: "OSM",
                     poiId: "poiId",
                     identifier: "id"
-                } as any,
+                },
                 geometry: {
                     type: "Point",
                     coordinates: [0, 0]
@@ -1058,13 +1111,14 @@ describe("Poi Service", () => {
                     showLocationUpdate: false,
                     location: { lat: 0, lng: 0 } as LatLngAltTime,
                     originalFeature: {
+                        type: "Feature",
                         properties: {
                             poiSource: "OSM",
                             poiId: "poiId",
                             identifier: "id",
                             poiIcon: "icon-spring",
                             poiIconColor: "#1e80e3"
-                        } as any,
+                        },
                         geometry: {
                             type: "Point",
                             coordinates: [0, 0]
@@ -1098,12 +1152,13 @@ describe("Poi Service", () => {
     it("Should get null length in Km for point", inject([PoiService],
         (poiService: PoiService) => {
             const feature = {
+                type: "Feature",
                 properties: {
                     poiSource: "OSM",
                     poiId: "poiId",
                     identifier: "id",
                     image: "invalid-image-url"
-                } as any,
+                },
                 geometry: {
                     type: "Point",
                     coordinates: [1, 2]
@@ -1117,12 +1172,13 @@ describe("Poi Service", () => {
     it("Should get length in Km for line", inject([PoiService],
         (poiService: PoiService) => {
             const feature = {
+                type: "Feature",
                 properties: {
                     poiSource: "OSM",
                     poiId: "poiId",
                     identifier: "id",
                     image: "invalid-image-url"
-                } as any,
+                },
                 geometry: {
                     type: "LineString",
                     coordinates: [
@@ -1139,12 +1195,13 @@ describe("Poi Service", () => {
     it("Should filter out incompatible images", inject([PoiService, Store],
         async (poiService: PoiService, store: Store) => {
             const feature = {
+                type: "Feature",
                 properties: {
                     poiSource: "OSM",
                     poiId: "poiId",
                     identifier: "id",
                     image: "invalid-image-url"
-                } as any,
+                },
                 geometry: {
                     type: "Point",
                     coordinates: [1, 2]
@@ -1163,6 +1220,7 @@ describe("Poi Service", () => {
     it("Should filter out invalid wikipedia images", inject([PoiService, Store],
         async (poiService: PoiService, store: Store) => {
             const feature = {
+                type: "Feature",
                 properties: {
                     poiSource: "OSM",
                     poiId: "poiId",
@@ -1172,7 +1230,7 @@ describe("Poi Service", () => {
                     image1: "https://upload.wikimedia.org/wikipedia/commons/b/b6/1.svg",
                     image2:
                         "https://upload.wikimedia.org/wikipedia/commons/b/b6/2.svg.png"
-                } as any,
+                },
                 geometry: {
                     type: "Point",
                     coordinates: [1, 2]
@@ -1191,6 +1249,7 @@ describe("Poi Service", () => {
     it("Should filter out images with no attribution", inject([PoiService, ImageAttributionService],
         async (poiService: PoiService, attributionService: ImageAttributionService) => {
             const feature = {
+                type: "Feature",
                 properties: {
                     poiSource: "OSM",
                     poiId: "poiId",
@@ -1198,7 +1257,7 @@ describe("Poi Service", () => {
                     image: "wikimedia.org/image-url",
                     image1: "wikimedia.org/image-url1",
                     image2: "wikimedia.org/image-url2"
-                } as any,
+                },
                 geometry: {
                     type: "Point",
                     coordinates: [1, 2]
@@ -1206,7 +1265,7 @@ describe("Poi Service", () => {
             } as GeoJSON.Feature;
             vi.spyOn(attributionService, "getAttributionForImage")
                 .mockReturnValueOnce(Promise.resolve(null))
-                .mockReturnValueOnce(Promise.resolve("aaa") as any)
+                .mockReturnValueOnce(Promise.resolve("aaa") as unknown as Promise<ImageAttribution>)
                 .mockReturnValueOnce(Promise.resolve(null));
 
             const imagesUrls = await poiService.getImagesThatHaveAttribution(feature);
@@ -1218,19 +1277,20 @@ describe("Poi Service", () => {
     it("Should deduplicate images with same url", inject([PoiService, ImageAttributionService],
         async (poiService: PoiService, attributionService: ImageAttributionService) => {
             const feature = {
+                type: "Feature",
                 properties: {
                     poiSource: "OSM",
                     poiId: "poiId",
                     identifier: "id",
                     image: "wikimedia.org/image-url()",
                     image1: encodeURIComponent("wikimedia.org/image-url()")
-                } as any,
+                },
                 geometry: {
                     type: "Point",
                     coordinates: [1, 2]
                 }
             } as GeoJSON.Feature;
-            vi.spyOn(attributionService, "getAttributionForImage").mockReturnValue(Promise.resolve("aaa") as any);
+            vi.spyOn(attributionService, "getAttributionForImage").mockReturnValue(Promise.resolve("aaa") as unknown as Promise<ImageAttribution>);
 
             const imagesUrls = await poiService.getImagesThatHaveAttribution(feature);
             expect(imagesUrls.length).toBe(1);
@@ -1283,7 +1343,7 @@ describe("Poi Service", () => {
         (poiService: PoiService) => {
             const results = poiService.getItmCoordinates({
                 properties: { poiItmEast: 1, poiItmNorth: 2 }
-            } as any as GeoJSON.Feature);
+            } as unknown as GeoJSON.Feature);
             expect(results.east).toBe(1);
             expect(results.north).toBe(2);
         }

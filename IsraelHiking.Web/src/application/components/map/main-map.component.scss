@@ -6,6 +6,18 @@
     @include mat.sidenav-overrides((container-width: v.$app-sidebar-width));
 }
 
+mat-sidenav-container.main-map-sidenav-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3;
+    background: transparent;
+    pointer-events: none;
+
+    .mat-drawer {
+        pointer-events: auto;
+    }
+}
+
 @media (width <=550px) {
     :root {
         @include mat.sidenav-overrides((container-width: 100vw));

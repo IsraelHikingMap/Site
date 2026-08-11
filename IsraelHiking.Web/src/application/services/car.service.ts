@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { registerPlugin } from "@capacitor/core";
 import { Store } from "@ngxs/store";
 import { skip } from "rxjs";
@@ -22,7 +22,7 @@ interface ReactivePreferencesPlugin {
 
 const ReactivePreferences = registerPlugin<ReactivePreferencesPlugin>("ReactivePreferences");
 
-@Injectable()
+@Service()
 export class CarService {
 
     private readonly store = inject(Store);
@@ -61,7 +61,7 @@ export class CarService {
 
     private async setStyle() {
         this.loggingService.info("[Car] Setting style");
-        const layerData = this.layersService.getSelectedBaseLayer();
+        const layerData = this.layersService.selectedBaseLayer();
         const styleLike = await this.defaultStyleService.getSourcesAndLayers(layerData, true, "car");
         await ReactivePreferences.storeValue({ key: "style", value: styleLike });
     }

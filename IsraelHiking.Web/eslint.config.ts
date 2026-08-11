@@ -34,7 +34,8 @@ export default defineConfig([
                     style: "camelCase",
                 },
             ],
-            "@typescript-eslint/no-explicit-any": "off", // HM TODO: fix this?
+            "@angular-eslint/prefer-signals": "error",
+            "@typescript-eslint/no-explicit-any": "error",
             "@typescript-eslint/no-empty-function": "off",
             "@typescript-eslint/no-unused-vars": [
                 "error",

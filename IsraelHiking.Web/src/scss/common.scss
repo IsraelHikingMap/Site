@@ -3,7 +3,6 @@
 @use "theme-colors";
 @use "dialogs";
 @use "../fonts/icons.css";
-@use "font-awesome/css/font-awesome.css";
 @use "maplibre-gl/dist/maplibre-gl.css";
 @use "import-tailwind";
 
@@ -27,7 +26,7 @@ html {
     @include mat.button-overrides($low-emphasis-button-labels);
 
     --brand-color: #32cd6d;
-    @include mat.theme-overrides((primary: var(--brand-color)));
+    @include mat.theme-overrides((primary: var(--brand-color), on-primary: #003018));
 }
 
 .dark-theme {
@@ -71,11 +70,29 @@ html {
     }
 }
 
+/* Latin slice first: browsers only fetch a face whose unicode-range matches text they
+   actually render, so latin readers never download the full multi-script file. No coverage
+   is lost - the full font still backs every other script. */
+@font-face {
+    font-family: 'Noto Sans Regular';
+    font-style: normal;
+    font-display: swap;
+    src: url('../fonts/noto-sans-latin.woff2') format('woff2');
+    unicode-range: U+0000-024F, U+2000-206F;
+}
+
+/* Scoped to the scripts this file actually contains. Without it the browser downloads all
+   177kb to look for characters that are not in there - the emoji on the landing page alone
+   were enough to pull it in, only to fall back to a system font anyway. */
 @font-face {
     font-family: 'Noto Sans Regular';
     font-style: normal;
     font-display: swap;
     src: url('../fonts/noto-sans-regular.woff2') format('woff2');
+    unicode-range: U+250-52F, U+900-97F, U+10FB, U+1AB0-1ACE, U+1C80-1C88, U+1D00-1FFF,
+        U+2070-2189, U+2212, U+25CC, U+2C60-2C7F, U+2DE0-2E5D, U+A640-A69F, U+A700-A7FF,
+        U+A8FF-A92E, U+AB30-AB6B, U+FB00-FB06, U+FE00-FE2F, U+FEFF, U+FFFC-FFFD,
+        U+10780-107BA, U+1DF00-1DF1E;
 }
 
 @font-face {
@@ -91,7 +108,7 @@ html {
     font-family: 'Noto Sans Cond Bold';
     font-style: normal;
     font-display: swap;
-    src: url('../fonts/noto-sans-condensed-bold.ttf') format('truetype');
+    src: url('../fonts/noto-sans-condensed-bold.woff2') format('woff2');
 }
 
 html {
@@ -163,6 +180,72 @@ body {
 
 .stack-icon-large {
     font-size: 1.25em !important;
+}
+
+/* Icon helpers, ported from font-awesome 4.7 when that dependency was dropped.
+   Every icon in the app comes from the generated mapeak font, so only the sizing and
+   stacking helpers were kept.
+   The family is repeated here on purpose: icons.css assigns it through an attribute selector, which
+   the critical css extractor does not carry into the inlined styles, and without it the icons fall
+   back to whatever the surrounding text uses until the full stylesheet arrives. */
+.fa {
+    display: inline-block;
+    font-family: "mapeak";
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    font-size: inherit;
+    line-height: 1;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.fa-lg {
+    font-size: 1.33333333em;
+    line-height: 0.75em;
+    vertical-align: -15%;
+}
+
+.fa-2x {
+    font-size: 2em;
+}
+
+.fa-3x {
+    font-size: 3em;
+}
+
+.fa-4x {
+    font-size: 4em;
+}
+
+.fa-5x {
+    font-size: 5em;
+}
+
+.fa-stack {
+    position: relative;
+    display: inline-block;
+    width: 2em;
+    height: 2em;
+    line-height: 2em;
+    vertical-align: middle;
+}
+
+.fa-stack-1x,
+.fa-stack-2x {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.fa-stack-1x {
+    line-height: inherit;
+}
+
+.fa-stack-2x {
+    font-size: 2em;
 }
 
 .fa.mat-icon {

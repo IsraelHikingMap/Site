@@ -29,7 +29,7 @@
         </div>
     </div>
     <div mat-dialog-actions>
-        <button mat-dialog-close mat-flat-button [disabled]="iAgree === false" (click)="submit()"
+        <button mat-dialog-close mat-flat-button [disabled]="iAgree() === false" (click)="submit()"
             analyticsOn="click" analyticsCategory="Terms Of Service"
             analyticsLabel="Sumbit">{{resources.submit}}</button>
     </div>

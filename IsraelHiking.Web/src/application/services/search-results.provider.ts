@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
@@ -10,7 +10,10 @@ import { ResourcesService } from "./resources.service";
 import { Urls } from "../urls";
 import type { ApplicationState, SearchResultsPointOfInterest } from "../models";
 
-@Injectable()
+const PREFIX_RANK = 0;
+const FULL_RANK = 1;
+
+@Service()
 export class SearchResultsProvider {
 
     private readonly httpClient = inject(HttpClient);
@@ -18,55 +21,66 @@ export class SearchResultsProvider {
     private readonly resources = inject(ResourcesService);
     private readonly store = inject(Store);
 
-    private requestsQueue: string[] = [];
+    /**
+     * The term of the most recently started search, and the rank of the best results already
+     * returned for it, so that a stale response never overwrites a fresher one.
+     * A term is searched twice - once as a prefix for fast results and once in full for accurate
+     * ones - so the full results (rank 1) supersede the prefix results (rank 0) for the same term.
+     * Note that these are shared by all the consumers of this service, which currently has a
+     * single one, adding another one will make them invalidate each other's results.
+     */
+    private latestTerm: string = null;
+    private latestReturnedRank = PREFIX_RANK - 1;
 
-    public async getResults(searchTerm: string, isPrefix: boolean): Promise<SearchResultsPointOfInterest[]> {
+    public async getResults(searchTerm: string, isPrefix: boolean, useMapCenter: boolean): Promise<SearchResultsPointOfInterest[]> {
         const searchWithoutBadCharacters = searchTerm.replace("/", " ").replace("\t", " ").trim();
+        if (searchWithoutBadCharacters !== this.latestTerm) {
+            this.latestTerm = searchWithoutBadCharacters;
+            this.latestReturnedRank = PREFIX_RANK - 1;
+        }
         if (searchWithoutBadCharacters.length <= 2) {
             return [];
         }
 
-        this.requestsQueue.push(searchWithoutBadCharacters);
-        try {
-            const latlng = this.coordinatesService.parseCoordinates(searchWithoutBadCharacters);
-            if (latlng) {
-                const id = getIdFromLatLng(latlng);
-                return [{
-                    id,
-                    displayName: searchWithoutBadCharacters || id,
-                    title: id,
-                    source: RouteStrings.COORDINATES,
-                    icon: "icon-globe",
-                    iconColor: "black",
-                    location: latlng,
-                    description: "",
-                    hasExtraData: false
-                }];
-            }
+        const latlng = await this.coordinatesService.parseCoordinates(searchWithoutBadCharacters);
+        if (latlng) {
+            const id = getIdFromLatLng(latlng);
+            return [{
+                id,
+                displayName: searchWithoutBadCharacters || id,
+                title: id,
+                source: RouteStrings.COORDINATES,
+                icon: "icon-globe",
+                iconColor: "black",
+                location: latlng,
+                description: "",
+                hasExtraData: false
+            }];
+        }
+        let params = new HttpParams()
+            .set("language", this.resources.getCurrentLanguageCodeSimplified())
+            .set("prefix", isPrefix);
+        if (useMapCenter) {
             const location = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
-            const params = new HttpParams()
-                .set("language", this.resources.getCurrentLanguageCodeSimplified())
+            params = params
                 .set("lat", location.latitude)
                 .set("lng", location.longitude)
-                .set("zoom", location.zoom)
-                .set("prefix", isPrefix);
-            const results = await firstValueFrom(this.httpClient.get<SearchResultsPointOfInterest[]>(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
-                params
-            }).pipe(timeout(5000)));
-            return this.requestsQueue[this.requestsQueue.length - 1] === searchWithoutBadCharacters ? results : null;
+                .set("zoom", location.zoom);
         }
-        finally {
-            if (isPrefix === false) {
-                // remove all matching strings
-                this.requestsQueue = this.requestsQueue.filter(s => s !== searchWithoutBadCharacters);
-            } else {
-                // remove last matching strings
-                const lastIndex = this.requestsQueue.lastIndexOf(searchWithoutBadCharacters);
-                if (lastIndex >= 0) {
-                    this.requestsQueue.splice(lastIndex, 1);
-                }
-            }
+        const results = await firstValueFrom(this.httpClient.get<SearchResultsPointOfInterest[]>(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
+            params
+        }).pipe(timeout(5000)));
+        if (searchWithoutBadCharacters !== this.latestTerm) {
+            // A newer term was searched while this request was in flight - ignore this stale response
+            return null;
         }
+        const rank = isPrefix ? PREFIX_RANK : FULL_RANK;
+        if (rank < this.latestReturnedRank) {
+            // Better results for this term were already returned - don't downgrade them
+            return null;
+        }
+        this.latestReturnedRank = rank;
+        return results;
 
         // HM TODO: think if there's a way to have offline search results
     }

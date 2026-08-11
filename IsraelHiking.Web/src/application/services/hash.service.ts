@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { NavigationEnd, Router } from "@angular/router";
 import { Store } from "@ngxs/store";
 import { filter, skip } from "rxjs";
@@ -51,7 +51,7 @@ export class RouteStrings {
     public static readonly EDIT = "edit";
 }
 
-@Injectable()
+@Service()
 export class HashService {
 
     private static readonly PERSICION = 4;

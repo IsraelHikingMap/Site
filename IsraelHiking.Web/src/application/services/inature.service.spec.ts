@@ -21,7 +21,7 @@ describe("INatureService", () => {
                 properties: {
                     "ref:IL:inature": "123"
                 }
-            } as any;
+            } as unknown as GeoJSON.Feature;
             const content = "content";
             const title = "title";
             const response = {

@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit } from "@angular/core";
+import { Component, inject, input, signal, OnInit } from "@angular/core";
 import { DecimalPipe } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 
@@ -15,9 +15,10 @@ import type { LatLngAltTime, NorthEast } from "../models";
 })
 export class CoordinatesComponent implements OnInit {
 
-    public latlng = input<LatLngAltTime>();
+    public readonly latlng = input<LatLngAltTime>();
 
-    public itmCoordinates: NorthEast;
+    public readonly itmCoordinates = signal<NorthEast>(null);
+    public readonly alt = signal<number>(undefined);
 
     public readonly resources = inject(ResourcesService);
 
@@ -25,10 +26,11 @@ export class CoordinatesComponent implements OnInit {
     private readonly elevationProvider = inject(ElevationProvider);
 
     public async ngOnInit(): Promise<void> {
-        const coordinates = this.itmCoordinatesService.toItm(this.latlng());
+        const coordinates = await this.itmCoordinatesService.toItm(this.latlng());
         if (coordinates.east > 100_000 && coordinates.north > 100_000 && coordinates.east < 300_000 && coordinates.north < 800_000) {
-            this.itmCoordinates = coordinates;
+            this.itmCoordinates.set(coordinates);
         }
         await this.elevationProvider.updateHeights([this.latlng()]);
+        this.alt.set(this.latlng().alt);
     }
 }

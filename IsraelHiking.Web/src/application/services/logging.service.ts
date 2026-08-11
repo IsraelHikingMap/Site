@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Service } from "@angular/core";
 import Dexie from "dexie";
 
 import { environment } from "../../environments/environment";
@@ -20,7 +20,7 @@ interface LogLine {
     level: LogLevel;
 }
 
-@Injectable()
+@Service()
 export class LoggingService {
     private static readonly LOGGING_DB_NAME = "Logging";
     private static readonly LOGGING_TABLE_NAME = "logging";
@@ -131,7 +131,7 @@ export class LoggingService {
         return dateString + " | " + logLine.level.padStart(5).toUpperCase() + " | " + logLine.message;
     }
 
-    public getErrorTypeAndMessage(ex: any): ErrorTypeAndMessage {
+    public getErrorTypeAndMessage(ex: unknown): ErrorTypeAndMessage {
         const typeAndMessage: ErrorTypeAndMessage = {
             type: "server",
             message: (ex as Error).message

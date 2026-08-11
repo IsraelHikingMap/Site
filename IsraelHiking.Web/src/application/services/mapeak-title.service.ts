@@ -1,7 +1,7 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { Title } from "@angular/platform-browser";
 
-@Injectable()
+@Service()
 export class MapeakTitleService {
     
     private readonly titleService = inject(Title);

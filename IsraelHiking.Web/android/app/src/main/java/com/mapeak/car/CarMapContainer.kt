@@ -399,6 +399,18 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
                     )
                 }
 
+        val routePointsCasingLayer =
+                CircleLayer(ROUTE_POINTS_CASING_LAYER_ID, ROUTE_SOURCE_ID).apply {
+                    setFilter(isPoint)
+                    setProperties(
+                            PropertyFactory.circleColor("transparent"),
+                            PropertyFactory.circleRadius(10f),
+                            PropertyFactory.circleStrokeColor("white"),
+                            PropertyFactory.circleStrokeOpacity(0.5f),
+                            PropertyFactory.circleStrokeWidth(1f)
+                    )
+                }
+
         val routeMarkerLabelsLayer =
                 SymbolLayer(ROUTE_MARKER_LABELS_LAYER_ID, ROUTE_SOURCE_ID).apply {
                     setFilter(isPoint)
@@ -419,11 +431,13 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
             style.addLayerBelow(routeLayer, LAYERING_ANCHOR_ID)
             style.addLayerAbove(routeArrowsLayer, ROUTE_LAYER_ID)
             style.addLayerAbove(routePointsLayer, ROUTE_ARROWS_LAYER_ID)
-            style.addLayerAbove(routeMarkerLabelsLayer, ROUTE_POINTS_LAYER_ID)
+            style.addLayerAbove(routePointsCasingLayer, ROUTE_POINTS_LAYER_ID)
+            style.addLayerAbove(routeMarkerLabelsLayer, ROUTE_POINTS_CASING_LAYER_ID)
         } else {
             style.addLayer(routeLayer)
             style.addLayer(routeArrowsLayer)
             style.addLayer(routePointsLayer)
+            style.addLayer(routePointsCasingLayer)
             style.addLayer(routeMarkerLabelsLayer)
         }
     }
@@ -654,6 +668,7 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
         private const val ROUTE_LAYER_ID = "planned-route-layer"
         private const val ROUTE_ARROWS_LAYER_ID = "planned-route-arrows-layer"
         private const val ROUTE_POINTS_LAYER_ID = "planned-route-points-layer"
+        private const val ROUTE_POINTS_CASING_LAYER_ID = "planned-route-points-casing-layer"
         private const val ROUTE_MARKER_LABELS_LAYER_ID = "planned-route-marker-labels-layer"
         private const val ROUTE_START_COLOR = "#43a047"
         private const val ROUTE_END_COLOR = "red"

@@ -131,7 +131,7 @@
     ]
   },
   {
-    "key": "legendSingles",
+    "key": "legendCyclingDifficulty",
     "items": [
       {
         "key": "legendUnknownScale",
@@ -191,7 +191,7 @@
     ]
   },
   {
-    "key": "legendTrails",
+    "key": "legendTracksAndPaths",
     "items": [
       {
         "key": "legendAllVehicles",
@@ -205,7 +205,7 @@
         "link": "osm-key-link"
       },
       {
-        "key": "legendLight4WDVehicles",
+        "key": "legend4WDTrack",
         "latlng": {
           "lat": 32.7870,
           "lng": 35.1050
@@ -216,7 +216,7 @@
         "link": "osm-key-link"
       },
       {
-        "key": "legendStrong4WDVehicles",
+        "key": "legendDifficult4WDTrack",
         "latlng": {
           "lat": 30.5892,
           "lng": 34.819
@@ -227,7 +227,7 @@
         "link": "osm-key-link"
       },
       {
-        "key": "legendDifficult4WD",
+        "key": "legendChallenging4WDTrack",
         "latlng": {
           "lat": 31.116553,
           "lng": 34.4296074
@@ -780,7 +780,7 @@
     "key": "legendBarriers",
     "items": [
       {
-        "key": "legendGate",
+        "key": "legendOpenEntrance",
         "latlng": {
           "lat": 32.722562,
           "lng": 35.0182021
@@ -791,7 +791,7 @@
         "link": "osm-tag-link"
       },
       {
-        "key": "legendClosedGate",
+        "key": "legendNoEntry",
         "latlng": {
           "lat": 32.5326335,
           "lng": 35.5364611
@@ -802,7 +802,7 @@
         "link": "osm-key-link"
       },
       {
-        "key": "legendBlock",
+        "key": "legendVehicleBlock",
         "latlng": {
           "lat": 30.5730456,
           "lng": 35.0763874
@@ -1010,7 +1010,7 @@
         "link": "osm-tag-link"
       },
       {
-        "key": "legendBnech",
+        "key": "legendBench",
         "latlng": {
           "lat": 32.846986,
           "lng": 35.114778
@@ -1131,7 +1131,7 @@
         "link": "osm-tag-link"
       },
       {
-        "key": "legendInformationCenter",
+        "key": "legendTravelInformation",
         "latlng": {
           "lat": 30.611540,
           "lng": 34.8035610

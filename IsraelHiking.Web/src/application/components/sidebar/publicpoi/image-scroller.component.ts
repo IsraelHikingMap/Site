@@ -1,4 +1,4 @@
-import { Component, OnChanges, SimpleChanges, input, inject, output } from "@angular/core";
+import { Component, OnChanges, SimpleChanges, input, inject, model, output, signal, computed } from "@angular/core";
 import { MatAnchor, MatButton } from "@angular/material/button";
 import { Dir } from "@angular/cdk/bidi";
 import { AnimationOptions, LottieComponent } from "ngx-lottie";
@@ -7,10 +7,9 @@ import { ImageAttributionComponent } from "../../image-attribution.component";
 import { ImageCaptureDirective } from "../../../directives/image-capture.directive";
 import { AnalyticsDirective } from "../../../directives/analytics.directive";
 import { ResourcesService } from "../../../services/resources.service";
-import { FileService } from "../../../services/file.service";
+import { FileService, HTMLElementInputChangeEvent } from "../../../services/file.service";
 import { ImageGalleryService } from "../../../services/image-gallery.service";
 import { ImageResizeService } from "../../../services/image-resize.service";
-import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.json";
 
 @Component({
     selector: "image-scroller",
@@ -19,13 +18,13 @@ import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.j
 })
 export class ImageScrollerComponent implements OnChanges {
     public readonly lottiePOI: AnimationOptions = {
-        animationData: sceneryPlaceholder
+        path: "content/lottie/placeholder-scenery.json"
     };
 
-    private currentIndex = 0;
+    private readonly currentIndex = signal(0);
 
-    public images = input<string[]>();
-    public canEdit = input<boolean>();
+    public readonly images = model<string[]>();
+    public readonly canEdit = input<boolean>();
 
     public currentImageChanged = output<string>();
 
@@ -35,59 +34,63 @@ export class ImageScrollerComponent implements OnChanges {
     private readonly imageGalleryService = inject(ImageGalleryService);
     private readonly imageResizeService = inject(ImageResizeService);
 
+    public readonly hasNext = computed(() => this.currentIndex() < this.images().length - 1);
+
+    public readonly hasPrevious = computed(() => this.currentIndex() > 0);
+
+    public readonly getCurrentValue = computed(() => {
+        if (this.images().length === 0) {
+            return null;
+        }
+        return this.images()[this.currentIndex()];
+    });
+
+    public readonly getIndexString = computed(() => `${this.currentIndex() + 1} / ${this.images().length}`);
+
     public ngOnChanges(changes: SimpleChanges<ImageScrollerComponent>): void {
         if (changes.images) {
-            this.currentIndex = 0;
+            this.currentIndex.set(0);
         }
     }
 
     public next() {
-        this.currentIndex++;
-        if (this.currentIndex >= this.images().length) {
-            this.currentIndex = this.images().length - 1;
+        this.currentIndex.set(this.currentIndex() + 1);
+        if (this.currentIndex() >= this.images().length) {
+            this.currentIndex.set(this.images().length - 1);
         }
         this.currentImageChanged.emit(this.getCurrentValue());
     }
 
     public previous() {
-        this.currentIndex--;
-        if (this.currentIndex < 0) {
-            this.currentIndex = 0;
+        this.currentIndex.set(this.currentIndex() - 1);
+        if (this.currentIndex() < 0) {
+            this.currentIndex.set(0);
         }
         this.currentImageChanged.emit(this.getCurrentValue());
     }
 
-    public hasNext(): boolean {
-        return this.currentIndex < this.images().length - 1;
-    }
-
-    public hasPrevious(): boolean {
-        return this.currentIndex > 0;
-    }
-
     public remove(): void {
-        this.images().splice(this.currentIndex, 1);
+        const indexToRemove = this.currentIndex();
+        this.images.update(images => images.filter((_, index) => index !== indexToRemove));
         this.previous();
     }
 
-    public async add(e: any) {
+    public onFileInputChanged(event: Event | HTMLElementInputChangeEvent) {
+        this.onFileDrop(event);
+    }
+
+    public async onFileDrop(event: DragEvent | Event | HTMLElementInputChangeEvent) {
+        event.preventDefault();
         if (this.canEdit() === false) {
             return;
         }
-        const files = this.fileService.getFilesFromEvent(e);
+        const files = this.fileService.getFilesFromEvent(event);
         for (const file of files) {
             const data = await this.imageResizeService.resizeImage(file);
-            this.images().push(data);
-            this.currentIndex = this.images().length - 1;
+            this.images.update(images => [...images, data]);
+            this.currentIndex.set(this.images().length - 1);
             this.currentImageChanged.emit(this.getCurrentValue());
         }
-    }
-
-    public getCurrentValue(): string {
-        if (this.images().length === 0) {
-            return null;
-        }
-        return this.images()[this.currentIndex];
     }
 
     public getCurrentImage() {
@@ -104,10 +107,6 @@ export class ImageScrollerComponent implements OnChanges {
             const imageUrlToPush = this.resources.getResizedImageUrl(imageUrl, 1920);
             imagesUrls.push(imageUrlToPush);
         }
-        this.imageGalleryService.open(imagesUrls, this.currentIndex);
-    }
-
-    public getIndexString() {
-        return `${this.currentIndex + 1} / ${this.images().length}`;
+        this.imageGalleryService.open(imagesUrls, this.currentIndex());
     }
 }

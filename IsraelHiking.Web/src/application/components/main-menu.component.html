@@ -10,15 +10,18 @@
   <span class="mx-1">{{resources.findRoutes}}</span>
 </button>
 }
-@if (!isIFrame() && !isLoggedIn()) {
+@if (isUserKnown() && !isIFrame() && !isLoggedIn()) {
 <button mat-raised-button (click)="login()">{{resources.signIn}}</button>
 }
 <button mat-button [matMenuTriggerFor]="appMenu" analyticsOn="click" analyticsCategory="Menu"
   analyticsLabel="Toggle main menu" class="!h-[56px] text-white!">
   <span class="flex flex-row justify-center items-center">
-    @if (isLoggedIn()) {
-    @if (userInfo?.imageUrl) {
-    <img [src]="userInfo.imageUrl" alt="" class="max-h-[48px] me-4 rounded-full" />
+    @if (!isUserKnown()) {
+    <!-- Holds the avatar's place until we know who the user is, so the toolbar does not jump -->
+    <span class="max-h-[48px] w-[48px] me-4"></span>
+    } @else if (isLoggedIn()) {
+    @if (userInfo()?.imageUrl) {
+    <img [src]="userInfo()?.imageUrl" alt="" class="max-h-[48px] w-[48px] me-4 rounded-full" />
     } @else {
     <i class="fa icon-user-circle fa-lg me-4"></i>
     }
@@ -54,7 +57,7 @@
     <button mat-menu-item (click)="orderOfflineMaps()" analyticsOn="click" analyticsCategory="Menu"
       analyticsLabel="Order">
       <i class="text-green-600 fa fa-lg icon-dollar mat-icon"></i>
-      <span class="mx-1 text-green-600">{{resources.purchaseSubscription}}</span>
+      <span class="mx-1 text-green-600">{{resources.mapeakPro}}</span>
     </button>
     }
     @if (isRenewAvailable()) {
@@ -68,18 +71,18 @@
     <button mat-menu-item routerLink="/offline-management" routerLinkActive="bg-[#528CFA40]! border-s-4! border-brand!"
       analyticsOn="click" analyticsCategory="User Menu" analyticsLabel="Download">
       <i class="fa fa-lg icon-download mat-icon"></i>
-      <span class="mx-1">{{resources.downloadMapForOfflineUse}}</span>
+      <span class="mx-1">{{resources.downloadMapForOfflineViewing}}</span>
     </button>
     }
-    <button mat-menu-item (click)="openConfigurationDialog()" analyticsOn="click" analyticsCategory="User Menu"
-      analyticsLabel="Settings open">
-      <span><i class="fa fa-lg icon-cogs"></i> {{resources.settings}}</span>
-    </button>
     <button mat-menu-item (click)="logout()" analyticsOn="click" analyticsCategory="User Menu" analyticsLabel="Logout">
       <span><i class="fa fa-lg icon-sign-out"></i> {{resources.logout}}</span>
     </button>
     <hr />
     }
+    <button mat-menu-item (click)="openConfigurationDialog()" analyticsOn="click" analyticsCategory="User Menu"
+      analyticsLabel="Settings open">
+      <span><i class="fa fa-lg icon-cogs"></i> {{resources.settings}}</span>
+    </button>
     <button mat-menu-item (click)="openLanguage()" analyticsOn="click" analyticsCategory="Menu"
       analyticsLabel="Open language selection">
       <i class="fa fa-lg icon-language mat-icon"></i>

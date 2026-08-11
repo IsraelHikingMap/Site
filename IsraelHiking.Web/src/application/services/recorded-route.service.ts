@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, computed, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
@@ -18,7 +18,7 @@ import { AddRouteAction } from "../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import type { TraceVisibility, DataContainer, ApplicationState, RouteData, LatLngAltTime, RecordedRoute, MarkerData } from "../models";
 
-@Injectable()
+@Service()
 export class RecordedRouteService {
     private static readonly MAX_SPPED = 55; // meters / seconds =~ 200 Km/hs
     private static readonly MIN_ACCURACY = 100; // meters
@@ -33,6 +33,19 @@ export class RecordedRouteService {
     private readonly loggingService = inject(LoggingService);
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
+
+    private readonly gpsStateSignal = this.store.selectSignal((s: ApplicationState) => s.gpsState);
+    private readonly recordedRouteStateSignal = this.store.selectSignal((s: ApplicationState) => s.recordedRouteState);
+
+    // Reactive derived state exposed as signals (not methods) so the reactive contract is explicit in
+    // the type: consumers read canRecord()/isRecording() and any change away from a signal breaks them.
+    public readonly canRecord = computed(() => {
+        const gpsState = this.gpsStateSignal();
+        return gpsState.tracking === "tracking"
+            && gpsState.currentPosition != null && this.runningContextService.isCapacitor;
+    });
+
+    public readonly isRecording = computed(() => this.recordedRouteStateSignal().isRecording);
 
     public initialize() {
         if (this.isRecording()) {
@@ -62,16 +75,6 @@ export class RecordedRouteService {
         const currentLocation = GeoLocationService.positionToLatLngTime(gpsState.currentPosition);
         this.store.dispatch(new StartRecordingAction());
         this.store.dispatch(new AddRecordingRoutePointsAction([currentLocation]));
-    }
-
-    public canRecord(): boolean {
-        const gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
-        return gpsState.tracking === "tracking"
-            && gpsState.currentPosition != null && this.runningContextService.isCapacitor;
-    }
-
-    public isRecording() {
-        return this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording;
     }
 
     public stopRecording(withToast = true) {

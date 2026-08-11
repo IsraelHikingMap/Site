@@ -1,12 +1,12 @@
-﻿<div [dir]="resources.direction" dnd-droppable (onDropSuccess)="addImage($event.mouseEvent)">
+﻿<div [dir]="resources.direction" (dragover)="$event.preventDefault()" (drop)="onFileDrop($event)">
   <div mat-dialog-title>
-    @if (!url) {
+    @if (!url()) {
     <div>
-      {{title}}
+      {{title()}}
     </div>
     } @else {
-    <a href="{{url.url}}" target="_blank">
-      {{title}}
+    <a href="{{url().url}}" target="_blank">
+      {{title()}}
     </a>
     }
     <button mat-icon-button aria-label="Close" type="button" mat-dialog-close tabindex="-1">
@@ -19,40 +19,41 @@
         <div class="flex flex-row">
           <mat-form-field class="w-full">
             <mat-label>{{resources.title}}</mat-label>
-            <input matInput #titleInput class="w-full" type="text" [dir]="resources.getDirection(title)"
+            <input matInput #titleInput class="w-full" type="text" [dir]="resources.getDirection(title())"
               [(ngModel)]="title" />
           </mat-form-field>
         </div>
         <div class="flex flex-row">
           <mat-form-field class="w-full">
             <mat-label>{{resources.description}}</mat-label>
-            <textarea class="w-full" rows="4" maxlength="255" matInput [dir]="resources.getDirection(description)"
+            <textarea class="w-full" rows="4" maxlength="255" matInput [dir]="resources.getDirection(description())"
               [(ngModel)]="description"></textarea>
           </mat-form-field>
         </div>
       </div>
       <div class="w-2/5">
         <div class="flex flex-row">
-          @if (!imageLink) {
+          @if (!imageLink()) {
           <label>
-            <a mat-button class="w-full h-[unset]!" imageCapture (changed)="addImage($event)" analyticsOn="click"
-              analyticsCategory="POI" analyticsLabel="Upload image">
+            <a mat-button class="w-full h-[unset]!" imageCapture (changed)="onFileInputChanged($event)"
+              analyticsOn="click" analyticsCategory="POI" analyticsLabel="Upload image">
               <i class="fa icon-camera fa-4x align-middle me-1"></i>
               <i class="fa icon-plus fa-2x align-middle"></i>
             </a>
-            <input type="file" (change)="addImage($event)" [style.display]="'none'" accept="image/*;capture=camera" />
+            <input type="file" (change)="onFileInputChanged($event)" [style.display]="'none'"
+              accept="image/*;capture=camera" />
           </label>
           } @else {
-          <img [src]="resources.getResizedImageUrl(imageLink.url, 330)" class="max-w-full w-full" />
+          <img [src]="resources.getResizedImageUrl(imageLink().url, 330)" class="max-w-full w-full" />
           }
         </div>
-        @if (imageLink) {
+        @if (imageLink()) {
         <div class="flex flex-row">
           <button mat-button class="w-full" (click)="clearImage()" matTooltip="{{resources.clear}}"
             matTooltipPosition="above"><i class="fa icon-trash"></i></button>
         </div>
         }
-        @if (showIcons) {
+        @if (showIcons()) {
         <div>
           <br />
           @for (group of iconsGroups; track group) {
@@ -61,7 +62,7 @@
             <div (click)="setMarkerType(icon)" class="cursor-pointer text-center"
               [ngStyle]="{width:100/iconsGroups.length + '%'}" analyticsOn="click" analyticsCategory="Private POI"
               analyticsLabel="Select icon {{icon}}">
-              <i class="fa icon-{{icon}} fa-lg p-1" [class.active]="icon === markerType"></i>
+              <i class="fa icon-{{icon}} fa-lg p-1" [class.active]="icon === markerType()"></i>
             </div>
             }
           </div>
@@ -70,16 +71,16 @@
         }
       </div>
     </div>
-    @if (showUrl && url) {
+    @if (showUrl() && url()) {
     <div class="flex flex-row">
       <mat-form-field class="w-full">
         <mat-label>{{resources.aLinkToAWebsite}}</mat-label>
-        <input matInput class="w-full" type="text" dir="ltr" [(ngModel)]="url.url" />
+        <input matInput class="w-full" type="text" dir="ltr" [ngModel]="url().url" (ngModelChange)="updateUrlValue($event)" />
         <button matSuffix mat-icon-button (click)="removeUrl()"><i class="fa icon-trash"></i></button>
       </mat-form-field>
     </div>
     }
-    @if (showCoordinates) {
+    @if (showCoordinates()) {
     <div class="flex flex-row">
       <coordinates [latlng]="marker.latlng"></coordinates>
     </div>
@@ -90,8 +91,8 @@
       <mat-menu #appMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
         <button mat-menu-item (click)="toggleCoordinates()" analyticsOn="click" analyticsCategory="Private POI"
           analyticsLabel="Toggle coordinates"><i class="fa icon-globe"></i> {{resources.showCoordinates}}</button>
-        <button mat-menu-item (click)="showIcons = !showIcons" analyticsOn="click" analyticsCategory="Private POI"
-          analyticsLabel="Toggle select icon"><i class="fa icon-{{markerType}}"></i>
+        <button mat-menu-item (click)="showIcons.set(!showIcons())" analyticsOn="click" analyticsCategory="Private POI"
+          analyticsLabel="Toggle select icon"><i class="fa icon-{{markerType()}}"></i>
           {{resources.selectIcon}}</button>
         <button mat-menu-item (click)="addUrl()" analyticsOn="click" analyticsCategory="Private POI"
           analyticsLabel="Add link"><i class="fa icon-external-link"></i> {{resources.aLinkToAWebsite}}</button>
@@ -114,7 +115,7 @@
     </div>
     <div class="flex-1">
       <button mat-button class="w-full" type="button" mat-dialog-close (click)="remove()"
-        matTooltip="{{resources.deletePoi}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
+        matTooltip="{{resources.deletePoint}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
     </div>
     <div class="flex-1">
       <button mat-button class="w-full" type="button" mat-dialog-close (click)="uploadPoint()"

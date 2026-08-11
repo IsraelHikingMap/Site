@@ -1,5 +1,5 @@
-import { inject, Injectable, InjectionToken } from "@angular/core";
-import { HttpClient, HttpEventType } from "@angular/common/http";
+import { inject, InjectionToken, Service } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
@@ -27,7 +27,18 @@ export type FormatViewModel = {
     extension: string;
 };
 
-@Injectable()
+/**
+ * A synthetic stand-in for a file `<input>` change / drop event, used when files are
+ * obtained outside the DOM (e.g. from the native camera). `target` is null because
+ * there is no input element to read files from or to reset afterwards.
+ */
+export type HTMLElementInputChangeEvent = {
+    dataTransfer: { files: File[] };
+    target: HTMLInputElement | null;
+    preventDefault(): void;
+};
+
+@Service()
 export class FileService {
 
     private readonly httpClient = inject(HttpClient);
@@ -40,7 +51,7 @@ export class FileService {
     private readonly elevationProvider = inject(ElevationProvider);
     private readonly saveAs = inject(SaveAsFactory);
 
-    public formats: FormatViewModel[] = [
+    public readonly formats: FormatViewModel[] = [
         {
             label: "GPX version 1.1 (.gpx)",
             extension: "gpx",
@@ -73,18 +84,15 @@ export class FileService {
         }
     ];
 
-    public getFileFromEvent(e: any): File {
-        const file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
-        if (!file) {
-            return null;
-        }
-        const target = e.target || e.srcElement;
-        target.value = "";
-        return file;
-    }
+    public getFilesFromEvent(e: Event | DragEvent | HTMLElementInputChangeEvent): File[] {
+        let files: File[] | FileList | null | undefined;
 
-    public getFilesFromEvent(e: any): File[] {
-        const files: FileList = e.dataTransfer ? e.dataTransfer.files : e.target.files;
+        if ("dataTransfer" in e && e.dataTransfer) {
+            files = e.dataTransfer.files;
+        } else {
+            const target = e.target as HTMLInputElement | null;
+            files = target?.files;
+        }
         if (!files || files.length === 0) {
             return [];
         }
@@ -93,8 +101,10 @@ export class FileService {
         for (const file of files) {
             filesToReturn.push(file);
         }
-        const target = e.target || e.srcElement;
-        target.value = ""; // this will reset files so we need to clone the array.
+        const target = e.target as HTMLInputElement | null;
+        if (target) {
+            target.value = "";
+        }
         return filesToReturn;
     }
 
@@ -109,11 +119,11 @@ export class FileService {
             return await firstValueFrom(this.httpClient.get(url, { responseType: "text" }).pipe(timeout(5000)));
         } catch (ex) {
             this.loggingService.error(`[Files] Unable to get style file, tryLocalStyle: ${tryLocalStyle}, ${url}, ${(ex as Error).message}`);
-            return `{
-                version: 8.0,
+            return JSON.stringify({
+                version: 8,
                 layers: [],
                 sources: {}
-            }`;
+            });
         }
     }
 
@@ -159,16 +169,55 @@ export class FileService {
         const fileResponse = await Filesystem.readFile({
             path: url
         });
-        const statResponse = await Filesystem.stat({
-            path: url
-        });
-        type = type || this.getTypeFromUrl(url);
-        const blob = await this.base64StringToBlob(fileResponse.data as string, type) as any;
-        blob.name = statResponse.name;
-        if (blob.name.indexOf(".") === -1) {
-            blob.name += this.getExtensionFromType(type);
+        const base64Content = fileResponse.data as string;
+        const fileName = await this.getFileName(url, base64Content);
+        type = type || this.getTypeFromUrl(fileName);
+        const blob = await this.base64StringToBlob(base64Content, type);
+        return new File([blob], fileName, { type });
+    }
+
+    private async getFileName(url: string, base64Content: string): Promise<string> {
+        let name: string = null;
+        try {
+            name = (await Filesystem.stat({ path: url })).name;
+        } catch (ex) {
+            // Some content providers, mainly mail apps, do not supply a display name for the file they share,
+            // which causes stat to fail, in that case the name needs to be resolved from the url and content.
+            this.loggingService.warning(`[Files] Unable to get the file name using stat: ${url}, ${(ex as Error).message}`);
         }
-        return blob;
+        if (!name) {
+            name = this.decodeUrlPart(last(url.split("/"))) || "file";
+        }
+        if (name.indexOf(".") === -1) {
+            name += this.getExtensionFromContent(base64Content);
+        }
+        return name;
+    }
+
+    private decodeUrlPart(urlPart: string): string {
+        try {
+            return decodeURIComponent(urlPart || "");
+        } catch {
+            return urlPart || "";
+        }
+    }
+
+    private getExtensionFromContent(base64Content: string): string {
+        const lengthToCheck = Math.min(base64Content.length, 2048) & ~3; // atob needs the length to be a multiple of 4
+        const contentStart = atob(base64Content.substring(0, lengthToCheck));
+        if (contentStart.startsWith("PK")) {
+            return ".kmz";
+        }
+        if (contentStart.startsWith("\xFF\xD8\xFF")) {
+            return ".jpg";
+        }
+        if (contentStart.indexOf("<kml") !== -1) {
+            return ".kml";
+        }
+        if (contentStart.indexOf("<gpx") !== -1) {
+            return ".gpx";
+        }
+        return ".unknown";
     }
 
     private getTypeFromUrl(url: string): string {
@@ -187,19 +236,6 @@ export class FileService {
             return ImageResizeService.JPEG;
         }
         return "application/" + fileExtension;
-    }
-
-    private getExtensionFromType(type: string): string {
-        if (type.indexOf("gpx") !== -1) {
-            return ".gpx";
-        }
-        if (type.indexOf("kml") !== -1) {
-            return ".kml";
-        }
-        if (type.indexOf("jpg") !== -1 || type.indexOf("jpeg") !== -1) {
-            return ".jpg";
-        }
-        return "." + type.split("/").pop();
     }
 
     public async addRoutesFromFile(file: File): Promise<void> {
@@ -271,35 +307,6 @@ export class FileService {
             encoding: isBase64 ? undefined : Encoding.UTF8
         });
         return results.uri;
-    }
-
-    /**
-     * Downloads a file while reporting progress
-     *
-     * @param url The url of the file
-     * @param progressCallback reports progress between 0 and 1
-     */
-    public async getFileContentWithProgress(url: string, progressCallback: (value: number) => void): Promise<Blob> {
-        return new Promise((resolve, reject) => {
-            this.httpClient.get(url, {
-                observe: "events",
-                responseType: "blob",
-                reportProgress: true
-            }).subscribe({
-                next: (event) => {
-                    if (event.type === HttpEventType.DownloadProgress) {
-                        progressCallback(event.loaded / event.total);
-                    }
-                    if (event.type === HttpEventType.Response) {
-                        if (event.ok) {
-                            resolve(event.body);
-                        } else {
-                            reject(new Error(event.statusText));
-                        }
-                    }
-                }, error: (error) => reject(error)
-            });
-        });
     }
 
     public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void, abortController: AbortController): Promise<void> {
