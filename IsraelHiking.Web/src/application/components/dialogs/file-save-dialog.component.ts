@@ -32,7 +32,7 @@ export class FileSaveDialogComponent {
         try {
             await this.fileService.saveToFile(`${this.getName(data)}.${format.extension}`, outputFormat, data);
         } catch (ex) {
-            this.toastService.error(ex as Error, this.resources.unableToSaveToFile);
+            this.toastService.error(ex as Error, this.resources.unableToExport);
         }
     }
 

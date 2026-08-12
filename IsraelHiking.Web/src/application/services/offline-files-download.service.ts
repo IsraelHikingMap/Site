@@ -57,7 +57,7 @@ export class OfflineFilesDownloadService {
             }
             this.toastService.confirm({
                 type: "YesNo",
-                message: this.resources.reccomendOfflineDownload,
+                message: this.resources.recommendOfflineDownload,
                 confirmAction: async () => {
                     this.router.navigate([RouteStrings.ROUTE_OFFLINE_MANAGEMENT]);
                 }

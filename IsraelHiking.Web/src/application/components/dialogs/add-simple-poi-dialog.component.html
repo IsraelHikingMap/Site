@@ -35,7 +35,7 @@
                 <button mat-button mat-dialog-close class="w-full p-0! h-[unset]!" (click)="addSimplePoint('OpenGate')"
                     analyticsOn="click" analyticsCategory="POI" analyticsLabel="Add open gate to OSM">
                     <i class="fa icon-gate"></i><br />
-                    {{resources.legendGate}}
+                    {{resources.legendOpenEntrance}}
                 </button>
             </div>
         </div>
@@ -45,14 +45,14 @@
                     (click)="addSimplePoint('ClosedGate')" analyticsOn="click" analyticsCategory="POI"
                     analyticsLabel="Add closed gate to OSM">
                     <i class="fa icon-gate" [style.color]="'red'"></i><br />
-                    {{resources.legendClosedGate}}
+                    {{resources.legendNoEntry}}
                 </button>
             </div>
             <div class="w-1/2">
                 <button mat-button mat-dialog-close class="w-full p-0! h-[unset]!" (click)="addSimplePoint('Block')"
                     analyticsOn="click" analyticsCategory="POI" analyticsLabel="Add block to OSM">
                     <i class="fa icon-bollards"></i><br />
-                    {{resources.legendBlock}}
+                    {{resources.legendVehicleBlock}}
                 </button>
             </div>
         </div>

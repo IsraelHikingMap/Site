@@ -47,7 +47,7 @@ export class AddSimplePoiDialogComponent {
             this.toastService.success(this.resources.dataUpdatedSuccessfullyItWillTakeTimeToSeeIt);
             this.deleteOriginalMarkerIfEmpty();
         } catch (ex) {
-            this.toastService.error(ex, this.resources.unableToSaveData);
+            this.toastService.error(ex, this.resources.unableToUploadPoint);
         }
     }
 

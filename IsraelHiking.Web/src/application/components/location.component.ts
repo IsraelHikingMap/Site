@@ -184,7 +184,7 @@ export class LocationComponent {
             }
             if (this.store.selectSnapshot((s: ApplicationState) => s.configuration).isShowBatteryConfirmation) {
                 this.toastService.confirm({
-                    message: this.resources.makeSureBatteryOptimizationIsOff,
+                    message: this.resources.turnOffBatteryOptimization,
                     type: "Custom",
                     confirmAction: () => {
                         BatteryOptimization.openBatteryOptimizationSettings();

@@ -111,4 +111,29 @@ describe("Open With Service", () => {
         expect(OpenWithService.parseGeoUrlCoordinates("geo:0,0?q=Masada+National+Park")).toBeNull();
         expect(OpenWithService.parseGeoUrlCoordinates("geo:0,0")).toBeNull();
     });
+
+    it("Should parse a location given as url parameters, whatever the parameters are called", () => {
+        expect(OpenWithService.parseParametersCoordinates("https://example.com/map?zoom=16&lat=32.1207&lng=34.8290"))
+            .toEqual({ lat: 32.1207, lng: 34.8290 });
+        expect(OpenWithService.parseParametersCoordinates("https://example.com/map?lon=34.8290&lat=32.1207&z=12.5"))
+            .toEqual({ lat: 32.1207, lng: 34.8290 });
+        expect(OpenWithService.parseParametersCoordinates("https://example.com/?latitude=-33.8688&longitude=-151.2093"))
+            .toEqual({ lat: -33.8688, lng: -151.2093 });
+    });
+
+    it("Should parse a location kept in the url fragment", () => {
+        expect(OpenWithService.parseParametersCoordinates("https://example.com/map#lat=32.1207&lon=34.8290&zoom=14"))
+            .toEqual({ lat: 32.1207, lng: 34.8290 });
+    });
+
+    it("Should return null for a url without a location in its parameters", () => {
+        expect(OpenWithService.parseParametersCoordinates("https://example.com/route.gpx")).toBeNull();
+        expect(OpenWithService.parseParametersCoordinates("https://example.com/map?lat=32.1207")).toBeNull();
+        expect(OpenWithService.parseParametersCoordinates("https://example.com/map?lat=Tel+Aviv&lng=34.8290")).toBeNull();
+        expect(OpenWithService.parseParametersCoordinates("https://example.com/map?lat=132.1&lng=34.8290")).toBeNull();
+    });
+
+    it("Should not mistake a parameter ending with the name of a location parameter", () => {
+        expect(OpenWithService.parseParametersCoordinates("https://example.com/?flat=32.1207&salon=34.8290")).toBeNull();
+    });
 });

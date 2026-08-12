@@ -108,7 +108,7 @@
         </div>
         <div class="flex-1">
             <button mat-button class="w-full" [cdkCopyToClipboard]="shareAddress()" (click)="copiedToClipboard.set(true)"
-                matTooltip="{{resources.copyUrl}}" matTooltipPosition="above" analyticsOn="click"
+                matTooltip="{{resources.copyLink}}" matTooltipPosition="above" analyticsOn="click"
                 analyticsCategory="Share" analyticsLabel="Share copy to clipboard">
                 <i class="fa icon-clipboard fa-lg"></i>
                 @if (copiedToClipboard()) {

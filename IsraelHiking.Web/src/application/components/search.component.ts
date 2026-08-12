@@ -223,7 +223,7 @@ export class SearchComponent {
     public placeholder() {
         const currentUrl = this.currentUrl();
         if (currentUrl === RouteStrings.ROUTE_SHARES) {
-            return this.resources.searchSharesPlaceHolder;
+            return this.resources.searchCloudSavesPlaceHolder;
         }
         if (currentUrl === RouteStrings.ROUTE_TRACES) {
             return this.resources.searchTracesPlaceHolder;

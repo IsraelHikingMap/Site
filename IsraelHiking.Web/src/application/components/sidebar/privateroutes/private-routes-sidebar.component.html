@@ -86,7 +86,7 @@
                                     <button mat-menu-item (click)="saveRouteToFile(route)" analyticsOn="click"
                                         analyticsCategory="Route" analyticsLabel="Save route to file">
                                         <i class="fa fa-lg icon-external-link-square"></i>
-                                        <span class="ms-2">{{resources.saveRouteToFile}}</span>
+                                        <span class="ms-2">{{resources.exportRoute}}</span>
                                     </button>
                                     <button mat-menu-item (click)="moveToRoute(route)" analyticsOn="click"
                                         analyticsCategory="Route" analyticsLabel="Move to route">
@@ -173,7 +173,7 @@
                         </mat-slider>
                     </div>
                     <div class="flex flex-row relative">
-                        <img width="100%" height="50px" src="content/legend/hike_legendLight4WDVehicles.png">
+                        <img width="100%" height="50px" src="content/legend/hike_legend4WDTrack.png">
                         <hr class="w-full border-0 border-solid absolute" [ngStyle]="{
                     'height': route.weight + 'px', 
                     'background-color': route.color, 

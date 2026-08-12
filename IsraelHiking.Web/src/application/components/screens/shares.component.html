@@ -125,7 +125,7 @@
                 (addToRoutes)="addShareUrlToRoutes(shareUrl)" (moveToRoute)="moveToShare(shareUrl)"></share-item>
         </div>
         } @empty {
-        <p class="mx-2">{{resources.noShares}}</p>
+        <p class="mx-2">{{resources.noCloudSaves}}</p>
         }
         @if (loading()) {
         <mat-spinner></mat-spinner>

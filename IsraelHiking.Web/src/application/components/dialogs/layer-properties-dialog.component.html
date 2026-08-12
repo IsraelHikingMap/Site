@@ -68,7 +68,7 @@
         </button>
         } @else {
         <button mat-button class="w-full" type="button" [cdkCopyToClipboard]="getShareLayerAddress()"
-          (click)="copiedToClipboard.set(true)" [matTooltip]="resources.copyUrl" matTooltipPosition="above"
+          (click)="copiedToClipboard.set(true)" [matTooltip]="resources.copyLink" matTooltipPosition="above"
           analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Share layer from web">
           <i class="fa fa-lg icon-clipboard"></i>
           @if (copiedToClipboard()) {
