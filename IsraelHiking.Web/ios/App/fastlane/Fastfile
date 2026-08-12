@@ -28,17 +28,6 @@ platform :ios do
     # Where CI resolved the packages. Derived from this file's own location rather
     # than an env var or lane argument, both of which have silently arrived empty.
     spm_cache = options[:spm_cache] || File.expand_path("../../.spm-cache", __dir__)
-    # TEMPORARY DIAGNOSTIC. The identical command runs in seconds in the workflow's
-    # resolve step, but hangs when build_app runs it here. The only remaining
-    # difference is that this point is after setup_ci swapped the default keychain.
-    # Running it ourselves, streamed, tells us which side the stall is on.
-    # NB: fastlane's `sh` runs in the fastlane/ directory, so cd to the project first.
-    sh("cd #{File.expand_path('..', __dir__).shellescape} && date +%T && " \
-       "xcodebuild -showBuildSettings -scheme App -project App.xcodeproj " \
-       "-clonedSourcePackagesDirPath #{spm_cache.shellescape} " \
-       "-disableAutomaticPackageResolution -skipPackageUpdates " \
-       "-destination 'generic/platform=iOS' > /dev/null; " \
-       "echo \"exit=$?\"; date +%T")
     build_app(
       project: "App.xcodeproj",
       scheme: "App",
