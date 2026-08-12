@@ -32,7 +32,8 @@ platform :ios do
     # resolve step, but hangs when build_app runs it here. The only remaining
     # difference is that this point is after setup_ci swapped the default keychain.
     # Running it ourselves, streamed, tells us which side the stall is on.
-    sh("date +%T; " \
+    # NB: fastlane's `sh` runs in the fastlane/ directory, so cd to the project first.
+    sh("cd #{File.expand_path('..', __dir__).shellescape} && date +%T && " \
        "xcodebuild -showBuildSettings -scheme App -project App.xcodeproj " \
        "-clonedSourcePackagesDirPath #{spm_cache.shellescape} " \
        "-disableAutomaticPackageResolution -skipPackageUpdates " \
