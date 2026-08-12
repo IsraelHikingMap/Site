@@ -1,0 +1,78 @@
+{
+  "originHash" : "4d8bfad6f3a29ea63c81ba1e05b43d65a023a6bac7dec7357287909ad3ffd085",
+  "pins" : [
+    {
+      "identity" : "capacitor-swift-pm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ionic-team/capacitor-swift-pm.git",
+      "state" : {
+        "revision" : "4f71d0b979f2f957326f04353eca7604ee937e1e",
+        "version" : "8.5.0"
+      }
+    },
+    {
+      "identity" : "ion-ios-camera",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ionic-team/ion-ios-camera.git",
+      "state" : {
+        "revision" : "9068b2cc9584bfa118c185b8032bbebb3a4a2174",
+        "version" : "1.0.5"
+      }
+    },
+    {
+      "identity" : "ion-ios-filesystem",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ionic-team/ion-ios-filesystem.git",
+      "state" : {
+        "revision" : "0d81e26e828ff9582807e2339112cedf2e0fab85",
+        "version" : "1.1.2"
+      }
+    },
+    {
+      "identity" : "maplibre-contour-rs",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Mapeak-com/maplibre-contour-rs",
+      "state" : {
+        "revision" : "494aed8b694e8f75abc8958cdf9e05902bc46feb",
+        "version" : "0.4.1"
+      }
+    },
+    {
+      "identity" : "maplibre-gl-native-distribution",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/maplibre/maplibre-gl-native-distribution",
+      "state" : {
+        "revision" : "5ee345ca5d65238a6fce29bba87816204be7df20",
+        "version" : "6.28.0"
+      }
+    },
+    {
+      "identity" : "pmtiles-mobile",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/mapeak-com/pmtiles-mobile.git",
+      "state" : {
+        "revision" : "50237542419cc5c3f61a520e653813c9db1ecc98",
+        "version" : "0.3.2"
+      }
+    },
+    {
+      "identity" : "purchases-hybrid-common",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RevenueCat/purchases-hybrid-common.git",
+      "state" : {
+        "revision" : "5001785fce0bfdfbcc260c8422f60f0a26a81f47",
+        "version" : "18.29.0"
+      }
+    },
+    {
+      "identity" : "purchases-ios-spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RevenueCat/purchases-ios-spm",
+      "state" : {
+        "revision" : "c69a23f56c63bdfe96096fa64a1c65334d2592db",
+        "version" : "5.83.0"
+      }
+    }
+  ],
+  "version" : 3
+}
