@@ -188,10 +188,6 @@ jobs:
     runs-on: macos-26
     needs: version
     timeout-minutes: 45
-    env:
-      # Swift Package Manager shells out to git. Without this, a credential prompt
-      # blocks forever instead of failing, which looks like a hung build.
-      GIT_TERMINAL_PROMPT: 0
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
@@ -239,20 +235,9 @@ jobs:
         timeout-minutes: 20
         run: |
           cd IsraelHiking.Web/ios/App
-          time xcodebuild -resolvePackageDependencies \
+          xcodebuild -resolvePackageDependencies \
             -project App.xcodeproj \
             -clonedSourcePackagesDirPath ../.spm-cache
-          echo "--- cache contents ---"
-          du -sh ../.spm-cache ../.spm-cache/artifacts
-          ls ../.spm-cache/artifacts
-          # Warm the build-settings lookup here, where the output is streamed and timed.
-          # fastlane captures this same command, so a slow first call inside the lane is
-          # invisible and reads as a hang.
-          echo "--- warming showBuildSettings ---"
-          time xcodebuild -showBuildSettings \
-            -project App.xcodeproj -scheme App \
-            -clonedSourcePackagesDirPath ../.spm-cache \
-            -destination 'generic/platform=iOS' > /dev/null
 
       - name: Save Swift package cache
         if: steps.spm-cache.outputs.cache-hit != 'true'

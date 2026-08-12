@@ -17,36 +17,22 @@ default_platform(:ios)
 
 platform :ios do
   desc "Build the iOS app only"
-  lane :build_ios do |options|
+  lane :build_ios do
     setup_ci
-    # -showBuildSettings needs longer than the 3 second default here. Cap the retries
-    # too, so a genuine hang fails in minutes instead of 3+6+12+24 escalating attempts.
-    ENV["FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT"] ||= "180"
-    ENV["FASTLANE_XCODEBUILD_SETTINGS_RETRIES"] ||= "2"
+    # Evaluating the Swift package graph takes -showBuildSettings around 15 seconds,
+    # which does not fit in fastlane's 3 second default.
+    ENV["FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT"] ||= "120"
     # The share extension is a second target with its own app id, so it needs its own profile.
     sync_code_signing(type: "appstore", app_identifier: ["com.mapeak", "com.mapeak.ShareExtension"])
-    # Where CI resolved the packages. Derived from this file's own location rather
-    # than an env var or lane argument, both of which have silently arrived empty.
-    spm_cache = options[:spm_cache] || File.expand_path("../../.spm-cache", __dir__)
     build_app(
       project: "App.xcodeproj",
       scheme: "App",
-      # -showBuildSettings itself triggers package resolution, which is what hangs on
-      # CI (fastlane#4059, actions/runner-images#6233). skip_package_dependencies_resolution
-      # above only suppresses gym's separate resolve step and does NOT affect this
-      # command (fastlane#21596) - these two are what put -disableAutomaticPackageResolution
-      # and -skipPackageUpdates on it, so it reads the committed Package.resolved instead.
-      disable_package_automatic_updates: true,
-      skip_package_repository_fetches: true,
-      # Also give it an explicit destination, so xcodebuild does not have to derive one.
-      destination: "generic/platform=iOS",
-      # Raw xcodebuild output. xcpretty hides SPM binary-artifact download progress,
-      # so a stall there is indistinguishable from a hung build.
-      xcodebuild_formatter: "",
-      # Packages are resolved once by a CI step before this lane runs. Re-resolving
-      # here re-downloads ~500MB of xcframeworks, which is what was timing out.
+      # CI resolves the packages into ios/.spm-cache before this lane runs. Reuse that
+      # rather than downloading the xcframeworks again, and build exactly the versions
+      # Package.resolved pins.
+      cloned_source_packages_path: File.expand_path("../../.spm-cache", __dir__),
       skip_package_dependencies_resolution: true,
-      cloned_source_packages_path: spm_cache,
+      disable_package_automatic_updates: true,
       export_options: {
         provisioningProfiles: {
           "com.mapeak" => "match AppStore com.mapeak",

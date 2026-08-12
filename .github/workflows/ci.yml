@@ -153,10 +153,9 @@ jobs:
         timeout-minutes: 20
         run: |
           cd IsraelHiking.Web/ios/App
-          time xcodebuild -resolvePackageDependencies \
+          xcodebuild -resolvePackageDependencies \
             -project App.xcodeproj \
             -clonedSourcePackagesDirPath ../.spm-cache
-          du -sh ../.spm-cache ../.spm-cache/artifacts
 
       - name: Save Swift package cache
         if: steps.spm-cache.outputs.cache-hit != 'true'
