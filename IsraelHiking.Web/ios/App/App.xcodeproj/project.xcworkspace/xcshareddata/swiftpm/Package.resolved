@@ -1,5 +1,5 @@
 {
-  "originHash" : "0872deecff781fc12e01063eb43d3b0b6ec471d6236fc29b76dd0cfe3312a7ca",
+  "originHash" : "e963cf86a6a7ba0c43b85893214e5f9f67c856b994aa34b4bcb36cf3a8e27a1b",
   "pins" : [
     {
       "identity" : "anycodable",
@@ -8,6 +8,33 @@
       "state" : {
         "revision" : "862808b2070cd908cb04f9aafe7de83d35f81b05",
         "version" : "0.6.7"
+      }
+    },
+    {
+      "identity" : "capacitor-swift-pm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ionic-team/capacitor-swift-pm.git",
+      "state" : {
+        "revision" : "4f71d0b979f2f957326f04353eca7604ee937e1e",
+        "version" : "8.5.0"
+      }
+    },
+    {
+      "identity" : "ion-ios-camera",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ionic-team/ion-ios-camera.git",
+      "state" : {
+        "revision" : "9068b2cc9584bfa118c185b8032bbebb3a4a2174",
+        "version" : "1.0.5"
+      }
+    },
+    {
+      "identity" : "ion-ios-filesystem",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ionic-team/ion-ios-filesystem.git",
+      "state" : {
+        "revision" : "0d81e26e828ff9582807e2339112cedf2e0fab85",
+        "version" : "1.1.2"
       }
     },
     {
@@ -22,19 +49,46 @@
     {
       "identity" : "maplibre-contour-rs",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Mapeak-com/maplibre-contour-rs",
+      "location" : "https://github.com/mapeak-com/maplibre-contour-rs",
       "state" : {
-        "revision" : "494aed8b694e8f75abc8958cdf9e05902bc46feb",
-        "version" : "0.4.1"
+        "revision" : "371a6c4fab691013935260046973a1afc507df6e",
+        "version" : "0.4.2"
+      }
+    },
+    {
+      "identity" : "maplibre-gl-native-distribution",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/maplibre/maplibre-gl-native-distribution",
+      "state" : {
+        "revision" : "5ee345ca5d65238a6fce29bba87816204be7df20",
+        "version" : "6.28.0"
       }
     },
     {
       "identity" : "pmtiles-mobile",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/mapeak-com/pmtiles-mobile.git",
+      "location" : "https://github.com/mapeak-com/pmtiles-mobile",
       "state" : {
-        "revision" : "50237542419cc5c3f61a520e653813c9db1ecc98",
-        "version" : "0.3.2"
+        "revision" : "69de95726314d81059c7e609dd865be719db94b3",
+        "version" : "0.3.3"
+      }
+    },
+    {
+      "identity" : "purchases-hybrid-common",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RevenueCat/purchases-hybrid-common.git",
+      "state" : {
+        "revision" : "5001785fce0bfdfbcc260c8422f60f0a26a81f47",
+        "version" : "18.29.0"
+      }
+    },
+    {
+      "identity" : "purchases-ios-spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RevenueCat/purchases-ios-spm",
+      "state" : {
+        "revision" : "c69a23f56c63bdfe96096fa64a1c65334d2592db",
+        "version" : "5.83.0"
       }
     },
     {

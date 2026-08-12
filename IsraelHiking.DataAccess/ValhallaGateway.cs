@@ -1,3 +1,4 @@
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using IsraelHiking.Common.Api;
@@ -32,47 +33,27 @@ class ValhallaRequest
 
     [JsonPropertyName("costing_options")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, ValhallaCostingOptions> CostingOptions { get; set; }
+    public Dictionary<string, JsonElement> CostingOptions { get; set; }
 }
 
-class ValhallaCostingOptions
+/// <summary>
+/// A single Valhalla routing profile, as defined in the profiles file
+/// </summary>
+public class ValhallaProfile
 {
-    [JsonPropertyName("shortest")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public bool? Shortest { get; set; }
+    /// <summary>
+    /// The Valhalla costing model, i.e. "pedestrian", "bicycle", "auto"
+    /// </summary>
+    [JsonPropertyName("costing")]
+    public string Costing { get; set; }
 
-    [JsonPropertyName("use_hills")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public double? UseHills { get; set; }
-
-    [JsonPropertyName("max_hiking_difficulty")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public int? MaxHikingDifficulty { get; set; }
-
-    /// <summary>Propensity to use track-grade roads (0 avoids, 1 fully allows). Valhalla defaults to 0 for autos.</summary>
-    [JsonPropertyName("use_tracks")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public double? UseTracks { get; set; }
-
-    [JsonPropertyName("gate_penalty")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public double? GatePenalty { get; set; }
-
-    [JsonPropertyName("gate_cost")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public double? GateCost { get; set; }
-
-    [JsonPropertyName("private_access_penalty")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public double? PrivateAccessPenalty { get; set; }
-
-    [JsonPropertyName("destination_only_penalty")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public double? DestinationOnlyPenalty { get; set; }
-
-    [JsonPropertyName("service_penalty")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public double? ServicePenalty { get; set; }
+    /// <summary>
+    /// Free-form Valhalla costing options, they are sent to Valhalla as-is under the costing name, so any
+    /// option Valhalla supports can be set without changing the code, see
+    /// https://valhalla.github.io/valhalla/api/turn-by-turn/api-reference/#costing-options
+    /// </summary>
+    [JsonPropertyName("costingOptions")]
+    public JsonElement? CostingOptions { get; set; }
 }
 
 public class ValhallaResponse
@@ -181,7 +162,7 @@ class ValhallaTraceRouteRequest
 
     [JsonPropertyName("costing_options")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, ValhallaCostingOptions> CostingOptions { get; set; }
+    public Dictionary<string, JsonElement> CostingOptions { get; set; }
 
     [JsonPropertyName("shape_match")]
     public string ShapeMatch { get; set; }
@@ -226,15 +207,24 @@ class GraphHopperCompatibleInstruction
 
 public class ValhallaGateway(IHttpClientFactory httpClientFactory,
     IOptions<ConfigurationData> options,
-    ILogger logger) : IRoutingGateway
+    ILogger logger) : IRoutingGateway, IInitializable
 {
+    private Dictionary<string, ValhallaProfile> _profiles;
+
     private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
     private readonly ConfigurationData _options = options.Value;
     private readonly ILogger _logger = logger;
 
+    public Task Initialize()
+    {
+        _profiles = ReadProfiles();
+        return Task.CompletedTask;
+    }
+
     public async Task<Feature> GetRouting(RoutingGatewayRequest request)
     {
         var httpClient = _httpClientFactory.CreateClient();
+        var profile = _profiles[request.Profile.ToString()];
         var requestJson = new ValhallaRequest
         {
             Locations = new List<ValhallaLocation>
@@ -250,8 +240,8 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
                     Lon = request.To.X
                 }
             },
-            Costing = ToCosting(request.Profile),
-            CostingOptions = ToCostingOptions(request.Profile),
+            Costing = profile.Costing,
+            CostingOptions = ToCostingOptions(profile),
             Units = "m",
             ElevationInterval = 30
         };
@@ -281,6 +271,7 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
     public async Task<Feature> GetMapMatch(MapMatchGatewayRequest request)
     {
         var httpClient = _httpClientFactory.CreateClient();
+        var profile = _profiles[request.Profile.ToString()];
         var traceRequest = new ValhallaTraceRouteRequest
         {
             // Only the endpoints are "break" points (so there is a single leg with a clean
@@ -291,8 +282,8 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
                 Lon = point.X,
                 Type = index == 0 || index == request.Points.Count - 1 ? "break" : "via"
             }).ToList(),
-            Costing = ToCosting(request.Profile),
-            CostingOptions = ToCostingOptions(request.Profile),
+            Costing = profile.Costing,
+            CostingOptions = ToCostingOptions(profile),
             ShapeMatch = "map_snap",
             DirectionsOptions = new ValhallaDirectionsOptions
             {
@@ -325,42 +316,36 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
         throw new Exception("Unable to map match the given points using Valhalla after 3 retries.");
     }
 
-    private static string ToCosting(ProfileType profile) => profile switch
+    private Dictionary<string, ValhallaProfile> ReadProfiles()
     {
-        ProfileType.Foot => "pedestrian",
-        ProfileType.Bike => "bicycle",
-        ProfileType.Car4WheelDrive => "auto",
-        _ => "pedestrian"
-    };
-
-    private static Dictionary<string, ValhallaCostingOptions> ToCostingOptions(ProfileType profile)
-    {
-        var options = profile switch
+        try
         {
-            ProfileType.Foot => new ValhallaCostingOptions
+            var content = File.ReadAllText(_options.ValhallaProfilesFilePath);
+            var profiles = JsonSerializer.Deserialize<Dictionary<string, ValhallaProfile>>(content, new JsonSerializerOptions
             {
-                Shortest = true,
-                MaxHikingDifficulty = 6, // allow the full SAC scale up to T6
-                UseHills = 1.0
-            },
-            ProfileType.Bike => new ValhallaCostingOptions
-            {
-                Shortest = true,
-                UseHills = 1.0
-            },
-            ProfileType.Car4WheelDrive => new ValhallaCostingOptions
-            {
-                UseTracks = 1.0,
-                GatePenalty = 0,
-                GateCost = 0,
-                PrivateAccessPenalty = 0,
-                DestinationOnlyPenalty = 0,
-                ServicePenalty = 0,
-                Shortest = true
-            },
-            _ => new ValhallaCostingOptions { Shortest = true }
-        };
-        return new Dictionary<string, ValhallaCostingOptions> { [ToCosting(profile)] = options };
+                PropertyNameCaseInsensitive = true,
+                ReadCommentHandling = JsonCommentHandling.Skip,
+                AllowTrailingCommas = true
+            })
+                ?? throw new InvalidOperationException("The file is empty");
+            _logger.LogInformation($"Loaded {profiles.Count} Valhalla profiles from {_options.ValhallaProfilesFilePath}");
+            return new Dictionary<string, ValhallaProfile>(profiles, StringComparer.OrdinalIgnoreCase);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Failed to read the Valhalla profiles from {_options.ValhallaProfilesFilePath}, falling back to Valhalla's default costing options");
+            return [];
+        }
+    }
+
+    /// <summary>
+    /// Valhalla expects the costing options to be keyed by the costing name they belong to
+    /// </summary>
+    private static Dictionary<string, JsonElement> ToCostingOptions(ValhallaProfile profile)
+    {
+        return profile.CostingOptions.HasValue
+            ? new Dictionary<string, JsonElement> { [profile.Costing] = profile.CostingOptions.Value }
+            : null;
     }
 
     private static object BuildInstructions(List<ValhallaManeuver> maneuvers, InstructionsFormat format)

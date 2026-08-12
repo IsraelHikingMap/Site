@@ -214,10 +214,34 @@ jobs:
           npm run set-version ${{ needs.version.outputs.version_string }} ${{ needs.version.outputs.version_code }}
           npm run build:mobile -- --no-progress
           npx cap sync ios
+
+      - name: Restore Swift package cache
+        id: spm-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: IsraelHiking.Web/ios/.spm-cache
+          key: spm-${{ runner.os }}-${{ hashFiles('IsraelHiking.Web/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          restore-keys: spm-${{ runner.os }}-
+
+      - name: Resolve Swift packages
+        run: |
+          cd IsraelHiking.Web/ios/App
+          xcodebuild -resolvePackageDependencies \
+            -project App.xcodeproj \
+            -clonedSourcePackagesDirPath ../.spm-cache
+
+      - name: Save Swift package cache
+        if: steps.spm-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: IsraelHiking.Web/ios/.spm-cache
+          key: spm-${{ runner.os }}-${{ hashFiles('IsraelHiking.Web/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+
       - name: Build iOS with signing
         if: ${{ github.secret_source == 'Actions' }}
         run: |
           cd IsraelHiking.Web/ios/App
+          # The lane reuses ios/.spm-cache, populated by the resolve step above.
           bundle exec fastlane build_ios
         env:
           MATCH_PASSWORD: ${{ secrets.PASSWORD }}

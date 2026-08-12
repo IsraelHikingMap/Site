@@ -21,6 +21,9 @@
     <Content Include="TestData\test.kml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\..\IsraelHiking.Web\valhalla-profiles.json" Link="valhalla-profiles.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

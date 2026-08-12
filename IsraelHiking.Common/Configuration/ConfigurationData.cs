@@ -85,6 +85,11 @@ public class ConfigurationData
     /// </summary>
     public string ValhallaServerAddress { get; set; }
     /// <summary>
+    /// The path to the file holding the Valhalla routing profiles definitions,
+    /// it can be mounted into the container in order to change the routing behavior
+    /// </summary>
+    public string ValhallaProfilesFilePath { get; set; }
+    /// <summary>
     /// GraphHopper server address
     /// </summary>
     public string GraphhopperServerAddress { get; set; }
@@ -148,6 +153,7 @@ public class ConfigurationData
         ClosestNodeWithGate = 30;
         GraphhopperServerAddress = "http://localhost:8989/";
         ValhallaServerAddress = "http://localhost:8002/";
+        ValhallaProfilesFilePath = "./valhalla-profiles.json";
         ElasticsearchServerAddress = "http://localhost:9200/";
         GpsBabelServerAddress = "http://localhost:11987/";
         ImageCreatorServerAddress = "http://localhost:11223/";
