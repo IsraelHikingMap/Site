@@ -1,8 +1,12 @@
 package com.mapeak.car
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.mapeak.valhalla.ValhallaRouteRequest
+import com.mapeak.valhalla.ValhallaRouter
+import com.mapeak.valhalla.ValhallaTiles
 import java.io.IOException
 import okhttp3.Call
 import okhttp3.Callback
@@ -15,6 +19,7 @@ import okhttp3.Response
 import org.json.JSONArray
 import org.json.JSONObject
 import org.maplibre.android.geometry.LatLng
+import org.maplibre.geojson.utils.PolylineUtils
 
 /**
  * Thin client over the Mapeak backend so the Android Auto experience can search for places and
@@ -22,8 +27,10 @@ import org.maplibre.android.geometry.LatLng
  * the Angular app (see search-results.provider.ts / routing.provider.ts): all results are delivered
  * back on the main thread so callers can update car screens directly.
  */
-class CarBackendService {
+class CarBackendService(context: Context) {
     private val mainHandler = Handler(Looper.getMainLooper())
+    private val valhallaTiles = ValhallaTiles(context)
+    private val valhallaRouter = ValhallaRouter(context)
 
     /**
      * Search for places matching [query] near [center]. Mirrors GET /api/search/{term}. Results are
@@ -85,9 +92,10 @@ class CarBackendService {
 
     /**
      * Compute a route from [from] to [to] using the given [routingType]. Mirrors GET /api/routing.
-     * Falls back to a straight line between the two points if the backend call fails so the user
-     * always gets a usable destination on the map. The from/to points keep a raw comma between
-     * lat/lng, matching the web client's "lat,lng" form.
+     * When the backend call fails the route is calculated on the device from the offline routing
+     * tiles, and only if those are missing or cannot produce a route does it fall back to a straight
+     * line between the two points, so the user always gets a usable destination on the map. The
+     * from/to points keep a raw comma between lat/lng, matching the web client's "lat,lng" form.
      */
     fun route(from: LatLng, to: LatLng, routingType: String, onResult: (List<LatLng>) -> Unit) {
         val url =
@@ -104,7 +112,7 @@ class CarBackendService {
                         object : Callback {
                             override fun onFailure(call: Call, e: IOException) {
                                 Log.w(LOG_TAG, "Routing failed", e)
-                                postResult(onResult, listOf(from, to))
+                                postResult(onResult, offlineRoute(from, to, routingType) ?: listOf(from, to))
                             }
 
                             override fun onResponse(call: Call, response: Response) {
@@ -118,6 +126,7 @@ class CarBackendService {
                                             Log.w(LOG_TAG, "Reading route response failed", e)
                                             null
                                         }
+                                                ?: offlineRoute(from, to, routingType)
                                                 ?: listOf(from, to)
                                 postResult(onResult, route)
                             }
@@ -185,6 +194,65 @@ class CarBackendService {
                             }
                         }
                 )
+    }
+
+    /**
+     * Calculate the route on the device from the tiles the user downloaded for offline use. Returns
+     * null when there are no tiles, or when valhalla cannot connect the two points, so the caller
+     * can fall back to a straight line. Called from okhttp's callback threads, never the main one.
+     *
+     * Note that this only replaces the geometry - the turn by turn instructions still come from the
+     * map match endpoint, and when that is unreachable CarNavigation keeps the turns it synthesized
+     * locally. Valhalla's own trace_route is not exposed by valhalla-mobile on android yet.
+     */
+    private fun offlineRoute(from: LatLng, to: LatLng, routingType: String): List<LatLng>? {
+        if (!valhallaTiles.hasTiles()) {
+            return null
+        }
+        return try {
+            val raw =
+                    valhallaRouter.route(
+                            ValhallaRouteRequest(
+                                    fromLat = from.latitude,
+                                    fromLng = from.longitude,
+                                    toLat = to.latitude,
+                                    toLng = to.longitude,
+                                    costing = toCosting(routingType)
+                            ),
+                            valhallaTiles.tilesDir()
+                    )
+            parseOfflineRoute(raw)
+        } catch (e: Exception) {
+            Log.w(LOG_TAG, "Offline routing failed", e)
+            null
+        }
+    }
+
+    /**
+     * The app's routing type is not a valhalla costing model - map it, the same way the web layer does.
+     */
+    private fun toCosting(routingType: String): String =
+            when (routingType) {
+                "Hike" -> "pedestrian"
+                "Bike" -> "bicycle"
+                else -> "auto"
+            }
+
+    /**
+     * Parse the geometry out of a valhalla response. An error response carries a code and a message
+     * instead of a trip, in which case there is no route to return.
+     */
+    private fun parseOfflineRoute(body: String): List<LatLng>? {
+        val legs = JSONObject(body).optJSONObject("trip")?.optJSONArray("legs") ?: return null
+        val points = ArrayList<LatLng>()
+        for (i in 0 until legs.length()) {
+            val shape = legs.optJSONObject(i)?.optString("shape").orEmpty()
+            if (shape.isEmpty()) continue
+            PolylineUtils.decode(shape, POLYLINE_PRECISION).forEach {
+                points.add(LatLng(it.latitude(), it.longitude()))
+            }
+        }
+        return points.ifEmpty { null }
     }
 
     private fun parseSearchResults(body: String): List<CarSearchResult> {
@@ -267,6 +335,8 @@ class CarBackendService {
         private const val LOG_TAG = "CarBackendService"
         private const val API_BASE = "https://mapeak.com/api/"
         private const val MAX_RESULTS = 6
+        /** Valhalla encodes its shapes with 6 digits of precision rather than the usual 5 */
+        private const val POLYLINE_PRECISION = 6
         private val JSON_MEDIA_TYPE = "application/json".toMediaType()
     }
 }
