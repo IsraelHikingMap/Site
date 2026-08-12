@@ -113,11 +113,13 @@ public class FilesController : ControllerBase
     /// <param name="lastModified">The last time this tile was downloaded</param>
     /// <param name="tileX">The tile's X coordinates, null for root</param>
     /// <param name="tileY">The tile's Y coordinates, null for root</param>
+    /// <param name="routingTile">Whether to also list the offline routing (valhalla) file of the tile.
+    /// Defaults to false so that clients that predate offline routing do not download it</param>
     /// <returns></returns>
     [HttpGet]
     [Route("offline")]
     [Authorize]
-    public async Task<IActionResult> GetOfflineFiles([FromQuery] DateTime lastModified, [FromQuery] long? tileX, [FromQuery] long? tileY)
+    public async Task<IActionResult> GetOfflineFiles([FromQuery] DateTime lastModified, [FromQuery] long? tileX, [FromQuery] long? tileY, [FromQuery] bool routingTile = false)
     {
         if (!await _receiptValidationGateway.IsEntitled(User.Identity?.Name))
         {
@@ -125,7 +127,7 @@ public class FilesController : ControllerBase
             return Forbid();
         }
         _logger.LogInformation($"Getting the list of offline files for user: {User.Identity?.Name}, date: {lastModified}");
-        return Ok(await _offlineFilesService.GetUpdatedFilesList(lastModified, tileX, tileY));
+        return Ok(await _offlineFilesService.GetUpdatedFilesList(lastModified, tileX, tileY, routingTile));
     }
 
     /// <summary>

@@ -25,6 +25,8 @@ public interface IOfflineFilesService
     /// <param name="lastModifiedDate">The date to check against</param>
     /// <param name="tileX">The tile's X coordinates, null for root</param>
     /// <param name="tileY">The tile's Y coordinates, null for root</param>
+    /// <param name="routingTile">Whether to also list the offline routing (valhalla) file of the tile,
+    /// only clients that know how to handle it should ask for it</param>
     /// <returns>A list of file names</returns>
-    Task<Dictionary<string, DateTime>> GetUpdatedFilesList(DateTime lastModifiedDate, long? tileX, long? tileY);
+    Task<Dictionary<string, DateTime>> GetUpdatedFilesList(DateTime lastModifiedDate, long? tileX, long? tileY, bool routingTile);
 }

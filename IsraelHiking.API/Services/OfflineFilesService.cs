@@ -59,6 +59,16 @@ public class OfflineFilesService : IOfflineFilesService
     private const string DEM_ALIAS_FILE_NAME = "raster-dem";
 
     /// <summary>
+    /// The offline routing (valhalla) tiles of a slice, a tar file that is sliced on the fly like the other
+    /// non-DEM files. It is not a part of the style, and it is only listed for clients that ask for it since
+    /// older clients do not know how to handle it.
+    /// </summary>
+    private const string VALHALLA_FILE_NAME = "valhalla";
+
+    /// <inheritdoc cref="VALHALLA_FILE_NAME"/>
+    private const string VALHALLA_FILE_EXTENSION = ".tar";
+
+    /// <summary>
     /// The fixed last modified date reported for the DEM, bumped whenever the underlying data changes.
     /// </summary>
     private static readonly DateTime DEM_MODIFIED_DATE = DateTimeOffset.Parse("2026-04-09T10:36:08.8024764Z", CultureInfo.InvariantCulture).UtcDateTime;
@@ -100,7 +110,7 @@ public class OfflineFilesService : IOfflineFilesService
     /// The on-the-fly files are generated on demand, so they are always reported with today's date,
     /// while the DEM file has a fixed date and only exists at the tile level.
     /// </remarks>
-    public async Task<Dictionary<string, DateTime>> GetUpdatedFilesList(DateTime lastModifiedDate, long? tileX, long? tileY)
+    public async Task<Dictionary<string, DateTime>> GetUpdatedFilesList(DateTime lastModifiedDate, long? tileX, long? tileY, bool routingTile)
     {
         var filesDictionary = new Dictionary<string, DateTime>();
         var today = DateTime.UtcNow.Date;
@@ -116,6 +126,12 @@ public class OfflineFilesService : IOfflineFilesService
             {
                 AddIfUpdated(filesDictionary, SourceNameToFileName(name, tileX, tileY), DEM_MODIFIED_DATE, lastModifiedDate);
             }
+        }
+        // The routing tiles only exist per slice - adjacent slices are extracted into the same tiles directory
+        // on the device, so there is nothing to download at the root level.
+        if (routingTile && tileX.HasValue && tileY.HasValue)
+        {
+            AddIfUpdated(filesDictionary, SourceNameToFileName(VALHALLA_FILE_NAME, tileX, tileY, VALHALLA_FILE_EXTENSION), today, lastModifiedDate);
         }
         return filesDictionary;
     }
@@ -244,10 +260,10 @@ public class OfflineFilesService : IOfflineFilesService
         return lastDashIndex >= 0 ? name[..lastDashIndex] : name;
     }
 
-    private static string SourceNameToFileName(string sourceName, long? tileX, long? tileY)
+    private static string SourceNameToFileName(string sourceName, long? tileX, long? tileY, string extension = ".pmtiles")
     {
         return tileX.HasValue && tileY.HasValue
-            ? $"{sourceName}+{SLICE_TILE_ZOOM}-{tileX}-{tileY}.pmtiles"
-            : $"{sourceName}-{ROOT_ZOOM}.pmtiles";
+            ? $"{sourceName}+{SLICE_TILE_ZOOM}-{tileX}-{tileY}{extension}"
+            : $"{sourceName}-{ROOT_ZOOM}{extension}";
     }
 }
