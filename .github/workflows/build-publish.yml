@@ -187,6 +187,12 @@ jobs:
   ios:
     runs-on: macos-26
     needs: version
+    timeout-minutes: 45
+    env:
+      # Swift Package Manager shells out to git. Without this, a credential prompt
+      # blocks forever instead of failing, which looks like a hung build.
+      GIT_TERMINAL_PROMPT: 0
+      SPM_CACHE: ${{ github.workspace }}/.spm-cache
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
@@ -214,8 +220,40 @@ jobs:
           npm run set-version ${{ needs.version.outputs.version_string }} ${{ needs.version.outputs.version_code }}
           npm run build:mobile -- --no-progress
           npx cap sync ios
+
+      # The cloned packages and their binary artifacts are ~750MB, almost all of it
+      # prebuilt xcframeworks. Restore and save are split rather than using
+      # actions/cache, which only saves when the whole job succeeds - the cache
+      # should persist even if the build step later fails.
+      - name: Restore Swift package cache
+        id: spm-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.SPM_CACHE }}
+          key: spm-${{ runner.os }}-${{ hashFiles('IsraelHiking.Web/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          restore-keys: spm-${{ runner.os }}-
+
+      # Resolve separately from the archive so the log shows how long package
+      # resolution and artifact download actually take. Must run after `npm ci`,
+      # since the plugin packages are referenced by path into node_modules.
+      - name: Resolve Swift packages
+        timeout-minutes: 15
+        run: |
+          cd IsraelHiking.Web/ios/App
+          time xcodebuild -resolvePackageDependencies \
+            -project App.xcodeproj \
+            -clonedSourcePackagesDirPath "$SPM_CACHE"
+
+      - name: Save Swift package cache
+        if: steps.spm-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.SPM_CACHE }}
+          key: spm-${{ runner.os }}-${{ hashFiles('IsraelHiking.Web/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+
       - name: Build iOS with signing
         if: ${{ github.secret_source == 'Actions' }}
+        timeout-minutes: 25
         run: |
           cd IsraelHiking.Web/ios/App
           bundle exec fastlane build_ios
