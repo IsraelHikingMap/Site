@@ -187,7 +187,6 @@ jobs:
   ios:
     runs-on: macos-26
     needs: version
-    timeout-minutes: 45
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
@@ -232,7 +231,6 @@ jobs:
       # resolution and artifact download actually take. Must run after `npm ci`,
       # since the plugin packages are referenced by path into node_modules.
       - name: Resolve Swift packages
-        timeout-minutes: 20
         run: |
           cd IsraelHiking.Web/ios/App
           xcodebuild -resolvePackageDependencies \
@@ -248,7 +246,6 @@ jobs:
 
       - name: Build iOS with signing
         if: ${{ github.secret_source == 'Actions' }}
-        timeout-minutes: 25
         run: |
           cd IsraelHiking.Web/ios/App
           # The lane reuses ios/.spm-cache, populated by the resolve step above.
