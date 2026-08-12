@@ -3,6 +3,9 @@ App/App/public
 DerivedData
 xcuserdata
 
+# Swift package checkouts and binary artifacts, populated by CI and cached
+.spm-cache
+
 # Cordova plugins for Capacitor
 capacitor-cordova-ios-plugins
 

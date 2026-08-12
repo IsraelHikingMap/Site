@@ -19,20 +19,24 @@ platform :ios do
   desc "Build the iOS app only"
   lane :build_ios do |options|
     setup_ci
+    # -showBuildSettings has to evaluate the whole Swift package graph, which does not
+    # fit in the 3 second default. Without this fastlane gives up after 4 retries.
+    ENV["FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT"] ||= "180"
     # The share extension is a second target with its own app id, so it needs its own profile.
     sync_code_signing(type: "appstore", app_identifier: ["com.mapeak", "com.mapeak.ShareExtension"])
+    # Where CI resolved the packages. Derived from this file's own location rather
+    # than an env var or lane argument, both of which have silently arrived empty.
+    spm_cache = options[:spm_cache] || File.expand_path("../../.spm-cache", __dir__)
     build_app(
       project: "App.xcodeproj",
       scheme: "App",
       # Raw xcodebuild output. xcpretty hides SPM binary-artifact download progress,
       # so a stall there is indistinguishable from a hung build.
       xcodebuild_formatter: "",
-      # Packages are resolved by a separate CI step, which runs before setup_ci
-      # replaces the default keychain. Resolving again from here has been observed
-      # to hang while downloading binary artifacts, so reuse that result instead.
-      # Passed as a lane argument rather than an env var so it shows up in the log.
+      # Packages are resolved once by a CI step before this lane runs. Re-resolving
+      # here re-downloads ~500MB of xcframeworks, which is what was timing out.
       skip_package_dependencies_resolution: true,
-      cloned_source_packages_path: options[:spm_cache],
+      cloned_source_packages_path: spm_cache,
       export_options: {
         provisioningProfiles: {
           "com.mapeak" => "match AppStore com.mapeak",

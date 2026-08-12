@@ -192,7 +192,6 @@ jobs:
       # Swift Package Manager shells out to git. Without this, a credential prompt
       # blocks forever instead of failing, which looks like a hung build.
       GIT_TERMINAL_PROMPT: 0
-      SPM_CACHE: ${{ github.workspace }}/.spm-cache
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
@@ -229,7 +228,7 @@ jobs:
         id: spm-cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.SPM_CACHE }}
+          path: IsraelHiking.Web/ios/.spm-cache
           key: spm-${{ runner.os }}-${{ hashFiles('IsraelHiking.Web/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
           restore-keys: spm-${{ runner.os }}-
 
@@ -242,13 +241,13 @@ jobs:
           cd IsraelHiking.Web/ios/App
           time xcodebuild -resolvePackageDependencies \
             -project App.xcodeproj \
-            -clonedSourcePackagesDirPath "$SPM_CACHE"
+            -clonedSourcePackagesDirPath ../.spm-cache
 
       - name: Save Swift package cache
         if: steps.spm-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          path: ${{ env.SPM_CACHE }}
+          path: IsraelHiking.Web/ios/.spm-cache
           key: spm-${{ runner.os }}-${{ hashFiles('IsraelHiking.Web/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
 
       - name: Build iOS with signing
@@ -256,10 +255,8 @@ jobs:
         timeout-minutes: 25
         run: |
           cd IsraelHiking.Web/ios/App
-          # Reuse the packages resolved by the cached step above, so the archive does
-          # not re-resolve and re-download ~650MB of xcframeworks after setup_ci has
-          # swapped the keychain. Passed as a lane argument so it appears in the log.
-          bundle exec fastlane build_ios spm_cache:"$SPM_CACHE"
+          # The lane reuses ios/.spm-cache, populated by the resolve step above.
+          bundle exec fastlane build_ios
         env:
           MATCH_PASSWORD: ${{ secrets.PASSWORD }}
       - name: Upload ipa artifacts
