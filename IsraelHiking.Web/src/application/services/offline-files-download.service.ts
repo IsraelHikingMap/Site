@@ -15,18 +15,24 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { PmTilesService } from "./pmtiles.service";
+import { RoutingProvider } from "./routing.provider";
 import { RouteStrings } from "./hash.service";
 import { DeleteOfflineMapsTileAction, SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
 import type { ApplicationState, FileNameDateVersion, TileMetadataPerFile } from "../models";
 
 @Service()
 export class OfflineFilesDownloadService {
+    /** The offline routing tiles of a slice, as they are named by the server */
+    private static readonly ROUTING_TILE_PREFIX = "valhalla";
+    private static readonly ROUTING_TILE_EXTENSION = ".tar";
+
     private readonly resources = inject(ResourcesService);
     private readonly fileService = inject(FileService);
     private readonly loggingService = inject(LoggingService);
     private readonly httpClient = inject(HttpClient);
     private readonly toastService = inject(ToastService);
     private readonly pmtilesService = inject(PmTilesService);
+    private readonly routingProvider = inject(RoutingProvider);
     private readonly store = inject(Store);
     private readonly router = inject(Router);
 
@@ -38,6 +44,15 @@ export class OfflineFilesDownloadService {
     public readonly tilesProgressChanged = new EventEmitter<{ tileX: number, tileY: number, progressValue: number }>();
     public get currentDownloadedTile() {
         return this._currentDownloadedTile;
+    }
+
+    private static sliceId(tileX: number, tileY: number): string {
+        return `${tileX}-${tileY}`;
+    }
+
+    private isRoutingTileFile(fileName: string): boolean {
+        return fileName.startsWith(OfflineFilesDownloadService.ROUTING_TILE_PREFIX) &&
+            fileName.endsWith(OfflineFilesDownloadService.ROUTING_TILE_EXTENSION);
     }
 
     public async initialize(): Promise<void> {
@@ -134,6 +149,10 @@ export class OfflineFilesDownloadService {
     private async getMetadataPerFile(fileNames: FileNameDateVersion[]): Promise<TileMetadataPerFile> {
         const metadata: FileNameDateVersion[] = []
         for (const fileNameAndDate of fileNames) {
+            if (this.isRoutingTileFile(fileNameAndDate.fileName)) {
+                metadata.push({ fileName: fileNameAndDate.fileName, date: fileNameAndDate.date, version: null });
+                continue;
+            }
             try {
                 const version = await this.pmtilesService.getVersion(fileNameAndDate.fileName);
                 metadata.push({ fileName: fileNameAndDate.fileName, date: fileNameAndDate.date, version });
@@ -181,6 +200,10 @@ export class OfflineFilesDownloadService {
             return;
         }
         await this.fileService.moveFileFromCacheToDataDirectory(fileName);
+        if (this.isRoutingTileFile(fileName)) {
+            const { tileX, tileY } = this._currentDownloadedTile!;
+            await this.routingProvider.extractOfflineRoutingTiles(fileName, OfflineFilesDownloadService.sliceId(tileX, tileY));
+        }
         this.downloadedFilesInCurrentSession.push(fileName);
         this.loggingService.info(`[Offline Download] Finished downloading ${fileName}`);
     }
@@ -208,6 +231,9 @@ export class OfflineFilesDownloadService {
         if (tileX != null && tileY != null) {
             params.tileX = tileX.toString();
             params.tileY = tileY.toString();
+            if (this.routingProvider.isOfflineRoutingSupported()) {
+                params.routingTile = "true";
+            }
         }
         const fileNames = await firstValueFrom(this.httpClient.get<Record<string, string>>(Urls.offlineFiles, { params: params }).pipe(timeout(5000)));
         this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
@@ -215,8 +241,9 @@ export class OfflineFilesDownloadService {
             return [];
         }
         const fileNameDates = Object.entries(fileNames).map(([key, value]) => ({ fileName: key, date: value }));
-        // Only pmtiles and non-contour files.
-        return fileNameDates.filter(fnd => fnd.fileName.endsWith(".pmtiles") && !fnd.fileName.includes("_contour_"));
+        // Only pmtiles and the offline routing tiles, and no contours.
+        return fileNameDates.filter(fnd => (fnd.fileName.endsWith(".pmtiles") || this.isRoutingTileFile(fnd.fileName)) &&
+            !fnd.fileName.includes("_contour_"));
     }
 
     public abortCurrentDownload(): void {
@@ -238,6 +265,12 @@ export class OfflineFilesDownloadService {
         if (Array.isArray(downloadedTile)) {
             const fileNames = downloadedTile.map(fnd => fnd.fileName);
             for (const fileName of fileNames) {
+                if (this.isRoutingTileFile(fileName)) {
+                    // The tar itself is gone once extracted, the tiles it holds are removed by the
+                    // plugin, which keeps the ones the adjacent tiles share with it.
+                    await this.routingProvider.deleteOfflineRoutingTiles(OfflineFilesDownloadService.sliceId(tileX, tileY));
+                    continue;
+                }
                 this.loggingService.info(`[Offline Download] Deleting file ${fileName}`);
                 await this.fileService.deleteFileInDataDirectory(fileName);
                 this.pmtilesService.invalidateFile(fileName);
