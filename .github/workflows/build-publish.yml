@@ -236,12 +236,23 @@ jobs:
       # resolution and artifact download actually take. Must run after `npm ci`,
       # since the plugin packages are referenced by path into node_modules.
       - name: Resolve Swift packages
-        timeout-minutes: 15
+        timeout-minutes: 20
         run: |
           cd IsraelHiking.Web/ios/App
           time xcodebuild -resolvePackageDependencies \
             -project App.xcodeproj \
             -clonedSourcePackagesDirPath ../.spm-cache
+          echo "--- cache contents ---"
+          du -sh ../.spm-cache ../.spm-cache/artifacts
+          ls ../.spm-cache/artifacts
+          # Warm the build-settings lookup here, where the output is streamed and timed.
+          # fastlane captures this same command, so a slow first call inside the lane is
+          # invisible and reads as a hang.
+          echo "--- warming showBuildSettings ---"
+          time xcodebuild -showBuildSettings \
+            -project App.xcodeproj -scheme App \
+            -clonedSourcePackagesDirPath ../.spm-cache \
+            -destination 'generic/platform=iOS' > /dev/null
 
       - name: Save Swift package cache
         if: steps.spm-cache.outputs.cache-hit != 'true'
