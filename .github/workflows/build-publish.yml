@@ -256,14 +256,12 @@ jobs:
         timeout-minutes: 25
         run: |
           cd IsraelHiking.Web/ios/App
-          bundle exec fastlane build_ios
+          # Reuse the packages resolved by the cached step above, so the archive does
+          # not re-resolve and re-download ~650MB of xcframeworks after setup_ci has
+          # swapped the keychain. Passed as a lane argument so it appears in the log.
+          bundle exec fastlane build_ios spm_cache:"$SPM_CACHE"
         env:
           MATCH_PASSWORD: ${{ secrets.PASSWORD }}
-          # Reuse the packages resolved by the cached step above. Set here as gym's
-          # own env vars rather than via the Fastfile, so the archive cannot silently
-          # fall back to re-resolving and re-downloading ~650MB of xcframeworks.
-          GYM_CLONED_SOURCE_PACKAGES_PATH: ${{ github.workspace }}/.spm-cache
-          GYM_SKIP_PACKAGE_DEPENDENCIES_RESOLUTION: 'true'
       - name: Upload ipa artifacts
         if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v7.0.1

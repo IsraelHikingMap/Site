@@ -17,7 +17,7 @@ default_platform(:ios)
 
 platform :ios do
   desc "Build the iOS app only"
-  lane :build_ios do
+  lane :build_ios do |options|
     setup_ci
     # The share extension is a second target with its own app id, so it needs its own profile.
     sync_code_signing(type: "appstore", app_identifier: ["com.mapeak", "com.mapeak.ShareExtension"])
@@ -27,9 +27,12 @@ platform :ios do
       # Raw xcodebuild output. xcpretty hides SPM binary-artifact download progress,
       # so a stall there is indistinguishable from a hung build.
       xcodebuild_formatter: "",
-      # CI also sets GYM_CLONED_SOURCE_PACKAGES_PATH and
-      # GYM_SKIP_PACKAGE_DEPENDENCIES_RESOLUTION so the archive reuses the packages
-      # already resolved by the cached workflow step instead of re-downloading them.
+      # Packages are resolved by a separate CI step, which runs before setup_ci
+      # replaces the default keychain. Resolving again from here has been observed
+      # to hang while downloading binary artifacts, so reuse that result instead.
+      # Passed as a lane argument rather than an env var so it shows up in the log.
+      skip_package_dependencies_resolution: true,
+      cloned_source_packages_path: options[:spm_cache],
       export_options: {
         provisioningProfiles: {
           "com.mapeak" => "match AppStore com.mapeak",
