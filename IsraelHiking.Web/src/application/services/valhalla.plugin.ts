@@ -1,4 +1,3 @@
-import { InjectionToken } from "@angular/core";
 import { registerPlugin } from "@capacitor/core";
 
 /**
@@ -41,14 +40,7 @@ export interface ValhallaPlugin {
     }): Promise<{ raw: string }>;
 }
 
-/**
- * Injected rather than used directly so that it can be replaced in tests, and so that swapping the
- * implementation for a real capacitor plugin later is a change of this factory alone.
- */
-export const VALHALLA_PLUGIN = new InjectionToken<ValhallaPlugin>("VALHALLA_PLUGIN", {
-    providedIn: "root",
-    factory: () => registerPlugin<ValhallaPlugin>("Valhalla")
-});
+export const Valhalla = registerPlugin<ValhallaPlugin>("Valhalla");
 
 /**
  * The valhalla response, the error fields are set instead of the trip when the request fails,

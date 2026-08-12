@@ -12,12 +12,27 @@ import { GeoJsonParser } from "./geojson.parser";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
-import { VALHALLA_PLUGIN } from "./valhalla.plugin";
 import type { ValhallaPlugin } from "./valhalla.plugin";
+
+// The plugin is registered at module scope, the capacitor way, so it is replaced here at its source
+const { pluginMock } = vi.hoisted(() => ({
+    pluginMock: {
+        route: vi.fn(),
+        extractTiles: vi.fn(),
+        deleteTiles: vi.fn(),
+        hasTiles: vi.fn(),
+        clearTiles: vi.fn()
+    } as unknown as ValhallaPlugin
+}));
+
+vi.mock("@capacitor/core", async (importOriginal) => ({
+    ...(await importOriginal<object>()),
+    registerPlugin: () => pluginMock
+}));
 
 const encodeShape = (latlngs: [number, number][]) => polyline.encode(latlngs, 6);
 
-const setupTestBed = (isCapacitor: boolean, pluginMock: ValhallaPlugin) => {
+const setupTestBed = (isCapacitor: boolean) => {
     TestBed.configureTestingModule({
         providers: [
             provideStore([]),
@@ -30,7 +45,6 @@ const setupTestBed = (isCapacitor: boolean, pluginMock: ValhallaPlugin) => {
             },
             { provide: LoggingService, useValue: { error: () => { }, info: () => { } } },
             { provide: RunningContextService, useValue: { isCapacitor } },
-            { provide: VALHALLA_PLUGIN, useValue: pluginMock },
             {
                 provide: ElevationProvider,
                 useValue: {
@@ -46,17 +60,10 @@ const setupTestBed = (isCapacitor: boolean, pluginMock: ValhallaPlugin) => {
 };
 
 describe("RoutingProvider", () => {
-    let pluginMock: ValhallaPlugin;
-
     beforeEach(() => {
-        pluginMock = {
-            route: vi.fn(),
-            extractTiles: vi.fn(),
-            deleteTiles: vi.fn(),
-            hasTiles: vi.fn().mockResolvedValue({ hasTiles: false }),
-            clearTiles: vi.fn()
-        };
-        setupTestBed(true, pluginMock);
+        vi.clearAllMocks();
+        vi.mocked(pluginMock.hasTiles).mockResolvedValue({ hasTiles: false });
+        setupTestBed(true);
     });
 
     it("Should route between two distant points with None routing type", inject([RoutingProvider, HttpTestingController],
@@ -298,7 +305,7 @@ describe("RoutingProvider", () => {
 
         it("Should not route offline when it is not supported", async () => {
             TestBed.resetTestingModule();
-            setupTestBed(false, pluginMock);
+            setupTestBed(false);
             const router = TestBed.inject(RoutingProvider);
             const backend = TestBed.inject(HttpTestingController);
             TestBed.inject(Store).reset({ offlineState: { isSubscribed: false } });
@@ -331,7 +338,7 @@ describe("RoutingProvider", () => {
 
         it("Should not ask the plugin to delete tiles when it is not supported", async () => {
             TestBed.resetTestingModule();
-            setupTestBed(false, pluginMock);
+            setupTestBed(false);
 
             await TestBed.inject(RoutingProvider).deleteOfflineRoutingTiles("52-75");
 

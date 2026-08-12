@@ -11,7 +11,7 @@ import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
-import { VALHALLA_PLUGIN } from "./valhalla.plugin";
+import { Valhalla } from "./valhalla.plugin";
 import type { ValhallaRouteLeg, ValhallaRouteResponse } from "./valhalla.plugin";
 import { Urls } from "../urls";
 import type { ApplicationState, LatLngAltTime, RoutingType } from "../models";
@@ -35,7 +35,6 @@ export class RoutingProvider {
     private readonly loggingService = inject(LoggingService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly elevationProvider = inject(ElevationProvider);
-    private readonly valhallaPlugin = inject(VALHALLA_PLUGIN);
     private readonly store = inject(Store);
 
     public async getRoute(latlngStart: LatLngAltTime, latlngEnd: LatLngAltTime, routinType: RoutingType): Promise<LatLngAltTime[]> {
@@ -85,7 +84,7 @@ export class RoutingProvider {
      * The slice is identified so that it can later be removed without affecting its neighbours.
      */
     public async extractOfflineRoutingTiles(fileName: string, sliceId: string): Promise<void> {
-        const results = await this.valhallaPlugin.extractTiles({ tarFileName: fileName, sliceId });
+        const results = await Valhalla.extractTiles({ tarFileName: fileName, sliceId });
         this.loggingService.info(`[Routing] Extracted ${results.extractedFiles} offline routing tiles from ${fileName}`);
     }
 
@@ -96,7 +95,7 @@ export class RoutingProvider {
         if (!this.isOfflineRoutingSupported()) {
             return;
         }
-        await this.valhallaPlugin.deleteTiles({ sliceId });
+        await Valhalla.deleteTiles({ sliceId });
         this.loggingService.info(`[Routing] Removed the offline routing tiles of ${sliceId}`);
     }
 
@@ -105,10 +104,10 @@ export class RoutingProvider {
      * The returned points have their elevation set from valhalla's elevation samples.
      */
     private async getOffineRoute(latlngStart: LatLngAltTime, latlngEnd: LatLngAltTime, routingType: RoutingType): Promise<LatLngAltTime[]> {
-        if (!this.isOfflineRoutingSupported() || !(await this.valhallaPlugin.hasTiles()).hasTiles) {
+        if (!this.isOfflineRoutingSupported() || !(await Valhalla.hasTiles()).hasTiles) {
             throw new Error("[Routing] There are no offline routing tiles on the device");
         }
-        const results = await this.valhallaPlugin.route({
+        const results = await Valhalla.route({
             fromLat: latlngStart.lat,
             fromLng: latlngStart.lng,
             toLat: latlngEnd.lat,
@@ -116,21 +115,28 @@ export class RoutingProvider {
             costing: RoutingProvider.VALHALLA_COSTING[routingType],
             elevationInterval: RoutingProvider.ELEVATION_INTERVAL_METERS
         });
-        const response = JSON.parse(results.raw) as ValhallaRouteResponse;
+        const latlngs = RoutingProvider.parseValhallaResponse(results.raw);
+        this.loggingService.info(`[Routing] Got an offline route with ${latlngs.length} points`);
+        return latlngs;
+    }
+
+    /**
+     * Turns a raw valhalla response into the route's points. Static and public so it can be tested
+     * without the native plugin, which has no web implementation to stand in for it.
+     */
+    public static parseValhallaResponse(raw: string): LatLngAltTime[] {
+        const response = JSON.parse(raw) as ValhallaRouteResponse;
         if (response.trip == null) {
             throw new Error(`[Routing] Offline routing failed with code ${response.code}: ${response.message}`);
         }
-        const latlngs = (response.trip.legs ?? []).flatMap(leg => this.valhallaLegToLatLngs(leg));
-        this.loggingService.info(`[Routing] Got an offline route with ${latlngs.length} points, ` +
-            `length: ${response.trip.summary?.length} ${response.trip.units}, time: ${response.trip.summary?.time}s`);
-        return latlngs;
+        return (response.trip.legs ?? []).flatMap(leg => RoutingProvider.valhallaLegToLatLngs(leg));
     }
 
     /**
      * Decodes a leg's shape and sets the elevation of every point by interpolating between the
      * elevation samples, which are evenly spaced along the leg.
      */
-    private valhallaLegToLatLngs(leg: ValhallaRouteLeg): LatLngAltTime[] {
+    private static valhallaLegToLatLngs(leg: ValhallaRouteLeg): LatLngAltTime[] {
         const points: LatLngAltTime[] = polyline.decode(leg.shape ?? "", 6).map(([lat, lng]) => ({ lat, lng }));
         const elevations = leg.elevation ?? [];
         if (elevations.length === 0) {
