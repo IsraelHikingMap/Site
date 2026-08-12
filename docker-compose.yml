@@ -8,6 +8,11 @@ services:
 #      - "5000:5000"
 #    volumes:
 #      - ./IsraelHiking.Web/appsettings.json:/israelhiking/appsettings.json
+#      # The Valhalla routing profiles - the keys are the profile names, "default" is used for any profile
+#      # that is not listed, and "costingOptions" is sent to Valhalla as-is, see
+#      # https://valhalla.github.io/valhalla/api/turn-by-turn/api-reference/#costing-options
+#      # The file is read on startup, so restart the container after changing it.
+#      - ./IsraelHiking.Web/valhalla-profiles.json:/israelhiking/valhalla-profiles.json
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.8
     container_name: elasticsearch
