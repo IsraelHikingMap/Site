@@ -31,9 +31,14 @@ platform :ios do
     build_app(
       project: "App.xcodeproj",
       scheme: "App",
-      # Without an explicit destination, fastlane's -showBuildSettings call omits
-      # -destination and xcodebuild has to work one out itself, which hangs on CI
-      # runners (fastlane#4059). The same command with this flag returns immediately.
+      # -showBuildSettings itself triggers package resolution, which is what hangs on
+      # CI (fastlane#4059, actions/runner-images#6233). skip_package_dependencies_resolution
+      # above only suppresses gym's separate resolve step and does NOT affect this
+      # command (fastlane#21596) - these two are what put -disableAutomaticPackageResolution
+      # and -skipPackageUpdates on it, so it reads the committed Package.resolved instead.
+      disable_package_automatic_updates: true,
+      skip_package_repository_fetches: true,
+      # Also give it an explicit destination, so xcodebuild does not have to derive one.
       destination: "generic/platform=iOS",
       # Raw xcodebuild output. xcpretty hides SPM binary-artifact download progress,
       # so a stall there is indistinguishable from a hung build.
