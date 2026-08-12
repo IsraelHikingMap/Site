@@ -23,9 +23,6 @@ platform :ios do
     build_app(
       project: "App.xcodeproj",
       scheme: "App",
-      # CI resolves the packages into ios/.spm-cache before this lane runs. Reuse that
-      # rather than downloading the xcframeworks again, and build exactly the versions
-      # Package.resolved pins.
       cloned_source_packages_path: File.expand_path("../../.spm-cache", __dir__),
       skip_package_dependencies_resolution: true,
       disable_package_automatic_updates: true,
