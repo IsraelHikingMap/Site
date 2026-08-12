@@ -12,58 +12,36 @@ import { GeoJsonParser } from "./geojson.parser";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
-import type { ValhallaPlugin } from "./valhalla.plugin";
-
-// The plugin is registered at module scope, the capacitor way, so it is replaced here at its source
-const { pluginMock } = vi.hoisted(() => ({
-    pluginMock: {
-        route: vi.fn(),
-        extractTiles: vi.fn(),
-        deleteTiles: vi.fn(),
-        hasTiles: vi.fn(),
-        clearTiles: vi.fn()
-    } as unknown as ValhallaPlugin
-}));
-
-vi.mock("@capacitor/core", async (importOriginal) => ({
-    ...(await importOriginal<object>()),
-    registerPlugin: () => pluginMock
-}));
 
 const encodeShape = (latlngs: [number, number][]) => polyline.encode(latlngs, 6);
 
-const setupTestBed = (isCapacitor: boolean) => {
-    TestBed.configureTestingModule({
-        providers: [
-            provideStore([]),
-            { provide: ResourcesService, useValue: {} },
-            {
-                provide: ToastService,
-                useValue: {
-                    warning: vi.fn()
-                }
-            },
-            { provide: LoggingService, useValue: { error: () => { }, info: () => { } } },
-            { provide: RunningContextService, useValue: { isCapacitor } },
-            {
-                provide: ElevationProvider,
-                useValue: {
-                    updateHeights: () => Promise.resolve()
-                }
-            },
-            GeoJsonParser,
-            RoutingProvider,
-            provideHttpClient(withInterceptorsFromDi()),
-            provideHttpClientTesting()
-        ]
-    });
-};
-
 describe("RoutingProvider", () => {
     beforeEach(() => {
-        vi.clearAllMocks();
-        vi.mocked(pluginMock.hasTiles).mockResolvedValue({ hasTiles: false });
-        setupTestBed(true);
+        TestBed.configureTestingModule({
+            providers: [
+                provideStore([]),
+                { provide: ResourcesService, useValue: {} },
+                {
+                    provide: ToastService,
+                    useValue: {
+                        warning: vi.fn()
+                    }
+                },
+                { provide: LoggingService, useValue: { error: () => { }, info: () => { } } },
+                // Offline routing needs the native plugin, which has no web implementation
+                { provide: RunningContextService, useValue: { isCapacitor: false } },
+                {
+                    provide: ElevationProvider,
+                    useValue: {
+                        updateHeights: () => Promise.resolve()
+                    }
+                },
+                GeoJsonParser,
+                RoutingProvider,
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting()
+            ]
+        });
     });
 
     it("Should route between two distant points with None routing type", inject([RoutingProvider, HttpTestingController],
@@ -138,7 +116,7 @@ describe("RoutingProvider", () => {
         }
     ));
 
-    it("Should return start and end points when getting error response from server and there are no offline tiles",
+    it("Should return start and end points when getting error response from server and there is no offline routing",
         inject([RoutingProvider, HttpTestingController, Store],
             async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
                 store.reset({
@@ -152,12 +130,11 @@ describe("RoutingProvider", () => {
                 mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
                 const data = await promise;
                 expect(data.length).toBe(2);
-                expect(pluginMock.route).not.toHaveBeenCalled();
             }
         )
     );
 
-    it("Should warn the user when routing fails and there are no offline tiles",
+    it("Should warn the user when routing fails and there is no offline routing",
         inject([RoutingProvider, HttpTestingController, Store, ToastService],
             async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService) => {
                 store.reset({
@@ -175,174 +152,84 @@ describe("RoutingProvider", () => {
         )
     );
 
-    describe("Offline routing", () => {
-        const routeOffline = async (router: RoutingProvider, mockBackend: HttpTestingController,
-            routingType: "Hike" | "Bike" | "4WD" = "Hike") => {
-            vi.mocked(pluginMock.hasTiles).mockResolvedValue({ hasTiles: true });
-            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.002, lng: 35.002 }, routingType);
-            mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-            return promise;
-        };
+    it("Should not offer offline routing when not running in capacitor", inject([RoutingProvider],
+        (router: RoutingProvider) => {
+            expect(router.isOfflineRoutingSupported()).toBe(false);
+        }
+    ));
 
-        it("Should map the routing type to a costing model", inject([RoutingProvider, HttpTestingController],
-            async (router: RoutingProvider, mockBackend: HttpTestingController) => {
-                vi.mocked(pluginMock.route).mockResolvedValue({
-                    raw: JSON.stringify({ trip: { legs: [{ shape: encodeShape([[32, 35], [32.002, 35.002]]) }] } })
-                });
+    /**
+     * The route itself comes from the native plugin, which has no web implementation to stand in for
+     * it, so what is covered here is turning its response into the route's points.
+     */
+    describe("Parsing an offline route", () => {
+        it("Should decode the route shape", () => {
+            const raw = JSON.stringify({
+                trip: { legs: [{ shape: encodeShape([[32, 35], [32.001, 35.001], [32.002, 35.002]]) }] }
+            });
 
-                await routeOffline(router, mockBackend, "Hike");
-                expect(vi.mocked(pluginMock.route).mock.calls[0][0].costing).toBe("pedestrian");
+            const latlngs = RoutingProvider.parseValhallaResponse(raw);
 
-                await routeOffline(router, mockBackend, "Bike");
-                expect(vi.mocked(pluginMock.route).mock.calls[1][0].costing).toBe("bicycle");
-
-                await routeOffline(router, mockBackend, "4WD");
-                expect(vi.mocked(pluginMock.route).mock.calls[2][0].costing).toBe("auto");
-            }
-        ));
-
-        it("Should decode the route shape", inject([RoutingProvider, HttpTestingController],
-            async (router: RoutingProvider, mockBackend: HttpTestingController) => {
-                vi.mocked(pluginMock.route).mockResolvedValue({
-                    raw: JSON.stringify({
-                        trip: { legs: [{ shape: encodeShape([[32, 35], [32.001, 35.001], [32.002, 35.002]]) }] }
-                    })
-                });
-
-                const latlngs = await routeOffline(router, mockBackend);
-
-                expect(latlngs.length).toBe(3);
-                expect(latlngs[0].lat).toBeCloseTo(32, 5);
-                expect(latlngs[0].lng).toBeCloseTo(35, 5);
-                expect(latlngs[2].lat).toBeCloseTo(32.002, 5);
-            }
-        ));
-
-        it("Should concatenate the legs of the route", inject([RoutingProvider, HttpTestingController],
-            async (router: RoutingProvider, mockBackend: HttpTestingController) => {
-                vi.mocked(pluginMock.route).mockResolvedValue({
-                    raw: JSON.stringify({
-                        trip: {
-                            legs: [
-                                { shape: encodeShape([[32, 35], [32.001, 35.001]]) },
-                                { shape: encodeShape([[32.001, 35.001], [32.002, 35.002]]) }
-                            ]
-                        }
-                    })
-                });
-
-                const latlngs = await routeOffline(router, mockBackend);
-
-                expect(latlngs.length).toBe(4);
-            }
-        ));
-
-        it("Should set the elevation of the points from the samples", inject([RoutingProvider, HttpTestingController],
-            async (router: RoutingProvider, mockBackend: HttpTestingController) => {
-                // Two points 30 meters apart, i.e. exactly one elevation interval
-                vi.mocked(pluginMock.route).mockResolvedValue({
-                    raw: JSON.stringify({
-                        trip: { legs: [{ shape: encodeShape([[32, 35], [32.00027, 35]]), elevation: [100, 130] }] }
-                    })
-                });
-
-                const latlngs = await routeOffline(router, mockBackend);
-
-                expect(latlngs[0].alt).toBe(100);
-                expect(latlngs[1].alt).toBeCloseTo(130, 0);
-            }
-        ));
-
-        it("Should interpolate the elevation between two samples", inject([RoutingProvider, HttpTestingController],
-            async (router: RoutingProvider, mockBackend: HttpTestingController) => {
-                // The middle point is roughly half an interval in, so its elevation is between the samples
-                vi.mocked(pluginMock.route).mockResolvedValue({
-                    raw: JSON.stringify({
-                        trip: {
-                            legs: [{
-                                shape: encodeShape([[32, 35], [32.000135, 35], [32.00027, 35]]),
-                                elevation: [100, 200]
-                            }]
-                        }
-                    })
-                });
-
-                const latlngs = await routeOffline(router, mockBackend);
-
-                expect(latlngs[1].alt).toBeGreaterThan(100);
-                expect(latlngs[1].alt).toBeLessThan(200);
-            }
-        ));
-
-        it("Should not set the elevation when there are no samples", inject([RoutingProvider, HttpTestingController],
-            async (router: RoutingProvider, mockBackend: HttpTestingController) => {
-                vi.mocked(pluginMock.route).mockResolvedValue({
-                    raw: JSON.stringify({ trip: { legs: [{ shape: encodeShape([[32, 35], [32.002, 35.002]]) }] } })
-                });
-
-                const latlngs = await routeOffline(router, mockBackend);
-
-                expect(latlngs.every(l => l.alt == null)).toBe(true);
-            }
-        ));
-
-        it("Should return start and end points when valhalla returns an error", inject([RoutingProvider, HttpTestingController, Store],
-            async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
-                store.reset({
-                    offlineState: {
-                        isSubscribed: true
-                    }
-                });
-                vi.mocked(pluginMock.route).mockResolvedValue({
-                    raw: JSON.stringify({ code: 171, message: "No suitable edges near location" })
-                });
-
-                const latlngs = await routeOffline(router, mockBackend);
-
-                expect(latlngs.length).toBe(2);
-            }
-        ));
-
-        it("Should not route offline when it is not supported", async () => {
-            TestBed.resetTestingModule();
-            setupTestBed(false);
-            const router = TestBed.inject(RoutingProvider);
-            const backend = TestBed.inject(HttpTestingController);
-            TestBed.inject(Store).reset({ offlineState: { isSubscribed: false } });
-            vi.mocked(pluginMock.hasTiles).mockResolvedValue({ hasTiles: true });
-
-            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.002, lng: 35.002 }, "Hike");
-            backend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-            await promise;
-
-            expect(pluginMock.route).not.toHaveBeenCalled();
+            expect(latlngs.length).toBe(3);
+            expect(latlngs[0].lat).toBeCloseTo(32, 5);
+            expect(latlngs[0].lng).toBeCloseTo(35, 5);
+            expect(latlngs[2].lat).toBeCloseTo(32.002, 5);
         });
 
-        it("Should extract downloaded tiles", inject([RoutingProvider],
-            async (router: RoutingProvider) => {
-                vi.mocked(pluginMock.extractTiles).mockResolvedValue({ extractedFiles: 42, tilesDir: "/data/valhalla_tiles" });
+        it("Should concatenate the legs of the route", () => {
+            const raw = JSON.stringify({
+                trip: {
+                    legs: [
+                        { shape: encodeShape([[32, 35], [32.001, 35.001]]) },
+                        { shape: encodeShape([[32.001, 35.001], [32.002, 35.002]]) }
+                    ]
+                }
+            });
 
-                await router.extractOfflineRoutingTiles("valhalla+7-52-75.tar", "52-75");
+            expect(RoutingProvider.parseValhallaResponse(raw).length).toBe(4);
+        });
 
-                expect(pluginMock.extractTiles).toHaveBeenCalledWith({ tarFileName: "valhalla+7-52-75.tar", sliceId: "52-75" });
-            }
-        ));
+        it("Should set the elevation of the points from the samples", () => {
+            // Two points 30 meters apart, i.e. exactly one elevation interval
+            const raw = JSON.stringify({
+                trip: { legs: [{ shape: encodeShape([[32, 35], [32.00027, 35]]), elevation: [100, 130] }] }
+            });
 
-        it("Should delete the tiles of a single slice", inject([RoutingProvider],
-            async (router: RoutingProvider) => {
-                await router.deleteOfflineRoutingTiles("52-75");
+            const latlngs = RoutingProvider.parseValhallaResponse(raw);
 
-                expect(pluginMock.deleteTiles).toHaveBeenCalledWith({ sliceId: "52-75" });
-            }
-        ));
+            expect(latlngs[0].alt).toBe(100);
+            expect(latlngs[1].alt).toBeCloseTo(130, 0);
+        });
 
-        it("Should not ask the plugin to delete tiles when it is not supported", async () => {
-            TestBed.resetTestingModule();
-            setupTestBed(false);
+        it("Should interpolate the elevation between two samples", () => {
+            // The middle point is roughly half an interval in, so its elevation is between the samples
+            const raw = JSON.stringify({
+                trip: {
+                    legs: [{
+                        shape: encodeShape([[32, 35], [32.000135, 35], [32.00027, 35]]),
+                        elevation: [100, 200]
+                    }]
+                }
+            });
 
-            await TestBed.inject(RoutingProvider).deleteOfflineRoutingTiles("52-75");
+            const latlngs = RoutingProvider.parseValhallaResponse(raw);
 
-            expect(pluginMock.deleteTiles).not.toHaveBeenCalled();
+            expect(latlngs[1].alt).toBeGreaterThan(100);
+            expect(latlngs[1].alt).toBeLessThan(200);
+        });
+
+        it("Should not set the elevation when there are no samples", () => {
+            const raw = JSON.stringify({
+                trip: { legs: [{ shape: encodeShape([[32, 35], [32.002, 35.002]]) }] }
+            });
+
+            expect(RoutingProvider.parseValhallaResponse(raw).every(l => l.alt == null)).toBe(true);
+        });
+
+        it("Should throw when valhalla returns an error", () => {
+            const raw = JSON.stringify({ code: 171, message: "No suitable edges near location" });
+
+            expect(() => RoutingProvider.parseValhallaResponse(raw)).toThrow("No suitable edges near location");
         });
     });
 });
