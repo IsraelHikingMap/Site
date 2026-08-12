@@ -19,10 +19,6 @@ platform :ios do
   desc "Build the iOS app only"
   lane :build_ios do
     setup_ci
-    # Evaluating the Swift package graph takes -showBuildSettings around 15 seconds,
-    # which does not fit in fastlane's 3 second default.
-    ENV["FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT"] ||= "120"
-    # The share extension is a second target with its own app id, so it needs its own profile.
     sync_code_signing(type: "appstore", app_identifier: ["com.mapeak", "com.mapeak.ShareExtension"])
     build_app(
       project: "App.xcodeproj",
