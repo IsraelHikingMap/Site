@@ -19,9 +19,10 @@ platform :ios do
   desc "Build the iOS app only"
   lane :build_ios do |options|
     setup_ci
-    # -showBuildSettings has to evaluate the whole Swift package graph, which does not
-    # fit in the 3 second default. Without this fastlane gives up after 4 retries.
+    # -showBuildSettings needs longer than the 3 second default here. Cap the retries
+    # too, so a genuine hang fails in minutes instead of 3+6+12+24 escalating attempts.
     ENV["FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT"] ||= "180"
+    ENV["FASTLANE_XCODEBUILD_SETTINGS_RETRIES"] ||= "2"
     # The share extension is a second target with its own app id, so it needs its own profile.
     sync_code_signing(type: "appstore", app_identifier: ["com.mapeak", "com.mapeak.ShareExtension"])
     # Where CI resolved the packages. Derived from this file's own location rather
@@ -30,6 +31,10 @@ platform :ios do
     build_app(
       project: "App.xcodeproj",
       scheme: "App",
+      # Without an explicit destination, fastlane's -showBuildSettings call omits
+      # -destination and xcodebuild has to work one out itself, which hangs on CI
+      # runners (fastlane#4059). The same command with this flag returns immediately.
+      destination: "generic/platform=iOS",
       # Raw xcodebuild output. xcpretty hides SPM binary-artifact download progress,
       # so a stall there is indistinguishable from a hung build.
       xcodebuild_formatter: "",
