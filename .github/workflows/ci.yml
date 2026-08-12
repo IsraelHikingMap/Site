@@ -133,10 +133,6 @@ jobs:
           npm run build:mobile -- --no-progress
           npx cap sync ios
 
-      # The cloned packages and their binary artifacts are ~250MB of prebuilt
-      # xcframeworks. Restore and save are split rather than using actions/cache,
-      # which only saves when the whole job succeeds - the cache should persist even
-      # if the build step later fails.
       - name: Restore Swift package cache
         id: spm-cache
         uses: actions/cache/restore@v4
@@ -145,10 +141,6 @@ jobs:
           key: spm-${{ runner.os }}-${{ hashFiles('IsraelHiking.Web/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
           restore-keys: spm-${{ runner.os }}-
 
-      # Resolve up front. Left to fastlane, this download happens inside
-      # xcodebuild -showBuildSettings, whose output fastlane captures - so it is
-      # invisible and trips the build-settings timeout. Must run after `npm ci`, since
-      # the plugin packages are path references into node_modules.
       - name: Resolve Swift packages
         run: |
           cd IsraelHiking.Web/ios/App

@@ -215,10 +215,6 @@ jobs:
           npm run build:mobile -- --no-progress
           npx cap sync ios
 
-      # The cloned packages and their binary artifacts are ~750MB, almost all of it
-      # prebuilt xcframeworks. Restore and save are split rather than using
-      # actions/cache, which only saves when the whole job succeeds - the cache
-      # should persist even if the build step later fails.
       - name: Restore Swift package cache
         id: spm-cache
         uses: actions/cache/restore@v4
@@ -227,9 +223,6 @@ jobs:
           key: spm-${{ runner.os }}-${{ hashFiles('IsraelHiking.Web/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
           restore-keys: spm-${{ runner.os }}-
 
-      # Resolve separately from the archive so the log shows how long package
-      # resolution and artifact download actually take. Must run after `npm ci`,
-      # since the plugin packages are referenced by path into node_modules.
       - name: Resolve Swift packages
         run: |
           cd IsraelHiking.Web/ios/App
