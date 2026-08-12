@@ -627,7 +627,7 @@
 		};
 		0D6243232FDEC57E00B2C10A /* XCRemoteSwiftPackageReference "maplibre-contour-rs" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Mapeak-com/maplibre-contour-rs";
+			repositoryURL = "https://github.com/mapeak-com/maplibre-contour-rs";
 			requirement = {
 				kind = exactVersion;
 				version = 0.4.1;
@@ -635,7 +635,7 @@
 		};
 		0DD5D9572FDBDBB300983BAA /* XCRemoteSwiftPackageReference "pmtiles-mobile" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/mapeak-com/pmtiles-mobile.git";
+			repositoryURL = "https://github.com/mapeak-com/pmtiles-mobile";
 			requirement = {
 				kind = exactVersion;
 				version = 0.3.2;

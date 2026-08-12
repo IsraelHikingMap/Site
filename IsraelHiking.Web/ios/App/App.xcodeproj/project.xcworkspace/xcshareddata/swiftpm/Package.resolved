@@ -1,5 +1,5 @@
 {
-  "originHash" : "4d8bfad6f3a29ea63c81ba1e05b43d65a023a6bac7dec7357287909ad3ffd085",
+  "originHash" : "6e1cda0f1af8abcc987329ac271df9c75a9d0bc6bcbe506b29a76772cc3e0c77",
   "pins" : [
     {
       "identity" : "capacitor-swift-pm",
@@ -31,7 +31,7 @@
     {
       "identity" : "maplibre-contour-rs",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Mapeak-com/maplibre-contour-rs",
+      "location" : "https://github.com/mapeak-com/maplibre-contour-rs",
       "state" : {
         "revision" : "494aed8b694e8f75abc8958cdf9e05902bc46feb",
         "version" : "0.4.1"
@@ -49,7 +49,7 @@
     {
       "identity" : "pmtiles-mobile",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/mapeak-com/pmtiles-mobile.git",
+      "location" : "https://github.com/mapeak-com/pmtiles-mobile",
       "state" : {
         "revision" : "50237542419cc5c3f61a520e653813c9db1ecc98",
         "version" : "0.3.2"

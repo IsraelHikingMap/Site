@@ -259,6 +259,11 @@ jobs:
           bundle exec fastlane build_ios
         env:
           MATCH_PASSWORD: ${{ secrets.PASSWORD }}
+          # Reuse the packages resolved by the cached step above. Set here as gym's
+          # own env vars rather than via the Fastfile, so the archive cannot silently
+          # fall back to re-resolving and re-downloading ~650MB of xcframeworks.
+          GYM_CLONED_SOURCE_PACKAGES_PATH: ${{ github.workspace }}/.spm-cache
+          GYM_SKIP_PACKAGE_DEPENDENCIES_RESOLUTION: 'true'
       - name: Upload ipa artifacts
         if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v7.0.1
