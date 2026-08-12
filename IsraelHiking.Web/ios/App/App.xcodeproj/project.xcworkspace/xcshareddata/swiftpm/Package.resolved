@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mapeak-com/maplibre-contour-rs",
       "state" : {
-        "revision" : "494aed8b694e8f75abc8958cdf9e05902bc46feb",
-        "version" : "0.4.1"
+        "revision" : "371a6c4fab691013935260046973a1afc507df6e",
+        "version" : "0.4.2"
       }
     },
     {

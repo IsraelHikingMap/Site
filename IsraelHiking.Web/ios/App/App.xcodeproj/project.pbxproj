@@ -630,7 +630,7 @@
 			repositoryURL = "https://github.com/mapeak-com/maplibre-contour-rs";
 			requirement = {
 				kind = exactVersion;
-				version = 0.4.1;
+				version = 0.4.2;
 			};
 		};
 		0DD5D9572FDBDBB300983BAA /* XCRemoteSwiftPackageReference "pmtiles-mobile" */ = {
