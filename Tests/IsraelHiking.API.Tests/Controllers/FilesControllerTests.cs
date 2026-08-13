@@ -183,7 +183,7 @@ public class FilesControllerTests
     {
         _controller.SetupIdentity();
         var dict = new Dictionary<string, DateTime>();
-        _offlineFilesService.GetUpdatedFilesList(Arg.Any<DateTime>(), 1, 2)
+        _offlineFilesService.GetUpdatedFilesList(Arg.Any<DateTime>(), 1, 2, Arg.Any<bool>())
             .Returns(dict);
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
 
@@ -193,6 +193,32 @@ public class FilesControllerTests
         var resultDict = results.Value as Dictionary<string, DateTime>;
         Assert.IsNotNull(resultDict);
         Assert.AreEqual(dict.Count, resultDict.Count);
+    }
+
+    [TestMethod]
+    public void GetOfflineFiles_OldClient_ShouldNotAskForTheRoutingTile()
+    {
+        _controller.SetupIdentity();
+        _offlineFilesService.GetUpdatedFilesList(Arg.Any<DateTime>(), 1, 2, Arg.Any<bool>())
+            .Returns(new Dictionary<string, DateTime>());
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+
+        _ = _controller.GetOfflineFiles(DateTime.Now, 1, 2).Result;
+
+        _offlineFilesService.Received(1).GetUpdatedFilesList(Arg.Any<DateTime>(), 1, 2, false);
+    }
+
+    [TestMethod]
+    public void GetOfflineFiles_ClientAsksForTheRoutingTile_ShouldPassItOn()
+    {
+        _controller.SetupIdentity();
+        _offlineFilesService.GetUpdatedFilesList(Arg.Any<DateTime>(), 1, 2, Arg.Any<bool>())
+            .Returns(new Dictionary<string, DateTime>());
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+
+        _ = _controller.GetOfflineFiles(DateTime.Now, 1, 2, true).Result;
+
+        _offlineFilesService.Received(1).GetUpdatedFilesList(Arg.Any<DateTime>(), 1, 2, true);
     }
 
     [TestMethod]

@@ -114,6 +114,10 @@ public class ConfigurationData
     /// </summary>
     public string OnTheFlyFilesAddress { get; set; }
     /// <summary>
+    /// The base address of the service that slices and serves the offline routing (valhalla) tiles
+    /// </summary>
+    public string RoutingTilesAddress { get; set; }
+    /// <summary>
     /// OSM server base address
     /// </summary>
     public string OsmBaseAddress { get; set; }
@@ -159,6 +163,7 @@ public class ConfigurationData
         ImageCreatorServerAddress = "http://localhost:11223/";
         OfflineFilesFolder = "./";
         OnTheFlyFilesAddress = "https://mapeak.com/serve-extract/";
+        RoutingTilesAddress = "https://mapeak.com/routing-tiles/";
         OsmBaseAddress = "https://www.openstreetmap.org";
         ShareUrlApiAddress = "https://israelhiking.osm.org.il/api/urls/";
         ImageUrlsAllowList =
