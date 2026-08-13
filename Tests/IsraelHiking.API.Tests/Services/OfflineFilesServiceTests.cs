@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IsraelHiking.API.Services;
@@ -18,6 +19,7 @@ namespace IsraelHiking.API.Tests.Services;
 public class OfflineFilesServiceTests
 {
     private const string OnTheFlyAddress = "https://mapeak.com/serve-extract/";
+    private const string RoutingTilesAddress = "https://mapeak.com/routing-tiles/";
     private const string StyleAddress = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json";
     private const string Style = """
     {
@@ -58,7 +60,11 @@ public class OfflineFilesServiceTests
         _fileSystemHelper.CreateFileProvider(Arg.Any<string>()).Returns(_fileProvider);
         SetupStyleResponse(Style);
         var options = Substitute.For<IOptions<ConfigurationData>>();
-        options.Value.Returns(new ConfigurationData { OnTheFlyFilesAddress = OnTheFlyAddress });
+        options.Value.Returns(new ConfigurationData
+        {
+            OnTheFlyFilesAddress = OnTheFlyAddress,
+            RoutingTilesAddress = RoutingTilesAddress
+        });
         _service = new OfflineFilesService(_fileSystemHelper, _remoteFileFetcherGateway, options, Substitute.For<ILogger>());
     }
 
@@ -85,7 +91,7 @@ public class OfflineFilesServiceTests
     [TestMethod]
     public async Task GetUpdatedFilesList_Root_ShouldReturnOnlyOnTheFlyFilesWithTodaysDate()
     {
-        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null);
+        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, false);
 
         Assert.HasCount(3, results);
         Assert.AreEqual(DateTime.UtcNow.Date, results["IHM-schema-6.pmtiles"]);
@@ -96,7 +102,7 @@ public class OfflineFilesServiceTests
     [TestMethod]
     public async Task GetUpdatedFilesList_Tile_ShouldReturnOnTheFlyAndJaxaFiles()
     {
-        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75);
+        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75, false);
 
         Assert.HasCount(4, results);
         Assert.AreEqual(DateTime.UtcNow.Date, results["IHM-schema+7-52-75.pmtiles"]);
@@ -106,9 +112,62 @@ public class OfflineFilesServiceTests
     }
 
     [TestMethod]
+    public async Task GetUpdatedFilesList_TileWithValhalla_ShouldAlsoReturnTheValhallaFile()
+    {
+        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75, true);
+
+        Assert.HasCount(5, results);
+        Assert.AreEqual(DateTime.UtcNow.Date, results["valhalla+7-52-75.tar"]);
+    }
+
+    [TestMethod]
+    public async Task GetUpdatedFilesList_TileWithoutValhalla_ShouldNotReturnTheValhallaFile()
+    {
+        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75, false);
+
+        Assert.IsFalse(results.Keys.Any(k => k.StartsWith("valhalla")));
+    }
+
+    [TestMethod]
+    public async Task GetUpdatedFilesList_RootWithValhalla_ShouldNotReturnTheValhallaFile()
+    {
+        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, true);
+
+        Assert.IsFalse(results.Keys.Any(k => k.StartsWith("valhalla")));
+    }
+
+    [TestMethod]
+    public async Task GetUpdatedFilesList_ValhallaUpToDate_ShouldNotReturnTheValhallaFile()
+    {
+        var results = await _service.GetUpdatedFilesList(DateTime.UtcNow.AddDays(1), 52, 75, true);
+
+        Assert.IsFalse(results.Keys.Any(k => k.StartsWith("valhalla")));
+    }
+
+    [TestMethod]
+    public async Task GetFileContent_ValhallaFile_ShouldBeFetchedFromTheRoutingTilesServer()
+    {
+        _remoteFileFetcherGateway.GetFileStream(Arg.Any<string>()).Returns((new MemoryStream() as Stream, (long?)0));
+
+        await _service.GetFileContent("valhalla+7-52-75.tar", 52, 75);
+
+        await _remoteFileFetcherGateway.Received(1).GetFileStream(RoutingTilesAddress + "valhalla+7-52-75.tar");
+    }
+
+    [TestMethod]
+    public async Task GetFileContent_NonValhallaFile_ShouldBeFetchedFromTheOnTheFlyServer()
+    {
+        _remoteFileFetcherGateway.GetFileStream(Arg.Any<string>()).Returns((new MemoryStream() as Stream, (long?)0));
+
+        await _service.GetFileContent("IHM-schema+7-52-75.pmtiles", 52, 75);
+
+        await _remoteFileFetcherGateway.Received(1).GetFileStream(OnTheFlyAddress + "IHM-schema+7-52-75.pmtiles");
+    }
+
+    [TestMethod]
     public async Task GetUpdatedFilesList_ShouldNotReturnContourFiles()
     {
-        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75);
+        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75, false);
 
         Assert.IsFalse(results.ContainsKey("JAXA_AW3D30_2024_contour_z5-Z12_vector+7-52-75.pmtiles"));
     }
@@ -116,7 +175,7 @@ public class OfflineFilesServiceTests
     [TestMethod]
     public async Task GetUpdatedFilesList_JaxaFiles_ShouldUseFixedDates()
     {
-        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75);
+        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75, false);
 
         Assert.AreEqual(DateTimeOffset.Parse("2026-04-09T10:36:08.8024764Z").UtcDateTime,
             results["jaxa_terrarium0-11_v2+7-52-75.pmtiles"].ToUniversalTime());
@@ -125,7 +184,7 @@ public class OfflineFilesServiceTests
     [TestMethod]
     public async Task GetUpdatedFilesList_EverythingUpToDate_ShouldReturnEmptyList()
     {
-        var results = await _service.GetUpdatedFilesList(DateTime.UtcNow.AddDays(1), 52, 75);
+        var results = await _service.GetUpdatedFilesList(DateTime.UtcNow.AddDays(1), 52, 75, false);
 
         Assert.IsEmpty(results);
     }
@@ -134,7 +193,7 @@ public class OfflineFilesServiceTests
     public async Task GetUpdatedFilesList_OnlyJaxaUpToDate_ShouldReturnOnlyOnTheFlyFiles()
     {
         // A last-modified between the fixed jaxa dates and today filters out jaxa but keeps the on-the-fly files.
-        var results = await _service.GetUpdatedFilesList(new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Utc), 52, 75);
+        var results = await _service.GetUpdatedFilesList(new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Utc), 52, 75, false);
 
         Assert.HasCount(3, results);
         Assert.IsTrue(results.ContainsKey("IHM-schema+7-52-75.pmtiles"));
@@ -144,7 +203,7 @@ public class OfflineFilesServiceTests
     [TestMethod]
     public async Task GetUpdatedFilesList_ShouldNotReadFileSystem()
     {
-        await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75);
+        await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75, false);
 
         _fileProvider.DidNotReceive().GetDirectoryContents(Arg.Any<string>());
     }
@@ -152,8 +211,8 @@ public class OfflineFilesServiceTests
     [TestMethod]
     public async Task GetUpdatedFilesList_Twice_ShouldFetchTheStyleOnlyOnce()
     {
-        await _service.GetUpdatedFilesList(DateTime.MinValue, null, null);
-        await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75);
+        await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, false);
+        await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75, false);
 
         await _remoteFileFetcherGateway.Received(1).GetFileContent(StyleAddress);
     }
@@ -165,7 +224,7 @@ public class OfflineFilesServiceTests
             _ => throw new Exception("some error"),
             _ => new RemoteFileFetcherGatewayResponse { Content = Encoding.UTF8.GetBytes(Style) });
 
-        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null);
+        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, false);
 
         Assert.HasCount(3, results);
         await _remoteFileFetcherGateway.Received(2).GetFileContent(StyleAddress);
@@ -177,7 +236,7 @@ public class OfflineFilesServiceTests
         _remoteFileFetcherGateway.GetFileContent(StyleAddress)
             .Returns(new RemoteFileFetcherGatewayResponse { Content = [] });
 
-        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => _service.GetUpdatedFilesList(DateTime.MinValue, null, null));
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => _service.GetUpdatedFilesList(DateTime.MinValue, null, null, false));
         await _remoteFileFetcherGateway.Received(3).GetFileContent(StyleAddress);
     }
 
@@ -186,7 +245,7 @@ public class OfflineFilesServiceTests
     {
         SetupStyleResponse(StyleWithAliasedDem);
 
-        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75);
+        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75, false);
 
         Assert.HasCount(4, results);
         Assert.IsFalse(results.ContainsKey("jaxa_terrarium0-11_v2+7-52-75.pmtiles"));
@@ -199,7 +258,7 @@ public class OfflineFilesServiceTests
     {
         SetupStyleResponse(StyleWithAliasedDem);
 
-        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null);
+        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, false);
 
         Assert.HasCount(3, results);
         Assert.IsFalse(results.ContainsKey("raster-dem-6.pmtiles"));
