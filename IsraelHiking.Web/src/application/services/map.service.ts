@@ -1,7 +1,7 @@
 import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { MAPLIBRE_WORKER_URL } from "@maplibre/ngx-maplibre-gl/config";
-import type { ErrorEvent, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, SourceSpecification } from "maplibre-gl";
+import type { ErrorEvent, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, SourceSpecification, MapMovementEvent } from "maplibre-gl";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { LoggingService } from "./logging.service";
@@ -158,7 +158,7 @@ export class MapService {
         this.loggingService.error("[Map] Error: " + e?.error?.message);
     }
 
-    public readonly onMoveEnd = (e: DragEvent) => {
+    public readonly onMoveEnd = (e: DragEvent | MapMovementEvent) => {
         if (!e || !this.currentMap) {
             return;
         }
