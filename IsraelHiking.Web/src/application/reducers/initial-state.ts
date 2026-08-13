@@ -222,6 +222,7 @@ export const initialState =
             uploadMarkerData: null
         },
         inMemoryState: {
+            effectiveTheme: "light",
             distance: false,
             following: true,
             pannedTimestamp: null,

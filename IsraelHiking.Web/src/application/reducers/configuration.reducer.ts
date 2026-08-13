@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { ConfigurationState, Language, BatteryOptimizationType, Theme } from "../models";
+import type { ConfigurationState, Language, BatteryOptimizationType, ThemeSetting } from "../models";
 
 
 export class SetLanguageAction {
@@ -52,7 +52,7 @@ export class SetDateFormatAction {
 
 export class SetThemeAction {
     public static readonly type = "[Configuration] SetThemeAction";
-    constructor(public readonly theme: Theme) { }
+    constructor(public readonly theme: ThemeSetting) { }
 }
 
 @State<ConfigurationState>({

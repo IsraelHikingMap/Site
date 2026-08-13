@@ -25,7 +25,7 @@ import {
     ToggleAutomaticRecordingUploadAction,
     ToggleGotLostWarningsAction
 } from "../../reducers/configuration.reducer";
-import type { ApplicationState, BatteryOptimizationType, Theme } from "../../models";
+import type { ApplicationState, BatteryOptimizationType, ThemeSetting } from "../../models";
 
 @Component({
     selector: "configuration-dialog",
@@ -70,7 +70,7 @@ export class ConfigurationDialogComponent {
         this.store.dispatch(new SetUnitsAction(units));
     }
 
-    public setTheme(theme: Theme) {
+    public setTheme(theme: ThemeSetting) {
         this.store.dispatch(new SetThemeAction(theme));
     }
 
