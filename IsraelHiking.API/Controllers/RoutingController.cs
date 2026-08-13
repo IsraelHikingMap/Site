@@ -49,6 +49,10 @@ public class RoutingController(IRoutingGateway routingGateway) : ControllerBase
             To = pointTo,
             Profile = profile,
         });
+        if (feature == null)
+        {
+            return BadRequest(new { Error = $"Could not find route from {@from} to {to} with profile type: {profile}" });
+        }
         feature.Attributes.AddOrUpdate("Name", $"Routing from {@from} to {to} profile type: {profile}");
         feature.Attributes.AddOrUpdate("Creator", "Mapeak");
         return Ok(new FeatureCollection { feature });
