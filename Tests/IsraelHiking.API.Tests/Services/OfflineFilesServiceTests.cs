@@ -19,6 +19,7 @@ namespace IsraelHiking.API.Tests.Services;
 public class OfflineFilesServiceTests
 {
     private const string OnTheFlyAddress = "https://mapeak.com/serve-extract/";
+    private const string RoutingTilesAddress = "https://mapeak.com/routing-tiles/";
     private const string StyleAddress = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json";
     private const string Style = """
     {
@@ -59,7 +60,11 @@ public class OfflineFilesServiceTests
         _fileSystemHelper.CreateFileProvider(Arg.Any<string>()).Returns(_fileProvider);
         SetupStyleResponse(Style);
         var options = Substitute.For<IOptions<ConfigurationData>>();
-        options.Value.Returns(new ConfigurationData { OnTheFlyFilesAddress = OnTheFlyAddress });
+        options.Value.Returns(new ConfigurationData
+        {
+            OnTheFlyFilesAddress = OnTheFlyAddress,
+            RoutingTilesAddress = RoutingTilesAddress
+        });
         _service = new OfflineFilesService(_fileSystemHelper, _remoteFileFetcherGateway, options, Substitute.For<ILogger>());
     }
 
@@ -140,13 +145,23 @@ public class OfflineFilesServiceTests
     }
 
     [TestMethod]
-    public async Task GetFileContent_ValhallaFile_ShouldBeFetchedFromTheSlicingServer()
+    public async Task GetFileContent_ValhallaFile_ShouldBeFetchedFromTheRoutingTilesServer()
     {
         _remoteFileFetcherGateway.GetFileStream(Arg.Any<string>()).Returns((new MemoryStream() as Stream, (long?)0));
 
         await _service.GetFileContent("valhalla+7-52-75.tar", 52, 75);
 
-        await _remoteFileFetcherGateway.Received(1).GetFileStream(OnTheFlyAddress + "valhalla+7-52-75.tar");
+        await _remoteFileFetcherGateway.Received(1).GetFileStream(RoutingTilesAddress + "valhalla+7-52-75.tar");
+    }
+
+    [TestMethod]
+    public async Task GetFileContent_NonValhallaFile_ShouldBeFetchedFromTheOnTheFlyServer()
+    {
+        _remoteFileFetcherGateway.GetFileStream(Arg.Any<string>()).Returns((new MemoryStream() as Stream, (long?)0));
+
+        await _service.GetFileContent("IHM-schema+7-52-75.pmtiles", 52, 75);
+
+        await _remoteFileFetcherGateway.Received(1).GetFileStream(OnTheFlyAddress + "IHM-schema+7-52-75.pmtiles");
     }
 
     [TestMethod]

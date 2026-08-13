@@ -127,8 +127,6 @@ public class OfflineFilesService : IOfflineFilesService
                 AddIfUpdated(filesDictionary, SourceNameToFileName(name, tileX, tileY), DEM_MODIFIED_DATE, lastModifiedDate);
             }
         }
-        // The routing tiles only exist per slice - adjacent slices are extracted into the same tiles directory
-        // on the device, so there is nothing to download at the root level.
         if (routingTile && tileX.HasValue && tileY.HasValue)
         {
             AddIfUpdated(filesDictionary, SourceNameToFileName(VALHALLA_FILE_NAME, tileX, tileY, VALHALLA_FILE_EXTENSION), today, lastModifiedDate);
@@ -139,10 +137,15 @@ public class OfflineFilesService : IOfflineFilesService
     /// <inheritdoc/>
     /// <remarks>
     /// The DEM might be requested by its alias name, but it is stored on disk under its original name.
+    /// The routing tiles are served by their own service, everything else by the on-the-fly one.
     /// </remarks>
     public async Task<(Stream Content, long? Length)> GetFileContent(string fileName, long? tileX, long? tileY)
     {
         var sourceName = FileNameToSourceName(fileName);
+        if (sourceName == VALHALLA_FILE_NAME)
+        {
+            return await _remoteFileFetcherGateway.GetFileStream(_options.RoutingTilesAddress + fileName);
+        }
         if (!IsDem(sourceName))
         {
             return await _remoteFileFetcherGateway.GetFileStream(_options.OnTheFlyFilesAddress + fileName);

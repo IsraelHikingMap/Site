@@ -113,8 +113,7 @@ public class FilesController : ControllerBase
     /// <param name="lastModified">The last time this tile was downloaded</param>
     /// <param name="tileX">The tile's X coordinates, null for root</param>
     /// <param name="tileY">The tile's Y coordinates, null for root</param>
-    /// <param name="routingTile">Whether to also list the offline routing (valhalla) file of the tile.
-    /// Defaults to false so that clients that predate offline routing do not download it</param>
+    /// <param name="routingTile">Whether to also list the offline routing file of the tile</param>
     /// <returns></returns>
     [HttpGet]
     [Route("offline")]
