@@ -202,7 +202,7 @@ export class DefaultStyleService {
     }
 
     private applyNightModeIfNeeded(styleJson: StyleSpecification): void {
-        const theme = this.store.selectSnapshot((s: ApplicationState) => s.configuration.theme);
+        const theme = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.effectiveTheme);
         if (theme !== "dark") {
             return;
         }

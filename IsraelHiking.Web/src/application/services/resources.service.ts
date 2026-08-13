@@ -186,6 +186,7 @@ export class ResourcesService {
     public theme: string;
     public themeLight: string;
     public themeDark: string;
+    public themeAuto: string;
     public batteryOptimization: string;
     public automaticRecordingUpload: string;
     public automaticRecordingUploadHint: string;
@@ -473,7 +474,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1786485692345");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1786623723252");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -613,6 +614,7 @@ export class ResourcesService {
         this.theme = this.gettextCatalog.getString("Theme");
         this.themeLight = this.gettextCatalog.getString("Light");
         this.themeDark = this.gettextCatalog.getString("Dark");
+        this.themeAuto = this.gettextCatalog.getString("Automatic");
         this.batteryOptimization = this.gettextCatalog.getString("Battery optimization");
         this.automaticRecordingUpload = this.gettextCatalog.getString("Automatic upload of recording");
         this.automaticRecordingUploadHint = this.gettextCatalog.getString("Allows you to automatically upload a recorded " +

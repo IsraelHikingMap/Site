@@ -1,7 +1,7 @@
 import { EventEmitter, NgZone, inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
-import type { MapMouseEvent, Map, GeoJSONSource, Point } from "maplibre-gl";
+import type { MapMouseEvent, Map, GeoJSONSource, Point, MapTouchEvent } from "maplibre-gl";
 import type { Immutable } from "immer";
 
 import { SEGMENT, SEGMENT_POINT, SelectedRouteService } from "../../services/selected-route.service";
@@ -121,7 +121,7 @@ export class RouteEditRouteInteraction {
         this.state = "canceled";
     };
 
-    private readonly handleDown = (event: MapMouseEvent) => {
+    private readonly handleDown = (event: MapMouseEvent | MapTouchEvent) => {
         this.mouseDownPoint = event.point;
         if (this.isTouchesBiggerThan(event.originalEvent, 1)) {
             this.cancelInteraction();
@@ -166,7 +166,7 @@ export class RouteEditRouteInteraction {
         }
     };
 
-    private readonly handleMove = (event: MapMouseEvent) => {
+    private readonly handleMove = (event: MapMouseEvent | MapTouchEvent) => {
         if (this.mouseDownPoint != null && event.point &&
             Math.abs((this.mouseDownPoint.x - event.point.x) + (this.mouseDownPoint.y - event.point.y)) < DRAG_PIXEL_TOLERANCE) {
             return;
@@ -188,7 +188,7 @@ export class RouteEditRouteInteraction {
         }
     };
 
-    private handleRoutePointDrag(event: MapMouseEvent) {
+    private handleRoutePointDrag(event: MapMouseEvent | MapTouchEvent) {
         const coordinate = SpatialService.toCoordinate(event.lngLat);
         this.selectedRoutePoint.geometry.coordinates = coordinate;
         const featuresToUpdate: GeoJSON.Feature<GeoJSON.Point | GeoJSON.LineString>[] = [this.selectedRoutePoint];
@@ -214,7 +214,7 @@ export class RouteEditRouteInteraction {
         this.updateData(featuresToUpdate);
     }
 
-    private handleRouteMiddleSegmentDrag(event: MapMouseEvent) {
+    private handleRouteMiddleSegmentDrag(event: MapMouseEvent | MapTouchEvent) {
         const coordinate = SpatialService.toCoordinate(event.lngLat);
         const segment = this.selectedRouteSegments[0];
         const coordinates = segment.geometry.coordinates;
@@ -226,7 +226,7 @@ export class RouteEditRouteInteraction {
         return this.selectedRoutePoint != null || this.selectedRouteSegments.length > 0;
     }
 
-    private readonly handleUp = (event: MapMouseEvent) => {
+    private readonly handleUp = (event: MapMouseEvent | MapTouchEvent) => {
         this.mouseDownPoint = null;
         if (this.isTouchesBiggerThan(event.originalEvent, 0)) {
             // more than zero touches - no need to do any thing.
