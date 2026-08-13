@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { ShareUrl, InMemoryState, PublicRoutesFilter } from "../models";
+import type { ShareUrl, InMemoryState, PublicRoutesFilter, Theme } from "../models";
 
 export class ToggleDistanceAction {
     public static readonly type = "[In Memory] ToggleDistanceAction";
@@ -46,6 +46,11 @@ export class SetUrlAction {
 export class SetPublicRoutesFilterAction {
     public static readonly type = "[In Memory] SetPublicRoutesFilterAction";
     constructor(public readonly filters: PublicRoutesFilter) { }
+}
+
+export class SetEffectiveThemeAction {
+    public static readonly type = "[In Memory] SetEffectiveThemeAction";
+    constructor(public readonly theme: Theme) { }
 }
 
 @State({
@@ -124,6 +129,14 @@ export class InMemoryReducer {
     public setPublicRoutesFilter(ctx: StateContext<InMemoryState>, action: SetPublicRoutesFilterAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.publicRoutesFilter = action.filters;
+            return lastState;
+        }));
+    }
+
+    @Action(SetEffectiveThemeAction)
+    public setEffectiveTheme(ctx: StateContext<InMemoryState>, action: SetEffectiveThemeAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.effectiveTheme = action.theme;
             return lastState;
         }));
     }
