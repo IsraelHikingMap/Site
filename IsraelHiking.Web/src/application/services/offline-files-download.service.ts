@@ -257,8 +257,6 @@ export class OfflineFilesDownloadService {
             const fileNames = downloadedTile.map(fnd => fnd.fileName);
             for (const fileName of fileNames) {
                 if (RoutingProvider.isRoutingTilesFile(fileName)) {
-                    // The tar itself is gone once extracted, the tiles it holds are removed by the
-                    // plugin, which keeps the ones the adjacent tiles share with it.
                     await this.routingProvider.deleteOfflineRoutingTiles(OfflineFilesDownloadService.sliceId(tileX, tileY));
                     continue;
                 }
