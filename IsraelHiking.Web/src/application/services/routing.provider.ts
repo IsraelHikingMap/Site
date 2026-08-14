@@ -150,7 +150,7 @@ export class RoutingProvider {
      */
     public async extractOfflineRoutingTiles(fileName: string, sliceId: string): Promise<void> {
         const results = await Valhalla.extractTiles({ tarFileName: fileName, sliceId });
-        this.loggingService.info(`[Routing] Extracted ${results.extractedFiles} offline routing tiles from ${fileName}`);
+        this.loggingService.info(`[Routing] Extracted ${results.extractedFiles} offline routing tiles from ${fileName} for sliceId: ${sliceId}`);
     }
 
     /**
