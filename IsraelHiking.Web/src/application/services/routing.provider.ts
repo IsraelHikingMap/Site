@@ -12,8 +12,8 @@ import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
 import { Valhalla } from "./valhalla.plugin";
-import type { ValhallaRouteLeg, ValhallaRouteResponse } from "./valhalla.plugin";
 import { Urls } from "../urls";
+import type { ValhallaRouteLeg, ValhallaRouteResponse } from "./valhalla.plugin";
 import type { ApplicationState, LatLngAltTime, RoutingType } from "../models";
 
 @Service()
