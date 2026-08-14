@@ -26,11 +26,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    kotlinOptions {
-        // The Valhalla artifacts are built with a newer Kotlin metadata version
-        // than this project's compiler; allow reading them (POC).
-        freeCompilerArgs += ["-Xskip-metadata-version-check"]
-    }
 }
 
 repositories {
