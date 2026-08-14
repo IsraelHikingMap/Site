@@ -337,7 +337,6 @@ class CarBackendService(context: Context) {
         private const val LOG_TAG = "CarBackendService"
         private const val API_BASE = "https://mapeak.com/api/"
         private const val MAX_RESULTS = 6
-        /** Valhalla encodes its shapes with 6 digits of precision rather than the usual 5 */
         private const val POLYLINE_PRECISION = 6
         private val JSON_MEDIA_TYPE = "application/json".toMediaType()
     }
