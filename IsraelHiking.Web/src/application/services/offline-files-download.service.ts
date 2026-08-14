@@ -143,7 +143,7 @@ export class OfflineFilesDownloadService {
         const metadata: FileNameDateVersion[] = []
         for (const fileNameAndDate of fileNames) {
             if (RoutingProvider.isRoutingTilesFile(fileNameAndDate.fileName)) {
-                metadata.push({ fileName: fileNameAndDate.fileName, date: fileNameAndDate.date, version: null });
+                metadata.push({ fileName: fileNameAndDate.fileName, date: fileNameAndDate.date });
                 continue;
             }
             try {
@@ -231,10 +231,7 @@ export class OfflineFilesDownloadService {
         if (Object.keys(fileNames).length === 0) {
             return [];
         }
-        const fileNameDates = Object.entries(fileNames).map(([key, value]) => ({ fileName: key, date: value }));
-        // Only pmtiles and the offline routing tiles, and no contours.
-        return fileNameDates.filter(fnd => (fnd.fileName.endsWith(".pmtiles") || RoutingProvider.isRoutingTilesFile(fnd.fileName)) &&
-            !fnd.fileName.includes("_contour_"));
+        return Object.entries(fileNames).map(([key, value]) => ({ fileName: key, date: value }));
     }
 
     public abortCurrentDownload(): void {
