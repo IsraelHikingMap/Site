@@ -29,6 +29,10 @@ export class RoutingProvider {
     /** Matches the resolution of valhalla's elevation data */
     private static readonly ELEVATION_INTERVAL_METERS = 30;
 
+    /** How long to wait for the server, shorter when the route can be calculated on the device */
+    private static readonly ONLINE_TIMEOUT_MS = 4500;
+    private static readonly ONLINE_TIMEOUT_WITH_TILES_MS = 1500;
+
     /** The zoom level the offline files are sliced at, see the server's OfflineFilesService */
     private static readonly SLICE_TILE_ZOOM = 7;
 
@@ -58,15 +62,17 @@ export class RoutingProvider {
         }
         const address = Urls.routing + "?from=" + latlngStart.lat + "," + latlngStart.lng +
             "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + routinType;
+        const hasTiles = this.areRoutingTilesDownloaded(latlngStart, latlngEnd);
         try {
-            const data = await firstValueFrom(this.httpClient.get<GeoJSON.FeatureCollection<GeoJSON.LineString>>(address).pipe(timeout(4500)));
+            const data = await firstValueFrom(this.httpClient.get<GeoJSON.FeatureCollection<GeoJSON.LineString>>(address)
+                .pipe(timeout(hasTiles ? RoutingProvider.ONLINE_TIMEOUT_WITH_TILES_MS : RoutingProvider.ONLINE_TIMEOUT_MS)));
             return data.features[0].geometry.coordinates.map(c => SpatialService.toLatLng(c));
         } catch (ex) {
             try {
                 return await this.getOffineRoute(latlngStart, latlngEnd, routinType);
             } catch (ex2) {
                 this.loggingService.error(`[Routing] failed: ${(ex as Error).message}, ${(ex2 as Error).message}`);
-                this.toastService.warning(this.getRoutingFailedMessage(latlngStart, latlngEnd));
+                this.toastService.warning(this.getRoutingFailedMessage(hasTiles));
                 const lngLat = [latlngStart, latlngEnd];
                 this.elevationProvider.updateHeights(lngLat);
                 return lngLat;
@@ -79,7 +85,7 @@ export class RoutingProvider {
      * offline at all, a subscribed user who did not download the area this route is in should
      * download it, and when the tiles are there no route could be found between the points.
      */
-    private getRoutingFailedMessage(latlngStart: LatLngAltTime, latlngEnd: LatLngAltTime): string {
+    private getRoutingFailedMessage(hasTiles: boolean): string {
         if (!this.runningContextService.isCapacitor) {
             return this.resources.routingFailed;
         }
@@ -87,9 +93,7 @@ export class RoutingProvider {
         if (!offlineState.isSubscribed) {
             return this.resources.routingFailedBuySubscription;
         }
-        return this.areRoutingTilesDownloaded([latlngStart, latlngEnd])
-            ? this.resources.routingFailed
-            : this.resources.routingFailedDownloadTheArea;
+        return hasTiles ? this.resources.routingFailed : this.resources.routingFailedDownloadTheArea;
     }
 
     /**
@@ -97,14 +101,21 @@ export class RoutingProvider {
      * A slice that was downloaded before offline routing existed holds no routing tiles, so it
      * needs to be downloaded again.
      */
-    private areRoutingTilesDownloaded(latlngs: LatLngAltTime[]): boolean {
-        const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles;
+    private areRoutingTilesDownloaded(start: LatLngAltTime, end: LatLngAltTime): boolean {
+        const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.offlineState)?.downloadedTiles;
         if (downloadedTiles == null) {
             return false;
         }
-        return latlngs.every(latlng => {
-            const tile = SpatialService.toTile(latlng, RoutingProvider.SLICE_TILE_ZOOM);
-            const files = downloadedTiles[`${Math.floor(tile.x)}-${Math.floor(tile.y)}`];
+        const startTile = SpatialService.toTile(start, RoutingProvider.SLICE_TILE_ZOOM);
+        const endTile = SpatialService.toTile(end, RoutingProvider.SLICE_TILE_ZOOM);
+        const tiles = new Set<string>();
+        for (let x = Math.floor(startTile.x); x <= Math.floor(endTile.x); x++) {
+            for (let y = Math.floor(startTile.y); y <= Math.floor(endTile.y); y++) {
+                tiles.add(`${x}-${y}`);
+            }
+        }
+        return Array.from(tiles).every(tile => {
+            const files = downloadedTiles[tile];
             return Array.isArray(files) && files.some(file => RoutingProvider.isRoutingTilesFile(file.fileName));
         });
     }
