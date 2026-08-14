@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" package="com.mapeak">
-    <!-- POC: valhalla-mobile declares minSdk 26; keep the app at 24 and force the merge (test on API 26+). -->
+    <!-- HM TODO: see what needs to change in order to solve this: valhalla-mobile declares minSdk 26; keep the app at 24 and force the merge (test on API 26+). -->
     <uses-sdk tools:overrideLibrary="com.valhalla.valhalla" />
     <application
         android:allowBackup="true"
