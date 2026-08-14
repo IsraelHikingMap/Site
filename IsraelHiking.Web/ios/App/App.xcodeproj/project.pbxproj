@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0DFA11000000000000000065 /* ValhallaProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFA11000000000000000064 /* ValhallaProfiles.swift */; };
 		0DFA11000000000000000002 /* ValhallaPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFA11000000000000000001 /* ValhallaPlugin.swift */; };
 		0DFA11000000000000000004 /* ValhallaTiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFA11000000000000000003 /* ValhallaTiles.swift */; };
 		0DFA11000000000000000006 /* ValhallaRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFA11000000000000000005 /* ValhallaRouter.swift */; };
@@ -66,6 +67,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0DFA11000000000000000064 /* ValhallaProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValhallaProfiles.swift; sourceTree = "<group>"; };
 		0DFA11000000000000000001 /* ValhallaPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValhallaPlugin.swift; sourceTree = "<group>"; };
 		0DFA11000000000000000003 /* ValhallaTiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValhallaTiles.swift; sourceTree = "<group>"; };
 		0DFA11000000000000000005 /* ValhallaRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValhallaRouter.swift; sourceTree = "<group>"; };
@@ -130,6 +132,7 @@
 				0DFA11000000000000000003 /* ValhallaTiles.swift */,
 				0DFA11000000000000000005 /* ValhallaRouter.swift */,
 				0DFA11000000000000000007 /* ValhallaTarExtractor.swift */,
+				0DFA11000000000000000064 /* ValhallaProfiles.swift */,
 			);
 			path = Valhalla;
 			sourceTree = "<group>";
@@ -346,6 +349,7 @@
 				0DFA11000000000000000004 /* ValhallaTiles.swift in Sources */,
 				0DFA11000000000000000006 /* ValhallaRouter.swift in Sources */,
 				0DFA11000000000000000008 /* ValhallaTarExtractor.swift in Sources */,
+				0DFA11000000000000000065 /* ValhallaProfiles.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

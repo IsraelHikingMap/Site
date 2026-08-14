@@ -18,6 +18,7 @@ class ValhallaPlugin : Plugin() {
 
     private val tiles by lazy { ValhallaTiles(context) }
     private val router by lazy { ValhallaRouter(context) }
+    private val profiles by lazy { ValhallaProfiles(context) }
 
     /**
      * Extracts a downloaded slice of routing tiles into the shared tiles directory.
@@ -42,6 +43,26 @@ class ValhallaPlugin : Plugin() {
             call.resolve(JSObject().put("extractedFiles", result.extractedFiles).put("tilesDir", result.tilesDir))
         } catch (ex: Exception) {
             call.reject("Tile extraction failed: ${ex.message}", ex)
+        }
+    }
+
+    /**
+     * Stores the routing profiles next to the tiles, so that a route uses the same costing options
+     * the server would have used.
+     */
+    @Suppress("unused")
+    @PluginMethod
+    fun storeProfiles(call: PluginCall) {
+        val content = call.getString("profiles")
+        if (content.isNullOrBlank()) {
+            call.reject("profiles is required")
+            return
+        }
+        try {
+            profiles.store(content)
+            call.resolve()
+        } catch (ex: Exception) {
+            call.reject("Failed to store the routing profiles: ${ex.message}", ex)
         }
     }
 
@@ -97,12 +118,11 @@ class ValhallaPlugin : Plugin() {
         val fromLng = call.getDouble("fromLng") ?: return call.reject("fromLng is required")
         val toLat = call.getDouble("toLat") ?: return call.reject("toLat is required")
         val toLng = call.getDouble("toLng") ?: return call.reject("toLng is required")
-        val costing = call.getString("costing")
-        if (costing.isNullOrBlank()) {
-            call.reject("costing is required")
+        val profile = call.getString("profile")
+        if (profile.isNullOrBlank()) {
+            call.reject("profile is required")
             return
         }
-        val costingOptions = call.getObject("costingOptions")?.toString()
         val elevationInterval = call.getInt("elevationInterval") ?: 0
         if (!tiles.hasTiles()) {
             call.reject("There are no valhalla tiles on the device")
@@ -115,8 +135,7 @@ class ValhallaPlugin : Plugin() {
                     fromLng = fromLng,
                     toLat = toLat,
                     toLng = toLng,
-                    costing = costing,
-                    costingOptionsJson = costingOptions,
+                    profile = profile,
                     elevationInterval = elevationInterval
                 ),
                 tiles.tilesDir()

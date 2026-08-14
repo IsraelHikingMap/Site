@@ -95,6 +95,7 @@ export class OfflineFilesDownloadService {
             for (const styleAndContent of styles) {
                 await this.fileService.writeStyle(styleAndContent.fileName, styleAndContent.content);
             }
+            await this.routingProvider.updateOfflineRoutingProfiles();
             const fileNamesForRoot = await this.getFilesToDownload();
             const fileNamesForTile = await this.getFilesToDownload(tileX, tileY);
             if (fileNamesForTile.length === 0 && fileNamesForRoot.length === 0) {

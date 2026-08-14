@@ -18,12 +18,12 @@ import type { ApplicationState, LatLngAltTime, RoutingType } from "../models";
 
 @Service()
 export class RoutingProvider {
-    /** The app's routing type is not a valhalla costing model */
-    private static readonly VALHALLA_COSTING: Record<RoutingType, string> = {
-        Hike: "pedestrian",
-        Bike: "bicycle",
-        "4WD": "auto",
-        None: "auto"
+    /** The name of the routing profile of every routing type, as they are named in the profiles file */
+    private static readonly VALHALLA_PROFILE: Record<RoutingType, string> = {
+        Hike: "foot",
+        Bike: "bike",
+        "4WD": "car4WheelDrive",
+        None: "default"
     };
 
     /** Matches the resolution of valhalla's elevation data */
@@ -129,6 +129,22 @@ export class RoutingProvider {
     }
 
     /**
+     * Downloads the routing profiles and stores them next to the tiles, so that an offline route is
+     * calculated with the same costing options the server would have used. Failing to get them is
+     * not fatal - valhalla's own defaults are used instead - so this only logs.
+     */
+    public async updateOfflineRoutingProfiles(): Promise<void> {
+        try {
+            const profiles = await firstValueFrom(this.httpClient.get(Urls.routingProfiles, { responseType: "text" })
+                .pipe(timeout(RoutingProvider.ONLINE_TIMEOUT_MS)));
+            await Valhalla.storeProfiles({ profiles });
+            this.loggingService.info("[Routing] Stored the offline routing profiles");
+        } catch (ex) {
+            this.loggingService.warning(`[Routing] Failed to store the offline routing profiles: ${(ex as Error).message}`);
+        }
+    }
+
+    /**
      * Extracts a downloaded offline routing tiles file, the file itself is removed once extracted.
      * The slice is identified so that it can later be removed without affecting its neighbours.
      */
@@ -158,7 +174,7 @@ export class RoutingProvider {
             fromLng: latlngStart.lng,
             toLat: latlngEnd.lat,
             toLng: latlngEnd.lng,
-            costing: RoutingProvider.VALHALLA_COSTING[routingType],
+            profile: RoutingProvider.VALHALLA_PROFILE[routingType],
             elevationInterval: RoutingProvider.ELEVATION_INTERVAL_METERS
         });
         const latlngs = RoutingProvider.parseValhallaResponse(results.raw);

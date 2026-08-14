@@ -3,8 +3,8 @@ import Valhalla
 import ValhallaConfigModels
 
 /**
- * A route request, `costingOptions` is a valhalla costing_options object keyed by costing name,
- * i.e. {"pedestrian": {...}}, so that the offline route matches the one the server would return.
+ * A route request. The costing model and its options are taken from the stored profile named
+ * `profile`, so that the offline route matches the one the server would return.
  * An `elevationInterval` of 0 means no elevation is requested.
  */
 struct ValhallaRouteRequest {
@@ -12,13 +12,13 @@ struct ValhallaRouteRequest {
     let fromLng: Double
     let toLat: Double
     let toLng: Double
-    let costing: String
-    let costingOptions: [String: Any]?
+    let profile: String
     let elevationInterval: Int
 }
 
 enum ValhallaRouterError: Error {
     case requestEncodingFailed
+    case profileNotFound(String)
 }
 
 /**
@@ -30,6 +30,7 @@ enum ValhallaRouterError: Error {
  */
 final class ValhallaRouter {
     private let tiles: ValhallaTiles
+    private let profiles = ValhallaProfiles()
     /// Holds the tiles open between requests, it is dropped whenever the tiles on disk change
     private var valhalla: Valhalla?
 
@@ -63,16 +64,22 @@ final class ValhallaRouter {
     }
 
     private func requestJson(_ request: ValhallaRouteRequest) throws -> String {
+        // Without the profiles there is no offline routing, the same as without tiles
+        guard let profile = profiles.profile(named: request.profile) else {
+            throw ValhallaRouterError.profileNotFound(request.profile)
+        }
+        let costing = profile.costing
         var json: [String: Any] = [
             "locations": [
                 ["lat": request.fromLat, "lon": request.fromLng],
                 ["lat": request.toLat, "lon": request.toLng]
             ],
-            "costing": request.costing,
+            "costing": costing,
             "directions_options": ["units": "kilometers"]
         ]
-        if let costingOptions = request.costingOptions {
-            json["costing_options"] = costingOptions
+        // Valhalla takes the options under the name of the costing model they belong to
+        if let costingOptions = profile.costingOptions {
+            json["costing_options"] = [costing: costingOptions]
         }
         if request.elevationInterval > 0 {
             json["elevation_interval"] = request.elevationInterval

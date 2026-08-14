@@ -8,8 +8,8 @@ import org.json.JSONObject
 import java.io.File
 
 /**
- * A route request, [costingOptionsJson] is a valhalla costing_options object keyed by costing name,
- * i.e. {"pedestrian": {...}}, so that the offline route matches the one the server would return.
+ * A route request. The costing model and its options are taken from the stored profile named
+ * [profile], so that the offline route matches the one the server would return.
  * An [elevationInterval] of 0 means no elevation is requested.
  */
 data class ValhallaRouteRequest(
@@ -17,8 +17,7 @@ data class ValhallaRouteRequest(
     val fromLng: Double,
     val toLat: Double,
     val toLng: Double,
-    val costing: String,
-    val costingOptionsJson: String? = null,
+    val profile: String,
     val elevationInterval: Int = 0
 )
 
@@ -28,6 +27,7 @@ data class ValhallaRouteRequest(
 class ValhallaRouter(private val context: Context) {
 
     private val configManager by lazy { ValhallaConfigManager(context) }
+    private val profiles by lazy { ValhallaProfiles(context) }
 
     /**
      * Returns the raw valhalla response json - the web layer decodes the shape and the elevation.
@@ -46,15 +46,20 @@ class ValhallaRouter(private val context: Context) {
     }
 
     private fun toRequestJson(request: ValhallaRouteRequest): String {
+        // Without the profiles there is no offline routing, the same as without tiles
+        val profile = profiles.get(request.profile)
+            ?: throw IllegalStateException("There is no routing profile named ${request.profile} on the device")
+        val costing = profile.costing
         val locations = JSONArray()
             .put(JSONObject().put("lat", request.fromLat).put("lon", request.fromLng))
             .put(JSONObject().put("lat", request.toLat).put("lon", request.toLng))
         val json = JSONObject()
             .put("locations", locations)
-            .put("costing", request.costing)
+            .put("costing", costing)
             .put("directions_options", JSONObject().put("units", "kilometers"))
-        if (request.costingOptionsJson != null) {
-            json.put("costing_options", JSONObject(request.costingOptionsJson))
+        // Valhalla takes the options under the name of the costing model they belong to
+        if (profile.costingOptions != null) {
+            json.put("costing_options", JSONObject().put(costing, profile.costingOptions))
         }
         if (request.elevationInterval > 0) {
             json.put("elevation_interval", request.elevationInterval)

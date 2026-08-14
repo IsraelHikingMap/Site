@@ -14,6 +14,7 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
     public let jsName = "Valhalla"
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "extractTiles", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "storeProfiles", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "deleteTiles", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "hasTiles", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "clearTiles", returnType: CAPPluginReturnPromise),
@@ -21,6 +22,7 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
     ]
 
     private let tiles = ValhallaTiles()
+    private let profiles = ValhallaProfiles()
     private lazy var router = ValhallaRouter(tiles: tiles)
 
     /**
@@ -57,6 +59,23 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
         tiles.delete(sliceId: sliceId)
         router.invalidate()
         call.resolve()
+    }
+
+    /**
+     * Stores the routing profiles next to the tiles, so that a route uses the same costing options
+     * the server would have used.
+     */
+    @objc func storeProfiles(_ call: CAPPluginCall) {
+        guard let content = call.getString("profiles"), !content.isEmpty else {
+            call.reject("profiles is required")
+            return
+        }
+        do {
+            try profiles.store(content)
+            call.resolve()
+        } catch {
+            call.reject("Failed to store the routing profiles: \(error.localizedDescription)", nil, error)
+        }
     }
 
     /**
@@ -99,8 +118,8 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
             call.reject("toLng is required")
             return
         }
-        guard let costing = call.getString("costing"), !costing.isEmpty else {
-            call.reject("costing is required")
+        guard let profile = call.getString("profile"), !profile.isEmpty else {
+            call.reject("profile is required")
             return
         }
         guard tiles.hasTiles() else {
@@ -114,8 +133,7 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
                     fromLng: fromLng,
                     toLat: toLat,
                     toLng: toLng,
-                    costing: costing,
-                    costingOptions: call.getObject("costingOptions"),
+                    profile: profile,
                     elevationInterval: call.getInt("elevationInterval") ?? 0
                 )
             )

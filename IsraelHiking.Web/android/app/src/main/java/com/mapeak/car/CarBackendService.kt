@@ -217,7 +217,7 @@ class CarBackendService(context: Context) {
                                     fromLng = from.longitude,
                                     toLat = to.latitude,
                                     toLng = to.longitude,
-                                    costing = toCosting(routingType)
+                                    profile = toProfile(routingType)
                             ),
                             valhallaTiles.tilesDir()
                     )
@@ -229,13 +229,15 @@ class CarBackendService(context: Context) {
     }
 
     /**
-     * The app's routing type is not a valhalla costing model - map it, the same way the web layer does.
+     * The routing profile of the routing type, as the profiles are named in the profiles file, so
+     * that the offline route uses the same costing options the server would have used.
      */
-    private fun toCosting(routingType: String): String =
+    private fun toProfile(routingType: String): String =
             when (routingType) {
-                "Hike" -> "pedestrian"
-                "Bike" -> "bicycle"
-                else -> "auto"
+                "Hike" -> "foot"
+                "Bike" -> "bike"
+                "4WD" -> "car4WheelDrive"
+                else -> "default"
             }
 
     /**
