@@ -58,13 +58,11 @@ dependencies {
     implementation "com.github.mapeak-com:maplibre-contour-rs:v$maplibreContourVersion"
     implementation "androidx.core:core-ktx:$androidxCoreKtxVersion"
     implementation "com.google.android.gms:play-services-location:$playServicesLocationVersion"
-    // Valhalla offline routing POC (native engine + models for the request/response types)
     implementation "io.github.rallista:valhalla-mobile:0.5.1"
     implementation "io.github.rallista:valhalla-models:0.2.0"
     implementation "io.github.rallista:valhalla-models-config:0.2.0"
     implementation "com.stadiamaps:osrm-openapi:0.0.10"
     implementation "com.squareup.moshi:moshi-kotlin:1.15.1"
-    // Untar downloaded Valhalla area extracts into a shared tile directory.
     implementation "org.apache.commons:commons-compress:1.27.1"
 }
 
