@@ -12,30 +12,32 @@ import { GeoJsonParser } from "./geojson.parser";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
+import { SpatialService } from "./spatial.service";
 
 const encodeShape = (latlngs: [number, number][]) => polyline.encode(latlngs, 6);
+
+const sliceKeyOf = (lat: number, lng: number) => {
+    const tile = SpatialService.toTile({ lat, lng }, 7);
+    return `${Math.floor(tile.x)}-${Math.floor(tile.y)}`;
+};
 
 describe("RoutingProvider", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [
                 provideStore([]),
-                { provide: ResourcesService, useValue: {} },
                 {
-                    provide: ToastService,
+                    provide: ResourcesService,
                     useValue: {
-                        warning: vi.fn()
+                        routingFailed: "routing-failed",
+                        routingFailedBuySubscription: "buy-subscription",
+                        routingFailedDownloadTheArea: "download-the-area"
                     }
                 },
+                { provide: ToastService, useValue: { warning: vi.fn() } },
                 { provide: LoggingService, useValue: { error: () => { }, info: () => { } } },
-                // Offline routing needs the native plugin, which has no web implementation
                 { provide: RunningContextService, useValue: { isCapacitor: false } },
-                {
-                    provide: ElevationProvider,
-                    useValue: {
-                        updateHeights: () => Promise.resolve()
-                    }
-                },
+                { provide: ElevationProvider, useValue: { updateHeights: () => Promise.resolve() } },
                 GeoJsonParser,
                 RoutingProvider,
                 provideHttpClient(withInterceptorsFromDi()),
@@ -152,84 +154,161 @@ describe("RoutingProvider", () => {
         )
     );
 
-    it("Should not offer offline routing when not running in capacitor", inject([RoutingProvider],
-        (router: RoutingProvider) => {
-            expect(router.isOfflineRoutingSupported()).toBe(false);
-        }
-    ));
+    it("Should suggest buying a subscription when the user is not subscribed",
+        inject([RoutingProvider, HttpTestingController, Store, ToastService, RunningContextService],
+            async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService,
+                runningContextService: RunningContextService) => {
+                (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
+                store.reset({
+                    offlineState: {
+                        isSubscribed: false
+                    }
+                });
 
-    /**
-     * The route itself comes from the native plugin, which has no web implementation to stand in for
-     * it, so what is covered here is turning its response into the route's points.
-     */
-    describe("Parsing an offline route", () => {
-        it("Should decode the route shape", () => {
-            const raw = JSON.stringify({
-                trip: { legs: [{ shape: encodeShape([[32, 35], [32.001, 35.001], [32.002, 35.002]]) }] }
-            });
+                const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
 
-            const latlngs = RoutingProvider.parseValhallaResponse(raw);
+                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+                await promise;
+                expect(toastService.warning).toHaveBeenCalledWith("buy-subscription");
+            }
+        )
+    );
 
-            expect(latlngs.length).toBe(3);
-            expect(latlngs[0].lat).toBeCloseTo(32, 5);
-            expect(latlngs[0].lng).toBeCloseTo(35, 5);
-            expect(latlngs[2].lat).toBeCloseTo(32.002, 5);
+    it("Should suggest downloading the area when it was never downloaded",
+        inject([RoutingProvider, HttpTestingController, Store, ToastService, RunningContextService],
+            async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService,
+                runningContextService: RunningContextService) => {
+                (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
+                store.reset({
+                    offlineState: {
+                        isSubscribed: true,
+                        downloadedTiles: {}
+                    }
+                });
+
+                const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
+
+                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+                await promise;
+                expect(toastService.warning).toHaveBeenCalledWith("download-the-area");
+            }
+        )
+    );
+
+    it("Should suggest downloading the area when it holds no routing tiles",
+        inject([RoutingProvider, HttpTestingController, Store, ToastService, RunningContextService],
+            async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService,
+                runningContextService: RunningContextService) => {
+                (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
+                store.reset({
+                    offlineState: {
+                        isSubscribed: true,
+                        downloadedTiles: {
+                            [sliceKeyOf(32, 35)]: [{ fileName: "IHM-schema+7-76-51.pmtiles", date: "2026-01-01" }]
+                        }
+                    }
+                });
+
+                const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
+
+                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+                await promise;
+                expect(toastService.warning).toHaveBeenCalledWith("download-the-area");
+            }
+        )
+    );
+
+    it("Should only say that routing failed when the area and its routing tiles are there",
+        inject([RoutingProvider, HttpTestingController, Store, ToastService, RunningContextService],
+            async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService,
+                runningContextService: RunningContextService) => {
+                (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
+                const files = [{ fileName: "valhalla+7-76-51.tar", date: "2026-01-01" }];
+                store.reset({
+                    offlineState: {
+                        isSubscribed: true,
+                        downloadedTiles: {
+                            [sliceKeyOf(32, 35)]: files,
+                            [sliceKeyOf(32.001, 35.001)]: files
+                        }
+                    }
+                });
+
+                const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
+
+                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+                await promise;
+                expect(toastService.warning).toHaveBeenCalledWith("routing-failed");
+            }
+        )
+    );
+
+    it("Should decode the shape of an offline route", () => {
+        const raw = JSON.stringify({
+            trip: { legs: [{ shape: encodeShape([[32, 35], [32.001, 35.001], [32.002, 35.002]]) }] }
         });
 
-        it("Should concatenate the legs of the route", () => {
-            const raw = JSON.stringify({
-                trip: {
-                    legs: [
-                        { shape: encodeShape([[32, 35], [32.001, 35.001]]) },
-                        { shape: encodeShape([[32.001, 35.001], [32.002, 35.002]]) }
-                    ]
-                }
-            });
+        const latlngs = RoutingProvider.parseValhallaResponse(raw);
 
-            expect(RoutingProvider.parseValhallaResponse(raw).length).toBe(4);
+        expect(latlngs.length).toBe(3);
+        expect(latlngs[0].lat).toBeCloseTo(32, 5);
+        expect(latlngs[0].lng).toBeCloseTo(35, 5);
+        expect(latlngs[2].lat).toBeCloseTo(32.002, 5);
+    });
+
+    it("Should concatenate the legs of an offline route", () => {
+        const raw = JSON.stringify({
+            trip: {
+                legs: [
+                    { shape: encodeShape([[32, 35], [32.001, 35.001]]) },
+                    { shape: encodeShape([[32.001, 35.001], [32.002, 35.002]]) }
+                ]
+            }
         });
 
-        it("Should set the elevation of the points from the samples", () => {
-            // Two points 30 meters apart, i.e. exactly one elevation interval
-            const raw = JSON.stringify({
-                trip: { legs: [{ shape: encodeShape([[32, 35], [32.00027, 35]]), elevation: [100, 130] }] }
-            });
+        expect(RoutingProvider.parseValhallaResponse(raw).length).toBe(4);
+    });
 
-            const latlngs = RoutingProvider.parseValhallaResponse(raw);
-
-            expect(latlngs[0].alt).toBe(100);
-            expect(latlngs[1].alt).toBeCloseTo(130, 0);
+    it("Should set the elevation of an offline route from the samples", () => {
+        // Two points 30 meters apart, i.e. exactly one elevation interval
+        const raw = JSON.stringify({
+            trip: { legs: [{ shape: encodeShape([[32, 35], [32.00027, 35]]), elevation: [100, 130] }] }
         });
 
-        it("Should interpolate the elevation between two samples", () => {
-            // The middle point is roughly half an interval in, so its elevation is between the samples
-            const raw = JSON.stringify({
-                trip: {
-                    legs: [{
-                        shape: encodeShape([[32, 35], [32.000135, 35], [32.00027, 35]]),
-                        elevation: [100, 200]
-                    }]
-                }
-            });
+        const latlngs = RoutingProvider.parseValhallaResponse(raw);
 
-            const latlngs = RoutingProvider.parseValhallaResponse(raw);
+        expect(latlngs[0].alt).toBe(100);
+        expect(latlngs[1].alt).toBeCloseTo(130, 0);
+    });
 
-            expect(latlngs[1].alt).toBeGreaterThan(100);
-            expect(latlngs[1].alt).toBeLessThan(200);
+    it("Should interpolate the elevation of an offline route between two samples", () => {
+        // The middle point is roughly half an interval in, so its elevation is between the samples
+        const raw = JSON.stringify({
+            trip: {
+                legs: [{
+                    shape: encodeShape([[32, 35], [32.000135, 35], [32.00027, 35]]),
+                    elevation: [100, 200]
+                }]
+            }
         });
 
-        it("Should not set the elevation when there are no samples", () => {
-            const raw = JSON.stringify({
-                trip: { legs: [{ shape: encodeShape([[32, 35], [32.002, 35.002]]) }] }
-            });
+        const latlngs = RoutingProvider.parseValhallaResponse(raw);
 
-            expect(RoutingProvider.parseValhallaResponse(raw).every(l => l.alt == null)).toBe(true);
+        expect(latlngs[1].alt).toBeGreaterThan(100);
+        expect(latlngs[1].alt).toBeLessThan(200);
+    });
+
+    it("Should not set the elevation of an offline route when there are no samples", () => {
+        const raw = JSON.stringify({
+            trip: { legs: [{ shape: encodeShape([[32, 35], [32.002, 35.002]]) }] }
         });
 
-        it("Should throw when valhalla returns an error", () => {
-            const raw = JSON.stringify({ code: 171, message: "No suitable edges near location" });
+        expect(RoutingProvider.parseValhallaResponse(raw).every(l => l.alt == null)).toBe(true);
+    });
 
-            expect(() => RoutingProvider.parseValhallaResponse(raw)).toThrow("No suitable edges near location");
-        });
+    it("Should throw when valhalla returns an error", () => {
+        const raw = JSON.stringify({ code: 171, message: "No suitable edges near location" });
+
+        expect(() => RoutingProvider.parseValhallaResponse(raw)).toThrow("No suitable edges near location");
     });
 });

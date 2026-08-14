@@ -29,6 +29,12 @@ export class RoutingProvider {
     /** Matches the resolution of valhalla's elevation data */
     private static readonly ELEVATION_INTERVAL_METERS = 30;
 
+    /** The zoom level the offline files are sliced at, see the server's OfflineFilesService */
+    private static readonly SLICE_TILE_ZOOM = 7;
+
+    private static readonly ROUTING_TILES_PREFIX = "valhalla";
+    private static readonly ROUTING_TILES_EXTENSION = ".tar";
+
     private readonly httpClient = inject(HttpClient);
     private readonly resources = inject(ResourcesService);
     private readonly toastService = inject(ToastService);
@@ -60,11 +66,7 @@ export class RoutingProvider {
                 return await this.getOffineRoute(latlngStart, latlngEnd, routinType);
             } catch (ex2) {
                 this.loggingService.error(`[Routing] failed: ${(ex as Error).message}, ${(ex2 as Error).message}`);
-                const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-                this.toastService.warning(offlineState.isSubscribed || !this.runningContextService.isCapacitor
-                    ? this.resources.routingFailedTryShorterRoute
-                    : this.resources.routingFailedBuySubscription
-                );
+                this.toastService.warning(this.getRoutingFailedMessage(latlngStart, latlngEnd));
                 const lngLat = [latlngStart, latlngEnd];
                 this.elevationProvider.updateHeights(lngLat);
                 return lngLat;
@@ -73,10 +75,46 @@ export class RoutingProvider {
     }
 
     /**
-     * Offline routing is only available where the native plugin is.
+     * Explains why the route could not be calculated: a user without a subscription cannot route
+     * offline at all, a subscribed user who did not download the area this route is in should
+     * download it, and when the tiles are there no route could be found between the points.
      */
-    public isOfflineRoutingSupported(): boolean {
-        return this.runningContextService.isCapacitor;
+    private getRoutingFailedMessage(latlngStart: LatLngAltTime, latlngEnd: LatLngAltTime): string {
+        if (!this.runningContextService.isCapacitor) {
+            return this.resources.routingFailed;
+        }
+        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+        if (!offlineState.isSubscribed) {
+            return this.resources.routingFailedBuySubscription;
+        }
+        return this.areRoutingTilesDownloaded([latlngStart, latlngEnd])
+            ? this.resources.routingFailed
+            : this.resources.routingFailedDownloadTheArea;
+    }
+
+    /**
+     * Whether the slices holding the given points were downloaded along with their routing tiles.
+     * A slice that was downloaded before offline routing existed holds no routing tiles, so it
+     * needs to be downloaded again.
+     */
+    private areRoutingTilesDownloaded(latlngs: LatLngAltTime[]): boolean {
+        const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles;
+        if (downloadedTiles == null) {
+            return false;
+        }
+        return latlngs.every(latlng => {
+            const tile = SpatialService.toTile(latlng, RoutingProvider.SLICE_TILE_ZOOM);
+            const files = downloadedTiles[`${Math.floor(tile.x)}-${Math.floor(tile.y)}`];
+            return Array.isArray(files) && files.some(file => RoutingProvider.isRoutingTilesFile(file.fileName));
+        });
+    }
+
+    /**
+     * Whether the given offline file is a slice of routing tiles, as the server names them.
+     */
+    public static isRoutingTilesFile(fileName: string): boolean {
+        return fileName.startsWith(RoutingProvider.ROUTING_TILES_PREFIX) &&
+            fileName.endsWith(RoutingProvider.ROUTING_TILES_EXTENSION);
     }
 
     /**
@@ -92,9 +130,6 @@ export class RoutingProvider {
      * Removes the offline routing tiles of a single slice, the tiles it shares with its neighbours are kept.
      */
     public async deleteOfflineRoutingTiles(sliceId: string): Promise<void> {
-        if (!this.isOfflineRoutingSupported()) {
-            return;
-        }
         await Valhalla.deleteTiles({ sliceId });
         this.loggingService.info(`[Routing] Removed the offline routing tiles of ${sliceId}`);
     }
@@ -104,7 +139,7 @@ export class RoutingProvider {
      * The returned points have their elevation set from valhalla's elevation samples.
      */
     private async getOffineRoute(latlngStart: LatLngAltTime, latlngEnd: LatLngAltTime, routingType: RoutingType): Promise<LatLngAltTime[]> {
-        if (!this.isOfflineRoutingSupported() || !(await Valhalla.hasTiles()).hasTiles) {
+        if (!(await Valhalla.hasTiles()).hasTiles) {
             throw new Error("[Routing] There are no offline routing tiles on the device");
         }
         const results = await Valhalla.route({
