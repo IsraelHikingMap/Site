@@ -22,6 +22,9 @@ import type { ApplicationState, FileNameDateVersion, TileMetadataPerFile } from 
 
 @Service()
 export class OfflineFilesDownloadService {
+    /** The key the root files, the ones that are not of a specific tile, are stored under */
+    private static readonly ROOT_TILE_KEY = "undefined-undefined";
+
 
     private readonly resources = inject(ResourcesService);
     private readonly fileService = inject(FileService);
@@ -55,7 +58,8 @@ export class OfflineFilesDownloadService {
         }
         try {
             const styles = await this.downloadStyleAndUpdateMetadata();
-            const needToAskToRedownload = offlineState.downloadedTiles == null || Object.values(offlineState.downloadedTiles).some(dt => !this.isTileCompatible(dt));
+            const needToAskToRedownload = offlineState.downloadedTiles == null ||
+                Object.entries(offlineState.downloadedTiles).some(([key, tile]) => !this.isTileCompatible(key, tile));
             if (!needToAskToRedownload) {
                 for (const styleAndContent of styles) {
                     await this.fileService.writeStyle(styleAndContent.fileName, styleAndContent.content);
@@ -286,9 +290,18 @@ export class OfflineFilesDownloadService {
         return lastModified;
     }
 
-    public isTileCompatible(downloadedTile: Immutable<TileMetadataPerFile>): boolean {
+    /**
+     * Whether the files of a tile are still the ones the app needs: they are new enough for the
+     * style, and the tile holds every file it should - a tile that was downloaded before offline
+     * routing existed has no routing tiles in it, and needs to be downloaded again.
+     */
+    public isTileCompatible(tileKey: string, downloadedTile: Immutable<TileMetadataPerFile>): boolean {
         if (!Array.isArray(downloadedTile)) {
             return Object.keys(this.metadata).every(k => !k.includes("min-version"));
+        }
+        if (tileKey !== OfflineFilesDownloadService.ROOT_TILE_KEY &&
+            !(downloadedTile as FileNameDateVersion[]).some(f => RoutingProvider.isRoutingTilesFile(f.fileName))) {
+            return false;
         }
         for (const fileDateVersion of downloadedTile as FileNameDateVersion[]) {
             const fileVersion = fileDateVersion.version;

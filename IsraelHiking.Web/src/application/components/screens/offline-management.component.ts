@@ -184,7 +184,7 @@ export class OfflineManagementComponent {
                 (downloadedDate.getMonth() + 1).toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 }) + "\n" +
                 downloadedDate.getDate().toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 });
             const feature = this.tileCoordinatesToPolygon(tileXDownloaded, tileYDownloaded, label, 1);
-            feature.properties.color = this.offlineFilesDownloadService.isTileCompatible(downloadedTiles[key]) ? "blue" : "red";
+            feature.properties.color = this.offlineFilesDownloadService.isTileCompatible(key, downloadedTiles[key]) ? "blue" : "red";
             features.push(feature);
         }
 
