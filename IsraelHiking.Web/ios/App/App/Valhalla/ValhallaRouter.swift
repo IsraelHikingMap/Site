@@ -24,9 +24,11 @@ enum ValhallaRouterError: Error {
 /**
  * Runs route requests against the native valhalla engine, mirroring `ValhallaRouter.kt`.
  *
- * Unlike android, where the raw entry point is internal and has to be reached by reflection, the
- * swift package exposes `route(rawRequest:)`, so the raw json - including the elevation, which the
- * typed models do not carry yet - is available directly.
+ * Android builds the request with the typed models, which is what this should do too, but the
+ * swift models cannot be used for it yet: valhalla-mobile pins them to `.upToNextMinor(from:
+ * "0.2.0")`, and `elevation_interval` only exists from 0.4.0, so a typed request here would come
+ * back without the elevation. Until that pin is widened the request is built as json and sent
+ * through `route(rawRequest:)`, which is a public part of the package - no workaround involved.
  */
 final class ValhallaRouter {
     private let tiles: ValhallaTiles

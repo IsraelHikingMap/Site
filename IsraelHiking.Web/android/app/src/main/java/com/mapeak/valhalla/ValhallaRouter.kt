@@ -1,10 +1,20 @@
 package com.mapeak.valhalla
 
 import android.content.Context
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.valhalla.api.models.AutoCostingOptions
+import com.valhalla.api.models.BicycleCostingOptions
+import com.valhalla.api.models.CostingModel
+import com.valhalla.api.models.CostingOptions
+import com.valhalla.api.models.DistanceUnit
+import com.valhalla.api.models.PedestrianCostingOptions
+import com.valhalla.api.models.RouteRequest
+import com.valhalla.api.models.RouteResponse
+import com.valhalla.api.models.RoutingWaypoint
 import com.valhalla.config.ValhallaConfigBuilder
-import com.valhalla.valhalla.config.ValhallaConfigManager
-import org.json.JSONArray
-import org.json.JSONObject
+import com.valhalla.valhalla.Valhalla
+import com.valhalla.valhalla.ValhallaResponse
 import java.io.File
 
 /**
@@ -26,56 +36,67 @@ data class ValhallaRouteRequest(
  */
 class ValhallaRouter(private val context: Context) {
 
-    private val configManager by lazy { ValhallaConfigManager(context) }
+    private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
     private val profiles by lazy { ValhallaProfiles(context) }
 
+    /** Built once with the tiles directory, the tiles themselves are read on every request */
+    private var valhalla: Valhalla? = null
+
     /**
-     * Returns the raw valhalla response json - the web layer decodes the shape and the elevation.
-     *
-     * The typed `Valhalla.route()` API cannot be used yet: its `RouteRequest` has no
-     * `elevation_interval` and its `RouteLeg` has no `elevation`, so the response would drop the
-     * elevation. Until https://github.com/Rallista/valhalla-mobile/issues/87 is released this calls
-     * the JNI wrapper directly, which is `internal`, hence the reflection.
+     * Returns the valhalla response json - the web layer decodes the shape and the elevation.
      */
     fun route(request: ValhallaRouteRequest, tilesDir: File): String {
-        val configPath = ensureConfig(tilesDir)
-        val valhallaKotlinClass = Class.forName("com.valhalla.valhalla.ValhallaKotlin")
-        val valhallaKotlin = valhallaKotlinClass.getDeclaredConstructor().newInstance()
-        val routeMethod = valhallaKotlinClass.getMethod("route", String::class.java, String::class.java)
-        return routeMethod.invoke(valhallaKotlin, toRequestJson(request), configPath) as String
+        val response = engine(tilesDir).route(toRouteRequest(request))
+        return when (response) {
+            is ValhallaResponse.Json -> moshi.adapter(RouteResponse::class.java).toJson(response.jsonResponse)
+            else -> throw IllegalStateException("Valhalla answered in a format that was not asked for")
+        }
     }
 
-    private fun toRequestJson(request: ValhallaRouteRequest): String {
+    private fun engine(tilesDir: File): Valhalla {
+        return valhalla
+            ?: Valhalla(context, ValhallaConfigBuilder().withTileDir(tilesDir.absolutePath).build())
+                .also { valhalla = it }
+    }
+
+    private fun toRouteRequest(request: ValhallaRouteRequest): RouteRequest {
         // Without the profiles there is no offline routing, the same as without tiles
         val profile = profiles.get(request.profile)
             ?: throw IllegalStateException("There is no routing profile named ${request.profile} on the device")
-        val costing = profile.costing
-        val locations = JSONArray()
-            .put(JSONObject().put("lat", request.fromLat).put("lon", request.fromLng))
-            .put(JSONObject().put("lat", request.toLat).put("lon", request.toLng))
-        val json = JSONObject()
-            .put("locations", locations)
-            .put("costing", costing)
-            .put("directions_options", JSONObject().put("units", "kilometers"))
-        // Valhalla takes the options under the name of the costing model they belong to
-        if (profile.costingOptions != null) {
-            json.put("costing_options", JSONObject().put(costing, profile.costingOptions))
-        }
-        if (request.elevationInterval > 0) {
-            json.put("elevation_interval", request.elevationInterval)
-        }
-        return json.toString()
+        val costing = CostingModel.entries.firstOrNull { it.value == profile.costing }
+            ?: throw IllegalStateException("${profile.costing} is not a valhalla costing model")
+        return RouteRequest(
+            locations =
+                listOf(
+                    RoutingWaypoint(lat = request.fromLat, lon = request.fromLng),
+                    RoutingWaypoint(lat = request.toLat, lon = request.toLng)
+                ),
+            costing = costing,
+            costingOptions = toCostingOptions(costing, profile.costingOptionsJson),
+            units = DistanceUnit.km,
+            elevationInterval = request.elevationInterval.toDouble()
+        )
     }
 
     /**
-     * Writes valhalla.json if it isn't there yet. The tiles directory never changes, so the config
-     * stays valid when more slices are extracted into it.
+     * The options of a profile belong to the costing model they were written for, and are read
+     * strictly: an option the models do not know of is a mismatch between the profiles file and the
+     * api, which should be fixed rather than quietly dropped, so it fails the request.
      */
-    private fun ensureConfig(tilesDir: File): String {
-        val configPath = configManager.getAbsolutePath()
-        if (!File(configPath).exists()) {
-            configManager.writeConfig(ValhallaConfigBuilder().withTileDir(tilesDir.absolutePath).build())
+    private fun toCostingOptions(costing: CostingModel, optionsJson: String?): CostingOptions? {
+        if (optionsJson == null) {
+            return null
         }
-        return configPath
+        return when (costing) {
+            CostingModel.pedestrian -> CostingOptions(pedestrian = parse<PedestrianCostingOptions>(optionsJson))
+            CostingModel.bicycle -> CostingOptions(bicycle = parse<BicycleCostingOptions>(optionsJson))
+            CostingModel.auto -> CostingOptions(auto = parse<AutoCostingOptions>(optionsJson))
+            else -> throw IllegalStateException("There are no costing options here for ${costing.value}")
+        }
+    }
+
+    private inline fun <reified T> parse(json: String): T {
+        return moshi.adapter(T::class.java).failOnUnknown().fromJson(json)
+            ?: throw IllegalStateException("Could not read the costing options of the profile")
     }
 }

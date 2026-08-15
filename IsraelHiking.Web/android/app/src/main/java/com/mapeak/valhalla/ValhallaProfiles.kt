@@ -5,16 +5,17 @@ import org.json.JSONObject
 import java.io.File
 
 /**
- * A single routing profile: the valhalla costing model and the costing options to use with it.
+ * A single routing profile: the valhalla costing model and the costing options to use with it, as
+ * the json they were stored as, so that they can be read into the models of that costing model.
  */
-data class ValhallaProfile(val costing: String, val costingOptions: JSONObject?)
+data class ValhallaProfile(val costing: String, val costingOptionsJson: String?)
 
 /**
  * The routing profiles on the device, stored next to the tiles.
  *
  * They are the same profiles the server routes with, so that a route calculated on the device
- * follows the same costing options as one calculated online. When there is no profiles file, or it
- * holds no such profile, the caller's costing model is used with valhalla's own defaults.
+ * follows the same costing options as one calculated online. Without them there is no offline
+ * routing, the same as without tiles.
  */
 class ValhallaProfiles(private val context: Context) {
 
@@ -52,6 +53,6 @@ class ValhallaProfiles(private val context: Context) {
         if (costing.isEmpty()) {
             return null
         }
-        return ValhallaProfile(costing, profile.optJSONObject(COSTING_OPTIONS_KEY))
+        return ValhallaProfile(costing, profile.optJSONObject(COSTING_OPTIONS_KEY)?.toString())
     }
 }
