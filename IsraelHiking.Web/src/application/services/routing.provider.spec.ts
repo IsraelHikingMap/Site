@@ -3,8 +3,8 @@ import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { provideStore, Store } from "@ngxs/store";
-import geojsonVt from "geojson-vt";
-import vtpbf from "vt-pbf";
+import { GeoJSONVT } from "@maplibre/geojson-vt";
+import { fromGeojsonVt } from "@maplibre/vt-pbf";
 
 import { RoutingProvider } from "./routing.provider";
 import { ResourcesService } from "./resources.service";
@@ -17,7 +17,7 @@ import { PmTilesService } from "./pmtiles.service";
 import { ElevationProvider } from "./elevation.provider";
 
 const createTileFromFeatureCollection = (featureCollection: GeoJSON.FeatureCollection): ArrayBuffer => {
-    const tileindex = geojsonVt(featureCollection);
+    const tileindex = new GeoJSONVT(featureCollection);
     const feature = featureCollection.features[0];
     let coordinate = [0, 0];
     if (feature.geometry.type === "LineString") {
@@ -27,7 +27,7 @@ const createTileFromFeatureCollection = (featureCollection: GeoJSON.FeatureColle
     }
     const xy = SpatialService.toTile(SpatialService.toLatLng(coordinate), 14);
     const tile = tileindex.getTile(14, Math.floor(xy.x), Math.floor(xy.y));
-    return vtpbf.fromGeojsonVt({ geojsonLayer: tile });
+    return fromGeojsonVt({ geojsonLayer: tile }).buffer as ArrayBuffer;
 };
 
 describe("RoutingProvider", () => {

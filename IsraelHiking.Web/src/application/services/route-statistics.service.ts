@@ -1,9 +1,8 @@
 import { Service } from "@angular/core";
-import linearInterpolator from "linear-interpolator";
 import type { Immutable } from "immer";
 
 import { SpatialService } from "./spatial.service";
-import type { LatLngAltTime } from "../models";
+import type { LatLngAltTime, RouteDataWithoutState, RouteSegmentData } from "../models";
 
 export const MINIMAL_DISTANCE = 50;
 export const MINIMAL_ANGLE = 30;
@@ -51,6 +50,26 @@ export type RouteStatistics = {
 
 @Service()
 export class RouteStatisticsService {
+    private readonly statisticsPerSegments = new WeakMap<Immutable<RouteSegmentData[]>, RouteStatistics>();
+
+    /**
+     * Same as {@link getStatisticsForStandAloneRoute}, only the result is cached by the route's segments array.
+     * The routes state is immutable, so a change that doesn't touch the route's points - renaming it for example -
+     * keeps the same segments array and the statistics are reused instead of being calculated again.
+     * The returned object is shared between all the callers, do not change it.
+     *
+     * @param route - the route to get the statistics for
+     */
+    public getStatisticsForRoute(route: Immutable<RouteDataWithoutState>): RouteStatistics {
+        const cachedStatistics = this.statisticsPerSegments.get(route.segments);
+        if (cachedStatistics != null) {
+            return cachedStatistics;
+        }
+        const statistics = this.getStatisticsForStandAloneRoute(route.segments.map(s => s.latlngs).flat());
+        this.statisticsPerSegments.set(route.segments, statistics);
+        return statistics;
+    }
+
     public getStatisticsByRange(latlngs: Immutable<LatLngAltTime[]>, start: RouteStatisticsPoint, end: RouteStatisticsPoint): RouteStatistics {
         const routeStatistics = {
             points: [] as RouteStatisticsPoint[],
@@ -86,15 +105,12 @@ export class RouteStatisticsService {
             routeStatistics.length = (end.coordinate[0] - start.coordinate[0]) * 1000;
         }
 
-        // filter invalid points for the rest of the calculations
-        routeStatistics.points = routeStatistics.points.filter(p => !isNaN(p.latlng.alt) && p.latlng.alt != null);
-        for (let pointIndex = routeStatistics.points.length - 1; pointIndex > 0; pointIndex--) {
-            const prevPoint = routeStatistics.points[pointIndex - 1];
-            const currentPoint = routeStatistics.points[pointIndex];
-            if (currentPoint.coordinate[0] - prevPoint.coordinate[0] < 0.001) {
-                routeStatistics.points.splice(pointIndex, 1);
-            }
-        }
+        // filter invalid points for the rest of the calculations, also points that are two close to each other
+        let validPoints = routeStatistics.points
+            .filter(p => !isNaN(p.latlng.alt) && p.latlng.alt != null);
+        validPoints = validPoints.filter((point, pointIndex) =>
+            pointIndex === 0 || point.coordinate[0] - validPoints[pointIndex - 1].coordinate[0] >= 0.001);
+        routeStatistics.points = validPoints;
         if (routeStatistics.points.length < 1) {
             return routeStatistics;
         }
@@ -129,11 +145,24 @@ export class RouteStatisticsService {
     private updateGainAndLoss(routeStatistics: RouteStatistics) {
         // resample coordinates along route at uniform resolution
         const coordinates = routeStatistics.points.map(p => p.coordinate);
-        const linterp = linearInterpolator(coordinates);
+        if (coordinates.length < 2) {
+            return;
+        }
         const resamplingResolutionKm = 0.01;
         const interpolatedCoordinates = [];
+        // The coordinates are sorted by distance and the resampling advances along them, so the segment
+        // holding the current x is found by moving forward from the previous one instead of searching
+        // the whole route for every sample - searching would make this quadratic and very slow on long routes.
+        let segmentIndex = 0;
         for (let x = coordinates[0][0]; x <= coordinates[coordinates.length - 1][0]; x += resamplingResolutionKm) {
-            interpolatedCoordinates.push([x, linterp(x)]);
+            while (segmentIndex < coordinates.length - 2 && x > coordinates[segmentIndex + 1][0]) {
+                segmentIndex++;
+            }
+            const segmentStart = coordinates[segmentIndex];
+            const segmentEnd = coordinates[segmentIndex + 1];
+            const alt = segmentStart[1] +
+                (x - segmentStart[0]) * (segmentEnd[1] - segmentStart[1]) / (segmentEnd[0] - segmentStart[0]);
+            interpolatedCoordinates.push([x, alt]);
         }
 
         // pad interpolated coordinates towards applying moving median filter
@@ -173,23 +202,29 @@ export class RouteStatisticsService {
     }
 
     public getStatisticsForRouteWithLocation(
-        closestRouteToRecordingLatlngs: LatLngAltTime[],
+        closestRouteToRecording: Immutable<RouteDataWithoutState>,
         currentLatlng: LatLngAltTime,
         heading: number
     ): RouteStatistics {
-        const closestRouteStatistics = this.getStatisticsByRange(closestRouteToRecordingLatlngs, null, null);
+        // the route's own statistics are taken from the cache, only the location dependent values are calculated
+        const closestRouteStatistics = { ...this.getStatisticsForRoute(closestRouteToRecording) };
         closestRouteStatistics.traveledDistance = (this.findDistanceForLatLngInKM(closestRouteStatistics, currentLatlng, heading) * 1000);
         closestRouteStatistics.remainingDistance = closestRouteStatistics.length - closestRouteStatistics.traveledDistance;
-        this.addDurationAndAverageSpeed(closestRouteToRecordingLatlngs, closestRouteStatistics.length, closestRouteStatistics);
         return closestRouteStatistics;
     }
 
     public getStatisticsForRecordedRouteWithPlannedRoute(recordedRouteLatlngs: Immutable<LatLngAltTime[]>,
-        closestRouteToRecordingLatlngs: LatLngAltTime[],
+        closestRouteToRecording: Immutable<RouteDataWithoutState>,
         currentLatlng: LatLngAltTime,
         heading: number) {
         const recordedRouteStatistics = this.getStatisticsByRange(recordedRouteLatlngs, null, null);
-        const closestRouteStatistics = this.getStatisticsByRange(closestRouteToRecordingLatlngs, null, null);
+        // the planned route's statistics are taken from the cache, its duration and average speed are
+        // replaced below by the ones of the recording, so they start off empty like in a plain range calculation
+        const closestRouteStatistics: RouteStatistics = {
+            ...this.getStatisticsForRoute(closestRouteToRecording),
+            duration: null,
+            averageSpeed: null
+        };
         closestRouteStatistics.remainingDistance =
             closestRouteStatistics.length - (this.findDistanceForLatLngInKM(closestRouteStatistics, currentLatlng, heading) * 1000);
         this.addDurationAndAverageSpeed(recordedRouteLatlngs, recordedRouteStatistics.length, closestRouteStatistics);
