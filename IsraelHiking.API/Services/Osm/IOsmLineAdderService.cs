@@ -16,6 +16,7 @@ public interface IOsmLineAdderService
     /// <param name="line">The line to add</param>
     /// <param name="tags">The tags to add to the line</param>
     /// <param name="osmGateway">OSM Gateway for OSM manipulations</param>
+    /// <param name="clientDetails">The details of the client that requested the change, unknown when not given</param>
     /// <returns></returns>
-    Task Add(LineString line, Dictionary<string, string> tags, IAuthClient osmGateway);
+    Task Add(LineString line, Dictionary<string, string> tags, IAuthClient osmGateway, ClientDetails clientDetails = null);
 }

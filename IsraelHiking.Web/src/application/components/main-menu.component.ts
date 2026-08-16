@@ -9,7 +9,7 @@ import { App } from "@capacitor/app";
 import { encode } from "base64-arraybuffer";
 import { Store } from "@ngxs/store";
 import { EmailComposer } from "capacitor-email-composer"
-import platform from "platform";
+import Bowser from "bowser";
 
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
@@ -123,9 +123,10 @@ export class MainMenuComponent {
         try {
             if (!this.runningContextService.isCapacitor) {
 
+                const browserInfo = Bowser.parse(navigator.userAgent);
                 infoString += [
-                    `Browser: ${platform.name} ${platform.version}`,
-                    `OS: ${platform.os}`,
+                    `Browser: ${browserInfo.browser.name} ${browserInfo.browser.version}`,
+                    `OS: ${browserInfo.os.name} ${browserInfo.os.version}`,
                     ""
                 ].join("\n");
                 await this.fileService.saveLogToZipFile(`support-${userInfo.id}.zip`, infoString + "\n" + logs);

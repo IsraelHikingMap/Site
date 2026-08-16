@@ -25,7 +25,7 @@ import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
 import { GeoLocationService } from "../services/geo-location.service";
 import { ToggleIsShowKmMarkersAction, ToggleIsShowSlopeAction } from "../reducers/configuration.reducer";
-import type { LatLngAltTime, ApplicationState } from "../models";
+import type { LatLngAltTime, ApplicationState, RouteData } from "../models";
 
 declare type DragState = "start" | "drag" | "none";
 
@@ -728,9 +728,9 @@ export class RouteStatisticsComponent implements OnInit {
         let slopeData = [] as [number, number][];
         if (data.length > 0) {
             // smoothing the slope data for the chart
-            slopeData = regressionLoess()
-                .x((d: RouteStatisticsPoint) => d.coordinate[0])
-                .y((d: RouteStatisticsPoint) => d.slope)
+            slopeData = regressionLoess<RouteStatisticsPoint>()
+                .x(d => d.coordinate[0])
+                .y(d => d.slope)
                 .bandwidth(0.03)(this.statistics.points);
         }
         if (slopeData.length > 1) {
@@ -959,14 +959,16 @@ export class RouteStatisticsComponent implements OnInit {
         if (recordedRouteState.isRecording && closestRouteToGps) {
             this.statistics = this.routeStatisticsService.getStatisticsForRecordedRouteWithPlannedRoute(
                 recordedRouteState.route.latlngs,
-                this.selectedRouteService.getLatlngs(closestRouteToGps),
+                closestRouteToGps,
                 currentLocation,
                 this.heading);
         } else if (closestRouteToGps) {
             this.statistics = this.routeStatisticsService.getStatisticsForRouteWithLocation(
-                this.selectedRouteService.getLatlngs(closestRouteToGps),
+                closestRouteToGps,
                 currentLocation,
                 this.heading);
+        } else if (route.routeData != null) {
+            this.statistics = this.routeStatisticsService.getStatisticsForRoute(route.routeData);
         } else {
             this.statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(route.latlngs);
         }
@@ -976,12 +978,17 @@ export class RouteStatisticsComponent implements OnInit {
         this.setViewStatisticsValues(this.statistics);
     }
 
-    private getRouteForChart(): { latlngs: Immutable<LatLngAltTime[]>; color: string; weight: number } | null {
+    /**
+     * @returns the route the chart shows, routeData is set when it originates from a route in the state,
+     * which allows getting its statistics from the cache instead of calculating them again
+     */
+    private getRouteForChart(): { routeData?: Immutable<RouteData>; latlngs: Immutable<LatLngAltTime[]>; color: string; weight: number } | null {
         const currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
         const currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
         const closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);
         if (closestRouteToGps) {
             return {
+                routeData: closestRouteToGps,
                 latlngs: this.selectedRouteService.getLatlngs(closestRouteToGps),
                 color: closestRouteToGps.color,
                 weight: closestRouteToGps.weight
@@ -998,6 +1005,7 @@ export class RouteStatisticsComponent implements OnInit {
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute) {
             return {
+                routeData: selectedRoute,
                 latlngs: this.selectedRouteService.getLatlngs(selectedRoute),
                 color: selectedRoute.color,
                 weight: selectedRoute.weight

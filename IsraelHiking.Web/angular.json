@@ -58,13 +58,8 @@
             "allowedCommonJsDependencies": [
               "@mapbox/polyline",
               "lottie-web",
-              "linear-interpolator",
-              "deepmerge",
-              "xml-beautify",
-              "platform",
-              "isomorphic-xml2js",
-              "piexif-ts",
-              "rbush"
+              "bowser",
+              "piexif-ts"
             ],
             "extractLicenses": false,
             "sourceMap": true,

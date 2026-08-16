@@ -61,7 +61,7 @@ export class DrawingComponent {
         return selectedRoute != null && selectedRoute.state === "Route";
     });
 
-    public readonly canDeleteAllRoutes = computed(() => this.presentRoutes().length > 0);
+    public readonly hasRoutes = computed(() => this.presentRoutes().length > 0);
 
     public readonly hasMultipleRoutes = computed(() => this.presentRoutes().length > 1);
 

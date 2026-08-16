@@ -3,8 +3,8 @@ import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { firstValueFrom } from "rxjs";
 import { debounceTime, timeout } from "rxjs/operators";
+import { deepmergeCustom } from "deepmerge-ts";
 import Dexie from "dexie";
-import deepmerge from "deepmerge";
 import type { GetResourceResponse } from "maplibre-gl";
 
 import { LoggingService } from "./logging.service";
@@ -29,6 +29,14 @@ export const NO_OFFLINE_FILE_MESSAGE = "There's no offline file";
 
 @Service()
 export class DatabaseService {
+    /**
+     * Arrays from the stored state replace the initial ones instead of being concatenated.
+     * The signature is spelled out because deepmerge-ts infers array merging at the type level
+     * regardless of the runtime `mergeArrays` option.
+     */
+    private static readonly mergeState = deepmergeCustom({ mergeArrays: false }) as
+        (initial: MutableApplicationState, stored: MutableApplicationState) => MutableApplicationState;
+
     private static readonly STATE_DB_NAME = "State";
     private static readonly STATE_TABLE_NAME = "state";
     private static readonly STATE_DOC_ID = "state";
@@ -225,9 +233,7 @@ export class DatabaseService {
     }
 
     private initialStateUpgrade(dbState: MutableApplicationState): MutableApplicationState {
-        const storedState = deepmerge(initialState, dbState, {
-            arrayMerge: (destinationArray, sourceArray) => sourceArray == null ? destinationArray : sourceArray
-        });
+        const storedState = DatabaseService.mergeState(initialState, dbState);
         if (+dbState.configuration.version < initialState.configuration.version) {
             storedState.configuration.version = initialState.configuration.version;
             storedState.layersState.baseLayers = initialState.layersState.baseLayers;

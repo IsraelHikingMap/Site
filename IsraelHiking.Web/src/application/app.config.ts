@@ -6,13 +6,12 @@ import { provideNgIdle } from "@ng-idle/core";
 import { provideStore, withNgxsNoopExecutionStrategy } from "@ngxs/store";
 import { progressInterceptor } from "ngx-progressbar/http";
 import { provideLottieOptions } from "ngx-lottie";
-import { saveAs } from "file-saver-es";
 import { provideMarkdown } from "ngx-markdown";
 // Services
 import { osmTokenInterceptor } from "./services/osm-token.interceptor";
+import { clientDetailsInterceptor } from "./services/client-details.interceptor";
 import { ApplicationInitializeService } from "./services/application-initialize.service";
 import { GlobalErrorHandler } from "./services/global-error.handler";
-import { SaveAsFactory } from "./services/file.service";
 // Map Interactions
 // Reducers
 import { ConfigurationReducer } from "./reducers/configuration.reducer";
@@ -55,9 +54,8 @@ export const appConfig: ApplicationConfig = {
         ], withNgxsNoopExecutionStrategy()),
         Title,
         { provide: ErrorHandler, useClass: GlobalErrorHandler },
-        { provide: SaveAsFactory, useFactory: () => saveAs },
         provideHttpClient(
-            withInterceptors([osmTokenInterceptor, progressInterceptor])
+            withInterceptors([osmTokenInterceptor, clientDetailsInterceptor, progressInterceptor])
         ),
         provideNgIdle(),
         provideRouter(routes),

@@ -100,7 +100,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     public readonly isShowSeeAlso = computed(() => this.fullFeature() && this.fullFeature().properties.poiSource !== RouteStrings.COORDINATES && (this.sourceImageUrls().length > 0 || this.getElementOsmAddress() != null));
 
     public readonly isRoute = computed(() => this.fullFeature() && (this.fullFeature().geometry.type === "LineString" ||
-            this.fullFeature().geometry.type === "MultiLineString"));
+        this.fullFeature().geometry.type === "MultiLineString"));
 
     public readonly getUrl = computed(() => this.urls().find(u => !this.isBadWikipediaUrl(u)));
 
@@ -247,6 +247,8 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     public async convertToRoute() {
         this.selectedRouteService.convertToRoute(this.fullFeature(), this.translationService.getBestDescription(this.fullFeature()));
         this.close();
+        const bounds = SpatialService.getBoundsForFeature(this.fullFeature());
+        await this.mapService.fitBounds(bounds);
     }
 
     public addPointToRoute() {

@@ -66,8 +66,7 @@ export class PrivateRoutesSidebarComponent {
     private readonly routeStatistics = computed(() => {
         const result: Record<string, RouteStatistics> = {};
         for (const route of this.routes()) {
-            const latlngs = this.selectedRouteService.getLatlngs(route);
-            result[route.id] = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
+            result[route.id] = this.routeStatisticsService.getStatisticsForRoute(route);
         }
         return result;
     });
@@ -170,7 +169,8 @@ export class PrivateRoutesSidebarComponent {
     }
 
     public updateProperty<TProperty extends keyof RouteData>(routeData: Immutable<RouteData>, property: TProperty, value: RouteData[TProperty]) {
-        const newRouteData = structuredClone(routeData) as RouteData;
+        // a shallow copy is enough here since only the route's properties are read from this object.
+        const newRouteData = { ...routeData } as RouteData;
         newRouteData[property] = value;
         if (property === "opacity") {
             this.store.dispatch(new SetOpacityAction(value as number));

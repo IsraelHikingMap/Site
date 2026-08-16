@@ -52,7 +52,7 @@ public class OsmLineAdderService : IOsmLineAdderService
     }
 
     /// <inheritdoc/>
-    public async Task Add(LineString line, Dictionary<string, string> tags, IAuthClient osmGateway)
+    public async Task Add(LineString line, Dictionary<string, string> tags, IAuthClient osmGateway, ClientDetails clientDetails = null)
     {
         _osmGateway = osmGateway;
         var createdElements = new List<OsmGeo>();
@@ -120,7 +120,7 @@ public class OsmLineAdderService : IOsmLineAdderService
             Modify = modifiedElement.ToArray(),
             Delete = []
         };
-        var changesetId = await _osmGateway.CreateChangeset(CreateCommentFromTags(tags));
+        var changesetId = await _osmGateway.CreateChangeset(CreateCommentFromTags(tags), clientDetails);
         try
         {
             await _osmGateway.UploadChangeset(changesetId, changes);

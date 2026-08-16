@@ -70,7 +70,7 @@ public class OsmController : ControllerBase
     {
         var tags = feature.Attributes.GetNames().ToDictionary(n => n, n => feature.Attributes[n].ToString());
         var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
-        await _osmLineAdderService.Add(feature.Geometry as LineString, tags, gateway);
+        await _osmLineAdderService.Add(feature.Geometry as LineString, tags, gateway, HttpContext?.Request.GetClientDetails());
     }
 
     /// <summary>

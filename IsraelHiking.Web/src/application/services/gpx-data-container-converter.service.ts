@@ -1,8 +1,8 @@
 import { Service } from "@angular/core";
-import { minBy, maxBy, flatten, last, escape } from "lodash-es";
-import { parseString, Builder } from "isomorphic-xml2js";
+import { minBy, maxBy, flatten, last } from "lodash-es";
+import { XMLParser } from "fast-xml-parser";
+import Builder from "fast-xml-builder";
 import { encode } from "base64-arraybuffer";
-import XmlBeautify from "xml-beautify";
 import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
 
@@ -76,8 +76,25 @@ type Gpx = {
     $: { version: string; creator: string; xmlns: string };
 }
 
+/**
+ * Attributes live under `$` and text content under `_`, matching the shape the `Gpx` types above describe.
+ * Values are kept as strings - the conversion code below does its own numeric coercion.
+ */
+const XML_OPTIONS = {
+    ignoreAttributes: false,
+    attributesGroupName: "$",
+    attributeNamePrefix: "",
+    textNodeName: "_"
+} as const;
+
 @Service()
 export class GpxDataContainerConverterService {
+    private static readonly XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>";
+
+    private readonly builder = new Builder({ ...XML_OPTIONS, format: true, indentBy: "  ", suppressEmptyNode: true });
+
+    private readonly parser = new XMLParser({ ...XML_OPTIONS, parseTagValue: false, parseAttributeValue: false });
+
     public static getSegmentsFromLatlngs(latlngs: Immutable<LatLngAltTime[]>, routingType: RoutingType): RouteSegmentData[] {
         const segments = [];
         const firstLatlng = latlngs[0];
@@ -136,9 +153,6 @@ export class GpxDataContainerConverterService {
      * @returns a base64 encoded gpx xml string
      */
     public async toGpx(dataContainer: DataContainer): Promise<string> {
-        const options = { rootName: "gpx" };
-
-        const builder = new Builder(options);
         const gpx = {
             $: {
                 version: "1.1",
@@ -161,14 +175,14 @@ export class GpxDataContainerConverterService {
                         lat: m.latlng.lat.toString(),
                         lon: m.latlng.lng.toString()
                     },
-                    name: escape(m.title),
-                    desc: escape(m.description),
+                    name: m.title,
+                    desc: m.description,
                     type: m.type,
                     link: m.urls.map(u => ({
                         $: {
                             href: u.url
                         },
-                        text: escape(u.text),
+                        text: u.text,
                         type: u.mimeType
                     } as Link))
                 } as Wpt;
@@ -180,27 +194,12 @@ export class GpxDataContainerConverterService {
         }
         for (const route of nonEmptyRoutes) {
             gpx.trk.push({
-                name: escape(route.name),
-                desc: escape(route.description),
+                name: route.name,
+                desc: route.description,
                 extensions: {
-                    Color: {
-                        $: {
-                            xmlns: ""
-                        },
-                        _: route.color.toString()
-                    },
-                    Opacity: {
-                        $: {
-                            xmlns: ""
-                        },
-                        _: route.opacity.toString()
-                    },
-                    Weight: {
-                        $: {
-                            xmlns: ""
-                        },
-                        _: route.weight.toString()
-                    }
+                    Color: { _: route.color.toString() },
+                    Opacity: { _: route.opacity.toString() },
+                    Weight: { _: route.weight.toString() }
                 },
                 trkseg: route.segments.map(s => ({
                     trkpt: s.latlngs.map(l => {
@@ -220,12 +219,7 @@ export class GpxDataContainerConverterService {
                         return wpt;
                     }),
                     extensions: {
-                        RoutingType: {
-                            $: {
-                                xmlns: ""
-                            },
-                            _: s.routingType
-                        }
+                        RoutingType: { _: s.routingType }
                     }
                 } as TrkSeg))
             } as Trk);
@@ -243,22 +237,14 @@ export class GpxDataContainerConverterService {
             };
         }
         this.updateBoundingBox(gpx);
-        let gpxString = builder.buildObject(gpx);
-        gpxString = "\uFEFF" + new XmlBeautify().beautify(gpxString);
+        const gpxString = "\uFEFF" + GpxDataContainerConverterService.XML_DECLARATION + "\n" + this.builder.build({ gpx });
         return encode(await new Response(gpxString).arrayBuffer());
     }
 
     public async toDataContainer(gpxXmlString: string): Promise<DataContainer> {
-        const gpxJsonObject: Gpx = await new Promise<Gpx>((resolve, reject) => {
-            // removing namespace since they can be invalid
-            gpxXmlString = gpxXmlString.replace(/xmlns="(.*?)"/g, "");
-            parseString(gpxXmlString, { explicitArray: false }, (err, res) => {
-                if (err) {
-                    reject(err);
-                }
-                resolve(res.gpx);
-            });
-        });
+        // removing namespace since they can be invalid, and the leading BOM written by toGpx
+        gpxXmlString = gpxXmlString.replace(/^\uFEFF/, "").replace(/xmlns="(.*?)"/g, "");
+        const gpxJsonObject: Gpx = this.parser.parse(gpxXmlString).gpx;
         this.convertToArrays(gpxJsonObject);
         this.updateBoundingBox(gpxJsonObject);
         const dataContainer = {

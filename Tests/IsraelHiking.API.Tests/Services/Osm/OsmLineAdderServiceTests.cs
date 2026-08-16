@@ -82,6 +82,20 @@ public class OsmLineAdderServiceTests
     }
 
     [TestMethod]
+    public void AddLine_WithClientDetails_ShouldPutTheGeneralizedDetailsInTheChangeset()
+    {
+        var osmGateway = SetupOsmGateway(1);
+        _overpassTurboGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns([]);
+        osmGateway.UploadChangeset(Arg.Any<long>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = [] });
+
+        _service.Add(new LineString([new Coordinate(0, 0), new Coordinate(1, 1)]), new Dictionary<string, string>(),
+            osmGateway, new ClientDetails("android", "9.21.2")).Wait();
+
+        osmGateway.Received(1).CreateChangeset(Arg.Is<TagsCollection>(t =>
+            t.GetValue("created_by").EndsWith("(app 9.21.2)")));
+    }
+
+    [TestMethod]
     public void AddLine_OneHighwayNearStart_ShouldAddTheLineAndConnectIt()
     {
         var osmGateway = SetupOsmGateway(42);

@@ -1,9 +1,9 @@
-import { describe, beforeEach, vi, it, expect, type Mock } from "vitest";
+import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 
-import { FileService, SaveAsFactory, type HTMLElementInputChangeEvent } from "./file.service";
+import { FileService, type HTMLElementInputChangeEvent } from "./file.service";
 import { ImageResizeService } from "./image-resize.service";
 import { RunningContextService } from "./running-context.service";
 import { SelectedRouteService } from "./selected-route.service";
@@ -15,10 +15,7 @@ import { Urls } from "../urls";
 import type { DataContainer, MarkerData, RouteData } from "../models";
 
 describe("FileService", () => {
-    let saveAsSpy: Mock;
-
     beforeEach(() => {
-        saveAsSpy = vi.fn();
         const imageResizeService = {
             resizeImageAndConvert: () =>
                 Promise.resolve({
@@ -46,7 +43,6 @@ describe("FileService", () => {
                 { provide: SelectedRouteService, useValue: selectedRouteService },
                 { provide: ImageResizeService, useValue: imageResizeService },
                 { provide: ElevationProvider, useValue: {} },
-                { provide: SaveAsFactory, useFactory: () => saveAsSpy },
                 FileService,
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting()
@@ -56,11 +52,12 @@ describe("FileService", () => {
 
     it("Should save to file on web", inject([FileService, HttpTestingController],
         async (service: FileService, mockBackend: HttpTestingController) => {
+            const anchorClickSpy = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => { });
             const promise = service.saveToFile("file.name", "format", {} as DataContainer);
 
             mockBackend.expectOne(Urls.files + "?format=format").flush(btoa("bytes"));
             await promise;
-            expect(saveAsSpy).toHaveBeenCalled();
+            expect(anchorClickSpy).toHaveBeenCalled();
         }
     ));
 
@@ -143,9 +140,11 @@ describe("FileService", () => {
     ));
 
     it("Should save log to zip file", inject([FileService], async (service: FileService) => {
+        const anchorClickSpy = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => { });
+
         await service.saveLogToZipFile("something.zip", "some text");
 
-        expect(saveAsSpy).toHaveBeenCalled();
+        expect(anchorClickSpy).toHaveBeenCalled();
     }));
 
     it("Should not download a file to cache due to network error", inject([FileService],

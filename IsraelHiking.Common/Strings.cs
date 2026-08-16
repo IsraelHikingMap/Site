@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Reflection;
 
 namespace IsraelHiking.Common;
 
@@ -102,4 +103,9 @@ public static class Branding
         "Mapeak/5.x bot (https://mapeak.com; support@mapeak.com)";
 
     public const string BASE_URL = "https://mapeak.com";
+
+    /// <summary>
+    /// The version of this server, as set when the assemblies were built
+    /// </summary>
+    public static readonly string VERSION = typeof(Branding).Assembly.GetName().Version?.ToString(3);
 }

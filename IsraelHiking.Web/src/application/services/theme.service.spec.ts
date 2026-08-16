@@ -14,6 +14,9 @@ describe("ThemeService", () => {
     const svalbardPosition = { coords: { latitude: 78.22, longitude: 15.65 } } as GeolocationPosition;
     const noonTelAvivTime = new Date("2024-06-21T09:50:00Z");
     const midNightTelAvivTime = new Date("2024-06-21T21:00:00Z");
+    /** Local times, used when there's no position to calculate the sunrise and sunset by */
+    const localNoonTime = new Date(2024, 5, 21, 12, 0, 0);
+    const localMidNightTime = new Date(2024, 5, 21, 0, 0, 0);
 
     beforeEach(() => {
         vi.useFakeTimers();
@@ -142,7 +145,7 @@ describe("ThemeService", () => {
         })
     );
 
-    it("should keep the current theme when there is no position and it is set to automatic", inject([ThemeService, Store],
+    it("should fall back to the local clock when the position is lost and it is set to automatic", inject([ThemeService, Store],
         (service: ThemeService, store: Store) => {
             vi.setSystemTime(midNightTelAvivTime);
             store.dispatch(new SetThemeAction("auto"));
@@ -150,21 +153,51 @@ describe("ThemeService", () => {
             service.initialize();
             expect(document.body.classList).toContain(ThemeService.DARK_THEME_CLASS);
 
+            vi.setSystemTime(localNoonTime);
             store.dispatch(new SetCurrentPositionAction(null));
 
-            expect(document.body.classList).toContain(ThemeService.DARK_THEME_CLASS);
+            expect(document.body.classList).not.toContain(ThemeService.DARK_THEME_CLASS);
         })
     );
 
-    it("should not change the theme when there has never been a position and it is set to automatic", inject([ThemeService, Store],
+    it("should apply the light theme during local day hours when there is no position", inject([ThemeService, Store],
         (service: ThemeService, store: Store) => {
-            vi.setSystemTime(midNightTelAvivTime);
+            vi.setSystemTime(localNoonTime);
             store.dispatch(new SetThemeAction("auto"));
 
             service.initialize();
 
             expect(document.body.classList).not.toContain(ThemeService.DARK_THEME_CLASS);
             expect(store.selectSnapshot((state: ApplicationState) => state.inMemoryState.effectiveTheme)).toBe("light");
+        })
+    );
+
+    it("should apply the dark theme during local night hours when there is no position", inject([ThemeService, Store],
+        (service: ThemeService, store: Store) => {
+            vi.setSystemTime(localMidNightTime);
+            store.dispatch(new SetThemeAction("auto"));
+
+            service.initialize();
+
+            expect(document.body.classList).toContain(ThemeService.DARK_THEME_CLASS);
+            expect(store.selectSnapshot((state: ApplicationState) => state.inMemoryState.effectiveTheme)).toBe("dark");
+        })
+    );
+
+    it("should switch theme at 6am and 6pm when there is no position", inject([ThemeService, Store],
+        (service: ThemeService, store: Store) => {
+            vi.setSystemTime(new Date(2024, 5, 21, 5, 59, 0));
+            store.dispatch(new SetThemeAction("auto"));
+            service.initialize();
+            expect(document.body.classList).toContain(ThemeService.DARK_THEME_CLASS);
+
+            vi.setSystemTime(new Date(2024, 5, 21, 6, 0, 0));
+            vi.advanceTimersByTime(5 * 60 * 1000);
+            expect(document.body.classList).not.toContain(ThemeService.DARK_THEME_CLASS);
+
+            vi.setSystemTime(new Date(2024, 5, 21, 18, 0, 0));
+            vi.advanceTimersByTime(5 * 60 * 1000);
+            expect(document.body.classList).toContain(ThemeService.DARK_THEME_CLASS);
         })
     );
 
