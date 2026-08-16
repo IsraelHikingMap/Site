@@ -728,9 +728,9 @@ export class RouteStatisticsComponent implements OnInit {
         let slopeData = [] as [number, number][];
         if (data.length > 0) {
             // smoothing the slope data for the chart
-            slopeData = regressionLoess()
-                .x((d: RouteStatisticsPoint) => d.coordinate[0])
-                .y((d: RouteStatisticsPoint) => d.slope)
+            slopeData = regressionLoess<RouteStatisticsPoint>()
+                .x(d => d.coordinate[0])
+                .y(d => d.slope)
                 .bandwidth(0.03)(this.statistics.points);
         }
         if (slopeData.length > 1) {

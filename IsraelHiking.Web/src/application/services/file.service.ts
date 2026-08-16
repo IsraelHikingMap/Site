@@ -1,4 +1,4 @@
-import { inject, InjectionToken, Service } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
@@ -6,7 +6,6 @@ import { last } from "lodash-es";
 import { firstValueFrom, timeout } from "rxjs";
 import { zipSync, strToU8 } from "fflate";
 import { encode } from "base64-arraybuffer";
-import type { saveAs as saveAsForType } from "file-saver";
 
 import { ImageResizeService } from "./image-resize.service";
 import { RunningContextService } from "./running-context.service";
@@ -19,7 +18,22 @@ import { ElevationProvider } from "./elevation.provider";
 import { Urls } from "../urls";
 import type { DataContainer } from "../models";
 
-export const SaveAsFactory = new InjectionToken<typeof saveAsForType>(null);
+/**
+ * Downloads a blob under the given file name using the anchor "download" attribute,
+ * which is supported by every browser this app targets.
+ */
+const saveAs = (blob: Blob, fileName: string) => {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = fileName;
+    anchor.rel = "noopener";
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    // Revoking straight away can cancel the download in some browsers, so give it time to start
+    setTimeout(() => URL.revokeObjectURL(url), 40000);
+};
 
 export type FormatViewModel = {
     label: string;
@@ -49,7 +63,6 @@ export class FileService {
     private readonly gpxDataContainerConverterService = inject(GpxDataContainerConverterService);
     private readonly loggingService = inject(LoggingService);
     private readonly elevationProvider = inject(ElevationProvider);
-    private readonly saveAs = inject(SaveAsFactory);
 
     public readonly formats: FormatViewModel[] = [
         {
@@ -149,7 +162,7 @@ export class FileService {
 
         if (!this.runningContextService.isCapacitor) {
             const blobToSave = await this.base64StringToBlob(responseData);
-            this.saveAs(blobToSave, fileName, { autoBom: false });
+            saveAs(blobToSave, fileName);
             return;
         }
         fileName = fileName.replace(/[/\\?%*:|"<>]/g, "-");
@@ -162,7 +175,7 @@ export class FileService {
     public async saveLogToZipFile(fileName: string, content: string) {
         const result = zipSync({ "log.txt": strToU8(content) });
         const resultBlob = new Blob([result as Uint8Array<ArrayBuffer>], { type: "application/zip" });
-        this.saveAs(resultBlob, fileName, { autoBom: false });
+        saveAs(resultBlob, fileName);
     }
 
     public async getFileFromUrl(url: string, type?: string): Promise<File> {
