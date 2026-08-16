@@ -41,14 +41,29 @@ public static class OsmApiClientExtensions
     /// </summary>
     /// <param name="client"></param>
     /// <param name="comment"></param>
+    /// <param name="clientDetails">The details of the client that requested the change</param>
     /// <returns></returns>
-    public static Task<long> CreateChangeset(this IAuthClient client, string comment)
+    public static Task<long> CreateChangeset(this IAuthClient client, string comment, ClientDetails clientDetails)
     {
         return client.CreateChangeset(new TagsCollection
         {
-            new Tag {Key = "created_by", Value = Branding.BASE_URL},
+            new Tag {Key = "created_by", Value = CreateCreatedByValue(clientDetails)},
             new Tag {Key = "comment", Value = comment}
         });
+    }
+
+    /// <summary>
+    /// Builds the "created_by" changeset tag - the server version, and the client details when the client reported any,
+    /// i.e. "Mapeak 9.21.3 (web)", "Mapeak 9.21.3 (app 9.21.2)" or "Mapeak 9.21.3" for a client that predates this
+    /// </summary>
+    /// <param name="clientDetails">The details of the client that requested the change</param>
+    /// <returns>The value of the "created_by" tag</returns>
+    private static string CreateCreatedByValue(ClientDetails clientDetails)
+    {
+        var osmInfo = clientDetails?.OsmInfo;
+        return string.IsNullOrEmpty(osmInfo)
+            ? $"{Branding.SITE_NAME} {Branding.VERSION}"
+            : $"{Branding.SITE_NAME} {Branding.VERSION} ({osmInfo})";
     }
 
     /// <summary>
@@ -56,9 +71,10 @@ public static class OsmApiClientExtensions
     /// </summary>
     /// <param name="osmGateway">The gateway</param>
     /// <param name="message">The change set message</param>
+    /// <param name="clientDetails">The details of the client that requested the change</param>
     /// <param name="createOrUpdate">The action to take between open and close of the change set</param>
     /// <param name="logger">A logger</param>
-    public static async Task UploadToOsmWithRetries(this IAuthClient osmGateway, string message, Func<long, Task> createOrUpdate, ILogger logger)
+    public static async Task UploadToOsmWithRetries(this IAuthClient osmGateway, string message, ClientDetails clientDetails, Func<long, Task> createOrUpdate, ILogger logger)
     {
         long changeSetId = -1;
         for (var retryIndex = 0; retryIndex < 3; retryIndex++)
@@ -67,7 +83,7 @@ public static class OsmApiClientExtensions
             {
                 if (changeSetId == -1)
                 {
-                    changeSetId = await osmGateway.CreateChangeset(message);    
+                    changeSetId = await osmGateway.CreateChangeset(message, clientDetails);
                 }
                 await createOrUpdate(changeSetId);
                 await osmGateway.CloseChangeset(changeSetId);

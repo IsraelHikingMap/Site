@@ -287,7 +287,7 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
 
 
     /// <inheritdoc/>
-    public async Task<IFeature> AddFeature(IFeature feature, IAuthClient osmGateway, string language)
+    public async Task<IFeature> AddFeature(IFeature feature, IAuthClient osmGateway, string language, ClientDetails clientDetails = null)
     {
         var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
         var location = feature.GetLocation();
@@ -312,6 +312,7 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
         AddFixMeToTouristAttraction(node.Tags);
         await osmGateway.UploadToOsmWithRetries(
             $"Added {feature.GetTitle(language)} using {Branding.BASE_URL}",
+            clientDetails,
             async changeSetId =>
             {
                 node.Id = await osmGateway.CreateElement(changeSetId, node);
@@ -322,7 +323,7 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
     }
 
     /// <inheritdoc/>
-    public async Task<IFeature> UpdateFeature(IFeature partialFeature, IAuthClient osmGateway, string language)
+    public async Task<IFeature> UpdateFeature(IFeature partialFeature, IAuthClient osmGateway, string language, ClientDetails clientDetails = null)
     {
         ICompleteOsmGeo completeOsmGeo = await osmGateway.GetCompleteElement(partialFeature.GetOsmId(), partialFeature.GetOsmType());
         var oldIcon = _tagsHelper.GetIconColorCategoryForTags(new AttributesTable(completeOsmGeo.Tags.ToDictionary(t => t.Key, t => t.Value as object))).Icon;
@@ -364,6 +365,7 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
         var feature = ConvertOsmToFeature(completeOsmGeo);
         await osmGateway.UploadToOsmWithRetries(
             $"Updated {feature?.GetTitle(language)} using {Branding.BASE_URL}",
+            clientDetails,
             async changeSetId =>
             {
                 await osmGateway.UpdateElement(changeSetId, completeOsmGeo);

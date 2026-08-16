@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Net.Http;
-using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -10,6 +9,7 @@ using IsraelHiking.API;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Middleware;
 using IsraelHiking.API.OpenApi;
+using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccess;
@@ -169,7 +169,7 @@ void InitializeServices(IServiceProvider serviceProvider)
 {
     var logger = serviceProvider.GetRequiredService<ILogger>();
     logger.LogInformation("-----------------------------------------------");
-    logger.LogInformation($"Version: {Assembly.GetExecutingAssembly().GetName().Version?.ToString()}");
+    logger.LogInformation($"Version: {Branding.VERSION}");
     logger.LogInformation("Initializing singleton services");
     var initializableServices = serviceProvider.GetServices<IInitializable>();
     foreach (var service in initializableServices)

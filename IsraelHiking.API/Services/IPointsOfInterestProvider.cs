@@ -43,8 +43,9 @@ public interface IPointsOfInterestProvider
     /// <param name="feature">The POI's data to add</param>
     /// <param name="osmGateway"></param>
     /// <param name="language"></param>
+    /// <param name="clientDetails">The details of the client that requested the change, unknown when not given</param>
     /// <returns></returns>
-    Task<IFeature> AddFeature(IFeature feature, IAuthClient osmGateway, string language);
+    Task<IFeature> AddFeature(IFeature feature, IAuthClient osmGateway, string language, ClientDetails clientDetails = null);
 
     /// <summary>
     /// Updates a POI
@@ -52,6 +53,7 @@ public interface IPointsOfInterestProvider
     /// <param name="partialFeature">The POI's new data - only added or deleted data will be in this feature</param>
     /// <param name="osmGateway"></param>
     /// <param name="language">The relevant language</param>
+    /// <param name="clientDetails">The details of the client that requested the change, unknown when not given</param>
     /// <returns></returns>
-    Task<IFeature> UpdateFeature(IFeature partialFeature, IAuthClient osmGateway, string language);
+    Task<IFeature> UpdateFeature(IFeature partialFeature, IAuthClient osmGateway, string language, ClientDetails clientDetails = null);
 }

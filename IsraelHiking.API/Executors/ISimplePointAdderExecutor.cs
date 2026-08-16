@@ -1,4 +1,5 @@
-﻿using IsraelHiking.Common.Api;
+﻿using IsraelHiking.API.Services;
+using IsraelHiking.Common.Api;
 using OsmSharp.IO.API;
 using System.Threading.Tasks;
 
@@ -14,6 +15,7 @@ public interface ISimplePointAdderExecutor
     /// </summary>
     /// <param name="osmGateway"></param>
     /// <param name="request"></param>
+    /// <param name="clientDetails">The details of the client that requested the change, unknown when not given</param>
     /// <returns></returns>
-    Task Add(IAuthClient osmGateway, AddSimplePointOfInterestRequest request);
+    Task Add(IAuthClient osmGateway, AddSimplePointOfInterestRequest request, ClientDetails clientDetails = null);
 }

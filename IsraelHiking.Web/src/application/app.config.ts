@@ -9,6 +9,7 @@ import { provideLottieOptions } from "ngx-lottie";
 import { provideMarkdown } from "ngx-markdown";
 // Services
 import { osmTokenInterceptor } from "./services/osm-token.interceptor";
+import { clientDetailsInterceptor } from "./services/client-details.interceptor";
 import { ApplicationInitializeService } from "./services/application-initialize.service";
 import { GlobalErrorHandler } from "./services/global-error.handler";
 // Map Interactions
@@ -54,7 +55,7 @@ export const appConfig: ApplicationConfig = {
         Title,
         { provide: ErrorHandler, useClass: GlobalErrorHandler },
         provideHttpClient(
-            withInterceptors([osmTokenInterceptor, progressInterceptor])
+            withInterceptors([osmTokenInterceptor, clientDetailsInterceptor, progressInterceptor])
         ),
         provideNgIdle(),
         provideRouter(routes),

@@ -69,7 +69,7 @@ public class OsmControllerTests
 
         _controller.PutAddUnmappedPartIntoOsm(feature).Wait();
 
-        _osmLineAdderService.Received(1).Add(Arg.Any<LineString>(), Arg.Any<Dictionary<string, string>>(), Arg.Any<IAuthClient>());
+        _osmLineAdderService.Received(1).Add(Arg.Any<LineString>(), Arg.Any<Dictionary<string, string>>(), Arg.Any<IAuthClient>(), Arg.Any<ClientDetails>());
     }
 
     [TestMethod]
