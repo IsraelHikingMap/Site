@@ -20,7 +20,7 @@
     <PackageVersion Include="MSTest.TestAdapter" Version="4.3.3" />
     <PackageVersion Include="MSTest.TestFramework" Version="4.3.3" />
     <PackageVersion Include="NEST" Version="7.17.5" />
-    <PackageVersion Include="NeoSmart.Caching.Sqlite.AspNetCore" Version="9.0.1" />
+    <PackageVersion Include="NeoSmart.Caching.Sqlite.AspNetCore" Version="9.0.3" />
     <PackageVersion Include="NetTopologySuite" Version="2.6.0" />
     <PackageVersion Include="NetTopologySuite.IO.GeoJSON4STJ" Version="4.0.0" />
     <PackageVersion Include="NetTopologySuite.IO.GPX" Version="1.1.1" />
@@ -32,11 +32,7 @@
     <PackageVersion Include="SharpZipLib.NETStandard" Version="1.0.7" />
     <PackageVersion Include="SkiaSharp" Version="4.151.1" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.151.1" />
-    <!-- Transitively pins NeoSmart's native SQLite binary (was 2.1.10) to patch GHSA-2m69-gcr7-jv3q. Managed stack stays 2.1.x (stable C ABI). -->
-    <PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.50.3" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.11" />
-    <!-- Transitively pins Microsoft.AspNetCore.OpenApi's Microsoft.OpenApi (was 2.0.0) to patch GHSA-v5pm-xwqc-g5wc. -->
-    <PackageVersion Include="Microsoft.OpenApi" Version="2.9.0" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.16.20" />
     <PackageVersion Include="Wangkanai.Detection" Version="8.20.0" />
   </ItemGroup>
