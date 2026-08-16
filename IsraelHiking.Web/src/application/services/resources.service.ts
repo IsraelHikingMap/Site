@@ -75,6 +75,7 @@ export class ResourcesService {
     public reverseRoute: string;
     public deleteRoute: string;
     public share: string;
+    public saveInCloudAndShare: string;
     public saveInCloudAndShareWithYourFriends: string;
     public zoomIn: string;
     public zoomOut: string;
@@ -474,7 +475,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1786623723252");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1786872268011");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -501,6 +502,7 @@ export class ResourcesService {
         this.reverseRoute = this.gettextCatalog.getString("Reverse Route");
         this.deleteRoute = this.gettextCatalog.getString("Delete Route");
         this.share = this.gettextCatalog.getString("Share");
+        this.saveInCloudAndShare = this.gettextCatalog.getString("Save in the Cloud and Share");
         this.saveInCloudAndShareWithYourFriends = this.gettextCatalog.getString("Save in the Cloud and Share With Your Friends!");
         this.zoomIn = this.gettextCatalog.getString("Zoom In");
         this.zoomOut = this.gettextCatalog.getString("Zoom Out");

@@ -65,32 +65,33 @@
       <span class="mx-1">{{resources.deleteAllRoutes}}</span>
     </button>
   </mat-menu>
+  } @else {
+  <button mat-button (click)="deleteAllRoutes()" [disabled]="!hasRoutes()"
+    matTooltip="{{resources.deleteAllRoutes}}" matTooltipPosition="left" analyticsOn="click" analyticsCategory="Drawing"
+    analyticsLabel="Delete all routes">
+    <i class="fa icon-trash fa-lg"></i>
+  </button>
+  }
   @if (hasMultipleRoutes()) {
-  <button mat-button matTooltip="{{resources.share}}" [matMenuTriggerFor]="shareMenu" matTooltipPosition="left"
-    analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Share">
-    <i class="fa icon-share-alt fa-lg"></i>
+  <button mat-button matTooltip="{{resources.saveInCloudAndShare}}" [matMenuTriggerFor]="shareMenu"
+    matTooltipPosition="left" analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Share">
+    <i class="fa icon-cloud-share fa-lg"></i>
   </button>
   <mat-menu #shareMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
     <button mat-menu-item (click)="share('current')" analyticsOn="click" analyticsCategory="Drawing"
-      analyticsLabel="Share current route"><i class="fa icon-share-alt"></i>
+      analyticsLabel="Share current route"><i class="fa icon-cloud-share"></i>
       <span class="mx-1">{{resources.currentRoute}}</span>
     </button>
     <button mat-menu-item (click)="share('all')" analyticsOn="click" analyticsCategory="Drawing"
-      analyticsLabel="Share all routes"><i class="fa icon-share-alt"></i>
+      analyticsLabel="Share all routes"><i class="fa icon-cloud-share"></i>
       <span class="mx-1">{{allXRoutesText()}}</span>
     </button>
   </mat-menu>
   } @else {
-  <button mat-button matTooltip="{{resources.share}}" (click)="share('current')" matTooltipPosition="left"
-    analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Share">
-    <i class="fa icon-share-alt fa-lg"></i>
-  </button>
-  }
-  } @else {
-  <button mat-button (click)="deleteAllRoutes()" [disabled]="!canDeleteAllRoutes()"
-    matTooltip="{{resources.deleteAllRoutes}}" matTooltipPosition="left" analyticsOn="click" analyticsCategory="Drawing"
-    analyticsLabel="Delete all routes">
-    <i class="fa icon-trash fa-lg"></i>
+  <button mat-button matTooltip="{{resources.saveInCloudAndShare}}" (click)="share('current')"
+    [disabled]="!hasRoutes()" matTooltipPosition="left" analyticsOn="click" analyticsCategory="Drawing"
+    analyticsLabel="Share">
+    <i class="fa icon-cloud-share fa-lg"></i>
   </button>
   }
 </div>

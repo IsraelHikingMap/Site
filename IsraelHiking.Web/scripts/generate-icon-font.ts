@@ -33,8 +33,10 @@ const fontName = 'mapeak';
 const outputFont = `./src/fonts/${fontName}.woff2`;
 const outputCss = './src/fonts/icons.css';
 /**
- * Private use area. Codepoints are an implementation detail - the css maps names to them - and are
- * assigned in name order so that regenerating produces a readable diff.
+ * Private use area. Codepoints are an implementation detail - the css maps names to them - but they
+ * are sticky: an icon keeps the one it was first given and a new icon is appended above the highest
+ * assigned so far. Renumbering them instead would rewrite the whole css for a single new icon, and
+ * would make anything still holding the previous font draw the wrong glyph for every icon that moved.
  */
 const firstCodepoint = 0xe900;
 
@@ -65,6 +67,25 @@ function collectIcons(): Map<string, string> {
         icons.set(name, allSvgs.get(target));
     }
     return icons;
+}
+
+/** What the previous run assigned, read back from the css it wrote. */
+function readAssignedCodepoints(): Map<string, number> {
+    if (!fs.existsSync(outputCss)) {
+        return new Map();
+    }
+    const rules = fs.readFileSync(outputCss, 'utf8').matchAll(/\.icon-([\w-]+):before \{\s+content: "\\([0-9a-f]+)";/g);
+    return new Map([...rules].map(rule => [rule[1], parseInt(rule[2], 16)]));
+}
+
+/**
+ * A codepoint per icon, in name order. Known icons keep theirs, new ones go above every codepoint
+ * assigned so far - including those of deleted icons, so that a name never inherits a stale glyph.
+ */
+function assignCodepoints(names: string[]): Map<string, number> {
+    const assigned = readAssignedCodepoints();
+    let nextCodepoint = Math.max(firstCodepoint - 1, ...assigned.values()) + 1;
+    return new Map(names.sort().map(name => [name, assigned.get(name) ?? nextCodepoint++]));
 }
 
 /** Strips fills so that a white sprite icon does not become an invisible glyph. */
@@ -146,7 +167,7 @@ function buildCss(codepoints: Map<string, number>): string {
 }
 
 const icons = collectIcons();
-const codepoints = new Map([...icons.keys()].sort().map((name, index) => [name, firstCodepoint + index] as const));
+const codepoints = assignCodepoints([...icons.keys()]);
 
 const svgFont = await buildSvgFont(icons, codepoints);
 const ttf = Buffer.from(svg2ttf(svgFont, { description: 'Mapeak icons', url: 'https://mapeak.com', ts: 0 }).buffer);
