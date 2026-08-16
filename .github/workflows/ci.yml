@@ -135,7 +135,7 @@ jobs:
 
       - name: Restore Swift package cache
         id: spm-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: IsraelHiking.Web/ios/.spm-cache
           key: spm-${{ runner.os }}-${{ hashFiles('IsraelHiking.Web/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
@@ -150,7 +150,7 @@ jobs:
 
       - name: Save Swift package cache
         if: steps.spm-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: IsraelHiking.Web/ios/.spm-cache
           key: spm-${{ runner.os }}-${{ hashFiles('IsraelHiking.Web/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
