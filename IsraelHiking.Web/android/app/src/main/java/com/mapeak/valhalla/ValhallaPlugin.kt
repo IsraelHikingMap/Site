@@ -41,8 +41,8 @@ class ValhallaPlugin : Plugin() {
         try {
             val result = tiles.extract(tarFileName, sliceId)
             call.resolve(JSObject().put("extractedFiles", result.extractedFiles).put("tilesDir", result.tilesDir))
-        } catch (ex: Exception) {
-            call.reject("Tile extraction failed: ${ex.message}", ex)
+        } catch (ex: Throwable) {
+            call.rejectWith("Tile extraction failed", ex)
         }
     }
 
@@ -61,8 +61,8 @@ class ValhallaPlugin : Plugin() {
         try {
             profiles.store(content)
             call.resolve()
-        } catch (ex: Exception) {
-            call.reject("Failed to store the routing profiles: ${ex.message}", ex)
+        } catch (ex: Throwable) {
+            call.rejectWith("Failed to store the routing profiles", ex)
         }
     }
 
@@ -89,8 +89,8 @@ class ValhallaPlugin : Plugin() {
         try {
             tiles.delete(sliceId)
             call.resolve()
-        } catch (ex: Exception) {
-            call.reject("Failed to delete the tiles of $sliceId: ${ex.message}", ex)
+        } catch (ex: Throwable) {
+            call.rejectWith("Failed to delete the tiles of $sliceId", ex)
         }
     }
 
@@ -103,8 +103,8 @@ class ValhallaPlugin : Plugin() {
         try {
             tiles.clear()
             call.resolve()
-        } catch (ex: Exception) {
-            call.reject("Failed to clear the tiles: ${ex.message}", ex)
+        } catch (ex: Throwable) {
+            call.rejectWith("Failed to clear the tiles", ex)
         }
     }
 
@@ -141,8 +141,17 @@ class ValhallaPlugin : Plugin() {
                 tiles.tilesDir()
             )
             call.resolve(JSObject().put("raw", raw))
-        } catch (ex: Exception) {
-            call.reject("Valhalla route failed: ${ex.message}", ex)
+        } catch (ex: Throwable) {
+            call.rejectWith("Valhalla route failed", ex)
         }
+    }
+
+    /**
+     * Rejects a call with anything that was thrown - a failure to link or to reflect is an Error
+     * rather than an Exception, and it should still reach the web layer rather than take the app
+     * down with it.
+     */
+    private fun PluginCall.rejectWith(message: String, error: Throwable) {
+        reject("$message: ${error.message}", error as? Exception ?: RuntimeException(error))
     }
 }

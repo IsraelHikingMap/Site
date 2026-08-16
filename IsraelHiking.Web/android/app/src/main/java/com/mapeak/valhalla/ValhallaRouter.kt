@@ -10,11 +10,9 @@ import com.valhalla.api.models.CostingOptions
 import com.valhalla.api.models.DistanceUnit
 import com.valhalla.api.models.PedestrianCostingOptions
 import com.valhalla.api.models.RouteRequest
-import com.valhalla.api.models.RouteResponse
 import com.valhalla.api.models.RoutingWaypoint
 import com.valhalla.config.ValhallaConfigBuilder
-import com.valhalla.valhalla.Valhalla
-import com.valhalla.valhalla.ValhallaResponse
+import com.valhalla.valhalla.config.ValhallaConfigManager
 import java.io.File
 
 /**
@@ -38,25 +36,47 @@ class ValhallaRouter(private val context: Context) {
 
     private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
     private val profiles by lazy { ValhallaProfiles(context) }
-
-    /** Built once with the tiles directory, the tiles themselves are read on every request */
-    private var valhalla: Valhalla? = null
+    private val configManager by lazy { ValhallaConfigManager(context) }
 
     /**
      * Returns the valhalla response json - the web layer decodes the shape and the elevation.
      */
     fun route(request: ValhallaRouteRequest, tilesDir: File): String {
-        val response = engine(tilesDir).route(toRouteRequest(request))
-        return when (response) {
-            is ValhallaResponse.Json -> moshi.adapter(RouteResponse::class.java).toJson(response.jsonResponse)
-            else -> throw IllegalStateException("Valhalla answered in a format that was not asked for")
-        }
+        val requestJson = moshi.adapter(RouteRequest::class.java).toJson(toRouteRequest(request))
+        return routeRaw(requestJson, ensureConfig(tilesDir))
     }
 
-    private fun engine(tilesDir: File): Valhalla {
-        return valhalla
-            ?: Valhalla(context, ValhallaConfigBuilder().withTileDir(tilesDir.absolutePath).build())
-                .also { valhalla = it }
+    /**
+     * Sends an already serialized request to the native engine and returns its raw response.
+     *
+     * `Valhalla.route()` would be the way to do this, but the published valhalla-mobile is built
+     * against valhalla-models 0.1.1, where `RouteRequest` still had a nested `DirectionsOptions`
+     * that 0.2.0 flattened away, so calling it against any current models throws
+     * NoSuchMethodError - see https://github.com/Rallista/valhalla-mobile/issues/60. The request
+     * above is built and serialized here from the very same models, so nothing is skipped or
+     * guessed, and this only reaches valhalla's own entry point, which is `internal`.
+     *
+     * Once valhalla-mobile is released against current models this whole method goes away, and
+     * route() above becomes:
+     *     val response = Valhalla(context, config).route(toRouteRequest(request))
+     */
+    private fun routeRaw(requestJson: String, configPath: String): String {
+        val valhallaKotlinClass = Class.forName("com.valhalla.valhalla.ValhallaKotlin")
+        val valhallaKotlin = valhallaKotlinClass.getDeclaredConstructor().newInstance()
+        val routeMethod = valhallaKotlinClass.getMethod("route", String::class.java, String::class.java)
+        return routeMethod.invoke(valhallaKotlin, requestJson, configPath) as String
+    }
+
+    /**
+     * Writes valhalla.json if it isn't there yet. The tiles directory never changes, so the config
+     * stays valid when more slices are extracted into it.
+     */
+    private fun ensureConfig(tilesDir: File): String {
+        val configPath = configManager.getAbsolutePath()
+        if (!File(configPath).exists()) {
+            configManager.writeConfig(ValhallaConfigBuilder().withTileDir(tilesDir.absolutePath).build())
+        }
+        return configPath
     }
 
     private fun toRouteRequest(request: ValhallaRouteRequest): RouteRequest {
