@@ -3,14 +3,14 @@ import Foundation
 /**
  * The routing tiles on the device, mirroring `ValhallaTiles.kt`.
  *
- * Every downloaded slice is a tar of a valhalla tile tree that is extracted into a single shared
- * directory. Tiles are keyed by their grid cell, so adjacent slices simply add their own cells and
- * routing can cross from one slice to the next.
+ * Every downloaded area is a tar of a valhalla tile tree that is extracted into a single shared
+ * directory, and is identified by the id of the tile it covers. Valhalla's tiles are keyed by their
+ * grid cell, so adjacent areas simply add their own cells and routing can cross from one to the next.
  *
- * Slices do share tiles though - a slice is roughly 2.8 degrees while valhalla's highway tiles are
- * 4 degrees and its arterial tiles are 1 degree, so a tile on the edge of a slice is also in its
- * neighbour's tar. Each slice therefore records what it extracted, and deleting a slice only
- * removes the tiles that no remaining slice lists.
+ * Areas do share tiles though - a downloaded tile is roughly 2.8 degrees while valhalla's highway
+ * tiles are 4 degrees and its arterial tiles are 1 degree, so a tile on the edge of an area is also
+ * in its neighbour's tar. Each area therefore records what it extracted, and deleting one only
+ * removes the tiles that no remaining area lists.
  */
 final class ValhallaTiles {
     private static let tilesDirName = "valhalla_tiles"
@@ -41,8 +41,8 @@ final class ValhallaTiles {
         dataURL.appendingPathComponent(ValhallaTiles.manifestsDirName, isDirectory: true)
     }
 
-    private func manifestURL(_ sliceId: String) -> URL {
-        manifestsURL.appendingPathComponent(sliceId).appendingPathExtension(ValhallaTiles.manifestExtension)
+    private func manifestURL(_ tileKey: String) -> URL {
+        manifestsURL.appendingPathComponent(tileKey).appendingPathExtension(ValhallaTiles.manifestExtension)
     }
 
     func hasTiles() -> Bool {
@@ -56,11 +56,22 @@ final class ValhallaTiles {
     }
 
     /**
+     * The keys of the tiles whose routing tiles are on the device, which is what the manifests are
+     * named after. This is what the app knows the downloaded areas by, so it stores nothing itself.
+     */
+    func tileKeys() -> [String] {
+        let manifests = (try? fileManager.contentsOfDirectory(at: manifestsURL, includingPropertiesForKeys: nil)) ?? []
+        return manifests
+            .filter { $0.pathExtension == ValhallaTiles.manifestExtension }
+            .map { $0.deletingPathExtension().lastPathComponent }
+    }
+
+    /**
      * Extracts the given tar, which is expected to be in the data directory, into the tiles
-     * directory, and records the tiles it holds under `sliceId`. The tar is deleted afterwards - it
+     * directory, and records the tiles it holds under `tileKey`. The tar is deleted afterwards - it
      * is large and is of no use once extracted.
      */
-    func extract(tarFileName: String, sliceId: String) throws -> ExtractResult {
+    func extract(tarFileName: String, tileKey: String) throws -> ExtractResult {
         let tarURL = dataURL.appendingPathComponent(tarFileName)
         guard fileManager.fileExists(atPath: tarURL.path) else {
             throw ValhallaTarError.tarNotFound(tarURL.path)
@@ -70,25 +81,25 @@ final class ValhallaTiles {
         let extractedPaths = try ValhallaTarExtractor.extract(tarAt: tarURL, into: tilesURL)
         excludeTilesFromBackup()
 
-        // When a slice is downloaded again it might no longer hold tiles it used to
-        let removedPaths = Set(readManifest(sliceId)).subtracting(extractedPaths)
-        try writeManifest(sliceId, paths: extractedPaths)
+        // When an area is downloaded again it might no longer hold tiles it used to
+        let removedPaths = Set(readManifest(tileKey)).subtracting(extractedPaths)
+        try writeManifest(tileKey, paths: extractedPaths)
         deleteUnreferenced(removedPaths)
 
         return ExtractResult(extractedFiles: extractedPaths.count, tilesDir: tilesURL.path)
     }
 
     /**
-     * Removes the tiles of the given slice, keeping any tile that a remaining slice still lists.
+     * Removes the tiles of the given area, keeping any tile that a remaining area still lists.
      */
-    func delete(sliceId: String) {
-        let paths = readManifest(sliceId)
-        try? fileManager.removeItem(at: manifestURL(sliceId))
+    func delete(tileKey: String) {
+        let paths = readManifest(tileKey)
+        try? fileManager.removeItem(at: manifestURL(tileKey))
         deleteUnreferenced(Set(paths))
     }
 
     /**
-     * Deletes the given tiles, except for those that are listed in a manifest of another slice.
+     * Deletes the given tiles, except for those that are listed in a manifest of another area.
      */
     private func deleteUnreferenced(_ paths: Set<String>) {
         if paths.isEmpty {
@@ -123,16 +134,16 @@ final class ValhallaTiles {
         }
     }
 
-    private func readManifest(_ sliceId: String) -> [String] {
-        guard let contents = try? String(contentsOf: manifestURL(sliceId), encoding: .utf8) else {
+    private func readManifest(_ tileKey: String) -> [String] {
+        guard let contents = try? String(contentsOf: manifestURL(tileKey), encoding: .utf8) else {
             return []
         }
         return contents.split(separator: "\n").map(String.init)
     }
 
-    private func writeManifest(_ sliceId: String, paths: [String]) throws {
+    private func writeManifest(_ tileKey: String, paths: [String]) throws {
         try fileManager.createDirectory(at: manifestsURL, withIntermediateDirectories: true)
-        try paths.joined(separator: "\n").write(to: manifestURL(sliceId), atomically: true, encoding: .utf8)
+        try paths.joined(separator: "\n").write(to: manifestURL(tileKey), atomically: true, encoding: .utf8)
     }
 
     /**

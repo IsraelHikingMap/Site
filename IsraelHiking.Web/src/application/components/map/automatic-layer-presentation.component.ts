@@ -1,4 +1,4 @@
-import { Component, OnInit, OnChanges, SimpleChanges, OnDestroy, OutputRefSubscription, inject, input } from "@angular/core";
+﻿import { Component, OnInit, OnChanges, SimpleChanges, OnDestroy, OutputRefSubscription, inject, input } from "@angular/core";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { Subject, mergeMap } from "rxjs";
 import { Store } from "@ngxs/store";
@@ -48,7 +48,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             }
             this.currentLanguageCode = language.code;
         }));
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.offlineState.downloadedTiles).subscribe(() => {
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.inMemoryState.downloadedTiles).subscribe(() => {
             this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
         }));
         this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.units).subscribe(() => {

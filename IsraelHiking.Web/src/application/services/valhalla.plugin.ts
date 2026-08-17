@@ -1,4 +1,4 @@
-import { registerPlugin } from "@capacitor/core";
+﻿import { registerPlugin } from "@capacitor/core";
 
 /**
  * The native offline routing plugin, see android/.../com/mapeak/valhalla/ValhallaPlugin.kt.
@@ -7,19 +7,20 @@ import { registerPlugin } from "@capacitor/core";
  */
 export interface ValhallaPlugin {
     /**
-     * Extracts a downloaded slice of routing tiles, the tar is deleted once extracted.
-     * Adjacent slices are extracted into the same directory so that routing can cross between them,
-     * the sliceId is what allows a single slice to be removed later on.
+     * Extracts a downloaded file of routing tiles, the tar is deleted once extracted.
+     * The files of adjacent tiles are extracted into the same directory so that routing can cross
+     * between them, the tileKey is what allows the tiles of one of them to be removed later on.
      */
-    extractTiles(options: { tarFileName: string; sliceId: string }): Promise<{ extractedFiles: number; tilesDir: string }>;
+    extractFile(options: { tarFileName: string; tileKey: string }): Promise<{ extractedFiles: number; tilesDir: string }>;
     /**
-     * Removes the tiles of a single slice, tiles that its neighbours share with it are kept.
+     * Removes the routing tiles of a single tile, the ones its neighbours share with it are kept.
      */
-    deleteTiles(options: { sliceId: string }): Promise<void>;
+    deleteTile(options: { tileKey: string }): Promise<void>;
     /**
-     * Whether there are any tiles on the device, i.e. whether offline routing can be attempted.
+     * The keys of the tiles whose routing tiles are on the device, i.e. the areas that can be routed
+     * in. The plugin is the one that keeps them, so this is what the app reads them from.
      */
-    hasTiles(): Promise<{ hasTiles: boolean }>;
+    listTiles(): Promise<{ tileKeys: string[] }>;
     /**
      * Removes all the tiles from the device.
      */

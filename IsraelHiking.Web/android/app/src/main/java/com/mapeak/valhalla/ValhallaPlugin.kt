@@ -1,5 +1,6 @@
 package com.mapeak.valhalla
 
+import com.getcapacitor.JSArray
 import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
@@ -21,25 +22,25 @@ class ValhallaPlugin : Plugin() {
     private val profiles by lazy { ValhallaProfiles(context) }
 
     /**
-     * Extracts a downloaded slice of routing tiles into the shared tiles directory.
-     * Extracting several adjacent slices into the same directory is the way to route across them.
-     * The sliceId identifies the slice so that it can later be removed on its own.
+     * Extracts a downloaded file of routing tiles into the shared tiles directory.
+     * Extracting the files of several adjacent tiles into it is the way to route across them.
+     * The tileKey identifies the tile the file belongs to, so that it can later be removed on its own.
      */
     @Suppress("unused")
     @PluginMethod
-    fun extractTiles(call: PluginCall) {
+    fun extractFile(call: PluginCall) {
         val tarFileName = call.getString("tarFileName")
         if (tarFileName.isNullOrBlank()) {
             call.reject("tarFileName is required")
             return
         }
-        val sliceId = call.getString("sliceId")
-        if (sliceId.isNullOrBlank()) {
-            call.reject("sliceId is required")
+        val tileKey = call.getString("tileKey")
+        if (tileKey.isNullOrBlank()) {
+            call.reject("tileKey is required")
             return
         }
         try {
-            val result = tiles.extract(tarFileName, sliceId)
+            val result = tiles.extract(tarFileName, tileKey)
             call.resolve(JSObject().put("extractedFiles", result.extractedFiles).put("tilesDir", result.tilesDir))
         } catch (ex: Throwable) {
             call.rejectWith("Tile extraction failed", ex)
@@ -67,30 +68,31 @@ class ValhallaPlugin : Plugin() {
     }
 
     /**
-     * Whether there are any extracted tiles on the device, i.e. whether offline routing can be attempted.
+     * The keys of the tiles whose routing tiles are on the device, so that the app can tell which
+     * areas it can route in without keeping a list of its own.
      */
     @Suppress("unused")
     @PluginMethod
-    fun hasTiles(call: PluginCall) {
-        call.resolve(JSObject().put("hasTiles", tiles.hasTiles()))
+    fun listTiles(call: PluginCall) {
+        call.resolve(JSObject().put("tileKeys", JSArray(tiles.tileKeys())))
     }
 
     /**
-     * Removes the tiles of a single slice, keeping the tiles that its neighbours share with it.
+     * Removes the routing tiles of a single tile, keeping the ones its neighbours share with it.
      */
     @Suppress("unused")
     @PluginMethod
-    fun deleteTiles(call: PluginCall) {
-        val sliceId = call.getString("sliceId")
-        if (sliceId.isNullOrBlank()) {
-            call.reject("sliceId is required")
+    fun deleteTile(call: PluginCall) {
+        val tileKey = call.getString("tileKey")
+        if (tileKey.isNullOrBlank()) {
+            call.reject("tileKey is required")
             return
         }
         try {
-            tiles.delete(sliceId)
+            tiles.delete(tileKey)
             call.resolve()
         } catch (ex: Throwable) {
-            call.rejectWith("Failed to delete the tiles of $sliceId", ex)
+            call.rejectWith("Failed to delete the tiles of $tileKey", ex)
         }
     }
 

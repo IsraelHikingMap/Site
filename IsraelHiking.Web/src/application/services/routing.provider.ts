@@ -1,4 +1,4 @@
-import { inject, Service } from "@angular/core";
+﻿import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
@@ -69,7 +69,7 @@ export class RoutingProvider {
             return data.features[0].geometry.coordinates.map(c => SpatialService.toLatLng(c));
         } catch (ex) {
             try {
-                return await this.getOffineRoute(latlngStart, latlngEnd, routinType);
+                return await this.getOffineRoute(latlngStart, latlngEnd, routinType, hasTiles);
             } catch (ex2) {
                 this.loggingService.error(`[Routing] failed: ${(ex as Error).message}, ${(ex2 as Error).message}`);
                 this.toastService.warning(this.getRoutingFailedMessage(hasTiles));
@@ -102,10 +102,7 @@ export class RoutingProvider {
      * needs to be downloaded again.
      */
     private areRoutingTilesDownloaded(start: LatLngAltTime, end: LatLngAltTime): boolean {
-        const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.offlineState)?.downloadedTiles;
-        if (downloadedTiles == null) {
-            return false;
-        }
+        const downloadedRoutingTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedRoutingTiles);
         const startTile = SpatialService.toTile(start, RoutingProvider.SLICE_TILE_ZOOM);
         const endTile = SpatialService.toTile(end, RoutingProvider.SLICE_TILE_ZOOM);
         const tiles = new Set<string>();
@@ -114,10 +111,7 @@ export class RoutingProvider {
                 tiles.add(`${x}-${y}`);
             }
         }
-        return Array.from(tiles).every(tile => {
-            const files = downloadedTiles[tile];
-            return Array.isArray(files) && files.some(file => RoutingProvider.isRoutingTilesFile(file.fileName));
-        });
+        return Array.from(tiles).every(tile => downloadedRoutingTiles.includes(tile));
     }
 
     /**
@@ -146,28 +140,42 @@ export class RoutingProvider {
 
     /**
      * Extracts a downloaded offline routing tiles file, the file itself is removed once extracted.
-     * The slice is identified so that it can later be removed without affecting its neighbours.
+     * The tile it belongs to is identified so that it can later be removed without affecting its neighbours.
      */
-    public async extractOfflineRoutingTiles(fileName: string, sliceId: string): Promise<void> {
-        const results = await Valhalla.extractTiles({ tarFileName: fileName, sliceId });
-        this.loggingService.info(`[Routing] Extracted ${results.extractedFiles} offline routing tiles from ${fileName} for sliceId: ${sliceId}`);
+    public async extractOfflineRoutingTiles(fileName: string, tileKey: string): Promise<void> {
+        const results = await Valhalla.extractFile({ tarFileName: fileName, tileKey });
+        this.loggingService.info(`[Routing] Extracted ${results.extractedFiles} offline routing tiles from ${fileName} for tile: ${tileKey}`);
     }
 
     /**
-     * Removes the offline routing tiles of a single slice, the tiles it shares with its neighbours are kept.
+     * The tiles whose routing tiles are on the device. They are stored by the plugin and not as files,
+     * so it is the one that knows about them, and failing to ask it means there are none to route with.
      */
-    public async deleteOfflineRoutingTiles(sliceId: string): Promise<void> {
-        await Valhalla.deleteTiles({ sliceId });
-        this.loggingService.info(`[Routing] Removed the offline routing tiles of ${sliceId}`);
+    public async getOfflineRoutingTiles(): Promise<string[]> {
+        try {
+            return (await Valhalla.listTiles()).tileKeys;
+        } catch (ex) {
+            this.loggingService.warning(`[Routing] Failed to get the offline routing tiles: ${(ex as Error).message}`);
+            return [];
+        }
+    }
+
+    /**
+     * Removes the offline routing tiles of a single tile, the tiles it shares with its neighbours are kept.
+     */
+    public async deleteOfflineRoutingTiles(tileKey: string): Promise<void> {
+        await Valhalla.deleteTile({ tileKey });
+        this.loggingService.info(`[Routing] Removed the offline routing tiles of ${tileKey}`);
     }
 
     /**
      * Calculates a route between the two given points using the tiles on the device.
      * The returned points have their elevation set from valhalla's elevation samples.
      */
-    private async getOffineRoute(latlngStart: LatLngAltTime, latlngEnd: LatLngAltTime, routingType: RoutingType): Promise<LatLngAltTime[]> {
-        if (!(await Valhalla.hasTiles()).hasTiles) {
-            throw new Error("[Routing] There are no offline routing tiles on the device");
+    private async getOffineRoute(latlngStart: LatLngAltTime, latlngEnd: LatLngAltTime, routingType: RoutingType,
+        hasTiles: boolean): Promise<LatLngAltTime[]> {
+        if (!hasTiles) {
+            throw new Error("[Routing] There are no offline routing tiles for the area of this route");
         }
         const results = await Valhalla.route({
             fromLat: latlngStart.lat,

@@ -1,4 +1,4 @@
-import { inject, Service } from "@angular/core";
+﻿import { inject, Service } from "@angular/core";
 import { Directory, Filesystem } from "@capacitor/filesystem";
 import { Source, RangeResponse, PMTiles } from "pmtiles";
 import { Store } from "@ngxs/store";
@@ -105,14 +105,15 @@ export class PmTilesService {
         if (z >= TILES_ZOOM) {
             ({ tileX, tileY } = SpatialService.getParentZoomTileCoordinates({ x, y }, z, TILES_ZOOM));
         }
-        if (this.store.selectSnapshot((state: ApplicationState) => state.offlineState).downloadedTiles?.[`${tileX}-${tileY}`] == null) {
+        const downloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState.downloadedTiles);
+        if (downloadedTiles[PmTilesService.toTileKey(tileX, tileY)] == null) {
             return false;
         }
         const fileName = this.getFileNameByType(z, x, y, type);
         try {
             await this.getSource(fileName);
         } catch (ex) {
-            this.loggingService.debug(`Failed to open file ${fileName} for tile ${tileX}-${tileY} type ${type} and ${z}/${x}/${y}: ${(ex as Error).message}`);
+            this.loggingService.debug(`Failed to open file ${fileName} for tile ${PmTilesService.toTileKey(tileX, tileY)} type ${type} and ${z}/${x}/${y}: ${(ex as Error).message}`);
             return false;
         }
         return true;
@@ -122,5 +123,23 @@ export class PmTilesService {
         const source = await this.getSource(fileName);
         const pmTilesProvider = new PMTiles(source);
         return (await pmTilesProvider.getMetadata() as { version?: string })?.version;
+    }
+
+    /**
+     * The key the files of a tile are stored under, where an undefined tile is the root, non-tiled, one.
+     */
+    public static toTileKey(tileX?: number, tileY?: number): string {
+        return `${tileX}-${tileY}`;
+    }
+
+    /**
+     * The tile a key was made of, null for the root key, which is not of a specific tile.
+     */
+    public static fromTileKey(tileKey: string): { tileX: number, tileY: number } | null {
+        const [tileX, tileY] = tileKey.split("-").map(Number);
+        if (!Number.isInteger(tileX) || !Number.isInteger(tileY)) {
+            return null;
+        }
+        return { tileX, tileY };
     }
 }

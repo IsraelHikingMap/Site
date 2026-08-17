@@ -69,7 +69,7 @@ class ValhallaRouter(private val context: Context) {
 
     /**
      * Writes valhalla.json if it isn't there yet. The tiles directory never changes, so the config
-     * stays valid when more slices are extracted into it.
+     * stays valid when more areas are extracted into it.
      */
     private fun ensureConfig(tilesDir: File): String {
         val configPath = configManager.getAbsolutePath()

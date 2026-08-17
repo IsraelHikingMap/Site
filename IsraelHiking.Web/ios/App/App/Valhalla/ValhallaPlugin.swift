@@ -13,10 +13,10 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "ValhallaPlugin"
     public let jsName = "Valhalla"
     public let pluginMethods: [CAPPluginMethod] = [
-        CAPPluginMethod(name: "extractTiles", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "extractFile", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "storeProfiles", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "deleteTiles", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "hasTiles", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "listTiles", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "deleteTile", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "clearTiles", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "route", returnType: CAPPluginReturnPromise)
     ]
@@ -26,21 +26,21 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
     private lazy var router = ValhallaRouter(tiles: tiles)
 
     /**
-     * Extracts a downloaded slice of routing tiles into the shared tiles directory.
-     * Extracting several adjacent slices into the same directory is the way to route across them.
-     * The sliceId identifies the slice so that it can later be removed on its own.
+     * Extracts a downloaded file of routing tiles into the shared tiles directory.
+     * Extracting the files of several adjacent tiles into it is the way to route across them.
+     * The tileKey identifies the tile the file belongs to, so that it can later be removed on its own.
      */
-    @objc func extractTiles(_ call: CAPPluginCall) {
+    @objc func extractFile(_ call: CAPPluginCall) {
         guard let tarFileName = call.getString("tarFileName"), !tarFileName.isEmpty else {
             call.reject("tarFileName is required")
             return
         }
-        guard let sliceId = call.getString("sliceId"), !sliceId.isEmpty else {
-            call.reject("sliceId is required")
+        guard let tileKey = call.getString("tileKey"), !tileKey.isEmpty else {
+            call.reject("tileKey is required")
             return
         }
         do {
-            let result = try tiles.extract(tarFileName: tarFileName, sliceId: sliceId)
+            let result = try tiles.extract(tarFileName: tarFileName, tileKey: tileKey)
             router.invalidate()
             call.resolve(["extractedFiles": result.extractedFiles, "tilesDir": result.tilesDir])
         } catch {
@@ -49,14 +49,22 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     /**
-     * Removes the tiles of a single slice, keeping the tiles that its neighbours share with it.
+     * The keys of the tiles whose routing tiles are on the device, so that the app can tell which
+     * areas it can route in without keeping a list of its own.
      */
-    @objc func deleteTiles(_ call: CAPPluginCall) {
-        guard let sliceId = call.getString("sliceId"), !sliceId.isEmpty else {
-            call.reject("sliceId is required")
+    @objc func listTiles(_ call: CAPPluginCall) {
+        call.resolve(["tileKeys": tiles.tileKeys()])
+    }
+
+    /**
+     * Removes the routing tiles of a single tile, keeping the ones its neighbours share with it.
+     */
+    @objc func deleteTile(_ call: CAPPluginCall) {
+        guard let tileKey = call.getString("tileKey"), !tileKey.isEmpty else {
+            call.reject("tileKey is required")
             return
         }
-        tiles.delete(sliceId: sliceId)
+        tiles.delete(tileKey: tileKey)
         router.invalidate()
         call.resolve()
     }
@@ -76,13 +84,6 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
         } catch {
             call.reject("Failed to store the routing profiles: \(error.localizedDescription)", nil, error)
         }
-    }
-
-    /**
-     * Whether there are any extracted tiles on the device, i.e. whether offline routing can be attempted.
-     */
-    @objc func hasTiles(_ call: CAPPluginCall) {
-        call.resolve(["hasTiles": tiles.hasTiles()])
     }
 
     /**

@@ -1,4 +1,4 @@
-import { describe, beforeEach, vi, it, expect } from "vitest";
+﻿import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
@@ -6,6 +6,7 @@ import { provideStore, Store } from "@ngxs/store";
 import polyline from "@mapbox/polyline";
 
 import { RoutingProvider } from "./routing.provider";
+import { InMemoryReducer } from "../reducers/in-memory.reducer";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { GeoJsonParser } from "./geojson.parser";
@@ -25,7 +26,7 @@ describe("RoutingProvider", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [
-                provideStore([]),
+                provideStore([InMemoryReducer]),
                 {
                     provide: ResourcesService,
                     useValue: {
@@ -105,9 +106,8 @@ describe("RoutingProvider", () => {
     it("Should return start and end points when reponse is not a geojson", inject([RoutingProvider, HttpTestingController, Store],
         async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
             store.reset({
-                offlineState: {
-                    isSubscribed: false
-                }
+                offlineState: { isSubscribed: false },
+                inMemoryState: { downloadedRoutingTiles: [] }
             });
 
             const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike");
@@ -122,9 +122,8 @@ describe("RoutingProvider", () => {
         inject([RoutingProvider, HttpTestingController, Store],
             async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
                 store.reset({
-                    offlineState: {
-                        isSubscribed: false
-                    }
+                    offlineState: { isSubscribed: false },
+                    inMemoryState: { downloadedRoutingTiles: [] }
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
@@ -140,9 +139,8 @@ describe("RoutingProvider", () => {
         inject([RoutingProvider, HttpTestingController, Store, ToastService],
             async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService) => {
                 store.reset({
-                    offlineState: {
-                        isSubscribed: false
-                    }
+                    offlineState: { isSubscribed: false },
+                    inMemoryState: { downloadedRoutingTiles: [] }
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
@@ -160,9 +158,8 @@ describe("RoutingProvider", () => {
                 runningContextService: RunningContextService) => {
                 (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
                 store.reset({
-                    offlineState: {
-                        isSubscribed: false
-                    }
+                    offlineState: { isSubscribed: false },
+                    inMemoryState: { downloadedRoutingTiles: [] }
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
@@ -180,10 +177,8 @@ describe("RoutingProvider", () => {
                 runningContextService: RunningContextService) => {
                 (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
                 store.reset({
-                    offlineState: {
-                        isSubscribed: true,
-                        downloadedTiles: {}
-                    }
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedRoutingTiles: [] }
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
@@ -201,12 +196,8 @@ describe("RoutingProvider", () => {
                 runningContextService: RunningContextService) => {
                 (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
                 store.reset({
-                    offlineState: {
-                        isSubscribed: true,
-                        downloadedTiles: {
-                            [sliceKeyOf(32, 35)]: [{ fileName: "IHM-schema+7-76-51.pmtiles", date: "2026-01-01" }]
-                        }
-                    }
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedRoutingTiles: [] }
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
@@ -223,15 +214,9 @@ describe("RoutingProvider", () => {
             async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService,
                 runningContextService: RunningContextService) => {
                 (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
-                const files = [{ fileName: "valhalla+7-76-51.tar", date: "2026-01-01" }];
                 store.reset({
-                    offlineState: {
-                        isSubscribed: true,
-                        downloadedTiles: {
-                            [sliceKeyOf(32, 35)]: files,
-                            [sliceKeyOf(32.001, 35.001)]: files
-                        }
-                    }
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedRoutingTiles: [sliceKeyOf(32, 35), sliceKeyOf(32.001, 35.001)] }
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");

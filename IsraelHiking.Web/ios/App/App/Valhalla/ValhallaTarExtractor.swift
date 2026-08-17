@@ -8,7 +8,7 @@ enum ValhallaTarError: Error {
 
 /**
  * A minimal streaming reader for the uncompressed tar files that hold the routing tiles, mirroring
- * what commons-compress does on android. It is streaming on purpose - a slice can be hundreds of
+ * what commons-compress does on android. It is streaming on purpose - an area can be hundreds of
  * megabytes, so neither the archive nor a single tile is ever held in memory.
  *
  * Only what valhalla's extracts contain is handled: regular files and directories, with the plain

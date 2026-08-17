@@ -11,14 +11,14 @@ import java.io.IOException
 /**
  * The routing tiles on the device.
  *
- * Every downloaded slice is a tar of a valhalla tile tree that is extracted into a single shared
- * directory. Tiles are keyed by their grid cell, so adjacent slices simply add their own cells and
- * routing can cross from one slice to the next.
+ * Every downloaded area is a tar of a valhalla tile tree that is extracted into a single shared
+ * directory, and is identified by the id of the tile it covers. Valhalla's tiles are keyed by their
+ * grid cell, so adjacent areas simply add their own cells and routing can cross from one to the next.
  *
- * Slices do share tiles though - a slice is roughly 2.8 degrees while valhalla's highway tiles are
- * 4 degrees and its arterial tiles are 1 degree, so a tile on the edge of a slice is also in its
- * neighbour's tar. Each slice therefore records what it extracted, and deleting a slice only
- * removes the tiles that no remaining slice lists.
+ * Areas do share tiles though - a downloaded tile is roughly 2.8 degrees while valhalla's highway
+ * tiles are 4 degrees and its arterial tiles are 1 degree, so a tile on the edge of an area is also
+ * in its neighbour's tar. Each area therefore records what it extracted, and deleting one only
+ * removes the tiles that no remaining area lists.
  */
 class ValhallaTiles(private val context: Context) {
 
@@ -39,7 +39,7 @@ class ValhallaTiles(private val context: Context) {
 
     private fun manifestsDir(): File = File(context.filesDir, MANIFESTS_DIR_NAME)
 
-    private fun manifestFile(sliceId: String): File = File(manifestsDir(), sliceId + MANIFEST_EXTENSION)
+    private fun manifestFile(tileKey: String): File = File(manifestsDir(), tileKey + MANIFEST_EXTENSION)
 
     fun hasTiles(): Boolean {
         val dir = tilesDir()
@@ -52,11 +52,20 @@ class ValhallaTiles(private val context: Context) {
     }
 
     /**
+     * The keys of the tiles whose routing tiles are on the device, which is what the manifests are
+     * named after. This is what the app knows the downloaded areas by, so it stores nothing itself.
+     */
+    fun tileKeys(): List<String> = manifestsDir().listFiles()
+        ?.filter { it.isFile && it.name.endsWith(MANIFEST_EXTENSION) }
+        ?.map { it.name.removeSuffix(MANIFEST_EXTENSION) }
+        ?: emptyList()
+
+    /**
      * Extracts the given tar, which is expected to be in the app's files directory, into the tiles
-     * directory, and records the tiles it holds under [sliceId]. The tar is deleted afterwards - it
+     * directory, and records the tiles it holds under [tileKey]. The tar is deleted afterwards - it
      * is large and is of no use once extracted.
      */
-    fun extract(tarFileName: String, sliceId: String): ExtractResult {
+    fun extract(tarFileName: String, tileKey: String): ExtractResult {
         val tar = File(context.filesDir, tarFileName)
         if (!tar.exists()) {
             throw IOException("Tar not found at ${tar.absolutePath}")
@@ -89,25 +98,25 @@ class ValhallaTiles(private val context: Context) {
             tar.delete()
         }
 
-        // When a slice is downloaded again it might no longer hold tiles it used to
-        val removedPaths = readManifest(sliceId) - extractedPaths.toSet()
-        writeManifest(sliceId, extractedPaths)
+        // When an area is downloaded again it might no longer hold tiles it used to
+        val removedPaths = readManifest(tileKey) - extractedPaths.toSet()
+        writeManifest(tileKey, extractedPaths)
         deleteUnreferenced(removedPaths)
 
         return ExtractResult(extractedPaths.size, tilesDir.absolutePath)
     }
 
     /**
-     * Removes the tiles of the given slice, keeping any tile that a remaining slice still lists.
+     * Removes the tiles of the given area, keeping any tile that a remaining area still lists.
      */
-    fun delete(sliceId: String) {
-        val paths = readManifest(sliceId)
-        manifestFile(sliceId).delete()
+    fun delete(tileKey: String) {
+        val paths = readManifest(tileKey)
+        manifestFile(tileKey).delete()
         deleteUnreferenced(paths)
     }
 
     /**
-     * Deletes the given tiles, except for those that are listed in a manifest of another slice.
+     * Deletes the given tiles, except for those that are listed in a manifest of another area.
      */
     private fun deleteUnreferenced(paths: Collection<String>) {
         if (paths.isEmpty()) {
@@ -141,13 +150,13 @@ class ValhallaTiles(private val context: Context) {
         }
     }
 
-    private fun readManifest(sliceId: String): List<String> {
-        val manifest = manifestFile(sliceId)
+    private fun readManifest(tileKey: String): List<String> {
+        val manifest = manifestFile(tileKey)
         return if (manifest.exists()) manifest.readLines().filter { it.isNotBlank() } else emptyList()
     }
 
-    private fun writeManifest(sliceId: String, paths: List<String>) {
+    private fun writeManifest(tileKey: String, paths: List<String>) {
         manifestsDir().mkdirs()
-        manifestFile(sliceId).writeText(paths.joinToString("\n"))
+        manifestFile(tileKey).writeText(paths.joinToString("\n"))
     }
 }

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from "@angular/core";
+﻿import { Component, inject, signal, computed } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { type Map, type MapMouseEvent, MercatorCoordinate, type StyleSpecification } from "maplibre-gl";
@@ -11,7 +11,7 @@ import { OfflineFilesDownloadService } from "../../services/offline-files-downlo
 import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
 import { ToastService } from "../../services/toast.service";
-import { TILES_ZOOM } from "../../services/pmtiles.service";
+import { PmTilesService, TILES_ZOOM } from "../../services/pmtiles.service";
 import { SpatialService } from "../../services/spatial.service";
 import { DEFAULT_BASE_LAYERS, HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import type { ApplicationState, EditableLayer } from "../../models";
@@ -23,9 +23,6 @@ import type { ApplicationState, EditableLayer } from "../../models";
 })
 export class OfflineManagementComponent {
     public readonly offlineMapStyle: StyleSpecification;
-    public readonly selectedTile = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
-    public readonly inProgressTile = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
-    public readonly downloadedTiles = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
     public readonly currentLocation: GeoJSON.FeatureCollection;
     public readonly baseLayerData: EditableLayer;
     public readonly selectedTileXY = signal<{ tileX: number; tileY: number }>(null);
@@ -37,15 +34,75 @@ export class OfflineManagementComponent {
     private readonly layersService = inject(LayersService);
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
-    private readonly downloadedTilesState = this.store.selectSignal((s: ApplicationState) => s.offlineState.downloadedTiles);
+    private readonly downloadedTilesState = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.downloadedTiles);
     public readonly resources = inject(ResourcesService);
+
+    /** The tile that is being downloaded right now and how far it got, null when there is no download */
+    public readonly downloadingTile = this.offlineFilesDownloadService.currentDownloadedTile;
 
     public readonly isSelectedAvailableForOffline = computed(() => {
         if (!this.selectedTileXY()) {
             return false;
         }
         const downloadedTiles = this.downloadedTilesState();
-        return downloadedTiles != null && downloadedTiles[`${this.selectedTileXY().tileX}-${this.selectedTileXY().tileY}`] != null;
+        return downloadedTiles[PmTilesService.toTileKey(this.selectedTileXY().tileX, this.selectedTileXY().tileY)] != null;
+    });
+
+    /**
+     * The tiles that were downloaded, drawn from the files that are on the device - they are read into
+     * the state while the app is running, so this follows it instead of being built once.
+     * The tile that is being downloaded and the selected one are drawn on their own, so they are skipped.
+     */
+    public readonly downloadedTiles = computed<GeoJSON.FeatureCollection>(() => {
+        const features: GeoJSON.Feature[] = [];
+        const downloadedTiles = this.downloadedTilesState();
+        for (const tileKey of Object.keys(downloadedTiles)) {
+            const downloadedTile = PmTilesService.fromTileKey(tileKey);
+            if (downloadedTile == null) {
+                continue;
+            }
+            const { tileX: tileXDownloaded, tileY: tileYDownloaded } = downloadedTile;
+            if (this.downloadingTile()?.tileX === tileXDownloaded && this.downloadingTile()?.tileY === tileYDownloaded) {
+                continue; // Skip tiles that are in progress
+            }
+            const { tileX, tileY } = this.selectedTileXY() || { tileX: null, tileY: null };
+            if (this.downloadingTile() == null && tileXDownloaded === tileX && tileYDownloaded === tileY) {
+                continue; // Skip the center tile if not downloading
+            }
+
+            const downloadedDate = this.offlineFilesDownloadService.getLastModifiedDate(downloadedTiles[tileKey]);
+            const label = downloadedDate.getFullYear() + "\n" +
+                (downloadedDate.getMonth() + 1).toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 }) + "\n" +
+                downloadedDate.getDate().toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 });
+            const feature = this.tileCoordinatesToPolygon(tileXDownloaded, tileYDownloaded, label, 1);
+            feature.properties.color = this.offlineFilesDownloadService.isTileCompatible(tileKey, downloadedTiles[tileKey]) ? "blue" : "red";
+            features.push(feature);
+        }
+
+        return { type: "FeatureCollection", features };
+    });
+
+    /** The tile the user selected, it is not drawn while a tile is being downloaded */
+    public readonly selectedTile = computed<GeoJSON.FeatureCollection>(() => {
+        const selectedTileXY = this.selectedTileXY();
+        const features = selectedTileXY == null || this.downloadingTile() != null
+            ? []
+            : [this.tileCoordinatesToPolygon(selectedTileXY.tileX, selectedTileXY.tileY, this.resources.clickBelow)];
+        return { type: "FeatureCollection", features };
+    });
+
+    /** The tile that is being downloaded, filled up to the progress of its download */
+    public readonly inProgressTile = computed<GeoJSON.FeatureCollection>(() => {
+        const downloadingTile = this.downloadingTile();
+        if (downloadingTile == null) {
+            return { type: "FeatureCollection", features: [] };
+        }
+        const { tileX, tileY, progress } = downloadingTile;
+        const fillFeature = this.tileCoordinatesToPolygon(tileX, tileY, "", progress / 100.0);
+        fillFeature.properties.fill = "true";
+        const strokeFeature = this.tileCoordinatesToPolygon(tileX, tileY, progress.toFixed(2) + "%");
+        strokeFeature.properties.stroke = "true";
+        return { type: "FeatureCollection", features: [fillFeature, strokeFeature] };
     });
 
     constructor() {
@@ -66,17 +123,11 @@ export class OfflineManagementComponent {
                 }
             }]
         }
-        this.updateDownloadedTiles();
-        this.offlineFilesDownloadService.tilesProgressChanged.subscribe((tileProgress) => {
-            if (this.downloadingTileXY()) {
-                this.updateInProgressTile(tileProgress.progressValue);
-            }
-        });
     }
 
     private initializeCenterAndZoomFromDownloadingTile() {
-        const dowloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.offlineState.downloadedTiles);
-        if (!dowloadedTiles) {
+        const dowloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState.downloadedTiles);
+        if (Object.keys(dowloadedTiles).length === 0) {
             const mapCenter = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
             this.map.flyTo({
                 center: [mapCenter.longitude, mapCenter.latitude],
@@ -89,11 +140,12 @@ export class OfflineManagementComponent {
         let maxTileX = Number.MIN_SAFE_INTEGER;
         let minTileY = Number.MAX_SAFE_INTEGER;
         let maxTileY = Number.MIN_SAFE_INTEGER;
-        for (const key of Object.keys(dowloadedTiles)) {
-            const [tileX, tileY] = key.split("-").map(Number);
-            if (isNaN(tileX) || isNaN(tileY)) {
+        for (const toTileKey of Object.keys(dowloadedTiles)) {
+            const tile = PmTilesService.fromTileKey(toTileKey);
+            if (tile == null) {
                 continue;
             }
+            const { tileX, tileY } = tile;
             minTileX = Math.min(minTileX, tileX);
             maxTileX = Math.max(maxTileX, tileX);
             minTileY = Math.min(minTileY, tileY);
@@ -113,8 +165,6 @@ export class OfflineManagementComponent {
             zoom: TILES_ZOOM - 1
         });
         this.selectedTileXY.set(null);
-        this.updateDownloadedTiles();
-        this.updateSelectedTile();
         const status = await this.offlineFilesDownloadService.downloadTile(tileX, tileY);
         switch (status) {
             case "up-to-date":
@@ -131,14 +181,6 @@ export class OfflineManagementComponent {
                 this.selectedTileXY.set({ tileX, tileY });
                 break;
         }
-
-        // For some reason, sometime it gets to 100% and doesn't clear the download progress, this is a hack to prevent it...
-        setTimeout(() => {
-            this.updateInProgressTile(100);
-            this.updateDownloadedTiles();
-            this.updateSelectedTile();
-        }, 3000)
-
     }
 
 
@@ -163,74 +205,10 @@ export class OfflineManagementComponent {
         }
     }
 
-    private updateDownloadedTiles() {
-        const features: GeoJSON.Feature[] = [];
-        const downloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.offlineState.downloadedTiles);
-        for (const key of Object.keys(downloadedTiles || {})) {
-            const [tileXDownloaded, tileYDownloaded] = key.split("-").map(Number);
-            if (isNaN(tileXDownloaded) || isNaN(tileYDownloaded)) {
-                continue;
-            }
-            if (this.downloadingTileXY()?.tileX === tileXDownloaded && this.downloadingTileXY()?.tileY === tileYDownloaded) {
-                continue; // Skip tiles that are in progress
-            }
-            const { tileX, tileY } = this.selectedTileXY() || { tileX: null, tileY: null };
-            if (this.downloadingTileXY() == null && tileXDownloaded === tileX && tileYDownloaded === tileY) {
-                continue; // Skip the center tile if not downloading
-            }
 
-            const downloadedDate = this.offlineFilesDownloadService.getLastModifiedDate(downloadedTiles[key]);
-            const label = downloadedDate.getFullYear() + "\n" +
-                (downloadedDate.getMonth() + 1).toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 }) + "\n" +
-                downloadedDate.getDate().toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 });
-            const feature = this.tileCoordinatesToPolygon(tileXDownloaded, tileYDownloaded, label, 1);
-            feature.properties.color = this.offlineFilesDownloadService.isTileCompatible(key, downloadedTiles[key]) ? "blue" : "red";
-            features.push(feature);
-        }
-
-        this.downloadedTiles.set({
-            type: "FeatureCollection",
-            features: features
-        });
-    }
-
-    private updateSelectedTile() {
-        const { tileX, tileY } = this.selectedTileXY() || { tileX: null, tileY: null };
-        this.selectedTile.set({
-            type: "FeatureCollection",
-            features: this.downloadingTileXY() != null || this.selectedTileXY() == null ? [] : [this.tileCoordinatesToPolygon(tileX, tileY, this.resources.clickBelow)]
-        });
-    }
-
-    private updateInProgressTile(progress: number) {
-        if (this.downloadingTileXY() == null) {
-            this.inProgressTile.set({ type: "FeatureCollection", features: [] });
-            return;
-        }
-        const fillFeature = this.tileCoordinatesToPolygon(
-            this.downloadingTileXY().tileX,
-            this.downloadingTileXY().tileY,
-            "",
-            progress / 100.0
-        );
-        fillFeature.properties.fill = "true";
-        const strokeFeature = this.tileCoordinatesToPolygon(
-            this.downloadingTileXY().tileX,
-            this.downloadingTileXY().tileY,
-            progress.toFixed(2) + "%"
-        );
-        strokeFeature.properties.stroke = "true";
-        this.inProgressTile.set({
-            type: "FeatureCollection",
-            features: [fillFeature, strokeFeature]
-        });
-    }
 
     public cancelDownload() {
         this.offlineFilesDownloadService.abortCurrentDownload();
-        this.updateDownloadedTiles();
-        this.updateInProgressTile(100);
-        this.updateSelectedTile();
     }
 
     public onMapClick(event: MapMouseEvent) {
@@ -239,8 +217,6 @@ export class OfflineManagementComponent {
         const tileX = Math.floor((mercator.x * tileCount));
         const tileY = Math.floor((mercator.y * tileCount));
         this.selectedTileXY.set({ tileX, tileY });
-        this.updateSelectedTile();
-        this.updateDownloadedTiles();
         this.map.flyTo({
             center: SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX + 0.5, y: tileY + 0.5 }, TILES_ZOOM)),
             zoom: TILES_ZOOM - 1
@@ -262,15 +238,9 @@ export class OfflineManagementComponent {
             message: this.resources.areYouSure,
             type: "YesNo",
             confirmAction: async () => {
-                await this.offlineFilesDownloadService.deleteTile(this.selectedTileXY().tileX, this.selectedTileXY().tileY);
+                await this.offlineFilesDownloadService.deleteTile(PmTilesService.toTileKey(this.selectedTileXY().tileX, this.selectedTileXY().tileY));
                 this.selectedTileXY.set(null);
-                this.updateSelectedTile();
-                this.updateDownloadedTiles();
             }
         });
-    }
-
-    public downloadingTileXY() {
-        return this.offlineFilesDownloadService.currentDownloadedTile;
     }
 }
