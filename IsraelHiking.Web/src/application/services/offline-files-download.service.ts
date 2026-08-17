@@ -1,4 +1,4 @@
-﻿import { computed, inject, Service, signal } from "@angular/core";
+import { computed, inject, Service, signal } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { timeout } from "rxjs/operators";

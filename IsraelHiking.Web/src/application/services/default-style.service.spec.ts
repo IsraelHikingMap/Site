@@ -1,4 +1,4 @@
-﻿import { describe, beforeEach, vi, it, expect, Mock } from "vitest";
+import { describe, beforeEach, vi, it, expect, Mock } from "vitest";
 import { inject, TestBed } from "@angular/core/testing";
 import { provideStore, Store } from "@ngxs/store";
 import type {

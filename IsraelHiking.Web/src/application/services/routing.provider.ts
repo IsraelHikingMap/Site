@@ -1,4 +1,4 @@
-﻿import { inject, Service } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
