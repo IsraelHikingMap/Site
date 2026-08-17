@@ -232,6 +232,9 @@ export class ResourcesService {
     public noDescriptionAvailableInYourLanguage: string;
     public clickTheMapToSelectATile: string;
     public clickBelow: string;
+    public oneTileNeedsToBeDownloadedAgain: string;
+    public tilesNeedToBeDownloadedAgain: string;
+    public download: string;
     public translatedBy: string;
     public clickToTranslate: string;
     public minimize: string;
@@ -662,6 +665,9 @@ export class ResourcesService {
         this.noDescriptionAvailableInYourLanguage = this.gettextCatalog.getString("No description available in your language");
         this.clickTheMapToSelectATile = this.gettextCatalog.getString("Click the map to select a tile");
         this.clickBelow = this.gettextCatalog.getString("Click below");
+        this.oneTileNeedsToBeDownloadedAgain = this.gettextCatalog.getString("One tile needs to be downloaded again");
+        this.tilesNeedToBeDownloadedAgain = this.gettextCatalog.getString("{{count}} tiles need to be downloaded again");
+        this.download = this.gettextCatalog.getString("Download");
         this.translatedBy = this.gettextCatalog.getString("Translated by LibreTranslate, click to view original text");
         this.clickToTranslate = this.gettextCatalog.getString("Click to translate");
         this.minimize = this.gettextCatalog.getString("Minimize");

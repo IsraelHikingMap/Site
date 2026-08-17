@@ -8,18 +8,29 @@
         </mgl-geojson-source>
         <mgl-geojson-source id="currnet-location" [data]="currentLocation">
         </mgl-geojson-source>
-        <mgl-layer id="download-tiles-border" type="line" source="download-tiles" [layout]="{
-              'line-cap': 'round', 
+        <mgl-layer id="download-tiles-border" type="line" source="download-tiles"
+            [filter]="['!=', ['get', 'incompatible'], 'true']" [layout]="{
+              'line-cap': 'round',
               'line-join': 'round'
           }" [paint]="{
               'line-color': ['get', 'color'],
               'line-width': 3
           }">
         </mgl-layer>
+        <mgl-layer id="download-tiles-border-incompatible" type="line" source="download-tiles"
+            [filter]="['==', ['get', 'incompatible'], 'true']" [layout]="{
+              'line-cap': 'butt',
+              'line-join': 'round'
+          }" [paint]="{
+              'line-color': ['get', 'color'],
+              'line-width': 3,
+              'line-dasharray': [2, 1]
+          }">
+        </mgl-layer>
         <mgl-layer id="download-tiles-text" type="symbol" source="download-tiles" [minzoom]="4" [layout]="{
               'text-field': ['get', 'label'],
               'text-font': ['Noto Sans Regular'],
-              'text-size': 30,
+              'text-size': ['get', 'textSize'],
           }" [paint]="{
               'text-color': ['get', 'color'],
               'text-halo-color' : 'white',
@@ -82,16 +93,9 @@
         </mgl-layer>
     </mgl-map>
 </div>
-<div class="absolute bottom-safe w-full text-lg text-center">
+<div class="absolute bottom-safe w-full text-lg text-center" [dir]="resources.direction">
     <div class="flex flex-row">
-        @if (!selectedTileXY() && !downloadingTileXY()) {
-        <div class="flex-1 bg-surface">
-            <div class="p-2">
-                {{resources.clickTheMapToSelectATile}}
-            </div>
-        </div>
-        }
-        @if (selectedTileXY() && !isSelectedAvailableForOffline() && !downloadingTileXY()) {
+        @if (selectedTileXY() && !isSelectedAvailableForOffline() && !downloadingTile()) {
         <div class="flex-1 m-1">
             <button mat-flat-button class="w-full" (click)="downloadSelected()" analyticsOn="click"
                 analyticsCategory="Offline Management" analyticsLabel="Download">
@@ -100,12 +104,13 @@
             </button>
         </div>
         }
-        @if (selectedTileXY() && isSelectedAvailableForOffline() && !downloadingTileXY()) {
+        @if (selectedTileXY() && isSelectedAvailableForOffline() && !downloadingTile()) {
         <div class="flex-1 m-1">
             <button mat-flat-button class="w-full" (click)="downloadSelected()" analyticsOn="click"
-                analyticsCategory="Offline Management" analyticsLabel="Update">
+                analyticsCategory="Offline Management"
+                [analyticsLabel]="isSelectedIncompatible() ? 'Download Again' : 'Update'">
                 <i class="fa fa-lg icon-download"></i>
-                {{resources.update}}
+                {{isSelectedIncompatible() ? resources.download : resources.update}}
             </button>
         </div>
         <div class="flex-1 m-1">
@@ -116,7 +121,7 @@
             </button>
         </div>
         }
-        @if (downloadingTileXY()) {
+        @if (downloadingTile()) {
         <div class="flex-1 m-1">
             <button mat-flat-button class="w-full" (click)="cancelDownload()" analyticsOn="click"
                 analyticsCategory="Offline Management" analyticsLabel="Cancel">
@@ -126,4 +131,21 @@
         </div>
         }
     </div>
+    @if (statusMessage()) {
+    <div class="bg-surface p-2 flex flex-row items-center justify-center gap-2"
+        [class.text-warning]="isStatusWarning()">
+        @if (isStatusWarning()) {
+        <i class="fa fa-lg icon-exclamation-triangle"></i>
+        }
+        <span>{{statusMessage()}}</span>
+        @if (isStatusWarning()) {
+        <button mat-button (click)="selectNextIncompatible()" analyticsOn="click"
+            analyticsCategory="Offline Management" analyticsLabel="Next Incompatible">
+            <i class="fa fa-lg" [class.icon-chevron-left]="resources.direction === 'rtl'"
+                [class.icon-chevron-right]="resources.direction !== 'rtl'"></i>
+            {{resources.next}}
+        </button>
+        }
+    </div>
+    }
 </div>

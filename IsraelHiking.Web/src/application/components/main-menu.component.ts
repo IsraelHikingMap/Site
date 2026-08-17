@@ -134,7 +134,7 @@ export class MainMenuComponent {
                 return;
             }
             const info = await Device.getInfo();
-            const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.offlineState.downloadedTiles);
+            const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
             infoString += [
                 `Manufacture: ${info.manufacturer}`,
                 `Model: ${info.model}`,
@@ -142,7 +142,7 @@ export class MainMenuComponent {
                 `OS version: ${info.osVersion}`,
                 `App version: ${(await App.getInfo()).version}`,
                 `Has Subscription: ${this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)}`,
-                downloadedTiles == null ? "" : `Downloaded Tiles: ${Object.keys(downloadedTiles)}`
+                `Downloaded Tiles: ${Object.keys(downloadedTiles)}`
             ].join("\n");
             const logFileUri = await this.fileService.storeFileToCache("log.txt", logs, false);
             const infoBase64 = encode(await new Response(infoString).arrayBuffer());

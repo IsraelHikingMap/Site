@@ -111,6 +111,7 @@
     "Distance": "Distancia",
     "Distance markers": "Marcadores de distancia",
     "Don't show this message again": "No mostrar este mensaje de nuevo",
+    "Download": "Descargar",
     "Download finished successfully!": "¡Descarga completada con éxito!",
     "Download Map for Offline viewing": "Descargar mapa para uso sin conexión",
     "Drinking Water": "Agua potable",
@@ -229,6 +230,7 @@
     "Not yet...": "Aún no...",
     "Observation Tower": "Torre de observación",
     "OK": "Aceptar",
+    "One tile needs to be downloaded again": "Un mosaico debe descargarse de nuevo",
     "Oops, something went wrong. Please try again later": "Vaya, algo salió mal. Por favor, inténtalo de nuevo más tarde",
     "Opacity": "Opacidad",
     "Open a File": "Abrir un archivo",
@@ -402,5 +404,6 @@
     "Yes": "Sí",
     "You have more than 10 routes which can cause performance issues.": "Tienes más de 10 rutas, lo que puede causar problemas de rendimiento.",
     "Zoom In": "Acercar",
-    "Zoom Out": "Alejar"
+    "Zoom Out": "Alejar",
+    "{{count}} tiles need to be downloaded again": "{{count}} mosaicos deben descargarse de nuevo"
 }

@@ -4,13 +4,7 @@
     version?: string;
 }
 
-export type TileMetadataPerFile = Date | FileNameDateVersion[];
-
 export type OfflineState = {
-    /**
-     * The downloaded tiles, key is the tile id and value is the date it was downloaded
-     */
-    downloadedTiles: Record<string, TileMetadataPerFile>;
     /**
      * `true` after a user made a purchase of the subscription 
      */

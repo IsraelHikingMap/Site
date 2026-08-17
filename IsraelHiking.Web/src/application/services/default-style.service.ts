@@ -231,7 +231,8 @@ export class DefaultStyleService {
             return this.createRasterLayer(layerData, isVisible);
         } else {
             const isBuiltInBaseLayer = DEFAULT_BASE_LAYERS.some(l => l.key === layerData.key);
-            const tryLocalStyle = mode !== "online-only" && isBuiltInBaseLayer && this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles != null;
+            const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
+            const tryLocalStyle = mode !== "online-only" && isBuiltInBaseLayer && Object.keys(downloadedTiles).length > 0;
             const language = this.resources.getCurrentLanguageCodeSimplified();
             const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration.units);
 

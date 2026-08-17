@@ -52,8 +52,21 @@ export type HTMLElementInputChangeEvent = {
     preventDefault(): void;
 };
 
+/** A file in the app's data directory, the time it was last written to and its size in bytes */
+export type DataDirectoryFile = {
+    fileName: string;
+    modifiedDate: Date;
+    size: number;
+};
+
 @Service()
 export class FileService {
+    /**
+     * The offline files are downloaded into their own directory in the cache, so that they can be
+     * cleared without touching anything else that is cached.
+     */
+    private static readonly OFFLINE_CACHE_DIRECTORY = "offline-files";
+
 
     private readonly httpClient = inject(HttpClient);
     private readonly runningContextService = inject(RunningContextService);
@@ -322,8 +335,13 @@ export class FileService {
         return results.uri;
     }
 
+    /**
+     * Downloads an offline file into the offline files cache. A file that was not downloaded to its end,
+     * because the download was aborted or failed, is deleted - only whole files are left in the cache.
+     */
     public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void, abortController: AbortController): Promise<void> {
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
+        const path = FileService.offlineCachePath(fileName);
         let previousPercentage = 0;
         const response = await fetch(url, {
             headers: {
@@ -339,50 +357,117 @@ export class FileService {
         const contentLength = Number(response.headers.get("Content-Length"));
         let receivedLength = 0;
         let done: boolean;
-        do {
-            const readResult = await reader.read();
-            done = readResult.done;
-            if (done) {
-                break;
-            }
-            const value = readResult.value;
-            if (abortController.signal.aborted) {
-                this.loggingService.info(`[Files] Aborting download of file ${fileName}`);
-                return;
-            }
-
-            if (receivedLength === 0) {
-                await Filesystem.writeFile({
-                    path: fileName,
-                    directory: Directory.Cache,
-                    data: encode(value.buffer)
-                });
-            } else {
-                await Filesystem.appendFile({
-                    path: fileName,
-                    directory: Directory.Cache,
-                    data: encode(value.buffer)
-                });
-            }
-            receivedLength += value.length;
-            if (contentLength > 0) {
-                const currentPercentage = receivedLength / contentLength;
-                if (currentPercentage - previousPercentage > 0.001) {
-                    progressCallback(currentPercentage);
-                    previousPercentage = currentPercentage;
+        try {
+            do {
+                const readResult = await reader.read();
+                done = readResult.done;
+                if (done) {
+                    break;
                 }
-            }
-        } while (!done);
+                const value = readResult.value;
+                if (abortController.signal.aborted) {
+                    this.loggingService.info(`[Files] Aborting download of file ${fileName}`);
+                    await this.deleteFileInOfflineCache(fileName);
+                    return;
+                }
+
+                if (receivedLength === 0) {
+                    await Filesystem.writeFile({
+                        path,
+                        directory: Directory.Cache,
+                        data: encode(value.buffer),
+                        recursive: true
+                    });
+                } else {
+                    await Filesystem.appendFile({
+                        path,
+                        directory: Directory.Cache,
+                        data: encode(value.buffer)
+                    });
+                }
+                receivedLength += value.length;
+                if (contentLength > 0) {
+                    const currentPercentage = receivedLength / contentLength;
+                    if (currentPercentage - previousPercentage > 0.001) {
+                        progressCallback(currentPercentage);
+                        previousPercentage = currentPercentage;
+                    }
+                }
+            } while (!done);
+        } catch (ex) {
+            await this.deleteFileInOfflineCache(fileName);
+            throw ex;
+        }
         this.loggingService.info(`[Files] Finished downloading and writing file to cache, file name ${fileName}`);
     }
 
     public async moveFileFromCacheToDataDirectory(fileName: string): Promise<void> {
         await Filesystem.rename({
-            from: fileName,
+            from: FileService.offlineCachePath(fileName),
             to: fileName,
             directory: Directory.Cache,
             toDirectory: Directory.Data
         })
+    }
+
+    /**
+     * The offline files that were fully downloaded and are waiting to be moved to the data directory.
+     * They are only there while a download is going on, or after one that did not get to finish.
+     */
+    public async listFilesInOfflineCache(): Promise<string[]> {
+        try {
+            const results = await Filesystem.readdir({
+                path: FileService.OFFLINE_CACHE_DIRECTORY,
+                directory: Directory.Cache
+            });
+            return results.files.filter(f => f.type === "file").map(f => f.name);
+        } catch {
+            return []; // The directory is only there once something was downloaded into it
+        }
+    }
+
+    /**
+     * Removes whatever is left in the offline files cache, so that a download never continues from files
+     * that were downloaded in a previous run of the app and might not be the current ones anymore.
+     */
+    public async clearOfflineCache(): Promise<void> {
+        try {
+            await Filesystem.rmdir({
+                path: FileService.OFFLINE_CACHE_DIRECTORY,
+                directory: Directory.Cache,
+                recursive: true
+            });
+            this.loggingService.info("[Files] Cleared the offline files cache");
+        } catch {
+            // The directory is only there once something was downloaded into it
+        }
+    }
+
+    private async deleteFileInOfflineCache(fileName: string): Promise<void> {
+        try {
+            await Filesystem.deleteFile({
+                path: FileService.offlineCachePath(fileName),
+                directory: Directory.Cache
+            });
+        } catch (ex) {
+            this.loggingService.error(`[Files] Failed to delete the partial file: ${fileName}, ${(ex as Error).message}`);
+        }
+    }
+
+    private static offlineCachePath(fileName: string): string {
+        return `${FileService.OFFLINE_CACHE_DIRECTORY}/${fileName}`;
+    }
+
+    /**
+     * The files that are currently stored in the data directory, which is where the offline files are
+     * kept, with the time each of them was last written to. Directories are not returned, only files.
+     */
+    public async listFilesInDataDirectory(): Promise<DataDirectoryFile[]> {
+        const results = await Filesystem.readdir({
+            path: "",
+            directory: Directory.Data
+        });
+        return results.files.filter(f => f.type === "file").map(f => ({ fileName: f.name, modifiedDate: new Date(f.mtime), size: f.size }));
     }
 
     public async deleteFileInDataDirectory(fileName: string): Promise<void> {
