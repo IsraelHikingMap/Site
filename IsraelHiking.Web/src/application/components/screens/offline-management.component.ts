@@ -1,4 +1,4 @@
-﻿import { Component, inject, signal, computed } from "@angular/core";
+import { Component, inject, signal, computed } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { type Map, type MapMouseEvent, MercatorCoordinate, type StyleSpecification } from "maplibre-gl";

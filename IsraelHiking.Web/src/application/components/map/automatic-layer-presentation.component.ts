@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, OnChanges, SimpleChanges, OnDestroy, OutputRefSubscription, inject, input } from "@angular/core";
+import { Component, OnInit, OnChanges, SimpleChanges, OnDestroy, OutputRefSubscription, inject, input } from "@angular/core";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { Subject, mergeMap } from "rxjs";
 import { Store } from "@ngxs/store";

@@ -111,6 +111,7 @@
     "Distance": "מרחק",
     "Distance markers": "סימני מרחק",
     "Don't show this message again": "אל תציג הודעה זו שוב",
+    "Download": "הורידו",
     "Download finished successfully!": "ההורדה הסתיימה בהצלחה!",
     "Download Map for Offline viewing": "הורידו מפות לצפיה ללא חיבור לרשת",
     "Drinking Water": "מי שתיה",
@@ -229,6 +230,7 @@
     "Not yet...": "עוד לא...",
     "Observation Tower": "מגדל תצפית",
     "OK": "אישור",
+    "One tile needs to be downloaded again": "יש להוריד מחדש אריח אחד",
     "Oops, something went wrong. Please try again later": "אופס, משהו השתבש. אנא נסו שנית מאוחר יותר",
     "Opacity": "שקיפות",
     "Open a File": "פתיחת קובץ",
@@ -402,5 +404,6 @@
     "Yes": "כן",
     "You have more than 10 routes which can cause performance issues.": "יש לך יותר מעשרה מסלולים בתכנון, מה שיכול לגרום לבעיות ביצועים.",
     "Zoom In": "הגדלת המפה",
-    "Zoom Out": "הקטנת המפה"
+    "Zoom Out": "הקטנת המפה",
+    "{{count}} tiles need to be downloaded again": "יש להוריד מחדש {{count}} אריחים"
 }

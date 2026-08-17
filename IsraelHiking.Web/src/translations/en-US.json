@@ -111,6 +111,7 @@
     "Distance": "Distance",
     "Distance markers": "Distance markers",
     "Don't show this message again": "Don't show this message again",
+    "Download": "Download",
     "Download finished successfully!": "Download finished successfully!",
     "Download Map for Offline viewing": "Download Map for Offline viewing",
     "Drinking Water": "Drinking Water",
@@ -229,6 +230,7 @@
     "Not yet...": "Not yet...",
     "Observation Tower": "Observation Tower",
     "OK": "OK",
+    "One tile needs to be downloaded again": "One tile needs to be downloaded again",
     "Oops, something went wrong. Please try again later": "Oops, something went wrong. Please try again later",
     "Opacity": "Opacity",
     "Open a File": "Open a File",
@@ -402,5 +404,6 @@
     "Yes": "Yes",
     "You have more than 10 routes which can cause performance issues.": "You have more than 10 routes which can cause performance issues.",
     "Zoom In": "Zoom In",
-    "Zoom Out": "Zoom Out"
+    "Zoom Out": "Zoom Out",
+    "{{count}} tiles need to be downloaded again": "{{count}} tiles need to be downloaded again"
 }

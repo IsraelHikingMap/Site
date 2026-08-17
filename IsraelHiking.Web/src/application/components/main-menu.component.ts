@@ -1,4 +1,4 @@
-﻿import { Component, inject, computed, signal, afterNextRender } from "@angular/core";
+import { Component, inject, computed, signal, afterNextRender } from "@angular/core";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 import { MatButton } from "@angular/material/button";
 import { MatMenuTrigger, MatMenu, MatMenuItem } from "@angular/material/menu";

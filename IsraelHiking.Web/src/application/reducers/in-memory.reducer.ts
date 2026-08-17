@@ -1,4 +1,4 @@
-﻿import { State, Action, StateContext } from "@ngxs/store";
+import { State, Action, StateContext } from "@ngxs/store";
 import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
@@ -56,11 +56,6 @@ export class SetEffectiveThemeAction {
 export class SetDownloadedTilesAction {
     public static readonly type = "[In Memory] SetDownloadedTilesAction";
     constructor(public readonly downloadedTiles: Record<string, FileNameDateVersion[]>) { }
-}
-
-export class SetDownloadedRoutingTilesAction {
-    public static readonly type = "[In Memory] SetDownloadedRoutingTilesAction";
-    constructor(public readonly downloadedRoutingTiles: string[]) { }
 }
 
 @State({
@@ -155,14 +150,6 @@ export class InMemoryReducer {
     public setDownloadedTiles(ctx: StateContext<InMemoryState>, action: SetDownloadedTilesAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.downloadedTiles = action.downloadedTiles;
-            return lastState;
-        }));
-    }
-
-    @Action(SetDownloadedRoutingTilesAction)
-    public setDownloadedRoutingTiles(ctx: StateContext<InMemoryState>, action: SetDownloadedRoutingTilesAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.downloadedRoutingTiles = action.downloadedRoutingTiles;
             return lastState;
         }));
     }

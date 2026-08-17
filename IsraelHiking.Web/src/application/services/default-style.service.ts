@@ -1,4 +1,4 @@
-﻿import { inject, Service } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import type { RasterLayerSpecification, RasterSourceSpecification, StyleSpecification } from "maplibre-gl";
 
