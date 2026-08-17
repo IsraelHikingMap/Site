@@ -111,6 +111,7 @@
     "Distance": "Расстояние",
     "Distance markers": "Маркеры расстояния",
     "Don't show this message again": "Не показывать это сообщение снова",
+    "Download": "Загрузить",
     "Download finished successfully!": "Загрузка завершена успешно!",
     "Download Map for Offline viewing": "Загрузите карту для офлайн-использования",
     "Drinking Water": "Питьевая вода",
@@ -242,6 +243,7 @@
     "Orange Regional Trail": "Оранжевая региональная тропа",
     "Orchard": "Сад",
     "OSM terms of service": "Условия обслуживания OSM",
+    "One area needs to be downloaded again": "Одну область нужно загрузить заново",
     "Other": "Другое",
     "Overlay Properties": "Свойства наложения",
     "Overlays": "Наложения",
@@ -403,5 +405,6 @@
     "Yes": "Да",
     "You have more than 10 routes which can cause performance issues.": "У вас есть более 10 маршрутов, что может вызвать проблемы с производительностью.",
     "Zoom In": "Увеличить",
-    "Zoom Out": "Уменьшить"
+    "Zoom Out": "Уменьшить",
+    "{{count}} areas need to be downloaded again": "Областей нужно загрузить заново: {{count}}"
 }

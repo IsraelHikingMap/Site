@@ -111,6 +111,7 @@
     "Distance": "מרחק",
     "Distance markers": "סימני מרחק",
     "Don't show this message again": "אל תציג הודעה זו שוב",
+    "Download": "הורדה",
     "Download finished successfully!": "ההורדה הסתיימה בהצלחה!",
     "Download Map for Offline viewing": "הורידו מפות לצפיה ללא חיבור לרשת",
     "Drinking Water": "מי שתיה",
@@ -242,6 +243,7 @@
     "Orange Regional Trail": "שביל אזורי כתום",
     "Orchard": "מטע",
     "OSM terms of service": "תנאי שימוש של OSM",
+    "One area needs to be downloaded again": "יש להוריד מחדש אזור אחד",
     "Other": "אחר",
     "Overlay Properties": "הגדרות שכבה",
     "Overlays": "שכבות שקופות",
@@ -403,5 +405,6 @@
     "Yes": "כן",
     "You have more than 10 routes which can cause performance issues.": "יש לך יותר מעשרה מסלולים בתכנון, מה שיכול לגרום לבעיות ביצועים.",
     "Zoom In": "הגדלת המפה",
-    "Zoom Out": "הקטנת המפה"
+    "Zoom Out": "הקטנת המפה",
+    "{{count}} areas need to be downloaded again": "יש להוריד מחדש {{count}} אזורים"
 }

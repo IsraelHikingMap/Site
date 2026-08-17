@@ -49,9 +49,57 @@ export class OfflineManagementComponent {
     });
 
     /**
+     * The tiles that are on the device but can no longer be used, sorted so that moving to the next one
+     * keeps the same order every time. The root files are not of a specific tile, so they are not here -
+     * they are not drawn on the map either, and they are updated along with any tile that is downloaded.
+     */
+    public readonly incompatibleTileKeys = computed<string[]>(() => {
+        const downloadedTiles = this.downloadedTilesState();
+        return Object.keys(downloadedTiles)
+            .filter(tileKey => PmTilesService.fromTileKey(tileKey) != null)
+            .filter(tileKey => !this.offlineFilesDownloadService.isTileCompatible(tileKey, downloadedTiles[tileKey]))
+            .sort();
+    });
+
+    public readonly isSelectedIncompatible = computed(() => {
+        const selectedTileXY = this.selectedTileXY();
+        if (selectedTileXY == null) {
+            return false;
+        }
+        return this.incompatibleTileKeys().includes(PmTilesService.toTileKey(selectedTileXY.tileX, selectedTileXY.tileY));
+    });
+
+    /**
+     * What to tell the user below the buttons: how many tiles need to be downloaded again, falling back to
+     * explaining how a tile is selected. The count is kept while a tile is selected rather than being
+     * replaced by something about that tile, so that the user can see how many are left as they go over
+     * them. Nothing is said while a tile is being downloaded, the progress on the tile itself says it.
+     */
+    public readonly statusMessage = computed<string>(() => {
+        if (this.downloadingTile() != null) {
+            return null;
+        }
+        const incompatibleCount = this.incompatibleTileKeys().length;
+        if (incompatibleCount === 1) {
+            return this.resources.oneAreaNeedsToBeDownloadedAgain;
+        }
+        if (incompatibleCount > 1) {
+            return this.resources.areasNeedToBeDownloadedAgain.replace("{{count}}", incompatibleCount.toString());
+        }
+        return this.selectedTileXY() == null ? this.resources.clickTheMapToSelectATile : null;
+    });
+
+    /** Whether the message is about tiles that need to be downloaded again and not just an explanation */
+    public readonly isStatusWarning = computed(() =>
+        this.downloadingTile() == null && this.incompatibleTileKeys().length > 0);
+
+    /**
      * The tiles that were downloaded, drawn from the files that are on the device - they are read into
      * the state while the app is running, so this follows it instead of being built once.
      * The tile that is being downloaded and the selected one are drawn on their own, so they are skipped.
+     * A tile that can no longer be used is marked with a "!" rather than with the date it was downloaded
+     * at, which is not the reason it can't be used, and is drawn with a dashed outline so that it is told
+     * apart from the rest without relying on its color alone.
      */
     public readonly downloadedTiles = computed<GeoJSON.FeatureCollection>(() => {
         const features: GeoJSON.Feature[] = [];
@@ -70,12 +118,18 @@ export class OfflineManagementComponent {
                 continue; // Skip the center tile if not downloading
             }
 
-            const downloadedDate = this.offlineFilesDownloadService.getLastModifiedDate(downloadedTiles[tileKey]);
-            const label = downloadedDate.getFullYear() + "\n" +
-                (downloadedDate.getMonth() + 1).toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 }) + "\n" +
-                downloadedDate.getDate().toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 });
+            const isCompatible = this.offlineFilesDownloadService.isTileCompatible(tileKey, downloadedTiles[tileKey]);
+            let label = "!";
+            if (isCompatible) {
+                const downloadedDate = this.offlineFilesDownloadService.getLastModifiedDate(downloadedTiles[tileKey]);
+                label = downloadedDate.getFullYear() + "\n" +
+                    (downloadedDate.getMonth() + 1).toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 }) + "\n" +
+                    downloadedDate.getDate().toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 });
+            }
             const feature = this.tileCoordinatesToPolygon(tileXDownloaded, tileYDownloaded, label, 1);
-            feature.properties.color = this.offlineFilesDownloadService.isTileCompatible(tileKey, downloadedTiles[tileKey]) ? "blue" : "red";
+            feature.properties.color = isCompatible ? "blue" : "red";
+            feature.properties.incompatible = isCompatible ? "false" : "true";
+            feature.properties.textSize = isCompatible ? 30 : 60;
             features.push(feature);
         }
 
@@ -216,11 +270,34 @@ export class OfflineManagementComponent {
         const mercator = MercatorCoordinate.fromLngLat(event.lngLat);
         const tileX = Math.floor((mercator.x * tileCount));
         const tileY = Math.floor((mercator.y * tileCount));
+        this.selectTile(tileX, tileY);
+    }
+
+    private selectTile(tileX: number, tileY: number) {
         this.selectedTileXY.set({ tileX, tileY });
         this.map.flyTo({
             center: SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX + 0.5, y: tileY + 0.5 }, TILES_ZOOM)),
             zoom: TILES_ZOOM - 1
         });
+    }
+
+    /**
+     * Moves to the tile that needs to be downloaded again after the one that is selected, so that the user
+     * can go over them one at a time and download each one when they want to. It goes back to the first one
+     * after the last, since a tile stays in the list until it is downloaded again or deleted.
+     */
+    public selectNextIncompatible() {
+        const incompatibleTileKeys = this.incompatibleTileKeys();
+        if (incompatibleTileKeys.length === 0) {
+            return;
+        }
+        const selectedTileXY = this.selectedTileXY();
+        const selectedTileKey = selectedTileXY == null
+            ? null
+            : PmTilesService.toTileKey(selectedTileXY.tileX, selectedTileXY.tileY);
+        const nextIndex = (incompatibleTileKeys.indexOf(selectedTileKey) + 1) % incompatibleTileKeys.length;
+        const { tileX, tileY } = PmTilesService.fromTileKey(incompatibleTileKeys[nextIndex]);
+        this.selectTile(tileX, tileY);
     }
 
     public onMapLoad(map: Map) {

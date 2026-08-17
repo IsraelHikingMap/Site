@@ -111,6 +111,7 @@
     "Distance": "Distancia",
     "Distance markers": "Marcadores de distancia",
     "Don't show this message again": "No mostrar este mensaje de nuevo",
+    "Download": "Descargar",
     "Download finished successfully!": "¡Descarga completada con éxito!",
     "Download Map for Offline viewing": "Descargar mapa para uso sin conexión",
     "Drinking Water": "Agua potable",
@@ -242,6 +243,7 @@
     "Orange Regional Trail": "Sendero regional naranja",
     "Orchard": "Huerto",
     "OSM terms of service": "Términos de servicio de OSM",
+    "One area needs to be downloaded again": "Un área debe descargarse de nuevo",
     "Other": "Otro",
     "Overlay Properties": "Propiedades de la superposición",
     "Overlays": "Superposiciones",
@@ -403,5 +405,6 @@
     "Yes": "Sí",
     "You have more than 10 routes which can cause performance issues.": "Tienes más de 10 rutas, lo que puede causar problemas de rendimiento.",
     "Zoom In": "Acercar",
-    "Zoom Out": "Alejar"
+    "Zoom Out": "Alejar",
+    "{{count}} areas need to be downloaded again": "{{count}} áreas deben descargarse de nuevo"
 }

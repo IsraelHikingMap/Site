@@ -111,6 +111,7 @@
     "Distance": "المسافة",
     "Distance markers": "علامات المسافة",
     "Don't show this message again": "لا تعرض هذه الرسالة مرة أخرى",
+    "Download": "تنزيل",
     "Download finished successfully!": "تم الانتهاء من تحميله بنجاح!",
     "Download Map for Offline viewing": "تحميل خريطة للاستخدام غير المتصل",
     "Drinking Water": "مياه شرب",
@@ -242,6 +243,7 @@
     "Orange Regional Trail": "مسار إقليمي برتقالي",
     "Orchard": "بستان",
     "OSM terms of service": "شروط خدمة OSM",
+    "One area needs to be downloaded again": "يجب تنزيل منطقة واحدة مرة أخرى",
     "Other": "آخر",
     "Overlay Properties": "خصائص الطبقة الإضافية",
     "Overlays": "طبقات إضافية",
@@ -403,5 +405,6 @@
     "Yes": "نعم",
     "You have more than 10 routes which can cause performance issues.": "لديك أكثر من 10 مسارات، وقد يتسبب ذلك في مشاكل في الأداء.",
     "Zoom In": "تكبير",
-    "Zoom Out": "تصغير"
+    "Zoom Out": "تصغير",
+    "{{count}} areas need to be downloaded again": "يجب تنزيل {{count}} مناطق مرة أخرى"
 }
