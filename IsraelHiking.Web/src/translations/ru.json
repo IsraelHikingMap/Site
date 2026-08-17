@@ -230,6 +230,7 @@
     "Not yet...": "Ещё не...",
     "Observation Tower": "Смотровая башня",
     "OK": "ОК",
+    "One tile needs to be downloaded again": "Одну плитку нужно загрузить заново",
     "Oops, something went wrong. Please try again later": "Упс, что-то пошло не так. Пожалуйста, попробуйте позже",
     "Opacity": "Прозрачность",
     "Open a File": "Открыть файл",
@@ -243,7 +244,6 @@
     "Orange Regional Trail": "Оранжевая региональная тропа",
     "Orchard": "Сад",
     "OSM terms of service": "Условия обслуживания OSM",
-    "One area needs to be downloaded again": "Одну область нужно загрузить заново",
     "Other": "Другое",
     "Overlay Properties": "Свойства наложения",
     "Overlays": "Наложения",
@@ -406,5 +406,5 @@
     "You have more than 10 routes which can cause performance issues.": "У вас есть более 10 маршрутов, что может вызвать проблемы с производительностью.",
     "Zoom In": "Увеличить",
     "Zoom Out": "Уменьшить",
-    "{{count}} areas need to be downloaded again": "Областей нужно загрузить заново: {{count}}"
+    "{{count}} tiles need to be downloaded again": "Плиток нужно загрузить заново: {{count}}"
 }

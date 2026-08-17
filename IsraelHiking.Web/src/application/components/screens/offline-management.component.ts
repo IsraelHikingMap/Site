@@ -81,10 +81,10 @@ export class OfflineManagementComponent {
         }
         const incompatibleCount = this.incompatibleTileKeys().length;
         if (incompatibleCount === 1) {
-            return this.resources.oneAreaNeedsToBeDownloadedAgain;
+            return this.resources.oneTileNeedsToBeDownloadedAgain;
         }
         if (incompatibleCount > 1) {
-            return this.resources.areasNeedToBeDownloadedAgain.replace("{{count}}", incompatibleCount.toString());
+            return this.resources.tilesNeedToBeDownloadedAgain.replace("{{count}}", incompatibleCount.toString());
         }
         return this.selectedTileXY() == null ? this.resources.clickTheMapToSelectATile : null;
     });
@@ -127,7 +127,7 @@ export class OfflineManagementComponent {
                     downloadedDate.getDate().toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 });
             }
             const feature = this.tileCoordinatesToPolygon(tileXDownloaded, tileYDownloaded, label, 1);
-            feature.properties.color = isCompatible ? "blue" : "red";
+            feature.properties.color = isCompatible ? "blue" : "#ef6c00";
             feature.properties.incompatible = isCompatible ? "false" : "true";
             feature.properties.textSize = isCompatible ? 30 : 60;
             features.push(feature);

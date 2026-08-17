@@ -230,6 +230,7 @@
     "Not yet...": "ليس بعد...",
     "Observation Tower": "برج المراقبة",
     "OK": "حسناً",
+    "One tile needs to be downloaded again": "يجب تنزيل مربع واحد مرة أخرى",
     "Oops, something went wrong. Please try again later": "عذرًا، حدث خطأ. يرجى المحاولة مرة أخرى لاحقًا",
     "Opacity": "شفافية",
     "Open a File": "فتح ملف",
@@ -243,7 +244,6 @@
     "Orange Regional Trail": "مسار إقليمي برتقالي",
     "Orchard": "بستان",
     "OSM terms of service": "شروط خدمة OSM",
-    "One area needs to be downloaded again": "يجب تنزيل منطقة واحدة مرة أخرى",
     "Other": "آخر",
     "Overlay Properties": "خصائص الطبقة الإضافية",
     "Overlays": "طبقات إضافية",
@@ -406,5 +406,5 @@
     "You have more than 10 routes which can cause performance issues.": "لديك أكثر من 10 مسارات، وقد يتسبب ذلك في مشاكل في الأداء.",
     "Zoom In": "تكبير",
     "Zoom Out": "تصغير",
-    "{{count}} areas need to be downloaded again": "يجب تنزيل {{count}} مناطق مرة أخرى"
+    "{{count}} tiles need to be downloaded again": "يجب تنزيل {{count}} مربعات مرة أخرى"
 }

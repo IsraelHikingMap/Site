@@ -230,6 +230,7 @@
     "Not yet...": "Aún no...",
     "Observation Tower": "Torre de observación",
     "OK": "Aceptar",
+    "One tile needs to be downloaded again": "Un mosaico debe descargarse de nuevo",
     "Oops, something went wrong. Please try again later": "Vaya, algo salió mal. Por favor, inténtalo de nuevo más tarde",
     "Opacity": "Opacidad",
     "Open a File": "Abrir un archivo",
@@ -243,7 +244,6 @@
     "Orange Regional Trail": "Sendero regional naranja",
     "Orchard": "Huerto",
     "OSM terms of service": "Términos de servicio de OSM",
-    "One area needs to be downloaded again": "Un área debe descargarse de nuevo",
     "Other": "Otro",
     "Overlay Properties": "Propiedades de la superposición",
     "Overlays": "Superposiciones",
@@ -406,5 +406,5 @@
     "You have more than 10 routes which can cause performance issues.": "Tienes más de 10 rutas, lo que puede causar problemas de rendimiento.",
     "Zoom In": "Acercar",
     "Zoom Out": "Alejar",
-    "{{count}} areas need to be downloaded again": "{{count}} áreas deben descargarse de nuevo"
+    "{{count}} tiles need to be downloaded again": "{{count}} mosaicos deben descargarse de nuevo"
 }

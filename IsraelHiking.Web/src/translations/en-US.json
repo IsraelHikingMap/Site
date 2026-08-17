@@ -230,6 +230,7 @@
     "Not yet...": "Not yet...",
     "Observation Tower": "Observation Tower",
     "OK": "OK",
+    "One tile needs to be downloaded again": "One tile needs to be downloaded again",
     "Oops, something went wrong. Please try again later": "Oops, something went wrong. Please try again later",
     "Opacity": "Opacity",
     "Open a File": "Open a File",
@@ -243,7 +244,6 @@
     "Orange Regional Trail": "Orange Regional Trail",
     "Orchard": "Orchard",
     "OSM terms of service": "OSM terms of service",
-    "One area needs to be downloaded again": "One area needs to be downloaded again",
     "Other": "Other",
     "Overlay Properties": "Overlay Properties",
     "Overlays": "Overlays",
@@ -406,5 +406,5 @@
     "You have more than 10 routes which can cause performance issues.": "You have more than 10 routes which can cause performance issues.",
     "Zoom In": "Zoom In",
     "Zoom Out": "Zoom Out",
-    "{{count}} areas need to be downloaded again": "{{count}} areas need to be downloaded again"
+    "{{count}} tiles need to be downloaded again": "{{count}} tiles need to be downloaded again"
 }

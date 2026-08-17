@@ -230,6 +230,7 @@
     "Not yet...": "עוד לא...",
     "Observation Tower": "מגדל תצפית",
     "OK": "אישור",
+    "One tile needs to be downloaded again": "יש להוריד מחדש אריח אחד",
     "Oops, something went wrong. Please try again later": "אופס, משהו השתבש. אנא נסו שנית מאוחר יותר",
     "Opacity": "שקיפות",
     "Open a File": "פתיחת קובץ",
@@ -243,7 +244,6 @@
     "Orange Regional Trail": "שביל אזורי כתום",
     "Orchard": "מטע",
     "OSM terms of service": "תנאי שימוש של OSM",
-    "One area needs to be downloaded again": "יש להוריד מחדש אזור אחד",
     "Other": "אחר",
     "Overlay Properties": "הגדרות שכבה",
     "Overlays": "שכבות שקופות",
@@ -406,5 +406,5 @@
     "You have more than 10 routes which can cause performance issues.": "יש לך יותר מעשרה מסלולים בתכנון, מה שיכול לגרום לבעיות ביצועים.",
     "Zoom In": "הגדלת המפה",
     "Zoom Out": "הקטנת המפה",
-    "{{count}} areas need to be downloaded again": "יש להוריד מחדש {{count}} אזורים"
+    "{{count}} tiles need to be downloaded again": "יש להוריד מחדש {{count}} אריחים"
 }
