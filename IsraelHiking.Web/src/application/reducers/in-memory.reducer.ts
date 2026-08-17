@@ -1,9 +1,9 @@
-import { State, Action, StateContext } from "@ngxs/store";
+﻿import { State, Action, StateContext } from "@ngxs/store";
 import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { ShareUrl, InMemoryState, PublicRoutesFilter, Theme } from "../models";
+import type { ShareUrl, InMemoryState, PublicRoutesFilter, Theme, FileNameDateVersion } from "../models";
 
 export class ToggleDistanceAction {
     public static readonly type = "[In Memory] ToggleDistanceAction";
@@ -51,6 +51,16 @@ export class SetPublicRoutesFilterAction {
 export class SetEffectiveThemeAction {
     public static readonly type = "[In Memory] SetEffectiveThemeAction";
     constructor(public readonly theme: Theme) { }
+}
+
+export class SetDownloadedTilesAction {
+    public static readonly type = "[In Memory] SetDownloadedTilesAction";
+    constructor(public readonly downloadedTiles: Record<string, FileNameDateVersion[]>) { }
+}
+
+export class SetDownloadedRoutingTilesAction {
+    public static readonly type = "[In Memory] SetDownloadedRoutingTilesAction";
+    constructor(public readonly downloadedRoutingTiles: string[]) { }
 }
 
 @State({
@@ -137,6 +147,22 @@ export class InMemoryReducer {
     public setEffectiveTheme(ctx: StateContext<InMemoryState>, action: SetEffectiveThemeAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.effectiveTheme = action.theme;
+            return lastState;
+        }));
+    }
+
+    @Action(SetDownloadedTilesAction)
+    public setDownloadedTiles(ctx: StateContext<InMemoryState>, action: SetDownloadedTilesAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.downloadedTiles = action.downloadedTiles;
+            return lastState;
+        }));
+    }
+
+    @Action(SetDownloadedRoutingTilesAction)
+    public setDownloadedRoutingTiles(ctx: StateContext<InMemoryState>, action: SetDownloadedRoutingTilesAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.downloadedRoutingTiles = action.downloadedRoutingTiles;
             return lastState;
         }));
     }

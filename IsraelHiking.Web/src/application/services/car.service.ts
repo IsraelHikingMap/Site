@@ -1,4 +1,4 @@
-import { inject, Service } from "@angular/core";
+﻿import { inject, Service } from "@angular/core";
 import { registerPlugin } from "@capacitor/core";
 import { Store } from "@ngxs/store";
 import { skip } from "rxjs";
@@ -39,7 +39,7 @@ export class CarService {
         this.store.select((state: ApplicationState) => state.layersState.selectedBaseLayerKey).pipe(skip(1)).subscribe(() => {
             this.setStyle();
         });
-        this.store.select((state: ApplicationState) => state.offlineState.downloadedTiles).pipe(skip(1)).subscribe(() => {
+        this.store.select((state: ApplicationState) => state.inMemoryState.downloadedTiles).pipe(skip(1)).subscribe(() => {
             this.setStyle();
         });
         this.store.select((state: ApplicationState) => state.routes.present).pipe(skip(1)).subscribe(() => {

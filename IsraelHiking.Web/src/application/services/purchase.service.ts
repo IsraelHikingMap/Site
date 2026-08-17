@@ -1,4 +1,4 @@
-import { inject, Service } from "@angular/core";
+﻿import { computed, inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { firstValueFrom, timeout } from "rxjs";
@@ -21,6 +21,19 @@ export class PurchaseService {
     private readonly loggingService = inject(LoggingService);
     private readonly httpClient = inject(HttpClient);
     private readonly store = inject(Store);
+
+    private readonly isSubscribed = this.store.selectSignal((s: ApplicationState) => s.offlineState.isSubscribed);
+    private readonly downloadedTiles = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.downloadedTiles);
+    /** Whether there are any offline files on the device, i.e. whether this user ever downloaded an area */
+    private readonly hasDownloadedTiles = computed(() => Object.keys(this.downloadedTiles()).length > 0);
+
+    /** The subscription can be bought by a user that has no offline files, and renewed by one that has */
+    public readonly isPurchaseAvailable = computed(() =>
+        this.runningContextService.isCapacitor && !this.isSubscribed() && !this.hasDownloadedTiles());
+
+    /** @see isPurchaseAvailable */
+    public readonly isRenewAvailable = computed(() =>
+        this.runningContextService.isCapacitor && !this.isSubscribed() && this.hasDownloadedTiles());
 
     public async initialize() {
         if (!this.runningContextService.isCapacitor) {
@@ -97,20 +110,6 @@ export class PurchaseService {
             await Purchases.syncPurchases();
             await this.checkAndUpdateOfflineAvailability();
         }
-    }
-
-    public isPurchaseAvailable(): boolean {
-        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        return this.runningContextService.isCapacitor &&
-            !offlineState.isSubscribed &&
-            offlineState.downloadedTiles == null;
-    }
-
-    public isRenewAvailable() {
-        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        return this.runningContextService.isCapacitor &&
-            !offlineState.isSubscribed &&
-            offlineState.downloadedTiles != null;
     }
 
     private shouldShowPaywall(): boolean {

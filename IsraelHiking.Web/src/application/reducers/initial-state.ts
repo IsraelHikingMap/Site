@@ -223,6 +223,8 @@ export const initialState =
         },
         inMemoryState: {
             effectiveTheme: "light",
+            downloadedTiles: {},
+            downloadedRoutingTiles: [],
             distance: false,
             following: true,
             pannedTimestamp: null,
@@ -243,7 +245,6 @@ export const initialState =
         },
         offlineState: {
             isSubscribed: false,
-            downloadedTiles: null,
             uploadPoiQueue: [],
             lastOfflineDetectedDate: null
         },

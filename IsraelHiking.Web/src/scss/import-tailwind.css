@@ -12,4 +12,5 @@
     --color-on-surface: var(--mat-sys-on-surface);
     --color-outline-variant: var(--mat-sys-outline-variant);
     --color-brand: var(--brand-color);
+    --color-warning: var(--warning-color);
 }

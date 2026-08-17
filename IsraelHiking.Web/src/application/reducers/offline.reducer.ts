@@ -1,23 +1,13 @@
-import { State, Action, StateContext } from "@ngxs/store";
+﻿import { State, Action, StateContext } from "@ngxs/store";
 import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { OfflineState, TileMetadataPerFile } from "../models";
+import type { OfflineState } from "../models";
 
 export class SetOfflineSubscribedAction {
     public static readonly type = "[Offline] SetOfflineSubscribedAction";
     constructor(public readonly isSubscribed: boolean) { }
-}
-
-export class SetOfflineMapsLastModifiedDateAction {
-    public static readonly type = "[Offline] SetOfflineMapsLastModifiedDateAction";
-    constructor(public readonly data: TileMetadataPerFile, public readonly tileX: number, public readonly tileY: number) { }
-}
-
-export class DeleteOfflineMapsTileAction {
-    public static readonly type = "[Offline] DeleteOfflineMapsTileAction";
-    constructor(public readonly tileX: number, public readonly tileY: number) { }
 }
 
 export class AddToPoiQueueAction {
@@ -46,31 +36,6 @@ export class OfflineReducer {
     public setOfflineSubscribed(ctx: StateContext<OfflineState>, action: SetOfflineSubscribedAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.isSubscribed = action.isSubscribed;
-            return lastState;
-        }));
-    }
-
-    @Action(SetOfflineMapsLastModifiedDateAction)
-    public setOfflineMpasLastModifiedDate(ctx: StateContext<OfflineState>, action: SetOfflineMapsLastModifiedDateAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            if (lastState.downloadedTiles == null) {
-                lastState.downloadedTiles = {};
-            }
-            lastState.downloadedTiles[`${action.tileX}-${action.tileY}`] = action.data;
-            return lastState;
-        }));
-    }
-
-    @Action(DeleteOfflineMapsTileAction)
-    public deleteOfflineMapsTile(ctx: StateContext<OfflineState>, action: DeleteOfflineMapsTileAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            if (lastState.downloadedTiles == null) {
-                return lastState;
-            }
-            delete lastState.downloadedTiles[`${action.tileX}-${action.tileY}`];
-            if (Object.keys(lastState.downloadedTiles).length === 0) {
-                lastState.downloadedTiles = undefined;
-            }
             return lastState;
         }));
     }

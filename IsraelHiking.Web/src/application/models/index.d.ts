@@ -36,7 +36,7 @@ export type { ShareUrlsState } from "./state/share-urls-state";
 export type { UserState } from "./state/user-state";
 export type { PointsOfInterestState } from "./state/poi-state";
 export type { InMemoryState } from "./state/in-memory-state";
-export type { OfflineState, TileMetadataPerFile, FileNameDateVersion } from "./state/offline-state";
+export type { OfflineState, FileNameDateVersion } from "./state/offline-state";
 export type { GpsState, TrackingStateType } from "./state/gps-state";
 export type { RouteEditingState } from "./state/route-editing-state";
 export type { RecordedRouteState } from "./state/recorded-route-state";

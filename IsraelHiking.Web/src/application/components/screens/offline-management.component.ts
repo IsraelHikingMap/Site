@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from "@angular/core";
+﻿import { Component, inject, signal, computed } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { type Map, type MapMouseEvent, MercatorCoordinate, type StyleSpecification } from "maplibre-gl";
@@ -11,7 +11,7 @@ import { OfflineFilesDownloadService } from "../../services/offline-files-downlo
 import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
 import { ToastService } from "../../services/toast.service";
-import { TILES_ZOOM } from "../../services/pmtiles.service";
+import { PmTilesService, TILES_ZOOM } from "../../services/pmtiles.service";
 import { SpatialService } from "../../services/spatial.service";
 import { DEFAULT_BASE_LAYERS, HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import type { ApplicationState, EditableLayer } from "../../models";
@@ -23,9 +23,6 @@ import type { ApplicationState, EditableLayer } from "../../models";
 })
 export class OfflineManagementComponent {
     public readonly offlineMapStyle: StyleSpecification;
-    public readonly selectedTile = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
-    public readonly inProgressTile = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
-    public readonly downloadedTiles = signal<GeoJSON.FeatureCollection>({ features: [], type: "FeatureCollection" });
     public readonly currentLocation: GeoJSON.FeatureCollection;
     public readonly baseLayerData: EditableLayer;
     public readonly selectedTileXY = signal<{ tileX: number; tileY: number }>(null);
@@ -37,15 +34,129 @@ export class OfflineManagementComponent {
     private readonly layersService = inject(LayersService);
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
-    private readonly downloadedTilesState = this.store.selectSignal((s: ApplicationState) => s.offlineState.downloadedTiles);
+    private readonly downloadedTilesState = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.downloadedTiles);
     public readonly resources = inject(ResourcesService);
+
+    /** The tile that is being downloaded right now and how far it got, null when there is no download */
+    public readonly downloadingTile = this.offlineFilesDownloadService.currentDownloadedTile;
 
     public readonly isSelectedAvailableForOffline = computed(() => {
         if (!this.selectedTileXY()) {
             return false;
         }
         const downloadedTiles = this.downloadedTilesState();
-        return downloadedTiles != null && downloadedTiles[`${this.selectedTileXY().tileX}-${this.selectedTileXY().tileY}`] != null;
+        return downloadedTiles[PmTilesService.toTileKey(this.selectedTileXY().tileX, this.selectedTileXY().tileY)] != null;
+    });
+
+    /**
+     * The tiles that are on the device but can no longer be used, sorted so that moving to the next one
+     * keeps the same order every time. The root files are not of a specific tile, so they are not here -
+     * they are not drawn on the map either, and they are updated along with any tile that is downloaded.
+     */
+    public readonly incompatibleTileKeys = computed<string[]>(() => {
+        const downloadedTiles = this.downloadedTilesState();
+        return Object.keys(downloadedTiles)
+            .filter(tileKey => PmTilesService.fromTileKey(tileKey) != null)
+            .filter(tileKey => !this.offlineFilesDownloadService.isTileCompatible(tileKey, downloadedTiles[tileKey]))
+            .sort();
+    });
+
+    public readonly isSelectedIncompatible = computed(() => {
+        const selectedTileXY = this.selectedTileXY();
+        if (selectedTileXY == null) {
+            return false;
+        }
+        return this.incompatibleTileKeys().includes(PmTilesService.toTileKey(selectedTileXY.tileX, selectedTileXY.tileY));
+    });
+
+    /**
+     * What to tell the user below the buttons: how many tiles need to be downloaded again, falling back to
+     * explaining how a tile is selected. The count is kept while a tile is selected rather than being
+     * replaced by something about that tile, so that the user can see how many are left as they go over
+     * them. Nothing is said while a tile is being downloaded, the progress on the tile itself says it.
+     */
+    public readonly statusMessage = computed<string>(() => {
+        if (this.downloadingTile() != null) {
+            return null;
+        }
+        const incompatibleCount = this.incompatibleTileKeys().length;
+        if (incompatibleCount === 1) {
+            return this.resources.oneTileNeedsToBeDownloadedAgain;
+        }
+        if (incompatibleCount > 1) {
+            return this.resources.tilesNeedToBeDownloadedAgain.replace("{{count}}", incompatibleCount.toString());
+        }
+        return this.selectedTileXY() == null ? this.resources.clickTheMapToSelectATile : null;
+    });
+
+    /** Whether the message is about tiles that need to be downloaded again and not just an explanation */
+    public readonly isStatusWarning = computed(() =>
+        this.downloadingTile() == null && this.incompatibleTileKeys().length > 0);
+
+    /**
+     * The tiles that were downloaded, drawn from the files that are on the device - they are read into
+     * the state while the app is running, so this follows it instead of being built once.
+     * The tile that is being downloaded and the selected one are drawn on their own, so they are skipped.
+     * A tile that can no longer be used is marked with a "!" rather than with the date it was downloaded
+     * at, which is not the reason it can't be used, and is drawn with a dashed outline so that it is told
+     * apart from the rest without relying on its color alone.
+     */
+    public readonly downloadedTiles = computed<GeoJSON.FeatureCollection>(() => {
+        const features: GeoJSON.Feature[] = [];
+        const downloadedTiles = this.downloadedTilesState();
+        for (const tileKey of Object.keys(downloadedTiles)) {
+            const downloadedTile = PmTilesService.fromTileKey(tileKey);
+            if (downloadedTile == null) {
+                continue;
+            }
+            const { tileX: tileXDownloaded, tileY: tileYDownloaded } = downloadedTile;
+            if (this.downloadingTile()?.tileX === tileXDownloaded && this.downloadingTile()?.tileY === tileYDownloaded) {
+                continue; // Skip tiles that are in progress
+            }
+            const { tileX, tileY } = this.selectedTileXY() || { tileX: null, tileY: null };
+            if (this.downloadingTile() == null && tileXDownloaded === tileX && tileYDownloaded === tileY) {
+                continue; // Skip the center tile if not downloading
+            }
+
+            const isCompatible = this.offlineFilesDownloadService.isTileCompatible(tileKey, downloadedTiles[tileKey]);
+            let label = "!";
+            if (isCompatible) {
+                const downloadedDate = this.offlineFilesDownloadService.getLastModifiedDate(downloadedTiles[tileKey]);
+                label = downloadedDate.getFullYear() + "\n" +
+                    (downloadedDate.getMonth() + 1).toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 }) + "\n" +
+                    downloadedDate.getDate().toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 });
+            }
+            const feature = this.tileCoordinatesToPolygon(tileXDownloaded, tileYDownloaded, label, 1);
+            feature.properties.color = isCompatible ? "blue" : "#ef6c00";
+            feature.properties.incompatible = isCompatible ? "false" : "true";
+            feature.properties.textSize = isCompatible ? 30 : 60;
+            features.push(feature);
+        }
+
+        return { type: "FeatureCollection", features };
+    });
+
+    /** The tile the user selected, it is not drawn while a tile is being downloaded */
+    public readonly selectedTile = computed<GeoJSON.FeatureCollection>(() => {
+        const selectedTileXY = this.selectedTileXY();
+        const features = selectedTileXY == null || this.downloadingTile() != null
+            ? []
+            : [this.tileCoordinatesToPolygon(selectedTileXY.tileX, selectedTileXY.tileY, this.resources.clickBelow)];
+        return { type: "FeatureCollection", features };
+    });
+
+    /** The tile that is being downloaded, filled up to the progress of its download */
+    public readonly inProgressTile = computed<GeoJSON.FeatureCollection>(() => {
+        const downloadingTile = this.downloadingTile();
+        if (downloadingTile == null) {
+            return { type: "FeatureCollection", features: [] };
+        }
+        const { tileX, tileY, progress } = downloadingTile;
+        const fillFeature = this.tileCoordinatesToPolygon(tileX, tileY, "", progress / 100.0);
+        fillFeature.properties.fill = "true";
+        const strokeFeature = this.tileCoordinatesToPolygon(tileX, tileY, progress.toFixed(2) + "%");
+        strokeFeature.properties.stroke = "true";
+        return { type: "FeatureCollection", features: [fillFeature, strokeFeature] };
     });
 
     constructor() {
@@ -66,17 +177,11 @@ export class OfflineManagementComponent {
                 }
             }]
         }
-        this.updateDownloadedTiles();
-        this.offlineFilesDownloadService.tilesProgressChanged.subscribe((tileProgress) => {
-            if (this.downloadingTileXY()) {
-                this.updateInProgressTile(tileProgress.progressValue);
-            }
-        });
     }
 
     private initializeCenterAndZoomFromDownloadingTile() {
-        const dowloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.offlineState.downloadedTiles);
-        if (!dowloadedTiles) {
+        const dowloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState.downloadedTiles);
+        if (Object.keys(dowloadedTiles).length === 0) {
             const mapCenter = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
             this.map.flyTo({
                 center: [mapCenter.longitude, mapCenter.latitude],
@@ -89,11 +194,12 @@ export class OfflineManagementComponent {
         let maxTileX = Number.MIN_SAFE_INTEGER;
         let minTileY = Number.MAX_SAFE_INTEGER;
         let maxTileY = Number.MIN_SAFE_INTEGER;
-        for (const key of Object.keys(dowloadedTiles)) {
-            const [tileX, tileY] = key.split("-").map(Number);
-            if (isNaN(tileX) || isNaN(tileY)) {
+        for (const toTileKey of Object.keys(dowloadedTiles)) {
+            const tile = PmTilesService.fromTileKey(toTileKey);
+            if (tile == null) {
                 continue;
             }
+            const { tileX, tileY } = tile;
             minTileX = Math.min(minTileX, tileX);
             maxTileX = Math.max(maxTileX, tileX);
             minTileY = Math.min(minTileY, tileY);
@@ -113,8 +219,6 @@ export class OfflineManagementComponent {
             zoom: TILES_ZOOM - 1
         });
         this.selectedTileXY.set(null);
-        this.updateDownloadedTiles();
-        this.updateSelectedTile();
         const status = await this.offlineFilesDownloadService.downloadTile(tileX, tileY);
         switch (status) {
             case "up-to-date":
@@ -131,14 +235,6 @@ export class OfflineManagementComponent {
                 this.selectedTileXY.set({ tileX, tileY });
                 break;
         }
-
-        // For some reason, sometime it gets to 100% and doesn't clear the download progress, this is a hack to prevent it...
-        setTimeout(() => {
-            this.updateInProgressTile(100);
-            this.updateDownloadedTiles();
-            this.updateSelectedTile();
-        }, 3000)
-
     }
 
 
@@ -163,74 +259,10 @@ export class OfflineManagementComponent {
         }
     }
 
-    private updateDownloadedTiles() {
-        const features: GeoJSON.Feature[] = [];
-        const downloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.offlineState.downloadedTiles);
-        for (const key of Object.keys(downloadedTiles || {})) {
-            const [tileXDownloaded, tileYDownloaded] = key.split("-").map(Number);
-            if (isNaN(tileXDownloaded) || isNaN(tileYDownloaded)) {
-                continue;
-            }
-            if (this.downloadingTileXY()?.tileX === tileXDownloaded && this.downloadingTileXY()?.tileY === tileYDownloaded) {
-                continue; // Skip tiles that are in progress
-            }
-            const { tileX, tileY } = this.selectedTileXY() || { tileX: null, tileY: null };
-            if (this.downloadingTileXY() == null && tileXDownloaded === tileX && tileYDownloaded === tileY) {
-                continue; // Skip the center tile if not downloading
-            }
 
-            const downloadedDate = this.offlineFilesDownloadService.getLastModifiedDate(downloadedTiles[key]);
-            const label = downloadedDate.getFullYear() + "\n" +
-                (downloadedDate.getMonth() + 1).toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 }) + "\n" +
-                downloadedDate.getDate().toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 });
-            const feature = this.tileCoordinatesToPolygon(tileXDownloaded, tileYDownloaded, label, 1);
-            feature.properties.color = this.offlineFilesDownloadService.isTileCompatible(downloadedTiles[key]) ? "blue" : "red";
-            features.push(feature);
-        }
-
-        this.downloadedTiles.set({
-            type: "FeatureCollection",
-            features: features
-        });
-    }
-
-    private updateSelectedTile() {
-        const { tileX, tileY } = this.selectedTileXY() || { tileX: null, tileY: null };
-        this.selectedTile.set({
-            type: "FeatureCollection",
-            features: this.downloadingTileXY() != null || this.selectedTileXY() == null ? [] : [this.tileCoordinatesToPolygon(tileX, tileY, this.resources.clickBelow)]
-        });
-    }
-
-    private updateInProgressTile(progress: number) {
-        if (this.downloadingTileXY() == null) {
-            this.inProgressTile.set({ type: "FeatureCollection", features: [] });
-            return;
-        }
-        const fillFeature = this.tileCoordinatesToPolygon(
-            this.downloadingTileXY().tileX,
-            this.downloadingTileXY().tileY,
-            "",
-            progress / 100.0
-        );
-        fillFeature.properties.fill = "true";
-        const strokeFeature = this.tileCoordinatesToPolygon(
-            this.downloadingTileXY().tileX,
-            this.downloadingTileXY().tileY,
-            progress.toFixed(2) + "%"
-        );
-        strokeFeature.properties.stroke = "true";
-        this.inProgressTile.set({
-            type: "FeatureCollection",
-            features: [fillFeature, strokeFeature]
-        });
-    }
 
     public cancelDownload() {
         this.offlineFilesDownloadService.abortCurrentDownload();
-        this.updateDownloadedTiles();
-        this.updateInProgressTile(100);
-        this.updateSelectedTile();
     }
 
     public onMapClick(event: MapMouseEvent) {
@@ -238,13 +270,34 @@ export class OfflineManagementComponent {
         const mercator = MercatorCoordinate.fromLngLat(event.lngLat);
         const tileX = Math.floor((mercator.x * tileCount));
         const tileY = Math.floor((mercator.y * tileCount));
+        this.selectTile(tileX, tileY);
+    }
+
+    private selectTile(tileX: number, tileY: number) {
         this.selectedTileXY.set({ tileX, tileY });
-        this.updateSelectedTile();
-        this.updateDownloadedTiles();
         this.map.flyTo({
             center: SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX + 0.5, y: tileY + 0.5 }, TILES_ZOOM)),
             zoom: TILES_ZOOM - 1
         });
+    }
+
+    /**
+     * Moves to the tile that needs to be downloaded again after the one that is selected, so that the user
+     * can go over them one at a time and download each one when they want to. It goes back to the first one
+     * after the last, since a tile stays in the list until it is downloaded again or deleted.
+     */
+    public selectNextIncompatible() {
+        const incompatibleTileKeys = this.incompatibleTileKeys();
+        if (incompatibleTileKeys.length === 0) {
+            return;
+        }
+        const selectedTileXY = this.selectedTileXY();
+        const selectedTileKey = selectedTileXY == null
+            ? null
+            : PmTilesService.toTileKey(selectedTileXY.tileX, selectedTileXY.tileY);
+        const nextIndex = (incompatibleTileKeys.indexOf(selectedTileKey) + 1) % incompatibleTileKeys.length;
+        const { tileX, tileY } = PmTilesService.fromTileKey(incompatibleTileKeys[nextIndex]);
+        this.selectTile(tileX, tileY);
     }
 
     public onMapLoad(map: Map) {
@@ -262,15 +315,9 @@ export class OfflineManagementComponent {
             message: this.resources.areYouSure,
             type: "YesNo",
             confirmAction: async () => {
-                await this.offlineFilesDownloadService.deleteTile(this.selectedTileXY().tileX, this.selectedTileXY().tileY);
+                await this.offlineFilesDownloadService.deleteTile(PmTilesService.toTileKey(this.selectedTileXY().tileX, this.selectedTileXY().tileY));
                 this.selectedTileXY.set(null);
-                this.updateSelectedTile();
-                this.updateDownloadedTiles();
             }
         });
-    }
-
-    public downloadingTileXY() {
-        return this.offlineFilesDownloadService.currentDownloadedTile;
     }
 }
