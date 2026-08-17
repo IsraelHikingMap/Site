@@ -1,6 +1,27 @@
 ﻿import { registerPlugin } from "@capacitor/core";
 
 /**
+ * The valhalla response, the error fields are set instead of the trip when the request fails,
+ * for example: { code: 125, message: "No costing method found" }.
+ */
+export type ValhallaRouteResponse = {
+    code?: number;
+    message?: string;
+    trip?: {
+        units?: string;
+        summary?: { length?: number; time?: number };
+        legs?: ValhallaRouteLeg[];
+    };
+};
+
+export type ValhallaRouteLeg = {
+    /** An encoded polyline with 6 digits of precision */
+    shape?: string;
+    /** Sampled every elevation_interval meters along the leg */
+    elevation?: number[];
+};
+
+/**
  * The native offline routing plugin, see android/.../com/mapeak/valhalla/ValhallaPlugin.kt.
  * This file is the boundary of that plugin - when it is extracted to its own capacitor plugin
  * this is the only file that should be replaced by an import from it.
@@ -47,24 +68,3 @@ export interface ValhallaPlugin {
 }
 
 export const Valhalla = registerPlugin<ValhallaPlugin>("Valhalla");
-
-/**
- * The valhalla response, the error fields are set instead of the trip when the request fails,
- * for example: { code: 125, message: "No costing method found" }.
- */
-export type ValhallaRouteResponse = {
-    code?: number;
-    message?: string;
-    trip?: {
-        units?: string;
-        summary?: { length?: number; time?: number };
-        legs?: ValhallaRouteLeg[];
-    };
-};
-
-export type ValhallaRouteLeg = {
-    /** An encoded polyline with 6 digits of precision */
-    shape?: string;
-    /** Sampled every elevation_interval meters along the leg */
-    elevation?: number[];
-};
