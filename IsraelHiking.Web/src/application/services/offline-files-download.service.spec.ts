@@ -38,7 +38,7 @@ function createStyle(minVersions: MinVersions) {
         sources: {
             "IHM": { type: "vector", url: "https://mapeak.com/vector/data/IHM-schema.json" },
             "IHM-code": { type: "vector", url: "https://mapeak.com/vector/data/IHM-code.json" },
-            "DEM": { type: "raster-dem", url: "https://global.israelhikingmap.workers.dev/raster-dem.json" }
+            "DEM": { type: "raster-dem", url: "https://mapeak.com/vector/data/raster-dem.json" }
         },
         layers: [] as object[]
     };

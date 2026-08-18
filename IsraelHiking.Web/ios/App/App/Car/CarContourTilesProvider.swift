@@ -20,7 +20,7 @@ final class CarContourTilesProvider {
         var config = defaultConfig()
         config.encoding = .terrarium
         config.demUrlPattern =
-            "https://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.webp?use=slice"
+            "https://mapeak.com/vector/data/raster-dem/{z}/{x}/{y}.webp?use=slice"
         config.demMaxZoom = 11
         config.overzoom = 1
         config.thresholds = parseThresholdSpec(spec: "11*200*1000~12*10*100~13*10*100~14*10*100~15*10*100")

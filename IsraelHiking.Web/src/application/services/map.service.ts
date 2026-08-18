@@ -71,7 +71,7 @@ export class MapService {
         const promise = new Promise<void>(resolve => {
             globalDispatcher.registerMessageHandler("contour-worker", async () => {
                 await globalDispatcher.broadcast("contour-worker", {
-                    demUrlPattern: "slice://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.webp",
+                    demUrlPattern: "slice://mapeak.com/vector/data/raster-dem/{z}/{x}/{y}.webp",
                     encoding: "terrarium",
                     maxzoom: 11
                 });

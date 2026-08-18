@@ -27,7 +27,7 @@ class CarContourTilesProvider internal constructor(private val okHttpClient: OkH
                     .copy(
                             encoding = Encoding.TERRARIUM,
                             demUrlPattern =
-                                    "https://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.webp?use=slice",
+                                    "https://mapeak.com/vector/data/raster-dem/{z}/{x}/{y}.webp?use=slice",
                             demMaxZoom = 11.toUByte(),
                             overzoom = 1.toUByte(),
                             thresholds =
