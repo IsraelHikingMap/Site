@@ -67,6 +67,12 @@ export class FileService {
      */
     private static readonly OFFLINE_CACHE_DIRECTORY = "offline-files";
 
+    /**
+     * Tells the file a download is writing apart from the one another download of the same file writes,
+     * so that two downloads of the same tile never write over each other, see
+     * downloadFileToCacheAuthenticated.
+     */
+    private static partialFileCounter = 0;
 
     private readonly httpClient = inject(HttpClient);
     private readonly runningContextService = inject(RunningContextService);
@@ -336,12 +342,17 @@ export class FileService {
     }
 
     /**
-     * Downloads an offline file into the offline files cache. A file that was not downloaded to its end,
-     * because the download was aborted or failed, is deleted - only whole files are left in the cache.
+     * Downloads an offline file into the offline files cache. It is written under a name of its own and
+     * only takes the name of the file once it was downloaded to its end, so that only whole files are ever
+     * in the cache, and so that a download that is still unwinding after it was aborted can not write over
+     * the file of the download that took its place - they never share a path.
+     * A file that was not downloaded to its end, because the download was aborted or failed, is deleted.
      */
     public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void, abortController: AbortController): Promise<void> {
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
-        const path = FileService.offlineCachePath(fileName);
+        await this.ensureOfflineCacheDirectory();
+        const partialFileName = `${fileName}.${FileService.partialFileCounter++}.part`;
+        const path = FileService.offlineCachePath(partialFileName);
         let previousPercentage = 0;
         const response = await fetch(url, {
             headers: {
@@ -367,7 +378,7 @@ export class FileService {
                 const value = readResult.value;
                 if (abortController.signal.aborted) {
                     this.loggingService.info(`[Files] Aborting download of file ${fileName}`);
-                    await this.deleteFileInOfflineCache(fileName);
+                    await this.deleteFileInOfflineCache(partialFileName);
                     return;
                 }
 
@@ -375,8 +386,7 @@ export class FileService {
                     await Filesystem.writeFile({
                         path,
                         directory: Directory.Cache,
-                        data: encode(value.buffer),
-                        recursive: true
+                        data: encode(value.buffer)
                     });
                 } else {
                     await Filesystem.appendFile({
@@ -395,9 +405,14 @@ export class FileService {
                 }
             } while (!done);
         } catch (ex) {
-            await this.deleteFileInOfflineCache(fileName);
+            await this.deleteFileInOfflineCache(partialFileName);
             throw ex;
         }
+        await Filesystem.rename({
+            from: path,
+            to: FileService.offlineCachePath(fileName),
+            directory: Directory.Cache
+        });
         this.loggingService.info(`[Files] Finished downloading and writing file to cache, file name ${fileName}`);
     }
 
@@ -443,6 +458,47 @@ export class FileService {
         }
     }
 
+    /**
+     * Creates the offline files cache directory when it is not there. Neither writing the first chunk of a
+     * file nor appending the rest of them creates it, so it is created before the file is downloaded.
+     * It is only created once it was found to be missing, since creating a directory that is already there
+     * is an error on android while it is not on ios. Creating it can still fail on another download that
+     * is creating it at that same moment, files are downloaded a few at a time, which is not a problem as
+     * long as it ended up there - what the failure was is only worth passing on when it did not.
+     */
+    private async ensureOfflineCacheDirectory(): Promise<void> {
+        if (await this.offlineCacheDirectoryExists()) {
+            return;
+        }
+        try {
+            await Filesystem.mkdir({
+                path: FileService.OFFLINE_CACHE_DIRECTORY,
+                directory: Directory.Cache,
+                recursive: true
+            });
+        } catch (ex) {
+            if (await this.offlineCacheDirectoryExists()) {
+                return;
+            }
+            const message = "There is no offline files cache directory to download into and it " +
+                `could not be created: ${(ex as Error).message}`;
+            this.loggingService.error(`[Files] ${message}`);
+            throw new Error(message, { cause: ex });
+        }
+    }
+
+    private async offlineCacheDirectoryExists(): Promise<boolean> {
+        try {
+            const result = await Filesystem.stat({
+                path: FileService.OFFLINE_CACHE_DIRECTORY,
+                directory: Directory.Cache
+            });
+            return result.type === "directory";
+        } catch {
+            return false;
+        }
+    }
+
     private async deleteFileInOfflineCache(fileName: string): Promise<void> {
         try {
             await Filesystem.deleteFile({
@@ -450,7 +506,7 @@ export class FileService {
                 directory: Directory.Cache
             });
         } catch (ex) {
-            this.loggingService.error(`[Files] Failed to delete the partial file: ${fileName}, ${(ex as Error).message}`);
+            this.loggingService.debug(`[Files] Did not delete the partial file: ${fileName}, ${(ex as Error).message}`);
         }
     }
 
