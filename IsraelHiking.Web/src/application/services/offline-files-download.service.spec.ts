@@ -40,7 +40,7 @@ function createStyle(minVersions: MinVersions) {
         sources: {
             "IHM": { type: "vector", url: "https://mapeak.com/vector/data/IHM-schema.json" },
             "IHM-code": { type: "vector", url: "https://mapeak.com/vector/data/IHM-code.json" },
-            "DEM": { type: "raster-dem", url: "https://global.israelhikingmap.workers.dev/raster-dem.json" }
+            "DEM": { type: "raster-dem", url: "https://mapeak.com/vector/data/raster-dem.json" }
         },
         layers: [] as object[]
     };
@@ -86,6 +86,7 @@ describe("OfflineFilesDownloadService", () => {
                 {
                     provide: FileService, useValue: {
                         writeStyle: vi.fn(() => Promise.resolve()),
+                        getStyleJsonContent: vi.fn(() => Promise.resolve(JSON.stringify(createStyle({})))),
                         downloadFileToCacheAuthenticated: vi.fn(() => Promise.resolve()),
                         moveFileFromCacheToDataDirectory: vi.fn(() => Promise.resolve()),
                         deleteFileInDataDirectory: vi.fn(() => Promise.resolve()),
@@ -137,7 +138,7 @@ describe("OfflineFilesDownloadService", () => {
                 await initialize(service, mockBackend, store, {});
 
                 const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.isTileCompatible(TILE_KEY, downloadedTiles[TILE_KEY])).toBe(true);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("compatible");
                 expect(pmTilesService.getVersion).not.toHaveBeenCalled();
             }
         )
@@ -153,7 +154,7 @@ describe("OfflineFilesDownloadService", () => {
                 await initialize(service, mockBackend, store, { IHM: versionTheStyleRequires });
 
                 const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.isTileCompatible(TILE_KEY, downloadedTiles[TILE_KEY])).toBe(false);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("outdated");
             }
         )
     );
@@ -168,7 +169,7 @@ describe("OfflineFilesDownloadService", () => {
                 await initialize(service, mockBackend, store, { IHM: versionTheStyleRequires });
 
                 const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.isTileCompatible(TILE_KEY, downloadedTiles[TILE_KEY])).toBe(true);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("compatible");
             }
         )
     );
@@ -183,7 +184,7 @@ describe("OfflineFilesDownloadService", () => {
                 await initialize(service, mockBackend, store, { "IHM-schema": versionTheStyleRequires });
 
                 const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.isTileCompatible(TILE_KEY, downloadedTiles[TILE_KEY])).toBe(false);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("outdated");
             }
         )
     );
@@ -198,7 +199,7 @@ describe("OfflineFilesDownloadService", () => {
                 await initialize(service, mockBackend, store, { ihm: versionTheStyleRequires });
 
                 const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.isTileCompatible(TILE_KEY, downloadedTiles[TILE_KEY])).toBe(false);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("outdated");
             }
         )
     );
@@ -213,7 +214,7 @@ describe("OfflineFilesDownloadService", () => {
                 await initialize(service, mockBackend, store, { IHM: versionTheStyleRequires });
 
                 const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.isTileCompatible(ROOT_TILE_KEY, downloadedTiles[ROOT_TILE_KEY])).toBe(false);
+                expect(service.getTileCompatibility(ROOT_TILE_KEY, downloadedTiles[ROOT_TILE_KEY])).toBe("outdated");
             }
         )
     );
@@ -228,7 +229,7 @@ describe("OfflineFilesDownloadService", () => {
                 await initialize(service, mockBackend, store, { IHM: versionTheStyleRequires });
 
                 const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.isTileCompatible(ROOT_TILE_KEY, downloadedTiles[ROOT_TILE_KEY])).toBe(true);
+                expect(service.getTileCompatibility(ROOT_TILE_KEY, downloadedTiles[ROOT_TILE_KEY])).toBe("compatible");
             }
         )
     );
@@ -243,7 +244,7 @@ describe("OfflineFilesDownloadService", () => {
                 await initialize(service, mockBackend, store, { IHM: versionTheStyleRequires });
 
                 const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.isTileCompatible(TILE_KEY, downloadedTiles[TILE_KEY])).toBe(true);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("compatible");
             }
         )
     );
@@ -258,7 +259,7 @@ describe("OfflineFilesDownloadService", () => {
                 await initialize(service, mockBackend, store, { IHM: versionTheStyleRequires });
 
                 const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.isTileCompatible(TILE_KEY, downloadedTiles[TILE_KEY])).toBe(false);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("outdated");
             }
         )
     );
@@ -273,7 +274,7 @@ describe("OfflineFilesDownloadService", () => {
                 await initialize(service, mockBackend, store, { IHM: fileVersion }, { "IHM-schema": "3" });
 
                 const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.isTileCompatible(TILE_KEY, downloadedTiles[TILE_KEY])).toBe(false);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("outdated");
             }
         )
     );
@@ -285,7 +286,7 @@ describe("OfflineFilesDownloadService", () => {
                 await initialize(service, mockBackend, store, { IHM: "2" }); // The style requires 2
 
                 const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.isTileCompatible(TILE_KEY, downloadedTiles[TILE_KEY])).toBe(false);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("outdated");
             }
         )
     );
@@ -299,19 +300,106 @@ describe("OfflineFilesDownloadService", () => {
                 await initialize(service, mockBackend, store, { "a-source-that-does-not-exist": "3" });
 
                 const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.isTileCompatible(TILE_KEY, downloadedTiles[TILE_KEY])).toBe(true);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("compatible");
             }
         )
     );
 
-    it("Should consider a tile without routing tiles incompatible, but not the root files",
+    it("Should consider a tile that holds a file of a source the styles no longer use incompatible",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
+                await initialize(service, mockBackend, store, {});
+
+                // The source was renamed, so what the tile holds is of a source the styles know nothing of
+                expect(service.getTileCompatibility(TILE_KEY, [{ fileName: "mapeak-schema+7-76-51.pmtiles", date: "2026-01-01" }]))
+                    .not.toBe("compatible");
+            }
+        )
+    );
+
+    it("Should consider a tile that has no file of a source the styles use incompatible",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
+                await initialize(service, mockBackend, store, {});
+
+                // The device holds IHM-schema files for tiles, so a tile without one can not be drawn
+                expect(service.getTileCompatibility(TILE_KEY, [{ fileName: "raster-dem+7-76-51.pmtiles", date: "2026-01-01" }]))
+                    .not.toBe("compatible");
+            }
+        )
+    );
+
+    it("Should not expect the root files to hold a source that is only downloaded for tiles",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
+                fileService: FileService) => {
+                vi.mocked(fileService.listFilesInDataDirectory).mockResolvedValue(
+                    [MAP_FILE, "raster-dem+7-76-51.pmtiles", ROOT_MAP_FILE].map(
+                        fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
+
+                await initialize(service, mockBackend, store, {});
+
+                // raster-dem has tile files but no root file of its own, so the root is not missing anything
+                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
+                expect(service.getTileCompatibility(ROOT_TILE_KEY, downloadedTiles[ROOT_TILE_KEY])).toBe("compatible");
+                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("compatible");
+            }
+        )
+    );
+
+    it("Should consider a tile that is new enough for every style compatible",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, PmTilesService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
+                pmTilesService: PmTilesService) => {
+                vi.mocked(pmTilesService.getVersion).mockResolvedValue("2"); // The files are at version 2
+
+                await initialize(service, mockBackend, store, { IHM: "2" }); // Both styles require 2
+
+                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("compatible");
+            }
+        )
+    );
+
+    it("Should consider a tile that only the style that was downloaded now asks more of outdated",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, PmTilesService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
+                pmTilesService: PmTilesService) => {
+                vi.mocked(pmTilesService.getVersion).mockResolvedValue("2"); // The files are at version 2
+
+                // The style on the device requires nothing, the one that was downloaded now requires 3
+                await initialize(service, mockBackend, store, { IHM: "3" });
+
+                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("outdated");
+            }
+        )
+    );
+
+    it("Should consider a tile that the styles on the device already ask more of unusable",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, PmTilesService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
+                fileService: FileService, pmTilesService: PmTilesService) => {
+                vi.mocked(pmTilesService.getVersion).mockResolvedValue("2"); // The files are at version 2
+                // The styles that are already on the device require 3, so the map is drawn wrong right now
+                vi.mocked(fileService.getStyleJsonContent).mockResolvedValue(JSON.stringify(createStyle({ IHM: "3" })));
+
+                await initialize(service, mockBackend, store, { IHM: "3" });
+
+                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("unusable");
+            }
+        )
+    );
+
+    it("Should consider a tile without routing tiles outdated, since its map is still drawn, but not the root files",
         inject([OfflineFilesDownloadService, HttpTestingController, Store],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
                 await initialize(service, mockBackend, store, {});
                 store.reset({ inMemoryState: { downloadedTiles: {}, downloadedRoutingTiles: [] } });
 
-                expect(service.isTileCompatible(TILE_KEY, [{ fileName: MAP_FILE, date: "2026-01-01" }])).toBe(false);
-                expect(service.isTileCompatible(ROOT_TILE_KEY, [{ fileName: ROOT_MAP_FILE, date: "2026-01-01" }])).toBe(true);
+                expect(service.getTileCompatibility(TILE_KEY, [{ fileName: MAP_FILE, date: "2026-01-01" }])).toBe("outdated");
+                expect(service.getTileCompatibility(ROOT_TILE_KEY, [{ fileName: ROOT_MAP_FILE, date: "2026-01-01" }])).toBe("compatible");
             }
         )
     );
@@ -462,6 +550,60 @@ describe("OfflineFilesDownloadService", () => {
                 expect(fileService.downloadFileToCacheAuthenticated).toHaveBeenCalledWith(
                     expect.stringContaining(ROUTING_TILES_FILE), ROUTING_TILES_FILE, "token", expect.any(Function), expect.any(AbortController));
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(MAP_FILE);
+            }
+        )
+    );
+
+    it("Should ask for every file of a tile that can not be used instead of only for what changed since",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
+                // The tile holds a file of a source the styles do not use, so it can not be drawn as it is
+                vi.mocked(fileService.listFilesInDataDirectory).mockResolvedValue(
+                    ["a-removed-source+7-76-51.pmtiles", ROOT_MAP_FILE].map(
+                        fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
+                store.reset({
+                    userState: { token: "token" },
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedTiles: {} }
+                });
+
+                const promise = service.downloadTile(76, 51);
+                await flushStyles(mockBackend, {});
+                await flushFilesToDownload(mockBackend, false, {});
+                const tileRequest = await flushFilesToDownload(mockBackend, true, {});
+                await promise;
+
+                // Asking only for what changed would have the server answer that there is nothing to download
+                expect(tileRequest.request.params.has("lastModified")).toBe(false);
+            }
+        )
+    );
+
+    it("Should only delete the files of unused sources that belong to the tile that is being downloaded",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
+                vi.mocked(fileService.listFilesInDataDirectory).mockResolvedValue([
+                    MAP_FILE,
+                    "a-removed-source+7-76-51.pmtiles",
+                    "a-removed-source+7-75-50.pmtiles",
+                    "a-removed-source-6.pmtiles"
+                ].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
+                store.reset({
+                    userState: { token: "token" },
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedTiles: {} }
+                });
+
+                const promise = service.downloadTile(76, 51);
+                await flushStyles(mockBackend, {});
+                await flushFilesToDownload(mockBackend, false, {});
+                await flushFilesToDownload(mockBackend, true, {});
+                await promise;
+
+                expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith("a-removed-source+7-76-51.pmtiles");
+                // 75-50 was not asked for, and it still needs its files and the root files they go with
+                expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith("a-removed-source+7-75-50.pmtiles");
+                expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith("a-removed-source-6.pmtiles");
             }
         )
     );

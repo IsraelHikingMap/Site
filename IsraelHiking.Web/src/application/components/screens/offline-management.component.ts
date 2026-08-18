@@ -7,7 +7,7 @@ import { MatButton } from "@angular/material/button";
 import { AutomaticLayerPresentationComponent } from "../map/automatic-layer-presentation.component";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
-import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
+import { OfflineFilesDownloadService, type TileCompatibility } from "../../services/offline-files-download.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
 import { ToastService } from "../../services/toast.service";
@@ -22,6 +22,17 @@ import type { ApplicationState, EditableLayer } from "../../models";
     imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent]
 })
 export class OfflineManagementComponent {
+    /**
+     * The color a downloaded tile is drawn in: orange when only the style that was downloaded now asks
+     * for more than the tile holds, which is something to do rather than something that is broken, and
+     * red when the styles that are already on the device do, which is what draws the map itself wrong.
+     */
+    private static readonly TILE_COLOR: Record<TileCompatibility, string> = {
+        compatible: "blue",
+        outdated: "#ef6c00",
+        unusable: "red"
+    };
+
     public readonly offlineMapStyle: StyleSpecification;
     public readonly currentLocation: GeoJSON.FeatureCollection;
     public readonly baseLayerData: EditableLayer;
@@ -57,7 +68,7 @@ export class OfflineManagementComponent {
         const downloadedTiles = this.downloadedTilesState();
         return Object.keys(downloadedTiles)
             .filter(tileKey => PmTilesService.fromTileKey(tileKey) != null)
-            .filter(tileKey => !this.offlineFilesDownloadService.isTileCompatible(tileKey, downloadedTiles[tileKey]))
+            .filter(tileKey => this.offlineFilesDownloadService.getTileCompatibility(tileKey, downloadedTiles[tileKey]) !== "compatible")
             .sort();
     });
 
@@ -118,7 +129,8 @@ export class OfflineManagementComponent {
                 continue; // Skip the center tile if not downloading
             }
 
-            const isCompatible = this.offlineFilesDownloadService.isTileCompatible(tileKey, downloadedTiles[tileKey]);
+            const compatibility = this.offlineFilesDownloadService.getTileCompatibility(tileKey, downloadedTiles[tileKey]);
+            const isCompatible = compatibility === "compatible";
             let label = "!";
             if (isCompatible) {
                 const downloadedDate = this.offlineFilesDownloadService.getLastModifiedDate(downloadedTiles[tileKey]);
@@ -127,7 +139,7 @@ export class OfflineManagementComponent {
                     downloadedDate.getDate().toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 });
             }
             const feature = this.tileCoordinatesToPolygon(tileXDownloaded, tileYDownloaded, label, 1);
-            feature.properties.color = isCompatible ? "blue" : "#ef6c00";
+            feature.properties.color = OfflineManagementComponent.TILE_COLOR[compatibility];
             feature.properties.incompatible = isCompatible ? "false" : "true";
             feature.properties.textSize = isCompatible ? 30 : 60;
             features.push(feature);

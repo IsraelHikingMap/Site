@@ -1,4 +1,4 @@
-import { computed, inject, Service, signal } from "@angular/core";
+﻿import { computed, inject, Service, signal } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { timeout } from "rxjs/operators";
@@ -28,6 +28,12 @@ type StyleRequirements = {
     /** The lower cased names of the files of the sources the styles use */
     sourceFileNames: string[];
 };
+
+/**
+ * How usable the files of a tile still are, see getTileCompatibility. "outdated" only means that a newer
+ * style wants more than they hold, while "unusable" means the map is already drawn wrong without them.
+ */
+export type TileCompatibility = "compatible" | "outdated" | "unusable";
 
 /** The download that is going on right now, everything that lives as long as it does */
 type CurrentDownload = {
@@ -64,8 +70,14 @@ export class OfflineFilesDownloadService {
     private readonly store = inject(Store);
     private readonly router = inject(Router);
 
-    /** What the styles need from the offline files, read from them every time they are downloaded */
-    private styleRequirements: StyleRequirements = { minVersionPerFile: {}, sourceFileNames: [] };
+    /** What the styles that were downloaded now need from the offline files, read every time they are downloaded */
+    private onlineStyleRequirements: StyleRequirements = { minVersionPerFile: {}, sourceFileNames: [] };
+    /**
+     * What the styles that are already on the device need. They are what the map is drawn with when there
+     * is no network, and they are only replaced once every tile can be drawn with them, so a tile that
+     * does not meet them is one the app can not draw correctly right now.
+     */
+    private offlineStyleRequirements: StyleRequirements = { minVersionPerFile: {}, sourceFileNames: [] };
     private readonly currentDownload = signal<CurrentDownload | null>(null);
 
     /** The tile that is being downloaded right now and how far it got, null when there is no download */
@@ -89,6 +101,7 @@ export class OfflineFilesDownloadService {
         }
         await this.fileService.clearOfflineCache();
         await this.updateDownloadedTilesFromDevice();
+        await this.updateOfflineStyleRequirements();
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         const userState = this.store.selectSnapshot((s: ApplicationState) => s.userState);
         if (userState == null || offlineState.isSubscribed === false) {
@@ -99,16 +112,14 @@ export class OfflineFilesDownloadService {
             await this.updateVersionsOfDownloadedFiles();
             const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
             const incompatibleTileKeys = Object.entries(downloadedTiles)
-                .filter(([tileKey, files]) => !this.isTileCompatible(tileKey, files))
+                .filter(([tileKey, files]) => this.getTileCompatibility(tileKey, files) !== "compatible")
                 .map(([tileKey]) => tileKey);
             if (incompatibleTileKeys.length > 0) {
                 this.loggingService.info(`[Offline Download] These tiles need to be downloaded again: ${incompatibleTileKeys.join(", ")}`);
             }
             const needToAskToRedownload = Object.keys(downloadedTiles).length === 0 || incompatibleTileKeys.length > 0;
             if (!needToAskToRedownload) {
-                for (const styleAndContent of styles) {
-                    await this.fileService.writeStyle(styleAndContent.fileName, styleAndContent.content);
-                }
+                await this.writeStylesToDevice(styles);
                 return;
             }
             this.toastService.confirm({
@@ -123,15 +134,40 @@ export class OfflineFilesDownloadService {
         }
     }
 
+    /**
+     * Stores the styles that were downloaded on the device, which makes them the ones the map is drawn
+     * with offline, and reads what they require now that they are the ones in use.
+     */
+    private async writeStylesToDevice(styles: { fileName: string, content: string }[]): Promise<void> {
+        for (const styleAndContent of styles) {
+            await this.fileService.writeStyle(styleAndContent.fileName, styleAndContent.content);
+        }
+        await this.updateOfflineStyleRequirements();
+    }
+
+    /**
+     * Reads what the styles that are on the device require, so that a tile that can not be drawn with them
+     * is told apart from one that only lacks what a newer style asks for. A style that is not on the device
+     * reads as empty and requires nothing - without it there is nothing to say the tiles are drawn wrong.
+     */
+    private async updateOfflineStyleRequirements(): Promise<void> {
+        const requirements: StyleRequirements = { minVersionPerFile: {}, sourceFileNames: [] };
+        for (const baseLayerUrl of [Urls.HIKING_STYLE_ADDRESS, Urls.MTB_STYLE_ADDRESS]) {
+            const content = await this.fileService.getStyleJsonContent(baseLayerUrl, true);
+            this.readStyleRequirements(JSON.parse(content) as StyleSpecification, requirements);
+        }
+        this.offlineStyleRequirements = requirements;
+    }
+
     private async downloadStyleAndUpdateMetadata(): Promise<{ fileName: string, content: string }[]> {
         const styles: { fileName: string, content: string }[] = [];
         for (const baseLayerUrl of [Urls.HIKING_STYLE_ADDRESS, Urls.MTB_STYLE_ADDRESS]) {
             const style = await firstValueFrom(this.httpClient.get(baseLayerUrl, { responseType: "text" }).pipe(timeout(5000)));
             styles.push({ fileName: last(baseLayerUrl.split("/")), content: style });
         }
-        this.styleRequirements = { minVersionPerFile: {}, sourceFileNames: [] };
+        this.onlineStyleRequirements = { minVersionPerFile: {}, sourceFileNames: [] };
         for (const style of styles) {
-            this.readStyleRequirements(JSON.parse(style.content) as StyleSpecification);
+            this.readStyleRequirements(JSON.parse(style.content) as StyleSpecification, this.onlineStyleRequirements);
         }
         return styles;
     }
@@ -144,7 +180,7 @@ export class OfflineFilesDownloadService {
      * either name, so that a mismatch between the two does not silently skip the version check.
      * When both styles require a version from the same file the stricter one wins.
      */
-    private readStyleRequirements(style: StyleSpecification): void {
+    private readStyleRequirements(style: StyleSpecification, requirements: StyleRequirements): void {
         const fileNamePerSourceName: Record<string, string> = {};
         for (const [sourceName, source] of Object.entries(style.sources ?? {})) {
             const fileName = OfflineFilesDownloadService.getFileNameFromUrl((source as { url?: string }).url);
@@ -153,7 +189,7 @@ export class OfflineFilesDownloadService {
             }
         }
         const knownFileNames = Object.values(fileNamePerSourceName).map(f => f.toLowerCase());
-        this.styleRequirements.sourceFileNames = [...new Set([...this.styleRequirements.sourceFileNames, ...knownFileNames])];
+        requirements.sourceFileNames = [...new Set([...requirements.sourceFileNames, ...knownFileNames])];
         for (const [key, minVersion] of Object.entries((style.metadata ?? {}) as Record<string, string>)) {
             const name = OfflineFilesDownloadService.MIN_VERSION_KEY_REGEX.exec(key)?.[1];
             if (name == null || !minVersion) {
@@ -164,9 +200,9 @@ export class OfflineFilesDownloadService {
                 this.loggingService.warning(`[Offline Download] The style requires version ${minVersion} from "${name}", ` +
                     "which is not a source of the style, using it as a file name");
             }
-            const currentMinVersion = this.styleRequirements.minVersionPerFile[fileName];
+            const currentMinVersion = requirements.minVersionPerFile[fileName];
             if (currentMinVersion == null || OfflineFilesDownloadService.compareVersions(minVersion, currentMinVersion) > 0) {
-                this.styleRequirements.minVersionPerFile[fileName] = minVersion;
+                requirements.minVersionPerFile[fileName] = minVersion;
             }
         }
     }
@@ -225,14 +261,13 @@ export class OfflineFilesDownloadService {
         this.abortCurrentDownload();
         const currentDownload: CurrentDownload = { tileX, tileY, progress: 0, abortController: new AbortController() };
         this.currentDownload.set(currentDownload);
-        this.loggingService.info(`[Offline Download] Starting downloading the offline files of ${PmTilesService.toTileKey(tileX, tileY)}`);
+        const tileKey = PmTilesService.toTileKey(tileX, tileY);
+        this.loggingService.info(`[Offline Download] Starting downloading the offline files of ${tileKey}`);
         try {
             const styles = await this.downloadStyleAndUpdateMetadata();
-            for (const styleAndContent of styles) {
-                await this.fileService.writeStyle(styleAndContent.fileName, styleAndContent.content);
-            }
+            await this.writeStylesToDevice(styles);
             await this.routingProvider.updateOfflineRoutingProfiles();
-            await this.deleteFilesOfUnusedSources();
+            await this.deleteFilesOfUnusedSources(tileKey);
             // What is asked of the server is decided by the state, so it is read again now that files were deleted
             await this.updateDownloadedTilesFromDevice();
             const fileNamesForRoot = await this.getFilesToDownload();
@@ -262,14 +297,14 @@ export class OfflineFilesDownloadService {
             const typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
             switch (typeAndMessage.type) {
                 case "timeout":
-                    this.loggingService.error("[Offline Download] Failed to get download files list due to timeout");
+                    this.loggingService.error(`[Offline Download] The download of ${tileKey} failed due to timeout`);
                     break;
                 case "client":
-                    this.loggingService.error("[Offline Download] Failed to get download files list due to client side error: " +
+                    this.loggingService.error(`[Offline Download] The download of ${tileKey} failed due to client side error: ` +
                         typeAndMessage.message);
                     break;
                 default:
-                    this.loggingService.error("[Offline Download] Failed to get download files list due to server side error: " +
+                    this.loggingService.error(`[Offline Download] The download of ${tileKey} failed due to server side error: ` +
                         typeAndMessage.message);
             }
             return "error";
@@ -355,8 +390,14 @@ export class OfflineFilesDownloadService {
 
     private async getFilesToDownload(tileX?: number, tileY?: number): Promise<FileNameDateVersion[]> {
         const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-        const downloadedTile = downloadedTiles[PmTilesService.toTileKey(tileX, tileY)];
-        const lastModifiedString = this.getLastModifiedDate(downloadedTile)?.toISOString();
+        const tileKey = PmTilesService.toTileKey(tileX, tileY);
+        const downloadedTile = downloadedTiles[tileKey];
+        const isCompatible = downloadedTile != null &&
+            this.getTileCompatibility(tileKey, downloadedTile) === "compatible";
+        if (downloadedTile != null && !isCompatible) {
+            this.loggingService.info(`[Offline Download] Asking for every file of ${tileKey}, what it holds can not be used`);
+        }
+        const lastModifiedString = isCompatible ? this.getLastModifiedDate(downloadedTile)?.toISOString() : undefined;
         const params: Record<string, string> = {};
         if (lastModifiedString) {
             params.lastModified = lastModifiedString;
@@ -367,7 +408,9 @@ export class OfflineFilesDownloadService {
             params.routingTile = "true";
         }
         const fileNames = await firstValueFrom(this.httpClient.get<Record<string, string>>(Urls.offlineFiles, { params: params }).pipe(timeout(5000)));
-        this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
+        this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that need to be downloaded ` +
+            `for ${tileKey === PmTilesService.toTileKey() ? "the root files" : tileKey}, ` +
+            `${lastModifiedString == null ? "all of them" : `the ones that changed since ${lastModifiedString}`}`);
         if (Object.keys(fileNames).length === 0) {
             return [];
         }
@@ -475,7 +518,7 @@ export class OfflineFilesDownloadService {
      */
     private async updateVersionsOfDownloadedFiles(): Promise<void> {
         const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-        if (Object.keys(this.styleRequirements.minVersionPerFile).length === 0) {
+        if (Object.keys(this.onlineStyleRequirements.minVersionPerFile).length === 0) {
             return;
         }
         const tilesWithVersions: Record<string, FileNameDateVersion[]> = {};
@@ -483,7 +526,7 @@ export class OfflineFilesDownloadService {
             tilesWithVersions[tileKey] = [];
             for (const file of files) {
                 const sourceFileName = OfflineFilesDownloadService.getSourceFileName(file.fileName).toLowerCase();
-                if (file.version != null || this.styleRequirements.minVersionPerFile[sourceFileName] == null) {
+                if (file.version != null || this.onlineStyleRequirements.minVersionPerFile[sourceFileName] == null) {
                     tilesWithVersions[tileKey].push(file);
                     continue;
                 }
@@ -505,20 +548,35 @@ export class OfflineFilesDownloadService {
 
     /**
      * Deletes the offline files whose source is not used by the styles nor by the app - a source that was
-     * removed or renamed leaves its files behind, only taking up space. Only the offline map files are
-     * deleted, the styles and any other file that is stored in the same directory are not this service's.
+     * removed or renamed leaves its files behind, only taking up space. Only the files of the tile that is
+     * being downloaded are deleted: a tile the user did not ask for keeps what it has until it is
+     * downloaded itself, so that downloading one tile never takes another one apart. The root files are
+     * shared by every tile, so they only go once no tile is left that still holds that source.
+     * Only the offline map files are deleted, the styles and any other file that is stored in the same
+     * directory are not this service's.
      */
-    private async deleteFilesOfUnusedSources(): Promise<void> {
-        if (this.styleRequirements.sourceFileNames.length === 0) {
+    private async deleteFilesOfUnusedSources(tileKey: string): Promise<void> {
+        if (this.onlineStyleRequirements.sourceFileNames.length === 0) {
             this.loggingService.warning("[Offline Download] The styles have no sources, keeping all the files");
             return;
         }
-        const usedSourceFileNames = [...this.styleRequirements.sourceFileNames, ...OfflineFilesDownloadService.APPLICATION_SOURCE_FILE_NAMES];
+        const usedSourceFileNames = [...this.onlineStyleRequirements.sourceFileNames, ...OfflineFilesDownloadService.APPLICATION_SOURCE_FILE_NAMES];
+        const rootTileKey = PmTilesService.toTileKey();
         const files = await this.fileService.listFilesInDataDirectory();
-        for (const { fileName } of files) {
+        const unusedFiles = files.filter(f => f.fileName.endsWith(OfflineFilesDownloadService.OFFLINE_FILE_EXTENSION) &&
+            !usedSourceFileNames.includes(OfflineFilesDownloadService.getSourceFileName(f.fileName).toLowerCase()));
+        for (const { fileName } of unusedFiles) {
+            const fileTileKey = OfflineFilesDownloadService.getTileKey(fileName);
+            if (fileTileKey !== tileKey && fileTileKey !== rootTileKey) {
+                continue; // It is another tile's, and that tile still needs it until it is downloaded again
+            }
             const sourceFileName = OfflineFilesDownloadService.getSourceFileName(fileName).toLowerCase();
-            if (!fileName.endsWith(OfflineFilesDownloadService.OFFLINE_FILE_EXTENSION) ||
-                usedSourceFileNames.includes(sourceFileName)) {
+            const isLeftToAnotherTile = fileTileKey === rootTileKey && unusedFiles.some(other => {
+                const otherTileKey = OfflineFilesDownloadService.getTileKey(other.fileName);
+                return otherTileKey !== rootTileKey && otherTileKey !== tileKey &&
+                    OfflineFilesDownloadService.getSourceFileName(other.fileName).toLowerCase() === sourceFileName;
+            });
+            if (isLeftToAnotherTile) {
                 continue;
             }
             this.loggingService.info(`[Offline Download] Deleting ${fileName}, ${sourceFileName} is not a source of the styles`);
@@ -542,21 +600,88 @@ export class OfflineFilesDownloadService {
     }
 
     /**
-     * Whether the files of a tile are still the ones the app needs: they are new enough for the style,
-     * and the tile has everything it should - a tile that was downloaded before offline routing existed
-     * has no routing tiles, and needs to be downloaded again. The root files are not of a specific area,
-     * so they have no routing tiles of their own.
-     * A file the style requires a version from but that has none is treated as too old, either it was
-     * downloaded before the versions existed or it can not be read.
+     * How usable the files of a tile still are: they are "outdated" when only the style that was just
+     * downloaded asks for more than they hold, which leaves the map drawn as it always was until they
+     * are downloaded again, and "unusable" when the styles that are already on the device ask for more,
+     * which is what makes the map itself come out wrong.
      */
-    public isTileCompatible(tileKey: string, files: Immutable<FileNameDateVersion[]>): boolean {
+    public getTileCompatibility(tileKey: string, files: Immutable<FileNameDateVersion[]>): TileCompatibility {
+        if (!this.meetsRequirements(tileKey, files, this.offlineStyleRequirements)) {
+            return "unusable";
+        }
+        if (!this.meetsRequirements(tileKey, files, this.onlineStyleRequirements) || !this.hasRoutingTiles(tileKey)) {
+            return "outdated";
+        }
+        return "compatible";
+    }
+
+    /**
+     * Whether the routing tiles of a tile are on the device. A tile that was downloaded before offline
+     * routing existed has none and has to be downloaded again to get them, but the map itself is still
+     * drawn from the files it does have, so such a tile is only out of date and not unusable.
+     * The root files are not of a specific area, so they have no routing tiles of their own.
+     */
+    private hasRoutingTiles(tileKey: string): boolean {
+        if (tileKey === PmTilesService.toTileKey()) {
+            return true;
+        }
         const downloadedRoutingTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedRoutingTiles);
-        if (tileKey !== PmTilesService.toTileKey() && !downloadedRoutingTiles.includes(tileKey)) {
-            return false;
+        return downloadedRoutingTiles.includes(tileKey);
+    }
+
+    /**
+     * The names of the source files a tile is expected to hold. The server decides which source has files
+     * of its own per tile and which only has root files - the elevation source, for example, has no root
+     * file - so rather than assume, this takes the sources the styles use and keeps the ones that are
+     * actually downloaded for tiles of the same kind, root or not, as any other tile on the device shows.
+     */
+    private getExpectedSourceFileNames(tileKey: string, requirements: StyleRequirements): string[] {
+        const rootTileKey = PmTilesService.toTileKey();
+        const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
+        const downloadedSourceFileNames = new Set<string>();
+        for (const [otherTileKey, otherFiles] of Object.entries(downloadedTiles)) {
+            if ((otherTileKey === rootTileKey) !== (tileKey === rootTileKey)) {
+                continue;
+            }
+            for (const { fileName } of otherFiles) {
+                downloadedSourceFileNames.add(OfflineFilesDownloadService.getSourceFileName(fileName).toLowerCase());
+            }
+        }
+        return requirements.sourceFileNames.filter(sourceFileName => downloadedSourceFileNames.has(sourceFileName));
+    }
+
+    /**
+     * Whether the files of a tile are still the ones a style can be drawn with: it has a file of every
+     * source the style uses, none of a source it no longer uses, and they are all new enough for it.
+     * A source that was renamed shows up as both - the file of the old name is of no source of the style
+     * and the new name has no file at all - and either way the tile can not be drawn and has to be
+     * downloaded again. A file the style requires a version from but that has none is treated as too old,
+     * either it was downloaded before the versions existed or it can not be read.
+     */
+    private meetsRequirements(tileKey: string, files: Immutable<FileNameDateVersion[]>, requirements: StyleRequirements): boolean {
+        if (requirements.sourceFileNames.length === 0) {
+            return true; // Nothing was read from the styles, so there is nothing to hold the files against
+        }
+        const sourceFileNamesOfTile = new Set(files.map(
+            f => OfflineFilesDownloadService.getSourceFileName(f.fileName).toLowerCase()));
+        const usedSourceFileNames = [...requirements.sourceFileNames, ...OfflineFilesDownloadService.APPLICATION_SOURCE_FILE_NAMES];
+        for (const sourceFileName of sourceFileNamesOfTile) {
+            if (!usedSourceFileNames.includes(sourceFileName)) {
+                this.loggingService.info(`[Offline Download] ${sourceFileName} is not a source of the style, ` +
+                    `tile: ${tileKey}`);
+                return false;
+            }
+        }
+        for (const sourceFileName of this.getExpectedSourceFileNames(tileKey, requirements)) {
+            if (!sourceFileNamesOfTile.has(sourceFileName)) {
+                this.loggingService.info(`[Offline Download] There is no file of ${sourceFileName}, ` +
+                    `which the style uses, tile: ${tileKey}`);
+                return false;
+            }
         }
         for (const fileDateVersion of files) {
             const sourceFileName = OfflineFilesDownloadService.getSourceFileName(fileDateVersion.fileName);
-            const minVersion = this.styleRequirements.minVersionPerFile[sourceFileName.toLowerCase()];
+            const minVersion = requirements.minVersionPerFile[sourceFileName.toLowerCase()];
             if (minVersion == null) {
                 continue;
             }
