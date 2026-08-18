@@ -111,9 +111,17 @@ export class OfflineFilesDownloadService {
             const styles = await this.downloadStyleAndUpdateMetadata();
             await this.updateVersionsOfDownloadedFiles();
             const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-            const incompatibleTileKeys = Object.entries(downloadedTiles)
-                .filter(([tileKey, files]) => this.getTileCompatibility(tileKey, files) !== "compatible")
-                .map(([tileKey]) => tileKey);
+            const incompatibleTileKeys: string[] = [];
+            for (const [tileKey, files] of Object.entries(downloadedTiles)) {
+                const compatibility = this.getTileCompatibility(tileKey, files);
+                if (compatibility === "compatible") {
+                    continue;
+                }
+                incompatibleTileKeys.push(tileKey);
+                const reason = this.getUnmetRequirement(tileKey, files, this.offlineStyleRequirements)
+                    ?? this.getUnmetRequirement(tileKey, files, this.onlineStyleRequirements);
+                this.loggingService.info(`[Offline Download] ${tileKey} is ${compatibility}${reason == null ? "" : `: ${reason}`}`);
+            }
             if (incompatibleTileKeys.length > 0) {
                 this.loggingService.info(`[Offline Download] These tiles need to be downloaded again: ${incompatibleTileKeys.join(", ")}`);
             }
@@ -659,24 +667,30 @@ export class OfflineFilesDownloadService {
      * either it was downloaded before the versions existed or it can not be read.
      */
     private meetsRequirements(tileKey: string, files: Immutable<FileNameDateVersion[]>, requirements: StyleRequirements): boolean {
+        return this.getUnmetRequirement(tileKey, files, requirements) == null;
+    }
+
+    /**
+     * What keeps the files of a tile from being drawn with a style, in words, or null when nothing does.
+     * It says it rather than writes it to the log, since this is asked for every tile that is drawn on the
+     * offline management screen every time anything on it changes - only the reasons that are worth
+     * telling about are written, see initialize.
+     */
+    private getUnmetRequirement(tileKey: string, files: Immutable<FileNameDateVersion[]>, requirements: StyleRequirements): string | null {
         if (requirements.sourceFileNames.length === 0) {
-            return true; // Nothing was read from the styles, so there is nothing to hold the files against
+            return null; // Nothing was read from the styles, so there is nothing to hold the files against
         }
         const sourceFileNamesOfTile = new Set(files.map(
             f => OfflineFilesDownloadService.getSourceFileName(f.fileName).toLowerCase()));
         const usedSourceFileNames = [...requirements.sourceFileNames, ...OfflineFilesDownloadService.APPLICATION_SOURCE_FILE_NAMES];
         for (const sourceFileName of sourceFileNamesOfTile) {
             if (!usedSourceFileNames.includes(sourceFileName)) {
-                this.loggingService.info(`[Offline Download] ${sourceFileName} is not a source of the style, ` +
-                    `tile: ${tileKey}`);
-                return false;
+                return `${sourceFileName} is not a source of the style`;
             }
         }
         for (const sourceFileName of this.getExpectedSourceFileNames(tileKey, requirements)) {
             if (!sourceFileNamesOfTile.has(sourceFileName)) {
-                this.loggingService.info(`[Offline Download] There is no file of ${sourceFileName}, ` +
-                    `which the style uses, tile: ${tileKey}`);
-                return false;
+                return `there is no file of ${sourceFileName}, which the style uses`;
             }
         }
         for (const fileDateVersion of files) {
@@ -686,14 +700,13 @@ export class OfflineFilesDownloadService {
                 continue;
             }
             if (!fileDateVersion.version) {
-                this.loggingService.info(`[Offline Download] ${fileDateVersion.fileName} has no version ` +
-                    `while the style requires ${minVersion}, tile: ${tileKey}`);
-                return false;
+                return `${fileDateVersion.fileName} has no version while the style requires ${minVersion}`;
             }
             if (OfflineFilesDownloadService.compareVersions(fileDateVersion.version, minVersion) < 0) {
-                return false;
+                return `${fileDateVersion.fileName} is at version ${fileDateVersion.version} ` +
+                    `while the style requires ${minVersion}`;
             }
         }
-        return true;
+        return null;
     }
 }
