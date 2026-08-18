@@ -239,6 +239,9 @@ export class DefaultStyleService {
             let styleAsText = await this.fileService.getStyleJsonContent(layerData.address, tryLocalStyle);
             styleAsText = styleAsText.replace(/name:he/g, `name:${language}`);
             styleAsText = styleAsText.replaceAll("Open Sans", "Noto Sans");
+            if (units === "imperial") {
+                styleAsText = styleAsText.replaceAll("1.0000000", "3.28084");
+            }
             const styleJson = JSON.parse(styleAsText) as StyleSpecification;
             switch (mode) {
                 case "online-only":
