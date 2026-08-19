@@ -27,19 +27,11 @@ public class OfflineFilesService : IOfflineFilesService
     private const int ROOT_ZOOM = 6;
 
     /// <summary>
-    /// The location of the styles the map is drawn with, both online and offline.
+    /// The location of the styles the map is drawn with, which the client reads them from by itself.
     /// </summary>
     private const string STYLES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/";
 
     private const string HIKE_STYLE_FILE_NAME = "mapeak-hike.json";
-    private const string BIKE_STYLE_FILE_NAME = "mapeak-bike.json";
-
-    /// <summary>
-    /// The styles the client draws the offline map with. They are served by this server rather than taken by the
-    /// client straight from github, so that a client that can only reach this server still gets them, and so that
-    /// they are the very same styles the sources list is taken from.
-    /// </summary>
-    private static readonly string[] STYLE_FILE_NAMES = [HIKE_STYLE_FILE_NAME, BIKE_STYLE_FILE_NAME];
 
     /// <summary>
     /// The style that defines which sources (i.e. offline files) the client needs.
@@ -101,14 +93,13 @@ public class OfflineFilesService : IOfflineFilesService
     private static readonly DateTime DEM_MODIFIED_DATE = DateTimeOffset.Parse("2026-04-09T10:36:08.8024764Z", CultureInfo.InvariantCulture).UtcDateTime;
 
     /// <summary>
-    /// The files that are needed for offline usage but are not sliced per tile - the styles the offline map is
-    /// drawn with and the two files the offline routing engine needs. They are only relevant to the root, and
-    /// like the routing tiles they are only listed for clients that ask for them, since older clients do not
-    /// know how to handle them.
+    /// The files that are needed for offline usage but are not sliced per tile - the two files the offline
+    /// routing engine needs. They are only relevant to the root, and like the routing tiles they are only
+    /// listed for clients that ask for them, since older clients do not know how to handle them.
     /// </summary>
     private static readonly string[] ROOT_ONLY_FILE_NAMES =
     [
-        .. STYLE_FILE_NAMES, VALHALLA_CONFIGURATION_FILE_NAME, VALHALLA_PROFILES_FILE_NAME
+        VALHALLA_CONFIGURATION_FILE_NAME, VALHALLA_PROFILES_FILE_NAME
     ];
 
     private readonly IFileProvider _fileProvider;
@@ -182,17 +173,12 @@ public class OfflineFilesService : IOfflineFilesService
     /// <inheritdoc/>
     /// <remarks>
     /// The DEM might be requested by its alias name, but it is stored on disk under its original name.
-    /// The styles are proxied from where they are published, the valhalla configuration files are read from
-    /// this server's own files, the routing tiles are served by their own service, and everything else by the
-    /// on-the-fly one.
+    /// The valhalla configuration files are read from this server's own files, the routing tiles are served
+    /// by their own service, and everything else by the on-the-fly one.
     /// </remarks>
     public async Task<(Stream Content, long? Length)> GetFileContent(string fileName, long? tileX, long? tileY)
     {
         // The files that are not per tile are named by themselves and not by a source, so they are matched first.
-        if (STYLE_FILE_NAMES.Contains(fileName))
-        {
-            return await _remoteFileFetcherGateway.GetFileStream(STYLES_ADDRESS + fileName);
-        }
         if (fileName == VALHALLA_CONFIGURATION_FILE_NAME)
         {
             return OpenLocalFile(_options.ValhallaConfigurationFilePath);

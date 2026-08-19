@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -153,19 +153,17 @@ public class OfflineFilesServiceTests
     }
 
     [TestMethod]
-    public async Task GetUpdatedFilesList_RootWithValhalla_ShouldAlsoReturnTheStylesAndTheValhallaConfigurationFiles()
+    public async Task GetUpdatedFilesList_RootWithValhalla_ShouldAlsoReturnTheValhallaConfigurationFiles()
     {
         var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, true);
 
-        Assert.HasCount(7, results);
-        Assert.AreEqual(DateTime.UtcNow.Date, results["mapeak-hike.json"]);
-        Assert.AreEqual(DateTime.UtcNow.Date, results["mapeak-bike.json"]);
+        Assert.HasCount(5, results);
         Assert.AreEqual(DateTime.UtcNow.Date, results["valhalla-config.json"]);
         Assert.AreEqual(DateTime.UtcNow.Date, results["valhalla-profiles.json"]);
     }
 
     [TestMethod]
-    public async Task GetUpdatedFilesList_RootWithoutValhalla_ShouldNotReturnTheStylesAndTheValhallaConfigurationFiles()
+    public async Task GetUpdatedFilesList_RootWithoutValhalla_ShouldNotReturnTheValhallaConfigurationFiles()
     {
         var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, false);
 
@@ -173,7 +171,7 @@ public class OfflineFilesServiceTests
     }
 
     [TestMethod]
-    public async Task GetUpdatedFilesList_TileWithValhalla_ShouldNotReturnTheStylesAndTheValhallaConfigurationFiles()
+    public async Task GetUpdatedFilesList_TileWithValhalla_ShouldNotReturnTheValhallaConfigurationFiles()
     {
         var results = await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75, true);
 
@@ -186,16 +184,6 @@ public class OfflineFilesServiceTests
         var results = await _service.GetUpdatedFilesList(DateTime.UtcNow.AddDays(1), null, null, true);
 
         Assert.IsEmpty(results);
-    }
-
-    [TestMethod]
-    public async Task GetFileContent_StyleFile_ShouldBeFetchedFromTheStylesAddress()
-    {
-        _remoteFileFetcherGateway.GetFileStream(Arg.Any<string>()).Returns((new MemoryStream() as Stream, (long?)0));
-
-        await _service.GetFileContent("mapeak-bike.json", null, null);
-
-        await _remoteFileFetcherGateway.Received(1).GetFileStream(StylesAddress + "mapeak-bike.json");
     }
 
     [TestMethod]
