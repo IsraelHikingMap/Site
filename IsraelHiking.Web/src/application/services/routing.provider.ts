@@ -39,6 +39,10 @@ export class RoutingProvider {
     private static readonly ROUTING_TILES_PREFIX = "valhalla";
     private static readonly ROUTING_TILES_EXTENSION = ".tar";
 
+    /** The files the offline routing engine is set up with, as the server names them */
+    private static readonly CONFIGURATION_FILE_NAME = "valhalla-config.json";
+    private static readonly PROFILES_FILE_NAME = "valhalla-profiles.json";
+
     private readonly httpClient = inject(HttpClient);
     private readonly resources = inject(ResourcesService);
     private readonly toastService = inject(ToastService);
@@ -123,19 +127,24 @@ export class RoutingProvider {
     }
 
     /**
-     * Downloads the routing profiles and stores them next to the tiles, so that an offline route is
-     * calculated with the same costing options the server would have used. Failing to get them is
-     * not fatal - valhalla's own defaults are used instead - so this only logs.
+     * Whether the given offline file is one the offline routing engine is set up with, rather than
+     * one the app itself reads.
      */
-    public async updateOfflineRoutingProfiles(): Promise<void> {
-        try {
-            const profiles = await firstValueFrom(this.httpClient.get(Urls.routingProfiles, { responseType: "text" })
-                .pipe(timeout(RoutingProvider.ONLINE_TIMEOUT_MS)));
-            await Valhalla.storeProfiles({ profiles });
-            this.loggingService.info("[Routing] Stored the offline routing profiles");
-        } catch (ex) {
-            this.loggingService.warning(`[Routing] Failed to store the offline routing profiles: ${(ex as Error).message}`);
+    public static isRoutingSetupFile(fileName: string): boolean {
+        return fileName === RoutingProvider.CONFIGURATION_FILE_NAME || fileName === RoutingProvider.PROFILES_FILE_NAME;
+    }
+
+    /**
+     * Hands a downloaded setup file to the routing plugin, which keeps it from now on - where it is
+     * kept is the plugin's to decide, the app only knows which file it is.
+     */
+    public async storeRoutingSetupFile(fileName: string, content: string): Promise<void> {
+        if (fileName === RoutingProvider.CONFIGURATION_FILE_NAME) {
+            await Valhalla.storeConfiguration({ configuration: content });
+        } else {
+            await Valhalla.storeProfiles({ profiles: content });
         }
+        this.loggingService.info(`[Routing] Handed ${fileName} to the offline routing engine`);
     }
 
     /**

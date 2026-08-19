@@ -9,8 +9,6 @@ export class Urls {
     public static readonly translations = "translations/";
     public static readonly health = Urls.apiBase + "health/";
     public static readonly routing = Urls.apiBase + "routing";
-    // HM TODO: use a production url for the routing profiles
-    public static readonly routingProfiles = "https://raw.githubusercontent.com/IsraelHikingMap/Site/refs/heads/main/IsraelHiking.Web/valhalla-profiles.json";
     public static readonly files = Urls.apiBase + "files";
     public static readonly openFile = Urls.files + "/open";
     public static readonly offlineFiles = Urls.files + "/offline";

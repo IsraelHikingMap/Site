@@ -47,14 +47,20 @@ export interface ValhallaPlugin {
      */
     clearTiles(): Promise<void>;
     /**
-     * Stores the routing profiles next to the tiles, so that a route uses the same costing options
-     * the server would have used. The content is the profiles file as it is served.
+     * Stores the configuration the engine is set up with, as it was downloaded. The plugin keeps it
+     * and fills in where the tiles are on this device, which the server can not know.
+     */
+    storeConfiguration(options: { configuration: string }): Promise<void>;
+    /**
+     * Stores the routing profiles, as they were downloaded, so that a route uses the same costing
+     * options the server would have used.
      */
     storeProfiles(options: { profiles: string }): Promise<void>;
     /**
      * Calculates a route, returns the raw valhalla response json.
-     * The costing model and its options are taken from the stored profile of the given name, so
-     * without the profiles there is no offline routing, the same as without tiles.
+     * The costing model and its options are taken from the profile of the given name, out of the
+     * routing files that were downloaded with the offline maps - without them, as without tiles,
+     * there is no offline routing.
      * An elevationInterval of 0 means no elevation is requested.
      */
     route(options: {

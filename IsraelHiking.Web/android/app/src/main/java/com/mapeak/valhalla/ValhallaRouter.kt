@@ -11,8 +11,7 @@ import com.valhalla.api.models.DistanceUnit
 import com.valhalla.api.models.PedestrianCostingOptions
 import com.valhalla.api.models.RouteRequest
 import com.valhalla.api.models.RoutingWaypoint
-import com.valhalla.config.ValhallaConfigBuilder
-import com.valhalla.valhalla.config.ValhallaConfigManager
+import org.json.JSONObject
 import java.io.File
 
 /**
@@ -34,9 +33,20 @@ data class ValhallaRouteRequest(
  */
 class ValhallaRouter(private val context: Context) {
 
+    companion object {
+        /** The plugin's own copy, the app hands it the file it downloaded */
+        private const val CONFIGURATION_FILE_NAME = "valhalla_configuration.json"
+
+        /** The configuration the engine is run with, the downloaded one with the tiles directory in it */
+        private const val ENGINE_CONFIGURATION_FILE_NAME = "valhalla.json"
+
+        private const val MJOLNIR_KEY = "mjolnir"
+        private const val TILE_DIR_KEY = "tile_dir"
+    }
+
     private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
     private val profiles by lazy { ValhallaProfiles(context) }
-    private val configManager by lazy { ValhallaConfigManager(context) }
+
 
     /**
      * Returns the valhalla response json - the web layer decodes the shape and the elevation.
@@ -68,15 +78,33 @@ class ValhallaRouter(private val context: Context) {
     }
 
     /**
-     * Writes valhalla.json if it isn't there yet. The tiles directory never changes, so the config
-     * stays valid when more areas are extracted into it.
+     * Keeps the configuration as it was downloaded, it is only read when a route is calculated.
+     */
+    fun storeConfiguration(configuration: String) {
+        // Fail here rather than when routing, so that content that can not be read is never kept
+        JSONObject(configuration)
+        File(context.filesDir, CONFIGURATION_FILE_NAME).writeText(configuration)
+    }
+
+    /**
+     * The configuration the engine is run with: the one that was downloaded with the offline maps,
+     * which is the very same one the server runs with, with the only thing it can not know - where
+     * the tiles are on this device - filled in. Without it, as without tiles, there is no offline
+     * routing.
+     *
+     * It is written on every route rather than kept, so that a configuration that was downloaded
+     * again takes effect without having to notice that it changed.
      */
     private fun ensureConfig(tilesDir: File): String {
-        val configPath = configManager.getAbsolutePath()
-        if (!File(configPath).exists()) {
-            configManager.writeConfig(ValhallaConfigBuilder().withTileDir(tilesDir.absolutePath).build())
+        val downloaded = File(context.filesDir, CONFIGURATION_FILE_NAME)
+        if (!downloaded.exists()) {
+            throw IllegalStateException("The routing configuration was not downloaded to the device")
         }
-        return configPath
+        val config = JSONObject(downloaded.readText())
+        config.getJSONObject(MJOLNIR_KEY).put(TILE_DIR_KEY, tilesDir.absolutePath)
+        val engineConfig = File(context.filesDir, ENGINE_CONFIGURATION_FILE_NAME)
+        engineConfig.writeText(config.toString())
+        return engineConfig.absolutePath
     }
 
     private fun toRouteRequest(request: ValhallaRouteRequest): RouteRequest {

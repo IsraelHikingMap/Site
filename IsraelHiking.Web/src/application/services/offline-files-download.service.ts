@@ -167,6 +167,12 @@ export class OfflineFilesDownloadService {
         this.offlineStyleRequirements = requirements;
     }
 
+    /**
+     * Gets the newest styles, in order to know what they require and to keep the ones on the device
+     * up to date. They are taken from where they are published, which is public and needs nothing
+     * from this server, and they are stored on the device by whoever asked for them - they are not
+     * a part of the offline files the server lists.
+     */
     private async downloadStyleAndUpdateMetadata(): Promise<{ fileName: string, content: string }[]> {
         const styles: { fileName: string, content: string }[] = [];
         for (const baseLayerUrl of [Urls.HIKING_STYLE_ADDRESS, Urls.MTB_STYLE_ADDRESS]) {
@@ -274,7 +280,6 @@ export class OfflineFilesDownloadService {
         try {
             const styles = await this.downloadStyleAndUpdateMetadata();
             await this.writeStylesToDevice(styles);
-            await this.routingProvider.updateOfflineRoutingProfiles();
             await this.deleteFilesOfUnusedSources(tileKey);
             // What is asked of the server is decided by the state, so it is read again now that files were deleted
             await this.updateDownloadedTilesFromDevice();
@@ -371,6 +376,9 @@ export class OfflineFilesDownloadService {
             await this.fileService.moveFileFromCacheToDataDirectory(fileName);
             if (RoutingProvider.isRoutingTilesFile(fileName)) {
                 await this.routingProvider.extractOfflineRoutingTiles(fileName, tileKey);
+            } else if (RoutingProvider.isRoutingSetupFile(fileName)) {
+                await this.routingProvider.storeRoutingSetupFile(fileName, await this.fileService.readFileInDataDirectory(fileName));
+                await this.fileService.deleteFileInDataDirectory(fileName);
             }
         }
         this.loggingService.info(`[Offline Download] Moved ${fileNames.length} files of ${tileKey} to the data directory`);

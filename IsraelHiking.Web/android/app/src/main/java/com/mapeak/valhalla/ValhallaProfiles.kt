@@ -11,15 +11,16 @@ import java.io.File
 data class ValhallaProfile(val costing: String, val costingOptionsJson: String?)
 
 /**
- * The routing profiles on the device, stored next to the tiles.
+ * The routing profiles on the device.
  *
- * They are the same profiles the server routes with, so that a route calculated on the device
- * follows the same costing options as one calculated online. Without them there is no offline
- * routing, the same as without tiles.
+ * They are handed over after being downloaded with the offline maps, and are the same profiles the
+ * server routes with, so that a route on the device follows the same costing options as one online.
+ * Without them there is no offline routing, the same as without tiles.
  */
 class ValhallaProfiles(private val context: Context) {
 
     companion object {
+        /** The plugin's own copy, the app hands it the file it downloaded */
         private const val PROFILES_FILE_NAME = "valhalla_profiles.json"
         private const val COSTING_KEY = "costing"
         private const val COSTING_OPTIONS_KEY = "costingOptions"
@@ -28,20 +29,17 @@ class ValhallaProfiles(private val context: Context) {
     private fun profilesFile(): File = File(context.filesDir, PROFILES_FILE_NAME)
 
     /**
-     * Stores the profiles file as it was served, it is parsed only when a route is calculated.
+     * Keeps the profiles as they were downloaded, they are only read when a route is calculated.
      */
     fun store(profiles: String) {
-        // Fail here rather than when routing, so that bad content is never stored
+        // Fail here rather than when routing, so that content that can not be read is never kept
         JSONObject(profiles)
         profilesFile().writeText(profiles)
     }
 
-    fun clear() {
-        profilesFile().delete()
-    }
-
     /**
-     * The profile of the given name, or null when there are no profiles or no such profile in them.
+     * The profile of the given name, or null when the profiles were not downloaded or hold no such
+     * profile.
      */
     fun get(name: String): ValhallaProfile? {
         val file = profilesFile()

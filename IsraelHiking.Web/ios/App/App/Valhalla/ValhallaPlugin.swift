@@ -14,6 +14,7 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
     public let jsName = "Valhalla"
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "extractFile", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "storeConfiguration", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "storeProfiles", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "listTiles", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "deleteTile", returnType: CAPPluginReturnPromise),
@@ -72,6 +73,23 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
     /**
      * Stores the routing profiles next to the tiles, so that a route uses the same costing options
      * the server would have used.
+     */
+    @objc func storeConfiguration(_ call: CAPPluginCall) {
+        guard let content = call.getString("configuration"), !content.isEmpty else {
+            call.reject("configuration is required")
+            return
+        }
+        do {
+            try router.storeConfiguration(content)
+            call.resolve()
+        } catch {
+            call.reject("Failed to store the routing configuration: \(error.localizedDescription)", nil, error)
+        }
+    }
+
+    /**
+     * Keeps the routing profiles, as the app downloaded them, so that a route uses the same costing
+     * options the server would have used.
      */
     @objc func storeProfiles(_ call: CAPPluginCall) {
         guard let content = call.getString("profiles"), !content.isEmpty else {

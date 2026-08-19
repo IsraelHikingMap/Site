@@ -1,6 +1,5 @@
 import Foundation
 import Valhalla
-import ValhallaConfigModels
 
 /**
  * A route request. The costing model and its options are taken from the stored profile named
@@ -19,6 +18,7 @@ struct ValhallaRouteRequest {
 enum ValhallaRouterError: Error {
     case requestEncodingFailed
     case profileNotFound(String)
+    case configurationNotDownloaded
 }
 
 /**
@@ -31,6 +31,13 @@ enum ValhallaRouterError: Error {
  * through `route(rawRequest:)`, which is a public part of the package - no workaround involved.
  */
 final class ValhallaRouter {
+    /// The plugin's own copy, the app hands it the file it downloaded
+    private static let configurationFileName = "valhalla_configuration.json"
+    /// The configuration the engine is run with, the downloaded one with the tiles directory in it
+    private static let engineConfigurationFileName = "valhalla.json"
+    private static let mjolnirKey = "mjolnir"
+    private static let tileDirKey = "tile_dir"
+
     private let tiles: ValhallaTiles
     private let profiles = ValhallaProfiles()
     /// Holds the tiles open between requests, it is dropped whenever the tiles on disk change
@@ -59,10 +66,48 @@ final class ValhallaRouter {
         if let valhalla {
             return valhalla
         }
-        let config = try ValhallaConfig(tilesDir: tiles.tilesURL)
-        let engine = try Valhalla(config)
+        let engine = try Valhalla(configPath: try engineConfigurationPath())
         valhalla = engine
         return engine
+    }
+
+    /**
+     * Keeps the configuration as it was downloaded, it is only read when a route is calculated.
+     */
+    func storeConfiguration(_ configuration: String) throws {
+        // Fail here rather than when routing, so that content that can not be read is never kept
+        guard let data = configuration.data(using: .utf8),
+              (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] != nil else {
+            throw ValhallaRouterError.configurationNotDownloaded
+        }
+        try data.write(to: dataURL().appendingPathComponent(ValhallaRouter.configurationFileName), options: .atomic)
+    }
+
+    private func dataURL() -> URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    }
+
+    /**
+     * The configuration the engine is run with: the one that was downloaded with the offline maps,
+     * which is the very same one the server runs with, with the only thing it can not know - where
+     * the tiles are on this device - filled in. Without it, as without tiles, there is no offline
+     * routing.
+     *
+     * It is written on every request rather than kept, so that a configuration that was downloaded
+     * again takes effect without having to notice that it changed.
+     */
+    private func engineConfigurationPath() throws -> String {
+        let downloadedURL = dataURL().appendingPathComponent(ValhallaRouter.configurationFileName)
+        guard let data = try? Data(contentsOf: downloadedURL),
+              var config = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              var mjolnir = config[ValhallaRouter.mjolnirKey] as? [String: Any] else {
+            throw ValhallaRouterError.configurationNotDownloaded
+        }
+        mjolnir[ValhallaRouter.tileDirKey] = tiles.tilesURL.path
+        config[ValhallaRouter.mjolnirKey] = mjolnir
+        let engineURL = dataURL().appendingPathComponent(ValhallaRouter.engineConfigurationFileName)
+        try JSONSerialization.data(withJSONObject: config).write(to: engineURL, options: .atomic)
+        return engineURL.path
     }
 
     private func requestJson(_ request: ValhallaRouteRequest) throws -> String {

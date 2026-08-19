@@ -3,23 +3,24 @@ import Foundation
 /**
  * A single routing profile: the valhalla costing model and the costing options to use with it.
  */
+enum ValhallaProfilesError: Error {
+    case invalidProfiles
+}
+
 struct ValhallaProfile {
     let costing: String
     let costingOptions: [String: Any]?
 }
 
-enum ValhallaProfilesError: Error {
-    case invalidProfiles
-}
-
 /**
- * The routing profiles on the device, stored next to the tiles, mirroring `ValhallaProfiles.kt`.
+ * The routing profiles on the device, mirroring `ValhallaProfiles.kt`.
  *
- * They are the same profiles the server routes with, so that a route calculated on the device
- * follows the same costing options as one calculated online. When there is no profiles file, or it
- * holds no such profile, the caller's costing model is used with valhalla's own defaults.
+ * They are handed over after being downloaded with the offline maps, and are the same profiles the
+ * server routes with, so that a route on the device follows the same costing options as one online.
+ * Without them there is no offline routing, the same as without tiles.
  */
 final class ValhallaProfiles {
+    /// The plugin's own copy, the app hands it the file it downloaded
     private static let profilesFileName = "valhalla_profiles.json"
     private static let costingKey = "costing"
     private static let costingOptionsKey = "costingOptions"
@@ -32,19 +33,15 @@ final class ValhallaProfiles {
     }
 
     /**
-     * Stores the profiles file as it was served, it is parsed only when a route is calculated.
+     * Keeps the profiles as they were downloaded, they are only read when a route is calculated.
      */
     func store(_ profiles: String) throws {
-        // Fail here rather than when routing, so that bad content is never stored
+        // Fail here rather than when routing, so that content that can not be read is never kept
         guard let data = profiles.data(using: .utf8),
               (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] != nil else {
             throw ValhallaProfilesError.invalidProfiles
         }
         try data.write(to: profilesURL, options: .atomic)
-    }
-
-    func clear() {
-        try? fileManager.removeItem(at: profilesURL)
     }
 
     /**
