@@ -90,6 +90,11 @@ public class ConfigurationData
     /// </summary>
     public string ValhallaProfilesFilePath { get; set; }
     /// <summary>
+    /// The path to the file holding the Valhalla setup configuration used by the client's offline routing
+    /// engine, it can be mounted into the container in order to change the offline routing setup
+    /// </summary>
+    public string ValhallaConfigurationFilePath { get; set; }
+    /// <summary>
     /// GraphHopper server address
     /// </summary>
     public string GraphhopperServerAddress { get; set; }
@@ -158,6 +163,7 @@ public class ConfigurationData
         GraphhopperServerAddress = "http://localhost:8989/";
         ValhallaServerAddress = "http://localhost:8002/";
         ValhallaProfilesFilePath = "./valhalla-profiles.json";
+        ValhallaConfigurationFilePath = "./valhalla-config.json";
         ElasticsearchServerAddress = "http://localhost:9200/";
         GpsBabelServerAddress = "http://localhost:11987/";
         ImageCreatorServerAddress = "http://localhost:11223/";

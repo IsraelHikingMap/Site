@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -26,9 +27,24 @@ public class OfflineFilesService : IOfflineFilesService
     private const int ROOT_ZOOM = 6;
 
     /// <summary>
+    /// The location of the styles the map is drawn with, both online and offline.
+    /// </summary>
+    private const string STYLES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/";
+
+    private const string HIKE_STYLE_FILE_NAME = "mapeak-hike.json";
+    private const string BIKE_STYLE_FILE_NAME = "mapeak-bike.json";
+
+    /// <summary>
+    /// The styles the client draws the offline map with. They are served by this server rather than taken by the
+    /// client straight from github, so that a client that can only reach this server still gets them, and so that
+    /// they are the very same styles the sources list is taken from.
+    /// </summary>
+    private static readonly string[] STYLE_FILE_NAMES = [HIKE_STYLE_FILE_NAME, BIKE_STYLE_FILE_NAME];
+
+    /// <summary>
     /// The style that defines which sources (i.e. offline files) the client needs.
     /// </summary>
-    private const string STYLE_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json";
+    private const string STYLE_ADDRESS = STYLES_ADDRESS + HIKE_STYLE_FILE_NAME;
 
     /// <summary>
     /// Sources whose name contains this are not downloaded for offline usage.
@@ -69,9 +85,31 @@ public class OfflineFilesService : IOfflineFilesService
     private const string VALHALLA_FILE_EXTENSION = ".tar";
 
     /// <summary>
+    /// The setup configuration the client initializes its offline routing (valhalla) engine with.
+    /// </summary>
+    private const string VALHALLA_CONFIGURATION_FILE_NAME = "valhalla-config.json";
+
+    /// <summary>
+    /// The routing profiles (costing options) the client routes offline with, the same file this server routes
+    /// with, so that a route that is calculated offline is the same one that is calculated online.
+    /// </summary>
+    private const string VALHALLA_PROFILES_FILE_NAME = "valhalla-profiles.json";
+
+    /// <summary>
     /// The fixed last modified date reported for the DEM, bumped whenever the underlying data changes.
     /// </summary>
     private static readonly DateTime DEM_MODIFIED_DATE = DateTimeOffset.Parse("2026-04-09T10:36:08.8024764Z", CultureInfo.InvariantCulture).UtcDateTime;
+
+    /// <summary>
+    /// The files that are needed for offline usage but are not sliced per tile - the styles the offline map is
+    /// drawn with and the two files the offline routing engine needs. They are only relevant to the root, and
+    /// like the routing tiles they are only listed for clients that ask for them, since older clients do not
+    /// know how to handle them.
+    /// </summary>
+    private static readonly string[] ROOT_ONLY_FILE_NAMES =
+    [
+        .. STYLE_FILE_NAMES, VALHALLA_CONFIGURATION_FILE_NAME, VALHALLA_PROFILES_FILE_NAME
+    ];
 
     private readonly IFileProvider _fileProvider;
     private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
@@ -131,16 +169,38 @@ public class OfflineFilesService : IOfflineFilesService
         {
             AddIfUpdated(filesDictionary, SourceNameToFileName(VALHALLA_FILE_NAME, tileX, tileY, VALHALLA_FILE_EXTENSION), today, lastModifiedDate);
         }
+        if (routingTile && !tileX.HasValue && !tileY.HasValue)
+        {
+            foreach (var fileName in ROOT_ONLY_FILE_NAMES)
+            {
+                AddIfUpdated(filesDictionary, fileName, today, lastModifiedDate);
+            }
+        }
         return filesDictionary;
     }
 
     /// <inheritdoc/>
     /// <remarks>
     /// The DEM might be requested by its alias name, but it is stored on disk under its original name.
-    /// The routing tiles are served by their own service, everything else by the on-the-fly one.
+    /// The styles are proxied from where they are published, the valhalla configuration files are read from
+    /// this server's own files, the routing tiles are served by their own service, and everything else by the
+    /// on-the-fly one.
     /// </remarks>
     public async Task<(Stream Content, long? Length)> GetFileContent(string fileName, long? tileX, long? tileY)
     {
+        // The files that are not per tile are named by themselves and not by a source, so they are matched first.
+        if (STYLE_FILE_NAMES.Contains(fileName))
+        {
+            return await _remoteFileFetcherGateway.GetFileStream(STYLES_ADDRESS + fileName);
+        }
+        if (fileName == VALHALLA_CONFIGURATION_FILE_NAME)
+        {
+            return OpenLocalFile(_options.ValhallaConfigurationFilePath);
+        }
+        if (fileName == VALHALLA_PROFILES_FILE_NAME)
+        {
+            return OpenLocalFile(_options.ValhallaProfilesFilePath);
+        }
         var sourceName = FileNameToSourceName(fileName);
         if (sourceName == VALHALLA_FILE_NAME)
         {
@@ -156,6 +216,15 @@ public class OfflineFilesService : IOfflineFilesService
             : demFileName;
         var fileInfo = _fileProvider.GetFileInfo(relativePath);
         return (fileInfo.CreateReadStream(), fileInfo.Length);
+    }
+
+    /// <summary>
+    /// Opens a file this server holds, which is not a part of the offline files folder, in order to serve it.
+    /// </summary>
+    private static (Stream Content, long? Length) OpenLocalFile(string path)
+    {
+        var fileInfo = new FileInfo(path);
+        return (fileInfo.OpenRead(), fileInfo.Length);
     }
 
     /// <summary>

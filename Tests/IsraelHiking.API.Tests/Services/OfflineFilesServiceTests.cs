@@ -20,7 +20,8 @@ public class OfflineFilesServiceTests
 {
     private const string OnTheFlyAddress = "https://mapeak.com/serve-extract/";
     private const string RoutingTilesAddress = "https://mapeak.com/routing-tiles/";
-    private const string StyleAddress = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json";
+    private const string StylesAddress = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/";
+    private const string StyleAddress = StylesAddress + "mapeak-hike.json";
     private const string Style = """
     {
         "sources": {
@@ -50,6 +51,8 @@ public class OfflineFilesServiceTests
     private IFileSystemHelper _fileSystemHelper;
     private IFileProvider _fileProvider;
     private IRemoteFileFetcherGateway _remoteFileFetcherGateway;
+    private string _valhallaConfigurationFilePath;
+    private string _valhallaProfilesFilePath;
 
     [TestInitialize]
     public void TestInitialize()
@@ -59,13 +62,26 @@ public class OfflineFilesServiceTests
         _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
         _fileSystemHelper.CreateFileProvider(Arg.Any<string>()).Returns(_fileProvider);
         SetupStyleResponse(Style);
+        _valhallaConfigurationFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        _valhallaProfilesFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        File.WriteAllText(_valhallaConfigurationFilePath, "{ \"mjolnir\": {} }");
+        File.WriteAllText(_valhallaProfilesFilePath, "{ \"foot\": {} }");
         var options = Substitute.For<IOptions<ConfigurationData>>();
         options.Value.Returns(new ConfigurationData
         {
             OnTheFlyFilesAddress = OnTheFlyAddress,
-            RoutingTilesAddress = RoutingTilesAddress
+            RoutingTilesAddress = RoutingTilesAddress,
+            ValhallaConfigurationFilePath = _valhallaConfigurationFilePath,
+            ValhallaProfilesFilePath = _valhallaProfilesFilePath
         });
         _service = new OfflineFilesService(_fileSystemHelper, _remoteFileFetcherGateway, options, Substitute.For<ILogger>());
+    }
+
+    [TestCleanup]
+    public void TestCleanup()
+    {
+        File.Delete(_valhallaConfigurationFilePath);
+        File.Delete(_valhallaProfilesFilePath);
     }
 
     private void SetupStyleResponse(string style)
@@ -129,11 +145,78 @@ public class OfflineFilesServiceTests
     }
 
     [TestMethod]
-    public async Task GetUpdatedFilesList_RootWithValhalla_ShouldNotReturnTheValhallaFile()
+    public async Task GetUpdatedFilesList_RootWithValhalla_ShouldNotReturnTheValhallaTileFile()
     {
         var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, true);
 
-        Assert.IsFalse(results.Keys.Any(k => k.StartsWith("valhalla")));
+        Assert.IsFalse(results.Keys.Any(k => k.EndsWith(".tar")));
+    }
+
+    [TestMethod]
+    public async Task GetUpdatedFilesList_RootWithValhalla_ShouldAlsoReturnTheStylesAndTheValhallaConfigurationFiles()
+    {
+        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, true);
+
+        Assert.HasCount(7, results);
+        Assert.AreEqual(DateTime.UtcNow.Date, results["mapeak-hike.json"]);
+        Assert.AreEqual(DateTime.UtcNow.Date, results["mapeak-bike.json"]);
+        Assert.AreEqual(DateTime.UtcNow.Date, results["valhalla-config.json"]);
+        Assert.AreEqual(DateTime.UtcNow.Date, results["valhalla-profiles.json"]);
+    }
+
+    [TestMethod]
+    public async Task GetUpdatedFilesList_RootWithoutValhalla_ShouldNotReturnTheStylesAndTheValhallaConfigurationFiles()
+    {
+        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, false);
+
+        Assert.IsFalse(results.Keys.Any(k => k.EndsWith(".json")));
+    }
+
+    [TestMethod]
+    public async Task GetUpdatedFilesList_TileWithValhalla_ShouldNotReturnTheStylesAndTheValhallaConfigurationFiles()
+    {
+        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75, true);
+
+        Assert.IsFalse(results.Keys.Any(k => k.EndsWith(".json")));
+    }
+
+    [TestMethod]
+    public async Task GetUpdatedFilesList_RootOnlyFilesUpToDate_ShouldNotReturnThem()
+    {
+        var results = await _service.GetUpdatedFilesList(DateTime.UtcNow.AddDays(1), null, null, true);
+
+        Assert.IsEmpty(results);
+    }
+
+    [TestMethod]
+    public async Task GetFileContent_StyleFile_ShouldBeFetchedFromTheStylesAddress()
+    {
+        _remoteFileFetcherGateway.GetFileStream(Arg.Any<string>()).Returns((new MemoryStream() as Stream, (long?)0));
+
+        await _service.GetFileContent("mapeak-bike.json", null, null);
+
+        await _remoteFileFetcherGateway.Received(1).GetFileStream(StylesAddress + "mapeak-bike.json");
+    }
+
+    [TestMethod]
+    public async Task GetFileContent_ValhallaConfigurationFile_ShouldBeReadFromTheConfiguredPath()
+    {
+        var (content, length) = await _service.GetFileContent("valhalla-config.json", null, null);
+
+        using var reader = new StreamReader(content);
+        Assert.AreEqual(File.ReadAllText(_valhallaConfigurationFilePath), await reader.ReadToEndAsync());
+        Assert.AreEqual(new FileInfo(_valhallaConfigurationFilePath).Length, length);
+        await _remoteFileFetcherGateway.DidNotReceive().GetFileStream(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public async Task GetFileContent_ValhallaProfilesFile_ShouldBeReadFromTheConfiguredPath()
+    {
+        var (content, _) = await _service.GetFileContent("valhalla-profiles.json", null, null);
+
+        using var reader = new StreamReader(content);
+        Assert.AreEqual(File.ReadAllText(_valhallaProfilesFilePath), await reader.ReadToEndAsync());
+        await _remoteFileFetcherGateway.DidNotReceive().GetFileStream(Arg.Any<string>());
     }
 
     [TestMethod]
