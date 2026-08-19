@@ -114,7 +114,7 @@ public class FilesController : ControllerBase
     /// <param name="tileX">The tile's X coordinates, null for root</param>
     /// <param name="tileY">The tile's Y coordinates, null for root</param>
     /// <param name="routingTile">Whether the client can handle the offline routing files - the routing tile
-    /// itself and, for the root, the styles and the valhalla configuration files</param>
+    /// itself and, for the root, the valhalla configuration files</param>
     /// <returns></returns>
     [HttpGet]
     [Route("offline")]
