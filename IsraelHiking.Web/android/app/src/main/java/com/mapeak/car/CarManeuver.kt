@@ -1,6 +1,7 @@
 package com.mapeak.car
 
 import androidx.car.app.navigation.model.Maneuver
+import com.valhalla.api.models.RouteManeuver
 import kotlin.math.abs
 import org.json.JSONArray
 import org.json.JSONException
@@ -34,6 +35,8 @@ data class CarManeuver(
                     .put("roundaboutExitNumber", roundaboutExitNumber)
 
     companion object {
+        private const val METERS_IN_KILOMETER = 1000
+
         @Throws(JSONException::class)
         fun fromJson(json: JSONObject): CarManeuver =
                 CarManeuver(
@@ -62,26 +65,52 @@ data class CarManeuver(
                 val exitNumber =
                         if (instruction.isNull("roundaboutExitNumber")) null
                         else instruction.optInt("roundaboutExitNumber")
-                maneuvers.add(toManeuver(type, text, cumulative, exitNumber))
+                maneuvers.add(
+                        toManeuver(RouteManeuverType.fromWire(type), text, cumulative, exitNumber)
+                )
                 cumulative += instruction.optDouble("distanceMeters", 0.0)
             }
             return maneuvers
         }
 
         /**
-         * Builds a single maneuver from a v2 instruction. A roundabout needs a valid exit number
-         * (>= 1) to render, so without one it falls back to a plain straight maneuver rather than
-         * crashing the maneuver builder. The backend does not provide a circulation direction (this
-         * is a worldwide app), and only the exit number is shown, so the arbitrary-but-required
+         * Build maneuvers from valhalla's own maneuvers, as they come back from an offline trace.
+         * This is the very same conversion the backend does for the v2 instructions above (see
+         * ValhallaGateway.ToRouteInstruction), so a route matched on the device gets the same turns
+         * as one matched by the server: the kind of turn comes from valhalla's numeric maneuver
+         * type, its instruction is already localized by the engine, and its length - which valhalla
+         * gives in the requested units, kilometers - is the length of the segment that starts at it.
+         */
+        fun fromValhallaManeuvers(maneuvers: List<RouteManeuver>): List<CarManeuver> {
+            val result = ArrayList<CarManeuver>(maneuvers.size)
+            var cumulative = 0.0
+            for (maneuver in maneuvers) {
+                result.add(
+                        toManeuver(
+                                RouteManeuverType.fromValhalla(maneuver.type),
+                                maneuver.instruction,
+                                cumulative,
+                                maneuver.roundaboutExitCount
+                        )
+                )
+                cumulative += maneuver.length * METERS_IN_KILOMETER
+            }
+            return result
+        }
+
+        /**
+         * Builds a single maneuver. A roundabout needs a valid exit number (>= 1) to render, so
+         * without one it falls back to a plain straight maneuver rather than crashing the maneuver
+         * builder. Neither the backend nor valhalla provides a circulation direction (this is a
+         * worldwide app), and only the exit number is shown, so the arbitrary-but-required
          * direction is left at counter-clockwise.
          */
         private fun toManeuver(
-                type: String,
+                maneuverType: RouteManeuverType,
                 text: String,
                 distanceAlongRouteM: Double,
                 exitNumber: Int?
         ): CarManeuver {
-            val maneuverType = RouteManeuverType.fromWire(type)
             if (maneuverType == RouteManeuverType.ROUNDABOUT) {
                 return if (exitNumber != null && exitNumber >= 1) {
                     CarManeuver(maneuverType.androidType, text, distanceAlongRouteM, exitNumber)
@@ -125,6 +154,34 @@ private enum class RouteManeuverType(val wire: String, val androidType: Int) {
 
         /** Resolves a wire value, mapping unknown/forward-compatible kinds to [CONTINUE]. */
         fun fromWire(wire: String): RouteManeuverType = byWire[wire] ?: CONTINUE
+
+        /**
+         * Resolves one of valhalla's numeric maneuver types, which is what an offline trace
+         * returns, the same way the backend resolves it for the v2 instructions (see
+         * ValhallaGateway.ToManeuverType). Kinds without a turn of their own - continue, becomes,
+         * the exit of a roundabout or of a ferry, and transit - fall through to [CONTINUE].
+         */
+        fun fromValhalla(type: Int): RouteManeuverType =
+                when (type) {
+                    1, 2, 3 -> DEPART
+                    4, 5, 6 -> ARRIVE
+                    9 -> SLIGHT_RIGHT
+                    10 -> RIGHT
+                    11 -> SHARP_RIGHT
+                    12 -> UTURN_RIGHT
+                    13 -> UTURN_LEFT
+                    14 -> SHARP_LEFT
+                    15 -> LEFT
+                    16 -> SLIGHT_LEFT
+                    18, 20 -> RAMP_RIGHT
+                    19, 21 -> RAMP_LEFT
+                    23 -> KEEP_RIGHT
+                    24 -> KEEP_LEFT
+                    25, 37, 38 -> MERGE
+                    26 -> ROUNDABOUT
+                    28 -> FERRY_ENTER
+                    else -> CONTINUE
+                }
     }
 }
 

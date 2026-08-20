@@ -1,5 +1,6 @@
 import Foundation
 import Valhalla
+import ValhallaModels
 
 /**
  * A route request. The costing model and its options are taken from the stored profile named
@@ -16,19 +17,14 @@ struct ValhallaRouteRequest {
 }
 
 enum ValhallaRouterError: Error {
-    case requestEncodingFailed
+    case responseEncodingFailed
     case profileNotFound(String)
+    case unknownCosting(String)
     case configurationNotDownloaded
 }
 
 /**
  * Runs route requests against the native valhalla engine, mirroring `ValhallaRouter.kt`.
- *
- * Android builds the request with the typed models, which is what this should do too, but the
- * swift models cannot be used for it yet: valhalla-mobile pins them to `.upToNextMinor(from:
- * "0.2.0")`, and `elevation_interval` only exists from 0.4.0, so a typed request here would come
- * back without the elevation. Until that pin is widened the request is built as json and sent
- * through `route(rawRequest:)`, which is a public part of the package - no workaround involved.
  */
 final class ValhallaRouter {
     /// The plugin's own copy, the app hands it the file it downloaded
@@ -48,11 +44,14 @@ final class ValhallaRouter {
     }
 
     /**
-     * Returns the raw valhalla response json - the web layer decodes the shape and the elevation.
+     * Returns the valhalla response json - the web layer decodes the shape and the elevation.
      */
     func route(_ request: ValhallaRouteRequest) throws -> String {
-        let engine = try engine()
-        return engine.route(rawRequest: try requestJson(request))
+        let response = try engine().route(request: try routeRequest(request))
+        guard let json = String(data: try JSONEncoder().encode(response), encoding: .utf8) else {
+            throw ValhallaRouterError.responseEncodingFailed
+        }
+        return json
     }
 
     /**
@@ -81,6 +80,7 @@ final class ValhallaRouter {
             throw ValhallaRouterError.configurationNotDownloaded
         }
         try data.write(to: dataURL().appendingPathComponent(ValhallaRouter.configurationFileName), options: .atomic)
+        invalidate()
     }
 
     private func dataURL() -> URL {
@@ -93,8 +93,8 @@ final class ValhallaRouter {
      * the tiles are on this device - filled in. Without it, as without tiles, there is no offline
      * routing.
      *
-     * It is written on every request rather than kept, so that a configuration that was downloaded
-     * again takes effect without having to notice that it changed.
+     * It is written whenever the engine is opened, so that a configuration that was downloaded
+     * again takes effect as soon as the engine is dropped.
      */
     private func engineConfigurationPath() throws -> String {
         let downloadedURL = dataURL().appendingPathComponent(ValhallaRouter.configurationFileName)
@@ -110,31 +110,44 @@ final class ValhallaRouter {
         return engineURL.path
     }
 
-    private func requestJson(_ request: ValhallaRouteRequest) throws -> String {
+    private func routeRequest(_ request: ValhallaRouteRequest) throws -> RouteRequest {
         // Without the profiles there is no offline routing, the same as without tiles
         guard let profile = profiles.profile(named: request.profile) else {
             throw ValhallaRouterError.profileNotFound(request.profile)
         }
-        let costing = profile.costing
-        var json: [String: Any] = [
-            "locations": [
-                ["lat": request.fromLat, "lon": request.fromLng],
-                ["lat": request.toLat, "lon": request.toLng]
+        guard let costing = CostingModel(rawValue: profile.costing) else {
+            throw ValhallaRouterError.unknownCosting(profile.costing)
+        }
+        return RouteRequest(
+            locations: [
+                RoutingWaypoint(lat: request.fromLat, lon: request.fromLng),
+                RoutingWaypoint(lat: request.toLat, lon: request.toLng)
             ],
-            "costing": costing,
-            "directions_options": ["units": "kilometers"]
-        ]
-        // Valhalla takes the options under the name of the costing model they belong to
-        if let costingOptions = profile.costingOptions {
-            json["costing_options"] = [costing: costingOptions]
+            costing: costing,
+            costingOptions: try costingOptions(costing, profile.costingOptions),
+            units: .km,
+            elevationInterval: Double(request.elevationInterval)
+        )
+    }
+
+    /**
+     * The options of a profile belong to the costing model they were written for, so they are read
+     * into the options of that model.
+     */
+    private func costingOptions(_ costing: CostingModel, _ options: [String: Any]?) throws -> CostingOptions? {
+        guard let options else {
+            return nil
         }
-        if request.elevationInterval > 0 {
-            json["elevation_interval"] = request.elevationInterval
+        let data = try JSONSerialization.data(withJSONObject: options)
+        switch costing {
+        case .pedestrian:
+            return CostingOptions(pedestrian: try JSONDecoder().decode(PedestrianCostingOptions.self, from: data))
+        case .bicycle:
+            return CostingOptions(bicycle: try JSONDecoder().decode(BicycleCostingOptions.self, from: data))
+        case .auto:
+            return CostingOptions(auto: try JSONDecoder().decode(AutoCostingOptions.self, from: data))
+        default:
+            throw ValhallaRouterError.unknownCosting(costing.rawValue)
         }
-        let data = try JSONSerialization.data(withJSONObject: json)
-        guard let requestJson = String(data: data, encoding: .utf8) else {
-            throw ValhallaRouterError.requestEncodingFailed
-        }
-        return requestJson
     }
 }

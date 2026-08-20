@@ -653,7 +653,7 @@
 			repositoryURL = "https://github.com/Rallista/valhalla-mobile.git";
 			requirement = {
 				kind = exactVersion;
-				version = 0.5.1;
+				version = 0.6.0;
 			};
 		};
 		0DCC0104000000000000CC04 /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */ = {

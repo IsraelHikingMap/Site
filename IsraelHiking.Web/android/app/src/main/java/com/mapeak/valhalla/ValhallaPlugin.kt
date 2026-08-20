@@ -40,6 +40,7 @@ class ValhallaPlugin : Plugin() {
             return
         }
         try {
+            ValhallaRouter.close()
             val result = tiles.extract(tarFileName, tileKey)
             call.resolve(JSObject().put("extractedFiles", result.extractedFiles).put("tilesDir", result.tilesDir))
         } catch (ex: Throwable) {
@@ -108,6 +109,7 @@ class ValhallaPlugin : Plugin() {
             return
         }
         try {
+            ValhallaRouter.close()
             tiles.delete(tileKey)
             call.resolve()
         } catch (ex: Throwable) {
@@ -122,6 +124,7 @@ class ValhallaPlugin : Plugin() {
     @PluginMethod
     fun clearTiles(call: PluginCall) {
         try {
+            ValhallaRouter.close()
             tiles.clear()
             call.resolve()
         } catch (ex: Throwable) {
@@ -150,7 +153,7 @@ class ValhallaPlugin : Plugin() {
             return
         }
         try {
-            val raw = router.route(
+            val raw = router.routeJson(
                 ValhallaRouteRequest(
                     fromLat = fromLat,
                     fromLng = fromLng,
