@@ -56,6 +56,7 @@
             },
             "scripts": [],
             "allowedCommonJsDependencies": [
+              "@mapbox/polyline",
               "lottie-web",
               "bowser",
               "piexif-ts"

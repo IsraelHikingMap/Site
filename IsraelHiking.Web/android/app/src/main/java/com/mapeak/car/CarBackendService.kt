@@ -1,8 +1,15 @@
 package com.mapeak.car
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.mapeak.valhalla.ValhallaPoint
+import com.mapeak.valhalla.ValhallaRouteRequest
+import com.mapeak.valhalla.ValhallaRouter
+import com.mapeak.valhalla.ValhallaTiles
+import com.mapeak.valhalla.ValhallaTraceRequest
+import com.valhalla.api.models.RouteLeg
 import java.io.IOException
 import okhttp3.Call
 import okhttp3.Callback
@@ -15,6 +22,7 @@ import okhttp3.Response
 import org.json.JSONArray
 import org.json.JSONObject
 import org.maplibre.android.geometry.LatLng
+import org.maplibre.geojson.utils.PolylineUtils
 
 /**
  * Thin client over the Mapeak backend so the Android Auto experience can search for places and
@@ -22,8 +30,10 @@ import org.maplibre.android.geometry.LatLng
  * the Angular app (see search-results.provider.ts / routing.provider.ts): all results are delivered
  * back on the main thread so callers can update car screens directly.
  */
-class CarBackendService {
+class CarBackendService(context: Context) {
     private val mainHandler = Handler(Looper.getMainLooper())
+    private val valhallaTiles = ValhallaTiles(context)
+    private val valhallaRouter = ValhallaRouter(context)
 
     /**
      * Search for places matching [query] near [center]. Mirrors GET /api/search/{term}. Results are
@@ -85,9 +95,10 @@ class CarBackendService {
 
     /**
      * Compute a route from [from] to [to] using the given [routingType]. Mirrors GET /api/routing.
-     * Falls back to a straight line between the two points if the backend call fails so the user
-     * always gets a usable destination on the map. The from/to points keep a raw comma between
-     * lat/lng, matching the web client's "lat,lng" form.
+     * When the backend call fails the route is calculated on the device from the offline routing
+     * tiles, and only if those are missing or cannot produce a route does it fall back to a straight
+     * line between the two points, so the user always gets a usable destination on the map. The
+     * from/to points keep a raw comma between lat/lng, matching the web client's "lat,lng" form.
      */
     fun route(from: LatLng, to: LatLng, routingType: String, onResult: (List<LatLng>) -> Unit) {
         val url =
@@ -104,7 +115,7 @@ class CarBackendService {
                         object : Callback {
                             override fun onFailure(call: Call, e: IOException) {
                                 Log.w(LOG_TAG, "Routing failed", e)
-                                postResult(onResult, listOf(from, to))
+                                postResult(onResult, offlineRoute(from, to, routingType) ?: listOf(from, to))
                             }
 
                             override fun onResponse(call: Call, response: Response) {
@@ -118,6 +129,7 @@ class CarBackendService {
                                             Log.w(LOG_TAG, "Reading route response failed", e)
                                             null
                                         }
+                                                ?: offlineRoute(from, to, routingType)
                                                 ?: listOf(from, to)
                                 postResult(onResult, route)
                             }
@@ -129,8 +141,9 @@ class CarBackendService {
      * Fetch turn-by-turn instructions for an existing route by map-matching its [points] to the
      * network. Mirrors POST /api/routing (the map-match action) with the routing [routingType],
      * [language] and the v2 instructions format as query parameters and the points as the JSON body.
-     * Returns an empty list (so the caller can keep its locally-synthesized turns) if the call fails
-     * or carries no instructions.
+     * When the backend call fails or carries no instructions the points are matched on the device
+     * against the offline routing tiles, and only if those are missing or cannot match them does it
+     * return an empty list, so that the caller keeps its locally-synthesized turns.
      */
     fun mapMatch(
             points: List<LatLng>,
@@ -166,7 +179,10 @@ class CarBackendService {
                         object : Callback {
                             override fun onFailure(call: Call, e: IOException) {
                                 Log.w(LOG_TAG, "Map match failed", e)
-                                postResult(onResult, emptyList())
+                                postResult(
+                                        onResult,
+                                        offlineMapMatch(points, routingType, language)
+                                )
                             }
 
                             override fun onResponse(call: Call, response: Response) {
@@ -181,10 +197,109 @@ class CarBackendService {
                                             Log.w(LOG_TAG, "Reading map match response failed", e)
                                             emptyList()
                                         }
-                                postResult(onResult, maneuvers)
+                                postResult(
+                                        onResult,
+                                        maneuvers.ifEmpty {
+                                            offlineMapMatch(points, routingType, language)
+                                        }
+                                )
                             }
                         }
                 )
+    }
+
+    /**
+     * Calculate the route on the device from the tiles the user downloaded for offline use. Returns
+     * null when there are no tiles, or when valhalla cannot connect the two points, so the caller
+     * can fall back to a straight line. Called from okhttp's callback threads, never the main one.
+     */
+    private fun offlineRoute(from: LatLng, to: LatLng, routingType: String): List<LatLng>? {
+        if (!valhallaTiles.hasTiles()) {
+            return null
+        }
+        return try {
+            val response =
+                    valhallaRouter.route(
+                            ValhallaRouteRequest(
+                                    fromLat = from.latitude,
+                                    fromLng = from.longitude,
+                                    toLat = to.latitude,
+                                    toLng = to.longitude,
+                                    profile = toProfile(routingType)
+                            ),
+                            valhallaTiles.tilesDir()
+                    )
+            decodeShape(response.trip?.legs)
+        } catch (e: Exception) {
+            Log.w(LOG_TAG, "Offline routing failed", e)
+            null
+        }
+    }
+
+    /**
+     * Match the route's points to the road network on the device, so that a route that was already
+     * calculated still gets real turn by turn instructions when the backend is unreachable. Returns
+     * an empty list when there are no tiles, or when valhalla cannot match the points, so that the
+     * caller keeps the turns it synthesized from the geometry.
+     */
+    private fun offlineMapMatch(
+            points: List<LatLng>,
+            routingType: String,
+            language: String
+    ): List<CarManeuver> {
+        if (!valhallaTiles.hasTiles()) {
+            return emptyList()
+        }
+        return try {
+            val response =
+                    valhallaRouter.traceRoute(
+                            ValhallaTraceRequest(
+                                    points =
+                                            points.map {
+                                                ValhallaPoint(it.latitude, it.longitude)
+                                            },
+                                    profile = toProfile(routingType),
+                                    language = language
+                            ),
+                            valhallaTiles.tilesDir()
+                    )
+            CarManeuver.fromValhallaManeuvers(
+                    response.trip?.legs?.flatMap { it.maneuvers.orEmpty() }.orEmpty()
+            )
+        } catch (e: Exception) {
+            Log.w(LOG_TAG, "Offline map match failed", e)
+            emptyList()
+        }
+    }
+
+    /**
+     * The routing profile of the routing type, as the profiles are named in the profiles file, so
+     * that the offline route uses the same costing options the server would have used.
+     */
+    private fun toProfile(routingType: String): String =
+            when (routingType) {
+                "Hike" -> "foot"
+                "Bike" -> "bike"
+                "4WD" -> "car4WheelDrive"
+                else -> "default"
+            }
+
+    /**
+     * The geometry of a valhalla trip: every leg carries its own encoded polyline, and they follow
+     * one another. Null when there is nothing to draw, so the caller can fall back.
+     */
+    private fun decodeShape(legs: List<RouteLeg>?): List<LatLng>? {
+        val points = ArrayList<LatLng>()
+        legs.orEmpty().forEach { leg ->
+            val shape = leg.shape
+            if (shape.isNullOrEmpty()) {
+                return@forEach
+            }
+            PolylineUtils.decode(shape, POLYLINE_PRECISION).forEach {
+                points.add(LatLng(it.latitude(), it.longitude()))
+            }
+        }
+        return points.ifEmpty { null }
     }
 
     private fun parseSearchResults(body: String): List<CarSearchResult> {
@@ -267,6 +382,7 @@ class CarBackendService {
         private const val LOG_TAG = "CarBackendService"
         private const val API_BASE = "https://mapeak.com/api/"
         private const val MAX_RESULTS = 6
+        private const val POLYLINE_PRECISION = 6
         private val JSON_MEDIA_TYPE = "application/json".toMediaType()
     }
 }

@@ -14,6 +14,11 @@ export type InMemoryState = {
      * and empty until they were read, which is also what an empty device looks like.
      */
     downloadedTiles: Record<string, FileNameDateVersion[]>;
+    /**
+     * The ids of the tiles whose routing tiles are on the device. They are not files, the routing
+     * plugin stores them, so they are read from it when the app starts just like the files are.
+     */
+    downloadedRoutingTiles: string[];
     distance: boolean;
     pannedTimestamp: Date;
     following: boolean;
