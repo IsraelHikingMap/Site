@@ -421,8 +421,8 @@ export class OfflineFilesDownloadService {
         if (tileX != null && tileY != null) {
             params.tileX = tileX.toString();
             params.tileY = tileY.toString();
-            params.routingTile = "true";
         }
+        params.routingTile = "true";
         const fileNames = await firstValueFrom(this.httpClient.get<Record<string, string>>(Urls.offlineFiles, { params: params }).pipe(timeout(5000)));
         this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that need to be downloaded ` +
             `for ${tileKey === PmTilesService.toTileKey() ? "the root files" : tileKey}, ` +
