@@ -31,7 +31,6 @@
     "@mapbox/polyline": "^1.2.1",
     "@mapbox/vector-tile": "^3.0.0",
     "@maplibre/ngx-maplibre-gl": "^22.1.0",
-    "@ng-idle/core": "^16.0.0",
     "@ngxs/store": "^22.0.0",
     "@revenuecat/purchases-capacitor": "^13.4.0",
     "@revenuecat/purchases-capacitor-ui": "^13.4.0",

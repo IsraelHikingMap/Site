@@ -2,7 +2,6 @@ import { provideAppInitializer, ErrorHandler, importProvidersFrom, inject, Appli
 import { provideHttpClient, withInterceptors } from "@angular/common/http";
 import { Title, BrowserModule } from "@angular/platform-browser";
 import { provideRouter } from "@angular/router";
-import { provideNgIdle } from "@ng-idle/core";
 import { provideStore, withNgxsNoopExecutionStrategy } from "@ngxs/store";
 import { progressInterceptor } from "ngx-progressbar/http";
 import { provideLottieOptions } from "ngx-lottie";
@@ -57,7 +56,6 @@ export const appConfig: ApplicationConfig = {
         provideHttpClient(
             withInterceptors([osmTokenInterceptor, clientDetailsInterceptor, progressInterceptor])
         ),
-        provideNgIdle(),
         provideRouter(routes),
         provideLottieOptions({ player: () => import("lottie-web") }),
         provideMarkdown()
