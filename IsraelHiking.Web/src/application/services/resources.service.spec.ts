@@ -23,7 +23,7 @@ describe("ResourcesService", () => {
         });
     });
 
-    it("Should faciliate language change to english and raise event", inject([ResourcesService, Store],
+    it("Should facilitate language change to english and raise event", inject([ResourcesService, Store],
         async (service: ResourcesService, store: Store) => {
             store.reset({
                 configuration: {
@@ -41,7 +41,7 @@ describe("ResourcesService", () => {
         }
     ));
 
-    it("Should faciliate translation", inject([ResourcesService, GetTextCatalogService],
+    it("Should facilitate translation", inject([ResourcesService, GetTextCatalogService],
         (service: ResourcesService, getText: GetTextCatalogService) => {
             vi.spyOn(getText, "getString").mockReturnValue("word's translation");
 

@@ -139,7 +139,7 @@ describe("RouteStatisticsService", () => {
         expect(statistics.remainingDistance).toBeCloseTo(statisticsOfFullRoute.length / 2, -2);
     });
 
-    it("Should get statistics on route when gps is close by but heading is oposite to route direction", () => {
+    it("Should get statistics on route when gps is close by but heading is opposite to route direction", () => {
         const gpsLatLng: LatLngAltTime = { lat: 1, lng: 0.0001, alt: 20, timestamp: new Date().toISOString() };
         const routeData: LatLngAltTime[] = [
             { lat: 1, lng: 1, alt: 10 },

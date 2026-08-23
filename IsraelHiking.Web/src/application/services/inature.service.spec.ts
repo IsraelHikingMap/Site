@@ -15,7 +15,7 @@ describe("INatureService", () => {
         });
     });
 
-    it("Should enritch feature from iNature", inject([INatureService, HttpTestingController],
+    it("Should enrich feature from iNature", inject([INatureService, HttpTestingController],
         async (service: INatureService, mockBackend: HttpTestingController) => {
             const feature = {
                 properties: {

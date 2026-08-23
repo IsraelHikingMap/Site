@@ -61,7 +61,7 @@ describe("ElevationProvider", () => {
         }
     ));
 
-    it("Should not call provider bacause all coordinates has elevation", inject([ElevationProvider],
+    it("Should not call provider because all coordinates have elevation", inject([ElevationProvider],
         async (elevationProvider: ElevationProvider) => {
 
             const latlngs = [{ lat: 32, lng: 35, alt: 1 }];

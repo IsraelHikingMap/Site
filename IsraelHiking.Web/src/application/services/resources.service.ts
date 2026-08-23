@@ -459,7 +459,7 @@ export class ResourcesService {
     public legendCemetery: string;
     public legendQuarry: string;
     public legendBench: string;
-    public legendAlpinehut: string;
+    public legendAlpineHut: string;
 
     public async initialize() {
         await this.setLanguageInternal(this.store.selectSnapshot((s: ApplicationState) => s.configuration).language);
@@ -908,7 +908,7 @@ export class ResourcesService {
         this.legendQuarry = this.gettextCatalog.getString("Quarry");
         this.legendConstructionSite = this.gettextCatalog.getString("Construction Site");
         this.legendBench = this.gettextCatalog.getString("Bench");
-        this.legendAlpinehut = this.gettextCatalog.getString("Alpine Hut");
+        this.legendAlpineHut = this.gettextCatalog.getString("Alpine Hut");
 
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);

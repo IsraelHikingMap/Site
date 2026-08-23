@@ -25,12 +25,12 @@ describe("Spatial service", () => {
         expect(length).toBeGreaterThan(100000);
     });
 
-    it("Should not simplify a signle coordinate", () => {
+    it("Should not simplify a single coordinate", () => {
         const simplified = SpatialService.simplify([], 0);
         expect(simplified.length).toBe(0);
     });
 
-    it("Should simplify according to imput", () => {
+    it("Should simplify according to input", () => {
         const simplified = SpatialService.simplify([[0, 0], [0, 0.5], [0, 1]], 0.1);
         expect(simplified.length).toBe(2);
     });
@@ -170,7 +170,7 @@ describe("Spatial service", () => {
         expect(split.end[0].lat).toBe(0);
     });
 
-    it("Should split a line in the middle and don't add a projected point since the new point is exatly on the middle point", () => {
+    it("Should split a line in the middle and don't add a projected point since the new point is exactly on the middle point", () => {
         const split = SpatialService.splitLine({ lat: 0, lng: 1 }, [{ lat: 0, lng: 0, timestamp: null }, { lat: 0, lng: 1, timestamp: null }, { lat: 0, lng: 2, timestamp: null }]);
         expect(split.start.length).toBe(2);
         expect(split.start[1].lng).toBe(1.0);
@@ -363,7 +363,7 @@ describe("Spatial service", () => {
         expect(merged.coordinates.length).toBe(4);
     });
 
-    it("Should try to merge and make the fisrt coordinate the same", () => {
+    it("Should try to merge and make the first coordinate the same", () => {
         const lines = [
             lineString([[0, 0], [1, 1]]),
             lineString([[2, 2], [1, 1]]),

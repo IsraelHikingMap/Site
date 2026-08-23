@@ -22,7 +22,7 @@ describe("ImageResizeService", () => {
         });
     });
 
-    it("Should fial to convert the image without location data", inject([ImageResizeService], async (service: ImageResizeService) => {
+    it("Should fail to convert the image without location data", inject([ImageResizeService], async (service: ImageResizeService) => {
         await expect(service.resizeImageAndConvert(new Blob([""]) as File)).rejects.toThrow();
     }));
 

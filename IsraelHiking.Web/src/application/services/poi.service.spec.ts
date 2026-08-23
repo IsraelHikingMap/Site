@@ -460,7 +460,7 @@ describe("Poi Service", () => {
         }
     ));
 
-    it("Should clear offline queue if feature is in database and not a new feautre", inject([PoiService, Store, DatabaseService, HttpTestingController],
+    it("Should clear offline queue if feature is in database and not a new feature", inject([PoiService, Store, DatabaseService, HttpTestingController],
         async (poiService: PoiService, store: Store, databaseService: DatabaseService, mockBackend: HttpTestingController) => {
             store.reset({
                 layersState: {},

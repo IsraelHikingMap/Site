@@ -574,7 +574,7 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiIconColor).toBe("black");
     });
 
-    it("Should set icon color category for inature and wikidata and prefer inture", () => {
+    it("Should set icon color category for iNature and wikidata and prefer iNature", () => {
         // Arrange
         const feature = createFeature({ wikipedia: "page", "ref:IL:inature": "inature" });
         const poi = createPoi();

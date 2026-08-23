@@ -754,7 +754,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should merge routes with oposite direction", inject([SelectedRouteService, Store],
+    it("Should merge routes with opposite direction", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -905,7 +905,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should revese an empty route", inject([SelectedRouteService, Store],
+    it("Should reverse an empty route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -931,7 +931,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should revese a route", inject([SelectedRouteService, Store],
+    it("Should reverse a route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -986,7 +986,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should remove the first segement", inject([SelectedRouteService, Store],
+    it("Should remove the first segment", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -1039,7 +1039,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should remove the last segement", inject([SelectedRouteService, Store],
+    it("Should remove the last segment", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {
@@ -1090,7 +1090,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should remove a middle segement", inject([SelectedRouteService, Store],
+    it("Should remove a middle segment", inject([SelectedRouteService, Store],
         async (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
                 {

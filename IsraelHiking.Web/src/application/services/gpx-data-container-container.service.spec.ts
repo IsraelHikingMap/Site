@@ -40,7 +40,7 @@ describe("GpxDataContainerConverterService", () => {
         }
     ));
 
-    it("Should roundtrip datacontiner with one marker", inject([GpxDataContainerConverterService],
+    it("Should roundtrip DataContainer with one marker", inject([GpxDataContainerConverterService],
         async (service: GpxDataContainerConverterService) => {
             const gpxBase64String = await service.toGpx({
                 baseLayer: {
@@ -126,7 +126,7 @@ describe("GpxDataContainerConverterService", () => {
         }
     ));
 
-    it("Should roundtrip datacontiner with one route", inject([GpxDataContainerConverterService],
+    it("Should roundtrip DataContainer with one route", inject([GpxDataContainerConverterService],
         async (service: GpxDataContainerConverterService) => {
             const gpxBase64String = await service.toGpx({
                 baseLayer: {
@@ -186,7 +186,7 @@ describe("GpxDataContainerConverterService", () => {
         }
     ));
 
-    it("Should roundtrip datacontiner with one route and split it - pretend the GPX was not created in this site",
+    it("Should roundtrip DataContainer with one route and split it - pretend the GPX was not created in this site",
         inject([GpxDataContainerConverterService], async (service: GpxDataContainerConverterService) => {
             const gpxBase64String = await service.toGpx({
                 baseLayer: {
@@ -243,7 +243,7 @@ describe("GpxDataContainerConverterService", () => {
         })
     );
 
-    it("Should regect invalid GPX", inject([GpxDataContainerConverterService], async (service: GpxDataContainerConverterService) => {
+    it("Should reject invalid GPX", inject([GpxDataContainerConverterService], async (service: GpxDataContainerConverterService) => {
         const gpxString = `<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
             <gpx></gpi>`;
         const promise = service.toDataContainer(gpxString);
