@@ -27,7 +27,7 @@ export type LegendSection = {
 export class LegendDialogComponent {
     public readonly resources = inject(ResourcesService);
     private readonly store = inject(Store);
-    private readonly data = inject<string>(MAT_DIALOG_DATA);
+    public readonly baseLayerKey = inject<string>(MAT_DIALOG_DATA);
 
     public readonly legendSections = signal<LegendSection[]>([]);
     private selectedSection: LegendSection = null;
@@ -59,9 +59,9 @@ export class LegendDialogComponent {
             }
         }
 
-        if (this.data === MTB_MAP) {
+        if (this.baseLayerKey === MTB_MAP) {
             this.removeMtbUnwantedLegend(sections);
-        } else if (this.data === HIKING_MAP) {
+        } else if (this.baseLayerKey === HIKING_MAP) {
             this.removeIhmUnwantedLegend(sections);
         } else {
             sections = [];
@@ -91,6 +91,8 @@ export class LegendDialogComponent {
         this.removeItemInSection(sections, this.resources.legendBorders, this.resources.legendThePurpleLine);
 
         this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendGuidepost);
+        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendAlpineHut);
+        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendBench);
 
         this.removeItemInSection(sections, this.resources.legendAreas, this.resources.legendBeach);
     }

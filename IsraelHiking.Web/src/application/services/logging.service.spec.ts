@@ -78,7 +78,7 @@ describe("LoggingService", () => {
         expect(typeAndMessage.type).toBe("client");
     });
 
-    it("Should classify serverside side error and return status code", async () => {
+    it("Should classify server side error and return status code", async () => {
         const timeoutError = new HttpErrorResponse({
             status: 404
         });

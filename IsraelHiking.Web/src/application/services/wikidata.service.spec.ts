@@ -197,7 +197,7 @@ describe("WikidataService", () => {
         expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([2, 1]);
     }));
 
-    it("should enritch feature that does not link to valid pages", inject([WikidataService, HttpTestingController], async (serive: WikidataService, backend: HttpTestingController) => {
+    it("should enrich feature that does not link to valid pages", inject([WikidataService, HttpTestingController], async (serive: WikidataService, backend: HttpTestingController) => {
         const wikidataId = "Q123";
         const imageName = "image_name";
         const language = "he";

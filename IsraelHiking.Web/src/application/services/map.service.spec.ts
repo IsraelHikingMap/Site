@@ -53,7 +53,7 @@ describe("MapService", () => {
         expect(url).toContain("/123");
     }));
 
-    it("Should should not do anything when missing image addres does not start with http", inject([MapService],
+    it("Should not do anything when missing image address does not start with http", inject([MapService],
         async (service: MapService) => {
             const spy = vi.fn();
             const mapMock = {

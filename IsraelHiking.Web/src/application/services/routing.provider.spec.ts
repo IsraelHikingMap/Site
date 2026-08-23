@@ -103,7 +103,7 @@ describe("RoutingProvider", () => {
         }
     ));
 
-    it("Should return start and end points when reponse is not a geojson", inject([RoutingProvider, HttpTestingController, Store],
+    it("Should return start and end points when response is not a geojson", inject([RoutingProvider, HttpTestingController, Store],
         async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
             store.reset({
                 offlineState: { isSubscribed: false },

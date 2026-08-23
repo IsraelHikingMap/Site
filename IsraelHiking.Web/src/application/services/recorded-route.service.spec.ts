@@ -139,7 +139,7 @@ describe("Recorded Route Service", () => {
         )
     );
 
-    it("Should initialize after a recording stopped in the middle with pending proccessing location and stop the recording gracefully",
+    it("Should initialize after a recording stopped in the middle with pending processing location and stop the recording gracefully",
         inject([RecordedRouteService, Store],
             (service: RecordedRouteService, store: Store) => {
                 store.reset({
@@ -231,7 +231,7 @@ describe("Recorded Route Service", () => {
         }
     ));
 
-    it("Should add a valid locations when a new position arrives and other are recieved while in background", inject([RecordedRouteService, GeoLocationService, Store],
+    it("Should add valid locations when a new position arrives and others are received while in background", inject([RecordedRouteService, GeoLocationService, Store],
         (service: RecordedRouteService, geoService: GeoLocationService, store: Store) => {
             store.reset({
                 recordedRouteState: {
@@ -291,7 +291,7 @@ describe("Recorded Route Service", () => {
         }
     ));
 
-    it("Should invalidate multiple locations once and update recoding when comming back to foregound", inject([RecordedRouteService, GeoLocationService, LoggingService, Store],
+    it("Should invalidate multiple locations once and update recording when coming back to foreground", inject([RecordedRouteService, GeoLocationService, LoggingService, Store],
         (service: RecordedRouteService, geoService: GeoLocationService, loggingService: LoggingService, store: Store) => {
             store.reset({
                 recordedRouteState: {
