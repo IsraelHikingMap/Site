@@ -390,7 +390,7 @@ export class ResourcesService {
     public legendFuelStation: string;
     public legendConvenienceStore: string;
     public legendLodging: string;
-    public legendToilettes: string;
+    public legendToilets: string;
     public legendTravelInformation: string;
     public legendGuidepost: string;
     public legendConstructionSite: string;
@@ -478,7 +478,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1786872268011");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1787493611246");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -625,7 +625,7 @@ export class ResourcesService {
         this.automaticRecordingUploadHint = this.gettextCatalog.getString("Allows you to automatically upload a recorded " +
             "route when you finish recording");
         this.gotLostWarnings = this.gettextCatalog.getString("Got lost warnings");
-        this.gotLostWarningsHint = this.gettextCatalog.getString("Lets you know when the your planned route " +
+        this.gotLostWarningsHint = this.gettextCatalog.getString("Lets you know when your planned route " +
             "is more than 50 meters from your current position");
         this.navigateWithWaze = this.gettextCatalog.getString("Navigate with Waze");
         this.navigateWithGoogleMaps = this.gettextCatalog.getString("Navigate with Google Maps");
@@ -839,7 +839,7 @@ export class ResourcesService {
         this.legendFuelStation = this.gettextCatalog.getString("Fuel Station");
         this.legendConvenienceStore = this.gettextCatalog.getString("Convenience Store");
         this.legendLodging = this.gettextCatalog.getString("Lodging");
-        this.legendToilettes = this.gettextCatalog.getString("Toilettes");
+        this.legendToilets = this.gettextCatalog.getString("Toilets");
         this.legendTravelInformation = this.gettextCatalog.getString("Travel Information");
         this.legendGuidepost = this.gettextCatalog.getString("Guidepost");
         this.legendViewpoint = this.gettextCatalog.getString("Viewpoint");

@@ -96,7 +96,7 @@
       </div>
       }
     </div>
-    <div class="flex flex-row">
+    <div class="flex flex-row mt-4">
       <mat-form-field class="w-full">
         <mat-label>{{resources.dateFormat}}</mat-label>
         <mat-select [ngModel]="dateFormat()" (ngModelChange)="setDateFormat($event)">
@@ -106,7 +106,6 @@
         </mat-select>
       </mat-form-field>
     </div>
-    <br />
     @if (isSubscribed()) {
     <p class="ms-2">
       {{resources.offlinePurchaseGratitude}}<br />

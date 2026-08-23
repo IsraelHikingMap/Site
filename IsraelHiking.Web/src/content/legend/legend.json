@@ -1120,7 +1120,7 @@
         "link": "osm-tag-link"
       },
       {
-        "key": "legendToilettes",
+        "key": "legendToilets",
         "latlng": {
           "lat": 31.0162196,
           "lng": 34.7610432

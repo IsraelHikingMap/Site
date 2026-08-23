@@ -1,4 +1,5 @@
 {
+    "{{count}} tiles need to be downloaded again": "{{count}} tiles need to be downloaded again",
     "4WD Track": "4WD Track",
     "4x4 Routing": "4x4 Routing",
     "A few words about what you are saving in the cloud.": "A few words about what you are saving in the cloud.",
@@ -167,7 +168,7 @@
     "Intro dialog description for maps": "High-quality maps that follow you anywhere. Access hiking and MTB trails online for free, or upgrade to Offline Maps for total reliability without cell service.",
     "Intro dialog description for routes and points": "Plan like a pro. Search official routes, analyze elevation gain, and find essential points of interest along your path.",
     "Israel Trail": "Israel Trail",
-    "Jammed position received...": "Jammed position received, once a good location will be recieved the position will be updated. You can turn off tracking in the upper right corner",
+    "Jammed position received...": "Jammed position received, once a good location will be received the position will be updated. You can turn off tracking in the upper right corner",
     "Keep screen on": "Keep screen on",
     "Kinneret Trail": "Kinneret Trail",
     "Lake, Reservoir": "Lake, Reservoir",
@@ -175,7 +176,7 @@
     "Last recording did not end well. Feel free to start a new one.": "Last recording did not end well. Feel free to start a new one.",
     "Legend": "Legend",
     "Length": "Length",
-    "Lets you know when the your planned route is more than 50 meters from your current position": "Lets you know when the your planned route is more than 50 meters from your current position",
+    "Lets you know when your planned route is more than 50 meters from your current position": "Lets you know when your planned route is more than 50 meters from your current position",
     "Light": "Light",
     "List": "List",
     "Local": "Local",
@@ -276,7 +277,7 @@
     "Renew subscription": "Renew subscription",
     "Report an issue": "Report an issue",
     "Report an issue instructions": "Please describe the problem as best as you can and attach screenshots that show it.\n\nUnfortunately, we will not be able to help without the following information:\n1. What happened?\n\n2. At what date and time did it happen?\n\n3. What did you do right before it happened?\n\n4. Is this the first time it happened?\n\n5. Is there a way to reproduce the problem?\n",
-    "Report an issue site instructions": "A report file was just downloaded. We need this file in order to better understand the issue.\nBelow is a button that allows you to send us a mail to support@mapeak.com.\nAfter pressing this button please attach the downloaded file.\nYou can also open you favorite mail client without using the button below.\nThanks!",
+    "Report an issue site instructions": "A report file was just downloaded. We need this file in order to better understand the issue.\nBelow is a button that allows you to send us a mail to support@mapeak.com.\nAfter pressing this button please attach the downloaded file.\nYou can also open your favorite mail client without using the button below.\nThanks!",
     "Reset Data": "Reset Data",
     "Residential": "Residential",
     "Restaurant": "Restaurant",
@@ -346,7 +347,7 @@
     "This will delete all current routes. Are you sure?": "This will delete all current routes. Are you sure?",
     "Title": "Title",
     "To prevent download errors, please don't switch apps or lock your screen until the download is finished": "To prevent download errors, please don't switch apps or lock your screen until the download is finished",
-    "Toilettes": "Toilettes",
+    "Toilets": "Toilets",
     "Traces are only saved locally. You can change that in the settings screen.": "Traces are only saved locally. You can change that in the settings screen.",
     "Tracks and Paths": "Tracks and Paths",
     "Translated by LibreTranslate, click to view original text": "Translated by LibreTranslate, click to view original text",
@@ -404,6 +405,5 @@
     "Yes": "Yes",
     "You have more than 10 routes which can cause performance issues.": "You have more than 10 routes which can cause performance issues.",
     "Zoom In": "Zoom In",
-    "Zoom Out": "Zoom Out",
-    "{{count}} tiles need to be downloaded again": "{{count}} tiles need to be downloaded again"
+    "Zoom Out": "Zoom Out"
 }
