@@ -1,5 +1,4 @@
 import { inject, Service } from "@angular/core";
-import { Idle, DEFAULT_INTERRUPTSOURCES } from "@ng-idle/core";
 import { TextZoom } from "@capacitor/text-zoom";
 import { KeepAwake } from "@capacitor-community/keep-awake";
 import { ScreenBrightness } from "@capacitor-community/screen-brightness";
@@ -8,6 +7,7 @@ import { Store } from "@ngxs/store";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
+import { IdleService } from "./idle.service";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
 import type { ApplicationState } from "../models";
 
@@ -17,7 +17,7 @@ export class ScreenService {
 
     private readonly runningContextService = inject(RunningContextService);
     private readonly store = inject(Store);
-    private readonly userIdleService = inject(Idle);
+    private readonly userIdleService = inject(IdleService);
     private readonly logger = inject(LoggingService);
 
     public async initialize() {
@@ -43,9 +43,6 @@ export class ScreenService {
                 }
             }
         });
-        this.userIdleService.setInterrupts(DEFAULT_INTERRUPTSOURCES);
-        this.userIdleService.setIdle(30);
-        this.userIdleService.setTimeout(false);
         this.userIdleService.onIdleStart.subscribe(() => {
             if (this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isAddingPoi) {
                 this.store.dispatch(new ToggleAddRecordingPoiAction());
