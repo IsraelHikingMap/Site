@@ -1034,10 +1034,10 @@
       {
         "key": "legendAlpineHut",
         "latlng": {
-          "lat": 37.929233,
-          "lng": 32.290632
+          "lat": 32.2568894,
+          "lng": 35.4198853
         },
-        "zoom": 19,
+        "zoom": 17,
         "type": "POI",
         "osmTags": [ "tourism=alpine_hut" ],
         "link": "osm-tag-link"

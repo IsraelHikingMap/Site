@@ -1,7 +1,10 @@
-import puppeteer from 'puppeteer';
-import legendJson from '../src/content/legend/legend.json' with { type: 'json' };
-import {argv} from 'process';
-import type { Map } from 'maplibre-gl';
+import puppeteer from "puppeteer";
+import http from "http";
+import legendJson from "../src/content/legend/legend.json" with { type: "json" };
+import projectPackage from "../package.json" with { type: "json" };
+import {argv} from "process";
+import type { AddressInfo } from "net";
+import type { Map } from "maplibre-gl";
 
 /**
  * This script generates images for the legend items.
@@ -18,6 +21,19 @@ if (specificImage) {
 // This is used in the evaluate function in puppeteer to access the map instance, the definition here is to allow TypeScript to recognize the type.
 const map: Map = null;
 
+// Both libraries are loaded from a CDN, so keep the versions in sync with the ones this project depends on.
+const maplibreVersion = projectPackage.dependencies["maplibre-gl"];
+const rtlTextVersion = projectPackage.dependencies["@mapbox/mapbox-gl-rtl-text"];
+
+// MapLibre v6 is ESM only and starts its worker from a same-origin blob URL, which the browser refuses on the
+// opaque origin that page.setContent() creates. Serving the page over http gives it a real origin instead.
+let pageHtml = "";
+const server = http.createServer((_, response) => {
+    response.writeHead(200, { "Content-Type": "text/html" });
+    response.end(pageHtml);
+}).listen(0);
+const pageUrl = `http://localhost:${(server.address() as AddressInfo).port}/`;
+
 async function createImages(style: string, type: string) {
     const html = `
 <!DOCTYPE html>
@@ -25,8 +41,7 @@ async function createImages(style: string, type: string) {
 <head>
     <meta charset='utf-8'>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' />
-    <script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
+    <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@${maplibreVersion}/dist/maplibre-gl.css' />
     <style>
         body { margin: 0; padding: 0; }
         html, body, #map { height: 100%; }
@@ -34,13 +49,16 @@ async function createImages(style: string, type: string) {
 </head>
 <body>
 <div id="map"></div>
-<script>
+<script type="module">
+    import * as maplibregl from 'https://unpkg.com/maplibre-gl@${maplibreVersion}/dist/maplibre-gl.mjs';
+
     maplibregl.setRTLTextPlugin(
-        'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/mapbox-gl-rtl-text.min.js',
+        'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@${rtlTextVersion}/dist/mapbox-gl-rtl-text.js',
         true // Lazy load the plugin
     );
 
-    const map = new maplibregl.Map({
+    // A module script has its own scope, so the map is put on window for page.evaluate to reach it.
+    window.map = new maplibregl.Map({
         container: 'map',
         style: ${JSON.stringify(style)},
         center: [0, 0],
@@ -58,16 +76,17 @@ async function createImages(style: string, type: string) {
     try {
         for (const width of [50, 200]) {
             const page = await browser.newPage();
-            // This needs to happen before set content so that the map loading will respect the device scale factor.
+            // This needs to happen before the page is loaded so that the map loading will respect the device scale factor.
             await page.setViewport({
-                    width,
-                    height,
-                    deviceScaleFactor: 2
-                });
-            await page.setContent(html);
+                width,
+                height,
+                deviceScaleFactor: 2
+            });
+            pageHtml = html;
+            await page.goto(pageUrl);
             await page.waitForFunction(() => map.loaded());
             for (const legendSection of legendJson) {
-                for (let legendItem of legendSection.items) {
+                for (const legendItem of legendSection.items) {
                     if (specificImage && legendItem.key !== specificImage) {
                         continue;
                     }
@@ -80,13 +99,13 @@ async function createImages(style: string, type: string) {
                     await page.evaluate((lnglat, zoom) => {
                         map.setCenter(lnglat);
                         map.setZoom(zoom - 1);
-                        return map.once('idle');
+                        return map.once("idle");
                     }, legendItem.latlng, legendItem.zoom);
 
                     const filename = `./src/content/legend/${type}_${legendItem.key}.png`;
                     await page.screenshot({
                         path: filename,
-                        type: 'png',
+                        type: "png",
                         clip: {
                             x: 0,
                             y: 0,
@@ -103,15 +122,16 @@ async function createImages(style: string, type: string) {
         console.log(err);
     }
 }
-for (let style of ["https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json", 
+for (const style of ["https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json", 
     "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-bike.json"]) {
 
     const response = await fetch(style);
     const text = await response.text();
-    const jsonStyle = JSON.parse(text.replace(/name:he/g, `name:en`));
+    const jsonStyle = JSON.parse(text.replace(/name:he/g, "name:en"));
 
     await createImages(jsonStyle, style.split("/").pop().split("-").pop().split(".")[0]);
 }
 
 
 await browser.close();
+server.close();

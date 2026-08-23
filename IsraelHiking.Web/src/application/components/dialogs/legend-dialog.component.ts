@@ -91,7 +91,6 @@ export class LegendDialogComponent {
         this.removeItemInSection(sections, this.resources.legendBorders, this.resources.legendThePurpleLine);
 
         this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendGuidepost);
-        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendAlpineHut);
         this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendBench);
 
         this.removeItemInSection(sections, this.resources.legendAreas, this.resources.legendBeach);
