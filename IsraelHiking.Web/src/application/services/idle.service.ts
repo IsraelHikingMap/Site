@@ -3,9 +3,11 @@ import { Subject } from "rxjs";
 
 /**
  * Pointer events cover mouse, touch and pen with a single set of listeners, so there's no need for the
- * legacy `mousedown`/`mousemove`/`touchstart`/`touchmove` pairs, nor for `DOMMouseScroll`/`mousewheel`.
+ * legacy `mousedown`/`mousemove`/`touchstart` trio, nor for `DOMMouseScroll`/`mousewheel`.
+ * `touchmove` is still needed though: once the browser claims a touch gesture for scrolling it fires
+ * `pointercancel` and stops sending `pointermove`, while `touchmove` keeps firing.
  */
-const ACTIVITY_EVENTS = ["pointerdown", "pointermove", "keydown", "wheel", "scroll"] as const;
+const ACTIVITY_EVENTS = ["pointerdown", "pointermove", "touchmove", "keydown", "wheel", "scroll"] as const;
 
 const IDLE_TIME_MILLISECONDS = 30_000;
 
