@@ -1,4 +1,5 @@
 {
+    "{{count}} tiles need to be downloaded again": "{{count}} mosaicos deben descargarse de nuevo",
     "4WD Track": "Pista 4WD",
     "4x4 Routing": "Navegación 4x4",
     "A few words about what you are saving in the cloud.": "Unas palabras sobre lo que estás guardando en la nube.",
@@ -175,7 +176,7 @@
     "Last recording did not end well. Feel free to start a new one.": "La última grabación no terminó bien. Puedes empezar una nueva.",
     "Legend": "Leyenda",
     "Length": "Longitud",
-    "Lets you know when the your planned route is more than 50 meters from your current position": "Te avisa cuando tu ruta planificada está a más de 50 metros de tu posición actual",
+    "Lets you know when your planned route is more than 50 meters from your current position": "Te avisa cuando tu ruta planificada está a más de 50 metros de tu posición actual",
     "Light": "Claro",
     "List": "Lista",
     "Local": "Local",
@@ -338,7 +339,7 @@
     "The Purple Line": "La Línea Morada",
     "The title for your saved work.": "El título de tu trabajo guardado.",
     "Theme": "Tema",
-    "There's no description :-(. To add one you'll need to login to OSM first, please use the button in the upper right corner to login.": "No hay descripción 😞. Para añadir una, primero debes iniciar sesión en OSM. Por favor, haz clic en el botón de cara triste en la esquina superior izquierda de la pantalla principal.",
+    "There's no description :-(. To add one you'll need to login to OSM first, please use the button in the upper right corner to login.": "No hay descripción 😞. Para añadir una, primero debes iniciar sesión en OSM. Por favor, haz clic en el botón de cara triste en la esquina superior derecha de la pantalla principal.",
     "There's no permission to use your location.": "No hay permiso para usar tu ubicación.",
     "There's no permission to use your location. Would you like to open the app settings?": "No hay permiso para usar tu ubicación. ¿Te gustaría abrir la configuración de la aplicación?",
     "There's so much more you can do with our app": "Hay mucho más que puedes hacer con nuestra aplicación",
@@ -347,7 +348,7 @@
     "This will delete all current routes. Are you sure?": "Esto eliminará todas las rutas actuales. ¿Estás seguro?",
     "Title": "Título",
     "To prevent download errors, please don't switch apps or lock your screen until the download is finished": "Para evitar errores de descarga, por favor no cambies de aplicación ni bloquees la pantalla hasta que la descarga haya terminado",
-    "Toilettes": "Aseos",
+    "Toilets": "Aseos",
     "Traces are only saved locally. You can change that in the settings screen.": "Las trazas solo se guardan localmente. Puedes cambiarlo en la pantalla de configuración.",
     "Tracks and Paths": "Caminos y senderos",
     "Translated by LibreTranslate, click to view original text": "Traducido por LibreTranslate, toca para ver el texto original",
@@ -405,6 +406,5 @@
     "Yes": "Sí",
     "You have more than 10 routes which can cause performance issues.": "Tienes más de 10 rutas, lo que puede causar problemas de rendimiento.",
     "Zoom In": "Acercar",
-    "Zoom Out": "Alejar",
-    "{{count}} tiles need to be downloaded again": "{{count}} mosaicos deben descargarse de nuevo"
+    "Zoom Out": "Alejar"
 }

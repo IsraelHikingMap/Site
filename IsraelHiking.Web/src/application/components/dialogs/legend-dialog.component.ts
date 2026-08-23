@@ -115,7 +115,7 @@ export class LegendDialogComponent {
         this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendRestaurant);
         this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendConvenienceStore);
         this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendLodging);
-        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendToilettes);
+        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendToilets);
         this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendTravelInformation);
         this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendPlayground);
 
