@@ -13,7 +13,7 @@
                 </mat-expansion-panel-header>
                 @if (isSectionOpen(section)) {
                 @for (item of section.items; track item) {
-                <legend-item [item]="item"></legend-item>
+                <legend-item [item]="item" [baseLayerKey]="baseLayerKey"></legend-item>
                 }
                 }
             </mat-expansion-panel>

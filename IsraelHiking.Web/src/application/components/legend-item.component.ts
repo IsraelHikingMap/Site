@@ -4,7 +4,6 @@ import { Dir } from "@angular/cdk/bidi";
 import { MatTooltip } from "@angular/material/tooltip";
 
 import { AnalyticsDirective } from "../directives/analytics.directive";
-import { LayersService } from "../services/layers.service";
 import { MapService } from "../services/map.service";
 import { HIKING_MAP } from "../reducers/initial-state";
 import type { ResourcesService } from "../services/resources.service";
@@ -33,10 +32,10 @@ export class LegendItemComponent {
     public static readonly OSM_KEY_LINK = "osm-key-link";
 
     public readonly item = input<ILegendItem>();
+    public readonly baseLayerKey = input<string>();
 
 
     private readonly mapService = inject(MapService);
-    private readonly layersService = inject(LayersService);
 
     public readonly getLink = computed(() => {
         if (this.item().link === LegendItemComponent.OSM_KEY_LINK) {
@@ -53,7 +52,6 @@ export class LegendItemComponent {
     }
 
     public getImageAddress() {
-        const styleKey = this.layersService.selectedBaseLayer().key;
-        return `content/legend/${styleKey === HIKING_MAP ? "hike" : "bike"}_${this.item().key}.png`;
+        return `content/legend/${this.baseLayerKey() === HIKING_MAP ? "hike" : "bike"}_${this.item().key}.png`;
     }
 }
