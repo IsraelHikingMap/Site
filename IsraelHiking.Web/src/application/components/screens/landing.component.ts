@@ -1,6 +1,8 @@
 import { Component, inject } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
+import { SearchComponent } from "../search.component";
+
 import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { PurchaseService } from "../../services/purchase.service";
@@ -9,7 +11,7 @@ import { Urls } from "../../urls";
 @Component({
     selector: "landing",
     templateUrl: "./landing.component.html",
-    imports: [RouterLink]
+    imports: [RouterLink, SearchComponent]
 })
 export class LandingComponent {
     public readonly androidAppUrl: string = Urls.ANDROID_APP_URL;
@@ -26,6 +28,10 @@ export class LandingComponent {
 
     public isApp(): boolean {
         return this.runningContextService.isCapacitor;
+    }
+
+    public isIos(): boolean {
+        return this.runningContextService.isIos;
     }
 
     public isShowPurchaseButton(): boolean {

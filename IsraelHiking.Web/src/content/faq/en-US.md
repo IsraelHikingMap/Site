@@ -11,13 +11,13 @@ Mapeak is an outdoor navigation app built for real adventures — hiking, cyclin
 Mapeak is available on iOS and Android. You can also plan routes on the web and sync them with your mobile device.
 
 ## Is Mapeak free to use?
-Yes! Mapeak Free gives you unlimited route planning, elevation analysis, community routes, and points of interest search at no cost. Mapeak Pro adds offline map downloads and offline navigation for $29.99/year.
+Yes! Mapeak Free gives you unlimited route planning, elevation analysis, community routes, and points of interest search at no cost. Mapeak Pro adds offline map downloads and offline navigation for $3.99/month or $29.99/year.
 
 ## How do I download maps for offline use?
 Open the app, go to Manage Offline Maps, and tap the region you want to download. Once downloaded, maps work with no internet connection for days of navigation.
 
 ## Do I need Mapeak Pro for offline maps?
-Yes. Unlimited offline map downloads and full offline navigation require a Mapeak Pro subscription at $29.99/year. You can subscribe directly inside the iOS or Android app.
+Yes. Unlimited offline map downloads and full offline navigation require a Mapeak Pro subscription, available at $3.99/month or $29.99/year. The yearly plan works out to about $2.50 a month — roughly 37% less than paying monthly. You can subscribe directly inside the iOS or Android app.
 
 ## How current are the offline maps?
 Community updates flow in daily. When you re-download a region, you get the latest trail changes, closures, and new paths contributed by the global Mapeak community.
@@ -47,10 +47,13 @@ Use the Report an Issue button in the app, or edit the map directly on OpenStree
 Yes! Log in with your OSM account and use the Edit This Map Using OSM button. You can also upload recorded tracks to help fill in unmapped routes.
 
 ## How do I subscribe to Mapeak Pro?
-Open the Mapeak app on iOS or Android and follow the upgrade prompt. Subscriptions are managed through the App Store or Google Play at $29.99/year.
+Open the Mapeak app on iOS or Android and follow the upgrade prompt, then pick the monthly plan at $3.99/month or the yearly plan at $29.99/year. Subscriptions are managed through the App Store or Google Play.
 
 ## How do I manage or cancel my subscription?
 Go to Manage Subscriptions inside the app, or manage it directly through your iOS App Store or Google Play account settings.
+
+## Can I switch between the monthly and yearly plans?
+Yes, but the switch is made in the store rather than in Mapeak. Open your subscription settings in the App Store (iOS) or Google Play (Android) and choose the other plan. The new plan takes effect at the end of your current billing period.
 
 ## Can I delete my account?
 Yes. Go to Settings and choose Delete Account. This will permanently remove your account and all associated cloud data.

@@ -390,3 +390,21 @@ mgl-map {
         display: none !important;
     }
 }
+
+// Strips the toolbar sizing and filled-field chrome off the search when the landing hero hosts it.
+// !important since search.component is ViewEncapsulation.None and injects its styles after this sheet.
+.landing-search {
+    .search-input-container,
+    .search-input-container.logged-in {
+        width: 100% !important;
+    }
+
+    .mat-mdc-text-field-wrapper {
+        background-color: transparent !important;
+    }
+
+    .mat-mdc-form-field-focus-overlay,
+    .mdc-line-ripple {
+        display: none !important;
+    }
+}
