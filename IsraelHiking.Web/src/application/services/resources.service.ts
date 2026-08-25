@@ -94,6 +94,7 @@ export class ResourcesService {
     public distance: string;
     public width: string;
     public searchPlaceHolder: string;
+    public searchLandingPlaceHolder: string;
     public close: string;
     public layerNamePlaceHolder: string;
     public language: string;
@@ -478,7 +479,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1787493611246");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1787601713245");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -525,6 +526,7 @@ export class ResourcesService {
         this.distance = this.gettextCatalog.getString("Distance");
         this.width = this.gettextCatalog.getString("Width");
         this.searchPlaceHolder = this.gettextCatalog.getString("Type to search...");
+        this.searchLandingPlaceHolder = this.gettextCatalog.getString("Where do you want to go?");
         this.close = this.gettextCatalog.getString("Close");
         this.layerNamePlaceHolder = this.gettextCatalog.getString("The name to be displayed in the maps or overlays list");
         this.language = this.gettextCatalog.getString("Language");

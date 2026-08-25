@@ -9,7 +9,7 @@ import {
 import { Router } from "@angular/router";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
-import { MatFormField } from "@angular/material/form-field";
+import { MatFormField, MatPrefix } from "@angular/material/form-field";
 import { MatInput } from "@angular/material/input";
 import { MatOption } from "@angular/material/core";
 import { MatAutocompleteTrigger, MatAutocomplete } from "@angular/material/autocomplete";
@@ -30,7 +30,7 @@ import type { ApplicationState, SearchResultsPointOfInterest } from "../models";
     templateUrl: "./search.component.html",
     styleUrls: ["./search.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgClass, Dir, MatFormField, MatInput, FormsModule, MatAutocompleteTrigger, MatAutocomplete, ReactiveFormsModule, MatOption]
+    imports: [NgClass, Dir, MatFormField, MatPrefix, MatInput, FormsModule, MatAutocompleteTrigger, MatAutocomplete, ReactiveFormsModule, MatOption]
 })
 export class SearchComponent {
 
@@ -109,9 +109,15 @@ export class SearchComponent {
 
     public focusOnSearchInput() {
         // ChangeDetectionRef doesn't work well for some reason...
+        const valueOnFocus = this.searchFromInput()?.nativeElement.value;
         setTimeout(() => {
-            this.searchFromInput().nativeElement.focus();
-            this.searchFromInput().nativeElement.select();
+            const input = this.searchFromInput().nativeElement;
+            input.focus();
+            // Selecting lets a new search replace the old term, but only when nothing was typed
+            // while waiting - otherwise the next keystroke would replace the character just typed
+            if (input.value === valueOnFocus) {
+                input.select();
+            }
         }, 100);
 
     }
@@ -222,6 +228,11 @@ export class SearchComponent {
 
     public placeholder() {
         const currentUrl = this.currentUrl();
+        if (currentUrl === RouteStrings.ROUTE_ROOT ||
+            currentUrl === RouteStrings.ROUTE_LANDING ||
+            currentUrl === RouteStrings.ROUTE_ABOUT) {
+            return this.resources.searchLandingPlaceHolder;
+        }
         if (currentUrl === RouteStrings.ROUTE_SHARES) {
             return this.resources.searchCloudSavesPlaceHolder;
         }

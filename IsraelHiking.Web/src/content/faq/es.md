@@ -11,13 +11,13 @@ Mapeak es una aplicación de navegación al aire libre diseñada para aventuras 
 Mapeak está disponible para iOS y Android. También puedes planificar rutas en la web y sincronizarlas con tu dispositivo móvil.
 
 ## ¿Mapeak es gratuita?
-¡Sí! La versión gratuita de Mapeak te ofrece planificación ilimitada de rutas, análisis de altitud, rutas de la comunidad y búsqueda de puntos de interés, sin ningún coste. Mapeak Pro añade descarga de mapas sin conexión y navegación offline por 29,99 $ al año.
+¡Sí! La versión gratuita de Mapeak te ofrece planificación ilimitada de rutas, análisis de altitud, rutas de la comunidad y búsqueda de puntos de interés, sin ningún coste. Mapeak Pro añade descarga de mapas sin conexión y navegación offline por 3,99 $ al mes o 29,99 $ al año.
 
 ## ¿Cómo descargo mapas para usarlos sin conexión?
 Abre la aplicación, ve a Gestionar mapas sin conexión y pulsa sobre la región que deseas descargar. Una vez descargados, los mapas funcionan sin conexión a internet durante días de navegación.
 
 ## ¿Necesito Mapeak Pro para los mapas sin conexión?
-Sí. La descarga ilimitada de mapas sin conexión y la navegación offline completa requieren una suscripción a Mapeak Pro por 29,99 $ al año. Puedes suscribirte directamente desde la aplicación de iOS o Android.
+Sí. La descarga ilimitada de mapas sin conexión y la navegación offline completa requieren una suscripción a Mapeak Pro, disponible por 3,99 $ al mes o 29,99 $ al año. El plan anual equivale a unos 2,50 $ al mes, alrededor de un 37 % menos que pagar mes a mes. Puedes suscribirte directamente desde la aplicación de iOS o Android.
 
 ## ¿Qué tan actualizados están los mapas sin conexión?
 Las actualizaciones de la comunidad llegan a diario. Al volver a descargar una región, obtienes los últimos cambios en senderos, cierres y nuevos caminos aportados por la comunidad global de Mapeak.
@@ -47,10 +47,13 @@ Usa el botón Reportar un problema en la aplicación, o edita el mapa directamen
 ¡Sí! Inicia sesión con tu cuenta de OSM y usa el botón Editar este mapa usando OSM. También puedes subir tracks grabados para ayudar a completar rutas sin mapear.
 
 ## ¿Cómo me suscribo a Mapeak Pro?
-Abre la aplicación Mapeak en iOS o Android y sigue el proceso de actualización. Las suscripciones se gestionan a través del App Store o Google Play por 29,99 $ al año.
+Abre la aplicación Mapeak en iOS o Android, sigue el proceso de actualización y elige el plan mensual por 3,99 $ al mes o el plan anual por 29,99 $ al año. Las suscripciones se gestionan a través del App Store o Google Play.
 
 ## ¿Cómo gestiono o cancelo mi suscripción?
 Ve a Gestionar suscripciones dentro de la aplicación, o gestíonala directamente desde la configuración de tu cuenta del App Store de iOS o Google Play.
+
+## ¿Puedo cambiar entre el plan mensual y el anual?
+Sí, aunque el cambio se realiza en la tienda y no dentro de Mapeak. Abre los ajustes de suscripciones del App Store (iOS) o de Google Play (Android) y elige el otro plan. El nuevo plan se aplica al final del periodo de facturación en curso.
 
 ## ¿Puedo eliminar mi cuenta?
 Sí. Ve a Ajustes y selecciona Eliminar cuenta. Esto eliminará de forma permanente tu cuenta y todos los datos en la nube asociados.

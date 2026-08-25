@@ -1,9 +1,15 @@
 <mat-toolbar #toolbar [dir]="resources.direction" class="toolbar fixed z-50"
     [class]="isScrolled() && isHome() ? 'transition-all duration-300' : isHome() ? 'transition-all duration-300 bg-transparent!' : ''">
-    <div class="flex flex-grow items-center">
+    <div class="flex flex-grow items-center overflow-hidden">
         @if (isIFrame()) {
-        <img src="/content/logo.png" alt="Mapeak" height="48" />
+        <img src="/content/logo-mark.png" alt="" width="48" height="48" class="h-10 w-10 shrink-0" />
         <span class="text-white">MAPEAK</span>
+        } @else if (isHome()) {
+        <a routerLink="/" class="flex items-center gap-2 overflow-hidden text-white no-underline">
+            <img src="/content/logo-mark.png" alt="Mapeak" width="40" height="40"
+                class="h-8 w-8 shrink-0 md:h-10 md:w-10" />
+            <span class="truncate text-base font-black uppercase tracking-widest md:text-lg">Mapeak</span>
+        </a>
         } @else {
         <search></search>
         }

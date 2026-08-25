@@ -1,6 +1,6 @@
 import { Component, HostListener, inject, viewChild, ElementRef, DestroyRef, afterNextRender, DOCUMENT, signal, computed } from "@angular/core";
 import { MatToolbar } from "@angular/material/toolbar";
-import { RouterOutlet } from "@angular/router";
+import { RouterLink, RouterOutlet } from "@angular/router";
 import { Store } from "@ngxs/store";
 
 import { MainMenuComponent } from "../main-menu.component";
@@ -14,7 +14,7 @@ import type { ApplicationState } from "../../models";
     selector: "app-root",
     templateUrl: "./app-root.component.html",
     styleUrls: ["./app-root.component.scss"],
-    imports: [MatToolbar, RouterOutlet, MainMenuComponent, SearchComponent]
+    imports: [MatToolbar, RouterLink, RouterOutlet, MainMenuComponent, SearchComponent]
 })
 export class AppRootComponent {
     public readonly isScrolled = signal(false);
