@@ -224,6 +224,7 @@ export const initialState =
         inMemoryState: {
             effectiveTheme: "light",
             downloadedTiles: {},
+            downloadedRoutingTiles: [],
             distance: false,
             following: true,
             pannedTimestamp: null,
