@@ -18,7 +18,7 @@ The technology stack of this site is based on the following frameworks:
 * [Elastic Search and NEST](https://www.elastic.co/) - for database and search capabilities
 * [Net Topology Suite](https://github.com/NetTopologySuite/NetTopologySuite) - for spatial mathmatics
 * [OsmSharp](https://www.osmsharp.com/) - for OSM capabilities
-* [NeoSmart.Caching.Sqlite](https://github.com/neosmart/SqliteCache) - for persistant cache, mainly to allow idempotent operations
+* [NeoSmart.Caching.Sqlite](https://github.com/neosmart/SqliteCache) - for persistent cache, mainly to allow idempotent operations
 * [Wikipedia using Wiki client library](https://github.com/CXuesong/WikiClientLibrary) - for Wikipedia data and upload images to Wikimedia common
 * [Imgur](https://imgur.com/) - for uploading anonymous images
 * [Docker](https://www.docker.com/) - for image creation and microservices architecture
