@@ -375,6 +375,9 @@ export class FileService {
      * A file that was not downloaded to its end, because the download was aborted or failed, is deleted.
      * The bytes are gathered into large writes rather than written as they arrive, see
      * DOWNLOAD_WRITE_BUFFER_SIZE.
+     * A download that failed is logged with the file it died on and how far it got, neither of which is in
+     * the error itself - without them a log only says that the download of the tile failed, and every file
+     * of it is a suspect.
      */
     public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: FileDownloadProgressCallback, abortController: AbortController): Promise<void> {
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
@@ -431,8 +434,6 @@ export class FileService {
             } while (!done);
             await this.writePendingChunks(path, pending);
         } catch (ex) {
-            // Which file a download died on, and how far it got, is not in the error itself - without it
-            // a log only says that the download of the tile failed, and every file of it is a suspect.
             this.loggingService.error(`[Files] Failed to download ${fileName} after ` +
                 `${(receivedLength / 1024 / 1024).toFixed(1)} of ${(contentLength / 1024 / 1024).toFixed(1)} MB: ` +
                 `${(ex as Error).message}`);
@@ -457,12 +458,14 @@ export class FileService {
      * It writes into the same partial file a download that streams into the cache writes, and that file is
      * renamed to the name of the file it holds once it is whole, so that both ways of downloading leave
      * the cache in the same state and neither of them puts a file there before it is whole.
+     * The partial file an earlier download left behind is deleted before this one starts, since the counter
+     * it is named after starts over whenever the app does and the plugin fails rather than write over a
+     * file that is already there. A download that failed is deleted for the same reason: what it wrote is
+     * of no use to anyone, and the plugin only removes what it wrote when it is stopped.
      */
     private async downloadFileToCacheNatively(url: string, fileName: string, partialFileName: string, token: string,
         progressCallback: FileDownloadProgressCallback, abortController: AbortController): Promise<void> {
         const path = FileService.offlineCachePath(partialFileName);
-        // The counter the partial file is named after starts over whenever the app does, so a file that an
-        // earlier download left behind might be in the way - the plugin fails rather than write over one.
         await Filesystem.deleteFile({ path, directory: Directory.Cache }).catch(() => { });
         const destination = (await Filesystem.getUri({ path, directory: Directory.Cache })).uri;
         let receivedLength = 0;
@@ -510,8 +513,6 @@ export class FileService {
         } catch (ex) {
             this.loggingService.error(`[Files] Failed to download ${fileName} after ` +
                 `${(receivedLength / 1024 / 1024).toFixed(1)} MB: ${(ex as Error).message}`);
-            // Whatever the download did write is of no use to anyone, and the plugin only removes what it
-            // wrote when it is stopped - a download that failed leaves it behind.
             await this.deleteFileInOfflineCache(partialFileName);
             throw ex;
         } finally {

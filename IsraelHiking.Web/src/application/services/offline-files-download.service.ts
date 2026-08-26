@@ -270,6 +270,10 @@ export class OfflineFilesDownloadService {
     /**
      * Downloads everything a tile needs. A download that is still going on when this is called is aborted
      * first, so that the one the user asked for last is the only one that goes on.
+     * A download that failed is logged with what it failed on rather than with a status code alone: a
+     * request that got no answer is the connection and not the server, which is how a download of hundreds
+     * of megabytes fails when it drops, and calling that a server side error sends whoever reads the log
+     * the wrong way.
      */
     public async downloadTile(tileX: number, tileY: number): Promise<"up-to-date" | "downloaded" | "error" | "aborted"> {
         this.abortCurrentDownload();
@@ -307,9 +311,6 @@ export class OfflineFilesDownloadService {
                 this.loggingService.info("[Offline Download] The download was aborted while it was going on");
                 return "aborted";
             }
-            // A request that failed without the server answering it is not a server side error, which is
-            // what a status code is - a download of hundreds of megabytes fails this way when the
-            // connection drops, and saying that the server failed sends whoever reads the log the wrong way.
             const typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
             const reason = typeAndMessage.type === "timeout"
                 ? "a timeout"
@@ -374,6 +375,8 @@ export class OfflineFilesDownloadService {
      * fails can not leave the files of the tile half moved, and failing to hand a file over is logged
      * and otherwise ignored: the map files of the tile are whole and are drawn from as they are, and a
      * tile that ended up without its routing tiles is reported as one to download again.
+     * A file the routing engine did not take is deleted, since it is of no use to the app and nothing else
+     * would ever clean it up - it is not one of the files the device is read for.
      */
     private async moveDownloadedFilesToDataDirectory(currentDownload: CurrentDownload, fileNames: FileNameDateVersion[]): Promise<void> {
         const tileKey = PmTilesService.toTileKey(currentDownload.tileX, currentDownload.tileY);
@@ -394,8 +397,6 @@ export class OfflineFilesDownloadService {
                 }
             } catch (ex) {
                 this.loggingService.warning(`[Offline Download] Failed to hand ${fileName} to the routing engine: ${(ex as Error).message}`);
-                // A file the routing engine did not take is of no use to the app, and nothing else would
-                // ever clean it up - it is not one of the files the device is read for.
                 await this.fileService.deleteFileInDataDirectory(fileName);
             }
         }
@@ -469,6 +470,12 @@ export class OfflineFilesDownloadService {
         this.currentDownload.set(null);
     }
 
+    /**
+     * Deletes everything a tile holds, its map files and its routing tiles alike. Failing to remove the
+     * routing tiles is logged and otherwise ignored: the map files of the tile are already gone, so what
+     * the device holds has to be read again either way, and leaving the state as it was would keep a tile
+     * that is no longer there.
+     */
     public async deleteTile(tileKey: string): Promise<void> {
         this.loggingService.info(`[Offline Download] Deleting tile ${tileKey}`);
         const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
@@ -480,8 +487,6 @@ export class OfflineFilesDownloadService {
         try {
             await this.routingProvider.deleteOfflineRoutingTiles(tileKey);
         } catch (ex) {
-            // The files of the tile are already gone, so what the device holds has to be read again
-            // either way - leaving the state as it was would keep a tile that is no longer there.
             this.loggingService.warning(`[Offline Download] Failed to remove the routing tiles of ${tileKey}: ${(ex as Error).message}`);
         }
         await this.updateDownloadedTilesFromDevice();

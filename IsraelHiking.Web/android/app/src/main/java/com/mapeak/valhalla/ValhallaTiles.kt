@@ -65,6 +65,9 @@ class ValhallaTiles(private val context: Context) {
      * Extracts the given archive, a gzipped tar which is expected to be in the app's files directory,
      * into the tiles directory, and records the tiles it holds under [tileKey]. The archive is deleted
      * afterwards - it is large and is of no use once extracted.
+     * An entry whose name would escape the tiles directory is rejected. An archive that was packed from
+     * within a directory names that directory itself first, which is the one entry that is allowed to be
+     * the tiles directory rather than something under it.
      */
     fun extract(tarFileName: String, tileKey: String): ExtractResult {
         val tar = File(context.filesDir, tarFileName)
@@ -81,9 +84,6 @@ class ValhallaTiles(private val context: Context) {
                 var entry = tarIn.nextEntry
                 while (entry != null) {
                     val outFile = File(tilesDir, entry.name)
-                    // Do not let an entry name escape the tiles directory. An archive that was packed
-                    // from within a directory names that directory itself first, which is the one entry
-                    // that is allowed to be the tiles directory rather than something under it.
                     val outPath = outFile.canonicalPath
                     if (outPath != tilesDirPath && !outPath.startsWith(tilesDirPath + File.separator)) {
                         throw IOException("Tar entry is outside of the tiles directory: ${entry.name}")

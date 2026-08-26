@@ -118,6 +118,12 @@ enum ValhallaTarExtractor {
 
     /**
      * Extracts the archive into the given directory and returns the relative paths of the files it wrote.
+     * An entry whose name would escape the tiles directory is rejected. An archive that was packed from
+     * within a directory names that directory itself first, which is the one entry that is allowed to be
+     * the tiles directory rather than something under it.
+     * What is returned is where each file ended up rather than how the archive spelled it, so that an
+     * archive packed as "./0/002/753.gph" and one packed as "0/002/753.gph" leave the same manifest
+     * behind - it is what the tiles are deleted by later on.
      */
     static func extract(archiveAt archiveURL: URL, into directoryURL: URL) throws -> [String] {
         let fileManager = FileManager.default
@@ -152,9 +158,6 @@ enum ValhallaTarExtractor {
             let typeFlag = header[Field.typeFlag]
 
             let entryURL = directoryURL.appendingPathComponent(entryName).standardizedFileURL
-            // Do not let an entry name escape the tiles directory. An archive that was packed from
-            // within a directory names that directory itself first, which is the one entry that is
-            // allowed to be the tiles directory rather than something under it.
             guard entryURL.path == directoryPath || entryURL.path.hasPrefix(directoryPath + "/") else {
                 throw ValhallaTarError.entryOutsideDirectory(entryName)
             }
@@ -167,9 +170,6 @@ enum ValhallaTarExtractor {
             } else if isFile {
                 try fileManager.createDirectory(at: entryURL.deletingLastPathComponent(), withIntermediateDirectories: true)
                 try write(from: reader, byteCount: size, to: entryURL)
-                // What is recorded is where the file ended up rather than how the archive spelled it,
-                // so that an archive packed as "./0/002/753.gph" and one packed as "0/002/753.gph"
-                // leave the same manifest behind - it is what the tiles are deleted by later on.
                 paths.append(String(entryURL.path.dropFirst(directoryPath.count + 1)))
             } else {
                 // Long names, pax headers and links are not produced by valhalla's extracts
