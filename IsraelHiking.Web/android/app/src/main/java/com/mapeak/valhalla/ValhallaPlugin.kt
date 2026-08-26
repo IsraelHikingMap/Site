@@ -49,25 +49,6 @@ class ValhallaPlugin : Plugin() {
     }
 
     /**
-     * Keeps the configuration the engine is set up with, as the app downloaded it.
-     */
-    @Suppress("unused")
-    @PluginMethod
-    fun storeConfiguration(call: PluginCall) {
-        val content = call.getString("configuration")
-        if (content.isNullOrBlank()) {
-            call.reject("configuration is required")
-            return
-        }
-        try {
-            router.storeConfiguration(content)
-            call.resolve()
-        } catch (ex: Throwable) {
-            call.rejectWith("Failed to store the routing configuration", ex)
-        }
-    }
-
-    /**
      * Keeps the routing profiles, as the app downloaded them, so that a route uses the same costing
      * options the server would have used.
      */

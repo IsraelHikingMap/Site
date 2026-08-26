@@ -382,14 +382,14 @@ export class OfflineFilesDownloadService {
         }
         for (const { fileName } of fileNames) {
             const isRoutingTilesFile = RoutingProvider.isRoutingTilesFile(fileName);
-            if (!isRoutingTilesFile && !RoutingProvider.isRoutingSetupFile(fileName)) {
+            if (!isRoutingTilesFile && !RoutingProvider.isRoutingProfilesFile(fileName)) {
                 continue;
             }
             try {
                 if (isRoutingTilesFile) {
                     await this.routingProvider.extractOfflineRoutingTiles(fileName, tileKey);
                 } else {
-                    await this.routingProvider.storeRoutingSetupFile(fileName, await this.fileService.readFileInDataDirectory(fileName));
+                    await this.routingProvider.storeRoutingProfiles(await this.fileService.readFileInDataDirectory(fileName));
                     await this.fileService.deleteFileInDataDirectory(fileName);
                 }
             } catch (ex) {

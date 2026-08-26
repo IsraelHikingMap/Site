@@ -1,4 +1,4 @@
-services:
+﻿services:
 #  website:
 #    image: israel-hiking
 #    build: .
@@ -13,9 +13,6 @@ services:
 #      # https://valhalla.github.io/valhalla/api/turn-by-turn/api-reference/#costing-options
 #      # The file is read on startup, so restart the container after changing it.
 #      - ./IsraelHiking.Web/valhalla-profiles.json:/israelhiking/valhalla-profiles.json
-#      # The Valhalla setup configuration, it is not used by the server itself but served to the clients
-#      # as a part of the offline files, so that they can start their own offline Valhalla instance.
-#      - ./IsraelHiking.Web/valhalla-config.json:/israelhiking/valhalla-config.json
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.8
     container_name: elasticsearch

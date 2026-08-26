@@ -51,7 +51,6 @@ public class OfflineFilesServiceTests
     private IFileSystemHelper _fileSystemHelper;
     private IFileProvider _fileProvider;
     private IRemoteFileFetcherGateway _remoteFileFetcherGateway;
-    private string _valhallaConfigurationFilePath;
     private string _valhallaProfilesFilePath;
 
     [TestInitialize]
@@ -62,16 +61,13 @@ public class OfflineFilesServiceTests
         _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
         _fileSystemHelper.CreateFileProvider(Arg.Any<string>()).Returns(_fileProvider);
         SetupStyleResponse(Style);
-        _valhallaConfigurationFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
         _valhallaProfilesFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-        File.WriteAllText(_valhallaConfigurationFilePath, "{ \"mjolnir\": {} }");
         File.WriteAllText(_valhallaProfilesFilePath, "{ \"foot\": {} }");
         var options = Substitute.For<IOptions<ConfigurationData>>();
         options.Value.Returns(new ConfigurationData
         {
             OnTheFlyFilesAddress = OnTheFlyAddress,
             RoutingTilesAddress = RoutingTilesAddress,
-            ValhallaConfigurationFilePath = _valhallaConfigurationFilePath,
             ValhallaProfilesFilePath = _valhallaProfilesFilePath
         });
         _service = new OfflineFilesService(_fileSystemHelper, _remoteFileFetcherGateway, options, Substitute.For<ILogger>());
@@ -80,7 +76,6 @@ public class OfflineFilesServiceTests
     [TestCleanup]
     public void TestCleanup()
     {
-        File.Delete(_valhallaConfigurationFilePath);
         File.Delete(_valhallaProfilesFilePath);
     }
 
@@ -153,17 +148,16 @@ public class OfflineFilesServiceTests
     }
 
     [TestMethod]
-    public async Task GetUpdatedFilesList_RootWithValhalla_ShouldAlsoReturnTheValhallaConfigurationFiles()
+    public async Task GetUpdatedFilesList_RootWithValhalla_ShouldAlsoReturnTheValhallaProfiles()
     {
         var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, true);
 
-        Assert.HasCount(5, results);
-        Assert.AreEqual(DateTime.UtcNow.Date, results["valhalla-config.json"]);
+        Assert.HasCount(4, results);
         Assert.AreEqual(DateTime.UtcNow.Date, results["valhalla-profiles.json"]);
     }
 
     [TestMethod]
-    public async Task GetUpdatedFilesList_RootWithoutValhalla_ShouldNotReturnTheValhallaConfigurationFiles()
+    public async Task GetUpdatedFilesList_RootWithoutValhalla_ShouldNotReturnTheValhallaProfiles()
     {
         var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, false);
 
@@ -171,7 +165,7 @@ public class OfflineFilesServiceTests
     }
 
     [TestMethod]
-    public async Task GetUpdatedFilesList_TileWithValhalla_ShouldNotReturnTheValhallaConfigurationFiles()
+    public async Task GetUpdatedFilesList_TileWithValhalla_ShouldNotReturnTheValhallaProfiles()
     {
         var results = await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75, true);
 
@@ -184,17 +178,6 @@ public class OfflineFilesServiceTests
         var results = await _service.GetUpdatedFilesList(DateTime.UtcNow.AddDays(1), null, null, true);
 
         Assert.IsEmpty(results);
-    }
-
-    [TestMethod]
-    public async Task GetFileContent_ValhallaConfigurationFile_ShouldBeReadFromTheConfiguredPath()
-    {
-        var (content, length) = await _service.GetFileContent("valhalla-config.json", null, null);
-
-        using var reader = new StreamReader(content);
-        Assert.AreEqual(File.ReadAllText(_valhallaConfigurationFilePath), await reader.ReadToEndAsync());
-        Assert.AreEqual(new FileInfo(_valhallaConfigurationFilePath).Length, length);
-        await _remoteFileFetcherGateway.DidNotReceive().GetFileStream(Arg.Any<string>());
     }
 
     [TestMethod]

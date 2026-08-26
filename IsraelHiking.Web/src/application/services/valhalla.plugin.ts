@@ -47,11 +47,6 @@ export interface ValhallaPlugin {
      */
     clearTiles(): Promise<void>;
     /**
-     * Stores the configuration the engine is set up with, as it was downloaded. The plugin keeps it
-     * and fills in where the tiles are on this device, which the server can not know.
-     */
-    storeConfiguration(options: { configuration: string }): Promise<void>;
-    /**
      * Stores the routing profiles, as they were downloaded, so that a route uses the same costing
      * options the server would have used.
      */

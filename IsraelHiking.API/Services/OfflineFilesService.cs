@@ -78,11 +78,6 @@ public class OfflineFilesService : IOfflineFilesService
     private const string VALHALLA_FILE_EXTENSION = ".tar";
 
     /// <summary>
-    /// The setup configuration the client initializes its offline routing (valhalla) engine with.
-    /// </summary>
-    private const string VALHALLA_CONFIGURATION_FILE_NAME = "valhalla-config.json";
-
-    /// <summary>
     /// The routing profiles (costing options) the client routes offline with, the same file this server routes
     /// with, so that a route that is calculated offline is the same one that is calculated online.
     /// </summary>
@@ -94,13 +89,13 @@ public class OfflineFilesService : IOfflineFilesService
     private static readonly DateTime DEM_MODIFIED_DATE = DateTimeOffset.Parse("2026-04-09T10:36:08.8024764Z", CultureInfo.InvariantCulture).UtcDateTime;
 
     /// <summary>
-    /// The files that are needed for offline usage but are not sliced per tile - the two files the offline
+    /// The files that are needed for offline usage but are not sliced per tile - the profiles the offline
     /// routing engine needs. They are only relevant to the root, and like the routing tiles they are only
     /// listed for clients that ask for them, since older clients do not know how to handle them.
     /// </summary>
     private static readonly string[] ROOT_ONLY_FILE_NAMES =
     [
-        VALHALLA_CONFIGURATION_FILE_NAME, VALHALLA_PROFILES_FILE_NAME
+        VALHALLA_PROFILES_FILE_NAME
     ];
 
     private readonly IFileProvider _fileProvider;
@@ -176,16 +171,12 @@ public class OfflineFilesService : IOfflineFilesService
     /// <inheritdoc/>
     /// <remarks>
     /// The DEM might be requested by its alias name, but it is stored on disk under its original name.
-    /// The valhalla configuration files are read from this server's own files, the routing tiles are served
-    /// by their own service, and everything else by the on-the-fly one.
+    /// The valhalla profiles are read from this server's own files, the routing tiles are served by their
+    /// own service, and everything else by the on-the-fly one.
     /// </remarks>
     public async Task<(Stream Content, long? Length)> GetFileContent(string fileName, long? tileX, long? tileY)
     {
         // The files that are not per tile are named by themselves and not by a source, so they are matched first.
-        if (fileName == VALHALLA_CONFIGURATION_FILE_NAME)
-        {
-            return OpenLocalFile(_options.ValhallaConfigurationFilePath);
-        }
         if (fileName == VALHALLA_PROFILES_FILE_NAME)
         {
             return OpenLocalFile(_options.ValhallaProfilesFilePath);
