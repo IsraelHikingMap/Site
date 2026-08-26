@@ -22,7 +22,7 @@ const ROOT_TILE_KEY = PmTilesService.toTileKey();
 const TILE_KEY = PmTilesService.toTileKey(76, 51);
 const MAP_FILE = "IHM-schema+7-76-51.pmtiles";
 const ROOT_MAP_FILE = "IHM-schema-6.pmtiles";
-const ROUTING_TILES_FILE = "valhalla+7-76-51.tar";
+const ROUTING_TILES_FILE = "valhalla+7-76-51.tgz";
 const DOWNLOAD_DATE = new Date("2026-01-01T10:00:00.000Z");
 const FILE_SIZE = 1024 * 1024;
 

@@ -67,15 +67,15 @@ public class OfflineFilesService : IOfflineFilesService
     private const string DEM_ALIAS_FILE_NAME = "raster-dem";
 
     /// <summary>
-    /// The offline routing (valhalla) tiles of a slice, a tar file that is sliced on the fly like the other
-    /// non-DEM files. It is not a part of the style, and it is only listed for clients that ask for it since
+    /// The offline routing (valhalla) tiles of a slice, a gzipped tar that is sliced on the fly like the
+    /// other non-DEM files - the client unpacks it, so it is served compressed rather than as a plain tar. It is not a part of the style, and it is only listed for clients that ask for it since
     /// older clients do not know how to handle it.
     /// It is the largest file of a tile and the slowest one to generate, which is why it is listed first.
     /// </summary>
     private const string VALHALLA_FILE_NAME = "valhalla";
 
     /// <inheritdoc cref="VALHALLA_FILE_NAME"/>
-    private const string VALHALLA_FILE_EXTENSION = ".tar";
+    private const string VALHALLA_FILE_EXTENSION = ".tgz";
 
     /// <summary>
     /// The routing profiles (costing options) the client routes offline with, the same file this server routes

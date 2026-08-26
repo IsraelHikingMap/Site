@@ -128,7 +128,7 @@ public class OfflineFilesServiceTests
         var results = await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75, true);
 
         Assert.HasCount(5, results);
-        Assert.AreEqual(DateTime.UtcNow.Date, results["valhalla+7-52-75.tar"]);
+        Assert.AreEqual(DateTime.UtcNow.Date, results["valhalla+7-52-75.tgz"]);
     }
 
     [TestMethod]
@@ -144,7 +144,7 @@ public class OfflineFilesServiceTests
     {
         var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, true);
 
-        Assert.IsFalse(results.Keys.Any(k => k.EndsWith(".tar")));
+        Assert.IsFalse(results.Keys.Any(k => k.EndsWith(".tgz")));
     }
 
     [TestMethod]
@@ -203,9 +203,9 @@ public class OfflineFilesServiceTests
     {
         _remoteFileFetcherGateway.GetFileStream(Arg.Any<string>()).Returns((new MemoryStream() as Stream, (long?)0));
 
-        await _service.GetFileContent("valhalla+7-52-75.tar", 52, 75);
+        await _service.GetFileContent("valhalla+7-52-75.tgz", 52, 75);
 
-        await _remoteFileFetcherGateway.Received(1).GetFileStream(RoutingTilesAddress + "valhalla+7-52-75.tar");
+        await _remoteFileFetcherGateway.Received(1).GetFileStream(RoutingTilesAddress + "valhalla+7-52-75.tgz");
     }
 
     [TestMethod]

@@ -37,7 +37,7 @@ export class RoutingProvider {
     private static readonly SLICE_TILE_ZOOM = 7;
 
     private static readonly ROUTING_TILES_PREFIX = "valhalla";
-    private static readonly ROUTING_TILES_EXTENSION = ".tar";
+    private static readonly ROUTING_TILES_EXTENSION = ".tgz";
 
     /** The file the offline routing engine is set up with, as the server names it */
     private static readonly PROFILES_FILE_NAME = "valhalla-profiles.json";
