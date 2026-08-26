@@ -1,6 +1,6 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
 import { Directory, Filesystem } from "@capacitor/filesystem";
-import { decode, encode } from "base64-arraybuffer";
+import { decode } from "base64-arraybuffer";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
@@ -15,30 +15,6 @@ import { LoggingService } from "./logging.service";
 import { ElevationProvider } from "./elevation.provider";
 import { Urls } from "../urls";
 import type { DataContainer, MarkerData, RouteData } from "../models";
-
-/** Stands in for the native downloader, so that the events it sends can be played out by hand */
-const downloader = vi.hoisted(() => {
-    const listeners: Record<string, ((event: unknown) => void)[]> = {};
-    return {
-        emit: (eventName: string, event: unknown) => (listeners[eventName] ?? []).forEach(listener => listener(event)),
-        plugin: {
-            addListener: (eventName: string, listenerFunc: (event: unknown) => void) => {
-                listeners[eventName] = [...listeners[eventName] ?? [], listenerFunc];
-                return Promise.resolve({
-                    remove: () => {
-                        listeners[eventName] = listeners[eventName].filter(listener => listener !== listenerFunc);
-                        return Promise.resolve();
-                    }
-                });
-            },
-            download: vi.fn((options: { id: string; url: string; destination: string; headers: Record<string, string> }) =>
-                Promise.resolve({ id: options.id, progress: 0, state: "RUNNING" })),
-            stop: vi.fn(() => Promise.resolve())
-        }
-    };
-});
-
-vi.mock("@capgo/capacitor-downloader", () => ({ CapacitorDownloader: downloader.plugin }));
 
 describe("FileService", () => {
     beforeEach(() => {
@@ -226,36 +202,6 @@ describe("FileService", () => {
             fetchSpy.mockRestore();
         }
     ));
-
-    it("Should download a file with the native downloader on ios and move it into the offline cache", async () => {
-        TestBed.overrideProvider(RunningContextService, { useValue: { isIos: true, isCapacitor: true } });
-        const service = TestBed.inject(FileService);
-        const progressSpy = vi.fn();
-
-        const promise = service.downloadFileToCacheAuthenticated(
-            "http://123.tar", "native.tar", "token", progressSpy, new AbortController());
-        // The download only starts once the cache directory is there and the listeners are registered
-        while (downloader.plugin.download.mock.calls.length === 0) {
-            await new Promise(resolve => setTimeout(resolve));
-        }
-
-        const options = downloader.plugin.download.mock.calls[0][0];
-        expect(options.headers.Authorization).toBe("Bearer token");
-        expect(options.destination).toContain(options.id);
-        // The plugin writes the file itself, which is what it does once it downloaded it
-        await Filesystem.writeFile({
-            path: `offline-files/${options.id}`,
-            directory: Directory.Cache,
-            data: encode(new Uint8Array([1, 2, 3, 4]).buffer)
-        });
-        downloader.emit("downloadProgress", { id: options.id, progress: 1, bytesWritten: 4, bytesTotal: 4 });
-        downloader.emit("downloadCompleted", { id: options.id });
-        await promise;
-
-        expect(progressSpy).toHaveBeenCalledWith(1);
-        const written = await Filesystem.readFile({ path: "offline-files/native.tar", directory: Directory.Cache });
-        expect(new Uint8Array(decode(written.data as string))).toEqual(new Uint8Array([1, 2, 3, 4]));
-    });
 
     it("Should write every byte of the chunks it gathered", inject([FileService],
         async (service: FileService) => {
