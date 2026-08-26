@@ -34,6 +34,15 @@ type StyleRequirements = {
  */
 export type TileCompatibility = "compatible" | "outdated" | "unusable";
 
+/**
+ * How far the download of one file got and how large it is, where a size of 0 means that it is not known
+ * yet - a file that was not started, or one whose size the server did not report.
+ */
+type FileProgress = {
+    receivedBytes: number;
+    totalBytes: number;
+};
+
 /** The download that is going on right now, everything that lives as long as it does */
 type CurrentDownload = {
     tileX: number;
@@ -324,12 +333,17 @@ export class OfflineFilesDownloadService {
     /**
      * Downloads the files into the cache, where a download that was aborted or failed leaves whatever it
      * did get, so that downloading the tile again continues from there instead of starting over.
+     * A few files are downloaded at a time, in the order they were listed in, which is why the server
+     * lists the files that take it longest first - a file that is started last is the one left downloading
+     * on its own once every other file is done.
+     * A file that is already whole in the cache is not downloaded again, and it weighs what it holds
+     * towards the progress like every other file of the tile.
      */
     private async downloadOfflineFilesProgressAction(currentDownload: CurrentDownload, fileNames: FileNameDateVersion[], rootFilesCount: number): Promise<void> {
         const { tileX, tileY, abortController } = currentDownload;
         this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${fileNames.length}, tile: ${tileX}-${tileY}`);
         const length = fileNames.length;
-        const progressPerFile: Record<number, number> = {};
+        const progressPerFile: Record<number, FileProgress> = {};
         const alreadyDownloaded = await this.fileService.listFilesInOfflineCache();
         const fileDownloadPromises: Promise<void>[] = [];
         const limit = pLimit(3);
@@ -339,9 +353,11 @@ export class OfflineFilesDownloadService {
                 this.loggingService.info("[Offline Download] Aborted downloading offline files, current file: " + fileName);
                 return;
             }
-            if (alreadyDownloaded.includes(fileName)) {
+            const cachedFile = alreadyDownloaded.find(f => f.fileName === fileName);
+            if (cachedFile != null) {
                 this.loggingService.info("[Offline Download] File already downloaded recently, skipping: " + fileName);
-                this.updateProgress(currentDownload, progressPerFile, fileNameIndex, 1, length);
+                this.updateProgress(currentDownload, progressPerFile, fileNameIndex,
+                    { receivedBytes: cachedFile.size, totalBytes: cachedFile.size }, length);
                 continue;
             }
             const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
@@ -351,7 +367,8 @@ export class OfflineFilesDownloadService {
             }
 
             fileDownloadPromises.push(limit(() => this.fileService.downloadFileToCacheAuthenticated(fileDownloadUrl, fileName, token,
-                value => this.updateProgress(currentDownload, progressPerFile, fileNameIndex, value, length), abortController)));
+                (receivedBytes, totalBytes) => this.updateProgress(currentDownload, progressPerFile, fileNameIndex,
+                    { receivedBytes, totalBytes }, length), abortController)));
         }
         await Promise.all(fileDownloadPromises);
         this.loggingService.info(`[Offline Download] Finished downloading offline files, current tile: ${PmTilesService.toTileKey(tileX, tileY)}`);
@@ -371,18 +388,39 @@ export class OfflineFilesDownloadService {
     }
 
     /**
-     * Reports how far the download of a tile got, where every one of its files weighs the same.
+     * Reports how far the download of a tile got, by the bytes of its files rather than by their number.
      * A download that is no longer the current one has nothing to report - its files might still be
      * coming in after it was aborted, and that says nothing about the download that took its place.
+     * The progress goes backwards when a file turns out to be larger than it was taken to be, since a
+     * progress that keeps moving says more about the download than one that sits still while it catches up.
      */
-    private updateProgress(currentDownload: CurrentDownload, progressPerFile: Record<number, number>,
-        fileNameIndex: number, progressValue: number, length: number) {
-        progressPerFile[fileNameIndex] = progressValue;
+    private updateProgress(currentDownload: CurrentDownload, progressPerFile: Record<number, FileProgress>,
+        fileNameIndex: number, fileProgress: FileProgress, length: number) {
+        progressPerFile[fileNameIndex] = fileProgress;
         if (!this.isCurrent(currentDownload)) {
             return;
         }
-        const totalProgress = Object.values(progressPerFile).reduce((a, b) => a + b, 0) / length;
-        this.currentDownload.set({ ...currentDownload, progress: totalProgress * 100.0 });
+        const progress = OfflineFilesDownloadService.toTotalProgress(progressPerFile, length);
+        this.currentDownload.set({ ...currentDownload, progress });
+    }
+
+    /**
+     * How much of a tile was downloaded, from 0 to 100, weighing every file by its size: the files of a
+     * tile differ in size by orders of magnitude, so counting them all the same made the progress race
+     * through the small ones and then crawl through the large ones.
+     * The size of a file is only known once its download started, so a file that did not start yet is
+     * counted as the size of an average file that did.
+     */
+    private static toTotalProgress(progressPerFile: Record<number, FileProgress>, length: number): number {
+        const fileProgresses = Object.values(progressPerFile);
+        const withKnownSize = fileProgresses.filter(f => f.totalBytes > 0);
+        if (withKnownSize.length === 0) {
+            return 0;
+        }
+        const knownBytes = withKnownSize.reduce((total, f) => total + f.totalBytes, 0);
+        const totalBytes = knownBytes + (knownBytes / withKnownSize.length) * (length - withKnownSize.length);
+        const receivedBytes = fileProgresses.reduce((total, f) => total + f.receivedBytes, 0);
+        return Math.min(receivedBytes / totalBytes, 1) * 100.0;
     }
 
     /** Whether the given download is the one that is going on, they are told apart by their controller */
@@ -390,6 +428,11 @@ export class OfflineFilesDownloadService {
         return this.currentDownload()?.abortController === currentDownload.abortController;
     }
 
+    /**
+     * Asks the server which of the files of a tile need downloading, the root files when no tile is given.
+     * The order the server lists them in is kept as it is: it lists the files that take it longest first,
+     * and they are downloaded in the order they are listed in, see downloadOfflineFilesProgressAction.
+     */
     private async getFilesToDownload(tileX?: number, tileY?: number): Promise<FileNameDateVersion[]> {
         const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
         const tileKey = PmTilesService.toTileKey(tileX, tileY);

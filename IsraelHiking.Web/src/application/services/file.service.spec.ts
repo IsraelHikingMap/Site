@@ -167,7 +167,7 @@ describe("FileService", () => {
         }
     ));
 
-    it("Should report a file as whole when the server did not report its length", inject([FileService],
+    it("Should report the size it actually downloaded when the server did not report a length", inject([FileService],
         async (service: FileService) => {
             const progressSpy = vi.fn();
             const url = "http://123.pmtiles";
@@ -198,7 +198,7 @@ describe("FileService", () => {
 
             expect(fetchSpy).toHaveBeenCalledTimes(1);
             expect(mockReader.read).toHaveBeenCalledTimes(3);
-            expect(progressSpy).toHaveBeenLastCalledWith(1);
+            expect(progressSpy).toHaveBeenLastCalledWith(4, 4);
             fetchSpy.mockRestore();
         }
     ));

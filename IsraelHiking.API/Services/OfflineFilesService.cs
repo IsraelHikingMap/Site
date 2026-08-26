@@ -139,6 +139,8 @@ public class OfflineFilesService : IOfflineFilesService
     /// <remarks>
     /// The on-the-fly files are generated on demand, so they are always reported with today's date,
     /// while the DEM file has a fixed date and only exists at the tile level.
+    /// The routing tiles are by far the largest and the slowest file of a tile, which is why they are
+    /// listed before everything else.
     /// </remarks>
     public async Task<Dictionary<string, DateTime>> GetUpdatedFilesList(DateTime lastModifiedDate, long? tileX, long? tileY, bool routingTile)
     {

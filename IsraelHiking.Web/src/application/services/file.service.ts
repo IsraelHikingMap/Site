@@ -62,6 +62,21 @@ type PendingChunks = {
     wroteAnything: boolean;
 };
 
+/**
+ * Reports how far the download of a file got, in bytes, along with how large the whole file is - which is
+ * 0 for as long as the server did not say.
+ * It is called with the size and nothing downloaded before the first byte arrives, since the download of a
+ * tile can only weigh its files against each other once it knows how large they are, and it is called with
+ * the size that was actually read once the file is whole, whatever the server said that size would be.
+ */
+export type FileDownloadProgressCallback = (receivedBytes: number, totalBytes: number) => void;
+
+/** An offline file that was fully downloaded into the cache and its size in bytes */
+export type CachedFile = {
+    fileName: string;
+    size: number;
+};
+
 /** A file in the app's data directory, the time it was last written to and its size in bytes */
 export type DataDirectoryFile = {
     fileName: string;
@@ -92,6 +107,12 @@ export class FileService {
      * by every download that is going on at the same time, along with the base64 text of its own buffer.
      */
     private static readonly DOWNLOAD_WRITE_BUFFER_SIZE = 2 * 1024 * 1024;
+
+    /**
+     * How many bytes a download takes in before it reports how far it got again. Every report redraws the
+     * tile that is being downloaded on the map, which is worth doing a few times a second and not more.
+     */
+    private static readonly PROGRESS_REPORT_BYTES = 512 * 1024;
 
     private readonly httpClient = inject(HttpClient);
     private readonly runningContextService = inject(RunningContextService);
@@ -367,14 +388,15 @@ export class FileService {
      * the file of the download that took its place - they never share a path.
      * A file that was not downloaded to its end, because the download was aborted or failed, is deleted.
      * The bytes are gathered into large writes rather than written as they arrive, see
-     * DOWNLOAD_WRITE_BUFFER_SIZE.
+     * DOWNLOAD_WRITE_BUFFER_SIZE, and how far the download got is reported in bytes, see
+     * FileDownloadProgressCallback.
      */
-    public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void, abortController: AbortController): Promise<void> {
+    public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: FileDownloadProgressCallback, abortController: AbortController): Promise<void> {
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
         await this.ensureOfflineCacheDirectory();
         const partialFileName = `${fileName}.${FileService.partialFileCounter++}.part`;
         const path = FileService.offlineCachePath(partialFileName);
-        let previousPercentage = 0;
+        let reportedLength = 0;
         const response = await fetch(url, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -387,6 +409,7 @@ export class FileService {
         }
         const reader = response.body.getReader();
         const contentLength = Number(response.headers.get("Content-Length"));
+        progressCallback(0, contentLength);
         let receivedLength = 0;
         const pending: PendingChunks = { chunks: [], length: 0, wroteAnything: false };
         let done: boolean;
@@ -410,12 +433,9 @@ export class FileService {
                 if (pending.length >= FileService.DOWNLOAD_WRITE_BUFFER_SIZE) {
                     await this.writePendingChunks(path, pending);
                 }
-                if (contentLength > 0) {
-                    const currentPercentage = receivedLength / contentLength;
-                    if (currentPercentage - previousPercentage > 0.001) {
-                        progressCallback(currentPercentage);
-                        previousPercentage = currentPercentage;
-                    }
+                if (receivedLength - reportedLength >= FileService.PROGRESS_REPORT_BYTES) {
+                    progressCallback(receivedLength, contentLength);
+                    reportedLength = receivedLength;
                 }
             } while (!done);
             await this.writePendingChunks(path, pending);
@@ -423,8 +443,7 @@ export class FileService {
             await this.deleteFileInOfflineCache(partialFileName);
             throw ex;
         }
-        // A file that was read to its end is whole, whatever the server did or did not say its length would be
-        progressCallback(1);
+        progressCallback(receivedLength, receivedLength);
         await Filesystem.rename({
             from: path,
             to: FileService.offlineCachePath(fileName),
@@ -489,13 +508,13 @@ export class FileService {
      * The offline files that were fully downloaded and are waiting to be moved to the data directory.
      * They are only there while a download is going on, or after one that did not get to finish.
      */
-    public async listFilesInOfflineCache(): Promise<string[]> {
+    public async listFilesInOfflineCache(): Promise<CachedFile[]> {
         try {
             const results = await Filesystem.readdir({
                 path: FileService.OFFLINE_CACHE_DIRECTORY,
                 directory: Directory.Cache
             });
-            return results.files.filter(f => f.type === "file").map(f => f.name);
+            return results.files.filter(f => f.type === "file").map(f => ({ fileName: f.name, size: f.size }));
         } catch {
             return []; // The directory is only there once something was downloaded into it
         }

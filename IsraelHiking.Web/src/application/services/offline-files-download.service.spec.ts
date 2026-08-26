@@ -8,7 +8,7 @@ import { provideStore, Store } from "@ngxs/store";
 import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import { OfflineReducer } from "../reducers/offline.reducer";
 import { InMemoryReducer } from "../reducers/in-memory.reducer";
-import { FileService } from "./file.service";
+import { FileService, type CachedFile, type FileDownloadProgressCallback } from "./file.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
@@ -89,7 +89,7 @@ describe("OfflineFilesDownloadService", () => {
                         moveFileFromCacheToDataDirectory: vi.fn(() => Promise.resolve()),
                         deleteFileInDataDirectory: vi.fn(() => Promise.resolve()),
                         listFilesInDataDirectory: vi.fn(() => Promise.resolve([MAP_FILE, ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })))),
-                        listFilesInOfflineCache: vi.fn(() => Promise.resolve([] as string[])),
+                        listFilesInOfflineCache: vi.fn(() => Promise.resolve([] as CachedFile[])),
                         clearOfflineCache: vi.fn(() => Promise.resolve())
                     }
                 },
@@ -465,7 +465,7 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedTiles: {} }
                 });
                 const stuckDownloads: (() => void)[] = [];
-                const progressCallbacks: ((value: number) => void)[] = [];
+                const progressCallbacks: FileDownloadProgressCallback[] = [];
                 vi.mocked(fileService.downloadFileToCacheAuthenticated).mockImplementation(
                     (_url, _fileName, _token, progressCallback) => {
                         progressCallbacks.push(progressCallback);
@@ -487,19 +487,98 @@ describe("OfflineFilesDownloadService", () => {
                 await new Promise(resolve => setTimeout(resolve));
 
                 // The download that was aborted reports its progress before it returns, which is not the progress of the one going on
-                progressCallbacks[0](0.5);
+                progressCallbacks[0](50, 100);
                 expect(service.currentDownloadedTile()).toEqual({ tileX: 76, tileY: 52, progress: 0 });
 
                 stuckDownloads[0](); // the download that was stuck finally returns
                 expect(await stuckPromise).toBe("aborted");
                 expect(service.currentDownloadedTile()).toEqual({ tileX: 76, tileY: 52, progress: 0 });
 
-                progressCallbacks[1](0.5);
+                progressCallbacks[1](50, 100);
                 expect(service.currentDownloadedTile()).toEqual({ tileX: 76, tileY: 52, progress: 50 });
 
                 stuckDownloads[1]();
                 expect(await secondPromise).toBe("downloaded");
                 expect(service.currentDownloadedTile()).toBeNull();
+            }
+        )
+    );
+
+    it("Should weigh the progress of a tile by the size of its files and not by their number",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
+                store.reset({
+                    userState: { token: "token" },
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedTiles: {} }
+                });
+                const stuckDownloads: (() => void)[] = [];
+                const progressCallbacks: FileDownloadProgressCallback[] = [];
+                vi.mocked(fileService.downloadFileToCacheAuthenticated).mockImplementation(
+                    (_url, _fileName, _token, progressCallback) => {
+                        progressCallbacks.push(progressCallback);
+                        return new Promise(resolve => stuckDownloads.push(resolve));
+                    });
+
+                const promise = service.downloadTile(76, 51);
+                await flushStyles(mockBackend, {});
+                await flushFilesToDownload(mockBackend, false, {});
+                await flushFilesToDownload(mockBackend, true,
+                    { [MAP_FILE]: "2026-06-01", "raster-dem+7-76-51.pmtiles": "2026-06-01" });
+                await new Promise(resolve => setTimeout(resolve));
+                expect(progressCallbacks.length).toBe(2);
+
+                // One file holds nine tenths of the bytes of the tile, and the other one all the rest
+                progressCallbacks[0](0, 90);
+                progressCallbacks[1](0, 10);
+                expect(service.currentDownloadedTile().progress).toBe(0);
+
+                // Downloading the small one to its end is a tenth of the tile and not half of it
+                progressCallbacks[1](10, 10);
+                expect(service.currentDownloadedTile().progress).toBe(10);
+
+                progressCallbacks[0](45, 90);
+                expect(service.currentDownloadedTile().progress).toBeCloseTo(55);
+
+                stuckDownloads.forEach(resolve => resolve());
+                expect(await promise).toBe("downloaded");
+            }
+        )
+    );
+
+    it("Should move the progress of a tile backwards when a file turns out to be larger than the rest",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
+                store.reset({
+                    userState: { token: "token" },
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedTiles: {} }
+                });
+                const stuckDownloads: (() => void)[] = [];
+                const progressCallbacks: FileDownloadProgressCallback[] = [];
+                vi.mocked(fileService.downloadFileToCacheAuthenticated).mockImplementation(
+                    (_url, _fileName, _token, progressCallback) => {
+                        progressCallbacks.push(progressCallback);
+                        return new Promise(resolve => stuckDownloads.push(resolve));
+                    });
+
+                const promise = service.downloadTile(76, 51);
+                await flushStyles(mockBackend, {});
+                await flushFilesToDownload(mockBackend, false, {});
+                await flushFilesToDownload(mockBackend, true,
+                    { [MAP_FILE]: "2026-06-01", "raster-dem+7-76-51.pmtiles": "2026-06-01" });
+                await new Promise(resolve => setTimeout(resolve));
+
+                // Only one file started, so the other one is taken to be of the same size, which puts the tile at a quarter
+                progressCallbacks[0](5, 10);
+                expect(service.currentDownloadedTile().progress).toBe(25);
+
+                // The other one turns out to be ten times larger, so the same bytes are now a smaller part of the tile
+                progressCallbacks[1](0, 100);
+                expect(service.currentDownloadedTile().progress).toBeCloseTo(100 * 5 / 110);
+
+                stuckDownloads.forEach(resolve => resolve());
+                expect(await promise).toBe("downloaded");
             }
         )
     );
@@ -512,7 +591,7 @@ describe("OfflineFilesDownloadService", () => {
                     offlineState: { isSubscribed: true },
                     inMemoryState: { downloadedTiles: {} }
                 });
-                vi.mocked(fileService.listFilesInOfflineCache).mockResolvedValue([MAP_FILE]);
+                vi.mocked(fileService.listFilesInOfflineCache).mockResolvedValue([{ fileName: MAP_FILE, size: FILE_SIZE }]);
 
                 const promise = service.downloadTile(76, 51);
                 await flushStyles(mockBackend, {});
