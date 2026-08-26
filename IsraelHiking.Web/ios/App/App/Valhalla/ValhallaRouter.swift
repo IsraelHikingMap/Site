@@ -1,5 +1,6 @@
 import Foundation
 import Valhalla
+import ValhallaConfigModels
 import ValhallaModels
 
 /**
@@ -29,10 +30,6 @@ enum ValhallaRouterError: Error {
 final class ValhallaRouter {
     /// The plugin's own copy, the app hands it the file it downloaded
     private static let configurationFileName = "valhalla_configuration.json"
-    /// The configuration the engine is run with, the downloaded one with the tiles directory in it
-    private static let engineConfigurationFileName = "valhalla.json"
-    private static let mjolnirKey = "mjolnir"
-    private static let tileDirKey = "tile_dir"
 
     private let tiles: ValhallaTiles
     private let profiles = ValhallaProfiles()
@@ -65,7 +62,7 @@ final class ValhallaRouter {
         if let valhalla {
             return valhalla
         }
-        let engine = try Valhalla(configPath: try engineConfigurationPath())
+        let engine = try Valhalla(try engineConfiguration())
         valhalla = engine
         return engine
     }
@@ -93,21 +90,22 @@ final class ValhallaRouter {
      * the tiles are on this device - filled in. Without it, as without tiles, there is no offline
      * routing.
      *
-     * It is written whenever the engine is opened, so that a configuration that was downloaded
-     * again takes effect as soon as the engine is dropped.
+     * It is read into the configuration model rather than handed to the engine as it was downloaded, the
+     * way `ValhallaRouter.kt` does: the server's configuration is written by its own version of valhalla,
+     * which knows settings that the version built into the app does not - and the engine refuses to start
+     * over a setting it can not make sense of, as it does over a costing it has no limits for. Reading it
+     * into the model keeps what both versions agree on and leaves the rest behind.
      */
-    private func engineConfigurationPath() throws -> String {
+    private func engineConfiguration() throws -> ValhallaConfig {
         let downloadedURL = dataURL().appendingPathComponent(ValhallaRouter.configurationFileName)
         guard let data = try? Data(contentsOf: downloadedURL),
-              var config = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
-              var mjolnir = config[ValhallaRouter.mjolnirKey] as? [String: Any] else {
+              var config = try? JSONDecoder().decode(ValhallaConfig.self, from: data) else {
             throw ValhallaRouterError.configurationNotDownloaded
         }
-        mjolnir[ValhallaRouter.tileDirKey] = tiles.tilesURL.path
-        config[ValhallaRouter.mjolnirKey] = mjolnir
-        let engineURL = dataURL().appendingPathComponent(ValhallaRouter.engineConfigurationFileName)
-        try JSONSerialization.data(withJSONObject: config).write(to: engineURL, options: .atomic)
-        return engineURL.path
+        var mjolnir = config.mjolnir ?? Mjolnir()
+        mjolnir.tileDir = tiles.tilesURL.path
+        config.mjolnir = mjolnir
+        return config
     }
 
     private func routeRequest(_ request: ValhallaRouteRequest) throws -> RouteRequest {
