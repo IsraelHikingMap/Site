@@ -70,6 +70,7 @@ public class OfflineFilesService : IOfflineFilesService
     /// The offline routing (valhalla) tiles of a slice, a tar file that is sliced on the fly like the other
     /// non-DEM files. It is not a part of the style, and it is only listed for clients that ask for it since
     /// older clients do not know how to handle it.
+    /// It is the largest file of a tile and the slowest one to generate, which is why it is listed first.
     /// </summary>
     private const string VALHALLA_FILE_NAME = "valhalla";
 
@@ -143,6 +144,10 @@ public class OfflineFilesService : IOfflineFilesService
     {
         var filesDictionary = new Dictionary<string, DateTime>();
         var today = DateTime.UtcNow.Date;
+        if (routingTile && tileX.HasValue && tileY.HasValue)
+        {
+            AddIfUpdated(filesDictionary, SourceNameToFileName(VALHALLA_FILE_NAME, tileX, tileY, VALHALLA_FILE_EXTENSION), today, lastModifiedDate);
+        }
         foreach (var name in await GetSourceNames())
         {
             if (!IsDem(name))
@@ -155,10 +160,6 @@ public class OfflineFilesService : IOfflineFilesService
             {
                 AddIfUpdated(filesDictionary, SourceNameToFileName(name, tileX, tileY), DEM_MODIFIED_DATE, lastModifiedDate);
             }
-        }
-        if (routingTile && tileX.HasValue && tileY.HasValue)
-        {
-            AddIfUpdated(filesDictionary, SourceNameToFileName(VALHALLA_FILE_NAME, tileX, tileY, VALHALLA_FILE_EXTENSION), today, lastModifiedDate);
         }
         if (routingTile && !tileX.HasValue && !tileY.HasValue)
         {

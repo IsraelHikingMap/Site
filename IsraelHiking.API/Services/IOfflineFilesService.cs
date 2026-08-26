@@ -27,6 +27,12 @@ public interface IOfflineFilesService
     /// <param name="tileY">The tile's Y coordinates, null for root</param>
     /// <param name="routingTile">Whether the client can handle the offline routing files - the routing tile
     /// itself and, for the root, the valhalla configuration files</param>
+    /// <remarks>
+    /// The order of the files is meaningful: the client downloads them in the order they are listed in, a
+    /// few at a time, so a file that is listed last is the one left downloading on its own once every other
+    /// file is done. The slowest files are therefore listed first, so that they are downloaded alongside the
+    /// rest instead of after them.
+    /// </remarks>
     /// <returns>A list of file names</returns>
     Task<Dictionary<string, DateTime>> GetUpdatedFilesList(DateTime lastModifiedDate, long? tileX, long? tileY, bool routingTile);
 }
