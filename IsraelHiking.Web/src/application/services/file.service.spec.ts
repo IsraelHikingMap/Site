@@ -191,7 +191,7 @@ describe("FileService", () => {
         }
     ));
 
-    it("Should report the size it actually downloaded when the server did not report a length", inject([FileService],
+    it("Should report a file as whole when the server did not report its length", inject([FileService],
         async (service: FileService) => {
             const progressSpy = vi.fn();
             const url = "http://123.pmtiles";
@@ -222,7 +222,7 @@ describe("FileService", () => {
 
             expect(fetchSpy).toHaveBeenCalledTimes(1);
             expect(mockReader.read).toHaveBeenCalledTimes(3);
-            expect(progressSpy).toHaveBeenLastCalledWith(4, 4);
+            expect(progressSpy).toHaveBeenLastCalledWith(1);
             fetchSpy.mockRestore();
         }
     ));
@@ -252,7 +252,7 @@ describe("FileService", () => {
         downloader.emit("downloadCompleted", { id: options.id });
         await promise;
 
-        expect(progressSpy).toHaveBeenCalledWith(4, 4);
+        expect(progressSpy).toHaveBeenCalledWith(1);
         const written = await Filesystem.readFile({ path: "offline-files/native.tar", directory: Directory.Cache });
         expect(new Uint8Array(decode(written.data as string))).toEqual(new Uint8Array([1, 2, 3, 4]));
     });
