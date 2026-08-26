@@ -99,13 +99,67 @@ final class ValhallaRouter {
     private func engineConfiguration() throws -> ValhallaConfig {
         let downloadedURL = dataURL().appendingPathComponent(ValhallaRouter.configurationFileName)
         guard let data = try? Data(contentsOf: downloadedURL),
-              var config = try? JSONDecoder().decode(ValhallaConfig.self, from: data) else {
+              let downloaded = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              let defaultsData = try? JSONEncoder().encode(ValhallaRouter.engineDefaults),
+              let defaults = (try? JSONSerialization.jsonObject(with: defaultsData)) as? [String: Any],
+              let mergedData = try? JSONSerialization.data(withJSONObject: ValhallaRouter.merged(defaults, downloaded)),
+              var config = try? JSONDecoder().decode(ValhallaConfig.self, from: mergedData) else {
             throw ValhallaRouterError.configurationNotDownloaded
         }
         var mjolnir = config.mjolnir ?? Mjolnir()
         mjolnir.tileDir = tiles.tilesURL.path
         config.mjolnir = mjolnir
         return config
+    }
+
+    /**
+     * The settings the engine falls back on for whatever the downloaded configuration does not say.
+     * It reads a long list of settings without a fallback of its own - it refuses to start rather than
+     * do without one of them - and the server writes its configuration with its own version of valhalla,
+     * which names some of them differently, so the ones it renamed would be missing. These are the
+     * defaults of the model, which is the version the app is built with, so they are the names and the
+     * values the engine here expects. `ValhallaRouter.kt` gets this for free: its model fills in its own
+     * defaults for whatever the configuration it is given leaves out.
+     */
+    private static let engineDefaults = ValhallaConfig(
+        httpd: Httpd(service: HttpdService()),
+        loki: Loki(service: LokiService(), serviceDefaults: LokiServiceDefaults()),
+        meili: Meili(_default: MeiliDefault(), grid: MeiliGrid()),
+        mjolnir: Mjolnir(),
+        odin: Odin(service: OdinService()),
+        serviceLimits: ServiceLimits(
+            auto: ServiceLimitsAuto(),
+            bicycle: ServiceLimitsBicycle(),
+            bikeshare: ServiceLimitsBicycle(),
+            bus: ServiceLimitsBus(),
+            centroid: ServiceLimitsCentroid(),
+            isochrone: ServiceLimitsIsochrone(),
+            motorScooter: ServiceLimitsBicycle(),
+            motorcycle: ServiceLimitsBicycle(),
+            multimodal: ServiceLimitsMultimodal(),
+            pedestrian: ServiceLimitsPedestrian(),
+            skadi: ServiceLimitsSkadi(),
+            status: ServiceLimitsStatus(),
+            taxi: ServiceLimitsAuto(),
+            trace: ServiceLimitsTrace(),
+            transit: ServiceLimitsBicycle(),
+            truck: ServiceLimitsAuto()),
+        thor: Thor(service: ThorService()))
+
+    /**
+     * The two configurations as one: what the downloaded one says wins, what it does not say is taken
+     * from the defaults, section by section rather than section for section.
+     */
+    private static func merged(_ base: [String: Any], _ overlay: [String: Any]) -> [String: Any] {
+        var result = base
+        for (key, value) in overlay {
+            if let baseSection = base[key] as? [String: Any], let overlaySection = value as? [String: Any] {
+                result[key] = merged(baseSection, overlaySection)
+            } else {
+                result[key] = value
+            }
+        }
+        return result
     }
 
     private func routeRequest(_ request: ValhallaRouteRequest) throws -> RouteRequest {

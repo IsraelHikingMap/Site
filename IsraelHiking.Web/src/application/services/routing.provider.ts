@@ -77,7 +77,7 @@ export class RoutingProvider {
             } catch (ex2) {
                 this.loggingService.error(`[Routing] failed: ${(ex as Error).message}, ${(ex2 as Error).message}`);
                 this.toastService.warning(this.getRoutingFailedMessage(hasTiles));
-                const lngLat = [latlngStart, latlngEnd];
+                const lngLat = [{ ...latlngStart }, { ...latlngEnd }];
                 this.elevationProvider.updateHeights(lngLat);
                 return lngLat;
             }
