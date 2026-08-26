@@ -15,9 +15,10 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { PmTilesService } from "./pmtiles.service";
+import { RoutingProvider } from "./routing.provider";
 import { RunningContextService } from "./running-context.service";
 import { RouteStrings } from "./hash.service";
-import { SetDownloadedTilesAction } from "../reducers/in-memory.reducer";
+import { SetDownloadedRoutingTilesAction, SetDownloadedTilesAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, FileNameDateVersion } from "../models";
 
 /** What the styles need from the offline files, see readStyleRequirements */
@@ -73,6 +74,7 @@ export class OfflineFilesDownloadService {
     private readonly httpClient = inject(HttpClient);
     private readonly toastService = inject(ToastService);
     private readonly pmtilesService = inject(PmTilesService);
+    private readonly routingProvider = inject(RoutingProvider);
     private readonly runningContextService = inject(RunningContextService);
     private readonly store = inject(Store);
     private readonly router = inject(Router);
@@ -174,6 +176,12 @@ export class OfflineFilesDownloadService {
         this.offlineStyleRequirements = requirements;
     }
 
+    /**
+     * Gets the newest styles, in order to know what they require and to keep the ones on the device
+     * up to date. They are taken from where they are published, which is public and needs nothing
+     * from this server, and they are stored on the device by whoever asked for them - they are not
+     * a part of the offline files the server lists.
+     */
     private async downloadStyleAndUpdateMetadata(): Promise<{ fileName: string, content: string }[]> {
         const styles: { fileName: string, content: string }[] = [];
         for (const baseLayerUrl of [Urls.HIKING_STYLE_ADDRESS, Urls.MTB_STYLE_ADDRESS]) {
@@ -375,14 +383,20 @@ export class OfflineFilesDownloadService {
     }
 
     /**
-     * Moves the files that were downloaded to where the app reads them from. This only happens once
-     * every file of the tile was downloaded, so that a download that was aborted or failed leaves the
-     * files of the tile as they were rather than half updated.
+     * Moves the files that were downloaded to where the app reads them from, and extracts the routing
+     * tiles among them. This only happens once every file of the tile was downloaded, so that a download
+     * that was aborted or failed leaves the files of the tile as they were rather than half updated.
      */
     private async moveDownloadedFilesToDataDirectory(currentDownload: CurrentDownload, fileNames: FileNameDateVersion[]): Promise<void> {
         const tileKey = PmTilesService.toTileKey(currentDownload.tileX, currentDownload.tileY);
         for (const { fileName } of fileNames) {
             await this.fileService.moveFileFromCacheToDataDirectory(fileName);
+            if (RoutingProvider.isRoutingTilesFile(fileName)) {
+                await this.routingProvider.extractOfflineRoutingTiles(fileName, tileKey);
+            } else if (RoutingProvider.isRoutingSetupFile(fileName)) {
+                await this.routingProvider.storeRoutingSetupFile(fileName, await this.fileService.readFileInDataDirectory(fileName));
+                await this.fileService.deleteFileInDataDirectory(fileName);
+            }
         }
         this.loggingService.info(`[Offline Download] Moved ${fileNames.length} files of ${tileKey} to the data directory`);
     }
@@ -451,6 +465,7 @@ export class OfflineFilesDownloadService {
             params.tileX = tileX.toString();
             params.tileY = tileY.toString();
         }
+        params.routingTile = "true";
         const fileNames = await firstValueFrom(this.httpClient.get<Record<string, string>>(Urls.offlineFiles, { params: params }).pipe(timeout(5000)));
         this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that need to be downloaded ` +
             `for ${tileKey === PmTilesService.toTileKey() ? "the root files" : tileKey}, ` +
@@ -481,6 +496,7 @@ export class OfflineFilesDownloadService {
             await this.fileService.deleteFileInDataDirectory(fileName);
             this.pmtilesService.invalidateFile(fileName);
         }
+        await this.routingProvider.deleteOfflineRoutingTiles(tileKey);
         await this.updateDownloadedTilesFromDevice();
         // The root files are only needed as long as there's an area that uses them.
         const rootTileId = PmTilesService.toTileKey();
@@ -495,12 +511,14 @@ export class OfflineFilesDownloadService {
 
     /**
      * Reads what was downloaded into the state, which is the only place it is listed - there's nothing
-     * stored that can go out of sync with the device. It is read from the files themselves: the date of a
-     * file is the time it was written, which is when it was downloaded, and its version is only read when
-     * it is needed, see updateVersionsOfDownloadedFiles.
+     * stored that can go out of sync with the device. The routing tiles are read from the routing plugin,
+     * which is what keeps them, and the rest from the files themselves: the date of a file is the time it
+     * was written, which is when it was downloaded, and its version is only read when it is needed, see
+     * updateVersionsOfDownloadedFiles.
      * Failing to read the files is logged and otherwise ignored, leaving them in the state as they were.
      */
     public async updateDownloadedTilesFromDevice(): Promise<void> {
+        this.store.dispatch(new SetDownloadedRoutingTilesAction(await this.routingProvider.getOfflineRoutingTiles()));
         let files: DataDirectoryFile[];
         try {
             files = await this.fileService.listFilesInDataDirectory();
@@ -535,6 +553,7 @@ export class OfflineFilesDownloadService {
         }
         const downloadDates = offlineFiles.map(f => f.modifiedDate.getTime());
         const totalSize = offlineFiles.reduce((total, file) => total + file.size, 0);
+        const downloadedRoutingTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedRoutingTiles);
         this.loggingService.info(`[Offline Download] The device holds ${offlineFiles.length} files of ` +
             `${Object.keys(downloadedTiles).length} tiles, ${OfflineFilesDownloadService.toReadableSize(totalSize)}, ` +
             `downloaded between ${new Date(Math.min(...downloadDates)).toISOString()} and ` +
@@ -542,7 +561,8 @@ export class OfflineFilesDownloadService {
         const rootTileKey = PmTilesService.toTileKey();
         this.loggingService.info(`[Offline Download] The tiles are: ${Object.entries(downloadedTiles)
             .map(([tileKey, tileFiles]) => `${tileKey === rootTileKey ? "root" : tileKey} ` +
-                `(${tileFiles.length} file${tileFiles.length === 1 ? "" : "s"})`).join(", ")}`);
+                `(${tileFiles.length} file${tileFiles.length === 1 ? "" : "s"}` +
+                `${downloadedRoutingTiles.includes(tileKey) ? ", with routing tiles" : ""})`).join(", ")}`);
     }
 
     /** A size that is readable in the logs, since they are read by a person and not by a machine */
@@ -648,7 +668,24 @@ export class OfflineFilesDownloadService {
         if (!this.meetsRequirements(tileKey, files, this.offlineStyleRequirements)) {
             return "unusable";
         }
-        return this.meetsRequirements(tileKey, files, this.onlineStyleRequirements) ? "compatible" : "outdated";
+        if (!this.meetsRequirements(tileKey, files, this.onlineStyleRequirements) || !this.hasRoutingTiles(tileKey)) {
+            return "outdated";
+        }
+        return "compatible";
+    }
+
+    /**
+     * Whether the routing tiles of a tile are on the device. A tile that was downloaded before offline
+     * routing existed has none and has to be downloaded again to get them, but the map itself is still
+     * drawn from the files it does have, so such a tile is only out of date and not unusable.
+     * The root files are not of a specific area, so they have no routing tiles of their own.
+     */
+    private hasRoutingTiles(tileKey: string): boolean {
+        if (tileKey === PmTilesService.toTileKey()) {
+            return true;
+        }
+        const downloadedRoutingTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedRoutingTiles);
+        return downloadedRoutingTiles.includes(tileKey);
     }
 
     /**

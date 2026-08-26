@@ -13,6 +13,7 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { PmTilesService } from "./pmtiles.service";
+import { RoutingProvider } from "./routing.provider";
 import { RunningContextService } from "./running-context.service";
 import { Urls } from "../urls";
 import type { ApplicationState } from "../models";
@@ -21,6 +22,7 @@ const ROOT_TILE_KEY = PmTilesService.toTileKey();
 const TILE_KEY = PmTilesService.toTileKey(76, 51);
 const MAP_FILE = "IHM-schema+7-76-51.pmtiles";
 const ROOT_MAP_FILE = "IHM-schema-6.pmtiles";
+const ROUTING_TILES_FILE = "valhalla+7-76-51.tar";
 const DOWNLOAD_DATE = new Date("2026-01-01T10:00:00.000Z");
 const FILE_SIZE = 1024 * 1024;
 
@@ -46,14 +48,14 @@ function createStyle(minVersions: MinVersions) {
 
 /**
  * Runs the initialization, which reads the files of the device into the state and the versions the
- * styles require.
+ * styles require, with the routing tiles of the tile the tests use already downloaded.
  */
 async function initialize(service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
     hikeMinVersions: MinVersions, bikeMinVersions: MinVersions = {}) {
     store.reset({
         userState: { token: "token" },
         offlineState: { isSubscribed: true },
-        inMemoryState: { downloadedTiles: {} }
+        inMemoryState: { downloadedTiles: {}, downloadedRoutingTiles: [] }
     });
     const promise = service.initialize();
     await flushStyles(mockBackend, hikeMinVersions, bikeMinVersions);
@@ -96,6 +98,14 @@ describe("OfflineFilesDownloadService", () => {
                 { provide: LoggingService, useValue: { info: vi.fn(), debug: vi.fn(), warning: vi.fn(), error: vi.fn(), getErrorTypeAndMessage: () => ({ type: "client", message: "" }) } },
                 { provide: ToastService, useValue: { confirm: vi.fn() } },
                 { provide: PmTilesService, useValue: { getVersion: vi.fn((): Promise<string> => Promise.resolve(undefined)), invalidateFile: vi.fn() } },
+                {
+                    provide: RoutingProvider, useValue: {
+                        updateOfflineRoutingProfiles: vi.fn(() => Promise.resolve()),
+                        extractOfflineRoutingTiles: vi.fn(() => Promise.resolve()),
+                        deleteOfflineRoutingTiles: vi.fn(() => Promise.resolve()),
+                        getOfflineRoutingTiles: vi.fn(() => Promise.resolve([TILE_KEY]))
+                    }
+                },
                 { provide: RunningContextService, useValue: { isCapacitor: true } },
                 { provide: Router, useValue: { navigate: vi.fn() } },
                 OfflineFilesDownloadService,
@@ -382,6 +392,18 @@ describe("OfflineFilesDownloadService", () => {
         )
     );
 
+    it("Should consider a tile without routing tiles outdated, since its map is still drawn, but not the root files",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
+                await initialize(service, mockBackend, store, {});
+                store.reset({ inMemoryState: { downloadedTiles: {}, downloadedRoutingTiles: [] } });
+
+                expect(service.getTileCompatibility(TILE_KEY, [{ fileName: MAP_FILE, date: "2026-01-01" }])).toBe("outdated");
+                expect(service.getTileCompatibility(ROOT_TILE_KEY, [{ fileName: ROOT_MAP_FILE, date: "2026-01-01" }])).toBe("compatible");
+            }
+        )
+    );
+
     it("Should tell that everything is up to date when downloading a tile that was just downloaded",
         inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
@@ -390,7 +412,7 @@ describe("OfflineFilesDownloadService", () => {
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedTiles: {} }
+                    inMemoryState: { downloadedTiles: {}, downloadedRoutingTiles: [] }
                 });
 
                 const promise = service.downloadTile(76, 51);
@@ -405,28 +427,32 @@ describe("OfflineFilesDownloadService", () => {
         )
     );
 
-    it("Should move the files that were downloaded and read them into the state",
-        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+    it("Should move the files that were downloaded, read them into the state and store the routing tiles on their own",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, RoutingProvider],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
-                fileService: FileService) => {
+                fileService: FileService, routingProvider: RoutingProvider) => {
                 vi.mocked(fileService.listFilesInDataDirectory)
                     .mockResolvedValueOnce(["raster-dem+7-76-51.pmtiles"].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })))
                     .mockResolvedValue(["raster-dem+7-76-51.pmtiles", MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
+                vi.mocked(routingProvider.getOfflineRoutingTiles).mockResolvedValueOnce([]).mockResolvedValue([TILE_KEY]);
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedTiles: {} }
+                    inMemoryState: { downloadedTiles: {}, downloadedRoutingTiles: [] }
                 });
 
                 const promise = service.downloadTile(76, 51);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, false, {});
-                await flushFilesToDownload(mockBackend, true, { [MAP_FILE]: "2026-06-01" });
+                await flushFilesToDownload(mockBackend, true, { [MAP_FILE]: "2026-06-01", [ROUTING_TILES_FILE]: "2026-06-01" });
 
                 expect(await promise).toBe("downloaded");
                 const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
                 expect(downloadedTiles[TILE_KEY].map(f => f.fileName)).toEqual(["raster-dem+7-76-51.pmtiles", MAP_FILE]);
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(MAP_FILE);
+                expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(ROUTING_TILES_FILE);
+                expect(routingProvider.extractOfflineRoutingTiles).toHaveBeenCalledWith(ROUTING_TILES_FILE, TILE_KEY);
+                expect(store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedRoutingTiles)).toEqual([TILE_KEY]);
             }
         )
     );
@@ -437,7 +463,7 @@ describe("OfflineFilesDownloadService", () => {
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedTiles: {} }
+                    inMemoryState: { downloadedTiles: {}, downloadedRoutingTiles: [] }
                 });
                 // Aborting a download makes the request of every file that is being downloaded fail
                 vi.mocked(fileService.downloadFileToCacheAuthenticated).mockImplementation(() => {
@@ -462,7 +488,7 @@ describe("OfflineFilesDownloadService", () => {
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedTiles: {} }
+                    inMemoryState: { downloadedTiles: {}, downloadedRoutingTiles: [] }
                 });
                 const stuckDownloads: (() => void)[] = [];
                 const progressCallbacks: FileDownloadProgressCallback[] = [];
@@ -589,19 +615,19 @@ describe("OfflineFilesDownloadService", () => {
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedTiles: {} }
+                    inMemoryState: { downloadedTiles: {}, downloadedRoutingTiles: [] }
                 });
                 vi.mocked(fileService.listFilesInOfflineCache).mockResolvedValue([{ fileName: MAP_FILE, size: FILE_SIZE }]);
 
                 const promise = service.downloadTile(76, 51);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, false, {});
-                await flushFilesToDownload(mockBackend, true, { [MAP_FILE]: "2026-06-01", "raster-dem+7-76-51.pmtiles": "2026-06-01" });
+                await flushFilesToDownload(mockBackend, true, { [MAP_FILE]: "2026-06-01", [ROUTING_TILES_FILE]: "2026-06-01" });
 
                 expect(await promise).toBe("downloaded");
                 expect(fileService.downloadFileToCacheAuthenticated).toHaveBeenCalledTimes(1);
                 expect(fileService.downloadFileToCacheAuthenticated).toHaveBeenCalledWith(
-                    expect.stringContaining("raster-dem+7-76-51.pmtiles"), "raster-dem+7-76-51.pmtiles", "token", expect.any(Function), expect.any(AbortController));
+                    expect.stringContaining(ROUTING_TILES_FILE), ROUTING_TILES_FILE, "token", expect.any(Function), expect.any(AbortController));
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(MAP_FILE);
             }
         )
@@ -674,7 +700,7 @@ describe("OfflineFilesDownloadService", () => {
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedTiles: {} }
+                    inMemoryState: { downloadedTiles: {}, downloadedRoutingTiles: [] }
                 });
 
                 const promise = service.downloadTile(76, 51);
@@ -692,16 +718,19 @@ describe("OfflineFilesDownloadService", () => {
         )
     );
 
-    it("Should delete the files of a tile and read what is left from the device",
-        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+    it("Should delete the files and the routing tiles of a tile, and read what is left from the device",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, RoutingProvider],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
-                fileService: FileService) => {
+                fileService: FileService, routingProvider: RoutingProvider) => {
                 await initialize(service, mockBackend, store, {});
                 vi.mocked(fileService.listFilesInDataDirectory).mockResolvedValue([ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
+                vi.mocked(routingProvider.getOfflineRoutingTiles).mockResolvedValue([]);
 
                 await service.deleteTile(TILE_KEY);
 
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(MAP_FILE);
+                expect(routingProvider.deleteOfflineRoutingTiles).toHaveBeenCalledWith(TILE_KEY);
+                expect(store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedRoutingTiles)).toEqual([]);
                 const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
                 expect(downloadedTiles[TILE_KEY]).toBeUndefined();
             }

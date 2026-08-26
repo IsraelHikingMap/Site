@@ -24,7 +24,7 @@ class CarSearchScreen(carContext: CarContext, private val initialQuery: String?)
         Screen(carContext) {
 
     private val store: CapacitorStore = CapacitorStore.get(carContext)
-    private val backend = CarBackendService()
+    private val backend = CarBackendService(carContext)
     private val translations: CarTranslations by lazy {
         CarTranslations.load(carContext, language())
     }

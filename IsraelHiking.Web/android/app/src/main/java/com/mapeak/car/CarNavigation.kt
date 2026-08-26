@@ -61,7 +61,7 @@ class CarNavigation(
             carContext.getCarService(NavigationManager::class.java)
     private val handler = Handler(Looper.getMainLooper())
     private val notification = CarNavigationNotification(carContext)
-    private val backend = CarBackendService()
+    private val backend = CarBackendService(carContext)
 
     private var routePoints: List<Point> = emptyList()
     private var maneuvers: List<CarManeuver> = emptyList()

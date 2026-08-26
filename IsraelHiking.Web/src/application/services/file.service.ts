@@ -495,6 +495,15 @@ export class FileService {
         return buffer.buffer;
     }
 
+    public async readFileInDataDirectory(fileName: string): Promise<string> {
+        const file = await Filesystem.readFile({
+            path: fileName,
+            directory: Directory.Data,
+            encoding: Encoding.UTF8
+        });
+        return file.data as string;
+    }
+
     public async moveFileFromCacheToDataDirectory(fileName: string): Promise<void> {
         await Filesystem.rename({
             from: FileService.offlineCachePath(fileName),

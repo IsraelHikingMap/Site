@@ -282,8 +282,9 @@ export class ResourcesService {
     public unableToLoadFromFile: string;
     public unableToLoadFromUrl: string;
     public unableToGenerateUrl: string;
-    public routingFailedTryShorterRoute: string;
+    public routingFailed: string;
     public routingFailedBuySubscription: string;
+    public routingFailedDownloadTheArea: string;
     public unableToLogin: string;
     public unableToSendRoute: string;
     public noUnmappedRoutes: string;
@@ -716,8 +717,9 @@ export class ResourcesService {
         this.unableToLoadFromFile = this.gettextCatalog.getString("Unable to extract geographic information from the file...");
         this.unableToLoadFromUrl = this.gettextCatalog.getString("Unable to load from URL...");
         this.unableToGenerateUrl = this.gettextCatalog.getString("Unable to generate URL, please try again later...");
-        this.routingFailedTryShorterRoute = this.gettextCatalog.getString("Routing failed, please try a shorter route...");
+        this.routingFailed = this.gettextCatalog.getString("Routing failed...");
         this.routingFailedBuySubscription = this.gettextCatalog.getString("Routing failed, consider buying a subscription for offline maps.");
+        this.routingFailedDownloadTheArea = this.gettextCatalog.getString("Routing failed, please download this area for offline routing.");
         this.unableToLogin = this.gettextCatalog.getString("Unable to login...");
         this.unableToSendRoute = this.gettextCatalog.getString("Unable to send route...");
         this.noUnmappedRoutes = this.gettextCatalog.getString("No unmapped routes! :-)");

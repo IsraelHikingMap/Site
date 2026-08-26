@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0DFA11000000000000000065 /* ValhallaProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFA11000000000000000064 /* ValhallaProfiles.swift */; };
+		0DFA11000000000000000002 /* ValhallaPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFA11000000000000000001 /* ValhallaPlugin.swift */; };
+		0DFA11000000000000000004 /* ValhallaTiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFA11000000000000000003 /* ValhallaTiles.swift */; };
+		0DFA11000000000000000006 /* ValhallaRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFA11000000000000000005 /* ValhallaRouter.swift */; };
+		0DFA11000000000000000008 /* ValhallaTarExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFA11000000000000000007 /* ValhallaTarExtractor.swift */; };
+		0DFA1100000000000000005D /* Valhalla in Frameworks */ = {isa = PBXBuildFile; productRef = 0DFA1100000000000000005C /* Valhalla */; };
 		0D4587ED2FCCC8A300269001 /* CarStoreKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4587EC2FCCC8A300269001 /* CarStoreKeys.swift */; };
 		0D46EA142FCC67830033E098 /* CarStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0F2FCC67830033E098 /* CarStatistics.swift */; };
 		0D46EA152FCC67830033E098 /* SliceURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA132FCC67830033E098 /* SliceURLProtocol.swift */; };
@@ -61,6 +67,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0DFA11000000000000000064 /* ValhallaProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValhallaProfiles.swift; sourceTree = "<group>"; };
+		0DFA11000000000000000001 /* ValhallaPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValhallaPlugin.swift; sourceTree = "<group>"; };
+		0DFA11000000000000000003 /* ValhallaTiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValhallaTiles.swift; sourceTree = "<group>"; };
+		0DFA11000000000000000005 /* ValhallaRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValhallaRouter.swift; sourceTree = "<group>"; };
+		0DFA11000000000000000007 /* ValhallaTarExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValhallaTarExtractor.swift; sourceTree = "<group>"; };
 		0D4587EC2FCCC8A300269001 /* CarStoreKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarStoreKeys.swift; sourceTree = "<group>"; };
 		0D46EA0B2FCC67830033E098 /* CarLocationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarLocationProvider.swift; sourceTree = "<group>"; };
 		0D46EA0C2FCC67830033E098 /* CarMapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarMapViewController.swift; sourceTree = "<group>"; };
@@ -107,12 +118,25 @@
 				0DCC0106000000000000CC06 /* MapLibre in Frameworks */,
 				0DD5D9592FDBDBB300983BAA /* PMTiles in Frameworks */,
 				0D6243252FDEC57E00B2C10A /* MaplibreContour in Frameworks */,
+				0DFA1100000000000000005D /* Valhalla in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0DFA1100000000000000005A /* Valhalla */ = {
+			isa = PBXGroup;
+			children = (
+				0DFA11000000000000000001 /* ValhallaPlugin.swift */,
+				0DFA11000000000000000003 /* ValhallaTiles.swift */,
+				0DFA11000000000000000005 /* ValhallaRouter.swift */,
+				0DFA11000000000000000007 /* ValhallaTarExtractor.swift */,
+				0DFA11000000000000000064 /* ValhallaProfiles.swift */,
+			);
+			path = Valhalla;
+			sourceTree = "<group>";
+		};
 		0D46EA0A2FCC67430033E098 /* Car */ = {
 			isa = PBXGroup;
 			children = (
@@ -166,6 +190,7 @@
 				0D46EA1D2FCC68230033E098 /* SceneDelegate.swift */,
 				0DAA0113000000000000AA13 /* Translations.swift */,
 				0D46EA0A2FCC67430033E098 /* Car */,
+				0DFA1100000000000000005A /* Valhalla */,
 				F15F05A52935486900827848 /* App.entitlements */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
@@ -257,6 +282,7 @@
 				0DCC0104000000000000CC04 /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */,
 				0DD5D9572FDBDBB300983BAA /* XCRemoteSwiftPackageReference "pmtiles-mobile" */,
 				0D6243232FDEC57E00B2C10A /* XCRemoteSwiftPackageReference "maplibre-contour-rs" */,
+				0DFA1100000000000000005B /* XCRemoteSwiftPackageReference "valhalla-mobile" */,
 			);
 			productRefGroup = 504EC3051FED79650016851F /* Products */;
 			projectDirPath = "";
@@ -319,6 +345,11 @@
 				0D46EA1A2FCC67830033E098 /* CapacitorStore.swift in Sources */,
 				0D46EA1B2FCC67830033E098 /* PMTilesService.swift in Sources */,
 				0D46EA1C2FCC67830033E098 /* MapeakCarSceneDelegate.swift in Sources */,
+				0DFA11000000000000000002 /* ValhallaPlugin.swift in Sources */,
+				0DFA11000000000000000004 /* ValhallaTiles.swift in Sources */,
+				0DFA11000000000000000006 /* ValhallaRouter.swift in Sources */,
+				0DFA11000000000000000008 /* ValhallaTarExtractor.swift in Sources */,
+				0DFA11000000000000000065 /* ValhallaProfiles.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -361,7 +392,7 @@
 				CURRENT_PROJECT_VERSION = 9.21.0;
 				DEVELOPMENT_TEAM = 2KT88923M5;
 				INFOPLIST_FILE = ShareExtension/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -388,7 +419,7 @@
 				DEVELOPMENT_TEAM = 2KT88923M5;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 2KT88923M5;
 				INFOPLIST_FILE = ShareExtension/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -459,7 +490,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -515,7 +546,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -535,7 +566,7 @@
 				CURRENT_PROJECT_VERSION = 9.21.0;
 				DEVELOPMENT_TEAM = 2KT88923M5;
 				INFOPLIST_FILE = App/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -561,7 +592,7 @@
 				DEVELOPMENT_TEAM = 2KT88923M5;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 2KT88923M5;
 				INFOPLIST_FILE = App/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -617,6 +648,14 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		0DFA1100000000000000005B /* XCRemoteSwiftPackageReference "valhalla-mobile" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Rallista/valhalla-mobile.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.6.0;
+			};
+		};
 		0DCC0104000000000000CC04 /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/maplibre/maplibre-gl-native-distribution";
@@ -644,6 +683,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		0DFA1100000000000000005C /* Valhalla */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0DFA1100000000000000005B /* XCRemoteSwiftPackageReference "valhalla-mobile" */;
+			productName = Valhalla;
+		};
 		0DCC0102000000000000CC02 /* CapApp-SPM */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 0DCC0101000000000000CC01 /* XCLocalSwiftPackageReference "CapApp-SPM" */;

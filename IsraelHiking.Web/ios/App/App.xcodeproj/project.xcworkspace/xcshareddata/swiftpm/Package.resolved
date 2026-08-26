@@ -1,6 +1,15 @@
 {
-  "originHash" : "6e1cda0f1af8abcc987329ac271df9c75a9d0bc6bcbe506b29a76772cc3e0c77",
+  "originHash" : "e963cf86a6a7ba0c43b85893214e5f9f67c856b994aa34b4bcb36cf3a8e27a1b",
   "pins" : [
+    {
+      "identity" : "anycodable",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Flight-School/AnyCodable",
+      "state" : {
+        "revision" : "862808b2070cd908cb04f9aafe7de83d35f81b05",
+        "version" : "0.6.7"
+      }
+    },
     {
       "identity" : "capacitor-swift-pm",
       "kind" : "remoteSourceControl",
@@ -26,6 +35,15 @@
       "state" : {
         "revision" : "0d81e26e828ff9582807e2339112cedf2e0fab85",
         "version" : "1.1.2"
+      }
+    },
+    {
+      "identity" : "light-swift-untar",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/UInt2048/Light-Swift-Untar.git",
+      "state" : {
+        "revision" : "fcff1f1b82373ea64b9565a364f63ffe7fdecf9f",
+        "version" : "1.0.4"
       }
     },
     {
@@ -71,6 +89,24 @@
       "state" : {
         "revision" : "c69a23f56c63bdfe96096fa64a1c65334d2592db",
         "version" : "5.83.0"
+      }
+    },
+    {
+      "identity" : "valhalla-mobile",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Rallista/valhalla-mobile.git",
+      "state" : {
+        "revision" : "7171475f7567d1f7551cd9908d6092be004a2bbb",
+        "version" : "0.6.0"
+      }
+    },
+    {
+      "identity" : "valhalla-openapi-models-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Rallista/valhalla-openapi-models-swift.git",
+      "state" : {
+        "revision" : "3b24aab4fd94eb507722e9bd339e97482475c1e9",
+        "version" : "0.5.0"
       }
     }
   ],
