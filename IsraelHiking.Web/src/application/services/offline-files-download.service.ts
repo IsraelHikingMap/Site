@@ -316,19 +316,16 @@ export class OfflineFilesDownloadService {
                 this.loggingService.info("[Offline Download] The download was aborted while it was going on");
                 return "aborted";
             }
+            // A request that failed without the server answering it is not a server side error, which is
+            // what a status code is - a download of hundreds of megabytes fails this way when the
+            // connection drops, and saying that the server failed sends whoever reads the log the wrong way.
             const typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
-            switch (typeAndMessage.type) {
-                case "timeout":
-                    this.loggingService.error(`[Offline Download] The download of ${tileKey} failed due to timeout`);
-                    break;
-                case "client":
-                    this.loggingService.error(`[Offline Download] The download of ${tileKey} failed due to client side error: ` +
-                        typeAndMessage.message);
-                    break;
-                default:
-                    this.loggingService.error(`[Offline Download] The download of ${tileKey} failed due to server side error: ` +
-                        typeAndMessage.message);
-            }
+            const reason = typeAndMessage.type === "timeout"
+                ? "a timeout"
+                : typeAndMessage.statusCode != null
+                    ? `the server answering with ${typeAndMessage.statusCode}`
+                    : "a request that got no answer, i.e. the connection and not the server";
+            this.loggingService.error(`[Offline Download] The download of ${tileKey} failed due to ${reason}: ${typeAndMessage.message}`);
             return "error";
         } finally {
             // A download that was aborted might only get here after the next one started, and it is not its to clear
@@ -386,15 +383,32 @@ export class OfflineFilesDownloadService {
      * Moves the files that were downloaded to where the app reads them from, and extracts the routing
      * tiles among them. This only happens once every file of the tile was downloaded, so that a download
      * that was aborted or failed leaves the files of the tile as they were rather than half updated.
+     * Every file is moved before any of them is handed to the routing engine, so that an engine that
+     * fails can not leave the files of the tile half moved, and failing to hand a file over is logged
+     * and otherwise ignored: the map files of the tile are whole and are drawn from as they are, and a
+     * tile that ended up without its routing tiles is reported as one to download again.
      */
     private async moveDownloadedFilesToDataDirectory(currentDownload: CurrentDownload, fileNames: FileNameDateVersion[]): Promise<void> {
         const tileKey = PmTilesService.toTileKey(currentDownload.tileX, currentDownload.tileY);
         for (const { fileName } of fileNames) {
             await this.fileService.moveFileFromCacheToDataDirectory(fileName);
-            if (RoutingProvider.isRoutingTilesFile(fileName)) {
-                await this.routingProvider.extractOfflineRoutingTiles(fileName, tileKey);
-            } else if (RoutingProvider.isRoutingSetupFile(fileName)) {
-                await this.routingProvider.storeRoutingSetupFile(fileName, await this.fileService.readFileInDataDirectory(fileName));
+        }
+        for (const { fileName } of fileNames) {
+            const isRoutingTilesFile = RoutingProvider.isRoutingTilesFile(fileName);
+            if (!isRoutingTilesFile && !RoutingProvider.isRoutingSetupFile(fileName)) {
+                continue;
+            }
+            try {
+                if (isRoutingTilesFile) {
+                    await this.routingProvider.extractOfflineRoutingTiles(fileName, tileKey);
+                } else {
+                    await this.routingProvider.storeRoutingSetupFile(fileName, await this.fileService.readFileInDataDirectory(fileName));
+                    await this.fileService.deleteFileInDataDirectory(fileName);
+                }
+            } catch (ex) {
+                this.loggingService.warning(`[Offline Download] Failed to hand ${fileName} to the routing engine: ${(ex as Error).message}`);
+                // A file the routing engine did not take is of no use to the app, and nothing else would
+                // ever clean it up - it is not one of the files the device is read for.
                 await this.fileService.deleteFileInDataDirectory(fileName);
             }
         }
@@ -496,7 +510,13 @@ export class OfflineFilesDownloadService {
             await this.fileService.deleteFileInDataDirectory(fileName);
             this.pmtilesService.invalidateFile(fileName);
         }
-        await this.routingProvider.deleteOfflineRoutingTiles(tileKey);
+        try {
+            await this.routingProvider.deleteOfflineRoutingTiles(tileKey);
+        } catch (ex) {
+            // The files of the tile are already gone, so what the device holds has to be read again
+            // either way - leaving the state as it was would keep a tile that is no longer there.
+            this.loggingService.warning(`[Offline Download] Failed to remove the routing tiles of ${tileKey}: ${(ex as Error).message}`);
+        }
         await this.updateDownloadedTilesFromDevice();
         // The root files are only needed as long as there's an area that uses them.
         const rootTileId = PmTilesService.toTileKey();

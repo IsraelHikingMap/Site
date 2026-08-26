@@ -38,6 +38,9 @@ project(':capgo-background-geolocation').projectDir = new File('../node_modules/
 include ':capgo-capacitor-compass'
 project(':capgo-capacitor-compass').projectDir = new File('../node_modules/@capgo/capacitor-compass/android')
 
+include ':capgo-capacitor-downloader'
+project(':capgo-capacitor-downloader').projectDir = new File('../node_modules/@capgo/capacitor-downloader/android')
+
 include ':capgo-capacitor-inappbrowser'
 project(':capgo-capacitor-inappbrowser').projectDir = new File('../node_modules/@capgo/capacitor-inappbrowser/android')
 

@@ -1,0 +1,115 @@
+diff --git a/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts b/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts
+index fe21d81..15eff01 100644
+--- a/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts
++++ b/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts
+@@ -117,6 +117,10 @@ export interface CapacitorDownloaderPlugin {
+     addListener(eventName: 'downloadProgress', listenerFunc: (progress: {
+         id: string;
+         progress: number;
++        /** Bytes written so far, ios only */
++        bytesWritten?: number;
++        /** The length of the whole file, 0 when the server did not report it, ios only */
++        bytesTotal?: number;
+     }) => void): Promise<PluginListenerHandle>;
+     /**
+      * Listen for download completion.
+diff --git a/node_modules/@capgo/capacitor-downloader/ios/Sources/CapacitorDownloaderPlugin/CapacitorDownloaderPlugin.swift b/node_modules/@capgo/capacitor-downloader/ios/Sources/CapacitorDownloaderPlugin/CapacitorDownloaderPlugin.swift
+index f3aafac..b3ef8e6 100644
+--- a/node_modules/@capgo/capacitor-downloader/ios/Sources/CapacitorDownloaderPlugin/CapacitorDownloaderPlugin.swift
++++ b/node_modules/@capgo/capacitor-downloader/ios/Sources/CapacitorDownloaderPlugin/CapacitorDownloaderPlugin.swift
+@@ -21,6 +21,8 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+         CAPPluginMethod(name: "getPluginVersion", returnType: CAPPluginReturnPromise)
+     ]
+ 
++    private static let destinationsKey = "CapacitorDownloaderDestinations"
++
+     private var tasks: [String: URLSessionDownloadTask] = [:]
+     private let tasksLock = NSLock()
+     private lazy var session: URLSession = {
+@@ -47,6 +49,39 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+         tasks.removeValue(forKey: id)
+     }
+ 
++    /**
++     * Where the file of a download should end up, as the caller asked for it. It is kept in the user
++     * defaults rather than in memory since a background session hands its downloads to whichever instance
++     * of the app is running when they finish, which might not be the one that started them.
++     */
++    private func setDestination(_ destination: String, for id: String) {
++        var destinations = UserDefaults.standard.dictionary(forKey: CapacitorDownloaderPlugin.destinationsKey) as? [String: String] ?? [:]
++        destinations[id] = destination
++        UserDefaults.standard.set(destinations, forKey: CapacitorDownloaderPlugin.destinationsKey)
++    }
++
++    /**
++     * The destination of a download, which is forgotten as it is taken - it is of no use to anyone once
++     * the download it belongs to is over. A destination that is not an absolute path is taken to be
++     * relative to the documents directory, and a download with none at all keeps the old behaviour of
++     * being named after its id there.
++     */
++    private func takeDestinationURL(for id: String) -> URL? {
++        var destinations = UserDefaults.standard.dictionary(forKey: CapacitorDownloaderPlugin.destinationsKey) as? [String: String] ?? [:]
++        let destination = destinations.removeValue(forKey: id)
++        UserDefaults.standard.set(destinations, forKey: CapacitorDownloaderPlugin.destinationsKey)
++        guard let destination = destination, !destination.isEmpty else {
++            return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent(id)
++        }
++        if destination.hasPrefix("file://") {
++            return URL(string: destination)
++        }
++        if destination.hasPrefix("/") {
++            return URL(fileURLWithPath: destination)
++        }
++        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent(destination)
++    }
++
+     private func idForTask(_ task: URLSessionDownloadTask) -> String? {
+         if let id = task.taskDescription, !id.isEmpty {
+             return id
+@@ -72,6 +107,7 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+             }
+         }
+ 
++        setDestination(destination, for: id)
+         let task = session.downloadTask(with: request)
+         task.taskDescription = id
+         setTask(task, for: id)
+@@ -170,8 +206,20 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+ 
+ extension CapacitorDownloaderPlugin: URLSessionDownloadDelegate {
+     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
+-        guard let id = idForTask(downloadTask),
+-              let destinationURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent(id) else {
++        guard let id = idForTask(downloadTask) else {
++            return
++        }
++
++        // A download task treats any answer as a download, so an error page would be stored as the file
++        // that was asked for - the status code is what tells an answer of the file from an answer about it.
++        if let response = downloadTask.response as? HTTPURLResponse, !(200...299).contains(response.statusCode) {
++            _ = takeDestinationURL(for: id)
++            notifyListeners("downloadFailed", data: ["id": id, "error": "The server answered with \(response.statusCode)"])
++            return
++        }
++
++        guard let destinationURL = takeDestinationURL(for: id) else {
++            notifyListeners("downloadFailed", data: ["id": id, "error": "Could not tell where to put the file"])
+             return
+         }
+ 
+@@ -202,7 +250,14 @@ extension CapacitorDownloaderPlugin: URLSessionDownloadDelegate {
+         }
+ 
+         let progress = Float(totalBytesWritten) / Float(totalBytesExpectedToWrite)
+-        notifyListeners("downloadProgress", data: ["id": id, "progress": progress])
++        // The bytes are reported alongside the progress so that a caller downloading several files can
++        // weigh them against each other by their size, which a fraction of each file on its own cannot say.
++        notifyListeners("downloadProgress", data: [
++            "id": id,
++            "progress": progress,
++            "bytesWritten": totalBytesWritten,
++            "bytesTotal": totalBytesExpectedToWrite
++        ])
+     }
+ 
+     @objc func getPluginVersion(_ call: CAPPluginCall) {

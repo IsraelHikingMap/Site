@@ -457,6 +457,34 @@ describe("OfflineFilesDownloadService", () => {
         )
     );
 
+    it("Should finish a download whose routing tiles could not be handed over and remove the file holding them",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, RoutingProvider],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
+                fileService: FileService, routingProvider: RoutingProvider) => {
+                vi.mocked(fileService.listFilesInDataDirectory)
+                    .mockResolvedValueOnce([])
+                    .mockResolvedValue([MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
+                vi.mocked(routingProvider.getOfflineRoutingTiles).mockResolvedValue([]);
+                vi.mocked(routingProvider.extractOfflineRoutingTiles).mockRejectedValue(new Error("Not implemented"));
+                store.reset({
+                    userState: { token: "token" },
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedTiles: {}, downloadedRoutingTiles: [] }
+                });
+
+                const promise = service.downloadTile(76, 51);
+                await flushStyles(mockBackend, {});
+                await flushFilesToDownload(mockBackend, false, {});
+                await flushFilesToDownload(mockBackend, true, { [MAP_FILE]: "2026-06-01", [ROUTING_TILES_FILE]: "2026-06-01" });
+
+                expect(await promise).toBe("downloaded");
+                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
+                expect(downloadedTiles[TILE_KEY].map(f => f.fileName)).toEqual([MAP_FILE]);
+                expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(ROUTING_TILES_FILE);
+            }
+        )
+    );
+
     it("Should report a download that was aborted while its files were being downloaded as aborted",
         inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
@@ -731,6 +759,24 @@ describe("OfflineFilesDownloadService", () => {
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(MAP_FILE);
                 expect(routingProvider.deleteOfflineRoutingTiles).toHaveBeenCalledWith(TILE_KEY);
                 expect(store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedRoutingTiles)).toEqual([]);
+                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
+                expect(downloadedTiles[TILE_KEY]).toBeUndefined();
+            }
+        )
+    );
+
+    it("Should read what the device holds even when the routing tiles of a tile could not be removed",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, RoutingProvider],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
+                fileService: FileService, routingProvider: RoutingProvider) => {
+                await initialize(service, mockBackend, store, {});
+                vi.mocked(fileService.listFilesInDataDirectory).mockResolvedValue([ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
+                vi.mocked(routingProvider.getOfflineRoutingTiles).mockResolvedValue([]);
+                vi.mocked(routingProvider.deleteOfflineRoutingTiles).mockRejectedValue(new Error("Not implemented"));
+
+                await service.deleteTile(TILE_KEY);
+
+                expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(MAP_FILE);
                 const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
                 expect(downloadedTiles[TILE_KEY]).toBeUndefined();
             }
